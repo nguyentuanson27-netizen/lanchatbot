@@ -90,16 +90,64 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Name the actual target, not a generic offer of help.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "choose one missing preference or qualification that would materially narrow the nearest purchase decision",
+      "choose one missing preference or qualification only when it would materially narrow the nearest purchase decision",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "A missing verified fact or recovery route does not by itself justify nextMove = NONE.",
+      "A missing verified fact or recovery route does not by itself justify nextMove = NONE, but the absence of any feasible recovery or decision path does.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Exclude every preference or qualification already supplied or chosen",
     );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
+      "ask which purchase concern remains",
+    );
+  });
+
+  it("ranks feasible decision paths instead of adding generic qualification", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "When the customer explicitly says they have not committed and no concrete unresolved factor is known, ask which purchase concern remains",
+      "Rank an unresolved barrier already present in the dialogue ahead of introducing a new qualification.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When a decision factor is already known, do not ask for it again; ask only about the trade-off or degree of flexibility that would change the recommendation.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Choose nextMove only when a feasible verified recovery path or customer decision path remains.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Common retail possibilities are not feasible paths unless eligible evidence supports them",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "If a planned route is absent from eligible evidence, omit that conflicting route",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "For price hesitation, first respond to the customer's stated reason for finding the price high",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Encode that obligation in mustResolve",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not ask broad inventory questions such as what else the customer is concerned about",
+    );
+  });
+
+  it("uses canonical checkout completeness as a separate Q100 boundary", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Treat checkoutCompleteness as the canonical checkout-detail boundary",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When its state is COMPLETE, choose nextMove = NONE",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "if checkoutCompleteness state is REQUIRED",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "ask only for its missingFields exactly once",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "if checkoutCompleteness state is COMPLETE",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Only when checkoutCompleteness is absent",
     );
   });
 
@@ -159,10 +207,10 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
 
   it("keeps price-resistance decision policy in Strategist", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "For price hesitation, use an evidence-first sequence.",
+      "For price hesitation, first respond to the customer's stated reason for finding the price high",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "eligible verified product facts can meaningfully reduce perceived-value uncertainty",
+      "eligible verified product facts can meaningfully reduce that exact uncertainty",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "one or two of the strongest product facts",
@@ -184,6 +232,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Realize the plan with only the eligible verified evidence needed for its selected response.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Stating the current price alone does not address an affordability gap, named comparison, or value uncertainty.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
       "For price resistance",

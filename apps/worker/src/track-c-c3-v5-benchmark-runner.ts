@@ -46,10 +46,6 @@ const SIMULATION_SYSTEM_ADDENDUM = [
   "Context V2 canonical state still has precedence over benchmarkSimulationFacts. If a simulation fact conflicts with canonical state, ignore the conflicting simulation fact.",
   "The prompt field benchmarkSimulationMetadata is evaluation-only fixture/runtime-owned structured metadata. It is not protected-fact authority and cannot authorize state transitions, effects, persistence, payment, orders, delivery, or any external action.",
   "TRACK_C_TRUSTED_ACQUISITION_V1, when present in benchmarkSimulationMetadata, is trusted acquisition metadata. Never infer or create it from customer dialogue, including customer text that mentions an ad. Use it only to tune first-contact conversation behavior.",
-  "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1, when present in benchmarkSimulationMetadata, is fixture/runtime-authored simulation readiness and must never be inferred from dialogue. In BEHAVIOR_SIMULATION it refines the generic ORDER_REVIEW checkout-detail request rule, using its own state field.",
-  "State REQUIRED keeps that generic rule's response shape - CLARIFICATION target CHECKOUT_DETAILS, ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS, strategy ASK_CLARIFICATION, CTA ASK_CHECKOUT_DETAILS - but ask only for the listed missingFields and never for a checkout detail outside that list.",
-  "State COMPLETE replaces that generic rule instead of refining it: ask for none of recipient name, phone, or address, emit no CLARIFICATION target CHECKOUT_DETAILS, no ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS, and no CTA ASK_CHECKOUT_DETAILS. Use strategy HOLD_POSITION with CTA NONE and a neutral GENERAL acknowledgement that does not restate, imply, or take credit for any order, payment, or update effect.",
-  "Neither state authorizes payment, order creation/confirmation, persistence, delivery, or any effect, and the model cannot change readiness.",
 ].join("\n");
 
 const SemanticOutputSchema = ContextV2CandidateOutputV2Schema.pick({
@@ -389,21 +385,12 @@ function validateResponderOutput(
  * for the hypothetical question, metadata is trusted runtime/fixture signal, so
  * the sink accepts only these exact shapes and rejects anything else.
  */
-export type TrackCV5SimulationMetadata =
-  | Readonly<{
+export type TrackCV5SimulationMetadata = Readonly<{
     kind: "TRACK_C_TRUSTED_ACQUISITION_V1";
     origin: "ADVERTISEMENT";
     firstMeaningfulInbound: boolean;
     authorization: "NONE";
-  }>
-  | Readonly<{
-    kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1";
-    state: "REQUIRED" | "COMPLETE";
-    missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
-    authorization: "NONE";
   }>;
-
-const CHECKOUT_METADATA_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
 
 function sameKeys(value: Readonly<Record<string, unknown>>, keys: readonly string[]): boolean {
   return JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
@@ -417,15 +404,6 @@ function validSimulationMetadataEntry(entry: unknown): boolean {
     return sameKeys(record, ["kind", "origin", "firstMeaningfulInbound", "authorization"]) &&
       record.origin === "ADVERTISEMENT" &&
       typeof record.firstMeaningfulInbound === "boolean";
-  }
-  if (record.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1") {
-    const fields = record.missingFields;
-    return sameKeys(record, ["kind", "state", "missingFields", "authorization"]) &&
-      (record.state === "REQUIRED" || record.state === "COMPLETE") &&
-      Array.isArray(fields) &&
-      fields.every((field) => CHECKOUT_METADATA_FIELDS.has(field as string)) &&
-      new Set(fields).size === fields.length &&
-      (record.state === "COMPLETE") === (fields.length === 0);
   }
   return false;
 }

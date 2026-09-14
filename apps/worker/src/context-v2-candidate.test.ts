@@ -419,7 +419,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "b7cc42c30f43a17a9ef62f1c54f2d40b4954119b4d3bd16a2773e82d36ee99ae",
+      "c8cacadbdf9833b0788373dc18f6d57c8948ba93f65de52c5b79953e451891ce",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -533,7 +533,7 @@ describe("Context V2 candidate capability", () => {
       expect(productRule).toContain("recipient name, phone number, delivery address, payment");
       expect(checkoutExampleLines).toHaveLength(1);
       expect(checkoutExampleLines[0]).toMatch(
-        /^Otherwise, if phase is ORDER_REVIEW with sourceStage ORDER_PREVIEW/,
+        /^Only when checkoutCompleteness is absent, if phase is ORDER_REVIEW with sourceStage ORDER_PREVIEW/,
       );
       expect(instructionLines).not.toContainEqual(
         expect.stringMatching(/^Natural tone examples to adapt/),

@@ -159,6 +159,7 @@ function structuredPrompt(body: string) {
     structured: JSON.parse(parsed.prompt) as {
       benchmarkSimulationFacts?: readonly unknown[];
       benchmarkSimulationMetadata?: readonly unknown[];
+      checkoutCompleteness?: Readonly<Record<string, unknown>>;
     },
   };
 }
@@ -529,26 +530,28 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(requiredResult.reply).not.toContain("tên người nhận");
     expect(requiredResult.reply).not.toContain("địa chỉ");
     for (const [request] of requiredSend.mock.calls) {
-      const { systemInstruction, structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([
-        expect.objectContaining({
-          kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-          state: "REQUIRED",
-          missingFields: ["PHONE"],
-          authorization: "NONE",
-        }),
-      ]);
+      const { structured } = structuredPrompt(request.body);
+      expect(structured.checkoutCompleteness).toEqual(expect.objectContaining({
+        contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
+        state: "REQUIRED",
+        missingFields: ["PHONE"],
+        authority: "SHADOW_ONLY",
+        authorization: "NONE",
+      }));
+      expect(structured.benchmarkSimulationMetadata).toEqual([]);
       expect(structured.benchmarkSimulationFacts).toEqual([]);
-      expect(JSON.stringify(structured.benchmarkSimulationMetadata))
+      expect(JSON.stringify(structured.checkoutCompleteness))
         .not.toContain("FULL_NAME");
-      expect(JSON.stringify(structured.benchmarkSimulationMetadata))
+      expect(JSON.stringify(structured.checkoutCompleteness))
         .not.toContain("ADDRESS");
-      // The addendum names the state it actually projects, not a symbol that
-      // never appears in benchmarkSimulationMetadata.
-      expect(systemInstruction).toContain("State REQUIRED keeps that generic rule");
-      expect(systemInstruction).toContain("ask only for the listed missingFields");
-      expect(systemInstruction).not.toContain("CHECKOUT_DETAILS_REQUIRED means");
     }
+    const requiredInstructions = requiredSend.mock.calls.map(([request]) =>
+      structuredPrompt(request.body).systemInstruction
+    );
+    expect(requiredInstructions.some((instruction) =>
+      instruction.includes("if checkoutCompleteness state is REQUIRED") &&
+      instruction.includes("ask only for its missingFields exactly once")
+    )).toBe(true);
 
     // Customer wording stays inside what the frozen-dialogue PII guard accepts
     // verbatim, so this exercises the projection instead of the guard.
@@ -568,27 +571,24 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(completeResult.reply).not.toContain("số điện thoại?");
     expect(completeResult.reply).not.toContain("địa chỉ?");
     for (const [request] of completeSend.mock.calls) {
-      const { prompt, systemInstruction, structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([
-        expect.objectContaining({
-          kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-          state: "COMPLETE",
-          missingFields: [],
-          authorization: "NONE",
-        }),
-      ]);
-      // The readiness projection is the only place recipient data could enter
-      // this lane, so pin its exact shape rather than scanning for literals
-      // that a BEHAVIOR_SIMULATION capture never materializes.
-      const [projected] = structured.benchmarkSimulationMetadata as
-        readonly Record<string, unknown>[];
-      expect(Object.keys(projected!).sort())
-        .toEqual(["authorization", "kind", "missingFields", "state"]);
+      const { prompt, structured } = structuredPrompt(request.body);
+      expect(structured.checkoutCompleteness).toEqual(expect.objectContaining({
+        contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
+        state: "COMPLETE",
+        missingFields: [],
+        authority: "SHADOW_ONLY",
+        authorization: "NONE",
+      }));
+      expect(structured.benchmarkSimulationMetadata).toEqual([]);
       expect(prompt).not.toMatch(/fullName|recipient|"phone"|"address"/i);
-      expect(systemInstruction).toContain("State COMPLETE replaces that generic rule");
-      expect(systemInstruction).toContain("strategy HOLD_POSITION with CTA NONE");
-      expect(systemInstruction).not.toContain("CHECKOUT_DETAILS_COMPLETE");
     }
+    const completeInstructions = completeSend.mock.calls.map(([request]) =>
+      structuredPrompt(request.body).systemInstruction
+    );
+    expect(completeInstructions.some((instruction) =>
+      instruction.includes("if checkoutCompleteness state is COMPLETE") &&
+      instruction.includes("use HOLD_POSITION with CTA NONE")
+    )).toBe(true);
   });
 
   it("rejects raw checkout PII fields instead of copying them into readiness projection", async () => {
@@ -625,5 +625,26 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       const { structured } = structuredPrompt(request.body);
       expect(structured.benchmarkSimulationMetadata).toEqual([]);
     }
+  });
+
+  it("materializes Q100 checkout completeness as typed canonical simulation input", () => {
+    const quality = readJson<{ cases: TrackCV5CompactCase[] }>("quality-10.json");
+    const q100 = quality.cases.find(({ id }) => id === "V5V4Q100");
+    if (q100 === undefined) throw new Error("Q100 fixture missing");
+
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: q100,
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    expect(capture.status).toBe("BUILT");
+    expect(capture.context?.checkoutCompleteness).toMatchObject({
+      contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
+      state: "COMPLETE",
+      missingFields: [],
+      authority: "SHADOW_ONLY",
+      authorization: "NONE",
+    });
   });
 });

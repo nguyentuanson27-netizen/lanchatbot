@@ -65,6 +65,11 @@
       "production_contract": "BLOCKED_BY_CONTRACT",
       "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
       "reason": "Changing a cart selection from an ORDER_PREVIEW requires canonical cart mutation/revalidation; the authored fixture skips that reachable transition while still asking the candidate to continue checkout."
+    },
+    "V5V4Q100": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
+      "reason": "Checkout completeness now crosses Context V2 canonically, but the authored latest message cannot materialize the fixture's exact PROCEED_TO_PAYMENT action and quantity through the current canonical buying-intent producer. Behavior simulation covers the conversation response; production-contract evidence remains blocked by that separate reachability mismatch."
     }
   }
 }

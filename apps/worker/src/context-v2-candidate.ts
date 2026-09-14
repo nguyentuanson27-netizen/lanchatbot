@@ -133,7 +133,9 @@ const SYSTEM_INSTRUCTION = [
   "Apply the first matching response rule below; these are general canonical-state rules, never corpus-item exceptions.",
   "If PRODUCT_CONTEXT_UNREADY is active or productBinding is STALE, AMBIGUOUS, or UNRESOLVED: naturally ask which product the customer means; declare CLARIFICATION target PRODUCT and ACTION_REQUEST PROVIDE_PRODUCT; use strategy ASK_CLARIFICATION and CTA ASK_PRODUCT. This branch has absolute precedence: until the product is resolved, never ask for recipient name, phone number, delivery address, payment, or any other checkout detail, even when buying intent is committed. Natural wording example for this branch only: 'Chị đang xem mẫu nào vậy ạ?'",
   "Otherwise, if MEASUREMENTS_REQUIRED is active: naturally ask for the missing everyday measurements such as height and weight; declare CLARIFICATION target MEASUREMENTS and ACTION_REQUEST PROVIDE_MEASUREMENTS; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS. A customer correction never authorizes a size recommendation. Natural wording example for this branch only: 'Chị cao và nặng khoảng bao nhiêu ạ?'",
-  "Otherwise, if phase is ORDER_REVIEW with sourceStage ORDER_PREVIEW and buyingIntent.requestedAction PROCEED_TO_PAYMENT: naturally ask for recipient name, phone number, and delivery address; declare CLARIFICATION target CHECKOUT_DETAILS and ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS; do not say an order was placed or confirmed. Natural wording example for this branch only: 'Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.'",
+  "Otherwise, if checkoutCompleteness state is REQUIRED: ask only for its missingFields exactly once; declare CLARIFICATION target CHECKOUT_DETAILS and ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS as one objective; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS; do not say an order was placed or confirmed.",
+  "Otherwise, if checkoutCompleteness state is COMPLETE: ask for no recipient detail; use HOLD_POSITION with CTA NONE and a neutral GENERAL acknowledgement; do not imply an order, payment, persistence, delivery, or other effect.",
+  "Only when checkoutCompleteness is absent, if phase is ORDER_REVIEW with sourceStage ORDER_PREVIEW and buyingIntent.requestedAction PROCEED_TO_PAYMENT: naturally ask for recipient name, phone number, and delivery address; declare CLARIFICATION target CHECKOUT_DETAILS and ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS; do not say an order was placed or confirmed. Natural wording example for this branch only: 'Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.'",
   "If phase is ORDER_CONFIRMED or sourceStage is PURCHASE_CONFIRMED: use HOLD_POSITION or ANSWER_VERIFIED_FACTS with CTA NONE, ask for nothing, and reply with a neutral acknowledgement that does not restate, imply, or take credit for any completed order effect. Do not emit EFFECT_CLAIM. Natural wording example for this branch only: 'Dạ em nắm rồi chị nha.'",
   "For a clarification that also asks the customer to provide something, use two short non-repetitive natural sentences so the CLARIFICATION and ACTION_REQUEST segments remain distinct without sounding robotic.",
   "Use only the natural wording example attached to the first matching rule; examples from later rules are inapplicable and must not be borrowed. Adapt the selected example rather than copying it mechanically. Avoid formal bot phrases such as 'vui lòng cung cấp thông tin tương ứng'.",
@@ -325,6 +327,10 @@ export function sanitizeContextV2CandidateInput(context: ContextV2) {
     barriers: parsed.barriers,
     buyingIntent: parsed.buyingIntent,
     cartReadiness: parsed.cartReadiness,
+    ...(parsed.checkoutCompleteness === null ||
+        parsed.checkoutCompleteness === undefined
+      ? {}
+      : { checkoutCompleteness: parsed.checkoutCompleteness }),
     ownership: {
       owner: parsed.ownership.owner,
       handoffActive: parsed.ownership.handoffActive,

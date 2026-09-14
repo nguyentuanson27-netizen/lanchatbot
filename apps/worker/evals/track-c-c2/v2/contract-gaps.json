@@ -101,8 +101,8 @@
     },
     "GAP_CHECKOUT_COMPLETENESS": {
       "name": "Checkout completeness / known delivery details",
-      "current_state": "CANONICAL_INPUT_MISSING",
-      "detail": "Current sanitized candidate canonical state can request checkout details but cannot represent that all required delivery fields are already known.",
+      "current_state": "CLOSED_CONTEXT_V2_EGRESS",
+      "detail": "Context V2 now projects PII-free recipient-field completeness from canonical commerce state and the candidate egress carries the typed REQUIRED/COMPLETE boundary.",
       "production_owner": "Context V2 / checkout canonical state"
     },
     "GAP_CANONICAL_REACHABILITY": {

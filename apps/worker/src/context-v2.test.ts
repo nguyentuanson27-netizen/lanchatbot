@@ -298,6 +298,46 @@ describe("DF09 final Context V2 capture", () => {
     expect(parseContextV2WithIntegrity(context)).toEqual(context);
   });
 
+  it("projects checkout completeness from canonical state without exposing PII", () => {
+    const partial = buildContextV2({
+      ...input(),
+      finalCommerceState: {
+        ...state(),
+        checkoutDraft: {
+          fullName: "Benchmark User",
+          phone: null,
+          address: "Benchmark Address 000",
+          paymentMethod: null,
+          updatedAt: "2026-08-16T10:00:00.000Z",
+        },
+      },
+    });
+    expect(partial.checkoutCompleteness).toMatchObject({
+      state: "REQUIRED",
+      missingFields: ["PHONE"],
+      salesCycleRevision: 3,
+      authorization: "NONE",
+    });
+    expect(JSON.stringify(partial.checkoutCompleteness)).not.toMatch(
+      /Benchmark User|Benchmark Address|0000000000/iu,
+    );
+
+    const complete = buildContextV2({
+      ...input(),
+      finalCommerceState: {
+        ...state(),
+        stage: "ORDER_PREVIEW",
+        checkoutDraft: null,
+        preview: {} as never,
+      },
+    });
+    expect(complete.checkoutCompleteness).toMatchObject({
+      state: "COMPLETE",
+      missingFields: [],
+      salesCycleRevision: 3,
+    });
+  });
+
   it("binds verified product attributes into Context V2 for the candidate egress", () => {
     const context = buildContextV2({ ...input(), productAttributes: productAttributes() });
     expect(context.productAttributes).toEqual(productAttributes());

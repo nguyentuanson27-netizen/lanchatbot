@@ -12,6 +12,7 @@ import {
 } from "./decision-observability.js";
 import { ProtectedClaimV1Schema } from "./canonical-evidence-readiness.js";
 import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
+import { CanonicalCheckoutCompletenessV1Schema } from "./checkout-completeness.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedReasonCodeSchema = z.string().regex(/^[A-Z0-9][A-Z0-9_.:-]{0,127}$/u);
@@ -309,6 +310,7 @@ export const ContextV2Schema = z.object({
     readinessHash: Sha256Schema,
     expiresAt: z.string().datetime(),
   }).strict().nullable(),
+  checkoutCompleteness: CanonicalCheckoutCompletenessV1Schema.nullable().optional(),
   ownership: z.object({
     owner: z.enum(["BOT", "HUMAN"]),
     handoffActive: z.boolean(),
@@ -349,6 +351,10 @@ export const ContextV2Schema = z.object({
         value.finalTurnEvidence.finalSalesCycleRevision ||
       value.barriers.salesCycleRevision !==
         value.finalTurnEvidence.finalSalesCycleRevision ||
+      (value.checkoutCompleteness !== undefined &&
+        value.checkoutCompleteness !== null &&
+        value.checkoutCompleteness.salesCycleRevision !==
+          value.finalTurnEvidence.finalSalesCycleRevision) ||
       value.barriers.conversationRevision !==
         value.finalTurnEvidence.finalConversationRevision) {
     context.addIssue({

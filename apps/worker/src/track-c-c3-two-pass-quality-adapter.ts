@@ -37,9 +37,6 @@ export type TrackCC3TwoPassQualityCandidateInput = Omit<
 export type TrackCC3TwoPassQualityCandidateResult =
   TrackCV5TwoPassBenchmarkResult;
 
-const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
-const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
-
 function trustedSimulationMetadata(
   fixture: TrackCC3TwoPassQualityFixture,
 ): readonly TrackCV5SimulationMetadata[] {
@@ -60,27 +57,6 @@ function trustedSimulationMetadata(
     }));
   }
 
-  const checkout = fixture.context.checkout_completeness;
-  if (checkout !== undefined) {
-    const fields = checkout.missing_fields;
-    const keys = Object.keys(checkout).sort();
-    if (fixture.context.source_stage !== "ORDER_PREVIEW" ||
-        JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
-        !Array.isArray(fields) ||
-        fields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
-        new Set(fields).size !== fields.length ||
-        (checkout.state === "COMPLETE" && fields.length !== 0) ||
-        (checkout.state === "REQUIRED" && fields.length === 0) ||
-        (checkout.state !== "COMPLETE" && checkout.state !== "REQUIRED")) {
-      throw new Error("TRACK_C_C3_CHECKOUT_COMPLETENESS_INVALID");
-    }
-    metadata.push(Object.freeze({
-      kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-      state: checkout.state,
-      missingFields: Object.freeze([...fields]),
-      authorization: "NONE",
-    }));
-  }
   return Object.freeze(metadata);
 }
 
