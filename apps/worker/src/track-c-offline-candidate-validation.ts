@@ -119,14 +119,6 @@ export function assertTrackCCheckoutCompletenessOutput(
 ): void {
   const completeness = context.checkoutCompleteness;
   if (completeness === null || completeness === undefined) return;
-  const productClarificationRequired =
-    context.productBinding.status === "UNRESOLVED" ||
-    context.productBinding.status === "AMBIGUOUS" ||
-    context.productBinding.status === "STALE";
-  const higherPriorityObjective = productClarificationRequired ||
-    context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY") ||
-    context.barriers.active.includes("MEASUREMENTS_REQUIRED");
-  if (higherPriorityObjective) return;
   const checkoutClarifications = output.segments.filter((segment) =>
     segment.kind === "CLARIFICATION" && segment.target === "CHECKOUT_DETAILS"
   );
@@ -134,6 +126,20 @@ export function assertTrackCCheckoutCompletenessOutput(
     segment.kind === "ACTION_REQUEST" &&
     segment.action === "PROVIDE_CHECKOUT_DETAILS"
   );
+  const productClarificationRequired =
+    context.productBinding.status === "UNRESOLVED" ||
+    context.productBinding.status === "AMBIGUOUS" ||
+    context.productBinding.status === "STALE";
+  const higherPriorityObjective = productClarificationRequired ||
+    context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY") ||
+    context.barriers.active.includes("MEASUREMENTS_REQUIRED");
+  if (higherPriorityObjective) {
+    if (output.cta === "ASK_CHECKOUT_DETAILS" ||
+        checkoutClarifications.length > 0 || checkoutActions.length > 0) {
+      throw new Error(errorCode);
+    }
+    return;
+  }
   const otherRequests = output.segments.filter((segment) =>
     (segment.kind === "CLARIFICATION" &&
       segment.target !== "CHECKOUT_DETAILS") ||

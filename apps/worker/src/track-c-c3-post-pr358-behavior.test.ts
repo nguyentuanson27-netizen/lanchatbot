@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import type { ShadowContextMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
+import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.js";
+import { validateTrackCOfflineCandidate } from
+  "./track-c-offline-candidate-validation.js";
 import {
   TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
   TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION,
@@ -136,6 +139,22 @@ function generalReply(text = "Dạ em nắm rồi chị ạ.") {
     strategy: "HOLD_POSITION",
     cta: "NONE",
   });
+}
+
+function checkoutAskOutput() {
+  return {
+    segments: [{
+      kind: "CLARIFICATION" as const,
+      text: "Em còn thiếu thông tin nhận hàng ạ.",
+      target: "CHECKOUT_DETAILS" as const,
+    }, {
+      kind: "ACTION_REQUEST" as const,
+      text: "Chị gửi em số điện thoại nhé.",
+      action: "PROVIDE_CHECKOUT_DETAILS" as const,
+    }],
+    strategy: "ASK_CLARIFICATION" as const,
+    cta: "ASK_CHECKOUT_DETAILS" as const,
+  };
 }
 
 function successfulTransport(responder = generalReply()) {
@@ -679,6 +698,10 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     }));
 
     await expect(runFixture(requiredFixture, measurementAsk)).resolves.toBeDefined();
+    await expect(runFixture(
+      requiredFixture,
+      successfulTransport(providerPayload(checkoutAskOutput())),
+    )).rejects.toThrow("TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED");
   });
 
   it("defers checkout validation to a higher-priority unresolved product clarification", async () => {
@@ -706,6 +729,58 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     }));
 
     await expect(runFixture(requiredFixture, productAsk)).resolves.toBeDefined();
+    await expect(runFixture(
+      requiredFixture,
+      successfulTransport(providerPayload(checkoutAskOutput())),
+    )).rejects.toThrow("TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED");
+  });
+
+  it("rejects a checkout override through the offline candidate validator path", () => {
+    const requiredFixture = fixture({
+      id: "OFFLINE_CHECKOUT_MEASUREMENT_PRECEDENCE",
+      message: "Chị chốt nhưng cần kiểm tra lại size nhé.",
+      canonicalFlags: ["MEASUREMENTS_REQUIRED"],
+      checkoutCompleteness: {
+        state: "REQUIRED",
+        missing_fields: ["PHONE"],
+      },
+    });
+    const evaluationContext = dialogue(requiredFixture.latest_customer_message);
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: requiredFixture,
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const request = buildTrackCOfflineCandidateRequest({
+      modelResource: MODEL_RESOURCE,
+      capture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext,
+      systemInstruction: "Offline checkout precedence regression.",
+    });
+
+    expect(() => validateTrackCOfflineCandidate({
+      caseId: "pii-security",
+      capture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      request,
+      providerModelVersion: "gemini-3.5-flash-lite",
+      accepted: {
+        context: evaluationContext,
+        verifiedFacts: null,
+        reply: "Dạ em cần thêm số đo để kiểm tra size ạ.",
+        proposalSummary: { action: "REPLY" },
+        guardOutcome: {
+          expectedOwner: "BOT",
+          action: "REPLY",
+          blockedReasonCodes: [],
+        },
+      },
+      output: checkoutAskOutput(),
+    })).toThrow(
+      "TRACK_C_C3_OFFLINE_CANDIDATE_CHECKOUT_COMPLETENESS_FAILED",
+    );
   });
 
   it("rejects every checkout request when canonical completeness is COMPLETE", async () => {
