@@ -137,11 +137,17 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "When its state is COMPLETE, choose nextMove = NONE",
     );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "missingFields can include recipient details and PAYMENT_METHOD",
+    );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "if checkoutCompleteness state is REQUIRED",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "ask only for its missingFields exactly once",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "choose COD or bank transfer when PAYMENT_METHOD is listed",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "if checkoutCompleteness state is COMPLETE",

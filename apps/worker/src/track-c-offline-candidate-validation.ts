@@ -83,6 +83,74 @@ function replyFromOutput(output: ContextV2CandidateOutputV2): string {
   return output.segments.map(({ text }) => text).join("\n");
 }
 
+const CHECKOUT_FIELD_LANGUAGE = Object.freeze({
+  FULL_NAME:
+    /họ\s*tên|tên\s+(?:người\s+)?nhận|(?:xin|gửi(?:\s+em)?|cho\s+em(?:\s+xin)?)\s+tên|tên\s*[,/&]|full\s*name/iu,
+  PHONE: /số\s*điện\s*thoại|sđt|phone/iu,
+  ADDRESS: /địa\s*chỉ(?:\s*(?:giao|nhận)\s*hàng)?|address/iu,
+  PAYMENT_METHOD:
+    /phương\s*thức\s*thanh\s*toán|thanh\s*toán\s*(?:cod|khi\s*nhận\s*hàng|chuyển\s*khoản)|\bcod\b|chuyển\s*khoản|bank\s*transfer|payment\s*method/iu,
+});
+
+function checkoutFieldsNamedInRequests(
+  output: ContextV2CandidateOutputV2,
+): readonly (keyof typeof CHECKOUT_FIELD_LANGUAGE)[] {
+  const requestText = output.segments.flatMap((segment) =>
+    segment.kind === "CLARIFICATION" || segment.kind === "ACTION_REQUEST"
+      ? [segment.text]
+      : []
+  ).join("\n");
+  return Object.entries(CHECKOUT_FIELD_LANGUAGE)
+    .flatMap(([field, pattern]) => pattern.test(requestText)
+      ? [field as keyof typeof CHECKOUT_FIELD_LANGUAGE]
+      : []);
+}
+
+/**
+ * Final, side-effect-free checkout guard. Canonical Context V2 selects the
+ * permitted checkout objective; bounded matching over request segments verifies
+ * only that the model did not widen its field list. It never derives sales
+ * intent, checkout state, or authority from reply text.
+ */
+export function assertTrackCCheckoutCompletenessOutput(
+  context: ContextV2,
+  output: ContextV2CandidateOutputV2,
+  errorCode: string,
+): void {
+  const completeness = context.checkoutCompleteness;
+  if (completeness === null || completeness === undefined) return;
+  const checkoutClarifications = output.segments.filter((segment) =>
+    segment.kind === "CLARIFICATION" && segment.target === "CHECKOUT_DETAILS"
+  );
+  const checkoutActions = output.segments.filter((segment) =>
+    segment.kind === "ACTION_REQUEST" &&
+    segment.action === "PROVIDE_CHECKOUT_DETAILS"
+  );
+  const otherRequests = output.segments.filter((segment) =>
+    (segment.kind === "CLARIFICATION" &&
+      segment.target !== "CHECKOUT_DETAILS") ||
+    (segment.kind === "ACTION_REQUEST" &&
+      segment.action !== "PROVIDE_CHECKOUT_DETAILS")
+  );
+  const namedRequestFields = checkoutFieldsNamedInRequests(output);
+  if (completeness.state === "COMPLETE") {
+    if (output.strategy !== "HOLD_POSITION" || output.cta !== "NONE" ||
+        checkoutClarifications.length > 0 || checkoutActions.length > 0 ||
+        otherRequests.length > 0) {
+      throw new Error(errorCode);
+    }
+    return;
+  }
+  if (output.strategy !== "ASK_CLARIFICATION" ||
+      output.cta !== "ASK_CHECKOUT_DETAILS" ||
+      checkoutClarifications.length !== 1 || checkoutActions.length !== 1 ||
+      otherRequests.length > 0 ||
+      canonicalJsonV1(namedRequestFields) !==
+        canonicalJsonV1(completeness.missingFields)) {
+    throw new Error(errorCode);
+  }
+}
+
 export interface TrackCOfflineCandidateValidationInput {
   readonly caseId: string;
   readonly capture: unknown;
@@ -170,6 +238,11 @@ export function validateTrackCOfflineCandidate(
     },
     ...semanticOutput,
   });
+  assertTrackCCheckoutCompletenessOutput(
+    context,
+    output,
+    "TRACK_C_C3_OFFLINE_CANDIDATE_CHECKOUT_COMPLETENESS_FAILED",
+  );
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []);
   const knownEvidenceHashes = new Set([

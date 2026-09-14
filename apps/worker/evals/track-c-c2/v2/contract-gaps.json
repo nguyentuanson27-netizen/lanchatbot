@@ -102,7 +102,7 @@
     "GAP_CHECKOUT_COMPLETENESS": {
       "name": "Checkout completeness / known delivery details",
       "current_state": "CLOSED_CONTEXT_V2_EGRESS",
-      "detail": "Context V2 now projects PII-free recipient-field completeness from canonical commerce state and the candidate egress carries the typed REQUIRED/COMPLETE boundary.",
+      "detail": "Context V2 now projects PII-free recipient and payment-method completeness from canonical commerce state; candidate egress carries the typed REQUIRED/COMPLETE boundary and the final offline guard rejects checkout requests that widen its missing-field set.",
       "production_owner": "Context V2 / checkout canonical state"
     },
     "GAP_CANONICAL_REACHABILITY": {

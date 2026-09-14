@@ -16,7 +16,9 @@ import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materializat
 
 export type TrackCC3CheckoutCompleteness = Readonly<{
   readonly state: "REQUIRED" | "COMPLETE";
-  readonly missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+  readonly missing_fields: readonly (
+    "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD"
+  )[];
 }>;
 
 export type TrackCC3TwoPassQualityFixture = TrackCV5CompactCase & Readonly<{

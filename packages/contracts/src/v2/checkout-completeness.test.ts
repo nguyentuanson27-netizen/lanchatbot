@@ -12,10 +12,11 @@ describe("canonical checkout completeness", () => {
       hasPreview: false,
       hasCheckoutDraft: true,
       checkoutClarificationActive: true,
-      recipientFields: {
+      checkoutFields: {
         fullNamePresent: true,
         phonePresent: false,
         addressPresent: true,
+        paymentMethodPresent: true,
       },
       salesCycleRevision: 7,
     });
@@ -40,10 +41,11 @@ describe("canonical checkout completeness", () => {
       hasPreview: true,
       hasCheckoutDraft: false,
       checkoutClarificationActive: false,
-      recipientFields: {
+      checkoutFields: {
         fullNamePresent: false,
         phonePresent: false,
         addressPresent: false,
+        paymentMethodPresent: false,
       },
       salesCycleRevision: 8,
     })).toMatchObject({
@@ -60,10 +62,11 @@ describe("canonical checkout completeness", () => {
       hasPreview: false,
       hasCheckoutDraft: false,
       checkoutClarificationActive: false,
-      recipientFields: {
+      checkoutFields: {
         fullNamePresent: false,
         phonePresent: false,
         addressPresent: false,
+        paymentMethodPresent: false,
       },
       salesCycleRevision: 2,
     })).toBeNull();
@@ -74,13 +77,32 @@ describe("canonical checkout completeness", () => {
       hasPreview: false,
       hasCheckoutDraft: false,
       checkoutClarificationActive: false,
-      recipientFields: {
+      checkoutFields: {
         fullNamePresent: false,
         phonePresent: false,
         addressPresent: false,
+        paymentMethodPresent: false,
       },
       salesCycleRevision: 3,
     })).toBeNull();
+
+    expect(deriveCanonicalCheckoutCompletenessV1({
+      commerceStage: "CART_OPEN",
+      hasCart: true,
+      hasPreview: false,
+      hasCheckoutDraft: true,
+      checkoutClarificationActive: true,
+      checkoutFields: {
+        fullNamePresent: true,
+        phonePresent: true,
+        addressPresent: true,
+        paymentMethodPresent: false,
+      },
+      salesCycleRevision: 4,
+    })).toMatchObject({
+      state: "REQUIRED",
+      missingFields: ["PAYMENT_METHOD"],
+    });
 
     expect(() => CanonicalCheckoutCompletenessV1Schema.parse({
       schemaVersion: 1,

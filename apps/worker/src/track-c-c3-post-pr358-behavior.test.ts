@@ -38,7 +38,9 @@ const facts = readJson<{
 
 type CheckoutCompleteness = Readonly<{
   state: "REQUIRED" | "COMPLETE";
-  missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+  missing_fields: readonly (
+    "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD"
+  )[];
 }>;
 
 type SimulationFixture = TrackCV5CompactCase & Readonly<{
@@ -564,7 +566,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       },
     });
     const completeSend = successfulTransport(generalReply(
-      "Dạ em đã có đủ thông tin nhận hàng chị nhé.",
+      "Dạ em đã ghi nhận đủ tên, số điện thoại, địa chỉ và phương thức thanh toán chị nhé.",
     ));
     const completeResult = await runFixture(completeFixture, completeSend);
     expect(completeResult.reply).not.toContain("gửi em tên");
@@ -589,6 +591,80 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       instruction.includes("if checkoutCompleteness state is COMPLETE") &&
       instruction.includes("use HOLD_POSITION with CTA NONE")
     )).toBe(true);
+  });
+
+  it("rejects checkout asks outside canonical missingFields in behavior simulation", async () => {
+    const requiredFixture = fixture({
+      id: "CHECKOUT_REQUIRED_GUARD",
+      message: "Chị chốt nhé.",
+      checkoutCompleteness: {
+        state: "REQUIRED",
+        missing_fields: ["PHONE"],
+      },
+    });
+    const overAsk = providerPayload({
+      segments: [{
+        kind: "CLARIFICATION",
+        text: "Dạ em còn thiếu thông tin nhận hàng ạ.",
+        target: "CHECKOUT_DETAILS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em số điện thoại và địa chỉ nhận hàng nhé.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
+    });
+    const simulationSend = successfulTransport(overAsk);
+    await expect(runFixture(requiredFixture, simulationSend)).rejects.toThrow(
+      "TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED",
+    );
+  });
+
+  it("allows exactly the canonical payment method when it is the only missing checkout field", async () => {
+    const requiredFixture = fixture({
+      id: "CHECKOUT_PAYMENT_METHOD_REQUIRED",
+      message: "Chị chốt nhé.",
+      checkoutCompleteness: {
+        state: "REQUIRED",
+        missing_fields: ["PAYMENT_METHOD"],
+      },
+    });
+    const paymentAsk = successfulTransport(providerPayload({
+      segments: [{
+        kind: "CLARIFICATION",
+        text: "Chị muốn thanh toán COD hay chuyển khoản ạ?",
+        target: "CHECKOUT_DETAILS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị chọn giúp em một phương thức thanh toán nhé.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
+    }));
+
+    await expect(runFixture(requiredFixture, paymentAsk)).resolves.toBeDefined();
+  });
+
+  it("rejects every checkout request when canonical completeness is COMPLETE", async () => {
+    const completeFixture = fixture({
+      id: "CHECKOUT_COMPLETE_GUARD",
+      message: "Chốt giúp chị nhé.",
+      checkoutCompleteness: { state: "COMPLETE", missing_fields: [] },
+    });
+    const checkoutAsk = successfulTransport(providerPayload({
+      segments: [{
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em số điện thoại nhé.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
+    }));
+    await expect(runFixture(completeFixture, checkoutAsk)).rejects.toThrow(
+      "TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED",
+    );
   });
 
   it("rejects raw checkout PII fields instead of copying them into readiness projection", async () => {

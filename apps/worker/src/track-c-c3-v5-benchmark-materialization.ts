@@ -63,7 +63,9 @@ export interface TrackCV5CompactCase {
     readonly runtime_claim_refs: readonly string[];
     readonly checkout_completeness?: Readonly<{
       readonly state: "REQUIRED" | "COMPLETE";
-      readonly missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+      readonly missing_fields: readonly (
+        "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD"
+      )[];
     }>;
   }>;
 }

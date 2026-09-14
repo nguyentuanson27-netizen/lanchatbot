@@ -26,6 +26,8 @@ import {
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
+import { assertTrackCCheckoutCompletenessOutput } from
+  "./track-c-offline-candidate-validation.js";
 import {
   buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
@@ -354,6 +356,11 @@ function validateResponderOutput(
   if (output.segments.some(({ kind }) => kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
+  assertTrackCCheckoutCompletenessOutput(
+    context,
+    output,
+    "TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED",
+  );
   const known = new Set([
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined

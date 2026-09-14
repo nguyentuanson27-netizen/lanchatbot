@@ -90,6 +90,23 @@ function replyPayload(reply: string) {
   };
 }
 
+function checkoutReplyPayload(reply: string) {
+  return {
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      segments: [
+        { kind: "CLARIFICATION", target: "CHECKOUT_DETAILS", text: reply },
+        {
+          kind: "ACTION_REQUEST",
+          action: "PROVIDE_CHECKOUT_DETAILS",
+          text: reply,
+        },
+      ],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
+    }) }] } }],
+  };
+}
+
 function transport() {
   let call = 0;
   const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
@@ -111,6 +128,23 @@ function transportWithReply(reply: string) {
     const current = call++;
     return {
       payload: current % 2 === 0 ? planPayload() : replyPayload(reply),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    };
+  });
+  return { send };
+}
+
+function transportWithTurnReplies(
+  replies: readonly ReturnType<typeof replyPayload>[],
+) {
+  let call = 0;
+  const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
+    const current = call++;
+    const turnIndex = Math.floor(current / 2);
+    return {
+      payload: current % 2 === 0
+        ? planPayload()
+        : replies[turnIndex] ?? replyPayload("Dạ em đã ghi nhận ạ."),
       providerModelVersion: "gemini-3.5-flash-lite",
     };
   });
@@ -232,9 +266,19 @@ describe("Track C C3 journey adapter", () => {
   it("runs the authored checkout and ad-lead journeys end to end", async () => {
     for (const journeyId of ["C2J001", "C2J006"]) {
       const authored = authoredJourney(journeyId);
-      const candidateTransport = transportWithReply(
-        "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
-      );
+      const candidateTransport = journeyId === "C2J001"
+        ? transportWithTurnReplies([
+            replyPayload("Dạ em đã ghi nhận ạ."),
+            replyPayload("Dạ em đã ghi nhận ạ."),
+            checkoutReplyPayload(
+              "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
+            ),
+          ])
+        : transportWithTurnReplies([
+            checkoutReplyPayload("Chị gửi em số điện thoại nhé."),
+            replyPayload("Dạ em đã ghi nhận ạ."),
+            replyPayload("Dạ, em dừng tại đây ạ."),
+          ]);
       const result = await runTrackCC3Journey({
         lane: "BEHAVIOR_SIMULATION",
         modelResource: MODEL_RESOURCE,

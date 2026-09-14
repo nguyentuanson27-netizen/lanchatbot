@@ -217,13 +217,16 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     checkoutClarificationActive:
       input.finalCommerceState.clarification?.reasonCode ===
         "CHECKOUT_DETAILS_MISSING",
-    recipientFields: {
+    checkoutFields: {
       fullNamePresent: input.finalCommerceState.checkoutDraft?.fullName !== null &&
         input.finalCommerceState.checkoutDraft?.fullName !== undefined,
       phonePresent: input.finalCommerceState.checkoutDraft?.phone !== null &&
         input.finalCommerceState.checkoutDraft?.phone !== undefined,
       addressPresent: input.finalCommerceState.checkoutDraft?.address !== null &&
         input.finalCommerceState.checkoutDraft?.address !== undefined,
+      paymentMethodPresent:
+        input.finalCommerceState.checkoutDraft?.paymentMethod !== null &&
+        input.finalCommerceState.checkoutDraft?.paymentMethod !== undefined,
     },
     salesCycleRevision: input.finalTurnEvidence.finalSalesCycleRevision,
   });

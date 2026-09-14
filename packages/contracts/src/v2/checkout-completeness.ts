@@ -1,32 +1,34 @@
 import { z } from "zod";
 import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
 
-export const CheckoutRecipientFieldV1Schema = z.enum([
+export const CheckoutRequiredFieldV1Schema = z.enum([
   "FULL_NAME",
   "PHONE",
   "ADDRESS",
+  "PAYMENT_METHOD",
 ]);
-export type CheckoutRecipientFieldV1 = z.infer<
-  typeof CheckoutRecipientFieldV1Schema
+export type CheckoutRequiredFieldV1 = z.infer<
+  typeof CheckoutRequiredFieldV1Schema
 >;
 
-const CHECKOUT_RECIPIENT_FIELD_ORDER: readonly CheckoutRecipientFieldV1[] = [
+const CHECKOUT_REQUIRED_FIELD_ORDER: readonly CheckoutRequiredFieldV1[] = [
   "FULL_NAME",
   "PHONE",
   "ADDRESS",
+  "PAYMENT_METHOD",
 ];
 
 export const CanonicalCheckoutCompletenessV1Schema = z.object({
   schemaVersion: z.literal(1),
   contractVersion: z.literal("CANONICAL_CHECKOUT_COMPLETENESS_V1"),
   state: z.enum(["REQUIRED", "COMPLETE"]),
-  missingFields: z.array(CheckoutRecipientFieldV1Schema).max(3),
+  missingFields: z.array(CheckoutRequiredFieldV1Schema).max(4),
   source: z.literal("CANONICAL_COMMERCE_STATE_V1"),
   salesCycleRevision: z.number().int().nonnegative(),
   authority: z.literal("SHADOW_ONLY"),
   authorization: z.literal("NONE"),
 }).strict().superRefine((value, context) => {
-  const canonicalMissingFields = CHECKOUT_RECIPIENT_FIELD_ORDER.filter((field) =>
+  const canonicalMissingFields = CHECKOUT_REQUIRED_FIELD_ORDER.filter((field) =>
     value.missingFields.includes(field)
   );
   if (JSON.stringify(canonicalMissingFields) !== JSON.stringify(value.missingFields)) {
@@ -54,18 +56,19 @@ export interface DeriveCanonicalCheckoutCompletenessV1Input {
   readonly hasPreview: boolean;
   readonly hasCheckoutDraft: boolean;
   readonly checkoutClarificationActive: boolean;
-  readonly recipientFields: Readonly<{
+  readonly checkoutFields: Readonly<{
     fullNamePresent: boolean;
     phonePresent: boolean;
     addressPresent: boolean;
+    paymentMethodPresent: boolean;
   }>;
   readonly salesCycleRevision: number;
 }
 
 /**
  * PII-free projection of checkout readiness from canonical commerce state.
- * An authoritative order preview proves that its validated recipient payload
- * already exists; earlier cart state exposes only which fields remain absent.
+ * An authoritative order preview proves that its validated checkout payload
+ * already exists; earlier cart state exposes only which required fields remain absent.
  */
 export function deriveCanonicalCheckoutCompletenessV1(
   input: DeriveCanonicalCheckoutCompletenessV1Input,
@@ -83,13 +86,14 @@ export function deriveCanonicalCheckoutCompletenessV1(
   if (!input.hasCart || (!input.hasPreview && !input.hasCheckoutDraft &&
       !input.checkoutClarificationActive)) return null;
 
-  const missingFields: CheckoutRecipientFieldV1[] = input.hasPreview
+  const missingFields: CheckoutRequiredFieldV1[] = input.hasPreview
     ? []
     : [
-        input.recipientFields.fullNamePresent ? null : "FULL_NAME",
-        input.recipientFields.phonePresent ? null : "PHONE",
-        input.recipientFields.addressPresent ? null : "ADDRESS",
-      ].filter((field): field is CheckoutRecipientFieldV1 => field !== null);
+        input.checkoutFields.fullNamePresent ? null : "FULL_NAME",
+        input.checkoutFields.phonePresent ? null : "PHONE",
+        input.checkoutFields.addressPresent ? null : "ADDRESS",
+        input.checkoutFields.paymentMethodPresent ? null : "PAYMENT_METHOD",
+      ].filter((field): field is CheckoutRequiredFieldV1 => field !== null);
 
   return CanonicalCheckoutCompletenessV1Schema.parse({
     schemaVersion: 1,

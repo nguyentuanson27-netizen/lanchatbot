@@ -314,7 +314,7 @@ describe("DF09 final Context V2 capture", () => {
     });
     expect(partial.checkoutCompleteness).toMatchObject({
       state: "REQUIRED",
-      missingFields: ["PHONE"],
+      missingFields: ["PHONE", "PAYMENT_METHOD"],
       salesCycleRevision: 3,
       authorization: "NONE",
     });
