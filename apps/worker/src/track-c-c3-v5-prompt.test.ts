@@ -58,6 +58,18 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
+  it("keeps decision-changing context in conversationRead and materializes known evidence", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "budget, deadline, occasion, fit concern, comparison, prior experience, information already supplied, and any signal that the customer wants to stop",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Before concluding that information is missing, check that product attributes, verified substitutes, and fulfillment evidence have actually been materialized into the request",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not ask again for a decision factor already present in Context V2 or the dialogue",
+    );
+  });
+
   it("requires a concrete decision target instead of a generic support bridge", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "choose at most one concrete decision target",
