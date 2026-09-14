@@ -119,6 +119,14 @@ export function assertTrackCCheckoutCompletenessOutput(
 ): void {
   const completeness = context.checkoutCompleteness;
   if (completeness === null || completeness === undefined) return;
+  const productClarificationRequired =
+    context.productBinding.status === "UNRESOLVED" ||
+    context.productBinding.status === "AMBIGUOUS" ||
+    context.productBinding.status === "STALE";
+  const higherPriorityObjective = productClarificationRequired ||
+    context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY") ||
+    context.barriers.active.includes("MEASUREMENTS_REQUIRED");
+  if (higherPriorityObjective) return;
   const checkoutClarifications = output.segments.filter((segment) =>
     segment.kind === "CLARIFICATION" && segment.target === "CHECKOUT_DETAILS"
   );

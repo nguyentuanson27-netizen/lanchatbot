@@ -56,6 +56,10 @@ function fixture(input: Readonly<{
   message: string;
   origin?: "ADVERTISEMENT" | "ORGANIC";
   firstMeaningfulInbound?: boolean;
+  productBinding?: Readonly<{
+    status: "RESOLVED" | "UNRESOLVED" | "AMBIGUOUS" | "STALE";
+    product_ids: readonly string[];
+  }>;
   canonicalFlags?: readonly string[];
   runtimeClaimRefs?: readonly string[];
   checkoutCompleteness?: CheckoutCompleteness;
@@ -67,7 +71,10 @@ function fixture(input: Readonly<{
     context: {
       origin: input.origin ?? "ORGANIC",
       first_meaningful_inbound: input.firstMeaningfulInbound ?? false,
-      product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+      product_binding: input.productBinding ?? {
+        status: "RESOLVED",
+        product_ids: ["SQ9012"],
+      },
       phase: hasCheckoutState ? "ORDER_REVIEW" : "BROWSING",
       canonical_flags: input.canonicalFlags ?? [],
       buying_intent: hasCheckoutState
@@ -645,6 +652,60 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     }));
 
     await expect(runFixture(requiredFixture, paymentAsk)).resolves.toBeDefined();
+  });
+
+  it("defers checkout validation to a higher-priority measurement clarification", async () => {
+    const requiredFixture = fixture({
+      id: "CHECKOUT_MEASUREMENT_PRECEDENCE",
+      message: "Chị chốt nhưng cần kiểm tra lại size nhé.",
+      canonicalFlags: ["MEASUREMENTS_REQUIRED"],
+      checkoutCompleteness: {
+        state: "REQUIRED",
+        missing_fields: ["PHONE"],
+      },
+    });
+    const measurementAsk = successfulTransport(providerPayload({
+      segments: [{
+        kind: "CLARIFICATION",
+        text: "Em cần thêm số đo còn thiếu để kiểm tra size ạ.",
+        target: "MEASUREMENTS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị cho em xin cân nặng nhé.",
+        action: "PROVIDE_MEASUREMENTS",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_MEASUREMENTS",
+    }));
+
+    await expect(runFixture(requiredFixture, measurementAsk)).resolves.toBeDefined();
+  });
+
+  it("defers checkout validation to a higher-priority unresolved product clarification", async () => {
+    const requiredFixture = fixture({
+      id: "CHECKOUT_PRODUCT_PRECEDENCE",
+      message: "Chị chốt mẫu đó nhé.",
+      productBinding: { status: "UNRESOLVED", product_ids: [] },
+      checkoutCompleteness: {
+        state: "COMPLETE",
+        missing_fields: [],
+      },
+    });
+    const productAsk = successfulTransport(providerPayload({
+      segments: [{
+        kind: "CLARIFICATION",
+        text: "Em chưa xác định được mẫu chị muốn chốt ạ.",
+        target: "PRODUCT",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em tên hoặc ảnh mẫu nhé.",
+        action: "PROVIDE_PRODUCT",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_PRODUCT",
+    }));
+
+    await expect(runFixture(requiredFixture, productAsk)).resolves.toBeDefined();
   });
 
   it("rejects every checkout request when canonical completeness is COMPLETE", async () => {
