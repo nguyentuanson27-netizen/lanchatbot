@@ -213,6 +213,25 @@ function verifiedMediaClaim(): ProtectedClaimV1 {
   };
 }
 
+function verifiedEtaClaim(): ProtectedClaimV1 {
+  return {
+    schemaVersion: 1,
+    claimId: "00000000-0000-4000-8000-000000000002",
+    type: "ETA",
+    scope: { kind: "PRODUCT", productId: "SD398", variantId: null },
+    value: { minDays: 2, maxDays: 4 },
+    provenance: {
+      authority: "FULFILLMENT_POLICY_V1",
+      sourceVersion: "fixture:fulfillment:1",
+      evidenceRef: "fixture:eta:SD398",
+      contentHash: hash("f"),
+      observedAt: evaluationAt.toISOString(),
+      expiresAt: "2099-01-01T00:00:00.000Z",
+    },
+    authorization: "NONE",
+  };
+}
+
 function conversationPlan() {
   return {
     currentNeed: "Xem mẫu sản phẩm",
@@ -1015,6 +1034,37 @@ describe("Track C C3 two-pass offline candidate", () => {
       },
     });
     expect(body.safetySettings).toBeDefined();
+  });
+
+  it("materializes product and fulfillment evidence into the Strategist request", () => {
+    const attributes = verifiedProductAttributes();
+    const presentation = verifiedProductPresentation();
+    const request = buildTrackCC3StrategistRequest({
+      modelResource,
+      capture: validCapture([verifiedEtaClaim()], attributes, presentation),
+      evaluationAt,
+      evaluationContext,
+    });
+    const body = JSON.parse(request.body) as {
+      contents: [{ parts: [{ text: string }] }];
+    };
+    const prompt = JSON.parse(body.contents[0].parts[0].text) as {
+      productAttributes: { scope: { productId: string } };
+      productPresentation: { scope: { productId: string } };
+      verifiedClaims: Array<{
+        type: string;
+        scope: { productId: string };
+        provenance: { authority: string };
+      }>;
+    };
+
+    expect(prompt.productAttributes.scope.productId).toBe("SD398");
+    expect(prompt.productPresentation.scope.productId).toBe("SD398");
+    expect(prompt.verifiedClaims).toContainEqual(expect.objectContaining({
+      type: "ETA",
+      scope: expect.objectContaining({ productId: "SD398" }),
+      provenance: expect.objectContaining({ authority: "FULFILLMENT_POLICY_V1" }),
+    }));
   });
 
   it("runs Strategist then Responder and sends only the final output through the existing guard", async () => {
