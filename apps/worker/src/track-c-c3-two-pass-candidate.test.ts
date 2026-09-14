@@ -343,7 +343,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       "productPresentation",
     );
     expect(request.identity.requestEnvelopeHash).toBe(
-      "d5cf32b82d56a12bd3754fdb21c94b5c88bda7a42a3b8945ee4030edfcc29c51",
+      "6fd7ddaa7dee16d4e4643b3f29d320122161b359521d27bce9aa73f46555156a",
     );
     const nullableRequest = buildTrackCC3ResponderRequest({
       modelResource,
@@ -380,6 +380,9 @@ describe("Track C C3 two-pass offline candidate", () => {
 
     expect(text.includes("When productAttributes is present"))
       .toBe(expectsAttributes);
+    expect(text.includes(
+      "Before applying the generic unverified-protected-fact rule, check whether eligible productAttributes directly answer the current need",
+    )).toBe(expectsAttributes);
     expect(text.includes("When productPresentation is present"))
       .toBe(expectsPresentation);
   });

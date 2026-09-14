@@ -68,6 +68,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Do not ask again for a decision factor already present in Context V2 or the dialogue",
     );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Treat an eligible product attribute that directly answers the current need as available evidence, not as a missing protected fact.",
+    );
   });
 
   it("requires a concrete decision target instead of a generic support bridge", () => {
@@ -151,6 +154,12 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "When the dialogue already identifies the comparison option or concrete trade-off, use it and do not ask for a more specific comparison description merely to continue the conversation.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When no eligible additional-promotion claim exists but a current verified price is eligible",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "For a request about an additional discount with no eligible promotion claim, include an eligible current verified price when the plan selected it as the bounded pricing answer",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Realize the plan with only the eligible verified evidence needed for its selected response.",
