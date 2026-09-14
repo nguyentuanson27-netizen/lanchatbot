@@ -343,7 +343,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       "productPresentation",
     );
     expect(request.identity.requestEnvelopeHash).toBe(
-      "8736cfbe91611a3d45588166db9ab20444435287a8b43c54cbfe874cfe74c520",
+      "569eb192ef8a6c4c7004a783c882a6fb86a3dc7c69678a8675726a39bf42074e",
     );
     const nullableRequest = buildTrackCC3ResponderRequest({
       modelResource,

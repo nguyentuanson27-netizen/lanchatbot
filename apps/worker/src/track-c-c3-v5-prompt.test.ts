@@ -150,10 +150,10 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Preserve the dispatch-versus-arrival distinction",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "obtains one missing qualification that can materially change the answer",
+      "When conversationPlan.nextMove is not NONE",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "ask it once without promising a later check",
+      "without promising a later check",
     );
   });
 
@@ -274,6 +274,15 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "never turn it into certainty or a guarantee",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "When conversationPlan.nextMove is not NONE, ask exactly that planned qualification once",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "unless an explicit higher-priority canonical or safety rule prohibits it",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "If the validated nextMove obtains one missing qualification that can materially change the answer",
     );
   });
 
