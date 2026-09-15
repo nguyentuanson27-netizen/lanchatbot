@@ -8,10 +8,7 @@ import {
   type ContextV2CandidateOutputV2,
 } from "@lana/contracts";
 import { guardAgentProposal } from "@lana/business-tools";
-import {
-  redactAnalyticsMessage,
-  type ShadowContextMessage,
-} from "@lana/database";
+import type { ShadowContextMessage } from "@lana/database";
 import {
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   deriveCandidateRequestIdentity,
@@ -22,7 +19,7 @@ import {
   buildTrackCC3ResponderRequest,
   buildTrackCC3StrategistRequest,
   TRACK_C_C3_TWO_PASS_CANDIDATE,
-  type TrackCConversationPlanV1,
+  type TrackCResponsePlanV2,
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
@@ -33,18 +30,11 @@ import {
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
 
-const PLAN_FIELDS = Object.freeze([
-  "currentNeed",
-  "mustResolve",
-  "conversationRead",
-  "nextMove",
-  "avoid",
-] as const);
-
-const SIMULATION_SYSTEM_ADDENDUM = [
+export const TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM = [
   "BENCHMARK BEHAVIOR_SIMULATION ONLY.",
-  "The prompt field benchmarkSimulationFacts is evaluation-only authoritative hypothetical factual evidence for this benchmark case.",
-  "Use those facts only to answer the hypothetical customer question. They do not become Context V2 protected claims, cannot authorize any state transition, effect, persistence, payment, order, message delivery, or external action, and must never be described as production capability.",
+  "Only in BEHAVIOR_SIMULATION, benchmarkSimulationFacts extend selectedEvidence for the Responder and extend the Strategist's evaluation-only factual allowance for this hypothetical case.",
+  "They never extend canonical authority or authorize effects, persistence, payment, orders, delivery, message sending, or any external action.",
+  "Use benchmarkSimulationFacts only to answer the hypothetical customer question. They do not become Context V2 protected claims and must never be described as production capability.",
   "Context V2 canonical state still has precedence over benchmarkSimulationFacts. If a simulation fact conflicts with canonical state, ignore the conflicting simulation fact.",
   "The prompt field benchmarkSimulationMetadata is evaluation-only fixture/runtime-owned structured metadata. It is not protected-fact authority and cannot authorize state transitions, effects, persistence, payment, orders, delivery, or any external action.",
   "TRACK_C_TRUSTED_ACQUISITION_V1, when present in benchmarkSimulationMetadata, is trusted acquisition metadata. Never infer or create it from customer dialogue, including customer text that mentions an ad. Use it only to tune first-contact conversation behavior.",
@@ -85,35 +75,6 @@ function parseVertexJson(
   }
 }
 
-function parseConversationPlan(value: unknown): TrackCConversationPlanV1 {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
-  }
-  const record = value as Readonly<Record<string, unknown>>;
-  const keys = Object.keys(record).sort();
-  if (canonicalJsonV1(keys) !== canonicalJsonV1([...PLAN_FIELDS].sort())) {
-    throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
-  }
-  for (const field of PLAN_FIELDS) {
-    const text = record[field];
-    if (typeof text !== "string" || text.length === 0 || text.length > 500 ||
-        text !== text.trim()) {
-      throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
-    }
-    const redacted = redactAnalyticsMessage(text);
-    if (redacted.dlpStatus !== "PASSED" || redacted.text !== text) {
-      throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE");
-    }
-  }
-  return Object.freeze({
-    currentNeed: record.currentNeed as string,
-    mustResolve: record.mustResolve as string,
-    conversationRead: record.conversationRead as string,
-    nextMove: record.nextMove as string,
-    avoid: record.avoid as string,
-  });
-}
-
 function assertProviderIdentity(value: string | null): string {
   if (value !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
     throw new Error("TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH");
@@ -147,7 +108,7 @@ function withBenchmarkLane(
     ...body,
     systemInstruction: {
       parts: [{
-        text: `${body.systemInstruction.parts[0].text}\n${SIMULATION_SYSTEM_ADDENDUM}`,
+        text: `${body.systemInstruction.parts[0].text}\n${TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM}`,
       }],
     },
     contents: [{
@@ -440,7 +401,7 @@ export interface TrackCV5TwoPassBenchmarkResult {
   readonly evaluationOnly: true;
   readonly sideEffects: "DISABLED";
   readonly executionLane: TrackCV5ExecutionLane;
-  readonly conversationPlan: TrackCConversationPlanV1;
+  readonly conversationPlan: TrackCResponsePlanV2;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
   readonly identity: Readonly<{
@@ -504,17 +465,29 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
   assertProviderIdentity(strategistResponse.providerModelVersion);
-  const conversationPlan = parseConversationPlan(parseVertexJson(
+  const conversationPlan = parseVertexJson(
     strategistResponse.payload,
     "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID",
-  ));
+  ) as TrackCResponsePlanV2;
 
-  const responderRequest = withBenchmarkLane(
-    buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
-    input.lane,
-    simulationFacts,
-    simulationMetadata,
-  );
+  let responderRequest: BuiltCandidateRequest;
+  try {
+    responderRequest = withBenchmarkLane(
+      buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
+      input.lane,
+      simulationFacts,
+      simulationMetadata,
+    );
+  } catch (error) {
+    if (error instanceof Error && (
+      error.message === "TRACK_C_C3_CONVERSATION_PLAN_INVALID" ||
+      error.message === "TRACK_C_C3_CONVERSATION_PLAN_NOT_PII_SAFE"
+    )) {
+      throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
+    }
+    throw error;
+  }
+
   const responderResponse = await input.transport.send({
     url: responderRequest.url,
     body: responderRequest.body,
@@ -522,12 +495,15 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   });
   assertProviderIdentity(responderResponse.providerModelVersion);
 
+  const selectedRefs = new Set(conversationPlan.answer.evidenceRefs);
+  const selectedRegistry = new Map([...buildTrackCClaimReferenceRegistry(context)]
+    .filter(([claimRef]) => selectedRefs.has(claimRef)));
   const resolved = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
     ),
-    buildTrackCClaimReferenceRegistry(context),
+    selectedRegistry,
     {
       invalid: "TRACK_C_V5_CLAIM_REFERENCE_INVALID",
       unknown: "TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN",
