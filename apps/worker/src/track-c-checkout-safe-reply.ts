@@ -5,7 +5,11 @@ import type {
 
 type CheckoutRenderContext = Pick<
   ContextV2,
-  "checkoutCompleteness" | "phase" | "buyingIntent"
+  | "checkoutCompleteness"
+  | "phase"
+  | "buyingIntent"
+  | "productBinding"
+  | "barriers"
 >;
 
 type CheckoutRenderOutput = Pick<
@@ -16,6 +20,21 @@ type CheckoutRenderOutput = Pick<
 type CheckoutField = NonNullable<
   ContextV2["checkoutCompleteness"]
 >["missingFields"][number];
+
+export type TrackCCanonicalActionSelection = Readonly<{
+  type:
+    | "NONE"
+    | "ASK_PRODUCT"
+    | "ASK_MEASUREMENTS"
+    | "ASK_CHECKOUT_DETAILS"
+    | "HOLD_POSITION";
+  requestedFields: readonly CheckoutField[];
+}>;
+
+export type TrackCOrdinaryNextMoveSelection = Readonly<{
+  action: "ASK" | "NONE";
+  target: string;
+}>;
 
 const LEGACY_CHECKOUT_FIELDS = Object.freeze([
   "FULL_NAME",
@@ -39,6 +58,14 @@ const CHECKOUT_REQUEST_TERMS = Object.freeze([
   "hình thức thanh toán",
   "cod",
   "chuyển khoản",
+  "full_name",
+  "recipient name",
+  "phone",
+  "phone number",
+  "address",
+  "delivery address",
+  "payment_method",
+  "payment method",
 ] as const);
 
 const REQUEST_CUES = Object.freeze([
@@ -92,7 +119,9 @@ function containsCheckoutRequest(text: string): boolean {
   return clauses.some((clause) => {
     const normalized = clause.trim();
     if (!mentionsCheckoutField(normalized)) return false;
-    return normalized.endsWith("?") || REQUEST_CUES.some((cue) =>
+    const imperative = /^(?:(?:chị|mình)\s+)?(?:vui lòng\s+)?(?:nhập|điền|để lại)\b/u
+      .test(normalized);
+    return normalized.endsWith("?") || imperative || REQUEST_CUES.some((cue) =>
       normalized.includes(cue)
     );
   });
@@ -125,6 +154,54 @@ function permittedCheckoutFields(
     context.buyingIntent.decision === "COMMITTED" &&
     context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT";
   return legacyCheckoutPermitted ? LEGACY_CHECKOUT_FIELDS : null;
+}
+
+export function assertTrackCOrdinaryNextMoveSafe(
+  nextMove: TrackCOrdinaryNextMoveSelection,
+): void {
+  if (nextMove.action !== "ASK") return;
+  const target = nextMove.target.normalize("NFC").toLocaleLowerCase("vi-VN");
+  if (mentionsCheckoutField(target)) {
+    throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  }
+}
+
+export function assertTrackCCanonicalActionPermitted(
+  context: CheckoutRenderContext,
+  action: TrackCCanonicalActionSelection,
+): void {
+  switch (action.type) {
+    case "NONE":
+      return;
+    case "ASK_PRODUCT": {
+      const productUnready = context.productBinding.status === "UNRESOLVED" ||
+        context.productBinding.status === "AMBIGUOUS" ||
+        context.productBinding.status === "STALE" ||
+        context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY");
+      if (!productUnready) {
+        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+      }
+      return;
+    }
+    case "ASK_MEASUREMENTS":
+      if (!context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
+        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+      }
+      return;
+    case "ASK_CHECKOUT_DETAILS": {
+      const permittedFields = permittedCheckoutFields(context);
+      if (permittedFields === null ||
+          JSON.stringify(action.requestedFields) !== JSON.stringify(permittedFields)) {
+        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+      }
+      return;
+    }
+    case "HOLD_POSITION":
+      if (context.phase.phase !== "ORDER_CONFIRMED" &&
+          context.phase.sourceStage !== "PURCHASE_CONFIRMED") {
+        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+      }
+  }
 }
 
 function assertDeclaredCheckoutRequest(
