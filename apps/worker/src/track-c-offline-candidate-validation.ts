@@ -85,10 +85,9 @@ function replyFromOutput(output: ContextV2CandidateOutputV2): string {
 }
 
 /**
- * Final, side-effect-free checkout guard. Canonical Context V2 selects the
- * permitted checkout objective; the declared checkout action fields verify
- * only that the model did not widen its field list. It never derives sales
- * intent, checkout state, or requested fields from reply text.
+ * Final, side-effect-free checkout guard. The model owns whether checkout is
+ * the conversational action. When it selects checkout, canonical Context V2
+ * strictly limits collection to the currently missing fields.
  */
 export function assertTrackCCheckoutCompletenessOutput(
   context: ContextV2,
@@ -104,35 +103,18 @@ export function assertTrackCCheckoutCompletenessOutput(
     segment.kind === "ACTION_REQUEST" &&
     segment.action === "PROVIDE_CHECKOUT_DETAILS"
   );
-  const productClarificationRequired =
-    context.productBinding.status === "UNRESOLVED" ||
-    context.productBinding.status === "AMBIGUOUS" ||
-    context.productBinding.status === "STALE";
-  const higherPriorityObjective = productClarificationRequired ||
-    context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY") ||
-    context.barriers.active.includes("MEASUREMENTS_REQUIRED");
-  if (higherPriorityObjective) {
-    if (output.cta === "ASK_CHECKOUT_DETAILS" ||
-        checkoutClarifications.length > 0 || checkoutActions.length > 0) {
-      throw new Error(errorCode);
-    }
-    return;
-  }
+  const checkoutRequested = output.cta === "ASK_CHECKOUT_DETAILS" ||
+    checkoutClarifications.length > 0 || checkoutActions.length > 0;
+  if (!checkoutRequested) return;
+
   const otherRequests = output.segments.filter((segment) =>
     (segment.kind === "CLARIFICATION" &&
       segment.target !== "CHECKOUT_DETAILS") ||
     (segment.kind === "ACTION_REQUEST" &&
       segment.action !== "PROVIDE_CHECKOUT_DETAILS")
   );
-  if (completeness.state === "COMPLETE") {
-    if (output.strategy !== "HOLD_POSITION" || output.cta !== "NONE" ||
-        checkoutClarifications.length > 0 || checkoutActions.length > 0 ||
-        otherRequests.length > 0) {
-      throw new Error(errorCode);
-    }
-    return;
-  }
-  if (output.strategy !== "ASK_CLARIFICATION" ||
+  if (completeness.state !== "REQUIRED" ||
+      output.strategy !== "ASK_CLARIFICATION" ||
       output.cta !== "ASK_CHECKOUT_DETAILS" ||
       checkoutClarifications.length !== 1 || checkoutActions.length !== 1 ||
       otherRequests.length > 0 ||
