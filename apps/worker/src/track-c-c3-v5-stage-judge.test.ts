@@ -118,9 +118,21 @@ describe("Track C V5 Vertex stage judge composition", () => {
       artifact: {
         conversationPlan: {
           currentNeed: "Answer price",
-          mustResolve: "Exact price",
-          conversationRead: "Product resolved",
-          nextMove: "NONE",
+          answer: {
+            mode: "DIRECT",
+            objective: "Answer the exact verified price",
+            evidenceRefs: ["CLAIM_001"],
+          },
+          nextMove: {
+            action: "NONE",
+            target: "NONE",
+            purpose: "NONE",
+          },
+          canonicalAction: {
+            type: "NONE",
+            requestedFields: [],
+          },
+          terminal: false,
           avoid: "No invented fact",
         },
         responderReply: "Mẫu này hiện 849k chị ạ.",
@@ -191,9 +203,21 @@ describe("Track C V5 Vertex stage judge composition", () => {
       artifact: {
         conversationPlan: {
           currentNeed: "Clarify the active product",
-          mustResolve: "Referent",
-          conversationRead: "Ambiguous",
-          nextMove: "Ask one clarification",
+          answer: {
+            mode: "CLARIFY",
+            objective: "Clarify the active product referent",
+            evidenceRefs: [],
+          },
+          nextMove: {
+            action: "NONE",
+            target: "NONE",
+            purpose: "NONE",
+          },
+          canonicalAction: {
+            type: "ASK_PRODUCT",
+            requestedFields: [],
+          },
+          terminal: false,
           avoid: "Do not guess",
         },
       },
