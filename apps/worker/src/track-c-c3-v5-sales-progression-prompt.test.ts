@@ -14,15 +14,18 @@ describe("Track C C3 V5 sales progression prompt policy", () => {
     );
   });
 
-  it("renders abstract sales planning as concrete Vietnamese shop chat", () => {
+  it("renders the selected next move without making a new sales decision", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "not a consultant, analyst, CRM, or customer-service script",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Translate abstract planning language into simple everyday shop language.",
+      "Render exactly the supplied nextMove.target as one short, concrete, natural customer question.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Prefer short concrete questions about the actual product choice, size, colour, budget, timing, fit, or comparison.",
+      "Do not introduce another decision variable",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "nextMove.purpose is internal reasoning only",
     );
   });
 });
