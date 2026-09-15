@@ -176,6 +176,20 @@ describe("renderTrackCCheckoutSafeReply", () => {
 
     expect(reply).toBe("Dạ bên em có hỗ trợ COD và chuyển khoản ạ.");
   });
+
+  it("allows a payment-policy answer followed by a different sales question", () => {
+    const reply = renderTrackCCheckoutSafeReply(
+      context("REQUIRED", ["PHONE"]),
+      output([{
+        kind: "GENERAL",
+        text: "Dạ bên em có hỗ trợ COD và chuyển khoản ạ. Chị mặc size nào?",
+      }], "ANSWER_VERIFIED_FACTS", "NONE"),
+    );
+
+    expect(reply).toBe(
+      "Dạ bên em có hỗ trợ COD và chuyển khoản ạ. Chị mặc size nào?",
+    );
+  });
 });
 
 describe("assertTrackCCheckoutCompletenessOutput", () => {
