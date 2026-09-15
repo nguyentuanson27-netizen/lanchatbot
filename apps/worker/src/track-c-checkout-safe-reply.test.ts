@@ -155,6 +155,16 @@ describe("renderTrackCCheckoutSafeReply", () => {
     )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   });
 
+  it("rejects ordinary checkout PII requests before checkout state exists", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      { checkoutCompleteness: null },
+      output([{
+        kind: "GENERAL",
+        text: "Chị cho em xin họ tên đầy đủ để em lên đơn nhé?",
+      }], "ANSWER_VERIFIED_FACTS", "NONE"),
+    )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  });
+
   it("allows a factual payment-policy answer without treating it as a request", () => {
     const reply = renderTrackCCheckoutSafeReply(
       context("REQUIRED", ["PHONE"]),
