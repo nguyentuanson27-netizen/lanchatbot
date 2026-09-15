@@ -235,6 +235,7 @@ export function validateTrackCOfflineCandidate(
     output,
     "TRACK_C_C3_OFFLINE_CANDIDATE_CHECKOUT_COMPLETENESS_FAILED",
   );
+  const safeReply = renderTrackCCheckoutSafeReply(context, output);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []);
   const knownEvidenceHashes = new Set([
@@ -288,7 +289,7 @@ export function validateTrackCOfflineCandidate(
     quality: Object.freeze({
       context: input.accepted.context,
       verifiedFacts: input.accepted.verifiedFacts,
-      reply: renderTrackCCheckoutSafeReply(context, output),
+      reply: safeReply,
       proposalSummary: Object.freeze({ strategy: output.strategy, cta: output.cta }),
       guardOutcome: Object.freeze({
         expectedOwner: "BOT",
