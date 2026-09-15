@@ -15,6 +15,8 @@ function context(
       contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
       state,
       missingFields: [...missingFields],
+      source: "CANONICAL_COMMERCE_STATE_V1",
+      salesCycleRevision: 1,
       authority: "SHADOW_ONLY",
       authorization: "NONE",
     },
