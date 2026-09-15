@@ -3,7 +3,11 @@ import type {
   ContextV2,
   ContextV2CandidateOutputV2,
 } from "@lana/contracts";
-import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
+import {
+  assertTrackCCanonicalActionPermitted,
+  assertTrackCOrdinaryNextMoveSafe,
+  renderTrackCCheckoutSafeReply,
+} from "./track-c-checkout-safe-reply.js";
 import { assertTrackCCheckoutCompletenessOutput } from
   "./track-c-offline-candidate-validation.js";
 
@@ -17,7 +21,7 @@ function context(
   missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[],
   options: Readonly<{
     productStatus?: "RESOLVED" | "UNRESOLVED" | "AMBIGUOUS" | "STALE";
-    barriers?: readonly string[];
+    barriers?: TestContext["barriers"]["active"];
   }> = {},
 ): TestContext {
   return {
@@ -199,6 +203,16 @@ describe("renderTrackCCheckoutSafeReply", () => {
     )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   });
 
+  it("rejects imperative checkout PII hidden inside ordinary prose", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      context("REQUIRED", ["PHONE"]),
+      output([{
+        kind: "GENERAL",
+        text: "Để lại số điện thoại nhé.",
+      }], "ANSWER_VERIFIED_FACTS", "NONE"),
+    )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  });
+
   it("rejects ordinary checkout PII requests before checkout state exists", () => {
     expect(() => renderTrackCCheckoutSafeReply(
       {
@@ -290,6 +304,44 @@ describe("renderTrackCCheckoutSafeReply", () => {
     expect(reply).toContain("số điện thoại");
     expect(reply).toContain("địa chỉ nhận hàng");
     expect(reply).not.toContain("phương thức thanh toán");
+  });
+});
+
+describe("Track C model-selected plan constraints", () => {
+  it("rejects checkout data in an ordinary nextMove target", () => {
+    expect(() => assertTrackCOrdinaryNextMoveSafe({
+      action: "ASK",
+      target: "PHONE",
+    })).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+    expect(() => assertTrackCOrdinaryNextMoveSafe({
+      action: "ASK",
+      target: "SIZE_PREFERENCE",
+    })).not.toThrow();
+  });
+
+  it("permits ASK_PRODUCT only when product context is unready", () => {
+    expect(() => assertTrackCCanonicalActionPermitted(
+      context("COMPLETE", []),
+      { type: "ASK_PRODUCT", requestedFields: [] },
+    )).toThrow("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+    expect(() => assertTrackCCanonicalActionPermitted(
+      context("COMPLETE", [], {
+        productStatus: "UNRESOLVED",
+        barriers: ["PRODUCT_CONTEXT_UNREADY"],
+      }),
+      { type: "ASK_PRODUCT", requestedFields: [] },
+    )).not.toThrow();
+  });
+
+  it("permits ASK_MEASUREMENTS only when measurements are required", () => {
+    expect(() => assertTrackCCanonicalActionPermitted(
+      context("COMPLETE", []),
+      { type: "ASK_MEASUREMENTS", requestedFields: [] },
+    )).toThrow("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+    expect(() => assertTrackCCanonicalActionPermitted(
+      context("COMPLETE", [], { barriers: ["MEASUREMENTS_REQUIRED"] }),
+      { type: "ASK_MEASUREMENTS", requestedFields: [] },
+    )).not.toThrow();
   });
 });
 
