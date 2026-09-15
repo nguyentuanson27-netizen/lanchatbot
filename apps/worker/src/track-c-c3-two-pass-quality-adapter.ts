@@ -13,6 +13,8 @@ import {
   type TrackCV5TwoPassBenchmarkResult,
 } from "./track-c-c3-v5-benchmark-runner.js";
 import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materialization.js";
+import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
+import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 
 export type TrackCC3CheckoutCompleteness = Readonly<{
   readonly state: "REQUIRED" | "COMPLETE";
@@ -79,8 +81,16 @@ export async function runTrackCC3TwoPassQualityCandidate(
   }
   const metadata = trustedSimulationMetadata(input.fixture);
   const { fixture: _fixture, ...runnerInput } = input;
-  return runTrackCV5TwoPassBenchmarkCase({
+  const result = await runTrackCV5TwoPassBenchmarkCase({
     ...runnerInput,
     simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? metadata : [],
+  });
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
+  return Object.freeze({
+    ...result,
+    reply: renderTrackCCheckoutSafeReply(context, result.output),
   });
 }
