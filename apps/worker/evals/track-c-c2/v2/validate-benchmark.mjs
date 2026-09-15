@@ -367,6 +367,7 @@ const componentPaths = [
   '../../../src/track-c-c3-v5-benchmark-materialization.ts',
   '../../../src/track-c-c3-v5-benchmark-runner.ts',
   '../../../src/track-c-offline-candidate-validation.ts',
+  '../../../src/track-c-checkout-safe-reply.ts',
 ];
 const componentsGitSha1 = Object.fromEntries(
   componentPaths.map((path) => [path, gitBlobSha1(path)]),
