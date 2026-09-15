@@ -9,6 +9,7 @@ import type {
   TrackCV5MaterializationRecipe,
   TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
+import type { TrackCResponsePlanV2 } from "./track-c-c3-two-pass-candidate.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -68,14 +69,30 @@ function journey(turnCount: number): TrackCC2JourneyFixture {
   };
 }
 
-function planPayload() {
+function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
   return {
     candidates: [{ content: { parts: [{ text: JSON.stringify({
       currentNeed: "Resolve the current customer need.",
-      mustResolve: "Use only supplied authority.",
-      conversationRead: "Use accumulated dialogue without creating authority.",
-      nextMove: "NONE",
+      answer: {
+        mode: "DIRECT",
+        objective: "Use only supplied authority.",
+        evidenceRefs: [],
+        ...(overrides.answer ?? {}),
+      },
+      nextMove: {
+        action: "NONE",
+        target: "NONE",
+        purpose: "NONE",
+        ...(overrides.nextMove ?? {}),
+      },
+      canonicalAction: {
+        type: "NONE",
+        requestedFields: [],
+        ...(overrides.canonicalAction ?? {}),
+      },
+      terminal: false,
       avoid: "Do not invent facts or effects.",
+      ...overrides,
     }) }] } }],
   };
 }
@@ -86,6 +103,28 @@ function replyPayload(reply: string) {
       segments: [{ kind: "GENERAL", text: reply }],
       strategy: "HOLD_POSITION",
       cta: "NONE",
+    }) }] } }],
+  };
+}
+
+function checkoutReplyPayload(
+  reply: string,
+  requestedFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[] =
+    ["FULL_NAME", "PHONE", "ADDRESS"],
+) {
+  return {
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      segments: [
+        { kind: "CLARIFICATION", target: "CHECKOUT_DETAILS", text: reply },
+        {
+          kind: "ACTION_REQUEST",
+          action: "PROVIDE_CHECKOUT_DETAILS",
+          text: reply,
+          requestedFields,
+        },
+      ],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
     }) }] } }],
   };
 }
@@ -111,6 +150,23 @@ function transportWithReply(reply: string) {
     const current = call++;
     return {
       payload: current % 2 === 0 ? planPayload() : replyPayload(reply),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    };
+  });
+  return { send };
+}
+
+function transportWithTurnReplies(
+  replies: readonly ReturnType<typeof replyPayload>[],
+) {
+  let call = 0;
+  const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
+    const current = call++;
+    const turnIndex = Math.floor(current / 2);
+    return {
+      payload: current % 2 === 0
+        ? planPayload()
+        : replies[turnIndex] ?? replyPayload("Dạ em đã ghi nhận ạ."),
       providerModelVersion: "gemini-3.5-flash-lite",
     };
   });
@@ -232,9 +288,19 @@ describe("Track C C3 journey adapter", () => {
   it("runs the authored checkout and ad-lead journeys end to end", async () => {
     for (const journeyId of ["C2J001", "C2J006"]) {
       const authored = authoredJourney(journeyId);
-      const candidateTransport = transportWithReply(
-        "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
-      );
+      const candidateTransport = journeyId === "C2J001"
+        ? transportWithTurnReplies([
+            replyPayload("Dạ em đã ghi nhận ạ."),
+            replyPayload("Dạ em đã ghi nhận ạ."),
+            checkoutReplyPayload(
+              "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
+            ),
+          ])
+        : transportWithTurnReplies([
+            checkoutReplyPayload("Chị gửi em số điện thoại nhé.", ["PHONE"]),
+            replyPayload("Dạ em đã ghi nhận ạ."),
+            replyPayload("Dạ, em dừng tại đây ạ."),
+          ]);
       const result = await runTrackCC3Journey({
         lane: "BEHAVIOR_SIMULATION",
         modelResource: MODEL_RESOURCE,

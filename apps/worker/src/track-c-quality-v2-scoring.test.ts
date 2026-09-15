@@ -7,7 +7,7 @@ import {
 } from "./track-c-c3-v5-benchmark-scoring.js";
 
 const RUBRIC = JSON.parse(readFileSync(
-  new URL("../evals/track-c-c3-v5/v4/rubric.json", import.meta.url),
+  new URL("../evals/track-c-c2/v2/rubric.json", import.meta.url),
   "utf8",
 )) as TrackCV5RubricConfig;
 

@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.5
+### Benchmark revision R2.11
 
-`benchmark_revision` is **R2.5**. Relative to R2.4, the C2-owned execution seam distinguishes a catalog size label carried by integrity-valid product-presentation evidence from an unbound fit recommendation. The catalog-aware guard mode is scoped only to that exact presentation hash; every other segment remains reject-only. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.11**. Relative to R2.10, the checkout safe-reply renderer is now a pinned bundle component because the offline validator uses its output as the final benchmark reply. This closes a reproducibility gap where renderer behavior could change without changing the benchmark bundle fingerprint. Corpus, splits, rubric, scoring weights, production-contract reachability and the aggregate gate are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 
@@ -32,7 +32,7 @@ Each journey turn owns its customer message, canonical/context state, required/f
 
 Accumulated dialogue stays inside the shared Track C offline-candidate bound of 15 messages, which is exactly the longest supported journey (8 customer turns plus the 7 replies between them). That dialogue is PII-guarded, so the adapter appends each reply in its redacted form; the unredacted reply stays on the turn result.
 
-Trusted acquisition metadata and checkout completeness in these fixtures are simulation/eval wiring only. `benchmarkSimulationMetadata` is a closed union of those two kinds: the benchmark runner rejects any other shape at the sink, so only validated fixture-authored signal reaches the prompt. `origin` / `first_meaningful_inbound` are never inferred from dialogue and grant no fact/effect authority. Checkout completeness carries only `REQUIRED`/`COMPLETE` plus missing-field names, not recipient PII. The production `GAP_AD_ORIGIN` and `GAP_CHECKOUT_COMPLETENESS` remain open until production runtime contracts provide equivalent authoritative signals; Q100 remains regression evidence rather than production-closure evidence.
+Trusted acquisition metadata and fixture-authored checkout completeness are simulation/eval wiring only, but use separate typed paths. `benchmarkSimulationMetadata` carries only `TRACK_C_TRUSTED_ACQUISITION_V1`; the benchmark runner rejects every other metadata shape at that sink. Fixture checkout state is validated separately and projected directly into the same PII-free `ContextV2.checkoutCompleteness` field used by production. `origin` / `first_meaningful_inbound` are never inferred from dialogue and grant no fact/effect authority. Production Context V2 derives checkout completeness from canonical commerce state, so `GAP_CHECKOUT_COMPLETENESS` is closed at that egress boundary; authored state combinations that the runtime still cannot produce remain blocked separately by `GAP_CANONICAL_REACHABILITY`. `GAP_AD_ORIGIN` remains open, and Q100 remains regression evidence rather than proof of live checkout persistence or effects.
 
 ## Quality evaluation
 

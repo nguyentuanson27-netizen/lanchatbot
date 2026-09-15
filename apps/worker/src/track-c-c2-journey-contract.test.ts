@@ -31,6 +31,10 @@ type JourneyBundle = {
         product_binding: { status: string; product_ids: string[] };
         runtime_claim_refs: string[];
         simulation_fact_refs: string[];
+        checkout_completeness?: {
+          state: "REQUIRED" | "COMPLETE";
+          missing_fields: string[];
+        };
         buying_intent: {
           decision: string;
           requested_action: string;
@@ -185,6 +189,19 @@ const validIntents: readonly FixtureIntent[] = [
 describe("Track C C2 authored journey contract", () => {
   it("accepts the authored supplemental journeys", () => {
     expect(validate(authored())).toEqual({ journeys: 6, customerTurns: 18 });
+  });
+
+  it("accepts PAYMENT_METHOD as a canonical checkout field", () => {
+    const bundle = authored();
+    const checkoutTurn = bundle.journeys
+      .flatMap(({ turns }) => turns)
+      .find(({ context }) => context.checkout_completeness?.state === "REQUIRED");
+    if (checkoutTurn?.context.checkout_completeness === undefined) {
+      throw new Error("authored bundle has no checkout-required turn");
+    }
+    checkoutTurn.context.checkout_completeness.missing_fields = ["PAYMENT_METHOD"];
+
+    expect(() => validate(bundle)).not.toThrow();
   });
 
   it("rejects product-scoped runtime evidence on an unresolved binding", () => {
