@@ -18,6 +18,7 @@ const CHECKOUT_REQUEST_TERMS = Object.freeze([
   "họ tên",
   "họ và tên",
   "tên đầy đủ",
+  "tên người nhận",
   "số điện thoại",
   "điện thoại",
   "sđt",
@@ -73,20 +74,29 @@ function isCheckoutRequestDeclared(output: CheckoutRenderOutput): boolean {
   );
 }
 
+function mentionsCheckoutField(text: string): boolean {
+  return CHECKOUT_REQUEST_TERMS.some((term) => text.includes(term));
+}
+
+function containsCheckoutRequest(text: string): boolean {
+  const clauses = text.match(/[^.!?\n]+[.!?]?/gu) ?? [text];
+  return clauses.some((clause) => {
+    const normalized = clause.trim();
+    if (!mentionsCheckoutField(normalized)) return false;
+    return normalized.endsWith("?") || REQUEST_CUES.some((cue) =>
+      normalized.includes(cue)
+    );
+  });
+}
+
 function assertNoUndeclaredCheckoutRequest(output: CheckoutRenderOutput): void {
   if (isCheckoutRequestDeclared(output)) return;
   for (const segment of output.segments) {
     const text = segment.text.normalize("NFC").toLocaleLowerCase("vi-VN");
-    const mentionsCheckoutField = CHECKOUT_REQUEST_TERMS.some((term) =>
-      text.includes(term)
-    );
-    if (!mentionsCheckoutField) continue;
     const requestSegment = segment.kind === "CLARIFICATION" ||
       segment.kind === "ACTION_REQUEST";
-    const requestLanguage = text.includes("?") || REQUEST_CUES.some((cue) =>
-      text.includes(cue)
-    );
-    if (requestSegment || requestLanguage) {
+    if ((requestSegment && mentionsCheckoutField(text)) ||
+        containsCheckoutRequest(text)) {
       throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
     }
   }
