@@ -14,6 +14,30 @@ describe("Track C C3 V5 sales progression prompt policy", () => {
     );
   });
 
+  it("chooses the most relevant supported sales move instead of a fixed funnel step", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Choose the single sales move that best addresses the customer's current decision or objection using only available code-owned evidence and capabilities.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not default to sizing, checkout, or any fixed funnel step when another supported move is more relevant.",
+    );
+  });
+
+  it("keeps checkout PII outside ordinary sales nextMove", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Ordinary nextMove must never request recipient name, phone number, delivery address, or payment method",
+    );
+  });
+
+  it("keeps canonical action as a model decision constrained by code-owned state", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Choose canonicalAction from the current conversational need and code-owned constraints, not from state alone.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
+      "Canonical precedence:",
+    );
+  });
+
   it("renders the selected next move without making a new sales decision", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "not a consultant, analyst, CRM, or customer-service script",
