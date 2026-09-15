@@ -101,14 +101,14 @@ export function renderTrackCCheckoutSafeReply(
   context: CheckoutRenderContext,
   output: CheckoutRenderOutput,
 ): string {
-  const completeness = context.checkoutCompleteness;
-  if (completeness === null || completeness === undefined) {
-    return rawReply(output);
-  }
-
   const checkoutRequested = isCheckoutRequestDeclared(output);
   if (!checkoutRequested) {
     assertNoUndeclaredCheckoutRequest(output);
+    return rawReply(output);
+  }
+
+  const completeness = context.checkoutCompleteness;
+  if (completeness === null || completeness === undefined) {
     return rawReply(output);
   }
 
