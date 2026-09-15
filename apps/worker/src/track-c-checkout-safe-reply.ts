@@ -5,6 +5,11 @@ import type {
 
 type CheckoutRenderContext = Pick<
   ContextV2,
+  "checkoutCompleteness" | "phase" | "buyingIntent"
+>;
+
+type CanonicalActionContext = Pick<
+  ContextV2,
   | "checkoutCompleteness"
   | "phase"
   | "buyingIntent"
@@ -167,7 +172,7 @@ export function assertTrackCOrdinaryNextMoveSafe(
 }
 
 export function assertTrackCCanonicalActionPermitted(
-  context: CheckoutRenderContext,
+  context: CanonicalActionContext,
   action: TrackCCanonicalActionSelection,
 ): void {
   switch (action.type) {
