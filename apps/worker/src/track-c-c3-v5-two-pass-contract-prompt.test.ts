@@ -3,6 +3,8 @@ import {
   TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
   TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION,
 } from "./track-c-c3-two-pass-candidate.js";
+import { TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM } from
+  "./track-c-c3-v5-benchmark-runner.js";
 
 describe("Track C C3 V5 typed two-pass prompt boundary", () => {
   it("makes Strategist choose exact evidence and one executable next move", () => {
@@ -65,6 +67,15 @@ describe("Track C C3 V5 typed two-pass prompt boundary", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "must not repeat the requested information",
+    );
+  });
+
+  it("makes simulation facts an explicit benchmark-only factual exception", () => {
+    expect(TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM).toContain(
+      "Only in BEHAVIOR_SIMULATION, benchmarkSimulationFacts extend selectedEvidence",
+    );
+    expect(TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM).toContain(
+      "They never extend canonical authority or authorize effects",
     );
   });
 });
