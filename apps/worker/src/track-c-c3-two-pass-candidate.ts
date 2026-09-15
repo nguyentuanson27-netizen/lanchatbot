@@ -17,6 +17,10 @@ import {
   contextFromFrozenTrackCCapture,
 } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
+import {
+  assertTrackCCanonicalActionPermitted,
+  assertTrackCOrdinaryNextMoveSafe,
+} from "./track-c-checkout-safe-reply.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -543,6 +547,8 @@ export function buildTrackCC3ResponderRequest(
     capture: input.capture,
     evaluationAt: input.evaluationAt,
   });
+  assertTrackCOrdinaryNextMoveSafe(conversationPlan.nextMove);
+  assertTrackCCanonicalActionPermitted(context, conversationPlan.canonicalAction);
   const registry = buildTrackCClaimReferenceRegistry(context);
   if (conversationPlan.answer.evidenceRefs.some((ref) => !registry.has(ref))) {
     throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
