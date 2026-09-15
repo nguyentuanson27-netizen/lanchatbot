@@ -8,6 +8,10 @@ import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js"
 function context(
   state: "REQUIRED" | "COMPLETE",
   missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[],
+  options: Readonly<{
+    productStatus?: "RESOLVED" | "UNRESOLVED" | "AMBIGUOUS" | "STALE";
+    barriers?: readonly string[];
+  }> = {},
 ): Pick<ContextV2, "checkoutCompleteness" | "productBinding" | "barriers"> {
   return {
     checkoutCompleteness: {
@@ -23,27 +27,30 @@ function context(
     productBinding: {
       schemaVersion: 2,
       contractVersion: "PRODUCT_BINDING_V2",
-      status: "RESOLVED",
-      productIds: ["SQ9012"],
+      status: options.productStatus ?? "RESOLVED",
+      productIds: options.productStatus === "UNRESOLVED" ? [] : ["SQ9012"],
       catalogVersion: "test",
     },
     barriers: {
       schemaVersion: 2,
       contractVersion: "CONVERSATION_BARRIERS_V2",
-      active: state === "REQUIRED" ? ["CHECKOUT_DETAILS_REQUIRED"] : [],
+      active: options.barriers ??
+        (state === "REQUIRED" ? ["CHECKOUT_DETAILS_REQUIRED"] : []),
       lifecycle: "UNTIL_AUTHORITATIVE_STATE_CHANGES",
       conversationRevision: 1,
       salesCycleRevision: 1,
       source: "CANONICAL_EVIDENCE_AND_COMMERCE_STATE_V1",
       authority: "SHADOW_ONLY",
     },
-  };
+  } as Pick<ContextV2, "checkoutCompleteness" | "productBinding" | "barriers">;
 }
 
 function output(
   segments: ContextV2CandidateOutputV2["segments"],
-): Pick<ContextV2CandidateOutputV2, "segments"> {
-  return { segments };
+  strategy: ContextV2CandidateOutputV2["strategy"] = "ASK_CLARIFICATION",
+  cta: ContextV2CandidateOutputV2["cta"] = "ASK_CHECKOUT_DETAILS",
+): Pick<ContextV2CandidateOutputV2, "segments" | "strategy" | "cta"> {
+  return { segments, strategy, cta };
 }
 
 describe("renderTrackCCheckoutSafeReply", () => {
@@ -74,7 +81,7 @@ describe("renderTrackCCheckoutSafeReply", () => {
       output([{
         kind: "GENERAL",
         text: "Chị gửi em số điện thoại và địa chỉ nhé.",
-      }]),
+      }], "HOLD_POSITION", "NONE"),
     );
 
     expect(reply).toBe("Dạ em đã có đủ thông tin cần thiết để tiếp tục ạ.");
@@ -91,5 +98,73 @@ describe("renderTrackCCheckoutSafeReply", () => {
     expect(reply).toBe(
       "Em cần thêm thông tin nhận hàng còn thiếu để tiếp tục ạ.\nChị cho em xin họ tên, số điện thoại, địa chỉ nhận hàng và phương thức thanh toán nhé.",
     );
+  });
+
+  it("renders deferred product clarification without model-authored checkout PII", () => {
+    const reply = renderTrackCCheckoutSafeReply(
+      context("REQUIRED", ["PHONE"], {
+        productStatus: "UNRESOLVED",
+        barriers: ["PRODUCT_CONTEXT_UNREADY", "CHECKOUT_DETAILS_REQUIRED"],
+      }),
+      output([{
+        kind: "CLARIFICATION",
+        text: "Em chưa rõ mẫu, chị gửi em số điện thoại và địa chỉ luôn nhé.",
+        target: "PRODUCT",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi tên mẫu, số điện thoại và địa chỉ nhận hàng nhé.",
+        action: "PROVIDE_PRODUCT",
+      }], "ASK_CLARIFICATION", "ASK_PRODUCT"),
+    );
+
+    expect(reply).toContain("mẫu sản phẩm");
+    expect(reply).not.toContain("số điện thoại");
+    expect(reply).not.toContain("địa chỉ");
+  });
+
+  it("renders deferred measurement clarification without model-authored checkout PII", () => {
+    const reply = renderTrackCCheckoutSafeReply(
+      context("REQUIRED", ["PHONE"], {
+        barriers: ["MEASUREMENTS_REQUIRED", "CHECKOUT_DETAILS_REQUIRED"],
+      }),
+      output([{
+        kind: "CLARIFICATION",
+        text: "Em cần cân nặng, số điện thoại và địa chỉ nhận hàng ạ.",
+        target: "MEASUREMENTS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em cân nặng, số điện thoại và địa chỉ nhé.",
+        action: "PROVIDE_MEASUREMENTS",
+      }], "ASK_CLARIFICATION", "ASK_MEASUREMENTS"),
+    );
+
+    expect(reply).toContain("số đo còn thiếu");
+    expect(reply).not.toContain("số điện thoại");
+    expect(reply).not.toContain("địa chỉ");
+  });
+
+  it("rejects a missing product clarification required by canonical state", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      context("COMPLETE", [], {
+        productStatus: "UNRESOLVED",
+        barriers: ["PRODUCT_CONTEXT_UNREADY"],
+      }),
+      output([{
+        kind: "GENERAL",
+        text: "Dạ em nắm rồi chị ạ.",
+      }], "ANSWER_VERIFIED_FACTS", "NONE"),
+    )).toThrow("TRACK_C_CANONICAL_REQUEST_OUTPUT_INVALID");
+  });
+
+  it("rejects a missing measurement clarification required by canonical state", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      context("COMPLETE", [], {
+        barriers: ["MEASUREMENTS_REQUIRED"],
+      }),
+      output([{
+        kind: "GENERAL",
+        text: "Dạ em nắm rồi chị ạ.",
+      }], "ANSWER_VERIFIED_FACTS", "NONE"),
+    )).toThrow("TRACK_C_CANONICAL_REQUEST_OUTPUT_INVALID");
   });
 });
