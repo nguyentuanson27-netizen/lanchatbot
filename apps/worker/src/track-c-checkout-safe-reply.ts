@@ -127,6 +127,34 @@ function permittedCheckoutFields(
   return legacyCheckoutPermitted ? LEGACY_CHECKOUT_FIELDS : null;
 }
 
+function assertDeclaredCheckoutRequest(
+  output: CheckoutRenderOutput,
+  permittedFields: readonly CheckoutField[],
+): void {
+  const checkoutClarifications = output.segments.filter((segment) =>
+    segment.kind === "CLARIFICATION" && segment.target === "CHECKOUT_DETAILS"
+  );
+  const checkoutActions = output.segments.filter((segment) =>
+    segment.kind === "ACTION_REQUEST" &&
+    segment.action === "PROVIDE_CHECKOUT_DETAILS"
+  );
+  const otherRequests = output.segments.filter((segment) =>
+    (segment.kind === "CLARIFICATION" &&
+      segment.target !== "CHECKOUT_DETAILS") ||
+    (segment.kind === "ACTION_REQUEST" &&
+      segment.action !== "PROVIDE_CHECKOUT_DETAILS")
+  );
+  if (output.strategy !== "ASK_CLARIFICATION" ||
+      output.cta !== "ASK_CHECKOUT_DETAILS" ||
+      checkoutClarifications.length !== 1 || checkoutActions.length !== 1 ||
+      otherRequests.length > 0 ||
+      checkoutActions[0]?.requestedFields === undefined ||
+      JSON.stringify(checkoutActions[0].requestedFields) !==
+        JSON.stringify(permittedFields)) {
+    throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  }
+}
+
 /**
  * User-visible checkout boundary. The model owns the conversational action;
  * code only constrains checkout data collection to canonical permitted fields
@@ -146,6 +174,7 @@ export function renderTrackCCheckoutSafeReply(
   if (permittedFields === null) {
     throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   }
+  assertDeclaredCheckoutRequest(output, permittedFields);
 
   const fields = permittedFields.map(checkoutFieldLabel);
   return [
