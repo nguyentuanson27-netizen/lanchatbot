@@ -24,10 +24,10 @@ const legacyContext: Pick<
   },
 };
 
+type CheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD";
+
 function checkoutOutput(
-  requestedFields: ContextV2CandidateOutputV2["segments"][number] extends infer _T
-    ? readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[]
-    : never,
+  requestedFields: readonly CheckoutField[],
 ): Pick<ContextV2CandidateOutputV2, "segments" | "strategy" | "cta"> {
   return {
     segments: [{
