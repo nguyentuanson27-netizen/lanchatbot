@@ -7,6 +7,11 @@ import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js"
 import { assertTrackCCheckoutCompletenessOutput } from
   "./track-c-offline-candidate-validation.js";
 
+type TestContext = Pick<
+  ContextV2,
+  "checkoutCompleteness" | "productBinding" | "barriers" | "phase" | "buyingIntent"
+>;
+
 function context(
   state: "REQUIRED" | "COMPLETE",
   missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[],
@@ -14,7 +19,7 @@ function context(
     productStatus?: "RESOLVED" | "UNRESOLVED" | "AMBIGUOUS" | "STALE";
     barriers?: readonly string[];
   }> = {},
-): Pick<ContextV2, "checkoutCompleteness" | "productBinding" | "barriers"> {
+): TestContext {
   return {
     checkoutCompleteness: {
       schemaVersion: 1,
@@ -44,7 +49,46 @@ function context(
       source: "CANONICAL_EVIDENCE_AND_COMMERCE_STATE_V1",
       authority: "SHADOW_ONLY",
     },
-  } as Pick<ContextV2, "checkoutCompleteness" | "productBinding" | "barriers">;
+    phase: {
+      schemaVersion: 2,
+      contractVersion: "CONVERSATION_PHASE_V2",
+      phase: "DISCOVERY",
+      source: "CANONICAL_COMMERCE_STATE_V1",
+      sourceStage: "DISCOVERY",
+      salesCycleRevision: 1,
+      authority: "SHADOW_ONLY",
+    },
+    buyingIntent: {
+      decision: "NONE",
+      requestedAction: "NONE",
+      productId: null,
+      evidenceHash: null,
+    },
+  };
+}
+
+function legacyCheckoutContext(): Pick<
+  ContextV2,
+  "checkoutCompleteness" | "phase" | "buyingIntent"
+> {
+  return {
+    checkoutCompleteness: null,
+    phase: {
+      schemaVersion: 2,
+      contractVersion: "CONVERSATION_PHASE_V2",
+      phase: "ORDER_REVIEW",
+      source: "CANONICAL_COMMERCE_STATE_V1",
+      sourceStage: "ORDER_PREVIEW",
+      salesCycleRevision: 1,
+      authority: "SHADOW_ONLY",
+    },
+    buyingIntent: {
+      decision: "COMMITTED",
+      requestedAction: "PROCEED_TO_PAYMENT",
+      productId: "SQ9012",
+      evidenceHash: "a".repeat(64),
+    },
+  };
 }
 
 function output(
@@ -157,7 +201,20 @@ describe("renderTrackCCheckoutSafeReply", () => {
 
   it("rejects ordinary checkout PII requests before checkout state exists", () => {
     expect(() => renderTrackCCheckoutSafeReply(
-      { checkoutCompleteness: null },
+      {
+        ...legacyCheckoutContext(),
+        phase: {
+          ...legacyCheckoutContext().phase,
+          phase: "DISCOVERY",
+          sourceStage: "DISCOVERY",
+        },
+        buyingIntent: {
+          decision: "NONE",
+          requestedAction: "NONE",
+          productId: null,
+          evidenceHash: null,
+        },
+      },
       output([{
         kind: "GENERAL",
         text: "Chị cho em xin họ tên đầy đủ để em lên đơn nhé?",
@@ -189,6 +246,50 @@ describe("renderTrackCCheckoutSafeReply", () => {
     expect(reply).toBe(
       "Dạ bên em có hỗ trợ COD và chuyển khoản ạ. Chị mặc size nào?",
     );
+  });
+
+  it("rejects declared checkout when legacy canonical state does not permit it", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      {
+        ...legacyCheckoutContext(),
+        phase: {
+          ...legacyCheckoutContext().phase,
+          phase: "DISCOVERY",
+          sourceStage: "DISCOVERY",
+        },
+      },
+      output([{
+        kind: "CLARIFICATION",
+        text: "Em cần thông tin nhận hàng ạ.",
+        target: "CHECKOUT_DETAILS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em họ tên, số điện thoại và địa chỉ nhé.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+        requestedFields: ["FULL_NAME", "PHONE", "ADDRESS"],
+      }]),
+    )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  });
+
+  it("renders only legacy code-owned checkout fields when that step is permitted", () => {
+    const reply = renderTrackCCheckoutSafeReply(
+      legacyCheckoutContext(),
+      output([{
+        kind: "CLARIFICATION",
+        text: "Em cần thông tin nhận hàng ạ.",
+        target: "CHECKOUT_DETAILS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em họ tên, số điện thoại, địa chỉ và phương thức thanh toán nhé.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+        requestedFields: ["FULL_NAME", "PHONE", "ADDRESS"],
+      }]),
+    );
+
+    expect(reply).toContain("họ tên");
+    expect(reply).toContain("số điện thoại");
+    expect(reply).toContain("địa chỉ nhận hàng");
+    expect(reply).not.toContain("phương thức thanh toán");
   });
 });
 
