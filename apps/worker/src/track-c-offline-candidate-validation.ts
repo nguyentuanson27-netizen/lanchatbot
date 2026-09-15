@@ -23,6 +23,7 @@ import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
 } from "./track-c-replay.js";
+import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
 
 const validated = new WeakSet<object>();
 const TrackCOfflineCandidateSemanticOutputSchema =
@@ -287,7 +288,7 @@ export function validateTrackCOfflineCandidate(
     quality: Object.freeze({
       context: input.accepted.context,
       verifiedFacts: input.accepted.verifiedFacts,
-      reply: replyFromOutput(output),
+      reply: renderTrackCCheckoutSafeReply(context, output),
       proposalSummary: Object.freeze({ strategy: output.strategy, cta: output.cta }),
       guardOutcome: Object.freeze({
         expectedOwner: "BOT",

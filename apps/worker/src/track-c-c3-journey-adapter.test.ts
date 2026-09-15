@@ -9,6 +9,7 @@ import type {
   TrackCV5MaterializationRecipe,
   TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
+import type { TrackCResponsePlanV2 } from "./track-c-c3-two-pass-candidate.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -68,14 +69,30 @@ function journey(turnCount: number): TrackCC2JourneyFixture {
   };
 }
 
-function planPayload() {
+function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
   return {
     candidates: [{ content: { parts: [{ text: JSON.stringify({
       currentNeed: "Resolve the current customer need.",
-      mustResolve: "Use only supplied authority.",
-      conversationRead: "Use accumulated dialogue without creating authority.",
-      nextMove: "NONE",
+      answer: {
+        mode: "DIRECT",
+        objective: "Use only supplied authority.",
+        evidenceRefs: [],
+        ...(overrides.answer ?? {}),
+      },
+      nextMove: {
+        action: "NONE",
+        target: "NONE",
+        purpose: "NONE",
+        ...(overrides.nextMove ?? {}),
+      },
+      canonicalAction: {
+        type: "NONE",
+        requestedFields: [],
+        ...(overrides.canonicalAction ?? {}),
+      },
+      terminal: false,
       avoid: "Do not invent facts or effects.",
+      ...overrides,
     }) }] } }],
   };
 }

@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.7
+### Benchmark revision R2.8
 
-`benchmark_revision` is **R2.7**. Relative to R2.6, the shared checkout guard rejects checkout target/action/CTA overrides while a higher-priority product or measurement clarification is active. When checkout is the active objective, the response may request exactly the canonical missing field set and must request nothing after completeness becomes complete. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.8**. Relative to R2.7, user-visible checkout replies are rendered deterministically from canonical missingFields after structured checkout validation passes, preventing model-authored free-form prose from requesting extra PII outside canonical missing fields, and ensuring a safe deterministic completion reply when checkout is complete. Pinned runner and validation bundle components are repinned under the R2.8 revision bump. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 

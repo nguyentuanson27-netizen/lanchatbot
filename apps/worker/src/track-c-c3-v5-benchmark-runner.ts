@@ -29,6 +29,7 @@ import {
   buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
+import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
 
 export const TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM = [
   "BENCHMARK BEHAVIOR_SIMULATION ONLY.",
@@ -479,11 +480,13 @@ export async function runTrackCV5TwoPassBenchmarkCase(
       simulationMetadata,
     );
   } catch (error) {
-    if (error instanceof Error && (
-      error.message === "TRACK_C_C3_CONVERSATION_PLAN_INVALID" ||
-      error.message === "TRACK_C_C3_CONVERSATION_PLAN_NOT_PII_SAFE"
-    )) {
-      throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
+    if (error instanceof Error) {
+      if (error.message === "TRACK_C_C3_CONVERSATION_PLAN_NOT_PII_SAFE") {
+        throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE");
+      }
+      if (error.message === "TRACK_C_C3_CONVERSATION_PLAN_INVALID") {
+        throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
+      }
     }
     throw error;
   }
@@ -517,7 +520,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     input.lane,
     input.evaluationAt,
   );
-  const reply = output.segments.map(({ text }) => text).join("\n");
+  const reply = renderTrackCCheckoutSafeReply(context, output);
   const identity = Object.freeze({
     captureContextHash: context.contextHash,
     strategistRequestEnvelopeHash:

@@ -12,6 +12,7 @@ import {
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runner.js";
+import type { TrackCResponsePlanV2 } from "./track-c-c3-two-pass-candidate.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -89,13 +90,29 @@ function providerPayload(value: unknown) {
   };
 }
 
-function planPayload() {
+function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
   return providerPayload({
-    currentNeed: "Answer the current price question.",
-    mustResolve: "Give the verified price directly.",
-    conversationRead: "The product is already resolved.",
-    nextMove: "NONE",
+    currentNeed: "Resolve the current customer need.",
+    answer: {
+      mode: "DIRECT",
+      objective: "Give the verified information directly.",
+      evidenceRefs: ["CLAIM_001"],
+      ...(overrides.answer ?? {}),
+    },
+    nextMove: {
+      action: "NONE",
+      target: "NONE",
+      purpose: "NONE",
+      ...(overrides.nextMove ?? {}),
+    },
+    canonicalAction: {
+      type: "NONE",
+      requestedFields: [],
+      ...(overrides.canonicalAction ?? {}),
+    },
+    terminal: false,
     avoid: "Do not invent another fact.",
+    ...overrides,
   });
 }
 
@@ -212,7 +229,13 @@ describe("Track C C3 V5 benchmark runner", () => {
     }
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: planPayload({
+          answer: {
+            mode: "DIRECT",
+            objective: "Mẫu này dùng chất liệu lụa ạ.",
+            evidenceRefs: ["PRODUCT_ATTRIBUTES_001"],
+          },
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -268,7 +291,13 @@ describe("Track C C3 V5 benchmark runner", () => {
     });
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: planPayload({
+          answer: {
+            mode: "DIRECT",
+            objective: "Báo giá sản phẩm.",
+            evidenceRefs: segments.map(({ claimRef }) => claimRef),
+          },
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -299,7 +328,13 @@ describe("Track C C3 V5 benchmark runner", () => {
     const capture = freshCapture();
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: planPayload({
+          answer: {
+            mode: "DIRECT",
+            objective: "Báo giá sản phẩm.",
+            evidenceRefs: [],
+          },
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -427,11 +462,7 @@ describe("Track C C3 V5 benchmark runner", () => {
     const capture = freshCapture();
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: providerPayload({
-          currentNeed: "Answer the current question.",
-          mustResolve: "Stay within verified evidence.",
-          conversationRead: "The product is resolved.",
-          nextMove: "NONE",
+        payload: planPayload({
           avoid: "Do not claim effects.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",

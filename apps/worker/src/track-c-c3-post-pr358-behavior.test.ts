@@ -8,6 +8,7 @@ import { validateTrackCOfflineCandidate } from
 import {
   TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
   TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION,
+  type TrackCResponsePlanV2,
 } from "./track-c-c3-two-pass-candidate.js";
 import {
   runTrackCC3TwoPassQualityCandidate,
@@ -119,15 +120,27 @@ function providerPayload(value: unknown) {
   };
 }
 
-function planPayload(overrides: Partial<Record<
-  "currentNeed" | "mustResolve" | "conversationRead" | "nextMove" | "avoid",
-  string
->> = {}) {
+function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
   return providerPayload({
     currentNeed: "Resolve the current customer need.",
-    mustResolve: "Stay within supplied authority.",
-    conversationRead: "Use the trusted structured context and dialogue correctly.",
-    nextMove: "NONE",
+    answer: {
+      mode: "DIRECT",
+      objective: "Stay within supplied authority.",
+      evidenceRefs: [],
+      ...(overrides.answer ?? {}),
+    },
+    nextMove: {
+      action: "NONE",
+      target: "NONE",
+      purpose: "NONE",
+      ...(overrides.nextMove ?? {}),
+    },
+    canonicalAction: {
+      type: "NONE",
+      requestedFields: [],
+      ...(overrides.canonicalAction ?? {}),
+    },
+    terminal: false,
     avoid: "Do not invent facts or effects.",
     ...overrides,
   });
@@ -158,10 +171,10 @@ function checkoutAskOutput() {
   };
 }
 
-function successfulTransport(responder = generalReply()) {
+function successfulTransport(responder = generalReply(), plan = planPayload()) {
   return vi.fn<CandidateVertexTransport["send"]>()
     .mockResolvedValueOnce({
-      payload: planPayload(),
+      payload: plan,
       providerModelVersion: "gemini-3.5-flash-lite",
     })
     .mockResolvedValueOnce({
@@ -417,8 +430,21 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       .mockResolvedValueOnce({
         payload: planPayload({
           currentNeed: "Determine fit without guessing from catalog size existence.",
-          mustResolve: "Ask only for the missing relevant measurement.",
-          nextMove: "ASK_MEASUREMENTS",
+          answer: {
+            mode: "CLARIFY",
+            objective: "Ask only for the missing relevant measurement.",
+            evidenceRefs: [],
+          },
+          nextMove: {
+            action: "NONE",
+            target: "NONE",
+            purpose: "NONE",
+          },
+          canonicalAction: {
+            type: "ASK_MEASUREMENTS",
+            requestedFields: [],
+          },
+          terminal: false,
           avoid: "Do not promise XL fits and do not repeat known height.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
@@ -450,12 +476,10 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(caseFixture.context.canonical_flags).toEqual([]);
     expect(caseFixture.context.runtime_claim_refs).toEqual([]);
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
-      .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
+      .toContain("Product size existence is not verified fit without an eligible SIZE_FIT claim.");
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
-      .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
-      .toContain("overrides the generic unverified-protected-fact response shape only for fit qualification");
-    expect(result.conversationPlan.nextMove).toBe("ASK_MEASUREMENTS");
+      .toContain("If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification and one PROVIDE_MEASUREMENTS action as a single objective; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS.");
+    expect(result.conversationPlan.canonicalAction.type).toBe("ASK_MEASUREMENTS");
     expect(result.reply).toContain("cân nặng");
     expect(result.reply).not.toContain("chiều cao");
     expect(send).toHaveBeenCalledTimes(2);
@@ -466,13 +490,12 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     const strategistPrompt = promptBody(strategistCall![0].body);
     const responderPrompt = promptBody(responderCall![0].body);
     expect(strategistPrompt.systemInstruction)
-      .toContain("choose one missing measurement direction");
+      .toContain("Product size existence is not verified fit without an eligible SIZE_FIT claim.");
     expect(responderPrompt.systemInstruction)
-      .toContain("ask only that one missing measurement");
+      .toContain("If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification and one PROVIDE_MEASUREMENTS action");
     for (const [request] of send.mock.calls) {
       const { prompt, systemInstruction } = promptBody(request.body);
       expect(prompt).toContain("Chị cao 1m60 rồi nhé.");
-      expect(systemInstruction).toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
       expect(systemInstruction).not.toContain("Q035");
     }
   });
@@ -486,10 +509,20 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         missing_fields: ["FULL_NAME", "PHONE", "ADDRESS"],
       },
     });
-    const planTransport = (nextMove: string) =>
+    const planTransport = (objective: string) =>
       vi.fn<CandidateVertexTransport["send"]>()
         .mockResolvedValueOnce({
-          payload: planPayload({ nextMove }),
+          payload: planPayload({
+            answer: {
+              mode: "CLARIFY",
+              objective,
+              evidenceRefs: [],
+            },
+            canonicalAction: {
+              type: "ASK_CHECKOUT_DETAILS",
+              requestedFields: ["FULL_NAME", "PHONE", "ADDRESS"],
+            },
+          }),
           providerModelVersion: "gemini-3.5-flash-lite",
         })
         .mockResolvedValueOnce({
@@ -530,7 +563,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(abstract).toHaveBeenCalledTimes(2);
     expect(result.reply).toContain("địa chỉ nhận hàng");
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
-      .toContain("CHECKOUT_OBJECTIVE_IS_NAMED_ABSTRACTLY");
+      .toContain("contact details, addresses");
   });
 
   it("projects checkout REQUIRED missing fields and COMPLETE without raw PII", async () => {
@@ -542,47 +575,64 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         missing_fields: ["PHONE"],
       },
     });
-    const requiredSend = successfulTransport(providerPayload({
-      segments: [{
-        kind: "CLARIFICATION",
-        text: "Chị cho em xin số điện thoại nhận hàng ạ?",
-        target: "CHECKOUT_DETAILS",
-      }, {
-        kind: "ACTION_REQUEST",
-        text: "Em cần đúng số điện thoại còn thiếu để tiếp tục ạ.",
-        action: "PROVIDE_CHECKOUT_DETAILS",
-        requestedFields: ["PHONE"],
-      }],
-      strategy: "ASK_CLARIFICATION",
-      cta: "ASK_CHECKOUT_DETAILS",
-    }));
+    const requiredSend = successfulTransport(
+      providerPayload({
+        segments: [{
+          kind: "CLARIFICATION",
+          text: "Chị cho em xin số điện thoại nhận hàng ạ?",
+          target: "CHECKOUT_DETAILS",
+        }, {
+          kind: "ACTION_REQUEST",
+          text: "Em cần đúng số điện thoại còn thiếu để tiếp tục ạ.",
+          action: "PROVIDE_CHECKOUT_DETAILS",
+          requestedFields: ["PHONE"],
+        }],
+        strategy: "ASK_CLARIFICATION",
+        cta: "ASK_CHECKOUT_DETAILS",
+      }),
+      planPayload({
+        canonicalAction: {
+          type: "ASK_CHECKOUT_DETAILS",
+          requestedFields: ["PHONE"],
+        },
+      }),
+    );
     const requiredResult = await runFixture(requiredFixture, requiredSend);
     expect(requiredResult.reply).toContain("số điện thoại");
     expect(requiredResult.reply).not.toContain("tên người nhận");
     expect(requiredResult.reply).not.toContain("địa chỉ");
-    for (const [request] of requiredSend.mock.calls) {
-      const { structured } = structuredPrompt(request.body);
-      expect(structured.checkoutCompleteness).toEqual(expect.objectContaining({
-        contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
-        state: "REQUIRED",
-        missingFields: ["PHONE"],
-        authority: "SHADOW_ONLY",
-        authorization: "NONE",
-      }));
-      expect(structured.benchmarkSimulationMetadata).toEqual([]);
-      expect(structured.benchmarkSimulationFacts).toEqual([]);
-      expect(JSON.stringify(structured.checkoutCompleteness))
-        .not.toContain("FULL_NAME");
-      expect(JSON.stringify(structured.checkoutCompleteness))
-        .not.toContain("ADDRESS");
-    }
-    const requiredInstructions = requiredSend.mock.calls.map(([request]) =>
-      structuredPrompt(request.body).systemInstruction
+    const [requiredStrategistCall, requiredResponderCall] = requiredSend.mock.calls;
+    const requiredStrategistPrompt = structuredPrompt(requiredStrategistCall![0].body);
+    const requiredResponderPrompt = structuredPrompt(requiredResponderCall![0].body);
+
+    expect(requiredStrategistPrompt.structured.checkoutCompleteness).toEqual(expect.objectContaining({
+      contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
+      state: "REQUIRED",
+      missingFields: ["PHONE"],
+      authority: "SHADOW_ONLY",
+      authorization: "NONE",
+    }));
+    expect(requiredStrategistPrompt.structured.benchmarkSimulationMetadata).toEqual([]);
+    expect(requiredStrategistPrompt.structured.benchmarkSimulationFacts).toEqual([]);
+    expect(JSON.stringify(requiredStrategistPrompt.structured.checkoutCompleteness))
+      .not.toContain("FULL_NAME");
+    expect(JSON.stringify(requiredStrategistPrompt.structured.checkoutCompleteness))
+      .not.toContain("ADDRESS");
+
+    const requiredResponderStructured = requiredResponderPrompt.structured as {
+      responsePlan?: TrackCResponsePlanV2;
+    };
+    expect(requiredResponderStructured.responsePlan?.canonicalAction).toEqual({
+      type: "ASK_CHECKOUT_DETAILS",
+      requestedFields: ["PHONE"],
+    });
+
+    expect(requiredStrategistPrompt.systemInstruction).toContain(
+      "checkoutCompleteness REQUIRED => ASK_CHECKOUT_DETAILS with requestedFields exactly equal to missingFields in canonical order",
     );
-    expect(requiredInstructions.some((instruction) =>
-      instruction.includes("if checkoutCompleteness state is REQUIRED") &&
-      instruction.includes("ask only for its missingFields exactly once")
-    )).toBe(true);
+    expect(requiredResponderPrompt.systemInstruction).toContain(
+      "requestedFields exactly equal to responsePlan.canonicalAction.requestedFields",
+    );
 
     // Customer wording stays inside what the frozen-dialogue PII guard accepts
     // verbatim, so this exercises the projection instead of the guard.
@@ -594,32 +644,117 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         missing_fields: [],
       },
     });
-    const completeSend = successfulTransport(generalReply(
-      "Dạ em đã ghi nhận đủ tên, số điện thoại, địa chỉ và phương thức thanh toán chị nhé.",
-    ));
-    const completeResult = await runFixture(completeFixture, completeSend);
-    expect(completeResult.reply).not.toContain("gửi em tên");
-    expect(completeResult.reply).not.toContain("số điện thoại?");
-    expect(completeResult.reply).not.toContain("địa chỉ?");
-    for (const [request] of completeSend.mock.calls) {
-      const { prompt, structured } = structuredPrompt(request.body);
-      expect(structured.checkoutCompleteness).toEqual(expect.objectContaining({
-        contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
-        state: "COMPLETE",
-        missingFields: [],
-        authority: "SHADOW_ONLY",
-        authorization: "NONE",
-      }));
-      expect(structured.benchmarkSimulationMetadata).toEqual([]);
-      expect(prompt).not.toMatch(/fullName|recipient|"phone"|"address"/i);
-    }
-    const completeInstructions = completeSend.mock.calls.map(([request]) =>
-      structuredPrompt(request.body).systemInstruction
+    const completeSend = successfulTransport(
+      generalReply(
+        "Dạ em đã ghi nhận đủ tên, số điện thoại, địa chỉ và phương thức thanh toán chị nhé.",
+      ),
+      planPayload({
+        canonicalAction: {
+          type: "HOLD_POSITION",
+          requestedFields: [],
+        },
+        terminal: true,
+      }),
     );
-    expect(completeInstructions.some((instruction) =>
-      instruction.includes("if checkoutCompleteness state is COMPLETE") &&
-      instruction.includes("use HOLD_POSITION with CTA NONE")
-    )).toBe(true);
+    const completeResult = await runFixture(completeFixture, completeSend);
+    expect(completeResult.reply).toBe("Dạ em đã có đủ thông tin cần thiết để tiếp tục ạ.");
+    expect(completeResult.reply).not.toContain("gửi em tên");
+    expect(completeResult.reply).not.toContain("số điện thoại");
+    expect(completeResult.reply).not.toContain("địa chỉ");
+
+    const [completeStrategistCall, completeResponderCall] = completeSend.mock.calls;
+    const completeStrategistPrompt = structuredPrompt(completeStrategistCall![0].body);
+    const completeResponderPrompt = structuredPrompt(completeResponderCall![0].body);
+
+    expect(completeStrategistPrompt.structured.checkoutCompleteness).toEqual(expect.objectContaining({
+      contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
+      state: "COMPLETE",
+      missingFields: [],
+      authority: "SHADOW_ONLY",
+      authorization: "NONE",
+    }));
+    expect(completeStrategistPrompt.structured.benchmarkSimulationMetadata).toEqual([]);
+    expect(completeStrategistPrompt.prompt).not.toMatch(/fullName|recipient|"phone"|"address"/i);
+
+    const completeResponderStructured = completeResponderPrompt.structured as {
+      responsePlan?: TrackCResponsePlanV2;
+    };
+    expect(completeResponderStructured.responsePlan?.canonicalAction).toEqual({
+      type: "HOLD_POSITION",
+      requestedFields: [],
+    });
+
+    expect(completeStrategistPrompt.systemInstruction).toContain(
+      "checkoutCompleteness COMPLETE => HOLD_POSITION and terminal = true",
+    );
+    expect(completeResponderPrompt.systemInstruction).toContain(
+      "If it is HOLD_POSITION, ask nothing, use one neutral GENERAL acknowledgement, strategy HOLD_POSITION, CTA NONE",
+    );
+  });
+
+  it("renders safe deterministic reply asking only missing fields when model prose asks for extra PII", async () => {
+    const requiredFixture = fixture({
+      id: "CHECKOUT_PROSE_EXTRA_PII",
+      message: "Chị chốt nhé.",
+      checkoutCompleteness: {
+        state: "REQUIRED",
+        missing_fields: ["PHONE"],
+      },
+    });
+    const modelProseExtraPii = successfulTransport(
+      providerPayload({
+        segments: [{
+          kind: "CLARIFICATION",
+          text: "Chị gửi em họ tên, số điện thoại, địa chỉ và phương thức thanh toán nhé.",
+          target: "CHECKOUT_DETAILS",
+        }, {
+          kind: "ACTION_REQUEST",
+          text: "Chị gửi em số điện thoại nhận hàng nhé.",
+          action: "PROVIDE_CHECKOUT_DETAILS",
+          requestedFields: ["PHONE"],
+        }],
+        strategy: "ASK_CLARIFICATION",
+        cta: "ASK_CHECKOUT_DETAILS",
+      }),
+      planPayload({
+        canonicalAction: {
+          type: "ASK_CHECKOUT_DETAILS",
+          requestedFields: ["PHONE"],
+        },
+      }),
+    );
+    const result = await runFixture(requiredFixture, modelProseExtraPii);
+    expect(result.reply).toContain("số điện thoại");
+    expect(result.reply).not.toContain("họ tên");
+    expect(result.reply).not.toContain("địa chỉ");
+    expect(result.reply).not.toContain("phương thức thanh toán");
+  });
+
+  it("renders safe deterministic completion without model PII leaks when checkout is COMPLETE", async () => {
+    const completeFixture = fixture({
+      id: "CHECKOUT_COMPLETE_EXTRA_PII",
+      message: "Chị gửi đủ thông tin rồi nhé.",
+      checkoutCompleteness: {
+        state: "COMPLETE",
+        missing_fields: [],
+      },
+    });
+    const modelProseExtraPii = successfulTransport(
+      generalReply(
+        "Dạ chị gửi em số điện thoại và địa chỉ nhận hàng để em chốt đơn nhé.",
+      ),
+      planPayload({
+        canonicalAction: {
+          type: "HOLD_POSITION",
+          requestedFields: [],
+        },
+        terminal: true,
+      }),
+    );
+    const result = await runFixture(completeFixture, modelProseExtraPii);
+    expect(result.reply).toBe("Dạ em đã có đủ thông tin cần thiết để tiếp tục ạ.");
+    expect(result.reply).not.toContain("số điện thoại");
+    expect(result.reply).not.toContain("địa chỉ");
   });
 
   it("rejects checkout asks outside canonical missingFields in behavior simulation", async () => {

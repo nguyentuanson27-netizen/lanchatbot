@@ -81,4 +81,15 @@ describe("renderTrackCCheckoutSafeReply", () => {
     expect(reply).not.toContain("số điện thoại");
     expect(reply).not.toContain("địa chỉ");
   });
+
+  it("renders canonical labels for all missing fields in order", () => {
+    const reply = renderTrackCCheckoutSafeReply(
+      context("REQUIRED", ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"]),
+      output([]),
+    );
+
+    expect(reply).toBe(
+      "Em cần thêm thông tin nhận hàng còn thiếu để tiếp tục ạ.\nChị cho em xin họ tên, số điện thoại, địa chỉ nhận hàng và phương thức thanh toán nhé.",
+    );
+  });
 });

@@ -19,7 +19,7 @@ function checkoutFieldLabel(field: CheckoutField): string {
     case "PHONE":
       return "số điện thoại";
     case "ADDRESS":
-      return "địa chỉ";
+      return "địa chỉ nhận hàng";
     case "PAYMENT_METHOD":
       return "phương thức thanh toán";
   }
