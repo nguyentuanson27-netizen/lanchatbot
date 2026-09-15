@@ -3,7 +3,10 @@ import type {
   ContextV2CandidateOutputV2,
 } from "@lana/contracts";
 
-type CheckoutRenderContext = Pick<ContextV2, "checkoutCompleteness">;
+type CheckoutRenderContext = Pick<
+  ContextV2,
+  "checkoutCompleteness" | "phase" | "buyingIntent"
+>;
 
 type CheckoutRenderOutput = Pick<
   ContextV2CandidateOutputV2,
@@ -13,6 +16,12 @@ type CheckoutRenderOutput = Pick<
 type CheckoutField = NonNullable<
   ContextV2["checkoutCompleteness"]
 >["missingFields"][number];
+
+const LEGACY_CHECKOUT_FIELDS = Object.freeze([
+  "FULL_NAME",
+  "PHONE",
+  "ADDRESS",
+] as const satisfies readonly CheckoutField[]);
 
 const CHECKOUT_REQUEST_TERMS = Object.freeze([
   "họ tên",
@@ -102,9 +111,25 @@ function assertNoUndeclaredCheckoutRequest(output: CheckoutRenderOutput): void {
   }
 }
 
+function permittedCheckoutFields(
+  context: CheckoutRenderContext,
+): readonly CheckoutField[] | null {
+  const completeness = context.checkoutCompleteness;
+  if (completeness !== null && completeness !== undefined) {
+    return completeness.state === "REQUIRED"
+      ? completeness.missingFields
+      : null;
+  }
+  const legacyCheckoutPermitted = context.phase.phase === "ORDER_REVIEW" &&
+    context.phase.sourceStage === "ORDER_PREVIEW" &&
+    context.buyingIntent.decision === "COMMITTED" &&
+    context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT";
+  return legacyCheckoutPermitted ? LEGACY_CHECKOUT_FIELDS : null;
+}
+
 /**
  * User-visible checkout boundary. The model owns the conversational action;
- * code only constrains checkout data collection to canonical missing fields
+ * code only constrains checkout data collection to canonical permitted fields
  * and rejects checkout requests hidden inside a non-checkout action.
  */
 export function renderTrackCCheckoutSafeReply(
@@ -117,16 +142,12 @@ export function renderTrackCCheckoutSafeReply(
     return rawReply(output);
   }
 
-  const completeness = context.checkoutCompleteness;
-  if (completeness === null || completeness === undefined) {
-    return rawReply(output);
-  }
-
-  if (completeness.state !== "REQUIRED") {
+  const permittedFields = permittedCheckoutFields(context);
+  if (permittedFields === null) {
     throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   }
 
-  const fields = completeness.missingFields.map(checkoutFieldLabel);
+  const fields = permittedFields.map(checkoutFieldLabel);
   return [
     "Em cần thêm thông tin nhận hàng còn thiếu để tiếp tục ạ.",
     `Chị cho em xin ${joinVi(fields)} nhé.`,
