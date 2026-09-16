@@ -77,7 +77,11 @@ describe("Track C V5 model/code boundaries", () => {
 
   it.each([
     "địa chỉ shop ở đâu",
+    "địa chỉ cửa hàng",
+    "địa chỉ của shop",
+    "shop address",
     "store address",
+    "Shop ở Hà Nội địa chỉ đâu em?",
   ])("allows shop address as an ordinary commercial next move: %s", (target) => {
     expect(() => assertTrackCOrdinaryNextMoveSafe({
       action: "ASK",
@@ -88,6 +92,8 @@ describe("Track C V5 model/code boundaries", () => {
   it.each([
     "địa chỉ giao hàng",
     "địa chỉ của chị",
+    "địa chỉ của chị có gần store không?",
+    "Chị cho em địa chỉ của chị gần cửa hàng nhé",
     "delivery address",
     "shop address and your address",
   ])("keeps recipient address behind the checkout PII boundary: %s", (target) => {
@@ -118,11 +124,11 @@ describe("Track C V5 model/code boundaries", () => {
     })).toThrow("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
   });
 
-  it("rejects compound ordinary nextMove targets", () => {
+  it("does not infer nextMove cardinality from conjunctions in free text", () => {
     expect(() => assertTrackCOrdinaryNextMoveSafe({
       action: "ASK",
       target: "size or color preference",
-    })).toThrow("TRACK_C_MULTIPLE_NEXT_MOVE_TARGETS");
+    })).not.toThrow();
   });
 
   it("exposes canonical permissions without choosing an action", () => {
@@ -158,10 +164,13 @@ describe("Track C V5 model/code boundaries", () => {
     expect(constraints.checkoutRequestedFields).toEqual(["PHONE"]);
   });
 
-  it("rejects internal asset identifiers in customer-facing text", () => {
+  it.each([
+    "Dạ em gửi chị ảnh asset_sq9012_front ạ.",
+    "Mẫu này có giá là CLAIM_001 ạ.",
+  ])("rejects internal identifiers in customer-facing text: %s", (text) => {
     expect(() => renderTrackCCheckoutSafeReply(
       context(),
-      output("Dạ em gửi chị ảnh asset_sq9012_front ạ."),
+      output(text),
     )).toThrow("TRACK_C_INTERNAL_TOKEN_LEAK");
   });
 
