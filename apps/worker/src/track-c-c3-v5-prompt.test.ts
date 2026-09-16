@@ -78,7 +78,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "nextMove.purpose is internal reasoning only.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Render exactly the supplied nextMove.target as one short, concrete, natural customer question.",
+      "Render exactly the supplied nextMove.target as one short, concrete, natural customer question ending with ?.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "not a consultant, analyst, CRM, or customer-service script",
