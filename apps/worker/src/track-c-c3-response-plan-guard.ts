@@ -10,6 +10,24 @@ type TrackCResponderOutputForGuard = Readonly<{
   cta: string;
 }>;
 
+function parseOutput(value: unknown): TrackCResponderOutputForGuard {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
+  }
+  const record = value as Readonly<Record<string, unknown>>;
+  if (!Array.isArray(record.segments) || typeof record.strategy !== "string" ||
+      typeof record.cta !== "string" || record.segments.some((segment) =>
+        segment === null || typeof segment !== "object" || Array.isArray(segment)
+      )) {
+    throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
+  }
+  return {
+    segments: record.segments as readonly Readonly<Record<string, unknown>>[],
+    strategy: record.strategy,
+    cta: record.cta,
+  };
+}
+
 function questionCount(output: TrackCResponderOutputForGuard): number {
   return output.segments.reduce((count, segment) => {
     const text = typeof segment.text === "string" ? segment.text : "";
@@ -60,8 +78,9 @@ function assertBoundedUncertainty(output: TrackCResponderOutputForGuard): void {
  */
 export function assertTrackCResponderFollowsPlan(
   plan: TrackCPlanForResponderGuard,
-  output: TrackCResponderOutputForGuard,
+  value: unknown,
 ): void {
+  const output = parseOutput(value);
   if (plan.answer.mode === "BOUNDED_UNCERTAINTY") {
     assertBoundedUncertainty(output);
   }
