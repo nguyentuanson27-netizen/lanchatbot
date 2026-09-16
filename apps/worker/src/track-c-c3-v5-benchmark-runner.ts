@@ -21,6 +21,8 @@ import {
   TRACK_C_C3_TWO_PASS_CANDIDATE,
   type TrackCResponsePlanV2,
 } from "./track-c-c3-two-pass-candidate.js";
+import { assertTrackCResponderFollowsPlan } from
+  "./track-c-c3-response-plan-guard.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import { assertTrackCCheckoutCompletenessOutput } from
@@ -520,6 +522,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     input.lane,
     input.evaluationAt,
   );
+  assertTrackCResponderFollowsPlan(conversationPlan, output);
   const reply = renderTrackCCheckoutSafeReply(context, output);
   const identity = Object.freeze({
     captureContextHash: context.contextHash,
