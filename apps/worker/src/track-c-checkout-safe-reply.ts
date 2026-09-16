@@ -41,13 +41,18 @@ export type TrackCOrdinaryNextMoveSelection = Readonly<{
   target: string;
 }>;
 
+export type TrackCCanonicalActionConstraints = Readonly<{
+  allowedTypes: readonly TrackCCanonicalActionSelection["type"][];
+  checkoutRequestedFields: readonly CheckoutField[];
+}>;
+
 const LEGACY_CHECKOUT_FIELDS = Object.freeze([
   "FULL_NAME",
   "PHONE",
   "ADDRESS",
 ] as const satisfies readonly CheckoutField[]);
 
-const CHECKOUT_REQUEST_TERMS = Object.freeze([
+const CHECKOUT_PII_TERMS = Object.freeze([
   "họ tên",
   "họ và tên",
   "tên đầy đủ",
@@ -59,18 +64,12 @@ const CHECKOUT_REQUEST_TERMS = Object.freeze([
   "địa chỉ nhận hàng",
   "địa chỉ",
   "thông tin nhận hàng",
-  "phương thức thanh toán",
-  "hình thức thanh toán",
-  "cod",
-  "chuyển khoản",
   "full_name",
   "recipient name",
   "phone",
   "phone number",
   "address",
   "delivery address",
-  "payment_method",
-  "payment method",
 ] as const);
 
 const REQUEST_CUES = Object.freeze([
@@ -115,15 +114,15 @@ function isCheckoutRequestDeclared(output: CheckoutRenderOutput): boolean {
   );
 }
 
-function mentionsCheckoutField(text: string): boolean {
-  return CHECKOUT_REQUEST_TERMS.some((term) => text.includes(term));
+function mentionsCheckoutPii(text: string): boolean {
+  return CHECKOUT_PII_TERMS.some((term) => text.includes(term));
 }
 
-function containsCheckoutRequest(text: string): boolean {
+function containsCheckoutPiiRequest(text: string): boolean {
   const clauses = text.match(/[^.!?\n]+[.!?]?/gu) ?? [text];
   return clauses.some((clause) => {
     const normalized = clause.trim();
-    if (!mentionsCheckoutField(normalized)) return false;
+    if (!mentionsCheckoutPii(normalized)) return false;
     const imperative = /^(?:(?:chị|mình)\s+)?(?:vui lòng\s+)?(?:nhập|điền|để lại)\b/u
       .test(normalized);
     return normalized.endsWith("?") || imperative || REQUEST_CUES.some((cue) =>
@@ -138,9 +137,22 @@ function assertNoUndeclaredCheckoutRequest(output: CheckoutRenderOutput): void {
     const text = segment.text.normalize("NFC").toLocaleLowerCase("vi-VN");
     const requestSegment = segment.kind === "CLARIFICATION" ||
       segment.kind === "ACTION_REQUEST";
-    if ((requestSegment && mentionsCheckoutField(text)) ||
-        containsCheckoutRequest(text)) {
+    if ((requestSegment && mentionsCheckoutPii(text)) ||
+        containsCheckoutPiiRequest(text)) {
       throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+    }
+  }
+}
+
+function assertNoUnauthorizedEffectClaim(output: CheckoutRenderOutput): void {
+  for (const segment of output.segments) {
+    const text = segment.text.normalize("NFC");
+    if (/\basset[_-][\p{L}\p{N}_-]+\b/iu.test(text)) {
+      throw new Error("TRACK_C_INTERNAL_TOKEN_LEAK");
+    }
+    const normalized = text.toLocaleLowerCase("vi-VN");
+    if (/\bem\s+(?:đã\s+)?(?:gửi|đính kèm)\s+(?:chị|mình)\b/u.test(normalized)) {
+      throw new Error("TRACK_C_UNAUTHORIZED_EFFECT_CLAIM");
     }
   }
 }
@@ -161,13 +173,49 @@ function permittedCheckoutFields(
   return legacyCheckoutPermitted ? LEGACY_CHECKOUT_FIELDS : null;
 }
 
+function productClarificationPermitted(context: CanonicalActionContext): boolean {
+  return context.productBinding.status === "UNRESOLVED" ||
+    context.productBinding.status === "AMBIGUOUS" ||
+    context.productBinding.status === "STALE" ||
+    context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY");
+}
+
+function holdPositionPermitted(context: CanonicalActionContext): boolean {
+  return context.phase.phase === "ORDER_CONFIRMED" ||
+    context.phase.sourceStage === "PURCHASE_CONFIRMED";
+}
+
+export function trackCCanonicalActionConstraints(
+  context: CanonicalActionContext,
+): TrackCCanonicalActionConstraints {
+  const allowedTypes: TrackCCanonicalActionSelection["type"][] = ["NONE"];
+  if (productClarificationPermitted(context)) allowedTypes.push("ASK_PRODUCT");
+  if (context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
+    allowedTypes.push("ASK_MEASUREMENTS");
+  }
+  const checkoutRequestedFields = permittedCheckoutFields(context) ?? [];
+  if (checkoutRequestedFields.length > 0) {
+    allowedTypes.push("ASK_CHECKOUT_DETAILS");
+  }
+  if (holdPositionPermitted(context)) allowedTypes.push("HOLD_POSITION");
+  return Object.freeze({
+    allowedTypes: Object.freeze(allowedTypes),
+    checkoutRequestedFields: Object.freeze([...checkoutRequestedFields]),
+  });
+}
+
 export function assertTrackCOrdinaryNextMoveSafe(
   nextMove: TrackCOrdinaryNextMoveSelection,
 ): void {
   if (nextMove.action !== "ASK") return;
   const target = nextMove.target.normalize("NFC").toLocaleLowerCase("vi-VN");
-  if (mentionsCheckoutField(target)) {
+  if (mentionsCheckoutPii(target)) {
     throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  }
+  const paymentPreference = /\b(?:payment method|payment preference|cod|bank transfer|chuyển khoản)\b/u
+    .test(target);
+  if (!paymentPreference && (/\s(?:or|and|hoặc|và)\s/u.test(target) || target.includes("/"))) {
+    throw new Error("TRACK_C_MULTIPLE_NEXT_MOVE_TARGETS");
   }
 }
 
@@ -175,37 +223,14 @@ export function assertTrackCCanonicalActionPermitted(
   context: CanonicalActionContext,
   action: TrackCCanonicalActionSelection,
 ): void {
-  switch (action.type) {
-    case "NONE":
-      return;
-    case "ASK_PRODUCT": {
-      const productUnready = context.productBinding.status === "UNRESOLVED" ||
-        context.productBinding.status === "AMBIGUOUS" ||
-        context.productBinding.status === "STALE" ||
-        context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY");
-      if (!productUnready) {
-        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
-      }
-      return;
-    }
-    case "ASK_MEASUREMENTS":
-      if (!context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
-        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
-      }
-      return;
-    case "ASK_CHECKOUT_DETAILS": {
-      const permittedFields = permittedCheckoutFields(context);
-      if (permittedFields === null ||
-          JSON.stringify(action.requestedFields) !== JSON.stringify(permittedFields)) {
-        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
-      }
-      return;
-    }
-    case "HOLD_POSITION":
-      if (context.phase.phase !== "ORDER_CONFIRMED" &&
-          context.phase.sourceStage !== "PURCHASE_CONFIRMED") {
-        throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
-      }
+  const constraints = trackCCanonicalActionConstraints(context);
+  if (!constraints.allowedTypes.includes(action.type)) {
+    throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+  }
+  if (action.type === "ASK_CHECKOUT_DETAILS" &&
+      JSON.stringify(action.requestedFields) !==
+        JSON.stringify(constraints.checkoutRequestedFields)) {
+    throw new Error("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
   }
 }
 
@@ -246,6 +271,7 @@ export function renderTrackCCheckoutSafeReply(
   context: CheckoutRenderContext,
   output: CheckoutRenderOutput,
 ): string {
+  assertNoUnauthorizedEffectClaim(output);
   const checkoutRequested = isCheckoutRequestDeclared(output);
   if (!checkoutRequested) {
     assertNoUndeclaredCheckoutRequest(output);
