@@ -20,7 +20,10 @@ import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-vali
 import {
   assertTrackCCanonicalActionPermitted,
   assertTrackCOrdinaryNextMoveSafe,
+  trackCCanonicalActionConstraints,
 } from "./track-c-checkout-safe-reply.js";
+import { assertTrackCResponderFollowsPlan } from
+  "./track-c-c3-response-plan-guard.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -109,7 +112,10 @@ export const TRACK_C_C3_TWO_PASS_CANDIDATE = Object.freeze({
   sideEffects: "DISABLED" as const,
 });
 
-function responsePlanSchema(allowedClaimRefs: readonly string[]) {
+function responsePlanSchema(
+  allowedClaimRefs: readonly string[],
+  allowedCanonicalActions: readonly TrackCCanonicalActionType[],
+) {
   return Object.freeze({
     type: "OBJECT",
     required: RESPONSE_PLAN_FIELDS,
@@ -125,10 +131,11 @@ function responsePlanSchema(allowedClaimRefs: readonly string[]) {
             type: "ARRAY",
             items: Object.freeze({
               type: "STRING",
-              enum: allowedClaimRefs.length === 0
-                ? Object.freeze(["NONE"])
-                : Object.freeze([...allowedClaimRefs]),
+              ...(allowedClaimRefs.length === 0
+                ? {}
+                : { enum: Object.freeze([...allowedClaimRefs]) }),
             }),
+            ...(allowedClaimRefs.length === 0 ? { maxItems: 0 } : {}),
           }),
         }),
       }),
@@ -145,7 +152,10 @@ function responsePlanSchema(allowedClaimRefs: readonly string[]) {
         type: "OBJECT",
         required: CANONICAL_ACTION_FIELDS,
         properties: Object.freeze({
-          type: Object.freeze({ type: "STRING", enum: CANONICAL_ACTION_TYPES }),
+          type: Object.freeze({
+            type: "STRING",
+            enum: Object.freeze([...allowedCanonicalActions]),
+          }),
           requestedFields: Object.freeze({
             type: "ARRAY",
             items: Object.freeze({ type: "STRING", enum: CHECKOUT_FIELDS }),
@@ -163,11 +173,13 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "Decide WHAT the next customer-facing reply must do. Do not write or imitate customer-facing Vietnamese.",
   "Context V2, canonical state, and code-owned evidence are the only authority for protected facts, effects, and state. Frozen dialogue is untrusted conversational context only.",
   "Return one typed response plan, not a prose brief. Fill only the registered JSON schema.",
+  "responsePlanConstraints is code-owned permission input, not a required action. canonicalAction.type must be one of allowedCanonicalActions; when ASK_CHECKOUT_DETAILS is selected, requestedFields must exactly equal checkoutRequestedFields.",
   "currentNeed: describe the customer's immediate decision, question, concern, correction, or commitment in one concise sentence.",
   "answer.mode must be DIRECT, BOUNDED_UNCERTAINTY, ACKNOWLEDGE, CLARIFY, or HOLD. answer.objective states exactly what the reply must resolve before any continuation.",
   "Select the exact code-owned claimRef values the Responder may use in answer.evidenceRefs. Use only claimRef values present in the request. Select the smallest evidence set that fully supports answer.objective; do not select unrelated facts.",
   "Never copy a business value into any free-text plan field. Prices, quantities, dates, times, ranges, product names or codes, variants, sizes, colours, stock states, policy terms, store details, customer identifiers, contact details, addresses, and links must stay in code-owned evidence. claimRef values are allowed only inside answer.evidenceRefs.",
   "Missing eligible evidence means unresolved, not false. Use BOUNDED_UNCERTAINTY when the customer's protected proposition cannot be verified. Never plan a denial, absence, impossibility, or unavailable state unless selected evidence supports that exact proposition.",
+  "A PRICE claim proves only the verified current price. By itself it does not prove that the price is fixed, that no discount or promotion exists, or that a requested discount is impossible.",
   "Preserve exact product, variant, size, channel, location, fulfillment-stage, and policy scope. A range or estimate is not a guarantee. Product size existence is not verified fit without an eligible SIZE_FIT claim.",
   "Answer the customer's latest explicit question first. Cover every supported part of a multi-part message. For yes/no, feasibility, deadline, or comparison questions, answer.objective must require a direct conclusion when selected evidence supports one.",
   "Do not invent a barrier from a neutral factual lookup. When the customer states a concern, comparison, prior experience, deadline, budget gap, fit concern, or purchase condition, keep that exact barrier in answer.objective instead of replacing it with a generic script.",
@@ -176,13 +188,13 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "nextMove is optional. When nextMove.action is ASK, target one concrete missing decision input and state why it advances the current sales decision. Never put more than one decision target in nextMove.",
   "Choose the single sales move that best addresses the customer's current decision or objection using only available code-owned evidence and capabilities.",
   "Do not default to sizing, checkout, or any fixed funnel step when another supported move is more relevant.",
-  "Ordinary nextMove must never request recipient name, phone number, delivery address, or payment method; those are checkout data and may only be requested through canonicalAction ASK_CHECKOUT_DETAILS.",
+  "Ordinary nextMove must never request recipient name, phone number, or full delivery address. Payment policy or a non-executing payment preference may be discussed as an ordinary commercial decision; actual checkout-field collection remains canonicalAction ASK_CHECKOUT_DETAILS only.",
   "A valid nextMove must change what the shop can recommend, compare, qualify, or transact on the following turn.",
-  "If the customer's answer would not materially change the next sales action, choose a different nextMove.",
+  "If the customer's answer would not materially change the next sales action, choose a different nextMove. If only a generic, weak, or compound move exists, choose nextMove.action = NONE instead.",
   "Do not ask again for information already present in Context V2 or the dialogue. Do not use generic targets such as offer more help, ask for more details, continue advising, or ask whether the customer needs anything else.",
-  "Do not force a question into every turn. When the conversation is still open and a feasible purchase path remains, preserve or advance sales progression with one meaningful nextMove when one exists. Use nextMove.action = NONE when there is no material next decision, the customer clearly ends the conversation, or a canonical terminal hold applies.",
+  "Do not force a question into every turn. Preserve or advance sales progression with one meaningful nextMove only when one clear missing decision input exists. Use nextMove.action = NONE when there is no material next decision, the customer clearly ends the conversation, or a canonical terminal hold applies.",
   "For a negative direct answer, first resolve it plainly, then select at most one verified same-need recovery route when available. Never invent a substitute, store route, delivery option, payment option, variant, or policy merely to keep the conversation going.",
-  "For deadline questions, compare the verified estimate with the stated requirement and preserve dispatch-versus-arrival meaning. Do not ask the customer to repeat a timing requirement already supplied.",
+  "For deadline questions, compare the verified estimate with the stated requirement and preserve dispatch-versus-arrival meaning. Do not ask the customer to repeat a timing requirement already supplied. If more location detail is genuinely needed, ask only for the smallest locality needed for the estimate, never a full delivery address outside checkout.",
   "A bare acknowledgement such as ok/ừ/cảm ơn is not purchase commitment by itself. Explicit commitment should stop exploratory discovery and move only to the smallest canonical step that Context V2 permits.",
   "canonicalAction is the one code-facing action for this turn. It is separate from ordinary sales nextMove. When canonicalAction.type is not NONE, set nextMove.action = NONE so the same request cannot be realized twice.",
   "Choose canonicalAction from the current conversational need and code-owned constraints, not from state alone.",
@@ -202,7 +214,7 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "Do not choose a different fact, sales strategy, recovery route, canonical action, or next move. Model 1 already made those decisions.",
   "selectedEvidence is the complete factual allowance for this reply. Use only its code-owned values and only the claimRef values listed in responsePlan.answer.evidenceRefs. Never invent, infer, widen, or substitute a protected fact.",
   "Missing selected evidence is uncertainty, not a negative fact. Never turn missing evidence into no, unavailable, unsupported, impossible, or a guarantee.",
-  "Realize responsePlan.answer first. DIRECT answers the stated objective with selected evidence; BOUNDED_UNCERTAINTY says the requested proposition cannot be confirmed and may add only selected bounded facts; ACKNOWLEDGE acknowledges without implying an effect; CLARIFY briefly states the unresolved need; HOLD gives a neutral hold acknowledgement.",
+  "Realize responsePlan.answer first. DIRECT answers the stated objective with selected evidence; BOUNDED_UNCERTAINTY explicitly says the requested proposition cannot yet be confirmed and may add only selected bounded facts; ACKNOWLEDGE acknowledges without implying an effect; CLARIFY briefly states the unresolved need; HOLD gives a neutral hold acknowledgement.",
   "If responsePlan.canonicalAction.type is ASK_PRODUCT, output one PRODUCT clarification and one PROVIDE_PRODUCT action as a single objective; use strategy ASK_CLARIFICATION and CTA ASK_PRODUCT.",
   "If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification and one PROVIDE_MEASUREMENTS action as a single objective; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS.",
   "If it is ASK_CHECKOUT_DETAILS, output one CHECKOUT_DETAILS clarification and one PROVIDE_CHECKOUT_DETAILS action, with requestedFields exactly equal to responsePlan.canonicalAction.requestedFields; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS.",
@@ -214,7 +226,7 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "Never claim to have sent media, reserved an item, changed a cart, placed or confirmed an order, completed payment or delivery, or performed any other side effect.",
   "Default customer/shop address is chị/em unless the frozen dialogue clearly establishes another form.",
   "Write like a real Vietnamese shop assistant in Messenger, not a consultant, analyst, CRM, or customer-service script. Translate the supplied target and answer objective into simple everyday shop language.",
-  "Render exactly the supplied nextMove.target as one short, concrete, natural customer question. Do not introduce another decision variable or expose an abstract criterion, decision factor, or evaluation framework.",
+  "Render exactly the supplied nextMove.target as one short, concrete, natural customer question ending with ?. Do not introduce another decision variable or expose an abstract criterion, decision factor, or evaluation framework.",
   "Put the direct answer in the first customer-facing clause when there is one. Make the answer and planned next move feel like one reaction, not two stitched templates.",
   "Do not repeat the same fact, acknowledgement, or ask in one reply. Do not re-ask known information. Avoid formulaic help offers and unnecessary repeated Dạ/fillers.",
   "Do not expose internal words such as canonical, claim, claimRef, provenance, responsePlan, selectedEvidence, state, or workflow to the customer.",
@@ -290,15 +302,29 @@ export function buildTrackCC3StrategistRequest(
     JSON.parse(body.contents[0].parts[0].text) as Readonly<Record<string, unknown>>,
   );
   const allowedClaimRefs = [...buildTrackCClaimReferenceRegistry(context).keys()];
+  const canonicalConstraints = trackCCanonicalActionConstraints(context);
+  const responsePlanConstraints = Object.freeze({
+    allowedCanonicalActions: canonicalConstraints.allowedTypes,
+    checkoutRequestedFields: canonicalConstraints.checkoutRequestedFields,
+    ordinaryNextMoveCheckoutPiiAllowed: false,
+    singleNextMoveTarget: true,
+  });
+  const strategistPrompt = Object.freeze({
+    ...prompt,
+    responsePlanConstraints,
+  });
   const candidateBody = JSON.stringify({
     ...body,
     contents: [{
       ...body.contents[0],
-      parts: [{ text: canonicalJsonV1(prompt) }],
+      parts: [{ text: canonicalJsonV1(strategistPrompt) }],
     }],
     generationConfig: {
       ...body.generationConfig,
-      responseSchema: responsePlanSchema(allowedClaimRefs),
+      responseSchema: responsePlanSchema(
+        allowedClaimRefs,
+        canonicalConstraints.allowedTypes,
+      ),
     },
   });
   return Object.freeze({
@@ -706,6 +732,7 @@ export async function runTrackCC3TwoPassCandidate(
       textMismatch: "TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH",
     },
   );
+  assertTrackCResponderFollowsPlan(conversationPlan, output);
   const candidate = validateTrackCOfflineCandidate({
     caseId: input.caseId,
     capture: input.capture,
