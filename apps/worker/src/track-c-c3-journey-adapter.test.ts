@@ -158,6 +158,7 @@ function transportWithReply(reply: string) {
 
 function transportWithTurnReplies(
   replies: readonly ReturnType<typeof replyPayload>[],
+  plans: readonly ReturnType<typeof planPayload>[] = [],
 ) {
   let call = 0;
   const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
@@ -165,7 +166,7 @@ function transportWithTurnReplies(
     const turnIndex = Math.floor(current / 2);
     return {
       payload: current % 2 === 0
-        ? planPayload()
+        ? plans[turnIndex] ?? planPayload()
         : replies[turnIndex] ?? replyPayload("Dạ em đã ghi nhận ạ."),
       providerModelVersion: "gemini-3.5-flash-lite",
     };
@@ -263,18 +264,15 @@ describe("Track C C3 journey adapter", () => {
     )).toBe(true);
   });
 
-  it("carries the candidate's prescribed checkout wording through the journey intact", async () => {
-    // Naming the checkout fields carries no identifier, so the reply reaches
-    // the next turn verbatim instead of aborting the journey or arriving
-    // truncated.
+  it("rejects undeclared checkout wording before it enters the next-turn dialogue", async () => {
     const checkoutReply = "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.";
     const candidateTransport = transportWithReply(checkoutReply);
-    const result = await runTrackCC3Journey(input(journey(3), candidateTransport));
 
-    expect(candidateTransport.send).toHaveBeenCalledTimes(6);
-    expect(result.turns[0]?.result.reply).toBe(checkoutReply);
-    expect(result.transcript[1]?.text).toBe(checkoutReply);
-    expect(result.turns[1]?.evaluationContext[1]?.text).toBe(checkoutReply);
+    await expect(runTrackCC3Journey(input(
+      journey(3),
+      candidateTransport,
+    ))).rejects.toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+    expect(candidateTransport.send).toHaveBeenCalledTimes(2);
   });
 
   it("keeps a six-digit price reply inside the PII-guarded frozen dialogue", async () => {
@@ -295,11 +293,29 @@ describe("Track C C3 journey adapter", () => {
             checkoutReplyPayload(
               "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
             ),
+          ], [
+            planPayload(),
+            planPayload(),
+            planPayload({
+              canonicalAction: {
+                type: "ASK_CHECKOUT_DETAILS",
+                requestedFields: ["FULL_NAME", "PHONE", "ADDRESS"],
+              },
+            }),
           ])
         : transportWithTurnReplies([
             checkoutReplyPayload("Chị gửi em số điện thoại nhé.", ["PHONE"]),
             replyPayload("Dạ em đã ghi nhận ạ."),
             replyPayload("Dạ, em dừng tại đây ạ."),
+          ], [
+            planPayload({
+              canonicalAction: {
+                type: "ASK_CHECKOUT_DETAILS",
+                requestedFields: ["PHONE"],
+              },
+            }),
+            planPayload(),
+            planPayload(),
           ]);
       const result = await runTrackCC3Journey({
         lane: "BEHAVIOR_SIMULATION",
