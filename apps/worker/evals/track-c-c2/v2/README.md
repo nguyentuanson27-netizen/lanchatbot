@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.11
+### Benchmark revision R2.12
 
-`benchmark_revision` is **R2.11**. Relative to R2.10, the checkout safe-reply renderer is now a pinned bundle component because the offline validator uses its output as the final benchmark reply. This closes a reproducibility gap where renderer behavior could change without changing the benchmark bundle fingerprint. Corpus, splits, rubric, scoring weights, production-contract reachability and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.12**. Relative to R2.11, the benchmark runner now enforces the same Responder-to-plan adherence boundary as the C3 two-pass path, and that guard is a pinned bundle component. The checkout safe-reply renderer remains pinned. Corpus, splits, rubric, scoring weights, production-contract reachability and the aggregate gate are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 
