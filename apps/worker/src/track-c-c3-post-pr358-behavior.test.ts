@@ -154,7 +154,11 @@ function generalReply(text = "Dạ em nắm rồi chị ạ.") {
   });
 }
 
-function checkoutAskOutput() {
+function checkoutAskOutput(
+  requestedFields: readonly (
+    "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD"
+  )[] = ["PHONE"],
+) {
   return {
     segments: [{
       kind: "CLARIFICATION" as const,
@@ -164,7 +168,7 @@ function checkoutAskOutput() {
       kind: "ACTION_REQUEST" as const,
       text: "Chị gửi em số điện thoại nhé.",
       action: "PROVIDE_CHECKOUT_DETAILS" as const,
-      requestedFields: ["PHONE"] as const,
+      requestedFields,
     }],
     strategy: "ASK_CLARIFICATION" as const,
     cta: "ASK_CHECKOUT_DETAILS" as const,
@@ -436,12 +440,12 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
             evidenceRefs: [],
           },
           nextMove: {
-            action: "NONE",
-            target: "NONE",
-            purpose: "NONE",
+            action: "ASK",
+            target: "cân nặng",
+            purpose: "Get the missing measurement needed to assess fit.",
           },
           canonicalAction: {
-            type: "ASK_MEASUREMENTS",
+            type: "NONE",
             requestedFields: [],
           },
           terminal: false,
@@ -452,16 +456,11 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       .mockResolvedValueOnce({
         payload: providerPayload({
           segments: [{
-            kind: "CLARIFICATION",
-            text: "XL có trong dải size nhưng chưa đủ để kết luận vừa chị nhé. Chị cho em xin cân nặng ạ?",
-            target: "MEASUREMENTS",
-          }, {
-            kind: "ACTION_REQUEST",
-            text: "Em dựa đúng số đo còn thiếu để kiểm tra fit cho mình ạ.",
-            action: "PROVIDE_MEASUREMENTS",
+            kind: "GENERAL",
+            text: "Chị cho em xin cân nặng ạ?",
           }],
-          strategy: "ASK_CLARIFICATION",
-          cta: "ASK_MEASUREMENTS",
+          strategy: "ANSWER_VERIFIED_FACTS",
+          cta: "NONE",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
@@ -478,21 +477,19 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
       .toContain("Product size existence is not verified fit without an eligible SIZE_FIT claim.");
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
-      .toContain("If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification and one PROVIDE_MEASUREMENTS action as a single objective; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS.");
-    expect(result.conversationPlan.canonicalAction.type).toBe("ASK_MEASUREMENTS");
+      .toContain("When canonicalAction.type is NONE, realize responsePlan.nextMove.target exactly once only when nextMove.action is ASK.");
+    expect(result.conversationPlan.nextMove.action).toBe("ASK");
+    expect(result.conversationPlan.canonicalAction.type).toBe("NONE");
     expect(result.reply).toContain("cân nặng");
     expect(result.reply).not.toContain("chiều cao");
     expect(send).toHaveBeenCalledTimes(2);
-    // The rule is carried by both passes, but each pass states its own half of
-    // it: the strategist picks the missing direction, the responder owns the
-    // segment/strategy/CTA shape.
     const [strategistCall, responderCall] = send.mock.calls;
     const strategistPrompt = promptBody(strategistCall![0].body);
     const responderPrompt = promptBody(responderCall![0].body);
     expect(strategistPrompt.systemInstruction)
       .toContain("Product size existence is not verified fit without an eligible SIZE_FIT claim.");
     expect(responderPrompt.systemInstruction)
-      .toContain("If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification and one PROVIDE_MEASUREMENTS action");
+      .toContain("Render exactly the supplied nextMove.target as one short, concrete, natural customer question ending with ?.");
     for (const [request] of send.mock.calls) {
       const { prompt, systemInstruction } = promptBody(request.body);
       expect(prompt).toContain("Chị cao 1m60 rồi nhé.");
@@ -628,14 +625,12 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     });
 
     expect(requiredStrategistPrompt.systemInstruction).toContain(
-      "checkoutCompleteness REQUIRED => ASK_CHECKOUT_DETAILS with requestedFields exactly equal to missingFields in canonical order",
+      "checkoutCompleteness REQUIRED permits ASK_CHECKOUT_DETAILS only when checkout is the selected conversational step; requestedFields must exactly equal missingFields in canonical order.",
     );
     expect(requiredResponderPrompt.systemInstruction).toContain(
       "requestedFields exactly equal to responsePlan.canonicalAction.requestedFields",
     );
 
-    // Customer wording stays inside what the frozen-dialogue PII guard accepts
-    // verbatim, so this exercises the projection instead of the guard.
     const completeFixture = fixture({
       id: "CHECKOUT_COMPLETE",
       message: "Tên và số điện thoại chị gửi đủ rồi, thông tin nhận hàng đủ hết nhé.",
@@ -645,19 +640,11 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       },
     });
     const completeSend = successfulTransport(
-      generalReply(
-        "Dạ em đã ghi nhận đủ tên, số điện thoại, địa chỉ và phương thức thanh toán chị nhé.",
-      ),
-      planPayload({
-        canonicalAction: {
-          type: "HOLD_POSITION",
-          requestedFields: [],
-        },
-        terminal: true,
-      }),
+      generalReply("Dạ em đã ghi nhận đủ thông tin cần thiết chị nhé."),
+      planPayload(),
     );
     const completeResult = await runFixture(completeFixture, completeSend);
-    expect(completeResult.reply).toBe("Dạ em đã có đủ thông tin cần thiết để tiếp tục ạ.");
+    expect(completeResult.reply).toBe("Dạ em đã ghi nhận đủ thông tin cần thiết chị nhé.");
     expect(completeResult.reply).not.toContain("gửi em tên");
     expect(completeResult.reply).not.toContain("số điện thoại");
     expect(completeResult.reply).not.toContain("địa chỉ");
@@ -680,15 +667,15 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       responsePlan?: TrackCResponsePlanV2;
     };
     expect(completeResponderStructured.responsePlan?.canonicalAction).toEqual({
-      type: "HOLD_POSITION",
+      type: "NONE",
       requestedFields: [],
     });
 
     expect(completeStrategistPrompt.systemInstruction).toContain(
-      "checkoutCompleteness COMPLETE => HOLD_POSITION and terminal = true",
+      "checkoutCompleteness COMPLETE forbids requesting checkout fields but does not by itself suppress an otherwise supported answer.",
     );
     expect(completeResponderPrompt.systemInstruction).toContain(
-      "If it is HOLD_POSITION, ask nothing, use one neutral GENERAL acknowledgement, strategy HOLD_POSITION, CTA NONE",
+      "When canonicalAction.type is NONE, realize responsePlan.nextMove.target exactly once only when nextMove.action is ASK.",
     );
   });
 
@@ -730,7 +717,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(result.reply).not.toContain("phương thức thanh toán");
   });
 
-  it("renders safe deterministic completion without model PII leaks when checkout is COMPLETE", async () => {
+  it("rejects undeclared checkout PII asks when checkout is COMPLETE", async () => {
     const completeFixture = fixture({
       id: "CHECKOUT_COMPLETE_EXTRA_PII",
       message: "Chị gửi đủ thông tin rồi nhé.",
@@ -739,22 +726,13 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         missing_fields: [],
       },
     });
-    const modelProseExtraPii = successfulTransport(
-      generalReply(
-        "Dạ chị gửi em số điện thoại và địa chỉ nhận hàng để em chốt đơn nhé.",
-      ),
-      planPayload({
-        canonicalAction: {
-          type: "HOLD_POSITION",
-          requestedFields: [],
-        },
-        terminal: true,
-      }),
+    const modelProseExtraPii = successfulTransport(generalReply(
+      "Dạ chị gửi em số điện thoại và địa chỉ nhận hàng để em chốt đơn nhé.",
+    ));
+
+    await expect(runFixture(completeFixture, modelProseExtraPii)).rejects.toThrow(
+      "TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST",
     );
-    const result = await runFixture(completeFixture, modelProseExtraPii);
-    expect(result.reply).toBe("Dạ em đã có đủ thông tin cần thiết để tiếp tục ạ.");
-    expect(result.reply).not.toContain("số điện thoại");
-    expect(result.reply).not.toContain("địa chỉ");
   });
 
   it("rejects checkout asks outside canonical missingFields in behavior simulation", async () => {
@@ -808,6 +786,11 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_CHECKOUT_DETAILS",
+    }), planPayload({
+      canonicalAction: {
+        type: "ASK_CHECKOUT_DETAILS",
+        requestedFields: ["PAYMENT_METHOD"],
+      },
     }));
 
     await expect(runFixture(requiredFixture, paymentAsk)).resolves.toBeDefined();
@@ -840,6 +823,11 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         }],
         strategy: "ASK_CLARIFICATION",
         cta: "ASK_CHECKOUT_DETAILS",
+      }), planPayload({
+        canonicalAction: {
+          type: "ASK_CHECKOUT_DETAILS",
+          requestedFields: [field],
+        },
       }));
 
       await expect(runFixture(requiredFixture, response)).resolves.toBeDefined();
@@ -871,9 +859,9 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     );
   });
 
-  it("defers checkout validation to a higher-priority measurement clarification", async () => {
+  it("allows either model-selected measurement or checkout action when both are permitted", async () => {
     const requiredFixture = fixture({
-      id: "CHECKOUT_MEASUREMENT_PRECEDENCE",
+      id: "CHECKOUT_MEASUREMENT_PERMISSIONS",
       message: "Chị chốt nhưng cần kiểm tra lại size nhé.",
       canonicalFlags: ["MEASUREMENTS_REQUIRED"],
       checkoutCompleteness: {
@@ -893,18 +881,29 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_MEASUREMENTS",
+    }), planPayload({
+      canonicalAction: {
+        type: "ASK_MEASUREMENTS",
+        requestedFields: [],
+      },
     }));
 
     await expect(runFixture(requiredFixture, measurementAsk)).resolves.toBeDefined();
-    await expect(runFixture(
-      requiredFixture,
-      successfulTransport(providerPayload(checkoutAskOutput())),
-    )).rejects.toThrow("TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED");
+    const checkoutAsk = successfulTransport(
+      providerPayload(checkoutAskOutput()),
+      planPayload({
+        canonicalAction: {
+          type: "ASK_CHECKOUT_DETAILS",
+          requestedFields: ["PHONE"],
+        },
+      }),
+    );
+    await expect(runFixture(requiredFixture, checkoutAsk)).resolves.toBeDefined();
   });
 
-  it("defers checkout validation to a higher-priority unresolved product clarification", async () => {
+  it("allows product clarification while COMPLETE blocks checkout collection", async () => {
     const requiredFixture = fixture({
-      id: "CHECKOUT_PRODUCT_PRECEDENCE",
+      id: "CHECKOUT_PRODUCT_PERMISSION",
       message: "Chị chốt mẫu đó nhé.",
       productBinding: { status: "UNRESOLVED", product_ids: [] },
       checkoutCompleteness: {
@@ -924,18 +923,31 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_PRODUCT",
+    }), planPayload({
+      canonicalAction: {
+        type: "ASK_PRODUCT",
+        requestedFields: [],
+      },
     }));
 
     await expect(runFixture(requiredFixture, productAsk)).resolves.toBeDefined();
-    await expect(runFixture(
-      requiredFixture,
-      successfulTransport(providerPayload(checkoutAskOutput())),
-    )).rejects.toThrow("TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED");
+    const checkoutAsk = successfulTransport(
+      providerPayload(checkoutAskOutput()),
+      planPayload({
+        canonicalAction: {
+          type: "ASK_CHECKOUT_DETAILS",
+          requestedFields: ["PHONE"],
+        },
+      }),
+    );
+    await expect(runFixture(requiredFixture, checkoutAsk)).rejects.toThrow(
+      "TRACK_C_CANONICAL_ACTION_NOT_PERMITTED",
+    );
   });
 
-  it("rejects a checkout override through the offline candidate validator path", () => {
+  it("rejects widened checkout fields through the offline candidate validator path", () => {
     const requiredFixture = fixture({
-      id: "OFFLINE_CHECKOUT_MEASUREMENT_PRECEDENCE",
+      id: "OFFLINE_CHECKOUT_FIELD_WIDENING",
       message: "Chị chốt nhưng cần kiểm tra lại size nhé.",
       canonicalFlags: ["MEASUREMENTS_REQUIRED"],
       checkoutCompleteness: {
@@ -955,7 +967,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       capture,
       evaluationAt: new Date(recipe.evaluation_at),
       evaluationContext,
-      systemInstruction: "Offline checkout precedence regression.",
+      systemInstruction: "Offline checkout field widening regression.",
     });
 
     expect(() => validateTrackCOfflineCandidate({
@@ -975,7 +987,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
           blockedReasonCodes: [],
         },
       },
-      output: checkoutAskOutput(),
+      output: checkoutAskOutput(["PHONE", "ADDRESS"]),
     })).toThrow(
       "TRACK_C_C3_OFFLINE_CANDIDATE_CHECKOUT_COMPLETENESS_FAILED",
     );
