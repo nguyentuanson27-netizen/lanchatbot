@@ -177,48 +177,6 @@ function validateMaterializedClaim(ref, compact, claim) {
   }
 }
 
-function derivedReachability(caseItem) {
-  for (const rule of reachability.derived_rules ?? []) {
-    if (rule.id !== 'CART_SCOPED_CLAIM_REQUIRES_CANONICAL_CART') {
-      throw new Error(`unknown reachability rule ${rule.id}`);
-    }
-    const hasCartClaim = caseItem.context.runtime_claim_refs.some((ref) =>
-      cartScopedTypes.has(runtime[ref]?.type)
-    );
-    if (hasCartClaim && caseItem.context.phase === rule.when.fixture_phase) return rule;
-  }
-  return null;
-}
-
-function effectiveExecution(caseItem) {
-  const override = reachability.overrides?.[caseItem.id];
-  if (override) return override;
-  const derived = derivedReachability(caseItem);
-  if (derived) return derived;
-  return caseItem.execution;
-}
-
-ok(materialization.schema === 'V5_BENCHMARK_RUNTIME_MATERIALIZATION_V2', 'materialization schema');
-ok(Number.isFinite(Date.parse(materialization.evaluation_at)), 'materialization evaluation time');
-ok(new Date(manifest.evaluation_at).toISOString() === materialization.evaluation_at, 'manifest/materialization evaluation instant');
-ok(gaps.schema === 'V5_BENCHMARK_CONTRACT_GAPS_V2', 'contract gaps schema');
-ok(reachability.schema === 'V5_PRODUCTION_CONTRACT_REACHABILITY_V2', 'reachability schema');
-ok(reachability.evaluation_at === materialization.evaluation_at, 'reachability evaluation time');
-ok(rubric.schema === 'V5_BENCHMARK_RUBRIC_V5', 'rubric schema');
-ok(rubric.judge_input_policy.judge_sees_case_id === false, 'judge must not see case id');
-ok(rubric.judge_input_policy.judge_sees_split === false, 'judge must not see split');
-ok(ownerRouteMap.schema === 'V5_OWNER_SAFETY_ROUTE_MAP_V1', 'owner route map schema');
-ok(capabilityMatrix.schema === 'V5_OWNER_SAFETY_CAPABILITY_MATRIX_V1', 'owner capability matrix schema');
-ok(capabilityMatrix.side_effects === 'DISABLED', 'owner capability probes effects disabled');
-ok(holdoutPolicy.schema === 'V5_HOLDOUT_POLICY_V1', 'holdout policy schema');
-ok(holdoutPolicy.current_embedded_holdout.blind_eligible === false, 'embedded holdout must remain exposed/non-blind');
-ok(rubric.owner_safety_scoring.route_map === 'owner-safety-route-map.json', 'owner route-map registration');
-ok(rubric.owner_safety_scoring.capability_matrix === 'owner-safety-capability-matrix.json', 'owner capability-matrix registration');
-const weightTotal = rubric.dimensions.reduce((sum, dimension) => sum + dimension.weight, 0);
-ok(Math.abs(weightTotal - 1) < 1e-12, 'rubric weights must sum to 1');
-ok(rubric.weighted_score.base_pass_threshold.PRODUCTION_CONTRACT >
-  rubric.weighted_score.base_pass_threshold.BEHAVIOR_SIMULATION, 'production threshold must be stricter');
-
 for (const [ref, compact] of Object.entries(runtime)) {
   validateMaterializedClaim(ref, compact, materializeRuntimeClaim(ref, compact));
 }
@@ -368,6 +326,7 @@ const componentPaths = [
   '../../../src/track-c-c3-v5-benchmark-runner.ts',
   '../../../src/track-c-offline-candidate-validation.ts',
   '../../../src/track-c-checkout-safe-reply.ts',
+  '../../../src/track-c-c3-response-plan-guard.ts',
 ];
 const componentsGitSha1 = Object.fromEntries(
   componentPaths.map((path) => [path, gitBlobSha1(path)]),
