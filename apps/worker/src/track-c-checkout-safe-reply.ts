@@ -52,7 +52,7 @@ const LEGACY_CHECKOUT_FIELDS = Object.freeze([
   "ADDRESS",
 ] as const satisfies readonly CheckoutField[]);
 
-const CHECKOUT_PII_TERMS = Object.freeze([
+const CHECKOUT_RECIPIENT_PII_TERMS = Object.freeze([
   "họ tên",
   "họ và tên",
   "tên đầy đủ",
@@ -62,14 +62,26 @@ const CHECKOUT_PII_TERMS = Object.freeze([
   "sđt",
   "sdt",
   "địa chỉ nhận hàng",
-  "địa chỉ",
+  "địa chỉ giao hàng",
   "thông tin nhận hàng",
   "full_name",
   "recipient name",
   "phone",
   "phone number",
-  "address",
   "delivery address",
+  "shipping address",
+] as const);
+
+const GENERIC_ADDRESS_TERMS = Object.freeze([
+  "địa chỉ",
+  "address",
+] as const);
+
+const SHOP_ADDRESS_TERMS = Object.freeze([
+  "shop",
+  "store",
+  "cửa hàng",
+  "lana store",
 ] as const);
 
 const REQUEST_CUES = Object.freeze([
@@ -114,8 +126,17 @@ function isCheckoutRequestDeclared(output: CheckoutRenderOutput): boolean {
   );
 }
 
+function mentionsShopAddress(text: string): boolean {
+  const hasAddress = GENERIC_ADDRESS_TERMS.some((term) => text.includes(term));
+  return hasAddress && SHOP_ADDRESS_TERMS.some((term) => text.includes(term));
+}
+
 function mentionsCheckoutPii(text: string): boolean {
-  return CHECKOUT_PII_TERMS.some((term) => text.includes(term));
+  if (CHECKOUT_RECIPIENT_PII_TERMS.some((term) => text.includes(term))) {
+    return true;
+  }
+  if (!GENERIC_ADDRESS_TERMS.some((term) => text.includes(term))) return false;
+  return !mentionsShopAddress(text);
 }
 
 function containsCheckoutPiiRequest(text: string): boolean {

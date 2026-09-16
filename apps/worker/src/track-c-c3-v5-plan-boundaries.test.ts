@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ContextV2, ContextV2CandidateOutputV2 } from "@lana/contracts";
 import {
+  assertTrackCCanonicalActionPermitted,
   assertTrackCOrdinaryNextMoveSafe,
   renderTrackCCheckoutSafeReply,
   trackCCanonicalActionConstraints,
@@ -72,6 +73,41 @@ describe("Track C V5 model/code boundaries", () => {
       action: "ASK",
       target: "preferred payment method: COD or bank transfer",
     })).not.toThrow();
+  });
+
+  it.each([
+    "địa chỉ shop ở đâu",
+    "store address",
+  ])("allows shop address as an ordinary commercial next move: %s", (target) => {
+    expect(() => assertTrackCOrdinaryNextMoveSafe({
+      action: "ASK",
+      target,
+    })).not.toThrow();
+  });
+
+  it.each([
+    "địa chỉ giao hàng",
+    "địa chỉ của chị",
+    "delivery address",
+  ])("keeps recipient address behind the checkout PII boundary: %s", (target) => {
+    expect(() => assertTrackCOrdinaryNextMoveSafe({
+      action: "ASK",
+      target,
+    })).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
+  });
+
+  it("allows shop-address wording in a non-checkout final reply", () => {
+    expect(renderTrackCCheckoutSafeReply(
+      context(),
+      output("Chị muốn em gửi địa chỉ shop không ạ?"),
+    )).toBe("Chị muốn em gửi địa chỉ shop không ạ?");
+  });
+
+  it("rejects invalid canonical checkout selection at the code boundary", () => {
+    expect(() => assertTrackCCanonicalActionPermitted(context(), {
+      type: "ASK_CHECKOUT_DETAILS",
+      requestedFields: ["PHONE"],
+    })).toThrow("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
   });
 
   it("rejects compound ordinary nextMove targets", () => {
