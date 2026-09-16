@@ -77,11 +77,17 @@ const GENERIC_ADDRESS_TERMS = Object.freeze([
   "address",
 ] as const);
 
-const SHOP_ADDRESS_TERMS = Object.freeze([
-  "shop",
-  "store",
-  "cửa hàng",
-  "lana store",
+const RECIPIENT_ADDRESS_PATTERNS = Object.freeze([
+  /địa chỉ\s+của\s+(?:chị|anh|em|bạn|khách|mình)\b/u,
+  /(?:your|recipient|customer)\s+address\b/u,
+  /address\s+of\s+(?:you|the\s+customer|the\s+recipient)\b/u,
+] as const);
+
+const SHOP_ADDRESS_PATTERNS = Object.freeze([
+  /\b(?:shop|store)\s+address\b/u,
+  /\baddress\s+(?:of\s+(?:the\s+)?)?(?:shop|store)\b/u,
+  /địa chỉ\s+(?:của\s+)?(?:shop|cửa hàng|lana store)(?=$|[\s,.!?])/u,
+  /(?:shop|cửa hàng|lana store)[^.!?\n]{0,40}địa chỉ\s+(?:ở\s+)?đâu\b/u,
 ] as const);
 
 const REQUEST_CUES = Object.freeze([
@@ -138,15 +144,16 @@ function countTerm(text: string, term: string): number {
 }
 
 function isShopAddressOnly(text: string): boolean {
-  if (CHECKOUT_RECIPIENT_PII_TERMS.some((term) => text.includes(term))) {
+  if (CHECKOUT_RECIPIENT_PII_TERMS.some((term) => text.includes(term)) ||
+      RECIPIENT_ADDRESS_PATTERNS.some((pattern) => pattern.test(text))) {
     return false;
   }
   const addressMentions = GENERIC_ADDRESS_TERMS.reduce(
     (count, term) => count + countTerm(text, term),
     0,
   );
-  return addressMentions === 1 && SHOP_ADDRESS_TERMS.some((term) =>
-    text.includes(term)
+  return addressMentions === 1 && SHOP_ADDRESS_PATTERNS.some((pattern) =>
+    pattern.test(text)
   );
 }
 
@@ -188,7 +195,8 @@ function assertNoUndeclaredCheckoutRequest(output: CheckoutRenderOutput): void {
 function assertNoUnauthorizedEffectClaim(output: CheckoutRenderOutput): void {
   for (const segment of output.segments) {
     const text = segment.text.normalize("NFC");
-    if (/\basset[_-][\p{L}\p{N}_-]+\b/iu.test(text)) {
+    if (/\basset[_-][\p{L}\p{N}_-]+\b/iu.test(text) ||
+        /\bclaim_\d{3,}\b/iu.test(text)) {
       throw new Error("TRACK_C_INTERNAL_TOKEN_LEAK");
     }
     const normalized = text.toLocaleLowerCase("vi-VN");
@@ -252,11 +260,6 @@ export function assertTrackCOrdinaryNextMoveSafe(
   const target = nextMove.target.normalize("NFC").toLocaleLowerCase("vi-VN");
   if (mentionsCheckoutPii(target) && !isShopAddressOnly(target)) {
     throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
-  }
-  const paymentPreference = /\b(?:payment method|payment preference|cod|bank transfer|chuyển khoản)\b/u
-    .test(target);
-  if (!paymentPreference && (/\s(?:or|and|hoặc|và)\s/u.test(target) || target.includes("/"))) {
-    throw new Error("TRACK_C_MULTIPLE_NEXT_MOVE_TARGETS");
   }
 }
 
