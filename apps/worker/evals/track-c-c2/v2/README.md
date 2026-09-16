@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.15
+### Benchmark revision R2.16
 
-`benchmark_revision` is **R2.15**. Relative to R2.14, the pinned checkout safe-reply renderer now uses explicit shop-address ownership patterns instead of broad shop/store token co-occurrence, does not infer `nextMove` cardinality from conjunctions in free text, and rejects raw internal `CLAIM_*` identifiers at the customer-facing boundary. Shop location and payment-preference wording remain ordinary commercial next moves, while recipient/customer address requests still fail closed outside an authorized checkout action. The Responder-to-plan guard remains pinned. Corpus, splits, rubric, scoring weights, production-contract reachability and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.16**. Relative to R2.15, the pinned checkout safe-reply renderer now uses a Unicode-safe separator boundary for unauthorized effect claims, so larger Vietnamese words such as `chịu` are not mistaken for the recipient phrase `chị` while exact send/attachment claims remain fail-closed. The Responder-to-plan guard remains pinned. Corpus, splits, rubric, scoring weights, production-contract reachability and the aggregate gate are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 
