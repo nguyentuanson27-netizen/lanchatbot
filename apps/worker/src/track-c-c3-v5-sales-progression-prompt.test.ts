@@ -23,15 +23,21 @@ describe("Track C C3 V5 sales progression prompt policy", () => {
     );
   });
 
-  it("keeps checkout PII outside ordinary sales nextMove", () => {
+  it("keeps checkout PII outside ordinary sales nextMove without blocking policy discussion", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "Ordinary nextMove must never request recipient name, phone number, delivery address, or payment method",
+      "Ordinary nextMove must never request recipient name, phone number, or full delivery address.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Payment policy or a non-executing payment preference may be discussed as an ordinary commercial decision",
     );
   });
 
   it("keeps canonical action as a model decision constrained by code-owned state", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Choose canonicalAction from the current conversational need and code-owned constraints, not from state alone.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "responsePlanConstraints is code-owned permission input, not a required action.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
       "Canonical precedence:",
@@ -43,7 +49,7 @@ describe("Track C C3 V5 sales progression prompt policy", () => {
       "not a consultant, analyst, CRM, or customer-service script",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Render exactly the supplied nextMove.target as one short, concrete, natural customer question.",
+      "Render exactly the supplied nextMove.target as one short, concrete, natural customer question ending with ?.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Do not introduce another decision variable",
