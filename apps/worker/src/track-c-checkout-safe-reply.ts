@@ -287,7 +287,7 @@ function assertDeclaredCheckoutRequest(
   );
   const checkoutActions = output.segments.filter((segment) =>
     segment.kind === "ACTION_REQUEST" &&
-      segment.action === "PROVIDE_CHECKOUT_DETAILS"
+    segment.action === "PROVIDE_CHECKOUT_DETAILS"
   );
   const otherRequests = output.segments.filter((segment) =>
     (segment.kind === "CLARIFICATION" &&
