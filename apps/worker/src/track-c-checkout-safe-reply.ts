@@ -200,7 +200,7 @@ function assertNoUnauthorizedEffectClaim(output: CheckoutRenderOutput): void {
       throw new Error("TRACK_C_INTERNAL_TOKEN_LEAK");
     }
     const normalized = text.toLocaleLowerCase("vi-VN");
-    if (/\bem\s+(?:đã\s+)?(?:gửi|đính kèm)\s+(?:chị|mình)\b/u.test(normalized)) {
+    if (/\bem\s+(?:đã\s+)?(?:gửi|đính kèm)\s+(?:chị|mình)(?=$|[\s,.!?])/u.test(normalized)) {
       throw new Error("TRACK_C_UNAUTHORIZED_EFFECT_CLAIM");
     }
   }
@@ -287,7 +287,7 @@ function assertDeclaredCheckoutRequest(
   );
   const checkoutActions = output.segments.filter((segment) =>
     segment.kind === "ACTION_REQUEST" &&
-    segment.action === "PROVIDE_CHECKOUT_DETAILS"
+      segment.action === "PROVIDE_CHECKOUT_DETAILS"
   );
   const otherRequests = output.segments.filter((segment) =>
     (segment.kind === "CLARIFICATION" &&
