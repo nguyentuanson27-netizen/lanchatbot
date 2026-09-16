@@ -89,6 +89,7 @@ describe("Track C V5 model/code boundaries", () => {
     "địa chỉ giao hàng",
     "địa chỉ của chị",
     "delivery address",
+    "shop address and your address",
   ])("keeps recipient address behind the checkout PII boundary: %s", (target) => {
     expect(() => assertTrackCOrdinaryNextMoveSafe({
       action: "ASK",
@@ -101,6 +102,13 @@ describe("Track C V5 model/code boundaries", () => {
       context(),
       output("Chị muốn em gửi địa chỉ shop không ạ?"),
     )).toBe("Chị muốn em gửi địa chỉ shop không ạ?");
+  });
+
+  it("does not let shop-address wording mask a recipient-address request", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      context(),
+      output("Chị cho em địa chỉ shop và địa chỉ của chị nhé?"),
+    )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   });
 
   it("rejects invalid canonical checkout selection at the code boundary", () => {

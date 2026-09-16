@@ -126,24 +126,42 @@ function isCheckoutRequestDeclared(output: CheckoutRenderOutput): boolean {
   );
 }
 
-function mentionsShopAddress(text: string): boolean {
-  const hasAddress = GENERIC_ADDRESS_TERMS.some((term) => text.includes(term));
-  return hasAddress && SHOP_ADDRESS_TERMS.some((term) => text.includes(term));
+function countTerm(text: string, term: string): number {
+  let count = 0;
+  let offset = 0;
+  while (true) {
+    const next = text.indexOf(term, offset);
+    if (next === -1) return count;
+    count += 1;
+    offset = next + term.length;
+  }
+}
+
+function isShopAddressOnly(text: string): boolean {
+  if (CHECKOUT_RECIPIENT_PII_TERMS.some((term) => text.includes(term))) {
+    return false;
+  }
+  const addressMentions = GENERIC_ADDRESS_TERMS.reduce(
+    (count, term) => count + countTerm(text, term),
+    0,
+  );
+  return addressMentions === 1 && SHOP_ADDRESS_TERMS.some((term) =>
+    text.includes(term)
+  );
 }
 
 function mentionsCheckoutPii(text: string): boolean {
-  if (CHECKOUT_RECIPIENT_PII_TERMS.some((term) => text.includes(term))) {
-    return true;
-  }
-  if (!GENERIC_ADDRESS_TERMS.some((term) => text.includes(term))) return false;
-  return !mentionsShopAddress(text);
+  return CHECKOUT_RECIPIENT_PII_TERMS.some((term) => text.includes(term)) ||
+    GENERIC_ADDRESS_TERMS.some((term) => text.includes(term));
 }
 
 function containsCheckoutPiiRequest(text: string): boolean {
   const clauses = text.match(/[^.!?\n]+[.!?]?/gu) ?? [text];
   return clauses.some((clause) => {
     const normalized = clause.trim();
-    if (!mentionsCheckoutPii(normalized)) return false;
+    if (!mentionsCheckoutPii(normalized) || isShopAddressOnly(normalized)) {
+      return false;
+    }
     const imperative = /^(?:(?:chị|mình)\s+)?(?:vui lòng\s+)?(?:nhập|điền|để lại)\b/u
       .test(normalized);
     return normalized.endsWith("?") || imperative || REQUEST_CUES.some((cue) =>
@@ -158,7 +176,9 @@ function assertNoUndeclaredCheckoutRequest(output: CheckoutRenderOutput): void {
     const text = segment.text.normalize("NFC").toLocaleLowerCase("vi-VN");
     const requestSegment = segment.kind === "CLARIFICATION" ||
       segment.kind === "ACTION_REQUEST";
-    if ((requestSegment && mentionsCheckoutPii(text)) ||
+    const containsRecipientPii = mentionsCheckoutPii(text) &&
+      !isShopAddressOnly(text);
+    if ((requestSegment && containsRecipientPii) ||
         containsCheckoutPiiRequest(text)) {
       throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
     }
@@ -230,7 +250,7 @@ export function assertTrackCOrdinaryNextMoveSafe(
 ): void {
   if (nextMove.action !== "ASK") return;
   const target = nextMove.target.normalize("NFC").toLocaleLowerCase("vi-VN");
-  if (mentionsCheckoutPii(target)) {
+  if (mentionsCheckoutPii(target) && !isShopAddressOnly(target)) {
     throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   }
   const paymentPreference = /\b(?:payment method|payment preference|cod|bank transfer|chuyển khoản)\b/u
