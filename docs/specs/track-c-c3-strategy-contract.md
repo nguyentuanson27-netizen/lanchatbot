@@ -126,7 +126,7 @@ type StrategistDecision = {
 
 `replyAct` is the smallest conversational discriminator the code cannot derive safely from evidence:
 
-- `ANSWER` — answer the customer's question/concern; code determines whether the fact is supported or unresolved;
+- `ANSWER` — answer the customer's question/concern; code determines whether the selected proposition is supported, unresolved, or not applicable;
 - `ACKNOWLEDGE` — acknowledgement without inventing an effect;
 - `CLARIFY` — the current need itself needs clarification.
 
@@ -230,7 +230,11 @@ A small shape is enough:
 ```ts
 type ResponderTask = {
   answer:
-    | { kind: "FACT"; status: "SUPPORTED" | "UNRESOLVED"; goal: string }
+    | {
+        kind: "ANSWER";
+        status: "SUPPORTED" | "UNRESOLVED" | "NOT_APPLICABLE";
+        goal: string;
+      }
     | { kind: "ACKNOWLEDGE"; goal: string }
     | { kind: "CLARIFY"; goal: string };
 
@@ -249,7 +253,7 @@ Code maps Strategist intent into this task:
 
 ```text
 replyAct = ANSWER
-  -> FACT + code-derived SUPPORTED/UNRESOLVED status
+  -> ANSWER + code-derived SUPPORTED / UNRESOLVED / NOT_APPLICABLE
 
 replyAct = ACKNOWLEDGE
   -> ACKNOWLEDGE
