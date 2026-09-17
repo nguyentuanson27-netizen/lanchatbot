@@ -17,7 +17,10 @@ export type TrackCOrdinaryDecisionInput =
   | "LOCALITY"
   | "PAYMENT_PREFERENCE"
   | "QUANTITY"
-  | "STYLE";
+  | "STYLE"
+  | "BUDGET"
+  | "DECISION_CRITERION"
+  | "DEADLINE";
 
 export type TrackCCanonicalAction =
   | "NONE"
@@ -105,12 +108,12 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   productResolved: boolean;
   classificationOrVariantRequired: boolean;
   colorChoiceMeaningful: boolean;
+  fitQualificationUseful: boolean;
   priceEvidenceRef: string | null;
   productEvidenceRefs: readonly string[];
-  authorizedSellingPointRef: string | null;
+  usefulProductFactRef: string | null;
 }>): TrackCResponderTask {
-  if (!input.productResolved || input.classificationOrVariantRequired ||
-      input.priceEvidenceRef === null) {
+  if (!input.productResolved || input.classificationOrVariantRequired) {
     return Object.freeze({
       answer: Object.freeze({
         kind: "CLARIFY",
@@ -123,13 +126,26 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       canonicalRequest: Object.freeze({ type: "ASK_PRODUCT" }),
     });
   }
+  if (input.priceEvidenceRef === null) {
+    return Object.freeze({
+      answer: Object.freeze({
+        kind: "ACKNOWLEDGE",
+        status: "NOT_APPLICABLE",
+        goal: "Acknowledge that the verified price is not currently available.",
+      }),
+      evidenceRefs: Object.freeze([]),
+      requiredEvidenceRefs: Object.freeze([]),
+      continuation: Object.freeze({ type: "KEEP_OPEN" }),
+      canonicalRequest: null,
+    });
+  }
 
   const evidenceRefs = [
     input.priceEvidenceRef,
     ...input.productEvidenceRefs,
-    ...(input.authorizedSellingPointRef === null
+    ...(input.usefulProductFactRef === null
       ? []
-      : [input.authorizedSellingPointRef]),
+      : [input.usefulProductFactRef]),
   ];
   if (new Set(evidenceRefs).size !== evidenceRefs.length) {
     throw new Error("TRACK_C_FIRST_CONTACT_EVIDENCE_DUPLICATE");
@@ -144,10 +160,14 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
     requiredEvidenceRefs: Object.freeze([input.priceEvidenceRef]),
     continuation: input.colorChoiceMeaningful
       ? Object.freeze({ type: "ASK", input: "COLOR" as const })
-      : null,
+      : input.fitQualificationUseful
+        ? null
+        : Object.freeze({ type: "KEEP_OPEN" }),
     canonicalRequest: input.colorChoiceMeaningful
       ? null
-      : Object.freeze({ type: "ASK_MEASUREMENTS" }),
+      : input.fitQualificationUseful
+        ? Object.freeze({ type: "ASK_MEASUREMENTS" })
+        : null,
   });
 }
 
@@ -160,6 +180,9 @@ const ORDINARY_INPUTS = new Set<TrackCOrdinaryDecisionInput>([
   "PAYMENT_PREFERENCE",
   "QUANTITY",
   "STYLE",
+  "BUDGET",
+  "DECISION_CRITERION",
+  "DEADLINE",
 ]);
 const CANONICAL_ACTIONS = new Set<TrackCCanonicalAction>([
   "NONE",

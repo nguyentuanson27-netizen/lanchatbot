@@ -285,7 +285,7 @@ describe("Track C C3 V5 benchmark runner", () => {
       claimContentHash:
         capture.context.productAttributes.metadata.contentHash,
     });
-    expect(result.output.segments[0]?.text).toBe("Dạ mẫu có chất liệu LỤA ạ.");
+    expect(result.output.segments[0]?.text).toBe("Dạ mẫu có chất liệu LỤA, thiết kế THANH LỊCH ạ.");
     expect(result.sideEffects).toBe("DISABLED");
   });
 

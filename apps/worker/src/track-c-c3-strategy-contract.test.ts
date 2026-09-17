@@ -115,9 +115,10 @@ describe("Track C C3 simplified strategy contract", () => {
       productResolved: true,
       classificationOrVariantRequired: false,
       colorChoiceMeaningful: true,
+      fitQualificationUseful: false,
       priceEvidenceRef: "CLAIM_001",
       productEvidenceRefs: ["PRODUCT_PRESENTATION_VARIANT_001"],
-      authorizedSellingPointRef: "CLAIM_002",
+      usefulProductFactRef: "CLAIM_002",
     });
 
     expect(task.answer.status).toBe("SUPPORTED");
@@ -135,9 +136,10 @@ describe("Track C C3 simplified strategy contract", () => {
       productResolved: true,
       classificationOrVariantRequired: false,
       colorChoiceMeaningful: false,
+      fitQualificationUseful: true,
       priceEvidenceRef: "CLAIM_001",
       productEvidenceRefs: [],
-      authorizedSellingPointRef: null,
+      usefulProductFactRef: null,
     });
 
     expect(task.continuation).toBeNull();
@@ -150,9 +152,10 @@ describe("Track C C3 simplified strategy contract", () => {
       productResolved: true,
       classificationOrVariantRequired: true,
       colorChoiceMeaningful: true,
+      fitQualificationUseful: true,
       priceEvidenceRef: "CLAIM_001",
       productEvidenceRefs: ["PRODUCT_PRESENTATION_VARIANT_001"],
-      authorizedSellingPointRef: "PRODUCT_ATTRIBUTES_001",
+      usefulProductFactRef: "PRODUCT_ATTRIBUTES_001",
     });
 
     expect(task).toMatchObject({
@@ -161,6 +164,36 @@ describe("Track C C3 simplified strategy contract", () => {
       continuation: null,
       canonicalRequest: { type: "ASK_PRODUCT" },
     });
+  });
+
+  it("keeps the known product when price is unresolved and does not force fit qualification", () => {
+    const missingPrice = compileTrackCFixedFirstContactTask({
+      productResolved: true,
+      classificationOrVariantRequired: false,
+      colorChoiceMeaningful: false,
+      fitQualificationUseful: false,
+      priceEvidenceRef: null,
+      productEvidenceRefs: ["PRODUCT_PRESENTATION_DISPLAY_001"],
+      usefulProductFactRef: null,
+    });
+    expect(missingPrice).toMatchObject({
+      answer: { kind: "ACKNOWLEDGE", status: "NOT_APPLICABLE" },
+      evidenceRefs: [],
+      continuation: { type: "KEEP_OPEN" },
+      canonicalRequest: null,
+    });
+
+    const lowPressure = compileTrackCFixedFirstContactTask({
+      productResolved: true,
+      classificationOrVariantRequired: false,
+      colorChoiceMeaningful: false,
+      fitQualificationUseful: false,
+      priceEvidenceRef: "CLAIM_001",
+      productEvidenceRefs: [],
+      usefulProductFactRef: null,
+    });
+    expect(lowPressure.continuation).toEqual({ type: "KEEP_OPEN" });
+    expect(lowPressure.canonicalRequest).toBeNull();
   });
 
   it("keeps product and measurements canonical-only and permits usual size only as a fallback", () => {
@@ -196,13 +229,20 @@ describe("Track C C3 simplified strategy contract", () => {
       permittedCanonicalActions: ["NONE"],
       measurementsUnavailable: true,
     })).toThrow("TRACK_C_STRATEGIST_DECISION_INVALID");
+
+    expect(compileTrackCStrategistDecision({
+      decision: { ...decision, continuation: { type: "ASK", input: "BUDGET" } },
+      evidenceCapabilities: new Map(),
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: false,
+    }).continuation).toEqual({ type: "ASK", input: "BUDGET" });
   });
 
   it("uses one real Responder call for fixed first contact and two calls for adaptive follow-up", async () => {
     const firstContactCapture = capture("BEHAVIOR_SIMULATION");
     const firstContactSend = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValue({
-        payload: responderPayload({ canonicalMeasurements: true }),
+        payload: responderPayload({ keepOpen: true }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
     await runTrackCV5TwoPassBenchmarkCase({
@@ -406,7 +446,8 @@ describe("Track C C3 simplified strategy contract", () => {
       transport: { send },
     });
 
-    expect(result.reply).toContain("Tường Vi");
+    expect(result.reply).toContain("tơ xước mềm");
+    expect(result.reply).not.toContain("{");
     const responderBody = JSON.parse(send.mock.calls[1]?.[0].body ?? "{}") as {
       contents?: Array<{ parts?: Array<{ text?: string }> }>;
     };
@@ -419,5 +460,84 @@ describe("Track C C3 simplified strategy contract", () => {
       capability: "PRODUCT_ATTRIBUTES",
     })]);
     expect(responderPrompt.benchmarkSimulationFacts).toEqual([simulationFact]);
+  });
+
+  it("fails closed before customer output when selected evidence has no safe renderer", async () => {
+    const stock = { kind: "FULFILLMENT_SNAPSHOT", data: { status: "MADE_TO_ORDER" } };
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the selected fulfillment status.",
+          proposition: "FULFILLMENT_STATUS",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          segments: [{
+            kind: "VERIFIED_CLAIM", text: "raw", claimRef: "SIMULATION_001",
+            role: "ANSWER", decisionInput: "NONE",
+          }, {
+            kind: "GENERAL", text: "Chị cân nhắc thêm nhé.",
+            role: "PROGRESSION", decisionInput: "NONE",
+          }],
+          strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao lâu có?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      simulationFacts: [stock], transport: { send },
+    })).rejects.toThrow("TRACK_C_SELECTED_EVIDENCE_UNRENDERABLE");
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("permits a code-recognized explicit stop to hold the conversation without reopening", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Honor the explicit request to stop.",
+          proposition: "NONE",
+          evidenceRefs: [], continuation: null, canonicalAction: "HOLD_POSITION",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          segments: [{
+            kind: "GENERAL", text: "Dạ em dừng tại đây ạ.",
+            role: "ANSWER", decisionInput: "NONE",
+          }],
+          strategy: "HOLD_POSITION", cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("PRODUCTION_CONTRACT"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Dừng ở đây nhé em, đừng hỏi thêm chị nữa.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe("Dạ em dừng tại đây ạ.");
+    expect(send).toHaveBeenCalledTimes(2);
   });
 });

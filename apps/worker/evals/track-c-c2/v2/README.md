@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.17
+### Benchmark revision R2.18
 
-`benchmark_revision` is **R2.17**. This is the unique fingerprint for the C3 strategy-contract candidate: selected evidence is materialized and bound before the Responder guard, simulation evidence is evaluation-only and follows that same reference seam, first-contact fixed policy has one generator call, and quality evaluation explicitly omits a Strategist assessment for that lane. Corpus, splits, rubric weights, and the aggregate quality population are unchanged.
+`benchmark_revision` is **R2.18**. This is the unique fingerprint for the C3 strategy-contract candidate: bound facts are rendered only through deterministic customer-facing renderers (otherwise the turn fails closed), fixed first contact avoids duplicate facts, separates unresolved price from product clarification, and uses color/fit progression only when each is useful. Adaptive follow-up adds only budget, decision-criterion, and deadline continuations, and honors explicit customer stops through code-permitted `HOLD_POSITION`. Corpus, splits, rubric weights, and the aggregate quality population are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 

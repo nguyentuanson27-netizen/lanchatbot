@@ -169,7 +169,11 @@ function responderPayload(
     role: "PROGRESSION",
     decisionInput: "NONE",
   });
-  return payload({ segments, strategy: "HOLD_POSITION", cta: "NONE" });
+  return payload({
+    segments,
+    strategy: answer.status === "SUPPORTED" ? "ANSWER_VERIFIED_FACTS" : "HOLD_POSITION",
+    cta: "NONE",
+  });
 }
 
 function transport(reply = "actual Lana reply", numbered = true) {
