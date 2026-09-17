@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   compileTrackCFixedFirstContactTask,
+  compileTrackCStrategistDecision,
   selectTrackCConversationLane,
 } from "./track-c-c3-strategy-contract.js";
 
@@ -52,5 +53,40 @@ describe("Track C C3 simplified strategy contract", () => {
     expect(task.continuation).toBeNull();
     expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
     expect(task.evidenceRefs).toEqual(["CLAIM_001"]);
+  });
+
+  it("keeps product and measurements canonical-only and permits usual size only as a fallback", () => {
+    const decision = {
+      replyAct: "ANSWER",
+      goal: "Resolve the fit concern without guessing.",
+      proposition: "SIZE_FIT",
+      evidenceRefs: [],
+      continuation: { type: "ASK", input: "USUAL_SIZE" },
+      canonicalAction: "NONE",
+    };
+
+    expect(() => compileTrackCStrategistDecision({
+      decision,
+      evidenceCapabilities: new Map(),
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: false,
+    })).toThrow("TRACK_C_STRATEGIST_USUAL_SIZE_NOT_FALLBACK");
+
+    expect(compileTrackCStrategistDecision({
+      decision,
+      evidenceCapabilities: new Map(),
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: true,
+    })).toMatchObject({
+      answer: { kind: "ANSWER", status: "UNRESOLVED" },
+      continuation: { type: "ASK", input: "USUAL_SIZE" },
+    });
+
+    expect(() => compileTrackCStrategistDecision({
+      decision: { ...decision, continuation: { type: "ASK", input: "PRODUCT" } },
+      evidenceCapabilities: new Map(),
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: true,
+    })).toThrow("TRACK_C_STRATEGIST_DECISION_INVALID");
   });
 });
