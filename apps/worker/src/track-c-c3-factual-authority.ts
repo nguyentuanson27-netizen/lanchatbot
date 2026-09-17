@@ -77,10 +77,12 @@ function simulationFact(
   if (typeof kind !== "string") {
     throw new Error("TRACK_C_V5_SIMULATION_FACT_INVALID");
   }
-  const capability = CAPABILITY_BY_SIMULATION_KIND[kind];
-  if (capability === undefined) {
+  if (!Object.hasOwn(CAPABILITY_BY_SIMULATION_KIND, kind)) {
     throw new Error("TRACK_C_V5_SIMULATION_FACT_INVALID");
   }
+  const capability = CAPABILITY_BY_SIMULATION_KIND[
+    kind as keyof typeof CAPABILITY_BY_SIMULATION_KIND
+  ];
   const canonicalFact = canonicalJsonV1(value);
   return Object.freeze({
     claimRef: `SIM_FACT_${String(index + 1).padStart(3, "0")}`,
