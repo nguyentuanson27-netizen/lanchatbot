@@ -16,11 +16,17 @@ import {
   type CandidateVertexTransport,
 } from "./context-v2-candidate.js";
 import {
+  buildTrackCC3FactualClaimReferenceRegistry,
   buildTrackCC3ResponderRequest,
   buildTrackCC3StrategistRequest,
   TRACK_C_C3_TWO_PASS_CANDIDATE,
   type TrackCResponsePlanV2,
 } from "./track-c-c3-two-pass-candidate.js";
+import {
+  EMPTY_TRACK_C_FACTUAL_AUTHORITY,
+  materializeTrackCBehaviorSimulationFactualAuthority,
+  type TrackCFactualAuthorityEnvelope,
+} from "./track-c-c3-factual-authority.js";
 import { assertTrackCResponderFollowsPlan } from
   "./track-c-c3-response-plan-guard.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
@@ -28,7 +34,6 @@ import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import { assertTrackCCheckoutCompletenessOutput } from
   "./track-c-offline-candidate-validation.js";
 import {
-  buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
 import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
@@ -88,13 +93,9 @@ function assertProviderIdentity(value: string | null): string {
 function withBenchmarkLane(
   request: BuiltCandidateRequest,
   lane: TrackCV5ExecutionLane,
-  simulationFacts: readonly unknown[],
   simulationMetadata: readonly unknown[],
 ): BuiltCandidateRequest {
   if (lane === "PRODUCTION_CONTRACT") {
-    if (simulationFacts.length > 0) {
-      throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
-    }
     if (simulationMetadata.length > 0) {
       throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
     }
@@ -120,7 +121,7 @@ function withBenchmarkLane(
         text: canonicalJsonV1({
           ...prompt,
           benchmarkExecutionLane: "BEHAVIOR_SIMULATION",
-          benchmarkSimulationFacts: simulationFacts,
+          benchmarkSimulationFacts: prompt.benchmarkSimulationFacts ?? [],
           benchmarkSimulationMetadata: simulationMetadata,
         }),
       }],
@@ -302,6 +303,7 @@ function validateResponderOutput(
   value: unknown,
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
+  factualAuthority: TrackCFactualAuthorityEnvelope,
 ): ContextV2CandidateOutputV2 {
   const semantic = SemanticOutputSchema.safeParse(value);
   if (!semantic.success) {
@@ -334,6 +336,7 @@ function validateResponderOutput(
         context.productPresentation === undefined
       ? []
       : [context.productPresentation.provenance.contentHash]),
+    ...factualAuthority.simulationFacts.map(({ contentHash }) => contentHash),
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
@@ -449,17 +452,20 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
   }
   assertSimulationMetadata(simulationMetadata);
+  const factualAuthority = input.lane === "BEHAVIOR_SIMULATION"
+    ? materializeTrackCBehaviorSimulationFactualAuthority(simulationFacts)
+    : EMPTY_TRACK_C_FACTUAL_AUTHORITY;
 
   const common = {
     modelResource: input.modelResource,
     capture: input.capture,
     evaluationAt: input.evaluationAt,
     evaluationContext: input.evaluationContext,
+    factualAuthority,
   };
   const strategistRequest = withBenchmarkLane(
     buildTrackCC3StrategistRequest(common),
     input.lane,
-    simulationFacts,
     simulationMetadata,
   );
   const strategistResponse = await input.transport.send({
@@ -478,7 +484,6 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     responderRequest = withBenchmarkLane(
       buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
       input.lane,
-      simulationFacts,
       simulationMetadata,
     );
   } catch (error) {
@@ -503,7 +508,9 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   assertProviderIdentity(responderResponse.providerModelVersion);
 
   const selectedRefs = new Set(conversationPlan.answer.evidenceRefs);
-  const selectedRegistry = new Map([...buildTrackCClaimReferenceRegistry(context)]
+  const selectedRegistry = new Map([
+    ...buildTrackCC3FactualClaimReferenceRegistry(context, factualAuthority),
+  ]
     .filter(([claimRef]) => selectedRefs.has(claimRef)));
   const resolved = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
@@ -523,6 +530,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     resolved,
     input.lane,
     input.evaluationAt,
+    factualAuthority,
   );
   assertTrackCResponderFollowsPlan(conversationPlan, output);
   const reply = renderTrackCCheckoutSafeReply(context, output);

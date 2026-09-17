@@ -32,10 +32,16 @@ import {
   type TrackCProtectedProposition,
   type TrackCProtectedResolution,
 } from "./track-c-c3-response-plan-control.js";
+import {
+  assertTrackCFactualAuthorityEnvelope,
+  EMPTY_TRACK_C_FACTUAL_AUTHORITY,
+  type TrackCFactualAuthorityEnvelope,
+} from "./track-c-c3-factual-authority.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
 import {
   buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
+  type ClaimReferenceRegistryEntry,
 } from "./track-c-claim-reference-resolver.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
@@ -291,6 +297,7 @@ type CandidateRequestInput = Readonly<{
   capture: unknown;
   evaluationAt: Date;
   evaluationContext: readonly ShadowContextMessage[];
+  factualAuthority?: TrackCFactualAuthorityEnvelope;
 }>;
 
 type CandidateRequestBody = Readonly<Record<string, unknown>> & {
@@ -333,6 +340,35 @@ function promptWithClaimRefs(
   });
 }
 
+export function buildTrackCC3FactualClaimReferenceRegistry(
+  context: ReturnType<typeof contextFromFrozenTrackCCapture>,
+  factualAuthority: TrackCFactualAuthorityEnvelope,
+): ReadonlyMap<string, ClaimReferenceRegistryEntry> {
+  const registry = new Map(buildTrackCClaimReferenceRegistry(context));
+  for (const fact of factualAuthority.simulationFacts) {
+    registry.set(fact.claimRef, Object.freeze({
+      contentHash: fact.contentHash,
+      placeholders: null,
+    }));
+  }
+  return registry;
+}
+
+function simulationFactsForPrompt(
+  factualAuthority: TrackCFactualAuthorityEnvelope,
+  selectedRefs?: readonly string[],
+): readonly Readonly<Record<string, unknown>>[] {
+  const selected = selectedRefs === undefined ? null : new Set(selectedRefs);
+  return Object.freeze(factualAuthority.simulationFacts
+    .filter(({ claimRef }) => selected === null || selected.has(claimRef))
+    .map(({ claimRef, capability, source, fact }) => Object.freeze({
+      claimRef,
+      capability,
+      source,
+      fact,
+    })));
+}
+
 export function buildTrackCC3StrategistRequest(
   input: CandidateRequestInput,
 ): BuiltCandidateRequest {
@@ -348,7 +384,13 @@ export function buildTrackCC3StrategistRequest(
   const prompt = promptWithClaimRefs(
     JSON.parse(body.contents[0].parts[0].text) as Readonly<Record<string, unknown>>,
   );
-  const allowedClaimRefs = [...buildTrackCClaimReferenceRegistry(context).keys()];
+  const factualAuthority = assertTrackCFactualAuthorityEnvelope(
+    input.factualAuthority ?? EMPTY_TRACK_C_FACTUAL_AUTHORITY,
+  );
+  const allowedClaimRefs = [...buildTrackCC3FactualClaimReferenceRegistry(
+    context,
+    factualAuthority,
+  ).keys()];
   const canonicalConstraints = trackCCanonicalActionConstraints(context);
   const responsePlanConstraints = Object.freeze({
     allowedCanonicalActions: canonicalConstraints.allowedTypes,
@@ -359,6 +401,9 @@ export function buildTrackCC3StrategistRequest(
   const strategistPrompt = Object.freeze({
     ...prompt,
     responsePlanConstraints,
+    ...(factualAuthority.simulationFacts.length === 0
+      ? {}
+      : { benchmarkSimulationFacts: simulationFactsForPrompt(factualAuthority) }),
   });
   const candidateBody = JSON.stringify({
     ...body,
@@ -531,6 +576,7 @@ function selectedEvidenceForResponder(
     readonly verifiedClaims: readonly Readonly<Record<string, unknown>>[];
   },
   selectedRefs: readonly string[],
+  factualAuthority: TrackCFactualAuthorityEnvelope,
 ): Readonly<Record<string, unknown>> {
   const selected = new Set(selectedRefs);
   const verifiedClaims = prompt.verifiedClaims
@@ -597,10 +643,12 @@ function selectedEvidenceForResponder(
     }
   }
 
+  const simulationFacts = simulationFactsForPrompt(factualAuthority, selectedRefs);
   return Object.freeze({
     verifiedClaims: Object.freeze(verifiedClaims),
     productAttributes: selectedProductAttributes,
     productPresentation: selectedProductPresentation,
+    ...(simulationFacts.length === 0 ? {} : { benchmarkSimulationFacts: simulationFacts }),
   });
 }
 
@@ -616,6 +664,7 @@ function selectedClaimRegistry(
 function selectedEvidenceCapabilities(
   context: ReturnType<typeof contextFromFrozenTrackCCapture>,
   selectedRefs: readonly string[],
+  factualAuthority: TrackCFactualAuthorityEnvelope,
 ): readonly TrackCProtectedProposition[] {
   const capabilityByRef = new Map<string, TrackCProtectedProposition>();
   for (const [index, claim] of context.verifiedClaims.entries()) {
@@ -639,6 +688,9 @@ function selectedEvidenceCapabilities(
       capabilityByRef.set(claim.claimRef, "PRODUCT_PRESENTATION");
     }
   }
+  for (const fact of factualAuthority.simulationFacts) {
+    capabilityByRef.set(fact.claimRef, fact.capability);
+  }
   return Object.freeze(selectedRefs.flatMap((ref) => {
     const capability = capabilityByRef.get(ref);
     return capability === undefined ? [] : [capability];
@@ -648,8 +700,12 @@ function selectedEvidenceCapabilities(
 function assertTrackCC3ResponsePlanPermitted(
   context: ReturnType<typeof contextFromFrozenTrackCCapture>,
   plan: ParsedTrackCResponsePlanV2,
+  factualAuthority = EMPTY_TRACK_C_FACTUAL_AUTHORITY,
 ): TrackCResponsePlanV2 {
-  const registry = buildTrackCClaimReferenceRegistry(context);
+  const registry = buildTrackCC3FactualClaimReferenceRegistry(
+    context,
+    factualAuthority,
+  );
   const evidenceRefs = plan.answer.evidenceRefs;
   if (new Set(evidenceRefs).size !== evidenceRefs.length ||
       evidenceRefs.some((ref) => !registry.has(ref))) {
@@ -680,6 +736,7 @@ function assertTrackCC3ResponsePlanPermitted(
     selectedEvidenceCapabilities: selectedEvidenceCapabilities(
       context,
       evidenceRefs,
+      factualAuthority,
     ),
     nextMoveAction: plan.nextMove.action,
     canonicalActionType: plan.canonicalAction.type,
@@ -699,9 +756,13 @@ export function buildTrackCC3ResponderRequest(
     capture: input.capture,
     evaluationAt: input.evaluationAt,
   });
+  const factualAuthority = assertTrackCFactualAuthorityEnvelope(
+    input.factualAuthority ?? EMPTY_TRACK_C_FACTUAL_AUTHORITY,
+  );
   const conversationPlan = assertTrackCC3ResponsePlanPermitted(
     context,
     parseConversationPlan(input.conversationPlan),
+    factualAuthority,
   );
 
   const request = buildTrackCOfflineCandidateRequest({
@@ -715,6 +776,7 @@ export function buildTrackCC3ResponderRequest(
   const selectedEvidence = selectedEvidenceForResponder(
     prompt,
     conversationPlan.answer.evidenceRefs,
+    factualAuthority,
   );
   const segmentSchema = body.generationConfig.responseSchema.properties
     .segments.items;

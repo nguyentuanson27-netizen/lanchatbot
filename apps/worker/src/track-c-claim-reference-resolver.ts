@@ -1,7 +1,7 @@
 import type { ContextV2 } from "@lana/contracts";
 import { candidateProductPresentationClaims } from "./context-v2-candidate.js";
 
-type ClaimReferenceRegistryEntry = Readonly<{
+export type ClaimReferenceRegistryEntry = Readonly<{
   contentHash: string;
   placeholders: Readonly<Record<string, string>> | null;
 }>;
