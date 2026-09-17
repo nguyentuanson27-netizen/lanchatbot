@@ -1,6 +1,11 @@
+import {
+  TRACK_C_RESPONDER_SEGMENT_ROLES,
+  type TrackCResponderSegmentRole,
+} from "./track-c-c3-responder-realization.js";
+
 type TrackCPlanForResponderGuard = Readonly<{
   answer: Readonly<{ mode: string }>;
-  nextMove: Readonly<{ action: string }>;
+  nextMove: Readonly<{ action: string; decisionInput: string }>;
   canonicalAction: Readonly<{ type: string }>;
 }>;
 
@@ -20,6 +25,14 @@ function parseOutput(value: unknown): TrackCResponderOutputForGuard {
         segment === null || typeof segment !== "object" || Array.isArray(segment)
       )) {
     throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
+  }
+  for (const segment of record.segments) {
+    const role = (segment as Readonly<Record<string, unknown>>).role;
+    if (!TRACK_C_RESPONDER_SEGMENT_ROLES.includes(
+      role as TrackCResponderSegmentRole,
+    )) {
+      throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
+    }
   }
   return {
     segments: record.segments as readonly Readonly<Record<string, unknown>>[],
@@ -41,6 +54,13 @@ function requestSegments(output: TrackCResponderOutputForGuard) {
   );
 }
 
+function roleSegments(
+  output: TrackCResponderOutputForGuard,
+  role: TrackCResponderSegmentRole,
+) {
+  return output.segments.filter((segment) => segment.role === role);
+}
+
 function assertCanonicalRequest(
   output: TrackCResponderOutputForGuard,
   target: "PRODUCT" | "MEASUREMENTS",
@@ -51,7 +71,8 @@ function assertCanonicalRequest(
     segment.kind === "CLARIFICATION" && segment.target === target
   );
   const actions = output.segments.filter((segment) =>
-    segment.kind === "ACTION_REQUEST" && segment.action === action
+    segment.kind === "ACTION_REQUEST" && segment.action === action &&
+      segment.role === "CANONICAL_ACTION"
   );
   if (output.strategy !== "ASK_CLARIFICATION" || output.cta !== cta ||
       clarifications.length !== 1 || actions.length !== 1 ||
@@ -99,13 +120,15 @@ export function assertTrackCResponderFollowsPlan(
       return;
     case "ASK_CHECKOUT_DETAILS":
       if (output.strategy !== "ASK_CLARIFICATION" ||
-          output.cta !== "ASK_CHECKOUT_DETAILS") {
+          output.cta !== "ASK_CHECKOUT_DETAILS" ||
+          roleSegments(output, "CANONICAL_ACTION").length !== 1) {
         throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
       }
       return;
     case "HOLD_POSITION":
       if (output.strategy !== "HOLD_POSITION" || output.cta !== "NONE" ||
-          requestSegments(output).length > 0 || questionCount(output) > 0) {
+          requestSegments(output).length > 0 || questionCount(output) > 0 ||
+          roleSegments(output, "CANONICAL_ACTION").length !== 1) {
         throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
       }
       return;
@@ -118,9 +141,15 @@ export function assertTrackCResponderFollowsPlan(
   if (output.cta !== "NONE" || requestSegments(output).length > 0) {
     throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
   }
-  const questions = questionCount(output);
-  if ((plan.nextMove.action === "ASK" && questions !== 1) ||
-      (plan.nextMove.action === "NONE" && questions !== 0)) {
+  if (roleSegments(output, "CANONICAL_ACTION").length !== 0) {
+    throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
+  }
+  const nextMoves = roleSegments(output, "NEXT_MOVE");
+  if ((plan.nextMove.action === "ASK" &&
+       (nextMoves.length !== 1 ||
+        nextMoves[0]?.decisionInput !== plan.nextMove.decisionInput)) ||
+      (plan.nextMove.action === "NONE" &&
+       (nextMoves.length !== 0 || questionCount(output) > 0))) {
     throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
   }
 }

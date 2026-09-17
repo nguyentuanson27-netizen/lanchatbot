@@ -84,9 +84,33 @@ function dialogue(): readonly ShadowContextMessage[] {
   }];
 }
 
+function withFixtureResponderRoles(value: unknown): unknown {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return value;
+  }
+  const output = value as Readonly<Record<string, unknown>>;
+  if (!Array.isArray(output.segments)) return value;
+  return {
+    ...output,
+    segments: output.segments.map((segment) => {
+      if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
+        return segment;
+      }
+      const record = segment as Readonly<Record<string, unknown>>;
+      if (Object.hasOwn(record, "role")) return record;
+      return {
+        ...record,
+        role: record.kind === "ACTION_REQUEST" ? "CANONICAL_ACTION" : "ANSWER",
+      };
+    }),
+  };
+}
+
 function providerPayload(value: unknown) {
   return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }],
+    candidates: [{ content: { parts: [{
+      text: JSON.stringify(withFixtureResponderRoles(value)),
+    }] } }],
   };
 }
 

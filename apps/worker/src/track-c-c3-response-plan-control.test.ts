@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assertTrackCC3ResponsePlanControl,
+  TrackCResponsePlanSemanticError,
   type TrackCResponsePlanControlV1,
 } from "./track-c-c3-response-plan-control.js";
 
@@ -48,6 +49,35 @@ describe("Track C C3 response-plan control", () => {
       canonicalActionType: "NONE",
       terminal: false,
     })).toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+  });
+
+  it("returns a safe semantic reason without exposing plan text", () => {
+    let caught: unknown;
+    try {
+      assertTrackCC3ResponsePlanControl({
+        control: control({
+          answer: {
+            protectedProposition: "PROMOTION_OFFER",
+            protectedResolution: "SUPPORTED",
+          },
+        }),
+        answerMode: "DIRECT",
+        selectedEvidenceCapabilities: ["PRICE"],
+        nextMoveAction: "NONE",
+        canonicalActionType: "NONE",
+        terminal: false,
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(TrackCResponsePlanSemanticError);
+    expect(caught).toMatchObject({
+      message: "TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC",
+      stage: "SEMANTIC",
+      reason: "UNSUPPORTED_PROTECTED_PROPOSITION",
+    });
+    expect(JSON.stringify(caught)).not.toContain("target");
   });
 
   it("allows unresolved promotion questions to carry PRICE only as bounded context", () => {

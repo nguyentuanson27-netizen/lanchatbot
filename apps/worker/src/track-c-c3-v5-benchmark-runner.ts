@@ -36,6 +36,8 @@ import { assertTrackCCheckoutCompletenessOutput } from
 import {
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
+import { stripTrackCResponderRealizationMetadata } from
+  "./track-c-c3-responder-realization.js";
 import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
 
 export const TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM = [
@@ -527,12 +529,12 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   );
   const output = validateResponderOutput(
     context,
-    resolved,
+    stripTrackCResponderRealizationMetadata(resolved),
     input.lane,
     input.evaluationAt,
     factualAuthority,
   );
-  assertTrackCResponderFollowsPlan(conversationPlan, output);
+  assertTrackCResponderFollowsPlan(conversationPlan, resolved);
   const reply = renderTrackCCheckoutSafeReply(context, output);
   const identity = Object.freeze({
     captureContextHash: context.contextHash,

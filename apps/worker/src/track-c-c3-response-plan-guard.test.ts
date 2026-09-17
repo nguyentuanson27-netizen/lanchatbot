@@ -4,12 +4,12 @@ import { assertTrackCResponderFollowsPlan } from
 
 const plan = {
   answer: { mode: "DIRECT" },
-  nextMove: { action: "ASK" },
+  nextMove: { action: "ASK", decisionInput: "SIZE" },
   canonicalAction: { type: "NONE" },
 } as const;
 
 describe("assertTrackCResponderFollowsPlan", () => {
-  it("requires one realized ordinary next-move question", () => {
+  it("requires one structurally declared ordinary next move", () => {
     expect(() => assertTrackCResponderFollowsPlan(plan, {
       segments: [{ kind: "GENERAL", text: "Dạ em hiểu ạ." }],
       strategy: "ANSWER_VERIFIED_FACTS",
@@ -17,16 +17,32 @@ describe("assertTrackCResponderFollowsPlan", () => {
     })).toThrow("TRACK_C_RESPONDER_PLAN_MISMATCH");
 
     expect(() => assertTrackCResponderFollowsPlan(plan, {
-      segments: [{ kind: "GENERAL", text: "Chị thường mặc size nào?" }],
+      segments: [{
+        kind: "GENERAL",
+        role: "NEXT_MOVE",
+        decisionInput: "SIZE",
+        text: "Chị thường mặc size nào?",
+      }],
       strategy: "ANSWER_VERIFIED_FACTS",
       cta: "NONE",
     })).not.toThrow();
+
+    expect(() => assertTrackCResponderFollowsPlan(plan, {
+      segments: [{
+        kind: "GENERAL",
+        role: "NEXT_MOVE",
+        decisionInput: "COLOR",
+        text: "Chị thích màu nào ạ?",
+      }],
+      strategy: "ANSWER_VERIFIED_FACTS",
+      cta: "NONE",
+    })).toThrow("TRACK_C_RESPONDER_PLAN_MISMATCH");
   });
 
   it("rejects an unplanned ordinary question", () => {
     expect(() => assertTrackCResponderFollowsPlan({
       ...plan,
-      nextMove: { action: "NONE" },
+      nextMove: { action: "NONE", decisionInput: "NONE" },
     }, {
       segments: [{ kind: "GENERAL", text: "Chị chốt mẫu này luôn không?" }],
       strategy: "ANSWER_VERIFIED_FACTS",
@@ -52,6 +68,7 @@ describe("assertTrackCResponderFollowsPlan", () => {
     }, {
       segments: [{
         kind: "GENERAL",
+        role: "ANSWER",
         text: "Dạ hiện em chưa thể xác nhận có ưu đãi thêm ạ.",
       }],
       strategy: "ANSWER_VERIFIED_FACTS",

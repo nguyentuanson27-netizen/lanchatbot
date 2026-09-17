@@ -26,6 +26,10 @@ import {
 import { assertTrackCResponderFollowsPlan } from
   "./track-c-c3-response-plan-guard.js";
 import {
+  TRACK_C_RESPONDER_SEGMENT_ROLES,
+  stripTrackCResponderRealizationMetadata,
+} from "./track-c-c3-responder-realization.js";
+import {
   TRACK_C_PROTECTED_PROPOSITIONS,
   TRACK_C_PROTECTED_RESOLUTIONS,
   assertTrackCC3ResponsePlanControl,
@@ -269,12 +273,13 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "selectedEvidence is the complete factual allowance for this reply. Use only its code-owned values and only the claimRef values listed in responsePlan.answer.evidenceRefs. Never invent, infer, widen, or substitute a protected fact.",
   "Missing selected evidence is uncertainty, not a negative fact. Never turn missing evidence into no, unavailable, unsupported, impossible, or a guarantee.",
   "Realize responsePlan.answer first. DIRECT answers the stated objective with selected evidence; BOUNDED_UNCERTAINTY explicitly says the requested proposition cannot yet be confirmed and may add only selected bounded facts; ACKNOWLEDGE acknowledges without implying an effect; CLARIFY briefly states the unresolved need; HOLD gives a neutral hold acknowledgement.",
-  "If responsePlan.canonicalAction.type is ASK_PRODUCT, output one PRODUCT clarification and one PROVIDE_PRODUCT action as a single objective; use strategy ASK_CLARIFICATION and CTA ASK_PRODUCT.",
-  "If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification and one PROVIDE_MEASUREMENTS action as a single objective; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS.",
-  "If it is ASK_CHECKOUT_DETAILS, output one CHECKOUT_DETAILS clarification and one PROVIDE_CHECKOUT_DETAILS action, with requestedFields exactly equal to responsePlan.canonicalAction.requestedFields; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS.",
+  "Every segment must declare role ANSWER, NEXT_MOVE, or CANONICAL_ACTION. role is a structural realization label, never customer text.",
+  "If responsePlan.canonicalAction.type is ASK_PRODUCT, output one PRODUCT clarification with role ANSWER and one PROVIDE_PRODUCT action with role CANONICAL_ACTION; use strategy ASK_CLARIFICATION and CTA ASK_PRODUCT.",
+  "If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification with role ANSWER and one PROVIDE_MEASUREMENTS action with role CANONICAL_ACTION; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS.",
+  "If it is ASK_CHECKOUT_DETAILS, output one CHECKOUT_DETAILS clarification with role ANSWER and one PROVIDE_CHECKOUT_DETAILS action with role CANONICAL_ACTION, with requestedFields exactly equal to responsePlan.canonicalAction.requestedFields; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS.",
   "When a canonical action requires both a clarification and an action-request segment, only the action-request segment may contain the actual ask. The clarification may explain the unresolved need, but must not repeat the requested information.",
-  "If it is HOLD_POSITION, ask nothing, use one neutral GENERAL acknowledgement, strategy HOLD_POSITION, CTA NONE, and claim no order, payment, persistence, delivery, or other effect.",
-  "When canonicalAction.type is NONE, realize responsePlan.nextMove.target exactly once only when nextMove.action is ASK. nextMove.purpose is internal reasoning only. Never verbalize or paraphrase currentNeed, nextMove.purpose, or avoid. An ordinary sales continuation is GENERAL with strategy ANSWER_VERIFIED_FACTS and CTA NONE. If nextMove.action is NONE, add no optional question or CTA.",
+  "If it is HOLD_POSITION, ask nothing, use one neutral GENERAL acknowledgement with role CANONICAL_ACTION, strategy HOLD_POSITION, CTA NONE, and claim no order, payment, persistence, delivery, or other effect.",
+  "When canonicalAction.type is NONE, realize responsePlan.nextMove.decisionInput exactly once only when nextMove.action is ASK: emit one GENERAL segment with role NEXT_MOVE and the same decisionInput. nextMove.target is wording guidance only; never change the selected decisionInput. nextMove.purpose is internal reasoning only. Never verbalize or paraphrase currentNeed, nextMove.purpose, or avoid. Answer segments use role ANSWER. If nextMove.action is NONE, add no NEXT_MOVE segment, optional question, or CTA.",
   "For every selected regular verified fact or selected product attribute used in text, emit one VERIFIED_CLAIM segment with its exact claimRef. Never use an unselected claimRef; never copy, invent, or return a provenance hash; never hide a protected fact inside GENERAL.",
   "For selected productPresentation evidence, write only the declared {{PLACEHOLDER}} tokens and safe Vietnamese framing; never type the underlying product name, colour, or size value directly. Use each declared placeholder exactly once so code can substitute the verified value.",
   "Never claim to have sent media, reserved an item, changed a cart, placed or confirmed an order, completed payment or delivery, or performed any other side effect.",
@@ -782,6 +787,9 @@ export function buildTrackCC3ResponderRequest(
     claimContentHash: _claimContentHash,
     ...segmentProperties
   } = segmentSchema.properties;
+  const existingSegmentRequired = Array.isArray(segmentSchema.required)
+    ? segmentSchema.required as readonly string[]
+    : [];
   const selectedClaimRefs = conversationPlan.answer.evidenceRefs;
   const responseSchema = {
     ...body.generationConfig.responseSchema,
@@ -791,8 +799,17 @@ export function buildTrackCC3ResponderRequest(
         ...body.generationConfig.responseSchema.properties.segments,
         items: {
           ...segmentSchema,
+          required: [...existingSegmentRequired, "role"],
           properties: {
             ...segmentProperties,
+            role: {
+              type: "STRING",
+              enum: TRACK_C_RESPONDER_SEGMENT_ROLES,
+            },
+            decisionInput: {
+              type: "STRING",
+              enum: TRACK_C_DECISION_INPUTS,
+            },
             claimRef: {
               type: "STRING",
               ...(selectedClaimRefs.length === 0
@@ -926,7 +943,7 @@ export async function runTrackCC3TwoPassCandidate(
     evaluationAt: input.evaluationAt,
     request: responderRequest,
     providerModelVersion,
-    output,
+    output: stripTrackCResponderRealizationMetadata(output),
     accepted: input.accepted,
   });
   const identity = Object.freeze({

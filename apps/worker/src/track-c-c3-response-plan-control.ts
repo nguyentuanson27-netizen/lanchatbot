@@ -51,6 +51,35 @@ export const TRACK_C_DECISION_INPUTS = Object.freeze([
 
 export type TrackCDecisionInput = typeof TRACK_C_DECISION_INPUTS[number];
 
+export type TrackCResponsePlanSemanticReason =
+  | "EFFECT_INTENT_FORBIDDEN"
+  | "DECISION_INPUT_CONSTRAINT"
+  | "PROTECTED_PROPOSITION_CONSTRAINT"
+  | "UNSUPPORTED_PROTECTED_PROPOSITION";
+
+/**
+ * Diagnostics intentionally expose only a stable stage and reason. They never
+ * carry free-text plan fields, customer messages, values, or provider payloads.
+ */
+export class TrackCResponsePlanSemanticError extends Error {
+  readonly stage = "SEMANTIC" as const;
+
+  constructor(
+    readonly reason: TrackCResponsePlanSemanticReason,
+    message = "TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC",
+  ) {
+    super(message);
+    this.name = "TrackCResponsePlanSemanticError";
+  }
+}
+
+export function trackCResponsePlanSemanticError(
+  reason: TrackCResponsePlanSemanticReason,
+  message?: string,
+): TrackCResponsePlanSemanticError {
+  return new TrackCResponsePlanSemanticError(reason, message);
+}
+
 export type TrackCResponsePlanControlV1 = Readonly<{
   answer: Readonly<{
     protectedProposition: TrackCProtectedProposition;
@@ -73,8 +102,8 @@ type TrackCResponsePlanControlInput = Readonly<{
   terminal: boolean;
 }>;
 
-function semanticInvalid(): never {
-  throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+function semanticInvalid(reason: TrackCResponsePlanSemanticReason): never {
+  throw trackCResponsePlanSemanticError(reason);
 }
 
 /**
@@ -86,7 +115,7 @@ export function assertTrackCC3ResponsePlanControl(
   input: TrackCResponsePlanControlInput,
 ): void {
   const { control } = input;
-  if (control.effectIntent !== "NONE") semanticInvalid();
+  if (control.effectIntent !== "NONE") semanticInvalid("EFFECT_INTENT_FORBIDDEN");
 
   const { target, purpose, decisionInput } = control.nextMove;
   if (!TRACK_C_DECISION_INPUTS.includes(decisionInput) ||
@@ -99,26 +128,30 @@ export function assertTrackCC3ResponsePlanControl(
         (target === "NONE" || purpose === "NONE")) ||
       (input.nextMoveAction === "NONE" &&
         (target !== "NONE" || purpose !== "NONE"))) {
-    semanticInvalid();
+    semanticInvalid("DECISION_INPUT_CONSTRAINT");
   }
 
   const proposition = control.answer.protectedProposition;
   const resolution = control.answer.protectedResolution;
   if (proposition === "NONE") {
-    if (resolution !== "NOT_APPLICABLE") semanticInvalid();
+    if (resolution !== "NOT_APPLICABLE") {
+      semanticInvalid("PROTECTED_PROPOSITION_CONSTRAINT");
+    }
     return;
   }
-  if (resolution === "NOT_APPLICABLE") semanticInvalid();
+  if (resolution === "NOT_APPLICABLE") {
+    semanticInvalid("PROTECTED_PROPOSITION_CONSTRAINT");
+  }
   if (resolution === "SUPPORTED" &&
       !input.selectedEvidenceCapabilities.includes(proposition)) {
-    semanticInvalid();
+    semanticInvalid("UNSUPPORTED_PROTECTED_PROPOSITION");
   }
   if (resolution === "UNRESOLVED" &&
       input.answerMode !== "BOUNDED_UNCERTAINTY") {
-    semanticInvalid();
+    semanticInvalid("PROTECTED_PROPOSITION_CONSTRAINT");
   }
   if (input.answerMode === "BOUNDED_UNCERTAINTY" &&
       resolution === "SUPPORTED") {
-    semanticInvalid();
+    semanticInvalid("PROTECTED_PROPOSITION_CONSTRAINT");
   }
 }

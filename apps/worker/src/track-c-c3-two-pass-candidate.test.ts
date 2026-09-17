@@ -483,6 +483,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       {
         segments: [{
           kind: "VERIFIED_CLAIM",
+          role: "ANSWER",
           text: "Mẫu này dùng chất liệu lụa ạ.",
           claimRef: "PRODUCT_ATTRIBUTES_001",
         }],
@@ -533,7 +534,12 @@ describe("Track C C3 two-pass offline candidate", () => {
     const outputs = [
       conversationPlan([claimRef]),
       {
-        segments: [{ kind: "VERIFIED_CLAIM", text: modelText, claimRef }],
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          role: "ANSWER",
+          text: modelText,
+          claimRef,
+        }],
         strategy: "ANSWER_VERIFIED_FACTS",
         cta: "NONE",
       },
@@ -571,7 +577,12 @@ describe("Track C C3 two-pass offline candidate", () => {
     const outputs = [
       conversationPlan([claimRef]),
       {
-        segments: [{ kind: "VERIFIED_CLAIM", text, claimRef }],
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          role: "ANSWER",
+          text,
+          claimRef,
+        }],
         strategy: "ANSWER_VERIFIED_FACTS",
         cta: "NONE",
       },
@@ -752,6 +763,7 @@ describe("Track C C3 two-pass offline candidate", () => {
             payload: vertexPayload({
               segments: [{
                 kind: "GENERAL",
+                role: "ANSWER",
                 text: "Dạ hiện em chưa thể xác nhận thông tin này ạ.",
               }],
               strategy: "ANSWER_VERIFIED_FACTS",
@@ -1031,6 +1043,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       {
         segments: [{
           kind: "VERIFIED_CLAIM",
+          role: "ANSWER",
           text: "Dạ tên mẫu là {{DISPLAY_NAME}} ạ.",
           claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
         }],

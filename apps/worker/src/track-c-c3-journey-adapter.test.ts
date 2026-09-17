@@ -117,7 +117,7 @@ function planPayload(overrides: ResponsePlanOverrides = {}) {
 function replyPayload(reply: string) {
   return {
     candidates: [{ content: { parts: [{ text: JSON.stringify({
-      segments: [{ kind: "GENERAL", text: reply }],
+      segments: [{ kind: "GENERAL", role: "ANSWER", text: reply }],
       strategy: "HOLD_POSITION",
       cta: "NONE",
     }) }] } }],
@@ -132,9 +132,15 @@ function checkoutReplyPayload(
   return {
     candidates: [{ content: { parts: [{ text: JSON.stringify({
       segments: [
-        { kind: "CLARIFICATION", target: "CHECKOUT_DETAILS", text: reply },
+        {
+          kind: "CLARIFICATION",
+          role: "ANSWER",
+          target: "CHECKOUT_DETAILS",
+          text: reply,
+        },
         {
           kind: "ACTION_REQUEST",
+          role: "CANONICAL_ACTION",
           action: "PROVIDE_CHECKOUT_DETAILS",
           text: reply,
           requestedFields,
