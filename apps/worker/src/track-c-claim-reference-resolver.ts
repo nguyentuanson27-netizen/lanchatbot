@@ -1,10 +1,42 @@
 import type { ContextV2 } from "@lana/contracts";
 import { candidateProductPresentationClaims } from "./context-v2-candidate.js";
+import type { TrackCProtectedProposition } from "./track-c-c3-response-plan-control.js";
 
 export type ClaimReferenceRegistryEntry = Readonly<{
   contentHash: string;
+  protectedProposition: TrackCProtectedProposition;
   placeholders: Readonly<Record<string, string>> | null;
+  protectedValueBindings: Readonly<Record<string, string>> | null;
 }>;
+
+function formatVnd(amount: number): string {
+  return `${amount.toLocaleString("vi-VN")}đ`;
+}
+
+function protectedValueBindings(
+  claim: ContextV2["verifiedClaims"][number],
+  context: ContextV2,
+): Readonly<Record<string, string>> | null {
+  if (claim.scope.kind !== "PRODUCT") return null;
+  let value: string | null = null;
+  if (claim.type === "PRICE" || claim.type === "SHIPPING_FEE" ||
+      claim.type === "PROMOTION_OFFER") {
+    value = formatVnd(claim.value.amountVnd);
+  } else if (claim.type === "ETA") {
+    value = `${claim.value.minDays}–${claim.value.maxDays} ngày`;
+  } else if (claim.type === "FREESHIP") {
+    value = claim.value.eligible
+      ? "được miễn phí vận chuyển"
+      : "chưa đủ điều kiện miễn phí vận chuyển";
+  }
+  const subject = context.productPresentation?.productId === claim.scope.productId
+    ? context.productPresentation.displayName
+    : claim.scope.productId;
+  return value === null ? null : Object.freeze({
+    CLAIM_SUBJECT: subject,
+    CLAIM_VALUE: value,
+  });
+}
 
 function hasValidPresentationProduction(
   text: string,
@@ -89,7 +121,9 @@ export function buildTrackCClaimReferenceRegistry(
       `CLAIM_${String(index + 1).padStart(3, "0")}`,
       Object.freeze({
         contentHash: claim.provenance.contentHash,
+        protectedProposition: claim.type,
         placeholders: null,
+        protectedValueBindings: protectedValueBindings(claim, context),
       }),
     ]),
   );
@@ -99,7 +133,9 @@ export function buildTrackCClaimReferenceRegistry(
       "PRODUCT_ATTRIBUTES_001",
       Object.freeze({
         contentHash: context.productAttributes.metadata.contentHash,
+        protectedProposition: "PRODUCT_ATTRIBUTES",
         placeholders: null,
+        protectedValueBindings: null,
       }),
     );
   }
@@ -110,7 +146,9 @@ export function buildTrackCClaimReferenceRegistry(
     )) {
       registry.set(claim.claimRef, Object.freeze({
         contentHash: context.productPresentation.provenance.contentHash,
+        protectedProposition: "PRODUCT_PRESENTATION",
         placeholders: claim.placeholders,
+        protectedValueBindings: null,
       }));
     }
   }
@@ -158,6 +196,34 @@ function resolvePlaceholders(
   );
 }
 
+function resolveProtectedValueBindings(
+  text: unknown,
+  bindings: Readonly<Record<string, string>>,
+  textMismatch: string,
+): string {
+  if (typeof text !== "string") throw new Error(textMismatch);
+  const rawTokens = [...text.matchAll(/\{\{([^{}]*)\}\}/gu)];
+  const tokens = rawTokens.map((match) => match[1]!);
+  const expected = Object.keys(bindings).sort();
+  if (tokens.length !== expected.length || new Set(tokens).size !== tokens.length ||
+      [...tokens].sort().some((token, index) => token !== expected[index])) {
+    throw new Error(textMismatch);
+  }
+  const framing = tokens.reduce(
+    (remaining, token) => remaining.replace(`{{${token}}}`, ""),
+    text,
+  );
+  if (/[{}]/u.test(framing) || Object.values(bindings).some((value) =>
+    framing.normalize("NFC").includes(value.normalize("NFC"))
+  )) {
+    throw new Error(textMismatch);
+  }
+  return tokens.reduce(
+    (resolved, token) => resolved.replace(`{{${token}}}`, bindings[token]!),
+    text,
+  );
+}
+
 export function resolveTrackCCandidateClaimReferences(
   value: unknown,
   registry: ReadonlyMap<string, ClaimReferenceRegistryEntry>,
@@ -178,6 +244,9 @@ export function resolveTrackCCandidateClaimReferences(
     if (Object.hasOwn(record, "claimContentHash")) {
       throw new Error(errors.invalid);
     }
+    if (Object.hasOwn(record, "supportedProposition")) {
+      throw new Error(errors.invalid);
+    }
     if (record.kind !== "VERIFIED_CLAIM") {
       if (Object.hasOwn(record, "claimRef")) throw new Error(errors.invalid);
       return record;
@@ -188,17 +257,24 @@ export function resolveTrackCCandidateClaimReferences(
     if (used.has(record.claimRef)) throw new Error(errors.duplicate);
     used.add(record.claimRef);
     const { claimRef: _claimRef, ...rest } = record;
-    const text = entry.placeholders === null
-      ? record.text
-      : resolvePlaceholders(
+    const text = entry.protectedValueBindings !== null
+      ? resolveProtectedValueBindings(
           record.text,
-          entry.placeholders,
+          entry.protectedValueBindings,
           errors.textMismatch,
-        );
+        )
+      : entry.placeholders === null
+        ? record.text
+        : resolvePlaceholders(
+            record.text,
+            entry.placeholders,
+            errors.textMismatch,
+          );
     return Object.freeze({
       ...rest,
       text,
       claimContentHash: entry.contentHash,
+      supportedProposition: entry.protectedProposition,
     });
   });
   return Object.freeze({ ...output, segments: Object.freeze(segments) });

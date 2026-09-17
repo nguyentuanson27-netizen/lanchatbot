@@ -2,9 +2,19 @@ import {
   TRACK_C_RESPONDER_SEGMENT_ROLES,
   type TrackCResponderSegmentRole,
 } from "./track-c-c3-responder-realization.js";
+import {
+  TRACK_C_PROTECTED_PROPOSITIONS,
+  TRACK_C_PROTECTED_RESOLUTIONS,
+  type TrackCProtectedProposition,
+  type TrackCProtectedResolution,
+} from "./track-c-c3-response-plan-control.js";
 
 type TrackCPlanForResponderGuard = Readonly<{
-  answer: Readonly<{ mode: string }>;
+  answer: Readonly<{
+    mode: string;
+    protectedProposition: TrackCProtectedProposition;
+    protectedResolution: TrackCProtectedResolution;
+  }>;
   nextMove: Readonly<{ action: string; decisionInput: string }>;
   canonicalAction: Readonly<{ type: string }>;
 }>;
@@ -61,6 +71,54 @@ function roleSegments(
   return output.segments.filter((segment) => segment.role === role);
 }
 
+function semanticMismatch(): never {
+  throw new Error("TRACK_C_RESPONDER_PLAN_MISMATCH");
+}
+
+/**
+ * The Responder declares the semantic status of every segment. A supported
+ * assertion must be a VERIFIED_CLAIM and its proposition is filled from the
+ * code-owned claim reference registry, never trusted from the model.
+ */
+function assertResponderSemantics(
+  plan: TrackCPlanForResponderGuard,
+  output: TrackCResponderOutputForGuard,
+): void {
+  let unresolvedAnswers = 0;
+  for (const segment of output.segments) {
+    const proposition = segment.protectedProposition;
+    const resolution = segment.protectedResolution;
+    if (!TRACK_C_PROTECTED_PROPOSITIONS.includes(
+      proposition as TrackCProtectedProposition,
+    ) || !TRACK_C_PROTECTED_RESOLUTIONS.includes(
+      resolution as TrackCProtectedResolution,
+    )) {
+      semanticMismatch();
+    }
+    const isAnswer = segment.role === "ANSWER";
+    if (segment.kind === "VERIFIED_CLAIM") {
+      if (!isAnswer || resolution !== "SUPPORTED" || proposition === "NONE" ||
+          segment.supportedProposition !== proposition) {
+        semanticMismatch();
+      }
+      continue;
+    }
+    if (isAnswer && plan.answer.protectedResolution === "UNRESOLVED" &&
+        proposition === plan.answer.protectedProposition &&
+        resolution === "UNRESOLVED") {
+      unresolvedAnswers += 1;
+      continue;
+    }
+    if (proposition !== "NONE" || resolution !== "NOT_APPLICABLE") {
+      semanticMismatch();
+    }
+  }
+  if (plan.answer.protectedResolution === "UNRESOLVED" &&
+      unresolvedAnswers !== 1) {
+    semanticMismatch();
+  }
+}
+
 function assertCanonicalRequest(
   output: TrackCResponderOutputForGuard,
   target: "PRODUCT" | "MEASUREMENTS",
@@ -102,6 +160,7 @@ export function assertTrackCResponderFollowsPlan(
   value: unknown,
 ): void {
   const output = parseOutput(value);
+  assertResponderSemantics(plan, output);
   if (plan.answer.mode === "BOUNDED_UNCERTAINTY") {
     assertBoundedUncertainty(output);
   }

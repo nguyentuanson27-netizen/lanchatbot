@@ -22,7 +22,13 @@ export function stripTrackCResponderRealizationMetadata(value: unknown): unknown
       }
       const { role: _role, decisionInput: _decisionInput, ...rest } =
         segment as Readonly<Record<string, unknown>>;
-      return Object.freeze(rest);
+      const {
+        protectedProposition: _protectedProposition,
+        protectedResolution: _protectedResolution,
+        supportedProposition: _supportedProposition,
+        ...customerOutput
+      } = rest;
+      return Object.freeze(customerOutput);
     })),
   });
 }

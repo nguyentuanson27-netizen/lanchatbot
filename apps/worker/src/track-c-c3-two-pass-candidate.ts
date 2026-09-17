@@ -33,6 +33,7 @@ import {
   TRACK_C_PROTECTED_PROPOSITIONS,
   TRACK_C_PROTECTED_RESOLUTIONS,
   assertTrackCC3ResponsePlanControl,
+  trackCResponsePlanSemanticError,
   TRACK_C_DECISION_INPUTS,
   type TrackCDecisionInput,
   type TrackCProtectedProposition,
@@ -273,7 +274,8 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "selectedEvidence is the complete factual allowance for this reply. Use only its code-owned values and only the claimRef values listed in responsePlan.answer.evidenceRefs. Never invent, infer, widen, or substitute a protected fact.",
   "Missing selected evidence is uncertainty, not a negative fact. Never turn missing evidence into no, unavailable, unsupported, impossible, or a guarantee.",
   "Realize responsePlan.answer first. DIRECT answers the stated objective with selected evidence; BOUNDED_UNCERTAINTY explicitly says the requested proposition cannot yet be confirmed and may add only selected bounded facts; ACKNOWLEDGE acknowledges without implying an effect; CLARIFY briefly states the unresolved need; HOLD gives a neutral hold acknowledgement.",
-  "Every segment must declare role ANSWER, NEXT_MOVE, or CANONICAL_ACTION. role is a structural realization label, never customer text.",
+  "Every segment must declare role ANSWER, NEXT_MOVE, or CANONICAL_ACTION plus protectedProposition and protectedResolution. These fields are structural realization labels, never customer text.",
+  "A VERIFIED_CLAIM must have protectedResolution SUPPORTED and exactly the protectedProposition granted by that claimRef. A GENERAL, clarification, or action segment must use NONE/NOT_APPLICABLE unless it is the one ANSWER realization of responsePlan.answer.protectedResolution UNRESOLVED; that unresolved segment must declare exactly responsePlan.answer.protectedProposition/UNRESOLVED. Never label a factual assertion as NONE.",
   "If responsePlan.canonicalAction.type is ASK_PRODUCT, output one PRODUCT clarification with role ANSWER and one PROVIDE_PRODUCT action with role CANONICAL_ACTION; use strategy ASK_CLARIFICATION and CTA ASK_PRODUCT.",
   "If it is ASK_MEASUREMENTS, output one MEASUREMENTS clarification with role ANSWER and one PROVIDE_MEASUREMENTS action with role CANONICAL_ACTION; use strategy ASK_CLARIFICATION and CTA ASK_MEASUREMENTS.",
   "If it is ASK_CHECKOUT_DETAILS, output one CHECKOUT_DETAILS clarification with role ANSWER and one PROVIDE_CHECKOUT_DETAILS action with role CANONICAL_ACTION, with requestedFields exactly equal to responsePlan.canonicalAction.requestedFields; use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS.",
@@ -281,6 +283,7 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "If it is HOLD_POSITION, ask nothing, use one neutral GENERAL acknowledgement with role CANONICAL_ACTION, strategy HOLD_POSITION, CTA NONE, and claim no order, payment, persistence, delivery, or other effect.",
   "When canonicalAction.type is NONE, realize responsePlan.nextMove.decisionInput exactly once only when nextMove.action is ASK: emit one GENERAL segment with role NEXT_MOVE and the same decisionInput. nextMove.target is wording guidance only; never change the selected decisionInput. nextMove.purpose is internal reasoning only. Never verbalize or paraphrase currentNeed, nextMove.purpose, or avoid. Answer segments use role ANSWER. If nextMove.action is NONE, add no NEXT_MOVE segment, optional question, or CTA.",
   "For every selected regular verified fact or selected product attribute used in text, emit one VERIFIED_CLAIM segment with its exact claimRef. Never use an unselected claimRef; never copy, invent, or return a provenance hash; never hide a protected fact inside GENERAL.",
+  "For a selected PRICE, ETA, SHIPPING_FEE, FREESHIP, or PROMOTION_OFFER claim, use {{CLAIM_SUBJECT}} and {{CLAIM_VALUE}} exactly once in that claim's VERIFIED_CLAIM text. Never type a protected subject or value directly; code performs the bound substitution after validating the claimRef.",
   "For selected productPresentation evidence, write only the declared {{PLACEHOLDER}} tokens and safe Vietnamese framing; never type the underlying product name, colour, or size value directly. Use each declared placeholder exactly once so code can substitute the verified value.",
   "Never claim to have sent media, reserved an item, changed a cart, placed or confirmed an order, completed payment or delivery, or performed any other side effect.",
   "Default customer/shop address is chị/em unless the frozen dialogue clearly establishes another form.",
@@ -354,7 +357,9 @@ export function buildTrackCC3FactualClaimReferenceRegistry(
   for (const fact of factualAuthority.simulationFacts) {
     registry.set(fact.claimRef, Object.freeze({
       contentHash: fact.contentHash,
+      protectedProposition: fact.capability,
       placeholders: null,
+      protectedValueBindings: null,
     }));
   }
   return registry;
@@ -712,7 +717,7 @@ function assertTrackCC3ResponsePlanPermitted(
   const evidenceRefs = plan.answer.evidenceRefs;
   if (new Set(evidenceRefs).size !== evidenceRefs.length ||
       evidenceRefs.some((ref) => !registry.has(ref))) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+    throw trackCResponsePlanSemanticError("EVIDENCE_REFERENCE_CONSTRAINT");
   }
   const requestedFields = plan.canonicalAction.requestedFields;
   if (new Set(requestedFields).size !== requestedFields.length ||
@@ -720,7 +725,7 @@ function assertTrackCC3ResponsePlanPermitted(
        requestedFields.length === 0) ||
       (plan.canonicalAction.type !== "ASK_CHECKOUT_DETAILS" &&
        requestedFields.length !== 0)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+    throw trackCResponsePlanSemanticError("CHECKOUT_FIELD_CONSTRAINT");
   }
   assertTrackCC3ResponsePlanControl({
     control: {
@@ -745,8 +750,22 @@ function assertTrackCC3ResponsePlanPermitted(
     canonicalActionType: plan.canonicalAction.type,
     terminal: plan.terminal,
   });
-  assertTrackCOrdinaryNextMoveSafe(plan.nextMove);
-  assertTrackCCanonicalActionPermitted(context, plan.canonicalAction);
+  try {
+    assertTrackCOrdinaryNextMoveSafe(plan.nextMove);
+  } catch {
+    throw trackCResponsePlanSemanticError(
+      "ORDINARY_NEXT_MOVE_NOT_PII_SAFE",
+      "TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST",
+    );
+  }
+  try {
+    assertTrackCCanonicalActionPermitted(context, plan.canonicalAction);
+  } catch {
+    throw trackCResponsePlanSemanticError(
+      "CANONICAL_ACTION_NOT_PERMITTED",
+      "TRACK_C_CANONICAL_ACTION_NOT_PERMITTED",
+    );
+  }
   return plan as TrackCResponsePlanV2;
 }
 
@@ -799,12 +818,25 @@ export function buildTrackCC3ResponderRequest(
         ...body.generationConfig.responseSchema.properties.segments,
         items: {
           ...segmentSchema,
-          required: [...existingSegmentRequired, "role"],
+          required: [
+            ...existingSegmentRequired,
+            "role",
+            "protectedProposition",
+            "protectedResolution",
+          ],
           properties: {
             ...segmentProperties,
             role: {
               type: "STRING",
               enum: TRACK_C_RESPONDER_SEGMENT_ROLES,
+            },
+            protectedProposition: {
+              type: "STRING",
+              enum: TRACK_C_PROTECTED_PROPOSITIONS,
+            },
+            protectedResolution: {
+              type: "STRING",
+              enum: TRACK_C_PROTECTED_RESOLUTIONS,
             },
             decisionInput: {
               type: "STRING",

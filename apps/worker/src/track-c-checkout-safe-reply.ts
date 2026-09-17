@@ -196,7 +196,8 @@ function assertNoUnauthorizedEffectClaim(output: CheckoutRenderOutput): void {
   for (const segment of output.segments) {
     const text = segment.text.normalize("NFC");
     if (/\basset[_-][\p{L}\p{N}_-]+\b/iu.test(text) ||
-        /\bclaim_\d{3,}\b/iu.test(text)) {
+        /\bclaim_\d{3,}\b/iu.test(text) ||
+        /\{\{[A-Z_]+\}\}/u.test(text)) {
       throw new Error("TRACK_C_INTERNAL_TOKEN_LEAK");
     }
     const normalized = text.toLocaleLowerCase("vi-VN");

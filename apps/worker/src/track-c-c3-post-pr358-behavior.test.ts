@@ -127,10 +127,27 @@ function withFixtureResponderRoles(value: unknown): unknown {
         return segment;
       }
       const record = segment as Readonly<Record<string, unknown>>;
-      if (Object.hasOwn(record, "role")) return record;
+      const role = Object.hasOwn(record, "role")
+        ? record.role
+        : record.kind === "ACTION_REQUEST" ? "CANONICAL_ACTION" : "ANSWER";
+      if (Object.hasOwn(record, "protectedProposition") &&
+          Object.hasOwn(record, "protectedResolution")) {
+        return { ...record, role };
+      }
+      const proposition = record.kind === "VERIFIED_CLAIM"
+        ? typeof record.claimRef === "string" &&
+            record.claimRef.startsWith("PRODUCT_ATTRIBUTES_")
+          ? "PRODUCT_ATTRIBUTES"
+          : typeof record.claimRef === "string" &&
+              record.claimRef.startsWith("PRODUCT_PRESENTATION_")
+            ? "PRODUCT_PRESENTATION"
+            : "PRICE"
+        : "NONE";
       return {
         ...record,
-        role: record.kind === "ACTION_REQUEST" ? "CANONICAL_ACTION" : "ANSWER",
+        role,
+        protectedProposition: proposition,
+        protectedResolution: proposition === "NONE" ? "NOT_APPLICABLE" : "SUPPORTED",
       };
     }),
   };
@@ -985,7 +1002,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       }),
     );
     await expect(runFixture(requiredFixture, checkoutAsk)).rejects.toThrow(
-      "TRACK_C_CANONICAL_ACTION_NOT_PERMITTED",
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC",
     );
   });
 

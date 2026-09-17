@@ -22,6 +22,8 @@ import {
   TRACK_C_C3_TWO_PASS_CANDIDATE,
   type TrackCResponsePlanV2,
 } from "./track-c-c3-two-pass-candidate.js";
+import { TrackCResponsePlanSemanticError } from
+  "./track-c-c3-response-plan-control.js";
 import {
   EMPTY_TRACK_C_FACTUAL_AUTHORITY,
   materializeTrackCBehaviorSimulationFactualAuthority,
@@ -495,8 +497,8 @@ export async function runTrackCV5TwoPassBenchmarkCase(
       }
       const stage = /^TRACK_C_C3_CONVERSATION_PLAN_INVALID:(SCHEMA|SEMANTIC)$/u
         .exec(error.message)?.[1];
-      if (stage !== undefined) {
-        throw new Error(`TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:${stage}`);
+      if (stage !== undefined || error instanceof TrackCResponsePlanSemanticError) {
+        throw new Error(`TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:${stage ?? "SEMANTIC"}`);
       }
     }
     throw error;

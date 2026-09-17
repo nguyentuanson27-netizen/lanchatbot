@@ -97,10 +97,27 @@ function withFixtureResponderRoles(value: unknown): unknown {
         return segment;
       }
       const record = segment as Readonly<Record<string, unknown>>;
-      if (Object.hasOwn(record, "role")) return record;
+      const role = Object.hasOwn(record, "role")
+        ? record.role
+        : record.kind === "ACTION_REQUEST" ? "CANONICAL_ACTION" : "ANSWER";
+      if (Object.hasOwn(record, "protectedProposition") &&
+          Object.hasOwn(record, "protectedResolution")) {
+        return { ...record, role };
+      }
+      const proposition = record.kind === "VERIFIED_CLAIM"
+        ? typeof record.claimRef === "string" &&
+            record.claimRef.startsWith("PRODUCT_ATTRIBUTES_")
+          ? "PRODUCT_ATTRIBUTES"
+          : typeof record.claimRef === "string" &&
+              record.claimRef.startsWith("PRODUCT_PRESENTATION_")
+            ? "PRODUCT_PRESENTATION"
+            : "PRICE"
+        : "NONE";
       return {
         ...record,
-        role: record.kind === "ACTION_REQUEST" ? "CANONICAL_ACTION" : "ANSWER",
+        role,
+        protectedProposition: proposition,
+        protectedResolution: proposition === "NONE" ? "NOT_APPLICABLE" : "SUPPORTED",
       };
     }),
   };
@@ -212,7 +229,7 @@ function successfulTransport() {
       payload: providerPayload({
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Mẫu này hiện 849k chị ạ.",
+          text: "Mẫu {{CLAIM_SUBJECT}} hiện {{CLAIM_VALUE}} chị ạ.",
           claimRef: "CLAIM_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -297,7 +314,7 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.output.segments).toEqual([{
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu này hiện 849k chị ạ.",
+      text: "Mẫu SQ9012 hiện 849.000đ chị ạ.",
       claimContentHash: capture.context.verifiedClaims[0]?.provenance.contentHash,
     }]);
     expect(result.identity.captureContextHash).toBe(capture.context.contextHash);
@@ -371,7 +388,7 @@ describe("Track C C3 V5 benchmark runner", () => {
       }
       return {
         kind: "VERIFIED_CLAIM" as const,
-        text: `${claim.scope.productId} hiện ${claim.value.amountVnd / 1_000}k chị ạ.`,
+        text: "{{CLAIM_SUBJECT}} hiện {{CLAIM_VALUE}} chị ạ.",
         claimRef: `CLAIM_${String(index + 1).padStart(3, "0")}`,
       };
     });
@@ -408,6 +425,13 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.output.segments).toHaveLength(2);
     expect(result.output.segments.every(({ kind }) => kind === "VERIFIED_CLAIM"))
       .toBe(true);
+    expect(result.output.segments.map(({ text }) => text)).toEqual(
+      capture.context.verifiedClaims.map((claim) =>
+        `${claim.scope.kind === "PRODUCT" ? claim.scope.productId : ""} hiện ${
+          claim.type === "PRICE" ? claim.value.amountVnd.toLocaleString("vi-VN") : ""
+        }đ chị ạ.`,
+      ),
+    );
   });
 
   it("blocks protected price text hidden inside a GENERAL production segment", async () => {
@@ -526,6 +550,8 @@ describe("Track C C3 V5 benchmark runner", () => {
         payload: providerPayload({
           segments: [{
             kind: "VERIFIED_CLAIM",
+            protectedProposition: "PRODUCT_ATTRIBUTES",
+            protectedResolution: "SUPPORTED",
             text: "Mẫu Tường Vi có chất tơ xước mềm, nhẹ.",
             claimRef: "SIM_FACT_001",
           }],
@@ -596,7 +622,7 @@ describe("Track C C3 V5 benchmark runner", () => {
       evaluationContext: dialogue(),
       simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
+    })).rejects.toThrow("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC");
     expect(send).toHaveBeenCalledTimes(1);
   });
 
@@ -617,6 +643,8 @@ describe("Track C C3 V5 benchmark runner", () => {
         payload: providerPayload({
           segments: [{
             kind: "VERIFIED_CLAIM",
+            protectedProposition: "POLICY",
+            protectedResolution: "SUPPORTED",
             text: "Shop hỗ trợ COD và chuyển khoản ạ.",
             claimRef: "SIM_FACT_001",
           }],

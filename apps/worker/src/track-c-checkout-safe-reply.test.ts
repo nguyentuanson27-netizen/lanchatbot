@@ -213,6 +213,16 @@ describe("renderTrackCCheckoutSafeReply", () => {
     )).toThrow("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   });
 
+  it("fails closed if an unresolved protected-value placeholder reaches rendering", () => {
+    expect(() => renderTrackCCheckoutSafeReply(
+      context("COMPLETE", []),
+      output([{
+        kind: "GENERAL",
+        text: "Mẫu {{CLAIM_SUBJECT}} giá {{CLAIM_VALUE}} ạ.",
+      }], "ANSWER_VERIFIED_FACTS", "NONE"),
+    )).toThrow("TRACK_C_INTERNAL_TOKEN_LEAK");
+  });
+
   it("rejects ordinary checkout PII requests before checkout state exists", () => {
     expect(() => renderTrackCCheckoutSafeReply(
       {

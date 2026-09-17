@@ -96,6 +96,60 @@ describe("Track C C3 response-plan control", () => {
     })).not.toThrow();
   });
 
+  it.each([
+    ["promotion", "PROMOTION_OFFER"],
+    ["care guidance", "CARE_GUIDANCE"],
+  ] as const)("allows an unresolved %s proposition without fabricating a negative fact", (
+    _label,
+    proposition,
+  ) => {
+    expect(() => assertTrackCC3ResponsePlanControl({
+      control: control({
+        answer: { protectedProposition: proposition, protectedResolution: "UNRESOLVED" },
+      }),
+      answerMode: "BOUNDED_UNCERTAINTY",
+      selectedEvidenceCapabilities: ["PRICE"],
+      nextMoveAction: "NONE",
+      canonicalActionType: "NONE",
+      terminal: false,
+    })).not.toThrow();
+  });
+
+  it("does not treat duplicate PRICE capabilities as an ambiguous authority", () => {
+    expect(() => assertTrackCC3ResponsePlanControl({
+      control: control(),
+      answerMode: "DIRECT",
+      selectedEvidenceCapabilities: ["PRICE", "PRICE"],
+      nextMoveAction: "NONE",
+      canonicalActionType: "NONE",
+      terminal: false,
+    })).not.toThrow();
+  });
+
+  it("does not force a permitted measurement action or ordinary input", () => {
+    expect(() => assertTrackCC3ResponsePlanControl({
+      control: control({
+        answer: { protectedProposition: "NONE", protectedResolution: "NOT_APPLICABLE" },
+      }),
+      answerMode: "ACKNOWLEDGE",
+      selectedEvidenceCapabilities: [],
+      nextMoveAction: "NONE",
+      canonicalActionType: "NONE",
+      terminal: false,
+    })).not.toThrow();
+
+    expect(() => assertTrackCC3ResponsePlanControl({
+      control: control({
+        answer: { protectedProposition: "NONE", protectedResolution: "NOT_APPLICABLE" },
+      }),
+      answerMode: "CLARIFY",
+      selectedEvidenceCapabilities: [],
+      nextMoveAction: "NONE",
+      canonicalActionType: "ASK_MEASUREMENTS",
+      terminal: false,
+    })).not.toThrow();
+  });
+
   it("uses one typed atomic decision input rather than parsing target prose", () => {
     expect(() => assertTrackCC3ResponsePlanControl({
       control: control({

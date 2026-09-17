@@ -246,6 +246,25 @@ function verifiedEtaClaim(): ProtectedClaimV1 {
   };
 }
 
+function verifiedPriceClaim(): ProtectedClaimV1 {
+  return {
+    schemaVersion: 1,
+    claimId: "00000000-0000-4000-8000-000000000003",
+    type: "PRICE",
+    scope: { kind: "PRODUCT", productId: "SD398", variantId: null },
+    value: { amountVnd: 849_000, currency: "VND" },
+    provenance: {
+      authority: "POS_SNAPSHOT",
+      sourceVersion: "fixture:price:SD398",
+      evidenceRef: "fixture:price:SD398",
+      contentHash: hash("c"),
+      observedAt: evaluationAt.toISOString(),
+      expiresAt: "2099-01-01T00:00:00.000Z",
+    },
+    authorization: "NONE",
+  };
+}
+
 function conversationPlan(
   evidenceRefs: readonly string[] = [],
   mode: TrackCResponsePlanV2["answer"]["mode"] = "DIRECT",
@@ -275,10 +294,12 @@ function conversationPlan(
   };
 }
 
-function accepted(): TrackCReplayJudgeEnvelope {
+function accepted(
+  verifiedFacts: TrackCReplayJudgeEnvelope["verifiedFacts"] = null,
+): TrackCReplayJudgeEnvelope {
   return {
     context: evaluationContext,
-    verifiedFacts: null,
+    verifiedFacts,
     reply: "Dạ mẫu này có giá niêm yết trong thông tin sản phẩm ạ.",
     proposalSummary: { action: "REPLY" },
     guardOutcome: {
@@ -286,6 +307,32 @@ function accepted(): TrackCReplayJudgeEnvelope {
       action: "REPLY",
       blockedReasonCodes: [],
     },
+  };
+}
+
+function verifiedPriceFacts(): NonNullable<TrackCReplayJudgeEnvelope["verifiedFacts"]> {
+  return {
+    schemaVersion: 1,
+    status: "OK",
+    source: "POS_SNAPSHOT",
+    observedAt: evaluationAt.toISOString(),
+    expiresAt: "2099-01-01T00:00:00.000Z",
+    productId: "SD398",
+    facts: {
+      schemaVersion: 1,
+      productId: "SD398",
+      parentProductId: "SD398",
+      offerType: "AO_DAI",
+      listPriceVnd: 849_000,
+      salePriceVnd: null,
+      sizes: ["M"],
+      stockStatus: "IN_STOCK",
+      stockQuantity: 1,
+      deliveryEta: { minDays: 1, maxDays: 2 },
+      fulfillmentPolicy: "READY_STOCK",
+      imageUrls: [],
+    },
+    reasonCode: null,
   };
 }
 
@@ -484,6 +531,8 @@ describe("Track C C3 two-pass offline candidate", () => {
         segments: [{
           kind: "VERIFIED_CLAIM",
           role: "ANSWER",
+          protectedProposition: "PRODUCT_ATTRIBUTES",
+          protectedResolution: "SUPPORTED",
           text: "Mẫu này dùng chất liệu lụa ạ.",
           claimRef: "PRODUCT_ATTRIBUTES_001",
         }],
@@ -508,6 +557,46 @@ describe("Track C C3 two-pass offline candidate", () => {
     });
     expect(result.candidate.quality.reply).toBe("Mẫu này dùng chất liệu lụa ạ.");
     expect(result.candidate.guard.status).toBe("PASS");
+  });
+
+  it("binds a verified price to its code-owned subject and value before customer output", async () => {
+    const outputs = [
+      conversationPlan(["CLAIM_001"]),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          role: "ANSWER",
+          protectedProposition: "PRICE",
+          protectedResolution: "SUPPORTED",
+          text: "Mẫu {{CLAIM_SUBJECT}} giá {{CLAIM_VALUE}} ạ.",
+          claimRef: "CLAIM_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture(
+        [verifiedPriceClaim()],
+        undefined,
+        verifiedProductPresentation(),
+      ),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(verifiedPriceFacts()),
+      transport,
+    });
+
+    expect(result.candidate.quality.reply).toBe("Mẫu Tường Vi giá 849.000đ ạ.");
   });
 
   it.each([
@@ -537,6 +626,8 @@ describe("Track C C3 two-pass offline candidate", () => {
         segments: [{
           kind: "VERIFIED_CLAIM",
           role: "ANSWER",
+          protectedProposition: "PRODUCT_PRESENTATION",
+          protectedResolution: "SUPPORTED",
           text: modelText,
           claimRef,
         }],
@@ -580,6 +671,8 @@ describe("Track C C3 two-pass offline candidate", () => {
         segments: [{
           kind: "VERIFIED_CLAIM",
           role: "ANSWER",
+          protectedProposition: "PRODUCT_PRESENTATION",
+          protectedResolution: "SUPPORTED",
           text,
           claimRef,
         }],
@@ -764,6 +857,8 @@ describe("Track C C3 two-pass offline candidate", () => {
               segments: [{
                 kind: "GENERAL",
                 role: "ANSWER",
+                protectedProposition: "NONE",
+                protectedResolution: "NOT_APPLICABLE",
                 text: "Dạ hiện em chưa thể xác nhận thông tin này ạ.",
               }],
               strategy: "ANSWER_VERIFIED_FACTS",
@@ -1044,6 +1139,8 @@ describe("Track C C3 two-pass offline candidate", () => {
         segments: [{
           kind: "VERIFIED_CLAIM",
           role: "ANSWER",
+          protectedProposition: "PRODUCT_PRESENTATION",
+          protectedResolution: "SUPPORTED",
           text: "Dạ tên mẫu là {{DISPLAY_NAME}} ạ.",
           claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
         }],
