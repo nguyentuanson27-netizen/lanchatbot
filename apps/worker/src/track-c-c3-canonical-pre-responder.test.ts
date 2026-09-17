@@ -161,4 +161,47 @@ describe("Track C canonical action pre-Responder boundary", () => {
     })).rejects.toThrow("TRACK_C_CANONICAL_ACTION_NOT_PERMITTED");
     expect(transport.send).toHaveBeenCalledTimes(1);
   });
+
+  it("rejects a supported protected proposition without matching selected evidence before Responder", async () => {
+    const plan = {
+      currentNeed: "Kiểm tra ưu đãi hiện có",
+      answer: {
+        mode: "DIRECT",
+        objective: "Trả lời tình trạng ưu đãi bằng evidence đã chọn",
+        evidenceRefs: [],
+        protectedProposition: "PROMOTION_OFFER",
+        protectedResolution: "SUPPORTED",
+      },
+      nextMove: {
+        action: "NONE",
+        target: "NONE",
+        purpose: "NONE",
+        decisionInputs: [],
+      },
+      canonicalAction: {
+        type: "NONE",
+        requestedFields: [],
+      },
+      terminal: false,
+      avoid: "Không suy diễn ưu đãi từ evidence không có capability tương ứng",
+      effectIntent: "NONE",
+    };
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(plan),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: captureWithoutCheckoutAuthorization(),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+    expect(transport.send).toHaveBeenCalledTimes(1);
+  });
 });
