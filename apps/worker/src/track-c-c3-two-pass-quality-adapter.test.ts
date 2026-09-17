@@ -90,29 +90,46 @@ function providerPayload(value: unknown) {
   };
 }
 
-function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
+type ResponsePlanOverrides = Omit<Partial<TrackCResponsePlanV2>,
+  "answer" | "nextMove" | "canonicalAction"> & Readonly<{
+    answer?: Partial<TrackCResponsePlanV2["answer"]>;
+    nextMove?: Partial<TrackCResponsePlanV2["nextMove"]>;
+    canonicalAction?: Partial<TrackCResponsePlanV2["canonicalAction"]>;
+  }>;
+
+function planPayload(overrides: ResponsePlanOverrides = {}) {
+  const {
+    answer: answerOverrides = {},
+    nextMove: nextMoveOverrides = {},
+    canonicalAction: canonicalActionOverrides = {},
+    ...planOverrides
+  } = overrides;
   return providerPayload({
     currentNeed: "Resolve the current customer need.",
     answer: {
       mode: "DIRECT",
       objective: "Give the verified information directly.",
       evidenceRefs: ["CLAIM_001"],
-      ...(overrides.answer ?? {}),
+      protectedProposition: "NONE",
+      protectedResolution: "NOT_APPLICABLE",
+      ...answerOverrides,
     },
     nextMove: {
       action: "NONE",
       target: "NONE",
       purpose: "NONE",
-      ...(overrides.nextMove ?? {}),
+      decisionInputs: [],
+      ...nextMoveOverrides,
     },
     canonicalAction: {
       type: "NONE",
       requestedFields: [],
-      ...(overrides.canonicalAction ?? {}),
+      ...canonicalActionOverrides,
     },
     terminal: false,
     avoid: "Do not invent another fact.",
-    ...overrides,
+    effectIntent: "NONE",
+    ...planOverrides,
   });
 }
 
@@ -182,6 +199,51 @@ function successfulTransport() {
 }
 
 describe("Track C C3 V5 benchmark runner", () => {
+  it.each([
+    [
+      "extraction",
+      { candidates: [{ content: { parts: [{ text: "{not-json" }] } }] },
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:EXTRACTION",
+    ],
+    [
+      "schema",
+      providerPayload({ currentNeed: "Missing required response-plan fields." }),
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SCHEMA",
+    ],
+    [
+      "semantic",
+      planPayload({
+        nextMove: {
+          action: "NONE",
+          target: "SIZE_PREFERENCE",
+          purpose: "NARROW_CHOICE",
+          decisionInputs: [],
+        },
+      }),
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC",
+    ],
+  ] as const)("keeps V5 strategist diagnostics stage-safe for %s", async (
+    _stage,
+    payload,
+    errorCode,
+  ) => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload,
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      transport: { send },
+    })).rejects.toThrow(errorCode);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it("derives production dialogue evidence through the canonical producer", () => {
     const capture = freshCapture();
     if (capture.status !== "BUILT" || capture.context === null) {

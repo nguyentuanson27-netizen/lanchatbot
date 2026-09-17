@@ -13,6 +13,8 @@ function control(
       protectedResolution: "SUPPORTED",
     },
     nextMove: {
+      target: "NONE",
+      purpose: "NONE",
       decisionInputs: [],
     },
     effectIntent: "NONE",
@@ -72,6 +74,8 @@ describe("Track C C3 response-plan control", () => {
           protectedResolution: "NOT_APPLICABLE",
         },
         nextMove: {
+          target: "SIZE_PREFERENCE",
+          purpose: "NARROW_CHOICE",
           decisionInputs: ["size or color preference"],
         },
       }),
@@ -86,7 +90,11 @@ describe("Track C C3 response-plan control", () => {
   it("rejects missing or extra structural decision inputs", () => {
     expect(() => assertTrackCC3ResponsePlanControl({
       control: control({
-        nextMove: { decisionInputs: [] },
+        nextMove: {
+          target: "SIZE_PREFERENCE",
+          purpose: "NARROW_CHOICE",
+          decisionInputs: [],
+        },
       }),
       answerMode: "DIRECT",
       selectedEvidenceCapabilities: ["PRICE"],
@@ -97,12 +105,27 @@ describe("Track C C3 response-plan control", () => {
 
     expect(() => assertTrackCC3ResponsePlanControl({
       control: control({
-        nextMove: { decisionInputs: ["size"] },
+        nextMove: {
+          target: "NONE",
+          purpose: "NONE",
+          decisionInputs: ["size"],
+        },
       }),
       answerMode: "DIRECT",
       selectedEvidenceCapabilities: ["PRICE"],
       nextMoveAction: "NONE",
       canonicalActionType: "NONE",
+      terminal: false,
+    })).toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+  });
+
+  it("preserves HOLD_POSITION as a terminal canonical action", () => {
+    expect(() => assertTrackCC3ResponsePlanControl({
+      control: control(),
+      answerMode: "HOLD",
+      selectedEvidenceCapabilities: ["PRICE"],
+      nextMoveAction: "NONE",
+      canonicalActionType: "HOLD_POSITION",
       terminal: false,
     })).toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
   });

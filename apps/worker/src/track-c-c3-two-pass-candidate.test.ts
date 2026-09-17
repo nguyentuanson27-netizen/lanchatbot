@@ -256,11 +256,14 @@ function conversationPlan(
       mode,
       objective: "Trả lời đúng nhu cầu hiện tại bằng evidence đã chọn",
       evidenceRefs,
+      protectedProposition: "NONE",
+      protectedResolution: "NOT_APPLICABLE",
     },
     nextMove: {
       action: "NONE",
       target: "NONE",
       purpose: "NONE",
+      decisionInputs: [],
     },
     canonicalAction: {
       type: "NONE",
@@ -268,6 +271,7 @@ function conversationPlan(
     },
     terminal: false,
     avoid: "Không bịa hoặc mở thêm mục tiêu bán hàng",
+    effectIntent: "NONE",
   };
 }
 
@@ -678,17 +682,42 @@ describe("Track C C3 two-pass offline candidate", () => {
         "canonicalAction",
         "terminal",
         "avoid",
+        "effectIntent",
       ],
       properties: {
         answer: {
           type: "OBJECT",
           properties: {
             evidenceRefs: { items: { enum: ["CLAIM_001"] } },
+            protectedProposition: { enum: [
+              "NONE",
+              "PRICE",
+              "STOCK",
+              "SIZE_FIT",
+              "ETA",
+              "SHIPPING_FEE",
+              "FREESHIP",
+              "PROMOTION_OFFER",
+              "PRODUCT_MEDIA",
+              "PRODUCT_ATTRIBUTES",
+              "PRODUCT_PRESENTATION",
+            ] },
+            protectedResolution: { enum: [
+              "SUPPORTED",
+              "UNRESOLVED",
+              "NOT_APPLICABLE",
+            ] },
           },
         },
-        nextMove: { type: "OBJECT" },
+        nextMove: {
+          type: "OBJECT",
+          properties: {
+            decisionInputs: { type: "ARRAY", maxItems: 1 },
+          },
+        },
         canonicalAction: { type: "OBJECT" },
         terminal: { type: "BOOLEAN" },
+        effectIntent: { type: "STRING" },
       },
     });
     expect(body.safetySettings).toBeDefined();
@@ -783,6 +812,109 @@ describe("Track C C3 two-pass offline candidate", () => {
       accepted: accepted(),
       transport,
     })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+    expect(transport.send).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [
+      "a provider payload without candidate text",
+      { candidates: [{ content: { parts: [{}] } }] },
+    ],
+    [
+      "a provider payload with non-string candidate text",
+      { candidates: [{ content: { parts: [{ text: 7 }] } }] },
+    ],
+    [
+      "a provider payload with malformed candidate JSON",
+      { candidates: [{ content: { parts: [{ text: "{not-json" }] } }] },
+    ],
+  ] as const)("reports strategist extraction failure for %s", async (
+    _name,
+    payload,
+  ) => {
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload,
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture(),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:EXTRACTION");
+    expect(transport.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a structurally invalid Strategist plan as schema failure", async () => {
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload({
+          ...conversationPlan(),
+          answer: {
+            ...conversationPlan().answer,
+            evidenceRefs: "CLAIM_001",
+            protectedProposition: "NONE",
+            protectedResolution: "NOT_APPLICABLE",
+          },
+          nextMove: {
+            ...conversationPlan().nextMove,
+            decisionInputs: [],
+          },
+          effectIntent: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture(),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SCHEMA");
+    expect(transport.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a structurally valid Strategist plan with a semantic mismatch", async () => {
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload({
+          ...conversationPlan(),
+          answer: {
+            ...conversationPlan().answer,
+            protectedProposition: "NONE",
+            protectedResolution: "NOT_APPLICABLE",
+          },
+          nextMove: {
+            action: "NONE",
+            target: "SIZE_PREFERENCE",
+            purpose: "NARROW_CHOICE",
+            decisionInputs: [],
+          },
+          effectIntent: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture(),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
     expect(transport.send).toHaveBeenCalledTimes(1);
   });
 

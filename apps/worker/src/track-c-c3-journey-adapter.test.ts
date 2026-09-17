@@ -69,7 +69,20 @@ function journey(turnCount: number): TrackCC2JourneyFixture {
   };
 }
 
-function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
+type ResponsePlanOverrides = Omit<Partial<TrackCResponsePlanV2>,
+  "answer" | "nextMove" | "canonicalAction"> & Readonly<{
+    answer?: Partial<TrackCResponsePlanV2["answer"]>;
+    nextMove?: Partial<TrackCResponsePlanV2["nextMove"]>;
+    canonicalAction?: Partial<TrackCResponsePlanV2["canonicalAction"]>;
+  }>;
+
+function planPayload(overrides: ResponsePlanOverrides = {}) {
+  const {
+    answer: answerOverrides = {},
+    nextMove: nextMoveOverrides = {},
+    canonicalAction: canonicalActionOverrides = {},
+    ...planOverrides
+  } = overrides;
   return {
     candidates: [{ content: { parts: [{ text: JSON.stringify({
       currentNeed: "Resolve the current customer need.",
@@ -77,22 +90,26 @@ function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
         mode: "DIRECT",
         objective: "Use only supplied authority.",
         evidenceRefs: [],
-        ...(overrides.answer ?? {}),
+        protectedProposition: "NONE",
+        protectedResolution: "NOT_APPLICABLE",
+        ...answerOverrides,
       },
       nextMove: {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        ...(overrides.nextMove ?? {}),
+        decisionInputs: [],
+        ...nextMoveOverrides,
       },
       canonicalAction: {
         type: "NONE",
         requestedFields: [],
-        ...(overrides.canonicalAction ?? {}),
+        ...canonicalActionOverrides,
       },
       terminal: false,
       avoid: "Do not invent facts or effects.",
-      ...overrides,
+      effectIntent: "NONE",
+      ...planOverrides,
     }) }] } }],
   };
 }

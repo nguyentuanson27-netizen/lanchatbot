@@ -6,7 +6,7 @@ import {
 describe("Track C C3 Strategist output diagnostics contract", () => {
   it("spells out the NONE sentinel required by the local response-plan parser", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      'When nextMove.action = NONE, set nextMove.target = "NONE" and nextMove.purpose = "NONE".',
+      'When nextMove.action = NONE, set nextMove.target = "NONE", nextMove.purpose = "NONE", and nextMove.decisionInputs = [].',
     );
   });
 });

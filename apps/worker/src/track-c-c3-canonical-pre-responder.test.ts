@@ -130,11 +130,14 @@ describe("Track C canonical action pre-Responder boundary", () => {
         mode: "DIRECT",
         objective: "Trả lời nhu cầu hiện tại",
         evidenceRefs: [],
+        protectedProposition: "NONE",
+        protectedResolution: "NOT_APPLICABLE",
       },
       nextMove: {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
+        decisionInputs: [],
       },
       canonicalAction: {
         type: "ASK_CHECKOUT_DETAILS",
@@ -142,6 +145,7 @@ describe("Track C canonical action pre-Responder boundary", () => {
       },
       terminal: false,
       avoid: "Không xin dữ liệu checkout khi chưa được canonical state cho phép",
+      effectIntent: "NONE",
     };
     const transport: CandidateVertexTransport = {
       send: vi.fn(async () => ({
@@ -184,6 +188,92 @@ describe("Track C canonical action pre-Responder boundary", () => {
       },
       terminal: false,
       avoid: "Không suy diễn ưu đãi từ evidence không có capability tương ứng",
+      effectIntent: "NONE",
+    };
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(plan),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: captureWithoutCheckoutAuthorization(),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+    expect(transport.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects a non-NONE effect intent before Responder", async () => {
+    const plan = {
+      currentNeed: "Xác nhận trạng thái đơn hàng",
+      answer: {
+        mode: "ACKNOWLEDGE",
+        objective: "Phản hồi mà không xác nhận effect",
+        evidenceRefs: [],
+        protectedProposition: "NONE",
+        protectedResolution: "NOT_APPLICABLE",
+      },
+      nextMove: {
+        action: "NONE",
+        target: "NONE",
+        purpose: "NONE",
+        decisionInputs: [],
+      },
+      canonicalAction: {
+        type: "NONE",
+        requestedFields: [],
+      },
+      terminal: false,
+      avoid: "Không để conversation plan tự cấp quyền effect",
+      effectIntent: "CONFIRM_ORDER",
+    };
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(plan),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: captureWithoutCheckoutAuthorization(),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+    expect(transport.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects checkout fields attached to a non-checkout canonical action", async () => {
+    const plan = {
+      currentNeed: "Trả lời câu hỏi hiện tại",
+      answer: {
+        mode: "DIRECT",
+        objective: "Trả lời không thu checkout fields",
+        evidenceRefs: [],
+        protectedProposition: "NONE",
+        protectedResolution: "NOT_APPLICABLE",
+      },
+      nextMove: {
+        action: "NONE",
+        target: "NONE",
+        purpose: "NONE",
+        decisionInputs: [],
+      },
+      canonicalAction: {
+        type: "NONE",
+        requestedFields: ["PHONE"],
+      },
+      terminal: false,
+      avoid: "Không widening checkout fields",
       effectIntent: "NONE",
     };
     const transport: CandidateVertexTransport = {

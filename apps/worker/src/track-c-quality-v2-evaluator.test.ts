@@ -48,11 +48,14 @@ function candidate(): TrackCV5TwoPassBenchmarkResult {
         mode: "DIRECT",
         objective: "Give the verified price.",
         evidenceRefs: ["CLAIM_001"],
+        protectedProposition: "PRICE",
+        protectedResolution: "SUPPORTED",
       },
       nextMove: {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
+        decisionInputs: [],
       },
       canonicalAction: {
         type: "NONE",
@@ -60,6 +63,7 @@ function candidate(): TrackCV5TwoPassBenchmarkResult {
       },
       terminal: false,
       avoid: "Do not invent facts.",
+      effectIntent: "NONE",
     },
     output: {
       schemaVersion: 2,

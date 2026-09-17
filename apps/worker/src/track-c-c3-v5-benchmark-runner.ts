@@ -59,7 +59,7 @@ function sha256(value: unknown): string {
 
 function parseVertexJson(
   payload: unknown,
-  errorCode: "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID" |
+  errorCode: "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:EXTRACTION" |
     "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
 ): unknown {
   try {
@@ -470,7 +470,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   assertProviderIdentity(strategistResponse.providerModelVersion);
   const conversationPlan = parseVertexJson(
     strategistResponse.payload,
-    "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID",
+    "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:EXTRACTION",
   ) as TrackCResponsePlanV2;
 
   let responderRequest: BuiltCandidateRequest;
@@ -486,8 +486,10 @@ export async function runTrackCV5TwoPassBenchmarkCase(
       if (error.message === "TRACK_C_C3_CONVERSATION_PLAN_NOT_PII_SAFE") {
         throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE");
       }
-      if (error.message === "TRACK_C_C3_CONVERSATION_PLAN_INVALID") {
-        throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
+      const stage = /^TRACK_C_C3_CONVERSATION_PLAN_INVALID:(SCHEMA|SEMANTIC)$/u
+        .exec(error.message)?.[1];
+      if (stage !== undefined) {
+        throw new Error(`TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:${stage}`);
       }
     }
     throw error;

@@ -38,11 +38,17 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "do not infer an extra promotion or the absence of one from missing evidence",
     );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "answer.protectedProposition and answer.protectedResolution declare the protected proposition",
+    );
   });
 
   it("requires one state-changing sales next move without forcing a question", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Never put more than one decision target in nextMove.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "nextMove.decisionInputs must contain exactly that one input.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "A valid nextMove must change what the shop can recommend, compare, qualify, or transact on the following turn.",
@@ -64,6 +70,12 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "When canonicalAction.type is not NONE, set nextMove.action = NONE",
+    );
+  });
+
+  it("keeps side-effect authority code-owned", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "effectIntent must be NONE.",
     );
   });
 

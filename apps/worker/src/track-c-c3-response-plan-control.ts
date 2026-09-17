@@ -29,9 +29,11 @@ export type TrackCResponsePlanControlV1 = Readonly<{
     protectedResolution: TrackCProtectedResolution;
   }>;
   nextMove: Readonly<{
+    target: string;
+    purpose: string;
     decisionInputs: readonly string[];
   }>;
-  effectIntent: "NONE";
+  effectIntent: string;
 }>;
 
 type TrackCResponsePlanControlInput = Readonly<{
@@ -58,12 +60,17 @@ export function assertTrackCC3ResponsePlanControl(
   const { control } = input;
   if (control.effectIntent !== "NONE") semanticInvalid();
 
-  const decisionInputs = control.nextMove.decisionInputs;
+  const { target, purpose, decisionInputs } = control.nextMove;
   if (decisionInputs.length > 1 ||
       (input.nextMoveAction === "ASK" && decisionInputs.length !== 1) ||
       (input.nextMoveAction === "NONE" && decisionInputs.length !== 0) ||
       (input.canonicalActionType !== "NONE" && decisionInputs.length !== 0) ||
-      (input.terminal && decisionInputs.length !== 0)) {
+      (input.terminal && decisionInputs.length !== 0) ||
+      (input.canonicalActionType === "HOLD_POSITION" && !input.terminal) ||
+      (input.nextMoveAction === "ASK" &&
+        (target === "NONE" || purpose === "NONE")) ||
+      (input.nextMoveAction === "NONE" &&
+        (target !== "NONE" || purpose !== "NONE"))) {
     semanticInvalid();
   }
 

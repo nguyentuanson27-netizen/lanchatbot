@@ -7,6 +7,7 @@ import {
 import {
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+  candidateProductPresentationClaims,
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
   type CandidateVertexTransport,
@@ -24,6 +25,13 @@ import {
 } from "./track-c-checkout-safe-reply.js";
 import { assertTrackCResponderFollowsPlan } from
   "./track-c-c3-response-plan-guard.js";
+import {
+  TRACK_C_PROTECTED_PROPOSITIONS,
+  TRACK_C_PROTECTED_RESOLUTIONS,
+  assertTrackCC3ResponsePlanControl,
+  type TrackCProtectedProposition,
+  type TrackCProtectedResolution,
+} from "./track-c-c3-response-plan-control.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -41,9 +49,21 @@ const RESPONSE_PLAN_FIELDS = Object.freeze([
   "canonicalAction",
   "terminal",
   "avoid",
+  "effectIntent",
 ] as const);
-const ANSWER_FIELDS = Object.freeze(["mode", "objective", "evidenceRefs"] as const);
-const NEXT_MOVE_FIELDS = Object.freeze(["action", "target", "purpose"] as const);
+const ANSWER_FIELDS = Object.freeze([
+  "mode",
+  "objective",
+  "evidenceRefs",
+  "protectedProposition",
+  "protectedResolution",
+] as const);
+const NEXT_MOVE_FIELDS = Object.freeze([
+  "action",
+  "target",
+  "purpose",
+  "decisionInputs",
+] as const);
 const CANONICAL_ACTION_FIELDS = Object.freeze(["type", "requestedFields"] as const);
 const ANSWER_MODES = Object.freeze([
   "DIRECT",
@@ -71,6 +91,7 @@ type TrackCAnswerMode = typeof ANSWER_MODES[number];
 type TrackCNextMoveAction = typeof NEXT_MOVE_ACTIONS[number];
 type TrackCCanonicalActionType = typeof CANONICAL_ACTION_TYPES[number];
 type TrackCCheckoutField = typeof CHECKOUT_FIELDS[number];
+type TrackCEffectIntent = "NONE";
 
 export interface TrackCResponsePlanV2 {
   readonly currentNeed: string;
@@ -78,11 +99,14 @@ export interface TrackCResponsePlanV2 {
     readonly mode: TrackCAnswerMode;
     readonly objective: string;
     readonly evidenceRefs: readonly string[];
+    readonly protectedProposition: TrackCProtectedProposition;
+    readonly protectedResolution: TrackCProtectedResolution;
   }>;
   readonly nextMove: Readonly<{
     readonly action: TrackCNextMoveAction;
     readonly target: string;
     readonly purpose: string;
+    readonly decisionInputs: readonly string[];
   }>;
   readonly canonicalAction: Readonly<{
     readonly type: TrackCCanonicalActionType;
@@ -90,7 +114,11 @@ export interface TrackCResponsePlanV2 {
   }>;
   readonly terminal: boolean;
   readonly avoid: string;
+  readonly effectIntent: TrackCEffectIntent;
 }
+
+type ParsedTrackCResponsePlanV2 = Omit<TrackCResponsePlanV2, "effectIntent"> &
+  Readonly<{ readonly effectIntent: string }>;
 
 /** @deprecated V5 now uses the typed TRACK_C_RESPONSE_PLAN_V2 contract. */
 export type TrackCConversationPlanV1 = TrackCResponsePlanV2;
@@ -137,6 +165,14 @@ function responsePlanSchema(
             }),
             ...(allowedClaimRefs.length === 0 ? { maxItems: 0 } : {}),
           }),
+          protectedProposition: Object.freeze({
+            type: "STRING",
+            enum: TRACK_C_PROTECTED_PROPOSITIONS,
+          }),
+          protectedResolution: Object.freeze({
+            type: "STRING",
+            enum: TRACK_C_PROTECTED_RESOLUTIONS,
+          }),
         }),
       }),
       nextMove: Object.freeze({
@@ -146,6 +182,11 @@ function responsePlanSchema(
           action: Object.freeze({ type: "STRING", enum: NEXT_MOVE_ACTIONS }),
           target: Object.freeze({ type: "STRING" }),
           purpose: Object.freeze({ type: "STRING" }),
+          decisionInputs: Object.freeze({
+            type: "ARRAY",
+            items: Object.freeze({ type: "STRING" }),
+            maxItems: 1,
+          }),
         }),
       }),
       canonicalAction: Object.freeze({
@@ -164,6 +205,10 @@ function responsePlanSchema(
       }),
       terminal: Object.freeze({ type: "BOOLEAN" }),
       avoid: Object.freeze({ type: "STRING" }),
+      effectIntent: Object.freeze({
+        type: "STRING",
+        description: "Must be NONE because this candidate has disabled side effects.",
+      }),
     }),
   });
 }
@@ -177,6 +222,7 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "currentNeed: describe the customer's immediate decision, question, concern, correction, or commitment in one concise sentence.",
   "answer.mode must be DIRECT, BOUNDED_UNCERTAINTY, ACKNOWLEDGE, CLARIFY, or HOLD. answer.objective states exactly what the reply must resolve before any continuation.",
   "Select the exact code-owned claimRef values the Responder may use in answer.evidenceRefs. Use only claimRef values present in the request. Select the smallest evidence set that fully supports answer.objective; do not select unrelated facts.",
+  "answer.protectedProposition and answer.protectedResolution declare the protected proposition selected by the Strategist. Use NONE with NOT_APPLICABLE for a non-factual answer. Use SUPPORTED only when the selected evidence has that exact capability; use UNRESOLVED when evidence does not support the proposition, without treating missing evidence as a negative fact.",
   "Never copy a business value into any free-text plan field. Prices, quantities, dates, times, ranges, product names or codes, variants, sizes, colours, stock states, policy terms, store details, customer identifiers, contact details, addresses, and links must stay in code-owned evidence. claimRef values are allowed only inside answer.evidenceRefs.",
   "Missing eligible evidence means unresolved, not false. Use BOUNDED_UNCERTAINTY when the customer's protected proposition cannot be verified. Never plan a denial, absence, impossibility, or unavailable state unless selected evidence supports that exact proposition.",
   "A PRICE claim proves only the verified current price. By itself it does not prove that the price is fixed, that no discount or promotion exists, or that a requested discount is impossible.",
@@ -185,8 +231,8 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "Do not invent a barrier from a neutral factual lookup. When the customer states a concern, comparison, prior experience, deadline, budget gap, fit concern, or purchase condition, keep that exact barrier in answer.objective instead of replacing it with a generic script.",
   "For price hesitation, respond to the stated reason first. Use at most one or two selected value-relevant facts when they directly reduce that uncertainty. Do not claim that a true feature automatically justifies the price, and do not infer an extra promotion or the absence of one from missing evidence.",
   "For an explicitly marked first meaningful ad/referral inbound with resolved product identity, answer the exact question first and select a compact first-contact bundle: verified price plus at most two or three additional decision-useful evidence refs. Do not infer ad origin from dialogue wording alone.",
-  "nextMove is optional. When nextMove.action is ASK, target one concrete missing decision input and state why it advances the current sales decision. Never put more than one decision target in nextMove.",
-  "When nextMove.action = NONE, set nextMove.target = \"NONE\" and nextMove.purpose = \"NONE\".",
+  "nextMove is optional. When nextMove.action is ASK, target one concrete missing decision input and state why it advances the current sales decision. nextMove.decisionInputs must contain exactly that one input. Never put more than one decision target in nextMove.",
+  "When nextMove.action = NONE, set nextMove.target = \"NONE\", nextMove.purpose = \"NONE\", and nextMove.decisionInputs = [].",
   "Choose the single sales move that best addresses the customer's current decision or objection using only available code-owned evidence and capabilities.",
   "Do not default to sizing, checkout, or any fixed funnel step when another supported move is more relevant.",
   "Ordinary nextMove must never request recipient name, phone number, or full delivery address. Payment policy or a non-executing payment preference may be discussed as an ordinary commercial decision; actual checkout-field collection remains canonicalAction ASK_CHECKOUT_DETAILS only.",
@@ -205,7 +251,7 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "answer and canonicalAction are independent responsibilities. ASK_PRODUCT, ASK_MEASUREMENTS, or ASK_CHECKOUT_DETAILS do not override a supported DIRECT, BOUNDED_UNCERTAINTY, or ACKNOWLEDGE answer. Do not change a supported direct answer into CLARIFY merely because a canonical action is also required. Use CLARIFY only when the unresolved current need itself requires clarification. For HOLD_POSITION use answer.mode = HOLD, nextMove.action = NONE, and terminal = true.",
   "terminal means the conversation must not be reopened in this turn. terminal = true requires nextMove.action = NONE.",
   "avoid names the single most important turn-specific failure risk: skipping the direct answer, repeating known information, losing the referent, generic continuation, purchase pressure, unsupported fact, scope widening, or unauthorized effect.",
-  "The response plan never authorizes a side effect. It only selects supported facts and conversational direction. Return only the registered JSON response schema.",
+  "effectIntent must be NONE. The response plan never authorizes a side effect; it only selects supported facts and conversational direction. Return only the registered JSON response schema.",
 ].join("\n");
 
 export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
@@ -341,14 +387,18 @@ function assertExactKeys(
 ): void {
   if (canonicalJsonV1(Object.keys(value).sort()) !==
       canonicalJsonV1([...fields].sort())) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+    schemaInvalid();
   }
+}
+
+function schemaInvalid(): never {
+  throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SCHEMA");
 }
 
 function parsePlanText(value: unknown, maxLength = 500): string {
   if (typeof value !== "string" || value.length === 0 ||
       value.length > maxLength || value !== value.trim()) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+    schemaInvalid();
   }
   const redacted = redactAnalyticsMessage(value);
   if (redacted.dlpStatus !== "PASSED" || redacted.text !== value) {
@@ -359,73 +409,66 @@ function parsePlanText(value: unknown, maxLength = 500): string {
 
 function parseRecord(value: unknown): Readonly<Record<string, unknown>> {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+    schemaInvalid();
   }
   return value as Readonly<Record<string, unknown>>;
 }
 
-function parseConversationPlan(value: unknown): TrackCResponsePlanV2 {
+function parseConversationPlan(value: unknown): ParsedTrackCResponsePlanV2 {
   const record = parseRecord(value);
   assertExactKeys(record, RESPONSE_PLAN_FIELDS);
 
   const answer = parseRecord(record.answer);
   assertExactKeys(answer, ANSWER_FIELDS);
   if (!ANSWER_MODES.includes(answer.mode as TrackCAnswerMode) ||
-      !Array.isArray(answer.evidenceRefs)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+      !Array.isArray(answer.evidenceRefs) ||
+      !TRACK_C_PROTECTED_PROPOSITIONS.includes(
+        answer.protectedProposition as TrackCProtectedProposition,
+      ) ||
+      !TRACK_C_PROTECTED_RESOLUTIONS.includes(
+        answer.protectedResolution as TrackCProtectedResolution,
+      )) {
+    schemaInvalid();
   }
   const evidenceRefs = answer.evidenceRefs.map((ref) => {
     if (typeof ref !== "string" || !/^[A-Z0-9_]+$/u.test(ref)) {
-      throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+      schemaInvalid();
     }
     return ref;
   });
-  if (new Set(evidenceRefs).size !== evidenceRefs.length) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
-  }
 
   const nextMove = parseRecord(record.nextMove);
   assertExactKeys(nextMove, NEXT_MOVE_FIELDS);
-  if (!NEXT_MOVE_ACTIONS.includes(nextMove.action as TrackCNextMoveAction)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+  if (!NEXT_MOVE_ACTIONS.includes(nextMove.action as TrackCNextMoveAction) ||
+      !Array.isArray(nextMove.decisionInputs)) {
+    schemaInvalid();
   }
   const nextMoveTarget = parsePlanText(nextMove.target, 160);
   const nextMovePurpose = parsePlanText(nextMove.purpose, 300);
-  if ((nextMove.action === "NONE" &&
-       (nextMoveTarget !== "NONE" || nextMovePurpose !== "NONE")) ||
-      (nextMove.action === "ASK" &&
-       (nextMoveTarget === "NONE" || nextMovePurpose === "NONE"))) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
-  }
+  const decisionInputs = nextMove.decisionInputs.map((input) =>
+    parsePlanText(input, 160)
+  );
 
   const canonicalAction = parseRecord(record.canonicalAction);
   assertExactKeys(canonicalAction, CANONICAL_ACTION_FIELDS);
   if (!CANONICAL_ACTION_TYPES.includes(
     canonicalAction.type as TrackCCanonicalActionType,
   ) || !Array.isArray(canonicalAction.requestedFields)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+    schemaInvalid();
   }
   const requestedFields = canonicalAction.requestedFields.map((field) => {
     if (!CHECKOUT_FIELDS.includes(field as TrackCCheckoutField)) {
-      throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+      schemaInvalid();
     }
     return field as TrackCCheckoutField;
   });
-  if (new Set(requestedFields).size !== requestedFields.length ||
-      (canonicalAction.type === "ASK_CHECKOUT_DETAILS" &&
-       requestedFields.length === 0) ||
-      (canonicalAction.type !== "ASK_CHECKOUT_DETAILS" &&
-       requestedFields.length !== 0)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
-  }
 
   if (typeof record.terminal !== "boolean") {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+    schemaInvalid();
   }
-  if ((record.terminal && nextMove.action !== "NONE") ||
-      (canonicalAction.type !== "NONE" && nextMove.action !== "NONE") ||
-      (canonicalAction.type === "HOLD_POSITION" && !record.terminal)) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
+  const effectIntent = record.effectIntent;
+  if (typeof effectIntent !== "string" || !/^[A-Z_]+$/u.test(effectIntent)) {
+    schemaInvalid();
   }
 
   return Object.freeze({
@@ -434,11 +477,16 @@ function parseConversationPlan(value: unknown): TrackCResponsePlanV2 {
       mode: answer.mode as TrackCAnswerMode,
       objective: parsePlanText(answer.objective),
       evidenceRefs: Object.freeze(evidenceRefs),
+      protectedProposition:
+        answer.protectedProposition as TrackCProtectedProposition,
+      protectedResolution:
+        answer.protectedResolution as TrackCProtectedResolution,
     }),
     nextMove: Object.freeze({
       action: nextMove.action as TrackCNextMoveAction,
       target: nextMoveTarget,
       purpose: nextMovePurpose,
+      decisionInputs: Object.freeze(decisionInputs),
     }),
     canonicalAction: Object.freeze({
       type: canonicalAction.type as TrackCCanonicalActionType,
@@ -446,12 +494,13 @@ function parseConversationPlan(value: unknown): TrackCResponsePlanV2 {
     }),
     terminal: record.terminal,
     avoid: parsePlanText(record.avoid),
+    effectIntent,
   });
 }
 
 function parseVertexJson(
   payload: unknown,
-  errorCode: "TRACK_C_C3_CONVERSATION_PLAN_INVALID" |
+  errorCode: "TRACK_C_C3_CONVERSATION_PLAN_INVALID:EXTRACTION" |
     "TRACK_C_C3_RESPONDER_OUTPUT_INVALID",
 ): unknown {
   try {
@@ -564,22 +613,96 @@ function selectedClaimRegistry(
     .filter(([claimRef]) => selected.has(claimRef)));
 }
 
+function selectedEvidenceCapabilities(
+  context: ReturnType<typeof contextFromFrozenTrackCCapture>,
+  selectedRefs: readonly string[],
+): readonly TrackCProtectedProposition[] {
+  const capabilityByRef = new Map<string, TrackCProtectedProposition>();
+  for (const [index, claim] of context.verifiedClaims.entries()) {
+    const capability = claim.type as TrackCProtectedProposition;
+    if (TRACK_C_PROTECTED_PROPOSITIONS.includes(capability)) {
+      capabilityByRef.set(
+        `CLAIM_${String(index + 1).padStart(3, "0")}`,
+        capability,
+      );
+    }
+  }
+  if (context.productAttributes !== null &&
+      context.productAttributes !== undefined) {
+    capabilityByRef.set("PRODUCT_ATTRIBUTES_001", "PRODUCT_ATTRIBUTES");
+  }
+  if (context.productPresentation !== null &&
+      context.productPresentation !== undefined) {
+    for (const claim of candidateProductPresentationClaims(
+      context.productPresentation,
+    )) {
+      capabilityByRef.set(claim.claimRef, "PRODUCT_PRESENTATION");
+    }
+  }
+  return Object.freeze(selectedRefs.flatMap((ref) => {
+    const capability = capabilityByRef.get(ref);
+    return capability === undefined ? [] : [capability];
+  }));
+}
+
+function assertTrackCC3ResponsePlanPermitted(
+  context: ReturnType<typeof contextFromFrozenTrackCCapture>,
+  plan: ParsedTrackCResponsePlanV2,
+): TrackCResponsePlanV2 {
+  const registry = buildTrackCClaimReferenceRegistry(context);
+  const evidenceRefs = plan.answer.evidenceRefs;
+  if (new Set(evidenceRefs).size !== evidenceRefs.length ||
+      evidenceRefs.some((ref) => !registry.has(ref))) {
+    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+  }
+  const requestedFields = plan.canonicalAction.requestedFields;
+  if (new Set(requestedFields).size !== requestedFields.length ||
+      (plan.canonicalAction.type === "ASK_CHECKOUT_DETAILS" &&
+       requestedFields.length === 0) ||
+      (plan.canonicalAction.type !== "ASK_CHECKOUT_DETAILS" &&
+       requestedFields.length !== 0)) {
+    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+  }
+  assertTrackCC3ResponsePlanControl({
+    control: {
+      answer: {
+        protectedProposition: plan.answer.protectedProposition,
+        protectedResolution: plan.answer.protectedResolution,
+      },
+      nextMove: {
+        target: plan.nextMove.target,
+        purpose: plan.nextMove.purpose,
+        decisionInputs: plan.nextMove.decisionInputs,
+      },
+      effectIntent: plan.effectIntent,
+    },
+    answerMode: plan.answer.mode,
+    selectedEvidenceCapabilities: selectedEvidenceCapabilities(
+      context,
+      evidenceRefs,
+    ),
+    nextMoveAction: plan.nextMove.action,
+    canonicalActionType: plan.canonicalAction.type,
+    terminal: plan.terminal,
+  });
+  assertTrackCOrdinaryNextMoveSafe(plan.nextMove);
+  assertTrackCCanonicalActionPermitted(context, plan.canonicalAction);
+  return plan as TrackCResponsePlanV2;
+}
+
 export function buildTrackCC3ResponderRequest(
   input: CandidateRequestInput & Readonly<{
     conversationPlan: TrackCResponsePlanV2;
   }>,
 ): BuiltCandidateRequest {
-  const conversationPlan = parseConversationPlan(input.conversationPlan);
   const context = contextFromFrozenTrackCCapture({
     capture: input.capture,
     evaluationAt: input.evaluationAt,
   });
-  assertTrackCOrdinaryNextMoveSafe(conversationPlan.nextMove);
-  assertTrackCCanonicalActionPermitted(context, conversationPlan.canonicalAction);
-  const registry = buildTrackCClaimReferenceRegistry(context);
-  if (conversationPlan.answer.evidenceRefs.some((ref) => !registry.has(ref))) {
-    throw new Error("TRACK_C_C3_CONVERSATION_PLAN_INVALID");
-  }
+  const conversationPlan = assertTrackCC3ResponsePlanPermitted(
+    context,
+    parseConversationPlan(input.conversationPlan),
+  );
 
   const request = buildTrackCOfflineCandidateRequest({
     ...input,
@@ -698,10 +821,17 @@ export async function runTrackCC3TwoPassCandidate(
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
   assertProviderIdentity(strategistResponse.providerModelVersion);
-  const conversationPlan = parseConversationPlan(parseVertexJson(
-    strategistResponse.payload,
-    "TRACK_C_C3_CONVERSATION_PLAN_INVALID",
-  ));
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
+  const conversationPlan = assertTrackCC3ResponsePlanPermitted(
+    context,
+    parseConversationPlan(parseVertexJson(
+      strategistResponse.payload,
+      "TRACK_C_C3_CONVERSATION_PLAN_INVALID:EXTRACTION",
+    )),
+  );
   const conversationPlanHash = sha256(conversationPlan);
 
   const responderRequest = buildTrackCC3ResponderRequest({
@@ -716,10 +846,6 @@ export async function runTrackCC3TwoPassCandidate(
   const providerModelVersion = assertProviderIdentity(
     responderResponse.providerModelVersion,
   );
-  const context = contextFromFrozenTrackCCapture({
-    capture: input.capture,
-    evaluationAt: input.evaluationAt,
-  });
   const output = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,

@@ -120,29 +120,46 @@ function providerPayload(value: unknown) {
   };
 }
 
-function planPayload(overrides: Partial<TrackCResponsePlanV2> = {}) {
+type ResponsePlanOverrides = Omit<Partial<TrackCResponsePlanV2>,
+  "answer" | "nextMove" | "canonicalAction"> & Readonly<{
+    answer?: Partial<TrackCResponsePlanV2["answer"]>;
+    nextMove?: Partial<TrackCResponsePlanV2["nextMove"]>;
+    canonicalAction?: Partial<TrackCResponsePlanV2["canonicalAction"]>;
+  }>;
+
+function planPayload(overrides: ResponsePlanOverrides = {}) {
+  const {
+    answer: answerOverrides = {},
+    nextMove: nextMoveOverrides = {},
+    canonicalAction: canonicalActionOverrides = {},
+    ...planOverrides
+  } = overrides;
   return providerPayload({
     currentNeed: "Resolve the current customer need.",
     answer: {
       mode: "DIRECT",
       objective: "Stay within supplied authority.",
       evidenceRefs: [],
-      ...(overrides.answer ?? {}),
+      protectedProposition: "NONE",
+      protectedResolution: "NOT_APPLICABLE",
+      ...answerOverrides,
     },
     nextMove: {
       action: "NONE",
       target: "NONE",
       purpose: "NONE",
-      ...(overrides.nextMove ?? {}),
+      decisionInputs: [],
+      ...nextMoveOverrides,
     },
     canonicalAction: {
       type: "NONE",
       requestedFields: [],
-      ...(overrides.canonicalAction ?? {}),
+      ...canonicalActionOverrides,
     },
     terminal: false,
     avoid: "Do not invent facts or effects.",
-    ...overrides,
+    effectIntent: "NONE",
+    ...planOverrides,
   });
 }
 
@@ -443,6 +460,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
             action: "ASK",
             target: "cân nặng",
             purpose: "Get the missing measurement needed to assess fit.",
+            decisionInputs: ["cân nặng"],
           },
           canonicalAction: {
             type: "NONE",
