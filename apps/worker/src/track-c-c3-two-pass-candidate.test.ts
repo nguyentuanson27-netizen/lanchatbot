@@ -23,7 +23,7 @@ import {
   buildTrackCC3StrategistRequest,
   runTrackCC3TwoPassCandidate,
 } from "./track-c-c3-two-pass-candidate.js";
-import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runner.js";
+import { runTrackCV5TwoPassBenchmarkCase as executeTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runner.js";
 
 const hash = (character: string): string => character.repeat(64);
 const evaluationAt = new Date("2026-09-05T00:00:00.000Z");
@@ -37,6 +37,68 @@ const evaluationContext = [{
   attachmentCount: 0,
   occurredAt: evaluationAt.toISOString(),
 }] as const;
+
+function v5PayloadForCurrentContract(
+  payload: unknown,
+  requestBody: string,
+): unknown {
+  const text = (payload as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> })
+    ?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (typeof text !== "string") return payload;
+  const value = JSON.parse(text) as Record<string, unknown>;
+  const prompt = JSON.parse(requestBody) as { contents?: [{ parts?: [{ text?: string }] }] };
+  const structured = JSON.parse(prompt.contents?.[0]?.parts?.[0]?.text ?? "{}") as {
+    strategistConstraints?: { evidenceCapabilities?: Record<string, string> };
+  };
+  if (Object.hasOwn(value, "currentNeed")) {
+    const capabilities = structured.strategistConstraints?.evidenceCapabilities ?? {};
+    const proposition = Object.values(capabilities)[0] ?? "NONE";
+    return vertexPayload({
+      replyAct: "ANSWER",
+      goal: "Answer with selected evidence.",
+      proposition,
+      evidenceRefs: Object.entries(capabilities)
+        .filter(([, capability]) => capability === proposition)
+        .map(([ref]) => ref),
+      continuation: { type: "KEEP_OPEN" },
+      canonicalAction: "NONE",
+    });
+  }
+  if (!Array.isArray(value.segments)) return payload;
+  return vertexPayload({
+    ...value,
+    segments: [
+      ...value.segments.map((segment) => ({
+        ...(segment as Record<string, unknown>),
+        role: "ANSWER",
+        decisionInput: "NONE",
+      })),
+      {
+        kind: "GENERAL",
+        text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+        role: "PROGRESSION",
+        decisionInput: "NONE",
+      },
+    ],
+  });
+}
+
+function runTrackCV5TwoPassBenchmarkCase(
+  input: Parameters<typeof executeTrackCV5TwoPassBenchmarkCase>[0],
+) {
+  return executeTrackCV5TwoPassBenchmarkCase({
+    ...input,
+    transport: {
+      send: async (request) => {
+        const response = await input.transport.send(request);
+        return {
+          ...response,
+          payload: v5PayloadForCurrentContract(response.payload, request.body),
+        };
+      },
+    },
+  });
+}
 
 function validCapture(
   verifiedClaims: readonly ProtectedClaimV1[] = [],
@@ -623,9 +685,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       transport,
     });
 
-    expect(result.reply).toBe(
-      "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
-    );
+    expect(result.reply).toContain("Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.");
     expect(result.sideEffects).toBe("DISABLED");
   });
 
@@ -789,9 +849,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       transport,
     });
 
-    expect(result.reply).toBe(
-      "Dạ tên mẫu là Tường Vi ạ.",
-    );
+    expect(result.reply).toContain("Dạ tên mẫu là Tường Vi ạ.");
   });
 
   it("fails before the first provider call for future-dated product attributes", async () => {

@@ -57,6 +57,8 @@ export type TrackCResponderTask = Readonly<{
     goal: string;
   }>;
   evidenceRefs: readonly string[];
+  /** Evidence that the code-owned policy requires the Responder to realize. */
+  requiredEvidenceRefs: readonly string[];
   continuation:
     | Readonly<{ type: "ASK"; input: TrackCOrdinaryDecisionInput }>
     | Readonly<{ type: "KEEP_OPEN" }>
@@ -101,12 +103,14 @@ export function selectTrackCConversationLane(
 
 export function compileTrackCFixedFirstContactTask(input: Readonly<{
   productResolved: boolean;
+  classificationOrVariantRequired: boolean;
   colorChoiceMeaningful: boolean;
   priceEvidenceRef: string | null;
   productEvidenceRefs: readonly string[];
   authorizedSellingPointRef: string | null;
 }>): TrackCResponderTask {
-  if (!input.productResolved || input.priceEvidenceRef === null) {
+  if (!input.productResolved || input.classificationOrVariantRequired ||
+      input.priceEvidenceRef === null) {
     return Object.freeze({
       answer: Object.freeze({
         kind: "CLARIFY",
@@ -114,6 +118,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
         goal: "Clarify the product before giving product-specific information.",
       }),
       evidenceRefs: Object.freeze([]),
+      requiredEvidenceRefs: Object.freeze([]),
       continuation: null,
       canonicalRequest: Object.freeze({ type: "ASK_PRODUCT" }),
     });
@@ -136,6 +141,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       goal: "Answer the verified price and give concise product information.",
     }),
     evidenceRefs: Object.freeze(evidenceRefs),
+    requiredEvidenceRefs: Object.freeze([input.priceEvidenceRef]),
     continuation: input.colorChoiceMeaningful
       ? Object.freeze({ type: "ASK", input: "COLOR" as const })
       : null,
@@ -274,6 +280,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   return Object.freeze({
     answer: Object.freeze({ kind: replyAct, status, goal: record.goal.trim() }),
     evidenceRefs: Object.freeze([...evidenceRefs]),
+    requiredEvidenceRefs: Object.freeze([]),
     continuation,
     canonicalRequest,
   });

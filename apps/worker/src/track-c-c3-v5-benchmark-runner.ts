@@ -33,6 +33,7 @@ import {
 import { runTrackCStrategyContractBenchmarkCase } from
   "./track-c-c3-strategy-contract-runner.js";
 import type {
+  TrackCConversationLane,
   TrackCResponderTask,
   TrackCStrategistDecision,
 } from "./track-c-c3-strategy-contract.js";
@@ -346,7 +347,11 @@ export function validateResponderOutput(
   value: unknown,
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
+  simulationClaimContentHashes: readonly string[] = [],
 ): ContextV2CandidateOutputV2 {
+  if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  }
   const semantic = SemanticOutputSchema.safeParse(value);
   if (!semantic.success) {
     throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
@@ -373,6 +378,7 @@ export function validateResponderOutput(
         context.productPresentation === undefined
       ? []
       : [context.productPresentation.provenance.contentHash]),
+    ...simulationClaimContentHashes,
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
@@ -461,6 +467,8 @@ export interface TrackCV5TwoPassBenchmarkResult {
   readonly evaluationOnly: true;
   readonly sideEffects: "DISABLED";
   readonly executionLane: TrackCV5ExecutionLane;
+  /** Explicit candidate stage shape; never infer it from provider-call count. */
+  readonly conversationLane: TrackCConversationLane;
   readonly conversationPlan:
     | TrackCConversationPlanV1
     | TrackCResponderTask
@@ -515,92 +523,5 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     context,
     simulationFacts,
     simulationMetadata,
-  });
-
-  const common = {
-    modelResource: input.modelResource,
-    capture: input.capture,
-    evaluationAt: input.evaluationAt,
-    evaluationContext: input.evaluationContext,
-  };
-  const strategistRequest = withBenchmarkLane(
-    buildTrackCC3StrategistRequest(common),
-    input.lane,
-    simulationFacts,
-    simulationMetadata,
-  );
-  const strategistResponse = await input.transport.send({
-    url: strategistRequest.url,
-    body: strategistRequest.body,
-    ...(input.signal === undefined ? {} : { signal: input.signal }),
-  });
-  assertProviderIdentity(strategistResponse.providerModelVersion);
-  const conversationPlan = parseConversationPlan(parseVertexJson(
-    strategistResponse.payload,
-    "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID",
-  ));
-
-  const responderRequest = withBenchmarkLane(
-    buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
-    input.lane,
-    simulationFacts,
-    simulationMetadata,
-  );
-  const responderResponse = await input.transport.send({
-    url: responderRequest.url,
-    body: responderRequest.body,
-    ...(input.signal === undefined ? {} : { signal: input.signal }),
-  });
-  assertProviderIdentity(responderResponse.providerModelVersion);
-
-  const resolved = resolveTrackCCandidateClaimReferences(
-    parseVertexJson(
-      responderResponse.payload,
-      "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
-    ),
-    buildTrackCClaimReferenceRegistry(context),
-    {
-      invalid: "TRACK_C_V5_CLAIM_REFERENCE_INVALID",
-      unknown: "TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN",
-      duplicate: "TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE",
-      textMismatch: "TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH",
-    },
-  );
-  const output = validateResponderOutput(
-    context,
-    resolved,
-    input.lane,
-    input.evaluationAt,
-  );
-  const reply = output.segments.map(({ text }) => text).join("\n");
-  const identity = Object.freeze({
-    captureContextHash: context.contextHash,
-    strategistRequestEnvelopeHash:
-      strategistRequest.identity.requestEnvelopeHash,
-    conversationPlanHash: sha256(conversationPlan),
-    responderRequestEnvelopeHash:
-      responderRequest.identity.requestEnvelopeHash,
-    responseOutputHash: sha256(output),
-    compositionHash: sha256({
-      candidateId: TRACK_C_C3_TWO_PASS_CANDIDATE.id,
-      executionLane: input.lane,
-      captureContextHash: context.contextHash,
-      strategistRequestEnvelopeHash:
-        strategistRequest.identity.requestEnvelopeHash,
-      conversationPlanHash: sha256(conversationPlan),
-      responderRequestEnvelopeHash:
-        responderRequest.identity.requestEnvelopeHash,
-      responseOutputHash: sha256(output),
-    }),
-  });
-  return Object.freeze({
-    contractVersion: "TRACK_C_V5_TWO_PASS_BENCHMARK_RESULT_V1",
-    evaluationOnly: true,
-    sideEffects: "DISABLED",
-    executionLane: input.lane,
-    conversationPlan,
-    output,
-    reply,
-    identity,
   });
 }

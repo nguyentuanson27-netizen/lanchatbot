@@ -15,6 +15,7 @@ import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materializ
 import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.js";
 import {
   buildTrackCClaimReferenceRegistry,
+  buildTrackCSimulationFactReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
 import {
@@ -103,6 +104,144 @@ function evidenceCapabilities(context: ContextV2) {
   return values;
 }
 
+type TrackCSelectedEvidence = Readonly<{
+  ref: string;
+  capability: TrackCProtectedProposition;
+  value: unknown;
+  simulationFact: unknown | null;
+}>;
+
+function simulationCapability(fact: unknown): TrackCProtectedProposition | null {
+  if (fact === null || typeof fact !== "object" || Array.isArray(fact)) return null;
+  const kind = (fact as Readonly<Record<string, unknown>>).kind;
+  const capabilities: Readonly<Record<string, TrackCProtectedProposition>> = {
+    PRODUCT_PROFILE: "PRODUCT_ATTRIBUTES",
+    PRODUCT_ATTRIBUTE: "PRODUCT_ATTRIBUTES",
+    POLICY_SNAPSHOT: "POLICY",
+    BUSINESS_LOCATION: "BUSINESS_LOCATION",
+    CARE_GUIDANCE: "CARE_GUIDANCE",
+    OFFER_CONFIGURATION: "OFFER_CONFIGURATION",
+    CHANNEL_PRICE_SNAPSHOT: "PRICE",
+    PROMOTION_SEMANTICS: "PROMOTION_OFFER",
+    FULFILLMENT_SNAPSHOT: "FULFILLMENT_STATUS",
+    CART_TOTAL: "CART_TOTAL",
+    PRODUCT_LIFECYCLE: "PRODUCT_LIFECYCLE",
+    PRODUCT_COMPARISON: "PRODUCT_COMPARISON",
+  };
+  return typeof kind === "string" ? capabilities[kind] ?? null : null;
+}
+
+function simulationEvidenceCapabilities(
+  facts: readonly unknown[],
+): ReadonlyMap<string, TrackCProtectedProposition> {
+  const values = new Map<string, TrackCProtectedProposition>();
+  facts.forEach((fact, index) => {
+    const capability = simulationCapability(fact);
+    if (capability !== null) values.set(
+      `SIMULATION_${String(index + 1).padStart(3, "0")}`,
+      capability,
+    );
+  });
+  return values;
+}
+
+function evidenceValues(
+  context: ContextV2,
+  simulationFacts: readonly unknown[],
+): ReadonlyMap<string, TrackCSelectedEvidence> {
+  const values = new Map<string, TrackCSelectedEvidence>();
+  context.verifiedClaims.forEach((claim, index) => {
+    const capability = capabilityForClaim(claim.type);
+    if (capability !== null) values.set(`CLAIM_${String(index + 1).padStart(3, "0")}`, {
+      ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,
+      capability,
+      value: claim.value,
+      simulationFact: null,
+    });
+  });
+  if (context.productAttributes !== null && context.productAttributes !== undefined) {
+    values.set("PRODUCT_ATTRIBUTES_001", {
+      ref: "PRODUCT_ATTRIBUTES_001",
+      capability: "PRODUCT_ATTRIBUTES",
+      value: {
+        materials: context.productAttributes.materials,
+        materialComponents: context.productAttributes.materialComponents,
+        colors: context.productAttributes.colors,
+        styles: context.productAttributes.styles,
+        silhouettes: context.productAttributes.silhouettes,
+        occasions: context.productAttributes.occasions,
+        designAttributes: context.productAttributes.designAttributes,
+        careInstructions: context.productAttributes.careInstructions,
+        wearProperties: context.productAttributes.wearProperties,
+        backCoverage: context.productAttributes.backCoverage,
+        designComplexity: context.productAttributes.designComplexity,
+      },
+      simulationFact: null,
+    });
+  }
+  if (context.productPresentation !== null && context.productPresentation !== undefined) {
+    for (const claim of candidateProductPresentationClaims(context.productPresentation)) {
+      values.set(claim.claimRef, {
+        ref: claim.claimRef,
+        capability: "PRODUCT_PRESENTATION",
+        value: claim.placeholders,
+        simulationFact: null,
+      });
+    }
+  }
+  simulationFacts.forEach((fact, index) => {
+    const capability = simulationCapability(fact);
+    if (capability !== null) {
+      const ref = `SIMULATION_${String(index + 1).padStart(3, "0")}`;
+      values.set(ref, { ref, capability, value: fact, simulationFact: fact });
+    }
+  });
+  return values;
+}
+
+function materializedEvidenceText(evidence: TrackCSelectedEvidence): string {
+  if (evidence.capability === "PRICE" && evidence.value !== null &&
+      typeof evidence.value === "object" && !Array.isArray(evidence.value)) {
+    const value = evidence.value as Readonly<Record<string, unknown>>;
+    if (typeof value.amountVnd === "number" && typeof value.currency === "string") {
+      return `Giá hiện tại là ${new Intl.NumberFormat("vi-VN").format(value.amountVnd)} ${value.currency} ạ.`;
+    }
+  }
+  if (evidence.capability === "PRODUCT_PRESENTATION" && evidence.value !== null &&
+      typeof evidence.value === "object" && !Array.isArray(evidence.value)) {
+    const value = evidence.value as Readonly<Record<string, unknown>>;
+    const displayName = value.DISPLAY_NAME;
+    const color = value.VARIANT_COLOR;
+    const size = value.VARIANT_SIZE;
+    if (typeof displayName === "string" && typeof color === "string" &&
+        typeof size === "string") {
+      return `Dạ ${displayName} có phiên bản màu ${color}, size ${size} ạ.`;
+    }
+    if (typeof displayName === "string") return `Dạ tên mẫu là ${displayName} ạ.`;
+  }
+  if (evidence.capability === "PRODUCT_ATTRIBUTES" && evidence.value !== null &&
+      typeof evidence.value === "object" && !Array.isArray(evidence.value)) {
+    const value = evidence.value as Readonly<Record<string, unknown>>;
+    const materials = value.materials;
+    if (Array.isArray(materials) && materials.every((material) => typeof material === "string") &&
+        materials.length > 0) {
+      return `Dạ mẫu có chất liệu ${materials.join(", ")} ạ.`;
+    }
+  }
+  return `Thông tin đã xác minh: ${canonicalJsonV1(evidence.value)}.`;
+}
+
+function selectedEvidence(
+  allEvidence: ReadonlyMap<string, TrackCSelectedEvidence>,
+  refs: readonly string[],
+): readonly TrackCSelectedEvidence[] {
+  return Object.freeze(refs.map((ref) => {
+    const evidence = allEvidence.get(ref);
+    if (evidence === undefined) throw new Error("TRACK_C_SELECTED_EVIDENCE_INVALID");
+    return evidence;
+  }));
+}
+
 function canonicalConstraints(
   context: ContextV2,
   metadata: readonly TrackCV5SimulationMetadata[],
@@ -149,6 +288,7 @@ function withSchema(
   request: BuiltCandidateRequest,
   responseSchema: unknown,
   promptPatch: Readonly<Record<string, unknown>>,
+  omittedPromptKeys: readonly string[] = [],
 ): BuiltCandidateRequest {
   const body = JSON.parse(request.body) as {
     contents: readonly [{ parts: readonly [{ text: string }] }];
@@ -159,7 +299,12 @@ function withSchema(
   const candidateBody = JSON.stringify({
     ...body,
     contents: [{ ...body.contents[0], parts: [{
-      text: canonicalJsonV1({ ...prompt, ...promptPatch }),
+      text: canonicalJsonV1({
+        ...Object.fromEntries(Object.entries(prompt).filter(([key]) =>
+          !omittedPromptKeys.includes(key)
+        )),
+        ...promptPatch,
+      }),
     }] }],
     generationConfig: { ...body.generationConfig, responseSchema },
   });
@@ -206,6 +351,7 @@ function responderRequest(input: Readonly<{
   evaluationAt: Date;
   evaluationContext: readonly ShadowContextMessage[];
   task: TrackCResponderTask;
+  evidence: readonly TrackCSelectedEvidence[];
 }>): BuiltCandidateRequest {
   const base = buildTrackCOfflineCandidateRequest({ ...input, systemInstruction: RESPONDER_INSTRUCTION });
   const body = JSON.parse(base.body) as {
@@ -232,7 +378,24 @@ function responderRequest(input: Readonly<{
       },
     },
   };
-  return withSchema(base, responseSchema, { responderTask: input.task });
+  return withSchema(base, responseSchema, {
+    responderTask: input.task,
+    selectedEvidence: input.evidence.map((evidence) => Object.freeze({
+      ref: evidence.ref,
+      capability: evidence.capability,
+      value: evidence.value,
+    })),
+  }, [
+    "verifiedClaims",
+    "productAttributes",
+    "productPresentation",
+    "dialogueEvidence",
+    "phase",
+    "barriers",
+    "buyingIntent",
+    "cartReadiness",
+    "ownership",
+  ]);
 }
 
 function metadataFreeOutput(value: unknown): unknown {
@@ -250,6 +413,18 @@ function metadataFreeOutput(value: unknown): unknown {
   });
 }
 
+function expectedResponderStrategy(task: TrackCResponderTask): string {
+  if (task.canonicalRequest?.type === "HOLD_POSITION") {
+    return "HOLD_POSITION";
+  }
+  if (task.canonicalRequest !== null || task.continuation?.type === "ASK" ||
+      task.answer.kind === "CLARIFY") {
+    return "ASK_CLARIFICATION";
+  }
+  if (task.answer.kind === "ACKNOWLEDGE") return "HOLD_POSITION";
+  return "ANSWER_VERIFIED_FACTS";
+}
+
 function assertResponderTask(output: unknown, task: TrackCResponderTask): void {
   const record = output as Readonly<Record<string, unknown>>;
   if (record === null || typeof record !== "object" || Array.isArray(record) ||
@@ -261,9 +436,15 @@ function assertResponderTask(output: unknown, task: TrackCResponderTask): void {
       typeof segment.decisionInput !== "string")) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
+  if (segments.some((segment) => segment.kind === "EFFECT_CLAIM")) {
+    throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  }
   const answerSegments = segments.filter((segment) => segment.role === "ANSWER");
   const progressionSegments = segments.filter((segment) => segment.role === "PROGRESSION");
   const canonicalSegments = segments.filter((segment) => segment.role === "CANONICAL");
+  if (record.strategy !== expectedResponderStrategy(task)) {
+    throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+  }
   if (task.answer.kind === "ANSWER" && answerSegments.length === 0 ||
       task.answer.kind !== "ANSWER" && answerSegments.some((segment) =>
         segment.kind === "VERIFIED_CLAIM")) {
@@ -275,6 +456,18 @@ function assertResponderTask(output: unknown, task: TrackCResponderTask): void {
       answerSegments.some((segment) => segment.kind === "VERIFIED_CLAIM")) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
+  if (task.answer.status === "SUPPORTED" &&
+      answerSegments.some((segment) => segment.kind !== "VERIFIED_CLAIM")) {
+    throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+  }
+  const realizedRefs = new Set(answerSegments.flatMap((segment) =>
+    segment.kind === "VERIFIED_CLAIM" && typeof segment.claimRef === "string"
+      ? [segment.claimRef]
+      : []
+  ));
+  if (task.requiredEvidenceRefs.some((ref) => !realizedRefs.has(ref))) {
+    throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+  }
   if (task.continuation?.type === "ASK") {
     if (progressionSegments.length !== 1 || canonicalSegments.length !== 0 ||
         progressionSegments[0]?.decisionInput !== task.continuation.input ||
@@ -282,7 +475,9 @@ function assertResponderTask(output: unknown, task: TrackCResponderTask): void {
     return;
   }
   if (task.continuation?.type === "KEEP_OPEN") {
-    if (progressionSegments.length !== 0 || canonicalSegments.length !== 0 ||
+    if (progressionSegments.length !== 1 || canonicalSegments.length !== 0 ||
+        progressionSegments[0]?.kind !== "GENERAL" ||
+        progressionSegments[0]?.decisionInput !== "NONE" ||
         record.cta !== "NONE") throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     return;
   }
@@ -299,13 +494,19 @@ function assertResponderTask(output: unknown, task: TrackCResponderTask): void {
         : null;
   if (expected !== null) {
     if (record.strategy !== "ASK_CLARIFICATION" || record.cta !== expected[2] ||
-        !canonicalSegments.some((segment) => segment.target === expected[0]) ||
-        !canonicalSegments.some((segment) => segment.action === expected[1])) {
+        canonicalSegments.length !== 2 ||
+        canonicalSegments.filter((segment) =>
+          segment.kind === "CLARIFICATION" && segment.target === expected[0]
+        ).length !== 1 ||
+        canonicalSegments.filter((segment) =>
+          segment.kind === "ACTION_REQUEST" && segment.action === expected[1]
+        ).length !== 1) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
     return;
   }
-  if (type !== "HOLD_POSITION" || record.strategy !== "HOLD_POSITION" ||
+  if (type !== "HOLD_POSITION" || canonicalSegments.length !== 0 ||
+      record.strategy !== "HOLD_POSITION" ||
       record.cta !== "NONE" || segments.some((segment) =>
         segment.kind === "CLARIFICATION" || segment.kind === "ACTION_REQUEST" ||
         (typeof segment.text === "string" && segment.text.includes("?")))) {
@@ -322,6 +523,44 @@ function assertNoUndeclaredCheckoutPii(
   if (output.segments.some(({ text }) => pii.test(text.normalize("NFC")))) {
     throw new Error("TRACK_C_UNAUTHORIZED_CHECKOUT_REQUEST");
   }
+}
+
+function materializeSelectedFactualText(
+  raw: unknown,
+  resolved: unknown,
+  evidence: readonly TrackCSelectedEvidence[],
+): unknown {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw) ||
+      resolved === null || typeof resolved !== "object" || Array.isArray(resolved)) {
+    throw new Error("TRACK_C_SELECTED_EVIDENCE_INVALID");
+  }
+  const rawSegments = (raw as Readonly<Record<string, unknown>>).segments;
+  const resolvedSegments = (resolved as Readonly<Record<string, unknown>>).segments;
+  if (!Array.isArray(rawSegments) || !Array.isArray(resolvedSegments) ||
+      rawSegments.length !== resolvedSegments.length) {
+    throw new Error("TRACK_C_SELECTED_EVIDENCE_INVALID");
+  }
+  const byRef = new Map(evidence.map((entry) => [entry.ref, entry]));
+  return Object.freeze({
+    ...(resolved as Readonly<Record<string, unknown>>),
+    segments: Object.freeze(resolvedSegments.map((segment, index) => {
+      const rawSegment = rawSegments[index];
+      if (segment === null || typeof segment !== "object" || Array.isArray(segment) ||
+          rawSegment === null || typeof rawSegment !== "object" || Array.isArray(rawSegment)) {
+        throw new Error("TRACK_C_SELECTED_EVIDENCE_INVALID");
+      }
+      const rawRecord = rawSegment as Readonly<Record<string, unknown>>;
+      if (rawRecord.kind !== "VERIFIED_CLAIM") return segment;
+      const selected = typeof rawRecord.claimRef === "string"
+        ? byRef.get(rawRecord.claimRef)
+        : undefined;
+      if (selected === undefined) throw new Error("TRACK_C_SELECTED_EVIDENCE_INVALID");
+      return Object.freeze({
+        ...(segment as Readonly<Record<string, unknown>>),
+        text: materializedEvidenceText(selected),
+      });
+    })),
+  });
 }
 
 function replyForTask(
@@ -354,12 +593,23 @@ function fixedTask(context: ContextV2): TrackCResponderTask {
       : ["PRODUCT_ATTRIBUTES_001"]
     : candidateProductPresentationClaims(presentation).slice(0, 1).map(({ claimRef }) => claimRef);
   const colors = presentation?.variants.flatMap((variant) => variant.color === null ? [] : [variant.color]) ?? [];
+  const classificationOrVariantRequired = context.productBinding.status !== "RESOLVED" ||
+    context.productBinding.productIds.length !== 1 ||
+    context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY");
+  const authorizedSellingPointRef = context.productAttributes !== null &&
+      context.productAttributes !== undefined &&
+      (context.productAttributes.materials.length > 0 ||
+       Object.values(context.productAttributes.wearProperties ?? {}).some(Boolean) ||
+       context.productAttributes.styles.length > 0)
+    ? "PRODUCT_ATTRIBUTES_001"
+    : null;
   return compileTrackCFixedFirstContactTask({
     productResolved: context.productBinding.status === "RESOLVED",
+    classificationOrVariantRequired,
     colorChoiceMeaningful: new Set(colors).size > 1,
     priceEvidenceRef: priceIndex === -1 ? null : `CLAIM_${String(priceIndex + 1).padStart(3, "0")}`,
     productEvidenceRefs,
-    authorizedSellingPointRef: null,
+    authorizedSellingPointRef,
   });
 }
 
@@ -370,7 +620,11 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
   simulationMetadata: readonly TrackCV5SimulationMetadata[];
 }>): Promise<TrackCV5TwoPassBenchmarkResult> {
   const lane = selectTrackCConversationLane(input.simulationMetadata);
-  const capabilities = evidenceCapabilities(input.context);
+  const allEvidence = evidenceValues(input.context, input.simulationFacts);
+  const capabilities = new Map([
+    ...evidenceCapabilities(input.context),
+    ...simulationEvidenceCapabilities(input.simulationFacts),
+  ]);
   const constraints = canonicalConstraints(input.context, input.simulationMetadata);
   const common = {
     modelResource: input.input.modelResource,
@@ -410,8 +664,10 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
     strategistHash = request.identity.requestEnvelopeHash;
     artifact = decision as TrackCStrategistDecision;
   }
-  const request = withBenchmarkLane(responderRequest({ ...common, task }), input.input.lane,
-    input.simulationFacts, input.simulationMetadata);
+  const selected = selectedEvidence(allEvidence, task.evidenceRefs);
+  const request = withBenchmarkLane(responderRequest({ ...common, task, evidence: selected }), input.input.lane,
+    selected.flatMap((evidence) => evidence.simulationFact === null ? [] : [evidence.simulationFact]),
+    input.simulationMetadata);
   const response = await input.input.transport.send({
     url: request.url,
     body: request.body,
@@ -420,8 +676,17 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
   if (response.providerModelVersion !== "gemini-3.5-flash-lite") {
     throw new Error("TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH");
   }
-  const selectedRegistry = new Map([...buildTrackCClaimReferenceRegistry(input.context)]
+  const selectedRegistry = new Map([
+    ...buildTrackCClaimReferenceRegistry(input.context),
+    ...buildTrackCSimulationFactReferenceRegistry(input.simulationFacts),
+  ]
     .filter(([ref]) => task.evidenceRefs.includes(ref)));
+  const selectedSimulationHashes = selected.flatMap((evidence) => {
+    if (evidence.simulationFact === null) return [];
+    const entry = selectedRegistry.get(evidence.ref);
+    if (entry === undefined) throw new Error("TRACK_C_SELECTED_EVIDENCE_INVALID");
+    return [entry.contentHash];
+  });
   const raw = providerJson(response.payload, "TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
   assertResponderTask(raw, task);
   const resolved = resolveTrackCCandidateClaimReferences(raw, selectedRegistry, {
@@ -430,8 +695,10 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
     duplicate: "TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE",
     textMismatch: "TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH",
   });
-  const output = validateResponderOutput(input.context, metadataFreeOutput(resolved),
-    input.input.lane, input.input.evaluationAt) as ContextV2CandidateOutputV2;
+  const output = validateResponderOutput(input.context, metadataFreeOutput(
+    materializeSelectedFactualText(raw, resolved, selected),
+  ), input.input.lane, input.input.evaluationAt, selectedSimulationHashes) as
+    ContextV2CandidateOutputV2;
   assertNoUndeclaredCheckoutPii(output, task);
   const reply = replyForTask(output, task);
   const identity = Object.freeze({
@@ -447,6 +714,7 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
     evaluationOnly: true,
     sideEffects: "DISABLED",
     executionLane: input.input.lane,
+    conversationLane: lane,
     conversationPlan: artifact,
     output,
     reply,

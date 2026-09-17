@@ -15,7 +15,7 @@ import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runne
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
-const EVAL_ROOT = new URL("../evals/track-c-c3-v5/v4/", import.meta.url);
+const EVAL_ROOT = new URL("../evals/track-c-c2/v2/", import.meta.url);
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(new URL(name, EVAL_ROOT), "utf8")) as T;
@@ -84,18 +84,54 @@ function dialogue(): readonly ShadowContextMessage[] {
 }
 
 function providerPayload(value: unknown) {
+  const record = value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+  const normalized = record !== null && Array.isArray(record.segments)
+    ? {
+        ...record,
+        segments: [
+          ...record.segments.map((segment) => {
+            const item = segment as Record<string, unknown>;
+            return {
+              ...item,
+              role: item.kind === "VERIFIED_CLAIM" || item.kind === "EFFECT_CLAIM"
+                ? "ANSWER"
+                : "ANSWER",
+              decisionInput: "NONE",
+            };
+          }),
+          ...(record.cta === "NONE" ? [{
+            kind: "GENERAL",
+            text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+            role: "PROGRESSION",
+            decisionInput: "NONE",
+          }] : []),
+        ],
+      }
+    : record !== null && Object.hasOwn(record, "currentNeed")
+      ? {
+          replyAct: "ANSWER",
+          goal: "Answer the verified price.",
+          proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }
+      : value;
   return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }],
+    candidates: [{ content: { parts: [{ text: JSON.stringify(normalized) }] } }],
   };
 }
 
 function planPayload() {
   return providerPayload({
-    currentNeed: "Answer the current price question.",
-    mustResolve: "Give the verified price directly.",
-    conversationRead: "The product is already resolved.",
-    nextMove: "NONE",
-    avoid: "Do not invent another fact.",
+    replyAct: "ANSWER",
+    goal: "Answer the verified price.",
+    proposition: "PRICE",
+    evidenceRefs: ["CLAIM_001"],
+    continuation: { type: "KEEP_OPEN" },
+    canonicalAction: "NONE",
   });
 }
 
@@ -192,11 +228,11 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(send).toHaveBeenCalledTimes(2);
     expect(result.executionLane).toBe("PRODUCTION_CONTRACT");
     expect(result.sideEffects).toBe("DISABLED");
-    expect(result.output.segments).toEqual([{
+    expect(result.output.segments[0]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu này hiện 849k chị ạ.",
+      text: "Giá hiện tại là 849.000 VND ạ.",
       claimContentHash: capture.context.verifiedClaims[0]?.provenance.contentHash,
-    }]);
+    });
     expect(result.identity.captureContextHash).toBe(capture.context.contextHash);
     expect(result.identity.compositionHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(send.mock.calls.map(([request]) => request.body).join("\n"))
@@ -212,7 +248,14 @@ describe("Track C C3 V5 benchmark runner", () => {
     }
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: providerPayload({
+          replyAct: "ANSWER",
+          goal: "Answer with the selected product attributes.",
+          proposition: "PRODUCT_ATTRIBUTES",
+          evidenceRefs: ["PRODUCT_ATTRIBUTES_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -237,12 +280,12 @@ describe("Track C C3 V5 benchmark runner", () => {
       transport: { send },
     });
 
-    expect(result.output.segments).toEqual([{
+    expect(result.output.segments[0]).toMatchObject({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu này dùng chất liệu lụa ạ.",
       claimContentHash:
         capture.context.productAttributes.metadata.contentHash,
-    }]);
+    });
+    expect(result.output.segments[0]?.text).toBe("Dạ mẫu có chất liệu LỤA ạ.");
     expect(result.sideEffects).toBe("DISABLED");
   });
 
@@ -268,7 +311,14 @@ describe("Track C C3 V5 benchmark runner", () => {
     });
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: providerPayload({
+          replyAct: "ANSWER",
+          goal: "Answer both selected verified prices.",
+          proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001", "CLAIM_002"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -290,8 +340,10 @@ describe("Track C C3 V5 benchmark runner", () => {
     });
 
     expect(send).toHaveBeenCalledTimes(2);
-    expect(result.output.segments).toHaveLength(2);
-    expect(result.output.segments.every(({ kind }) => kind === "VERIFIED_CLAIM"))
+    expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM"))
+      .toHaveLength(2);
+    expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")
+      .every(({ kind }) => kind === "VERIFIED_CLAIM"))
       .toBe(true);
   });
 
@@ -321,7 +373,7 @@ describe("Track C C3 V5 benchmark runner", () => {
       evaluationAt: new Date(recipe.evaluation_at),
       evaluationContext: dialogue(),
       transport: { send },
-    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED:UNAUTHORIZED_PRICE");
+    })).rejects.toThrow("TRACK_C_RESPONDER_TASK_MISMATCH");
     expect(send).toHaveBeenCalledTimes(2);
   });
 

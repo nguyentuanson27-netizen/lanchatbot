@@ -50,7 +50,9 @@ function payload(value: unknown) {
 
 function responderPayload(input: Readonly<{
   continuation?: "COLOR";
+  keepOpen?: boolean;
   canonicalMeasurements?: boolean;
+  strategy?: "ANSWER_VERIFIED_FACTS" | "ASK_CLARIFICATION" | "HOLD_POSITION";
 }>) {
   return payload({
     segments: [{
@@ -59,7 +61,12 @@ function responderPayload(input: Readonly<{
       claimRef: "CLAIM_001",
       role: "ANSWER",
       decisionInput: "NONE",
-    }, ...(input.continuation === undefined ? [] : [{
+    }, ...(input.keepOpen === true ? [{
+      kind: "GENERAL",
+      text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+      role: "PROGRESSION",
+      decisionInput: "NONE",
+    }] : []), ...(input.continuation === undefined ? [] : [{
       kind: "GENERAL",
       text: "Chị thích màu nào hơn ạ?",
       role: "PROGRESSION",
@@ -77,9 +84,9 @@ function responderPayload(input: Readonly<{
       role: "CANONICAL",
       decisionInput: "NONE",
     }] : [])],
-    strategy: input.canonicalMeasurements === true || input.continuation !== undefined
+    strategy: input.strategy ?? (input.canonicalMeasurements === true || input.continuation !== undefined
       ? "ASK_CLARIFICATION"
-      : "ANSWER_VERIFIED_FACTS",
+      : "ANSWER_VERIFIED_FACTS"),
     cta: input.canonicalMeasurements === true
       ? "ASK_MEASUREMENTS"
       : "NONE",
@@ -106,6 +113,7 @@ describe("Track C C3 simplified strategy contract", () => {
   it("uses one fixed progression and never asks usual size first", () => {
     const task = compileTrackCFixedFirstContactTask({
       productResolved: true,
+      classificationOrVariantRequired: false,
       colorChoiceMeaningful: true,
       priceEvidenceRef: "CLAIM_001",
       productEvidenceRefs: ["PRODUCT_PRESENTATION_VARIANT_001"],
@@ -125,6 +133,7 @@ describe("Track C C3 simplified strategy contract", () => {
   it("asks measurements when color is not a meaningful choice", () => {
     const task = compileTrackCFixedFirstContactTask({
       productResolved: true,
+      classificationOrVariantRequired: false,
       colorChoiceMeaningful: false,
       priceEvidenceRef: "CLAIM_001",
       productEvidenceRefs: [],
@@ -134,6 +143,24 @@ describe("Track C C3 simplified strategy contract", () => {
     expect(task.continuation).toBeNull();
     expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
     expect(task.evidenceRefs).toEqual(["CLAIM_001"]);
+  });
+
+  it("prioritizes canonical product classification before price and fit progression", () => {
+    const task = compileTrackCFixedFirstContactTask({
+      productResolved: true,
+      classificationOrVariantRequired: true,
+      colorChoiceMeaningful: true,
+      priceEvidenceRef: "CLAIM_001",
+      productEvidenceRefs: ["PRODUCT_PRESENTATION_VARIANT_001"],
+      authorizedSellingPointRef: "PRODUCT_ATTRIBUTES_001",
+    });
+
+    expect(task).toMatchObject({
+      evidenceRefs: [],
+      requiredEvidenceRefs: [],
+      continuation: null,
+      canonicalRequest: { type: "ASK_PRODUCT" },
+    });
   });
 
   it("keeps product and measurements canonical-only and permits usual size only as a fallback", () => {
@@ -215,7 +242,7 @@ describe("Track C C3 simplified strategy contract", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
-        payload: responderPayload({}),
+        payload: responderPayload({ keepOpen: true }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
     await runTrackCV5TwoPassBenchmarkCase({
@@ -234,5 +261,163 @@ describe("Track C C3 simplified strategy contract", () => {
       transport: { send: adaptiveSend },
     });
     expect(adaptiveSend).toHaveBeenCalledTimes(2);
+    const responderBody = JSON.parse(adaptiveSend.mock.calls[1]?.[0].body ?? "{}") as {
+      contents?: Array<{ parts?: Array<{ text?: string }> }>;
+    };
+    const responderPrompt = JSON.parse(
+      responderBody.contents?.[0]?.parts?.[0]?.text ?? "{}",
+    ) as Record<string, unknown>;
+    expect(responderPrompt).not.toHaveProperty("verifiedClaims");
+    expect(responderPrompt).not.toHaveProperty("productAttributes");
+    expect(responderPrompt.selectedEvidence).toEqual([expect.objectContaining({
+      ref: "CLAIM_001",
+      capability: "PRICE",
+    })]);
+  });
+
+  it("rejects an adaptive KEEP_OPEN reply that does not realize its continuation", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the verified price.",
+          proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: responderPayload({}),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("PRODUCTION_CONTRACT"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND",
+        senderType: "CUSTOMER",
+        messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_TASK_MISMATCH");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a Responder strategy that differs from the code-owned task", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the verified price and ask about color.",
+          proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "ASK", input: "COLOR" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: responderPayload({
+          continuation: "COLOR",
+          strategy: "ANSWER_VERIFIED_FACTS",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("PRODUCTION_CONTRACT"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND",
+        senderType: "CUSTOMER",
+        messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_TASK_MISMATCH");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it("binds simulation-only facts through selected evidence without exposing unselected Context V2 facts", async () => {
+    const simulationFact = {
+      kind: "PRODUCT_PROFILE",
+      productId: "SQ9012",
+      displayName: "Tường Vi",
+      material: "tơ xước mềm",
+    };
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer with the selected product detail.",
+          proposition: "PRODUCT_ATTRIBUTES",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          segments: [{
+            kind: "VERIFIED_CLAIM",
+            text: "Mẫu này rất thoải mái chị ạ.",
+            claimRef: "SIMULATION_001",
+            role: "ANSWER",
+            decisionInput: "NONE",
+          }, {
+            kind: "GENERAL",
+            text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+            role: "PROGRESSION",
+            decisionInput: "NONE",
+          }],
+          strategy: "ANSWER_VERIFIED_FACTS",
+          cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND",
+        senderType: "CUSTOMER",
+        messageType: "TEXT",
+        text: "Mẫu này chất liệu gì em?",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      simulationFacts: [simulationFact],
+      transport: { send },
+    });
+
+    expect(result.reply).toContain("Tường Vi");
+    const responderBody = JSON.parse(send.mock.calls[1]?.[0].body ?? "{}") as {
+      contents?: Array<{ parts?: Array<{ text?: string }> }>;
+    };
+    const responderPrompt = JSON.parse(
+      responderBody.contents?.[0]?.parts?.[0]?.text ?? "{}",
+    ) as Record<string, unknown>;
+    expect(responderPrompt).not.toHaveProperty("verifiedClaims");
+    expect(responderPrompt.selectedEvidence).toEqual([expect.objectContaining({
+      ref: "SIMULATION_001",
+      capability: "PRODUCT_ATTRIBUTES",
+    })]);
+    expect(responderPrompt.benchmarkSimulationFacts).toEqual([simulationFact]);
   });
 });
