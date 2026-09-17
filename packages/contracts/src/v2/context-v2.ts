@@ -12,6 +12,10 @@ import {
 } from "./decision-observability.js";
 import { ProtectedClaimV1Schema } from "./canonical-evidence-readiness.js";
 import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
+import {
+  CanonicalCheckoutCompletenessV1Schema,
+  CheckoutRequiredFieldV1Schema,
+} from "./checkout-completeness.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedReasonCodeSchema = z.string().regex(/^[A-Z0-9][A-Z0-9_.:-]{0,127}$/u);
@@ -309,6 +313,7 @@ export const ContextV2Schema = z.object({
     readinessHash: Sha256Schema,
     expiresAt: z.string().datetime(),
   }).strict().nullable(),
+  checkoutCompleteness: CanonicalCheckoutCompletenessV1Schema.nullable().optional(),
   ownership: z.object({
     owner: z.enum(["BOT", "HUMAN"]),
     handoffActive: z.boolean(),
@@ -349,6 +354,10 @@ export const ContextV2Schema = z.object({
         value.finalTurnEvidence.finalSalesCycleRevision ||
       value.barriers.salesCycleRevision !==
         value.finalTurnEvidence.finalSalesCycleRevision ||
+      (value.checkoutCompleteness !== undefined &&
+        value.checkoutCompleteness !== null &&
+        value.checkoutCompleteness.salesCycleRevision !==
+          value.finalTurnEvidence.finalSalesCycleRevision) ||
       value.barriers.conversationRevision !==
         value.finalTurnEvidence.finalConversationRevision) {
     context.addIssue({
@@ -463,6 +472,12 @@ export type ContextV2CandidateRequestedActionV2 = z.infer<
   typeof ContextV2CandidateRequestedActionV2Schema
 >;
 
+const ContextV2CandidateNonCheckoutRequestedActionV2Schema = z.enum([
+  "PROVIDE_PRODUCT",
+  "PROVIDE_MEASUREMENTS",
+  "CONFIRM_CART",
+]);
+
 // The interpreter sees customer wording, so it uses a customer-visible name
 // for selection confirmation instead of the runtime's internal cart label.
 export const GateEOutputInterpretationRequestedActionV1Schema = z.enum([
@@ -475,9 +490,7 @@ export type GateEOutputInterpretationRequestedActionV1 = z.infer<
   typeof GateEOutputInterpretationRequestedActionV1Schema
 >;
 
-export const ContextV2CandidateSemanticSegmentV2Schema = z.discriminatedUnion(
-  "kind",
-  [
+export const ContextV2CandidateSemanticSegmentV2Schema = z.union([
     z.object({
       kind: z.literal("GENERAL"),
       text: z.string().min(1).max(1_000),
@@ -495,15 +508,23 @@ export const ContextV2CandidateSemanticSegmentV2Schema = z.discriminatedUnion(
     z.object({
       kind: z.literal("ACTION_REQUEST"),
       text: z.string().min(1).max(1_000),
-      action: ContextV2CandidateRequestedActionV2Schema,
+      action: z.literal("PROVIDE_CHECKOUT_DETAILS"),
+      // This describes the checkout action itself. It is intentionally
+      // separate from customer-facing text so canonical checkout validation
+      // never needs to infer a requested PII field from wording.
+      requestedFields: z.array(CheckoutRequiredFieldV1Schema).min(1).max(4).optional(),
+    }).strict(),
+    z.object({
+      kind: z.literal("ACTION_REQUEST"),
+      text: z.string().min(1).max(1_000),
+      action: ContextV2CandidateNonCheckoutRequestedActionV2Schema,
     }).strict(),
     z.object({
       kind: z.literal("EFFECT_CLAIM"),
       text: z.string().min(1).max(1_000),
       effect: ContextV2CandidateEffectV2Schema,
     }).strict(),
-  ],
-);
+]);
 export type ContextV2CandidateSemanticSegmentV2 = z.infer<
   typeof ContextV2CandidateSemanticSegmentV2Schema
 >;

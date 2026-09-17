@@ -23,6 +23,7 @@ import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
 } from "./track-c-replay.js";
+import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
 
 const validated = new WeakSet<object>();
 const TrackCOfflineCandidateSemanticOutputSchema =
@@ -81,6 +82,47 @@ function sizeGuardInput(context: ContextV2, claimHashes: ReadonlySet<string>) {
 
 function replyFromOutput(output: ContextV2CandidateOutputV2): string {
   return output.segments.map(({ text }) => text).join("\n");
+}
+
+/**
+ * Final, side-effect-free checkout guard. The model owns whether checkout is
+ * the conversational action. When it selects checkout, canonical Context V2
+ * strictly limits collection to the currently missing fields.
+ */
+export function assertTrackCCheckoutCompletenessOutput(
+  context: ContextV2,
+  output: ContextV2CandidateOutputV2,
+  errorCode: string,
+): void {
+  const completeness = context.checkoutCompleteness;
+  if (completeness === null || completeness === undefined) return;
+  const checkoutClarifications = output.segments.filter((segment) =>
+    segment.kind === "CLARIFICATION" && segment.target === "CHECKOUT_DETAILS"
+  );
+  const checkoutActions = output.segments.filter((segment) =>
+    segment.kind === "ACTION_REQUEST" &&
+    segment.action === "PROVIDE_CHECKOUT_DETAILS"
+  );
+  const checkoutRequested = output.cta === "ASK_CHECKOUT_DETAILS" ||
+    checkoutClarifications.length > 0 || checkoutActions.length > 0;
+  if (!checkoutRequested) return;
+
+  const otherRequests = output.segments.filter((segment) =>
+    (segment.kind === "CLARIFICATION" &&
+      segment.target !== "CHECKOUT_DETAILS") ||
+    (segment.kind === "ACTION_REQUEST" &&
+      segment.action !== "PROVIDE_CHECKOUT_DETAILS")
+  );
+  if (completeness.state !== "REQUIRED" ||
+      output.strategy !== "ASK_CLARIFICATION" ||
+      output.cta !== "ASK_CHECKOUT_DETAILS" ||
+      checkoutClarifications.length !== 1 || checkoutActions.length !== 1 ||
+      otherRequests.length > 0 ||
+      checkoutActions[0]?.requestedFields === undefined ||
+      canonicalJsonV1(checkoutActions[0].requestedFields) !==
+        canonicalJsonV1(completeness.missingFields)) {
+    throw new Error(errorCode);
+  }
 }
 
 export interface TrackCOfflineCandidateValidationInput {
@@ -170,6 +212,12 @@ export function validateTrackCOfflineCandidate(
     },
     ...semanticOutput,
   });
+  assertTrackCCheckoutCompletenessOutput(
+    context,
+    output,
+    "TRACK_C_C3_OFFLINE_CANDIDATE_CHECKOUT_COMPLETENESS_FAILED",
+  );
+  const safeReply = renderTrackCCheckoutSafeReply(context, output);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []);
   const knownEvidenceHashes = new Set([
@@ -223,7 +271,7 @@ export function validateTrackCOfflineCandidate(
     quality: Object.freeze({
       context: input.accepted.context,
       verifiedFacts: input.accepted.verifiedFacts,
-      reply: replyFromOutput(output),
+      reply: safeReply,
       proposalSummary: Object.freeze({ strategy: output.strategy, cta: output.cta }),
       guardOutcome: Object.freeze({
         expectedOwner: "BOT",
