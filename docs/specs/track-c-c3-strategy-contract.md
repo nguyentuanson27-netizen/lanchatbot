@@ -6,73 +6,62 @@
 
 ## Objective
 
-Keep the Strategist/Responder separation for adaptive turns, while adding a code-owned first-contact lane that can call the Responder directly. Reduce model-owned protocol so each layer has one clear responsibility:
+Keep the current guarded Strategist/Responder design for adaptive turns, but simplify the contracts and add a fixed first-contact lane for Facebook Messenger.
 
-- fixed first-contact acquisition replies are policy-driven and do not require the Strategist;
-- follow-up turns use the Strategist for adaptive sales decisions;
-- code validates authority and derives deterministic state;
-- the Responder realizes an already-approved task in natural Vietnamese;
-- final code guards continue to own PII, factual, checkout, and effect boundaries.
-
-The runtime therefore has two explicit lanes rather than assuming every customer-facing turn is two-pass:
+The runtime has two lanes:
 
 ```text
 FIRST_CONTACT_FIXED
-input -> code classify/authority -> Responder -> final guard
+input -> code-owned first-contact policy -> Responder -> final guard
 
 ADAPTIVE_FOLLOWUP
 input -> Strategist -> code validate/resolve/derive/compile -> Responder -> final guard
 ```
 
-This spec is intentionally small. It records the agreed direction before implementation and is not an implementation PR.
+The first lane is intentionally policy-driven. The second lane is where the Strategist owns adaptive sales decisions.
 
-## 1. Interaction lanes
+## 1. First contact: fixed Messenger policy
 
-### 1.1 First contact: fixed acquisition policy
+Use `FIRST_CONTACT_FIXED` only when trusted metadata/canonical context says this is a first meaningful inbound such as ad/referral entry, a new customer asking price, or a new customer sending a single product image.
 
-Trusted first meaningful inbound cases such as ad/referral entry, a new customer asking price, or a new customer sending a single product image should use a fixed response policy.
-
-The first-contact lane should **bypass the Strategist**. Code builds a responder task from trusted acquisition metadata, resolved product context, and eligible evidence.
-
-First-contact classification is fail-closed:
+Do not infer first-contact status from dialogue wording alone.
 
 ```text
 trusted FIRST_CONTACT_FIXED signal exists
-  -> fixed first-contact lane
+  -> fixed lane
 
 trusted signal absent
-  -> do not infer first-contact/acquisition status from dialogue wording or history heuristics
-  -> fall back to the adaptive/current safe lane
+  -> use the current/adaptive safe lane
 ```
 
-Expected semantic form:
+The fixed reply target is:
 
 ```text
 Dạ mẫu {PRODUCT} có giá {PRICE} ...
 
-{useful color/material/product information} + {one authorized selling point}
+{useful product information} + {one authorized selling point when available}
 
-{exactly one relevant continuation/progression question}
+{exactly one progression question}
 ```
 
 Rules:
 
-- answer the customer's immediate question first;
-- expose useful product information quickly because the channel is Facebook Messenger;
-- target exactly one selling point and only when it is authorized by code-owned evidence;
-- selling-point authority must come from an explicit curated/verified claim or a separately allowlisted deterministic projection; raw product facts must not be freely rewritten into new benefits;
-- if no authorized selling point is available, omit that slot and treat it as a data-quality gap rather than allowing the Responder to invent one;
-- ask exactly one progression question when the turn is non-terminal;
-- do not let the Responder invent discounts, availability, benefits, policy, or other unsupported claims;
-- first-contact/acquisition status must come from trusted metadata or canonical context, never inference from dialogue wording alone.
+- answer the immediate question first;
+- expose useful product information quickly;
+- use color/material/product facts only from code-owned evidence;
+- use at most one selling point;
+- selling-point wording must come from an explicit verified/curated claim or an allowlisted deterministic projection;
+- if no authorized selling point exists, omit it rather than inventing a benefit;
+- use exactly one progression mechanism;
+- do not invent discounts, availability, policy, benefits, or effects.
 
-Continuation/progression priority for the fixed lane:
+First-contact progression priority:
 
-1. If a product classification/variant must be resolved first (for example set type, top/skirt/dress grouping), ask that classification.
-2. Otherwise, when color choice is a meaningful product decision and multiple colors exist, ask color.
-3. Otherwise, when fit qualification is the useful next step, ask for height + weight or the relevant body measurements for that product/category.
+1. If product classification/variant must be resolved first, ask that classification.
+2. Else, when multiple colors are a meaningful choice, ask color.
+3. Else, ask for height + weight or the relevant measurements needed for fit guidance.
 
-**Do not ask usual worn size as the first fit question.** `USUAL_SIZE` is a fallback only after the customer says they do not have or do not know the requested measurements.
+Do **not** ask usual worn size as the first fit question.
 
 Example:
 
@@ -83,36 +72,36 @@ Reply shape:
 "Dạ mẫu SV999 có giá 849.000đ chị nha. Mẫu có màu trắng và đen, chất liệu ..., [one authorized selling point]. Chị cho em xin chiều cao và cân nặng để em tư vấn size sát hơn nha?"
 ```
 
-### 1.2 Follow-up: adaptive sales strategy
+## 2. Follow-up: adaptive sales strategy
 
 From the customer's next real response onward, the Strategist owns the adaptive conversational choice.
 
-The Strategist should decide:
+The Strategist decides:
 
 - what the customer is trying to decide now;
-- which objection, uncertainty, preference, correction, or commitment should be handled first;
-- which eligible evidence is actually useful for that decision;
-- whether one customer input would materially change the next recommendation, comparison, qualification, or transaction;
-- which permitted canonical action, if any, is appropriate now.
+- which objection, uncertainty, preference, correction, or commitment matters first;
+- which eligible evidence is useful;
+- whether one follow-up input would materially change the next recommendation, comparison, qualification, or transaction;
+- which permitted canonical action, if any, should happen now.
 
 It must not follow a fixed funnel such as `price -> size -> checkout`.
 
-Objections come before progression. Explicit buying commitment should stop exploratory selling and move only to the smallest permitted controlled action.
+Objections come before progression. Explicit buying commitment should stop exploratory discovery and move only to the smallest permitted controlled action.
 
 Missing evidence is not negative evidence.
 
-## 2. Strategist contract
+## 3. Minimal Strategist contract
 
-The Strategist should output decisions, not deterministic validation metadata.
-
-`USUAL_SIZE` must be an explicit decision-input semantic, not an alias for `SIZE`: choosing a size to buy and reporting the size a customer usually wears are different signals.
-
-Proposed minimal shape:
+The Strategist should output decisions, not validation metadata.
 
 ```ts
-type DecisionInput = ExistingDecisionInput | "USUAL_SIZE";
+type OrdinaryDecisionInput =
+  | Exclude<TrackCDecisionInput, "NONE" | "PRODUCT" | "MEASUREMENTS">
+  | "USUAL_SIZE";
 
 type StrategistDecision = {
+  replyAct: "ANSWER" | "ACKNOWLEDGE" | "CLARIFY";
+
   goal: string;
 
   proposition: TrackCProtectedProposition | "NONE";
@@ -120,7 +109,7 @@ type StrategistDecision = {
   evidenceRefs: string[];
 
   continuation:
-    | { type: "ASK"; input: DecisionInput }
+    | { type: "ASK"; input: OrdinaryDecisionInput }
     | { type: "KEEP_OPEN" }
     | null;
 
@@ -133,73 +122,84 @@ type StrategistDecision = {
 };
 ```
 
-`continuation` replaces the current multi-field `nextMove` representation.
+### `replyAct`
 
-- `ASK` means exactly one missing customer input would materially change the next sales decision.
-- `KEEP_OPEN` means keep the conversation naturally open without introducing another decision variable or pressure step.
-- `null` means a canonical request already owns the next step, or the turn is intentionally terminal/held.
+`replyAct` is the smallest conversational discriminator the code cannot derive safely from evidence:
 
-The key cardinality invariant is:
+- `ANSWER` — answer the customer's question/concern; code determines whether the fact is supported or unresolved;
+- `ACKNOWLEDGE` — acknowledgement without inventing an effect;
+- `CLARIFY` — the current need itself needs clarification.
+
+Do not restore the larger `DIRECT / BOUNDED_UNCERTAINTY / ACKNOWLEDGE / CLARIFY / HOLD` transport taxonomy.
+
+### `continuation`
+
+`continuation` replaces `nextMove.action + target + purpose + decisionInput`.
+
+- `ASK` means one ordinary customer input would materially change what happens next;
+- `KEEP_OPEN` means keep the conversation naturally open without introducing a new decision variable;
+- `null` means a canonical action owns the progression for this turn.
+
+`PRODUCT` and `MEASUREMENTS` are **not** ordinary continuation inputs. They remain canonical actions through `ASK_PRODUCT` and `ASK_MEASUREMENTS`, so there is only one representation for those requests.
+
+`USUAL_SIZE` is separate from `SIZE`: reporting the size a customer usually wears is a fallback fit signal, not the same as selecting a purchase size.
+
+### Progression invariant
 
 ```text
-canonicalAction = NONE and turn is non-terminal
-  -> exactly one continuation: ASK or KEEP_OPEN
+canonicalAction = NONE
+  -> continuation = ASK or KEEP_OPEN
 
 canonicalAction != NONE
   -> continuation = null
-  -> the compiled canonicalRequest is the single progression mechanism
+  -> canonicalAction is the single progression mechanism
 
-HOLD_POSITION / terminal hold
+HOLD_POSITION
   -> continuation = null
   -> do not reopen the conversation
 ```
 
-A canonical request and an ordinary continuation must never be realized together in the same turn.
+There is no separate generic `terminal` field in this draft. `HOLD_POSITION` is the explicit no-reopen state currently needed.
 
-The Strategist should not be required to output fields that code can derive deterministically.
-
-Candidate fields to remove from the model-owned contract:
+Candidate fields to remove from model-owned output:
 
 - `protectedResolution`;
-- `nextMove.action` + `target` + `purpose` duplication;
+- `nextMove.action`;
+- `nextMove.target`;
+- `nextMove.purpose`;
 - `canonicalAction.requestedFields`;
-- `terminal` where it is derivable from canonical state/action;
+- `terminal`;
 - `avoid`;
-- `effectIntent` when effects are disabled;
-- a shared `DIRECT / BOUNDED_UNCERTAINTY / ACKNOWLEDGE / CLARIFY / HOLD` taxonomy solely for cross-model transport.
+- `effectIntent` when effects are disabled.
 
-`avoid`-style rules belong in the Responder prompt and deterministic guards, not in per-turn Strategist output.
+## 4. Strategist prompt responsibility
 
-## 3. Strategist prompt responsibility
-
-The Strategist prompt should focus on sales reasoning rather than protocol serialization.
-
-Core decision rules:
+Keep the prompt focused on sales decisions:
 
 1. Resolve the customer's current decision first.
-2. Identify the actual blocker; do not invent one.
+2. Identify the real blocker; do not invent one.
 3. Select the smallest useful evidence set.
-4. Choose at most one meaningful continuation input.
+4. Choose at most one useful follow-up input.
 5. Do not use a fixed sales funnel.
 6. Handle objections before progression.
 7. Treat explicit buying commitment differently from acknowledgement.
 8. Missing evidence is not a negative fact.
 9. Never invent facts, effects, discounts, availability, policies, or actions.
 
-A useful mental model for the Strategist is:
+Useful mental model:
 
 ```text
 1. What is the customer trying to decide?
 2. What is blocking that decision?
 3. Which eligible evidence helps?
-4. Is there exactly one input that would materially change what we do next?
+4. Is there one input that would materially change what we do next?
 ```
 
-## 4. Code seam between Strategist and Responder
+## 5. Code seam between Model 1 and Model 2
 
-Code still executes after Model 1 and before Model 2 on the adaptive lane, but it is a thin authority/compiler seam rather than a sales decision engine.
+On the adaptive lane, code runs after the Strategist and before the Responder.
 
-It should only:
+Its job is only:
 
 ```text
 VALIDATE -> RESOLVE -> DERIVE -> COMPILE
@@ -207,39 +207,37 @@ VALIDATE -> RESOLVE -> DERIVE -> COMPILE
 
 It must not choose a different sales strategy.
 
-Responsibilities include:
+Code owns:
 
-- validate selected evidence refs;
-- validate product/variant/scope binding;
-- validate proposition capability;
-- validate selected canonical action against code-owned permissions;
-- derive `SUPPORTED / UNRESOLVED / NOT_APPLICABLE` from evidence and proposition;
-- derive exact checkout requested fields;
-- enforce PII permissions;
-- keep effect authority code-owned;
-- derive terminal/hold semantics where deterministic;
-- compile the approved decision into a Responder-specific task.
+- evidence ref validity;
+- product/variant/scope binding;
+- proposition capability;
+- canonical-action permission;
+- `SUPPORTED / UNRESOLVED / NOT_APPLICABLE` derivation;
+- exact checkout requested fields;
+- PII permissions;
+- effect authority;
+- compilation into a Responder task.
 
 Do not ask the model to output a value when code already knows the only valid value.
 
-## 5. Responder task and output
+## 6. Responder task
 
-The Responder should not interpret the Strategist's internal planning ontology directly.
+The Responder should receive an execution task, not the Strategist's planning schema.
 
-Code should compile a new task contract, for example:
+A small shape is enough:
 
 ```ts
 type ResponderTask = {
   answer:
-    | { kind: "SUPPORTED_FACT"; goal: string }
-    | { kind: "UNRESOLVED_FACT"; goal: string }
-    | { kind: "ACKNOWLEDGEMENT"; goal: string }
-    | { kind: "CLARIFICATION"; goal: string };
+    | { kind: "FACT"; status: "SUPPORTED" | "UNRESOLVED"; goal: string }
+    | { kind: "ACKNOWLEDGE"; goal: string }
+    | { kind: "CLARIFY"; goal: string };
 
   evidence: ResolvedEvidence[];
 
   continuation:
-    | { type: "ASK"; input: DecisionInput }
+    | { type: "ASK"; input: OrdinaryDecisionInput }
     | { type: "KEEP_OPEN" }
     | null;
 
@@ -247,24 +245,29 @@ type ResponderTask = {
 };
 ```
 
-The exact type names are not fixed by this draft; the important boundary is that the Responder receives execution instructions, not the Strategist DSL.
+Code maps Strategist intent into this task:
 
-Responder progression invariant:
+```text
+replyAct = ANSWER
+  -> FACT + code-derived SUPPORTED/UNRESOLVED status
 
-- ordinary non-terminal reply: `continuation` is non-null and `canonicalRequest` is null;
-- canonical request reply: `continuation` is null and `canonicalRequest` is non-null;
-- terminal/hold reply: both may be null and the Responder must not reopen the conversation.
+replyAct = ACKNOWLEDGE
+  -> ACKNOWLEDGE
 
-Target Responder responsibility:
+replyAct = CLARIFY
+  -> CLARIFY
+```
+
+Responder responsibilities:
 
 - write one natural Vietnamese Messenger reply;
-- follow the approved task;
+- follow the supplied task;
 - use only supplied evidence for factual claims;
-- realize exactly the supplied progression mechanism: ordinary continuation or canonical request, never both;
-- do not choose a different strategy, evidence set, canonical action, or effect;
+- realize exactly one progression mechanism: ordinary continuation or canonical request;
+- do not choose another strategy, evidence set, canonical action, or effect;
 - do not expose internal protocol tokens.
 
-Long-term target output should be minimal, ideally:
+Target output should be as small as practical, ideally:
 
 ```json
 {
@@ -272,73 +275,45 @@ Long-term target output should be minimal, ideally:
 }
 ```
 
-If structured output is still needed for final validation, keep only the minimum structure required by deterministic guards. Do not require the Responder to re-serialize facts already known by code through `role`, `protectedResolution`, `claimRef`, placeholder, strategy, and CTA metadata unless a specific guard demonstrably requires it.
-
-## 6. Continuation behavior
-
-For an ordinary non-terminal reply that has no canonical request, the conversation must keep moving through exactly one of two forms:
-
-```ts
-continuation:
-  | { type: "ASK"; input: DecisionInput }
-  | { type: "KEEP_OPEN" };
-```
-
-`ASK`:
-
-- exactly one input;
-- only when the answer would materially change the next recommendation, comparison, qualification, or transaction;
-- never re-ask known information.
-
-`KEEP_OPEN`:
-
-- no new decision variable;
-- no checkout pressure;
-- no generic repeated "cần gì cứ nhắn em" template on every turn;
-- wording should stay tied to the current topic.
-
-Canonical requests are separate from ordinary continuation. If a controlled canonical request such as product, measurement, or checkout details is selected, it is itself the single progression mechanism for that reply and ordinary `continuation` must be null.
-
-A terminal/hold reply may have no progression mechanism and must not append a `KEEP_OPEN` sentence merely to satisfy a schema.
+Keep extra structured output only if a deterministic final guard demonstrably needs it.
 
 ## 7. Measurement fallback
 
 Fit qualification should prefer measurements over habitual size.
 
-Expected progression:
-
 ```text
 Need fit qualification
+  -> ASK_MEASUREMENTS
   -> ask height + weight and/or relevant measurements
 
 Customer says measurements are unavailable/unknown
-  -> adaptive Strategist may ask USUAL_SIZE as fallback
+  -> adaptive Strategist may use continuation ASK / USUAL_SIZE
 ```
 
-`USUAL_SIZE` therefore belongs to follow-up strategy, not the fixed first-contact script, and must be represented as its own decision-input semantic.
+`USUAL_SIZE` is therefore a follow-up fallback, not the fixed first-contact fit question.
 
 ## 8. Authority and safety boundaries that do not change
 
-This simplification must not weaken existing hard boundaries:
+This simplification must preserve:
 
-- Context V2 / code-owned evidence remains factual authority;
-- model output remains untrusted;
-- evidence scope/freshness/binding remains code validated;
-- recipient name, phone, and delivery address remain behind checkout authority;
-- exact checkout missing fields remain code-owned;
-- side effects remain disabled unless separately authorized by a real capability;
-- final factual/PII/effect guards remain fail-closed;
-- benchmark simulation facts grant factual authority only, never effect or persistence authority;
-- trusted acquisition origin is never inferred from customer text alone;
-- selling-point wording cannot widen a raw product fact into an unsupported benefit.
+- Context V2 / code-owned evidence as factual authority;
+- model output treated as untrusted;
+- evidence scope/freshness/binding validation;
+- recipient name, phone, and delivery address behind checkout authority;
+- exact checkout missing fields owned by code;
+- side effects disabled unless separately authorized by a real capability;
+- fail-closed factual/PII/effect guards;
+- benchmark simulation facts granting factual authority only, never effect/persistence authority;
+- trusted acquisition origin never inferred from customer wording;
+- no widening raw product facts into unsupported selling claims.
 
-## 9. Benchmark and generator-call cardinality
+## 9. Benchmark call cardinality
 
-The current R2.16 quality contract treats scored two-pass cases as exactly two generator calls. The proposed first-contact lane intentionally bypasses the Strategist and therefore has one generator call.
+Current R2.16 expects exactly two generator calls for scored two-pass cases. `FIRST_CONTACT_FIXED` intentionally uses only the Responder.
 
-Implementation must **not** add a no-op/fake Strategist call just to preserve the old count.
+Do not add a fake/no-op Strategist call to satisfy the old count.
 
-Before the first-contact lane can be considered benchmark-ready, the benchmark/execution contract must explicitly model expected generator-call cardinality by lane, for example:
+Before first-contact cases are benchmark-ready, the benchmark contract must support lane-specific call cardinality:
 
 ```text
 FIRST_CONTACT_FIXED
@@ -348,60 +323,53 @@ ADAPTIVE_FOLLOWUP
   -> 2 generator calls: Strategist + Responder
 
 PRE_MODEL_REJECT / CONTRACT_SKIP
-  -> 0 generator calls where already required by the benchmark contract
+  -> 0 generator calls where already required
 ```
 
-The exact benchmark revision/change belongs to the benchmark owner and must be reviewed separately. This spec defines the runtime requirement; it does not silently redefine benchmark semantics.
+The benchmark revision/schema change must be reviewed separately by the benchmark owner.
 
-## 10. Implementation slices
+## 10. Implementation order
 
-Do not change the Strategist contract, Responder contract, and first-contact behavior in one large commit.
+Keep the work incremental:
 
-Recommended sequence:
+1. Add the trusted first-contact lane and fixed task shape.
+2. Update benchmark call-cardinality expectations for the new lane.
+3. Simplify the Strategist contract: add `replyAct`, add `USUAL_SIZE`, remove redundant fields, and keep product/measurement requests canonical-only.
+4. Compile into the smaller Responder task and then simplify Responder output only as far as the final guard safely allows.
 
-1. **First-contact fixed lane contract** — define trusted classification, safe fallback when trusted acquisition signal is absent, selling-point authority, and fixed acquisition task shape. Do not fake a Strategist call.
-2. **Benchmark lane cardinality** — update/approve benchmark expectations so first-contact fixed cases can legitimately use one generator call while adaptive cases remain two-pass.
-3. **Simplify Strategist contract** — remove deterministic/redundant fields, add explicit `USUAL_SIZE`, and temporarily compile back into the current Responder contract if needed.
-4. **Introduce explicit ResponderTask** — separate Strategist vocabulary from Responder vocabulary and enforce exactly one progression mechanism.
-5. **Simplify Responder output** — remove model-managed realization metadata that code already owns.
-
-After each slice, run focused regression before continuing. Do not weaken a failing guard merely to increase benchmark completion.
+Run focused regressions after each slice. Do not weaken guards to improve completion.
 
 ## 11. Acceptance criteria
 
-This design is ready for implementation when:
+Implementation is ready when:
 
-- runtime has two explicit lanes: one-call `FIRST_CONTACT_FIXED` and adaptive Strategist/Responder follow-up;
-- first-contact classification uses a trusted signal only; missing trusted signal falls back safely and is never inferred from dialogue wording;
-- first-contact cases have a code-owned fixed semantic form and do not require Strategist choice;
-- first-contact selling points come only from explicit authorized evidence/allowlisted projection; missing selling-point authority degrades by omission rather than invention;
-- first-contact fit qualification asks measurements first, with usual size only as a later fallback;
-- `USUAL_SIZE` is represented explicitly and is not conflated with `SIZE`;
-- follow-up Strategist output contains only conversational choices that are not deterministic from context/evidence;
-- the Strategist selects relevant evidence from an eligible code-owned set;
-- code derives factual resolution, checkout fields, effect authority, and other deterministic state;
-- Model 2 no longer needs definitions of Strategist-only mode vocabulary;
-- Model 2 cannot choose a different sales strategy or evidence set;
-- an ordinary non-terminal reply has exactly one `ASK` or `KEEP_OPEN` continuation;
-- a canonical request is the single progression mechanism for its turn and cannot be paired with ordinary continuation;
-- terminal/hold turns are allowed to have no continuation and must not be reopened;
-- benchmark expectations explicitly support lane-specific generator-call cardinality before the fixed first-contact lane is scored as valid;
-- hard PII/factual/effect boundaries remain unchanged;
-- implementation is delivered incrementally with regression evidence after each slice.
+- first-contact status comes from trusted metadata/canonical context only;
+- fixed first-contact replies follow the Messenger form and use exactly one progression mechanism;
+- selling points are authorized or omitted;
+- first fit qualification asks measurements, not usual size;
+- `USUAL_SIZE` is a separate fallback signal;
+- Strategist has a minimal `replyAct` and does not output deterministic validation metadata;
+- ordinary `PRODUCT`/`MEASUREMENTS` continuation paths do not duplicate canonical actions;
+- code derives factual resolution, checkout fields, and effect authority;
+- Model 2 receives a small execution task instead of the Strategist plan DSL;
+- canonical action and ordinary continuation cannot both be realized;
+- `HOLD_POSITION` does not reopen the conversation;
+- benchmark call cardinality matches the runtime lane;
+- existing PII/factual/effect boundaries remain unchanged.
 
 ## 12. Open questions
 
-These should be resolved before implementation, not guessed in code:
+Resolve these before implementation rather than guessing:
 
-1. What exact trusted production signal classifies `FIRST_CONTACT_FIXED` for ad/referral/new-price/image-only inbound?
-2. What is the exact first-contact useful-information selection policy per product category?
-3. What is the canonical source and priority order for authorized selling-point claims when multiple candidates exist?
-4. Which measurements are required/preferred by product category before falling back to `USUAL_SIZE`?
-5. Can the Responder safely return only `{ "text": string }` while preserving the required deterministic final factual guard, or is a smaller structured binding seam still necessary?
-6. What benchmark revision/schema change will own lane-specific generator-call cardinality?
+1. What exact production signal classifies `FIRST_CONTACT_FIXED`?
+2. What useful product-info priority applies by product category?
+3. What is the source/priority for authorized selling-point claims?
+4. Which measurements are preferred by product category?
+5. Can the final Responder output safely become only `{ "text": string }`, or does the final factual guard still need a small binding structure?
+6. Which benchmark revision/schema owns lane-specific generator-call cardinality?
 
 ## Boundaries
 
-- **Always:** keep agent choice separate from code authority; preserve fail-closed validation; add regression coverage for every changed contract boundary; omit unsupported selling points instead of inventing them.
-- **Ask first:** widening production acquisition metadata, adding new effect capability, changing checkout/PII authority, or changing benchmark semantics/revision.
-- **Never:** add case-specific benchmark branches, infer trusted acquisition origin from dialogue wording, make code choose the business next step, add a fake Strategist call only to satisfy an old benchmark count, or weaken guards to improve completion rate.
+- **Always:** agent chooses adaptive strategy; code owns authority; preserve fail-closed validation.
+- **Ask first:** widening acquisition metadata, changing checkout/PII authority, adding effect capability, or changing benchmark semantics.
+- **Never:** infer trusted acquisition origin from dialogue wording, add case-specific benchmark branches, create duplicate representations for the same request, add a fake Strategist call, or weaken guards to raise completion.
