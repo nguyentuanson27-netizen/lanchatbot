@@ -31,6 +31,26 @@ export type TrackCProtectedProposition =
 export type TrackCProtectedResolution =
   typeof TRACK_C_PROTECTED_RESOLUTIONS[number];
 
+/**
+ * A deliberately small, code-readable identity for the one ordinary customer
+ * decision the Strategist selected. Natural-language target/purpose remain
+ * model-owned guidance; they are never parsed to determine this identity.
+ */
+export const TRACK_C_DECISION_INPUTS = Object.freeze([
+  "NONE",
+  "PRODUCT",
+  "MEASUREMENTS",
+  "SIZE",
+  "COLOR",
+  "VARIANT",
+  "LOCALITY",
+  "PAYMENT_PREFERENCE",
+  "QUANTITY",
+  "STYLE",
+] as const);
+
+export type TrackCDecisionInput = typeof TRACK_C_DECISION_INPUTS[number];
+
 export type TrackCResponsePlanControlV1 = Readonly<{
   answer: Readonly<{
     protectedProposition: TrackCProtectedProposition;
@@ -39,7 +59,7 @@ export type TrackCResponsePlanControlV1 = Readonly<{
   nextMove: Readonly<{
     target: string;
     purpose: string;
-    decisionInputs: readonly string[];
+    decisionInput: TrackCDecisionInput;
   }>;
   effectIntent: string;
 }>;
@@ -68,12 +88,12 @@ export function assertTrackCC3ResponsePlanControl(
   const { control } = input;
   if (control.effectIntent !== "NONE") semanticInvalid();
 
-  const { target, purpose, decisionInputs } = control.nextMove;
-  if (decisionInputs.length > 1 ||
-      (input.nextMoveAction === "ASK" && decisionInputs.length !== 1) ||
-      (input.nextMoveAction === "NONE" && decisionInputs.length !== 0) ||
-      (input.canonicalActionType !== "NONE" && decisionInputs.length !== 0) ||
-      (input.terminal && decisionInputs.length !== 0) ||
+  const { target, purpose, decisionInput } = control.nextMove;
+  if (!TRACK_C_DECISION_INPUTS.includes(decisionInput) ||
+      (input.nextMoveAction === "ASK" && decisionInput === "NONE") ||
+      (input.nextMoveAction === "NONE" && decisionInput !== "NONE") ||
+      (input.canonicalActionType !== "NONE" && decisionInput !== "NONE") ||
+      (input.terminal && decisionInput !== "NONE") ||
       (input.canonicalActionType === "HOLD_POSITION" && !input.terminal) ||
       (input.nextMoveAction === "ASK" &&
         (target === "NONE" || purpose === "NONE")) ||

@@ -137,7 +137,7 @@ describe("Track C canonical action pre-Responder boundary", () => {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        decisionInputs: [],
+        decisionInput: "NONE",
       },
       canonicalAction: {
         type: "ASK_CHECKOUT_DETAILS",
@@ -180,7 +180,7 @@ describe("Track C canonical action pre-Responder boundary", () => {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        decisionInputs: [],
+        decisionInput: "NONE",
       },
       canonicalAction: {
         type: "NONE",
@@ -223,7 +223,7 @@ describe("Track C canonical action pre-Responder boundary", () => {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        decisionInputs: [],
+        decisionInput: "NONE",
       },
       canonicalAction: {
         type: "NONE",
@@ -266,7 +266,7 @@ describe("Track C canonical action pre-Responder boundary", () => {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        decisionInputs: [],
+        decisionInput: "NONE",
       },
       canonicalAction: {
         type: "NONE",

@@ -15,7 +15,7 @@ function control(
     nextMove: {
       target: "NONE",
       purpose: "NONE",
-      decisionInputs: [],
+      decisionInput: "NONE",
     },
     effectIntent: "NONE",
     ...overrides,
@@ -66,7 +66,7 @@ describe("Track C C3 response-plan control", () => {
     })).not.toThrow();
   });
 
-  it("keeps ordinary next-move cardinality structural rather than parsing target prose", () => {
+  it("uses one typed atomic decision input rather than parsing target prose", () => {
     expect(() => assertTrackCC3ResponsePlanControl({
       control: control({
         answer: {
@@ -76,7 +76,7 @@ describe("Track C C3 response-plan control", () => {
         nextMove: {
           target: "SIZE_PREFERENCE",
           purpose: "NARROW_CHOICE",
-          decisionInputs: ["size or color preference"],
+          decisionInput: "SIZE",
         },
       }),
       answerMode: "ACKNOWLEDGE",
@@ -87,13 +87,13 @@ describe("Track C C3 response-plan control", () => {
     })).not.toThrow();
   });
 
-  it("rejects missing or extra structural decision inputs", () => {
+  it("rejects a missing, NONE, or competing ordinary decision input", () => {
     expect(() => assertTrackCC3ResponsePlanControl({
       control: control({
         nextMove: {
           target: "SIZE_PREFERENCE",
           purpose: "NARROW_CHOICE",
-          decisionInputs: [],
+          decisionInput: "NONE",
         },
       }),
       answerMode: "DIRECT",
@@ -108,13 +108,28 @@ describe("Track C C3 response-plan control", () => {
         nextMove: {
           target: "NONE",
           purpose: "NONE",
-          decisionInputs: ["size"],
+          decisionInput: "SIZE",
         },
       }),
       answerMode: "DIRECT",
       selectedEvidenceCapabilities: ["PRICE"],
       nextMoveAction: "NONE",
       canonicalActionType: "NONE",
+      terminal: false,
+    })).toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
+
+    expect(() => assertTrackCC3ResponsePlanControl({
+      control: control({
+        nextMove: {
+          target: "SIZE_PREFERENCE",
+          purpose: "NARROW_CHOICE",
+          decisionInput: "SIZE",
+        },
+      }),
+      answerMode: "DIRECT",
+      selectedEvidenceCapabilities: ["PRICE"],
+      nextMoveAction: "ASK",
+      canonicalActionType: "ASK_PRODUCT",
       terminal: false,
     })).toThrow("TRACK_C_C3_CONVERSATION_PLAN_INVALID:SEMANTIC");
   });

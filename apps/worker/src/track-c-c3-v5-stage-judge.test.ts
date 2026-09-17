@@ -129,7 +129,7 @@ describe("Track C V5 Vertex stage judge composition", () => {
             action: "NONE",
             target: "NONE",
             purpose: "NONE",
-            decisionInputs: [],
+            decisionInput: "NONE",
           },
           canonicalAction: {
             type: "NONE",
@@ -218,7 +218,7 @@ describe("Track C V5 Vertex stage judge composition", () => {
             action: "NONE",
             target: "NONE",
             purpose: "NONE",
-            decisionInputs: [],
+            decisionInput: "NONE",
           },
           canonicalAction: {
             type: "ASK_PRODUCT",

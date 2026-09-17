@@ -29,6 +29,8 @@ import {
   TRACK_C_PROTECTED_PROPOSITIONS,
   TRACK_C_PROTECTED_RESOLUTIONS,
   assertTrackCC3ResponsePlanControl,
+  TRACK_C_DECISION_INPUTS,
+  type TrackCDecisionInput,
   type TrackCProtectedProposition,
   type TrackCProtectedResolution,
 } from "./track-c-c3-response-plan-control.js";
@@ -68,7 +70,7 @@ const NEXT_MOVE_FIELDS = Object.freeze([
   "action",
   "target",
   "purpose",
-  "decisionInputs",
+  "decisionInput",
 ] as const);
 const CANONICAL_ACTION_FIELDS = Object.freeze(["type", "requestedFields"] as const);
 const ANSWER_MODES = Object.freeze([
@@ -112,7 +114,7 @@ export interface TrackCResponsePlanV2 {
     readonly action: TrackCNextMoveAction;
     readonly target: string;
     readonly purpose: string;
-    readonly decisionInputs: readonly string[];
+    readonly decisionInput: TrackCDecisionInput;
   }>;
   readonly canonicalAction: Readonly<{
     readonly type: TrackCCanonicalActionType;
@@ -188,10 +190,9 @@ function responsePlanSchema(
           action: Object.freeze({ type: "STRING", enum: NEXT_MOVE_ACTIONS }),
           target: Object.freeze({ type: "STRING" }),
           purpose: Object.freeze({ type: "STRING" }),
-          decisionInputs: Object.freeze({
-            type: "ARRAY",
-            items: Object.freeze({ type: "STRING" }),
-            maxItems: 1,
+          decisionInput: Object.freeze({
+            type: "STRING",
+            enum: TRACK_C_DECISION_INPUTS,
           }),
         }),
       }),
@@ -237,8 +238,8 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "Do not invent a barrier from a neutral factual lookup. When the customer states a concern, comparison, prior experience, deadline, budget gap, fit concern, or purchase condition, keep that exact barrier in answer.objective instead of replacing it with a generic script.",
   "For price hesitation, respond to the stated reason first. Use at most one or two selected value-relevant facts when they directly reduce that uncertainty. Do not claim that a true feature automatically justifies the price, and do not infer an extra promotion or the absence of one from missing evidence.",
   "For an explicitly marked first meaningful ad/referral inbound with resolved product identity, answer the exact question first and select a compact first-contact bundle: verified price plus at most two or three additional decision-useful evidence refs. Do not infer ad origin from dialogue wording alone.",
-  "nextMove is optional. When nextMove.action is ASK, target one concrete missing decision input and state why it advances the current sales decision. nextMove.decisionInputs must contain exactly that one input. Never put more than one decision target in nextMove.",
-  "When nextMove.action = NONE, set nextMove.target = \"NONE\", nextMove.purpose = \"NONE\", and nextMove.decisionInputs = [].",
+  "nextMove is optional. When nextMove.action is ASK, select exactly one typed nextMove.decisionInput and target that same concrete missing decision input. target and purpose are natural-language guidance only; never use them to encode another decision target.",
+  "When nextMove.action = NONE, set nextMove.decisionInput = \"NONE\", nextMove.target = \"NONE\", and nextMove.purpose = \"NONE\".",
   "Choose the single sales move that best addresses the customer's current decision or objection using only available code-owned evidence and capabilities.",
   "Do not default to sizing, checkout, or any fixed funnel step when another supported move is more relevant.",
   "Ordinary nextMove must never request recipient name, phone number, or full delivery address. Payment policy or a non-executing payment preference may be discussed as an ordinary commercial decision; actual checkout-field collection remains canonicalAction ASK_CHECKOUT_DETAILS only.",
@@ -485,14 +486,11 @@ function parseConversationPlan(value: unknown): ParsedTrackCResponsePlanV2 {
   const nextMove = parseRecord(record.nextMove);
   assertExactKeys(nextMove, NEXT_MOVE_FIELDS);
   if (!NEXT_MOVE_ACTIONS.includes(nextMove.action as TrackCNextMoveAction) ||
-      !Array.isArray(nextMove.decisionInputs)) {
+      !TRACK_C_DECISION_INPUTS.includes(nextMove.decisionInput as TrackCDecisionInput)) {
     schemaInvalid();
   }
   const nextMoveTarget = parsePlanText(nextMove.target, 160);
   const nextMovePurpose = parsePlanText(nextMove.purpose, 300);
-  const decisionInputs = nextMove.decisionInputs.map((input) =>
-    parsePlanText(input, 160)
-  );
 
   const canonicalAction = parseRecord(record.canonicalAction);
   assertExactKeys(canonicalAction, CANONICAL_ACTION_FIELDS);
@@ -531,7 +529,7 @@ function parseConversationPlan(value: unknown): ParsedTrackCResponsePlanV2 {
       action: nextMove.action as TrackCNextMoveAction,
       target: nextMoveTarget,
       purpose: nextMovePurpose,
-      decisionInputs: Object.freeze(decisionInputs),
+      decisionInput: nextMove.decisionInput as TrackCDecisionInput,
     }),
     canonicalAction: Object.freeze({
       type: canonicalAction.type as TrackCCanonicalActionType,
@@ -728,7 +726,7 @@ function assertTrackCC3ResponsePlanPermitted(
       nextMove: {
         target: plan.nextMove.target,
         purpose: plan.nextMove.purpose,
-        decisionInputs: plan.nextMove.decisionInputs,
+        decisionInput: plan.nextMove.decisionInput,
       },
       effectIntent: plan.effectIntent,
     },

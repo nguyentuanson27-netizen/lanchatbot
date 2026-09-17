@@ -55,7 +55,7 @@ function candidate(): TrackCV5TwoPassBenchmarkResult {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        decisionInputs: [],
+        decisionInput: "NONE",
       },
       canonicalAction: {
         type: "NONE",

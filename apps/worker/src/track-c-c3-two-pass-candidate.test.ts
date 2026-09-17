@@ -263,7 +263,7 @@ function conversationPlan(
       action: "NONE",
       target: "NONE",
       purpose: "NONE",
-      decisionInputs: [],
+      decisionInput: "NONE",
     },
     canonicalAction: {
       type: "NONE",
@@ -720,7 +720,13 @@ describe("Track C C3 two-pass offline candidate", () => {
         nextMove: {
           type: "OBJECT",
           properties: {
-            decisionInputs: { type: "ARRAY", maxItems: 1 },
+            decisionInput: {
+              type: "STRING",
+              enum: [
+                "NONE", "PRODUCT", "MEASUREMENTS", "SIZE", "COLOR",
+                "VARIANT", "LOCALITY", "PAYMENT_PREFERENCE", "QUANTITY", "STYLE",
+              ],
+            },
           },
         },
         canonicalAction: { type: "OBJECT" },
@@ -872,7 +878,7 @@ describe("Track C C3 two-pass offline candidate", () => {
           },
           nextMove: {
             ...conversationPlan().nextMove,
-            decisionInputs: [],
+            decisionInput: "NONE",
           },
           effectIntent: "NONE",
         }),
@@ -906,7 +912,7 @@ describe("Track C C3 two-pass offline candidate", () => {
             action: "NONE",
             target: "SIZE_PREFERENCE",
             purpose: "NARROW_CHOICE",
-            decisionInputs: [],
+            decisionInput: "NONE",
           },
           effectIntent: "NONE",
         }),

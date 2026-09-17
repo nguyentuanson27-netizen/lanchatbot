@@ -118,7 +118,7 @@ function planPayload(overrides: ResponsePlanOverrides = {}) {
       action: "NONE",
       target: "NONE",
       purpose: "NONE",
-      decisionInputs: [],
+      decisionInput: "NONE",
       ...nextMoveOverrides,
     },
     canonicalAction: {
@@ -217,7 +217,7 @@ describe("Track C C3 V5 benchmark runner", () => {
           action: "NONE",
           target: "SIZE_PREFERENCE",
           purpose: "NARROW_CHOICE",
-          decisionInputs: [],
+          decisionInput: "NONE",
         },
       }),
       "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC",

@@ -148,7 +148,7 @@ function planPayload(overrides: ResponsePlanOverrides = {}) {
       action: "NONE",
       target: "NONE",
       purpose: "NONE",
-      decisionInputs: [],
+      decisionInput: "NONE",
       ...nextMoveOverrides,
     },
     canonicalAction: {
@@ -460,7 +460,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
             action: "ASK",
             target: "cân nặng",
             purpose: "Get the missing measurement needed to assess fit.",
-            decisionInputs: ["cân nặng"],
+            decisionInput: "MEASUREMENTS",
           },
           canonicalAction: {
             type: "NONE",

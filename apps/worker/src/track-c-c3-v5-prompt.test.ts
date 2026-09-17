@@ -45,10 +45,10 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
 
   it("requires one state-changing sales next move without forcing a question", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "Never put more than one decision target in nextMove.",
+      "never use them to encode another decision target.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "nextMove.decisionInputs must contain exactly that one input.",
+      "select exactly one typed nextMove.decisionInput",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "A valid nextMove must change what the shop can recommend, compare, qualify, or transact on the following turn.",

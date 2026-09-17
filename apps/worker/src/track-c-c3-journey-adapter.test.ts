@@ -98,7 +98,7 @@ function planPayload(overrides: ResponsePlanOverrides = {}) {
         action: "NONE",
         target: "NONE",
         purpose: "NONE",
-        decisionInputs: [],
+        decisionInput: "NONE",
         ...nextMoveOverrides,
       },
       canonicalAction: {
