@@ -30,6 +30,12 @@ import {
   buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
+import { runTrackCStrategyContractBenchmarkCase } from
+  "./track-c-c3-strategy-contract-runner.js";
+import type {
+  TrackCResponderTask,
+  TrackCStrategistDecision,
+} from "./track-c-c3-strategy-contract.js";
 
 const PLAN_FIELDS = Object.freeze([
   "currentNeed",
@@ -123,7 +129,7 @@ function assertProviderIdentity(value: string | null): string {
   return value;
 }
 
-function withBenchmarkLane(
+export function withBenchmarkLane(
   request: BuiltCandidateRequest,
   lane: TrackCV5ExecutionLane,
   simulationFacts: readonly unknown[],
@@ -335,7 +341,7 @@ function guardProductionOutput(
   }
 }
 
-function validateResponderOutput(
+export function validateResponderOutput(
   context: ReturnType<typeof contextFromFrozenTrackCCapture>,
   value: unknown,
   lane: TrackCV5ExecutionLane,
@@ -455,12 +461,15 @@ export interface TrackCV5TwoPassBenchmarkResult {
   readonly evaluationOnly: true;
   readonly sideEffects: "DISABLED";
   readonly executionLane: TrackCV5ExecutionLane;
-  readonly conversationPlan: TrackCConversationPlanV1;
+  readonly conversationPlan:
+    | TrackCConversationPlanV1
+    | TrackCResponderTask
+    | TrackCStrategistDecision;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
   readonly identity: Readonly<{
     readonly captureContextHash: string;
-    readonly strategistRequestEnvelopeHash: string;
+    readonly strategistRequestEnvelopeHash: string | null;
     readonly conversationPlanHash: string;
     readonly responderRequestEnvelopeHash: string;
     readonly responseOutputHash: string;
@@ -500,6 +509,13 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
   }
   assertSimulationMetadata(simulationMetadata);
+
+  return runTrackCStrategyContractBenchmarkCase({
+    input,
+    context,
+    simulationFacts,
+    simulationMetadata,
+  });
 
   const common = {
     modelResource: input.modelResource,

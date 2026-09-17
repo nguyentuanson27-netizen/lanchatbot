@@ -2,6 +2,7 @@ import type {
   TrackCV5CaseScoreResult,
   TrackCV5ScoringLane,
 } from "./track-c-c3-v5-benchmark-scoring.js";
+import type { TrackCConversationLane } from "./track-c-c3-strategy-contract.js";
 
 export type TrackCV5ExecutionOutcome =
   | "SCORED"
@@ -17,6 +18,7 @@ export type TrackCV5ProductionClassification =
 
 export interface TrackCV5ExpectedCase {
   readonly caseId: string;
+  readonly conversationLane: TrackCConversationLane;
   readonly productionClassification: TrackCV5ProductionClassification;
   readonly expectedPreModelReject: boolean;
 }
@@ -95,7 +97,8 @@ function assertCaseRecord(
     return;
   }
   if (record.outcome === "SCORED") {
-    if (record.providerCallCount !== 2 ||
+    const expectedCalls = record.conversationLane === "FIRST_CONTACT_FIXED" ? 1 : 2;
+    if (record.providerCallCount !== expectedCalls ||
         record.score === null || record.score.lane !== lane) {
       throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
     }
@@ -147,7 +150,8 @@ export function gateTrackCV5QualityResults(input: Readonly<{
     }
     if (
       record.productionClassification !== planned.productionClassification ||
-      record.expectedPreModelReject !== planned.expectedPreModelReject
+      record.expectedPreModelReject !== planned.expectedPreModelReject ||
+      record.conversationLane !== planned.conversationLane
     ) {
       throw new Error(`TRACK_C_V5_GATE_EXPECTATION_MISMATCH:${record.caseId}`);
     }

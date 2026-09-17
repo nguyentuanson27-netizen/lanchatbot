@@ -1,3 +1,5 @@
+import { redactAnalyticsMessage } from "@lana/database";
+
 /**
  * The small, code-owned contract between the fixed/adaptive policy and the
  * Responder.  It deliberately carries no customer data, factual values, or
@@ -224,6 +226,8 @@ export function compileTrackCStrategistDecision(input: Readonly<{
        record.replyAct !== "CLARIFY") ||
       typeof record.goal !== "string" || !record.goal.trim() ||
       record.goal.length > 500 ||
+      redactAnalyticsMessage(record.goal).dlpStatus !== "PASSED" ||
+      redactAnalyticsMessage(record.goal).text !== record.goal ||
       typeof record.proposition !== "string" ||
       !TRACK_C_PROTECTED_PROPOSITIONS.includes(
         record.proposition as TrackCProtectedProposition,
