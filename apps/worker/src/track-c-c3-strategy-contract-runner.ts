@@ -62,7 +62,7 @@ const RESPONDER_INSTRUCTION = [
   "Use factualTexts in the supplied evidence order. Each item must contain all wording about its matching evidence, including any concise explanation or relation to the customer's preference.",
   "factualTexts is the only place for price, product name, material, color, availability, delivery, policy, comparison, or any other evidence-derived detail. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer those details.",
   "When supplied evidence is non-empty, emit answerText null. Put any acknowledgement plus grounded explanation in its matching factualTexts item.",
-  "For a KEEP_OPEN continuation, emit progressionText null; it is not a question or a new recommendation.",
+  "For a KEEP_OPEN continuation, emit one short natural progressionText that keeps the conversation open without a question, request, recommendation, or new decision variable.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
   "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
@@ -195,7 +195,7 @@ function sanitizedRawModelOutput(payload: unknown): string | null {
   if (raw === null) return null;
   const redacted = redactAnalyticsMessage(raw);
   return redacted.dlpStatus === "PASSED"
-    ? raw.slice(0, 2_000)
+    ? redacted.text.slice(0, 2_000)
     : "[QUARANTINED_MODEL_OUTPUT]";
 }
 
@@ -384,7 +384,8 @@ function responderTaskPrompt(task: TrackCResponderTask) {
 function responderNeedsProgression(task: TrackCResponderTask): boolean {
   return task.canonicalRequest?.type === "ASK_PRODUCT" ||
     task.canonicalRequest?.type === "ASK_MEASUREMENTS" ||
-    task.continuation?.type === "ASK";
+    task.continuation?.type === "ASK" ||
+    task.continuation?.type === "KEEP_OPEN";
 }
 
 function responderDraftSchema(task: TrackCResponderTask) {
@@ -522,6 +523,14 @@ function deterministicCheckoutText(fields: readonly CheckoutField[]): string {
 }
 
 function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): void {
+  if (task.continuation?.type === "KEEP_OPEN") {
+    if (draft.progressionText === null || draft.progressionText.includes("?") ||
+        /\b(?:chị|mình|bạn)\s+(?:cho|gửi|chọn|muốn|thích|cần|định)\b/iu
+          .test(draft.progressionText.normalize("NFC"))) {
+      throw new Error("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
+    }
+    return;
+  }
   if (task.canonicalRequest?.type === "HOLD_POSITION") {
     if (draft.progressionText !== null || draft.answerText === null ||
         draft.answerText.includes("?")) {
@@ -739,7 +748,6 @@ function fixedTask(
       context.productBinding.productIds.length !== 1 ||
       context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY"),
     colorChoiceMeaningful,
-    fitQualificationUseful: context.barriers.active.includes("MEASUREMENTS_REQUIRED"),
     evidence,
     boundProductIds: context.productBinding.productIds,
   });
