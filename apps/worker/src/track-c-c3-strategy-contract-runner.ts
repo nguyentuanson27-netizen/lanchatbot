@@ -194,9 +194,7 @@ function sanitizedRawModelOutput(payload: unknown): string | null {
   const raw = providerText(payload);
   if (raw === null) return null;
   const redacted = redactAnalyticsMessage(raw);
-  return redacted.dlpStatus === "PASSED"
-    ? redacted.text.slice(0, 2_000)
-    : "[QUARANTINED_MODEL_OUTPUT]";
+  return redacted.text.slice(0, 2_000);
 }
 
 function stageFailure(
