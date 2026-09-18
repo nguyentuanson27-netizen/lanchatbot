@@ -53,7 +53,16 @@ function responderPayload(input: Readonly<{
   keepOpen?: boolean;
   canonicalMeasurements?: boolean;
   strategy?: "ANSWER_VERIFIED_FACTS" | "ASK_CLARIFICATION" | "HOLD_POSITION";
+  modelMetadata?: boolean;
 }>) {
+  const modelMetadata = {
+    strategy: input.strategy ?? (input.canonicalMeasurements === true || input.continuation !== undefined
+      ? "ASK_CLARIFICATION"
+      : "ANSWER_VERIFIED_FACTS"),
+    cta: input.canonicalMeasurements === true
+      ? "ASK_MEASUREMENTS"
+      : "NONE",
+  };
   return payload({
     segments: [{
       kind: "VERIFIED_CLAIM",
@@ -86,12 +95,7 @@ function responderPayload(input: Readonly<{
       role: "CANONICAL",
       decisionInput: "NONE",
     }] : [])],
-    strategy: input.strategy ?? (input.canonicalMeasurements === true || input.continuation !== undefined
-      ? "ASK_CLARIFICATION"
-      : "ANSWER_VERIFIED_FACTS"),
-    cta: input.canonicalMeasurements === true
-      ? "ASK_MEASUREMENTS"
-      : "NONE",
+    ...(input.modelMetadata === false ? {} : modelMetadata),
   });
 }
 
@@ -112,7 +116,7 @@ describe("Track C C3 simplified strategy contract", () => {
     }])).toBe("FIRST_CONTACT_FIXED");
   });
 
-  it("sends a Vertex-valid nullable object schema for adaptive continuation", async () => {
+  it("sends the adaptive continuation schema and keeps Responder authority to segments", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockImplementationOnce(async (request) => {
         const continuation = (JSON.parse(request.body) as {
@@ -156,6 +160,12 @@ describe("Track C C3 simplified strategy contract", () => {
           type: "STRING",
           enum: expect.arrayContaining(["NONE", "PRICE", "STOCK"]),
         });
+        const strategistInstruction = (JSON.parse(request.body) as {
+          systemInstruction?: { parts?: Array<{ text?: string }> };
+        }).systemInstruction?.parts?.[0]?.text;
+        expect(strategistInstruction).toContain(
+          "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
+        );
         return {
           payload: payload({
             replyAct: "ANSWER",
@@ -169,17 +179,15 @@ describe("Track C C3 simplified strategy contract", () => {
         };
       })
       .mockImplementationOnce(async (request) => {
-        const properties = (JSON.parse(request.body) as {
-          generationConfig: { responseSchema: { properties: {
-            strategy: unknown;
-            cta: unknown;
-            segments: { items: { properties: Record<string, unknown> } };
-          } } };
-        }).generationConfig.responseSchema.properties;
-        expect(properties.strategy).toEqual({
-          type: "STRING", enum: ["ANSWER_VERIFIED_FACTS"],
-        });
-        expect(properties.cta).toEqual({ type: "STRING", enum: ["NONE"] });
+        const responseSchema = (JSON.parse(request.body) as {
+          generationConfig: { responseSchema: {
+            required: string[];
+            properties: { segments: { items: { properties: Record<string, unknown> } } };
+          } };
+        }).generationConfig.responseSchema;
+        const properties = responseSchema.properties;
+        expect(responseSchema.required).toEqual(["segments"]);
+        expect(Object.keys(properties)).toEqual(["segments"]);
         expect(properties.segments.items.properties).not.toHaveProperty(
           "claimContentHash",
         );
@@ -187,9 +195,54 @@ describe("Track C C3 simplified strategy contract", () => {
           type: "STRING", enum: ["CLAIM_001"],
         });
         return {
-          payload: responderPayload({ keepOpen: true }),
+          payload: responderPayload({ keepOpen: true, modelMetadata: false }),
           providerModelVersion: "gemini-3.5-flash-lite",
         };
+      });
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("PRODUCTION_CONTRACT"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result).toMatchObject({
+      conversationLane: "ADAPTIVE_FOLLOWUP",
+      output: { strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE" },
+    });
+  });
+
+  it("requires an ACKNOWLEDGE task to answer before progressing", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the customer before leaving the conversation open.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          segments: [{
+            kind: "GENERAL",
+            text: "Khi nào chị cần em hỗ trợ thêm thì nhắn em nhé.",
+            role: "PROGRESSION",
+            decisionInput: "NONE",
+          }],
+          strategy: "HOLD_POSITION",
+          cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
       });
 
     await expect(runTrackCV5TwoPassBenchmarkCase({
@@ -203,9 +256,7 @@ describe("Track C C3 simplified strategy contract", () => {
         occurredAt: "2026-09-10T01:00:00.000Z",
       }],
       transport: { send },
-    })).resolves.toMatchObject({
-      conversationLane: "ADAPTIVE_FOLLOWUP",
-    });
+    })).rejects.toThrow("TRACK_C_RESPONDER_TASK_MISMATCH");
   });
 
   it("fails closed on an unsolicited request for a delivery address", async () => {
@@ -493,7 +544,7 @@ describe("Track C C3 simplified strategy contract", () => {
     expect(send).toHaveBeenCalledTimes(2);
   });
 
-  it("rejects a Responder strategy that differs from the code-owned task", async () => {
+  it("overrides a Responder strategy with the code-owned task metadata", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({
@@ -514,7 +565,7 @@ describe("Track C C3 simplified strategy contract", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       });
 
-    await expect(runTrackCV5TwoPassBenchmarkCase({
+    const result = await runTrackCV5TwoPassBenchmarkCase({
       lane: "PRODUCTION_CONTRACT",
       modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       capture: capture("PRODUCTION_CONTRACT"),
@@ -528,8 +579,11 @@ describe("Track C C3 simplified strategy contract", () => {
         occurredAt: "2026-09-10T01:00:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_TASK_MISMATCH");
-    expect(send).toHaveBeenCalledTimes(2);
+    });
+    expect(result.output).toMatchObject({
+      strategy: "ASK_CLARIFICATION",
+      cta: "NONE",
+    });
   });
 
   it("binds simulation-only facts through selected evidence without exposing unselected Context V2 facts", async () => {
