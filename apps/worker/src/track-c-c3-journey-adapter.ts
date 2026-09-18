@@ -11,6 +11,10 @@ import {
   type TrackCC3TwoPassQualityCandidateResult,
   type TrackCC3TwoPassQualityFixture,
 } from "./track-c-c3-two-pass-quality-adapter.js";
+import {
+  TrackCStrategyContractFailure,
+  type TrackCStrategyContractDiagnostic,
+} from "./track-c-c3-strategy-contract-runner.js";
 
 export interface TrackCC2JourneyExpectedTurn {
   readonly required_behaviors: readonly string[];
@@ -63,6 +67,34 @@ export interface TrackCC3JourneyAdapterResult {
   readonly journeyId: string;
   readonly turns: readonly TrackCC3JourneyTurnResult[];
   readonly transcript: readonly ShadowContextMessage[];
+}
+
+export type TrackCC3JourneyDiagnostic = TrackCStrategyContractDiagnostic & Readonly<{
+  journeyId: string;
+  turnId: string;
+}>;
+
+/** A bounded, PII-safe failure record for a single authored journey turn. */
+export class TrackCC3JourneyFailure extends Error {
+  readonly diagnostic: TrackCC3JourneyDiagnostic;
+
+  constructor(diagnostic: TrackCC3JourneyDiagnostic) {
+    super(diagnostic.errorCode);
+    this.name = "TrackCC3JourneyFailure";
+    this.diagnostic = diagnostic;
+  }
+}
+
+function fallbackDiagnostic(error: unknown): TrackCStrategyContractDiagnostic {
+  const errorCode = error instanceof Error && /^[A-Z0-9_]+(?::|$)/
+    .test(error.message)
+    ? error.message.split(":", 1)[0]!
+    : "TRACK_C_C3_JOURNEY_UNEXPECTED_ERROR";
+  return Object.freeze({
+    stage: "EVIDENCE",
+    sanitizedRawModelOutput: null,
+    errorCode,
+  });
 }
 
 function occurredAt(
@@ -162,26 +194,38 @@ export async function runTrackCC3Journey(
       latest_customer_message: turn.customer_message,
       context: turn.context,
     };
-    const capture = materializeTrackCV5CaseCapture({
-      lane: "BEHAVIOR_SIMULATION",
-      fixture,
-      runtimeClaimCatalog: input.runtimeClaimCatalog,
-      recipe: input.recipe,
-    });
-    const result = await runTrackCC3TwoPassQualityCandidate({
-      lane: "BEHAVIOR_SIMULATION",
-      modelResource: input.modelResource,
-      fixture,
-      capture,
-      evaluationAt,
-      evaluationContext,
-      simulationFacts: resolveSimulationFacts(
-        turn.context.simulation_fact_refs,
-        input.simulationFactCatalog,
-      ),
-      transport: input.transport,
-      ...(input.signal === undefined ? {} : { signal: input.signal }),
-    });
+    let result: TrackCC3TwoPassQualityCandidateResult;
+    try {
+      const capture = materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture,
+        runtimeClaimCatalog: input.runtimeClaimCatalog,
+        recipe: input.recipe,
+      });
+      result = await runTrackCC3TwoPassQualityCandidate({
+        lane: "BEHAVIOR_SIMULATION",
+        modelResource: input.modelResource,
+        fixture,
+        capture,
+        evaluationAt,
+        evaluationContext,
+        simulationFacts: resolveSimulationFacts(
+          turn.context.simulation_fact_refs,
+          input.simulationFactCatalog,
+        ),
+        transport: input.transport,
+        ...(input.signal === undefined ? {} : { signal: input.signal }),
+      });
+    } catch (error) {
+      const base = error instanceof TrackCStrategyContractFailure
+        ? error.diagnostic
+        : fallbackDiagnostic(error);
+      throw new TrackCC3JourneyFailure(Object.freeze({
+        journeyId: input.journey.id,
+        turnId: turn.id,
+        ...base,
+      }));
+    }
     turns.push(Object.freeze({
       turnId: turn.id,
       customerMessage: turn.customer_message,

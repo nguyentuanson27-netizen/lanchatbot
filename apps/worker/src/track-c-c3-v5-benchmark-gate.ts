@@ -15,6 +15,11 @@ export type TrackCV5ProductionClassification =
   | "SUPPORTED"
   | "BLOCKED_BY_CONTRACT";
 
+/** Candidate execution shape is recorded separately from C2 corpus/rubric. */
+export type TrackCV5GeneratorCallShape =
+  | "FIRST_CONTACT_FIXED"
+  | "ADAPTIVE_FOLLOWUP";
+
 export interface TrackCV5ExpectedCase {
   readonly caseId: string;
   readonly productionClassification: TrackCV5ProductionClassification;
@@ -23,6 +28,7 @@ export interface TrackCV5ExpectedCase {
 
 export interface TrackCV5CaseExecutionRecord extends TrackCV5ExpectedCase {
   readonly lane: TrackCV5ScoringLane;
+  readonly generatorCallShape: TrackCV5GeneratorCallShape;
   readonly outcome: TrackCV5ExecutionOutcome;
   readonly providerCallCount: number;
   readonly score: TrackCV5CaseScoreResult | null;
@@ -62,6 +68,8 @@ function assertCaseRecord(
   lane: TrackCV5ScoringLane,
 ): void {
   if (!record.caseId.trim() || record.lane !== lane ||
+      (record.generatorCallShape !== "FIRST_CONTACT_FIXED" &&
+       record.generatorCallShape !== "ADAPTIVE_FOLLOWUP") ||
       !Number.isInteger(record.providerCallCount) || record.providerCallCount < 0) {
     throw new Error(`TRACK_C_V5_GATE_RECORD_INVALID:${record.caseId}`);
   }
@@ -95,7 +103,9 @@ function assertCaseRecord(
     return;
   }
   if (record.outcome === "SCORED") {
-    if (record.providerCallCount !== 2 ||
+    const expectedProviderCallCount = record.generatorCallShape ===
+      "FIRST_CONTACT_FIXED" ? 1 : 2;
+    if (record.providerCallCount !== expectedProviderCallCount ||
         record.score === null || record.score.lane !== lane) {
       throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
     }

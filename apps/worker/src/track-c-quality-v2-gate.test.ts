@@ -37,6 +37,7 @@ function record(
     lane: "PRODUCTION_CONTRACT",
     productionClassification: "SUPPORTED",
     expectedPreModelReject: false,
+    generatorCallShape: "ADAPTIVE_FOLLOWUP",
     outcome: "SCORED",
     providerCallCount: 2,
     score: score("PASS"),
@@ -138,9 +139,18 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
     expect(() => gate([q1])).toThrow("TRACK_C_V5_BLOCKED_CASE_NOT_SKIPPED:Q001");
   });
 
-  it("requires exactly two provider calls for a scored two-pass case", () => {
+  it("requires two provider calls for an adaptive scored case", () => {
     const q1 = record("Q001", { providerCallCount: 0 });
     expect(() => gate([q1])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
+  });
+
+  it("accepts exactly one provider call for a scored fixed first-contact case", () => {
+    const q1 = record("Q001", {
+      generatorCallShape: "FIRST_CONTACT_FIXED",
+      providerCallCount: 1,
+    });
+
+    expect(gate([q1]).passed).toBe(true);
   });
 
   it("requires zero provider calls for a production contract skip", () => {

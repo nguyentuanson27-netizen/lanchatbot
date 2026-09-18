@@ -335,12 +335,16 @@ function guardProductionOutput(
   }
 }
 
-function validateResponderOutput(
+export function validateResponderOutput(
   context: ReturnType<typeof contextFromFrozenTrackCCapture>,
   value: unknown,
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
+  simulationClaimContentHashes: readonly string[] = [],
 ): ContextV2CandidateOutputV2 {
+  if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  }
   const semantic = SemanticOutputSchema.safeParse(value);
   if (!semantic.success) {
     throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
@@ -367,6 +371,7 @@ function validateResponderOutput(
         context.productPresentation === undefined
       ? []
       : [context.productPresentation.provenance.contentHash]),
+    ...simulationClaimContentHashes,
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
