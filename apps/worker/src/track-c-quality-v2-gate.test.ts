@@ -20,6 +20,7 @@ function score(outcome: "PASS" | "PASS_WITH_NOTE" | "FAIL"): TrackCV5CaseScoreRe
     contractVersion: "TRACK_C_V5_RUBRIC_SCORE_V1",
     lane: "PRODUCTION_CONTRACT",
     domain: "PRICE_VALUE",
+    generatorCallShape: "ADAPTIVE_FOLLOWUP",
     strategist: { stage: "STRATEGIST", ...stage },
     responder: { stage: "RESPONDER", ...stage },
     outcome,
