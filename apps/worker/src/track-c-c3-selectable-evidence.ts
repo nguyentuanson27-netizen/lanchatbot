@@ -290,12 +290,6 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
           ))];
           return colors.length === 0 ? [] : [`màu ${colors.join(", ")}`];
         })(),
-        ...(() => {
-          const sizes = [...new Set(presentation.variants.flatMap(({ size }) =>
-            size === null ? [] : [size]
-          ))];
-          return sizes.length === 0 ? [] : [`size ${sizes.join(", ")}`];
-        })(),
       ].join("; ") + ".",
       provenance: Object.freeze({
         contentHash: presentation.provenance.contentHash,
