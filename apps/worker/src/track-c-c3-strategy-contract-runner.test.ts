@@ -321,7 +321,7 @@ describe("Track C C3 strategy-contract runner", () => {
         "Mẫu Tường Vi có chất liệu tơ xước và màu kem, đen ạ.",
       ],
       progressionText:
-        "Chị gửi 0901234567, lan@example.com, 12 Nguyễn Trãi Hà Nội nhé.",
+        "Chị gửi 0901234567, lan@example.com, địa chỉ: 12 Nguyễn Trãi, Hà Nội nhé.",
     };
     const rawModelText = JSON.stringify(rawDraft);
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
