@@ -34,7 +34,7 @@
     "holdout_30_expanded_sha256": "ef5ca6d4ce14eb0d518610c786601cb3eac1a3de17ef471d25dc6523fa0b43f8",
     "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e",
     "bundle_fingerprint_sha256": "f123fc6504aa2faeaa69b9cee52f4fd1fd6d28e4e5cff4ad69751c6f46895b76",
-    "quality_harness_fingerprint_sha256": "f25ab6fadab0662d231f2dbaa8b19ac9e7a8a9e7d6056873ae60b1fee6a79e0b"
+    "quality_harness_fingerprint_sha256": "988546bd10c9f05e36dbdc9d637fe25ecebb6c5c9560e3d139ea85a7ad799721"
   },
   "bundle_components_git_sha1": {
     "facts.json": "770c2eaf67ff054ce174d818ea8daa0f188b1e3b",
@@ -51,7 +51,7 @@
   "quality_harness_components_git_sha1": {
     "../../../src/track-c-c3-v5-benchmark-scoring.ts": "b61743d0d7ec397e64ffa2ebeaaa8696fb3b207c",
     "../../../src/track-c-c3-v5-benchmark-evaluator.ts": "67b1a774a6d01089aa666631987d0cad3a3440b6",
-    "../../../src/track-c-c3-v5-benchmark-gate.ts": "a9c8b6eadd7778f575f3b4ea8018da31921e7a3a"
+    "../../../src/track-c-c3-v5-benchmark-gate.ts": "62bc0eab919c025597c4c93f7d8895d5835831bf"
   },
   "storage": {
     "quality_chunks": "quality-01.json ... quality-10.json; 10 cases each",
@@ -84,7 +84,7 @@
     "BEHAVIOR_SIMULATION": "all 100 cases; the eval-only candidate adapter injects simulation_fact_refs only on this lane and keeps effects disabled",
     "PRODUCTION_CONTRACT": "only effectively SUPPORTED cases after contract-reachability.json; materialize runtime_claim_refs through runtime-materialization.json, derive canonical dialogue/buying evidence through the production canonical-evidence helper from latest_customer_message, and build canonical Context V2 before candidate request builders; stale/integrity failures reject before provider; protected-looking responder text is guarded segment-by-segment against exact frozen claim scope; malformed claim scope/evidence mappings and canonical-evidence expectation mismatches reject instead of receiving defaults",
     "QUALITY_EVALUATION": "C2 owns rubric/scoring/evaluation; FIRST_CONTACT_FIXED is evaluated as Responder-only and ADAPTIVE_FOLLOWUP as Strategist + Responder from the candidate-recorded runtime lane; benchmark identity remains independent of candidate prompt revision; judge input hides case ID/split and keeps responder output out of strategist judge input",
-    "QUALITY_GATE": "aggregate typed case outcomes against an explicit frozen expected-case population; partial populations or caller metadata that disagrees with the plan fail closed; scored FIRST_CONTACT_FIXED cases require exactly one generator call and scored ADAPTIVE_FOLLOWUP cases exactly two; production BLOCKED_BY_CONTRACT cases must be zero-call CONTRACT_SKIP, and expected pre-model rejects require zero provider calls",
+    "QUALITY_GATE": "aggregate typed case outcomes against an explicit frozen expected-case population; partial populations or caller metadata that disagrees with the plan fail closed; scored call cardinality is derived from the evaluated candidate shape in the score (FIRST_CONTACT_FIXED = 1, ADAPTIVE_FOLLOWUP = 2), not from a caller-supplied call-shape label; production BLOCKED_BY_CONTRACT cases must be zero-call CONTRACT_SKIP, and expected pre-model rejects require zero provider calls",
     "OWNER_SAFETY": "route-map and capability matrix define mandatory probes; the observation gate rejects always-HUMAN positive probes and any provider/effect/persistence/outbox activity, but positive authorized-capability probes are not production evidence until a matching real capability port exists",
     "SMOKE": "select only production-supported cases after production-contract suite passes; operational effects remain disabled until separately authorized end-to-end testing"
   },
