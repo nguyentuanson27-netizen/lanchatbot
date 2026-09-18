@@ -423,6 +423,39 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_RESPONDER_DRAFT_INVALID");
   });
 
+  it("rejects unsupported factual wording by evidence allowlist in simulation", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({
+        ...responderDraft(),
+        factualTexts: [
+          "Dạ mẫu này hiện 849.000đ ạ.",
+          "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ và màu kem, đen cao cấp ạ.",
+        ],
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+      },
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_FACTUAL_WORDING_UNGROUNDED");
+  });
+
   it("rejects effect language in a provenance-bound factual text", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
