@@ -63,6 +63,7 @@ const RESPONDER_INSTRUCTION = [
   "factualTexts is the only place for price, product name, material, color, availability, delivery, policy, comparison, or any other evidence-derived detail. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer those details.",
   "When supplied evidence is non-empty, emit answerText null. Put any acknowledgement plus grounded explanation in its matching factualTexts item.",
   "For a KEEP_OPEN continuation, emit one short natural progressionText that keeps the conversation open without a question, request, recommendation, or new decision variable.",
+  "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
   "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
