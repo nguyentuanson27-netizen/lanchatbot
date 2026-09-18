@@ -386,13 +386,13 @@ export function validateResponderOutput(
     guardProductionOutput(context, output, evaluationAt);
   } else {
     const simulationHashes = new Set(simulationClaimContentHashes);
-    const runtimeOnlyOutput = Object.freeze({
+    const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
       ...output,
-      segments: Object.freeze(output.segments.filter((segment) =>
+      segments: output.segments.filter((segment) =>
         segment.kind !== "VERIFIED_CLAIM" ||
         !simulationHashes.has(segment.claimContentHash)
-      )),
-    });
+      ),
+    };
     guardProductionOutput(context, runtimeOnlyOutput, evaluationAt);
   }
   return output;
