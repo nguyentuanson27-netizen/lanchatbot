@@ -202,4 +202,21 @@ describe("Track C C3 clean strategy contract", () => {
     expect(colors.continuation).toEqual({ type: "ASK", input: "COLOR" });
     expect(measurements.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
   });
+
+  it("keeps fixed progression priority when price is unresolved", () => {
+    const task = compileTrackCFixedFirstContactTask({
+      productResolved: true,
+      classificationOrVariantRequired: false,
+      colorChoiceMeaningful: false,
+      evidence: [],
+      boundProductIds: ["SQ9012"],
+    });
+
+    expect(task.answer).toMatchObject({
+      kind: "ACKNOWLEDGE",
+      proposition: "PRICE",
+    });
+    expect(task.continuation).toBeNull();
+    expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
+  });
 });
