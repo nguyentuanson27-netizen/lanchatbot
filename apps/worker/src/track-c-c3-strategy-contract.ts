@@ -128,7 +128,9 @@ function plainObject(value: unknown): Readonly<Record<string, unknown>> {
   return value as Readonly<Record<string, unknown>>;
 }
 
-function trustedFirstContact(value: unknown): value is TrackCTrustedAcquisitionMetadata {
+export function isTrackCTrustedAcquisitionMetadata(
+  value: unknown,
+): value is TrackCTrustedAcquisitionMetadata {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return false;
   }
@@ -143,7 +145,7 @@ function trustedFirstContact(value: unknown): value is TrackCTrustedAcquisitionM
 export function selectTrackCConversationLane(
   metadata: readonly unknown[],
 ): TrackCConversationLane {
-  return metadata.some(trustedFirstContact)
+  return metadata.some(isTrackCTrustedAcquisitionMetadata)
     ? "FIRST_CONTACT_FIXED"
     : "ADAPTIVE_FOLLOWUP";
 }
