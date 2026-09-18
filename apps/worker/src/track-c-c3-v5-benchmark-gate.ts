@@ -107,7 +107,8 @@ function assertCaseRecord(
     const expectedProviderCallCount = record.generatorCallShape ===
       "FIRST_CONTACT_FIXED" ? 1 : 2;
     if (record.providerCallCount !== expectedProviderCallCount ||
-        record.score === null || record.score.lane !== lane) {
+        record.score === null || record.score.lane !== lane ||
+        record.score.generatorCallShape !== record.generatorCallShape) {
       throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
     }
     return;
