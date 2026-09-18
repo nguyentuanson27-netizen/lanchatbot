@@ -523,7 +523,7 @@ function deterministicCheckoutText(fields: readonly CheckoutField[]): string {
 function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): void {
   if (task.continuation?.type === "KEEP_OPEN") {
     if (draft.progressionText === null || draft.progressionText.includes("?") ||
-        /\b(?:chị|mình|bạn)\s+(?:cho|gửi|chọn|muốn|thích|cần|định)\b/iu
+        /\b(?:chị|mình|bạn)\b[^.!…]{0,80}\b(?:màu|size|kích\s*thước|chiều\s*cao|cân\s*nặng|số\s*lượng|ngân\s*sách|phong\s*cách|địa\s*chỉ|số\s*điện\s*thoại)\b/iu
           .test(draft.progressionText.normalize("NFC"))) {
       throw new Error("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
     }
