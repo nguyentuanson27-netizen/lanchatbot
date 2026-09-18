@@ -110,14 +110,16 @@ function responderPayload(
   if (task === undefined) throw new Error("TEST_RESPONDER_TASK_REQUIRED");
   const canonical = task.canonicalRequest?.type;
   const hold = canonical === "HOLD_POSITION";
+  const keepOpen = task.continuation?.type === "KEEP_OPEN";
   const needsProgression = canonical === "ASK_PRODUCT" ||
     canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return modelPayload({
     answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : reply,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
-    progressionText: hold ? null : needsProgression
-      ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
+    progressionText: hold ? null : keepOpen
+      ? "Em vẫn ở đây khi chị cần xem thêm ạ."
+      : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   });
 }
 
