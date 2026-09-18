@@ -397,7 +397,7 @@ describe("Track C C3 strategy-contract runner", () => {
       payload: payload({
         answerText: null,
         factualTexts: ["Dạ giá này đã được xác minh ạ."],
-        progressionText: null,
+        progressionText: "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ.",
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
     });
