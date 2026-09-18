@@ -151,6 +151,11 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
     const q1 = record("Q001", {
       generatorCallShape: "FIRST_CONTACT_FIXED",
       providerCallCount: 1,
+      score: {
+        ...score("PASS"),
+        generatorCallShape: "FIRST_CONTACT_FIXED",
+        strategist: null,
+      },
     });
 
     expect(gate([q1]).passed).toBe(true);
@@ -165,6 +170,17 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
       ...expectedCase(q1),
       generatorCallShape: "ADAPTIVE_FOLLOWUP",
     }])).toThrow("TRACK_C_V5_GATE_EXPECTATION_MISMATCH:Q001");
+  });
+
+  it("rejects a scored call shape that disagrees with the planned record", () => {
+    const q1 = record("Q001", {
+      generatorCallShape: "FIRST_CONTACT_FIXED",
+      providerCallCount: 1,
+    });
+    expect(() => gate([q1], [{
+      ...expectedCase(q1),
+      generatorCallShape: "FIRST_CONTACT_FIXED",
+    }])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
   });
 
   it("requires zero provider calls for a production contract skip", () => {
