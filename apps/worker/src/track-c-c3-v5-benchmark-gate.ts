@@ -15,21 +15,15 @@ export type TrackCV5ProductionClassification =
   | "SUPPORTED"
   | "BLOCKED_BY_CONTRACT";
 
-/** Candidate execution shape is recorded separately from C2 corpus/rubric. */
-export type TrackCV5GeneratorCallShape =
-  | "FIRST_CONTACT_FIXED"
-  | "ADAPTIVE_FOLLOWUP";
 
 export interface TrackCV5ExpectedCase {
   readonly caseId: string;
   readonly productionClassification: TrackCV5ProductionClassification;
   readonly expectedPreModelReject: boolean;
-  readonly generatorCallShape: TrackCV5GeneratorCallShape;
 }
 
 export interface TrackCV5CaseExecutionRecord extends TrackCV5ExpectedCase {
   readonly lane: TrackCV5ScoringLane;
-  readonly generatorCallShape: TrackCV5GeneratorCallShape;
   readonly outcome: TrackCV5ExecutionOutcome;
   readonly providerCallCount: number;
   readonly score: TrackCV5CaseScoreResult | null;
@@ -69,8 +63,6 @@ function assertCaseRecord(
   lane: TrackCV5ScoringLane,
 ): void {
   if (!record.caseId.trim() || record.lane !== lane ||
-      (record.generatorCallShape !== "FIRST_CONTACT_FIXED" &&
-       record.generatorCallShape !== "ADAPTIVE_FOLLOWUP") ||
       !Number.isInteger(record.providerCallCount) || record.providerCallCount < 0) {
     throw new Error(`TRACK_C_V5_GATE_RECORD_INVALID:${record.caseId}`);
   }
@@ -104,11 +96,12 @@ function assertCaseRecord(
     return;
   }
   if (record.outcome === "SCORED") {
-    const expectedProviderCallCount = record.generatorCallShape ===
+    if (record.score === null || record.score.lane !== lane) {
+      throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
+    }
+    const expectedProviderCallCount = record.score.generatorCallShape ===
       "FIRST_CONTACT_FIXED" ? 1 : 2;
-    if (record.providerCallCount !== expectedProviderCallCount ||
-        record.score === null || record.score.lane !== lane ||
-        record.score.generatorCallShape !== record.generatorCallShape) {
+    if (record.providerCallCount !== expectedProviderCallCount) {
       throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
     }
     return;
@@ -159,8 +152,7 @@ export function gateTrackCV5QualityResults(input: Readonly<{
     }
     if (
       record.productionClassification !== planned.productionClassification ||
-      record.expectedPreModelReject !== planned.expectedPreModelReject ||
-      record.generatorCallShape !== planned.generatorCallShape
+      record.expectedPreModelReject !== planned.expectedPreModelReject
     ) {
       throw new Error(`TRACK_C_V5_GATE_EXPECTATION_MISMATCH:${record.caseId}`);
     }
