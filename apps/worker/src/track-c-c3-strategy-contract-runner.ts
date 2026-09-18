@@ -485,6 +485,54 @@ function assertNoUnboundFactText(value: string | null, task: TrackCResponderTask
   }
 }
 
+const FACTUAL_CONNECTIVE_TOKENS = new Set([
+  "dạ", "ạ", "chị", "em", "mình", "mẫu", "sản", "phẩm", "này", "hiện",
+  "có", "giá", "là", "chất", "liệu", "màu", "và", "với", "gồm", "của",
+  "đang", "còn", "theo", "được", "xác", "minh", "nha", "nhé", "thì",
+  "ở", "cho",
+]);
+
+function factualLexicalTokens(value: string): readonly string[] {
+  return value.normalize("NFC").toLocaleLowerCase("vi-VN")
+    .replace(/(?<=\d)[.,](?=\d{3}\b)/gu, "")
+    .replace(/(\p{N})(\p{L})/gu, "$1 $2")
+    .replace(/(\p{L})(\p{N})/gu, "$1 $2")
+    .match(/[\p{L}\p{N}]+/gu) ?? [];
+}
+
+function evidenceLexicalTokens(evidence: TrackCSelectableEvidence): Set<string> {
+  const tokens = new Set<string>();
+  const visit = (value: unknown): void => {
+    if (typeof value === "string" || typeof value === "number") {
+      for (const token of factualLexicalTokens(String(value))) tokens.add(token);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (value !== null && typeof value === "object") {
+      Object.values(value as Readonly<Record<string, unknown>>).forEach(visit);
+    }
+  };
+  visit(evidence.value);
+  visit(evidence.subject);
+  return tokens;
+}
+
+function assertFactualTextGrounded(
+  value: string,
+  evidence: TrackCSelectableEvidence,
+): void {
+  const authority = evidenceLexicalTokens(evidence);
+  const unsupported = factualLexicalTokens(value).filter((token) =>
+    token.length > 1 && !authority.has(token) && !FACTUAL_CONNECTIVE_TOKENS.has(token)
+  );
+  if (unsupported.length > 0) {
+    throw new Error("TRACK_C_RESPONDER_FACTUAL_WORDING_UNGROUNDED");
+  }
+}
+
 function assertNoEffectText(value: string | null): void {
   if (value !== null &&
       /\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value)) {
@@ -571,7 +619,10 @@ function compileResponderDraft(input: Readonly<{
   // A factual segment is provenance-bound, but it is still model-authored
   // wording. Simulation and runtime evidence grant facts only; neither grants
   // the Responder authority to claim that an external effect already happened.
-  draft.factualTexts.forEach((factualText) => assertNoEffectText(factualText));
+  draft.factualTexts.forEach((factualText, index) => {
+    assertFactualTextGrounded(factualText, task.evidence[index]!);
+    assertNoEffectText(factualText);
+  });
   assertProgression(task, draft);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (draft.answerText !== null) segments.push({ kind: "GENERAL", text: draft.answerText });
