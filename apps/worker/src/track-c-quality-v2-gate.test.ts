@@ -34,6 +34,7 @@ function record(
 ): TrackCV5CaseExecutionRecord {
   return {
     caseId,
+    conversationLane: "ADAPTIVE_FOLLOWUP",
     lane: "PRODUCTION_CONTRACT",
     productionClassification: "SUPPORTED",
     expectedPreModelReject: false,
@@ -49,6 +50,7 @@ function expectedCase(
 ): TrackCV5ExpectedCase {
   return {
     caseId: value.caseId,
+    conversationLane: value.conversationLane,
     productionClassification: value.productionClassification,
     expectedPreModelReject: value.expectedPreModelReject,
   };
@@ -103,6 +105,7 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
     const q1 = record("Q001");
     expect(() => gate([q1], [{
       caseId: "Q001",
+      conversationLane: "ADAPTIVE_FOLLOWUP",
       productionClassification: "BLOCKED_BY_CONTRACT",
       expectedPreModelReject: false,
     }])).toThrow("TRACK_C_V5_GATE_EXPECTATION_MISMATCH:Q001");
@@ -141,6 +144,14 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
   it("requires exactly two provider calls for a scored two-pass case", () => {
     const q1 = record("Q001", { providerCallCount: 0 });
     expect(() => gate([q1])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
+  });
+
+  it("accepts exactly one provider call for a scored fixed first-contact case", () => {
+    const q1 = record("Q001", {
+      conversationLane: "FIRST_CONTACT_FIXED",
+      providerCallCount: 1,
+    });
+    expect(gate([q1]).passed).toBe(true);
   });
 
   it("requires zero provider calls for a production contract skip", () => {

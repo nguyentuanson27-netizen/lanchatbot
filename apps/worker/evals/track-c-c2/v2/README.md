@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.5
+### Benchmark revision R2.23
 
-`benchmark_revision` is **R2.5**. Relative to R2.4, the C2-owned execution seam distinguishes a catalog size label carried by integrity-valid product-presentation evidence from an unbound fit recommendation. The catalog-aware guard mode is scoped only to that exact presentation hash; every other segment remains reject-only. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.23**. This is the unique fingerprint for the C3 strategy-contract candidate: the Strategist sees only evidence with a deterministic atomic renderer; rich policy, offer, comparison, and unknown care-code objects remain unavailable until the code has a bounded projection. Fixed first contact uses a minimal renderable simulation product fact without adding a Strategist call, and requires that fact together with price when it is selected. Adaptive follow-up treats canonical `NEGATED` as the primary no-reopen signal, and evaluates text stop/measurement fallback from the latest relevant inbound state. The Vertex Strategist continuation now matches the compiler's nullable ASK/KEEP_OPEN union, while proposition accepts the full protected enum so code can derive an unresolved answer from an empty code-offered evidence set. The Responder emits only code-selected segments and guard metadata; code attaches deterministic strategy and CTA after parsing, while ACKNOWLEDGE must be realized before progression. Selected product-presentation text is materialized by code rather than an obsolete placeholder protocol. Corpus, splits, rubric weights, and the aggregate quality population are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 
@@ -20,7 +20,7 @@ Any change to a pinned bundle component changes the bundle fingerprint, so it mu
 
 All 100 quality cases can run in `BEHAVIOR_SIMULATION`. `PRODUCTION_CONTRACT` uses `contract-reachability.json`; the current effective distribution is **47 supported / 53 blocked by contract**. A simulation pass is not production support.
 
-Production materialization uses real protected-claim schemas and canonical Context V2 construction. Producer/runtime-unreachable states fail closed instead of being fabricated. The current C3 two-pass adapter reuses the existing strategist/responder request builders and exposes no persistence, checkout, payment, delivery, or other effect port.
+Production materialization uses real protected-claim schemas and canonical Context V2 construction. Producer/runtime-unreachable states fail closed instead of being fabricated. The current C3 adapter exposes no persistence, checkout, payment, delivery, or other effect port. Production currently has no trusted acquisition-origin signal, so `FIRST_CONTACT_FIXED` is simulation-only until an equivalent canonical production signal is introduced.
 
 ## Supplemental conversation journeys
 
@@ -36,7 +36,7 @@ Trusted acquisition metadata and checkout completeness in these fixtures are sim
 
 ## Quality evaluation
 
-`rubric.json` defines deterministic scoring thresholds and stage diagnostics. The current V2 execution/scoring harness is intentionally bound to the existing two-pass strategist/responder candidate. A future candidate with a different stage shape may reuse the same C2 corpus, but it must provide a compatible adapter/scoring contract rather than silently being treated as two-pass.
+`rubric.json` defines deterministic scoring thresholds and stage diagnostics. `ADAPTIVE_FOLLOWUP` is assessed as Strategist + Responder; `FIRST_CONTACT_FIXED` is assessed only as Responder because its policy is code-owned. A future candidate with a different stage shape may reuse the same C2 corpus, but it must provide a compatible adapter/scoring contract rather than silently being treated as two-pass.
 
 The aggregate C2 gate binds an explicit expected population. Partial populations, relabeled cases, infrastructure failures, unsupported production cases executed as model calls, and unexpected pre-model rejects fail closed.
 
