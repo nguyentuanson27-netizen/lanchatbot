@@ -180,7 +180,6 @@ describe("Track C C3 clean strategy contract", () => {
       productResolved: false,
       classificationOrVariantRequired: true,
       colorChoiceMeaningful: true,
-      fitQualificationUseful: true,
       evidence: [priceEvidence],
       boundProductIds: ["SQ9012"],
     });
@@ -188,7 +187,6 @@ describe("Track C C3 clean strategy contract", () => {
       productResolved: true,
       classificationOrVariantRequired: false,
       colorChoiceMeaningful: true,
-      fitQualificationUseful: true,
       evidence: [priceEvidence],
       boundProductIds: ["SQ9012"],
     });
@@ -196,7 +194,6 @@ describe("Track C C3 clean strategy contract", () => {
       productResolved: true,
       classificationOrVariantRequired: false,
       colorChoiceMeaningful: false,
-      fitQualificationUseful: true,
       evidence: [priceEvidence],
       boundProductIds: ["SQ9012"],
     });
