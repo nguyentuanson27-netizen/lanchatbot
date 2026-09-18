@@ -227,6 +227,9 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         capability,
         ...(subject === undefined ? {} : { subject }),
         value: Object.freeze({ ...claim.value }),
+        ...(capability === "PRODUCT_MEDIA"
+          ? { deterministicText: "Có tư liệu hình ảnh sản phẩm đã xác minh." }
+          : {}),
         provenance: Object.freeze({
           contentHash: claim.provenance.contentHash,
           authority: "RUNTIME" as const,
