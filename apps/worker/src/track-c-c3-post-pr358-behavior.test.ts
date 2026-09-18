@@ -140,7 +140,8 @@ function responderFor(
     canonical !== "ASK_CHECKOUT_DETAILS" &&
     (canonical !== undefined || task.continuation !== null);
   return {
-    answerText: task.answer.status === "SUPPORTED" ? null : answerText,
+    answerText: task.answer.status === "SUPPORTED" ||
+        canonical === "ASK_CHECKOUT_DETAILS" ? null : answerText,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
     progressionText: needsProgression
       ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
@@ -357,6 +358,11 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
     expect(responder.responderTask?.canonicalRequest).toEqual({
       type: "ASK_CHECKOUT_DETAILS", requestedFields: ["PHONE"],
     });
+    const responderRequest = JSON.parse(candidate.send.mock.calls[1]![0].body) as {
+      generationConfig: { responseSchema: { properties: { answerText: unknown } } };
+    };
+    expect(responderRequest.generationConfig.responseSchema.properties.answerText)
+      .toEqual({ type: "NULL" });
   });
 
   it("enforces canonical NEGATED as a hard stop instead of reopening the turn", async () => {
