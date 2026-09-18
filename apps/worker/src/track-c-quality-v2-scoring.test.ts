@@ -44,6 +44,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "PRICE_VALUE",
       strategist: strategist(),
       responder: responder(),
@@ -61,6 +62,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "CONVERSATION_CONTROL",
       strategist: {
         ...weakStrategist,
@@ -83,6 +85,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "PRICE_VALUE",
       strategist: strategist(),
       responder: {
@@ -101,6 +104,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "PRICE_VALUE",
       strategist: {
         ...stage,
@@ -118,6 +122,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "BEHAVIOR_SIMULATION",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "CONVERSATION_CONTROL",
       strategist: strategist(3),
       responder: {
@@ -131,11 +136,26 @@ describe("Track C C3 V5 benchmark scoring", () => {
     expect(result.responder.passed).toBe(true);
   });
 
+  it("scores fixed first contact with responder only", () => {
+    const result = scoreTrackCV5BenchmarkCase({
+      rubric: RUBRIC,
+      lane: "BEHAVIOR_SIMULATION",
+      generatorCallShape: "FIRST_CONTACT_FIXED",
+      domain: "PRICE_VALUE",
+      responder: responder(),
+    });
+
+    expect(result.outcome).toBe("PASS");
+    expect(result.strategist).toBeNull();
+    expect(result.responder.passed).toBe(true);
+  });
+
   it("rejects fractional scores because the registered rubric is integer-only", () => {
     const invalid = responder();
     expect(() => scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "BEHAVIOR_SIMULATION",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "CONVERSATION_CONTROL",
       strategist: strategist(3),
       responder: {
