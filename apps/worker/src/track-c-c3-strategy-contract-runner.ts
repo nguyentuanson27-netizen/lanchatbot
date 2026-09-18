@@ -85,26 +85,6 @@ function capabilityForClaim(type: string): TrackCProtectedProposition | null {
     : null;
 }
 
-function evidenceCapabilities(context: ContextV2) {
-  const values = new Map<string, TrackCProtectedProposition>();
-  context.verifiedClaims.forEach((claim, index) => {
-    const capability = capabilityForClaim(claim.type);
-    if (capability !== null) values.set(
-      `CLAIM_${String(index + 1).padStart(3, "0")}`,
-      capability,
-    );
-  });
-  if (context.productAttributes !== null && context.productAttributes !== undefined) {
-    values.set("PRODUCT_ATTRIBUTES_001", "PRODUCT_ATTRIBUTES");
-  }
-  if (context.productPresentation !== null && context.productPresentation !== undefined) {
-    for (const { claimRef } of candidateProductPresentationClaims(
-      context.productPresentation,
-    )) values.set(claimRef, "PRODUCT_PRESENTATION");
-  }
-  return values;
-}
-
 type TrackCSelectedEvidence = Readonly<{
   ref: string;
   capability: TrackCProtectedProposition;
@@ -132,20 +112,6 @@ function simulationCapability(fact: unknown): TrackCProtectedProposition | null 
   return typeof kind === "string" ? capabilities[kind] ?? null : null;
 }
 
-function simulationEvidenceCapabilities(
-  facts: readonly unknown[],
-): ReadonlyMap<string, TrackCProtectedProposition> {
-  const values = new Map<string, TrackCProtectedProposition>();
-  facts.forEach((fact, index) => {
-    const capability = simulationCapability(fact);
-    if (capability !== null) values.set(
-      `SIMULATION_${String(index + 1).padStart(3, "0")}`,
-      capability,
-    );
-  });
-  return values;
-}
-
 function evidenceValues(
   context: ContextV2,
   simulationFacts: readonly unknown[],
@@ -165,17 +131,7 @@ function evidenceValues(
       ref: "PRODUCT_ATTRIBUTES_001",
       capability: "PRODUCT_ATTRIBUTES",
       value: {
-        materials: context.productAttributes.materials,
-        materialComponents: context.productAttributes.materialComponents,
-        colors: context.productAttributes.colors,
-        styles: context.productAttributes.styles,
-        silhouettes: context.productAttributes.silhouettes,
-        occasions: context.productAttributes.occasions,
-        designAttributes: context.productAttributes.designAttributes,
-        careInstructions: context.productAttributes.careInstructions,
-        wearProperties: context.productAttributes.wearProperties,
-        backCoverage: context.productAttributes.backCoverage,
-        designComplexity: context.productAttributes.designComplexity,
+        material: context.productAttributes.materials[0] ?? null,
       },
       simulationFact: null,
     });
@@ -224,7 +180,7 @@ function dayRange(min: unknown, max: unknown): string | null {
   return min === max ? `${String(min)} ngày` : `${String(min)}–${String(max)} ngày`;
 }
 
-/** Converts only known, bound fact shapes to customer-facing language. */
+/** Converts only small, atomic bound facts to customer-facing language. */
 function materializedEvidenceText(evidence: TrackCSelectedEvidence): string | null {
   const value = objectValue(evidence.value);
   if (value === null) return null;
@@ -262,11 +218,7 @@ function materializedEvidenceText(evidence: TrackCSelectedEvidence): string | nu
   }
   if (evidence.capability === "PROMOTION_OFFER") {
     const amount = vnd(value.amountVnd) ?? vnd(data.amountVnd);
-    if (amount !== null) return `Ưu đãi hiện có giảm ${amount} ạ.`;
-    if (data.active === true && typeof data.condition === "string" && typeof data.gift === "string") {
-      return `Ưu đãi hiện áp dụng khi ${data.condition}: tặng ${data.gift} ạ.`;
-    }
-    return null;
+    return amount === null ? null : `Ưu đãi hiện có giảm ${amount} ạ.`;
   }
   if (evidence.capability === "PRODUCT_MEDIA" && typeof value.assetId === "string") {
     return "Dạ em có ảnh của mẫu để chị xem kỹ hơn ạ.";
@@ -284,51 +236,15 @@ function materializedEvidenceText(evidence: TrackCSelectedEvidence): string | nu
     return typeof displayName === "string" ? `Dạ tên mẫu là ${displayName} ạ.` : null;
   }
   if (evidence.capability === "PRODUCT_ATTRIBUTES") {
-    const material = typeof value.material === "string" ? [value.material] : stringList(value.materials);
-    const styles = stringList(value.styles) ?? stringList(value.silhouettes) ?? stringList(value.design);
-    const wear = objectValue(value.wearProperties);
-    const wearLabels: readonly string[] = wear === null ? [] : [
-      wear.stretch === "LIGHT" ? "co giãn nhẹ" : null,
-      wear.wrinkleResistance === "REDUCED_WRINKLING" ? "hạn chế nhăn" : null,
-      wear.opacity === "OPAQUE" ? "không xuyên thấu" : null,
-      wear.breathability === "PRESENT" ? "có độ thoáng" : null,
-    ].filter((label): label is string => label !== null);
-    const details = [
-      material !== null && material.length > 0 ? `chất liệu ${material.join(", ")}` : null,
-      styles !== null && styles.length > 0 ? `thiết kế ${styles.join(", ")}` : null,
-      wearLabels.length > 0 ? `đặc tính ${wearLabels.join(", ")}` : null,
-    ].filter((detail): detail is string => detail !== null);
-    return details.length > 0 ? `Dạ mẫu có ${details.join(", ")} ạ.` : null;
+    const material = typeof value.material === "string"
+      ? value.material
+      : typeof data.material === "string"
+        ? data.material
+        : null;
+    return material === null ? null : `Dạ mẫu có chất liệu ${material} ạ.`;
   }
-  if (evidence.capability === "POLICY") {
-    if (typeof value.policy === "string" && typeof data.windowDays === "number") {
-      return `Chính sách ${value.policy.toLocaleLowerCase("vi-VN")} hiện áp dụng trong ${String(data.windowDays)} ngày ạ.`;
-    }
-    if (typeof value.policy === "string" && typeof data.allowed === "boolean") {
-      return data.allowed ? `Chính sách ${value.policy.toLocaleLowerCase("vi-VN")} hiện được hỗ trợ ạ.` :
-        `Chính sách ${value.policy.toLocaleLowerCase("vi-VN")} hiện chưa được hỗ trợ ạ.`;
-    }
-    if (typeof value.policy === "string" && typeof data.supported === "boolean") {
-      return data.supported ? `Dịch vụ ${value.policy.toLocaleLowerCase("vi-VN")} hiện được hỗ trợ ạ.` :
-        `Dịch vụ ${value.policy.toLocaleLowerCase("vi-VN")} hiện chưa được hỗ trợ ạ.`;
-    }
-    return null;
-  }
-  if (evidence.capability === "CARE_GUIDANCE" && typeof data.wash === "string") {
-    return `Dạ mẫu nên ${data.wash === "hand_or_gentle" ? "giặt tay hoặc giặt nhẹ" : data.wash} ạ.`;
-  }
-  if (evidence.capability === "OFFER_CONFIGURATION") {
-    const setPrice = vnd(data.fullSetVnd) ?? vnd(data.twoPieceVnd);
-    return setPrice === null ? null : `Giá bộ hiện là ${setPrice} ạ.`;
-  }
-  if (evidence.capability === "BUSINESS_LOCATION" && typeof data.address === "string") {
-    return `Shop ở ${data.address}${typeof data.hours === "string" ? `, mở cửa ${data.hours}` : ""} ạ.`;
-  }
-  if (evidence.capability === "FULFILLMENT_STATUS") {
-    const production = dayRange(data.productionMinDays, data.productionMaxDays);
-    const delivery = dayRange(data.deliveryMinDays, data.deliveryMaxDays);
-    return production === null || delivery === null ? null :
-      `Mẫu này cần ${production} sản xuất, sau đó giao khoảng ${delivery} ạ.`;
+  if (evidence.capability === "CARE_GUIDANCE" && data.wash === "hand_or_gentle") {
+    return "Dạ mẫu nên giặt tay hoặc giặt nhẹ ạ.";
   }
   if (evidence.capability === "CART_TOTAL") {
     const total = vnd(data.totalVnd);
@@ -337,13 +253,15 @@ function materializedEvidenceText(evidence: TrackCSelectedEvidence): string | nu
   if (evidence.capability === "PRODUCT_LIFECYCLE" && typeof data.status === "string") {
     return data.status === "DISCONTINUED" ? "Mẫu này đã ngừng kinh doanh ạ." : null;
   }
-  if (evidence.capability === "PRODUCT_COMPARISON") {
-    const comparison = objectValue(data);
-    if (comparison === null) return null;
-    const entries = Object.entries(comparison).filter(([, description]) => typeof description === "string");
-    return entries.length === 0 ? null : `Dạ ${entries.map(([id, description]) => `${id}: ${description}`).join("; ")} ạ.`;
-  }
   return null;
+}
+
+function renderableEvidenceCapabilities(
+  evidence: ReadonlyMap<string, TrackCSelectedEvidence>,
+): ReadonlyMap<string, TrackCProtectedProposition> {
+  return new Map([...evidence].flatMap(([ref, entry]) =>
+    materializedEvidenceText(entry) === null ? [] : [[ref, entry.capability] as const],
+  ));
 }
 
 function selectedEvidence(
@@ -384,6 +302,7 @@ function canonicalConstraints(
   if (checkoutRequestedFields.length > 0) permitted.push("ASK_CHECKOUT_DETAILS");
   if (context.phase.phase === "ORDER_CONFIRMED" ||
       context.phase.sourceStage === "PURCHASE_CONFIRMED" ||
+      context.buyingIntent.decision === "NEGATED" ||
       explicitStopRequested(dialogue)) {
     permitted.push("HOLD_POSITION");
   }
@@ -394,17 +313,24 @@ function canonicalConstraints(
 }
 
 function explicitStopRequested(dialogue: readonly ShadowContextMessage[]): boolean {
-  return dialogue.some((message) => message.direction === "INBOUND" &&
-    /(?:dừng(?:\s+lại|\s+ở đây)?|đừng\s+hỏi(?:\s+thêm)?|không\s+cần(?:\s+hỗ trợ)?\s+nữa)/iu
-      .test(message.text.normalize("NFC")));
+  const latestInbound = [...dialogue].reverse().find(({ direction }) => direction === "INBOUND");
+  return latestInbound !== undefined &&
+    /^\s*(?:(?:dạ\s*)?(?:chị|mình)\s*)?(?:dừng(?:\s+lại|\s+ở\s+đây)?|không\s+cần(?:\s+(?:hỗ\s+trợ|tư\s+vấn))?\s+nữa)(?:\s+(?:nhé|ạ|em|chị|mình|đừng\s+hỏi\s+thêm|nữa)|[,!.…])*\s*$/iu
+      .test(latestInbound.text.normalize("NFC"));
 }
 
 function measurementsUnavailable(
   dialogue: readonly ShadowContextMessage[],
 ): boolean {
-  return dialogue.some((message) => message.direction === "INBOUND" &&
-    /(?:không|chưa)\s+(?:có|biết|đo(?:\s+được)?)\s+(?:số\s*đo|chiều\s*cao|cân\s*nặng)/iu
-      .test(message.text.normalize("NFC")));
+  const unavailable = /(?:không|chưa)\s+(?:có|biết|đo(?:\s+được)?)\s+(?:số\s*đo|chiều\s*cao|cân\s*nặng)/iu;
+  const provided = /(?:\b\d{2,3}\s*(?:cm|kg)\b|(?:đã\s+)?(?:có|gửi)\s+(?:số\s*đo|chiều\s*cao|cân\s*nặng))/iu;
+  const latestMeasurementState = [...dialogue].reverse().find((message) =>
+    message.direction === "INBOUND" &&
+    (unavailable.test(message.text.normalize("NFC")) || provided.test(message.text.normalize("NFC"))),
+  );
+  return latestMeasurementState !== undefined && unavailable.test(
+    latestMeasurementState.text.normalize("NFC"),
+  );
 }
 
 function withSchema(
@@ -713,7 +639,14 @@ function replyForTask(
   return `Em cần thêm thông tin nhận hàng còn thiếu để tiếp tục ạ. Chị cho em xin ${joined} nhé.`;
 }
 
-function fixedTask(context: ContextV2): TrackCResponderTask {
+function fixedTask(
+  context: ContextV2,
+  allEvidence: ReadonlyMap<string, TrackCSelectedEvidence>,
+): TrackCResponderTask {
+  const isRenderable = (ref: string) => {
+    const evidence = allEvidence.get(ref);
+    return evidence !== undefined && materializedEvidenceText(evidence) !== null;
+  };
   const priceIndex = context.verifiedClaims.findIndex((claim) => claim.type === "PRICE");
   const presentation = context.productPresentation;
   const colors = presentation?.variants.flatMap((variant) => variant.color === null ? [] : [variant.color]) ?? [];
@@ -730,26 +663,27 @@ function fixedTask(context: ContextV2): TrackCResponderTask {
       return [claimRef];
     });
   })();
-  const productEvidenceRefs = colorChoiceMeaningful
+  const productEvidenceRefs = (colorChoiceMeaningful
     ? colorEvidenceRefs
-    : presentationClaims.slice(0, 1).map(({ claimRef }) => claimRef);
+    : presentationClaims.slice(0, 1).map(({ claimRef }) => claimRef))
+    .filter(isRenderable);
   const classificationOrVariantRequired = context.productBinding.status !== "RESOLVED" ||
     context.productBinding.productIds.length !== 1 ||
     context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY");
-  const usefulProductFactRef = context.productAttributes !== null &&
-      context.productAttributes !== undefined &&
-      (context.productAttributes.materials.length > 0 ||
-       Object.values(context.productAttributes.wearProperties ?? {}).some(Boolean) ||
-       context.productAttributes.styles.length > 0 ||
-       context.productAttributes.silhouettes.length > 0)
-    ? "PRODUCT_ATTRIBUTES_001"
-    : null;
+  const usefulProductFactRef = [...allEvidence.values()].find((evidence) =>
+    evidence.capability === "PRODUCT_ATTRIBUTES" && materializedEvidenceText(evidence) !== null,
+  )?.ref ?? null;
+  const priceEvidenceRef = priceIndex === -1
+    ? null
+    : `CLAIM_${String(priceIndex + 1).padStart(3, "0")}`;
   return compileTrackCFixedFirstContactTask({
     productResolved: context.productBinding.status === "RESOLVED",
     classificationOrVariantRequired,
     colorChoiceMeaningful,
     fitQualificationUseful: context.barriers.active.includes("MEASUREMENTS_REQUIRED"),
-    priceEvidenceRef: priceIndex === -1 ? null : `CLAIM_${String(priceIndex + 1).padStart(3, "0")}`,
+    priceEvidenceRef: priceEvidenceRef !== null && isRenderable(priceEvidenceRef)
+      ? priceEvidenceRef
+      : null,
     productEvidenceRefs,
     usefulProductFactRef,
   });
@@ -763,10 +697,7 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
 }>): Promise<TrackCV5TwoPassBenchmarkResult> {
   const lane = selectTrackCConversationLane(input.simulationMetadata);
   const allEvidence = evidenceValues(input.context, input.simulationFacts);
-  const capabilities = new Map([
-    ...evidenceCapabilities(input.context),
-    ...simulationEvidenceCapabilities(input.simulationFacts),
-  ]);
+  const capabilities = renderableEvidenceCapabilities(allEvidence);
   const constraints = canonicalConstraints(
     input.context,
     input.simulationMetadata,
@@ -782,7 +713,7 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
   let artifact: TrackCResponderTask | TrackCStrategistDecision;
   let task: TrackCResponderTask;
   if (lane === "FIRST_CONTACT_FIXED") {
-    task = fixedTask(input.context);
+    task = fixedTask(input.context, allEvidence);
     artifact = task;
   } else {
     const request = withBenchmarkLane(strategistRequest({
