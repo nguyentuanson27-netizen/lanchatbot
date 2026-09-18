@@ -384,6 +384,16 @@ export function validateResponderOutput(
   }
   if (lane === "PRODUCTION_CONTRACT") {
     guardProductionOutput(context, output, evaluationAt);
+  } else {
+    const simulationHashes = new Set(simulationClaimContentHashes);
+    const runtimeOnlyOutput = Object.freeze({
+      ...output,
+      segments: Object.freeze(output.segments.filter((segment) =>
+        segment.kind !== "VERIFIED_CLAIM" ||
+        !simulationHashes.has(segment.claimContentHash)
+      )),
+    });
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt);
   }
   return output;
 }
