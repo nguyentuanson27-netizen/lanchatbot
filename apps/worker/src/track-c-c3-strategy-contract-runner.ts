@@ -697,8 +697,15 @@ function compileResponderDraft(input: Readonly<{
   if (draft.answerText !== null) segments.push({ kind: "GENERAL", text: draft.answerText });
   let authoredIndex = 0;
   task.evidence.forEach((evidence) => {
-    const factualText = evidence.deterministicText ??
-      draft.factualTexts[authoredIndex++]!;
+    const factualText = evidence.deterministicText === undefined
+      ? draft.factualTexts[authoredIndex++]!
+      : text(
+          evidence.deterministicText,
+          "TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE",
+        );
+    if (factualText === null) {
+      throw new Error("TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE");
+    }
     segments.push({
       kind: "VERIFIED_CLAIM",
       text: factualText,
