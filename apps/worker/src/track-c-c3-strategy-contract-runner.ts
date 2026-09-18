@@ -29,6 +29,7 @@ import {
   type TrackCCanonicalAction,
   type TrackCConversationLane,
   type TrackCOrdinaryDecisionInput,
+  type TrackCProtectedProposition,
   type TrackCResponderTask,
   type TrackCSelectableEvidence,
   type TrackCStrategistDecision,
@@ -374,15 +375,16 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   });
 }
 
-const PRODUCTION_TEXT_GUARD_CAPABILITIES = new Set([
-  "PRICE",
-  "STOCK",
-  "SIZE_FIT",
-  "ETA",
-  "SHIPPING_FEE",
-  "FREESHIP",
-  "PROMOTION_OFFER",
-] as const);
+const PRODUCTION_TEXT_GUARD_CAPABILITIES: ReadonlySet<TrackCProtectedProposition> =
+  new Set([
+    "PRICE",
+    "STOCK",
+    "SIZE_FIT",
+    "ETA",
+    "SHIPPING_FEE",
+    "FREESHIP",
+    "PROMOTION_OFFER",
+  ]);
 
 function modelAuthoredEvidence(
   task: TrackCResponderTask,
@@ -393,11 +395,7 @@ function modelAuthoredEvidence(
       if (evidence.capability === "PRICE") return true;
       throw new Error("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
     }
-    if (PRODUCTION_TEXT_GUARD_CAPABILITIES.has(
-      evidence.capability as typeof PRODUCTION_TEXT_GUARD_CAPABILITIES extends Set<infer T>
-        ? T
-        : never,
-    )) {
+    if (PRODUCTION_TEXT_GUARD_CAPABILITIES.has(evidence.capability)) {
       return true;
     }
     throw new Error("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
