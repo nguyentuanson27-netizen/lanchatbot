@@ -615,7 +615,7 @@ function explicitStopRequested(dialogue: readonly ShadowContextMessage[]): boole
 
 function measurementsUnavailable(dialogue: readonly ShadowContextMessage[]): boolean {
   const unavailable = /(?:không|chưa)\s+(?:có|biết|đo(?:\s+được)?)\s+(?:số\s*đo|chiều\s*cao|cân\s*nặng)/iu;
-  const provided = /(?:\b\d{2,3}\s*(?:cm|kg)\b|(?:đã\s+)?(?:có|gửi)\s+(?:số\s*đo|chiều\s*cao|cân\s*nặng))/iu;
+  const provided = /(?:\b\d{2,3}\s*(?:cm|kg)\b|\b\d(?:[.,]\d+)?\s*m\s*\d{1,2}\b|(?:đã\s+)?(?:có|gửi)\s+(?:số\s*đo|chiều\s*cao|cân\s*nặng))/iu;
   const latest = [...dialogue].reverse().find(({ direction, text }) =>
     direction === "INBOUND" &&
     (unavailable.test(text.normalize("NFC")) || provided.test(text.normalize("NFC")))

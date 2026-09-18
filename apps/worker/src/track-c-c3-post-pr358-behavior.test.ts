@@ -293,7 +293,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
       occurredAt: "2026-09-10T01:57:00.000Z",
     }, {
       direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
-      text: "Chị cao 160cm rồi nhé.", attachmentCount: 0,
+      text: "Chị cao 1m60 rồi nhé.", attachmentCount: 0,
       occurredAt: "2026-09-10T01:58:00.000Z",
     }, ...dialogue(caseFixture.latest_customer_message)];
     const measuredCandidate = candidateTransport({
