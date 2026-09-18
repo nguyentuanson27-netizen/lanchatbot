@@ -306,7 +306,6 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   productResolved: boolean;
   classificationOrVariantRequired: boolean;
   colorChoiceMeaningful: boolean;
-  fitQualificationUseful: boolean;
   evidence: readonly TrackCSelectableEvidence[];
   boundProductIds?: readonly string[];
 }>): TrackCResponderTask {
@@ -358,8 +357,8 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
     requiredEvidenceRefs: Object.freeze(evidence.map(({ ref }) => ref)),
     continuation: input.colorChoiceMeaningful
       ? Object.freeze({ type: "ASK", input: "COLOR" })
-      : input.fitQualificationUseful ? null : Object.freeze({ type: "KEEP_OPEN" }),
-    canonicalRequest: input.colorChoiceMeaningful || !input.fitQualificationUseful
+      : null,
+    canonicalRequest: input.colorChoiceMeaningful
       ? null : Object.freeze({ type: "ASK_MEASUREMENTS" }),
   });
 }
