@@ -275,7 +275,6 @@ function strategistResponseSchema(
       type: "ARRAY",
       minItems: 0,
       maxItems: 8,
-      uniqueItems: true,
       items: { type: "STRING", enum: evidence.map(({ ref }) => ref) },
     },
   };
@@ -378,20 +377,27 @@ function responderTaskPrompt(task: TrackCResponderTask) {
 }
 
 function responderDraftSchema(task: TrackCResponderTask) {
+  const needsProgression = task.canonicalRequest?.type !== "HOLD_POSITION" &&
+    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+    (task.canonicalRequest !== null || task.continuation !== null);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
     minProperties: 3,
     maxProperties: 3,
     properties: {
-      answerText: { type: "STRING", nullable: true, maxLength: 1_000 },
+      answerText: task.answer.status === "SUPPORTED"
+        ? { type: "NULL" }
+        : { type: "STRING", minLength: 1, maxLength: 1_000 },
       factualTexts: {
         type: "ARRAY",
         minItems: task.evidence.length,
         maxItems: task.evidence.length,
         items: { type: "STRING", minLength: 1, maxLength: 1_000 },
       },
-      progressionText: { type: "STRING", nullable: true, maxLength: 1_000 },
+      progressionText: needsProgression
+        ? { type: "STRING", minLength: 1, maxLength: 1_000 }
+        : { type: "NULL" },
     },
   };
 }

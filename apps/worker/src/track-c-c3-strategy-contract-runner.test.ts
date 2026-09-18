@@ -222,6 +222,10 @@ describe("Track C C3 strategy-contract runner", () => {
     };
     expect(Object.keys(request.generationConfig.responseSchema.properties).sort())
       .toEqual(["answerText", "factualTexts", "progressionText"]);
+    expect(request.generationConfig.responseSchema.properties.answerText)
+      .toEqual({ type: "NULL" });
+    expect(request.generationConfig.responseSchema.properties.progressionText)
+      .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
   });
 
   it("accepts a runtime-owned acquisition signal in production without admitting simulation facts", async () => {
