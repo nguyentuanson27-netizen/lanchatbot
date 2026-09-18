@@ -157,7 +157,10 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       goal: "Answer the verified price and give concise product information.",
     }),
     evidenceRefs: Object.freeze(evidenceRefs),
-    requiredEvidenceRefs: Object.freeze([input.priceEvidenceRef]),
+    requiredEvidenceRefs: Object.freeze([
+      input.priceEvidenceRef,
+      ...(input.usefulProductFactRef === null ? [] : [input.usefulProductFactRef]),
+    ]),
     continuation: input.colorChoiceMeaningful
       ? Object.freeze({ type: "ASK", input: "COLOR" as const })
       : input.fitQualificationUseful

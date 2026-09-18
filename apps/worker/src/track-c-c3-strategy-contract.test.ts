@@ -120,14 +120,33 @@ describe("Track C C3 simplified strategy contract", () => {
             continuation: unknown;
           } } };
         }).generationConfig.responseSchema.properties.continuation;
-        expect(continuation).toMatchObject({
-          type: "OBJECT",
-          nullable: true,
-          required: ["type"],
-          properties: {
-            type: { type: "STRING", enum: ["ASK", "KEEP_OPEN"] },
-            input: { type: "STRING" },
-          },
+        expect(continuation).toEqual({
+          anyOf: [{
+            type: "OBJECT",
+            nullable: true,
+            minProperties: 2,
+            maxProperties: 2,
+            required: ["type", "input"],
+            properties: {
+              type: { type: "STRING", enum: ["ASK"] },
+              input: {
+                type: "STRING",
+                enum: [
+                  "SIZE", "USUAL_SIZE", "COLOR", "VARIANT", "LOCALITY",
+                  "PAYMENT_PREFERENCE", "QUANTITY", "STYLE", "BUDGET",
+                  "DECISION_CRITERION", "DEADLINE",
+                ],
+              },
+            },
+          }, {
+            type: "OBJECT",
+            minProperties: 1,
+            maxProperties: 1,
+            required: ["type"],
+            properties: {
+              type: { type: "STRING", enum: ["KEEP_OPEN"] },
+            },
+          }],
         });
         expect((JSON.parse(request.body) as {
           generationConfig: { responseSchema: { properties: {
@@ -135,7 +154,7 @@ describe("Track C C3 simplified strategy contract", () => {
           } } };
         }).generationConfig.responseSchema.properties.proposition).toMatchObject({
           type: "STRING",
-          enum: expect.arrayContaining(["NONE", "PRICE"]),
+          enum: expect.arrayContaining(["NONE", "PRICE", "STOCK"]),
         });
         return {
           payload: payload({
@@ -249,6 +268,7 @@ describe("Track C C3 simplified strategy contract", () => {
       "PRODUCT_PRESENTATION_VARIANT_001",
       "CLAIM_002",
     ]);
+    expect(task.requiredEvidenceRefs).toEqual(["CLAIM_001", "CLAIM_002"]);
     expect(task.continuation).toEqual({ type: "ASK", input: "COLOR" });
     expect(task.canonicalRequest).toBeNull();
   });
@@ -591,7 +611,28 @@ describe("Track C C3 simplified strategy contract", () => {
       material: "tơ xước mềm",
     };
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
-      payload: responderPayload({ keepOpen: true }),
+      payload: payload({
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu này hiện 849k chị ạ.",
+          claimRef: "CLAIM_001",
+          role: "ANSWER",
+          decisionInput: "NONE",
+        }, {
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu có chất liệu tơ xước mềm ạ.",
+          claimRef: "SIMULATION_001",
+          role: "ANSWER",
+          decisionInput: "NONE",
+        }, {
+          kind: "GENERAL",
+          text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+          role: "PROGRESSION",
+          decisionInput: "NONE",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      }),
       providerModelVersion: "gemini-3.5-flash-lite",
     });
 

@@ -116,13 +116,13 @@ function responderPayload(
   const evidenceRefs = task.evidenceRefs as readonly string[];
   const segments: Array<Record<string, unknown>> = [];
   if (answer.status === "SUPPORTED") {
-    segments.push({
+    segments.push(...evidenceRefs.map((claimRef) => ({
       kind: "VERIFIED_CLAIM",
       text: reply,
-      claimRef: evidenceRefs[0],
+      claimRef,
       role: "ANSWER",
       decisionInput: "NONE",
-    });
+    })));
   } else {
     segments.push({
       kind: "GENERAL",

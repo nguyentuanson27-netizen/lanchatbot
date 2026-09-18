@@ -383,19 +383,29 @@ function strategistRequest(input: Readonly<{
       goal: { type: "STRING" },
       proposition: {
         type: "STRING",
-        enum: TRACK_C_PROTECTED_PROPOSITIONS.filter((proposition) =>
-          proposition === "NONE" || [...input.capabilities.values()].includes(proposition)
-        ),
+        enum: TRACK_C_PROTECTED_PROPOSITIONS,
       },
       evidenceRefs: { type: "ARRAY", items: { type: "STRING", enum: [...input.capabilities.keys()] } },
       continuation: {
-        type: "OBJECT",
-        nullable: true,
-        required: ["type"],
-        properties: {
-          type: { type: "STRING", enum: ["ASK", "KEEP_OPEN"] },
-          input: { type: "STRING", enum: ORDINARY_INPUTS },
-        },
+        anyOf: [{
+          type: "OBJECT",
+          nullable: true,
+          minProperties: 2,
+          maxProperties: 2,
+          required: ["type", "input"],
+          properties: {
+            type: { type: "STRING", enum: ["ASK"] },
+            input: { type: "STRING", enum: ORDINARY_INPUTS },
+          },
+        }, {
+          type: "OBJECT",
+          minProperties: 1,
+          maxProperties: 1,
+          required: ["type"],
+          properties: {
+            type: { type: "STRING", enum: ["KEEP_OPEN"] },
+          },
+        }],
       },
       canonicalAction: { type: "STRING", enum: input.constraints.permitted },
     },
@@ -801,11 +811,18 @@ export async function runTrackCStrategyContractBenchmarkCase(input: Readonly<{
   if (response.providerModelVersion !== "gemini-3.5-flash-lite") {
     throw new Error("TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH");
   }
+  const selectedByRef = new Map(selected.map((evidence) => [evidence.ref, evidence]));
   const selectedRegistry = new Map([
     ...buildTrackCClaimReferenceRegistry(input.context),
     ...buildTrackCSimulationFactReferenceRegistry(input.simulationFacts),
   ]
-    .filter(([ref]) => task.evidenceRefs.includes(ref)));
+    .filter(([ref]) => task.evidenceRefs.includes(ref))
+    .map(([ref, entry]) => [
+      ref,
+      selectedByRef.get(ref)?.capability === "PRODUCT_PRESENTATION"
+        ? Object.freeze({ ...entry, placeholders: null })
+        : entry,
+    ] as const));
   const selectedSimulationHashes = selected.flatMap((evidence) => {
     if (evidence.simulationFact === null) return [];
     const entry = selectedRegistry.get(evidence.ref);

@@ -544,6 +544,54 @@ describe("Track C C3 two-pass offline candidate", () => {
     expect(result.candidate.guard.status).toBe("PASS");
   });
 
+  it("strategy-contract runner materializes selected presentation evidence without placeholders", async () => {
+    const presentation = verifiedProductPresentation();
+    const transport: CandidateVertexTransport = {
+      send: vi.fn()
+        .mockResolvedValueOnce({
+          payload: vertexPayload({
+            replyAct: "ANSWER",
+            goal: "Answer with the selected product presentation.",
+            proposition: "PRODUCT_PRESENTATION",
+            evidenceRefs: ["PRODUCT_PRESENTATION_DISPLAY_001"],
+            continuation: { type: "KEEP_OPEN" },
+            canonicalAction: "NONE",
+          }),
+          providerModelVersion: "gemini-3.5-flash-lite",
+        })
+        .mockResolvedValueOnce({
+          payload: vertexPayload({
+            segments: [{
+              kind: "VERIFIED_CLAIM",
+              text: "Dạ mẫu Tường Vi chị nhé.",
+              claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+              role: "ANSWER",
+              decisionInput: "NONE",
+            }, {
+              kind: "GENERAL",
+              text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+              role: "PROGRESSION",
+              decisionInput: "NONE",
+            }],
+            strategy: "ANSWER_VERIFIED_FACTS",
+            cta: "NONE",
+          }),
+          providerModelVersion: "gemini-3.5-flash-lite",
+        }),
+    };
+
+    const result = await executeTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, presentation),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    });
+
+    expect(result.reply).toContain("Dạ tên mẫu là Tường Vi ạ.");
+  });
+
   it.each([
     ["display name", "Dạ mẫu này là Hồng Nhung ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
     ["color", "Dạ {{DISPLAY_NAME}} có màu ĐỎ, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
@@ -592,7 +640,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     "Chị {{DISPLAY_NAME}} có thông tin ạ.",
     "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.",
     "Dạ mẫu {{DISPLAY_NAME}} là của chị ạ.",
-  ])("rejects a display name bound to the customer on the V5 path: %s", async (text) => {
+  ])("materializes a display name safely on the V5 path: %s", async (text) => {
     const outputs = [
       conversationPlan(),
       {
@@ -612,21 +660,23 @@ describe("Track C C3 two-pass offline candidate", () => {
       })),
     };
 
-    await expect(runTrackCV5TwoPassBenchmarkCase({
+    const result = await runTrackCV5TwoPassBenchmarkCase({
       lane: "PRODUCTION_CONTRACT",
       modelResource,
       capture: validCapture([], null, verifiedProductPresentation()),
       evaluationAt,
       evaluationContext,
       transport,
-    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+    });
+
+    expect(result.reply).toContain("Dạ tên mẫu là Tường Vi ạ.");
   });
 
   it.each([
     "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.",
     "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.",
     "Em tên {{DISPLAY_NAME}}, mẫu có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
-  ])("rejects swapped presentation roles on the V5 path: %s", async (text) => {
+  ])("materializes a selected variant safely on the V5 path: %s", async (text) => {
     const outputs = [
       conversationPlan(),
       {
@@ -646,14 +696,16 @@ describe("Track C C3 two-pass offline candidate", () => {
       })),
     };
 
-    await expect(runTrackCV5TwoPassBenchmarkCase({
+    const result = await runTrackCV5TwoPassBenchmarkCase({
       lane: "PRODUCTION_CONTRACT",
       modelResource,
       capture: validCapture([], null, verifiedProductPresentation()),
       evaluationAt,
       evaluationContext,
       transport,
-    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+    });
+
+    expect(result.reply).toContain("Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.");
   });
 
   it("accepts a catalog size label from verified presentation evidence on the V5 path", async () => {
@@ -689,7 +741,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     expect(result.sideEffects).toBe("DISABLED");
   });
 
-  it("rejects fit semantics before presentation substitution", async () => {
+  it("materializes a selected variant instead of model fit wording", async () => {
     const outputs = [
       conversationPlan(),
       {
@@ -709,14 +761,16 @@ describe("Track C C3 two-pass offline candidate", () => {
       })),
     };
 
-    await expect(runTrackCV5TwoPassBenchmarkCase({
+    const result = await runTrackCV5TwoPassBenchmarkCase({
       lane: "PRODUCTION_CONTRACT",
       modelResource,
       capture: validCapture([], null, verifiedProductPresentation()),
       evaluationAt,
       evaluationContext,
       transport,
-    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+    });
+
+    expect(result.reply).toContain("Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.");
   });
 
   it("rejects extra presentation literals and unregistered placeholder syntax on the normal path", async () => {
@@ -753,7 +807,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
   });
 
-  it("rejects a cross-variant presentation statement on the V5 production-contract path", async () => {
+  it("materializes the selected variant instead of a cross-variant statement on the V5 path", async () => {
     const presentation = verifiedProductPresentation({}, [
       { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
       { variantId: "SD398-DO-L", color: "ĐỎ", size: "L" },
@@ -777,17 +831,19 @@ describe("Track C C3 two-pass offline candidate", () => {
       })),
     };
 
-    await expect(runTrackCV5TwoPassBenchmarkCase({
+    const result = await runTrackCV5TwoPassBenchmarkCase({
       lane: "PRODUCTION_CONTRACT",
       modelResource,
       capture: validCapture([], null, presentation),
       evaluationAt,
       evaluationContext,
       transport,
-    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+    });
+
+    expect(result.reply).toContain("Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.");
   });
 
-  it("rejects extra presentation literals and malformed placeholders on the V5 path", async () => {
+  it("materializes selected presentation evidence despite malformed model placeholders on the V5 path", async () => {
     const outputs = [
       conversationPlan(),
       {
@@ -807,7 +863,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       })),
     };
 
-    await expect(runTrackCV5TwoPassBenchmarkCase({
+    const result = await runTrackCV5TwoPassBenchmarkCase({
       lane: "PRODUCTION_CONTRACT",
       modelResource,
       capture: validCapture([], null, verifiedProductPresentation({}, [
@@ -817,7 +873,9 @@ describe("Track C C3 two-pass offline candidate", () => {
       evaluationAt,
       evaluationContext,
       transport,
-    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+    });
+
+    expect(result.reply).toContain("Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.");
   });
 
   it("preserves model wording after resolving presentation values on the V5 path", async () => {
