@@ -84,7 +84,7 @@ function promptOf(request: { body: string }) {
     responderTask?: {
       answer: { kind: string; status: string };
       evidence: unknown[];
-      continuation: unknown;
+      continuation: Readonly<{ type: string }> | null;
       canonicalRequest: { type: string } | null;
     };
   };
@@ -110,9 +110,8 @@ function responderPayload(
   if (task === undefined) throw new Error("TEST_RESPONDER_TASK_REQUIRED");
   const canonical = task.canonicalRequest?.type;
   const hold = canonical === "HOLD_POSITION";
-  const needsProgression = !hold && canonical !==
-      "ASK_CHECKOUT_DETAILS" &&
-    (task.canonicalRequest !== null || task.continuation !== null);
+  const needsProgression = canonical === "ASK_PRODUCT" ||
+    canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return modelPayload({
     answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : reply,
@@ -198,7 +197,7 @@ describe("Track C C3 journey adapter", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.turns[1]?.evaluationContext.map(({ text }) => text)).toEqual([
       "customer turn 1",
-      "actual Lana reply 2\nChị cho em biết thêm để em hỗ trợ sát hơn nhé?",
+      "actual Lana reply 2",
       "customer turn 2",
     ]);
     const turnTwoStrategistRequest = candidateTransport.send.mock.calls[2]?.[0];

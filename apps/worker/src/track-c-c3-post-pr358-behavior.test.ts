@@ -101,7 +101,7 @@ type ContractPrompt = Readonly<{
   responderTask?: Readonly<{
     answer: Readonly<{ kind: string; status: string }>;
     evidence: readonly unknown[];
-    continuation: unknown;
+    continuation: Readonly<{ type: string }> | null;
     canonicalRequest: Readonly<{
       type: string;
       requestedFields?: readonly string[];
@@ -136,9 +136,8 @@ function responderFor(
   const task = prompt.responderTask;
   if (task === undefined) throw new Error("TEST_RESPONDER_TASK_REQUIRED");
   const canonical = task.canonicalRequest?.type;
-  const needsProgression = canonical !== "HOLD_POSITION" &&
-    canonical !== "ASK_CHECKOUT_DETAILS" &&
-    (canonical !== undefined || task.continuation !== null);
+  const needsProgression = canonical === "ASK_PRODUCT" ||
+    canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return {
     answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : answerText,

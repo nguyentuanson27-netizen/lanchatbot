@@ -62,6 +62,7 @@ const RESPONDER_INSTRUCTION = [
   "Use factualTexts in the supplied evidence order. Each item must contain all wording about its matching evidence, including any concise explanation or relation to the customer's preference.",
   "factualTexts is the only place for price, product name, material, color, availability, delivery, policy, comparison, or any other evidence-derived detail. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer those details.",
   "When supplied evidence is non-empty, emit answerText null. Put any acknowledgement plus grounded explanation in its matching factualTexts item.",
+  "For a KEEP_OPEN continuation, emit progressionText null; it is not a question or a new recommendation.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
   "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
@@ -380,10 +381,14 @@ function responderTaskPrompt(task: TrackCResponderTask) {
   });
 }
 
+function responderNeedsProgression(task: TrackCResponderTask): boolean {
+  return task.canonicalRequest?.type === "ASK_PRODUCT" ||
+    task.canonicalRequest?.type === "ASK_MEASUREMENTS" ||
+    task.continuation?.type === "ASK";
+}
+
 function responderDraftSchema(task: TrackCResponderTask) {
-  const needsProgression = task.canonicalRequest?.type !== "HOLD_POSITION" &&
-    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-    (task.canonicalRequest !== null || task.continuation !== null);
+  const needsProgression = responderNeedsProgression(task);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -530,8 +535,7 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
     }
     return;
   }
-  const needsProgression = task.canonicalRequest !== null ||
-    task.continuation !== null;
+  const needsProgression = responderNeedsProgression(task);
   if (needsProgression !== (draft.progressionText !== null)) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }

@@ -228,12 +228,58 @@ describe("Track C C3 strategy-contract runner", () => {
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
   });
 
+  it("keeps a KEEP_OPEN decision out of the Responder progression surface", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the customer concern without reopening discovery.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "849k thì hơi cao em ạ.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    expect(send).toHaveBeenCalledTimes(2);
+    const responderRequest = JSON.parse(send.mock.calls[1]![0].body) as {
+      generationConfig: { responseSchema: { properties: { progressionText: unknown } } };
+    };
+    expect(responderRequest.generationConfig.responseSchema.properties.progressionText)
+      .toEqual({ type: "NULL" });
+    expect(result.output.segments).toEqual([{
+      kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ.",
+    }]);
+  });
+
   it("accepts a runtime-owned acquisition signal in production without admitting simulation facts", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
         answerText: null,
         factualTexts: ["Dạ giá này đã được xác minh ạ."],
-        progressionText: "Chị cần em hỗ trợ thêm phần nào ạ?",
+        progressionText: null,
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
     });
