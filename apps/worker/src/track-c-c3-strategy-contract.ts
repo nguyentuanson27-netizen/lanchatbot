@@ -335,8 +335,11 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       }),
       evidence: Object.freeze([]),
       requiredEvidenceRefs: Object.freeze([]),
-      continuation: Object.freeze({ type: "KEEP_OPEN" }),
-      canonicalRequest: null,
+      continuation: input.colorChoiceMeaningful
+        ? Object.freeze({ type: "ASK", input: "COLOR" })
+        : null,
+      canonicalRequest: input.colorChoiceMeaningful
+        ? null : Object.freeze({ type: "ASK_MEASUREMENTS" }),
     });
   }
   const useful = available.find(({ capability, ref }) =>
