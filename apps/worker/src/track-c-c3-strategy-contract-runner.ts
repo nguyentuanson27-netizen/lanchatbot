@@ -59,7 +59,9 @@ const STRATEGIST_INSTRUCTION = [
 
 const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
-  "Use factualTexts in the supplied evidence order. Each item must describe only its matching evidence. Do not introduce another factual assertion in answerText or progressionText.",
+  "Use factualTexts in the supplied evidence order. Each item must contain all wording about its matching evidence, including any concise explanation or relation to the customer's preference.",
+  "factualTexts is the only place for price, product name, material, color, availability, delivery, policy, comparison, or any other evidence-derived detail. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer those details.",
+  "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
   "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
   "Acknowledge the customer's concern before any supplied progression. Never claim that an order, payment, delivery, message, or other effect has happened.",
 ].join("\n");
