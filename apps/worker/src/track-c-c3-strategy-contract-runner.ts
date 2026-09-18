@@ -592,6 +592,12 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
     }
     return;
   }
+  if (task.canonicalRequest?.type === "ASK_MEASUREMENTS") {
+    const progression = draft.progressionText?.normalize("NFC") ?? "";
+    if (!/(?:chiều\s*cao|cân\s*nặng|số\s*đo|kích\s*thước)/iu.test(progression)) {
+      throw new Error("TRACK_C_RESPONDER_MEASUREMENTS_QUESTION_INVALID");
+    }
+  }
   const needsProgression = responderNeedsProgression(task);
   if (needsProgression !== (draft.progressionText !== null)) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
