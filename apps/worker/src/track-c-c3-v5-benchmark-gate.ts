@@ -24,6 +24,7 @@ export interface TrackCV5ExpectedCase {
   readonly caseId: string;
   readonly productionClassification: TrackCV5ProductionClassification;
   readonly expectedPreModelReject: boolean;
+  readonly generatorCallShape: TrackCV5GeneratorCallShape;
 }
 
 export interface TrackCV5CaseExecutionRecord extends TrackCV5ExpectedCase {
@@ -157,7 +158,8 @@ export function gateTrackCV5QualityResults(input: Readonly<{
     }
     if (
       record.productionClassification !== planned.productionClassification ||
-      record.expectedPreModelReject !== planned.expectedPreModelReject
+      record.expectedPreModelReject !== planned.expectedPreModelReject ||
+      record.generatorCallShape !== planned.generatorCallShape
     ) {
       throw new Error(`TRACK_C_V5_GATE_EXPECTATION_MISMATCH:${record.caseId}`);
     }
