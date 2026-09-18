@@ -524,11 +524,13 @@ function assertFactualTextGrounded(
   value: string,
   evidence: TrackCSelectableEvidence,
 ): void {
+  if (evidence.provenance.authority !== "SIMULATION") return;
   const authority = evidenceLexicalTokens(evidence);
-  const unsupported = factualLexicalTokens(value).filter((token) =>
-    token.length > 1 && !authority.has(token) && !FACTUAL_CONNECTIVE_TOKENS.has(token)
+  const tokens = factualLexicalTokens(value).filter((token) => token.length > 1);
+  const unsupported = tokens.filter((token) =>
+    !authority.has(token) && !FACTUAL_CONNECTIVE_TOKENS.has(token)
   );
-  if (unsupported.length > 0) {
+  if (unsupported.length > 0 || !tokens.some((token) => authority.has(token))) {
     throw new Error("TRACK_C_RESPONDER_FACTUAL_WORDING_UNGROUNDED");
   }
 }
