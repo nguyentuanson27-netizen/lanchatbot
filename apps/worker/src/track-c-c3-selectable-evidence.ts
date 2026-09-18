@@ -68,11 +68,13 @@ function boundedSimulationEvidence(
     capability: TrackCProtectedProposition,
     projected: Readonly<Record<string, unknown>>,
     subject?: TrackCSelectableEvidence["subject"],
+    deterministicText?: string,
   ) => Object.freeze({
     ref,
     capability,
     ...(subject === undefined ? {} : { subject }),
     value: Object.freeze({ ...projected }),
+    ...(deterministicText === undefined ? {} : { deterministicText }),
     provenance: Object.freeze({ contentHash, authority: "SIMULATION" as const }),
   });
   if (kind === "PRODUCT_PROFILE") {
@@ -84,13 +86,21 @@ function boundedSimulationEvidence(
     if (displayName === null || material === null || colors === null || design === null) {
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
+    const offerType = typeof value.offerType === "string" ? value.offerType : null;
+    const deterministicText = [
+      `Mẫu ${displayName}`,
+      ...(offerType === null ? [] : [`dạng ${offerType}`]),
+      `chất liệu ${material}`,
+      ...(colors.length === 0 ? [] : [`màu ${colors.join(", ")}`]),
+      ...(design.length === 0 ? [] : [`thiết kế ${design.join(", ")}`]),
+    ].join("; ") + ".";
     return make("PRODUCT_PRESENTATION", {
       displayName,
       material,
       colors,
       design,
-      ...(typeof value.offerType === "string" ? { offerType: value.offerType } : {}),
-    }, { productId: subjectProductId, displayName });
+      ...(offerType === null ? {} : { offerType }),
+    }, { productId: subjectProductId, displayName }, deterministicText);
   }
   if (kind === "PRODUCT_COMPARISON") {
     const products = arrayOfStrings(value.products, 4);
@@ -100,13 +110,32 @@ function boundedSimulationEvidence(
         Object.keys(descriptions).some((id) => !products.includes(id))) {
       throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
     }
-    return make("PRODUCT_COMPARISON", { products, descriptions });
+    if (products.some((id) => typeof descriptions[id] !== "string")) {
+      throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    }
+    const deterministicText = "So sánh: " + products
+      .map((id) => `${id}: ${descriptions[id] as string}`)
+      .join("; ") + ".";
+    return make(
+      "PRODUCT_COMPARISON",
+      { products, descriptions },
+      undefined,
+      deterministicText,
+    );
   }
   if (kind === "CARE_GUIDANCE") {
     const subjectProductId = requireBoundProduct();
-    return make("CARE_GUIDANCE", {
-      data: plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID"),
-    }, { productId: subjectProductId });
+    const data = plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    if (typeof data.wash !== "string" || typeof data.avoid !== "string" ||
+        typeof data.dry !== "string") {
+      throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    }
+    return make(
+      "CARE_GUIDANCE",
+      { data },
+      { productId: subjectProductId },
+      `Chăm sóc: giặt ${data.wash}; tránh ${data.avoid}; phơi ${data.dry}.`,
+    );
   }
   if (kind === "CHANNEL_PRICE_SNAPSHOT") {
     const subjectProductId = requireBoundProduct();
@@ -118,15 +147,33 @@ function boundedSimulationEvidence(
   }
   if (kind === "FULFILLMENT_SNAPSHOT") {
     const subjectProductId = requireBoundProduct();
-    return make("FULFILLMENT_STATUS", {
-      data: plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID"),
-    }, { productId: subjectProductId });
+    const data = plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    if (typeof data.status !== "string" ||
+        typeof data.productionMinDays !== "number" ||
+        typeof data.productionMaxDays !== "number" ||
+        typeof data.deliveryMinDays !== "number" ||
+        typeof data.deliveryMaxDays !== "number") {
+      throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    }
+    return make(
+      "FULFILLMENT_STATUS",
+      { data },
+      { productId: subjectProductId },
+      `Trạng thái thực hiện: ${data.status}; sản xuất ${data.productionMinDays}–${data.productionMaxDays} ngày; giao ${data.deliveryMinDays}–${data.deliveryMaxDays} ngày.`,
+    );
   }
   if (kind === "PRODUCT_LIFECYCLE") {
     const subjectProductId = requireBoundProduct();
-    return make("PRODUCT_LIFECYCLE", {
-      data: plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID"),
-    }, { productId: subjectProductId });
+    const data = plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    if (typeof data.status !== "string") {
+      throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    }
+    return make(
+      "PRODUCT_LIFECYCLE",
+      { data },
+      { productId: subjectProductId },
+      `Trạng thái sản phẩm: ${data.status}.`,
+    );
   }
   if (kind === "POLICY_SNAPSHOT" || kind === "PRODUCT_ATTRIBUTE" ||
       kind === "OFFER_CONFIGURATION" || kind === "PROMOTION_SEMANTICS" ||
@@ -138,10 +185,24 @@ function boundedSimulationEvidence(
       kind === "BUSINESS_LOCATION" ? "BUSINESS_LOCATION" : "POLICY";
     const subjectProductId = productId === undefined
       ? undefined : requireBoundProduct();
+    const data = plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    const policy = typeof value.policy === "string" ? value.policy : null;
+    const deterministicText = kind === "POLICY_SNAPSHOT"
+      ? `Chính sách ${policy ?? "không xác định"}: ${canonicalJsonV1(data)}.`
+      : kind === "PRODUCT_ATTRIBUTE"
+        ? `Thuộc tính sản phẩm: ${canonicalJsonV1(data)}.`
+        : kind === "OFFER_CONFIGURATION"
+          ? `Cấu hình bán: ${canonicalJsonV1(data)}.`
+          : kind === "PROMOTION_SEMANTICS"
+            ? `Khuyến mãi: ${canonicalJsonV1(data)}.`
+            : kind === "CART_TOTAL"
+              ? `Tổng giỏ hàng: ${canonicalJsonV1(data)}.`
+              : `Thông tin cửa hàng: ${canonicalJsonV1(data)}.`;
     return make(capability, {
-      ...(typeof value.policy === "string" ? { policy: value.policy } : {}),
-      data: plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID"),
-    }, subjectProductId === undefined ? undefined : { productId: subjectProductId });
+      ...(policy === null ? {} : { policy }),
+      data,
+    }, subjectProductId === undefined ? undefined : { productId: subjectProductId },
+    deterministicText);
   }
   return null;
 }
@@ -185,6 +246,14 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         colors: Object.freeze([...attributes.colors]),
         styles: Object.freeze([...attributes.styles]),
       }),
+      deterministicText: [
+        ...(attributes.materials.length === 0
+          ? [] : [`Chất liệu ${attributes.materials.join(", ")}`]),
+        ...(attributes.colors.length === 0
+          ? [] : [`màu ${attributes.colors.join(", ")}`]),
+        ...(attributes.styles.length === 0
+          ? [] : [`phong cách ${attributes.styles.join(", ")}`]),
+      ].join("; ") + ".",
       provenance: Object.freeze({
         contentHash: attributes.metadata.contentHash,
         authority: "RUNTIME" as const,
@@ -210,6 +279,21 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
           Object.freeze({ color, size })
         )),
       }),
+      deterministicText: [
+        `Mẫu ${presentation.displayName}`,
+        ...(() => {
+          const colors = [...new Set(presentation.variants.flatMap(({ color }) =>
+            color === null ? [] : [color]
+          ))];
+          return colors.length === 0 ? [] : [`màu ${colors.join(", ")}`];
+        })(),
+        ...(() => {
+          const sizes = [...new Set(presentation.variants.flatMap(({ size }) =>
+            size === null ? [] : [size]
+          ))];
+          return sizes.length === 0 ? [] : [`size ${sizes.join(", ")}`];
+        })(),
+      ].join("; ") + ".",
       provenance: Object.freeze({
         contentHash: presentation.provenance.contentHash,
         authority: "RUNTIME" as const,
