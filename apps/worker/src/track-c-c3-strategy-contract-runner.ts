@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
 import {
+  BusinessFactEnvelopeV1Schema,
   canonicalJsonV1,
   type ContextV2,
   type ContextV2CandidateOutputV2,
 } from "@lana/contracts";
+import { guardAgentProposal } from "@lana/business-tools";
 import {
   redactAnalyticsMessage,
   type ShadowContextMessage,
@@ -59,8 +61,9 @@ const STRATEGIST_INSTRUCTION = [
 
 const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
-  "Use factualTexts in the supplied evidence order. Each item must contain all wording about its matching evidence, including any concise explanation or relation to the customer's preference.",
-  "factualTexts is the only place for price, product name, material, color, availability, delivery, policy, comparison, or any other evidence-derived detail. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer those details.",
+  "The supplied responderTask.evidence contains only evidence whose factual wording may be model-authored and production-guarded. Code realizes other selected factual evidence deterministically.",
+  "Use factualTexts in the supplied evidence order. Each item must stay within its matching evidence capability.",
+  "factualTexts is the only model-authored place for supplied factual evidence. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer factual details.",
   "When supplied evidence is non-empty, emit answerText null. Put any acknowledgement plus grounded explanation in its matching factualTexts item.",
   "For a KEEP_OPEN continuation, emit one short natural progressionText that keeps the conversation open without a question, request, recommendation, or new decision variable.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
@@ -371,10 +374,40 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   });
 }
 
+const PRODUCTION_TEXT_GUARD_CAPABILITIES = new Set([
+  "PRICE",
+  "STOCK",
+  "SIZE_FIT",
+  "ETA",
+  "SHIPPING_FEE",
+  "FREESHIP",
+  "PROMOTION_OFFER",
+] as const);
+
+function modelAuthoredEvidence(
+  task: TrackCResponderTask,
+): readonly TrackCSelectableEvidence[] {
+  return Object.freeze(task.evidence.filter((evidence) => {
+    if (evidence.deterministicText !== undefined) return false;
+    if (evidence.provenance.authority === "SIMULATION") {
+      if (evidence.capability === "PRICE") return true;
+      throw new Error("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
+    }
+    if (PRODUCTION_TEXT_GUARD_CAPABILITIES.has(
+      evidence.capability as typeof PRODUCTION_TEXT_GUARD_CAPABILITIES extends Set<infer T>
+        ? T
+        : never,
+    )) {
+      return true;
+    }
+    throw new Error("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
+  }));
+}
+
 function responderTaskPrompt(task: TrackCResponderTask) {
   return Object.freeze({
     answer: task.answer,
-    evidence: presentableEvidence(task.evidence),
+    evidence: presentableEvidence(modelAuthoredEvidence(task)),
     continuation: task.continuation,
     canonicalRequest: task.canonicalRequest,
   });
@@ -389,6 +422,7 @@ function responderNeedsProgression(task: TrackCResponderTask): boolean {
 
 function responderDraftSchema(task: TrackCResponderTask) {
   const needsProgression = responderNeedsProgression(task);
+  const factualEvidenceCount = modelAuthoredEvidence(task).length;
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -401,8 +435,8 @@ function responderDraftSchema(task: TrackCResponderTask) {
         : { type: "STRING", minLength: 1, maxLength: 1_000 },
       factualTexts: {
         type: "ARRAY",
-        minItems: task.evidence.length,
-        maxItems: task.evidence.length,
+        minItems: factualEvidenceCount,
+        maxItems: factualEvidenceCount,
         items: { type: "STRING", minLength: 1, maxLength: 1_000 },
       },
       progressionText: needsProgression
@@ -451,7 +485,7 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask): Respond
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
   if (!Array.isArray(record.factualTexts) ||
-      record.factualTexts.length !== task.evidence.length) {
+      record.factualTexts.length !== modelAuthoredEvidence(task).length) {
     throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
   }
   return Object.freeze({
@@ -486,60 +520,81 @@ function assertNoUnboundFactText(value: string | null, task: TrackCResponderTask
   }
 }
 
-const FACTUAL_CONNECTIVE_TOKENS = new Set([
-  "dạ", "ạ", "chị", "em", "mình", "mẫu", "sản", "phẩm", "này", "hiện",
-  "có", "giá", "là", "chất", "liệu", "màu", "và", "với", "gồm", "của",
-  "đang", "còn", "theo", "được", "xác", "minh", "nha", "nhé", "thì",
-  "ở", "cho",
-]);
-
-function factualLexicalTokens(value: string): readonly string[] {
-  return value.normalize("NFC").toLocaleLowerCase("vi-VN")
-    .replace(/(?<=\d)[.,](?=\d{3}\b)/gu, "")
-    .replace(/(\p{N})(\p{L})/gu, "$1 $2")
-    .replace(/(\p{L})(\p{N})/gu, "$1 $2")
-    .match(/[\p{L}\p{N}]+/gu) ?? [];
-}
-
-function evidenceLexicalTokens(evidence: TrackCSelectableEvidence): Set<string> {
-  const tokens = new Set<string>();
-  const visit = (value: unknown): void => {
-    if (typeof value === "string" || typeof value === "number") {
-      for (const token of factualLexicalTokens(String(value))) tokens.add(token);
-      return;
-    }
-    if (Array.isArray(value)) {
-      value.forEach(visit);
-      return;
-    }
-    if (value !== null && typeof value === "object") {
-      Object.values(value as Readonly<Record<string, unknown>>).forEach(visit);
-    }
-  };
-  visit(evidence.value);
-  visit(evidence.subject);
-  return tokens;
-}
-
-function assertFactualTextGrounded(
-  value: string,
-  evidence: TrackCSelectableEvidence,
-): void {
-  if (evidence.provenance.authority !== "SIMULATION") return;
-  const authority = evidenceLexicalTokens(evidence);
-  const tokens = factualLexicalTokens(value).filter((token) => token.length > 1);
-  const unsupported = tokens.filter((token) =>
-    !authority.has(token) && !FACTUAL_CONNECTIVE_TOKENS.has(token)
-  );
-  if (unsupported.length > 0 || !tokens.some((token) => authority.has(token))) {
-    throw new Error("TRACK_C_RESPONDER_FACTUAL_WORDING_UNGROUNDED");
-  }
-}
-
 function assertNoEffectText(value: string | null): void {
   if (value !== null &&
       /\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value)) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  }
+}
+
+function guardSimulationPriceText(
+  context: ContextV2,
+  evidence: TrackCSelectableEvidence,
+  text: string,
+  evaluationAt: Date,
+): void {
+  if (evidence.provenance.authority !== "SIMULATION" ||
+      evidence.capability !== "PRICE") {
+    return;
+  }
+  const productId = evidence.subject?.productId;
+  const amountVnd = evidence.value.chatVnd;
+  if (productId === undefined || typeof amountVnd !== "number" ||
+      !Number.isFinite(amountVnd)) {
+    throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
+  }
+  const facts = BusinessFactEnvelopeV1Schema.parse({
+    schemaVersion: 1,
+    status: "OK",
+    source: "POS_SNAPSHOT",
+    observedAt: evaluationAt.toISOString(),
+    expiresAt: new Date(evaluationAt.getTime() + 60_000).toISOString(),
+    productId,
+    facts: {
+      schemaVersion: 1,
+      productId,
+      parentProductId: productId,
+      offerType: "DIRECT",
+      listPriceVnd: null,
+      salePriceVnd: amountVnd,
+      sizes: [],
+      stockStatus: "UNKNOWN",
+      stockQuantity: null,
+      deliveryEta: null,
+      fulfillmentPolicy: null,
+      imageUrls: [],
+    },
+    reasonCode: null,
+  });
+  const guard = guardAgentProposal({
+    proposal: {
+      schemaVersion: 1,
+      intent: "TRACK_C_V5_PRODUCTION_EVALUATION",
+      conversationStage: context.phase.phase,
+      productId,
+      action: "REPLY",
+      reply: text,
+      attachments: [],
+      handoffReason: null,
+      protectedClaimIds: [],
+    },
+    facts,
+    verifiedProductIds: new Set(context.productBinding.productIds),
+    buyingSignal: context.buyingIntent.decision === "COMMITTED",
+    sizeClaimContext: {
+      activeProductId: productId,
+      activeVariantId: null,
+      customerProfileId: null,
+      customerProfileRevision: null,
+      claims: [],
+    },
+    sizeClaimTextMode: "STRUCTURED_REJECT_ONLY",
+    now: evaluationAt,
+  });
+  if (guard.blockedReasonCodes.length > 0) {
+    throw new Error(
+      `TRACK_C_V5_PRODUCTION_GUARD_FAILED:${guard.blockedReasonCodes.join(",")}`,
+    );
   }
 }
 
@@ -625,20 +680,30 @@ function compileResponderDraft(input: Readonly<{
   assertNoUnboundFactText(draft.progressionText, task);
   assertNoEffectText(draft.answerText);
   assertNoEffectText(draft.progressionText);
-  // A factual segment is provenance-bound, but it is still model-authored
-  // wording. Simulation and runtime evidence grant facts only; neither grants
-  // the Responder authority to claim that an external effect already happened.
+  // Model-authored factual wording exists only for capabilities handled by the
+  // existing production guard. Unsupported capabilities are code-realized from
+  // the selected evidence and are never exposed as free-text factual slots.
+  const authoredEvidence = modelAuthoredEvidence(task);
   draft.factualTexts.forEach((factualText, index) => {
-    assertFactualTextGrounded(factualText, task.evidence[index]!);
+    const evidence = authoredEvidence[index]!;
     assertNoEffectText(factualText);
+    guardSimulationPriceText(
+      input.context,
+      evidence,
+      factualText,
+      input.evaluationAt,
+    );
   });
   assertProgression(task, draft);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (draft.answerText !== null) segments.push({ kind: "GENERAL", text: draft.answerText });
-  task.evidence.forEach((evidence, index) => {
+  let authoredIndex = 0;
+  task.evidence.forEach((evidence) => {
+    const factualText = evidence.deterministicText ??
+      draft.factualTexts[authoredIndex++]!;
     segments.push({
       kind: "VERIFIED_CLAIM",
-      text: draft.factualTexts[index]!,
+      text: factualText,
       claimContentHash: evidence.provenance.contentHash,
     });
   });
