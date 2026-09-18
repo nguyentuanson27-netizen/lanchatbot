@@ -51,9 +51,9 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("PASS");
-    expect(result.strategist.passed).toBe(true);
+    expect(result.strategist?.passed).toBe(true);
     expect(result.responder.passed).toBe(true);
-    expect(result.strategist.weightedScore).toBe(4);
+    expect(result.strategist?.weightedScore).toBe(4);
     expect(result.responder.weightedScore).toBe(4);
   });
 
@@ -75,8 +75,8 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("FAIL");
-    expect(result.strategist.passed).toBe(false);
-    expect(result.strategist.failedDimensions).toContain("QUESTION_RESOLUTION");
+    expect(result.strategist?.passed).toBe(false);
+    expect(result.strategist?.failedDimensions).toContain("QUESTION_RESOLUTION");
     expect(result.responder.passed).toBe(true);
   });
 
@@ -114,8 +114,8 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("FAIL");
-    expect(result.strategist.failedDimensions).toContain("FACT_GROUNDING");
-    expect(result.strategist.weightedScore).toBeGreaterThan(3.2);
+    expect(result.strategist?.failedDimensions).toContain("FACT_GROUNDING");
+    expect(result.strategist?.weightedScore).toBeGreaterThan(3.2);
   });
 
   it("allows an all-3 simulation case when its domain floors are satisfied", () => {
@@ -132,7 +132,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("PASS_WITH_NOTE");
-    expect(result.strategist.passed).toBe(true);
+    expect(result.strategist?.passed).toBe(true);
     expect(result.responder.passed).toBe(true);
   });
 
