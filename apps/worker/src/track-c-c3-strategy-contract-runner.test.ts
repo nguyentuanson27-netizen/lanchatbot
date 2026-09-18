@@ -2,10 +2,11 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
-  buildTrackCSelectableEvidence,
   buildTrackCStrategistContractRequest,
   runTrackCStrategyContractCase,
 } from "./track-c-c3-strategy-contract-runner.js";
+import { buildTrackCSelectableEvidence } from
+  "./track-c-c3-selectable-evidence.js";
 import {
   materializeTrackCV5CaseCapture,
   type TrackCV5MaterializationRecipe,
