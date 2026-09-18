@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
+import { redactAnalyticsMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
   buildTrackCStrategistContractRequest,
   runTrackCStrategyContractCase,
+  TrackCStrategyContractFailure,
 } from "./track-c-c3-strategy-contract-runner.js";
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
@@ -228,7 +230,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
   });
 
-  it("keeps a KEEP_OPEN decision out of the Responder progression surface", async () => {
+  it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({
@@ -245,7 +247,7 @@ describe("Track C C3 strategy-contract runner", () => {
         payload: payload({
           answerText: "Dạ em hiểu băn khoăn của chị ạ.",
           factualTexts: [],
-          progressionText: null,
+          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
@@ -268,10 +270,96 @@ describe("Track C C3 strategy-contract runner", () => {
       generationConfig: { responseSchema: { properties: { progressionText: unknown } } };
     };
     expect(responderRequest.generationConfig.responseSchema.properties.progressionText)
-      .toEqual({ type: "NULL" });
-    expect(result.output.segments).toEqual([{
-      kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ.",
-    }]);
+      .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
+    expect(result.output.segments).toEqual([
+      { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
+      { kind: "GENERAL", text: "Em vẫn ở đây khi chị cần xem thêm ạ." },
+    ]);
+  });
+
+  it("rejects KEEP_OPEN wording that turns into a new decision variable", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge without reopening discovery.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          factualTexts: [],
+          progressionText: "Chị thích màu nào hơn ạ.",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "849k thì hơi cao em ạ.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
+  });
+
+  it("returns redacted diagnostic text for phone email and address", async () => {
+    const rawDraft = {
+      answerText: null,
+      factualTexts: [
+        "Dạ mẫu này hiện 849.000đ ạ.",
+        "Mẫu Tường Vi có chất liệu tơ xước và màu kem, đen ạ.",
+      ],
+      progressionText:
+        "Chị gửi 0901234567, lan@example.com, 12 Nguyễn Trãi Hà Nội nhé.",
+    };
+    const rawModelText = JSON.stringify(rawDraft);
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload(rawDraft),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    try {
+      await runTrackCStrategyContractCase({
+        lane: "BEHAVIOR_SIMULATION",
+        modelResource: MODEL_RESOURCE,
+        capture: capture(),
+        evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: [{
+          direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+          occurredAt: "2026-09-10T01:59:00.000Z",
+        }],
+        simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+        trustedAcquisition: {
+          kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+          origin: "ADVERTISEMENT",
+          firstMeaningfulInbound: true,
+          authorization: "NONE",
+        },
+        transport: { send },
+      });
+      throw new Error("EXPECTED_TRACK_C_FAILURE");
+    } catch (error) {
+      expect(error).toBeInstanceOf(TrackCStrategyContractFailure);
+      const failure = error as TrackCStrategyContractFailure;
+      expect(failure.diagnostic.sanitizedRawModelOutput).toBe(
+        redactAnalyticsMessage(rawModelText).text.slice(0, 2_000),
+      );
+      expect(failure.diagnostic.sanitizedRawModelOutput).not.toContain("0901234567");
+      expect(failure.diagnostic.sanitizedRawModelOutput).not.toContain("lan@example.com");
+      expect(failure.diagnostic.sanitizedRawModelOutput).not.toContain("12 Nguyễn Trãi");
+    }
   });
 
   it("accepts a runtime-owned acquisition signal in production without admitting simulation facts", async () => {
