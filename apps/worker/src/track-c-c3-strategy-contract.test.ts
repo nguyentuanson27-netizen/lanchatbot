@@ -112,6 +112,126 @@ describe("Track C C3 simplified strategy contract", () => {
     }])).toBe("FIRST_CONTACT_FIXED");
   });
 
+  it("sends a Vertex-valid nullable object schema for adaptive continuation", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockImplementationOnce(async (request) => {
+        const continuation = (JSON.parse(request.body) as {
+          generationConfig: { responseSchema: { properties: {
+            continuation: unknown;
+          } } };
+        }).generationConfig.responseSchema.properties.continuation;
+        expect(continuation).toMatchObject({
+          type: "OBJECT",
+          nullable: true,
+          required: ["type"],
+          properties: {
+            type: { type: "STRING", enum: ["ASK", "KEEP_OPEN"] },
+            input: { type: "STRING" },
+          },
+        });
+        expect((JSON.parse(request.body) as {
+          generationConfig: { responseSchema: { properties: {
+            proposition: unknown;
+          } } };
+        }).generationConfig.responseSchema.properties.proposition).toMatchObject({
+          type: "STRING",
+          enum: expect.arrayContaining(["NONE", "PRICE"]),
+        });
+        return {
+          payload: payload({
+            replyAct: "ANSWER",
+            goal: "Answer the verified price and keep the conversation open.",
+            proposition: "PRICE",
+            evidenceRefs: ["CLAIM_001"],
+            continuation: { type: "KEEP_OPEN" },
+            canonicalAction: "NONE",
+          }),
+          providerModelVersion: "gemini-3.5-flash-lite",
+        };
+      })
+      .mockImplementationOnce(async (request) => {
+        const properties = (JSON.parse(request.body) as {
+          generationConfig: { responseSchema: { properties: {
+            strategy: unknown;
+            cta: unknown;
+            segments: { items: { properties: Record<string, unknown> } };
+          } } };
+        }).generationConfig.responseSchema.properties;
+        expect(properties.strategy).toEqual({
+          type: "STRING", enum: ["ANSWER_VERIFIED_FACTS"],
+        });
+        expect(properties.cta).toEqual({ type: "STRING", enum: ["NONE"] });
+        expect(properties.segments.items.properties).not.toHaveProperty(
+          "claimContentHash",
+        );
+        expect(properties.segments.items.properties.claimRef).toEqual({
+          type: "STRING", enum: ["CLAIM_001"],
+        });
+        return {
+          payload: responderPayload({ keepOpen: true }),
+          providerModelVersion: "gemini-3.5-flash-lite",
+        };
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("PRODUCTION_CONTRACT"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      transport: { send },
+    })).resolves.toMatchObject({
+      conversationLane: "ADAPTIVE_FOLLOWUP",
+    });
+  });
+
+  it("fails closed on an unsolicited request for a delivery address", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the verified price without requesting checkout details.",
+          proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          segments: [{
+            kind: "VERIFIED_CLAIM", text: "Giá hiện tại là 849.000 VND ạ.",
+            claimRef: "CLAIM_001", role: "ANSWER", decisionInput: "NONE",
+          }, {
+            kind: "GENERAL", text: "Chị cho em xin thông tin địa chỉ cụ thể nhé.",
+            role: "PROGRESSION", decisionInput: "NONE",
+          }],
+          strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      capture: capture("PRODUCTION_CONTRACT"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:00:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow(
+      "TRACK_C_V5_PRODUCTION_GUARD_FAILED:PREMATURE_ORDER_INFO_REQUEST",
+    );
+  });
+
   it("uses one fixed progression and never asks usual size first", () => {
     const task = compileTrackCFixedFirstContactTask({
       productResolved: true,
