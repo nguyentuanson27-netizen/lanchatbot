@@ -62,10 +62,7 @@ function payload(value: unknown) {
 function responderDraft() {
   return {
     answerText: null,
-    factualTexts: [
-      "Dạ mẫu này hiện 849.000đ ạ.",
-      "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ và có màu kem, đen ạ.",
-    ],
+    factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
     progressionText: "Chị thích màu nào hơn ạ?",
   };
 }
@@ -226,8 +223,17 @@ describe("Track C C3 strategy-contract runner", () => {
       .toEqual(["answerText", "factualTexts", "progressionText"]);
     expect(request.generationConfig.responseSchema.properties.answerText)
       .toEqual({ type: "NULL" });
+    expect(request.generationConfig.responseSchema.properties.factualTexts)
+      .toMatchObject({ minItems: 1, maxItems: 1 });
     expect(request.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
+    expect(result.output.segments[1]).toEqual({
+      kind: "VERIFIED_CLAIM",
+      text: "Mẫu Tường Vi; dạng set áo & quần; chất liệu tơ xước mềm, nhẹ; màu kem, đen; thiết kế phom suông, quần cạp chun.",
+      claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
+        ? result.output.segments[1].claimContentHash
+        : "",
+    });
   });
 
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
@@ -316,10 +322,7 @@ describe("Track C C3 strategy-contract runner", () => {
   it("returns redacted diagnostic text for phone email and address", async () => {
     const rawDraft = {
       answerText: null,
-      factualTexts: [
-        "Dạ mẫu này hiện 849.000đ ạ.",
-        "Mẫu Tường Vi có chất liệu tơ xước và màu kem, đen ạ.",
-      ],
+      factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
       progressionText:
         "Chị gửi 0901234567, lan@example.com, địa chỉ: 12 Nguyễn Trãi, Hà Nội nhé.",
     };
@@ -453,13 +456,13 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_RESPONDER_DRAFT_INVALID");
   });
 
-  it("rejects unsupported factual wording by evidence allowlist in simulation", async () => {
+  it("does not give the model a free-text slot for unsupported product presentation", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
         ...responderDraft(),
         factualTexts: [
           "Dạ mẫu này hiện 849.000đ ạ.",
-          "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ và màu kem, đen cao cấp ạ.",
+          "Mẫu Tường Vi cao cấp ạ.",
         ],
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
@@ -483,17 +486,67 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_FACTUAL_WORDING_UNGROUNDED");
+    })).rejects.toThrow("TRACK_C_RESPONDER_DRAFT_INVALID");
+  });
+
+  it("reuses the production price guard for simulation price evidence", async () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_SIM_PRICE_GUARD",
+        latest_customer_message: "Mẫu này bao nhiêu em?",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "NONE",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: null,
+          },
+          source_stage: null,
+          runtime_claim_refs: [],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({
+        answerText: null,
+        factualTexts: ["Dạ mẫu này hiện 899.000đ ạ."],
+        progressionText: "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ.",
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_CHANNEL_PRICE],
+      trustedAcquisition: {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+      },
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED:UNAUTHORIZED_PRICE");
   });
 
   it("rejects effect language in a provenance-bound factual text", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
         ...responderDraft(),
-        factualTexts: [
-          "Em đã tạo đơn theo giá 849.000đ rồi ạ.",
-          "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ và có màu kem, đen ạ.",
-        ],
+        factualTexts: ["Em đã tạo đơn theo giá 849.000đ rồi ạ."],
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
     });
