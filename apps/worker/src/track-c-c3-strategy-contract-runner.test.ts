@@ -362,6 +362,36 @@ describe("Track C C3 strategy-contract runner", () => {
     }
   });
 
+  it("does not let first-contact ASK_MEASUREMENTS fall back to usual size", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({
+        answerText: null,
+        factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
+        progressionText: "Chị thường mặc size gì ạ.",
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      trustedAcquisition: {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+      },
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_MEASUREMENTS_QUESTION_INVALID");
+  });
+
   it("accepts a runtime-owned acquisition signal in production without admitting simulation facts", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
