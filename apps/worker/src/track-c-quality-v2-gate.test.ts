@@ -38,7 +38,6 @@ function record(
     lane: "PRODUCTION_CONTRACT",
     productionClassification: "SUPPORTED",
     expectedPreModelReject: false,
-    generatorCallShape: "ADAPTIVE_FOLLOWUP",
     outcome: "SCORED",
     providerCallCount: 2,
     score: score("PASS"),
@@ -53,7 +52,6 @@ function expectedCase(
     caseId: value.caseId,
     productionClassification: value.productionClassification,
     expectedPreModelReject: value.expectedPreModelReject,
-    generatorCallShape: value.generatorCallShape,
   };
 }
 
@@ -108,7 +106,6 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
       caseId: "Q001",
       productionClassification: "BLOCKED_BY_CONTRACT",
       expectedPreModelReject: false,
-      generatorCallShape: "ADAPTIVE_FOLLOWUP",
     }])).toThrow("TRACK_C_V5_GATE_EXPECTATION_MISMATCH:Q001");
   });
 
@@ -149,7 +146,6 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
 
   it("accepts exactly one provider call for a scored fixed first-contact case", () => {
     const q1 = record("Q001", {
-      generatorCallShape: "FIRST_CONTACT_FIXED",
       providerCallCount: 1,
       score: {
         ...score("PASS"),
@@ -161,26 +157,12 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
     expect(gate([q1]).passed).toBe(true);
   });
 
-  it("rejects a caller relabel of generator call shape", () => {
+  it("rejects caller cardinality that disagrees with the evaluated candidate shape", () => {
     const q1 = record("Q001", {
-      generatorCallShape: "FIRST_CONTACT_FIXED",
       providerCallCount: 1,
+      score: score("PASS"),
     });
-    expect(() => gate([q1], [{
-      ...expectedCase(q1),
-      generatorCallShape: "ADAPTIVE_FOLLOWUP",
-    }])).toThrow("TRACK_C_V5_GATE_EXPECTATION_MISMATCH:Q001");
-  });
-
-  it("rejects a scored call shape that disagrees with the planned record", () => {
-    const q1 = record("Q001", {
-      generatorCallShape: "FIRST_CONTACT_FIXED",
-      providerCallCount: 1,
-    });
-    expect(() => gate([q1], [{
-      ...expectedCase(q1),
-      generatorCallShape: "FIRST_CONTACT_FIXED",
-    }])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
+    expect(() => gate([q1])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
   });
 
   it("requires zero provider calls for a production contract skip", () => {
