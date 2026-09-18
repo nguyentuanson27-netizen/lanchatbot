@@ -140,7 +140,7 @@ function responderFor(
     canonical !== "ASK_CHECKOUT_DETAILS" &&
     (canonical !== undefined || task.continuation !== null);
   return {
-    answerText: task.answer.status === "SUPPORTED" ||
+    answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : answerText,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
     progressionText: needsProgression
@@ -345,7 +345,11 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
         expect(prompt.constraints?.permittedCanonicalActions)
           .toEqual(["ASK_CHECKOUT_DETAILS"]);
         expect(JSON.stringify(prompt)).not.toContain("090");
-        return decisionFor(prompt);
+        return {
+          ...decisionFor(prompt),
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the commitment and request only required details.",
+        };
       },
     });
 

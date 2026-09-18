@@ -114,7 +114,7 @@ function responderPayload(
       "ASK_CHECKOUT_DETAILS" &&
     (task.canonicalRequest !== null || task.continuation !== null);
   return modelPayload({
-    answerText: task.answer.status === "SUPPORTED" ||
+    answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : reply,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
     progressionText: hold ? null : needsProgression

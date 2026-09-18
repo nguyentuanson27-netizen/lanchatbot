@@ -61,6 +61,7 @@ const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
   "Use factualTexts in the supplied evidence order. Each item must contain all wording about its matching evidence, including any concise explanation or relation to the customer's preference.",
   "factualTexts is the only place for price, product name, material, color, availability, delivery, policy, comparison, or any other evidence-derived detail. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer those details.",
+  "When supplied evidence is non-empty, emit answerText null. Put any acknowledgement plus grounded explanation in its matching factualTexts item.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
   "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
@@ -389,7 +390,7 @@ function responderDraftSchema(task: TrackCResponderTask) {
     minProperties: 3,
     maxProperties: 3,
     properties: {
-      answerText: task.answer.status === "SUPPORTED" ||
+      answerText: task.evidence.length > 0 ||
           task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS"
         ? { type: "NULL" }
         : { type: "STRING", minLength: 1, maxLength: 1_000 },
@@ -547,7 +548,9 @@ function compileResponderDraft(input: Readonly<{
   if (task.answer.status === "SUPPORTED" && draft.answerText !== null) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  if (task.answer.kind === "ACKNOWLEDGE" && draft.answerText === null) {
+  if (task.answer.kind === "ACKNOWLEDGE" && task.evidence.length === 0 &&
+      task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+      draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
   assertNoUnboundFactText(draft.answerText, task);
