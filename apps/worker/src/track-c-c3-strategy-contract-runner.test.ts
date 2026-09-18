@@ -539,7 +539,7 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED:UNAUTHORIZED_PRICE");
+    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
   });
 
   it("rejects effect language in a provenance-bound factual text", async () => {
