@@ -74,6 +74,11 @@ const RESPONDER_INSTRUCTION = [
   "Acknowledge the customer's concern before any supplied progression. Never claim that an order, payment, delivery, message, or other effect has happened.",
 ].join("\n");
 
+const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
+  "Dạ em hiểu ý chị ạ.",
+  "Dạ em hiểu băn khoăn của chị ạ.",
+] as const);
+
 type CheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS";
 type ResponderDraft = Readonly<{
   answerText: string | null;
@@ -418,25 +423,30 @@ function responderNeedsProgression(task: TrackCResponderTask): boolean {
     task.continuation?.type === "KEEP_OPEN";
 }
 
+function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
+  return task.answer.kind === "ACKNOWLEDGE" &&
+    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+    task.evidence.some(({ deterministicText }) => deterministicText !== undefined);
+}
+
 function responderDraftSchema(task: TrackCResponderTask) {
   const needsProgression = responderNeedsProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
-  const hasDeterministicEvidence = task.evidence.some(
-    ({ deterministicText }) => deterministicText !== undefined,
-  );
+  const boundedAcknowledgement = usesBoundedAcknowledgement(task);
   const answerTextAllowed =
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-    (task.evidence.length === 0 ||
-      (task.answer.kind === "ACKNOWLEDGE" && hasDeterministicEvidence));
+    (task.evidence.length === 0 || boundedAcknowledgement);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
     minProperties: 3,
     maxProperties: 3,
     properties: {
-      answerText: answerTextAllowed
-        ? { type: "STRING", minLength: 1, maxLength: 1_000 }
-        : { type: "NULL" },
+      answerText: boundedAcknowledgement
+        ? { type: "STRING", enum: BOUNDED_ACKNOWLEDGEMENTS }
+        : answerTextAllowed
+          ? { type: "STRING", minLength: 1, maxLength: 1_000 }
+          : { type: "NULL" },
       factualTexts: {
         type: "ARRAY",
         minItems: factualEvidenceCount,
@@ -633,7 +643,7 @@ function deterministicCheckoutText(fields: readonly CheckoutField[]): string {
 function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): void {
   if (task.continuation?.type === "KEEP_OPEN") {
     if (draft.progressionText === null || draft.progressionText.includes("?") ||
-        /\b(?:chị|mình|bạn)\b[^.!…]{0,80}\b(?:màu|size|kích\s*thước|chiều\s*cao|cân\s*nặng|số\s*lượng|ngân\s*sách|phong\s*cách|địa\s*chỉ|số\s*điện\s*thoại)\b/iu
+        /(?:chị|mình|bạn)[^.!…]{0,80}(?:màu|size|kích\s*thước|chiều\s*cao|cân\s*nặng|số\s*lượng|ngân\s*sách|phong\s*cách|địa\s*chỉ|số\s*điện\s*thoại)/iu
           .test(draft.progressionText.normalize("NFC"))) {
       throw new Error("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
     }
@@ -675,11 +685,15 @@ function compileResponderDraft(input: Readonly<{
   if (task.answer.status === "SUPPORTED" && draft.answerText !== null) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  if (task.answer.kind === "ACKNOWLEDGE" &&
-      task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-      task.evidence.some(({ deterministicText }) => deterministicText !== undefined) &&
-      draft.answerText === null) {
-    throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+  if (usesBoundedAcknowledgement(task)) {
+    if (draft.answerText === null) {
+      throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+    }
+    if (!BOUNDED_ACKNOWLEDGEMENTS.includes(
+      draft.answerText as typeof BOUNDED_ACKNOWLEDGEMENTS[number],
+    )) {
+      throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+    }
   }
   assertNoUnboundFactText(draft.answerText, task);
   assertNoUnboundFactText(draft.progressionText, task);
