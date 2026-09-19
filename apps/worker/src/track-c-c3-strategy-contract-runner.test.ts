@@ -66,7 +66,7 @@ function payload(value: unknown) {
 function responderDraft() {
   return {
     answerText: null,
-    factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
+    factualTexts: [],
     progressionText: "Chị thích màu nào hơn ạ?",
   };
 }
@@ -319,7 +319,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(request.generationConfig.responseSchema.properties.answerText)
       .toEqual({ type: "NULL" });
     expect(request.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 1, maxItems: 1 });
+      .toMatchObject({ minItems: 0, maxItems: 0 });
     expect(request.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
     expect(result.output.segments[1]).toEqual({
@@ -585,7 +585,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .mockResolvedValueOnce({
         payload: payload({
           answerText: "Dạ em hiểu ý chị ạ.",
-          factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
+          factualTexts: [],
           progressionText: null,
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
@@ -624,8 +624,8 @@ describe("Track C C3 strategy-contract runner", () => {
         ],
       });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 1, maxItems: 1 });
-    expect(responderPrompt.responderTask.evidence).toHaveLength(1);
+      .toMatchObject({ minItems: 0, maxItems: 0 });
+    expect(responderPrompt.responderTask.evidence).toEqual([]);
     expect(result.output.segments[0]).toEqual({
       kind: "GENERAL",
       text: "Dạ em hiểu ý chị ạ.",
@@ -735,7 +735,7 @@ describe("Track C C3 strategy-contract runner", () => {
   it("returns redacted diagnostic text for phone email and address", async () => {
     const rawDraft = {
       answerText: null,
-      factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
+      factualTexts: [],
       progressionText:
         "Chị gửi 0901234567, lan@example.com, địa chỉ: 12 Nguyễn Trãi, Hà Nội nhé.",
     };
@@ -782,7 +782,7 @@ describe("Track C C3 strategy-contract runner", () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
         answerText: null,
-        factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
+        factualTexts: [],
         progressionText: "Chị thường mặc size gì ạ.",
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
@@ -812,7 +812,7 @@ describe("Track C C3 strategy-contract runner", () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
         answerText: null,
-        factualTexts: ["Dạ giá này đã được xác minh ạ."],
+        factualTexts: [],
         progressionText: "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ.",
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
@@ -902,11 +902,11 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_RESPONDER_DRAFT_INVALID");
   });
 
-  it("reuses the production price guard for simulation price evidence", async () => {
+  it("code-realizes simulation price instead of exposing a factual text slot", async () => {
     const captureValue = materializeTrackCV5CaseCapture({
       lane: "BEHAVIOR_SIMULATION",
       fixture: {
-        id: "C3_SIM_PRICE_GUARD",
+        id: "C3_SIM_PRICE_DETERMINISTIC",
         latest_customer_message: "Mẫu này bao nhiêu em?",
         context: {
           product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
@@ -925,16 +925,28 @@ describe("Track C C3 strategy-contract runner", () => {
       runtimeClaimCatalog: facts.runtime_claim_catalog,
       recipe,
     });
-    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
-      payload: payload({
-        answerText: null,
-        factualTexts: ["Dạ mẫu này hiện 899.000đ ạ."],
-        progressionText: "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ.",
-      }),
-      providerModelVersion: "gemini-3.5-flash-lite",
-    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the verified channel price.",
+          proposition: "PRICE",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: null,
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
 
-    await expect(runTrackCStrategyContractCase({
+    const result = await runTrackCStrategyContractCase({
       lane: "BEHAVIOR_SIMULATION",
       modelResource: MODEL_RESOURCE,
       capture: captureValue,
@@ -945,14 +957,11 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       simulationFacts: [facts.simulation_fact_catalog.SF_CHANNEL_PRICE],
-      trustedAcquisition: {
-        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
-        origin: "ADVERTISEMENT",
-        firstMeaningfulInbound: true,
-        authorization: "NONE",
-      },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
+    });
+
+    expect(result.reply).toContain("849.000đ");
+    expect(result.reply).not.toContain("899.000đ");
   });
 
   it("rejects effect language in deterministic factual text", async () => {
@@ -1001,7 +1010,7 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   });
 
-  it("rejects effect language in a provenance-bound factual text", async () => {
+  it("fails closed when the model injects factual or effect text into factualTexts", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
         ...responderDraft(),
@@ -1028,7 +1037,7 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+    })).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
   });
 
   it("does not allow simulation facts to leak through GENERAL text or production execution", async () => {
