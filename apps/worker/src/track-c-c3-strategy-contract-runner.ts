@@ -65,7 +65,7 @@ const RESPONDER_INSTRUCTION = [
   "The supplied responderTask.evidence contains only evidence whose factual wording may be model-authored and production-guarded. Code realizes other selected factual evidence deterministically.",
   "Use factualTexts in the supplied evidence order. Each item must stay within its matching evidence capability.",
   "factualTexts is the only model-authored place for supplied factual evidence. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer factual details.",
-  "When answer.kind is ACKNOWLEDGE and checkout details are not being requested, put one short non-factual acknowledgement in answerText even when selected evidence is code-realized. Otherwise, when supplied evidence is non-empty, emit answerText null.",
+  "When answer.kind is ACKNOWLEDGE, checkout details are not being requested, and responderTask.evidence is empty because selected facts are code-realized, put one short non-factual acknowledgement in answerText. Otherwise, when supplied evidence is non-empty, emit answerText null.",
   "For a KEEP_OPEN continuation, emit one short natural progressionText that keeps the conversation open without a question, request, recommendation, or new decision variable.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
