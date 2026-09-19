@@ -148,7 +148,7 @@ function responderFor(
     answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : answerText,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
-    progressionText: keepOpen ? "Em vẫn ở đây khi chị cần xem thêm ạ."
+    progressionText: keepOpen ? null
       : canonical === "ASK_MEASUREMENTS"
         ? "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?"
         : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
