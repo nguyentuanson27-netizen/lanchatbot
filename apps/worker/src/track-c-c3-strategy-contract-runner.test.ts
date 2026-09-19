@@ -16,6 +16,8 @@ import {
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
+import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
+import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -148,9 +150,14 @@ describe("Track C C3 strategy-contract runner", () => {
       ],
       executionLane: "BEHAVIOR_SIMULATION",
     });
-    expect(evidence.some(
+    const comparison = evidence.find(
       ({ capability }) => capability === "PRODUCT_COMPARISON",
-    )).toBe(false);
+    );
+    expect(comparison).toMatchObject({
+      deterministicText:
+        "Tường Vi thiên về dáng tối giản, dễ mặc; Nguyệt Hà có phom chỉn chu hơn ạ.",
+      provenance: { authority: "SIMULATION" },
+    });
   });
 
   it("exposes only evidence that already has a safe factual egress", () => {
@@ -322,6 +329,96 @@ describe("Track C C3 strategy-contract runner", () => {
         ? result.output.segments[1].claimContentHash
         : "",
     });
+  });
+
+  it("does not give the model a free-form factual slot for an authorized price", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({
+        answerText: null,
+        factualTexts: ["Dạ mẫu này hiện 849.000đ và rất cao cấp ạ."],
+        progressionText: "Chị thích màu nào hơn ạ?",
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+      },
+      transport: { send },
+    })).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
+  });
+
+  it("keeps typed STOCK variant identity out of SIZE_FIT recommendation semantics", () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "PRODUCTION_CONTRACT",
+      fixture: {
+        id: "C3_STOCK_VARIANT_GUARD",
+        latest_customer_message: "Tường Vi size S hết rồi à em?",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "NONE",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: null,
+          },
+          source_stage: null,
+          runtime_claim_refs: ["RC_STOCK_SIZE_S_OUT"],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const context = contextFromFrozenTrackCCapture({
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+    });
+    const claim = context.verifiedClaims[0]!;
+    const value = {
+      segments: [{
+        kind: "VERIFIED_CLAIM",
+        text: "Dạ mẫu này hiện hết size S ạ.",
+        claimContentHash: claim.provenance.contentHash,
+      }],
+      strategy: "ANSWER_VERIFIED_FACTS",
+      cta: "NONE",
+    };
+
+    expect(() => validateResponderOutput(
+      context,
+      value,
+      "PRODUCTION_CONTRACT",
+      new Date(recipe.evaluation_at),
+    )).not.toThrow();
+
+    expect(() => validateResponderOutput(
+      context,
+      {
+        ...value,
+        segments: [{
+          ...value.segments[0],
+          text: "Dạ mẫu này hiện hết size S ạ, theo số đo chị hợp size M.",
+        }],
+      },
+      "PRODUCTION_CONTRACT",
+      new Date(recipe.evaluation_at),
+    )).toThrow();
   });
 
   it("code-realizes a bounded answer for unresolved factual propositions", async () => {
