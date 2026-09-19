@@ -199,7 +199,7 @@ describe("Track C C3 journey adapter", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.turns[1]?.evaluationContext.map(({ text }) => text)).toEqual([
       "customer turn 1",
-      "actual Lana reply 2",
+      "actual Lana reply 2\nEm vẫn ở đây khi chị cần xem thêm ạ.",
       "customer turn 2",
     ]);
     const turnTwoStrategistRequest = candidateTransport.send.mock.calls[2]?.[0];
