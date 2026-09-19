@@ -517,6 +517,42 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
   });
 
+  it("rejects KEEP_OPEN decision variables regardless of word order", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge without reopening discovery.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          factualTexts: [],
+          progressionText: "Màu nào chị thích hơn ạ.",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "849k thì hơi cao em ạ.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
+  });
+
   it("returns redacted diagnostic text for phone email and address", async () => {
     const rawDraft = {
       answerText: null,
