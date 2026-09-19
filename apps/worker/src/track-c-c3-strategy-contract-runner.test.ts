@@ -9,6 +9,8 @@ import {
 } from "./track-c-c3-strategy-contract-runner.js";
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
+import { trackCEvidenceHasSafeFactualEgress } from
+  "./track-c-c3-strategy-contract.js";
 import {
   materializeTrackCV5CaseCapture,
   type TrackCV5MaterializationRecipe,
@@ -161,9 +163,10 @@ describe("Track C C3 strategy-contract runner", () => {
       context: captureValue.context,
       simulationFacts: [
         facts.simulation_fact_catalog.SF_PAYMENT,
-        facts.simulation_fact_catalog.SF_CARE_REN,
-        facts.simulation_fact_catalog.SF_FULFILL_MTO,
-        facts.simulation_fact_catalog.SF_OCCASION,
+        facts.simulation_fact_catalog.SF_STORE,
+        facts.simulation_fact_catalog.SF_GIFT_PROMO,
+        facts.simulation_fact_catalog.SF_ORDER_TOTAL,
+        facts.simulation_fact_catalog.SF_BACK_COVERAGE,
         facts.simulation_fact_catalog.SF_CHANNEL_PRICE,
       ],
       executionLane: "BEHAVIOR_SIMULATION",
@@ -173,12 +176,7 @@ describe("Track C C3 strategy-contract runner", () => {
       "PRICE",
       "PRICE",
     ]);
-    expect(evidence.every(({ deterministicText, provenance, capability }) =>
-      deterministicText !== undefined ||
-      (provenance.authority === "RUNTIME" &&
-        ["PRICE", "STOCK", "SIZE_FIT", "ETA"].includes(capability)) ||
-      (provenance.authority === "SIMULATION" && capability === "PRICE")
-    )).toBe(true);
+    expect(evidence.every(trackCEvidenceHasSafeFactualEgress)).toBe(true);
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
