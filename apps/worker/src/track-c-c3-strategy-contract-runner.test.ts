@@ -426,7 +426,13 @@ describe("Track C C3 strategy-contract runner", () => {
     ) as { responderTask: { evidence: unknown[] } };
 
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
+      .toEqual({
+        type: "STRING",
+        enum: [
+          "Dạ em hiểu ý chị ạ.",
+          "Dạ em hiểu băn khoăn của chị ạ.",
+        ],
+      });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
       .toMatchObject({ minItems: 1, maxItems: 1 });
     expect(responderPrompt.responderTask.evidence).toHaveLength(1);
