@@ -117,8 +117,7 @@ function responderPayload(
     answerText: task.evidence.length > 0 ||
         canonical === "ASK_CHECKOUT_DETAILS" ? null : reply,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
-    progressionText: hold ? null : keepOpen
-      ? "Em vẫn ở đây khi chị cần xem thêm ạ."
+    progressionText: hold || keepOpen ? null
       : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   });
 }
