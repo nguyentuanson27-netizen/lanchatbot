@@ -52,6 +52,7 @@ function boundedSimulationEvidence(
   fact: unknown,
   ref: string,
   boundProductIds: readonly string[],
+  displayNamesByProductId: ReadonlyMap<string, string>,
 ): TrackCSelectableEvidence | null {
   const value = plainObject(fact, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
   const kind = value.kind;
@@ -89,10 +90,8 @@ function boundedSimulationEvidence(
     const offerType = typeof value.offerType === "string" ? value.offerType : null;
     const deterministicText = [
       `Mẫu ${displayName}`,
-      ...(offerType === null ? [] : [`dạng ${offerType}`]),
       `chất liệu ${material}`,
       ...(colors.length === 0 ? [] : [`màu ${colors.join(", ")}`]),
-      ...(design.length === 0 ? [] : [`thiết kế ${design.join(", ")}`]),
     ].join("; ") + ".";
     return make("PRODUCT_PRESENTATION", {
       displayName,
@@ -113,9 +112,16 @@ function boundedSimulationEvidence(
     if (products.some((id) => typeof descriptions[id] !== "string")) {
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
-    const deterministicText = "So sánh: " + products
-      .map((id) => `${id}: ${descriptions[id] as string}`)
-      .join("; ") + ".";
+    const canRender = products.every((id) =>
+      displayNamesByProductId.has(id)
+    );
+    const deterministicText = canRender
+      ? "So sánh: " + products
+          .map((id) =>
+            `${displayNamesByProductId.get(id)!}: ${descriptions[id] as string}`
+          )
+          .join("; ") + "."
+      : undefined;
     return make(
       "PRODUCT_COMPARISON",
       { products, descriptions },
@@ -134,7 +140,6 @@ function boundedSimulationEvidence(
       "CARE_GUIDANCE",
       { data },
       { productId: subjectProductId },
-      `Chăm sóc: giặt ${data.wash}; tránh ${data.avoid}; phơi ${data.dry}.`,
     );
   }
   if (kind === "CHANNEL_PRICE_SNAPSHOT") {
@@ -159,7 +164,6 @@ function boundedSimulationEvidence(
       "FULFILLMENT_STATUS",
       { data },
       { productId: subjectProductId },
-      `Trạng thái thực hiện: ${data.status}; sản xuất ${data.productionMinDays}–${data.productionMaxDays} ngày; giao ${data.deliveryMinDays}–${data.deliveryMaxDays} ngày.`,
     );
   }
   if (kind === "PRODUCT_LIFECYCLE") {
@@ -172,7 +176,6 @@ function boundedSimulationEvidence(
       "PRODUCT_LIFECYCLE",
       { data },
       { productId: subjectProductId },
-      `Trạng thái sản phẩm: ${data.status}.`,
     );
   }
   if (kind === "POLICY_SNAPSHOT" || kind === "PRODUCT_ATTRIBUTE" ||
@@ -187,22 +190,10 @@ function boundedSimulationEvidence(
       ? undefined : requireBoundProduct();
     const data = plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
     const policy = typeof value.policy === "string" ? value.policy : null;
-    const deterministicText = kind === "POLICY_SNAPSHOT"
-      ? `Chính sách ${policy ?? "không xác định"}: ${canonicalJsonV1(data)}.`
-      : kind === "PRODUCT_ATTRIBUTE"
-        ? `Thuộc tính sản phẩm: ${canonicalJsonV1(data)}.`
-        : kind === "OFFER_CONFIGURATION"
-          ? `Cấu hình bán: ${canonicalJsonV1(data)}.`
-          : kind === "PROMOTION_SEMANTICS"
-            ? `Khuyến mãi: ${canonicalJsonV1(data)}.`
-            : kind === "CART_TOTAL"
-              ? `Tổng giỏ hàng: ${canonicalJsonV1(data)}.`
-              : `Thông tin cửa hàng: ${canonicalJsonV1(data)}.`;
     return make(capability, {
       ...(policy === null ? {} : { policy }),
       data,
-    }, subjectProductId === undefined ? undefined : { productId: subjectProductId },
-    deterministicText);
+    }, subjectProductId === undefined ? undefined : { productId: subjectProductId });
   }
   return null;
 }
@@ -227,9 +218,6 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         capability,
         ...(subject === undefined ? {} : { subject }),
         value: Object.freeze({ ...claim.value }),
-        ...(capability === "PRODUCT_MEDIA"
-          ? { deterministicText: "Có tư liệu hình ảnh sản phẩm đã xác minh." }
-          : {}),
         provenance: Object.freeze({
           contentHash: claim.provenance.contentHash,
           authority: "RUNTIME" as const,
@@ -240,6 +228,12 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
     const attributes = input.context.productAttributes;
+    const attributeTextParts = [
+      ...(attributes.materials.length === 0
+        ? [] : [`Chất liệu ${attributes.materials.join(", ")}`]),
+      ...(attributes.colors.length === 0
+        ? [] : [`màu ${attributes.colors.join(", ")}`]),
+    ];
     evidence.push(Object.freeze({
       ref: "PRODUCT_ATTRIBUTES_001",
       capability: "PRODUCT_ATTRIBUTES",
@@ -249,14 +243,9 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         colors: Object.freeze([...attributes.colors]),
         styles: Object.freeze([...attributes.styles]),
       }),
-      deterministicText: [
-        ...(attributes.materials.length === 0
-          ? [] : [`Chất liệu ${attributes.materials.join(", ")}`]),
-        ...(attributes.colors.length === 0
-          ? [] : [`màu ${attributes.colors.join(", ")}`]),
-        ...(attributes.styles.length === 0
-          ? [] : [`phong cách ${attributes.styles.join(", ")}`]),
-      ].join("; ") + ".",
+      ...(attributeTextParts.length === 0
+        ? {}
+        : { deterministicText: attributeTextParts.join("; ") + "." }),
       provenance: Object.freeze({
         contentHash: attributes.metadata.contentHash,
         authority: "RUNTIME" as const,
@@ -297,11 +286,22 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       }),
     }));
   }
+  const displayNamesByProductId = new Map<string, string>();
+  for (const fact of input.simulationFacts) {
+    if (fact === null || typeof fact !== "object" || Array.isArray(fact)) continue;
+    const record = fact as Readonly<Record<string, unknown>>;
+    if (record.kind === "PRODUCT_PROFILE" &&
+        typeof record.productId === "string" &&
+        typeof record.displayName === "string") {
+      displayNamesByProductId.set(record.productId, record.displayName);
+    }
+  }
   input.simulationFacts.forEach((fact, index) => {
     const projected = boundedSimulationEvidence(
       fact,
       `SIMULATION_${String(index + 1).padStart(3, "0")}`,
       input.context.productBinding.productIds,
+      displayNamesByProductId,
     );
     if (projected !== null) evidence.push(projected);
   });
