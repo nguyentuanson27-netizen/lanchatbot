@@ -87,11 +87,9 @@ function boundedSimulationEvidence(
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
     const offerType = typeof value.offerType === "string" ? value.offerType : null;
-    const deterministicText = [
-      `Mẫu ${displayName}`,
-      `chất liệu ${material}`,
-      ...(colors.length === 0 ? [] : [`màu ${colors.join(", ")}`]),
-    ].join("; ") + ".";
+    const deterministicText = colors.length === 0
+      ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
+      : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {
       displayName,
       material,
@@ -215,12 +213,14 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
     const attributes = input.context.productAttributes;
-    const attributeTextParts = [
-      ...(attributes.materials.length === 0
-        ? [] : [`Chất liệu ${attributes.materials.join(", ")}`]),
-      ...(attributes.colors.length === 0
-        ? [] : [`màu ${attributes.colors.join(", ")}`]),
-    ];
+    const attributeText = attributes.materials.length > 0 &&
+        attributes.colors.length > 0
+      ? `Mẫu này có chất liệu ${attributes.materials.join(", ")} và màu ${attributes.colors.join(", ")} ạ.`
+      : attributes.materials.length > 0
+        ? `Mẫu này có chất liệu ${attributes.materials.join(", ")} ạ.`
+        : attributes.colors.length > 0
+          ? `Mẫu này hiện có màu ${attributes.colors.join(", ")} ạ.`
+          : null;
     evidence.push(Object.freeze({
       ref: "PRODUCT_ATTRIBUTES_001",
       capability: "PRODUCT_ATTRIBUTES",
@@ -230,9 +230,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         colors: Object.freeze([...attributes.colors]),
         styles: Object.freeze([...attributes.styles]),
       }),
-      ...(attributeTextParts.length === 0
-        ? {}
-        : { deterministicText: attributeTextParts.join("; ") + "." }),
+      ...(attributeText === null ? {} : { deterministicText: attributeText }),
       provenance: Object.freeze({
         contentHash: attributes.metadata.contentHash,
         authority: "RUNTIME" as const,
@@ -258,15 +256,14 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
           Object.freeze({ color, size })
         )),
       }),
-      deterministicText: [
-        `Mẫu ${presentation.displayName}`,
-        ...(() => {
-          const colors = [...new Set(presentation.variants.flatMap(({ color }) =>
-            color === null ? [] : [color]
-          ))];
-          return colors.length === 0 ? [] : [`màu ${colors.join(", ")}`];
-        })(),
-      ].join("; ") + ".",
+      deterministicText: (() => {
+        const colors = [...new Set(presentation.variants.flatMap(({ color }) =>
+          color === null ? [] : [color]
+        ))];
+        return colors.length === 0
+          ? `Đây là mẫu ${presentation.displayName} ạ.`
+          : `Mẫu ${presentation.displayName} hiện có màu ${colors.join(", ")} ạ.`;
+      })(),
       provenance: Object.freeze({
         contentHash: presentation.provenance.contentHash,
         authority: "RUNTIME" as const,
