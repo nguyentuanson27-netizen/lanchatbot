@@ -276,12 +276,18 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
       firstMeaningfulInbound: true,
     });
     const factCandidate = candidateTransport({
-      responder: (prompt) => responderFor(prompt, "Mẫu này 849.000đ chị ạ."),
+      responder: (prompt) => ({
+        ...responderFor(prompt),
+        answerText: "Mẫu này 849.000đ chị ạ.",
+      }),
     });
     await expect(runFixture(caseFixture, factCandidate)).rejects.toBeInstanceOf(Error);
 
     const effectCandidate = candidateTransport({
-      responder: (prompt) => responderFor(prompt, "Em đã tạo đơn cho chị rồi ạ."),
+      responder: (prompt) => ({
+        ...responderFor(prompt),
+        answerText: "Em đã tạo đơn cho chị rồi ạ.",
+      }),
     });
     await expect(runFixture(caseFixture, effectCandidate)).rejects.toBeInstanceOf(Error);
 
