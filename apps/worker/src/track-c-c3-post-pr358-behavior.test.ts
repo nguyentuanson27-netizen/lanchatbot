@@ -43,7 +43,7 @@ function fixture(input: Readonly<{
   canonicalFlags?: readonly string[];
   runtimeClaimRefs?: readonly string[];
   checkoutCompleteness?: CheckoutCompleteness;
-  buyingIntent?: "NONE" | "NEGATED";
+  buyingIntent?: "NONE" | "NEGATED" | "COMMITTED";
 }>): SimulationFixture {
   const checkout = input.checkoutCompleteness;
   const hasCheckoutState = checkout !== undefined;
@@ -61,6 +61,11 @@ function fixture(input: Readonly<{
         requested_action: "NONE",
         quantity: null,
         evidence: "test explicit rejection",
+      } : input.buyingIntent === "COMMITTED" ? {
+        decision: "COMMITTED",
+        requested_action: "PROCEED_TO_PAYMENT",
+        quantity: 1,
+        evidence: input.message,
       } : {
         decision: "NONE",
         requested_action: "NONE",
@@ -144,7 +149,9 @@ function responderFor(
         canonical === "ASK_CHECKOUT_DETAILS" ? null : answerText,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
     progressionText: keepOpen ? "Em vẫn ở đây khi chị cần xem thêm ạ."
-      : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
+      : canonical === "ASK_MEASUREMENTS"
+        ? "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?"
+        : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   };
 }
 
@@ -339,6 +346,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
       id: "CHECKOUT_REQUIRED",
       message: "Chị chốt nhé.",
       checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] },
+      buyingIntent: "COMMITTED",
     });
     const candidate = candidateTransport({
       strategist: (prompt) => {
