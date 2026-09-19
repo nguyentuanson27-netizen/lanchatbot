@@ -1,11 +1,9 @@
 import { createHash } from "node:crypto";
 import {
-  BusinessFactEnvelopeV1Schema,
   canonicalJsonV1,
   type ContextV2,
   type ContextV2CandidateOutputV2,
 } from "@lana/contracts";
-import { guardAgentProposal } from "@lana/business-tools";
 import {
   redactAnalyticsMessage,
   type ShadowContextMessage,
@@ -27,11 +25,9 @@ import {
   selectTrackCConversationLane,
   TRACK_C_PROTECTED_PROPOSITIONS,
   trackCEvidenceHasSafeFactualEgress,
-  trackCEvidenceUsesModelAuthoredWording,
   type TrackCCanonicalAction,
   type TrackCConversationLane,
   type TrackCOrdinaryDecisionInput,
-  type TrackCProtectedProposition,
   type TrackCResponderTask,
   type TrackCSelectableEvidence,
   type TrackCStrategistDecision,
@@ -65,9 +61,8 @@ const STRATEGIST_INSTRUCTION = [
 
 const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
-  "The supplied responderTask.evidence contains only evidence whose factual wording may be model-authored and production-guarded. Code realizes other selected factual evidence deterministically.",
-  "Use factualTexts in the supplied evidence order. Each item must stay within its matching evidence capability.",
-  "factualTexts is the only model-authored place for supplied factual evidence. answerText may only acknowledge and progressionText may only ask when the response schema permits; neither may carry factual details.",
+  "All selected factual evidence is realized by code from customer-ready deterministic projections. Do not author factual wording.",
+  "Emit factualTexts as an empty array. answerText may only acknowledge and progressionText may only ask when the response schema permits; neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema; put factual explanation only in factualTexts.",
   "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
   "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
@@ -396,9 +391,7 @@ function modelAuthoredEvidence(
   if (task.evidence.some((evidence) => !trackCEvidenceHasSafeFactualEgress(evidence))) {
     throw new Error("TRACK_C_RESPONDER_TASK_EVIDENCE_INVALID");
   }
-  return Object.freeze(
-    task.evidence.filter(trackCEvidenceUsesModelAuthoredWording),
-  );
+  return Object.freeze([]);
 }
 
 function responderTaskPrompt(task: TrackCResponderTask) {
@@ -536,77 +529,6 @@ function assertNoEffectText(value: string | null): void {
   }
 }
 
-function guardSimulationPriceText(
-  context: ContextV2,
-  evidence: TrackCSelectableEvidence,
-  text: string,
-  evaluationAt: Date,
-): void {
-  if (evidence.provenance.authority !== "SIMULATION" ||
-      evidence.capability !== "PRICE") {
-    return;
-  }
-  const productId = evidence.subject?.productId;
-  const amountVnd = evidence.value.chatVnd;
-  if (productId === undefined || typeof amountVnd !== "number" ||
-      !Number.isFinite(amountVnd)) {
-    throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
-  }
-  const facts = BusinessFactEnvelopeV1Schema.parse({
-    schemaVersion: 1,
-    status: "OK",
-    source: "POS_SNAPSHOT",
-    observedAt: evaluationAt.toISOString(),
-    expiresAt: new Date(evaluationAt.getTime() + 60_000).toISOString(),
-    productId,
-    facts: {
-      schemaVersion: 1,
-      productId,
-      parentProductId: productId,
-      offerType: "DIRECT",
-      listPriceVnd: null,
-      salePriceVnd: amountVnd,
-      sizes: [],
-      stockStatus: "UNKNOWN",
-      stockQuantity: null,
-      deliveryEta: null,
-      fulfillmentPolicy: null,
-      imageUrls: [],
-    },
-    reasonCode: null,
-  });
-  const guard = guardAgentProposal({
-    proposal: {
-      schemaVersion: 1,
-      intent: "TRACK_C_V5_PRODUCTION_EVALUATION",
-      conversationStage: context.phase.phase,
-      productId,
-      action: "REPLY",
-      reply: text,
-      attachments: [],
-      handoffReason: null,
-      protectedClaimIds: [],
-    },
-    facts,
-    verifiedProductIds: new Set(context.productBinding.productIds),
-    buyingSignal: context.buyingIntent.decision === "COMMITTED",
-    sizeClaimContext: {
-      activeProductId: productId,
-      activeVariantId: null,
-      customerProfileId: null,
-      customerProfileRevision: null,
-      claims: [],
-    },
-    sizeClaimTextMode: "STRUCTURED_REJECT_ONLY",
-    now: evaluationAt,
-  });
-  if (guard.blockedReasonCodes.length > 0) {
-    throw new Error(
-      `TRACK_C_V5_PRODUCTION_GUARD_FAILED:${guard.blockedReasonCodes.join(",")}`,
-    );
-  }
-}
-
 function expectedStrategy(task: TrackCResponderTask): ContextV2CandidateOutputV2["strategy"] {
   if (task.canonicalRequest?.type === "HOLD_POSITION") return "HOLD_POSITION";
   if (task.canonicalRequest !== null || task.continuation?.type === "ASK" ||
@@ -693,20 +615,12 @@ function compileResponderDraft(input: Readonly<{
   assertNoUnboundFactText(draft.progressionText, task);
   assertNoEffectText(draft.answerText);
   assertNoEffectText(draft.progressionText);
-  // Selectable evidence already has a safe factual egress by construction.
-  // This path handles only the subset whose wording is authorized for the
-  // existing model-authored guard; deterministic projections bypass it.
+  // Selectable evidence already has a customer-ready deterministic factual
+  // projection. The Responder never owns factual wording.
   const authoredEvidence = modelAuthoredEvidence(task);
-  draft.factualTexts.forEach((factualText, index) => {
-    const evidence = authoredEvidence[index]!;
-    assertNoEffectText(factualText);
-    guardSimulationPriceText(
-      input.context,
-      evidence,
-      factualText,
-      input.evaluationAt,
-    );
-  });
+  if (authoredEvidence.length !== 0 || draft.factualTexts.length !== 0) {
+    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  }
   assertProgression(task, draft);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED") {
@@ -714,16 +628,19 @@ function compileResponderDraft(input: Readonly<{
   } else if (draft.answerText !== null) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
   }
-  let authoredIndex = 0;
   task.evidence.forEach((evidence) => {
     const factualText = evidence.deterministicText === undefined
-      ? draft.factualTexts[authoredIndex++]!
+      ? null
       : text(
           evidence.deterministicText,
           "TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE",
         );
     if (factualText === null) {
-      throw new Error("TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE");
+      throw new Error(
+        evidence.deterministicText === undefined
+          ? "TRACK_C_RESPONDER_TASK_EVIDENCE_INVALID"
+          : "TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE",
+      );
     }
     assertNoEffectText(factualText);
     segments.push({
