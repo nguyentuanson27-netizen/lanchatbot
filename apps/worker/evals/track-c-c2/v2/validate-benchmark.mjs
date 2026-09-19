@@ -73,6 +73,21 @@ const productNames = new Map(
     .map((fact) => [fact.displayName.toLocaleLowerCase('vi-VN'), fact.productId]),
 );
 
+for (const [ref, fact] of Object.entries(sim)) {
+  if (fact.kind !== 'PRODUCT_COMPARISON') continue;
+  ok(
+    typeof fact.customerText === 'string' &&
+      fact.customerText === fact.customerText.trim() &&
+      fact.customerText.length > 0 &&
+      fact.customerText.length <= 500,
+    `${ref}: comparison requires bounded customerText`,
+  );
+  ok(
+    !fact.products.some((productId) => fact.customerText.includes(productId)),
+    `${ref}: comparison customerText leaks internal product id`,
+  );
+}
+
 function validateBinding(caseId, binding) {
   const ids = binding.product_ids;
   ok(Array.isArray(ids), `${caseId}: product ids`);
