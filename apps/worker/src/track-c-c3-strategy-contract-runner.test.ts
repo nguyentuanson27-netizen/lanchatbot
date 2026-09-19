@@ -701,6 +701,52 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
   });
 
+  it("rejects effect language in deterministic factual text", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge and use the selected product evidence.",
+          proposition: "PRODUCT_PRESENTATION",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu ý chị ạ.",
+          factualTexts: [],
+          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị đang xem mẫu này.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [{
+        kind: "PRODUCT_PROFILE",
+        productId: "SQ9012",
+        displayName: "Tường Vi",
+        offerType: "set áo & quần",
+        material: "shop đã tạo đơn",
+        design: [],
+        sizes: ["S"],
+        colors: ["đen"],
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  });
+
   it("rejects effect language in a provenance-bound factual text", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
