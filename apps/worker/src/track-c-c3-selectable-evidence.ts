@@ -52,7 +52,6 @@ function boundedSimulationEvidence(
   fact: unknown,
   ref: string,
   boundProductIds: readonly string[],
-  displayNamesByProductId: ReadonlyMap<string, string>,
 ): TrackCSelectableEvidence | null {
   const value = plainObject(fact, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
   const kind = value.kind;
@@ -112,21 +111,9 @@ function boundedSimulationEvidence(
     if (products.some((id) => typeof descriptions[id] !== "string")) {
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
-    const canRender = products.every((id) =>
-      displayNamesByProductId.has(id)
-    );
-    const deterministicText = canRender
-      ? "So sánh: " + products
-          .map((id) =>
-            `${displayNamesByProductId.get(id)!}: ${descriptions[id] as string}`
-          )
-          .join("; ") + "."
-      : undefined;
     return make(
       "PRODUCT_COMPARISON",
       { products, descriptions },
-      undefined,
-      deterministicText,
     );
   }
   if (kind === "CARE_GUIDANCE") {
@@ -286,22 +273,11 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       }),
     }));
   }
-  const displayNamesByProductId = new Map<string, string>();
-  for (const fact of input.simulationFacts) {
-    if (fact === null || typeof fact !== "object" || Array.isArray(fact)) continue;
-    const record = fact as Readonly<Record<string, unknown>>;
-    if (record.kind === "PRODUCT_PROFILE" &&
-        typeof record.productId === "string" &&
-        typeof record.displayName === "string") {
-      displayNamesByProductId.set(record.productId, record.displayName);
-    }
-  }
   input.simulationFacts.forEach((fact, index) => {
     const projected = boundedSimulationEvidence(
       fact,
       `SIMULATION_${String(index + 1).padStart(3, "0")}`,
       input.context.productBinding.productIds,
-      displayNamesByProductId,
     );
     if (projected !== null) evidence.push(projected);
   });
