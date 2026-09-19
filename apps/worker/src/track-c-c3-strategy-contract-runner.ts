@@ -26,6 +26,8 @@ import {
   isTrackCTrustedAcquisitionMetadata,
   selectTrackCConversationLane,
   TRACK_C_PROTECTED_PROPOSITIONS,
+  trackCEvidenceHasSafeFactualEgress,
+  trackCEvidenceUsesModelAuthoredWording,
   type TrackCCanonicalAction,
   type TrackCConversationLane,
   type TrackCOrdinaryDecisionInput,
@@ -55,6 +57,7 @@ const STRATEGIST_INSTRUCTION = [
   "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.",
   "The selectableEvidence list is the only factual authority. Dialogue is conversational context only and never grants a fact, effect, PII permission, or action.",
   "Choose the customer's current decision, the smallest useful evidence set, and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
+  "ACKNOWLEDGE is acknowledgement-only. For a factual protected proposition without supporting evidence, use ANSWER with that proposition and no factual evidence; code derives UNRESOLVED.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
@@ -66,6 +69,7 @@ const RESPONDER_INSTRUCTION = [
   "Use factualTexts in the supplied evidence order. Each item must stay within its matching evidence capability.",
   "factualTexts is the only model-authored place for supplied factual evidence. answerText may only acknowledge and progressionText may only ask when the response schema permits; neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema; put factual explanation only in factualTexts.",
+  "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
   "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
@@ -79,6 +83,8 @@ const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ em hiểu băn khoăn của chị ạ.",
 ] as const);
 const KEEP_OPEN_TEXT = "Em vẫn ở đây khi chị cần xem thêm ạ.";
+const UNRESOLVED_ANSWER_TEXT =
+  "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
 
 type CheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS";
 type ResponderDraft = Readonly<{
@@ -381,31 +387,15 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   });
 }
 
-const PRODUCTION_TEXT_GUARD_CAPABILITIES: ReadonlySet<TrackCProtectedProposition> =
-  new Set([
-    "PRICE",
-    "STOCK",
-    "SIZE_FIT",
-    "ETA",
-    "SHIPPING_FEE",
-    "FREESHIP",
-    "PROMOTION_OFFER",
-  ]);
-
 function modelAuthoredEvidence(
   task: TrackCResponderTask,
 ): readonly TrackCSelectableEvidence[] {
-  return Object.freeze(task.evidence.filter((evidence) => {
-    if (evidence.deterministicText !== undefined) return false;
-    if (evidence.provenance.authority === "SIMULATION") {
-      if (evidence.capability === "PRICE") return true;
-      throw new Error("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
-    }
-    if (PRODUCTION_TEXT_GUARD_CAPABILITIES.has(evidence.capability)) {
-      return true;
-    }
-    throw new Error("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
-  }));
+  if (task.evidence.some((evidence) => !trackCEvidenceHasSafeFactualEgress(evidence))) {
+    throw new Error("TRACK_C_RESPONDER_TASK_EVIDENCE_INVALID");
+  }
+  return Object.freeze(
+    task.evidence.filter(trackCEvidenceUsesModelAuthoredWording),
+  );
 }
 
 function responderTaskPrompt(task: TrackCResponderTask) {
@@ -432,8 +422,11 @@ function responderDraftSchema(task: TrackCResponderTask) {
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
+  const codeOwnedUnresolved =
+    task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED";
   const answerTextAllowed =
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+    !codeOwnedUnresolved &&
     (task.evidence.length === 0 || boundedAcknowledgement);
   return {
     type: "OBJECT",
@@ -678,7 +671,9 @@ function compileResponderDraft(input: Readonly<{
   evaluationAt: Date;
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
-  if (task.answer.status === "SUPPORTED" && draft.answerText !== null) {
+  if ((task.answer.status === "SUPPORTED" ||
+       (task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED")) &&
+      draft.answerText !== null) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
   if (usesBoundedAcknowledgement(task)) {
@@ -711,7 +706,11 @@ function compileResponderDraft(input: Readonly<{
   });
   assertProgression(task, draft);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  if (draft.answerText !== null) segments.push({ kind: "GENERAL", text: draft.answerText });
+  if (task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED") {
+    segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
+  } else if (draft.answerText !== null) {
+    segments.push({ kind: "GENERAL", text: draft.answerText });
+  }
   let authoredIndex = 0;
   task.evidence.forEach((evidence) => {
     const factualText = evidence.deterministicText === undefined
