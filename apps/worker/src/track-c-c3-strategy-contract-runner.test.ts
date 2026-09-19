@@ -87,7 +87,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
       deterministicText:
-        "Mẫu Tường Vi; chất liệu tơ xước mềm, nhẹ; màu kem, đen.",
+        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ.",
       provenance: { authority: "SIMULATION" },
     });
     expect(JSON.stringify(evidence)).not.toContain("effect");
@@ -325,7 +325,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu Tường Vi; chất liệu tơ xước mềm, nhẹ; màu kem, đen.",
+      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ.",
       claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
         ? result.output.segments[1].claimContentHash
         : "",
