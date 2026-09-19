@@ -352,7 +352,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .mockResolvedValueOnce({
         payload: payload({
           answerText: "Dạ em hiểu băn khoăn của chị ạ.",
-          factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
+          factualTexts: [],
           progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
@@ -390,7 +390,7 @@ describe("Track C C3 strategy-contract runner", () => {
           replyAct: "ACKNOWLEDGE",
           goal: "Acknowledge the preference and add the selected product fact.",
           proposition: "PRODUCT_PRESENTATION",
-          evidenceRefs: ["SIMULATION_001"],
+          evidenceRefs: ["CLAIM_001", "SIMULATION_001"],
           continuation: { type: "KEEP_OPEN" },
           canonicalAction: "NONE",
         }),
@@ -399,7 +399,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .mockResolvedValueOnce({
         payload: payload({
           answerText: "Dạ em hiểu ý chị ạ.",
-          factualTexts: [],
+          factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
           progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
