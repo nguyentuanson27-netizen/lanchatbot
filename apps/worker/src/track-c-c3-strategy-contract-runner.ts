@@ -423,7 +423,8 @@ function responderDraftSchema(task: TrackCResponderTask) {
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const answerTextAllowed =
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-    (task.answer.kind === "ACKNOWLEDGE" || task.evidence.length === 0);
+    (task.evidence.length === 0 ||
+      (task.answer.kind === "ACKNOWLEDGE" && factualEvidenceCount === 0));
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -673,6 +674,7 @@ function compileResponderDraft(input: Readonly<{
   }
   if (task.answer.kind === "ACKNOWLEDGE" &&
       task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+      modelAuthoredEvidence(task).length === 0 &&
       draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
