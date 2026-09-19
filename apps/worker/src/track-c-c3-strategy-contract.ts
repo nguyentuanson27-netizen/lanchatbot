@@ -268,6 +268,9 @@ function selectedEvidence(
     throw new Error("TRACK_C_STRATEGIST_EVIDENCE_INVALID");
   }
   const values = selected as TrackCSelectableEvidence[];
+  if (values.some((entry) => !trackCEvidenceHasSafeFactualEgress(entry))) {
+    throw new Error("TRACK_C_STRATEGIST_EVIDENCE_INVALID");
+  }
   if (new Set(values.map(({ provenance }) => provenance.contentHash)).size !==
       values.length) {
     throw new Error("TRACK_C_EVIDENCE_PROVENANCE_DUPLICATE");
@@ -317,7 +320,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   const status = decision.replyAct !== "ANSWER" || decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
-  if (status === "SUPPORTED" &&
+  if (supportsProposition &&
       decision.canonicalAction === "NONE" &&
       decision.continuation?.type === "ASK") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
