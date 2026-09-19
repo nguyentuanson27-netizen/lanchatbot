@@ -110,7 +110,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(policy).not.toHaveProperty("deterministicText");
   });
 
-  it("deterministic-renders comparison only with customer-facing product names", () => {
+  it("does not deterministic-render comparison without a customer-facing projection", () => {
     const captureValue = materializeTrackCV5CaseCapture({
       lane: "BEHAVIOR_SIMULATION",
       fixture: {
@@ -153,12 +153,8 @@ describe("Track C C3 strategy-contract runner", () => {
       ({ capability }) => capability === "PRODUCT_COMPARISON",
     );
 
-    expect(comparison?.deterministicText).toBe(
-      "So sánh: Tường Vi: minimal, easy-going silhouette; " +
-      "Nguyệt Hà: more structured and dressy.",
-    );
-    expect(comparison?.deterministicText).not.toContain("SQ9012");
-    expect(comparison?.deterministicText).not.toContain("SV9031");
+    expect(comparison).toBeDefined();
+    expect(comparison).not.toHaveProperty("deterministicText");
   });
 
   it("fails closed when selected factual capability has no safe realization path", async () => {
@@ -440,6 +436,43 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     expect(result.reply).toContain("Mẫu Tường Vi");
     expect(result.reply).toContain("Em vẫn ở đây khi chị cần xem thêm ạ.");
+  });
+
+  it("rejects unsupported selling wording in deterministic ACK answerText", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the preference and add the selected product fact.",
+          proposition: "PRODUCT_PRESENTATION",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ mẫu này cao cấp lắm chị ạ.",
+          factualTexts: [],
+          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị thích đồ nhẹ em ạ.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   });
 
   it("rejects KEEP_OPEN wording that turns into a new decision variable", async () => {
