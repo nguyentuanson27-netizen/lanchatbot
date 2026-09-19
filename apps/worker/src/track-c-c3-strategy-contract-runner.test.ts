@@ -168,7 +168,7 @@ describe("Track C C3 strategy-contract runner", () => {
           replyAct: "ANSWER",
           goal: "Answer the payment-policy question.",
           proposition: "POLICY",
-          evidenceRefs: ["SIMULATION_001"],
+          evidenceRefs: ["CLAIM_001", "SIMULATION_001"],
           continuation: { type: "KEEP_OPEN" },
           canonicalAction: "NONE",
         }),
@@ -352,7 +352,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .mockResolvedValueOnce({
         payload: payload({
           answerText: "Dạ em hiểu băn khoăn của chị ạ.",
-          factualTexts: [],
+          factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
           progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
@@ -432,8 +432,8 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
-    expect(responderPrompt.responderTask.evidence).toEqual([]);
+      .toMatchObject({ minItems: 1, maxItems: 1 });
+    expect(responderPrompt.responderTask.evidence).toHaveLength(1);
     expect(result.output.segments[0]).toEqual({
       kind: "GENERAL",
       text: "Dạ em hiểu ý chị ạ.",
