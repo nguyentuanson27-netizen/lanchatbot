@@ -413,6 +413,19 @@ describe("Track C C3 strategy-contract runner", () => {
         ...value,
         segments: [{
           ...value.segments[0],
+          text: "Dạ mẫu này hiện hết size M ạ.",
+        }],
+      },
+      "PRODUCTION_CONTRACT",
+      new Date(recipe.evaluation_at),
+    )).toThrow();
+
+    expect(() => validateResponderOutput(
+      context,
+      {
+        ...value,
+        segments: [{
+          ...value.segments[0],
           text: "Dạ mẫu này hiện hết size S ạ, theo số đo chị hợp size M.",
         }],
       },
