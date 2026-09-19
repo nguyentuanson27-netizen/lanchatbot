@@ -161,6 +161,36 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(comparison?.deterministicText).not.toContain("SV9031");
   });
 
+  it("fails closed when selected factual capability has no safe realization path", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the payment-policy question.",
+          proposition: "POLICY",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Shop nhận thanh toán thế nào em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
     const request = buildTrackCStrategistContractRequest({
       modelResource: MODEL_RESOURCE,
