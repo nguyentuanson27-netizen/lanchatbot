@@ -70,30 +70,13 @@ export type TrackCSelectableEvidence = Readonly<{
   }>;
 }>;
 
-const TRACK_C_RUNTIME_MODEL_GUARDED_CAPABILITIES =
-  new Set<TrackCProtectedProposition>([
-    "PRICE",
-    "STOCK",
-    "SIZE_FIT",
-    "ETA",
-  ]);
-
 export function trackCEvidenceHasSafeFactualEgress(
   evidence: TrackCSelectableEvidence,
 ): boolean {
-  if (evidence.deterministicText !== undefined) return true;
-  if (evidence.provenance.authority === "RUNTIME") {
-    return TRACK_C_RUNTIME_MODEL_GUARDED_CAPABILITIES.has(evidence.capability);
-  }
-  return evidence.provenance.authority === "SIMULATION" &&
-    evidence.capability === "PRICE";
-}
-
-export function trackCEvidenceUsesModelAuthoredWording(
-  evidence: TrackCSelectableEvidence,
-): boolean {
-  return evidence.deterministicText === undefined &&
-    trackCEvidenceHasSafeFactualEgress(evidence);
+  // Existing authoritative guards validate protected facts, not arbitrary
+  // surrounding sales/value prose. Selectable evidence therefore needs a
+  // customer-ready code-owned projection before the Strategist can choose it.
+  return evidence.deterministicText !== undefined;
 }
 
 export type TrackCStrategistDecision = Readonly<{
@@ -319,6 +302,11 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   const status = decision.replyAct !== "ANSWER" || decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
+  if (status === "SUPPORTED" &&
+      decision.canonicalAction === "NONE" &&
+      decision.continuation?.type === "ASK") {
+    throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  }
   return Object.freeze({
     answer: Object.freeze({
       kind: decision.replyAct,
