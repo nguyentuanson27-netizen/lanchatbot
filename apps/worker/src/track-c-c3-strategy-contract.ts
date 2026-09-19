@@ -70,6 +70,21 @@ export type TrackCSelectableEvidence = Readonly<{
   }>;
 }>;
 
+const TRACK_C_CUSTOMER_SIZE_VALUES = new Set([
+  "XXXS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL",
+  ...Array.from({ length: 17 }, (_, index) => String(index + 34)),
+]);
+
+export function trackCCustomerFacingSizeFromVariantId(
+  variantId: string | null,
+): string | null {
+  if (variantId === null) return null;
+  const match = /^SIZE_([A-Z0-9]+)$/iu.exec(variantId);
+  if (match?.[1] === undefined) return null;
+  const size = match[1].toLocaleUpperCase("vi-VN");
+  return TRACK_C_CUSTOMER_SIZE_VALUES.has(size) ? size : null;
+}
+
 export function trackCEvidenceHasSafeFactualEgress(
   evidence: TrackCSelectableEvidence,
 ): boolean {
