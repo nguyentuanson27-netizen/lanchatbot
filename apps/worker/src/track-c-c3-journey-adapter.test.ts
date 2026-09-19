@@ -114,8 +114,9 @@ function responderPayload(
   const needsProgression = canonical === "ASK_PRODUCT" ||
     canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return modelPayload({
-    answerText: task.evidence.length > 0 ||
-        canonical === "ASK_CHECKOUT_DETAILS" ? null : reply,
+    answerText: task.answer.status === "UNRESOLVED" ||
+        task.evidence.length > 0 || canonical === "ASK_CHECKOUT_DETAILS"
+      ? null : reply,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
     progressionText: hold || keepOpen ? null
       : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
