@@ -70,6 +70,32 @@ export type TrackCSelectableEvidence = Readonly<{
   }>;
 }>;
 
+const TRACK_C_RUNTIME_MODEL_GUARDED_CAPABILITIES =
+  new Set<TrackCProtectedProposition>([
+    "PRICE",
+    "STOCK",
+    "SIZE_FIT",
+    "ETA",
+  ]);
+
+export function trackCEvidenceHasSafeFactualEgress(
+  evidence: TrackCSelectableEvidence,
+): boolean {
+  if (evidence.deterministicText !== undefined) return true;
+  if (evidence.provenance.authority === "RUNTIME") {
+    return TRACK_C_RUNTIME_MODEL_GUARDED_CAPABILITIES.has(evidence.capability);
+  }
+  return evidence.provenance.authority === "SIMULATION" &&
+    evidence.capability === "PRICE";
+}
+
+export function trackCEvidenceUsesModelAuthoredWording(
+  evidence: TrackCSelectableEvidence,
+): boolean {
+  return evidence.deterministicText === undefined &&
+    trackCEvidenceHasSafeFactualEgress(evidence);
+}
+
 export type TrackCStrategistDecision = Readonly<{
   replyAct: "ANSWER" | "ACKNOWLEDGE" | "CLARIFY";
   goal: string;
@@ -285,6 +311,11 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   }
   const supportsProposition = decision.proposition !== "NONE" &&
     evidence.some(({ capability }) => capability === decision.proposition);
+  if (decision.replyAct === "ACKNOWLEDGE" &&
+      decision.proposition !== "NONE" &&
+      !supportsProposition) {
+    throw new Error("TRACK_C_STRATEGIST_REPLY_ACT_INVALID");
+  }
   const status = decision.replyAct !== "ANSWER" || decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
@@ -335,8 +366,8 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   if (price === null) {
     return Object.freeze({
       answer: Object.freeze({
-        kind: "ACKNOWLEDGE", status: "NOT_APPLICABLE", proposition: "PRICE",
-        goal: "Thông báo giá chưa có xác minh.",
+        kind: "ANSWER", status: "UNRESOLVED", proposition: "PRICE",
+        goal: "Trả lời câu hỏi giá mà không suy đoán khi chưa có authority.",
       }),
       evidence: Object.freeze([]),
       requiredEvidenceRefs: Object.freeze([]),
