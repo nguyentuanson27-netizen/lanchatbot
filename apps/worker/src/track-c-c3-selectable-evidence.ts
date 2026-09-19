@@ -54,7 +54,7 @@ function formatVnd(amount: number): string {
   return `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/gu, ".")}đ`;
 }
 
-function runtimeClaimDeterministicText(
+export function trackCRuntimeClaimDeterministicText(
   claim: ContextV2["verifiedClaims"][number],
 ): string | null {
   if (claim.scope.kind !== "PRODUCT") return null;
@@ -263,7 +263,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
       const subject = productSubject(claim.scope);
-      const deterministicText = runtimeClaimDeterministicText(claim);
+      const deterministicText = trackCRuntimeClaimDeterministicText(claim);
       evidence.push(Object.freeze({
         ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,
         capability,
