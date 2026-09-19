@@ -144,6 +144,24 @@ describe("Track C C3 clean strategy contract", () => {
     expect(task.evidence).toEqual([stockEvidence]);
   });
 
+  it("keeps supported factual answers from creating a new decision variable", () => {
+    expect(() => compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "ANSWER",
+        goal: "Trả lời giá đã xác minh.",
+        proposition: "PRICE",
+        evidenceRefs: [priceEvidence.ref],
+        continuation: { type: "ASK", input: "LOCALITY" },
+        canonicalAction: "NONE",
+      },
+      evidence: [priceEvidence],
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: false,
+    })).toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  });
+
   it("rejects selected evidence outside the bound product referent", () => {
     const otherProduct = {
       ...stockEvidence,
