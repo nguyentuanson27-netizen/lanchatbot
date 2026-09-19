@@ -713,6 +713,7 @@ function compileResponderDraft(input: Readonly<{
     if (factualText === null) {
       throw new Error("TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE");
     }
+    assertNoEffectText(factualText);
     segments.push({
       kind: "VERIFIED_CLAIM",
       text: factualText,
