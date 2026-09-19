@@ -86,9 +86,79 @@ describe("Track C C3 strategy-contract runner", () => {
     ]);
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
+      deterministicText:
+        "Mẫu Tường Vi; chất liệu tơ xước mềm, nhẹ; màu kem, đen.",
       provenance: { authority: "SIMULATION" },
     });
     expect(JSON.stringify(evidence)).not.toContain("effect");
+  });
+
+  it("does not deterministic-render generic structured simulation data", () => {
+    const captureValue = capture();
+    if (captureValue.status !== "BUILT" || captureValue.context === null) {
+      throw new Error("TEST_CAPTURE_REQUIRED");
+    }
+
+    const evidence = buildTrackCSelectableEvidence({
+      context: captureValue.context,
+      simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT],
+      executionLane: "BEHAVIOR_SIMULATION",
+    });
+    const policy = evidence.find(({ capability }) => capability === "POLICY");
+
+    expect(policy).toBeDefined();
+    expect(policy).not.toHaveProperty("deterministicText");
+  });
+
+  it("deterministic-renders comparison only with customer-facing product names", () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_COMPARISON_RENDER_TEST",
+        latest_customer_message: "Hai mẫu này khác nhau thế nào?",
+        context: {
+          product_binding: {
+            status: "RESOLVED",
+            product_ids: ["SQ9012", "SV9031"],
+          },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "CONSIDERING",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: "customer compares two products",
+          },
+          source_stage: null,
+          runtime_claim_refs: [],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    if (captureValue.status !== "BUILT" || captureValue.context === null) {
+      throw new Error("TEST_CAPTURE_REQUIRED");
+    }
+
+    const evidence = buildTrackCSelectableEvidence({
+      context: captureValue.context,
+      simulationFacts: [
+        facts.simulation_fact_catalog.SF_PRODUCT_A,
+        facts.simulation_fact_catalog.SF_PRODUCT_B,
+        facts.simulation_fact_catalog.SF_OCCASION,
+      ],
+      executionLane: "BEHAVIOR_SIMULATION",
+    });
+    const comparison = evidence.find(
+      ({ capability }) => capability === "PRODUCT_COMPARISON",
+    );
+
+    expect(comparison?.deterministicText).toBe(
+      "So sánh: Tường Vi: minimal, easy-going silhouette; " +
+      "Nguyệt Hà: more structured and dressy.",
+    );
+    expect(comparison?.deterministicText).not.toContain("SQ9012");
+    expect(comparison?.deterministicText).not.toContain("SV9031");
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
@@ -229,7 +299,7 @@ describe("Track C C3 strategy-contract runner", () => {
       .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu Tường Vi; dạng set áo & quần; chất liệu tơ xước mềm, nhẹ; màu kem, đen; thiết kế phom suông, quần cạp chun.",
+      text: "Mẫu Tường Vi; chất liệu tơ xước mềm, nhẹ; màu kem, đen.",
       claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
         ? result.output.segments[1].claimContentHash
         : "",
@@ -281,6 +351,65 @@ describe("Track C C3 strategy-contract runner", () => {
       { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
       { kind: "GENERAL", text: "Em vẫn ở đây khi chị cần xem thêm ạ." },
     ]);
+  });
+
+  it("keeps non-factual acknowledgement when selected evidence is deterministic", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the preference and add the selected product fact.",
+          proposition: "PRODUCT_PRESENTATION",
+          evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu ý chị ạ.",
+          factualTexts: [],
+          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị thích đồ nhẹ em ạ.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      transport: { send },
+    });
+
+    const responderRequest = JSON.parse(send.mock.calls[1]![0].body) as {
+      generationConfig: {
+        responseSchema: { properties: { answerText: unknown; factualTexts: unknown } };
+      };
+      contents: [{ parts: [{ text: string }] }];
+    };
+    const responderPrompt = JSON.parse(
+      responderRequest.contents[0].parts[0].text,
+    ) as { responderTask: { evidence: unknown[] } };
+
+    expect(responderRequest.generationConfig.responseSchema.properties.answerText)
+      .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
+    expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
+      .toMatchObject({ minItems: 0, maxItems: 0 });
+    expect(responderPrompt.responderTask.evidence).toEqual([]);
+    expect(result.output.segments[0]).toEqual({
+      kind: "GENERAL",
+      text: "Dạ em hiểu ý chị ạ.",
+    });
+    expect(result.reply).toContain("Mẫu Tường Vi");
+    expect(result.reply).toContain("Em vẫn ở đây khi chị cần xem thêm ạ.");
   });
 
   it("rejects KEEP_OPEN wording that turns into a new decision variable", async () => {
