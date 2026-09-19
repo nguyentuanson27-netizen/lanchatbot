@@ -65,8 +65,8 @@ const RESPONDER_INSTRUCTION = [
   "The supplied responderTask.evidence contains only evidence whose factual wording may be model-authored and production-guarded. Code realizes other selected factual evidence deterministically.",
   "Use factualTexts in the supplied evidence order. Each item must stay within its matching evidence capability.",
   "factualTexts is the only model-authored place for supplied factual evidence. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer factual details.",
-  "When the response schema allows answerText for ACKNOWLEDGE, put one short non-factual acknowledgement there. Otherwise, when supplied evidence is non-empty, emit answerText null.",
-  "For a KEEP_OPEN continuation, emit one short natural progressionText that keeps the conversation open without a question, request, recommendation, or new decision variable.",
+  "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema; put factual explanation only in factualTexts.",
+  "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
@@ -78,6 +78,7 @@ const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ em hiểu ý chị ạ.",
   "Dạ em hiểu băn khoăn của chị ạ.",
 ] as const);
+const KEEP_OPEN_TEXT = "Em vẫn ở đây khi chị cần xem thêm ạ.";
 
 type CheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS";
 type ResponderDraft = Readonly<{
@@ -416,21 +417,19 @@ function responderTaskPrompt(task: TrackCResponderTask) {
   });
 }
 
-function responderNeedsProgression(task: TrackCResponderTask): boolean {
+function responderNeedsModelProgression(task: TrackCResponderTask): boolean {
   return task.canonicalRequest?.type === "ASK_PRODUCT" ||
     task.canonicalRequest?.type === "ASK_MEASUREMENTS" ||
-    task.continuation?.type === "ASK" ||
-    task.continuation?.type === "KEEP_OPEN";
+    task.continuation?.type === "ASK";
 }
 
 function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
   return task.answer.kind === "ACKNOWLEDGE" &&
-    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-    task.evidence.some(({ deterministicText }) => deterministicText !== undefined);
+    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
 
 function responderDraftSchema(task: TrackCResponderTask) {
-  const needsProgression = responderNeedsProgression(task);
+  const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
   const answerTextAllowed =
@@ -616,7 +615,6 @@ function expectedStrategy(task: TrackCResponderTask): ContextV2CandidateOutputV2
   if (task.canonicalRequest?.type === "HOLD_POSITION") return "HOLD_POSITION";
   if (task.canonicalRequest !== null || task.continuation?.type === "ASK" ||
       task.answer.kind === "CLARIFY") return "ASK_CLARIFICATION";
-  if (task.answer.kind === "ACKNOWLEDGE") return "HOLD_POSITION";
   return "ANSWER_VERIFIED_FACTS";
 }
 
@@ -642,9 +640,7 @@ function deterministicCheckoutText(fields: readonly CheckoutField[]): string {
 
 function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): void {
   if (task.continuation?.type === "KEEP_OPEN") {
-    if (draft.progressionText === null || draft.progressionText.includes("?") ||
-        /(?:màu|size|kích\s*thước|chiều\s*cao|cân\s*nặng|số\s*lượng|ngân\s*sách|phong\s*cách|địa\s*chỉ|số\s*điện\s*thoại)/iu
-          .test(draft.progressionText.normalize("NFC"))) {
+    if (draft.progressionText !== null) {
       throw new Error("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
     }
     return;
@@ -668,7 +664,7 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
       throw new Error("TRACK_C_RESPONDER_MEASUREMENTS_QUESTION_INVALID");
     }
   }
-  const needsProgression = responderNeedsProgression(task);
+  const needsProgression = responderNeedsModelProgression(task);
   if (needsProgression !== (draft.progressionText !== null)) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
@@ -752,6 +748,8 @@ function compileResponderDraft(input: Readonly<{
       target: "MEASUREMENTS",
       text: draft.progressionText!,
     });
+  } else if (task.continuation?.type === "KEEP_OPEN") {
+    segments.push({ kind: "GENERAL", text: KEEP_OPEN_TEXT });
   } else if (draft.progressionText !== null) {
     segments.push({ kind: "GENERAL", text: draft.progressionText });
   }
