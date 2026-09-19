@@ -93,7 +93,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(JSON.stringify(evidence)).not.toContain("effect");
   });
 
-  it("does not deterministic-render generic structured simulation data", () => {
+  it("does not expose structured simulation evidence without a safe factual egress", () => {
     const captureValue = capture();
     if (captureValue.status !== "BUILT" || captureValue.context === null) {
       throw new Error("TEST_CAPTURE_REQUIRED");
@@ -104,13 +104,10 @@ describe("Track C C3 strategy-contract runner", () => {
       simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT],
       executionLane: "BEHAVIOR_SIMULATION",
     });
-    const policy = evidence.find(({ capability }) => capability === "POLICY");
-
-    expect(policy).toBeDefined();
-    expect(policy).not.toHaveProperty("deterministicText");
+    expect(evidence.some(({ capability }) => capability === "POLICY")).toBe(false);
   });
 
-  it("does not deterministic-render comparison without a customer-facing projection", () => {
+  it("does not expose comparison evidence without a customer-facing projection", () => {
     const captureValue = materializeTrackCV5CaseCapture({
       lane: "BEHAVIOR_SIMULATION",
       fixture: {
@@ -149,42 +146,39 @@ describe("Track C C3 strategy-contract runner", () => {
       ],
       executionLane: "BEHAVIOR_SIMULATION",
     });
-    const comparison = evidence.find(
+    expect(evidence.some(
       ({ capability }) => capability === "PRODUCT_COMPARISON",
-    );
-
-    expect(comparison).toBeDefined();
-    expect(comparison).not.toHaveProperty("deterministicText");
+    )).toBe(false);
   });
 
-  it("fails closed when selected factual capability has no safe realization path", async () => {
-    const send = vi.fn<CandidateVertexTransport["send"]>()
-      .mockResolvedValueOnce({
-        payload: payload({
-          replyAct: "ANSWER",
-          goal: "Answer the payment-policy question.",
-          proposition: "POLICY",
-          evidenceRefs: ["CLAIM_001", "SIMULATION_001"],
-          continuation: { type: "KEEP_OPEN" },
-          canonicalAction: "NONE",
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      });
+  it("exposes only evidence that already has a safe factual egress", () => {
+    const captureValue = capture();
+    if (captureValue.status !== "BUILT" || captureValue.context === null) {
+      throw new Error("TEST_CAPTURE_REQUIRED");
+    }
 
-    await expect(runTrackCStrategyContractCase({
-      lane: "BEHAVIOR_SIMULATION",
-      modelResource: MODEL_RESOURCE,
-      capture: capture(),
-      evaluationAt: new Date(recipe.evaluation_at),
-      evaluationContext: [{
-        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
-        text: "Shop nhận thanh toán thế nào em?", attachmentCount: 0,
-        occurredAt: "2026-09-10T01:59:00.000Z",
-      }],
-      simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT],
-      transport: { send },
-    })).rejects.toThrow("TRACK_C_EVIDENCE_DETERMINISTIC_REALIZATION_REQUIRED");
-    expect(send).toHaveBeenCalledTimes(1);
+    const evidence = buildTrackCSelectableEvidence({
+      context: captureValue.context,
+      simulationFacts: [
+        facts.simulation_fact_catalog.SF_PAYMENT,
+        facts.simulation_fact_catalog.SF_CARE_REN,
+        facts.simulation_fact_catalog.SF_FULFILL_MTO,
+        facts.simulation_fact_catalog.SF_OCCASION,
+        facts.simulation_fact_catalog.SF_CHANNEL_PRICE,
+      ],
+      executionLane: "BEHAVIOR_SIMULATION",
+    });
+
+    expect(evidence.map(({ capability }) => capability)).toEqual([
+      "PRICE",
+      "PRICE",
+    ]);
+    expect(evidence.every(({ deterministicText, provenance, capability }) =>
+      deterministicText !== undefined ||
+      (provenance.authority === "RUNTIME" &&
+        ["PRICE", "STOCK", "SIZE_FIT", "ETA"].includes(capability)) ||
+      (provenance.authority === "SIMULATION" && capability === "PRICE")
+    )).toBe(true);
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
@@ -330,6 +324,58 @@ describe("Track C C3 strategy-contract runner", () => {
         ? result.output.segments[1].claimContentHash
         : "",
     });
+  });
+
+  it("code-realizes a bounded answer for unresolved factual propositions", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the stock question without inventing availability.",
+          proposition: "STOCK",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: null,
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này còn hàng không em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    const responderRequest = JSON.parse(send.mock.calls[1]![0].body) as {
+      generationConfig: {
+        responseSchema: { properties: { answerText: unknown } };
+      };
+    };
+    expect(responderRequest.generationConfig.responseSchema.properties.answerText)
+      .toEqual({ type: "NULL" });
+    expect(result.conversationPlan).toMatchObject({
+      replyAct: "ANSWER",
+      proposition: "STOCK",
+    });
+    expect(result.reply).toBe(
+      "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.\n" +
+      "Em vẫn ở đây khi chị cần xem thêm ạ.",
+    );
   });
 
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
