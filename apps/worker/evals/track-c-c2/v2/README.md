@@ -6,13 +6,13 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 - **C1** remains the authority for hard safety, protected facts, and effect/runtime contracts.
 - **C2** owns this corpus, rubric, materialization contract, scoring, evaluation evidence, and aggregate quality gate.
-- **C3** owns candidate experiments. The current two-pass candidate is connected through `track-c-c3-two-pass-quality-adapter.ts`; later prompt revisions can use the same C2 corpus without forking it.
+- **C3** owns candidate experiments. The current two-lane candidate is connected through `track-c-c3-two-pass-quality-adapter.ts`; later prompt revisions can use the same C2 corpus without forking it.
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.5
+### Benchmark revision R2.7
 
-`benchmark_revision` is **R2.5**. Relative to R2.4, the C2-owned execution seam distinguishes a catalog size label carried by integrity-valid product-presentation evidence from an unbound fit recommendation. The catalog-aware guard mode is scoped only to that exact presentation hash; every other segment remains reject-only. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.7**. Corpus, splits, rubric, scoring weights, lane cardinality and materialization are unchanged from R2.6. The benchmark-owner comparison fact now carries an explicit bounded Vietnamese `customerText` projection so PRODUCT_COMPARISON is executable without candidate-side translation or generic rendering. This factual-input semantic change is registered in the bundle hashes; candidate runner, prompt, and request identities remain outside the C2 bundle fingerprint.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 
@@ -20,7 +20,7 @@ Any change to a pinned bundle component changes the bundle fingerprint, so it mu
 
 All 100 quality cases can run in `BEHAVIOR_SIMULATION`. `PRODUCTION_CONTRACT` uses `contract-reachability.json`; the current effective distribution is **47 supported / 53 blocked by contract**. A simulation pass is not production support.
 
-Production materialization uses real protected-claim schemas and canonical Context V2 construction. Producer/runtime-unreachable states fail closed instead of being fabricated. The current C3 two-pass adapter reuses the existing strategist/responder request builders and exposes no persistence, checkout, payment, delivery, or other effect port.
+Production materialization uses real protected-claim schemas and canonical Context V2 construction. Producer/runtime-unreachable states fail closed instead of being fabricated. The current C3 adapter uses a fixed first-contact or adaptive-followup shape and exposes no persistence, checkout, payment, delivery, or other effect port.
 
 ## Supplemental conversation journeys
 
@@ -36,7 +36,7 @@ Trusted acquisition metadata and checkout completeness in these fixtures are sim
 
 ## Quality evaluation
 
-`rubric.json` defines deterministic scoring thresholds and stage diagnostics. The current V2 execution/scoring harness is intentionally bound to the existing two-pass strategist/responder candidate. A future candidate with a different stage shape may reuse the same C2 corpus, but it must provide a compatible adapter/scoring contract rather than silently being treated as two-pass.
+`rubric.json` defines deterministic scoring thresholds and stage diagnostics. The current V2 execution/scoring harness records whether a C3 candidate used the fixed first-contact or adaptive-followup shape. A future candidate with a different stage shape may reuse the same C2 corpus, but it must provide a compatible adapter/scoring contract rather than silently being treated as two-pass.
 
 The aggregate C2 gate binds an explicit expected population. Partial populations, relabeled cases, infrastructure failures, unsupported production cases executed as model calls, and unexpected pre-model rejects fail closed.
 

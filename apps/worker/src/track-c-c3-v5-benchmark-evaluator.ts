@@ -8,8 +8,7 @@ import {
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
 } from "./context-v2-candidate.js";
 import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
-import type { TrackCConversationPlanV1 } from "./track-c-c3-two-pass-candidate.js";
-import type { TrackCV5TwoPassBenchmarkResult } from "./track-c-c3-v5-benchmark-runner.js";
+import type { TrackCStrategyContractCaseResult } from "./track-c-c3-strategy-contract-runner.js";
 import {
   scoreTrackCV5BenchmarkCase,
   type TrackCV5CaseScoreResult,
@@ -28,7 +27,7 @@ export interface TrackCV5JudgeDescriptor {
 
 export interface TrackCV5StageJudgeInput {
   readonly contractVersion: "TRACK_C_V5_STAGE_JUDGE_INPUT_V1";
-  readonly executionLane: TrackCV5TwoPassBenchmarkResult["executionLane"];
+  readonly executionLane: TrackCStrategyContractCaseResult["executionLane"];
   readonly domain: string;
   readonly stage: TrackCV5Stage;
   readonly dialogue: readonly ShadowContextMessage[];
@@ -38,9 +37,9 @@ export interface TrackCV5StageJudgeInput {
   }>;
   readonly authoritativeEvidence: unknown;
   readonly artifact: Readonly<{
-    readonly conversationPlan: TrackCConversationPlanV1;
+    readonly conversationPlan: TrackCStrategyContractCaseResult["conversationPlan"];
     readonly responderReply?: string;
-    readonly responderOutput?: TrackCV5TwoPassBenchmarkResult["output"];
+    readonly responderOutput?: TrackCStrategyContractCaseResult["output"];
   }>;
 }
 
@@ -59,7 +58,7 @@ export interface TrackCV5BenchmarkEvaluationInput {
   }>;
   /** Exact lane-authoritative evidence only. Never include split labels or case IDs. */
   readonly authoritativeEvidence: unknown;
-  readonly candidate: TrackCV5TwoPassBenchmarkResult;
+  readonly candidate: TrackCStrategyContractCaseResult;
   readonly judge: TrackCV5StageJudgePort;
   /** Frozen manifest core-bundle fingerprint used for this run. */
   readonly bundleFingerprint: string;
@@ -78,7 +77,7 @@ export interface TrackCV5BenchmarkEvaluationResult {
     readonly candidateSourceRevision: string;
     readonly candidateProviderModelVersion: string;
     readonly candidateCompositionHash: string;
-    readonly strategistRequestEnvelopeHash: string;
+    readonly strategistRequestEnvelopeHash: string | null;
     readonly responderRequestEnvelopeHash: string;
     readonly judgeProvider: string;
     readonly judgeModel: string;
@@ -167,7 +166,7 @@ function judgeInput(
   dialogue: readonly ShadowContextMessage[],
   expected: ReturnType<typeof safeExpected>,
   authoritativeEvidence: unknown,
-  conversationPlan: TrackCConversationPlanV1,
+  conversationPlan: TrackCStrategyContractCaseResult["conversationPlan"],
 ): TrackCV5StageJudgeInput {
   const artifact = stage === "STRATEGIST"
     ? Object.freeze({ conversationPlan })
@@ -228,30 +227,33 @@ export async function evaluateTrackCV5BenchmarkCase(
   const authoritativeEvidence = safeEvidence(input.authoritativeEvidence);
   const conversationPlan = safeEvidence(
     input.candidate.conversationPlan,
-  ) as TrackCConversationPlanV1;
-  const [strategist, responder] = await Promise.all([
-    input.judge.assess(judgeInput(
-      input,
-      "STRATEGIST",
-      dialogue,
-      expected,
-      authoritativeEvidence,
-      conversationPlan,
-    )),
-    input.judge.assess(judgeInput(
-      input,
-      "RESPONDER",
-      dialogue,
-      expected,
-      authoritativeEvidence,
-      conversationPlan,
-    )),
-  ]);
+  ) as TrackCStrategyContractCaseResult["conversationPlan"];
+  const responderPromise = input.judge.assess(judgeInput(
+    input,
+    "RESPONDER",
+    dialogue,
+    expected,
+    authoritativeEvidence,
+    conversationPlan,
+  ));
+  const strategistPromise = input.candidate.conversationLane === "ADAPTIVE_FOLLOWUP"
+    ? input.judge.assess(judgeInput(
+        input,
+        "STRATEGIST",
+        dialogue,
+        expected,
+        authoritativeEvidence,
+        conversationPlan,
+      ))
+    : null;
+  const responder = await responderPromise;
+  const strategist = strategistPromise === null ? undefined : await strategistPromise;
   const score = scoreTrackCV5BenchmarkCase({
     rubric: input.rubric,
     lane: input.candidate.executionLane,
     domain: input.domain,
-    strategist,
+    generatorCallShape: input.candidate.conversationLane,
+    ...(strategist === undefined ? {} : { strategist }),
     responder,
   });
   const runIdentityBase = Object.freeze({

@@ -12,6 +12,7 @@ const stable = (value) => Array.isArray(value)
     ? `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`
     : JSON.stringify(value);
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+const hash = (value) => sha256(stable(value));
 const gitBlobSha1 = (relativePath) => {
   const bytes = Buffer.from(readText(relativePath), 'utf8');
   return createHash('sha1')
@@ -28,25 +29,29 @@ const gatePath = '../../../src/track-c-c3-v5-benchmark-gate.ts';
 const scoringGitSha1 = gitBlobSha1(scoringPath);
 const evaluatorGitSha1 = gitBlobSha1(evaluatorPath);
 const gateGitSha1 = gitBlobSha1(gatePath);
-const coreBundleFingerprint = manifest.content_hashes.bundle_fingerprint_sha256;
-const qualityHarnessFingerprint = sha256(stable({
-  coreBundleFingerprint,
-  scoringGitSha1,
-  evaluatorGitSha1,
-  gateGitSha1,
-}));
+const qualityHarnessComponentsGitSha1 = {
+  [scoringPath]: scoringGitSha1,
+  [evaluatorPath]: evaluatorGitSha1,
+  [gatePath]: gateGitSha1,
+};
+const qualityHarnessFingerprint = hash({
+  benchmarkId: manifest.benchmark_id,
+  benchmarkRevision: manifest.benchmark_revision,
+  qualityHarnessComponentsGitSha1,
+});
 
 ok(manifest.adapter_sources.scoring === 'apps/worker/src/track-c-c3-v5-benchmark-scoring.ts', 'quality harness scoring source registration');
 ok(manifest.adapter_sources.evaluation === 'apps/worker/src/track-c-c3-v5-benchmark-evaluator.ts', 'quality harness evaluator source registration');
 ok(manifest.adapter_sources.gate === 'apps/worker/src/track-c-c3-v5-benchmark-gate.ts', 'quality harness gate source registration');
-ok(manifest.quality_harness_components_git_sha1[scoringPath] === scoringGitSha1, 'quality harness scoring Git SHA mismatch');
-ok(manifest.quality_harness_components_git_sha1[evaluatorPath] === evaluatorGitSha1, 'quality harness evaluator Git SHA mismatch');
-ok(manifest.quality_harness_components_git_sha1[gatePath] === gateGitSha1, 'quality harness gate Git SHA mismatch');
+ok(
+  stable(manifest.quality_harness_components_git_sha1) ===
+    stable(qualityHarnessComponentsGitSha1),
+  'quality harness component Git SHA mismatch',
+);
 ok(manifest.content_hashes.quality_harness_fingerprint_sha256 === qualityHarnessFingerprint, `quality harness fingerprint mismatch: actual=${qualityHarnessFingerprint}`);
 
 console.log(JSON.stringify({
   ok: true,
-  coreBundleFingerprint,
   qualityHarnessFingerprint,
-  components: { scoringGitSha1, evaluatorGitSha1, gateGitSha1 },
+  components: qualityHarnessComponentsGitSha1,
 }, null, 2));

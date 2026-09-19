@@ -25,6 +25,10 @@ import {
   type TrackCConversationPlanV1,
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
+import { trackCCustomerFacingSizeFromVariantId } from
+  "./track-c-c3-strategy-contract.js";
+import { trackCRuntimeClaimDeterministicText } from
+  "./track-c-c3-selectable-evidence.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -209,7 +213,13 @@ function factEnvelopeForClaim(claim: VerifiedClaim) {
       offerType: "DIRECT",
       listPriceVnd,
       salePriceVnd,
-      sizes: [],
+      sizes: claim.type === "STOCK" &&
+          (claim.value.status === "IN_STOCK" || claim.value.status === "LOW_STOCK")
+        ? (() => {
+            const size = trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+            return size === null ? [] : [size];
+          })()
+        : [],
       stockStatus,
       stockQuantity,
       deliveryEta,
@@ -297,6 +307,12 @@ function guardProductionOutput(
     if (claim?.scope.kind === "CART") {
       throw new Error("TRACK_C_V5_PRODUCTION_CART_GUARD_UNSUPPORTED");
     }
+    if (claim !== null) {
+      const deterministicText = trackCRuntimeClaimDeterministicText(claim);
+      if (deterministicText !== null && segment.text !== deterministicText) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+    }
     const productId = claim?.scope.kind === "PRODUCT"
       ? claim.scope.productId
       : segment.kind === "VERIFIED_CLAIM" &&
@@ -322,7 +338,7 @@ function guardProductionOutput(
       verifiedProductIds,
       buyingSignal: context.buyingIntent.decision === "COMMITTED",
       sizeClaimContext,
-      sizeClaimTextMode: usesProductPresentationEvidence
+      sizeClaimTextMode: usesProductPresentationEvidence || claim?.type === "STOCK"
         ? "LEGACY_SEMANTIC"
         : "STRUCTURED_REJECT_ONLY",
       now: evaluationAt,
@@ -335,12 +351,16 @@ function guardProductionOutput(
   }
 }
 
-function validateResponderOutput(
+export function validateResponderOutput(
   context: ReturnType<typeof contextFromFrozenTrackCCapture>,
   value: unknown,
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
+  simulationClaimContentHashes: readonly string[] = [],
 ): ContextV2CandidateOutputV2 {
+  if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  }
   const semantic = SemanticOutputSchema.safeParse(value);
   if (!semantic.success) {
     throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
@@ -367,6 +387,7 @@ function validateResponderOutput(
         context.productPresentation === undefined
       ? []
       : [context.productPresentation.provenance.contentHash]),
+    ...simulationClaimContentHashes,
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
@@ -379,6 +400,16 @@ function validateResponderOutput(
   }
   if (lane === "PRODUCTION_CONTRACT") {
     guardProductionOutput(context, output, evaluationAt);
+  } else {
+    const simulationHashes = new Set(simulationClaimContentHashes);
+    const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
+      ...output,
+      segments: output.segments.filter((segment) =>
+        segment.kind !== "VERIFIED_CLAIM" ||
+        !simulationHashes.has(segment.claimContentHash)
+      ),
+    };
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt);
   }
   return output;
 }

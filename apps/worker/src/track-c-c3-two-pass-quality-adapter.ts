@@ -7,12 +7,14 @@
  * revisions without changing benchmark ownership.
  */
 import {
-  runTrackCV5TwoPassBenchmarkCase,
   type TrackCV5SimulationMetadata,
   type TrackCV5TwoPassBenchmarkInput,
-  type TrackCV5TwoPassBenchmarkResult,
 } from "./track-c-c3-v5-benchmark-runner.js";
 import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materialization.js";
+import {
+  runTrackCStrategyContractCase,
+  type TrackCStrategyContractCaseResult,
+} from "./track-c-c3-strategy-contract-runner.js";
 
 export type TrackCC3CheckoutCompleteness = Readonly<{
   readonly state: "REQUIRED" | "COMPLETE";
@@ -35,7 +37,7 @@ export type TrackCC3TwoPassQualityCandidateInput = Omit<
 }>;
 
 export type TrackCC3TwoPassQualityCandidateResult =
-  TrackCV5TwoPassBenchmarkResult;
+  TrackCStrategyContractCaseResult;
 
 const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
 const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
@@ -100,9 +102,23 @@ export async function runTrackCC3TwoPassQualityCandidate(
     throw new Error("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
   }
   const metadata = trustedSimulationMetadata(input.fixture);
+  const acquisitionMetadata = metadata.find((entry) =>
+    entry.kind === "TRACK_C_TRUSTED_ACQUISITION_V1"
+  );
+  const trustedAcquisition = acquisitionMetadata !== undefined &&
+    acquisitionMetadata.kind === "TRACK_C_TRUSTED_ACQUISITION_V1" &&
+    acquisitionMetadata.firstMeaningfulInbound
+    ? acquisitionMetadata
+    : undefined;
+  const checkoutMetadata = metadata.filter((entry) =>
+    entry.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1"
+  );
   const { fixture: _fixture, ...runnerInput } = input;
-  return runTrackCV5TwoPassBenchmarkCase({
+  return runTrackCStrategyContractCase({
     ...runnerInput,
-    simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? metadata : [],
+    simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? checkoutMetadata : [],
+    ...(input.lane === "BEHAVIOR_SIMULATION" && trustedAcquisition !== undefined
+      ? { trustedAcquisition }
+      : {}),
   });
 }

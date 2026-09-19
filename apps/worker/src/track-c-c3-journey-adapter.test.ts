@@ -68,37 +68,72 @@ function journey(turnCount: number): TrackCC2JourneyFixture {
   };
 }
 
-function planPayload() {
+function modelPayload(value: unknown) {
   return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify({
-      currentNeed: "Resolve the current customer need.",
-      mustResolve: "Use only supplied authority.",
-      conversationRead: "Use accumulated dialogue without creating authority.",
-      nextMove: "NONE",
-      avoid: "Do not invent facts or effects.",
-    }) }] } }],
+    candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }],
   };
 }
 
-function replyPayload(reply: string) {
-  return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify({
-      segments: [{ kind: "GENERAL", text: reply }],
-      strategy: "HOLD_POSITION",
-      cta: "NONE",
-    }) }] } }],
+function promptOf(request: { body: string }) {
+  const body = JSON.parse(request.body) as {
+    contents: [{ parts: [{ text: string }] }];
+  };
+  return JSON.parse(body.contents[0].parts[0].text) as {
+    contractVersion: string;
+    constraints?: { permittedCanonicalActions: string[] };
+    responderTask?: {
+      answer: { kind: string; status: string };
+      evidence: unknown[];
+      continuation: Readonly<{ type: string }> | null;
+      canonicalRequest: { type: string } | null;
+    };
   };
 }
 
-function transport() {
+function strategistPayload(prompt: ReturnType<typeof promptOf>) {
+  const canonicalAction = prompt.constraints?.permittedCanonicalActions[0] ?? "NONE";
+  return modelPayload({
+    replyAct: "ANSWER",
+    goal: "Resolve the current customer decision.",
+    proposition: "NONE",
+    evidenceRefs: [],
+    continuation: canonicalAction === "NONE" ? { type: "KEEP_OPEN" } : null,
+    canonicalAction,
+  });
+}
+
+function responderPayload(
+  prompt: ReturnType<typeof promptOf>,
+  reply: string,
+) {
+  const task = prompt.responderTask;
+  if (task === undefined) throw new Error("TEST_RESPONDER_TASK_REQUIRED");
+  const canonical = task.canonicalRequest?.type;
+  const hold = canonical === "HOLD_POSITION";
+  const keepOpen = task.continuation?.type === "KEEP_OPEN";
+  const needsProgression = canonical === "ASK_PRODUCT" ||
+    canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
+  return modelPayload({
+    answerText: (task.answer.kind === "ANSWER" &&
+        task.answer.status !== "NOT_APPLICABLE") ||
+        canonical === "ASK_CHECKOUT_DETAILS"
+      ? null : reply,
+    factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
+    progressionText: hold || keepOpen ? null
+      : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
+  });
+}
+
+function transport(replyPrefix = "actual Lana reply") {
   let call = 0;
-  const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
+  const send = vi.fn<CandidateVertexTransport["send"]>(async (request) => {
     const current = call++;
-    const turnNumber = Math.floor(current / 2) + 1;
+    const prompt = promptOf(request);
+    const turnNumber = current + 1;
     return {
-      payload: current % 2 === 0
-        ? planPayload()
-        : replyPayload(`actual Lana reply ${turnNumber}`),
+      payload: prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+        ? strategistPayload(prompt)
+        : responderPayload(prompt, `${replyPrefix} ${turnNumber}`),
       providerModelVersion: "gemini-3.5-flash-lite",
     };
   });
@@ -106,15 +141,7 @@ function transport() {
 }
 
 function transportWithReply(reply: string) {
-  let call = 0;
-  const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
-    const current = call++;
-    return {
-      payload: current % 2 === 0 ? planPayload() : replyPayload(reply),
-      providerModelVersion: "gemini-3.5-flash-lite",
-    };
-  });
-  return { send };
+  return transport(reply);
 }
 
 function input(
@@ -162,7 +189,7 @@ describe("Track C C3 journey adapter", () => {
     expect(candidateTransport.send).not.toHaveBeenCalled();
   });
 
-  it("puts the actual previous Lana reply into the next-turn dialogue and makes exactly two generator calls per turn", async () => {
+  it("puts the actual previous Lana reply into the next-turn dialogue and makes two adaptive calls per turn", async () => {
     const candidateTransport = transport();
     const result = await runTrackCC3Journey(input(
       journey(3),
@@ -173,7 +200,7 @@ describe("Track C C3 journey adapter", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.turns[1]?.evaluationContext.map(({ text }) => text)).toEqual([
       "customer turn 1",
-      "actual Lana reply 1",
+      "actual Lana reply 2\nEm vẫn ở đây khi chị cần xem thêm ạ.",
       "customer turn 2",
     ]);
     const turnTwoStrategistRequest = candidateTransport.send.mock.calls[2]?.[0];
@@ -182,11 +209,11 @@ describe("Track C C3 journey adapter", () => {
       contents: [{ parts: [{ text: string }] }];
     };
     const prompt = JSON.parse(body.contents[0].parts[0].text) as {
-      evaluationContext: Array<{ text: string }>;
+      dialogue: Array<{ text: string }>;
     };
-    expect(prompt.evaluationContext.map(({ text }) => text)).toContain(
-      "actual Lana reply 1",
-    );
+    expect(prompt.dialogue.some(({ text }) =>
+      text.includes("actual Lana reply 2")
+    )).toBe(true);
     expect(Object.hasOwn(result, "persistence")).toBe(false);
     expect(Object.hasOwn(result, "effectPort")).toBe(false);
     expect(Object.hasOwn(result, "delivery")).toBe(false);
@@ -203,38 +230,53 @@ describe("Track C C3 journey adapter", () => {
     expect(result.turns).toHaveLength(8);
     expect(result.turns[7]?.evaluationContext).toHaveLength(15);
     expect(result.turns[7]?.evaluationContext.some(({ text }) =>
-      text === "actual Lana reply 7"
+      text.includes("actual Lana reply")
     )).toBe(true);
   });
 
-  it("carries the candidate's prescribed checkout wording through the journey intact", async () => {
-    // Naming the checkout fields carries no identifier, so the reply reaches
-    // the next turn verbatim instead of aborting the journey or arriving
-    // truncated.
-    const checkoutReply = "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.";
-    const candidateTransport = transportWithReply(checkoutReply);
+  it("carries a non-factual generated reply through the journey intact", async () => {
+    const generatedReply = "Dạ em hỗ trợ chị tiếp nhé.";
+    const candidateTransport = transportWithReply(generatedReply);
     const result = await runTrackCC3Journey(input(journey(3), candidateTransport));
 
     expect(candidateTransport.send).toHaveBeenCalledTimes(6);
-    expect(result.turns[0]?.result.reply).toBe(checkoutReply);
-    expect(result.transcript[1]?.text).toBe(checkoutReply);
-    expect(result.turns[1]?.evaluationContext[1]?.text).toBe(checkoutReply);
+    expect(result.turns[0]?.result.reply).toContain(generatedReply);
+    expect(result.transcript[1]?.text).toContain(generatedReply);
+    expect(result.turns[1]?.evaluationContext[1]?.text).toContain(generatedReply);
   });
 
-  it("keeps a six-digit price reply inside the PII-guarded frozen dialogue", async () => {
-    const candidateTransport = transportWithReply("Dạ bộ này 849000 đồng chị nhé.");
+  it("returns a sanitized, turn-scoped diagnostic when a model contract fails", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: modelPayload({}),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    await expect(runTrackCC3Journey(input(journey(3), { send }))).rejects
+      .toMatchObject({
+        diagnostic: {
+          journeyId: "TEST_JOURNEY_3",
+          turnId: "T1",
+          stage: "STRATEGIST",
+          errorCode: "TRACK_C_STRATEGIST_DECISION_INVALID",
+          sanitizedRawModelOutput: "{}",
+        },
+      });
+  });
+
+  it("keeps generated replies redacted in accumulated dialogue", async () => {
+    const candidateTransport = transportWithReply("Dạ em hỗ trợ chị tiếp nhé.");
     const result = await runTrackCC3Journey(input(journey(3), candidateTransport));
 
     expect(candidateTransport.send).toHaveBeenCalledTimes(6);
-    expect(result.transcript[1]?.text).toBe("Dạ bộ này [NUMBER] đồng chị nhé.");
+    expect(result.transcript[1]?.text).toContain("Dạ em hỗ trợ chị tiếp nhé.");
   });
 
-  it("runs the authored checkout and ad-lead journeys end to end", async () => {
-    for (const journeyId of ["C2J001", "C2J006"]) {
+  it("runs all six authored journeys through the contract", async () => {
+    for (const journeyId of [
+      "C2J001", "C2J002", "C2J003", "C2J004", "C2J005", "C2J006",
+    ]) {
       const authored = authoredJourney(journeyId);
-      const candidateTransport = transportWithReply(
-        "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
-      );
+      const candidateTransport = transport();
       const result = await runTrackCC3Journey({
         lane: "BEHAVIOR_SIMULATION",
         modelResource: MODEL_RESOURCE,
@@ -248,7 +290,10 @@ describe("Track C C3 journey adapter", () => {
       expect(result.journeyId).toBe(journeyId);
       expect(result.turns.map(({ turnId }) => turnId))
         .toEqual(authored.turns.map(({ id }) => id));
-      expect(candidateTransport.send).toHaveBeenCalledTimes(authored.turns.length * 2);
+      const expectedCalls = authored.turns.reduce((total, turn) => total +
+        (turn.context.origin === "ADVERTISEMENT" &&
+         turn.context.first_meaningful_inbound ? 1 : 2), 0);
+      expect(candidateTransport.send).toHaveBeenCalledTimes(expectedCalls);
       expect(result.transcript).toHaveLength(authored.turns.length * 2);
       expect(result.sideEffects).toBe("DISABLED");
     }

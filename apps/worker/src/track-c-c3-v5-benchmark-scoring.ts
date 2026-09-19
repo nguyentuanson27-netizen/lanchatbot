@@ -8,6 +8,9 @@ export type TrackCV5RubricDimension =
 
 export type TrackCV5ScoringLane = "BEHAVIOR_SIMULATION" | "PRODUCTION_CONTRACT";
 export type TrackCV5Stage = "STRATEGIST" | "RESPONDER";
+export type TrackCV5GeneratorCallShape =
+  | "FIRST_CONTACT_FIXED"
+  | "ADAPTIVE_FOLLOWUP";
 
 export interface TrackCV5RubricConfig {
   readonly score_scale: Readonly<{
@@ -50,7 +53,8 @@ export interface TrackCV5CaseScoringInput {
   readonly rubric: TrackCV5RubricConfig;
   readonly lane: TrackCV5ScoringLane;
   readonly domain: string;
-  readonly strategist: TrackCV5StageAssessmentInput;
+  readonly generatorCallShape: TrackCV5GeneratorCallShape;
+  readonly strategist?: TrackCV5StageAssessmentInput;
   readonly responder: TrackCV5StageAssessmentInput;
 }
 
@@ -68,7 +72,8 @@ export interface TrackCV5CaseScoreResult {
   readonly contractVersion: "TRACK_C_V5_RUBRIC_SCORE_V1";
   readonly lane: TrackCV5ScoringLane;
   readonly domain: string;
-  readonly strategist: TrackCV5StageScoreResult;
+  readonly generatorCallShape: TrackCV5GeneratorCallShape;
+  readonly strategist: TrackCV5StageScoreResult | null;
   readonly responder: TrackCV5StageScoreResult;
   readonly outcome: "PASS" | "PASS_WITH_NOTE" | "FAIL";
   readonly hardFailures: readonly string[];
@@ -193,21 +198,31 @@ export function scoreTrackCV5BenchmarkCase(
   if (!input.rubric.domain_thresholds[input.domain]) {
     throw new Error(`TRACK_C_V5_RUBRIC_DOMAIN_UNKNOWN:${input.domain}`);
   }
-  const strategist = scoreStage(input, "STRATEGIST", input.strategist);
+  const strategist = input.generatorCallShape === "FIRST_CONTACT_FIXED"
+    ? null
+    : input.strategist === undefined
+      ? (() => { throw new Error("TRACK_C_V5_STRATEGIST_ASSESSMENT_REQUIRED"); })()
+      : scoreStage(input, "STRATEGIST", input.strategist);
+  if (input.generatorCallShape === "FIRST_CONTACT_FIXED" &&
+      input.strategist !== undefined) {
+    throw new Error("TRACK_C_V5_FIXED_STRATEGIST_ASSESSMENT_FORBIDDEN");
+  }
   const responder = scoreStage(input, "RESPONDER", input.responder);
   const hardFailures = [...new Set([
-    ...strategist.hardFailures,
+    ...(strategist?.hardFailures ?? []),
     ...responder.hardFailures,
   ])].sort();
   const tuningNotes = [...new Set([
-    ...(input.strategist.tuningNotes ?? []),
+    ...(input.strategist?.tuningNotes ?? []),
     ...(input.responder.tuningNotes ?? []),
   ].map((note) => note.trim()).filter(Boolean))];
-  const passed = strategist.passed && responder.passed && hardFailures.length === 0;
+  const passed = (strategist?.passed ?? true) && responder.passed &&
+    hardFailures.length === 0;
   return Object.freeze({
     contractVersion: "TRACK_C_V5_RUBRIC_SCORE_V1",
     lane: input.lane,
     domain: input.domain,
+    generatorCallShape: input.generatorCallShape,
     strategist,
     responder,
     outcome: !passed ? "FAIL" : tuningNotes.length > 0 ? "PASS_WITH_NOTE" : "PASS",
