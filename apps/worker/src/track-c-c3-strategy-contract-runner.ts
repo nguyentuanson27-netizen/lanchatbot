@@ -65,7 +65,7 @@ const RESPONDER_INSTRUCTION = [
   "The supplied responderTask.evidence contains only evidence whose factual wording may be model-authored and production-guarded. Code realizes other selected factual evidence deterministically.",
   "Use factualTexts in the supplied evidence order. Each item must stay within its matching evidence capability.",
   "factualTexts is the only model-authored place for supplied factual evidence. answerText and progressionText may acknowledge or ask, but must not repeat, paraphrase, or infer factual details.",
-  "When supplied evidence is non-empty, emit answerText null. Put any acknowledgement plus grounded explanation in its matching factualTexts item.",
+  "When answer.kind is ACKNOWLEDGE and checkout details are not being requested, put one short non-factual acknowledgement in answerText even when selected evidence is code-realized. Otherwise, when supplied evidence is non-empty, emit answerText null.",
   "For a KEEP_OPEN continuation, emit one short natural progressionText that keeps the conversation open without a question, request, recommendation, or new decision variable.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
@@ -421,16 +421,18 @@ function responderNeedsProgression(task: TrackCResponderTask): boolean {
 function responderDraftSchema(task: TrackCResponderTask) {
   const needsProgression = responderNeedsProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
+  const answerTextAllowed =
+    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+    (task.answer.kind === "ACKNOWLEDGE" || task.evidence.length === 0);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
     minProperties: 3,
     maxProperties: 3,
     properties: {
-      answerText: task.evidence.length > 0 ||
-          task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS"
-        ? { type: "NULL" }
-        : { type: "STRING", minLength: 1, maxLength: 1_000 },
+      answerText: answerTextAllowed
+        ? { type: "STRING", minLength: 1, maxLength: 1_000 }
+        : { type: "NULL" },
       factualTexts: {
         type: "ARRAY",
         minItems: factualEvidenceCount,
@@ -669,7 +671,7 @@ function compileResponderDraft(input: Readonly<{
   if (task.answer.status === "SUPPORTED" && draft.answerText !== null) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  if (task.answer.kind === "ACKNOWLEDGE" && task.evidence.length === 0 &&
+  if (task.answer.kind === "ACKNOWLEDGE" &&
       task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
