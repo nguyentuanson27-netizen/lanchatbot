@@ -105,6 +105,24 @@ describe("Track C C3 clean strategy contract", () => {
     expect(task.requiredEvidenceRefs).toEqual([]);
   });
 
+  it("does not let ACKNOWLEDGE stand in for an unresolved factual answer", () => {
+    expect(() => compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "ACKNOWLEDGE",
+        goal: "Acknowledge a factual question without evidence.",
+        proposition: "STOCK",
+        evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" },
+        canonicalAction: "NONE",
+      },
+      evidence: [stockEvidence],
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: false,
+    })).toThrow("TRACK_C_STRATEGIST_REPLY_ACT_INVALID");
+  });
+
   it("allows grounded evidence for an acknowledge-and-explain response", () => {
     const task = compileTrackCStrategistDecision({
       decision: {
@@ -213,7 +231,8 @@ describe("Track C C3 clean strategy contract", () => {
     });
 
     expect(task.answer).toMatchObject({
-      kind: "ACKNOWLEDGE",
+      kind: "ANSWER",
+      status: "UNRESOLVED",
       proposition: "PRICE",
     });
     expect(task.continuation).toBeNull();
