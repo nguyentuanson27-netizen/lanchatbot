@@ -349,7 +349,7 @@ describe("Track C C3 strategy-contract runner", () => {
         payload: payload({
           answerText: "Dạ em hiểu băn khoăn của chị ạ.",
           factualTexts: [],
-          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+          progressionText: null,
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
@@ -369,14 +369,63 @@ describe("Track C C3 strategy-contract runner", () => {
 
     expect(send).toHaveBeenCalledTimes(2);
     const responderRequest = JSON.parse(send.mock.calls[1]![0].body) as {
-      generationConfig: { responseSchema: { properties: { progressionText: unknown } } };
+      generationConfig: {
+        responseSchema: {
+          properties: { answerText: unknown; progressionText: unknown };
+        };
+      };
     };
+    expect(responderRequest.generationConfig.responseSchema.properties.answerText)
+      .toEqual({
+        type: "STRING",
+        enum: [
+          "Dạ em hiểu ý chị ạ.",
+          "Dạ em hiểu băn khoăn của chị ạ.",
+        ],
+      });
     expect(responderRequest.generationConfig.responseSchema.properties.progressionText)
-      .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
+      .toEqual({ type: "NULL" });
+    expect(result.output.strategy).toBe("ANSWER_VERIFIED_FACTS");
     expect(result.output.segments).toEqual([
       { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
       { kind: "GENERAL", text: "Em vẫn ở đây khi chị cần xem thêm ạ." },
     ]);
+  });
+
+  it("rejects model-authored KEEP_OPEN wording even when it looks neutral", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge without reopening discovery.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu ý chị ạ.",
+          factualTexts: [],
+          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị để xem thêm nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
   });
 
   it("keeps non-factual acknowledgement when selected evidence is deterministic", async () => {
