@@ -59,7 +59,10 @@ export type TrackCSelectableEvidence = Readonly<{
     displayName?: string;
   }>;
   value: Readonly<Record<string, unknown>>;
-  /** Code-owned wording for capabilities the production factual guard cannot validate. */
+  /**
+   * Optional code-owned customer-facing projection. It must already be safe,
+   * natural reply copy; value remains the factual authority/reasoning data.
+   */
   deterministicText?: string;
   provenance: Readonly<{
     contentHash: string;
