@@ -27,6 +27,8 @@ import {
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { trackCCustomerFacingSizeFromVariantId } from
   "./track-c-c3-strategy-contract.js";
+import { trackCRuntimeClaimDeterministicText } from
+  "./track-c-c3-selectable-evidence.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -304,6 +306,12 @@ function guardProductionOutput(
       : null;
     if (claim?.scope.kind === "CART") {
       throw new Error("TRACK_C_V5_PRODUCTION_CART_GUARD_UNSUPPORTED");
+    }
+    if (claim !== null) {
+      const deterministicText = trackCRuntimeClaimDeterministicText(claim);
+      if (deterministicText !== null && segment.text !== deterministicText) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
     }
     const productId = claim?.scope.kind === "PRODUCT"
       ? claim.scope.productId
