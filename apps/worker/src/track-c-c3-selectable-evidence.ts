@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
   TRACK_C_PROTECTED_PROPOSITIONS,
+  trackCCustomerFacingSizeFromVariantId,
   trackCEvidenceHasSafeFactualEgress,
   type TrackCProtectedProposition,
   type TrackCSelectableEvidence,
@@ -47,6 +48,55 @@ function arrayOfStrings(value: unknown, limit: number): readonly string[] | null
       value.every((item) => typeof item === "string" && item.length <= 128)
     ? Object.freeze([...value]) as readonly string[]
     : null;
+}
+
+function formatVnd(amount: number): string {
+  return `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/gu, ".")}đ`;
+}
+
+function runtimeClaimDeterministicText(
+  claim: ContextV2["verifiedClaims"][number],
+): string | null {
+  if (claim.scope.kind !== "PRODUCT") return null;
+  if (claim.type === "PRICE") {
+    return `Dạ giá hiện tại của mẫu này là ${formatVnd(claim.value.amountVnd)} ạ.`;
+  }
+  if (claim.type === "STOCK") {
+    const size = trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+    if (claim.scope.variantId !== null && size === null) return null;
+    const subject = size === null ? "mẫu này" : `size ${size} của mẫu này`;
+    if (claim.value.status === "IN_STOCK") {
+      return size === null
+        ? "Dạ mẫu này hiện còn hàng ạ."
+        : `Dạ mẫu này hiện còn size ${size} ạ.`;
+    }
+    if (claim.value.status === "LOW_STOCK") {
+      return size === null
+        ? "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ."
+        : `Dạ mẫu này hiện còn size ${size} nhưng số lượng không nhiều ạ.`;
+    }
+    if (claim.value.status === "OUT_OF_STOCK") {
+      return size === null
+        ? "Dạ mẫu này hiện hết hàng ạ."
+        : `Dạ mẫu này hiện hết size ${size} ạ.`;
+    }
+    if (claim.value.status === "PRE_ORDER") {
+      return `Dạ ${subject} hiện nhận đặt trước ạ.`;
+    }
+    if (claim.value.status === "COMING_SOON") {
+      return `Dạ ${subject} hiện sắp về ạ.`;
+    }
+    return null;
+  }
+  if (claim.type === "SIZE_FIT") {
+    return `Dạ theo thông tin size đã xác minh, size phù hợp là ${claim.value.recommendedSizes.join(" hoặc ")} ạ.`;
+  }
+  if (claim.type === "ETA") {
+    return claim.value.minDays === claim.value.maxDays
+      ? `Dạ thời gian giao dự kiến hiện khoảng ${claim.value.minDays} ngày ạ.`
+      : `Dạ thời gian giao dự kiến hiện là ${claim.value.minDays}–${claim.value.maxDays} ngày ạ. Em chưa thể cam kết chính xác một ngày cụ thể trong khoảng này ạ.`;
+  }
+  return null;
 }
 
 function boundedSimulationEvidence(
@@ -110,9 +160,18 @@ function boundedSimulationEvidence(
     if (products.some((id) => typeof descriptions[id] !== "string")) {
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
+    const customerText = typeof value.customerText === "string" &&
+        value.customerText === value.customerText.trim() &&
+        value.customerText.length > 0 && value.customerText.length <= 500
+      ? value.customerText : null;
+    if (customerText !== null && products.some((id) => customerText.includes(id))) {
+      throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
+    }
     return make(
       "PRODUCT_COMPARISON",
       { products, descriptions },
+      undefined,
+      customerText ?? undefined,
     );
   }
   if (kind === "CARE_GUIDANCE") {
@@ -134,7 +193,12 @@ function boundedSimulationEvidence(
     if (typeof data.chatVnd !== "number") {
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
-    return make("PRICE", { chatVnd: data.chatVnd }, { productId: subjectProductId });
+    return make(
+      "PRICE",
+      { chatVnd: data.chatVnd },
+      { productId: subjectProductId },
+      `Dạ giá trên kênh chat hiện là ${formatVnd(data.chatVnd)} ạ.`,
+    );
   }
   if (kind === "FULFILLMENT_SNAPSHOT") {
     const subjectProductId = requireBoundProduct();
@@ -199,11 +263,13 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
       const subject = productSubject(claim.scope);
+      const deterministicText = runtimeClaimDeterministicText(claim);
       evidence.push(Object.freeze({
         ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,
         capability,
         ...(subject === undefined ? {} : { subject }),
         value: Object.freeze({ ...claim.value }),
+        ...(deterministicText === null ? {} : { deterministicText }),
         provenance: Object.freeze({
           contentHash: claim.provenance.contentHash,
           authority: "RUNTIME" as const,
