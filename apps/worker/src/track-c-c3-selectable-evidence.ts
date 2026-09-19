@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
   TRACK_C_PROTECTED_PROPOSITIONS,
+  trackCEvidenceHasSafeFactualEgress,
   type TrackCProtectedProposition,
   type TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
@@ -278,10 +279,11 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
     );
     if (projected !== null) evidence.push(projected);
   });
-  if (new Set(evidence.map(({ ref }) => ref)).size !== evidence.length ||
-      new Set(evidence.map(({ provenance }) => provenance.contentHash)).size !==
-        evidence.length) {
+  const selectable = evidence.filter(trackCEvidenceHasSafeFactualEgress);
+  if (new Set(selectable.map(({ ref }) => ref)).size !== selectable.length ||
+      new Set(selectable.map(({ provenance }) => provenance.contentHash)).size !==
+        selectable.length) {
     throw new Error("TRACK_C_EVIDENCE_PROVENANCE_DUPLICATE");
   }
-  return Object.freeze(evidence);
+  return Object.freeze(selectable);
 }
