@@ -693,9 +693,9 @@ function compileResponderDraft(input: Readonly<{
   assertNoUnboundFactText(draft.progressionText, task);
   assertNoEffectText(draft.answerText);
   assertNoEffectText(draft.progressionText);
-  // Model-authored factual wording exists only for capabilities handled by the
-  // existing production guard. Unsupported capabilities are code-realized from
-  // the selected evidence and are never exposed as free-text factual slots.
+  // Selectable evidence already has a safe factual egress by construction.
+  // This path handles only the subset whose wording is authorized for the
+  // existing model-authored guard; deterministic projections bypass it.
   const authoredEvidence = modelAuthoredEvidence(task);
   draft.factualTexts.forEach((factualText, index) => {
     const evidence = authoredEvidence[index]!;
