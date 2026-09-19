@@ -369,6 +369,9 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   evidence: readonly TrackCSelectableEvidence[];
   constraints: TrackCStrategistConstraints;
 }>): BuiltCandidateRequest {
+  if (input.evidence.some((evidence) => !trackCEvidenceHasSafeFactualEgress(evidence))) {
+    throw new Error("TRACK_C_STRATEGIST_EVIDENCE_NOT_EXECUTABLE");
+  }
   const base = buildTrackCOfflineCandidateRequest({
     modelResource: input.modelResource,
     capture: input.capture,
