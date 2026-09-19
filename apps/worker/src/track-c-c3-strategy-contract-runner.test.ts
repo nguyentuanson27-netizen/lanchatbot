@@ -445,7 +445,7 @@ describe("Track C C3 strategy-contract runner", () => {
         payload: payload({
           answerText: "Dạ em hiểu ý chị ạ.",
           factualTexts: ["Dạ mẫu này hiện 849.000đ ạ."],
-          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+          progressionText: null,
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
@@ -510,7 +510,7 @@ describe("Track C C3 strategy-contract runner", () => {
         payload: payload({
           answerText: "Dạ mẫu này cao cấp lắm chị ạ.",
           factualTexts: [],
-          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+          progressionText: null,
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
@@ -530,76 +530,65 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   });
 
-  it("rejects KEEP_OPEN wording that turns into a new decision variable", async () => {
+  it("reserves HOLD_POSITION strategy for an actual no-reopen canonical stop", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({
           replyAct: "ACKNOWLEDGE",
-          goal: "Acknowledge without reopening discovery.",
+          goal: "Respect the explicit stop without reopening.",
           proposition: "NONE",
           evidenceRefs: [],
-          continuation: { type: "KEEP_OPEN" },
-          canonicalAction: "NONE",
+          continuation: null,
+          canonicalAction: "HOLD_POSITION",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          answerText: "Dạ em hiểu ý chị ạ.",
           factualTexts: [],
-          progressionText: "Chị thích màu nào hơn ạ.",
+          progressionText: null,
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
 
-    await expect(runTrackCStrategyContractCase({
+    const result = await runTrackCStrategyContractCase({
       lane: "BEHAVIOR_SIMULATION",
       modelResource: MODEL_RESOURCE,
-      capture: capture(),
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_HOLD_POSITION_METADATA",
+          latest_customer_message: "Không cần nữa em.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "BROWSING",
+            canonical_flags: [],
+            buying_intent: {
+              decision: "NEGATED",
+              requested_action: "NONE",
+              quantity: null,
+              evidence: "customer explicitly stopped",
+            },
+            source_stage: null,
+            runtime_claim_refs: [],
+          },
+        },
+        runtimeClaimCatalog: facts.runtime_claim_catalog,
+        recipe,
+      }),
       evaluationAt: new Date(recipe.evaluation_at),
       evaluationContext: [{
         direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
-        text: "849k thì hơi cao em ạ.", attachmentCount: 0,
+        text: "Không cần nữa em.", attachmentCount: 0,
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
-  });
+    });
 
-  it("rejects KEEP_OPEN decision variables regardless of word order", async () => {
-    const send = vi.fn<CandidateVertexTransport["send"]>()
-      .mockResolvedValueOnce({
-        payload: payload({
-          replyAct: "ACKNOWLEDGE",
-          goal: "Acknowledge without reopening discovery.",
-          proposition: "NONE",
-          evidenceRefs: [],
-          continuation: { type: "KEEP_OPEN" },
-          canonicalAction: "NONE",
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      })
-      .mockResolvedValueOnce({
-        payload: payload({
-          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
-          factualTexts: [],
-          progressionText: "Màu nào chị thích hơn ạ.",
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      });
-
-    await expect(runTrackCStrategyContractCase({
-      lane: "BEHAVIOR_SIMULATION",
-      modelResource: MODEL_RESOURCE,
-      capture: capture(),
-      evaluationAt: new Date(recipe.evaluation_at),
-      evaluationContext: [{
-        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
-        text: "849k thì hơi cao em ạ.", attachmentCount: 0,
-        occurredAt: "2026-09-10T01:59:00.000Z",
-      }],
-      transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
+    expect(result.output.strategy).toBe("HOLD_POSITION");
+    expect(result.output.cta).toBe("NONE");
+    expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
   });
 
   it("returns redacted diagnostic text for phone email and address", async () => {
@@ -842,7 +831,7 @@ describe("Track C C3 strategy-contract runner", () => {
         payload: payload({
           answerText: "Dạ em hiểu ý chị ạ.",
           factualTexts: [],
-          progressionText: "Em vẫn ở đây khi chị cần xem thêm ạ.",
+          progressionText: null,
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
