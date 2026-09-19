@@ -689,8 +689,8 @@ function compileResponderDraft(input: Readonly<{
     if (draft.answerText === null) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
-    if (!BOUNDED_ACKNOWLEDGEMENTS.includes(
-      draft.answerText as typeof BOUNDED_ACKNOWLEDGEMENTS[number],
+    if (!BOUNDED_ACKNOWLEDGEMENTS.some((acknowledgement) =>
+      acknowledgement === draft.answerText
     )) {
       throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
     }
