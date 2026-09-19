@@ -11,6 +11,7 @@ const stockEvidence: TrackCSelectableEvidence = {
   capability: "STOCK",
   subject: { productId: "SQ9012", displayName: "Mẫu A" },
   value: { status: "IN_STOCK" },
+  deterministicText: "Dạ mẫu này hiện còn hàng ạ.",
   provenance: {
     contentHash: "a".repeat(64),
     authority: "RUNTIME",
@@ -22,6 +23,7 @@ const priceEvidence: TrackCSelectableEvidence = {
   capability: "PRICE",
   subject: { productId: "SQ9012", displayName: "Mẫu A" },
   value: { amountVnd: 849000 },
+  deterministicText: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
   provenance: {
     contentHash: "b".repeat(64),
     authority: "RUNTIME",
