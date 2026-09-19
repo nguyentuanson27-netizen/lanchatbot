@@ -25,6 +25,8 @@ import {
   type TrackCConversationPlanV1,
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
+import { trackCCustomerFacingSizeFromVariantId } from
+  "./track-c-c3-strategy-contract.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -209,7 +211,13 @@ function factEnvelopeForClaim(claim: VerifiedClaim) {
       offerType: "DIRECT",
       listPriceVnd,
       salePriceVnd,
-      sizes: [],
+      sizes: claim.type === "STOCK" &&
+          (claim.value.status === "IN_STOCK" || claim.value.status === "LOW_STOCK")
+        ? (() => {
+            const size = trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+            return size === null ? [] : [size];
+          })()
+        : [],
       stockStatus,
       stockQuantity,
       deliveryEta,
@@ -322,7 +330,7 @@ function guardProductionOutput(
       verifiedProductIds,
       buyingSignal: context.buyingIntent.decision === "COMMITTED",
       sizeClaimContext,
-      sizeClaimTextMode: usesProductPresentationEvidence
+      sizeClaimTextMode: usesProductPresentationEvidence || claim?.type === "STOCK"
         ? "LEGACY_SEMANTIC"
         : "STRUCTURED_REJECT_ONLY",
       now: evaluationAt,
