@@ -33,11 +33,11 @@
     "dev_70_expanded_sha256": "714d803526d38993b0504997feea01590db1ce3b636c32efb6fc4b92f849d37f",
     "holdout_30_expanded_sha256": "c68a079f50f565045f81098a9b7a2ecc0a1dbcf8b09007bd46005fb72adbecc6",
     "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e",
-    "bundle_fingerprint_sha256": "4a3e3fa090cf8410ce0555f17f3ca9c3bbee2cee7d07a88801362ae11e523724",
+    "bundle_fingerprint_sha256": "2aad1d3065d3d2500544137fc59f63da1962c4891473bad40d255867357c1101",
     "quality_harness_fingerprint_sha256": "1c765408fbb008fe0cb504665301ed77aa045ab544709843b3616f1b05453e74"
   },
   "bundle_components_git_sha1": {
-    "facts.json": "d1c958d39f3f4622a55eba66c18a52ae85257ff0",
+    "facts.json": "93cc14dc49e20f37fdf60bfeacdc5c6563317a45",
     "rubric.json": "4a06598f1d0cab43fa539a6ecc38fc23aaa22cc5",
     "contract-gaps.json": "17cb1b48aa037fa4f65c8729b71a65ab2df34181",
     "contract-reachability.json": "24a6e7ea67dacc97157e76515a386e314638ceb1",
