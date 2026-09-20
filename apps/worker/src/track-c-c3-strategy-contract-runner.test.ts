@@ -1382,4 +1382,166 @@ describe("Track C C3 strategy-contract runner", () => {
       ...input,
     })).rejects.toThrow("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
   });
+
+  it("requires first-contact ASK COLOR to request customer preference rather than shop availability", async () => {
+    const validSend = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({
+        answerText: null,
+        factualTexts: [],
+        progressionText: "Chị thích màu nào hơn ạ?",
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    const valid = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+      },
+      transport: { send: validSend },
+    });
+
+    expect(valid.reply).toMatch(/thích\s+màu|màu\s+nào/iu);
+
+    const invalidSend = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({
+        answerText: null,
+        factualTexts: [],
+        progressionText: "Mẫu này bên em có những màu nào ạ?",
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+      },
+      transport: { send: invalidSend },
+    })).rejects.toThrow("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
+  });
+
+  it("rejects a typed COLOR ASK realized as a different customer decision input", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the customer's stated preference and ask only the chosen color decision.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "ASK", input: "COLOR" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu ý chị ạ.",
+          factualTexts: [],
+          progressionText: "Chị cần nhận hàng trước ngày nào ạ?",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị đang cân nhắc màu.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
+  });
+
+  it("derives conservative deadline feasibility from selected verified ETA and the customer cutoff", async () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_DEADLINE_FEASIBILITY",
+        latest_customer_message: "Nếu tới ngày thứ 4 thì chị không dùng được nữa.",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "CONSIDERING",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: "customer has a delivery cutoff",
+          },
+          source_stage: null,
+          runtime_claim_refs: ["RC_ETA_HN"],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Resolve whether the verified delivery window can guarantee the customer's cutoff.",
+          proposition: "ETA",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: null,
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Nếu tới ngày thứ 4 thì chị không dùng được nữa.",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    expect(result.reply).toMatch(/2.?4\s*ngày/iu);
+    expect(result.reply).toMatch(/không\s+bảo\s+đảm.*(?:kịp|mốc)/iu);
+    expect(result.reply).not.toMatch(/giao\s+hỏa\s*tốc|express|chắc\s+chắn\s+kịp/iu);
+  });
+
 });
