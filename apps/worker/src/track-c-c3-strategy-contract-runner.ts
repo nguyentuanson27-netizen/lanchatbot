@@ -612,6 +612,7 @@ function compileResponderDraft(input: Readonly<{
   draft: ResponderDraft;
   lane: TrackCV5ExecutionLane;
   evaluationAt: Date;
+  dialogue: readonly ShadowContextMessage[];
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
   if ((task.answer.status === "SUPPORTED" ||
@@ -667,6 +668,13 @@ function compileResponderDraft(input: Readonly<{
       claimContentHash: evidence.provenance.contentHash,
     });
   });
+  if (task.evidence.some(({ capability }) => capability === "ETA") &&
+      customerStatesDeadlineConstraint(input.dialogue)) {
+    segments.push({
+      kind: "GENERAL",
+      text: "Với mốc thời gian chị vừa nêu, khoảng giao dự kiến này không bảo đảm kịp mốc đó ạ.",
+    });
+  }
   if (task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS") {
     segments.push({
       kind: "ACTION_REQUEST",
@@ -829,27 +837,6 @@ function customerStatesDeadlineConstraint(
     .test(value);
 }
 
-function deriveDeadlineFeasibility(
-  task: TrackCResponderTask,
-  dialogue: readonly ShadowContextMessage[],
-): TrackCResponderTask {
-  if (!customerStatesDeadlineConstraint(dialogue) ||
-      !task.evidence.some(({ capability }) => capability === "ETA")) {
-    return task;
-  }
-  const feasibilityText =
-    "Với mốc thời gian chị vừa nêu, khoảng giao dự kiến này không bảo đảm kịp mốc đó ạ.";
-  const evidence = Object.freeze(task.evidence.map((entry) =>
-    entry.capability !== "ETA" || entry.deterministicText === undefined
-      ? entry
-      : Object.freeze({
-          ...entry,
-          deterministicText: `${entry.deterministicText} ${feasibilityText}`,
-        })
-  ));
-  return Object.freeze({ ...task, evidence });
-}
-
 function fixedTask(
   context: ContextV2,
   evidence: readonly TrackCSelectableEvidence[],
@@ -951,7 +938,6 @@ export async function runTrackCStrategyContractCase(
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
       });
-      task = deriveDeadlineFeasibility(task, input.evaluationContext);
     } catch (error) {
       throw stageFailure("STRATEGIST", strategistPayload, error);
     }
@@ -990,6 +976,7 @@ export async function runTrackCStrategyContractCase(
       draft,
       lane: input.lane,
       evaluationAt: input.evaluationAt,
+      dialogue: input.evaluationContext,
     });
   } catch (error) {
     throw stageFailure("FINAL_GUARD", responderPayload, error);
