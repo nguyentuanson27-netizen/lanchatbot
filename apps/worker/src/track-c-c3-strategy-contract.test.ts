@@ -107,11 +107,11 @@ describe("Track C C3 clean strategy contract", () => {
     expect(task.requiredEvidenceRefs).toEqual([]);
   });
 
-  it("does not let ACKNOWLEDGE stand in for an unresolved factual answer", () => {
-    expect(() => compileTrackCStrategistDecision({
+  it("allows acknowledgement-only intent without factual evidence", () => {
+    const task = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ACKNOWLEDGE",
-        goal: "Acknowledge a factual question without evidence.",
+        goal: "Ghi nhận băn khoăn của khách.",
         proposition: "STOCK",
         evidenceRefs: [],
         continuation: { type: "KEEP_OPEN" },
@@ -122,7 +122,15 @@ describe("Track C C3 clean strategy contract", () => {
       measurementsUnavailable: false,
       productResolved: true,
       hardStop: false,
-    })).toThrow("TRACK_C_STRATEGIST_REPLY_ACT_INVALID");
+    });
+
+    expect(task.answer).toMatchObject({
+      kind: "ACKNOWLEDGE",
+      status: "NOT_APPLICABLE",
+      proposition: "STOCK",
+    });
+    expect(task.evidence).toEqual([]);
+    expect(task.requiredEvidenceRefs).toEqual([]);
   });
 
   it("allows grounded evidence for an acknowledge-and-explain response", () => {
@@ -146,14 +154,14 @@ describe("Track C C3 clean strategy contract", () => {
     expect(task.evidence).toEqual([stockEvidence]);
   });
 
-  it("keeps supported factual answers from creating a new decision variable", () => {
-    expect(() => compileTrackCStrategistDecision({
+  it("allows supported evidence with a typed ordinary ASK chosen by the Strategist", () => {
+    const task = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ANSWER",
-        goal: "Trả lời giá đã xác minh.",
+        goal: "Trả lời giá rồi hỏi tiêu chí có thể thay đổi bước tư vấn tiếp theo.",
         proposition: "PRICE",
         evidenceRefs: [priceEvidence.ref],
-        continuation: { type: "ASK", input: "LOCALITY" },
+        continuation: { type: "ASK", input: "DECISION_CRITERION" },
         canonicalAction: "NONE",
       },
       evidence: [priceEvidence],
@@ -161,7 +169,71 @@ describe("Track C C3 clean strategy contract", () => {
       measurementsUnavailable: false,
       productResolved: true,
       hardStop: false,
+    });
+
+    expect(task.answer).toMatchObject({
+      kind: "ANSWER",
+      status: "SUPPORTED",
+      proposition: "PRICE",
+    });
+    expect(task.continuation).toEqual({
+      type: "ASK",
+      input: "DECISION_CRITERION",
+    });
+  });
+
+  it("requires canonical action to be the only progression mechanism", () => {
+    const valid = compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "CLARIFY",
+        goal: "Xin số đo cần thiết.",
+        proposition: "NONE",
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "ASK_MEASUREMENTS",
+      },
+      evidence: [],
+      permittedCanonicalActions: ["ASK_MEASUREMENTS"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: false,
+    });
+    expect(valid.continuation).toBeNull();
+    expect(valid.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
+
+    expect(() => compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "CLARIFY",
+        goal: "Xin số đo cần thiết.",
+        proposition: "NONE",
+        evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" },
+        canonicalAction: "ASK_MEASUREMENTS",
+      },
+      evidence: [],
+      permittedCanonicalActions: ["ASK_MEASUREMENTS"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: false,
     })).toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  });
+
+  it("rejects an unknown selected evidence reference", () => {
+    expect(() => compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "ANSWER",
+        goal: "Trả lời tình trạng còn hàng.",
+        proposition: "STOCK",
+        evidenceRefs: ["E_UNKNOWN"],
+        continuation: { type: "KEEP_OPEN" },
+        canonicalAction: "NONE",
+      },
+      evidence: [stockEvidence],
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: false,
+    })).toThrow("TRACK_C_STRATEGIST_EVIDENCE_INVALID");
   });
 
   it("rejects selected evidence outside the bound product referent", () => {
