@@ -515,6 +515,18 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(body.systemInstruction.parts[0].text).toContain(
       "If the latest customer turn expresses an objection, concern, hesitation, or resistance, replyAct must be ACKNOWLEDGE",
     );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "directly relevant to the customer's current decision or to an immediate next decision already established",
+    );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "Do not invent a new discovery dimension merely because it could be useful later",
+    );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "primarily confirms or corrects a preference or product selection",
+    );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "A selection alone is not buying commitment or checkout authorization",
+    );
     expect(body.generationConfig.responseSchema.anyOf).toBeDefined();
   });
 
