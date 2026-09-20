@@ -70,8 +70,7 @@ const RESPONDER_INSTRUCTION = [
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
   "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
-  "For a typed ASK, progressionText must request the customer's own decision input for only the supplied continuation.input. Never ask the customer to provide a shop/system fact that the task or evidence would own. Do not add factual explanation, evidence wording, product facts, referent assertions, another decision variable, or a second question.",
-  "For ASK COLOR, ask which color the customer prefers, chooses, wants, or prioritizes. Never ask which colors the shop/product has.",
+  "For a typed ASK, progressionText must request the customer's own decision input for only the supplied continuation.input. COLOR asks for the customer's color preference or choice; DEADLINE asks for the customer's cutoff; BUDGET asks for the customer's budget constraint; STYLE asks for the customer's style preference. Never ask the customer to provide a shop/system fact that the task or evidence would own. Do not add factual explanation, evidence wording, product facts, referent assertions, another decision variable, or a second question.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
@@ -88,6 +87,9 @@ const UNRESOLVED_ANSWER_TEXT =
   "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
 
 type CheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS";
+type TrackCDeliveryDeadlineConstraint = Readonly<{
+  maxDeliveryDays: number;
+}>;
 type ResponderDraft = Readonly<{
   answerText: string | null;
   factualTexts: readonly string[];
@@ -111,6 +113,11 @@ export interface TrackCStrategyContractCaseInput {
   readonly simulationFacts?: readonly unknown[];
   /** Runtime-owned; never inferred from dialogue or carried as model evidence. */
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
+  /**
+   * Code-owned structured decision constraint. Never derive this value from
+   * customer dialogue text inside this contract runner.
+   */
+  readonly deliveryDeadlineConstraint?: TrackCDeliveryDeadlineConstraint;
   readonly simulationMetadata?: readonly TrackCV5SimulationMetadata[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
@@ -590,13 +597,10 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
   }
   if (task.continuation?.type === "ASK" && task.continuation.input === "COLOR") {
     const progression = draft.progressionText?.normalize("NFC") ?? "";
-    const asksCustomerChoice =
-      /(?:thích|chọn|ưu\s*tiên|muốn|nghiêng|lấy)[^?!.…]{0,80}màu|màu[^?!.…]{0,80}(?:thích|chọn|ưu\s*tiên|muốn|nghiêng|lấy)/iu
+    const asksShopColorFact =
+      /(?:shop|bên\s+em|mẫu(?:\s+này)?(?:\s+bên\s+em)?)\s+(?:hiện\s+)?(?:có|còn)\s+(?:những\s+)?màu\s+(?:gì|nào)/iu
         .test(progression);
-    const asksShopFact =
-      /(?:shop|bên\s+em|mẫu\s+(?:này\s+)?(?:có|còn))[^?!.…]{0,80}màu|có\s+(?:những\s+)?màu\s+(?:gì|nào)/iu
-        .test(progression);
-    if (!asksCustomerChoice || asksShopFact) {
+    if (asksShopColorFact) {
       throw new Error("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
     }
   }
@@ -606,13 +610,30 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
   }
 }
 
+function deterministicDeadlineFeasibilityText(
+  task: TrackCResponderTask,
+  constraint: TrackCDeliveryDeadlineConstraint | null,
+): string | null {
+  if (constraint === null || task.answer.proposition !== "ETA") return null;
+  const eta = task.evidence.find(({ capability }) => capability === "ETA");
+  const minDays = eta?.value.minDays;
+  const maxDays = eta?.value.maxDays;
+  if (!Number.isInteger(minDays) || !Number.isInteger(maxDays) ||
+      (minDays as number) < 0 || (maxDays as number) < (minDays as number)) {
+    return null;
+  }
+  return (maxDays as number) > constraint.maxDeliveryDays
+    ? "Với mốc nhận hàng đã xác định, khoảng giao dự kiến này không bảo đảm kịp mốc đó ạ."
+    : null;
+}
+
 function compileResponderDraft(input: Readonly<{
   context: ContextV2;
   task: TrackCResponderTask;
   draft: ResponderDraft;
   lane: TrackCV5ExecutionLane;
   evaluationAt: Date;
-  dialogue: readonly ShadowContextMessage[];
+  deliveryDeadlineConstraint: TrackCDeliveryDeadlineConstraint | null;
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
   if ((task.answer.status === "SUPPORTED" ||
@@ -668,12 +689,12 @@ function compileResponderDraft(input: Readonly<{
       claimContentHash: evidence.provenance.contentHash,
     });
   });
-  if (task.evidence.some(({ capability }) => capability === "ETA") &&
-      customerStatesDeadlineConstraint(input.dialogue)) {
-    segments.push({
-      kind: "GENERAL",
-      text: "Với mốc thời gian chị vừa nêu, khoảng giao dự kiến này không bảo đảm kịp mốc đó ạ.",
-    });
+  const deadlineFeasibilityText = deterministicDeadlineFeasibilityText(
+    task,
+    input.deliveryDeadlineConstraint,
+  );
+  if (deadlineFeasibilityText !== null) {
+    segments.push({ kind: "GENERAL", text: deadlineFeasibilityText });
   }
   if (task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS") {
     segments.push({
@@ -825,16 +846,16 @@ function constraintsFor(
   });
 }
 
-function customerStatesDeadlineConstraint(
-  dialogue: readonly ShadowContextMessage[],
-): boolean {
-  const latestInbound = [...dialogue].reverse().find(({ direction }) =>
-    direction === "INBOUND"
-  );
-  if (latestInbound === undefined) return false;
-  const value = latestInbound.text.normalize("NFC");
-  return /(?:\bdeadline\b|(?:cần|phải)\s+nhận\s+(?:trước|trong)|(?:trước|tới|đến|kịp|hạn)\s+(?:ngày|thứ|\d)|\btrong\s+\d+\s*ngày\b)/iu
-    .test(value);
+function validatedDeliveryDeadlineConstraint(
+  value: TrackCDeliveryDeadlineConstraint | undefined,
+): TrackCDeliveryDeadlineConstraint | null {
+  if (value === undefined) return null;
+  if (canonicalJsonV1(Object.keys(value).sort()) !==
+      canonicalJsonV1(["maxDeliveryDays"]) ||
+      !Number.isInteger(value.maxDeliveryDays) || value.maxDeliveryDays < 0) {
+    throw new Error("TRACK_C_DEADLINE_CONSTRAINT_INVALID");
+  }
+  return Object.freeze({ maxDeliveryDays: value.maxDeliveryDays });
 }
 
 function fixedTask(
@@ -871,6 +892,9 @@ export async function runTrackCStrategyContractCase(
   const simulationFacts = input.simulationFacts ?? [];
   const simulationMetadata = input.simulationMetadata ?? [];
   const trustedAcquisition = input.trustedAcquisition;
+  const deliveryDeadlineConstraint = validatedDeliveryDeadlineConstraint(
+    input.deliveryDeadlineConstraint,
+  );
   if (trustedAcquisition !== undefined &&
       !isTrackCTrustedAcquisitionMetadata(trustedAcquisition)) {
     throw new Error("TRACK_C_ACQUISITION_METADATA_INVALID");
@@ -976,7 +1000,7 @@ export async function runTrackCStrategyContractCase(
       draft,
       lane: input.lane,
       evaluationAt: input.evaluationAt,
-      dialogue: input.evaluationContext,
+      deliveryDeadlineConstraint,
     });
   } catch (error) {
     throw stageFailure("FINAL_GUARD", responderPayload, error);
