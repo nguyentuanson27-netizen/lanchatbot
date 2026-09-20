@@ -12,6 +12,8 @@ import {
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runner.js";
+import { trackCRuntimeClaimDeterministicText } from
+  "./track-c-c3-selectable-evidence.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -154,7 +156,7 @@ function successfulTransport() {
       payload: providerPayload({
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Mẫu này hiện 849k chị ạ.",
+          text: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
           claimRef: "CLAIM_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -194,7 +196,7 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.output.segments).toEqual([{
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu này hiện 849k chị ạ.",
+      text: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
       claimContentHash: capture.context.verifiedClaims[0]?.provenance.contentHash,
     }]);
     expect(result.identity.captureContextHash).toBe(capture.context.contextHash);
@@ -260,9 +262,13 @@ describe("Track C C3 V5 benchmark runner", () => {
       if (claim.type !== "PRICE" || claim.scope.kind !== "PRODUCT") {
         throw new Error("TEST_V5_MULTI_PRICE_CLAIM_REQUIRED");
       }
+      const deterministicText = trackCRuntimeClaimDeterministicText(claim);
+      if (deterministicText === null) {
+        throw new Error("TEST_V5_MULTI_DETERMINISTIC_TEXT_REQUIRED");
+      }
       return {
         kind: "VERIFIED_CLAIM" as const,
-        text: `${claim.scope.productId} hiện ${claim.value.amountVnd / 1_000}k chị ạ.`,
+        text: deterministicText,
         claimRef: `CLAIM_${String(index + 1).padStart(3, "0")}`,
       };
     });
