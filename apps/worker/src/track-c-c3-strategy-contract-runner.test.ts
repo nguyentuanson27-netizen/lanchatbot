@@ -580,11 +580,11 @@ describe("Track C C3 strategy-contract runner", () => {
     });
 
     expect(result.conversationPlan).toMatchObject({
-      answer: {
-        kind: "ACKNOWLEDGE",
-        proposition: "STOCK",
-      },
+      replyAct: "ACKNOWLEDGE",
+      proposition: "STOCK",
+      evidenceRefs: ["CLAIM_001"],
       continuation: { type: "KEEP_OPEN" },
+      canonicalAction: "NONE",
     });
     expect(result.output.segments).toEqual([
       { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
