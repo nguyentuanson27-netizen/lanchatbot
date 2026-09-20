@@ -154,6 +154,32 @@ describe("Track C C3 clean strategy contract", () => {
     expect(task.evidence).toEqual([stockEvidence]);
   });
 
+  it("allows a supported factual answer to KEEP_OPEN when no further blocker is chosen", () => {
+    const task = compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "ANSWER",
+        goal: "Trả lời giá hiện tại và không tự mở thêm qualification.",
+        proposition: "PRICE",
+        evidenceRefs: [priceEvidence.ref],
+        continuation: { type: "KEEP_OPEN" },
+        canonicalAction: "NONE",
+      },
+      evidence: [priceEvidence],
+      permittedCanonicalActions: ["NONE"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: false,
+    });
+
+    expect(task.answer).toMatchObject({
+      kind: "ANSWER",
+      status: "SUPPORTED",
+      proposition: "PRICE",
+    });
+    expect(task.continuation).toEqual({ type: "KEEP_OPEN" });
+    expect(task.canonicalRequest).toBeNull();
+  });
+
   it("allows supported evidence with a typed ordinary ASK chosen by the Strategist", () => {
     const task = compileTrackCStrategistDecision({
       decision: {
