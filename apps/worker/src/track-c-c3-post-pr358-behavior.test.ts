@@ -106,7 +106,7 @@ type ContractPrompt = Readonly<{
   responderTask?: Readonly<{
     answer: Readonly<{ kind: string; status: string }>;
     evidence: readonly unknown[];
-    continuation: Readonly<{ type: string }> | null;
+    continuation: Readonly<{ type: string; input?: string }> | null;
     canonicalRequest: Readonly<{
       type: string;
       requestedFields?: readonly string[];
@@ -153,7 +153,9 @@ function responderFor(
     progressionText: keepOpen ? null
       : canonical === "ASK_MEASUREMENTS"
         ? "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?"
-        : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
+        : task.continuation?.type === "ASK" && task.continuation.input === "COLOR"
+          ? "Màu nào hợp ý chị hơn ạ?"
+          : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   };
 }
 
