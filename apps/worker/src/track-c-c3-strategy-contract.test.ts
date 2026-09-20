@@ -218,6 +218,33 @@ describe("Track C C3 clean strategy contract", () => {
     })).toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   });
 
+  it("keeps HOLD_POSITION closed for acknowledgement-only protected intent", () => {
+    const task = compileTrackCStrategistDecision({
+      decision: {
+        replyAct: "ACKNOWLEDGE",
+        goal: "Ghi nhận và không mở lại cuộc hội thoại.",
+        proposition: "STOCK",
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      },
+      evidence: [stockEvidence],
+      permittedCanonicalActions: ["HOLD_POSITION"],
+      measurementsUnavailable: false,
+      productResolved: true,
+      hardStop: true,
+    });
+
+    expect(task.answer).toMatchObject({
+      kind: "ACKNOWLEDGE",
+      status: "NOT_APPLICABLE",
+      proposition: "STOCK",
+    });
+    expect(task.evidence).toEqual([]);
+    expect(task.continuation).toBeNull();
+    expect(task.canonicalRequest).toEqual({ type: "HOLD_POSITION" });
+  });
+
   it("rejects an unknown selected evidence reference", () => {
     expect(() => compileTrackCStrategistDecision({
       decision: {
