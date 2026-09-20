@@ -596,6 +596,173 @@ describe("Track C C3 strategy-contract runner", () => {
     ]);
   });
 
+  it("keeps preference or selection confirmation on ACKNOWLEDGE + KEEP_OPEN without checkout", async () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_SELECTION_ACK_KEEP_OPEN",
+        latest_customer_message: "Chị nghiêng về mẫu này rồi nhé.",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "CONSIDERING",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: "customer confirms a preference but has not committed",
+          },
+          source_stage: null,
+          runtime_claim_refs: [],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the customer's selection preference without reopening discovery.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu ý chị ạ.",
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị nghiêng về mẫu này rồi nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    expect(result.conversationPlan).toMatchObject({
+      replyAct: "ACKNOWLEDGE",
+      proposition: "NONE",
+      continuation: { type: "KEEP_OPEN" },
+      canonicalAction: "NONE",
+    });
+    expect(result.output.cta).toBe("NONE");
+    expect(result.reply).toBe(
+      "Dạ em hiểu ý chị ạ.\nEm vẫn ở đây khi chị cần xem thêm ạ.",
+    );
+  });
+
+  it("gives the Responder only the typed ASK input and no factual wording authority", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "CLARIFY",
+          goal: "Ask the color choice already relevant to the customer's current decision.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "ASK", input: "COLOR" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ được chị ạ.",
+          factualTexts: [],
+          progressionText: "Chị muốn chọn màu nào ạ?",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị đang chọn màu cho mẫu này.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    const responderBody = JSON.parse(send.mock.calls[1]![0].body) as {
+      systemInstruction: { parts: [{ text: string }] };
+      contents: [{ parts: [{ text: string }] }];
+    };
+    const responderPrompt = JSON.parse(
+      responderBody.contents[0].parts[0].text,
+    ) as {
+      responderTask: {
+        evidence: unknown[];
+        continuation: { type: string; input: string } | null;
+      };
+    };
+
+    expect(responderPrompt.responderTask.evidence).toEqual([]);
+    expect(responderPrompt.responderTask.continuation).toEqual({
+      type: "ASK",
+      input: "COLOR",
+    });
+    expect(responderBody.systemInstruction.parts[0].text).toContain(
+      "For a typed ASK, progressionText must be one minimal question about only the supplied continuation.input",
+    );
+    expect(result.output.segments.at(-1)).toEqual({
+      kind: "GENERAL",
+      text: "Chị muốn chọn màu nào ạ?",
+    });
+  });
+
+  it("fails closed when an ASK progression authors factual wording", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "CLARIFY",
+          goal: "Ask the color choice already relevant to the customer's current decision.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "ASK", input: "COLOR" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ được chị ạ.",
+          factualTexts: [],
+          progressionText: "Mẫu này giá 849.000đ, chị muốn chọn màu nào ạ?",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị đang chọn màu cho mẫu này.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  });
+
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
