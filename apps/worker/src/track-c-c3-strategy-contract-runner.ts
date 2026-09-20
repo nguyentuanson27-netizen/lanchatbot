@@ -59,6 +59,7 @@ const STRATEGIST_INSTRUCTION = [
   "ACKNOWLEDGE is acknowledgement-only. For an ordinary factual question that is not an objection, concern, hesitation, or resistance, use ANSWER; if supporting evidence is unavailable, keep evidenceRefs empty so code derives UNRESOLVED.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
+  "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
 ].join("\n");
 
@@ -69,7 +70,8 @@ const RESPONDER_INSTRUCTION = [
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
   "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
-  "For a typed ASK, progressionText must be one minimal question about only the supplied continuation.input. Do not add factual explanation, evidence wording, product facts, referent assertions, another decision variable, or a second question.",
+  "For a typed ASK, progressionText must request the customer's own decision input for only the supplied continuation.input. Never ask the customer to provide a shop/system fact that the task or evidence would own. Do not add factual explanation, evidence wording, product facts, referent assertions, another decision variable, or a second question.",
+  "For ASK COLOR, ask which color the customer prefers, chooses, wants, or prioritizes. Never ask which colors the shop/product has.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
@@ -586,6 +588,18 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
       throw new Error("TRACK_C_RESPONDER_MEASUREMENTS_QUESTION_INVALID");
     }
   }
+  if (task.continuation?.type === "ASK" && task.continuation.input === "COLOR") {
+    const progression = draft.progressionText?.normalize("NFC") ?? "";
+    const asksCustomerChoice =
+      /(?:thích|chọn|ưu\s*tiên|muốn|nghiêng|lấy)[^?!.…]{0,80}màu|màu[^?!.…]{0,80}(?:thích|chọn|ưu\s*tiên|muốn|nghiêng|lấy)/iu
+        .test(progression);
+    const asksShopFact =
+      /(?:shop|bên\s+em|mẫu\s+(?:này\s+)?(?:có|còn))[^?!.…]{0,80}màu|có\s+(?:những\s+)?màu\s+(?:gì|nào)/iu
+        .test(progression);
+    if (!asksCustomerChoice || asksShopFact) {
+      throw new Error("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
+    }
+  }
   const needsProgression = responderNeedsModelProgression(task);
   if (needsProgression !== (draft.progressionText !== null)) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
@@ -803,6 +817,39 @@ function constraintsFor(
   });
 }
 
+function customerStatesDeadlineConstraint(
+  dialogue: readonly ShadowContextMessage[],
+): boolean {
+  const latestInbound = [...dialogue].reverse().find(({ direction }) =>
+    direction === "INBOUND"
+  );
+  if (latestInbound === undefined) return false;
+  const value = latestInbound.text.normalize("NFC");
+  return /(?:\bdeadline\b|(?:cần|phải)\s+nhận\s+(?:trước|trong)|(?:trước|tới|đến|kịp|hạn)\s+(?:ngày|thứ|\d)|\btrong\s+\d+\s*ngày\b)/iu
+    .test(value);
+}
+
+function deriveDeadlineFeasibility(
+  task: TrackCResponderTask,
+  dialogue: readonly ShadowContextMessage[],
+): TrackCResponderTask {
+  if (!customerStatesDeadlineConstraint(dialogue) ||
+      !task.evidence.some(({ capability }) => capability === "ETA")) {
+    return task;
+  }
+  const feasibilityText =
+    "Với mốc thời gian chị vừa nêu, khoảng giao dự kiến này không bảo đảm kịp mốc đó ạ.";
+  const evidence = Object.freeze(task.evidence.map((entry) =>
+    entry.capability !== "ETA" || entry.deterministicText === undefined
+      ? entry
+      : Object.freeze({
+          ...entry,
+          deterministicText: `${entry.deterministicText} ${feasibilityText}`,
+        })
+  ));
+  return Object.freeze({ ...task, evidence });
+}
+
 function fixedTask(
   context: ContextV2,
   evidence: readonly TrackCSelectableEvidence[],
@@ -904,6 +951,7 @@ export async function runTrackCStrategyContractCase(
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
       });
+      task = deriveDeadlineFeasibility(task, input.evaluationContext);
     } catch (error) {
       throw stageFailure("STRATEGIST", strategistPayload, error);
     }
