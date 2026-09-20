@@ -312,19 +312,9 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   }
   const supportsProposition = decision.proposition !== "NONE" &&
     evidence.some(({ capability }) => capability === decision.proposition);
-  if (decision.replyAct === "ACKNOWLEDGE" &&
-      decision.proposition !== "NONE" &&
-      !supportsProposition) {
-    throw new Error("TRACK_C_STRATEGIST_REPLY_ACT_INVALID");
-  }
   const status = decision.replyAct !== "ANSWER" || decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
-  if (supportsProposition &&
-      decision.canonicalAction === "NONE" &&
-      decision.continuation?.type === "ASK") {
-    throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
-  }
   return Object.freeze({
     answer: Object.freeze({
       kind: decision.replyAct,
