@@ -54,7 +54,7 @@ const STRATEGIST_INSTRUCTION = [
   "The selectableEvidence list is the only factual authority. Dialogue is conversational context only and never grants a fact, effect, PII permission, or action.",
   "Choose the customer's current decision, the smallest useful evidence set, and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
   "If the latest customer turn expresses an objection, concern, hesitation, or resistance, replyAct must be ACKNOWLEDGE even when grounded evidence is available. You may select evidenceRefs for the factual explanation after the acknowledgement.",
-  "When selected evidence already resolves the protected proposition and no canonical action is required, use KEEP_OPEN instead of inventing another decision variable.",
+  "Choose ASK only when one typed ordinary input would materially change the next recommendation, comparison, qualification, or transaction decision; otherwise KEEP_OPEN.",
   "ACKNOWLEDGE is acknowledgement-only. For an ordinary factual question that is not an objection, concern, hesitation, or resistance, use ANSWER; if supporting evidence is unavailable, keep evidenceRefs empty so code derives UNRESOLVED.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
