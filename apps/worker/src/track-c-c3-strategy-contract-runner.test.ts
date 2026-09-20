@@ -59,6 +59,54 @@ function capture() {
   });
 }
 
+function etaCapture() {
+  return materializeTrackCV5CaseCapture({
+    lane: "BEHAVIOR_SIMULATION",
+    fixture: {
+      id: "C3_DEADLINE_FEASIBILITY",
+      latest_customer_message: "Chị đang cân nhắc mốc nhận hàng.",
+      context: {
+        product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+        phase: "BROWSING",
+        canonical_flags: [],
+        buying_intent: {
+          decision: "CONSIDERING",
+          requested_action: "NONE",
+          quantity: null,
+          evidence: "customer is deciding delivery feasibility",
+        },
+        source_stage: null,
+        runtime_claim_refs: ["RC_ETA_HN"],
+      },
+    },
+    runtimeClaimCatalog: facts.runtime_claim_catalog,
+    recipe,
+  });
+}
+
+function etaDecisionTransport() {
+  return vi.fn<CandidateVertexTransport["send"]>()
+    .mockResolvedValueOnce({
+      payload: payload({
+        replyAct: "ANSWER",
+        goal: "Resolve delivery feasibility using the verified ETA.",
+        proposition: "ETA",
+        evidenceRefs: ["CLAIM_001"],
+        continuation: { type: "KEEP_OPEN" },
+        canonicalAction: "NONE",
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    })
+    .mockResolvedValueOnce({
+      payload: payload({
+        answerText: null,
+        factualTexts: [],
+        progressionText: null,
+      }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+}
+
 function payload(value: unknown) {
   return { candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] };
 }
@@ -336,7 +384,7 @@ describe("Track C C3 strategy-contract runner", () => {
       payload: payload({
         answerText: null,
         factualTexts: ["Dạ mẫu này hiện 849.000đ và rất cao cấp ạ."],
-        progressionText: "Chị thích màu nào hơn ạ?",
+        progressionText: "Màu nào hợp ý chị hơn ạ?",
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
     });
@@ -731,7 +779,10 @@ describe("Track C C3 strategy-contract runner", () => {
       input: "COLOR",
     });
     expect(responderBody.systemInstruction.parts[0].text).toContain(
-      "For a typed ASK, progressionText must be one minimal question about only the supplied continuation.input",
+      "request the customer's own decision input for only the supplied continuation.input",
+    );
+    expect(responderBody.systemInstruction.parts[0].text).toContain(
+      "Never ask the customer to provide a shop/system fact",
     );
     expect(result.output.segments.at(-1)).toEqual({
       kind: "GENERAL",
@@ -1413,7 +1464,7 @@ describe("Track C C3 strategy-contract runner", () => {
       transport: { send: validSend },
     });
 
-    expect(valid.reply).toMatch(/thích\s+màu|màu\s+nào/iu);
+    expect(valid.reply).toContain("Màu nào hợp ý chị hơn ạ?");
 
     const invalidSend = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
@@ -1445,12 +1496,12 @@ describe("Track C C3 strategy-contract runner", () => {
     })).rejects.toThrow("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
   });
 
-  it("rejects a typed COLOR ASK realized as a different customer decision input", async () => {
+  it("does not require a fixed vocabulary for a valid COLOR decision question", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({
-          replyAct: "ACKNOWLEDGE",
-          goal: "Acknowledge the customer's stated preference and ask only the chosen color decision.",
+          replyAct: "CLARIFY",
+          goal: "Ask only for the customer's color decision.",
           proposition: "NONE",
           evidenceRefs: [],
           continuation: { type: "ASK", input: "COLOR" },
@@ -1462,12 +1513,12 @@ describe("Track C C3 strategy-contract runner", () => {
         payload: payload({
           answerText: "Dạ em hiểu ý chị ạ.",
           factualTexts: [],
-          progressionText: "Chị cần nhận hàng trước ngày nào ạ?",
+          progressionText: "Màu nào hợp ý chị hơn ạ?",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
 
-    await expect(runTrackCStrategyContractCase({
+    const result = await runTrackCStrategyContractCase({
       lane: "BEHAVIOR_SIMULATION",
       modelResource: MODEL_RESOURCE,
       capture: capture(),
@@ -1478,61 +1529,64 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
+    });
+
+    expect(result.reply).toContain("Màu nào hợp ý chị hơn ạ?");
   });
 
-  it("derives conservative deadline feasibility from selected verified ETA and the customer cutoff", async () => {
-    const captureValue = materializeTrackCV5CaseCapture({
-      lane: "BEHAVIOR_SIMULATION",
-      fixture: {
-        id: "C3_DEADLINE_FEASIBILITY",
-        latest_customer_message: "Nếu tới ngày thứ 4 thì chị không dùng được nữa.",
-        context: {
-          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
-          phase: "BROWSING",
-          canonical_flags: [],
-          buying_intent: {
-            decision: "CONSIDERING",
-            requested_action: "NONE",
-            quantity: null,
-            evidence: "customer has a delivery cutoff",
-          },
-          source_stage: null,
-          runtime_claim_refs: ["RC_ETA_HN"],
-        },
-      },
-      runtimeClaimCatalog: facts.runtime_claim_catalog,
-      recipe,
-    });
-    const send = vi.fn<CandidateVertexTransport["send"]>()
-      .mockResolvedValueOnce({
-        payload: payload({
-          replyAct: "ANSWER",
-          goal: "Resolve whether the verified delivery window can guarantee the customer's cutoff.",
-          proposition: "ETA",
-          evidenceRefs: ["CLAIM_001"],
-          continuation: { type: "KEEP_OPEN" },
-          canonicalAction: "NONE",
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      })
-      .mockResolvedValueOnce({
-        payload: payload({
-          answerText: null,
-          factualTexts: [],
-          progressionText: null,
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      });
-
+  it("derives a conservative non-guarantee when structured deadline conflicts with verified ETA", async () => {
+    const send = etaDecisionTransport();
     const result = await runTrackCStrategyContractCase({
       lane: "BEHAVIOR_SIMULATION",
       modelResource: MODEL_RESOURCE,
-      capture: captureValue,
+      capture: etaCapture(),
       evaluationAt: new Date(recipe.evaluation_at),
       evaluationContext: [{
         direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
-        text: "Nếu tới ngày thứ 4 thì chị không dùng được nữa.",
+        text: "Chị đang cân nhắc mốc nhận hàng.",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      deliveryDeadlineConstraint: { maxDeliveryDays: 3 },
+      transport: { send },
+    });
+
+    expect(result.reply).toMatch(/2.?4\s*ngày/iu);
+    expect(result.reply).toMatch(/không\s+bảo\s+đảm.*(?:kịp|mốc)/iu);
+    expect(result.reply).not.toMatch(/giao\s+hỏa\s*tốc|express|chắc\s+chắn\s+kịp/iu);
+  });
+
+  it("does not derive a false non-guarantee when structured deadline is wider than verified ETA", async () => {
+    const send = etaDecisionTransport();
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: etaCapture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị cần nhận trong 10 ngày.",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      deliveryDeadlineConstraint: { maxDeliveryDays: 10 },
+      transport: { send },
+    });
+
+    expect(result.reply).toMatch(/2.?4\s*ngày/iu);
+    expect(result.reply).not.toMatch(/không\s+bảo\s+đảm.*(?:kịp|mốc)/iu);
+  });
+
+  it("does not infer deadline feasibility from dialogue when structured deadline is absent", async () => {
+    const send = etaDecisionTransport();
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: etaCapture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị cần nhận trong 3 ngày.",
         attachmentCount: 0,
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
@@ -1540,8 +1594,7 @@ describe("Track C C3 strategy-contract runner", () => {
     });
 
     expect(result.reply).toMatch(/2.?4\s*ngày/iu);
-    expect(result.reply).toMatch(/không\s+bảo\s+đảm.*(?:kịp|mốc)/iu);
-    expect(result.reply).not.toMatch(/giao\s+hỏa\s*tốc|express|chắc\s+chắn\s+kịp/iu);
+    expect(result.reply).not.toMatch(/không\s+bảo\s+đảm.*(?:kịp|mốc)/iu);
   });
 
 });
