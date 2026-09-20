@@ -84,7 +84,7 @@ function promptOf(request: { body: string }) {
     responderTask?: {
       answer: { kind: string; status: string };
       evidence: unknown[];
-      continuation: Readonly<{ type: string }> | null;
+      continuation: Readonly<{ type: string; input?: string }> | null;
       canonicalRequest: { type: string } | null;
     };
   };
@@ -120,7 +120,9 @@ function responderPayload(
       ? null : reply,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
     progressionText: hold || keepOpen ? null
-      : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
+      : task.continuation?.type === "ASK" && task.continuation.input === "COLOR"
+        ? "Màu nào hợp ý chị hơn ạ?"
+        : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   });
 }
 
