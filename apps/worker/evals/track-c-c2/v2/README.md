@@ -46,10 +46,10 @@ Provider-backed scores remain inadmissible until the owner-selected judge provid
 
 The embedded 30-case HOLDOUT is an **exposed regression checkpoint**, not blind evidence. A future blind HOLDOUT must be sealed after candidate/adapter/rubric freeze.
 
-Frozen corpus hashes remain:
+Current expanded content hashes:
 
 - DEV 70: `714d803526d38993b0504997feea01590db1ce3b636c32efb6fc4b92f849d37f`
-- HOLDOUT 30: `ef5ca6d4ce14eb0d518610c786601cb3eac1a3de17ef471d25dc6523fa0b43f8`
+- HOLDOUT 30: `c68a079f50f565045f81098a9b7a2ecc0a1dbcf8b09007bd46005fb72adbecc6`
 - OWNER/SAFETY 15: `cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e`
 
 Run from `apps/worker`:
