@@ -486,6 +486,116 @@ describe("Track C C3 strategy-contract runner", () => {
     );
   });
 
+  it("encodes objection-first strategist semantics without changing the minimal contract", () => {
+    const request = buildTrackCStrategistContractRequest({
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND",
+        senderType: "CUSTOMER",
+        messageType: "TEXT",
+        text: "Chị vẫn còn lăn tăn nên chưa muốn quyết ngay.",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      evidence: [],
+      constraints: {
+        permittedCanonicalActions: ["NONE"],
+        measurementsUnavailable: false,
+        productResolved: true,
+        hardStop: false,
+      },
+    });
+    const body = JSON.parse(request.body) as {
+      systemInstruction: { parts: [{ text: string }] };
+      generationConfig: { responseSchema: { anyOf: unknown[] } };
+    };
+
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "If the latest customer turn expresses an objection, concern, hesitation, or resistance, replyAct must be ACKNOWLEDGE",
+    );
+    expect(body.generationConfig.responseSchema.anyOf).toBeDefined();
+  });
+
+  it("handles objection before grounded factual explanation when supported evidence exists", async () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_OBJECTION_SUPPORTED_EVIDENCE",
+        latest_customer_message:
+          "Chị vẫn lăn tăn vì mẫu này chỉ còn ít, chị chưa yên tâm lắm.",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "CONSIDERING",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: "customer remains hesitant",
+          },
+          source_stage: null,
+          runtime_claim_refs: ["RC_STOCK_A_LOW"],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "Acknowledge the concern, then explain the verified stock state.",
+          proposition: "STOCK",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND",
+        senderType: "CUSTOMER",
+        messageType: "TEXT",
+        text: "Chị vẫn lăn tăn vì mẫu này chỉ còn ít, chị chưa yên tâm lắm.",
+        attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    expect(result.conversationPlan).toMatchObject({
+      answer: {
+        kind: "ACKNOWLEDGE",
+        proposition: "STOCK",
+      },
+      continuation: { type: "KEEP_OPEN" },
+    });
+    expect(result.output.segments).toEqual([
+      { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
+      expect.objectContaining({
+        kind: "VERIFIED_CLAIM",
+        text: "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
+      }),
+      { kind: "GENERAL", text: "Em vẫn ở đây khi chị cần xem thêm ạ." },
+    ]);
+  });
+
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
