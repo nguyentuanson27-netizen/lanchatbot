@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import * as database from "@lana/database";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
@@ -48,7 +49,7 @@ describe("Track C C3 clean strategy contract", () => {
   });
 
   it("keeps unresolved propositions selectable without granting a fact", () => {
-    const task = compileTrackCStrategistDecision({
+    const { task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ANSWER",
         goal: "Làm rõ tình trạng còn hàng.",
@@ -64,7 +65,7 @@ describe("Track C C3 clean strategy contract", () => {
       hardStop: false,
     });
 
-    expect(task.answer).toMatchObject({ kind: "ANSWER", status: "UNRESOLVED" });
+    expect(task.answer).toMatchObject({ kind: "ANSWER", evidenceStatus: "UNRESOLVED" });
     expect(task.evidence).toEqual([]);
   });
 
@@ -87,7 +88,7 @@ describe("Track C C3 clean strategy contract", () => {
   });
 
   it("does not mark a proposition supported when its selected evidence has another capability", () => {
-    const task = compileTrackCStrategistDecision({
+    const { task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ANSWER",
         goal: "Làm rõ tình trạng còn hàng.",
@@ -103,12 +104,12 @@ describe("Track C C3 clean strategy contract", () => {
       hardStop: false,
     });
 
-    expect(task.answer.status).toBe("UNRESOLVED");
+    expect(task.answer).toMatchObject({ kind: "ANSWER", evidenceStatus: "UNRESOLVED" });
     expect(task.requiredEvidenceRefs).toEqual([]);
   });
 
   it("allows acknowledgement-only intent without factual evidence", () => {
-    const task = compileTrackCStrategistDecision({
+    const { task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ACKNOWLEDGE",
         goal: "Ghi nhận băn khoăn của khách.",
@@ -126,15 +127,13 @@ describe("Track C C3 clean strategy contract", () => {
 
     expect(task.answer).toMatchObject({
       kind: "ACKNOWLEDGE",
-      status: "NOT_APPLICABLE",
-      proposition: "STOCK",
     });
     expect(task.evidence).toEqual([]);
     expect(task.requiredEvidenceRefs).toEqual([]);
   });
 
   it("allows grounded evidence for an acknowledge-and-explain response", () => {
-    const task = compileTrackCStrategistDecision({
+    const { task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ACKNOWLEDGE",
         goal: "Ghi nhận băn khoăn rồi giải thích tình trạng còn hàng.",
@@ -150,15 +149,15 @@ describe("Track C C3 clean strategy contract", () => {
       hardStop: false,
     });
 
-    expect(task.answer).toMatchObject({ kind: "ACKNOWLEDGE", status: "NOT_APPLICABLE" });
+    expect(task.answer).toEqual({ kind: "ACKNOWLEDGE", goal: "Ghi nhận băn khoăn rồi giải thích tình trạng còn hàng." });
     expect(task.evidence).toEqual([stockEvidence]);
   });
 
-  it("allows a supported factual answer to KEEP_OPEN when no further blocker is chosen", () => {
-    const task = compileTrackCStrategistDecision({
+  it("retains price evidence and the unanswered part of a compound question without adding progression", () => {
+    const { decision, task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ANSWER",
-        goal: "Trả lời giá hiện tại và không tự mở thêm qualification.",
+        goal: "Trả lời giá đã xác minh; chưa có evidence về khả năng chống nhăn.",
         proposition: "PRICE",
         evidenceRefs: [priceEvidence.ref],
         continuation: { type: "KEEP_OPEN" },
@@ -173,15 +172,36 @@ describe("Track C C3 clean strategy contract", () => {
 
     expect(task.answer).toMatchObject({
       kind: "ANSWER",
-      status: "SUPPORTED",
+      evidenceStatus: "SUPPORTED",
       proposition: "PRICE",
     });
     expect(task.continuation).toEqual({ type: "KEEP_OPEN" });
     expect(task.canonicalRequest).toBeNull();
+    expect(task.evidence).toEqual([priceEvidence]);
+    expect(task.answer.goal).toBe(decision.goal);
+  });
+
+  it("still rejects quarantined goals at the shared PII boundary", () => {
+    const redact = vi.spyOn(database, "redactAnalyticsMessage").mockReturnValueOnce({
+      text: "[PII_REDACTED_MESSAGE]", dlpStatus: "QUARANTINED",
+    });
+    try {
+      expect(() => compileTrackCStrategistDecision({
+        decision: {
+          replyAct: "ACKNOWLEDGE", goal: "Unsafe planning text.",
+          proposition: "NONE", evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        },
+        evidence: [], permittedCanonicalActions: ["NONE"],
+        measurementsUnavailable: false, productResolved: true, hardStop: false,
+      })).toThrow("TRACK_C_STRATEGIST_DECISION_INVALID");
+    } finally {
+      redact.mockRestore();
+    }
   });
 
   it("allows supported evidence with a typed ordinary ASK chosen by the Strategist", () => {
-    const task = compileTrackCStrategistDecision({
+    const { task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ANSWER",
         goal: "Trả lời giá rồi hỏi tiêu chí có thể thay đổi bước tư vấn tiếp theo.",
@@ -199,7 +219,7 @@ describe("Track C C3 clean strategy contract", () => {
 
     expect(task.answer).toMatchObject({
       kind: "ANSWER",
-      status: "SUPPORTED",
+      evidenceStatus: "SUPPORTED",
       proposition: "PRICE",
     });
     expect(task.continuation).toEqual({
@@ -209,7 +229,7 @@ describe("Track C C3 clean strategy contract", () => {
   });
 
   it("requires canonical action to be the only progression mechanism", () => {
-    const valid = compileTrackCStrategistDecision({
+    const { task: valid } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "CLARIFY",
         goal: "Xin số đo cần thiết.",
@@ -245,7 +265,7 @@ describe("Track C C3 clean strategy contract", () => {
   });
 
   it("keeps HOLD_POSITION closed for acknowledgement-only protected intent", () => {
-    const task = compileTrackCStrategistDecision({
+    const { task } = compileTrackCStrategistDecision({
       decision: {
         replyAct: "ACKNOWLEDGE",
         goal: "Ghi nhận và không mở lại cuộc hội thoại.",
@@ -263,8 +283,6 @@ describe("Track C C3 clean strategy contract", () => {
 
     expect(task.answer).toMatchObject({
       kind: "ACKNOWLEDGE",
-      status: "NOT_APPLICABLE",
-      proposition: "STOCK",
     });
     expect(task.evidence).toEqual([]);
     expect(task.continuation).toBeNull();
@@ -377,7 +395,7 @@ describe("Track C C3 clean strategy contract", () => {
 
     expect(task.answer).toMatchObject({
       kind: "ANSWER",
-      status: "UNRESOLVED",
+      evidenceStatus: "UNRESOLVED",
       proposition: "PRICE",
     });
     expect(task.continuation).toBeNull();

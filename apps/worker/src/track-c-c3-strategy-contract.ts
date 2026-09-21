@@ -105,12 +105,15 @@ export type TrackCStrategistDecision = Readonly<{
 }>;
 
 export type TrackCResponderTask = Readonly<{
-  answer: Readonly<{
-    kind: "ANSWER" | "ACKNOWLEDGE" | "CLARIFY";
-    status: "SUPPORTED" | "UNRESOLVED" | "NOT_APPLICABLE";
-    goal: string;
-    proposition: TrackCProtectedProposition;
-  }>;
+  answer:
+    | Readonly<{
+        kind: "ANSWER";
+        /** Capability authority only; not semantic question resolution. */
+        evidenceStatus: "SUPPORTED" | "UNRESOLVED" | "NOT_APPLICABLE";
+        goal: string;
+        proposition: TrackCProtectedProposition;
+      }>
+    | Readonly<{ kind: "ACKNOWLEDGE" | "CLARIFY"; goal: string }>;
   evidence: readonly TrackCSelectableEvidence[];
   requiredEvidenceRefs: readonly string[];
   continuation:
@@ -203,10 +206,10 @@ function safeGoal(value: unknown): string {
     throw new Error("TRACK_C_STRATEGIST_DECISION_INVALID");
   }
   const redacted = redactAnalyticsMessage(value);
-  if (redacted.dlpStatus !== "PASSED" || redacted.text !== value) {
+  if (redacted.dlpStatus !== "PASSED") {
     throw new Error("TRACK_C_STRATEGIST_DECISION_INVALID");
   }
-  return value;
+  return redacted.text;
 }
 
 function readDecision(value: unknown): TrackCStrategistDecision {
@@ -299,7 +302,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   hardStop: boolean;
   boundProductIds?: readonly string[];
   checkoutRequestedFields?: readonly TrackCCheckoutField[];
-}>): TrackCResponderTask {
+}>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
   const decision = readDecision(input.decision);
   const evidence = selectedEvidence(
     decision.evidenceRefs,
@@ -324,19 +327,21 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   }
   const supportsProposition = decision.proposition !== "NONE" &&
     evidence.some(({ capability }) => capability === decision.proposition);
-  const status = decision.replyAct !== "ANSWER" || decision.proposition === "NONE"
+  const evidenceStatus = decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
-  return Object.freeze({
-    answer: Object.freeze({
-      kind: decision.replyAct,
-      status,
-      goal: decision.goal,
-      proposition: decision.proposition,
-    }),
+  const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
+    ? Object.freeze({
+        kind: "ANSWER", evidenceStatus, goal: decision.goal,
+        proposition: decision.proposition,
+      })
+    : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
+  const task: TrackCResponderTask = Object.freeze({
+    answer,
     evidence,
     requiredEvidenceRefs: Object.freeze(
-      status === "SUPPORTED" ? [...decision.evidenceRefs] : [],
+      decision.replyAct === "ANSWER" && evidenceStatus === "SUPPORTED"
+        ? [...decision.evidenceRefs] : [],
     ),
     continuation: decision.continuation,
     canonicalRequest: canonicalRequest(
@@ -344,6 +349,9 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       input.checkoutRequestedFields ?? [],
     ),
   });
+  // Return the validated, PII-safe decision used to compile this exact task.
+  // Consumers must not reuse the provider's raw planning text for reporting.
+  return Object.freeze({ decision, task });
 }
 
 export function compileTrackCFixedFirstContactTask(input: Readonly<{
@@ -356,7 +364,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   if (!input.productResolved || input.classificationOrVariantRequired) {
     return Object.freeze({
       answer: Object.freeze({
-        kind: "CLARIFY", status: "NOT_APPLICABLE", proposition: "NONE",
+        kind: "CLARIFY",
         goal: "Làm rõ mẫu sản phẩm đang được hỏi.",
       }),
       evidence: Object.freeze([]),
@@ -375,7 +383,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   if (price === null) {
     return Object.freeze({
       answer: Object.freeze({
-        kind: "ANSWER", status: "UNRESOLVED", proposition: "PRICE",
+        kind: "ANSWER", evidenceStatus: "UNRESOLVED", proposition: "PRICE",
         goal: "Trả lời câu hỏi giá mà không suy đoán khi chưa có authority.",
       }),
       evidence: Object.freeze([]),
@@ -398,7 +406,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   }
   return Object.freeze({
     answer: Object.freeze({
-      kind: "ANSWER", status: "SUPPORTED", proposition: "PRICE",
+      kind: "ANSWER", evidenceStatus: "SUPPORTED", proposition: "PRICE",
       goal: "Trả lời giá đã xác minh và một thông tin sản phẩm hữu ích.",
     }),
     evidence,

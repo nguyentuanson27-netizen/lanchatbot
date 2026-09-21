@@ -1,4 +1,6 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { canonicalJsonV1 } from "@lana/contracts";
 import { describe, expect, it, vi } from "vitest";
 import { redactAnalyticsMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
@@ -120,6 +122,48 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("uses one redacted decision for the task, plan and identity without changing fact authority", async () => {
+    const goal = "Address the customer's reported budget 700000; recipient phone 0901234567, email lan@example.com. Answer only the verified shop price.";
+    const decision = {
+      replyAct: "ANSWER", goal, proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+      continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+    };
+    const normalized = { ...decision, goal: redactAnalyticsMessage(goal).text };
+    expect(normalized.goal).not.toBe(goal);
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload(decision),
+        providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Giá này hơi cao so với ngân sách của chị.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    });
+    expect(result.conversationPlan).toEqual(normalized);
+    expect(result.responderTask.answer).toEqual({ kind: "ANSWER",
+      evidenceStatus: "SUPPORTED", proposition: "PRICE", goal: normalized.goal });
+    expect(result.identity.decisionHash).toBe(createHash("sha256")
+      .update(canonicalJsonV1(normalized)).digest("hex"));
+    const responderBody = JSON.parse(send.mock.calls[1]![0].body);
+    const prompt = JSON.parse(responderBody.contents[0].parts[0].text);
+    expect(prompt.responderTask.answer.goal).toBe(normalized.goal);
+    for (const raw of ["700000", "0901234567", "lan@example.com"]) {
+      expect(JSON.stringify(result)).not.toContain(raw);
+      expect(send.mock.calls[1]![0].body).not.toContain(raw);
+    }
+    expect(result.output.segments).toEqual([expect.objectContaining({
+      kind: "VERIFIED_CLAIM",
+      text: result.responderTask.evidence[0]!.deterministicText,
+      claimContentHash: result.responderTask.evidence[0]!.provenance.contentHash,
+    })]);
+  });
+
   it("preserves earlier known inputs in both model requests within the validated dialogue window", async () => {
     const evaluationContext = Array.from({ length: 15 }, (_, index) => ({
       direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
@@ -213,7 +257,9 @@ describe("Track C C3 strategy-contract runner", () => {
         transport: { send },
       });
       expect(result.reply).toBe(expected);
-      expect(result.responderTask.answer.status).toBe(ref === null ? "UNRESOLVED" : "SUPPORTED");
+      expect(result.responderTask.answer).toMatchObject({
+        kind: "ANSWER", evidenceStatus: ref === null ? "UNRESOLVED" : "SUPPORTED",
+      });
       expect(result.responderTask.evidence.map(({ ref }) => ref)).toEqual(ref === null ? [] : [ref]);
     }
   });
@@ -712,7 +758,7 @@ describe("Track C C3 strategy-contract runner", () => {
     };
 
     expect(body.systemInstruction.parts[0].text).toContain(
-      "If the latest customer turn expresses an objection, concern, hesitation, or resistance, replyAct must be ACKNOWLEDGE",
+      "An objection does not force ACKNOWLEDGE",
     );
     expect(body.systemInstruction.parts[0].text).toContain(
       "directly relevant to the customer's current decision or to an immediate next decision already established",

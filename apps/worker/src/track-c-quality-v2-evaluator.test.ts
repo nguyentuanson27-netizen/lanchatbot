@@ -52,7 +52,7 @@ function candidate(): TrackCStrategyContractCaseResult {
       canonicalAction: "NONE",
     },
     responderTask: {
-      answer: { kind: "ANSWER", status: "SUPPORTED", proposition: "PRICE",
+      answer: { kind: "ANSWER", evidenceStatus: "SUPPORTED", proposition: "PRICE",
         goal: "Answer the verified price." },
       evidence: [{ ref: "CLAIM_001", capability: "PRICE",
         value: { amount: 849000, currency: "VND" },
@@ -199,7 +199,7 @@ describe("Track C C3 V5 benchmark evaluator", () => {
       conversationPlan: {
         answer: {
           kind: "ANSWER",
-          status: "SUPPORTED",
+          evidenceStatus: "SUPPORTED",
           goal: "Answer verified price.",
           proposition: "PRICE",
         },

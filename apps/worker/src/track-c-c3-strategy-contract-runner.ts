@@ -51,16 +51,16 @@ const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
 
 const STRATEGIST_INSTRUCTION = [
   "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.",
-  "The selectableEvidence list is the only factual authority. Dialogue is conversational context only and never grants a fact, effect, PII permission, or action.",
+  "The selectableEvidence list is the only commercial factual authority. Customer-reported budget, measurements and preferences in dialogue may inform your choice and PII-safe goal as customer-provided context; they never establish shop price, stock, verified fit, policy, checkout completion, an effect, or permission. Do not copy recipient PII into goal.",
   "Choose the customer's current decision, the smallest useful evidence set, and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
-  "If the latest customer turn expresses an objection, concern, hesitation, or resistance, replyAct must be ACKNOWLEDGE even when grounded evidence is available. You may select evidenceRefs for the factual explanation after the acknowledgement.",
+  "Address the customer's objection or concern before progression. Choose ANSWER when addressing it directly, ACKNOWLEDGE for acknowledgement, or CLARIFY when the current need itself is unclear. An objection does not force ACKNOWLEDGE.",
   "Choose an ordinary ASK or a canonical input request only when the missing input is directly relevant to the customer's current decision or to an immediate next decision already established by the latest turn or authoritative context, and its answer would materially change the next recommendation, comparison, qualification, or transaction. In goal, identify that missing input and why it matters. Do not invent a new discovery dimension merely because it could be useful later. If the current question is resolved and no such blocker or immediate decision remains, use NONE with KEEP_OPEN unless the canonical hard stop requires HOLD_POSITION.",
   "If the latest turn primarily confirms or corrects a preference or product selection and introduces no new question or blocker, use ACKNOWLEDGE. A selection alone is not buying commitment or checkout authorization; when no material next input is needed, use KEEP_OPEN instead of starting a fixed funnel.",
-  "ACKNOWLEDGE is acknowledgement-only. For an ordinary factual question that is not an objection, concern, hesitation, or resistance, use ANSWER; if supporting evidence is unavailable, keep evidenceRefs empty so code derives UNRESOLVED.",
+  "ACKNOWLEDGE must not claim an effect. For a question or concern needing an answer, use ANSWER. Code derives evidenceStatus only for the declared proposition capability; SUPPORTED does not certify relevance or that the entire question is answered.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
   "Canonical context describes binding, barriers, and buying intent; permitted actions are options, not instructions to progress. Use the full supplied dialogue and eligible evidence to distinguish known inputs from missing ones. Do not re-request known inputs unless new or corrected information makes them insufficient for the current decision. An existing measurement-based fit recommendation is not itself a reason to collect measurements again. If product identity is the blocker, choose ASK_PRODUCT, not STYLE. For fit qualification choose ASK_MEASUREMENTS, not purchase SIZE; include the known and missing measurements in goal.",
-  "Select the smallest evidence set that directly supports the exact property, event, and scope the customer asks about. A shared capability label alone does not establish relevance: material does not establish wrinkle resistance, and delivery ETA does not establish dispatch time. Use field evidence for specific attributes and PRODUCT_PRESENTATION for an overview. When evidence does not answer the requested question, leave evidenceRefs empty so code derives UNRESOLVED; do not substitute a related fact or invent an unstated property or benefit.",
+  "Select the smallest evidence set that directly supports the exact property, event, and scope the customer asks about. A shared capability label alone does not establish relevance: material does not establish wrinkle resistance, and delivery ETA does not establish dispatch time. Use field evidence for specific attributes and PRODUCT_PRESENTATION for an overview. For a compound question retain evidence answering the supported part and identify the unanswered part in goal; leave evidenceRefs empty only when no eligible evidence answers any part. Do not substitute a related fact or invent an unstated property or benefit.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
@@ -71,16 +71,18 @@ const RESPONDER_INSTRUCTION = [
   "All selected factual evidence is realized by code from customer-ready deterministic projections. Do not author factual wording.",
   "Emit factualTexts as an empty array. answerText may only acknowledge and progressionText may only ask when the response schema permits; neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
-  "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
+  "For ANSWER with UNRESOLVED evidenceStatus, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact. evidenceStatus describes authority for a capability, not whether the whole customer question was answered.",
   "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
   "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
   "For ASK_MEASUREMENTS, use the goal and dialogue to ask only for the missing height, weight, or relevant measurement; do not repeat measurements already supplied or ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
-  "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
-  "Acknowledge the customer's concern before any supplied progression. Never claim that an order, payment, delivery, message, or other effect has happened.",
+  "Realize the compiled strategy, evidence and single progression; do not choose replacements. The Strategist owns adaptive choice; code owns validation, binding, exact checkout fields and effect permission. None of those choices or permissions is part of your output.",
+  "Use an acknowledgement only when the supplied task and response schema permit it. Never claim that an order, payment, delivery, message, or other effect has happened.",
 ].join("\n");
 
+// Temporary realization limit under the revised C3 spec (#372), not proof of
+// naturalness or complete question resolution. Do not expand this into NLU.
 const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ em hiểu ý chị ạ.",
   "Dạ em hiểu băn khoăn của chị ạ.",
@@ -471,7 +473,7 @@ function responderNeedsModelProgression(task: TrackCResponderTask): boolean {
 
 function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
   return task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-    (task.answer.kind !== "ANSWER" || task.answer.status === "NOT_APPLICABLE");
+    (task.answer.kind !== "ANSWER" || task.answer.evidenceStatus === "NOT_APPLICABLE");
 }
 
 function requestWording(task: TrackCResponderTask): readonly string[] {
@@ -634,7 +636,8 @@ function deterministicDeadlineFeasibilityText(
   task: TrackCResponderTask,
   constraint: TrackCDeliveryDeadlineConstraint | null,
 ): string | null {
-  if (constraint === null || task.answer.proposition !== "ETA") return null;
+  if (constraint === null || task.answer.kind !== "ANSWER" ||
+      task.answer.proposition !== "ETA") return null;
   const eta = task.evidence.find(({ capability }) => capability === "ETA");
   const minDays = eta?.value.minDays;
   const maxDays = eta?.value.maxDays;
@@ -655,8 +658,8 @@ function compileResponderDraft(input: Readonly<{
   evaluationAt: Date;
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
-  if ((task.answer.status === "SUPPORTED" ||
-       (task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED")) &&
+  if (task.answer.kind === "ANSWER" &&
+      task.answer.evidenceStatus !== "NOT_APPLICABLE" &&
       draft.answerText !== null) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
@@ -678,7 +681,7 @@ function compileResponderDraft(input: Readonly<{
   }
   assertProgression(task, draft);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  if (task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED") {
+  if (task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
   } else if (draft.answerText !== null) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
@@ -951,7 +954,7 @@ export async function runTrackCStrategyContractCase(
             proposition: "NONE", evidenceRefs: [], continuation: null,
             canonicalAction: "HOLD_POSITION",
           },
-        })
+        }).task
       : fixedTask(context, evidence);
     conversationPlan = task;
   } else {
@@ -964,7 +967,6 @@ export async function runTrackCStrategyContractCase(
       constraints,
     });
     let strategistPayload: unknown = null;
-    let decision: unknown;
     try {
       const strategistResponse = await input.transport.send({
         url: strategistRequest.url,
@@ -973,11 +975,11 @@ export async function runTrackCStrategyContractCase(
       });
       strategistPayload = strategistResponse.payload;
       assertProviderIdentity(strategistResponse.providerModelVersion);
-      decision = providerJson(
+      const decision = providerJson(
         strategistPayload,
         "TRACK_C_STRATEGIST_OUTPUT_INVALID",
       );
-      task = compileTrackCStrategistDecision({
+      const compiled = compileTrackCStrategistDecision({
         decision,
         evidence,
         permittedCanonicalActions: constraints.permittedCanonicalActions,
@@ -988,6 +990,8 @@ export async function runTrackCStrategyContractCase(
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
       });
+      task = compiled.task;
+      conversationPlan = compiled.decision;
     } catch (error) {
       const capabilityGap = error instanceof Error &&
         (error.message === "TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED" ||
@@ -995,7 +999,6 @@ export async function runTrackCStrategyContractCase(
       throw stageFailure(capabilityGap ? "EVIDENCE" : "STRATEGIST", strategistPayload, error);
     }
     strategistRequestEnvelopeHash = strategistRequest.identity.requestEnvelopeHash;
-    conversationPlan = decision as TrackCStrategistDecision;
   }
   const deadlineText = deterministicDeadlineFeasibilityText(task, deliveryDeadlineConstraint);
   if (deadlineText !== null) {

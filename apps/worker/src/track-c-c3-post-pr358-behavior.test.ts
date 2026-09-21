@@ -104,7 +104,7 @@ type ContractPrompt = Readonly<{
     measurementsUnavailable: boolean;
   }>;
   responderTask?: Readonly<{
-    answer: Readonly<{ kind: string; status: string }>;
+    answer: Readonly<{ kind: string; evidenceStatus?: string }>;
     evidence: readonly unknown[];
     continuation: Readonly<{ type: string; input?: string }> | null;
     canonicalRequest: Readonly<{
@@ -146,7 +146,7 @@ function responderFor(
     canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return {
     answerText: (task.answer.kind === "ANSWER" &&
-        task.answer.status !== "NOT_APPLICABLE") ||
+        task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
         canonical === "ASK_CHECKOUT_DETAILS"
       ? null : answerText,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),

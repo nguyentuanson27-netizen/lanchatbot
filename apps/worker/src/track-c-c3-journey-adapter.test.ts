@@ -82,7 +82,7 @@ function promptOf(request: { body: string }) {
     contractVersion: string;
     constraints?: { permittedCanonicalActions: string[] };
     responderTask?: {
-      answer: { kind: string; status: string };
+      answer: { kind: string; evidenceStatus?: string };
       evidence: unknown[];
       continuation: Readonly<{ type: string; input?: string }> | null;
       canonicalRequest: { type: string } | null;
@@ -115,7 +115,7 @@ function responderPayload(
     canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return modelPayload({
     answerText: (task.answer.kind === "ANSWER" &&
-        task.answer.status !== "NOT_APPLICABLE") ||
+        task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
         canonical === "ASK_CHECKOUT_DETAILS"
       ? null : reply,
     factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
