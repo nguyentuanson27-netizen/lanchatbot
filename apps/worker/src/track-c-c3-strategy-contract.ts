@@ -88,9 +88,7 @@ export function trackCCustomerFacingSizeFromVariantId(
 export function trackCEvidenceHasSafeFactualEgress(
   evidence: TrackCSelectableEvidence,
 ): boolean {
-  // Existing authoritative guards validate protected facts, not arbitrary
-  // surrounding sales/value prose. Selectable evidence therefore needs a
-  // customer-ready code-owned projection before the Strategist can choose it.
+  // Realization support is separate from the validity of an evidence entry.
   return evidence.deterministicText !== undefined;
 }
 
@@ -125,6 +123,8 @@ export type TrackCResponderTask = Readonly<{
       requestedFields?: readonly TrackCCheckoutField[];
     }>
     | null;
+  /** Code-derived before the Responder; never inferred from dialogue. */
+  deliveryDeadlineText?: string;
 }>;
 
 export type TrackCTrustedAcquisitionMetadata = Readonly<{
@@ -268,9 +268,6 @@ function selectedEvidence(
     throw new Error("TRACK_C_STRATEGIST_EVIDENCE_INVALID");
   }
   const values = selected as TrackCSelectableEvidence[];
-  if (values.some((entry) => !trackCEvidenceHasSafeFactualEgress(entry))) {
-    throw new Error("TRACK_C_STRATEGIST_EVIDENCE_INVALID");
-  }
   if (new Set(values.map(({ provenance }) => provenance.contentHash)).size !==
       values.length) {
     throw new Error("TRACK_C_EVIDENCE_PROVENANCE_DUPLICATE");
@@ -279,6 +276,16 @@ function selectedEvidence(
     subject?.productId !== undefined && !boundProductIds.includes(subject.productId)
   )) {
     throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
+  }
+  if (values.some((entry) => !trackCEvidenceHasSafeFactualEgress(entry))) {
+    throw new Error("TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED");
+  }
+  if (new Set(values.flatMap(({ subject }) =>
+    subject?.productId === undefined ? [] : [subject.productId]
+  )).size > 1 && values.some(({ subject }) =>
+    subject?.productId !== undefined && subject.displayName === undefined
+  )) {
+    throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
   }
   return Object.freeze(values);
 }
@@ -299,12 +306,17 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     input.evidence,
     input.boundProductIds ?? [],
   );
+  if (!input.productResolved && evidence.some(({ subject }) =>
+    subject?.productId !== undefined
+  )) {
+    throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
+  }
   if (!input.permittedCanonicalActions.includes(decision.canonicalAction) ||
       (decision.canonicalAction === "NONE" && decision.continuation === null) ||
       (decision.canonicalAction !== "NONE" && decision.continuation !== null) ||
       (input.hardStop && decision.canonicalAction !== "HOLD_POSITION") ||
-      (!input.hardStop && !input.productResolved &&
-        decision.canonicalAction !== "ASK_PRODUCT") ||
+      (decision.canonicalAction === "HOLD_POSITION" &&
+        (decision.replyAct !== "ACKNOWLEDGE" || decision.evidenceRefs.length !== 0)) ||
       (decision.continuation?.type === "ASK" &&
         decision.continuation.input === "USUAL_SIZE" &&
         !input.measurementsUnavailable)) {
@@ -354,9 +366,10 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
     });
   }
   const bound = input.boundProductIds ?? [];
-  const available = input.evidence.filter(({ subject }) =>
-    subject?.productId === undefined || bound.length === 0 ||
-    bound.includes(subject.productId)
+  const available = input.evidence.filter((entry) =>
+    trackCEvidenceHasSafeFactualEgress(entry) &&
+    (entry.subject?.productId === undefined || bound.length === 0 ||
+    bound.includes(entry.subject.productId))
   );
   const price = available.find(({ capability }) => capability === "PRICE") ?? null;
   if (price === null) {

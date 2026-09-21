@@ -61,6 +61,7 @@ const STRATEGIST_INSTRUCTION = [
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
+  "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
 ].join("\n");
 
 const RESPONDER_INSTRUCTION = [
@@ -70,7 +71,7 @@ const RESPONDER_INSTRUCTION = [
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
   "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
-  "For a typed ASK, progressionText must request the customer's own decision input for only the supplied continuation.input. COLOR asks for the customer's color preference or choice; DEADLINE asks for the customer's cutoff; BUDGET asks for the customer's budget constraint; STYLE asks for the customer's style preference. Never ask the customer to provide a shop/system fact that the task or evidence would own. Do not add factual explanation, evidence wording, product facts, referent assertions, another decision variable, or a second question.",
+  "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
   "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
@@ -85,6 +86,32 @@ const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
 const KEEP_OPEN_TEXT = "Em vẫn ở đây khi chị cần xem thêm ạ.";
 const UNRESOLVED_ANSWER_TEXT =
   "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
+
+// A small vocabulary for the existing typed requests, not a text classifier.
+// The Strategist chooses the input; the Responder chooses its wording. Exact
+// membership closes the fact/effect side channel without Vietnamese regexes.
+const REQUEST_WORDING: Readonly<Record<TrackCOrdinaryDecisionInput |
+  "ASK_PRODUCT" | "ASK_MEASUREMENTS", readonly string[]>> = Object.freeze({
+  SIZE: ["Chị muốn chọn size nào ạ?", "Chị chọn size nào cho mình ạ?"],
+  USUAL_SIZE: ["Chị thường mặc size gì ạ?", "Chị cho em biết size mình thường mặc nhé?"],
+  COLOR: ["Chị thích màu nào hơn ạ?", "Màu nào hợp ý chị hơn ạ?"],
+  VARIANT: ["Chị muốn chọn phiên bản nào ạ?", "Chị chọn phiên bản nào cho mình ạ?"],
+  LOCALITY: ["Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?", "Chị ở tỉnh hoặc thành phố nào để em kiểm tra giao hàng ạ?"],
+  PAYMENT_PREFERENCE: ["Chị muốn thanh toán theo cách nào ạ?", "Chị muốn chọn cách thanh toán nào ạ?"],
+  QUANTITY: ["Chị muốn lấy bao nhiêu sản phẩm ạ?", "Chị cho em biết số lượng mình muốn lấy nhé?"],
+  STYLE: ["Chị thích kiểu dáng như thế nào ạ?", "Chị muốn tìm phong cách như thế nào ạ?"],
+  BUDGET: ["Chị đang cân nhắc ngân sách khoảng bao nhiêu ạ?", "Chị muốn chọn trong tầm ngân sách nào ạ?"],
+  DECISION_CRITERION: ["Điều chị ưu tiên nhất khi lựa chọn là gì ạ?", "Chị đang cân nhắc nhất điểm nào ạ?"],
+  DEADLINE: ["Chị cần nhận hàng trước thời điểm nào ạ?", "Chị muốn nhận hàng chậm nhất khi nào ạ?"],
+  ASK_PRODUCT: ["Chị gửi em mã hoặc ảnh mẫu mình đang hỏi nhé?", "Chị đang hỏi mẫu nào ạ?"],
+  ASK_MEASUREMENTS: [
+    "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?",
+    "Chị cho em xin thêm chiều cao nhé?",
+    "Chị cho em xin thêm cân nặng nhé?",
+    "Chị cho em xin thêm số đo vòng eo nhé?",
+    "Chị cho em xin số đo cần kiểm tra để em tư vấn tiếp ạ?",
+  ],
+});
 
 type CheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS";
 type TrackCDeliveryDeadlineConstraint = Readonly<{
@@ -280,7 +307,6 @@ function frozenDialogueWindow(
 
 function strategyActions(constraints: TrackCStrategistConstraints): readonly TrackCCanonicalAction[] {
   if (constraints.hardStop) return Object.freeze(["HOLD_POSITION"]);
-  if (!constraints.productResolved) return Object.freeze(["ASK_PRODUCT"]);
   return Object.freeze([...constraints.permittedCanonicalActions]);
 }
 
@@ -296,7 +322,8 @@ function strategistResponseSchema(
     ? ORDINARY_INPUTS
     : ORDINARY_INPUTS.filter((input) => input !== "USUAL_SIZE");
   const shared = {
-    replyAct: { type: "STRING", enum: ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
+    replyAct: { type: "STRING", enum: constraints.hardStop
+      ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
     goal: { type: "STRING", minLength: 1, maxLength: 500 },
     proposition: { type: "STRING", enum: TRACK_C_PROTECTED_PROPOSITIONS },
     evidenceRefs: {
@@ -359,12 +386,13 @@ function strategistResponseSchema(
 function presentableEvidence(
   evidence: readonly TrackCSelectableEvidence[],
 ): readonly Readonly<Record<string, unknown>>[] {
-  return Object.freeze(evidence.map(({ ref, capability, subject, value }) =>
+  return Object.freeze(evidence.map(({ ref, capability, subject, value, deterministicText }) =>
     Object.freeze({
       ref,
       capability,
       ...(subject === undefined ? {} : { subject }),
       value,
+      realizationSupported: deterministicText !== undefined,
     })
   ));
 }
@@ -377,9 +405,6 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   evidence: readonly TrackCSelectableEvidence[];
   constraints: TrackCStrategistConstraints;
 }>): BuiltCandidateRequest {
-  if (input.evidence.some((evidence) => !trackCEvidenceHasSafeFactualEgress(evidence))) {
-    throw new Error("TRACK_C_STRATEGIST_EVIDENCE_NOT_EXECUTABLE");
-  }
   const base = buildTrackCOfflineCandidateRequest({
     modelResource: input.modelResource,
     capture: input.capture,
@@ -413,6 +438,9 @@ function responderTaskPrompt(task: TrackCResponderTask) {
     evidence: presentableEvidence(modelAuthoredEvidence(task)),
     continuation: task.continuation,
     canonicalRequest: task.canonicalRequest,
+    ...(task.deliveryDeadlineText === undefined ? {} : {
+      deliveryDeadlineText: task.deliveryDeadlineText,
+    }),
   });
 }
 
@@ -423,20 +451,23 @@ function responderNeedsModelProgression(task: TrackCResponderTask): boolean {
 }
 
 function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
-  return task.answer.kind === "ACKNOWLEDGE" &&
-    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
+  return task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+    (task.answer.kind !== "ANSWER" || task.answer.status === "NOT_APPLICABLE");
+}
+
+function requestWording(task: TrackCResponderTask): readonly string[] {
+  const canonical = task.canonicalRequest?.type;
+  if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
+    return REQUEST_WORDING[canonical];
+  }
+  return task.continuation?.type === "ASK"
+    ? REQUEST_WORDING[task.continuation.input] : [];
 }
 
 function responderDraftSchema(task: TrackCResponderTask) {
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
-  const codeOwnedUnresolved =
-    task.answer.kind === "ANSWER" && task.answer.status === "UNRESOLVED";
-  const answerTextAllowed =
-    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-    !codeOwnedUnresolved &&
-    (task.evidence.length === 0 || boundedAcknowledgement);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -445,9 +476,7 @@ function responderDraftSchema(task: TrackCResponderTask) {
     properties: {
       answerText: boundedAcknowledgement
         ? { type: "STRING", enum: BOUNDED_ACKNOWLEDGEMENTS }
-        : answerTextAllowed
-          ? { type: "STRING", minLength: 1, maxLength: 1_000 }
-          : { type: "NULL" },
+        : { type: "NULL" },
       factualTexts: {
         type: "ARRAY",
         minItems: factualEvidenceCount,
@@ -455,7 +484,7 @@ function responderDraftSchema(task: TrackCResponderTask) {
         items: { type: "STRING", minLength: 1, maxLength: 1_000 },
       },
       progressionText: needsProgression
-        ? { type: "STRING", minLength: 1, maxLength: 1_000 }
+        ? { type: "STRING", enum: requestWording(task) }
         : { type: "NULL" },
     },
   };
@@ -514,27 +543,6 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask): Respond
   });
 }
 
-function factLiterals(value: unknown): readonly string[] {
-  if (typeof value === "string") return value.trim().length >= 4 ? [value] : [];
-  if (typeof value === "number" && Number.isFinite(value)) return [String(value)];
-  if (Array.isArray(value)) return value.flatMap(factLiterals);
-  if (value !== null && typeof value === "object") {
-    return Object.values(value as Readonly<Record<string, unknown>>).flatMap(factLiterals);
-  }
-  return [];
-}
-
-function assertNoUnboundFactText(value: string | null, task: TrackCResponderTask): void {
-  if (value === null) return;
-  const normalized = value.normalize("NFC").toLocaleLowerCase("vi-VN");
-  const literals = task.evidence.flatMap(({ value: fact }) => factLiterals(fact));
-  if (literals.some((literal) => normalized.includes(
-    literal.normalize("NFC").toLocaleLowerCase("vi-VN"),
-  )) || /\d{3,}(?:[.,]\d{3})*\s*(?:đ|vnđ|vnd|đồng)/iu.test(value)) {
-    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
-  }
-}
-
 function assertNoEffectText(value: string | null): void {
   if (value !== null &&
       /\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value)) {
@@ -577,8 +585,7 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
     return;
   }
   if (task.canonicalRequest?.type === "HOLD_POSITION") {
-    if (draft.progressionText !== null || draft.answerText === null ||
-        draft.answerText.includes("?")) {
+    if (draft.progressionText !== null || draft.answerText === null) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
     return;
@@ -589,24 +596,13 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
     }
     return;
   }
-  if (task.canonicalRequest?.type === "ASK_MEASUREMENTS") {
-    const progression = draft.progressionText?.normalize("NFC") ?? "";
-    if (!/(?:chiều\s*cao|cân\s*nặng|số\s*đo|kích\s*thước)/iu.test(progression)) {
-      throw new Error("TRACK_C_RESPONDER_MEASUREMENTS_QUESTION_INVALID");
-    }
-  }
-  if (task.continuation?.type === "ASK" && task.continuation.input === "COLOR") {
-    const progression = draft.progressionText?.normalize("NFC") ?? "";
-    const asksShopColorFact =
-      /(?:shop|bên\s+em|mẫu(?:\s+này)?(?:\s+bên\s+em)?)\s+(?:hiện\s+)?(?:có|còn)\s+(?:những\s+)?màu\s+(?:gì|nào)/iu
-        .test(progression);
-    if (asksShopColorFact) {
-      throw new Error("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
-    }
-  }
   const needsProgression = responderNeedsModelProgression(task);
   if (needsProgression !== (draft.progressionText !== null)) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+  }
+  if (draft.progressionText !== null &&
+      !requestWording(task).includes(draft.progressionText)) {
+    throw new Error("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
   }
 }
 
@@ -633,7 +629,6 @@ function compileResponderDraft(input: Readonly<{
   draft: ResponderDraft;
   lane: TrackCV5ExecutionLane;
   evaluationAt: Date;
-  deliveryDeadlineConstraint: TrackCDeliveryDeadlineConstraint | null;
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
   if ((task.answer.status === "SUPPORTED" ||
@@ -651,10 +646,6 @@ function compileResponderDraft(input: Readonly<{
       throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
     }
   }
-  assertNoUnboundFactText(draft.answerText, task);
-  assertNoUnboundFactText(draft.progressionText, task);
-  assertNoEffectText(draft.answerText);
-  assertNoEffectText(draft.progressionText);
   // Selectable evidence already has a customer-ready deterministic factual
   // projection. The Responder never owns factual wording.
   const authoredEvidence = modelAuthoredEvidence(task);
@@ -668,6 +659,9 @@ function compileResponderDraft(input: Readonly<{
   } else if (draft.answerText !== null) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
   }
+  const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
+    subject?.productId === undefined ? [] : [subject.productId]
+  )).size > 1;
   task.evidence.forEach((evidence) => {
     const factualText = evidence.deterministicText === undefined
       ? null
@@ -683,18 +677,21 @@ function compileResponderDraft(input: Readonly<{
       );
     }
     assertNoEffectText(factualText);
+    if (multipleSubjects && evidence.subject?.productId !== undefined) {
+      const label = text(evidence.subject.displayName,
+        "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
+      if (label === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
+      assertNoEffectText(label);
+      segments.push({ kind: "GENERAL", text: `Với mẫu ${label}:` });
+    }
     segments.push({
       kind: "VERIFIED_CLAIM",
       text: factualText,
       claimContentHash: evidence.provenance.contentHash,
     });
   });
-  const deadlineFeasibilityText = deterministicDeadlineFeasibilityText(
-    task,
-    input.deliveryDeadlineConstraint,
-  );
-  if (deadlineFeasibilityText !== null) {
-    segments.push({ kind: "GENERAL", text: deadlineFeasibilityText });
+  if (task.deliveryDeadlineText !== undefined) {
+    segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });
   }
   if (task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS") {
     segments.push({
@@ -814,7 +811,7 @@ function constraintsFor(
   }
   if (!productResolved) {
     return Object.freeze({
-      permittedCanonicalActions: Object.freeze(["ASK_PRODUCT"] as const),
+      permittedCanonicalActions: Object.freeze(["NONE", "ASK_PRODUCT"] as const),
       measurementsUnavailable: false,
       productResolved: false,
       hardStop: false,
@@ -822,7 +819,7 @@ function constraintsFor(
   }
   if (checkoutRequestedFields.length > 0) {
     return Object.freeze({
-      permittedCanonicalActions: Object.freeze(["ASK_CHECKOUT_DETAILS"] as const),
+      permittedCanonicalActions: Object.freeze(["NONE", "ASK_CHECKOUT_DETAILS"] as const),
       measurementsUnavailable: false,
       productResolved: true,
       hardStop: false,
@@ -832,7 +829,7 @@ function constraintsFor(
   const unavailable = measurementsUnavailable(dialogue);
   if (context.barriers.active.includes("MEASUREMENTS_REQUIRED") && !unavailable) {
     return Object.freeze({
-      permittedCanonicalActions: Object.freeze(["ASK_MEASUREMENTS"] as const),
+      permittedCanonicalActions: Object.freeze(["NONE", "ASK_MEASUREMENTS"] as const),
       measurementsUnavailable: false,
       productResolved: true,
       hardStop: false,
@@ -926,7 +923,18 @@ export async function runTrackCStrategyContractCase(
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
   let task: TrackCResponderTask;
   if (lane === "FIRST_CONTACT_FIXED") {
-    task = fixedTask(context, evidence);
+    task = constraints.hardStop
+      ? compileTrackCStrategistDecision({
+          ...constraints,
+          evidence,
+          boundProductIds: context.productBinding.productIds,
+          decision: {
+            replyAct: "ACKNOWLEDGE", goal: "Respect the canonical hard stop.",
+            proposition: "NONE", evidenceRefs: [], continuation: null,
+            canonicalAction: "HOLD_POSITION",
+          },
+        })
+      : fixedTask(context, evidence);
     conversationPlan = task;
   } else {
     const strategistRequest = buildTrackCStrategistContractRequest({
@@ -963,10 +971,17 @@ export async function runTrackCStrategyContractCase(
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
       });
     } catch (error) {
-      throw stageFailure("STRATEGIST", strategistPayload, error);
+      const capabilityGap = error instanceof Error &&
+        (error.message === "TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED" ||
+         error.message === "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
+      throw stageFailure(capabilityGap ? "EVIDENCE" : "STRATEGIST", strategistPayload, error);
     }
     strategistRequestEnvelopeHash = strategistRequest.identity.requestEnvelopeHash;
     conversationPlan = decision as TrackCStrategistDecision;
+  }
+  const deadlineText = deterministicDeadlineFeasibilityText(task, deliveryDeadlineConstraint);
+  if (deadlineText !== null) {
+    task = Object.freeze({ ...task, deliveryDeadlineText: deadlineText });
   }
   const responderRequest = buildTrackCResponderContractRequest({
     modelResource: input.modelResource,
@@ -1000,7 +1015,6 @@ export async function runTrackCStrategyContractCase(
       draft,
       lane: input.lane,
       evaluationAt: input.evaluationAt,
-      deliveryDeadlineConstraint,
     });
   } catch (error) {
     throw stageFailure("FINAL_GUARD", responderPayload, error);

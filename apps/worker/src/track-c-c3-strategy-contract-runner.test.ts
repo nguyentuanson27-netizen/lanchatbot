@@ -120,6 +120,51 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("closes factual, effect and duplicate-request side channels in otherwise valid drafts", async () => {
+    for (const draft of [
+      { answerText: "Mẫu này thiết kế tỉ mỉ và bền đẹp chị nha.", progressionText: "Chị thích màu nào hơn ạ?" },
+      { answerText: "Dạ em đã ghi nhận đơn của chị ạ.", progressionText: "Chị thích màu nào hơn ạ?" },
+      { answerText: "Chị thích màu nào hơn ạ?", progressionText: "Chị thích màu nào hơn ạ?" },
+      { answerText: "Dạ em hiểu ý chị ạ.", progressionText: "Chị thích màu nào ạ? Ngân sách chị khoảng bao nhiêu ạ?" },
+      { answerText: "Dạ em hiểu ý chị ạ.", progressionText: "Dạ em đã ghi nhận đơn của chị ạ. Chị thích màu nào ạ?" },
+    ]) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "CLARIFY", goal: "Ask for the customer color preference.",
+          proposition: "NONE", evidenceRefs: [],
+          continuation: { type: "ASK", input: "COLOR" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({ ...draft, factualTexts: [] }),
+          providerModelVersion: "gemini-3.5-flash-lite" });
+      await expect(runTrackCStrategyContractCase({
+        lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
+        evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{
+          direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Chị đang chọn màu.", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+        }], transport: { send },
+      })).rejects.toMatchObject({ diagnostic: { stage: "FINAL_GUARD" } });
+    }
+  });
+
+  it("reports an unsupported selected realization as an evidence gap before Responder", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({ replyAct: "ANSWER", goal: "Explain the payment policy.",
+        proposition: "POLICY", evidenceRefs: ["SIMULATION_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị thanh toán thế nào?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+      }], simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT], transport: { send },
+    })).rejects.toMatchObject({ diagnostic: {
+      stage: "EVIDENCE", errorCode: "TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED",
+    } });
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it("projects simulation facts once into selectable evidence without effect authority", () => {
     const captureValue = capture();
     if (captureValue.status !== "BUILT" || captureValue.context === null) {
@@ -139,13 +184,13 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
       deterministicText:
-        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ.",
+        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       provenance: { authority: "SIMULATION" },
     });
     expect(JSON.stringify(evidence)).not.toContain("effect");
   });
 
-  it("does not expose structured simulation evidence without a safe factual egress", () => {
+  it("keeps valid evidence visible when its realization is unsupported", () => {
     const captureValue = capture();
     if (captureValue.status !== "BUILT" || captureValue.context === null) {
       throw new Error("TEST_CAPTURE_REQUIRED");
@@ -156,7 +201,9 @@ describe("Track C C3 strategy-contract runner", () => {
       simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT],
       executionLane: "BEHAVIOR_SIMULATION",
     });
-    expect(evidence.some(({ capability }) => capability === "POLICY")).toBe(false);
+    const policy = evidence.find(({ capability }) => capability === "POLICY");
+    expect(policy).toBeDefined();
+    expect(policy?.deterministicText).toBeUndefined();
   });
 
   it("does not expose comparison evidence without a customer-facing projection", () => {
@@ -208,7 +255,7 @@ describe("Track C C3 strategy-contract runner", () => {
     });
   });
 
-  it("exposes only evidence that already has a safe factual egress", () => {
+  it("distinguishes factual availability from safe realization support", () => {
     const captureValue = capture();
     if (captureValue.status !== "BUILT" || captureValue.context === null) {
       throw new Error("TEST_CAPTURE_REQUIRED");
@@ -228,10 +275,12 @@ describe("Track C C3 strategy-contract runner", () => {
     });
 
     expect(evidence.map(({ capability }) => capability)).toEqual([
-      "PRICE",
+      "PRICE", "POLICY", "BUSINESS_LOCATION", "PROMOTION_OFFER",
+      "CART_TOTAL", "PRODUCT_ATTRIBUTES",
       "PRICE",
     ]);
-    expect(evidence.every(trackCEvidenceHasSafeFactualEgress)).toBe(true);
+    expect(evidence.filter(trackCEvidenceHasSafeFactualEgress)
+      .map(({ capability }) => capability)).toEqual(["PRICE", "PRICE"]);
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
@@ -369,10 +418,12 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(request.generationConfig.responseSchema.properties.factualTexts)
       .toMatchObject({ minItems: 0, maxItems: 0 });
     expect(request.generationConfig.responseSchema.properties.progressionText)
-      .toEqual({ type: "STRING", minLength: 1, maxLength: 1_000 });
+      .toEqual({ type: "STRING", enum: [
+        "Chị thích màu nào hơn ạ?", "Màu nào hợp ý chị hơn ạ?",
+      ] });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ.",
+      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
         ? result.output.segments[1].claimContentHash
         : "",
@@ -740,9 +791,9 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ được chị ạ.",
+          answerText: "Dạ em hiểu ý chị ạ.",
           factualTexts: [],
-          progressionText: "Chị muốn chọn màu nào ạ?",
+          progressionText: "Chị thích màu nào hơn ạ?",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
@@ -779,14 +830,14 @@ describe("Track C C3 strategy-contract runner", () => {
       input: "COLOR",
     });
     expect(responderBody.systemInstruction.parts[0].text).toContain(
-      "request the customer's own decision input for only the supplied continuation.input",
+      "choose one of the response schema's customer-directed questions",
     );
     expect(responderBody.systemInstruction.parts[0].text).toContain(
-      "Never ask the customer to provide a shop/system fact",
+      "Never append factual explanation, an effect, another decision variable, or a second question",
     );
     expect(result.output.segments.at(-1)).toEqual({
       kind: "GENERAL",
-      text: "Chị muốn chọn màu nào ạ?",
+      text: "Chị thích màu nào hơn ạ?",
     });
   });
 
@@ -805,7 +856,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ được chị ạ.",
+          answerText: "Dạ em hiểu ý chị ạ.",
           factualTexts: [],
           progressionText: "Mẫu này giá 849.000đ, chị muốn chọn màu nào ạ?",
         }),
@@ -823,7 +874,7 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+    })).rejects.toThrow("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
   });
 
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
@@ -1158,7 +1209,7 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_MEASUREMENTS_QUESTION_INVALID");
+    })).rejects.toThrow("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
   });
 
   it("accepts a runtime-owned acquisition signal in production without admitting simulation facts", async () => {
@@ -1166,7 +1217,7 @@ describe("Track C C3 strategy-contract runner", () => {
       payload: payload({
         answerText: null,
         factualTexts: [],
-        progressionText: "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ.",
+        progressionText: "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?",
       }),
       providerModelVersion: "gemini-3.5-flash-lite",
     });
@@ -1464,7 +1515,7 @@ describe("Track C C3 strategy-contract runner", () => {
       transport: { send: validSend },
     });
 
-    expect(valid.reply).toContain("Màu nào hợp ý chị hơn ạ?");
+    expect(valid.reply).toContain("Chị thích màu nào hơn ạ?");
 
     const invalidSend = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload({
@@ -1493,10 +1544,10 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send: invalidSend },
-    })).rejects.toThrow("TRACK_C_RESPONDER_COLOR_DECISION_QUESTION_INVALID");
+    })).rejects.toThrow("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
   });
 
-  it("does not require a fixed vocabulary for a valid COLOR decision question", async () => {
+  it("accepts an alternative bounded COLOR phrasing", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({

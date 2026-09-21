@@ -136,7 +136,7 @@ function decisionFor(prompt: ContractPrompt) {
 
 function responderFor(
   prompt: ContractPrompt,
-  answerText = "Dạ em nắm nhu cầu của chị ạ.",
+  answerText = "Dạ em hiểu ý chị ạ.",
 ) {
   const task = prompt.responderTask;
   if (task === undefined) throw new Error("TEST_RESPONDER_TASK_REQUIRED");
@@ -155,6 +155,8 @@ function responderFor(
         ? "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?"
         : task.continuation?.type === "ASK" && task.continuation.input === "COLOR"
           ? "Màu nào hợp ý chị hơn ạ?"
+          : task.continuation?.type === "ASK" && task.continuation.input === "USUAL_SIZE"
+            ? "Chị thường mặc size gì ạ?"
           : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   };
 }
@@ -203,6 +205,37 @@ async function runFixture(
 }
 
 describe("Track C C3 post-PR358 behavior wiring", () => {
+  it("allows an objection to KEEP_OPEN despite missing measurements or checkout fields", async () => {
+    for (const caseFixture of [
+      fixture({ id: "MEASUREMENT_OBJECTION", message: "Chị còn lăn tăn.",
+        canonicalFlags: ["MEASUREMENTS_REQUIRED"] }),
+      fixture({ id: "CHECKOUT_OBJECTION", message: "Chị muốn nghĩ thêm.",
+        checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] },
+        buyingIntent: "COMMITTED" }),
+    ]) {
+      const candidate = candidateTransport({ strategist: () => ({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge hesitation without more discovery.",
+        proposition: "NONE", evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) });
+      const result = await runFixture(caseFixture, candidate);
+      expect(result.output.cta).toBe("NONE");
+      expect(result.reply).not.toMatch(/chiều cao|cân nặng|số điện thoại/u);
+    }
+  });
+
+  it("gives canonical hard stop precedence over trusted first-contact acquisition", async () => {
+    const candidate = candidateTransport();
+    const result = await runFixture(fixture({
+      id: "FIRST_CONTACT_STOP", message: "Không cần nữa em.",
+      origin: "ADVERTISEMENT", firstMeaningfulInbound: true,
+      buyingIntent: "NEGATED", runtimeClaimRefs: ["RC_PRICE_A"],
+    }), candidate, [facts.simulation_fact_catalog.SF_PRODUCT_A]);
+    expect(candidate.send).toHaveBeenCalledTimes(1);
+    expect(result.output.strategy).toBe("HOLD_POSITION");
+    expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
+  });
+
   it("uses only trusted acquisition metadata to select the fixed first-contact lane", async () => {
     const caseFixture = fixture({
       id: "AD_ORIGIN",
@@ -316,10 +349,10 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
     const measuredCandidate = candidateTransport({
       strategist: (prompt) => {
         expect(prompt.constraints).toMatchObject({
-          permittedCanonicalActions: ["ASK_MEASUREMENTS"],
+          permittedCanonicalActions: ["NONE", "ASK_MEASUREMENTS"],
           measurementsUnavailable: false,
         });
-        return decisionFor(prompt);
+        return { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
       },
     });
     const measured = await runFixture(caseFixture, measuredCandidate, [], staleUnavailable);
@@ -360,11 +393,13 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
     const candidate = candidateTransport({
       strategist: (prompt) => {
         expect(prompt.constraints?.permittedCanonicalActions)
-          .toEqual(["ASK_CHECKOUT_DETAILS"]);
+          .toEqual(["NONE", "ASK_CHECKOUT_DETAILS"]);
         expect(JSON.stringify(prompt)).not.toContain("090");
         return {
           ...decisionFor(prompt),
           replyAct: "ACKNOWLEDGE",
+          canonicalAction: "ASK_CHECKOUT_DETAILS",
+          continuation: null,
           goal: "Acknowledge the commitment and request only required details.",
         };
       },

@@ -3,7 +3,6 @@ import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
   TRACK_C_PROTECTED_PROPOSITIONS,
   trackCCustomerFacingSizeFromVariantId,
-  trackCEvidenceHasSafeFactualEgress,
   type TrackCProtectedProposition,
   type TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
@@ -89,7 +88,9 @@ export function trackCRuntimeClaimDeterministicText(
     return null;
   }
   if (claim.type === "SIZE_FIT") {
-    return `Dạ theo thông tin size đã xác minh, size phù hợp là ${claim.value.recommendedSizes.join(" hoặc ")} ạ.`;
+    const alternative = claim.value.alternativeSizes.length === 0 ? "" :
+      ` Size thay thế đã được xác minh: ${claim.value.alternativeSizes.join(" hoặc ")} ạ.`;
+    return `Dạ theo thông tin size đã xác minh, size phù hợp là ${claim.value.recommendedSizes.join(" hoặc ")} ạ.${alternative}`;
   }
   if (claim.type === "ETA") {
     return claim.value.minDays === claim.value.maxDays
@@ -138,9 +139,11 @@ function boundedSimulationEvidence(
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
     const offerType = typeof value.offerType === "string" ? value.offerType : null;
-    const deterministicText = colors.length === 0
+    const profileText = colors.length === 0
       ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
       : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
+    const deterministicText = design.length === 0 ? profileText :
+      `${profileText} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {
       displayName,
       material,
@@ -345,11 +348,27 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
     );
     if (projected !== null) evidence.push(projected);
   });
-  const selectable = evidence.filter(trackCEvidenceHasSafeFactualEgress);
-  if (new Set(selectable.map(({ ref }) => ref)).size !== selectable.length ||
-      new Set(selectable.map(({ provenance }) => provenance.contentHash)).size !==
-        selectable.length) {
+  // Missing realization is a capability gap, not missing factual authority.
+  // Keep the evidence visible; the compiler rejects unsupported selections.
+  if (new Set(evidence.map(({ ref }) => ref)).size !== evidence.length ||
+      new Set(evidence.map(({ provenance }) => provenance.contentHash)).size !==
+        evidence.length) {
     throw new Error("TRACK_C_EVIDENCE_PROVENANCE_DUPLICATE");
   }
-  return Object.freeze(selectable);
+  const names = new Map<string, string>();
+  for (const { subject } of evidence) {
+    if (subject?.productId === undefined || subject.displayName === undefined) continue;
+    const previous = names.get(subject.productId);
+    if (previous !== undefined && previous !== subject.displayName) {
+      throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
+    }
+    names.set(subject.productId, subject.displayName);
+  }
+  return Object.freeze(evidence.map((entry) => {
+    const displayName = entry.subject?.productId === undefined
+      ? undefined : names.get(entry.subject.productId);
+    return displayName === undefined ? entry : Object.freeze({
+      ...entry, subject: Object.freeze({ ...entry.subject, displayName }),
+    });
+  }));
 }
