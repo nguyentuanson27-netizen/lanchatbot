@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 import {
   TSC_BUILD_SCRIPT,
+  hasSrcToDistLayout,
   pruneStaleBuildOutputs,
   workspacePackageDirs,
 } from "./prune-stale-build-outputs.mjs";
@@ -137,4 +138,29 @@ test("covers exactly the workspace packages that build with tsc", () => {
     );
     assert.equal(manifest.scripts.build, TSC_BUILD_SCRIPT);
   }
+});
+
+test("every tsc-built package uses the src/ -> dist/ layout this script assumes", () => {
+  // The script skips a package laid out differently rather than mis-pruning it,
+  // which is safe but silently costs that package its cache safety. This fails
+  // instead, so the layout change is a decision someone makes on purpose.
+  const covered = new Set(workspacePackageDirs(repoRoot));
+  const divergent = [];
+
+  for (const root of ["apps", "packages"]) {
+    for (const entry of readdirSync(join(repoRoot, root))) {
+      const packageDir = join(repoRoot, root, entry);
+      const manifestPath = join(packageDir, "package.json");
+      if (!existsSync(manifestPath)) continue;
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+      if (manifest.scripts?.build !== TSC_BUILD_SCRIPT) continue;
+      if (!covered.has(packageDir)) {
+        divergent.push(`${root}/${entry}: builds with tsc but is not rootDir src / outDir dist`);
+      }
+    }
+  }
+
+  assert.deepEqual(divergent, []);
+  assert.ok(hasSrcToDistLayout(join(repoRoot, "apps/admin-api")));
+  assert.ok(!hasSrcToDistLayout(join(repoRoot, "apps/lana-mcp")));
 });

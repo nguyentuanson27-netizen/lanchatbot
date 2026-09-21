@@ -6,9 +6,11 @@
 // leftovers from an older commit -- and @lana/admin-api runs its tests with
 // `node --test dist/*.test.js`, a glob that would happily run them.
 //
-// Only packages that build with `tsc -p tsconfig.json` (rootDir src, outDir dist)
-// are handled; scripts/ci/ci-workflow.test.mjs pins which packages those are.
-// @lana/admin-web builds with vite and is excluded from the CI cache instead.
+// Only packages that build with `tsc -p tsconfig.json` into the rootDir src /
+// outDir dist layout are handled; prune-stale-build-outputs.test.mjs fails if a
+// tsc-built package ever stops matching it, rather than letting that package
+// silently lose its cache safety. @lana/admin-web builds with vite and is
+// excluded from the CI cache instead.
 
 import { existsSync, readdirSync, readFileSync, rmdirSync, unlinkSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
@@ -87,6 +89,13 @@ export function pruneStaleBuildOutputs(packageDir) {
   return { removed, unrecognized };
 }
 
+export function hasSrcToDistLayout(packageDir) {
+  const tsconfigPath = join(packageDir, "tsconfig.json");
+  if (!existsSync(tsconfigPath)) return false;
+  const options = JSON.parse(readFileSync(tsconfigPath, "utf-8")).compilerOptions ?? {};
+  return options.rootDir === "src" && options.outDir === "dist";
+}
+
 export function workspacePackageDirs(repoRoot) {
   const dirs = [];
   for (const root of ["apps", "packages"]) {
@@ -99,6 +108,11 @@ export function workspacePackageDirs(repoRoot) {
       if (!existsSync(manifestPath)) continue;
       const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
       if (manifest.scripts?.build !== TSC_BUILD_SCRIPT) continue;
+      // The dist/ -> src/ mapping below only holds for this layout. A package
+      // laid out differently is skipped rather than mis-pruned; the test in
+      // prune-stale-build-outputs.test.mjs fails if one ever appears, so it is
+      // noticed instead of silently losing its cache safety.
+      if (!hasSrcToDistLayout(packageDir)) continue;
       dirs.push(packageDir);
     }
   }

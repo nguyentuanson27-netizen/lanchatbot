@@ -258,7 +258,6 @@ function emitOutput({ mode, reason, baseRef, changedFiles }) {
   if (githubOutput) {
     const lines = [
       `mode=${mode}`,
-      `doc_coupled_filters=${DOC_COUPLED_SUITES.map((suite) => `--filter ${suite.packageName}`).join(" ")}`,
       `reason=${reason}`,
       `base_ref=${baseRef}`,
       `pnpm_filter=...[${baseRef}]`,
