@@ -181,3 +181,53 @@ test("CLI execution: explicit files via --files flag selects track-c mode", () =
   );
   assert.match(stdout, /mode: track-c/);
 });
+
+test("selectCiScope: prose-only changes select docs mode", () => {
+  const cases = [
+    ["docs/current/PRODUCTION_BASELINE_20260722.md"],
+    ["README.md"],
+    ["AGENTS.md"],
+    ["tasks/plan.txt"],
+    ["docs/a.md", "tasks/b.md", "AGENTS.md"],
+  ];
+
+  for (const changedFiles of cases) {
+    assert.equal(
+      selectCiScope(changedFiles).mode,
+      "docs",
+      `expected docs mode for ${JSON.stringify(changedFiles)}`,
+    );
+  }
+});
+
+test("selectCiScope: anything beyond prose escapes docs mode", () => {
+  // Non-prose files under docs/ and tasks/ are not inert, so they keep the
+  // conservative treatment the rules below them already give every other path.
+  const cases = [
+    [["docs/img.png"], "full"],
+    [["docs/tool.mjs"], "full"],
+    [["docs/data.json"], "full"],
+    [["docs/a.md", "deploy/track-b-0041-operator.mjs"], "full"],
+    [["docs/a.md", ".github/workflows/ci.yml"], "full"],
+    [["README.md", "package.json"], "full"],
+    [["docs/a.md", "apps/worker/src/vertex.ts"], "full"],
+    [["apps/worker/README.md"], "affected"],
+  ];
+
+  for (const [changedFiles, expected] of cases) {
+    assert.equal(
+      selectCiScope(changedFiles).mode,
+      expected,
+      `expected ${expected} for ${JSON.stringify(changedFiles)}`,
+    );
+  }
+});
+
+test("selectCiScope: docs mode reaches the CLI and exports the doc-coupled filters", () => {
+  const stdout = execFileSync(
+    process.execPath,
+    ["scripts/ci/ci-scope.mjs", "--files", "docs/current/PRODUCTION_BASELINE_20260722.md"],
+    { encoding: "utf-8" },
+  );
+  assert.match(stdout, /mode: docs/);
+});
