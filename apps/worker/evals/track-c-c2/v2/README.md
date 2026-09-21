@@ -42,6 +42,33 @@ The aggregate C2 gate binds an explicit expected population. Partial populations
 
 Provider-backed scores remain inadmissible until the owner-selected judge provider/model/location/config identity is pinned.
 
+### C3 no-judge report mapping
+
+External diagnostic runners calling `runTrackCC3TwoPassQualityCandidate` must
+export successful results from the returned candidate result:
+
+```js
+const record = {
+  finalReply: result.reply,
+  compiledTask: result.responderTask,
+  selectedEvidence: result.responderTask.evidence,
+  conversationPlan: result.conversationPlan,
+  completionClassification: "COMPLETED_NOT_JUDGED",
+  behaviorAssessment: "NOT_RUN",
+};
+// Apply the runner's recursive PII redaction before writing any artifact.
+```
+
+The Responder request prompt deliberately omits code-rendered evidence; it is
+not the full compiled task. Do not populate evidence or compiled-task report
+sections from that prompt, or read a nonexistent `result.finalReply` field.
+For failed cases retain the stage/error and a null reply; distinguish capability
+gaps, correct evidence rejects, and execution failures. Completion or a matching
+capability label is not proof that the reply answers the customer's question.
+Behavior review separately checks evidence relevance, question resolution and
+whether progression asks for a genuinely missing input. This diagnostic mapping
+does not change the corpus, rubric, scoring or benchmark acceptance contract.
+
 ## HOLDOUT and reproducibility
 
 The embedded 30-case HOLDOUT is an **exposed regression checkpoint**, not blind evidence. A future blind HOLDOUT must be sealed after candidate/adapter/rubric freeze.

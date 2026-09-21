@@ -120,6 +120,39 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("preserves earlier known inputs in both model requests within the validated dialogue window", async () => {
+    const evaluationContext = Array.from({ length: 15 }, (_, index) => ({
+      direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
+      senderType: index % 2 === 0 ? "CUSTOMER" as const : "BOT" as const,
+      messageType: "TEXT" as const,
+      text: index === 0 ? "Ngân sách chị khoảng 700k, chị cao 1m58 và nặng 57kg."
+        : index === 14 ? "Chị vẫn đang cân nhắc nhé."
+        : index % 2 === 0 ? "Chị xem thêm một chút." : "Dạ chị cứ xem nhé.",
+      attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z",
+    }));
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge hesitation without requesting known inputs.",
+        proposition: "NONE", evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "Dạ em hiểu ý chị ạ.", factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext, transport: { send },
+    });
+    expect(send).toHaveBeenCalledTimes(2);
+    for (const [request] of send.mock.calls) {
+      const body = JSON.parse(request.body);
+      const prompt = JSON.parse(body.contents[0].parts[0].text);
+      expect(prompt.dialogue).toEqual(evaluationContext);
+    }
+  });
+
   it("realizes bounded locality questions while rejecting appended customer PII", async () => {
     for (const progressionText of [
       "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
