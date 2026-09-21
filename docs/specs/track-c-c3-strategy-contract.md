@@ -146,8 +146,15 @@ concern. The Strategist may choose `ANSWER` to address a concern directly.
 
 `goal` describes the current conversational objective and, when asking for an
 input, the specific missing input and why it matters. It is never factual,
-checkout, or effect authority. Facts and exact values come from resolved
-evidence; requested checkout fields come from canonical state.
+checkout, or effect authority. Commercial facts and their exact values come
+from resolved evidence; requested checkout fields come from canonical state.
+
+Customer-reported budget, measurements, and preferences may inform strategy
+and be acknowledged as customer-provided context, subject to the same PII
+boundary. The compiled goal may carry that PII-safe context for the Responder.
+It cannot establish shop price, stock, verified fit, policy, an order effect, or
+checkout completion. For example, a reported weight is a fit input, not proof
+that a size fits; a reported budget is not an authorized shop price.
 
 Code validates the goal's shape and length, applies the existing PII redaction,
 and accepts only the resulting PII-safe text. A successful redaction need not
@@ -254,16 +261,21 @@ Do not ask the model to output a value when code already knows the only valid va
 The Strategist owns selection of evidence that answers the exact property,
 event, and scope in the customer's current question. Related subject matter or
 a shared capability label alone is insufficient. Material does not establish
-wrinkle resistance; delivery ETA does not establish dispatch time. When the
-needed fact is absent, the Strategist leaves the answer's evidence selection
-empty rather than substituting a related fact.
+wrinkle resistance; delivery ETA does not establish dispatch time. Retain
+verified evidence that directly answers part of a compound question; leave the
+selection empty only when no eligible evidence answers any part. For example,
+for price plus wrinkle resistance, retain verified price and use the existing
+goal to identify the unanswered wrinkle question. Do not substitute material
+for wrinkle evidence or invent a negative answer. No extra decision field or
+per-question taxonomy is needed.
 
 For `ANSWER`, code derives `answer.evidenceStatus` after validating references,
 freshness, binding, scope, and capability:
 
 - `SUPPORTED`: eligible selected evidence supports the declared proposition
   capability. This is a bounded authority result, not proof of relevance to the
-  natural-language question or successful question resolution.
+  natural-language question or successful question resolution. It does not
+  mean every part of a compound question is supported or answered.
 - `UNRESOLVED`: no eligible selected evidence supports that capability. Missing
   evidence is not a negative fact, and invalid evidence still fails validation.
 - `NOT_APPLICABLE`: the `ANSWER` task declares proposition `NONE`, so there is no
@@ -329,7 +341,8 @@ Responder responsibilities:
 
 - write one natural Vietnamese Messenger reply;
 - follow the supplied task;
-- use only supplied evidence for factual claims;
+- use only supplied evidence for factual claims, except acknowledgement of
+  customer-reported context as permitted by the compiled goal in section 3;
 - realize exactly one progression mechanism: ordinary continuation or canonical request;
 - do not choose another strategy, evidence set, canonical action, or effect;
 - do not expose internal protocol tokens.
@@ -349,12 +362,18 @@ Keep extra structured output only if a deterministic final guard demonstrably ne
 Code owns which factual assertions are authorized; the Responder realizes the
 compiled task within the available safe wording surface. It must not replace
 the strategy, repair a bad evidence selection by choosing another fact, or
-derive new factual conclusions from `goal` or dialogue.
+derive new factual conclusions from `goal` or dialogue. Acknowledging
+customer-reported context does not turn it into verified commercial evidence.
 
 For the next implementation slice, retain code-owned factual segments and the
-existing bounded nonfactual wording surface. This is an explicit implementation
-limit, not a requirement that all future replies use fixed templates. It does
-not by itself satisfy the naturalness or question-resolution requirements.
+bounded nonfactual wording surface reviewed in PR #371 at exact HEAD
+`da12894e84551b66f8048782a5e170925f720197`, in
+`apps/worker/src/track-c-c3-strategy-contract-runner.ts`. This is an explicit,
+temporary implementation limit, not a requirement that all future replies use
+fixed templates. It does not by itself satisfy the naturalness or
+question-resolution requirements. If that surface cannot express a partial
+answer and its remaining uncertainty, record the realization capability gap;
+do not discard valid evidence or treat completion as successful resolution.
 
 Before expanding model-authored wording, specify which text it may author and
 how factual binding, checkout/PII, effects, and the single progression are
@@ -401,7 +420,12 @@ This simplification must preserve:
 
 ## 9. Benchmark call cardinality
 
-Current R2.16 expects exactly two generator calls for scored two-pass cases. `FIRST_CONTACT_FIXED` intentionally uses only the Responder.
+The original #369 described R2.16 as expecting exactly two generator calls for
+scored two-pass cases. That is historical context, not an assertion about the
+current benchmark revision. The authoritative Track C C2 benchmark artifacts
+under `apps/worker/evals/track-c-c2/v2/` at the evaluated commit determine the
+applicable revision and call contract.
+`FIRST_CONTACT_FIXED` intentionally uses only the Responder.
 
 Do not add a fake/no-op Strategist call to satisfy the old count.
 
