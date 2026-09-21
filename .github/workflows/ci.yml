@@ -40,6 +40,12 @@ jobs:
           --health-retries 12
     env:
       CI: true
+      # Every workspace package carries pre*/post* hooks that rebuild its dependency
+      # graph. pnpm already runs workspace scripts in topological order, so inside a
+      # recursive or filtered CI invocation those hooks rebuild the same packages once
+      # per script phase. The hooks stay in package.json for standalone single-package
+      # runs; CI opts out and relies on the topological order instead.
+      PNPM_NO_PRE_POST: --config.enable-pre-post-scripts=false
       POLICY_STORE_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55432/lana_policy_test
       GATE_E_STORE_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55432/lana_policy_test
     steps:
@@ -65,8 +71,61 @@ jobs:
       - name: Install dependencies
         run: time pnpm install --frozen-lockfile
 
+      - name: Verify CI selector logic
+        run: |
+          time node --test \
+            scripts/ci/ci-scope.test.mjs \
+            scripts/ci/ci-workflow.test.mjs \
+            scripts/ci/prune-stale-build-outputs.test.mjs
+
+      - name: Determine CI scope
+        id: ci-scope
+        run: time node scripts/ci/ci-scope.mjs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+      # A cold workspace build recompiles all 20 packages; with dist/ and the
+      # .tsbuildinfo files restored, tsc only redoes what changed. The exact key
+      # is a content hash, so a hit means the outputs match these sources; the
+      # prefix restore-key is what makes the common case incremental.
+      # @lana/admin-web is excluded: it builds with vite, so the prune step below
+      # cannot reason about its output.
+      - name: Restore build outputs
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            apps/*/dist
+            packages/*/dist
+            !apps/admin-web/dist
+            apps/*/*.tsbuildinfo
+            packages/*/*.tsbuildinfo
+          key: lana-build-${{ runner.os }}-${{ hashFiles('tsconfig.base.json', 'pnpm-lock.yaml', 'apps/*/tsconfig.json', 'packages/*/tsconfig.json', 'apps/*/src/**', 'packages/*/src/**') }}
+          restore-keys: |
+            lana-build-${{ runner.os }}-
+
+      # tsc never deletes the output of a source that was removed or renamed, so
+      # a restored dist/ can still hold an executable leftover from an older
+      # commit -- and @lana/admin-api runs `node --test dist/*.test.js`.
+      - name: Prune stale build outputs
+        run: time node scripts/ci/prune-stale-build-outputs.mjs
+
+      # One build for the whole job. Every later step consumes this dist/ instead
+      # of rebuilding its own slice: the PostgreSQL spec compile, the Track C
+      # lane and the test lanes all used to re-derive it.
+      - name: Build workspace
+        run: time pnpm $PNPM_NO_PRE_POST -r build
+
+      # `tsc -p tsconfig.json` type-checks exactly what `--noEmit` does (declaration
+      # emit makes it stricter, never weaker), so the build above already covers
+      # every package that builds with tsc. @lana/admin-web builds with vite, which
+      # does not type-check, so it is the only package left needing its own pass.
+      # scripts/ci/ci-workflow.test.mjs pins that invariant.
+      - name: Typecheck packages not covered by the build
+        run: time pnpm $PNPM_NO_PRE_POST --filter @lana/admin-web typecheck
+
       - name: Verify policy transactions on PostgreSQL
-        run: time pnpm --filter @lana/admin-api test:postgres
+        run: time pnpm $PNPM_NO_PRE_POST --filter @lana/admin-api test:postgres
 
       - name: Verify Track B 0037 migration operator
         run: |
@@ -95,23 +154,21 @@ jobs:
       - name: Verify release integrity
         run: time pnpm check:release-integrity
 
-      - name: Verify CI selector logic
-        run: time node --test scripts/ci/ci-scope.test.mjs scripts/ci/ci-workflow.test.mjs
-
-      - name: Determine CI scope
-        id: ci-scope
-        run: time node scripts/ci/ci-scope.mjs
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      # Prose-only changes still reach a few checks that assert against
+      # repository documentation. scripts/ci/ci-scope.mjs lists them in
+      # DOC_COUPLED_SUITES, and scripts/ci/ci-workflow.test.mjs fails if a source
+      # file starts reading documentation without this lane covering it.
+      - name: Run documentation-coupled checks
+        if: steps.ci-scope.outputs.mode == 'docs'
+        run: |
+          time pnpm $PNPM_NO_PRE_POST --filter @lana/worker exec vitest run src/context-v2-evaluation.test.ts
+          time pnpm $PNPM_NO_PRE_POST --filter @lana/mcp test
 
       - name: Run Track C focused checks
         if: steps.ci-scope.outputs.mode == 'track-c'
         run: |
-          time pnpm --filter @lana/worker typecheck
-          time pnpm --filter @lana/worker lint
-          time pnpm --filter @lana/worker benchmark:c2:validate
-          time pnpm --filter @lana/worker exec vitest run \
+          time pnpm $PNPM_NO_PRE_POST --filter @lana/worker benchmark:c2:validate
+          time pnpm $PNPM_NO_PRE_POST --filter @lana/worker exec vitest run \
             src/track-c-replay.test.ts \
             src/track-c-must-pass.test.ts \
             src/track-c-offline-candidate.test.ts \
@@ -128,14 +185,9 @@ jobs:
         if: steps.ci-scope.outputs.mode == 'affected'
         run: |
           BASE_REF="${{ steps.ci-scope.outputs.base_ref || 'origin/main' }}"
-          time pnpm --filter "...[$BASE_REF]..." run --if-present build
-          time pnpm --filter "...[$BASE_REF]" run --if-present typecheck
-          time pnpm --filter "...[$BASE_REF]" run --if-present test
-          time pnpm --filter "...[$BASE_REF]" run --if-present lint
+          time pnpm $PNPM_NO_PRE_POST --filter "...[$BASE_REF]" run --if-present test
 
       - name: Run repository checks (full regression)
         if: steps.ci-scope.outputs.mode == 'full'
         run: |
-          time pnpm -r build
-          time pnpm -r typecheck
-          time pnpm -r test
+          time pnpm $PNPM_NO_PRE_POST -r test

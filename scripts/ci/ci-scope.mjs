@@ -18,6 +18,32 @@ export const TRACK_C_OFFLINE_SAFE_FILES = new Set([
   "apps/worker/src/track-c-quality-suite-gate.test.ts",
 ]);
 
+// Files that only carry prose. They cannot change compiled behaviour, but they
+// are not inert either: a few checks assert against repository documentation, so
+// the docs lane still runs those. DOC_COUPLED_SUITES below names them, and
+// scripts/ci/ci-workflow.test.mjs fails if a source file starts reading
+// repository documentation without the lane being extended to cover it.
+// Deliberately extension-scoped: anything else under docs/ or tasks/ (a script,
+// a JSON fixture, an image) falls through to the conservative rules below.
+export const DOC_ONLY_PATH_PATTERNS = [
+  /^docs\/.*\.(?:md|txt)$/,
+  /^tasks\/.*\.(?:md|txt)$/,
+  /^[^/]+\.md$/,
+];
+
+// Every check that reads repository documentation, and therefore has to run even
+// when a change touches nothing but prose.
+export const DOC_COUPLED_SUITES = Object.freeze([
+  // asserts against docs/current/architecture-program/contracts/MODEL_EVALUATION_BOUNDARY.md
+  { packageName: "@lana/worker", testFile: "src/context-v2-evaluation.test.ts" },
+  // repositoryListFiles/repositoryReadFile fixtures mirror README.md and docs/current layout
+  { packageName: "@lana/mcp", testFile: "server.test.mjs" },
+]);
+
+export function isDocOnlyPath(filePath) {
+  return DOC_ONLY_PATH_PATTERNS.some((pattern) => pattern.test(filePath));
+}
+
 export function normalizePath(filePath) {
   if (typeof filePath !== "string") return "";
   let normalized = filePath.trim().replace(/\\/g, "/");
@@ -46,7 +72,19 @@ export function selectCiScope(changedFiles) {
     };
   }
 
-  // 1. Conservative fallback check for global/root/infra/config paths
+  // 1. Documentation-only changes.
+  // Checked before the global-impact fallback below, which would otherwise send
+  // every docs/ and *.md change through a full regression. The lane still runs
+  // the mandatory gates plus DOC_COUPLED_SUITES, so the checks that actually
+  // read these files keep running.
+  if (normalizedFiles.every(isDocOnlyPath)) {
+    return {
+      mode: "docs",
+      reason: "all changed files are repository documentation; running mandatory gates and doc-coupled suites",
+    };
+  }
+
+  // 2. Conservative fallback check for global/root/infra/config paths
   for (const file of normalizedFiles) {
     if (file.startsWith(".github/")) {
       return {
@@ -86,7 +124,7 @@ export function selectCiScope(changedFiles) {
     }
   }
 
-  // 2. Track C offline safe allowlist check
+  // 3. Track C offline safe allowlist check
   // Selected ONLY when 100% of changed files are within the verified offline allowlist
   const isTrackCOfflineOnly = normalizedFiles.every((file) =>
     TRACK_C_OFFLINE_SAFE_FILES.has(file)
@@ -99,7 +137,7 @@ export function selectCiScope(changedFiles) {
     };
   }
 
-  // 3. Affected package mode
+  // 4. Affected package mode
   // Changes are isolated to apps/ or packages/ without global-impact files
   return {
     mode: "affected",
