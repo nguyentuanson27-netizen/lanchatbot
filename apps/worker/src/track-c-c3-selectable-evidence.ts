@@ -346,7 +346,40 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       `SIMULATION_${String(index + 1).padStart(3, "0")}`,
       input.context.productBinding.productIds,
     );
-    if (projected !== null) evidence.push(projected);
+    if (projected === null) return;
+    evidence.push(projected);
+    if (projected.capability === "PRODUCT_PRESENTATION") {
+      // Preserve the overview for fixed first contact, while adaptive turns
+      // can select just one verified attribute without printing the bundle.
+      const { material, colors, design } = projected.value as {
+        material: string; colors: readonly string[]; design: readonly string[];
+      };
+      const fields = [
+        { field: "material", value: material,
+          text: `Mẫu này có chất liệu ${material} ạ.` },
+        ...(colors.length === 0 ? [] : [{ field: "colors", value: colors,
+          text: `Mẫu này hiện có màu ${colors.join(", ")} ạ.` }]),
+        ...(design.length === 0 ? [] : [{ field: "design", value: design,
+          text: `Thiết kế của mẫu gồm ${design.join(", ")} ạ.` }]),
+      ];
+      for (const field of fields) {
+        evidence.push(Object.freeze({
+          ref: `${projected.ref}_${field.field.toUpperCase()}`,
+          capability: "PRODUCT_ATTRIBUTES" as const,
+          subject: projected.subject!,
+          value: Object.freeze({ [field.field]: field.value }),
+          deterministicText: field.text,
+          provenance: Object.freeze({
+            authority: "SIMULATION" as const,
+            contentHash: sha256({
+              sourceContentHash: projected.provenance.contentHash,
+              field: field.field,
+              value: field.value,
+            }),
+          }),
+        }));
+      }
+    }
   });
   // Missing realization is a capability gap, not missing factual authority.
   // Keep the evidence visible; the compiler rejects unsupported selections.

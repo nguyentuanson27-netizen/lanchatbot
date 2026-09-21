@@ -51,6 +51,16 @@ function candidate(): TrackCStrategyContractCaseResult {
       continuation: { type: "KEEP_OPEN" },
       canonicalAction: "NONE",
     },
+    responderTask: {
+      answer: { kind: "ANSWER", status: "SUPPORTED", proposition: "PRICE",
+        goal: "Answer the verified price." },
+      evidence: [{ ref: "CLAIM_001", capability: "PRICE",
+        value: { amount: 849000, currency: "VND" },
+        deterministicText: "Mẫu này hiện 849k chị ạ.",
+        provenance: { contentHash: HASH, authority: "RUNTIME" } }],
+      requiredEvidenceRefs: ["CLAIM_001"],
+      continuation: { type: "KEEP_OPEN" }, canonicalRequest: null,
+    },
     output: {
       schemaVersion: 2,
       contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",

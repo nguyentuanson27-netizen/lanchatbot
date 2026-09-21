@@ -120,6 +120,71 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("realizes bounded locality questions while rejecting appended customer PII", async () => {
+    for (const progressionText of [
+      "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
+      "Chị ở tỉnh hoặc thành phố nào để em kiểm tra giao hàng ạ?",
+      "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ? 0901234567",
+    ]) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "CLARIFY", goal: "Ask locality to check delivery coverage.",
+          proposition: "NONE", evidenceRefs: [],
+          continuation: { type: "ASK", input: "LOCALITY" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText: "Dạ em hiểu ý chị ạ.", factualTexts: [], progressionText,
+        }), providerModelVersion: "gemini-3.5-flash-lite" });
+      const result = runTrackCStrategyContractCase({
+        lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+        capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: [{
+          direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Shop có giao tới chỗ chị không?", attachmentCount: 0,
+          occurredAt: "2026-09-10T01:59:00.000Z",
+        }], transport: { send },
+      });
+      if (progressionText.endsWith("0901234567")) {
+        await expect(result).rejects.toMatchObject({ diagnostic: {
+          stage: "RESPONDER", errorCode: "TRACK_C_RESPONDER_DRAFT_INVALID",
+        } });
+      } else {
+        expect((await result).output.segments.at(-1)?.text).toBe(progressionText);
+      }
+    }
+  });
+
+  it("compiles only the selected profile field and leaves absent properties unresolved", async () => {
+    for (const [ref, expected] of [
+      ["SIMULATION_001_MATERIAL", "Mẫu này có chất liệu tơ xước mềm, nhẹ ạ."],
+      ["SIMULATION_001_DESIGN", "Thiết kế của mẫu gồm phom suông, quần cạp chun ạ."],
+      [null, "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ."],
+    ] as const) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: ref === null ? "Wrinkle resistance is unknown." : "Answer the requested attribute.",
+          proposition: "PRODUCT_ATTRIBUTES", evidenceRefs: ref === null ? [] : [ref],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText: null, factualTexts: [], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" });
+      const result = await runTrackCStrategyContractCase({
+        lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+        capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: [{
+          direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: ref === null ? "Mẫu này có dễ nhăn không?" : "Cho chị biết thuộc tính này nhé.",
+          attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+        }], simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+        transport: { send },
+      });
+      expect(result.reply).toBe(expected);
+      expect(result.responderTask.answer.status).toBe(ref === null ? "UNRESOLVED" : "SUPPORTED");
+      expect(result.responderTask.evidence.map(({ ref }) => ref)).toEqual(ref === null ? [] : [ref]);
+    }
+  });
+
   it("closes factual, effect and duplicate-request side channels in otherwise valid drafts", async () => {
     for (const draft of [
       { answerText: "Mẫu này thiết kế tỉ mỉ và bền đẹp chị nha.", progressionText: "Chị thích màu nào hơn ạ?" },
@@ -180,6 +245,9 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence.map(({ capability }) => capability)).toEqual([
       "PRICE",
       "PRODUCT_PRESENTATION",
+      "PRODUCT_ATTRIBUTES",
+      "PRODUCT_ATTRIBUTES",
+      "PRODUCT_ATTRIBUTES",
     ]);
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
@@ -580,8 +648,7 @@ describe("Track C C3 strategy-contract runner", () => {
       proposition: "STOCK",
     });
     expect(result.reply).toBe(
-      "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.\n" +
-      "Em vẫn ở đây khi chị cần xem thêm ạ.",
+      "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.",
     );
   });
 
@@ -703,7 +770,6 @@ describe("Track C C3 strategy-contract runner", () => {
         kind: "VERIFIED_CLAIM",
         text: "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
       }),
-      { kind: "GENERAL", text: "Em vẫn ở đây khi chị cần xem thêm ạ." },
     ]);
   });
 
@@ -772,7 +838,7 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     expect(result.output.cta).toBe("NONE");
     expect(result.reply).toBe(
-      "Dạ em hiểu ý chị ạ.\nEm vẫn ở đây khi chị cần xem thêm ạ.",
+      "Dạ em hiểu ý chị ạ.",
     );
   });
 
@@ -933,7 +999,6 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.output.strategy).toBe("ANSWER_VERIFIED_FACTS");
     expect(result.output.segments).toEqual([
       { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
-      { kind: "GENERAL", text: "Em vẫn ở đây khi chị cần xem thêm ạ." },
     ]);
   });
 
@@ -1035,7 +1100,7 @@ describe("Track C C3 strategy-contract runner", () => {
       text: "Dạ em hiểu ý chị ạ.",
     });
     expect(result.reply).toContain("Mẫu Tường Vi");
-    expect(result.reply).toContain("Em vẫn ở đây khi chị cần xem thêm ạ.");
+    expect(result.reply).not.toContain("Em vẫn ở đây khi chị cần xem thêm ạ.");
   });
 
   it("rejects unsupported selling wording in deterministic ACK answerText", async () => {

@@ -205,6 +205,28 @@ async function runFixture(
 }
 
 describe("Track C C3 post-PR358 behavior wiring", () => {
+  it("keeps fit clarification available and blocks checkout while measurements are required", async () => {
+    for (const caseFixture of [
+      fixture({ id: "FIT_WITHOUT_FLAG", message: "Chị cần thêm số đo nào để chọn vừa?" }),
+      fixture({ id: "FIT_BEFORE_CHECKOUT", message: "Chị muốn kiểm tra vòng eo trước.",
+        canonicalFlags: ["MEASUREMENTS_REQUIRED"], buyingIntent: "COMMITTED",
+        checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] } }),
+    ]) {
+      const candidate = candidateTransport({ strategist: (prompt) => {
+        expect(prompt.constraints?.permittedCanonicalActions).toEqual(["NONE", "ASK_MEASUREMENTS"]);
+        expect(prompt).toMatchObject({ canonicalContext: {
+          productBinding: { status: "RESOLVED", productIds: ["SQ9012"] },
+          activeBarriers: caseFixture.context.canonical_flags,
+          buyingIntent: { decision: caseFixture.context.buying_intent.decision },
+        } });
+        return { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
+      } });
+      const result = await runFixture(caseFixture, candidate);
+      expect(result.output.cta).toBe("ASK_MEASUREMENTS");
+      expect(result.reply).not.toContain("số điện thoại");
+    }
+  });
+
   it("allows an objection to KEEP_OPEN despite missing measurements or checkout fields", async () => {
     for (const caseFixture of [
       fixture({ id: "MEASUREMENT_OBJECTION", message: "Chị còn lăn tăn.",
@@ -393,7 +415,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
     const candidate = candidateTransport({
       strategist: (prompt) => {
         expect(prompt.constraints?.permittedCanonicalActions)
-          .toEqual(["NONE", "ASK_CHECKOUT_DETAILS"]);
+          .toEqual(["NONE", "ASK_MEASUREMENTS", "ASK_CHECKOUT_DETAILS"]);
         expect(JSON.stringify(prompt)).not.toContain("090");
         return {
           ...decisionFor(prompt),
@@ -455,6 +477,6 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
 
     expect(result.output.cta).toBe("NONE");
     const strategist = promptOf(candidate.send.mock.calls[0]![0]);
-    expect(strategist.constraints?.permittedCanonicalActions).toEqual(["NONE"]);
+    expect(strategist.constraints?.permittedCanonicalActions).toEqual(["NONE", "ASK_MEASUREMENTS"]);
   });
 });

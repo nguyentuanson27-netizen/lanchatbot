@@ -59,6 +59,8 @@ const STRATEGIST_INSTRUCTION = [
   "ACKNOWLEDGE is acknowledgement-only. For an ordinary factual question that is not an objection, concern, hesitation, or resistance, use ANSWER; if supporting evidence is unavailable, keep evidenceRefs empty so code derives UNRESOLVED.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
+  "Canonical context describes binding, barriers, and buying intent; permitted actions are options, not instructions to progress. If product identity is the blocker, choose ASK_PRODUCT, not an ordinary STYLE question. For fit qualification choose ASK_MEASUREMENTS, not purchase SIZE. In goal, identify the missing measurement and measurements already supplied so the Responder asks only what is needed.",
+  "For a specific product attribute, select only the relevant field evidence. A material, color, or design fact does not establish an unstated property or benefit. Use the combined PRODUCT_PRESENTATION only when an overview is needed; leave evidenceRefs empty when the requested property is absent.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
@@ -70,9 +72,9 @@ const RESPONDER_INSTRUCTION = [
   "Emit factualTexts as an empty array. answerText may only acknowledge and progressionText may only ask when the response schema permits; neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "For ANSWER with UNRESOLVED status, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact.",
-  "For KEEP_OPEN, emit progressionText null. Code appends the neutral customer-facing keep-open phrase.",
+  "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
   "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
-  "For ASK_MEASUREMENTS, ask for height, weight, or relevant measurements; do not ask usual worn size.",
+  "For ASK_MEASUREMENTS, use the goal and dialogue to ask only for the missing height, weight, or relevant measurement; do not repeat measurements already supplied or ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
   "Do not choose another strategy, evidence, canonical action, continuation, effect, checkout field, role, target, or CTA. Those are code-owned and are not part of your output.",
@@ -83,7 +85,6 @@ const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ em hiểu ý chị ạ.",
   "Dạ em hiểu băn khoăn của chị ạ.",
 ] as const);
-const KEEP_OPEN_TEXT = "Em vẫn ở đây khi chị cần xem thêm ạ.";
 const UNRESOLVED_ANSWER_TEXT =
   "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
 
@@ -157,6 +158,8 @@ export interface TrackCStrategyContractCaseResult {
   readonly executionLane: TrackCV5ExecutionLane;
   readonly conversationLane: TrackCConversationLane;
   readonly conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
+  /** Full code-compiled task; the model prompt omits code-rendered evidence. */
+  readonly responderTask: TrackCResponderTask;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
   readonly identity: Readonly<{
@@ -412,13 +415,27 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
     evaluationContext: input.evaluationContext,
     systemInstruction: STRATEGIST_INSTRUCTION,
   });
+  const context = contextFromFrozenTrackCCapture(input);
   return narrowRequest(base, strategistResponseSchema(input.constraints, input.evidence), {
     contractVersion: "TRACK_C_C3_STRATEGIST_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
     selectableEvidence: presentableEvidence(input.evidence),
+    canonicalContext: {
+      productBinding: context.productBinding,
+      activeBarriers: context.barriers.active,
+      phase: context.phase.phase,
+      sourceStage: context.phase.sourceStage,
+      buyingIntent: {
+        decision: context.buyingIntent.decision,
+        requestedAction: context.buyingIntent.requestedAction,
+      },
+    },
     constraints: {
       permittedCanonicalActions: strategyActions(input.constraints),
       measurementsUnavailable: input.constraints.measurementsUnavailable,
+      productResolved: input.constraints.productResolved,
+      hardStop: input.constraints.hardStop,
+      checkoutRequestedFields: input.constraints.checkoutRequestedFields ?? [],
     },
   });
 }
@@ -539,7 +556,12 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask): Respond
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
       return result;
     })),
-    progressionText: text(record.progressionText, "TRACK_C_RESPONDER_DRAFT_INVALID"),
+    // Exact schema vocabulary contains no customer values. Resolve it to the
+    // code-owned string before DLP, which can mistake a locality question for
+    // an address. Any other text still goes through DLP and final validation.
+    progressionText: requestWording(task).find((wording) =>
+      wording === record.progressionText
+    ) ?? text(record.progressionText, "TRACK_C_RESPONDER_DRAFT_INVALID"),
   });
 }
 
@@ -711,8 +733,6 @@ function compileResponderDraft(input: Readonly<{
       target: "MEASUREMENTS",
       text: draft.progressionText!,
     });
-  } else if (task.continuation?.type === "KEEP_OPEN") {
-    segments.push({ kind: "GENERAL", text: KEEP_OPEN_TEXT });
   } else if (draft.progressionText !== null) {
     segments.push({ kind: "GENERAL", text: draft.progressionText });
   }
@@ -817,29 +837,25 @@ function constraintsFor(
       hardStop: false,
     });
   }
-  if (checkoutRequestedFields.length > 0) {
-    return Object.freeze({
-      permittedCanonicalActions: Object.freeze(["NONE", "ASK_CHECKOUT_DETAILS"] as const),
-      measurementsUnavailable: false,
-      productResolved: true,
-      hardStop: false,
-      checkoutRequestedFields: Object.freeze([...checkoutRequestedFields]),
-    });
-  }
   const unavailable = measurementsUnavailable(dialogue);
-  if (context.barriers.active.includes("MEASUREMENTS_REQUIRED") && !unavailable) {
-    return Object.freeze({
-      permittedCanonicalActions: Object.freeze(["NONE", "ASK_MEASUREMENTS"] as const),
-      measurementsUnavailable: false,
-      productResolved: true,
-      hardStop: false,
-    });
+  const permittedCanonicalActions: TrackCCanonicalAction[] = ["NONE"];
+  if (!unavailable) permittedCanonicalActions.push("ASK_MEASUREMENTS");
+  const checkoutAuthorized = context.buyingIntent.decision === "COMMITTED" &&
+    context.phase.sourceStage === "ORDER_PREVIEW" &&
+    context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT" &&
+    !context.barriers.active.includes("MEASUREMENTS_REQUIRED") &&
+    checkoutRequestedFields.length > 0;
+  if (checkoutAuthorized) {
+    permittedCanonicalActions.push("ASK_CHECKOUT_DETAILS");
   }
   return Object.freeze({
-    permittedCanonicalActions: Object.freeze(["NONE"] as const),
+    permittedCanonicalActions: Object.freeze(permittedCanonicalActions),
     measurementsUnavailable: unavailable,
     productResolved: true,
     hardStop: false,
+    ...(checkoutAuthorized ? {
+      checkoutRequestedFields: Object.freeze([...checkoutRequestedFields]),
+    } : {}),
   });
 }
 
@@ -1040,6 +1056,7 @@ export async function runTrackCStrategyContractCase(
     executionLane: input.lane,
     conversationLane: lane,
     conversationPlan,
+    responderTask: task,
     output,
     reply: output.segments.map(({ text }) => text).join("\n"),
     identity,
