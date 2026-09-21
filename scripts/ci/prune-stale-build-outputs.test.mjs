@@ -155,12 +155,37 @@ test("every tsc-built package uses the src/ -> dist/ layout this script assumes"
       const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
       if (manifest.scripts?.build !== TSC_BUILD_SCRIPT) continue;
       if (!covered.has(packageDir)) {
-        divergent.push(`${root}/${entry}: builds with tsc but is not rootDir src / outDir dist`);
+        divergent.push(
+          `${root}/${entry}: builds with tsc, but its tsconfig.json is not readable as ` +
+            `rootDir src / outDir dist, so its dist/ is never pruned`,
+        );
       }
     }
   }
 
   assert.deepEqual(divergent, []);
   assert.ok(hasSrcToDistLayout(join(repoRoot, "apps/admin-api")));
-  assert.ok(!hasSrcToDistLayout(join(repoRoot, "apps/lana-mcp")));
+});
+
+test("treats an unreadable or differently laid out tsconfig as unknown", () => {
+  const dir = mkdtempSync(join(tmpdir(), "lana-prune-"));
+  try {
+    // No tsconfig at all.
+    assert.equal(hasSrcToDistLayout(dir), false);
+
+    // A different layout.
+    write(join(dir, "tsconfig.json"), JSON.stringify({ compilerOptions: { rootDir: ".", outDir: "dist" } }));
+    assert.equal(hasSrcToDistLayout(dir), false);
+
+    // JSONC, which tsconfig.json allows. This must not throw: the script runs
+    // before the build, so an exception here would fail the whole CI job.
+    write(join(dir, "tsconfig.json"), '{\n  // a comment\n  "compilerOptions": { "rootDir": "src", "outDir": "dist" }\n}');
+    assert.equal(hasSrcToDistLayout(dir), false);
+
+    // The layout the dist/ -> src/ mapping actually relies on.
+    write(join(dir, "tsconfig.json"), JSON.stringify({ compilerOptions: { rootDir: "src", outDir: "dist" } }));
+    assert.equal(hasSrcToDistLayout(dir), true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

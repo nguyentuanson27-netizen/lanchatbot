@@ -92,7 +92,17 @@ export function pruneStaleBuildOutputs(packageDir) {
 export function hasSrcToDistLayout(packageDir) {
   const tsconfigPath = join(packageDir, "tsconfig.json");
   if (!existsSync(tsconfigPath)) return false;
-  const options = JSON.parse(readFileSync(tsconfigPath, "utf-8")).compilerOptions ?? {};
+  let options;
+  try {
+    // tsconfig.json is JSONC by convention, and this script runs before the
+    // build: throwing here would fail the whole job over a comment. Anything
+    // this cannot read is treated as an unknown layout, which only means the
+    // package is skipped -- and the test below turns that into a visible
+    // failure rather than a silent loss of cache safety.
+    options = JSON.parse(readFileSync(tsconfigPath, "utf-8")).compilerOptions ?? {};
+  } catch {
+    return false;
+  }
   return options.rootDir === "src" && options.outDir === "dist";
 }
 
