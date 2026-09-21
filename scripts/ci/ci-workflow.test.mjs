@@ -86,16 +86,62 @@ test("CI preserves mandatory gates and selector-driven code lanes", () => {
   assert.match(stepBlock(check, "Run repository checks (full regression)"), /if:\s*steps\.ci-scope\.outputs\.mode == 'full'/);
 });
 
-test("Track C checks build the worker dependency closure before compiling", () => {
-  const trackC = stepBlock(jobBlock("check"), "Run Track C focused checks");
-  const build = trackC.indexOf('--filter "@lana/worker..." run --if-present build');
-  const typecheck = trackC.indexOf("--filter @lana/worker typecheck");
+test("the shared workspace build runs once, before every consumer of dist/", () => {
+  const check = jobBlock("check");
+  const build = check.indexOf("- name: Build workspace");
+  assert.notEqual(build, -1, "CI must build the workspace once up front");
+  assert.equal(
+    (check.match(/pnpm \$PNPM_NO_PRE_POST -r build/g) ?? []).length,
+    1,
+    "the workspace must be built exactly once per job",
+  );
 
-  // With pre*/post* hooks disabled, nothing else prepares @lana/worker's
-  // dependencies, so the explicit closure build has to come first.
-  assert.notEqual(build, -1, "Track C lane must build the worker dependency closure");
-  assert.notEqual(typecheck, -1);
-  assert.ok(build < typecheck);
+  // Everything downstream reads dist/ rather than re-deriving its own slice.
+  for (const stepName of [
+    "Typecheck packages not covered by the build",
+    "Verify policy transactions on PostgreSQL",
+    "Run Track C focused checks",
+    "Run affected packages checks",
+    "Run repository checks (full regression)",
+  ]) {
+    const consumer = check.indexOf(`- name: ${stepName}`);
+    assert.notEqual(consumer, -1, `CI job is missing step: ${stepName}`);
+    assert.ok(build < consumer, `${stepName} must run after the shared build`);
+  }
+
+  // The scope has to be known before the build so lanes can opt out of it.
+  assert.ok(check.indexOf("- name: Determine CI scope") < build);
+});
+
+test("only packages whose build does not type-check get a separate typecheck pass", () => {
+  // `tsc -p tsconfig.json` performs the same checks as `tsc --noEmit`, and
+  // declaration emit adds more, so a tsc build subsumes the typecheck script.
+  // Anything built another way still needs its own pass, and the workflow has
+  // to name it explicitly.
+  const typecheckStep = stepBlock(jobBlock("check"), "Typecheck packages not covered by the build");
+  const explicitlyTypechecked = new Set(
+    [...typecheckStep.matchAll(/--filter (@[\w/-]+) typecheck/g)].map((match) => match[1]),
+  );
+
+  const uncovered = workspacePackages()
+    .filter(({ manifest }) => {
+      const scripts = manifest.scripts ?? {};
+      if (!scripts.typecheck) return false;
+      if (scripts.build === "tsc -p tsconfig.json") return false;
+      if (scripts.build === scripts.typecheck) return false;
+      return !explicitlyTypechecked.has(manifest.name);
+    })
+    .map(({ dir, manifest }) => `${dir}: build=${manifest.scripts.build}`);
+
+  assert.deepEqual(uncovered, [], "these packages are never type-checked by CI");
+
+  // And nothing is listed that the build already covers.
+  const redundant = workspacePackages()
+    .filter(({ manifest }) => explicitlyTypechecked.has(manifest.name))
+    .filter(({ manifest }) => manifest.scripts?.build === "tsc -p tsconfig.json")
+    .map(({ dir }) => dir);
+
+  assert.deepEqual(redundant, [], "these packages are type-checked twice");
 });
 
 test("Track C focused checks gate the C2 100-case benchmark and C3 adapter regressions", () => {
@@ -112,16 +158,12 @@ test("Track C focused checks gate the C2 100-case benchmark and C3 adapter regre
   assert.doesNotMatch(trackC, /track-c-quality-suite-gate\.test\.ts/);
 });
 
-test("affected-package build prepares the dependency closure of changed packages and dependents", () => {
+test("the affected lane tests changed packages and their dependents", () => {
   const affected = stepBlock(jobBlock("check"), "Run affected packages checks");
 
   assert.match(
     affected,
-    /pnpm \$PNPM_NO_PRE_POST --filter "\.\.\.\[\$BASE_REF\]\.\.\." run --if-present build/,
-  );
-  assert.match(
-    affected,
-    /pnpm \$PNPM_NO_PRE_POST --filter "\.\.\.\[\$BASE_REF\]" run --if-present typecheck/,
+    /pnpm \$PNPM_NO_PRE_POST --filter "\.\.\.\[\$BASE_REF\]" run --if-present test/,
   );
 });
 
@@ -138,8 +180,6 @@ test("full regression deduplicates release integrity and the second top-level wo
 
   assert.doesNotMatch(full, /pnpm check(?:\s|$)/);
   assert.doesNotMatch(full, /check:release-integrity/);
-  assert.equal((full.match(/pnpm \$PNPM_NO_PRE_POST -r build/g) ?? []).length, 1);
-  assert.equal((full.match(/pnpm \$PNPM_NO_PRE_POST -r typecheck/g) ?? []).length, 1);
   assert.equal((full.match(/pnpm \$PNPM_NO_PRE_POST -r test/g) ?? []).length, 1);
 
   assert.equal((workflow.match(/pnpm check:release-integrity/g) ?? []).length, 1);
@@ -196,4 +236,106 @@ test("lint stays byte-identical to typecheck, so CI runs the tsc pass once", () 
       `${stepName} re-runs lint, which duplicates typecheck`,
     );
   }
+});
+
+test("the docs lane runs every check that reads repository documentation", async () => {
+  const { DOC_COUPLED_SUITES } = await import("./ci-scope.mjs");
+
+  const dirByName = new Map(
+    workspacePackages().map(({ dir, manifest }) => [manifest.name, dir]),
+  );
+  const covered = new Set(
+    DOC_COUPLED_SUITES.map(({ packageName, testFile }) => {
+      const dir = dirByName.get(packageName);
+      assert.ok(dir, `DOC_COUPLED_SUITES names an unknown package: ${packageName}`);
+      return `${dir}/${testFile}`;
+    }),
+  );
+
+  // Quoted literals only: a doc path inside a backtick comment is a pointer for
+  // readers, not something the code reads. deploy/ is excluded because
+  // check:release-integrity runs unconditionally and deploy/ changes already
+  // force a full regression.
+  const DOC_PATH_LITERAL =
+    /(['"])[^'"\n]*(?:\bREADME\.md\b|\bAGENTS\.md\b|docs\/[^'"\n]*\.md)[^'"\n]*\1/;
+
+  const readers = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(resolve(repoRoot, dir), { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === "dist") continue;
+      const path = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) {
+        walk(path);
+      } else if (/\.(?:ts|tsx|mjs|js)$/.test(entry.name)) {
+        if (DOC_PATH_LITERAL.test(readFileSync(resolve(repoRoot, path), "utf-8"))) {
+          readers.push(path);
+        }
+      }
+    }
+  };
+  walk("apps");
+  walk("packages");
+
+  const uncovered = readers.filter((path) => !covered.has(path));
+  assert.deepEqual(
+    uncovered,
+    [],
+    "these files read repository documentation but the docs lane does not run them",
+  );
+
+  // And the workflow actually runs what DOC_COUPLED_SUITES promises.
+  const docsLane = stepBlock(jobBlock("check"), "Run documentation-coupled checks");
+  assert.match(docsLane, /if:\s*steps\.ci-scope\.outputs\.mode == 'docs'/);
+  for (const { packageName, testFile } of DOC_COUPLED_SUITES) {
+    assert.ok(
+      docsLane.includes(packageName),
+      `docs lane does not run ${packageName}`,
+    );
+    assert.ok(
+      docsLane.includes(testFile) || docsLane.includes(`--filter ${packageName} test`),
+      `docs lane does not run ${packageName} ${testFile}`,
+    );
+  }
+});
+
+test("restored build outputs are pruned before anything compiles or runs", () => {
+  const check = jobBlock("check");
+  const restore = check.indexOf("- name: Restore build outputs");
+  const prune = check.indexOf("- name: Prune stale build outputs");
+  const build = check.indexOf("- name: Build workspace");
+
+  assert.notEqual(restore, -1, "CI must restore build outputs");
+  assert.notEqual(prune, -1, "a restored dist/ must be pruned");
+  // Order is the whole safety property: a leftover dist/*.test.js from an older
+  // commit is executable, so it has to go before tsc decides what to re-emit.
+  assert.ok(restore < prune, "prune must run after the cache is restored");
+  assert.ok(prune < build, "prune must run before the build");
+
+  const restoreStep = stepBlock(check, "Restore build outputs");
+  // vite output cannot be mapped back to sources, so it is never restored.
+  assert.match(restoreStep, /!apps\/admin-web\/dist/);
+  assert.match(restoreStep, /restore-keys:/);
+  assert.match(restoreStep, /\*\.tsbuildinfo/);
+
+  assert.match(
+    stepBlock(check, "Prune stale build outputs"),
+    /node scripts\/ci\/prune-stale-build-outputs\.mjs/,
+  );
+
+  // The pruning logic is itself gated.
+  assert.match(
+    stepBlock(check, "Verify CI selector logic"),
+    /scripts\/ci\/prune-stale-build-outputs\.test\.mjs/,
+  );
+});
+
+test("incremental compilation is on, and its state file is not committed", () => {
+  const tsconfig = JSON.parse(readFileSync(resolve(repoRoot, "tsconfig.base.json"), "utf-8"));
+  assert.equal(tsconfig.compilerOptions.incremental, true);
+
+  const gitignore = readFileSync(resolve(repoRoot, ".gitignore"), "utf-8");
+  assert.ok(
+    gitignore.split(/\r?\n/).includes("*.tsbuildinfo"),
+    "tsc writes tsconfig.tsbuildinfo beside tsconfig.json, outside dist/",
+  );
 });
