@@ -1,15 +1,22 @@
 # Draft Spec: Track C C3 strategy contract simplification
 
-**Status:** Draft / authority and realization clarification
+**Status:** Draft / evidence input contract, scope and checkout alignment
 
-**Source:** PR #369, exact head `ab89c7fea17ff00ec367c9ce69652e13b02069ac`
+**Source:** PR #369, clarified in merged PR #372, extended here alongside the
+implementation on PR #371.
 
 **Principle:** **Agent owns choice. Code owns authority.**
 
-This revision clarifies evidence status, Responder realization, and goal handling
-before further implementation in #371. It retains the six-field Strategist
-decision, two lanes, progression invariant, and all authority boundaries. This
-document alone does not change runtime code or benchmark acceptance semantics.
+Earlier revisions clarified evidence status, Responder realization and goal
+handling. This one adds the evidence input contract (§6b), checkout
+completeness against the real runtime state machine (§6c), and the known
+implementation gaps (§6d). It retains the six-field Strategist decision, the
+two lanes, the progression invariant and every authority boundary.
+
+Sections 6b and 6c describe contracts the implementation now follows. Section
+6d records requirements this spec makes that the code does not yet meet; those
+are implementation gaps, and the requirement is not weakened to match the
+current code.
 
 ## Objective
 
@@ -394,9 +401,22 @@ For PRICE, STOCK and ETA projections made entirely from validated typed
 numbers/enums and allowlisted labels, the final guard checks exact projection,
 claim identity, product binding and freshness without reclassifying the same
 sentence using semantic keywords. This does not exempt arbitrary model text,
-free-text evidence, SIZE_FIT provenance, or CART binding from their guards.
-CART remains unsupported here until the input contract can bind the current
-cart identity/revision; adding a formatter alone is insufficient.
+free-text evidence, or SIZE_FIT provenance from their guards.
+
+The same rule now extends to the remaining typed groups, each projected from
+its own validated fields: cart adjustments (shipping fee, freeship, promotion
+offer), the published policies (inspection, exchange, sale exchange, refund,
+payment, customization, split size), store location, care guidance, offer
+configuration, promotion semantics, cart total, product lifecycle, fulfilment
+spans, and every populated product attribute group. A projection reads only
+fields of the group it belongs to. An unrecognised enum value or an
+unrepresentable shape yields no wording, which is reported as an unmet
+realization rather than guessed at or silently dropped.
+
+Cart-scoped evidence carries `cartId` and `cartVersion` on its subject so the
+value can be revalidated against the current cart before egress. A formatter
+alone was never sufficient and still is not: the scope is what makes the
+revalidation possible.
 
 Before expanding model-authored wording, specify which text it may author and
 how factual binding, checkout/PII, effects, and the single progression are
@@ -410,6 +430,129 @@ relevance and sales quality remain responsibilities of strategy/realization and
 behavioral evaluation, not new Vietnamese keyword rules in the guard. Deadline
 or comparison conclusions require an authorized structured derivation; a model
 goal alone never grants that authority.
+
+## 6b. Evidence input contract
+
+### Input timing: pre-decision input versus post-turn capture
+
+The evidence C3 decides from and the record of what a turn did are two
+different artifacts, taken at two different moments.
+
+- **Pre-decision input.** Before the Strategist runs, the turn assembles the
+  evidence that is valid for the current product/cart scope, from the
+  authoritative producers, at one canonical revision. This is what the
+  Strategist may choose from.
+- **Post-turn capture.** After the reply is authorized, the turn records what
+  happened, for audit and replay.
+
+These must not be substituted for one another. At the time of writing,
+`apps/worker/src/realtime-runner.ts` calls the model first and then builds its
+`ContextV2` capture from the final state with
+`verifiedClaims: protectedOutboundClaims` — a set already selected, filtered and
+authorized *for the outbound reply*. Using that as the pre-decision input would
+show C3 only the facts a previous path had already chosen, and would show them
+after the decision it was meant to inform. The capture keeps its existing
+meaning; a pre-decision envelope is a separate artifact.
+
+Because state can change while the model runs, revision and freshness are
+rechecked at the send and effect boundary, not only at selection time. Raw PII
+and whole-database dumps are never the answer to an input gap.
+
+### Subject scope, provenance and freshness
+
+Every selectable evidence entry keeps the scope it was produced under, rather
+than collapsing to an optional product identifier:
+
+| Scope | Carries | Why |
+|---|---|---|
+| `PRODUCT` | `productId`, `displayName` when known | Binds the fact to a bound product |
+| `VARIANT` | `productId`, `variantId`, `variantLabel` | Names the exact colour/size a fact covers |
+| `OFFER` | `offerId` | Separates an offer's terms from the product's |
+| `CART` | `cartId`, `cartVersion` | Allows revalidation against the current cart |
+| `SHOP` | `shopId` | Binds published policy and store facts |
+
+A customer-facing variant label comes from the authoritative presentation
+mapping. Variant identifiers are opaque: parsing a naming convention out of
+them is not an authority, and it silently produced nothing for every scheme that
+did not follow it.
+
+### Authority versus realization availability
+
+`evidenceStatus` describes capability support. It does not certify that the
+customer's question was resolved; that remains a matter for strategy,
+realization and behavioural evaluation.
+
+Authority and the ability to state something are separate properties:
+
+- Evidence does not lose authority because no projection exists for it yet.
+- The selection surface reports which entries can be stated, so the Strategist
+  can choose accordingly.
+- When a selection is partly realizable, the realizable part is answered and
+  the rest is carried on the task as unrealized evidence, so the reply can name
+  what it does not cover. A capability counts as supported only when it can
+  also be stated.
+- When none of it is realizable, the turn produces an honest limited answer.
+  Discarding the evidence silently, and failing the whole turn, are both wrong.
+- Integrity, binding and scope violations still reject. A realization gap is
+  not a reason to relax them.
+
+### Product attributes
+
+Every populated group of the typed product attribute contract is projected,
+one selectable entry per field, so a selection can carry the single attribute a
+question needs instead of a whole bundle. Absent values stay absent: `null`
+means the catalog has not verified that property, and it is never derived from
+a neighbouring field. A material does not imply a care instruction, a wrinkle
+property, or a fit.
+
+## 6c. Checkout completeness
+
+The checkout field set mirrors the runtime `missingCheckout` set, payment
+method included. A missing payment choice is a missing field like any other.
+
+The request is permitted at the state the runtime actually reaches. The runtime
+raises its `CHECKOUT_DETAILS_MISSING` clarification while the cart is open and
+builds an order preview only once checkout data is complete and revalidation
+has passed. Requiring an order preview *and* missing fields therefore described
+a state the runtime cannot produce. An open cart permits the request; the
+preview stage stays permitted for a draft invalidated by a later mutation.
+
+These four are distinct and must not be collapsed:
+
+```text
+complete information -> valid preview -> customer confirmation -> successful effect
+```
+
+C3 states only outcomes for which the runtime produced evidence. Model text is
+never an effect receipt, and C3 does not host a second checkout state machine.
+
+## 6d. Known implementation gaps
+
+Recorded as gaps against this spec, not as revisions to it.
+
+- **C3 is not wired into the runtime.** Neither `realtime-server.ts` nor
+  `realtime-runner.ts` calls the contract runner; the legacy path still owns
+  live replies. Until an integration slice exists, no offline result is
+  evidence of live behaviour.
+- **Single-product context.** `ContextV2` carries one `productAttributes` and
+  one `productPresentation`. A reply covering several bound products cannot
+  name them all, so a multi-product answer stops rather than guessing. Closing
+  this needs product-keyed projections and matching producer/binding work, not
+  a field changed to an array.
+- **Negative freeship is not producible.** The cart-policy producer emits
+  `FREESHIP` only with `eligible: true`; a non-free cart is represented by
+  `SHIPPING_FEE` when the fee is known. The projection handles the negative
+  value, but production cannot currently reach it.
+- **No `CART_OPEN` materialization.** The benchmark materialization recipe maps
+  only `ORDER_PREVIEW` and `PURCHASE_CONFIRMED` explicitly, so the open-cart
+  checkout state above is not yet exercised by the corpus.
+- **ETA semantics are inconsistent upstream.** `catalog-projection.ts` sums
+  preparation and transit, while `realtime-product-facts-v2.ts` assigns
+  `etaToCustomer` from preparation bounds alone. Fulfilment projections here
+  report preparation and delivery as separate spans, but the upstream
+  disagreement is unresolved and is a prerequisite for any deadline reasoning.
+- **Media has no transport binding.** Until an attachment result exists, a
+  reply must not claim an image was sent.
 
 ## 7. Measurement fallback
 
