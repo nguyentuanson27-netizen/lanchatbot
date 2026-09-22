@@ -118,7 +118,9 @@ function responderPayload(
         task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
         canonical === "ASK_CHECKOUT_DETAILS"
       ? null : reply,
-    factualTexts: task.evidence.map(() => "Dạ thông tin này đã được xác minh ạ."),
+    // Factual wording is code-rendered from the selected evidence, so the
+    // Responder authors none of it.
+    factualTexts: [],
     progressionText: hold || keepOpen ? null
       : task.continuation?.type === "ASK" && task.continuation.input === "COLOR"
         ? "Màu nào hợp ý chị hơn ạ?"

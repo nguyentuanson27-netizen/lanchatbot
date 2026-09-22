@@ -36,6 +36,17 @@ const facts = JSON.parse(readFileSync(
   simulation_fact_catalog: Record<string, unknown>;
 };
 
+/**
+ * A fact group with authority but no code-owned wording. It keeps the
+ * authority-versus-realization distinction under test now that every group the
+ * benchmark fixtures use has a projection.
+ */
+const UNREALIZABLE_POLICY_FACT = Object.freeze({
+  kind: "POLICY_SNAPSHOT",
+  policy: "WARRANTY",
+  data: Object.freeze({ months: 12 }),
+});
+
 function capture(amountVnd?: number) {
   return materializeTrackCV5CaseCapture({
     lane: "BEHAVIOR_SIMULATION",
@@ -352,22 +363,34 @@ describe("Track C C3 strategy-contract runner", () => {
   });
 
   it("reports an unsupported selected realization as an evidence gap before Responder", async () => {
-    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
-      payload: payload({ replyAct: "ANSWER", goal: "Explain the payment policy.",
-        proposition: "POLICY", evidenceRefs: ["SIMULATION_001"],
-        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
-      providerModelVersion: "gemini-3.5-flash-lite",
-    });
-    await expect(runTrackCStrategyContractCase({
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({ replyAct: "ANSWER", goal: "Explain the payment policy.",
+          proposition: "POLICY", evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+    const result = await runTrackCStrategyContractCase({
       lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
       evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{
         direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
         text: "Chị thanh toán thế nào?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
-      }], simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT], transport: { send },
-    })).rejects.toMatchObject({ diagnostic: {
-      stage: "EVIDENCE", errorCode: "TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED",
-    } });
-    expect(send).toHaveBeenCalledTimes(1);
+      }], simulationFacts: [UNREALIZABLE_POLICY_FACT], transport: { send },
+    });
+    // The selection is reported as unmet rather than discarded, and the answer
+    // does not claim support it cannot state.
+    expect(result.responderTask.answer).toMatchObject({
+      evidenceStatus: "UNRESOLVED",
+    });
+    expect(result.responderTask.evidence).toEqual([]);
+    expect(result.responderTask.unrealizedEvidence).toEqual([
+      { ref: "SIMULATION_001", capability: "POLICY" },
+    ]);
+    expect(result.responderTask.requiredEvidenceRefs).toEqual([]);
   });
 
   it("projects simulation facts once into selectable evidence without effect authority", () => {
@@ -404,13 +427,16 @@ describe("Track C C3 strategy-contract runner", () => {
       throw new Error("TEST_CAPTURE_REQUIRED");
     }
 
+    // A policy the projector has no wording for still reaches the selection
+    // surface: authority does not depend on a renderer existing for it.
     const evidence = buildTrackCSelectableEvidence({
       context: captureValue.context,
-      simulationFacts: [facts.simulation_fact_catalog.SF_PAYMENT],
+      simulationFacts: [UNREALIZABLE_POLICY_FACT],
       executionLane: "BEHAVIOR_SIMULATION",
     });
     const policy = evidence.find(({ capability }) => capability === "POLICY");
     expect(policy).toBeDefined();
+    expect(policy?.value).toMatchObject({ policy: "WARRANTY" });
     expect(policy?.deterministicText).toBeUndefined();
   });
 
@@ -478,6 +504,7 @@ describe("Track C C3 strategy-contract runner", () => {
         facts.simulation_fact_catalog.SF_ORDER_TOTAL,
         facts.simulation_fact_catalog.SF_BACK_COVERAGE,
         facts.simulation_fact_catalog.SF_CHANNEL_PRICE,
+        UNREALIZABLE_POLICY_FACT,
       ],
       executionLane: "BEHAVIOR_SIMULATION",
     });
@@ -485,10 +512,17 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence.map(({ capability }) => capability)).toEqual([
       "PRICE", "POLICY", "BUSINESS_LOCATION", "PROMOTION_OFFER",
       "CART_TOTAL", "PRODUCT_ATTRIBUTES",
-      "PRICE",
+      "PRICE", "POLICY",
     ]);
+    // Every group that has a code-owned projection can now be stated; the
+    // unknown policy keeps authority without one.
     expect(evidence.filter(trackCEvidenceHasSafeFactualEgress)
-      .map(({ capability }) => capability)).toEqual(["PRICE", "PRICE"]);
+      .map(({ capability }) => capability)).toEqual([
+        "PRICE", "POLICY", "BUSINESS_LOCATION", "PROMOTION_OFFER",
+        "CART_TOTAL", "PRODUCT_ATTRIBUTES", "PRICE",
+      ]);
+    expect(evidence.filter((entry) => !trackCEvidenceHasSafeFactualEgress(entry))
+      .map(({ capability }) => capability)).toEqual(["POLICY"]);
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
@@ -1248,7 +1282,15 @@ describe("Track C C3 strategy-contract runner", () => {
       });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
       .toMatchObject({ minItems: 0, maxItems: 0 });
-    expect(responderPrompt.responderTask.evidence).toEqual([]);
+    // The Responder reads the code-rendered projections but cannot author
+    // factual wording: factualTexts stays pinned to zero items above, so the
+    // acknowledgement itself remains non-factual.
+    expect(responderPrompt.responderTask.evidence).toEqual(
+      result.responderTask.evidence.map(({ deterministicText }) =>
+        ({ text: deterministicText })),
+    );
+    expect(JSON.stringify(responderPrompt.responderTask.evidence))
+      .not.toContain("contentHash");
     expect(result.output.segments[0]).toEqual({
       kind: "GENERAL",
       text: "Dạ em hiểu ý chị ạ.",

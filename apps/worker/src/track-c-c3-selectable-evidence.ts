@@ -8,6 +8,12 @@ import {
 } from "./track-c-c3-strategy-contract.js";
 import type { TrackCV5ExecutionLane } from
   "./track-c-c3-v5-benchmark-materialization.js";
+import { trackCProductAttributeEvidence } from
+  "./track-c-c3-attribute-projection.js";
+import {
+  trackCFormatVnd,
+  trackCSimulationFactText,
+} from "./track-c-c3-fact-realization.js";
 
 function sha256(value: unknown): string {
   return createHash("sha256")
@@ -31,15 +37,60 @@ function capabilityForClaim(type: string): TrackCProtectedProposition | null {
     : null;
 }
 
-function productSubject(
+/**
+ * Keep the claim's own scope on the evidence subject.
+ *
+ * Only PRODUCT scope used to survive, so cart-scoped facts (shipping fee,
+ * freeship, cart total, cart promotions) reached the selection surface with no
+ * cart identity and no version to revalidate against, and shop-scoped facts
+ * (policy, store location) lost their shop binding.
+ */
+function claimSubject(
   scope: ContextV2["verifiedClaims"][number]["scope"],
-) {
-  return scope.kind === "PRODUCT"
-    ? Object.freeze({
-        productId: scope.productId,
-        ...(scope.variantId === null ? {} : { variantId: scope.variantId }),
-      })
-    : undefined;
+  presentation: ContextV2["productPresentation"],
+): TrackCSelectableEvidence["subject"] {
+  if (scope.kind === "PRODUCT") {
+    const label = scope.variantId === null
+      ? null
+      : trackCVariantLabel(presentation ?? null, scope.variantId);
+    return Object.freeze({
+      scope: scope.variantId === null ? "PRODUCT" as const : "VARIANT" as const,
+      productId: scope.productId,
+      ...(scope.variantId === null ? {} : { variantId: scope.variantId }),
+      ...(label === null ? {} : { variantLabel: label }),
+    });
+  }
+  if (scope.kind === "CART") {
+    return Object.freeze({
+      scope: "CART" as const,
+      cartId: scope.cartId,
+      cartVersion: scope.cartVersion,
+    });
+  }
+  return Object.freeze({ scope: "SHOP" as const, shopId: scope.shopId });
+}
+
+/**
+ * Customer-facing variant label from the authoritative presentation mapping.
+ *
+ * Parsing `SIZE_*` out of a variant ID only worked for IDs that happened to
+ * encode a size and silently produced nothing for every other scheme, which
+ * dropped exact colour/size stock answers. The presentation carries the real
+ * mapping, so it is the source used here.
+ */
+export function trackCVariantLabel(
+  presentation: ContextV2["productPresentation"] | null,
+  variantId: string,
+): Readonly<{ color?: string; size?: string }> | null {
+  const variant = presentation?.variants.find(
+    (entry) => entry.variantId === variantId,
+  );
+  if (variant === undefined) return null;
+  if (variant.color === null && variant.size === null) return null;
+  return Object.freeze({
+    ...(variant.color === null ? {} : { color: variant.color }),
+    ...(variant.size === null ? {} : { size: variant.size }),
+  });
 }
 
 function arrayOfStrings(value: unknown, limit: number): readonly string[] | null {
@@ -49,35 +100,47 @@ function arrayOfStrings(value: unknown, limit: number): readonly string[] | null
     : null;
 }
 
-function formatVnd(amount: number): string {
-  return `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/gu, ".")}đ`;
-}
-
 export function trackCRuntimeClaimDeterministicText(
   claim: ContextV2["verifiedClaims"][number],
+  presentation?: ContextV2["productPresentation"],
 ): string | null {
   if (claim.scope.kind !== "PRODUCT") return null;
   if (claim.type === "PRICE") {
-    return `Dạ giá hiện tại của mẫu này là ${formatVnd(claim.value.amountVnd)} ạ.`;
+    return `Dạ giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
   }
   if (claim.type === "STOCK") {
-    const size = trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
-    if (claim.scope.variantId !== null && size === null) return null;
-    const subject = size === null ? "mẫu này" : `size ${size} của mẫu này`;
+    // Prefer the authoritative variant mapping; fall back to the ID convention
+    // only when no presentation is available for this turn.
+    const label = claim.scope.variantId === null
+      ? null
+      : trackCVariantLabel(presentation ?? null, claim.scope.variantId);
+    const size = label?.size
+      ?? trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+    const color = label?.color ?? null;
+    if (claim.scope.variantId !== null && size === null && color === null) {
+      return null;
+    }
+    // Name exactly the variant the claim covers, so a colour+size question is
+    // not answered with a bare size.
+    const variant = [
+      ...(color === null ? [] : [`màu ${color}`]),
+      ...(size === null ? [] : [`size ${size}`]),
+    ].join(" ");
+    const subject = variant === "" ? "mẫu này" : `${variant} của mẫu này`;
     if (claim.value.status === "IN_STOCK") {
-      return size === null
+      return variant === ""
         ? "Dạ mẫu này hiện còn hàng ạ."
-        : `Dạ mẫu này hiện còn size ${size} ạ.`;
+        : `Dạ mẫu này hiện còn ${variant} ạ.`;
     }
     if (claim.value.status === "LOW_STOCK") {
-      return size === null
+      return variant === ""
         ? "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ."
-        : `Dạ mẫu này hiện còn size ${size} nhưng số lượng không nhiều ạ.`;
+        : `Dạ mẫu này hiện còn ${variant} nhưng số lượng không nhiều ạ.`;
     }
     if (claim.value.status === "OUT_OF_STOCK") {
-      return size === null
+      return variant === ""
         ? "Dạ mẫu này hiện hết hàng ạ."
-        : `Dạ mẫu này hiện hết size ${size} ạ.`;
+        : `Dạ mẫu này hiện hết ${variant} ạ.`;
     }
     if (claim.value.status === "PRE_ORDER") {
       return `Dạ ${subject} hiện nhận đặt trước ạ.`;
@@ -150,7 +213,8 @@ function boundedSimulationEvidence(
       colors,
       design,
       ...(offerType === null ? {} : { offerType }),
-    }, { productId: subjectProductId, displayName }, deterministicText);
+    }, { scope: "PRODUCT", productId: subjectProductId, displayName },
+      deterministicText);
   }
   if (kind === "PRODUCT_COMPARISON") {
     const products = arrayOfStrings(value.products, 4);
@@ -187,7 +251,8 @@ function boundedSimulationEvidence(
     return make(
       "CARE_GUIDANCE",
       { data },
-      { productId: subjectProductId },
+      { scope: "PRODUCT", productId: subjectProductId },
+      trackCSimulationFactText("CARE_GUIDANCE", data, null) ?? undefined,
     );
   }
   if (kind === "CHANNEL_PRICE_SNAPSHOT") {
@@ -199,8 +264,8 @@ function boundedSimulationEvidence(
     return make(
       "PRICE",
       { chatVnd: data.chatVnd },
-      { productId: subjectProductId },
-      `Dạ giá trên kênh chat hiện là ${formatVnd(data.chatVnd)} ạ.`,
+      { scope: "PRODUCT", productId: subjectProductId },
+      `Dạ giá trên kênh chat hiện là ${trackCFormatVnd(data.chatVnd)} ạ.`,
     );
   }
   if (kind === "FULFILLMENT_SNAPSHOT") {
@@ -216,7 +281,8 @@ function boundedSimulationEvidence(
     return make(
       "FULFILLMENT_STATUS",
       { data },
-      { productId: subjectProductId },
+      { scope: "PRODUCT", productId: subjectProductId },
+      trackCSimulationFactText("FULFILLMENT_SNAPSHOT", data, null) ?? undefined,
     );
   }
   if (kind === "PRODUCT_LIFECYCLE") {
@@ -228,7 +294,8 @@ function boundedSimulationEvidence(
     return make(
       "PRODUCT_LIFECYCLE",
       { data },
-      { productId: subjectProductId },
+      { scope: "PRODUCT", productId: subjectProductId },
+      trackCSimulationFactText("PRODUCT_LIFECYCLE", data, null) ?? undefined,
     );
   }
   if (kind === "POLICY_SNAPSHOT" || kind === "PRODUCT_ATTRIBUTE" ||
@@ -243,10 +310,25 @@ function boundedSimulationEvidence(
       ? undefined : requireBoundProduct();
     const data = plainObject(value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
     const policy = typeof value.policy === "string" ? value.policy : null;
+    // Cart-scoped facts keep their cart identity and version so the value can
+    // be revalidated against the current cart before it is stated.
+    const cartId = typeof value.cartId === "string" ? value.cartId : null;
+    const cartVersion = typeof data["cartVersion"] === "number"
+      ? data["cartVersion"] : null;
+    const subject: TrackCSelectableEvidence["subject"] =
+      kind === "CART_TOTAL"
+        ? Object.freeze({
+            scope: "CART" as const,
+            ...(cartId === null ? {} : { cartId }),
+            ...(cartVersion === null ? {} : { cartVersion }),
+          })
+        : subjectProductId === undefined
+          ? undefined
+          : Object.freeze({ scope: "PRODUCT" as const, productId: subjectProductId });
     return make(capability, {
       ...(policy === null ? {} : { policy }),
       data,
-    }, subjectProductId === undefined ? undefined : { productId: subjectProductId });
+    }, subject, trackCSimulationFactText(kind, data, policy) ?? undefined);
   }
   return null;
 }
@@ -265,8 +347,10 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   input.context.verifiedClaims.forEach((claim, index) => {
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
-      const subject = productSubject(claim.scope);
-      const deterministicText = trackCRuntimeClaimDeterministicText(claim);
+      const subject = claimSubject(claim.scope, input.context.productPresentation);
+      const deterministicText = trackCRuntimeClaimDeterministicText(
+        claim, input.context.productPresentation,
+      );
       evidence.push(Object.freeze({
         ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,
         capability,
@@ -282,29 +366,17 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   });
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
-    const attributes = input.context.productAttributes;
-    const attributeText = attributes.materials.length > 0 &&
-        attributes.colors.length > 0
-      ? `Mẫu này có chất liệu ${attributes.materials.join(", ")} và màu ${attributes.colors.join(", ")} ạ.`
-      : attributes.materials.length > 0
-        ? `Mẫu này có chất liệu ${attributes.materials.join(", ")} ạ.`
-        : attributes.colors.length > 0
-          ? `Mẫu này hiện có màu ${attributes.colors.join(", ")} ạ.`
-          : null;
-    evidence.push(Object.freeze({
-      ref: "PRODUCT_ATTRIBUTES_001",
-      capability: "PRODUCT_ATTRIBUTES",
-      subject: Object.freeze({ productId: attributes.productId }),
-      value: Object.freeze({
-        materials: Object.freeze([...attributes.materials]),
-        colors: Object.freeze([...attributes.colors]),
-        styles: Object.freeze([...attributes.styles]),
-      }),
-      ...(attributeText === null ? {} : { deterministicText: attributeText }),
-      provenance: Object.freeze({
-        contentHash: attributes.metadata.contentHash,
-        authority: "RUNTIME" as const,
-      }),
+    // Every verified attribute group, one selectable entry per field. The
+    // previous projection kept only materials/colors/styles, which discarded
+    // the verified design, wear and care data the catalog already owns.
+    evidence.push(...trackCProductAttributeEvidence({
+      attributes: input.context.productAttributes,
+      refPrefix: "PRODUCT_ATTRIBUTES_001",
+      authority: "RUNTIME",
+      ...(input.context.productPresentation?.productId ===
+          input.context.productAttributes.productId
+        ? { displayName: input.context.productPresentation.displayName }
+        : {}),
     }));
   }
   if (input.context.productPresentation !== null &&
@@ -314,6 +386,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       ref: "PRODUCT_PRESENTATION_001",
       capability: "PRODUCT_PRESENTATION",
       subject: Object.freeze({
+        scope: "PRODUCT" as const,
         productId: presentation.productId,
         displayName: presentation.displayName,
       }),
@@ -322,8 +395,10 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         colors: Object.freeze(presentation.variants.flatMap(({ color }) =>
           color === null ? [] : [color]
         )),
-        variants: Object.freeze(presentation.variants.map(({ color, size }) =>
-          Object.freeze({ color, size })
+        // Keep the variant identity alongside its labels so a selection can be
+        // resolved back to the authoritative variant it came from.
+        variants: Object.freeze(presentation.variants.map(
+          ({ variantId, color, size }) => Object.freeze({ variantId, color, size })
         )),
       }),
       deterministicText: (() => {

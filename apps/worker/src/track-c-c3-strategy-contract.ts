@@ -48,15 +48,36 @@ export const TRACK_C_PROTECTED_PROPOSITIONS = Object.freeze([
 export type TrackCProtectedProposition =
   typeof TRACK_C_PROTECTED_PROPOSITIONS[number];
 
-type TrackCCheckoutField = "FULL_NAME" | "PHONE" | "ADDRESS";
+/**
+ * Mirrors the runtime `missingCheckout` field set. PAYMENT_METHOD was missing
+ * here, so a cart that only lacked a payment choice could not be asked for
+ * through the canonical request and had to fall back to free wording.
+ */
+export type TrackCCheckoutField =
+  | "FULL_NAME"
+  | "PHONE"
+  | "ADDRESS"
+  | "PAYMENT_METHOD";
 
 export type TrackCSelectableEvidence = Readonly<{
   ref: string;
   capability: TrackCProtectedProposition;
+  /**
+   * The evidence subject keeps the scope it was produced under. Collapsing
+   * every scope to an optional productId dropped cart identity and version,
+   * so cart-scoped facts could not be revalidated before egress.
+   */
   subject?: Readonly<{
+    scope?: "PRODUCT" | "VARIANT" | "OFFER" | "CART" | "SHOP";
     productId?: string;
     variantId?: string;
     displayName?: string;
+    /** Customer-facing variant label from the authoritative presentation. */
+    variantLabel?: Readonly<{ color?: string; size?: string }>;
+    offerId?: string;
+    cartId?: string;
+    cartVersion?: number;
+    shopId?: string;
   }>;
   value: Readonly<Record<string, unknown>>;
   /**
@@ -92,6 +113,31 @@ export function trackCEvidenceHasSafeFactualEgress(
   return evidence.deterministicText !== undefined;
 }
 
+/**
+ * Split a selection into the part that can be stated and the part that has
+ * authority but no safe wording yet.
+ *
+ * Rejecting the whole turn when any selected entry lacked a projection threw
+ * away the parts that were answerable, so a question the catalog could half
+ * answer produced nothing. The unrealizable part is returned rather than
+ * dropped: the task carries it so the reply can name what it cannot cover.
+ */
+export function trackCPartitionEvidenceRealization(
+  evidence: readonly TrackCSelectableEvidence[],
+): Readonly<{
+  realizable: readonly TrackCSelectableEvidence[];
+  unrealizable: readonly TrackCSelectableEvidence[];
+}> {
+  return Object.freeze({
+    realizable: Object.freeze(
+      evidence.filter((entry) => trackCEvidenceHasSafeFactualEgress(entry)),
+    ),
+    unrealizable: Object.freeze(
+      evidence.filter((entry) => !trackCEvidenceHasSafeFactualEgress(entry)),
+    ),
+  });
+}
+
 export type TrackCStrategistDecision = Readonly<{
   replyAct: "ANSWER" | "ACKNOWLEDGE" | "CLARIFY";
   goal: string;
@@ -116,6 +162,15 @@ export type TrackCResponderTask = Readonly<{
     | Readonly<{ kind: "ACKNOWLEDGE" | "CLARIFY"; goal: string }>;
   evidence: readonly TrackCSelectableEvidence[];
   requiredEvidenceRefs: readonly string[];
+  /**
+   * Selected evidence that holds authority but has no safe projection yet.
+   * It is reported rather than dropped so the reply states the limit instead
+   * of implying the question was fully covered.
+   */
+  unrealizedEvidence: readonly Readonly<{
+    ref: string;
+    capability: TrackCProtectedProposition;
+  }>[];
   continuation:
     | Readonly<{ type: "ASK"; input: TrackCOrdinaryDecisionInput }>
     | Readonly<{ type: "KEEP_OPEN" }>
@@ -280,12 +335,17 @@ function selectedEvidence(
   )) {
     throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
   }
-  if (values.some((entry) => !trackCEvidenceHasSafeFactualEgress(entry))) {
-    throw new Error("TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED");
-  }
-  if (new Set(values.flatMap(({ subject }) =>
+  // Realization is handled by the caller, which keeps the answerable part and
+  // reports the rest. Integrity and scope violations above still reject.
+  //
+  // A display name is only needed for entries that actually get stated, and
+  // only when more than one product is being stated in the same reply.
+  const stated = values.filter((entry) =>
+    trackCEvidenceHasSafeFactualEgress(entry)
+  );
+  if (new Set(stated.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
-  )).size > 1 && values.some(({ subject }) =>
+  )).size > 1 && stated.some(({ subject }) =>
     subject?.productId !== undefined && subject.displayName === undefined
   )) {
     throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
@@ -325,8 +385,12 @@ export function compileTrackCStrategistDecision(input: Readonly<{
         !input.measurementsUnavailable)) {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
+  const { realizable, unrealizable } =
+    trackCPartitionEvidenceRealization(evidence);
+  // A capability counts as supported only when it can also be stated: holding
+  // authority the reply cannot express does not answer the customer.
   const supportsProposition = decision.proposition !== "NONE" &&
-    evidence.some(({ capability }) => capability === decision.proposition);
+    realizable.some(({ capability }) => capability === decision.proposition);
   const evidenceStatus = decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
@@ -338,11 +402,14 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
   const task: TrackCResponderTask = Object.freeze({
     answer,
-    evidence,
+    evidence: realizable,
     requiredEvidenceRefs: Object.freeze(
       decision.replyAct === "ANSWER" && evidenceStatus === "SUPPORTED"
-        ? [...decision.evidenceRefs] : [],
+        ? realizable.map(({ ref }) => ref) : [],
     ),
+    unrealizedEvidence: Object.freeze(unrealizable.map(({ ref, capability }) =>
+      Object.freeze({ ref, capability })
+    )),
     continuation: decision.continuation,
     canonicalRequest: canonicalRequest(
       decision.canonicalAction,
@@ -369,6 +436,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       }),
       evidence: Object.freeze([]),
       requiredEvidenceRefs: Object.freeze([]),
+      unrealizedEvidence: Object.freeze([]),
       continuation: null,
       canonicalRequest: Object.freeze({ type: "ASK_PRODUCT" }),
     });
@@ -388,6 +456,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       }),
       evidence: Object.freeze([]),
       requiredEvidenceRefs: Object.freeze([]),
+      unrealizedEvidence: Object.freeze([]),
       continuation: input.colorChoiceMeaningful
         ? Object.freeze({ type: "ASK", input: "COLOR" })
         : null,
@@ -411,6 +480,9 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
     }),
     evidence,
     requiredEvidenceRefs: Object.freeze(evidence.map(({ ref }) => ref)),
+    // The fixed lane only ever selects entries that already passed the
+    // realization filter above, so nothing is left unstated here.
+    unrealizedEvidence: Object.freeze([]),
     continuation: input.colorChoiceMeaningful
       ? Object.freeze({ type: "ASK", input: "COLOR" })
       : null,

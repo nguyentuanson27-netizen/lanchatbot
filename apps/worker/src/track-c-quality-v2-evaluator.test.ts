@@ -59,6 +59,7 @@ function candidate(): TrackCStrategyContractCaseResult {
         deterministicText: "Mẫu này hiện 849k chị ạ.",
         provenance: { contentHash: HASH, authority: "RUNTIME" } }],
       requiredEvidenceRefs: ["CLAIM_001"],
+      unrealizedEvidence: [],
       continuation: { type: "KEEP_OPEN" }, canonicalRequest: null,
     },
     output: {
@@ -205,6 +206,7 @@ describe("Track C C3 V5 benchmark evaluator", () => {
         },
         evidence: [],
         requiredEvidenceRefs: [],
+        unrealizedEvidence: [],
         continuation: null,
         canonicalRequest: { type: "ASK_MEASUREMENTS" },
       },
