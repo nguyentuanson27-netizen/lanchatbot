@@ -58,7 +58,11 @@ export interface TrackCV5CompactCase {
       readonly quantity: number | null;
       readonly evidence: string | null;
     }>;
-    readonly source_stage: "ORDER_PREVIEW" | "PURCHASE_CONFIRMED" | null;
+    readonly source_stage:
+      | "CART_OPEN"
+      | "ORDER_PREVIEW"
+      | "PURCHASE_CONFIRMED"
+      | null;
     readonly runtime_claim_refs: readonly string[];
   }>;
 }
@@ -76,10 +80,10 @@ export interface TrackCV5MaterializationRecipe {
       readonly sourceStage: "MEASUREMENTS_REQUIRED";
     }>;
     readonly explicit_source_stage: Readonly<Record<
-      "ORDER_PREVIEW" | "PURCHASE_CONFIRMED",
+      "CART_OPEN" | "ORDER_PREVIEW" | "PURCHASE_CONFIRMED",
       Readonly<{
-        readonly phase: "ORDER_REVIEW" | "ORDER_CONFIRMED";
-        readonly sourceStage: "ORDER_PREVIEW" | "PURCHASE_CONFIRMED";
+        readonly phase: "CART_ACTIVE" | "ORDER_REVIEW" | "ORDER_CONFIRMED";
+        readonly sourceStage: "CART_OPEN" | "ORDER_PREVIEW" | "PURCHASE_CONFIRMED";
       }>
     >>;
   }>;
