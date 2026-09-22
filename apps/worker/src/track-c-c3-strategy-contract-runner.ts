@@ -48,7 +48,10 @@ const ORDINARY_INPUTS = Object.freeze([
   "PAYMENT_PREFERENCE", "QUANTITY", "STYLE", "BUDGET",
   "DECISION_CRITERION", "DEADLINE",
 ] as const satisfies readonly TrackCOrdinaryDecisionInput[]);
-const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+// Mirrors the runtime missingCheckout field set, payment included.
+const CHECKOUT_FIELDS = new Set<string>(
+  ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"] satisfies TrackCCheckoutField[],
+);
 
 const STRATEGIST_INSTRUCTION = [
   "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.",
@@ -882,8 +885,19 @@ function constraintsFor(
   const unavailable = measurementsUnavailable(dialogue);
   const permittedCanonicalActions: TrackCCanonicalAction[] = ["NONE"];
   if (!unavailable) permittedCanonicalActions.push("ASK_MEASUREMENTS");
+  // Ask for the missing details at the state the runtime actually reaches.
+  //
+  // Requiring ORDER_PREVIEW made this unreachable: the runtime only builds a
+  // preview once checkout data is complete and revalidation passed, so a
+  // preview never coexists with missing fields. The runtime raises its
+  // CHECKOUT_DETAILS_MISSING clarification while the cart is open, so an open
+  // cart is the state that permits the request. ORDER_PREVIEW stays permitted
+  // for the case where a later mutation invalidates a previously complete draft.
+  const checkoutStageReached =
+    context.phase.sourceStage === "CART_OPEN" ||
+    context.phase.sourceStage === "ORDER_PREVIEW";
   const checkoutAuthorized = context.buyingIntent.decision === "COMMITTED" &&
-    context.phase.sourceStage === "ORDER_PREVIEW" &&
+    checkoutStageReached &&
     context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT" &&
     !context.barriers.active.includes("MEASUREMENTS_REQUIRED") &&
     checkoutRequestedFields.length > 0;

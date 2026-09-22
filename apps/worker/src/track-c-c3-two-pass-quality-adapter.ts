@@ -11,6 +11,7 @@ import {
   type TrackCV5TwoPassBenchmarkInput,
 } from "./track-c-c3-v5-benchmark-runner.js";
 import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materialization.js";
+import type { TrackCCheckoutField } from "./track-c-c3-strategy-contract.js";
 import {
   runTrackCStrategyContractCase,
   type TrackCStrategyContractCaseResult,
@@ -18,7 +19,7 @@ import {
 
 export type TrackCC3CheckoutCompleteness = Readonly<{
   readonly state: "REQUIRED" | "COMPLETE";
-  readonly missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+  readonly missing_fields: readonly TrackCCheckoutField[];
 }>;
 
 export type TrackCC3TwoPassQualityFixture = TrackCV5CompactCase & Readonly<{
@@ -39,7 +40,10 @@ export type TrackCC3TwoPassQualityCandidateInput = Omit<
 export type TrackCC3TwoPassQualityCandidateResult =
   TrackCStrategyContractCaseResult;
 
-const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+// Mirrors the runtime missingCheckout field set, payment included.
+const CHECKOUT_FIELDS = new Set<string>(
+  ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"] satisfies TrackCCheckoutField[],
+);
 const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
 
 function trustedSimulationMetadata(
