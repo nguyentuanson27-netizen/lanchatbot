@@ -15,6 +15,7 @@ export type TrackCV5ProductionClassification =
   | "SUPPORTED"
   | "BLOCKED_BY_CONTRACT";
 
+
 export interface TrackCV5ExpectedCase {
   readonly caseId: string;
   readonly productionClassification: TrackCV5ProductionClassification;
@@ -95,8 +96,12 @@ function assertCaseRecord(
     return;
   }
   if (record.outcome === "SCORED") {
-    if (record.providerCallCount !== 2 ||
-        record.score === null || record.score.lane !== lane) {
+    if (record.score === null || record.score.lane !== lane) {
+      throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
+    }
+    const expectedProviderCallCount = record.score.generatorCallShape ===
+      "FIRST_CONTACT_FIXED" ? 1 : 2;
+    if (record.providerCallCount !== expectedProviderCallCount) {
       throw new Error(`TRACK_C_V5_SCORED_RESULT_INVALID:${record.caseId}`);
     }
     return;
