@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   BusinessFactEnvelopeV1Schema,
   ContextV2CandidateOutputV2Schema,
+  ProtectedClaimV1Schema,
   SizeRecommendationProtectedClaimV1Schema,
   canonicalJsonV1,
   type ContextV2,
@@ -311,6 +312,27 @@ function guardProductionOutput(
       const deterministicText = trackCRuntimeClaimDeterministicText(claim);
       if (deterministicText !== null && segment.text !== deterministicText) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      if (deterministicText !== null &&
+          (claim.type === "PRICE" || claim.type === "STOCK" || claim.type === "ETA")) {
+        // These projections contain only typed numbers/enums and allowlisted
+        // size labels. Exact equality binds every word to this claim; a second
+        // keyword classifier must not reinterpret STOCK as SIZE_FIT, etc.
+        // Keep the authority, scope and freshness checks at this boundary.
+        if (!ProtectedClaimV1Schema.safeParse(claim).success) {
+          throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_AUTHORITY_INVALID");
+        }
+        if (claim.scope.kind !== "PRODUCT" ||
+            context.productBinding.status !== "RESOLVED" ||
+            !verifiedProductIds.has(claim.scope.productId)) {
+          throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_BINDING_INVALID");
+        }
+        if (!Number.isFinite(evaluationAt.getTime()) ||
+            Date.parse(claim.provenance.observedAt) > evaluationAt.getTime() ||
+            Date.parse(claim.provenance.expiresAt) <= evaluationAt.getTime()) {
+          throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_STALE");
+        }
+        continue;
       }
     }
     const productId = claim?.scope.kind === "PRODUCT"

@@ -36,7 +36,7 @@ const facts = JSON.parse(readFileSync(
   simulation_fact_catalog: Record<string, unknown>;
 };
 
-function capture() {
+function capture(amountVnd?: number) {
   return materializeTrackCV5CaseCapture({
     lane: "BEHAVIOR_SIMULATION",
     fixture: {
@@ -56,7 +56,10 @@ function capture() {
         runtime_claim_refs: ["RC_PRICE_A"],
       },
     },
-    runtimeClaimCatalog: facts.runtime_claim_catalog,
+    runtimeClaimCatalog: amountVnd === undefined ? facts.runtime_claim_catalog : {
+      ...facts.runtime_claim_catalog,
+      RC_PRICE_A: { ...facts.runtime_claim_catalog.RC_PRICE_A!, value: { amountVnd, currency: "VND" } },
+    },
     recipe,
   });
 }
@@ -287,6 +290,56 @@ describe("Track C C3 strategy-contract runner", () => {
           text: "Chị đang chọn màu.", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
         }], transport: { send },
       })).rejects.toMatchObject({ diagnostic: { stage: "FINAL_GUARD" } });
+    }
+  });
+
+  it("preserves supported facts while realizing bounded uncertainty without a second question", async () => {
+    const uncertainty = "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
+    for (const answerText of [null, "Dạ em hiểu ý chị ạ.", uncertainty,
+      "Dạ mẫu này bền đẹp và giá tương xứng ạ.",
+      "Dạ em đã ghi nhận đơn của chị ạ.", "Chị muốn chốt luôn không ạ?",
+      "Chị gọi 0901234567 nhé."]) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER",
+          goal: "State the verified price; return eligibility is not supplied. Ask locality only to resolve the customer's shipping question.",
+          proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "ASK", input: "LOCALITY" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({ answerText, factualTexts: [],
+          progressionText: "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
+        }), providerModelVersion: "gemini-3.5-flash-lite" });
+      const result = runTrackCStrategyContractCase({
+        lane: "PRODUCTION_CONTRACT", modelResource: MODEL_RESOURCE,
+        capture: capture(415_000), evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: [{
+          direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Giá mẫu này thế nào, không vừa có trả được không, giao tới chỗ chị được chứ?",
+          attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+        }], transport: { send },
+      });
+      if (answerText !== null && answerText !== uncertainty && answerText !== "Dạ em hiểu ý chị ạ.") {
+        await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
+        continue;
+      }
+      const completed = await result;
+      const body = JSON.parse(send.mock.calls[1]![0].body);
+      expect(body.generationConfig.responseSchema.properties.answerText).toMatchObject({
+        anyOf: [{ type: "NULL" }, { type: "STRING", enum: expect.arrayContaining([uncertainty]) }],
+      });
+      expect(completed.responderTask.answer).toMatchObject({ evidenceStatus: "SUPPORTED" });
+      expect(completed.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM"))
+        .toEqual([{ kind: "VERIFIED_CLAIM", text: "Dạ giá hiện tại của mẫu này là 415.000đ ạ.",
+          claimContentHash: completed.responderTask.evidence[0]!.provenance.contentHash }]);
+      expect(completed.reply.match(/\?/gu)).toHaveLength(1);
+      if (answerText === uncertainty) {
+        expect(completed.output.segments.map(({ text }) => text)).toEqual([
+          "Dạ giá hiện tại của mẫu này là 415.000đ ạ.", uncertainty,
+          "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
+        ]);
+      } else {
+        expect(completed.reply).not.toContain(uncertainty);
+      }
     }
   });
 
@@ -678,6 +731,20 @@ describe("Track C C3 strategy-contract runner", () => {
       "PRODUCTION_CONTRACT",
       new Date(recipe.evaluation_at),
     )).toThrow();
+
+    for (const [invalidContext, error] of [
+      [{ ...context, productBinding: { ...context.productBinding, productIds: ["ANOTHER_PRODUCT"] } },
+        "TRACK_C_V5_PRODUCTION_CLAIM_BINDING_INVALID"],
+      [{ ...context, verifiedClaims: [{ ...claim, provenance: {
+        ...claim.provenance, expiresAt: recipe.evaluation_at,
+      } }] }, "TRACK_C_V5_PRODUCTION_CLAIM_STALE"],
+      [{ ...context, verifiedClaims: [{ ...claim, provenance: {
+        ...claim.provenance, authority: "CART_POLICY_V1" as const,
+      } }] }, "TRACK_C_V5_PRODUCTION_CLAIM_AUTHORITY_INVALID"],
+    ] satisfies [typeof context, string][]) {
+      expect(() => validateResponderOutput(invalidContext, value,
+        "PRODUCTION_CONTRACT", new Date(recipe.evaluation_at))).toThrow(error);
+    }
   });
 
   it("code-realizes a bounded answer for unresolved factual propositions", async () => {

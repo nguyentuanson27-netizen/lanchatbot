@@ -365,7 +365,7 @@ the strategy, repair a bad evidence selection by choosing another fact, or
 derive new factual conclusions from `goal` or dialogue. Acknowledging
 customer-reported context does not turn it into verified commercial evidence.
 
-For the next implementation slice, retain code-owned factual segments and the
+The initial implementation slice retains code-owned factual segments and the
 bounded nonfactual wording surface reviewed in PR #371 at exact HEAD
 `da12894e84551b66f8048782a5e170925f720197`, in
 `apps/worker/src/track-c-c3-strategy-contract-runner.ts`. This is an explicit,
@@ -374,6 +374,29 @@ fixed templates. It does not by itself satisfy the naturalness or
 question-resolution requirements. If that surface cannot express a partial
 answer and its remaining uncertainty, record the realization capability gap;
 do not discard valid evidence or treat completion as successful resolution.
+
+The next bounded correction reuses that same vocabulary in the existing
+`answerText` slot for adaptive `ANSWER / SUPPORTED`: the Responder may choose null, an
+existing acknowledgement, or the existing uncertainty sentence when the
+compiled goal identifies an unanswered part. Code emits every selected factual
+projection unchanged and places that uncertainty once after the facts. This
+does not authorize free-form context acknowledgement or factual paraphrase;
+the Strategist's six fields and the single progression remain unchanged.
+`UNRESOLVED` still has its one code-owned uncertainty sentence and a null
+model slot. Checkout retains null model slots and exact canonical fields;
+HOLD_POSITION retains acknowledgement-only wording and no progression. Trusted
+fixed first contact retains its existing schema and wording permissions.
+Schema vocabulary and exact membership validation close factual, effect and
+additional-question channels in this slot; the existing PII check still applies.
+Correct choice of uncertainty remains realization quality, not a regex verdict.
+
+For PRICE, STOCK and ETA projections made entirely from validated typed
+numbers/enums and allowlisted labels, the final guard checks exact projection,
+claim identity, product binding and freshness without reclassifying the same
+sentence using semantic keywords. This does not exempt arbitrary model text,
+free-text evidence, SIZE_FIT provenance, or CART binding from their guards.
+CART remains unsupported here until the input contract can bind the current
+cart identity/revision; adding a formatter alone is insufficient.
 
 Before expanding model-authored wording, specify which text it may author and
 how factual binding, checkout/PII, effects, and the single progression are

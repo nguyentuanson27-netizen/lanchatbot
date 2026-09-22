@@ -55,7 +55,7 @@ const STRATEGIST_INSTRUCTION = [
   "Choose the customer's current decision, the smallest useful evidence set, and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
   "Address the customer's objection or concern before progression. Choose ANSWER when addressing it directly, ACKNOWLEDGE for acknowledgement, or CLARIFY when the current need itself is unclear. An objection does not force ACKNOWLEDGE.",
   "Choose an ordinary ASK or a canonical input request only when the missing input is directly relevant to the customer's current decision or to an immediate next decision already established by the latest turn or authoritative context, and its answer would materially change the next recommendation, comparison, qualification, or transaction. In goal, identify that missing input and why it matters. Do not invent a new discovery dimension merely because it could be useful later. If the current question is resolved and no such blocker or immediate decision remains, use NONE with KEEP_OPEN unless the canonical hard stop requires HOLD_POSITION.",
-  "If the latest turn primarily confirms or corrects a preference or product selection and introduces no new question or blocker, use ACKNOWLEDGE. A selection alone is not buying commitment or checkout authorization; when no material next input is needed, use KEEP_OPEN instead of starting a fixed funnel.",
+  "If the latest turn primarily confirms or corrects a preference or product selection and introduces no new question or blocker, use ACKNOWLEDGE. A selection alone is not buying commitment or checkout authorization. Preserve any buying commitment already established in canonical context and consider its remaining blocker; when no material next input is needed, use KEEP_OPEN instead of starting a fixed funnel.",
   "ACKNOWLEDGE must not claim an effect. For a question or concern needing an answer, use ANSWER. Code derives evidenceStatus only for the declared proposition capability; SUPPORTED does not certify relevance or that the entire question is answered.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
@@ -69,9 +69,10 @@ const STRATEGIST_INSTRUCTION = [
 const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
   "All selected factual evidence is realized by code from customer-ready deterministic projections. Do not author factual wording.",
-  "Emit factualTexts as an empty array. answerText may only acknowledge and progressionText may only ask when the response schema permits; neither may carry factual details.",
+  "Emit factualTexts as an empty array. answerText may only select the response schema's bounded acknowledgement or uncertainty wording; progressionText may only ask when permitted. Neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "For ANSWER with UNRESOLVED evidenceStatus, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact. evidenceStatus describes authority for a capability, not whether the whole customer question was answered.",
+  "For ANSWER with SUPPORTED evidenceStatus, follow the compiled goal and response schema: when permitted, answerText may be null, a bounded acknowledgement, or the bounded uncertainty sentence when the goal identifies an unanswered part. Code preserves all selected facts and places uncertainty after them. Do not add uncertainty merely because the option exists, or repair the Strategist's evidence selection.",
   "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
   "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
   "For ASK_MEASUREMENTS, use the goal and dialogue to ask only for the missing height, weight, or relevant measurement; do not repeat measurements already supplied or ask usual worn size.",
@@ -476,6 +477,21 @@ function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
     (task.answer.kind !== "ANSWER" || task.answer.evidenceStatus === "NOT_APPLICABLE");
 }
 
+function answerWording(
+  task: TrackCResponderTask,
+  conversationLane: TrackCConversationLane,
+): readonly string[] {
+  if (usesBoundedAcknowledgement(task)) return BOUNDED_ACKNOWLEDGEMENTS;
+  if (conversationLane === "ADAPTIVE_FOLLOWUP" &&
+      task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
+      task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "SUPPORTED") {
+    // Reuse the existing wording surface. Authority support must not prevent
+    // the Responder from realizing uncertainty already identified in the goal.
+    return [...BOUNDED_ACKNOWLEDGEMENTS, UNRESOLVED_ANSWER_TEXT];
+  }
+  return [];
+}
+
 function requestWording(task: TrackCResponderTask): readonly string[] {
   const canonical = task.canonicalRequest?.type;
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
@@ -485,10 +501,11 @@ function requestWording(task: TrackCResponderTask): readonly string[] {
     ? REQUEST_WORDING[task.continuation.input] : [];
 }
 
-function responderDraftSchema(task: TrackCResponderTask) {
+function responderDraftSchema(task: TrackCResponderTask, conversationLane: TrackCConversationLane) {
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
+  const answers = answerWording(task, conversationLane);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -496,8 +513,10 @@ function responderDraftSchema(task: TrackCResponderTask) {
     maxProperties: 3,
     properties: {
       answerText: boundedAcknowledgement
-        ? { type: "STRING", enum: BOUNDED_ACKNOWLEDGEMENTS }
-        : { type: "NULL" },
+        ? { type: "STRING", enum: answers }
+        : answers.length > 0
+          ? { anyOf: [{ type: "NULL" }, { type: "STRING", enum: answers }] }
+          : { type: "NULL" },
       factualTexts: {
         type: "ARRAY",
         minItems: factualEvidenceCount,
@@ -517,6 +536,7 @@ function buildTrackCResponderContractRequest(input: Readonly<{
   evaluationAt: Date;
   evaluationContext: readonly ShadowContextMessage[];
   task: TrackCResponderTask;
+  conversationLane: TrackCConversationLane;
 }>): BuiltCandidateRequest {
   const base = buildTrackCOfflineCandidateRequest({
     modelResource: input.modelResource,
@@ -525,7 +545,7 @@ function buildTrackCResponderContractRequest(input: Readonly<{
     evaluationContext: input.evaluationContext,
     systemInstruction: RESPONDER_INSTRUCTION,
   });
-  return narrowRequest(base, responderDraftSchema(input.task), {
+  return narrowRequest(base, responderDraftSchema(input.task, input.conversationLane), {
     contractVersion: "TRACK_C_C3_RESPONDER_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
     responderTask: responderTaskPrompt(input.task),
@@ -655,23 +675,16 @@ function compileResponderDraft(input: Readonly<{
   task: TrackCResponderTask;
   draft: ResponderDraft;
   lane: TrackCV5ExecutionLane;
+  conversationLane: TrackCConversationLane;
   evaluationAt: Date;
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
-  if (task.answer.kind === "ANSWER" &&
-      task.answer.evidenceStatus !== "NOT_APPLICABLE" &&
-      draft.answerText !== null) {
+  if (draft.answerText !== null &&
+      !answerWording(task, input.conversationLane).includes(draft.answerText)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  if (usesBoundedAcknowledgement(task)) {
-    if (draft.answerText === null) {
-      throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
-    }
-    if (!BOUNDED_ACKNOWLEDGEMENTS.some((acknowledgement) =>
-      acknowledgement === draft.answerText
-    )) {
-      throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
-    }
+  if (usesBoundedAcknowledgement(task) && draft.answerText === null) {
+    throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
   // Selectable evidence already has a customer-ready deterministic factual
   // projection. The Responder never owns factual wording.
@@ -683,7 +696,7 @@ function compileResponderDraft(input: Readonly<{
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
-  } else if (draft.answerText !== null) {
+  } else if (draft.answerText !== null && draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
   }
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
@@ -717,6 +730,9 @@ function compileResponderDraft(input: Readonly<{
       claimContentHash: evidence.provenance.contentHash,
     });
   });
+  if (draft.answerText === UNRESOLVED_ANSWER_TEXT) {
+    segments.push({ kind: "GENERAL", text: draft.answerText });
+  }
   if (task.deliveryDeadlineText !== undefined) {
     segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });
   }
@@ -1010,6 +1026,7 @@ export async function runTrackCStrategyContractCase(
     evaluationAt: input.evaluationAt,
     evaluationContext: input.evaluationContext,
     task,
+    conversationLane: lane,
   });
   let responderPayload: unknown = null;
   let draft: ResponderDraft;
@@ -1035,6 +1052,7 @@ export async function runTrackCStrategyContractCase(
       task,
       draft,
       lane: input.lane,
+      conversationLane: lane,
       evaluationAt: input.evaluationAt,
     });
   } catch (error) {
