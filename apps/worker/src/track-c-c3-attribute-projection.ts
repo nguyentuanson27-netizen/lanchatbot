@@ -215,6 +215,47 @@ export function trackCProductAttributeProjections(
 }
 
 /**
+ * The attribute projections keyed by their derived content hash.
+ *
+ * The final validator and the production guard rebuild this from the
+ * authoritative attributes so they can recognise a field-level projection
+ * without trusting a hash the candidate supplied. Each entry binds the hash to
+ * the field, its exact wording and the product it belongs to.
+ */
+export function trackCProductAttributeProjectionRegistry(
+  attributes: ProductAttributesV1,
+): ReadonlyMap<string, Readonly<{
+  field: string;
+  productId: string;
+  deterministicText: string | null;
+}>> {
+  const registry = new Map<string, Readonly<{
+    field: string;
+    productId: string;
+    deterministicText: string | null;
+  }>>();
+  for (const projection of trackCProductAttributeProjections(attributes)) {
+    registry.set(projectionHash(attributes, projection), Object.freeze({
+      field: projection.field,
+      productId: attributes.productId,
+      deterministicText: projection.text ?? null,
+    }));
+  }
+  return registry;
+}
+
+function projectionHash(
+  attributes: ProductAttributesV1,
+  projection: AttributeProjection,
+): string {
+  return sha256({
+    sourceContentHash: attributes.metadata.contentHash,
+    field: projection.field,
+    value: projection.value,
+  });
+}
+
+/**
  * Selectable evidence for one product's attributes, one entry per field.
  *
  * `refPrefix` keeps refs stable and distinct when several bound products are
@@ -245,11 +286,8 @@ export function trackCProductAttributeEvidence(input: Readonly<{
         value: Object.freeze({ [projection.field]: projection.value }),
         ...(projection.text === undefined ? {} : { deterministicText: projection.text }),
         provenance: Object.freeze({
-          contentHash: sha256({
-            sourceContentHash: input.attributes.metadata.contentHash,
-            field: projection.field,
-            value: projection.value,
-          }),
+          // Same derivation the validator and guard rebuild from source.
+          contentHash: projectionHash(input.attributes, projection),
           authority: input.authority,
         }),
       })

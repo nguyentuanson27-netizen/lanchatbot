@@ -71,6 +71,24 @@ function claimSubject(
 }
 
 /**
+ * The presentation that may resolve labels for this claim.
+ *
+ * A presentation only speaks for the product it describes, so it is usable
+ * here only when it matches the claim's product. Both the projector and the
+ * final guard resolve it through this one function, so the text they compare
+ * is always built from the same input.
+ */
+export function trackCBoundPresentationForClaim(
+  presentation: ContextV2["productPresentation"] | null | undefined,
+  scope: ContextV2["verifiedClaims"][number]["scope"],
+): ContextV2["productPresentation"] | null {
+  return presentation !== null && presentation !== undefined &&
+      scope.kind === "PRODUCT" && presentation.productId === scope.productId
+    ? presentation
+    : null;
+}
+
+/**
  * Customer-facing variant label from the authoritative presentation mapping.
  *
  * Parsing `SIZE_*` out of a variant ID only worked for IDs that happened to
@@ -365,9 +383,12 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   input.context.verifiedClaims.forEach((claim, index) => {
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
-      const subject = claimSubject(claim.scope, input.context.productPresentation);
+      const boundPresentation = trackCBoundPresentationForClaim(
+        input.context.productPresentation, claim.scope,
+      );
+      const subject = claimSubject(claim.scope, boundPresentation);
       const deterministicText = trackCRuntimeClaimDeterministicText(
-        claim, input.context.productPresentation,
+        claim, boundPresentation,
       );
       evidence.push(Object.freeze({
         ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,

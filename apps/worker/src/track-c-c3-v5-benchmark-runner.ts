@@ -26,6 +26,10 @@ import {
   type TrackCConversationPlanV1,
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
+import { trackCBoundPresentationForClaim } from
+  "./track-c-c3-selectable-evidence.js";
+import { trackCProductAttributeProjectionRegistry } from
+  "./track-c-c3-attribute-projection.js";
 import { trackCCustomerFacingSizeFromVariantId } from
   "./track-c-c3-strategy-contract.js";
 import { trackCRuntimeClaimDeterministicText } from
@@ -297,6 +301,11 @@ function guardProductionOutput(
   const productAttributesHash = context.productAttributes?.metadata.contentHash ?? null;
   const productPresentationHash =
     context.productPresentation?.provenance.contentHash ?? null;
+  // Derived from the authoritative attributes on this side of the boundary.
+  const attributeProjections =
+    context.productAttributes === null || context.productAttributes === undefined
+      ? new Map()
+      : trackCProductAttributeProjectionRegistry(context.productAttributes);
   for (const segment of output.segments) {
     const usesProductPresentationEvidence =
       segment.kind === "VERIFIED_CLAIM" &&
@@ -305,11 +314,33 @@ function guardProductionOutput(
     const claim = segment.kind === "VERIFIED_CLAIM"
       ? claims.get(segment.claimContentHash) ?? null
       : null;
+    const attributeProjection = segment.kind === "VERIFIED_CLAIM"
+      ? attributeProjections.get(segment.claimContentHash) ?? null
+      : null;
+    if (attributeProjection !== null) {
+      // Exact equality binds every word of the segment to the field this hash
+      // was derived from, so a projection cannot be reused for another value.
+      if (attributeProjection.deterministicText === null ||
+          segment.text !== attributeProjection.deterministicText) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      if (context.productBinding.status !== "RESOLVED" ||
+          !verifiedProductIds.has(attributeProjection.productId)) {
+        throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_BINDING_INVALID");
+      }
+    }
     if (claim?.scope.kind === "CART") {
       throw new Error("TRACK_C_V5_PRODUCTION_CART_GUARD_UNSUPPORTED");
     }
     if (claim !== null) {
-      const deterministicText = trackCRuntimeClaimDeterministicText(claim);
+      // The projector resolves variant labels from the presentation, so the
+      // guard must rebuild the text from the same input or it compares two
+      // different strings. The presentation is only usable for this claim when
+      // it describes the same product.
+      const deterministicText = trackCRuntimeClaimDeterministicText(
+        claim,
+        trackCBoundPresentationForClaim(context.productPresentation, claim.scope),
+      );
       if (deterministicText !== null && segment.text !== deterministicText) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }
@@ -337,12 +368,14 @@ function guardProductionOutput(
     }
     const productId = claim?.scope.kind === "PRODUCT"
       ? claim.scope.productId
-      : segment.kind === "VERIFIED_CLAIM" &&
-          (segment.claimContentHash === productAttributesHash ||
-           segment.claimContentHash === productPresentationHash)
-        ? context.productAttributes?.productId ??
-          context.productPresentation?.productId ?? null
-        : null;
+      : attributeProjection !== null
+        ? attributeProjection.productId
+        : segment.kind === "VERIFIED_CLAIM" &&
+            (segment.claimContentHash === productAttributesHash ||
+             segment.claimContentHash === productPresentationHash)
+          ? context.productAttributes?.productId ??
+            context.productPresentation?.productId ?? null
+          : null;
     const sizeClaimContext = sizeGuardInputForClaim(context, claim);
     const guard = guardAgentProposal({
       proposal: {
@@ -400,11 +433,19 @@ export function validateResponderOutput(
   if (output.segments.some(({ kind }) => kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
+  // Rebuilt from the authoritative attributes, never from the candidate: a
+  // field-level projection is recognised only if this side derives the same
+  // hash from the same source.
+  const attributeProjections =
+    context.productAttributes === null || context.productAttributes === undefined
+      ? new Map()
+      : trackCProductAttributeProjectionRegistry(context.productAttributes);
   const known = new Set([
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined
       ? []
       : [context.productAttributes.metadata.contentHash]),
+    ...attributeProjections.keys(),
     ...(context.productPresentation === null ||
         context.productPresentation === undefined
       ? []
