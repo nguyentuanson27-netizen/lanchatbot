@@ -156,6 +156,14 @@ describe("Track C C3 strategy-contract runner", () => {
     const responderBody = JSON.parse(send.mock.calls[1]![0].body);
     const prompt = JSON.parse(responderBody.contents[0].parts[0].text);
     expect(prompt.responderTask.answer.goal).toBe(normalized.goal);
+    expect(prompt.responderTask.evidence).toEqual([{
+      text: result.responderTask.evidence[0]!.deterministicText,
+    }]);
+    expect(responderBody.generationConfig.responseSchema.properties.factualTexts)
+      .toMatchObject({ minItems: 0, maxItems: 0 });
+    for (const internal of ["CLAIM_001", "contentHash", "provenance", "amountVnd"]) {
+      expect(JSON.stringify(prompt.responderTask.evidence)).not.toContain(internal);
+    }
     for (const raw of ["700000", "0901234567", "lan@example.com"]) {
       expect(JSON.stringify(result)).not.toContain(raw);
       expect(send.mock.calls[1]![0].body).not.toContain(raw);

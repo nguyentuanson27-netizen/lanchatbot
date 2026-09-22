@@ -161,7 +161,7 @@ export interface TrackCStrategyContractCaseResult {
   readonly executionLane: TrackCV5ExecutionLane;
   readonly conversationLane: TrackCConversationLane;
   readonly conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
-  /** Full code-compiled task; the model prompt omits code-rendered evidence. */
+  /** Full code-compiled task; the model prompt sees only safe factual projections. */
   readonly responderTask: TrackCResponderTask;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
@@ -445,19 +445,36 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   });
 }
 
-function modelAuthoredEvidence(
+function responderReadableEvidence(
   task: TrackCResponderTask,
+): readonly Readonly<{ text: string }>[] {
+  return Object.freeze(task.evidence.map((evidence) => {
+    if (!trackCEvidenceHasSafeFactualEgress(evidence) ||
+        evidence.deterministicText === undefined) {
+      throw new Error("TRACK_C_RESPONDER_TASK_EVIDENCE_INVALID");
+    }
+    const factualText = text(
+      evidence.deterministicText,
+      "TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE",
+    );
+    if (factualText === null) {
+      throw new Error("TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE");
+    }
+    assertNoEffectText(factualText);
+    return Object.freeze({ text: factualText });
+  }));
+}
+
+function modelAuthoredEvidence(
+  _task: TrackCResponderTask,
 ): readonly TrackCSelectableEvidence[] {
-  if (task.evidence.some((evidence) => !trackCEvidenceHasSafeFactualEgress(evidence))) {
-    throw new Error("TRACK_C_RESPONDER_TASK_EVIDENCE_INVALID");
-  }
   return Object.freeze([]);
 }
 
 function responderTaskPrompt(task: TrackCResponderTask) {
   return Object.freeze({
     answer: task.answer,
-    evidence: presentableEvidence(modelAuthoredEvidence(task)),
+    evidence: responderReadableEvidence(task),
     continuation: task.continuation,
     canonicalRequest: task.canonicalRequest,
     ...(task.deliveryDeadlineText === undefined ? {} : {
