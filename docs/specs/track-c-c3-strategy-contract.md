@@ -404,19 +404,35 @@ sentence using semantic keywords. This does not exempt arbitrary model text,
 free-text evidence, or SIZE_FIT provenance from their guards.
 
 The same rule now extends to the remaining typed groups, each projected from
-its own validated fields: cart adjustments (shipping fee, freeship, promotion
-offer), the published policies (inspection, exchange, sale exchange, refund,
-payment, customization, split size), store location, care guidance, offer
-configuration, promotion semantics, cart total, product lifecycle, fulfilment
-spans, and every populated product attribute group. A projection reads only
+its own validated fields: the published policies (inspection, exchange, sale
+exchange, refund, payment, customization, split size), store location, care
+guidance, offer configuration, promotion semantics, product lifecycle,
+fulfilment spans, and every populated product attribute group. A projection reads only
 fields of the group it belongs to. An unrecognised enum value or an
 unrepresentable shape yields no wording, which is reported as an unmet
 realization rather than guessed at or silently dropped.
 
 Cart-scoped evidence carries `cartId` and `cartVersion` on its subject so the
-value can be revalidated against the current cart before egress. A formatter
-alone was never sufficient and still is not: the scope is what makes the
-revalidation possible.
+value can be revalidated against the current cart before egress. It is
+deliberately left without wording until that revalidation exists. Stating a
+shipping fee, a freeship status or a cart promotion asserts it about the cart
+as it is now, and the input contract carries no current cart identity or
+revision to check the claim against, so the figure could come from a cart the
+customer has since changed. The group therefore keeps its authority, is
+reported as a realization limit, and is answered only once the input contract
+carries the binding. A formatter alone does not open cart answers.
+
+A field-level projection's content hash is derived from its source hash, its
+field and its value. The final validator and the production guard rebuild that
+derivation from the authoritative source rather than trusting a hash supplied
+with the output, and bind each projection to its exact wording and product. A
+projection the source does not derive is rejected.
+
+Wherever the same fact is rendered twice — once when projecting it and once
+when the guard re-derives it to compare — both sides must resolve their inputs
+through the same rule. A presentation speaks only for the product it describes,
+so variant labels are resolved through one shared binding check on both paths;
+building the two strings from different inputs rejects correct answers.
 
 Before expanding model-authored wording, specify which text it may author and
 how factual binding, checkout/PII, effects, and the single progression are
@@ -541,11 +557,11 @@ Recorded as gaps against this spec, not as revisions to it.
   a field changed to an array.
 - **Negative freeship is not producible.** The cart-policy producer emits
   `FREESHIP` only with `eligible: true`; a non-free cart is represented by
-  `SHIPPING_FEE` when the fee is known. The projection handles the negative
-  value, but production cannot currently reach it.
-- **No `CART_OPEN` materialization.** The benchmark materialization recipe maps
-  only `ORDER_PREVIEW` and `PURCHASE_CONFIRMED` explicitly, so the open-cart
-  checkout state above is not yet exercised by the corpus.
+  `SHIPPING_FEE` when the fee is known.
+- **Cart answers need a current-cart binding.** `ContextV2` carries no cart
+  identity or revision, so no cart-scoped fact can be revalidated before egress
+  and none is stated. Closing this needs that binding in the input contract,
+  not a renderer.
 - **ETA semantics are inconsistent upstream.** `catalog-projection.ts` sums
   preparation and transit, while `realtime-product-facts-v2.ts` assigns
   `etaToCustomer` from preparation bounds alone. Fulfilment projections here

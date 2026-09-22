@@ -62,34 +62,38 @@ describe("Track C C3 evidence subject scope", () => {
     expect(shipping?.subject?.productId).toBeUndefined();
   });
 
-  it("can state a cart shipping fee that previously had no projection", () => {
-    const [shipping] = evidenceFor(["RC_SHIP_30"]).filter(
-      ({ capability }) => capability === "SHIPPING_FEE",
-    );
-    expect(shipping && trackCEvidenceHasSafeFactualEgress(shipping)).toBe(true);
-    expect(shipping?.deterministicText).toContain("phí giao hàng");
+  it("keeps a cart fact selectable but not statable without a cart binding", () => {
+    // Quoting a fee asserts it about the cart as it is now, and the input
+    // contract carries no current cart revision to check that against. The
+    // fact keeps its authority and is reported as a realization limit rather
+    // than being quoted from a cart the customer may have changed.
+    for (const ref of ["RC_SHIP_30", "RC_FREESHIP_Y", "RC_FREESHIP_N"]) {
+      const [entry] = evidenceFor([ref]).filter(
+        ({ subject }) => subject?.scope === "CART",
+      );
+      expect(entry).toBeDefined();
+      expect(trackCEvidenceHasSafeFactualEgress(entry!)).toBe(false);
+    }
   });
 
-  it("distinguishes an ineligible freeship from an eligible one", () => {
-    const eligible = evidenceFor(["RC_FREESHIP_Y"]).find(
-      ({ capability }) => capability === "FREESHIP",
-    );
-    const ineligible = evidenceFor(["RC_FREESHIP_N"]).find(
-      ({ capability }) => capability === "FREESHIP",
-    );
-    expect(eligible?.deterministicText).toContain("được miễn phí giao hàng");
-    expect(ineligible?.deterministicText).toContain("chưa đạt điều kiện");
-  });
-
-  it("changes the stated fee when the cart claim changes", () => {
+  it("keeps the cart version distinct when the cart claim changes", () => {
     const cheap = evidenceFor(["RC_SHIP_30"]).find(
       ({ capability }) => capability === "SHIPPING_FEE",
     );
     const dear = evidenceFor(["RC_SHIP_45"]).find(
       ({ capability }) => capability === "SHIPPING_FEE",
     );
-    expect(cheap?.deterministicText).not.toBe(dear?.deterministicText);
     expect(cheap?.subject?.cartVersion).not.toBe(dear?.subject?.cartVersion);
+  });
+
+  it("never emits a cart fact through the final guard", () => {
+    // The guard rejects cart-scoped output because nothing has revalidated the
+    // cart. Since the projection no longer offers wording, that rejection is
+    // unreachable from a normal turn instead of being a live failure mode.
+    const [shipping] = evidenceFor(["RC_SHIP_30"]).filter(
+      ({ capability }) => capability === "SHIPPING_FEE",
+    );
+    expect(shipping?.deterministicText).toBeUndefined();
   });
 
   it("marks a product-scoped claim with the product scope", () => {

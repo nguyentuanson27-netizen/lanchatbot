@@ -122,24 +122,14 @@ export function trackCRuntimeClaimDeterministicText(
   claim: ContextV2["verifiedClaims"][number],
   presentation?: ContextV2["productPresentation"],
 ): string | null {
-  // Cart adjustments are cart-scoped by contract, so they were previously left
-  // without any wording and could not be stated at all. They are projected
-  // here; the cart identity stays on the subject for revalidation.
-  if (claim.type === "SHIPPING_FEE") {
-    return claim.value.amountVnd === 0
-      ? "Dạ đơn hiện tại của chị được miễn phí giao hàng ạ."
-      : `Dạ phí giao hàng cho đơn hiện tại của chị là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
-  }
-  if (claim.type === "FREESHIP") {
-    // The negative case is stated as not-yet-eligible, without inventing the
-    // threshold that would make it eligible.
-    return claim.value.eligible
-      ? "Dạ đơn hiện tại của chị được miễn phí giao hàng ạ."
-      : "Dạ đơn hiện tại của chị chưa đạt điều kiện miễn phí giao hàng ạ.";
-  }
-  if (claim.type === "PROMOTION_OFFER") {
-    return `Dạ đơn hiện tại của chị đang được giảm ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
-  }
+  // Cart adjustments (shipping fee, freeship, promotion offer) are deliberately
+  // left without wording. Stating one means asserting it about the cart as it
+  // is now, and the input contract carries no current cart identity or revision
+  // to check the claim against, so a fee could be quoted from a cart the
+  // customer has since changed. Adding a formatter alone would not close that,
+  // so the group stays unrealizable and is reported as a realization limit
+  // until the input contract carries the binding. The subject already keeps
+  // cartId/cartVersion for that revalidation.
   if (claim.scope.kind !== "PRODUCT") return null;
   if (claim.type === "PRICE") {
     return `Dạ giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
