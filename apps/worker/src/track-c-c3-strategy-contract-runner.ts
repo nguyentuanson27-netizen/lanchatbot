@@ -94,6 +94,11 @@ const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
 ] as const);
 const UNRESOLVED_ANSWER_TEXT =
   "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
+// Code-owned limit sentence for a selection that was only partly realizable.
+// Without it, a compound question could be answered with the part that has
+// wording while the rest disappeared silently. It carries no fact of its own.
+const PARTIAL_REALIZATION_TEXT =
+  "Dạ phần còn lại trong câu hỏi của chị thì hiện em chưa có thông tin đã xác minh để trả lời chắc chắn ạ.";
 
 // A small vocabulary for the existing typed requests, not a text classifier.
 // The Strategist chooses the input; the Responder chooses its wording. Exact
@@ -481,6 +486,13 @@ function responderTaskPrompt(task: TrackCResponderTask) {
   return Object.freeze({
     answer: task.answer,
     evidence: responderReadableEvidence(task),
+    // Capability names only: enough for the Responder to know part of the
+    // question is not covered, with none of the underlying values.
+    ...(task.unrealizedEvidence.length === 0 ? {} : {
+      unrealizedCapabilities: Object.freeze(
+        [...new Set(task.unrealizedEvidence.map(({ capability }) => capability))],
+      ),
+    }),
     continuation: task.continuation,
     canonicalRequest: task.canonicalRequest,
     ...(task.deliveryDeadlineText === undefined ? {} : {
@@ -756,6 +768,14 @@ function compileResponderDraft(input: Readonly<{
   });
   if (draft.answerText === UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
+  }
+  // Only when facts were actually stated: an UNRESOLVED answer already opened
+  // with its own uncertainty sentence, so a second one would repeat it.
+  if (task.unrealizedEvidence.length > 0 &&
+      task.answer.kind === "ANSWER" &&
+      task.answer.evidenceStatus === "SUPPORTED" &&
+      draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
+    segments.push({ kind: "GENERAL", text: PARTIAL_REALIZATION_TEXT });
   }
   if (task.deliveryDeadlineText !== undefined) {
     segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });

@@ -70,7 +70,11 @@ function trustedSimulationMetadata(
   if (checkout !== undefined) {
     const fields = checkout.missing_fields;
     const keys = Object.keys(checkout).sort();
-    if (fixture.context.source_stage !== "ORDER_PREVIEW" ||
+    // The runner permits a checkout request at either reachable state, so the
+    // adapter must let both through: requiring ORDER_PREVIEW here rejected the
+    // open-cart case before it could reach the runner at all.
+    if ((fixture.context.source_stage !== "ORDER_PREVIEW" &&
+         fixture.context.source_stage !== "CART_OPEN") ||
         JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
         !Array.isArray(fields) ||
         fields.some((field) => !CHECKOUT_FIELDS.has(field)) ||

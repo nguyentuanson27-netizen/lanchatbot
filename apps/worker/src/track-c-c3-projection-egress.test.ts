@@ -92,11 +92,8 @@ function withPresentation(
       productId: PRODUCT_ID,
       displayName: "Tường Vi",
       variants: [...variants],
-      provenance: {
-        ...(context.verifiedClaims[0]!.provenance as never),
-        contentHash: "b".repeat(64),
-      },
-    } as ContextV2["productPresentation"],
+      provenance: { contentHash: "b".repeat(64) },
+    } as unknown as ContextV2["productPresentation"],
   };
 }
 

@@ -393,6 +393,41 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.responderTask.requiredEvidenceRefs).toEqual([]);
   });
 
+  it("states the uncovered part when only some selected evidence is realizable", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({ replyAct: "ANSWER", goal: "Answer price and the payment policy.",
+          proposition: "PRICE", evidenceRefs: ["CLAIM_001", "SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này bao nhiêu và bảo hành thế nào em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], simulationFacts: [UNREALIZABLE_POLICY_FACT], transport: { send },
+    });
+
+    // The Responder is told which capability it cannot cover...
+    const responderPrompt = JSON.parse(
+      JSON.parse(send.mock.calls[1]![0].body).contents[0].parts[0].text,
+    ) as { responderTask: { unrealizedCapabilities?: readonly string[] } };
+    expect(responderPrompt.responderTask.unrealizedCapabilities).toEqual(["POLICY"]);
+
+    // ...and the reply states the price it can answer and names the rest,
+    // instead of answering half the question silently.
+    const texts = result.output.segments.map(({ text }) => text);
+    expect(texts.some((text) => text.includes("giá hiện tại"))).toBe(true);
+    expect(texts.some((text) => text.includes("phần còn lại"))).toBe(true);
+  });
+
   it("projects simulation facts once into selectable evidence without effect authority", () => {
     const captureValue = capture();
     if (captureValue.status !== "BUILT" || captureValue.context === null) {
