@@ -12,6 +12,7 @@ import { trackCEvidenceHasSafeFactualEgress } from
 import { trackCCartClaimIsCurrent } from "./track-c-c3-cart-binding.js";
 import { runTrackCC3TwoPassQualityCandidate } from
   "./track-c-c3-two-pass-quality-adapter.js";
+import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 
 const EVAL_ROOT = new URL("../evals/track-c-c2/v2/", import.meta.url);
 const recipe = JSON.parse(readFileSync(
@@ -104,6 +105,30 @@ describe("Track C C3 evidence subject scope", () => {
       evaluationContext: [], simulationFacts: [],
       transport: { send: async () => { throw new Error("SHOULD_NOT_CALL_PROVIDER"); } },
     } as never)).rejects.toThrow("TRACK_C_C3_CURRENT_CART_BINDING_REQUIRED");
+  });
+
+  it("carries current-cart readback through the simulation final guard", () => {
+    const chunk = JSON.parse(readFileSync(
+      new URL("quality-03.json", EVAL_ROOT), "utf8",
+    )) as { cases: Array<{ id: string }> };
+    const fixture = chunk.cases.find((entry) => entry.id === "V5V4Q025")!;
+    const input = { fixture: fixture as never,
+      runtimeClaimCatalog: facts.runtime_claim_catalog, recipe };
+    const capture = materializeTrackCV5CaseCapture({
+      ...input, lane: "BEHAVIOR_SIMULATION",
+    });
+    const currentCart = materializeTrackCV5CaseCurrentCart(input)!;
+    const claim = capture.context!.verifiedClaims.find(({ type }) =>
+      type === "SHIPPING_FEE"
+    )!;
+    expect(validateResponderOutput(capture.context!, {
+      segments: [{
+        kind: "VERIFIED_CLAIM", text: "Phí giao hàng của giỏ hiện tại là 30.000đ ạ.",
+        claimContentHash: claim.provenance.contentHash,
+      }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    }, "BEHAVIOR_SIMULATION", new Date(recipe.evaluation_at), [], currentCart)
+      .segments).toHaveLength(1);
   });
   it("keeps cart identity and version on a cart-scoped claim", () => {
     const [shipping] = evidenceFor(["RC_SHIP_30"]).filter(

@@ -484,7 +484,9 @@ export function validateResponderOutput(
         !simulationHashes.has(segment.claimContentHash)
       ),
     };
-    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt);
+    // Simulation facts are excluded above; runtime cart claims still need the
+    // same pinned cart readback that production uses for their final guard.
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart);
   }
   return output;
 }
