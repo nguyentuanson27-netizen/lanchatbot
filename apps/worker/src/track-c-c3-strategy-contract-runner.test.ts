@@ -137,6 +137,30 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("labels two bound products by canonical code when catalog display names are absent", async () => {
+    const twoProducts = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", recipe, runtimeClaimCatalog: facts.runtime_claim_catalog,
+      fixture: { id: "MULTI_PRODUCT_CANONICAL_LABELS", latest_customer_message: "Giá từng mẫu thế nào?",
+        context: { product_binding: { status: "RESOLVED", product_ids: ["SQ9012", "SV9031"] },
+          phase: "BROWSING", canonical_flags: [], source_stage: null,
+          buying_intent: { decision: "NONE", requested_action: "NONE", quantity: null, evidence: null },
+          runtime_claim_refs: ["RC_PRICE_A", "RC_PRICE_B"] } },
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({ replyAct: "ANSWER", goal: "Give each product's verified price.",
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001", "CLAIM_002"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "PRODUCTION_CONTRACT", modelResource: MODEL_RESOURCE, capture: twoProducts,
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{ direction: "INBOUND",
+        senderType: "CUSTOMER", messageType: "TEXT", text: "Giá từng mẫu thế nào?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send },
+    });
+    expect(result.reply).toBe("Với mẫu SQ9012: Giá hiện tại của mẫu này là 849.000đ. Với mẫu SV9031: Giá hiện tại của mẫu này là 1.099.000đ ạ.");
+    expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(2);
+  });
   it("accepts a writer's bound price realization and rejects a changed price or benefit through the live core", async () => {
     const decisionAt = new Date(recipe.evaluation_at);
     const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
@@ -462,7 +486,7 @@ describe("Track C C3 strategy-contract runner", () => {
           attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
         }], transport: { send },
       });
-      if (answerText !== null && answerText !== uncertainty && answerText !== "Dạ em hiểu ý chị ạ.") {
+      if (answerText !== null && answerText !== uncertainty) {
         await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
         continue;
       }

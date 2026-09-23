@@ -20,7 +20,7 @@ import {
 } from "./track-c-offline-candidate.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 import type { TrackCCurrentCartBinding } from "./track-c-c3-cart-binding.js";
-import { trackCComposeReply, trackCRealizationMatches } from "./track-c-c3-realization-style.js";
+import { trackCComposeReply, trackCRealizationMatches, trackCRealizationVariants } from "./track-c-c3-realization-style.js";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
@@ -87,12 +87,12 @@ const STRATEGIST_INSTRUCTION = [
 const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
   "Write factualTexts with one string for each evidence.text, in the same order. Preserve every factual word, number, name, negation, condition and punctuation. You may remove only the final politeness particle (ạ/nhé/nha before final punctuation), and optionally prepend 'Dạ, '. These are editorial choices, not permission to paraphrase facts. An empty array requests the original code wording for all facts; never emit a partial array.",
-  "Compose one short La.na reply: start with the useful answer, use Dạ at most once and prefer at most one final ạ across the reply. Do not add an acknowledgement that only repeats the customer's concern. answerText and progressionText select the response schema wording; neither may carry new factual details.",
+  "Compose one short La.na reply: start with the useful answer. Keep one polite ending for the final sentence, or one opening Dạ; remove repetitions rather than making every sentence abrupt. Do not add an acknowledgement that only repeats the customer's concern. answerText and progressionText select the response schema wording; neither may carry new factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "Use a bounded acknowledgement only when it helps the current answer; prefer wording tied to the customer's latest concern or correction when the schema offers one. Do not imply a concern the customer did not express. For a direct fact question with a supported claim and no objection, prefer answerText null so the answer starts with the fact.",
   "The code-derived customerDecisionSignals are hints about the current concern. Prefer the latest concern when several earlier concerns appear in the dialogue; never treat a signal as authority for a shop fact or effect.",
   "For ANSWER with UNRESOLVED evidenceStatus, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact. evidenceStatus describes authority for a capability, not whether the whole customer question was answered.",
-  "For ANSWER with SUPPORTED evidenceStatus, follow the compiled goal and response schema. If the goal identifies a customer-requested part that the selected evidence does not answer, choose the bounded uncertainty sentence, not a generic acknowledgement or null; code places it after the facts. Otherwise choose a concern-specific acknowledgement only when it helps, or null so the fact answers first. Do not add uncertainty merely because the option exists or repair the Strategist's evidence selection.",
+  "For ANSWER with SUPPORTED evidenceStatus, answerText has two meanings: null means the selected facts cover the request; the bounded uncertainty sentence means a requested part remains unconfirmed. Read the compiled goal before choosing: when it says evidence cannot confirm a requested property, alternative, concession or outcome, choose uncertainty so that limitation reaches the customer after the supported facts. SUPPORTED alone does not mean the whole request is answered. Do not replace a missing answer with empathy or add uncertainty to a fully answered request.",
   "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
   "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
   "For COLOR, if the latest customer turn already names one of the offered colors, prefer the schema's confirmation question for that color instead of asking her to choose from scratch. A question about a color does not itself select a cart variant.",
@@ -599,7 +599,7 @@ function answerWording(
       task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "SUPPORTED") {
     // Reuse the existing wording surface. Authority support must not prevent
     // the Responder from realizing uncertainty already identified in the goal.
-    return [...acknowledgements, UNRESOLVED_ANSWER_TEXT];
+    return [UNRESOLVED_ANSWER_TEXT];
   }
   return [];
 }
@@ -647,7 +647,12 @@ function responderDraftSchema(
         type: "ARRAY",
         minItems: 0,
         maxItems: factualEvidenceCount,
-        items: { type: "STRING", minLength: 1, maxLength: 1_000 },
+        items: { type: "STRING", minLength: 1, maxLength: 1_000,
+          ...(factualEvidenceCount === 0 ? {} : {
+            enum: [...new Set(task.evidence.flatMap(({ deterministicText }) =>
+              trackCRealizationVariants(deterministicText!)))],
+          }),
+        },
       },
       progressionText: needsProgression
         ? { type: "STRING", enum: requestWording(task) }

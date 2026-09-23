@@ -882,3 +882,12 @@ Frozen DEV70 remains unmodified and is a separate behavioral probe. Neither
 completion nor passing the schema is a sales-quality score. Full question
 coverage, useful next steps and customer-facing tone must be reviewed from the
 resulting transcripts, with remaining gaps reported explicitly.
+
+The response schema enumerates the same editorial variants accepted by the
+guard, closing a mismatch where a writer obeyed the voice instruction but
+removed repeated particles inside a multi-sentence policy. Those policies are
+now composed at their typed projector, retaining every condition and amount.
+For a supported ANSWER, `answerText` selects null (request covered) or the
+existing uncertainty sentence (a requested part remains uncovered). A generic
+acknowledgement cannot replace that choice. This reduces the competing wording
+choices; whole-question coverage still requires behavioral evaluation.

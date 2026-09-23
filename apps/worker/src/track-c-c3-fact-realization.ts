@@ -9,6 +9,8 @@
  * one).
  */
 
+import { trackCComposeReply } from "./track-c-c3-realization-style.js";
+
 export function trackCFormatVnd(amount: number): string {
   return `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/gu, ".")}đ`;
 }
@@ -120,7 +122,8 @@ function policyText(
       : tryOn === "ORDER_DEPENDENT"
         ? " Riêng việc thử đồ còn tuỳ theo từng đơn, em cần kiểm tra lại giúp chị ạ."
         : "";
-    return `Khi nhận hàng chị được kiểm tra ${joinVi(checks)} ạ.${tryOnText}`;
+    return trackCComposeReply([`Khi nhận hàng chị được kiểm tra ${joinVi(checks)} ạ.`,
+      ...(tryOnText.length === 0 ? [] : [tryOnText.trim()])]);
   }
   if (policy === "EXCHANGE") {
     const windowDays = numberField(data, "windowDays");
@@ -132,11 +135,12 @@ function policyText(
     const maxPerInvoice = numberField(data, "maxExchangesPerInvoice");
     // The conditions are material to the answer, so they are never summarised
     // away into a bare "chị đổi được".
-    return `Mẫu này đổi được trong ${windowDays} ngày, với điều kiện ${joinVi(mapped)} ạ.` +
-      (fee === null ? ""
-        : ` Nếu chị đổi theo nhu cầu cá nhân thì có phí ${trackCFormatVnd(fee)} ạ.`) +
-      (maxPerInvoice === null ? ""
-        : ` Mỗi đơn được đổi tối đa ${maxPerInvoice} lần ạ.`);
+    return trackCComposeReply([
+      `Mẫu này đổi được trong ${windowDays} ngày, với điều kiện ${joinVi(mapped)} ạ.`,
+      ...(fee === null ? []
+        : [`Nếu chị đổi theo nhu cầu cá nhân thì có phí ${trackCFormatVnd(fee)} ạ.`]),
+      ...(maxPerInvoice === null ? [] : [`Mỗi đơn được đổi tối đa ${maxPerInvoice} lần ạ.`]),
+    ]);
   }
   if (policy === "EXCHANGE_SALE") {
     const threshold = numberField(data, "discountAtLeastPercent");
@@ -145,9 +149,11 @@ function policyText(
     if (threshold === null || allowed === null || modelChange === null) return null;
     const mapped = mapAll(allowed, EXCHANGE_CHANGE_TEXT);
     if (mapped === null) return null;
-    return `Với mẫu giảm từ ${threshold}% trở lên, chị đổi được ${joinVi(mapped)} ạ.` +
-      (modelChange ? " Chị cũng đổi sang mẫu khác được ạ."
-        : " Phần đổi sang mẫu khác thì chưa áp dụng cho nhóm này ạ.");
+    return trackCComposeReply([
+      `Với mẫu giảm từ ${threshold}% trở lên, chị đổi được ${joinVi(mapped)} ạ.`,
+      modelChange ? "Chị cũng đổi sang mẫu khác được ạ."
+        : "Phần đổi sang mẫu khác thì chưa áp dụng cho nhóm này ạ.",
+    ]);
   }
   if (policy === "REFUND") {
     const reasons = stringList(data, "eligibleReasons");
@@ -163,8 +169,8 @@ function policyText(
     const mapped = mapAll(methods, PAYMENT_METHOD_TEXT);
     if (mapped === null) return null;
     const deposit = booleanField(data, "depositRequired");
-    return `Shop nhận ${joinVi(mapped)} ạ.` +
-      (deposit === false ? " Chị không cần đặt cọc trước ạ." : "");
+    return trackCComposeReply([`Shop nhận ${joinVi(mapped)} ạ.`,
+      ...(deposit === false ? ["Chị không cần đặt cọc trước ạ."] : [])]);
   }
   if (policy === "CUSTOMIZATION") {
     const supported = booleanField(data, "supported");
@@ -208,10 +214,12 @@ export function trackCSimulationFactText(
     if (address === null) return null;
     const hours = stringField(data, "hours");
     const tryOn = booleanField(data, "tryOn");
-    return `Cửa hàng của shop ở ${address} ạ.` +
-      (hours === null ? "" : ` Shop mở cửa ${hours} ạ.`) +
-      (tryOn === true ? " Chị qua thử trực tiếp được ạ."
-        : tryOn === false ? " Hiện shop chưa hỗ trợ thử tại cửa hàng ạ." : "");
+    return trackCComposeReply([
+      `Cửa hàng của shop ở ${address} ạ.`,
+      ...(hours === null ? [] : [`Shop mở cửa ${hours} ạ.`]),
+      ...(tryOn === true ? ["Chị qua thử trực tiếp được ạ."]
+        : tryOn === false ? ["Hiện shop chưa hỗ trợ thử tại cửa hàng ạ."] : []),
+    ]);
   }
   if (kind === "CARE_GUIDANCE") {
     const wash = stringField(data, "wash");
@@ -291,7 +299,7 @@ export function trackCSimulationFactText(
     const madeToOrder = stringField(data, "status") === "MADE_TO_ORDER";
     return `Mẫu này ${madeToOrder ? "được may sau khi chị đặt, " : ""}` +
       `thời gian chuẩn bị hàng khoảng ${span(productionMin, productionMax)}, ` +
-      `sau đó vận chuyển thêm khoảng ${span(deliveryMin, deliveryMax)} ạ. ` +
+      `sau đó vận chuyển thêm khoảng ${span(deliveryMin, deliveryMax)}. ` +
       `Tổng thời gian dự kiến là ${span(
         productionMin + deliveryMin, productionMax + deliveryMax,
       )}, em chưa thể cam kết chính xác một ngày cụ thể ạ.`;

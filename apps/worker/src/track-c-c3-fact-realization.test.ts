@@ -31,6 +31,9 @@ describe("Track C C3 typed fact realization", () => {
     for (const condition of ["chưa qua sử dụng", "còn nguyên tag", "chưa giặt"]) {
       expect(text).toContain(condition);
     }
+    expect(text?.match(/ ạ\./gu)).toHaveLength(1);
+    expect(text).toContain("30.000đ");
+    expect(text).toContain("tối đa 1 lần");
   });
 
   it("reports a conditional try-on as conditional rather than as a promise", () => {

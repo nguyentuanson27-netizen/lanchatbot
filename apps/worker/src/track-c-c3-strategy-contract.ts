@@ -337,19 +337,9 @@ function selectedEvidence(
   }
   // Realization is handled by the caller, which keeps the answerable part and
   // reports the rest. Integrity and scope violations above still reject.
-  //
-  // A display name is only needed for entries that actually get stated, and
-  // only when more than one product is being stated in the same reply.
-  const stated = values.filter((entry) =>
-    trackCEvidenceHasSafeFactualEgress(entry)
-  );
-  if (new Set(stated.flatMap(({ subject }) =>
-    subject?.productId === undefined ? [] : [subject.productId]
-  )).size > 1 && stated.some(({ subject }) =>
-    subject?.productId !== undefined && subject.displayName === undefined
-  )) {
-    throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
-  }
+  // A canonical product ID already identifies the subject when a display name
+  // is unavailable. Rendering validates that label before egress; lack of a
+  // display name must not discard otherwise bound multi-product facts.
   return Object.freeze(values);
 }
 
