@@ -167,6 +167,18 @@ describe("Track C C3 strategy-contract runner", () => {
     }));
     expect(send).toHaveBeenCalledTimes(2);
     expect(result).not.toHaveProperty("evaluationOnly");
+    const strategistRequest = JSON.parse(send.mock.calls[0]![0].body);
+    const strategistPrompt = JSON.parse(strategistRequest.contents[0].parts[0].text);
+    expect(strategistPrompt.canonicalContext.dialogueEvidence).toEqual({
+      act: context.dialogueEvidence.act,
+      confidenceBand: context.dialogueEvidence.confidenceBand,
+      reasonCodes: context.dialogueEvidence.reasonCodes,
+    });
+    const responderRequest = JSON.parse(send.mock.calls[1]![0].body);
+    const responderPrompt = JSON.parse(responderRequest.contents[0].parts[0].text);
+    expect(responderPrompt.customerDecisionSignals).toEqual(
+      strategistPrompt.canonicalContext.dialogueEvidence,
+    );
     await expect(runTrackCStrategyLive({
       ...input, simulationMetadata: [],
     } as unknown as Parameters<typeof runTrackCStrategyLive>[0]))
@@ -1030,6 +1042,45 @@ describe("Track C C3 strategy-contract runner", () => {
         text: "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
       }),
     ]);
+  });
+
+  it("can acknowledge a customer's decision context without repeating an unrelated shop fact", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "The customer is comparing the verified price with her own budget; no new shop fact resolves the gap.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị thích mẫu này nhưng đang cân đối ngân sách.",
+        attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe("Dạ em hiểu băn khoăn của chị ạ.");
+    expect(result.output.segments).toEqual([{
+      kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ.",
+    }]);
   });
 
   it("keeps preference or selection confirmation on ACKNOWLEDGE + KEEP_OPEN without checkout", async () => {

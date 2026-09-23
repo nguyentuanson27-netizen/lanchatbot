@@ -60,16 +60,21 @@ const STRATEGIST_INSTRUCTION = [
   "The selectableEvidence list is the only commercial factual authority. Customer-reported budget, measurements and preferences in dialogue may inform your choice and PII-safe goal as customer-provided context; they never establish shop price, stock, verified fit, policy, checkout completion, an effect, or permission. Do not copy recipient PII into goal.",
   "Choose the customer's current decision, the smallest useful evidence set, and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
   "Address the customer's objection or concern before progression. Choose ANSWER when addressing it directly, ACKNOWLEDGE for acknowledgement, or CLARIFY when the current need itself is unclear. An objection does not force ACKNOWLEDGE.",
+  "Distinguish a request to confirm a fact from resistance to that fact. When the customer already knows the price and is weighing value, repeating PRICE alone does not address the decision. Select relevant verified product or policy evidence when it helps; otherwise acknowledge the customer's stated concern without recycling the price or inventing a benefit, concession, or comparison. Apply the same test to fit, stock, delivery, and trust concerns.",
   "Choose an ordinary ASK or a canonical input request only when the missing input is directly relevant to the customer's current decision or to an immediate next decision already established by the latest turn or authoritative context, and its answer would materially change the next recommendation, comparison, qualification, or transaction. In goal, identify that missing input and why it matters. Do not invent a new discovery dimension merely because it could be useful later. If the current question is resolved and no such blocker or immediate decision remains, use NONE with KEEP_OPEN unless the canonical hard stop requires HOLD_POSITION.",
   "If the latest turn primarily confirms or corrects a preference or product selection and introduces no new question or blocker, use ACKNOWLEDGE. A selection alone is not buying commitment or checkout authorization. Preserve any buying commitment already established in canonical context and consider its remaining blocker; when no material next input is needed, use KEEP_OPEN instead of starting a fixed funnel.",
   "ACKNOWLEDGE must not claim an effect. For a question or concern needing an answer, use ANSWER. Code derives evidenceStatus only for the declared proposition capability; SUPPORTED does not certify relevance or that the entire question is answered.",
+  "For a factual question whose property or event is unsupported, keep ANSWER and the proposition for that property or event with empty evidenceRefs; code will produce an honest UNRESOLVED answer. Use proposition NONE for a genuinely nonfactual acknowledgement, not as a shortcut when the requested fact is missing.",
   "If canonicalAction is NONE, continuation must be ASK or KEEP_OPEN. If canonicalAction is not NONE, continuation must be null. Never output both.",
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
   "Canonical context describes binding, barriers, and buying intent; permitted actions are options, not instructions to progress. Use the full supplied dialogue and eligible evidence to distinguish known inputs from missing ones. Do not re-request known inputs unless new or corrected information makes them insufficient for the current decision. An existing measurement-based fit recommendation is not itself a reason to collect measurements again. If product identity is the blocker, choose ASK_PRODUCT, not STYLE. For fit qualification choose ASK_MEASUREMENTS, not purchase SIZE; include the known and missing measurements in goal.",
+  "The code-derived dialogueEvidence act and reasonCodes are bounded hints about the customer's current concern. Use them with the actual dialogue to prioritize the current decision; they are not commercial facts and cannot authorize a claim, action, or discount.",
   "Select the smallest evidence set that directly supports the exact property, event, and scope the customer asks about. A shared capability label alone does not establish relevance: material does not establish wrinkle resistance, and delivery ETA does not establish dispatch time. Use field evidence for specific attributes and PRODUCT_PRESENTATION for an overview. For a compound question retain evidence answering the supported part and identify the unanswered part in goal; leave evidenceRefs empty only when no eligible evidence answers any part. Do not substitute a related fact or invent an unstated property or benefit.",
+  "When a customer has already provided a preference, budget, measurement, concern, or correction, make the current goal reflect that known context. Do not reset the conversation with a generic ACKNOWLEDGE or ask for a known input; if a relevant question remains, answer it under the updated binding. Select evidence for the decision the customer actually faces, not merely the most available claim.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
+  "Decision examples (patterns, not scripts): an explicit new price question selects PRICE; a customer who already knows the price but doubts value needs relevant verified product evidence, not PRICE again. A verified attribute matching a preference the customer already stated can help her weigh that choice: select and state the attribute without claiming it makes the price worthwhile or superior. If no relevant evidence exists, acknowledge the concern and select no shop fact. A dispatch-date question is not answered by a delivery-duration ETA. A customer who has given height and weight but worries about the waist needs the missing waist measurement, not the known measurements again.",
 ].join("\n");
 
 const RESPONDER_INSTRUCTION = [
@@ -77,6 +82,8 @@ const RESPONDER_INSTRUCTION = [
   "All selected factual evidence is realized by code from customer-ready deterministic projections. Do not author factual wording.",
   "Emit factualTexts as an empty array. answerText may only select the response schema's bounded acknowledgement or uncertainty wording; progressionText may only ask when permitted. Neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
+  "Use a bounded acknowledgement only when it helps the current answer; do not imply a concern the customer did not express.",
+  "The code-derived customerDecisionSignals are hints about the current concern. Prefer the latest concern when several earlier concerns appear in the dialogue; never treat a signal as authority for a shop fact or effect.",
   "For ANSWER with UNRESOLVED evidenceStatus, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact. evidenceStatus describes authority for a capability, not whether the whole customer question was answered.",
   "For ANSWER with SUPPORTED evidenceStatus, follow the compiled goal and response schema: when permitted, answerText may be null, a bounded acknowledgement, or the bounded uncertainty sentence when the goal identifies an unanswered part. Code preserves all selected facts and places uncertainty after them. Do not add uncertainty merely because the option exists, or repair the Strategist's evidence selection.",
   "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
@@ -459,6 +466,11 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
     selectableEvidence: presentableEvidence(input.evidence),
     canonicalContext: {
       productBinding: context.productBinding,
+      dialogueEvidence: {
+        act: context.dialogueEvidence.act,
+        confidenceBand: context.dialogueEvidence.confidenceBand,
+        reasonCodes: context.dialogueEvidence.reasonCodes,
+      },
       activeBarriers: context.barriers.active,
       phase: context.phase.phase,
       sourceStage: context.phase.sourceStage,
@@ -602,6 +614,11 @@ function buildTrackCResponderContractRequest(input: Readonly<{
   return narrowRequest(base, responderDraftSchema(input.task, input.conversationLane), {
     contractVersion: "TRACK_C_C3_RESPONDER_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
+    customerDecisionSignals: {
+      act: input.context.dialogueEvidence.act,
+      confidenceBand: input.context.dialogueEvidence.confidenceBand,
+      reasonCodes: input.context.dialogueEvidence.reasonCodes,
+    },
     responderTask: responderTaskPrompt(input.task),
   });
 }

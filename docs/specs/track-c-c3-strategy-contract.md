@@ -736,3 +736,30 @@ bounded realization surface remains in place, and no behavioral conversion
 claim follows from deterministic integration tests. R2.8 benchmark ownership
 review remains separate; this change does not edit the bundle, rubric or
 historical runs.
+
+## Sales-quality follow-up (working tree after `afcd5cb`)
+
+The C3 decision boundary must distinguish a newly requested shop fact from a
+customer weighing a fact she already knows. In particular, a value objection
+after a known price is not resolved by repeating the price. The Strategist now
+receives the canonical dialogue act and reason codes as decision hints and is
+instructed to select only relevant verified evidence for the exact question.
+Those hints cannot grant factual or effect authority. The Responder still
+selects only bounded nonfactual wording; an overly specific acknowledgement
+that can misstate the customer's concern is not admitted.
+
+The existing Google Sheets product registry feeds typed design, occasion, wear,
+care and material attributes through ProductAttributes V1. Field-scoped,
+deterministic projections of populated attributes are the currently authorized
+selling-point surface. `DESCRIPTION_OVERRIDE` also comes from the registry,
+but its description authority does not establish approval of each benefit in
+the prose. Until the approved claim field and approval semantics are identified,
+the description is not promoted to a C3 selling point. Missing approved claims
+are omitted, never inferred from materials or model knowledge.
+
+An exploratory `gemini-3.5-flash` run is not a model migration: held-out sales
+probes still found an unconvincing reply to a prior poor-fit experience, and
+provider timeout/transient errors prevented two of six outcomes from being
+judged. The realtime server and C3 model pin remain unchanged. Compiler
+success and response completion do not satisfy the behavioral acceptance
+criterion above.
