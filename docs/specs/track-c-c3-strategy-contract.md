@@ -737,7 +737,7 @@ claim follows from deterministic integration tests. R2.8 benchmark ownership
 review remains separate; this change does not edit the bundle, rubric or
 historical runs.
 
-## Sales-quality follow-up (working tree after `afcd5cb`)
+## Sales-quality follow-up (after `afcd5cb`)
 
 The C3 decision boundary must distinguish a newly requested shop fact from a
 customer weighing a fact she already knows. In particular, a value objection
