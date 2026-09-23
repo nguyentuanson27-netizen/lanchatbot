@@ -330,7 +330,7 @@ describe("Track C C3 strategy-contract runner", () => {
     for (const [ref, expected] of [
       ["SIMULATION_001_MATERIAL", "Mẫu này có chất liệu tơ xước mềm, nhẹ ạ."],
       ["SIMULATION_001_DESIGN", "Thiết kế của mẫu gồm phom suông, quần cạp chun ạ."],
-      [null, "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ."],
+      [null, "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ."],
     ] as const) {
       const send = vi.fn<CandidateVertexTransport["send"]>()
         .mockResolvedValueOnce({ payload: payload({
@@ -386,7 +386,7 @@ describe("Track C C3 strategy-contract runner", () => {
   });
 
   it("preserves supported facts while realizing bounded uncertainty without a second question", async () => {
-    const uncertainty = "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
+    const uncertainty = "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.";
     for (const answerText of [null, "Dạ em hiểu ý chị ạ.", uncertainty,
       "Dạ mẫu này bền đẹp và giá tương xứng ạ.",
       "Dạ em đã ghi nhận đơn của chị ạ.", "Chị muốn chốt luôn không ạ?",
@@ -944,7 +944,7 @@ describe("Track C C3 strategy-contract runner", () => {
       proposition: "STOCK",
     });
     expect(result.reply).toBe(
-      "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.",
+      "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.",
     );
   });
 
@@ -1106,6 +1106,53 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.output.segments).toEqual([{
       kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ.",
     }]);
+  });
+
+  it("offers a concern-specific acknowledgement without letting the model write facts", async () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_PRICE_CONCERN_VOICE",
+        latest_customer_message: "Giá này cao quá em.",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING", canonical_flags: [],
+          buying_intent: {
+            decision: "CONSIDERING", requested_action: "NONE",
+            quantity: null, evidence: "customer is weighing the price",
+          },
+          source_stage: null, runtime_claim_refs: ["RC_PRICE_A"],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const specific = "Dạ, em hiểu chị đang cân nhắc mức giá này ạ.";
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge the stated price concern.",
+        proposition: "NONE", evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: specific, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: captureValue, evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Giá này cao quá em.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe(specific);
+    const request = JSON.parse(send.mock.calls[1]![0].body);
+    expect(request.generationConfig.responseSchema.properties.answerText.enum)
+      .toContain(specific);
+    expect(request.generationConfig.responseSchema.properties.factualTexts.maxItems)
+      .toBe(0);
   });
 
   it("keeps preference or selection confirmation on ACKNOWLEDGE + KEEP_OPEN without checkout", async () => {
@@ -1322,13 +1369,10 @@ describe("Track C C3 strategy-contract runner", () => {
       };
     };
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({
-        type: "STRING",
-        enum: [
-          "Dạ em hiểu ý chị ạ.",
-          "Dạ em hiểu băn khoăn của chị ạ.",
-        ],
-      });
+      .toMatchObject({ type: "STRING", enum: expect.arrayContaining([
+        "Dạ em hiểu ý chị ạ.",
+        "Dạ em hiểu băn khoăn của chị ạ.",
+      ]) });
     expect(responderRequest.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "NULL" });
     expect(result.output.strategy).toBe("ANSWER_VERIFIED_FACTS");
@@ -1420,13 +1464,10 @@ describe("Track C C3 strategy-contract runner", () => {
     ) as { responderTask: { evidence: unknown[] } };
 
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({
-        type: "STRING",
-        enum: [
-          "Dạ em hiểu ý chị ạ.",
-          "Dạ em hiểu băn khoăn của chị ạ.",
-        ],
-      });
+      .toMatchObject({ type: "STRING", enum: expect.arrayContaining([
+        "Dạ em hiểu ý chị ạ.",
+        "Dạ em hiểu băn khoăn của chị ạ.",
+      ]) });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
       .toMatchObject({ minItems: 0, maxItems: 0 });
     // The Responder reads the code-rendered projections but cannot author

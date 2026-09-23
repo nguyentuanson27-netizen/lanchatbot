@@ -73,6 +73,8 @@ const STRATEGIST_INSTRUCTION = [
   "Select the smallest evidence set that directly supports the exact property, event, and scope the customer asks about. Before selecting each ref, check whether its realizationText would answer that property or event if read aloud to the customer. A shared capability label alone does not establish relevance: material does not establish wrinkle resistance, and delivery ETA does not establish dispatch time. Use field evidence for specific attributes and PRODUCT_PRESENTATION for an overview. For a compound question retain evidence answering the supported part and identify the unanswered part in goal; leave evidenceRefs empty only when no eligible evidence answers any part. Do not substitute a related fact or invent an unstated property or benefit.",
   "When a customer has already provided a preference, budget, measurement, concern, or correction, make the current goal reflect that known context. Do not reset the conversation with a generic ACKNOWLEDGE or ask for a known input; if a relevant question remains, answer it under the updated binding. Select evidence for the decision the customer actually faces, not merely the most available claim.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
+  "A request to see a product, compare alternatives, or complete a purchase remains a request even when the available evidence cannot realize it. Do not turn it into a bare acknowledgement. Select the matching capability when it exists but cannot be stated, so code can report the limit; for a compound question, answer the supported part and identify the unanswered part in goal. Never claim an image was sent, an alternative exists, or a transaction happened without its own authority.",
+  "When a customer has given a budget below the known price, the budget gap is already known. If no approved evidence explains value or offers another product, do not repeat price or finish with a generic acknowledgement. Ask at most one decision question only when her choice between keeping this model and prioritizing her budget would change the next advice; otherwise state the limit honestly. Do not imply that a cheaper option exists.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
   "Each evidence entry with realizationText shows the exact sentence code will state if you select it. Compare these sentences before selecting refs: do not select an overview and field entries that repeat the same details, and do not select a sentence that answers a different event or property from the customer's question. The text is a preview of existing authorized evidence, not new authority.",
@@ -84,7 +86,7 @@ const RESPONDER_INSTRUCTION = [
   "All selected factual evidence is realized by code from customer-ready deterministic projections. Do not author factual wording.",
   "Emit factualTexts as an empty array. answerText may only select the response schema's bounded acknowledgement or uncertainty wording; progressionText may only ask when permitted. Neither may carry factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
-  "Use a bounded acknowledgement only when it helps the current answer; do not imply a concern the customer did not express.",
+  "Use a bounded acknowledgement only when it helps the current answer; prefer wording tied to the customer's latest concern or correction when the schema offers one. Do not imply a concern the customer did not express. For a direct fact question with a supported claim and no objection, prefer answerText null so the answer starts with the fact.",
   "The code-derived customerDecisionSignals are hints about the current concern. Prefer the latest concern when several earlier concerns appear in the dialogue; never treat a signal as authority for a shop fact or effect.",
   "For ANSWER with UNRESOLVED evidenceStatus, emit answerText null. Code supplies the bounded unresolved answer; do not invent a fact. evidenceStatus describes authority for a capability, not whether the whole customer question was answered.",
   "For ANSWER with SUPPORTED evidenceStatus, follow the compiled goal and response schema: when permitted, answerText may be null, a bounded acknowledgement, or the bounded uncertainty sentence when the goal identifies an unanswered part. Code preserves all selected facts and places uncertainty after them. Do not add uncertainty merely because the option exists, or repair the Strategist's evidence selection.",
@@ -102,14 +104,18 @@ const RESPONDER_INSTRUCTION = [
 const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ em hiểu ý chị ạ.",
   "Dạ em hiểu băn khoăn của chị ạ.",
+  "Dạ, em hiểu chị đang cân nhắc mức giá này ạ.",
+  "Dạ, em hiểu chị đang lo về độ vừa vặn ạ.",
+  "Dạ, em hiểu chị đang cân nhắc mốc nhận hàng ạ.",
+  "Dạ, em theo thông tin chị vừa sửa ạ.",
 ] as const);
 const UNRESOLVED_ANSWER_TEXT =
-  "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
+  "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.";
 // Code-owned limit sentence for a selection that was only partly realizable.
 // Without it, a compound question could be answered with the part that has
 // wording while the rest disappeared silently. It carries no fact of its own.
 const PARTIAL_REALIZATION_TEXT =
-  "Dạ phần còn lại trong câu hỏi của chị thì hiện em chưa có thông tin đã xác minh để trả lời chắc chắn ạ.";
+  "Riêng phần còn lại, em chưa thể xác nhận chắc cho chị ạ.";
 
 // A small vocabulary for the existing typed requests, not a text classifier.
 // The Strategist chooses the input; the Responder chooses its wording. Exact
@@ -130,6 +136,7 @@ const REQUEST_WORDING: Readonly<Record<TrackCOrdinaryDecisionInput |
     "Chị đang cân nhắc nhất điểm nào ạ?",
     "Lần trước chị thấy không thoải mái ở phần nào để em tư vấn đúng điểm đó ạ?",
     "Điểm nào của mẫu khiến chị chưa thấy phù hợp với mức mình dự tính ạ?",
+    "Chị muốn ưu tiên mức ngân sách của mình hay xem kỹ hơn mẫu này ạ?",
   ],
   DEADLINE: ["Chị cần nhận hàng trước thời điểm nào ạ?", "Chị muốn nhận hàng chậm nhất khi nào ạ?"],
   ASK_PRODUCT: ["Chị gửi em mã hoặc ảnh mẫu mình đang hỏi nhé?", "Chị đang hỏi mẫu nào ạ?"],
@@ -553,17 +560,32 @@ function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
     (task.answer.kind !== "ANSWER" || task.answer.evidenceStatus === "NOT_APPLICABLE");
 }
 
+function acknowledgementWording(context: ContextV2): readonly string[] {
+  // The frozen benchmark and some live paths have no objection reason code.
+  // These choices say nothing about shop facts or effects; the Responder uses
+  // the full dialogue to choose one, while the guard still checks exact text.
+  return context.buyingIntent.decision === "COMMITTED" &&
+      context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT"
+    ? [...BOUNDED_ACKNOWLEDGEMENTS, "Dạ, em nắm ý chị muốn chốt mẫu này ạ."]
+    : BOUNDED_ACKNOWLEDGEMENTS;
+}
+
 function answerWording(
   task: TrackCResponderTask,
   conversationLane: TrackCConversationLane,
+  context: ContextV2,
 ): readonly string[] {
-  if (usesBoundedAcknowledgement(task)) return BOUNDED_ACKNOWLEDGEMENTS;
+  const acknowledgements = conversationLane === "FIRST_CONTACT_FIXED" ||
+      task.answer.kind === "CLARIFY" ||
+      task.canonicalRequest?.type === "HOLD_POSITION"
+    ? BOUNDED_ACKNOWLEDGEMENTS : acknowledgementWording(context);
+  if (usesBoundedAcknowledgement(task)) return acknowledgements;
   if (conversationLane === "ADAPTIVE_FOLLOWUP" &&
       task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "SUPPORTED") {
     // Reuse the existing wording surface. Authority support must not prevent
     // the Responder from realizing uncertainty already identified in the goal.
-    return [...BOUNDED_ACKNOWLEDGEMENTS, UNRESOLVED_ANSWER_TEXT];
+    return [...acknowledgements, UNRESOLVED_ANSWER_TEXT];
   }
   return [];
 }
@@ -577,11 +599,15 @@ function requestWording(task: TrackCResponderTask): readonly string[] {
     ? REQUEST_WORDING[task.continuation.input] : [];
 }
 
-function responderDraftSchema(task: TrackCResponderTask, conversationLane: TrackCConversationLane) {
+function responderDraftSchema(
+  task: TrackCResponderTask,
+  conversationLane: TrackCConversationLane,
+  context: ContextV2,
+) {
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
-  const answers = answerWording(task, conversationLane);
+  const answers = answerWording(task, conversationLane, context);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -619,7 +645,9 @@ function buildTrackCResponderContractRequest(input: Readonly<{
     evaluationContext: input.evaluationContext,
     systemInstruction: RESPONDER_INSTRUCTION,
   });
-  return narrowRequest(base, responderDraftSchema(input.task, input.conversationLane), {
+  return narrowRequest(base, responderDraftSchema(
+    input.task, input.conversationLane, input.context,
+  ), {
     contractVersion: "TRACK_C_C3_RESPONDER_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
     customerDecisionSignals: {
@@ -767,7 +795,7 @@ function compileResponderDraft(input: Readonly<{
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
   if (draft.answerText !== null &&
-      !answerWording(task, input.conversationLane).includes(draft.answerText)) {
+      !answerWording(task, input.conversationLane, input.context).includes(draft.answerText)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
   if (usesBoundedAcknowledgement(task) && draft.answerText === null) {
