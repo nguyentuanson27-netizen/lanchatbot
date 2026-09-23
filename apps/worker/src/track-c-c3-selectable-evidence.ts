@@ -133,8 +133,10 @@ export function trackCRuntimeClaimDeterministicText(
     if (claim.type === "SHIPPING_FEE") {
       return `Phí giao hàng của giỏ hiện tại là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
     }
-    if (claim.type === "FREESHIP" && claim.value.eligible) {
-      return "Giỏ hiện tại được miễn phí giao hàng ạ.";
+    if (claim.type === "FREESHIP") {
+      return claim.value.eligible
+        ? "Giỏ hiện tại được miễn phí giao hàng ạ."
+        : "Giỏ hiện tại vẫn tính phí giao hàng ạ.";
     }
     if (claim.type === "PROMOTION_OFFER") {
       return `Ưu đãi đã áp dụng cho giỏ hiện tại là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;

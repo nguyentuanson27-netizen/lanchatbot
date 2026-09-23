@@ -6,10 +6,16 @@ import {
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
-import { buildTrackCSelectableEvidence } from "./track-c-c3-selectable-evidence.js";
+import {
+  buildTrackCSelectableEvidence,
+  trackCRuntimeClaimDeterministicText,
+} from "./track-c-c3-selectable-evidence.js";
 import { trackCEvidenceHasSafeFactualEgress } from
   "./track-c-c3-strategy-contract.js";
-import { trackCCartClaimIsCurrent } from "./track-c-c3-cart-binding.js";
+import {
+  trackCCartClaimIsCurrent,
+  trackCCurrentCartClaims,
+} from "./track-c-c3-cart-binding.js";
 import { runTrackCC3TwoPassQualityCandidate } from
   "./track-c-c3-two-pass-quality-adapter.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
@@ -57,6 +63,27 @@ function evidenceFor(claimRefs: readonly string[]) {
 }
 
 describe("Track C C3 evidence subject scope", () => {
+  it("states a known non-free cart without changing legacy cart claims", () => {
+    const chunk = JSON.parse(readFileSync(
+      new URL("quality-03.json", EVAL_ROOT), "utf8",
+    )) as { cases: Array<{ id: string }> };
+    const fixture = chunk.cases.find((entry) => entry.id === "V5V4Q025")!;
+    const currentCart = materializeTrackCV5CaseCurrentCart({
+      fixture: fixture as never,
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    })!;
+    const at = new Date(recipe.evaluation_at);
+    const negative = trackCCurrentCartClaims(currentCart, at).find((claim) =>
+      claim.type === "FREESHIP" && claim.value.eligible === false
+    );
+    expect(negative).toBeDefined();
+    expect(trackCCartClaimIsCurrent(negative!, currentCart, at)).toBe(true);
+    expect(trackCRuntimeClaimDeterministicText(
+      negative!, undefined, currentCart, at,
+    )).toBe("Giỏ hiện tại vẫn tính phí giao hàng ạ.");
+  });
+
   it("revalidates DEV cart facts against the same materialized cart and policy", () => {
     const chunk = JSON.parse(readFileSync(
       new URL("quality-03.json", EVAL_ROOT), "utf8",

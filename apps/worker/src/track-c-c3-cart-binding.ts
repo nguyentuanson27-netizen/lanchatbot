@@ -35,6 +35,7 @@ export function trackCCurrentCartClaims(
     policySourceVersion: binding.policySourceVersion,
     policyEvidenceRef: binding.policyEvidenceRef,
     expiresAt: binding.claimExpiresAt,
+    includeNegativeFreeShipping: true,
   });
 }
 

@@ -2541,6 +2541,15 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     const shipping = evidence.find(({ capability }) => capability === "SHIPPING_FEE");
     expect(shipping?.deterministicText).toContain("Phí giao hàng của giỏ hiện tại");
+    const notFree = evidence.find(({ capability, value }) =>
+      capability === "FREESHIP" && value.eligible === false
+    );
+    expect(notFree?.deterministicText).toBe("Giỏ hiện tại vẫn tính phí giao hàng ạ.");
+    expect(validateResponderOutput(live.context, {
+      segments: [{ kind: "VERIFIED_CLAIM", text: notFree!.deterministicText!,
+        claimContentHash: notFree!.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    }, "PRODUCTION_CONTRACT", now, [], live.currentCart).segments).toHaveLength(1);
     const semantic = {
       segments: [{ kind: "VERIFIED_CLAIM", text: shipping!.deterministicText,
         claimContentHash: shipping!.provenance.contentHash }],
