@@ -750,12 +750,15 @@ that can misstate the customer's concern is not admitted.
 
 The existing Google Sheets product registry feeds typed design, occasion, wear,
 care and material attributes through ProductAttributes V1. Field-scoped,
-deterministic projections of populated attributes are the currently authorized
-selling-point surface. `DESCRIPTION_OVERRIDE` also comes from the registry,
-but its description authority does not establish approval of each benefit in
-the prose. Until the approved claim field and approval semantics are identified,
-the description is not promoted to a C3 selling point. Missing approved claims
-are omitted, never inferred from materials or model knowledge.
+deterministic projections of populated attributes are an authorized
+selling-point surface under section 1; no separate approved-selling-point
+column is required for those projections. `DESCRIPTION_OVERRIDE` also comes
+from the registry, but description authority alone does not approve each
+benefit in free-form prose. Any new promotional claim sourced from that prose
+needs an explicit verified/curated claim with exact wording and product/source
+binding before C3 can use it. Do not infer benefits from materials or model
+knowledge. The registry's derived `AUTO_OK`/`NEED_REVIEW` extraction status is
+not a human approval of promotional wording.
 
 An exploratory `gemini-3.5-flash` run is not a model migration: held-out sales
 probes still found an unconvincing reply to a prior poor-fit experience, and

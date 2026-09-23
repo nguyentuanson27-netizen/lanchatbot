@@ -25,14 +25,15 @@ pinned model. The exploratory run is not part of the PR implementation.
 
 Code checks after this follow-up: 44 focused C3 runner tests passed; worker
 TypeScript compilation passed. Those checks prove contract handling, not the
-sales-quality outcomes above. The approved selling-point field and its review
-semantics remain unidentified. The product registry already supplies typed
-attribute projections, but a generic description override is not proof that
-each promotional benefit in its prose was approved.
+sales-quality outcomes above. The product registry already supplies typed
+attribute projections that satisfy the spec's allowlisted deterministic
+projection route. A generic description override is not proof that each
+promotional benefit in its prose was verified or curated; no separate selling
+point column is a prerequisite for using the existing typed projections.
 
-Remaining acceptance work: identify the approved selling-point source; bind
-its claims to product identity, source version and exact customer-facing
-wording; improve decision-specific conversational realization without widening
+Remaining acceptance work: improve selection of relevant existing typed
+attributes and decision-specific conversational realization without widening
 factual/effect authority; then run judged out-of-sample and DEV70 regression
-through the runtime entrypoint. Do not activate traffic on the basis of this
-report.
+through the runtime entrypoint. If free-form description benefits are later
+needed, bind each to product identity, source version and exact curated wording.
+Do not activate traffic on the basis of this report.
