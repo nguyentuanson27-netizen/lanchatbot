@@ -97,3 +97,116 @@ Verification for the code change: worker TypeScript build passed, 45 focused
 C3 runner tests passed, and the realtime runner C3 entrypoint test passed.
 The present result does not authorize a model switch, merge, deploy, or
 traffic activation.
+
+### Full-history Luna follow-up at `032dac7`
+
+The next bounded-voice revision ran all 70 frozen DEV histories through the
+compiled C3 core with GPT-6 Luna in both model stages. The unjudged execution
+result was 66 guarded replies, two expected stale materialization rejects,
+and two multi-product label failures. The four cart cases that previously
+lacked bindings were run with current-cart readbacks materialized from the
+frozen R2.9 fixtures. Their cart IDs, revisions, hashes, expiry, policy source
+and claim equality are recorded in the owner-local
+`LUNA6_DEV70_C3_032dac7_20260923T091721Z` artifact. These are synthetic
+simulation inputs, not production cart evidence. The complete histories,
+both-stage model outputs, final replies, manifest and qualitative comparison
+are preserved there. No judge ran and 66 is not a sales-quality score.
+
+The revised vocabulary produced more specific acknowledgements for price
+concerns and a correction, and the budget-gap case asked whether to stay
+within the customer's budget or keep considering the model. It also exposed
+remaining defects: another price-comparison case repeated a known price;
+a prior-quality concern asked a broad criterion question; an out-of-stock
+alternative request stated only the stock fact; an unsupported media request
+became a cautious limit rather than a content-free acknowledgement; and a
+purchase request with no canonical effect receipt still received only an
+acknowledgement. The frozen fit case without `MEASUREMENTS_REQUIRED` and the
+deadline cases without structured constraints remained unresolved in the
+same ways. Six independent full-core Luna holdouts on that commit found one
+budget turn asking for an amount already supplied. Completion and bounded
+wording therefore still do not satisfy behavioral acceptance.
+
+The following source revision narrows `BUDGET` amount requests in the prompt,
+requires the Responder to state an uncovered part of a compound request, and
+adds a C3-only negative freeship claim when the current cart has a known
+positive shipping fee. The legacy cart claim set remains unchanged. These
+changes need a new exact-head behavioral run before claiming improvement.
+
+### Full-history Luna follow-up at `fe19c68`
+
+The `fe19c68` candidate ran all 70 frozen R2.9 DEV histories through the
+compiled C3 core with GPT-6 Luna in both model stages. The owner-local
+`LUNA6_DEV70_C3_fe19c68_20260923T093524Z` artifact preserves all 70
+histories, 131 model-stage calls, prompts, schema, model outputs, final replies,
+cart provenance and a manifest. Sixty-six replies completed the final guard
+without a quality judge; two multi-product cases failed for missing
+authoritative labels and two expired cases rejected before the model. Those
+figures are execution status, not a sales score. Four cart cases used synthetic
+current-cart readbacks from frozen fixtures, not production carts. The frozen
+negative-freeship case has no complete cart snapshot, so it remains unresolved
+even though the current C3 producer can state non-free shipping for a known,
+bound cart.
+
+Q015 no longer repeats the shop price already stated in the dialogue; Q016
+asks which aspect of the previous purchase felt uncomfortable. Q046 regressed:
+the Strategist selected an unsupported alternative/comparison proposition and
+dropped the verified out-of-stock fact in the same question. Q062 repeats
+`Dạ` in the acknowledgement and ETA projection, and the frozen deadline cases
+still lack a canonical deadline constraint for a precise conclusion. Q096's
+fixture says checkout details are missing in dialogue but sends
+`checkoutRequestedFields=[]` and permits only `NONE`, so its missing checkout
+question is an input mismatch, not a model omission. Q100 remains an
+acknowledgement without an effect receipt. Six independent full-core holdouts
+in `LUNA6_FULL_C3_FE19C68_20260923` confirm the budget improvement and show
+the same awkward measurement preamble and padded deadline wording. Both runs
+were offline, with an evaluation-only provider identity adapter, no realtime
+transport, Outbox or customer traffic; no judge ran.
+
+The next source revision addresses the contract-wide compound-selection rule,
+removes repeated opening politeness from code-owned factual projections, and
+omits the generic preamble when the canonical action asks for a missing
+measurement. This does not add
+product alternatives, media transport, structured deadlines, multi-product
+labels, or transaction effects.
+
+### Exact-code follow-up at `e695677`
+
+The revised code ran all 70 R2.9 DEV histories again with GPT-6 Luna medium
+through the compiled C3 core. The owner-local
+`LUNA6_DEV70_C3_e695677_20260923T095106Z` artifact contains 70/70 readable
+histories and records, 131 model-stage calls, prompt/schema/output evidence,
+cart provenance, comparison and `sales-voice-review.json`; its manifest binds
+the run to code commit `e695677e02e4cbf7ade3982e5f74908d65b2aa6e`.
+The execution outcome remained 66 guarded replies, two multi-product label
+failures and two expected pre-model stale rejects. No judge or sales pass rate
+was run. The six independent full-core holdouts at
+`LUNA6_FULL_C3_E695677_20260923` also completed; they remain qualitative.
+Neither evaluation drove realtime transport, Outbox or customer traffic.
+
+The code-owned wording removed adjacent repeated `Dạ` in the 66 completed
+DEV replies (9 on `fe19c68`, zero on `e695677`). Neutral confirmations and
+thanks now receive appropriate bounded acknowledgements, and the purchase
+request receives a specific intent acknowledgement without pretending an
+order was placed. A measurement holdout asks directly for the missing waist
+measure. Known budget values are not re-requested. The comparison holdout
+states verified design attributes without claiming an unsupported superiority.
+
+Sales resolution is still incomplete. Q046 now states the verified out-of-stock
+fact, but the alternative request is silently left unanswered even though the
+Strategist goal notes the gap. Q035's frozen fit context lacks the canonical
+`MEASUREMENTS_REQUIRED` blocker and the model asks for a purchase size instead
+of fit measurements. Q014 asks a decision question although its fixture expects
+no next step; Q016's wording is less specific about the previous bad
+experience. Q062 reports the 2–4 day ETA without directly resolving the
+tomorrow deadline, because the frozen input has no structured deadline
+constraint. Q024 lacks a complete current-cart binding; its old fixture flag
+must not be read as a current producer gap. Q096's dialogue and canonical
+checkout fields disagree. Q100 has no order effect receipt. These remain
+behavioral or input-authority gaps against the spec, not compiler failures.
+
+Verification on the same code commit: worker build and 245 focused worker
+tests passed, including realtime C3 entrypoint, SalesCycle transition/cart
+claims, checkout reachability, projection equality, current-cart validation
+and the r31.3 replay seam. The protected-cart producer tests passed on the
+`fe19c68` source slice; the producer is unchanged at `e695677`. Exact draft
+PR HEAD and remote CI evidence must be updated after this documentation commit.

@@ -542,26 +542,26 @@ complete information -> valid preview -> customer confirmation -> successful eff
 C3 states only outcomes for which the runtime produced evidence. Model text is
 never an effect receipt, and C3 does not host a second checkout state machine.
 
-## 6d. Known implementation gaps
+## 6d. Implementation gap status
 
-Recorded as gaps against this spec, not as revisions to it.
+This inventory records status against the contract; the runtime integration
+appendix below describes the completed boundaries in detail.
 
-- **C3 is not wired into the runtime.** Neither `realtime-server.ts` nor
-  `realtime-runner.ts` calls the contract runner; the legacy path still owns
-  live replies. Until an integration slice exists, no offline result is
-  evidence of live behaviour.
+- **Runtime call: implemented in the draft.** `realtime-runner.ts` calls the
+  shared C3 core after canonical input construction when its gate permits it.
+  The production model pin and traffic remain unchanged.
 - **Single-product context.** `ContextV2` carries one `productAttributes` and
   one `productPresentation`. A reply covering several bound products cannot
   name them all, so a multi-product answer stops rather than guessing. Closing
   this needs product-keyed projections and matching producer/binding work, not
   a field changed to an array.
-- **Negative freeship is not producible.** The cart-policy producer emits
-  `FREESHIP` only with `eligible: true`; a non-free cart is represented by
-  `SHIPPING_FEE` when the fee is known.
-- **Cart answers need a current-cart binding.** `ContextV2` carries no cart
-  identity or revision, so no cart-scoped fact can be revalidated before egress
-  and none is stated. Closing this needs that binding in the input contract,
-  not a renderer.
+- **Negative freeship: implemented for C3 when known.** A canonical current
+  cart with a positive shipping fee now yields a cart-bound `FREESHIP` false
+  claim; a null fee yields no conclusion. The legacy claim set is unchanged.
+- **Current-cart binding: implemented in the runtime input.** C3 receives the
+  cart identity, revision, hash, policy source and expiry outside `ContextV2`.
+  The final guard and Outbox commit readback recheck that binding. Frozen
+  cases without a complete cart cannot state cart-scoped facts.
 - **ETA semantics are inconsistent upstream.** `catalog-projection.ts` sums
   preparation and transit, while `realtime-product-facts-v2.ts` assigns
   `etaToCustomer` from preparation bounds alone. Fulfilment projections here
@@ -787,3 +787,60 @@ compiler acceptance into a semantic-quality certificate. If a real fit need
 arrives without a canonical measurement blocker, the owning producer/state
 transition must be corrected. C3 must not recover by allowing measurement
 requests after every product-bound turn.
+
+### Follow-up: request resolution and bounded voice
+
+An adaptive request for media, an alternative, or a purchase step remains a
+request when the available evidence cannot realize it. The Strategist must
+select the relevant capability and report the unresolved part rather than
+turning the turn into a content-free acknowledgement. A known budget gap is
+not a reason to repeat the price or invent a value claim; a decision question
+is useful only when its answer changes the next advice.
+
+The Responder may choose from a slightly wider set of code-owned, nonfactual
+acknowledgements and questions using the full redacted dialogue. Some frozen
+and live turns lack a reliable objection reason code, so absence of that code
+does not remove safe wording choices. The model still cannot author factual
+text or effect claims. The uncertainty sentence now uses ordinary shop
+language, while provenance, binding, exact checkout fields and the final guard
+remain unchanged. This is a realization improvement, not proof that the
+customer's question was answered or that a sale progressed.
+
+### Follow-up: known non-free current cart
+
+When the canonical cart has a known positive shipping fee, the cart-policy
+producer can now expose a `FREESHIP` claim with `eligible: false` to C3, bound
+to the same cart ID, revision, policy source and expiry as the fee. A null fee
+does not imply a negative eligibility claim. C3 states the negative conclusion
+through a code-owned sentence and revalidates it at the existing current-cart
+boundary. The legacy protected outbound path does not request this additional
+claim, so its claim set and reply path are unchanged. Frozen cases without a
+full current-cart binding remain unable to state either positive or negative
+cart claims.
+
+### Follow-up: compound requests and composed voice
+
+For a question with several requested parts, the Strategist declares one
+supported proposition when any part has relevant, realizable evidence, selects
+the evidence for each supported part, and names the unresolved parts in its
+existing goal. This applies to stock plus a request for an alternative just as
+it does to price plus another property. The current decision shape stays
+minimal; `evidenceStatus` still reports authority for the declared capability
+and is not a certificate that every part was answered. With no supported part,
+the unresolved answer remains. No model-authored factual text is introduced.
+
+Customer-facing factual projections omit an automatic opening `Dạ`, so a
+concern acknowledgement followed by a verified fact does not repeat that word
+across adjacent sentences. The exact projection equality check still binds the
+full sentence to its source claim. When a fit answer is blocked specifically by
+a canonical measurement request, the requested missing measurement itself is
+the response; a generic uncertainty preamble adds no information. Confirmation,
+thanks and purchase intent have bounded, nonfactual acknowledgement choices;
+none is an order or payment effect receipt.
+
+The unjudged `e695677` Luna DEV70 run is recorded in the sales-quality
+evidence note. It showed the stock fact survives one compound stock/alternative
+request, but the Responder can still omit the unavailable alternative even
+when the goal names it. This remains an open behavioral gap under this
+contract; `SUPPORTED` is not whole-question resolution. Frozen fit and
+checkout cases with inconsistent canonical state remain producer/fixture work.
