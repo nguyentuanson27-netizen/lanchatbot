@@ -163,6 +163,8 @@ export interface TrackCStrategyContractCaseInput {
    */
   readonly deliveryDeadlineConstraint?: TrackCDeliveryDeadlineConstraint;
   readonly simulationMetadata?: readonly TrackCV5SimulationMetadata[];
+  /** Frozen C2 cart readback; every cart claim must revalidate against it. */
+  readonly currentCart?: TrackCCurrentCartBinding | null;
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }

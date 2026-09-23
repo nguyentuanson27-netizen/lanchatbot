@@ -2,12 +2,16 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   materializeTrackCV5CaseCapture,
+  materializeTrackCV5CaseCurrentCart,
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import { buildTrackCSelectableEvidence } from "./track-c-c3-selectable-evidence.js";
 import { trackCEvidenceHasSafeFactualEgress } from
   "./track-c-c3-strategy-contract.js";
+import { trackCCartClaimIsCurrent } from "./track-c-c3-cart-binding.js";
+import { runTrackCC3TwoPassQualityCandidate } from
+  "./track-c-c3-two-pass-quality-adapter.js";
 
 const EVAL_ROOT = new URL("../evals/track-c-c2/v2/", import.meta.url);
 const recipe = JSON.parse(readFileSync(
@@ -52,6 +56,55 @@ function evidenceFor(claimRefs: readonly string[]) {
 }
 
 describe("Track C C3 evidence subject scope", () => {
+  it("revalidates DEV cart facts against the same materialized cart and policy", () => {
+    const chunk = JSON.parse(readFileSync(
+      new URL("quality-03.json", EVAL_ROOT), "utf8",
+    )) as { cases: Array<{ id: string }> };
+    for (const id of ["V5V4Q022", "V5V4Q023", "V5V4Q025", "V5V4Q026"]) {
+      const fixture = chunk.cases.find((entry) => entry.id === id)!;
+      const input = {
+        fixture: fixture as never,
+        runtimeClaimCatalog: facts.runtime_claim_catalog,
+        recipe,
+      };
+      const capture = materializeTrackCV5CaseCapture({ ...input, lane: "BEHAVIOR_SIMULATION" });
+      const currentCart = materializeTrackCV5CaseCurrentCart(input);
+      expect(capture.context).not.toBeNull();
+      expect(currentCart).not.toBeNull();
+      const cartClaims = capture.context!.verifiedClaims.filter((claim) =>
+        claim.scope.kind === "CART"
+      );
+      expect(cartClaims.length).toBeGreaterThan(0);
+      expect(cartClaims.every((claim) => trackCCartClaimIsCurrent(
+        claim, currentCart, new Date(recipe.evaluation_at),
+      ))).toBe(true);
+      const evidence = buildTrackCSelectableEvidence({
+        context: capture.context!, simulationFacts: [],
+        executionLane: "BEHAVIOR_SIMULATION", currentCart,
+        evaluationAt: new Date(recipe.evaluation_at),
+      });
+      expect(evidence.filter((entry) => entry.subject?.scope === "CART")
+        .every(trackCEvidenceHasSafeFactualEgress)).toBe(true);
+    }
+  });
+
+  it("rejects a cart fixture if the diagnostic runner omits its current-cart readback", async () => {
+    const chunk = JSON.parse(readFileSync(
+      new URL("quality-03.json", EVAL_ROOT), "utf8",
+    )) as { cases: Array<{ id: string }> };
+    const fixture = chunk.cases.find((entry) => entry.id === "V5V4Q022")!;
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", fixture: fixture as never,
+      runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    await expect(runTrackCC3TwoPassQualityCandidate({
+      lane: "BEHAVIOR_SIMULATION", fixture,
+      capture, evaluationAt: new Date(recipe.evaluation_at),
+      modelResource: "projects/test/locations/global/publishers/google/models/gemini-3.5-flash-lite",
+      evaluationContext: [], simulationFacts: [],
+      transport: { send: async () => { throw new Error("SHOULD_NOT_CALL_PROVIDER"); } },
+    } as never)).rejects.toThrow("TRACK_C_C3_CURRENT_CART_BINDING_REQUIRED");
+  });
   it("keeps cart identity and version on a cart-scoped claim", () => {
     const [shipping] = evidenceFor(["RC_SHIP_30"]).filter(
       ({ capability }) => capability === "SHIPPING_FEE",

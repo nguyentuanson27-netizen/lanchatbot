@@ -17,6 +17,10 @@ import {
   hashProtectedClaimSetV1,
   type CanonicalDecisionEvidenceV1,
 } from "@lana/business-tools";
+import {
+  trackCCurrentCartClaims,
+  type TrackCCurrentCartBinding,
+} from "./track-c-c3-cart-binding.js";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import { buildContextV2Capture } from "./context-v2.js";
 
@@ -64,6 +68,12 @@ export interface TrackCV5CompactCase {
       | "PURCHASE_CONFIRMED"
       | null;
     readonly runtime_claim_refs: readonly string[];
+    /** C2-authored offline cart input; never inferred from a model response. */
+    readonly cart_snapshot?: Readonly<{ readonly shipping_fee_vnd: number | null }>;
+    readonly checkout_completeness?: Readonly<{
+      readonly state: "REQUIRED" | "COMPLETE";
+      readonly missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[];
+    }>;
   }>;
 }
 
@@ -251,10 +261,29 @@ export function materializeTrackCV5Claims(
   runtimeClaimCatalog: Readonly<Record<string, TrackCV5RuntimeClaimFixture>>,
   recipe: TrackCV5MaterializationRecipe,
 ): readonly ProtectedClaimV1[] {
+  const currentCart = materializeTrackCV5CaseCurrentCart({
+    fixture, runtimeClaimCatalog, recipe,
+  });
+  const currentClaims = currentCart === null ? [] :
+    trackCCurrentCartClaims(currentCart, new Date(recipe.evaluation_at));
   const claims = fixture.context.runtime_claim_refs.map((ref) => {
     const compact = runtimeClaimCatalog[ref];
     if (compact === undefined) {
       throw new Error(`TRACK_C_V5_RUNTIME_CLAIM_MISSING:${ref}`);
+    }
+    if (compact.scope.kind === "CART" && currentCart !== null) {
+      const matched = currentClaims.filter((claim) => claim.type === compact.type &&
+        (claim.type === "PROMOTION_OFFER"
+          ? claim.value.amountVnd === compact.value.amountVnd
+          : claim.type === "FREESHIP"
+            ? claim.value.eligible === compact.value.eligible
+            : claim.type === "SHIPPING_FEE"
+              ? claim.value.amountVnd === compact.value.amountVnd
+              : false));
+      if (matched.length !== 1) {
+        throw new Error(`TRACK_C_V5_CURRENT_CART_CLAIM_MISMATCH:${ref}`);
+      }
+      return matched[0]!;
     }
     return materializedClaim(ref, compact, recipe);
   });
@@ -262,6 +291,92 @@ export function materializeTrackCV5Claims(
     throw new Error("TRACK_C_V5_CLAIM_ID_DUPLICATE");
   }
   return Object.freeze(claims);
+}
+
+/** One frozen cart and policy projection for the C2 behavior simulation. */
+export function materializeTrackCV5CaseCurrentCart(input: Omit<
+  MaterializeTrackCV5CaseInput, "lane"
+>): TrackCCurrentCartBinding | null {
+  const { fixture, runtimeClaimCatalog, recipe } = input;
+  const snapshot = fixture.context.cart_snapshot;
+  if (snapshot === undefined) return null;
+  if (Object.keys(snapshot).length !== 1 ||
+      !Object.hasOwn(snapshot, "shipping_fee_vnd") ||
+      (snapshot.shipping_fee_vnd !== null &&
+       (!Number.isInteger(snapshot.shipping_fee_vnd) || snapshot.shipping_fee_vnd < 0))) {
+    throw new Error("TRACK_C_V5_CURRENT_CART_SNAPSHOT_INVALID");
+  }
+  const refs = fixture.context.runtime_claim_refs.filter((ref) =>
+    runtimeClaimCatalog[ref]?.scope.kind === "CART"
+  );
+  if (refs.length !== 1 ||
+      fixture.context.product_binding.status !== "RESOLVED" ||
+      fixture.context.product_binding.product_ids.length === 0) {
+    throw new Error("TRACK_C_V5_CURRENT_CART_SOURCE_INVALID");
+  }
+  const compact = runtimeClaimCatalog[refs[0]!]!;
+  const revision = compact.scope.cartVersion;
+  if (!Number.isInteger(revision) || (revision ?? 0) < 1 ||
+      compact.freshness !== "FRESH") {
+    throw new Error("TRACK_C_V5_CURRENT_CART_SOURCE_INVALID");
+  }
+  const productIds = fixture.context.product_binding.product_ids;
+  const productId = productIds[0]!;
+  const base = checkoutArtifacts(fixture, recipe.evaluation_at, productId).cart;
+  const promotion = compact.type === "PROMOTION_OFFER" ? compact.value : null;
+  const adjustment = promotion === null ? [] : [{
+    adjustmentId: deterministicUuid(`V5_CART_ADJUSTMENT\n${refs[0]}`),
+    kind: "FIXED_DISCOUNT" as const,
+    amountVnd: promotion.amountVnd,
+    percentageBps: null,
+    policyAuthorization: {
+      policyBundleId: "eval-c2-policy",
+      policyBundleVersion: "v1",
+      ruleId: String(promotion.adjustmentId),
+      decisionId: deterministicUuid(`V5_CART_POLICY_DECISION\n${refs[0]}`),
+      authorizedAt: base.updatedAt,
+    },
+  }];
+  const shipping = snapshot.shipping_fee_vnd;
+  const subtotal = productIds.length * 1_000_000;
+  const discount = promotion === null ? 0 : Number(promotion.amountVnd);
+  const cart = CartV1Schema.parse({
+    ...base,
+    cartId: deterministicUuid(`V5_CURRENT_CART\n${fixture.id}`),
+    revision,
+    status: shipping === null ? "OPEN" : "READY_FOR_CONFIRMATION",
+    checkoutEligibility: shipping === null ? "BLOCKED_MISSING_SHIPPING_FEE" : "ELIGIBLE",
+    lines: productIds.map((id) => ({
+      ...base.lines[0]!,
+      lineId: deterministicUuid(`V5_CURRENT_CART_LINE\n${fixture.id}\n${id}`),
+      parentProductId: id,
+      offerId: id,
+      components: [{
+        ...base.lines[0]!.components[0]!,
+        componentProductId: id,
+        componentSku: `${id}-EVAL`,
+      }],
+      priceAuthority: {
+        ...base.lines[0]!.priceAuthority,
+        parentProductId: id,
+        offerId: id,
+      },
+      posUnitPriceVnd: 1_000_000,
+      lineTotalVnd: 1_000_000,
+    })),
+    adjustments: adjustment,
+    shippingFeeVnd: shipping,
+    subtotalVnd: subtotal,
+    discountTotalVnd: discount,
+    grandTotalVnd: shipping === null ? null : subtotal + shipping - discount,
+  });
+  return Object.freeze({
+    cart,
+    cartExpiresAt: shiftedIso(recipe.evaluation_at, 10 * 60_000),
+    policySourceVersion: "eval-c2-policy:v1",
+    policyEvidenceRef: `eval://track-c-c2/cart-policy/${fixture.id}`,
+    claimExpiresAt: recipe.claim_projection.freshness.FRESH.expiresAt,
+  });
 }
 
 function productBinding(
