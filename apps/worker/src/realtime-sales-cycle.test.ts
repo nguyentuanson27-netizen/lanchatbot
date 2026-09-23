@@ -1686,6 +1686,42 @@ describe("realtime Phase 3 sales cycle", () => {
     ]));
     expect(hesitant.messages[0]).toMatchObject({ text: expect.stringContaining("giảm 5% và freeship") });
 
+    const benefitText = "Giỏ hiện có quyền lợi gì?";
+    const benefitReadback = await evaluateRealtimeSalesCycle({
+      ...input(state, benefitText, "event-benefit-readback"),
+      c3CartReadback: true,
+    });
+    expect(benefitReadback.cartReadback).toMatchObject({
+      effect: "CART_READY", outcome: "READY",
+    });
+    const benefitInput = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000082",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: benefitText, sourceMessageId: "mid-event-benefit-readback",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 8, finalConversationRevision: 9,
+      preSalesRevision: state.revision, commerceState: state,
+      productId: "CB182", catalogVersion: null, facts: [],
+      productFacts: null, policyResolution,
+      cartReadiness: [benefitReadback.cartReadback!], now,
+    });
+    const benefitEvidence = buildTrackCSelectableEvidence({
+      context: benefitInput.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT",
+      currentCart: benefitInput.currentCart, evaluationAt: now,
+    });
+    for (const capability of ["FREESHIP", "PROMOTION_OFFER"] as const) {
+      const selected = benefitEvidence.find((entry) => entry.capability === capability);
+      expect(selected?.deterministicText).toBeTruthy();
+      expect(validateResponderOutput(benefitInput.context, {
+        segments: [{ kind: "VERIFIED_CLAIM", text: selected!.deterministicText!,
+          claimContentHash: selected!.provenance.contentHash }],
+        strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+      }, "PRODUCTION_CONTRACT", now, [], benefitInput.currentCart).segments)
+        .toHaveLength(1);
+    }
+
     const retry = await evaluateRealtimeSalesCycle({
       ...input(state, "đắt quá bớt đi", "event-objection-retry"),
       messageId: "mid-event-objection-1",
