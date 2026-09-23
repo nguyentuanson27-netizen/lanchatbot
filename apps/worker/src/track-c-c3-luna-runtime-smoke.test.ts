@@ -410,6 +410,22 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       }, null, 2), "utf8");
     }
     expect(records).toHaveLength(9);
+    // A sales-success assertion cannot hide an ownership violation. Once the
+    // existing runtime hands off, later customer details must not resume bot
+    // checkout. Keep the unmet automatic size-edit acceptance below visible.
+    for (const record of records) {
+      const journey = record as { turns: readonly {
+        stateBefore: { conversation: { conversationOwner: string }; commerce: unknown };
+        stateAfter: { commerce: unknown }; reply: string | null; c3Calls: unknown[];
+      }[] };
+      for (const turn of journey.turns) {
+        if (turn.stateBefore.conversation.conversationOwner === "HUMAN") {
+          expect(turn.stateAfter.commerce).toEqual(turn.stateBefore.commerce);
+          expect(turn.reply).toBeNull();
+          expect(turn.c3Calls).toHaveLength(0);
+        }
+      }
+    }
     for (const index of [7, 8]) {
       const journey = records[index] as { turns: readonly { processed: boolean; c3Outcome: string }[]; finalCommerceState: { stage: string } };
       expect(journey.turns.every(({ processed }) => processed)).toBe(true);

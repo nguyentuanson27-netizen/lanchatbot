@@ -4977,6 +4977,7 @@ export class RealtimeRunner {
     if (
       salesCycleRecord &&
       !message.isEcho &&
+      nextState.conversationOwner === "BOT" &&
       preSalePolicyIntent === null &&
       !clarificationHandled &&
       handoff === null

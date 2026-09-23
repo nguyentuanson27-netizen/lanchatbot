@@ -3307,7 +3307,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it("builds the final capture and calls C3 through the realtime runner", async () => {
+  it.each(["BOT", "HUMAN"] as const)("builds C3 through realtime and respects %s checkout ownership", async (checkoutOwner) => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
@@ -3733,6 +3733,30 @@ describe("RealtimeRunner inbound batching", () => {
     });
     expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
     expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
+    if (checkoutOwner === "HUMAN") {
+      persistedState = { ...persistedState, conversationOwner: "HUMAN",
+        ownerReason: "AGENT_HANDOFF", ownerLeaseUntil: "2026-07-22T03:00:00.000Z" };
+      const beforeCommerce = structuredClone(persistedCommerce);
+      const beforeModelCalls = c3Send.mock.calls.length;
+      for (const [offset, text] of [
+        "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh", "COD", "ok",
+      ].entries()) {
+        const humanEntry = item(43 + offset, text);
+        currentBatch = { ...batch, generation: 13 + offset,
+          inboxIds: [humanEntry.inboxId], firstReceiveSequence: 43 + offset,
+          lastReceiveSequence: 43 + offset, items: [humanEntry] };
+        vi.setSystemTime(humanEntry.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const written = commit.mock.calls.at(-1)![0] as {
+          salesCyclePlan?: unknown; metaPlan?: { messages: readonly unknown[] };
+        };
+        expect(written.salesCyclePlan).toBeUndefined();
+        expect(written.metaPlan?.messages ?? []).toEqual([]);
+        expect(persistedCommerce).toEqual(beforeCommerce);
+      }
+      expect(c3Send.mock.calls.length).toBe(beforeModelCalls);
+      return;
+    }
     const detailsEntry = item(43, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh");
     currentBatch = {
       ...batch, generation: 13, inboxIds: [detailsEntry.inboxId],

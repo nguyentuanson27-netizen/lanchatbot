@@ -901,3 +901,11 @@ boundary uses Unicode letter boundaries so Vietnamese words such as `sẽ` and
 `lấy` cannot become sizes S and L. Color confirmation wording is offered only
 for a catalog color literally mentioned in the latest inbound; it does not
 infer interest from catalog availability alone.
+
+Commerce advancement shares the conversation ownership boundary: after a
+handoff, a HUMAN-owned conversation cannot capture checkout details, create a
+preview or confirm purchase through SalesCycle. A later inbound is not an
+implicit return to BOT ownership. The Luna runtime journey exposed this missing
+entrypoint check; regression coverage exercises details, payment and confirmation
+after handoff. Automatic cart size editing remains a separate unmet capability;
+handoff preserves the cart and must not be reported as a successful size edit.
