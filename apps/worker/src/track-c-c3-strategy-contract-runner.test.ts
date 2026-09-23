@@ -163,7 +163,7 @@ describe("Track C C3 strategy-contract runner", () => {
     };
     const result = await runTrackCStrategyLive(input);
     expect(result.output.segments).toContainEqual(expect.objectContaining({
-      kind: "VERIFIED_CLAIM", text: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
+      kind: "VERIFIED_CLAIM", text: "Giá hiện tại của mẫu này là 849.000đ ạ.",
     }));
     expect(send).toHaveBeenCalledTimes(2);
     expect(result).not.toHaveProperty("evaluationOnly");
@@ -175,7 +175,7 @@ describe("Track C C3 strategy-contract runner", () => {
       reasonCodes: context.dialogueEvidence.reasonCodes,
     });
     expect(strategistPrompt.selectableEvidence[0].realizationText)
-      .toBe("Dạ giá hiện tại của mẫu này là 849.000đ ạ.");
+      .toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
     const responderRequest = JSON.parse(send.mock.calls[1]![0].body);
     const responderPrompt = JSON.parse(responderRequest.contents[0].parts[0].text);
     expect(responderPrompt.customerDecisionSignals).toEqual(
@@ -257,6 +257,30 @@ describe("Track C C3 strategy-contract runner", () => {
       expect(prompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
         .toBe(expected);
     }
+  });
+
+  it("asks for the missing measurement without a generic uncertainty preamble", async () => {
+    const question = "Chị cho em xin thêm số đo vòng eo nhé?";
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Cần vòng eo để tư vấn đúng lo ngại chật bụng.",
+        proposition: "SIZE_FIT", evidenceRefs: [], continuation: null,
+        canonicalAction: "ASK_MEASUREMENTS",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: question,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(undefined, ["MEASUREMENTS_REQUIRED"]),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị cao 1m60, nặng 58kg nhưng hay chật bụng. Mẫu này vừa không em?",
+        attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    });
+    expect(result.reply).toBe(question);
   });
 
   it("preserves earlier known inputs in both model requests within the validated dialogue window", async () => {
@@ -421,12 +445,12 @@ describe("Track C C3 strategy-contract runner", () => {
       });
       expect(completed.responderTask.answer).toMatchObject({ evidenceStatus: "SUPPORTED" });
       expect(completed.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM"))
-        .toEqual([{ kind: "VERIFIED_CLAIM", text: "Dạ giá hiện tại của mẫu này là 415.000đ ạ.",
+        .toEqual([{ kind: "VERIFIED_CLAIM", text: "Giá hiện tại của mẫu này là 415.000đ ạ.",
           claimContentHash: completed.responderTask.evidence[0]!.provenance.contentHash }]);
       expect(completed.reply.match(/\?/gu)).toHaveLength(1);
       if (answerText === uncertainty) {
         expect(completed.output.segments.map(({ text }) => text)).toEqual([
-          "Dạ giá hiện tại của mẫu này là 415.000đ ạ.", uncertainty,
+          "Giá hiện tại của mẫu này là 415.000đ ạ.", uncertainty,
           "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
         ]);
       } else {
@@ -497,7 +521,7 @@ describe("Track C C3 strategy-contract runner", () => {
     // ...and the reply states the price it can answer and names the rest,
     // instead of answering half the question silently.
     const texts = result.output.segments.map(({ text }) => text);
-    expect(texts.some((text) => text.includes("giá hiện tại"))).toBe(true);
+    expect(texts.some((text) => text.includes("Giá hiện tại"))).toBe(true);
     expect(texts.some((text) => text.includes("phần còn lại"))).toBe(true);
   });
 
@@ -842,7 +866,7 @@ describe("Track C C3 strategy-contract runner", () => {
     const value = {
       segments: [{
         kind: "VERIFIED_CLAIM",
-        text: "Dạ mẫu này hiện hết size S ạ.",
+        text: "Mẫu này hiện hết size S ạ.",
         claimContentHash: claim.provenance.contentHash,
       }],
       strategy: "ANSWER_VERIFIED_FACTS",
@@ -1064,7 +1088,7 @@ describe("Track C C3 strategy-contract runner", () => {
       { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
       expect.objectContaining({
         kind: "VERIFIED_CLAIM",
-        text: "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
+        text: "Mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
       }),
     ]);
   });

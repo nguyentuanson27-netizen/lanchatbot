@@ -3657,7 +3657,7 @@ describe("RealtimeRunner inbound batching", () => {
     };
     expect(commitInput.salesCyclePlan?.expectedRevision).toBe(commerceState.revision);
     expect(commitInput.metaPlan?.messages).toContainEqual({
-      kind: "TEXT", text: "Dạ giá hiện tại của mẫu này là 799.000đ ạ.",
+      kind: "TEXT", text: "Giá hiện tại của mẫu này là 799.000đ ạ.",
     });
     expect(commitInput.metaPlan?.protectedClaimTypes).toContain("PRICE");
     expect(commit).toHaveBeenCalledTimes(1);

@@ -75,7 +75,8 @@ const STRATEGIST_INSTRUCTION = [
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "A request to see a product, compare alternatives, or complete a purchase remains a request even when the available evidence cannot realize it. Do not turn it into a bare acknowledgement. Select the matching capability when it exists but cannot be stated, so code can report the limit; for a compound question, answer the supported part and identify the unanswered part in goal. Never claim an image was sent, an alternative exists, or a transaction happened without its own authority.",
   "When a customer has given a budget below the known price, the budget gap is already known. If no approved evidence explains value or offers another product, do not repeat price or finish with a generic acknowledgement. Ask at most one decision question only when her choice between keeping this model and prioritizing her budget would change the next advice; otherwise state the limit honestly. Do not imply that a cheaper option exists.",
-  "BUDGET asks for an amount only when the customer has not supplied one. If an amount is already in the dialogue, use DECISION_CRITERION for the remaining tradeoff; do not select BUDGET simply because the topic is price. A previous shop price in the dialogue is already known to the customer; select PRICE again only when the latest turn explicitly asks to confirm it.",
+  "BUDGET asks for an amount only when the customer has not supplied one. If an amount is already in the dialogue, use DECISION_CRITERION for the remaining tradeoff; do not select BUDGET simply because the topic is price. Do not repeat an unchanged shop price already stated in the dialogue unless the latest turn asks to confirm it. If the current verified price differs and that change matters to the customer's decision, state the current price without treating the old one as authority.",
+  "For a question with several requested parts, when any part has relevant realizable evidence, set proposition to one supported part and select evidence for every supported part. Name the unsupported requested parts in goal so the Responder states the limit after the facts. Use an unsupported proposition with empty evidenceRefs only when no requested part has relevant realizable evidence. This applies to any compound request, including availability plus an alternative; do not turn the entire turn into uncertainty when one part is verified.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
   "Each evidence entry with realizationText shows the exact sentence code will state if you select it. Compare these sentences before selecting refs: do not select an overview and field entries that repeat the same details, and do not select a sentence that answers a different event or property from the customer's question. The text is a preview of existing authorized evidence, not new authority.",
@@ -94,6 +95,7 @@ const RESPONDER_INSTRUCTION = [
   "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
   "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
   "For a BUDGET ASK, if the dialogue already gives an amount, do not ask for that amount again; use the bounded choice about keeping the stated budget or continuing with this model. For DECISION_CRITERION, choose the question that names the customer's actual concern when one is available, especially a prior uncomfortable purchase. A broad criterion question is only for a genuinely broad decision.",
+  "For a simple customer confirmation, choose 'Dạ vâng chị ạ.' when an acknowledgement is required; for thanks, choose 'Dạ em cảm ơn chị ạ.' when allowed. If canonical buying intent is committed and asks to proceed but code supplies no effect receipt, acknowledge that the customer wants to chốt using the bounded commitment wording; never say the order was placed. Avoid a concern-specific acknowledgement when it names an older concern instead of the latest one.",
   "For ASK_MEASUREMENTS, use the goal and dialogue to ask only for the missing height, weight, or relevant measurement; do not repeat measurements already supplied or ask usual worn size.",
   "For an ASK_CHECKOUT_DETAILS task, emit answerText null and progressionText null. Code writes the exact requested fields.",
   "When the response schema requires answerText or progressionText to be null, emit the JSON literal null, never an empty string.",
@@ -106,6 +108,8 @@ const RESPONDER_INSTRUCTION = [
 const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ em hiểu ý chị ạ.",
   "Dạ em hiểu băn khoăn của chị ạ.",
+  "Dạ vâng chị ạ.",
+  "Dạ em cảm ơn chị ạ.",
   "Dạ, em hiểu chị đang cân nhắc mức giá này ạ.",
   "Dạ, em hiểu chị đang lo về độ vừa vặn ạ.",
   "Dạ, em hiểu chị đang cân nhắc mốc nhận hàng ạ.",
@@ -815,7 +819,8 @@ function compileResponderDraft(input: Readonly<{
   }
   assertProgression(task, draft);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  if (task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED") {
+  if (task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
+      task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
   } else if (draft.answerText !== null && draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: draft.answerText });

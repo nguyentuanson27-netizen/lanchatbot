@@ -81,14 +81,14 @@ const CARE_DRY_TEXT: Readonly<Record<string, string>> = Object.freeze({
 });
 
 const ATTRIBUTE_BACK_COVERAGE_TEXT: Readonly<Record<string, string>> = Object.freeze({
-  closed_back: "Dạ phần lưng của mẫu này là lưng kín ạ.",
-  open_back: "Dạ phần lưng của mẫu này để hở ạ.",
-  partial_back: "Dạ phần lưng của mẫu này hở một phần ạ.",
+  closed_back: "Phần lưng của mẫu này là lưng kín ạ.",
+  open_back: "Phần lưng của mẫu này để hở ạ.",
+  partial_back: "Phần lưng của mẫu này hở một phần ạ.",
 });
 
 const LIFECYCLE_TEXT: Readonly<Record<string, string>> = Object.freeze({
-  DISCONTINUED: "Dạ mẫu này đã ngừng sản xuất nên hiện shop không còn nhận đặt ạ.",
-  ACTIVE: "Dạ mẫu này hiện vẫn đang được bán ạ.",
+  DISCONTINUED: "Mẫu này đã ngừng sản xuất nên hiện shop không còn nhận đặt ạ.",
+  ACTIVE: "Mẫu này hiện vẫn đang được bán ạ.",
 });
 
 /** Map every listed token, or nothing: a partial vocabulary match is dropped. */
@@ -120,7 +120,7 @@ function policyText(
       : tryOn === "ORDER_DEPENDENT"
         ? " Riêng việc thử đồ còn tuỳ theo từng đơn, em cần kiểm tra lại giúp chị ạ."
         : "";
-    return `Dạ khi nhận hàng chị được kiểm tra ${joinVi(checks)} ạ.${tryOnText}`;
+    return `Khi nhận hàng chị được kiểm tra ${joinVi(checks)} ạ.${tryOnText}`;
   }
   if (policy === "EXCHANGE") {
     const windowDays = numberField(data, "windowDays");
@@ -132,7 +132,7 @@ function policyText(
     const maxPerInvoice = numberField(data, "maxExchangesPerInvoice");
     // The conditions are material to the answer, so they are never summarised
     // away into a bare "chị đổi được".
-    return `Dạ mẫu này đổi được trong ${windowDays} ngày, với điều kiện ${joinVi(mapped)} ạ.` +
+    return `Mẫu này đổi được trong ${windowDays} ngày, với điều kiện ${joinVi(mapped)} ạ.` +
       (fee === null ? ""
         : ` Nếu chị đổi theo nhu cầu cá nhân thì có phí ${trackCFormatVnd(fee)} ạ.`) +
       (maxPerInvoice === null ? ""
@@ -145,7 +145,7 @@ function policyText(
     if (threshold === null || allowed === null || modelChange === null) return null;
     const mapped = mapAll(allowed, EXCHANGE_CHANGE_TEXT);
     if (mapped === null) return null;
-    return `Dạ với mẫu giảm từ ${threshold}% trở lên, chị đổi được ${joinVi(mapped)} ạ.` +
+    return `Với mẫu giảm từ ${threshold}% trở lên, chị đổi được ${joinVi(mapped)} ạ.` +
       (modelChange ? " Chị cũng đổi sang mẫu khác được ạ."
         : " Phần đổi sang mẫu khác thì chưa áp dụng cho nhóm này ạ.");
   }
@@ -155,7 +155,7 @@ function policyText(
     if (reasons === null || days === null) return null;
     const mapped = mapAll(reasons, REFUND_REASON_TEXT);
     if (mapped === null) return null;
-    return `Dạ shop hoàn tiền trong trường hợp ${joinVi(mapped)}, khi chị báo trong ${days} ngày kể từ lúc nhận hàng ạ.`;
+    return `Shop hoàn tiền trong trường hợp ${joinVi(mapped)}, khi chị báo trong ${days} ngày kể từ lúc nhận hàng ạ.`;
   }
   if (policy === "PAYMENT") {
     const methods = stringList(data, "methods");
@@ -163,22 +163,22 @@ function policyText(
     const mapped = mapAll(methods, PAYMENT_METHOD_TEXT);
     if (mapped === null) return null;
     const deposit = booleanField(data, "depositRequired");
-    return `Dạ shop nhận ${joinVi(mapped)} ạ.` +
+    return `Shop nhận ${joinVi(mapped)} ạ.` +
       (deposit === false ? " Chị không cần đặt cọc trước ạ." : "");
   }
   if (policy === "CUSTOMIZATION") {
     const supported = booleanField(data, "supported");
     if (supported === null) return null;
     return supported
-      ? "Dạ mẫu này có nhận chỉnh sửa theo yêu cầu ạ."
-      : "Dạ mẫu này hiện shop chưa nhận chỉnh sửa theo yêu cầu ạ.";
+      ? "Mẫu này có nhận chỉnh sửa theo yêu cầu ạ."
+      : "Mẫu này hiện shop chưa nhận chỉnh sửa theo yêu cầu ạ.";
   }
   if (policy === "SPLIT_SIZE") {
     const allowed = booleanField(data, "allowed");
     if (allowed === null) return null;
     return allowed
-      ? "Dạ set này chị tách size giữa áo và quần được ạ."
-      : "Dạ set này hiện chưa tách size riêng từng món được ạ.";
+      ? "Set này chị tách size giữa áo và quần được ạ."
+      : "Set này hiện chưa tách size riêng từng món được ạ.";
   }
   return null;
 }
@@ -208,7 +208,7 @@ export function trackCSimulationFactText(
     if (address === null) return null;
     const hours = stringField(data, "hours");
     const tryOn = booleanField(data, "tryOn");
-    return `Dạ cửa hàng của shop ở ${address} ạ.` +
+    return `Cửa hàng của shop ở ${address} ạ.` +
       (hours === null ? "" : ` Shop mở cửa ${hours} ạ.`) +
       (tryOn === true ? " Chị qua thử trực tiếp được ạ."
         : tryOn === false ? " Hiện shop chưa hỗ trợ thử tại cửa hàng ạ." : "");
@@ -224,7 +224,7 @@ export function trackCSimulationFactText(
     if (washText === undefined || avoidText === undefined || dryText === undefined) {
       return null;
     }
-    return `Dạ mẫu này chị ${washText}, ${avoidText} và ${dryText} ạ.`;
+    return `Mẫu này chị ${washText}, ${avoidText} và ${dryText} ạ.`;
   }
   if (kind === "OFFER_CONFIGURATION") {
     // Separate set pricing from per-item retail: an unavailable item is stated
@@ -254,22 +254,22 @@ export function trackCSimulationFactText(
           ? `${label} có bán lẻ`
           : `${label} hiện chưa bán lẻ riêng`);
     }
-    return parts.length === 0 ? null : `Dạ ${joinVi(parts)} ạ.`;
+    return parts.length === 0 ? null : `${joinVi(parts).replace(/^./u, (first) => first.toUpperCase())} ạ.`;
   }
   if (kind === "PROMOTION_SEMANTICS") {
     const active = booleanField(data, "active");
     if (active === null) return null;
-    if (!active) return "Dạ hiện chưa có chương trình ưu đãi nào đang áp dụng ạ.";
+    if (!active) return "Hiện chưa có chương trình ưu đãi nào đang áp dụng ạ.";
     const condition = stringField(data, "condition");
     const gift = stringField(data, "gift");
     if (condition === null || gift === null) return null;
-    return `Dạ hiện có ưu đãi tặng ${gift} khi đơn đạt điều kiện: ${condition} ạ.`;
+    return `Hiện có ưu đãi tặng ${gift} khi đơn đạt điều kiện: ${condition} ạ.`;
   }
   if (kind === "CART_TOTAL") {
     const total = numberField(data, "totalVnd");
     return total === null
       ? null
-      : `Dạ tổng đơn hiện tại của chị là ${trackCFormatVnd(total)} ạ.`;
+      : `Tổng đơn hiện tại của chị là ${trackCFormatVnd(total)} ạ.`;
   }
   if (kind === "PRODUCT_LIFECYCLE") {
     const status = stringField(data, "status");
@@ -289,7 +289,7 @@ export function trackCSimulationFactText(
     const span = (min: number, max: number): string =>
       min === max ? `${min} ngày` : `${min}–${max} ngày`;
     const madeToOrder = stringField(data, "status") === "MADE_TO_ORDER";
-    return `Dạ mẫu này ${madeToOrder ? "được may sau khi chị đặt, " : ""}` +
+    return `Mẫu này ${madeToOrder ? "được may sau khi chị đặt, " : ""}` +
       `thời gian chuẩn bị hàng khoảng ${span(productionMin, productionMax)}, ` +
       `sau đó vận chuyển thêm khoảng ${span(deliveryMin, deliveryMax)} ạ. ` +
       `Tổng thời gian dự kiến là ${span(
