@@ -48,7 +48,7 @@ const UNREALIZABLE_POLICY_FACT = Object.freeze({
   data: Object.freeze({ months: 12 }),
 });
 
-function capture(amountVnd?: number) {
+function capture(amountVnd?: number, canonicalFlags: string[] = []) {
   return materializeTrackCV5CaseCapture({
     lane: "BEHAVIOR_SIMULATION",
     fixture: {
@@ -57,7 +57,7 @@ function capture(amountVnd?: number) {
       context: {
         product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
         phase: "BROWSING",
-        canonical_flags: [],
+        canonical_flags: canonicalFlags,
         buying_intent: {
           decision: "NONE",
           requested_action: "NONE",
@@ -234,6 +234,29 @@ describe("Track C C3 strategy-contract runner", () => {
       text: result.responderTask.evidence[0]!.deterministicText,
       claimContentHash: result.responderTask.evidence[0]!.provenance.contentHash,
     })]);
+  });
+
+  it("offers adaptive measurement requests only for a canonical fit blocker", async () => {
+    const dialogue = [{ direction: "INBOUND" as const,
+      senderType: "CUSTOMER" as const, messageType: "TEXT" as const,
+      text: "Mẫu này còn hàng không?", attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z" }];
+    for (const [flags, expected] of [
+      [[], false], [["MEASUREMENTS_REQUIRED"], true],
+    ] as const) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockRejectedValue(new Error("CAPTURE_REQUEST"));
+      await expect(runTrackCStrategyContractCase({
+        lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+        capture: capture(undefined, [...flags]),
+        evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: dialogue, transport: { send },
+      })).rejects.toThrow();
+      const body = JSON.parse(send.mock.calls[0]![0].body);
+      const prompt = JSON.parse(body.contents[0].parts[0].text);
+      expect(prompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
+        .toBe(expected);
+    }
   });
 
   it("preserves earlier known inputs in both model requests within the validated dialogue window", async () => {

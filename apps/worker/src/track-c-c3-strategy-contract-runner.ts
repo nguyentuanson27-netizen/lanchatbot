@@ -58,10 +58,11 @@ const CHECKOUT_FIELDS = new Set<string>(
 const STRATEGIST_INSTRUCTION = [
   "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.",
   "The selectableEvidence list is the only commercial factual authority. Customer-reported budget, measurements and preferences in dialogue may inform your choice and PII-safe goal as customer-provided context; they never establish shop price, stock, verified fit, policy, checkout completion, an effect, or permission. Do not copy recipient PII into goal.",
-  "Choose the customer's current decision, the smallest useful evidence set, and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
+  "First reconstruct the customer's current decision from the entire dialogue: what they already know, what they are trying to decide now, and which precise property or event remains uncertain. Then choose the smallest evidence set and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
   "Address the customer's objection or concern before progression. Choose ANSWER when addressing it directly, ACKNOWLEDGE for acknowledgement, or CLARIFY when the current need itself is unclear. An objection does not force ACKNOWLEDGE.",
-  "Distinguish a request to confirm a fact from resistance to that fact. When the customer already knows the price and is weighing value, repeating PRICE alone does not address the decision. Select relevant verified product or policy evidence when it helps; otherwise acknowledge the customer's stated concern without recycling the price or inventing a benefit, concession, or comparison. Apply the same test to fit, stock, delivery, and trust concerns.",
+  "Distinguish a request to confirm a fact from resistance to that fact. Do not select a fact solely because its topic matches the objection: a price already stated does not answer whether the purchase is worthwhile; an attribute does not establish a benefit or repair a previous bad experience. Select a verified detail only if it helps with the customer's stated decision. When the cause of a previous bad experience is unknown, ask for the specific failed aspect only if that answer would change the next recommendation. Otherwise acknowledge the concern without recycling known facts or inventing a benefit, concession, or comparison. Apply this test to fit, stock, delivery, and trust concerns as well.",
   "Choose an ordinary ASK or a canonical input request only when the missing input is directly relevant to the customer's current decision or to an immediate next decision already established by the latest turn or authoritative context, and its answer would materially change the next recommendation, comparison, qualification, or transaction. In goal, identify that missing input and why it matters. Do not invent a new discovery dimension merely because it could be useful later. If the current question is resolved and no such blocker or immediate decision remains, use NONE with KEEP_OPEN unless the canonical hard stop requires HOLD_POSITION.",
+  "Before emitting any ASK or canonical input request, verify that goal names the missing input and explains how its answer changes the current decision. If that explanation cannot be stated from the dialogue and canonical context, use KEEP_OPEN. ASK_MEASUREMENTS is only for a current fit decision or an established transaction blocked by fit; it is not a follow-up to stock, price, policy, media, offer, or delivery answers simply because it is permitted. For an unresolved objection with no useful shop evidence, prefer one specific decision-criterion question when learning the missing reason would change advice; a generic acknowledgement alone does not resolve it.",
   "If the latest turn primarily confirms or corrects a preference or product selection and introduces no new question or blocker, use ACKNOWLEDGE. A selection alone is not buying commitment or checkout authorization. Preserve any buying commitment already established in canonical context and consider its remaining blocker; when no material next input is needed, use KEEP_OPEN instead of starting a fixed funnel.",
   "ACKNOWLEDGE must not claim an effect. For a question or concern needing an answer, use ANSWER. Code derives evidenceStatus only for the declared proposition capability; SUPPORTED does not certify relevance or that the entire question is answered.",
   "For a factual question whose property or event is unsupported, keep ANSWER and the proposition for that property or event with empty evidenceRefs; code will produce an honest UNRESOLVED answer. Use proposition NONE for a genuinely nonfactual acknowledgement, not as a shortcut when the requested fact is missing.",
@@ -69,7 +70,7 @@ const STRATEGIST_INSTRUCTION = [
   "PRODUCT and MEASUREMENTS are canonical actions, never ordinary continuation inputs. Use USUAL_SIZE only when constraints say measurements are unavailable.",
   "Canonical context describes binding, barriers, and buying intent; permitted actions are options, not instructions to progress. Use the full supplied dialogue and eligible evidence to distinguish known inputs from missing ones. Do not re-request known inputs unless new or corrected information makes them insufficient for the current decision. An existing measurement-based fit recommendation is not itself a reason to collect measurements again. If product identity is the blocker, choose ASK_PRODUCT, not STYLE. For fit qualification choose ASK_MEASUREMENTS, not purchase SIZE; include the known and missing measurements in goal.",
   "The code-derived dialogueEvidence act and reasonCodes are bounded hints about the customer's current concern. Use them with the actual dialogue to prioritize the current decision; they are not commercial facts and cannot authorize a claim, action, or discount.",
-  "Select the smallest evidence set that directly supports the exact property, event, and scope the customer asks about. A shared capability label alone does not establish relevance: material does not establish wrinkle resistance, and delivery ETA does not establish dispatch time. Use field evidence for specific attributes and PRODUCT_PRESENTATION for an overview. For a compound question retain evidence answering the supported part and identify the unanswered part in goal; leave evidenceRefs empty only when no eligible evidence answers any part. Do not substitute a related fact or invent an unstated property or benefit.",
+  "Select the smallest evidence set that directly supports the exact property, event, and scope the customer asks about. Before selecting each ref, check whether its realizationText would answer that property or event if read aloud to the customer. A shared capability label alone does not establish relevance: material does not establish wrinkle resistance, and delivery ETA does not establish dispatch time. Use field evidence for specific attributes and PRODUCT_PRESENTATION for an overview. For a compound question retain evidence answering the supported part and identify the unanswered part in goal; leave evidenceRefs empty only when no eligible evidence answers any part. Do not substitute a related fact or invent an unstated property or benefit.",
   "When a customer has already provided a preference, budget, measurement, concern, or correction, make the current goal reflect that known context. Do not reset the conversation with a generic ACKNOWLEDGE or ask for a known input; if a relevant question remains, answer it under the updated binding. Select evidence for the decision the customer actually faces, not merely the most available claim.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
@@ -124,7 +125,12 @@ const REQUEST_WORDING: Readonly<Record<TrackCOrdinaryDecisionInput |
   QUANTITY: ["Chị muốn lấy bao nhiêu sản phẩm ạ?", "Chị cho em biết số lượng mình muốn lấy nhé?"],
   STYLE: ["Chị thích kiểu dáng như thế nào ạ?", "Chị muốn tìm phong cách như thế nào ạ?"],
   BUDGET: ["Chị đang cân nhắc ngân sách khoảng bao nhiêu ạ?", "Chị muốn chọn trong tầm ngân sách nào ạ?"],
-  DECISION_CRITERION: ["Điều chị ưu tiên nhất khi lựa chọn là gì ạ?", "Chị đang cân nhắc nhất điểm nào ạ?"],
+  DECISION_CRITERION: [
+    "Điều chị ưu tiên nhất khi lựa chọn là gì ạ?",
+    "Chị đang cân nhắc nhất điểm nào ạ?",
+    "Lần trước chị thấy không thoải mái ở phần nào để em tư vấn đúng điểm đó ạ?",
+    "Điểm nào của mẫu khiến chị chưa thấy phù hợp với mức mình dự tính ạ?",
+  ],
   DEADLINE: ["Chị cần nhận hàng trước thời điểm nào ạ?", "Chị muốn nhận hàng chậm nhất khi nào ạ?"],
   ASK_PRODUCT: ["Chị gửi em mã hoặc ảnh mẫu mình đang hỏi nhé?", "Chị đang hỏi mẫu nào ạ?"],
   ASK_MEASUREMENTS: [
@@ -955,7 +961,13 @@ function constraintsFor(
   }
   const unavailable = measurementsUnavailable(dialogue);
   const permittedCanonicalActions: TrackCCanonicalAction[] = ["NONE"];
-  if (!unavailable) permittedCanonicalActions.push("ASK_MEASUREMENTS");
+  // The fixed first-contact lane owns its fit question. In adaptive turns,
+  // canonical fit readiness must identify a measurement blocker before this
+  // action is offered; a resolved product alone does not authorize a new fit
+  // funnel after an unrelated question.
+  if (!unavailable && context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
+    permittedCanonicalActions.push("ASK_MEASUREMENTS");
+  }
   // Ask for the missing details at the state the runtime actually reaches.
   //
   // Requiring ORDER_PREVIEW made this unreachable: the runtime only builds a
