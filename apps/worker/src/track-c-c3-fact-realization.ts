@@ -155,7 +155,7 @@ function policyText(
     if (reasons === null || days === null) return null;
     const mapped = mapAll(reasons, REFUND_REASON_TEXT);
     if (mapped === null) return null;
-    return `Shop hoàn tiền trong trường hợp ${joinVi(mapped)}, khi chị báo trong ${days} ngày kể từ lúc nhận hàng ạ.`;
+    return `Shop hoàn tiền trong trường hợp ${mapped.join(" hoặc ")}, khi chị báo trong ${days} ngày kể từ lúc nhận hàng ạ.`;
   }
   if (policy === "PAYMENT") {
     const methods = stringList(data, "methods");

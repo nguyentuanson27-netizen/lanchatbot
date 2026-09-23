@@ -20,6 +20,7 @@ import {
 } from "./track-c-offline-candidate.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 import type { TrackCCurrentCartBinding } from "./track-c-c3-cart-binding.js";
+import { trackCComposeReply, trackCRealizationMatches } from "./track-c-c3-realization-style.js";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
@@ -58,11 +59,11 @@ const CHECKOUT_FIELDS = new Set<string>(
 const STRATEGIST_INSTRUCTION = [
   "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.",
   "The selectableEvidence list is the only commercial factual authority. Customer-reported budget, measurements and preferences in dialogue may inform your choice and PII-safe goal as customer-provided context; they never establish shop price, stock, verified fit, policy, checkout completion, an effect, or permission. Do not copy recipient PII into goal.",
-  "First reconstruct the customer's current decision from the entire dialogue: what they already know, what they are trying to decide now, and which precise property or event remains uncertain. Then choose the smallest evidence set and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
+  "Read the latest inbound first to identify the current question, correction or buying decision. Read prior dialogue to recover relevant known inputs and the customer's reason, never to resume an older topic instead of answering the latest turn. In goal state the current need, known relevant inputs, the supported answer and any remaining limitation. Then choose the smallest evidence set and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
   "Address the customer's objection or concern before progression. Choose ANSWER when addressing it directly, ACKNOWLEDGE for acknowledgement, or CLARIFY when the current need itself is unclear. An objection does not force ACKNOWLEDGE.",
   "Distinguish a request to confirm a fact from resistance to that fact. Do not select a fact solely because its topic matches the objection: a price already stated does not answer whether the purchase is worthwhile; an attribute does not establish a benefit or repair a previous bad experience. Select a verified detail only if it helps with the customer's stated decision. When the cause of a previous bad experience is unknown, ask for the specific failed aspect only if that answer would change the next recommendation. Otherwise acknowledge the concern without recycling known facts or inventing a benefit, concession, or comparison. Apply this test to fit, stock, delivery, and trust concerns as well.",
   "Choose an ordinary ASK or a canonical input request only when the missing input is directly relevant to the customer's current decision or to an immediate next decision already established by the latest turn or authoritative context, and its answer would materially change the next recommendation, comparison, qualification, or transaction. In goal, identify that missing input and why it matters. Do not invent a new discovery dimension merely because it could be useful later. If the current question is resolved and no such blocker or immediate decision remains, use NONE with KEEP_OPEN unless the canonical hard stop requires HOLD_POSITION.",
-  "Before emitting any ASK or canonical input request, verify that goal names the missing input and explains how its answer changes the current decision. If that explanation cannot be stated from the dialogue and canonical context, use KEEP_OPEN. ASK_MEASUREMENTS is only for a current fit decision or an established transaction blocked by fit; it is not a follow-up to stock, price, policy, media, offer, or delivery answers simply because it is permitted. For an unresolved objection with no useful shop evidence, prefer one specific decision-criterion question when learning the missing reason would change advice; a generic acknowledgement alone does not resolve it.",
+  "Before any ASK, verify the next step is executable with current evidence/canonical capabilities. Name the missing input and that next step in goal. Do not ask for a preference merely to keep chatting when neither answer lets you help. ASK_MEASUREMENTS is only for a current fit decision or an established transaction blocked by fit. If the blocker is missing shop evidence, a customer's answer cannot supply that authority: state the limit and KEEP_OPEN. Ask a decision criterion only when its answer lets you use a relevant available fact or complete a permitted step.",
   "If the latest turn primarily confirms or corrects a preference or product selection and introduces no new question or blocker, use ACKNOWLEDGE. A selection alone is not buying commitment or checkout authorization. Preserve any buying commitment already established in canonical context and consider its remaining blocker; when no material next input is needed, use KEEP_OPEN instead of starting a fixed funnel.",
   "ACKNOWLEDGE must not claim an effect. For a question or concern needing an answer, use ANSWER. Code derives evidenceStatus only for the declared proposition capability; SUPPORTED does not certify relevance or that the entire question is answered.",
   "For a factual question whose property or event is unsupported, keep ANSWER and the proposition for that property or event with empty evidenceRefs; code will produce an honest UNRESOLVED answer. Use proposition NONE for a genuinely nonfactual acknowledgement, not as a shortcut when the requested fact is missing.",
@@ -74,8 +75,8 @@ const STRATEGIST_INSTRUCTION = [
   "When a customer has already provided a preference, budget, measurement, concern, or correction, make the current goal reflect that known context. Do not reset the conversation with a generic ACKNOWLEDGE or ask for a known input; if a relevant question remains, answer it under the updated binding. Select evidence for the decision the customer actually faces, not merely the most available claim.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "A request to see a product, compare alternatives, or complete a purchase remains a request even when the available evidence cannot realize it. Do not turn it into a bare acknowledgement. Select the matching capability when it exists but cannot be stated, so code can report the limit; for a compound question, answer the supported part and identify the unanswered part in goal. Never claim an image was sent, an alternative exists, or a transaction happened without its own authority.",
-  "When a customer has given a budget below the known price, the budget gap is already known. If no approved evidence explains value or offers another product, do not repeat price or finish with a generic acknowledgement. Ask at most one decision question only when her choice between keeping this model and prioritizing her budget would change the next advice; otherwise state the limit honestly. Do not imply that a cheaper option exists.",
-  "BUDGET asks for an amount only when the customer has not supplied one. If an amount is already in the dialogue, use DECISION_CRITERION for the remaining tradeoff; do not select BUDGET simply because the topic is price. Do not repeat an unchanged shop price already stated in the dialogue unless the latest turn asks to confirm it. If the current verified price differs and that change matters to the customer's decision, state the current price without treating the old one as authority.",
+  "A known budget below the shop price is an established gap. Look for approved evidence relevant to why this customer is hesitant, including prior reported experience. Without that evidence or an available alternative, another budget-versus-product question cannot resolve the gap: do not imply an alternative exists or a concession is possible. A conditional offer to buy at a lower price is not commitment at the shop price.",
+  "BUDGET asks for an amount only when missing and needed for an executable recommendation. A known amount needs no repeat question. Do not repeat an unchanged price unless the latest turn asks to confirm it. If the current verified price differs and matters, state the current price without treating the old one as authority.",
   "For a question with several requested parts, when any part has relevant realizable evidence, set proposition to one supported part and select evidence for every supported part. Name the unsupported requested parts in goal so the Responder states the limit after the facts. Use an unsupported proposition with empty evidenceRefs only when no requested part has relevant realizable evidence. This applies to any compound request, including availability plus an alternative; do not turn the entire turn into uncertainty when one part is verified.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
@@ -85,8 +86,8 @@ const STRATEGIST_INSTRUCTION = [
 
 const RESPONDER_INSTRUCTION = [
   "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.",
-  "All selected factual evidence is realized by code from customer-ready deterministic projections. Do not author factual wording.",
-  "Emit factualTexts as an empty array. answerText may only select the response schema's bounded acknowledgement or uncertainty wording; progressionText may only ask when permitted. Neither may carry factual details.",
+  "Write factualTexts with one string for each evidence.text, in the same order. Preserve every factual word, number, name, negation, condition and punctuation. You may remove only the final politeness particle (ạ/nhé/nha before final punctuation), and optionally prepend 'Dạ, '. These are editorial choices, not permission to paraphrase facts. An empty array requests the original code wording for all facts; never emit a partial array.",
+  "Compose one short La.na reply: start with the useful answer, use Dạ at most once and prefer at most one final ạ across the reply. Do not add an acknowledgement that only repeats the customer's concern. answerText and progressionText select the response schema wording; neither may carry new factual details.",
   "For ACKNOWLEDGE, answerText is acknowledgement-only and restricted by the response schema. Factual explanation is code-owned from selected evidence.",
   "Use a bounded acknowledgement only when it helps the current answer; prefer wording tied to the customer's latest concern or correction when the schema offers one. Do not imply a concern the customer did not express. For a direct fact question with a supported claim and no objection, prefer answerText null so the answer starts with the fact.",
   "The code-derived customerDecisionSignals are hints about the current concern. Prefer the latest concern when several earlier concerns appear in the dialogue; never treat a signal as authority for a shop fact or effect.",
@@ -94,6 +95,7 @@ const RESPONDER_INSTRUCTION = [
   "For ANSWER with SUPPORTED evidenceStatus, follow the compiled goal and response schema. If the goal identifies a customer-requested part that the selected evidence does not answer, choose the bounded uncertainty sentence, not a generic acknowledgement or null; code places it after the facts. Otherwise choose a concern-specific acknowledgement only when it helps, or null so the fact answers first. Do not add uncertainty merely because the option exists or repair the Strategist's evidence selection.",
   "For KEEP_OPEN, emit progressionText null. The answer itself keeps the conversation open; no closing invitation is required.",
   "For a typed ASK, choose one of the response schema's customer-directed questions for the supplied continuation.input. These are bounded realizations of the Strategist's choice. Never append factual explanation, an effect, another decision variable, or a second question.",
+  "For COLOR, if the latest customer turn already names one of the offered colors, prefer the schema's confirmation question for that color instead of asking her to choose from scratch. A question about a color does not itself select a cart variant.",
   "For a BUDGET ASK, if the dialogue already gives an amount, do not ask for that amount again; use the bounded choice about keeping the stated budget or continuing with this model. For DECISION_CRITERION, choose the question that names the customer's actual concern when one is available, especially a prior uncomfortable purchase. A broad criterion question is only for a genuinely broad decision.",
   "For a simple customer confirmation, choose 'Dạ vâng chị ạ.' when an acknowledgement is required; for thanks, choose 'Dạ em cảm ơn chị ạ.' when allowed. If canonical buying intent is committed and asks to proceed but code supplies no effect receipt, acknowledge that the customer wants to chốt using the bounded commitment wording; never say the order was placed. Avoid a concern-specific acknowledgement when it names an older concern instead of the latest one.",
   "For ASK_MEASUREMENTS, use the goal and dialogue to ask only for the missing height, weight, or relevant measurement; do not repeat measurements already supplied or ask usual worn size.",
@@ -155,6 +157,8 @@ const REQUEST_WORDING: Readonly<Record<TrackCOrdinaryDecisionInput |
     "Chị cho em xin thêm chiều cao nhé?",
     "Chị cho em xin thêm cân nặng nhé?",
     "Chị cho em xin thêm số đo vòng eo nhé?",
+    "Chị cho em xin thêm số đo vòng ngực nhé?",
+    "Chị cho em xin thêm số đo vòng hông nhé?",
     "Chị cho em xin số đo cần kiểm tra để em tư vấn tiếp ạ?",
   ],
 });
@@ -535,9 +539,9 @@ function responderReadableEvidence(
 }
 
 function modelAuthoredEvidence(
-  _task: TrackCResponderTask,
+  task: TrackCResponderTask,
 ): readonly TrackCSelectableEvidence[] {
-  return Object.freeze([]);
+  return task.evidence;
 }
 
 function responderTaskPrompt(task: TrackCResponderTask) {
@@ -605,8 +609,18 @@ function requestWording(task: TrackCResponderTask): readonly string[] {
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
     return REQUEST_WORDING[canonical];
   }
-  return task.continuation?.type === "ASK"
-    ? REQUEST_WORDING[task.continuation.input] : [];
+  if (task.continuation?.type !== "ASK") return [];
+  if (task.continuation.input !== "COLOR") return REQUEST_WORDING[task.continuation.input];
+  // The writer can confirm a color already mentioned in dialogue, without
+  // inventing a variant or binding that interest as a purchase selection.
+  const colors = [...new Set(task.evidence.flatMap(({ value }) =>
+    Array.isArray(value.colors) ? value.colors.filter((color): color is string =>
+      typeof color === "string" && color.length > 0 && color.length <= 80 &&
+      !/[.!?\r\n]/u.test(color) && redactAnalyticsMessage(color).text === color
+    ) : []
+  ))];
+  return [...REQUEST_WORDING.COLOR,
+    ...colors.map((color) => `Chị đang ưu tiên màu ${color} đúng không ạ?`)];
 }
 
 function responderDraftSchema(
@@ -631,7 +645,7 @@ function responderDraftSchema(
           : { type: "NULL" },
       factualTexts: {
         type: "ARRAY",
-        minItems: factualEvidenceCount,
+        minItems: 0,
         maxItems: factualEvidenceCount,
         items: { type: "STRING", minLength: 1, maxLength: 1_000 },
       },
@@ -687,7 +701,8 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask): Respond
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
   if (!Array.isArray(record.factualTexts) ||
-      record.factualTexts.length !== modelAuthoredEvidence(task).length) {
+      (record.factualTexts.length !== 0 &&
+       record.factualTexts.length !== modelAuthoredEvidence(task).length)) {
     throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
   }
   return Object.freeze({
@@ -811,10 +826,13 @@ function compileResponderDraft(input: Readonly<{
   if (usesBoundedAcknowledgement(task) && draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
-  // Selectable evidence already has a customer-ready deterministic factual
-  // projection. The Responder never owns factual wording.
+  // An empty array deliberately chooses all original projections. Otherwise
+  // every selected claim needs its own positional, lossless realization.
   const authoredEvidence = modelAuthoredEvidence(task);
-  if (authoredEvidence.length !== 0 || draft.factualTexts.length !== 0) {
+  if (draft.factualTexts.length !== 0 &&
+      (draft.factualTexts.length !== authoredEvidence.length ||
+       draft.factualTexts.some((value, index) =>
+         !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!)))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
   assertProgression(task, draft);
@@ -828,11 +846,11 @@ function compileResponderDraft(input: Readonly<{
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
   )).size > 1;
-  task.evidence.forEach((evidence) => {
+  task.evidence.forEach((evidence, index) => {
     const factualText = evidence.deterministicText === undefined
       ? null
       : text(
-          evidence.deterministicText,
+          draft.factualTexts[index] ?? evidence.deterministicText,
           "TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE",
         );
     if (factualText === null) {
@@ -844,7 +862,7 @@ function compileResponderDraft(input: Readonly<{
     }
     assertNoEffectText(factualText);
     if (multipleSubjects && evidence.subject?.productId !== undefined) {
-      const label = text(evidence.subject.displayName,
+      const label = text(evidence.subject.displayName ?? evidence.subject.productId,
         "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       if (label === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       assertNoEffectText(label);
@@ -1250,7 +1268,7 @@ async function runTrackCStrategyContractCore(
     conversationPlan,
     responderTask: task,
     output,
-    reply: output.segments.map(({ text }) => text).join("\n"),
+    reply: trackCComposeReply(output.segments.map(({ text }) => text)),
     identity,
   });
 }

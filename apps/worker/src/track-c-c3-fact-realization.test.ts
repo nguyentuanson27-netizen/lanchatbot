@@ -12,6 +12,14 @@ import {
  */
 
 describe("Track C C3 typed fact realization", () => {
+  it("keeps refund reasons as alternatives and the reporting deadline as a condition", () => {
+    const text = trackCSimulationFactText("POLICY_SNAPSHOT", {
+      eligibleReasons: ["manufacturing_defect", "wrong_item_by_shop"], reportWithinDays: 3,
+    }, "REFUND");
+    expect(text).toContain(" hoặc ");
+    expect(text).toContain("khi chị báo trong 3 ngày kể từ lúc nhận hàng");
+    expect(text).not.toContain(" và ");
+  });
   it("keeps the material conditions of an exchange policy in the answer", () => {
     const text = trackCSimulationFactText("POLICY_SNAPSHOT", {
       windowDays: 15,

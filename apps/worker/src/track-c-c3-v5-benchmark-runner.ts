@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { trackCRealizationMatches } from "./track-c-c3-realization-style.js";
 import {
   BusinessFactEnvelopeV1Schema,
   ContextV2CandidateOutputV2Schema,
@@ -323,10 +324,10 @@ function guardProductionOutput(
       ? attributeProjections.get(segment.claimContentHash) ?? null
       : null;
     if (attributeProjection !== null) {
-      // Exact equality binds every word of the segment to the field this hash
-      // was derived from, so a projection cannot be reused for another value.
+      // Bound editorial variants preserve every factual word for the field
+      // this hash was derived from; no semantic paraphrase is accepted.
       if (attributeProjection.deterministicText === null ||
-          segment.text !== attributeProjection.deterministicText) {
+          !trackCRealizationMatches(segment.text, attributeProjection.deterministicText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }
       if (context.productBinding.status !== "RESOLVED" ||
@@ -335,10 +336,11 @@ function guardProductionOutput(
       }
     }
     if (claim?.scope.kind === "CART") {
+      const cartText = trackCRuntimeClaimDeterministicText(
+        claim, undefined, currentCart, evaluationAt,
+      );
       if (!trackCCartClaimIsCurrent(claim, currentCart, evaluationAt) ||
-          segment.text !== trackCRuntimeClaimDeterministicText(
-            claim, undefined, currentCart, evaluationAt,
-          )) {
+          cartText === null || !trackCRealizationMatches(segment.text, cartText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
       }
       continue;
@@ -352,13 +354,13 @@ function guardProductionOutput(
         claim,
         trackCBoundPresentationForClaim(context.productPresentation, claim.scope),
       );
-      if (deterministicText !== null && segment.text !== deterministicText) {
+      if (deterministicText !== null && !trackCRealizationMatches(segment.text, deterministicText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }
       if (deterministicText !== null &&
           (claim.type === "PRICE" || claim.type === "STOCK" || claim.type === "ETA")) {
         // These projections contain only typed numbers/enums and allowlisted
-        // size labels. Exact equality binds every word to this claim; a second
+        // size labels. Editorial equality binds every fact to this claim; a second
         // keyword classifier must not reinterpret STOCK as SIZE_FIT, etc.
         // Keep the authority, scope and freshness checks at this boundary.
         if (!ProtectedClaimV1Schema.safeParse(claim).success) {

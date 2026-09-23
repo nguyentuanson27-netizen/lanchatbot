@@ -137,6 +137,34 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("accepts a writer's bound price realization and rejects a changed price or benefit through the live core", async () => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+    for (const [candidate, accepted] of [
+      ["Dạ, Giá hiện tại của mẫu này là 849.000đ.", true],
+      ["Giá hiện tại của mẫu này là 699.000đ.", false],
+      ["Giá hiện tại của mẫu này là 849.000đ, chất lượng cao cấp.", false],
+    ] as const) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Answer the current price.", proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText: null, factualTexts: [candidate], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" });
+      const run = runTrackCStrategyLive({
+        context, modelResource: MODEL_RESOURCE, decisionAt,
+        dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Giá mẫu này bao nhiêu?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }],
+        checkoutRequestedFields: [], checkoutClarificationActive: false,
+        currentCart: null, paymentOptions: ["COD"], transport: { send },
+      });
+      if (accepted) expect((await run).reply).toBe(candidate);
+      else await expect(run).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+      expect(send).toHaveBeenCalledTimes(2);
+    }
+  });
   it("runs the shared core from a live context and rejects replay fields", async () => {
     const decisionAt = new Date(recipe.evaluation_at);
     const context = contextFromFrozenTrackCCapture({
@@ -221,7 +249,7 @@ describe("Track C C3 strategy-contract runner", () => {
       text: result.responderTask.evidence[0]!.deterministicText,
     }]);
     expect(responderBody.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
+      .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
     for (const internal of ["CLAIM_001", "contentHash", "provenance", "amountVnd"]) {
       expect(JSON.stringify(prompt.responderTask.evidence)).not.toContain(internal);
     }
@@ -547,7 +575,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
       deterministicText:
-        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
+        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       provenance: { authority: "SIMULATION" },
     });
     expect(JSON.stringify(evidence)).not.toContain("effect");
@@ -790,14 +818,15 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(request.generationConfig.responseSchema.properties.answerText)
       .toEqual({ type: "NULL" });
     expect(request.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
+      .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
     expect(request.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "STRING", enum: [
         "Chị thích màu nào hơn ạ?", "Màu nào hợp ý chị hơn ạ?",
+        "Chị đang ưu tiên màu kem đúng không ạ?", "Chị đang ưu tiên màu đen đúng không ạ?",
       ] });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
+      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
         ? result.output.segments[1].claimContentHash
         : "",
@@ -1493,10 +1522,9 @@ describe("Track C C3 strategy-contract runner", () => {
         "Dạ em hiểu băn khoăn của chị ạ.",
       ]) });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
-    // The Responder reads the code-rendered projections but cannot author
-    // factual wording: factualTexts stays pinned to zero items above, so the
-    // acknowledgement itself remains non-factual.
+      .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
+    // Editorial factual realizations stay bound to each selected projection;
+    // the acknowledgement remains a separate non-factual slot.
     expect(responderPrompt.responderTask.evidence).toEqual(
       result.responderTask.evidence.map(({ deterministicText }) =>
         ({ text: deterministicText })),
@@ -1776,7 +1804,7 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_DRAFT_INVALID");
+    })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   });
 
   it("code-realizes simulation price instead of exposing a factual text slot", async () => {

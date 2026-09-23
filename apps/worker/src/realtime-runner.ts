@@ -5134,9 +5134,7 @@ export class RealtimeRunner {
         if (cartSelected && (cart === null || parent === null)) {
           throw new Error("TRACK_C_C3_CART_READINESS_UNAVAILABLE");
         }
-        const candidateMessages = chosen.output.segments.map(({ text }) => ({
-          kind: "TEXT" as const, text,
-        }));
+        const candidateMessages = [{ kind: "TEXT" as const, text: chosen.reply }];
         const payloadHash = canonicalSha256(candidateMessages);
         const readiness = evaluateDeterministicEffectReadinessV1({
           effect: "PROTECTED_OUTBOUND",

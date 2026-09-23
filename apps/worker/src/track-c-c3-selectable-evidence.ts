@@ -191,13 +191,13 @@ export function trackCRuntimeClaimDeterministicText(
   }
   if (claim.type === "SIZE_FIT") {
     const alternative = claim.value.alternativeSizes.length === 0 ? "" :
-      ` Size thay thế đã được xác minh: ${claim.value.alternativeSizes.join(" hoặc ")} ạ.`;
-    return `Theo thông tin size đã xác minh, size phù hợp là ${claim.value.recommendedSizes.join(" hoặc ")} ạ.${alternative}`;
+      ` Chị cũng có thể cân nhắc size ${claim.value.alternativeSizes.join(" hoặc ")} ạ.`;
+    return `Size phù hợp với chị là ${claim.value.recommendedSizes.join(" hoặc ")}${alternative.length === 0 ? " ạ" : ""}.${alternative}`;
   }
   if (claim.type === "ETA") {
     return claim.value.minDays === claim.value.maxDays
       ? `Thời gian giao dự kiến hiện khoảng ${claim.value.minDays} ngày ạ.`
-      : `Thời gian giao dự kiến hiện là ${claim.value.minDays}–${claim.value.maxDays} ngày ạ. Em chưa thể cam kết chính xác một ngày cụ thể trong khoảng này ạ.`;
+      : `Thời gian giao dự kiến là ${claim.value.minDays}–${claim.value.maxDays} ngày. Em chưa thể hẹn chính xác ngày nhận trong khoảng này ạ.`;
   }
   return null;
 }
@@ -245,7 +245,7 @@ function boundedSimulationEvidence(
       ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
       : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
     const deterministicText = design.length === 0 ? profileText :
-      `${profileText} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
+      `${profileText.replace(/ ạ\.$/u, ".")} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {
       displayName,
       material,

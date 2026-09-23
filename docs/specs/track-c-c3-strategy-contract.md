@@ -844,3 +844,41 @@ request, but the Responder can still omit the unavailable alternative even
 when the goal names it. This remains an open behavioral gap under this
 contract; `SUPPORTED` is not whole-question resolution. Frozen fit and
 checkout cases with inconsistent canonical state remain producer/fixture work.
+
+### Follow-up: editorial realization and stateful sales smoke (2026-09-23)
+
+The six-field strategy contract and canonical authority remain unchanged. The
+Strategist starts from the latest request, uses history to recover known inputs,
+and asks a follow-up only when its answer enables an available recommendation
+or a permitted transaction step. A missing shop fact cannot be obtained by
+asking the customer another preference question. A lower-price conditional offer
+does not establish commitment at the verified shop price.
+
+The Responder's existing `factualTexts` now accepts either all selected evidence
+texts, in order, or an empty array to use all original projections. A partial
+array fails closed. For each supplied text the guard permits only removal of
+the final politeness particle and an optional opening `Dạ, `; every factual word,
+number, subject, negation, condition and punctuation stays bound to the source.
+This supersedes the zero-length-only slot described above. It does **not** yet
+provide unrestricted natural factual paraphrasing or prove naturalness acceptance.
+Acknowledgements, uncertainty and progression remain bounded choices. Color
+confirmation questions may name colors present in selected authoritative
+evidence; this neither binds a variant nor establishes buying commitment.
+
+The shared core composes validated segments into one customer-facing text,
+removing only the final politeness particle of non-final segments. Runtime hashes
+that actual outgoing text at the existing protected outbound boundary. Evidence
+segments and claim hashes remain available for validation and diagnostics.
+Multi-product facts without display names use their canonical product IDs as
+labels, never an invented product name. Refund reason alternatives use `hoặc`;
+the reporting deadline remains a required condition.
+
+The opt-in Luna runtime smoke uses `RealtimeRunner.processOne`, persisted
+in-memory conversation/commerce state and mock business ports. It retains every
+synthetic turn, model request/response, fallback reason and state transition.
+It is runtime-entrypoint evidence, not live integration or conversion evidence.
+Luna uses a test-only identity adapter; the production model pin is unchanged.
+Frozen DEV70 remains unmodified and is a separate behavioral probe. Neither
+completion nor passing the schema is a sales-quality score. Full question
+coverage, useful next steps and customer-facing tone must be reviewed from the
+resulting transcripts, with remaining gaps reported explicitly.
