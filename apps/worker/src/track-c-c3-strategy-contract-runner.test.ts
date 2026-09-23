@@ -174,6 +174,8 @@ describe("Track C C3 strategy-contract runner", () => {
       confidenceBand: context.dialogueEvidence.confidenceBand,
       reasonCodes: context.dialogueEvidence.reasonCodes,
     });
+    expect(strategistPrompt.selectableEvidence[0].realizationText)
+      .toBe("Dạ giá hiện tại của mẫu này là 849.000đ ạ.");
     const responderRequest = JSON.parse(send.mock.calls[1]![0].body);
     const responderPrompt = JSON.parse(responderRequest.contents[0].parts[0].text);
     expect(responderPrompt.customerDecisionSignals).toEqual(

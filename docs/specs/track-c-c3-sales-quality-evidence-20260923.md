@@ -37,3 +37,17 @@ factual/effect authority; then run judged out-of-sample and DEV70 regression
 through the runtime entrypoint. If free-form description benefits are later
 needed, bind each to product identity, source version and exact curated wording.
 Do not activate traffic on the basis of this report.
+
+### Follow-up: realization preview
+
+The Strategist now receives the exact deterministic sentence that selecting
+each fact would print. Re-running the same six synthetic conversations on the
+pinned Flash Lite model changed the value objection from generic acknowledgement
+to acknowledgement plus material/design facts, and reduced the comparison reply
+from repeated overview plus fields to one overview. The prior poor-experience
+reply still added price and broad attributes without finding the failed aspect;
+the dispatch-date question still received a delivery-duration estimate. The
+waist question remained generic, and the deadline conclusion remained bounded.
+This is a narrower evidence-selection improvement, not a sales-quality pass.
+An exploratory stronger Strategist request for the prior-experience case timed
+out, so it provides no acceptance evidence.

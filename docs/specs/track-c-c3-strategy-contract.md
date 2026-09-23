@@ -747,6 +747,10 @@ instructed to select only relevant verified evidence for the exact question.
 Those hints cannot grant factual or effect authority. The Responder still
 selects only bounded nonfactual wording; an overly specific acknowledgement
 that can misstate the customer's concern is not admitted.
+The Strategist also sees the exact code-owned realization sentence of each
+selectable evidence entry when one exists. This lets it compare the actual
+sentences for overlap and question scope before selecting refs; it does not
+grant new authority or permit the model to author factual wording.
 
 The existing Google Sheets product registry feeds typed design, occasion, wear,
 care and material attributes through ProductAttributes V1. Field-scoped,

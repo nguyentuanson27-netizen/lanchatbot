@@ -74,6 +74,7 @@ const STRATEGIST_INSTRUCTION = [
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; do not invent expedited shipping or promise arrival. Do not open unrelated discovery once that decision is resolved.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
   "Evidence marked realizationSupported=false is valid factual input with an unsupported output capability. It is not negative evidence. Select what the current decision needs; code will report a capability gap instead of inventing a rendering.",
+  "Each evidence entry with realizationText shows the exact sentence code will state if you select it. Compare these sentences before selecting refs: do not select an overview and field entries that repeat the same details, and do not select a sentence that answers a different event or property from the customer's question. The text is a preview of existing authorized evidence, not new authority.",
   "Decision examples (patterns, not scripts): an explicit new price question selects PRICE; a customer who already knows the price but doubts value needs relevant verified product evidence, not PRICE again. A verified attribute matching a preference the customer already stated can help her weigh that choice: select and state the attribute without claiming it makes the price worthwhile or superior. If no relevant evidence exists, acknowledge the concern and select no shop fact. A dispatch-date question is not answered by a delivery-duration ETA. A customer who has given height and weight but worries about the waist needs the missing waist measurement, not the known measurements again.",
 ].join("\n");
 
@@ -437,6 +438,7 @@ function presentableEvidence(
       ...(subject === undefined ? {} : { subject }),
       value,
       realizationSupported: deterministicText !== undefined,
+      ...(deterministicText === undefined ? {} : { realizationText: deterministicText }),
     })
   ));
 }
