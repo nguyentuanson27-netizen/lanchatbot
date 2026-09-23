@@ -209,4 +209,12 @@ tests passed, including realtime C3 entrypoint, SalesCycle transition/cart
 claims, checkout reachability, projection equality, current-cart validation
 and the r31.3 replay seam. The protected-cart producer tests passed on the
 `fe19c68` source slice; the producer is unchanged at `e695677`. Exact draft
-PR HEAD and remote CI evidence must be updated after this documentation commit.
+PR HEAD and remote CI evidence are tracked in draft PR #374.
+
+The first full CI dispatch at documentation HEAD `0c03e9e` found three stale
+expectations in `track-c-c3-post-pr358-behavior.test.ts`: those tests still
+offered `ASK_MEASUREMENTS` without a canonical `MEASUREMENTS_REQUIRED` blocker.
+The current contract intentionally requires that blocker. The tests now
+expect `NONE` without it and still verify that an actual blocker permits the
+measurement question ahead of checkout. The focused file passed 11/11 after
+the correction; the replacement exact-head CI result is linked from PR #374.
