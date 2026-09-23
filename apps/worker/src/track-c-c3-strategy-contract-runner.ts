@@ -15,9 +15,10 @@ import {
   type CandidateVertexTransport,
 } from "./context-v2-candidate.js";
 import {
-  buildTrackCOfflineCandidateRequest,
+  buildTrackCSharedCandidateRequest,
   contextFromFrozenTrackCCapture,
 } from "./track-c-offline-candidate.js";
+import { parseContextV2WithIntegrity } from "./context-v2.js";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
@@ -161,6 +162,17 @@ export interface TrackCStrategyContractCaseInput {
    */
   readonly deliveryDeadlineConstraint?: TrackCDeliveryDeadlineConstraint;
   readonly simulationMetadata?: readonly TrackCV5SimulationMetadata[];
+  readonly transport: CandidateVertexTransport;
+  readonly signal?: AbortSignal;
+}
+
+export interface TrackCStrategyLiveInput {
+  readonly context: ContextV2;
+  readonly modelResource: string;
+  readonly decisionAt: Date;
+  readonly dialogue: readonly ShadowContextMessage[];
+  readonly checkoutRequestedFields: readonly TrackCCheckoutField[];
+  readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -418,20 +430,23 @@ function presentableEvidence(
 
 export function buildTrackCStrategistContractRequest(input: Readonly<{
   modelResource: string;
-  capture: unknown;
-  evaluationAt: Date;
+  context?: ContextV2;
+  capture?: unknown;
+  evaluationAt?: Date;
   evaluationContext: readonly ShadowContextMessage[];
   evidence: readonly TrackCSelectableEvidence[];
   constraints: TrackCStrategistConstraints;
 }>): BuiltCandidateRequest {
-  const base = buildTrackCOfflineCandidateRequest({
-    modelResource: input.modelResource,
+  const context = input.context ?? contextFromFrozenTrackCCapture({
     capture: input.capture,
-    evaluationAt: input.evaluationAt,
+    evaluationAt: input.evaluationAt ?? new Date(Number.NaN),
+  });
+  const base = buildTrackCSharedCandidateRequest({
+    modelResource: input.modelResource,
+    context,
     evaluationContext: input.evaluationContext,
     systemInstruction: STRATEGIST_INSTRUCTION,
   });
-  const context = contextFromFrozenTrackCCapture(input);
   return narrowRequest(base, strategistResponseSchema(input.constraints, input.evidence), {
     contractVersion: "TRACK_C_C3_STRATEGIST_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
@@ -567,16 +582,14 @@ function responderDraftSchema(task: TrackCResponderTask, conversationLane: Track
 
 function buildTrackCResponderContractRequest(input: Readonly<{
   modelResource: string;
-  capture: unknown;
-  evaluationAt: Date;
+  context: ContextV2;
   evaluationContext: readonly ShadowContextMessage[];
   task: TrackCResponderTask;
   conversationLane: TrackCConversationLane;
 }>): BuiltCandidateRequest {
-  const base = buildTrackCOfflineCandidateRequest({
+  const base = buildTrackCSharedCandidateRequest({
     modelResource: input.modelResource,
-    capture: input.capture,
-    evaluationAt: input.evaluationAt,
+    context: input.context,
     evaluationContext: input.evaluationContext,
     systemInstruction: RESPONDER_INSTRUCTION,
   });
@@ -871,6 +884,7 @@ function constraintsFor(
   context: ContextV2,
   metadata: readonly TrackCV5SimulationMetadata[],
   dialogue: readonly ShadowContextMessage[],
+  canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[],
 ): TrackCStrategistConstraints {
   if (!metadata.every(validMetadata)) {
     throw new Error("TRACK_C_V5_SIMULATION_METADATA_INVALID");
@@ -883,9 +897,9 @@ function constraintsFor(
     entry.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1" &&
     entry.state === "REQUIRED"
   );
-  const checkoutRequestedFields = checkout?.kind ===
+  const checkoutRequestedFields = canonicalCheckoutRequestedFields ?? (checkout?.kind ===
       "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1"
-    ? checkout.missingFields : [];
+    ? checkout.missingFields : []);
   if (hardStop) {
     return Object.freeze({
       permittedCanonicalActions: Object.freeze(["HOLD_POSITION"] as const),
@@ -968,13 +982,15 @@ function fixedTask(
   });
 }
 
-export async function runTrackCStrategyContractCase(
-  input: TrackCStrategyContractCaseInput,
+type TrackCStrategyCoreInput = Omit<TrackCStrategyContractCaseInput, "capture"> & Readonly<{
+  context: ContextV2;
+  canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[];
+}>;
+
+async function runTrackCStrategyContractCore(
+  input: TrackCStrategyCoreInput,
 ): Promise<TrackCStrategyContractCaseResult> {
-  const context = contextFromFrozenTrackCCapture({
-    capture: input.capture,
-    evaluationAt: input.evaluationAt,
-  });
+  const context = input.context;
   if (context.ownership.owner !== "BOT" || context.ownership.handoffActive) {
     throw new Error("TRACK_C_V5_GENERATION_OWNER_FORBIDDEN");
   }
@@ -1010,7 +1026,10 @@ export async function runTrackCStrategyContractCase(
   const lane = selectTrackCConversationLane(
     trustedAcquisition === undefined ? [] : [trustedAcquisition],
   );
-  const constraints = constraintsFor(context, simulationMetadata, input.evaluationContext);
+  const constraints = constraintsFor(
+    context, simulationMetadata, input.evaluationContext,
+    input.canonicalCheckoutRequestedFields,
+  );
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
   let task: TrackCResponderTask;
@@ -1031,8 +1050,7 @@ export async function runTrackCStrategyContractCase(
   } else {
     const strategistRequest = buildTrackCStrategistContractRequest({
       modelResource: input.modelResource,
-      capture: input.capture,
-      evaluationAt: input.evaluationAt,
+      context,
       evaluationContext: input.evaluationContext,
       evidence,
       constraints,
@@ -1077,8 +1095,7 @@ export async function runTrackCStrategyContractCase(
   }
   const responderRequest = buildTrackCResponderContractRequest({
     modelResource: input.modelResource,
-    capture: input.capture,
-    evaluationAt: input.evaluationAt,
+    context,
     evaluationContext: input.evaluationContext,
     task,
     conversationLane: lane,
@@ -1138,5 +1155,53 @@ export async function runTrackCStrategyContractCase(
     output,
     reply: output.segments.map(({ text }) => text).join("\n"),
     identity,
+  });
+}
+
+/** Frozen replay keeps its original admission and evaluation-only contract. */
+export async function runTrackCStrategyContractCase(
+  input: TrackCStrategyContractCaseInput,
+): Promise<TrackCStrategyContractCaseResult> {
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
+  const { capture: _capture, ...coreInput } = input;
+  return runTrackCStrategyContractCore({ ...coreInput, context });
+}
+
+/** Live adapter accepts only a validated pre-decision context and canonical fields. */
+export async function runTrackCStrategyLive(
+  input: TrackCStrategyLiveInput,
+): Promise<Pick<TrackCStrategyContractCaseResult,
+  "conversationLane" | "conversationPlan" | "responderTask" | "output" | "reply" | "identity">> {
+  const context = parseContextV2WithIntegrity(input.context);
+  if (input.checkoutRequestedFields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
+      context.phase.sourceStage !== "CART_OPEN" &&
+        context.phase.sourceStage !== "ORDER_PREVIEW" &&
+        input.checkoutRequestedFields.length > 0) {
+    throw new Error("TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_INVALID");
+  }
+  const result = await runTrackCStrategyContractCore({
+    lane: "PRODUCTION_CONTRACT",
+    context,
+    modelResource: input.modelResource,
+    evaluationAt: input.decisionAt,
+    evaluationContext: input.dialogue,
+    simulationFacts: [],
+    simulationMetadata: [],
+    canonicalCheckoutRequestedFields: input.checkoutRequestedFields,
+    ...(input.trustedAcquisition === undefined
+      ? {} : { trustedAcquisition: input.trustedAcquisition }),
+    transport: input.transport,
+    ...(input.signal === undefined ? {} : { signal: input.signal }),
+  });
+  return Object.freeze({
+    conversationLane: result.conversationLane,
+    conversationPlan: result.conversationPlan,
+    responderTask: result.responderTask,
+    output: result.output,
+    reply: result.reply,
+    identity: result.identity,
   });
 }

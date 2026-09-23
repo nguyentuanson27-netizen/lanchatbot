@@ -192,15 +192,27 @@ export function buildTrackCOfflineCandidateRequest(input: Readonly<{
   evaluationContext: readonly ShadowContextMessage[];
   systemInstruction: string;
 }>): BuiltCandidateRequest {
+  return buildTrackCSharedCandidateRequest({
+    modelResource: input.modelResource,
+    context: contextFromFrozenTrackCCapture(input),
+    evaluationContext: input.evaluationContext,
+    systemInstruction: input.systemInstruction,
+  });
+}
+
+/** Shared, side-effect-free request builder for frozen replay and live input. */
+export function buildTrackCSharedCandidateRequest(input: Readonly<{
+  modelResource: string;
+  context: ContextV2;
+  evaluationContext: readonly ShadowContextMessage[];
+  systemInstruction: string;
+}>): BuiltCandidateRequest {
   if (!input.systemInstruction.trim()) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_SYSTEM_INSTRUCTION_INVALID");
   }
   const request = buildCandidateRequest({
     modelResource: input.modelResource,
-    context: contextFromFrozenTrackCCapture({
-      capture: input.capture,
-      evaluationAt: input.evaluationAt,
-    }),
+    context: input.context,
   });
   const body = JSON.parse(request.body) as {
     readonly contents: readonly [{
