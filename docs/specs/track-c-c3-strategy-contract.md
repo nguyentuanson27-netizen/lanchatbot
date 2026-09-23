@@ -770,3 +770,20 @@ provider timeout/transient errors prevented two of six outcomes from being
 judged. The realtime server and C3 model pin remain unchanged. Compiler
 success and response completion do not satisfy the behavioral acceptance
 criterion above.
+
+### Follow-up: adaptive measurement permission
+
+On adaptive turns, product binding alone no longer makes
+`ASK_MEASUREMENTS` available. The canonical pre-decision context must carry
+`MEASUREMENTS_REQUIRED`, and the customer must still be able to provide the
+measurement. This prevents a permitted but unrelated fit request from being
+attached to a price, stock, policy, offer or delivery answer. Trusted fixed
+first contact retains its separately specified measurement progression.
+
+The decision prompt asks the Strategist to identify what the customer already
+knows, the exact property or event still open, and why a proposed input would
+change the current decision. These checks guide model choice; they do not turn
+compiler acceptance into a semantic-quality certificate. If a real fit need
+arrives without a canonical measurement blocker, the owning producer/state
+transition must be corrected. C3 must not recover by allowing measurement
+requests after every product-bound turn.

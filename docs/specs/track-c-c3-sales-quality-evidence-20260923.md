@@ -51,3 +51,49 @@ waist question remained generic, and the deadline conclusion remained bounded.
 This is a narrower evidence-selection improvement, not a sales-quality pass.
 An exploratory stronger Strategist request for the prior-experience case timed
 out, so it provides no acceptance evidence.
+
+### GPT-6 Luna root-cause follow-up at `ff6839c`
+
+The candidate now requires a canonical `MEASUREMENTS_REQUIRED` blocker before
+offering adaptive `ASK_MEASUREMENTS`; fixed first contact remains separate.
+The Strategist instruction makes known facts, exact question scope, and the
+reason for any next input explicit. The bounded `DECISION_CRITERION` wording
+can ask which part of a previous purchase was uncomfortable or which product
+point remains hard to justify against the customer's budget. No commercial
+fact, effect authority, output field, or model pin was added.
+
+An offline GPT-6 Luna `medium` run sent all 70 frozen DEV cases through the
+current C3 core, with Luna supplying both model stages and the code compiler,
+projector, and final guard retained. The run completed 62 guarded replies;
+four cart cases lacked the full canonical cart identity/revision needed by the
+current-cart binding, two stale captures rejected before a model call, and two
+multi-product price answers failed because a safe display label was not
+available. The run is not a judged 62/70 sales score. It used a temporary
+evaluation-only provider identity adapter and did not execute realtime
+transport, Outbox, or customer traffic. The full histories, decisions and
+replies are retained in the owner-local `LUNA_DEV70_ROOTFIX_GATED_20260923`
+artifact, bound to code commit `ff6839c`.
+
+Observed improvement: the dispatch-date question no longer receives the
+delivery-duration ETA; the wrinkle question no longer treats material as
+wrinkle evidence; unrelated measurement prompts after stock, policy, offer,
+and delivery answers disappeared; a previous-discomfort holdout asks which
+part was uncomfortable. A known-price value objection with verified design
+attributes selects a relevant design projection.
+
+Remaining sales-quality gaps are material. A budget objection with only a
+price fact can still end in generic acknowledgement; design projections do
+not explain value by themselves. The available bounded Responder surface is
+still formulaic. DEV fit case `V5V4Q035` asks for fit guidance while its frozen
+canonical context has no measurement blocker, so the safe reply is unresolved;
+that input disagreement must be fixed at the producer/fixture boundary rather
+than widening `ASK_MEASUREMENTS` globally. DEV deadline cases receive the
+verified ETA but lack a canonical deadline constraint for a guarded conclusion.
+The four cart fixtures need full current-cart binding, and multi-product
+answers need authoritative product-keyed labels. The six independent holdouts
+remain qualitative probes, not conversion or behavioral acceptance evidence.
+
+Verification for the code change: worker TypeScript build passed, 45 focused
+C3 runner tests passed, and the realtime runner C3 entrypoint test passed.
+The present result does not authorize a model switch, merge, deploy, or
+traffic activation.
