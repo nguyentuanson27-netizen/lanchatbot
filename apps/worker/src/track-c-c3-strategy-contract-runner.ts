@@ -604,7 +604,7 @@ function answerWording(
   return [];
 }
 
-function requestWording(task: TrackCResponderTask): readonly string[] {
+function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): readonly string[] {
   const canonical = task.canonicalRequest?.type;
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
     return REQUEST_WORDING[canonical];
@@ -619,14 +619,30 @@ function requestWording(task: TrackCResponderTask): readonly string[] {
       !/[.!?\r\n]/u.test(color) && redactAnalyticsMessage(color).text === color
     ) : []
   ))];
+  const latest = [...dialogue].reverse().find(({ direction }) => direction === "INBOUND")?.text
+    .normalize("NFC").toLocaleLowerCase("vi-VN") ?? "";
+  const mentionedColors = colors.filter((color) => {
+    const normalized = color.normalize("NFC").toLocaleLowerCase("vi-VN");
+    // Closed catalog labels only, bounded by Unicode word characters. This
+    // merely enables a confirmation question; it grants no cart selection.
+    let index = latest.indexOf(normalized);
+    while (index !== -1) {
+      const before = latest[index - 1] ?? "";
+      const after = latest[index + normalized.length] ?? "";
+      if (!/[\p{L}\p{N}]/u.test(before) && !/[\p{L}\p{N}]/u.test(after)) return true;
+      index = latest.indexOf(normalized, index + 1);
+    }
+    return false;
+  });
   return [...REQUEST_WORDING.COLOR,
-    ...colors.map((color) => `Chị đang ưu tiên màu ${color} đúng không ạ?`)];
+    ...mentionedColors.map((color) => `Chị đang ưu tiên màu ${color} đúng không ạ?`)];
 }
 
 function responderDraftSchema(
   task: TrackCResponderTask,
   conversationLane: TrackCConversationLane,
   context: ContextV2,
+  dialogue: readonly ShadowContextMessage[],
 ) {
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
@@ -655,7 +671,7 @@ function responderDraftSchema(
         },
       },
       progressionText: needsProgression
-        ? { type: "STRING", enum: requestWording(task) }
+        ? { type: "STRING", enum: requestWording(task, dialogue) }
         : { type: "NULL" },
     },
   };
@@ -675,7 +691,7 @@ function buildTrackCResponderContractRequest(input: Readonly<{
     systemInstruction: RESPONDER_INSTRUCTION,
   });
   return narrowRequest(base, responderDraftSchema(
-    input.task, input.conversationLane, input.context,
+    input.task, input.conversationLane, input.context, input.evaluationContext,
   ), {
     contractVersion: "TRACK_C_C3_RESPONDER_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
@@ -701,7 +717,7 @@ function text(value: unknown, errorCode: string): string | null {
   return value;
 }
 
-function parseResponderDraft(value: unknown, task: TrackCResponderTask): ResponderDraft {
+function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): ResponderDraft {
   const record = plainObject(value, "TRACK_C_RESPONDER_DRAFT_INVALID");
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -720,7 +736,7 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask): Respond
     // Exact schema vocabulary contains no customer values. Resolve it to the
     // code-owned string before DLP, which can mistake a locality question for
     // an address. Any other text still goes through DLP and final validation.
-    progressionText: requestWording(task).find((wording) =>
+    progressionText: requestWording(task, dialogue).find((wording) =>
       wording === record.progressionText
     ) ?? text(record.progressionText, "TRACK_C_RESPONDER_DRAFT_INVALID"),
   });
@@ -766,7 +782,7 @@ function deterministicCheckoutText(
   return `Chị cho em xin ${joined} để tiếp tục nhé.`;
 }
 
-function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): void {
+function assertProgression(task: TrackCResponderTask, draft: ResponderDraft, dialogue: readonly ShadowContextMessage[]): void {
   if (task.continuation?.type === "KEEP_OPEN") {
     if (draft.progressionText !== null) {
       throw new Error("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
@@ -790,7 +806,7 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft): vo
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
   if (draft.progressionText !== null &&
-      !requestWording(task).includes(draft.progressionText)) {
+      !requestWording(task, dialogue).includes(draft.progressionText)) {
     throw new Error("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
   }
 }
@@ -815,6 +831,7 @@ function deterministicDeadlineFeasibilityText(
 
 function compileResponderDraft(input: Readonly<{
   context: ContextV2;
+  dialogue: readonly ShadowContextMessage[];
   task: TrackCResponderTask;
   draft: ResponderDraft;
   lane: TrackCV5ExecutionLane;
@@ -840,7 +857,7 @@ function compileResponderDraft(input: Readonly<{
          !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!)))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  assertProgression(task, draft);
+  assertProgression(task, draft, input.dialogue);
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
@@ -1231,6 +1248,7 @@ async function runTrackCStrategyContractCore(
     draft = parseResponderDraft(
       providerJson(responderPayload, "TRACK_C_RESPONDER_DRAFT_INVALID"),
       task,
+      input.evaluationContext,
     );
   } catch (error) {
     throw stageFailure("RESPONDER", responderPayload, error);
@@ -1239,6 +1257,7 @@ async function runTrackCStrategyContractCore(
   try {
     output = compileResponderDraft({
       context,
+      dialogue: input.evaluationContext,
       task,
       draft,
       lane: input.lane,

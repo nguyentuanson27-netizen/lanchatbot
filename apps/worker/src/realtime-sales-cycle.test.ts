@@ -241,6 +241,24 @@ function input(
   } as const;
 }
 
+describe("Unicode size selection at the commerce boundary", () => {
+  it.each(["Chị sẽ lấy một bộ size M.", "Chị lấy một bộ size M.",
+    "Chị sẽ lấy một bộ size M.".normalize("NFD"), "Chốt CB182, size XL nhé."])(
+    "passes the actual size token to POS: %s", async (text) => {
+      let queriedSize: string | null | undefined;
+      const result = await evaluateRealtimeSalesCycle({
+        ...input(createRealtimeSalesState(conversationId, pageId, now), text, "unicode-size"),
+        facts: { ...facts, resolveCartSelection: async (query, at) => {
+          queriedSize = query.size;
+          return facts.resolveCartSelection!(query, at);
+        } },
+      });
+      expect(queriedSize).toBe(text.includes("XL") ? "XL" : "M");
+      expect(result.plan?.state.stage).toBe("CART_OPEN");
+    },
+  );
+});
+
 function signals(input: {
   fullName?: { value: string; evidenceText?: string; confidence?: number };
   phone?: { value: string; evidenceText?: string; confidence?: number };

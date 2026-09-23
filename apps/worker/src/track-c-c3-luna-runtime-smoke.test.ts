@@ -81,11 +81,20 @@ function invokeLuna(prompt: string, schemaPath: string, outputPath: string): Pro
     const args = ["exec", "-m", "gpt-6-luna", "-c", 'model_reasoning_effort="medium"',
       "--ephemeral", "--skip-git-repo-check", "--ignore-user-config", "--ignore-rules",
       "-s", "read-only", "-C", outputDir!, "--output-schema", schemaPath, "-o", outputPath, "-"];
-    const child = spawn(process.execPath, [cli, ...args], {
-      cwd: outputDir!, windowsHide: true, stdio: ["pipe", "ignore", "ignore"],
-    });
+    const child = /\.[cm]?js$/iu.test(cli)
+      ? spawn(process.execPath, [cli, ...args], {
+        cwd: outputDir!, windowsHide: true, stdio: ["pipe", "ignore", "pipe"],
+      })
+      : spawn(cli, args, {
+      cwd: outputDir!, windowsHide: true, stdio: ["pipe", "ignore", "pipe"],
+      });
+    let diagnostics = "";
+    child.stderr.on("data", (chunk) => { diagnostics += String(chunk); });
     child.on("error", () => resolveExit(-1));
-    child.on("close", (code) => resolveExit(code ?? -1));
+    child.on("close", (code) => {
+      void writeFile(`${outputPath}.stderr.txt`, diagnostics, "utf8")
+        .finally(() => resolveExit(code ?? -1));
+    });
     child.stdin.end(prompt);
   });
 }
@@ -162,7 +171,8 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       const pageId = "1198992073286645";
       const conversationHash = `synthetic:${journey.id}`;
       const conversationId = `43820fd4-daa7-4917-9835-a38cb55120e${journeyIndex}`;
-      const baseAt = new Date("2026-09-23T02:00:00.000Z");
+      const baseAt = new Date();
+      const priceExpiresAt = new Date(baseAt.getTime() + 172_800_000).toISOString();
       let currentBatch: any;
       const batchSeed = item({ sequence: journeyIndex * 10 + 1, text: journey.turns[0], journeyId: journey.id, occurredAt: baseAt });
       currentBatch = {
@@ -310,12 +320,14 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
             expiresAt: "2099-01-01T00:00:00.000Z", productId: "CB182", facts: { schemaVersion: 1, productId: "CB182",
               parentProductId: "CB182", offerType: "SET", listPriceVnd: null, salePriceVnd: 799000, sizes: ["M"], stockStatus: "IN_STOCK",
               stockQuantity: 2, deliveryEta: { minDays: 2, maxDays: 4 }, fulfillmentPolicy: "READY_STOCK", imageUrls: [] }, reasonCode: null }),
-          resolveCartSelection: async (query: { quantity: number; deliveryAddress?: string | null }) => {
-            if (/size\s*L\b/iu.test(String(currentBatch.items[0].envelope.message.text))) selectedSize = "L";
+          resolveCartSelection: async (query: { quantity: number; lineId?: string; size?: string | null; deliveryAddress?: string | null }) => {
+            // The provider resolves the requested selection. It must not
+            // mutate a cart implicitly by re-reading the latest utterance.
+            if (query.size) selectedSize = query.size;
             const size = selectedSize;
             const unitPrice = 799_000;
             return { status: "READY", line: {
-              lineId: size === "L" ? "13000000-0000-4000-8000-000000000002" : "13000000-0000-4000-8000-000000000001",
+              lineId: query.lineId ?? "13000000-0000-4000-8000-000000000001",
               parentProductId: "CB182", offerId: "SET", offerKind: "SET", quantity: query.quantity,
               components: [{ componentProductId: "CB182_AO", componentSku: `CB182_AO_BE_${size}`,
                 componentRole: "TOP", color: "BE", size, quantity: 1 },
@@ -325,7 +337,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
               priceAuthority: { priceFactRef: "synthetic-price-v1", shopId: "SYNTHETIC", parentProductId: "CB182",
                 offerId: "SET", offerPriceKind: "SET", componentProductId: null,
                 metadata: { authority: "PANCAKE_POS", sourceVersion: "synthetic-pos-v1", observedAt: baseAt.toISOString(),
-                  expiresAt: "2099-01-01T00:00:00.000Z", freshForSeconds: 172800, freshnessState: "FRESH" } },
+                  expiresAt: priceExpiresAt, freshForSeconds: 172800, freshnessState: "FRESH" } },
               lineTotalVnd: unitPrice * query.quantity,
             }, shopId: "SYNTHETIC", versions: { price: "synthetic-price-v1", inventory: "synthetic-inventory-v1",
               size: "synthetic-size-v1", eta: query.deliveryAddress ? "synthetic-eta-v1" : null },
@@ -351,7 +363,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       for (let turnIndex = 0; turnIndex < journey.turns.length; turnIndex += 1) {
         const sequence = journeyIndex * 10 + turnIndex + 1;
         sourceMessagePk = `00000000-0000-4000-8000-${String(sequence).padStart(12, "0")}`;
-        const at = new Date(baseAt.getTime() + turnIndex * 60_000);
+        const at = new Date();
         const entry = item({ sequence, text: journey.turns[turnIndex]!, journeyId: journey.id, occurredAt: at });
         currentBatch = { ...currentBatch, generation: sequence, inboxIds: [entry.inboxId],
           firstReceiveSequence: sequence, lastReceiveSequence: sequence, items: [entry] };

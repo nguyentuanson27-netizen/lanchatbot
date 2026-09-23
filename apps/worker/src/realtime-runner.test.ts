@@ -3690,7 +3690,17 @@ describe("RealtimeRunner inbound batching", () => {
       },
     });
 
-    const cartEntry = item(35, "chốt CB182 size M");
+    // An ordinary follow-up may leave commerce unchanged. It still needs C3;
+    // requiring a new SalesCycle plan previously bypassed adaptive dialogue.
+    const followupEntry = item(40, "Chị vẫn đang cân nhắc mẫu này.");
+    currentBatch = { ...batch, generation: 11, inboxIds: [followupEntry.inboxId],
+      firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followupEntry] };
+    vi.setSystemTime(followupEntry.occurredAt);
+    const callsBeforeFollowup = c3Send.mock.calls.length;
+    expect(await runner.processOne()).toBe(true);
+    expect(c3Send.mock.calls.length - callsBeforeFollowup).toBe(2);
+    expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
+    const cartEntry = item(41, "chốt CB182 size M");
     currentBatch = {
       ...batch, generation: 11, inboxIds: [cartEntry.inboxId],
       firstReceiveSequence: 35, lastReceiveSequence: 35, items: [cartEntry],
@@ -3704,14 +3714,14 @@ describe("RealtimeRunner inbound batching", () => {
     expect(persistedCommerce.stage).toBe("CART_OPEN");
     const cartRevision = persistedCommerce.cart!.value.revision;
 
-    const feeEntry = item(36, "Giỏ này tính tiền giao thế nào?");
+    const feeEntry = item(42, "Giỏ này tính tiền giao thế nào?");
     currentBatch = {
       ...batch, generation: 12, inboxIds: [feeEntry.inboxId],
       firstReceiveSequence: 36, lastReceiveSequence: 36, items: [feeEntry],
     };
     vi.setSystemTime(feeEntry.occurredAt);
     expect(await runner.processOne()).toBe(true);
-    const feeCommit = commit.mock.calls[2]![0] as {
+    const feeCommit = commit.mock.calls[3]![0] as {
       metaPlan?: { messages: readonly { text: string }[];
         protectedClaimTypes?: readonly string[] };
       salesCycleReadback?: { expectedRevision: number; readiness: {
@@ -3723,7 +3733,7 @@ describe("RealtimeRunner inbound batching", () => {
     });
     expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
     expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
-    const detailsEntry = item(37, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh");
+    const detailsEntry = item(43, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh");
     currentBatch = {
       ...batch, generation: 13, inboxIds: [detailsEntry.inboxId],
       firstReceiveSequence: 37, lastReceiveSequence: 37, items: [detailsEntry],
@@ -3731,7 +3741,7 @@ describe("RealtimeRunner inbound batching", () => {
     vi.setSystemTime(detailsEntry.occurredAt);
     expect(await runner.processOne()).toBe(true);
     expect(persistedCommerce.stage).toBe("CART_OPEN");
-    const detailsCommit = commit.mock.calls[3]![0] as {
+    const detailsCommit = commit.mock.calls[4]![0] as {
       metaPlan?: { messages: readonly { text: string }[] };
     };
     expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
@@ -3739,7 +3749,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
       .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
 
-    const paymentEntry = item(38, "COD");
+    const paymentEntry = item(44, "COD");
     currentBatch = {
       ...batch, generation: 14, inboxIds: [paymentEntry.inboxId],
       firstReceiveSequence: 38, lastReceiveSequence: 38, items: [paymentEntry],
@@ -3747,7 +3757,7 @@ describe("RealtimeRunner inbound batching", () => {
     vi.setSystemTime(paymentEntry.occurredAt);
     expect(await runner.processOne()).toBe(true);
     expect(persistedCommerce.stage).toBe("ORDER_PREVIEW");
-    const confirmationEntry = item(39, "ok");
+    const confirmationEntry = item(45, "ok");
     currentBatch = {
       ...batch, generation: 15, inboxIds: [confirmationEntry.inboxId],
       firstReceiveSequence: 39, lastReceiveSequence: 39, items: [confirmationEntry],
@@ -3755,7 +3765,7 @@ describe("RealtimeRunner inbound batching", () => {
     vi.setSystemTime(confirmationEntry.occurredAt);
     expect(await runner.processOne()).toBe(true);
     expect(persistedCommerce.stage).toBe("PURCHASE_CONFIRMED");
-    expect(commit).toHaveBeenCalledTimes(6);
+    expect(commit).toHaveBeenCalledTimes(7);
     } finally {
       vi.useRealTimers();
     }

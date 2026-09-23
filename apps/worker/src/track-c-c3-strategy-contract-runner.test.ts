@@ -137,6 +137,23 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it.each(["Ib", "Mẫu có màu đen không em?"])("only offers color confirmation when the customer mentioned that catalog color: %s", async (customerText) => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload(responderDraft()), providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{ direction: "INBOUND",
+        senderType: "CUSTOMER", messageType: "TEXT", text: customerText, attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: { kind: "TRACK_C_TRUSTED_ACQUISITION_V1", origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true, authorization: "NONE" }, transport: { send },
+    });
+    const choices = JSON.parse(send.mock.calls[0]![0].body).generationConfig.responseSchema.properties.progressionText.enum;
+    expect(choices.includes("Chị đang ưu tiên màu đen đúng không ạ?")).toBe(customerText.includes("đen"));
+    expect(choices).not.toContain("Chị đang ưu tiên màu kem đúng không ạ?");
+  });
   it("labels two bound products by canonical code when catalog display names are absent", async () => {
     const twoProducts = materializeTrackCV5CaseCapture({
       lane: "BEHAVIOR_SIMULATION", recipe, runtimeClaimCatalog: facts.runtime_claim_catalog,
@@ -846,7 +863,6 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(request.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "STRING", enum: [
         "Chị thích màu nào hơn ạ?", "Màu nào hợp ý chị hơn ạ?",
-        "Chị đang ưu tiên màu kem đúng không ạ?", "Chị đang ưu tiên màu đen đúng không ạ?",
       ] });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",

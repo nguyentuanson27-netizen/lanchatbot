@@ -308,7 +308,10 @@ function money(value: number): string {
 }
 
 function explicitSize(text: string): string | null {
-  return text.toUpperCase().match(/(?:^|[^A-Z])(S|M|L|XL)(?:$|[^A-Z])/u)?.[1] ?? null;
+  // Vietnamese accented letters are letters too: "sẽ" and "lấy" must
+  // never become S or L before the customer's actual size token is read.
+  return text.normalize("NFC").toUpperCase()
+    .match(/(?:^|[^\p{L}\p{N}])(XL|S|M|L)(?=$|[^\p{L}\p{N}])/u)?.[1] ?? null;
 }
 
 function requestedQuantityValue(

@@ -5058,7 +5058,6 @@ export class RealtimeRunner {
     // The transaction below remains the only owner of send and effects.
     if (this.options.c3 !== null && triggerMessagePk !== null &&
         salesCycleRecord !== null &&
-        (salesCyclePlan !== null || salesCartReadback !== null) &&
         !message.isEcho && handoff === null &&
         nextState.conversationOwner === "BOT" &&
         resolution.products.length <= 1 &&

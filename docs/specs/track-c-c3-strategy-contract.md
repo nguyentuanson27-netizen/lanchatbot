@@ -891,3 +891,13 @@ For a supported ANSWER, `answerText` selects null (request covered) or the
 existing uncertainty sentence (a requested part remains uncovered). A generic
 acknowledgement cannot replace that choice. This reduces the competing wording
 choices; whole-question coverage still requires behavioral evaluation.
+
+Runtime follow-ups do not require a new commerce mutation: a persisted canonical
+SalesCycle record is sufficient to build a fresh decision context. Existing
+ownership, media, handled-effect, cart-readback and protected-outbound checks
+still apply. This closes the gap where advisory turns silently bypassed C3
+because the cart had not changed. Size token extraction at the commerce
+boundary uses Unicode letter boundaries so Vietnamese words such as `sẽ` and
+`lấy` cannot become sizes S and L. Color confirmation wording is offered only
+for a catalog color literally mentioned in the latest inbound; it does not
+infer interest from catalog availability alone.
