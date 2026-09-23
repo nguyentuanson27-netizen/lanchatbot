@@ -18,10 +18,15 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  missingRealtimeCheckoutFields,
   buildGuardedModelNegotiationProposalV1,
   prepareHandoffStatePlanV1,
   type ModelNegotiationProposalV1,
 } from "./realtime-sales-cycle.js";
+import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import { buildTrackCSelectableEvidence } from "./track-c-c3-selectable-evidence.js";
+import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
+import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import {
   finalizeModelOwnedRealtimePostGenerationReply,
   runRealtimeReplyDifferential,
@@ -2455,5 +2460,128 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.plan?.state.stage).not.toBe("PURCHASE_CONFIRMED");
     expect(output.plan?.state.confirmation ?? null).toBeNull();
     expect(output.desiredTag).not.toBe("DA_CHOT_DON");
+  });
+
+  it("derives C3 checkout fields and bound cart facts from real transitions", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "c3-open",
+    ));
+    expect(opened.plan?.state.stage).toBe("CART_OPEN");
+    const openState = opened.plan!.state;
+    expect(missingRealtimeCheckoutFields(openState)).toEqual([
+      "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
+    ]);
+    const readbackText = "Giỏ này tính tiền giao thế nào?";
+    const readback = await evaluateRealtimeSalesCycle({
+      ...input(openState, readbackText, "c3-cart-readback"),
+      c3CartReadback: true,
+    });
+    expect(readback.cartReadback).toEqual(expect.objectContaining({
+      effect: "CART_READY", outcome: "READY",
+    }));
+    const canonicalEvidence = buildCanonicalDecisionEvidenceV1({
+      text: readbackText, sourceMessageId: "mid-c3-cart-readback",
+      productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+    });
+    const live = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000077",
+      canonicalEvidence,
+      preConversationRevision: 7, finalConversationRevision: 8,
+      preSalesRevision: openState.revision,
+      commerceState: openState,
+      productId: "CB182", catalogVersion: null,
+      facts: [], productFacts: null, policyResolution,
+      cartReadiness: [readback.cartReadback!], now,
+    });
+    expect(live.currentCart).not.toBeNull();
+    expect(live.checkoutRequestedFields).toEqual([
+      "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
+    ]);
+    const evidence = buildTrackCSelectableEvidence({
+      context: live.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT",
+      currentCart: live.currentCart, evaluationAt: now,
+    });
+    const shipping = evidence.find(({ capability }) => capability === "SHIPPING_FEE");
+    expect(shipping?.deterministicText).toContain("Phí giao hàng của giỏ hiện tại");
+    const semantic = {
+      segments: [{ kind: "VERIFIED_CLAIM", text: shipping!.deterministicText,
+        claimContentHash: shipping!.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    };
+    expect(validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT", now, [], live.currentCart,
+    ).segments).toHaveLength(1);
+    expect(() => validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT", now, [],
+      { ...live.currentCart!, cart: { ...live.currentCart!.cart,
+        revision: live.currentCart!.cart.revision + 1 } },
+    )).toThrow("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
+    expect(() => validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT", now, [],
+      { ...live.currentCart!, cart: { ...live.currentCart!.cart,
+        cartId: "00000000-0000-4000-8000-000000000099" } },
+    )).toThrow("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
+    expect(() => validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT",
+      new Date(Date.parse(live.currentCart!.claimExpiresAt) + 1), [],
+      live.currentCart,
+    )).toThrow("TRACK_C_CURRENT_CART_BINDING_STALE");
+
+    const partial = await evaluateRealtimeSalesCycle(input(
+      openState,
+      "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh",
+      "c3-details-without-payment",
+    ));
+    expect(partial.plan?.state.stage).toBe("CART_OPEN");
+    expect(missingRealtimeCheckoutFields(partial.plan!.state)).toEqual(["PAYMENT_METHOD"]);
+    const paymentInput = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000078",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "Em muốn tiếp tục thanh toán", sourceMessageId: "mid-c3-payment-only",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 8, finalConversationRevision: 9,
+      preSalesRevision: openState.revision,
+      commerceState: partial.plan!.state,
+      productId: "CB182", catalogVersion: null,
+      facts: [], productFacts: null, policyResolution,
+      cartReadiness: [], now,
+    });
+    expect(paymentInput.checkoutRequestedFields).toEqual(["PAYMENT_METHOD"]);
+    expect(paymentInput.paymentOptions).toEqual(["COD"]);
+    const paymentModel = async (_request: { body: string }) => ({
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
+        _request.body.includes("TRACK_C_C3_STRATEGIST_INPUT_V1")
+          ? {
+              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              proposition: "PRICE", evidenceRefs: [],
+              continuation: null, canonicalAction: "ASK_CHECKOUT_DETAILS",
+            }
+          : { answerText: null, factualTexts: [], progressionText: null },
+      ) }] } }] },
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    const paymentReply = await runTrackCStrategyLive({
+      ...paymentInput,
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      decisionAt: now, dialogue: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Em muốn tiếp tục thanh toán", attachmentCount: 0,
+        occurredAt: now.toISOString(),
+      }], checkoutClarificationActive: true,
+      transport: { send: paymentModel },
+    });
+    expect(paymentReply.output.cta).toBe("ASK_CHECKOUT_DETAILS");
+    expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
+      .toContain("hình thức thanh toán COD");
+    expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
+      .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
+    const preview = await evaluateRealtimeSalesCycle(input(
+      partial.plan!.state, "COD", "c3-payment",
+    ));
+    expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(missingRealtimeCheckoutFields(preview.plan!.state)).toEqual([]);
   });
 });

@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
+  trackCCartClaimIsCurrent,
+  type TrackCCurrentCartBinding,
+} from "./track-c-c3-cart-binding.js";
+import {
   TRACK_C_PROTECTED_PROPOSITIONS,
   trackCCustomerFacingSizeFromVariantId,
   type TrackCProtectedProposition,
@@ -121,15 +125,22 @@ function arrayOfStrings(value: unknown, limit: number): readonly string[] | null
 export function trackCRuntimeClaimDeterministicText(
   claim: ContextV2["verifiedClaims"][number],
   presentation?: ContextV2["productPresentation"],
+  cartBinding: TrackCCurrentCartBinding | null = null,
+  at: Date = new Date(),
 ): string | null {
-  // Cart adjustments (shipping fee, freeship, promotion offer) are deliberately
-  // left without wording. Stating one means asserting it about the cart as it
-  // is now, and the input contract carries no current cart identity or revision
-  // to check the claim against, so a fee could be quoted from a cart the
-  // customer has since changed. Adding a formatter alone would not close that,
-  // so the group stays unrealizable and is reported as a realization limit
-  // until the input contract carries the binding. The subject already keeps
-  // cartId/cartVersion for that revalidation.
+  if (claim.scope.kind === "CART") {
+    if (!trackCCartClaimIsCurrent(claim, cartBinding, at)) return null;
+    if (claim.type === "SHIPPING_FEE") {
+      return `Phí giao hàng của giỏ hiện tại là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
+    }
+    if (claim.type === "FREESHIP" && claim.value.eligible) {
+      return "Giỏ hiện tại được miễn phí giao hàng ạ.";
+    }
+    if (claim.type === "PROMOTION_OFFER") {
+      return `Ưu đãi đã áp dụng cho giỏ hiện tại là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
+    }
+    return null;
+  }
   if (claim.scope.kind !== "PRODUCT") return null;
   if (claim.type === "PRICE") {
     return `Dạ giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
@@ -364,6 +375,8 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   context: ContextV2;
   simulationFacts: readonly unknown[];
   executionLane: TrackCV5ExecutionLane;
+  currentCart?: TrackCCurrentCartBinding | null;
+  evaluationAt?: Date;
 }>): readonly TrackCSelectableEvidence[] {
   if (input.executionLane !== "BEHAVIOR_SIMULATION" &&
       input.simulationFacts.length > 0) {
@@ -378,7 +391,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       );
       const subject = claimSubject(claim.scope, boundPresentation);
       const deterministicText = trackCRuntimeClaimDeterministicText(
-        claim, boundPresentation,
+        claim, boundPresentation, input.currentCart ?? null, input.evaluationAt,
       );
       evidence.push(Object.freeze({
         ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,

@@ -32,6 +32,10 @@ import {
   RealtimeRunner as Bf01Bf02RealtimeRunner,
 } from "./bf02-realtime-runner.js";
 import { runRealtimeLoop } from "./realtime-loop.js";
+import {
+  CONTEXT_V2_CANDIDATE_MODEL_ID,
+  FetchCandidateVertexTransport,
+} from "./context-v2-candidate.js";
 import { RedisRealtimeGenerationQuota } from "./realtime-quota.js";
 import { RedisChatHistoryStore } from "./redis-chat-history.js";
 import { RedisBusinessFactsReader } from "./redis-business-facts.js";
@@ -783,6 +787,16 @@ const runnerOptions = {
     process.env.REALTIME_RECORDED_REPLAY_CAPTURE_ENABLED === "true",
   recordedReplayPageId: required("META_PAGE_ID"),
   contextV2CaptureEnabled: df13CommerceStartupInput.mode === "COMMERCE",
+  ...(mode === "DRY_RUN" && process.env.REALTIME_C3_LOCAL_TEST_ENABLED === "true"
+    ? { c3: {
+        modelResource: `projects/${required("VERTEX_PROJECT_ID")}/locations/${
+          process.env.VERTEX_LOCATION?.trim() || credential.region
+        }/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
+        transport: new FetchCandidateVertexTransport(
+          () => vertexModel.candidateAccessToken(),
+        ),
+      } }
+    : {}),
   mediaRecognitionEnabled: mediaCutoutModeRaw === "LIVE",
   mediaClarificationEnabled:
     process.env.REALTIME_MEDIA_CLARIFICATION_ENABLED === "true",

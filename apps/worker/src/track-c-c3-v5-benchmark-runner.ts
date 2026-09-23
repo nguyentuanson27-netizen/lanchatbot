@@ -36,6 +36,10 @@ import { trackCRuntimeClaimDeterministicText } from
   "./track-c-c3-selectable-evidence.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import {
+  trackCCartClaimIsCurrent,
+  type TrackCCurrentCartBinding,
+} from "./track-c-c3-cart-binding.js";
+import {
   buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
@@ -290,6 +294,7 @@ function guardProductionOutput(
   context: ContextV2,
   output: ContextV2CandidateOutputV2,
   evaluationAt: Date,
+  currentCart: TrackCCurrentCartBinding | null = null,
 ): void {
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
@@ -330,7 +335,13 @@ function guardProductionOutput(
       }
     }
     if (claim?.scope.kind === "CART") {
-      throw new Error("TRACK_C_V5_PRODUCTION_CART_GUARD_UNSUPPORTED");
+      if (!trackCCartClaimIsCurrent(claim, currentCart, evaluationAt) ||
+          segment.text !== trackCRuntimeClaimDeterministicText(
+            claim, undefined, currentCart, evaluationAt,
+          )) {
+        throw new Error("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
+      }
+      continue;
     }
     if (claim !== null) {
       // The projector resolves variant labels from the presentation, so the
@@ -412,6 +423,7 @@ export function validateResponderOutput(
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
   simulationClaimContentHashes: readonly string[] = [],
+  currentCart: TrackCCurrentCartBinding | null = null,
 ): ContextV2CandidateOutputV2 {
   if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -462,7 +474,7 @@ export function validateResponderOutput(
     throw new Error("TRACK_C_V5_RESPONDER_PROVENANCE_INVALID");
   }
   if (lane === "PRODUCTION_CONTRACT") {
-    guardProductionOutput(context, output, evaluationAt);
+    guardProductionOutput(context, output, evaluationAt, currentCart);
   } else {
     const simulationHashes = new Set(simulationClaimContentHashes);
     const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {

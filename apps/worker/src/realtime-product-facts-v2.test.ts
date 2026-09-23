@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  buildCanonicalDecisionEvidenceV1,
   selectProductMediaV2,
   buildProductAttributesV1,
   type CatalogSnapshotV3,
@@ -8,6 +9,8 @@ import {
 } from "@lana/business-tools";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { buildRealtimeProductFactsV2, productMediaView } from "./realtime-product-facts-v2.js";
+import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 type ProductImage = StableProductDocument["images"][number];
 
@@ -201,6 +204,26 @@ describe("realtime ProductFactsV2 media projection", () => {
       } },
       attributes: { productId: "SD375", materials: ["LỤA"] },
     });
+    const decisionAt = new Date("2026-08-10T01:00:00.000Z");
+    const live = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000081",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "Mẫu SD375 có chất liệu gì?", sourceMessageId: "mid-sd375-attributes",
+        productId: "SD375", modelBuyingIntent: null, evaluatedAt: decisionAt,
+      }),
+      preConversationRevision: 2, finalConversationRevision: 3,
+      preSalesRevision: 0,
+      commerceState: createRealtimeSalesState(
+        "33333333-3333-4333-8333-333333333333", "page-1", decisionAt,
+      ),
+      productId: "SD375", catalogVersion: "bf09-catalog-v1",
+      facts: [], productFacts: facts, policyResolution: null,
+      cartReadiness: [], now: decisionAt,
+    });
+    expect(live.context.productAttributes).toMatchObject({
+      productId: "SD375", materials: ["LỤA"], silhouettes: ["CHIẾT EO"],
+    });
+    expect(live.context.productPresentation).not.toBeNull();
   });
 
   it("classifies approved front views of a full set or dress as FULL_LOOK", () => {

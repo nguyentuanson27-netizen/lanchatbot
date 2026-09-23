@@ -120,6 +120,8 @@ export interface RealtimeSalesCycleInput {
   readonly now: Date;
   /** Production supplies a live clock; deterministic tests may omit it. */
   readonly effectNow?: () => Date;
+  /** Revalidate a passive cart read before a C3 factual answer. */
+  readonly c3CartReadback?: boolean;
 }
 
 export interface ModelNegotiationProposalV1 {
@@ -180,6 +182,7 @@ export interface RealtimeSalesCycleOutput {
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
   readonly readinessAttempt?: DeterministicEffectReadinessV1;
+  readonly cartReadback?: DeterministicEffectReadinessV1;
   readonly protectedOutbound?: Readonly<{
     claims: readonly ProtectedClaimV1[];
     claimTypes: readonly ProtectedClaimV1["type"][];
@@ -556,10 +559,10 @@ const CHECKOUT_FIELD_LABELS: Readonly<Record<CheckoutFieldKey, string>> = {
   FULL_NAME: "tên người nhận",
   PHONE: "số điện thoại",
   ADDRESS: "địa chỉ",
-  PAYMENT_METHOD: "COD hoặc chuyển khoản",
+  PAYMENT_METHOD: "thanh toán khi nhận hàng (COD)",
 };
 
-function missingCheckout(
+export function missingRealtimeCheckoutFields(
   state: SalesCycleRuntimeState,
 ): readonly CheckoutFieldKey[] {
   const draft = state.checkoutDraft;
@@ -570,6 +573,8 @@ function missingCheckout(
     ...(draft?.paymentMethod ? [] : ["PAYMENT_METHOD" as const]),
   ];
 }
+
+const missingCheckout = missingRealtimeCheckoutFields;
 
 function checkoutCapturedFields(details: CheckoutDetails): readonly CheckoutFieldKey[] {
   return [
@@ -583,8 +588,11 @@ function checkoutCapturedFields(details: CheckoutDetails): readonly CheckoutFiel
 function clarificationMessage(
   missing: readonly CheckoutFieldKey[],
   attemptCount: number,
+  bankTransferAvailable: boolean,
 ): string {
-  const labels = missing.map((field) => CHECKOUT_FIELD_LABELS[field]);
+  const labels = missing.map((field) => field === "PAYMENT_METHOD" && bankTransferAvailable
+    ? "COD hoặc chuyển khoản"
+    : CHECKOUT_FIELD_LABELS[field]);
   if (attemptCount === 1) {
     return `Chị gửi thêm ${labels.join(", ")} trong một tin nhắn giúp em nhé.`;
   }
@@ -1391,7 +1399,8 @@ export async function evaluateRealtimeSalesCycle(
         },
       };
     }
-    const message = clarificationMessage(missing, attemptCount);
+    const message = clarificationMessage(missing, attemptCount,
+      bank !== null);
     const requested = apply({
       kind: "CLARIFICATION_REQUESTED",
       commandId: commandId(`clarification-${attemptCount}`),
@@ -2325,6 +2334,20 @@ export async function evaluateRealtimeSalesCycle(
   ) {
     apply({ kind: "FACTS_PRESENTED", commandId: commandId("facts") });
   }
+  let cartReadback: DeterministicEffectReadinessV1 | null = null;
+  if (input.c3CartReadback && state.cart !== null) {
+    const selections = await currentSelections(
+      input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
+    );
+    const ready = selections.filter(
+      (selection): selection is ReadyCartSelection => selection.status === "READY",
+    );
+    if (ready.length === state.cart.value.lines.length &&
+        selectionsMatchCartLines(state.cart.value.lines, ready)) {
+      const checked = freshReadiness("CART_READY", ready, state.cart.value);
+      if (checked.outcome === "READY") cartReadback = checked;
+    }
+  }
   return {
     handled: false,
     messages: [],
@@ -2332,6 +2355,7 @@ export async function evaluateRealtimeSalesCycle(
     transferToHuman: false,
     desiredTag: null,
     reasonCode: null,
+    ...(cartReadback === null ? {} : { cartReadback }),
     ...(state.stage === "ORDER_PREVIEW" && confirmationDecision.attempted
       ? {
           telemetry: {

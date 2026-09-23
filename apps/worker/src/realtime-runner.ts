@@ -159,6 +159,9 @@ import {
   blockedContextV2Capture,
   buildContextV2Capture,
 } from "./context-v2.js";
+import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
+import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { mapWithBoundedConcurrency } from "./bounded-concurrency.js";
@@ -1340,7 +1343,12 @@ export function classifyCustomerUrlsForInbound(
   policy: CustomerUrlPolicyV1,
   mediaInputLimitExceeded: boolean,
   classify: typeof classifyCustomerUrls = classifyCustomerUrls,
+  checkoutPhoneAllowed = false,
 ): CustomerUrlDecision {
+  if (checkoutPhoneAllowed && /^0\d{9}$/u.test(text.trim())) {
+    return { policy, disposition: "CONTINUE", items: [], productCodes: [],
+      candidateProductCodes: [], reasonCodes: [], explanationAllowed: false };
+  }
   if (!mediaInputLimitExceeded) return classify(text, policy);
   return {
     policy,
@@ -2159,6 +2167,11 @@ export interface RealtimeRunnerOptions {
   readonly wave2StrategyEnabled?: boolean;
   readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
   readonly adAcquisitionPageIds?: readonly string[];
+  /** Explicit test/composition opt-in. Source default stays on the baseline. */
+  readonly c3?: Readonly<{
+    modelResource: string;
+    transport: Parameters<typeof runTrackCStrategyLive>[0]["transport"];
+  }> | null;
 }
 
 export interface ContextV2CaptureTrigger {
@@ -2374,6 +2387,7 @@ export class RealtimeRunner {
       wave2StrategyEnabled: options.wave2StrategyEnabled ?? false,
       adAcquisitionAnalyticsMode: options.adAcquisitionAnalyticsMode ?? "OFF",
       adAcquisitionPageIds: [...(options.adAcquisitionPageIds ?? [])],
+      c3: options.c3 ?? null,
     };
   }
 
@@ -2875,6 +2889,9 @@ export class RealtimeRunner {
       message.text ?? "",
       activeCustomerUrlPolicy(policyResolution),
       mediaInputLimitExceeded,
+      classifyCustomerUrls,
+      salesCycleRecord?.state.stage === "CART_OPEN" ||
+        salesCycleRecord?.state.stage === "ORDER_PREVIEW",
     );
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
@@ -3309,6 +3326,9 @@ export class RealtimeRunner {
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
     let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
+    let salesCartReadback: DeterministicEffectReadinessV1 | null = null;
+    let c3Chosen = false;
+    let c3CartSelected = false;
     let modelNegotiationProposal: ModelNegotiationProposalV1 | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
@@ -5003,6 +5023,7 @@ export class RealtimeRunner {
         policyResolution,
         behaviorModeResolution,
         facts: this.factsReader,
+        c3CartReadback: this.options.c3 !== null,
         now,
         effectNow: () => new Date(),
       });
@@ -5011,6 +5032,7 @@ export class RealtimeRunner {
       salesTelemetry = sales.telemetry ?? null;
       salesProtectedOutbound = sales.protectedOutbound ?? null;
       salesReadinessAttempt = sales.readinessAttempt ?? null;
+      salesCartReadback = sales.cartReadback ?? null;
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -5029,6 +5051,141 @@ export class RealtimeRunner {
         );
         nextState = transitioned.state;
         handoff = transitioned.handoff;
+      }
+    }
+
+    // C3 composes one candidate after commerce has advanced canonical state.
+    // The transaction below remains the only owner of send and effects.
+    if (this.options.c3 !== null && triggerMessagePk !== null &&
+        salesCycleRecord !== null &&
+        (salesCyclePlan !== null || salesCartReadback !== null) &&
+        !message.isEcho && handoff === null &&
+        nextState.conversationOwner === "BOT" &&
+        resolution.products.length <= 1 &&
+        !metaMessages.some((unit) => unit.kind === "IMAGE") &&
+        (!salesHandled || salesTelemetry?.clarificationCase === true)) {
+      try {
+        const c3Input = buildRealtimeC3Input({
+          sourceMessagePk: triggerMessagePk,
+          canonicalEvidence: canonicalDecisionEvidenceForTurn(),
+          preConversationRevision: record.stateVersion,
+          finalConversationRevision: nextState.revision,
+          preSalesRevision: salesCycleRecord.stateRevision,
+          commerceState: salesCyclePlan?.state ?? salesCycleRecord.state,
+          productId: resolvedProduct?.productId ?? nextState.currentProductId,
+          catalogVersion: resolvedProduct?.catalogVersion ?? null,
+          facts: businessFactEnvelopes,
+          productFacts: productFactsV2,
+          policyResolution,
+          cartReadiness: [
+            ...(salesCyclePlan?.effectReadiness ?? []),
+            ...(salesCartReadback === null ? [] : [salesCartReadback]),
+          ],
+          now: new Date(),
+        });
+        const chosen = await runTrackCStrategyLive({
+          ...c3Input,
+          modelResource: this.options.c3.modelResource,
+          decisionAt: new Date(),
+          dialogue: context.map((entry) => ({
+            ...entry,
+            text: redactCustomerUrlsForModel(
+              redactAnalyticsMessage(entry.text).text,
+            ),
+          })),
+          checkoutClarificationActive:
+            (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
+              "CHECKOUT_DETAILS_MISSING",
+          transport: this.options.c3.transport,
+        });
+        validateResponderOutput(
+          c3Input.context, {
+            segments: chosen.output.segments,
+            strategy: chosen.output.strategy,
+            cta: chosen.output.cta,
+          }, "PRODUCTION_CONTRACT", new Date(),
+          [], c3Input.currentCart,
+        );
+        const hashes = new Set(chosen.output.segments.flatMap((segment) =>
+          segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
+        ));
+        const chosenClaims = c3Input.context.verifiedClaims.filter((claim) =>
+          hashes.has(claim.provenance.contentHash)
+        );
+        const selectedTypes = new Set(chosenClaims.map(({ type }) => type));
+        const baselineTypes = salesProtectedOutbound?.claimTypes ??
+          protectedClaimValidation.claimTypes;
+        if (baselineTypes.some((type) => !selectedTypes.has(type))) {
+          throw new Error("TRACK_C_C3_BASELINE_FACT_PRESERVATION");
+        }
+        const cartSelected = chosenClaims.some((claim) => claim.scope.kind === "CART");
+        const cart = cartSelected
+          ? (salesCyclePlan?.state ?? salesCycleRecord.state).cart?.value ?? null
+          : null;
+        const parent = cart === null ? null :
+          [
+            ...(salesCyclePlan?.effectReadiness ?? []),
+            ...(salesCartReadback === null ? [] : [salesCartReadback]),
+          ].reverse().find((readiness) =>
+            readiness.outcome === "READY" &&
+            readiness.binding.cart?.cartId === cart.cartId &&
+            readiness.binding.cart?.cartRevision === cart.revision
+          ) ?? null;
+        if (cartSelected && (cart === null || parent === null)) {
+          throw new Error("TRACK_C_C3_CART_READINESS_UNAVAILABLE");
+        }
+        const candidateMessages = chosen.output.segments.map(({ text }) => ({
+          kind: "TEXT" as const, text,
+        }));
+        const payloadHash = canonicalSha256(candidateMessages);
+        const readiness = evaluateDeterministicEffectReadinessV1({
+          effect: "PROTECTED_OUTBOUND",
+          pageId: claim.pageId,
+          conversationId: record.conversationId,
+          sourceMessageIdHash: canonicalDecisionEvidenceForTurn().buyingIntent.sourceMessageIdHash,
+          conversationRevision: record.stateVersion,
+          salesCycleRevision: salesCycleRecord.stateRevision,
+          productIds: cart === null
+            ? c3Input.context.productBinding.productIds
+            : [...new Set(cart.lines.map(({ parentProductId }) => parentProductId))],
+          cartId: cart?.cartId ?? null,
+          cartVersion: cart?.revision ?? null,
+          cartStateHash: parent?.cartStateHash ?? null,
+          ...(cart === null ? {} : { cartLines: cart.lines }),
+          orderPreviewId: null,
+          orderPreviewHash: null,
+          buyingIntent: null,
+          claims: chosenClaims,
+          protectedClaimTypes: [...selectedTypes].sort(),
+          deterministicEvidenceHash: payloadHash,
+          parentReadinessHash: parent?.readinessHash ?? null,
+          payloadHash,
+          checkedAt: new Date(),
+        });
+        if (readiness.outcome !== "READY") {
+          throw new Error("TRACK_C_C3_OUTBOUND_READINESS_BLOCKED");
+        }
+        if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = candidateMessages;
+          salesProtectedOutbound = {
+            claims: chosenClaims,
+            claimTypes: [...selectedTypes].sort(),
+            readiness,
+          };
+          c3Chosen = true;
+          c3CartSelected = cartSelected;
+        }
+      } catch (error) {
+        const rawCode = error instanceof Error ? error.message : "TRACK_C_C3_UNKNOWN_ERROR";
+        const code = /^[A-Z][A-Z0-9_]{2,100}$/u.test(rawCode)
+          ? rawCode : "TRACK_C_C3_RUNTIME_FAILURE";
+        process.stderr.write(`${JSON.stringify({
+          level: "warn", code: "TRACK_C_C3_FALLBACK",
+          candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
+          reason: code,
+          conversationRevision: record.stateVersion,
+          salesCycleRevision: salesCycleRecord.stateRevision,
+        })}\n`);
       }
     }
 
@@ -5053,7 +5210,9 @@ export class RealtimeRunner {
         proposal?.businessFactQuery.intent === "PRICE"
       ),
     };
-    const postGenerationReply = wordingAuthority === "MODEL"
+    const postGenerationReply = c3Chosen
+      ? { messages: metaMessages }
+      : wordingAuthority === "MODEL"
       ? finalizeModelOwnedRealtimePostGenerationReply(postGenerationReplyInput)
       : finalizeLegacyRealtimePostGenerationReply(postGenerationReplyInput);
     metaMessages = [...postGenerationReply.messages];
@@ -5072,7 +5231,8 @@ export class RealtimeRunner {
             : []
         );
     if (protectedOutboundReadiness !== null) {
-      const salesCart = salesCyclePlan?.state.cart?.value ?? null;
+      const salesCart = c3Chosen && protectedOutboundReadiness.cartId === null
+        ? null : (salesCyclePlan?.state ?? salesCycleRecord?.state)?.cart?.value ?? null;
       const payloadHash = canonicalSha256(metaMessages);
       protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
         effect: "PROTECTED_OUTBOUND",
@@ -5925,6 +6085,13 @@ export class RealtimeRunner {
             }
           : {}),
         ...(salesCyclePlan ? { salesCyclePlan } : {}),
+        ...(c3Chosen && c3CartSelected && salesCyclePlan === null &&
+          salesCartReadback !== null && salesCycleRecord !== null
+          ? { salesCycleReadback: {
+              expectedRevision: salesCycleRecord.stateRevision,
+              readiness: salesCartReadback,
+            } }
+          : {}),
         ...(acquisitionAnalyticsEnabled
           ? {
               acquisitionPlan: {

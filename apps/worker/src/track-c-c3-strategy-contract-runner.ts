@@ -19,6 +19,7 @@ import {
   contextFromFrozenTrackCCapture,
 } from "./track-c-offline-candidate.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
+import type { TrackCCurrentCartBinding } from "./track-c-c3-cart-binding.js";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
@@ -172,6 +173,9 @@ export interface TrackCStrategyLiveInput {
   readonly decisionAt: Date;
   readonly dialogue: readonly ShadowContextMessage[];
   readonly checkoutRequestedFields: readonly TrackCCheckoutField[];
+  readonly checkoutClarificationActive: boolean;
+  readonly currentCart: TrackCCurrentCartBinding | null;
+  readonly paymentOptions: readonly ("COD" | "BANK_TRANSFER")[];
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
@@ -658,12 +662,17 @@ function expectedCta(task: TrackCResponderTask): ContextV2CandidateOutputV2["cta
     action === "ASK_CHECKOUT_DETAILS" ? "ASK_CHECKOUT_DETAILS" : "NONE";
 }
 
-function deterministicCheckoutText(fields: readonly CheckoutField[]): string {
+function deterministicCheckoutText(
+  fields: readonly CheckoutField[],
+  paymentOptions: readonly ("COD" | "BANK_TRANSFER")[],
+): string {
   const labels: Record<CheckoutField, string> = {
     FULL_NAME: "họ tên",
     PHONE: "số điện thoại",
     ADDRESS: "địa chỉ nhận hàng",
-    PAYMENT_METHOD: "hình thức thanh toán (COD hoặc chuyển khoản)",
+    PAYMENT_METHOD: paymentOptions.includes("BANK_TRANSFER")
+      ? "hình thức thanh toán (COD hoặc chuyển khoản)"
+      : "hình thức thanh toán COD",
   };
   const names = fields.map((field) => labels[field]);
   const joined = names.length === 1 ? names[0]! : names.length === 2
@@ -726,6 +735,8 @@ function compileResponderDraft(input: Readonly<{
   lane: TrackCV5ExecutionLane;
   conversationLane: TrackCConversationLane;
   evaluationAt: Date;
+  currentCart?: TrackCCurrentCartBinding | null;
+  paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
   if (draft.answerText !== null &&
@@ -797,7 +808,10 @@ function compileResponderDraft(input: Readonly<{
     segments.push({
       kind: "ACTION_REQUEST",
       action: "PROVIDE_CHECKOUT_DETAILS",
-      text: deterministicCheckoutText(task.canonicalRequest.requestedFields ?? []),
+      text: deterministicCheckoutText(
+        task.canonicalRequest.requestedFields ?? [],
+        input.paymentOptions ?? ["COD", "BANK_TRANSFER"],
+      ),
     });
   } else if (task.canonicalRequest?.type === "ASK_PRODUCT") {
     segments.push({
@@ -828,6 +842,7 @@ function compileResponderDraft(input: Readonly<{
     input.lane,
     input.evaluationAt,
     simulationHashes,
+    input.currentCart ?? null,
   );
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       validated.segments.some(({ text }) =>
@@ -885,6 +900,7 @@ function constraintsFor(
   metadata: readonly TrackCV5SimulationMetadata[],
   dialogue: readonly ShadowContextMessage[],
   canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[],
+  checkoutClarificationActive = false,
 ): TrackCStrategistConstraints {
   if (!metadata.every(validMetadata)) {
     throw new Error("TRACK_C_V5_SIMULATION_METADATA_INVALID");
@@ -930,9 +946,10 @@ function constraintsFor(
   const checkoutStageReached =
     context.phase.sourceStage === "CART_OPEN" ||
     context.phase.sourceStage === "ORDER_PREVIEW";
-  const checkoutAuthorized = context.buyingIntent.decision === "COMMITTED" &&
+  const checkoutAuthorized = (checkoutClarificationActive ||
+      (context.buyingIntent.decision === "COMMITTED" &&
+       context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT")) &&
     checkoutStageReached &&
-    context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT" &&
     !context.barriers.active.includes("MEASUREMENTS_REQUIRED") &&
     checkoutRequestedFields.length > 0;
   if (checkoutAuthorized) {
@@ -985,6 +1002,9 @@ function fixedTask(
 type TrackCStrategyCoreInput = Omit<TrackCStrategyContractCaseInput, "capture"> & Readonly<{
   context: ContextV2;
   canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[];
+  checkoutClarificationActive?: boolean;
+  currentCart?: TrackCCurrentCartBinding | null;
+  paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
 }>;
 
 async function runTrackCStrategyContractCore(
@@ -1014,6 +1034,8 @@ async function runTrackCStrategyContractCore(
       context,
       simulationFacts,
       executionLane: input.lane,
+      currentCart: input.currentCart ?? null,
+      evaluationAt: input.evaluationAt,
     });
   } catch (error) {
     throw stageFailure("EVIDENCE", null, error);
@@ -1029,6 +1051,7 @@ async function runTrackCStrategyContractCore(
   const constraints = constraintsFor(
     context, simulationMetadata, input.evaluationContext,
     input.canonicalCheckoutRequestedFields,
+    input.checkoutClarificationActive,
   );
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
@@ -1126,6 +1149,8 @@ async function runTrackCStrategyContractCore(
       lane: input.lane,
       conversationLane: lane,
       evaluationAt: input.evaluationAt,
+      currentCart: input.currentCart ?? null,
+      ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
     });
   } catch (error) {
     throw stageFailure("FINAL_GUARD", responderPayload, error);
@@ -1175,8 +1200,14 @@ export async function runTrackCStrategyLive(
   input: TrackCStrategyLiveInput,
 ): Promise<Pick<TrackCStrategyContractCaseResult,
   "conversationLane" | "conversationPlan" | "responderTask" | "output" | "reply" | "identity">> {
+  if ("simulationFacts" in input || "simulationMetadata" in input ||
+      "capture" in input) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  }
   const context = parseContextV2WithIntegrity(input.context);
   if (input.checkoutRequestedFields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
+      input.paymentOptions.length === 0 ||
+      input.paymentOptions.some((option) => option !== "COD" && option !== "BANK_TRANSFER") ||
       context.phase.sourceStage !== "CART_OPEN" &&
         context.phase.sourceStage !== "ORDER_PREVIEW" &&
         input.checkoutRequestedFields.length > 0) {
@@ -1191,6 +1222,9 @@ export async function runTrackCStrategyLive(
     simulationFacts: [],
     simulationMetadata: [],
     canonicalCheckoutRequestedFields: input.checkoutRequestedFields,
+    checkoutClarificationActive: input.checkoutClarificationActive,
+    currentCart: input.currentCart,
+    paymentOptions: input.paymentOptions,
     ...(input.trustedAcquisition === undefined
       ? {} : { trustedAcquisition: input.trustedAcquisition }),
     transport: input.transport,

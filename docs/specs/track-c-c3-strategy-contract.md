@@ -13,10 +13,10 @@ completeness against the real runtime state machine (§6c), and the known
 implementation gaps (§6d). It retains the six-field Strategist decision, the
 two lanes, the progression invariant and every authority boundary.
 
-Sections 6b and 6c describe contracts the implementation now follows. Section
-6d records requirements this spec makes that the code does not yet meet; those
-are implementation gaps, and the requirement is not weakened to match the
-current code.
+Sections 6b and 6c describe the input and checkout contracts. The runtime
+implementation and remaining limits are recorded in the integration appendix
+below. Historical gap notes in §6d describe the PR371 baseline; use the
+appendix for the current implementation status.
 
 ## Objective
 
@@ -674,3 +674,65 @@ Resolve these before implementation rather than guessing:
 - **Always:** agent chooses adaptive strategy; code owns authority; preserve fail-closed validation.
 - **Ask first:** widening acquisition metadata, changing checkout/PII authority, adding effect capability, or changing benchmark semantics.
 - **Never:** infer trusted acquisition origin from dialogue wording, add case-specific benchmark branches, create duplicate representations for the same request, add a fake Strategist call, or weaken guards to raise completion.
+
+## Runtime integration appendix (stacked on PR371 at 88a1ce4)
+
+The realtime runner now composes C3 after inbound canonical decision evidence,
+product/business fact resolution and the SalesCycle transition for the turn.
+`buildRealtimeC3Input` produces the pre-decision Context V2 from the resulting
+commerce state and independently verified product and cart evidence. The
+existing end-of-turn Context V2 capture remains a separate historical artifact.
+The offline capture/simulation adapter and live adapter call the same C3 core,
+including lane selection, projectors, compilers and final guard. Live input
+rejects simulation and capture-only fields.
+
+| Input | Authority and binding | Consumer and last check |
+| --- | --- | --- |
+| Turn identity, buying intent, barriers | Inbound canonical decision producer; conversation and SalesCycle revisions | Context V2, action compiler; transaction conversation CAS |
+| Product price and stock | Business fact envelopes and protected-claim producer; product ID, provenance and expiry | Selectable evidence, Responder guard, protected outbound readiness |
+| Design and care attributes | ProductFacts V2 presentation/attribute projector; product and catalog scope | Selectable evidence and projection equality guard |
+| Checkout completeness | SalesCycle checkout draft in CART_OPEN/ORDER_PREVIEW; four presence flags only | Canonical action compiler; SalesCycle owns draft and preview |
+| Cart fee and offer | Canonical cart plus pinned policy and CART_READY; cart ID, revision, hash, expiry | Cart claim producer, exact formatter/guard equality; locked SalesCycle readback or mutation CAS at Outbox commit |
+
+The model receives presence and missing-field names, not recipient name,
+phone or address values. The allowed payment options are COD plus bank transfer
+only when the pinned policy has a bank-transfer artifact. A clarification that
+remains active in CART_OPEN can ask only the fields still missing even when the
+next message no longer repeats a proceed-to-payment intent. The code-owned
+checkout transition remains responsible for capture, revalidation and preview.
+The inbound URL classifier permits a labeled Vietnamese checkout phone and a
+standalone phone only while CART_OPEN or ORDER_PREVIEW; a numeric host with a path remains
+subject to the existing URL policy. Dialogue is redacted before the live C3
+adapter receives it.
+
+Cart claims are enabled only when the pinned policy matches the current
+bundle, a fresh CART_READY result binds the current cart, and the existing
+cart-policy producer can reconstruct the exact claim. The final guard checks
+the same cart identity/revision and producer value. A read-only cart turn
+passes a SalesCycle readback through the existing atomic commit transaction;
+it locks the row and checks revision, cart hash, expiry and readiness before
+the Outbox row can be created. Cart mutation turns use the existing SalesCycle
+plan CAS. A changed cart rejects the transaction and follows the ordinary
+bounded inbox retry path.
+
+The realtime runner owns the one response group and calls the shared C3 core
+only when a single product is bound, the bot still owns the conversation, and
+the current commerce branch can safely replace its text reply. The existing
+SalesCycle owns all mutations, preview, confirmation and effects. The existing
+Inbox/Outbox and delivery gate own deduplication and send. Provider failure,
+invalid model output, projection/guard failure or unavailable canonical input
+falls back to the existing guarded reply; the candidate cannot bypass the
+verified-fact preservation check. `REALTIME_C3_LOCAL_TEST_ENABLED` wires a
+model transport only in `DRY_RUN`; injected transport supports deterministic
+LIVE-mode runner tests. No production activation is part of this change.
+
+Enabled in this slice: a guarded product price reply and current-cart
+shipping/free-shipping/promotion wording when the canonical producer supplies
+those claims. ETA remains excluded because upstream delivery semantics are
+unresolved. Multi-product and media replies retain their existing paths.
+Trusted first-contact acquisition is still unavailable to this live adapter,
+so it uses the adaptive lane; it never infers ad origin from dialogue. The
+bounded realization surface remains in place, and no behavioral conversion
+claim follows from deterministic integration tests. R2.8 benchmark ownership
+review remains separate; this change does not edit the bundle, rubric or
+historical runs.

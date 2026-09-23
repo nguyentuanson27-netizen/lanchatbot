@@ -41,6 +41,7 @@ import {
   splitRealtimeMetaMessages,
   unavailableFactsRequireHandoff,
   composeSizeEngineAdvice,
+  classifyCustomerUrlsForInbound,
   withProactiveSizeAdvice,
   unresolvedProductRequiresHandoff,
   verifiedProductInfoProposal,
@@ -63,6 +64,15 @@ import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 describe("RealtimeRunner", () => {
+  it("accepts a standalone checkout phone only with an open cart", () => {
+    const phone = "0984997797";
+    expect(classifyCustomerUrlsForInbound(phone, "CLASSIFIED_ALLOWLIST_V1", false)
+      .disposition).not.toBe("CONTINUE");
+    expect(classifyCustomerUrlsForInbound(phone, "CLASSIFIED_ALLOWLIST_V1", false,
+      undefined, true)).toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(classifyCustomerUrlsForInbound(`${phone}/admin`, "CLASSIFIED_ALLOWLIST_V1",
+      false, undefined, true).disposition).not.toBe("CONTINUE");
+  });
   it("binds distinct pre-transition and final revisions without temporal skew", () => {
     expect(bindContextV2FinalTurnEvidence({
       sourceMessagePk: "00000000-0000-4000-8000-000000000003",
@@ -3297,8 +3307,11 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it("builds a hash-valid Context V2 capture from the final realtime commerce snapshot", async () => {
-    const entry = item(34, "chốt CB182 size M");
+  it("builds the final capture and calls C3 through the realtime runner", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
+    try {
+    const entry = item(34, "Mẫu CB182 bao nhiêu?");
     const batch = {
       pageId,
       conversationHash,
@@ -3312,9 +3325,10 @@ describe("RealtimeRunner inbound batching", () => {
       attemptCount: 1,
       items: [entry],
     };
+    let currentBatch = batch;
     const inbox: RealtimeInboxPort = {
       claimNext: vi.fn(async () => null),
-      claimNextBatch: vi.fn(async () => batch),
+      claimNextBatch: vi.fn(async () => currentBatch),
       complete: vi.fn(async () => true),
       completeBatch: vi.fn(async () => true),
       isBatchCurrent: vi.fn(async () => true),
@@ -3333,7 +3347,13 @@ describe("RealtimeRunner inbound batching", () => {
       pageId,
       new Date(occurredAt),
     );
-    const commit = vi.fn(async (_input: unknown) => ({
+    let persistedState = state;
+    let persistedCommerce = commerceState;
+    const commit = vi.fn(async (input: unknown) => {
+      const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState } };
+      persistedState = written.state;
+      if (written.salesCyclePlan) persistedCommerce = written.salesCyclePlan.state;
+      return ({
       stateCommitted: true,
       metaOutboxCreated: 1,
       pancakeTagOutboxCreated: false,
@@ -3341,14 +3361,15 @@ describe("RealtimeRunner inbound batching", () => {
       sendAuthorized: true,
       reasonCodes: [],
       inboxBatchStatus: "COMMITTED" as const,
-    }));
+      });
+    });
     const runtime: RealtimeRuntimePort = {
       loadOrCreate: vi.fn(async () => ({
         conversationId,
         pageId,
         customerHash: conversationHash,
-        stateVersion: state.revision,
-        state,
+        stateVersion: persistedState.revision,
+        state: persistedState,
         routingOwner: "APP" as const,
         appSendEnabled: true,
         killSwitch: false,
@@ -3356,8 +3377,8 @@ describe("RealtimeRunner inbound batching", () => {
       loadOrCreateSalesCycle: async <TState>() => ({
         conversationId,
         pageId,
-        stateRevision: commerceState.revision,
-        state: commerceState as unknown as TState,
+        stateRevision: persistedCommerce.revision,
+        state: persistedCommerce as unknown as TState,
         cartExpiresAt: null,
         expiresAt: new Date("2026-08-22T02:00:00.000Z"),
       }),
@@ -3365,6 +3386,39 @@ describe("RealtimeRunner inbound batching", () => {
       linkProviderConversation: vi.fn(async () => undefined),
     };
     const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    const c3Send = vi.fn(async (request: { body: string }) => {
+      const body = JSON.parse(request.body) as { contents: [{ parts: [{ text: string }] }] };
+      const prompt = JSON.parse(body.contents[0].parts[0].text) as {
+        contractVersion: string;
+        selectableEvidence?: Array<{ ref: string; capability: string }>;
+        constraints?: { checkoutRequestedFields?: string[] };
+      };
+      const shipping = prompt.selectableEvidence?.filter(({ capability }) =>
+        capability === "SHIPPING_FEE"
+      ) ?? [];
+      const response = prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+        ? prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
+          ? {
+              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              proposition: "PRICE", evidenceRefs: [], continuation: null,
+              canonicalAction: "ASK_CHECKOUT_DETAILS",
+            }
+          : {
+            replyAct: "ANSWER", goal: shipping.length > 0
+              ? "Answer the verified cart delivery fee." : "Answer the verified price.",
+            proposition: shipping.length > 0 ? "SHIPPING_FEE" : "PRICE",
+            evidenceRefs: shipping.length > 0 ? shipping.map(({ ref }) => ref) :
+              prompt.selectableEvidence?.filter(({ capability }) =>
+              capability === "PRICE"
+            ).map(({ ref }) => ref) ?? [],
+            continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+          }
+        : { answerText: null, factualTexts: [], progressionText: null };
+      return {
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+        providerModelVersion: "gemini-3.5-flash-lite",
+      };
+    });
     const product = {
       productId: "CB182",
       parentProductId: "CB182",
@@ -3460,15 +3514,11 @@ describe("RealtimeRunner inbound batching", () => {
         },
       },
     } as unknown as RuntimePolicyResolution;
+    const baseModel = replyModel();
     const runner = new RealtimeRunner(
       inbox,
       runtime,
-      replyModel({
-        decision: "COMMITTED",
-        requestedAction: "OPEN_CART",
-        quantity: 1,
-        evidenceText: "chốt CB182 size M",
-      }),
+      baseModel,
       {
         ready: vi.fn(async () => true),
         resolve: vi.fn(async () => ({
@@ -3494,7 +3544,7 @@ describe("RealtimeRunner inbound batching", () => {
           },
           reasonCode: null,
         })),
-        resolveCartSelection: vi.fn(async (query: { quantity: number }) => ({
+        resolveCartSelection: vi.fn(async (query: { quantity: number; deliveryAddress?: string | null }) => ({
           status: "READY" as const,
           line: {
             lineId: "13000000-0000-4000-8000-000000000001",
@@ -3503,14 +3553,21 @@ describe("RealtimeRunner inbound batching", () => {
             offerKind: "SET" as const,
             quantity: query.quantity,
             components: [{
-              componentProductId: "CB182",
-              componentSku: "CB182_BE_M",
+              componentProductId: "CB182_AO",
+              componentSku: "CB182_AO_BE_M",
               componentRole: "TOP" as const,
               color: "BE",
               size: "M",
               quantity: 1,
+            }, {
+              componentProductId: "CB182_CV",
+              componentSku: "CB182_CV_BE_M",
+              componentRole: "SKIRT" as const,
+              color: "BE",
+              size: "M",
+              quantity: 1,
             }],
-            allowMixedSizes: false,
+            allowMixedSizes: true,
             allowComponentSale: false,
             posUnitPriceVnd: 799_000,
             priceAuthority: {
@@ -3524,8 +3581,8 @@ describe("RealtimeRunner inbound batching", () => {
                 authority: "PANCAKE_POS" as const,
                 sourceVersion: "snapshot-v1",
                 observedAt: occurredAt,
-                expiresAt: "2099-01-01T00:00:00.000Z",
-                freshForSeconds: 60,
+                expiresAt: "2026-07-24T02:00:00.000Z",
+                freshForSeconds: 172_800,
                 freshnessState: "FRESH" as const,
               },
             },
@@ -3533,10 +3590,11 @@ describe("RealtimeRunner inbound batching", () => {
           },
           shopId: "LANA",
           versions: {
-            price: "price-v1", inventory: "inventory-v1", size: "size-v1", eta: null,
+            price: "price-v1", inventory: "inventory-v1", size: "size-v1",
+            eta: query.deliveryAddress ? "eta-v1" : null,
           },
-          eta: null,
-          etaExpiresAt: null,
+          eta: query.deliveryAddress ? { minDays: 3, maxDays: 6 } : null,
+          etaExpiresAt: query.deliveryAddress ? "2026-07-24T02:00:00.000Z" : null,
           sourceAuthority: "POS_SNAPSHOT" as const,
           stockStatus: "IN_STOCK" as const,
           stockAvailableQuantity: 2,
@@ -3564,6 +3622,10 @@ describe("RealtimeRunner inbound batching", () => {
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
+        c3: {
+          modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+          transport: { send: c3Send },
+        },
       },
       undefined,
       undefined,
@@ -3576,8 +3638,13 @@ describe("RealtimeRunner inbound batching", () => {
     );
 
     expect(await runner.processOne()).toBe(true);
+    expect(c3Send).toHaveBeenCalledTimes(2);
     const commitInput = commit.mock.calls[0]![0] as {
       state: { revision: number };
+      metaPlan?: {
+        messages: readonly { kind: string; text: string }[];
+        protectedClaimTypes?: readonly string[];
+      };
       salesCyclePlan?: {
         expectedRevision: number;
         state: { revision: number };
@@ -3589,6 +3656,11 @@ describe("RealtimeRunner inbound batching", () => {
       } };
     };
     expect(commitInput.salesCyclePlan?.expectedRevision).toBe(commerceState.revision);
+    expect(commitInput.metaPlan?.messages).toContainEqual({
+      kind: "TEXT", text: "Dạ giá hiện tại của mẫu này là 799.000đ ạ.",
+    });
+    expect(commitInput.metaPlan?.protectedClaimTypes).toContain("PRICE");
+    expect(commit).toHaveBeenCalledTimes(1);
     const finalSalesCycleRevision = commitInput.salesCyclePlan!.state.revision;
     expect(finalSalesCycleRevision).toBeGreaterThan(commerceState.revision);
     const finalConversationRevision = commitInput.state.revision;
@@ -3617,6 +3689,76 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+
+    const cartEntry = item(35, "chốt CB182 size M");
+    currentBatch = {
+      ...batch, generation: 11, inboxIds: [cartEntry.inboxId],
+      firstReceiveSequence: 35, lastReceiveSequence: 35, items: [cartEntry],
+    };
+    vi.mocked(baseModel.generate).mockImplementationOnce(replyModel({
+      decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+      evidenceText: "chốt CB182 size M",
+    }).generate);
+    vi.setSystemTime(cartEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("CART_OPEN");
+    const cartRevision = persistedCommerce.cart!.value.revision;
+
+    const feeEntry = item(36, "Giỏ này tính tiền giao thế nào?");
+    currentBatch = {
+      ...batch, generation: 12, inboxIds: [feeEntry.inboxId],
+      firstReceiveSequence: 36, lastReceiveSequence: 36, items: [feeEntry],
+    };
+    vi.setSystemTime(feeEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    const feeCommit = commit.mock.calls[2]![0] as {
+      metaPlan?: { messages: readonly { text: string }[];
+        protectedClaimTypes?: readonly string[] };
+      salesCycleReadback?: { expectedRevision: number; readiness: {
+        effect: string; cartVersion: number } };
+    };
+    expect(feeCommit.salesCycleReadback).toMatchObject({
+      expectedRevision: persistedCommerce.revision,
+      readiness: { effect: "CART_READY", cartVersion: cartRevision },
+    });
+    expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
+    expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
+    const detailsEntry = item(37, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh");
+    currentBatch = {
+      ...batch, generation: 13, inboxIds: [detailsEntry.inboxId],
+      firstReceiveSequence: 37, lastReceiveSequence: 37, items: [detailsEntry],
+    };
+    vi.setSystemTime(detailsEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("CART_OPEN");
+    const detailsCommit = commit.mock.calls[3]![0] as {
+      metaPlan?: { messages: readonly { text: string }[] };
+    };
+    expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
+      .toContain("hình thức thanh toán COD");
+    expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
+      .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
+
+    const paymentEntry = item(38, "COD");
+    currentBatch = {
+      ...batch, generation: 14, inboxIds: [paymentEntry.inboxId],
+      firstReceiveSequence: 38, lastReceiveSequence: 38, items: [paymentEntry],
+    };
+    vi.setSystemTime(paymentEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("ORDER_PREVIEW");
+    const confirmationEntry = item(39, "ok");
+    currentBatch = {
+      ...batch, generation: 15, inboxIds: [confirmationEntry.inboxId],
+      firstReceiveSequence: 39, lastReceiveSequence: 39, items: [confirmationEntry],
+    };
+    vi.setSystemTime(confirmationEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("PURCHASE_CONFIRMED");
+    expect(commit).toHaveBeenCalledTimes(6);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not separately complete a batch whose atomic commit is superseded", async () => {

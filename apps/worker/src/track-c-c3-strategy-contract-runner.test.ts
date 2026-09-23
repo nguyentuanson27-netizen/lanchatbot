@@ -7,6 +7,7 @@ import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
   buildTrackCStrategistContractRequest,
   runTrackCStrategyContractCase,
+  runTrackCStrategyLive,
   TrackCStrategyContractFailure,
 } from "./track-c-c3-strategy-contract-runner.js";
 import { buildTrackCSelectableEvidence } from
@@ -136,6 +137,41 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("runs the shared core from a live context and rejects replay fields", async () => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({
+      capture: capture(), evaluationAt: decisionAt,
+    });
+    const dialogue = [{
+      direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+      messageType: "TEXT" as const, text: "Mẫu này giá bao nhiêu?",
+      attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+    }];
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Answer the verified price.",
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const input = {
+      context, modelResource: MODEL_RESOURCE, decisionAt, dialogue,
+      checkoutRequestedFields: [], checkoutClarificationActive: false,
+      currentCart: null, paymentOptions: ["COD"] as const, transport: { send },
+    };
+    const result = await runTrackCStrategyLive(input);
+    expect(result.output.segments).toContainEqual(expect.objectContaining({
+      kind: "VERIFIED_CLAIM", text: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
+    }));
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(result).not.toHaveProperty("evaluationOnly");
+    await expect(runTrackCStrategyLive({
+      ...input, simulationMetadata: [],
+    } as unknown as Parameters<typeof runTrackCStrategyLive>[0]))
+      .rejects.toThrow("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  });
   it("uses one redacted decision for the task, plan and identity without changing fact authority", async () => {
     const goal = "Address the customer's reported budget 700000; recipient phone 0901234567, email lan@example.com. Answer only the verified shop price.";
     const decision = {

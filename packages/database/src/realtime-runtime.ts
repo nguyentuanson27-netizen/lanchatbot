@@ -401,6 +401,11 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly handoffEventPlan?: RealtimeHandoffEventPlan;
   readonly handoffAcknowledgementPlan?: RealtimeHandoffAcknowledgementPlan;
   readonly salesCyclePlan?: RealtimeSalesCyclePlan<TSalesState>;
+  /** Read-only cart fence for a C3 answer when this turn made no sales mutation. */
+  readonly salesCycleReadback?: Readonly<{
+    expectedRevision: number;
+    readiness: DeterministicEffectReadinessV1;
+  }>;
   readonly decisionEvents?: readonly RealtimeDecisionEventPlan[];
   readonly contextV2CapturePlan?: ContextV2CapturePlan;
   /** COMMERCE fresh-process commits roll back unless this capture persists. */
@@ -1673,6 +1678,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
   input: RealtimeCommitInput<TState, TSalesState>,
   now: Date,
   currentSourceMessageIdHash: string | null,
+  lockedReadbackCart: CartV1 | null = null,
 ): void {
   const meta = input.metaPlan;
   if (!meta) return;
@@ -1725,7 +1731,10 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     throw new Error("PROTECTED_OUTBOUND_PAYLOAD_MISMATCH");
   }
   if (readiness.binding.cart !== null) {
-    const salesReadiness = (input.salesCyclePlan?.effectReadiness ?? []).map((value) =>
+    const salesReadiness = [
+      ...(input.salesCyclePlan?.effectReadiness ?? []),
+      ...(input.salesCycleReadback === undefined ? [] : [input.salesCycleReadback.readiness]),
+    ].map((value) =>
       DeterministicEffectReadinessV1Schema.parse(value)
     );
     const parent = salesReadiness.find(({ readinessHash }) =>
@@ -1763,7 +1772,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
   if (readiness.binding.cart !== null) {
     const state = input.salesCyclePlan?.state as Record<string, unknown> | undefined;
     const cartEnvelope = state?.cart as { value?: unknown } | null | undefined;
-    const cart = CartV1Schema.parse(cartEnvelope?.value);
+    const cart = lockedReadbackCart ?? CartV1Schema.parse(cartEnvelope?.value);
     const cartSemantics = validateCartEffectClaimSemanticsV1({
       effect: "PROTECTED_OUTBOUND",
       lines: cart.lines.map((line) => ({
@@ -2364,7 +2373,24 @@ export class PostgresRealtimeRuntimeStore {
       );
       const ownerBefore = before.rows[0]?.conversation_owner;
       if (!ownerBefore) throw new Error("STATE_REVISION_CONFLICT");
-      validateMetaEffectReadiness(input, transactionNow, currentSourceMessageIdHash);
+      let lockedReadbackCart: CartV1 | null = null;
+      if (input.salesCycleReadback !== undefined) {
+        if (input.salesCyclePlan !== undefined) {
+          throw new Error("SALES_CYCLE_READBACK_PLAN_CONFLICT");
+        }
+        if (input.metaPlan?.effectReadiness?.binding.cart === null ||
+            input.metaPlan?.effectReadiness?.binding.cart === undefined ||
+            input.metaPlan.effectReadiness.binding.parentReadinessHash !==
+              input.salesCycleReadback.readiness.readinessHash) {
+          throw new Error("SALES_CYCLE_READBACK_OUTBOUND_REQUIRED");
+        }
+        lockedReadbackCart = await this.validateSalesCycleReadback(
+          client, input, transactionNow, currentSourceMessageIdHash,
+        );
+      }
+      validateMetaEffectReadiness(
+        input, transactionNow, currentSourceMessageIdHash, lockedReadbackCart,
+      );
       if (input.salesCyclePlan) {
         validateSalesEffectReadiness(input, transactionNow, currentSourceMessageIdHash);
         await this.commitSalesCyclePlan(
@@ -3585,6 +3611,53 @@ export class PostgresRealtimeRuntimeStore {
       ],
     );
     return result.rowCount === 1;
+  }
+
+  private async validateSalesCycleReadback<TState, TSalesState>(
+    client: PoolClient,
+    input: RealtimeCommitInput<TState, TSalesState>,
+    now: Date,
+    currentSourceMessageIdHash: string | null,
+  ): Promise<CartV1> {
+    const readback = input.salesCycleReadback;
+    if (readback === undefined) throw new Error("SALES_CYCLE_READBACK_REQUIRED");
+    const readiness = DeterministicEffectReadinessV1Schema.parse(readback.readiness);
+    validateReadinessEnvelopeHashesV1(readiness);
+    if (readiness.effect !== "CART_READY" || readiness.outcome !== "READY" ||
+        readiness.pageId !== input.pageId ||
+        readiness.conversationId !== input.conversationId ||
+        readiness.sourceMessageIdHash !== currentSourceMessageIdHash ||
+        readiness.conversationRevision !== input.expectedStateVersion ||
+        readiness.salesCycleRevision !== readback.expectedRevision ||
+        validateEffectReadinessTemporalWindowV1({
+          checkedAt: readiness.checkedAt, expiresAt: readiness.expiresAt, now,
+        }) !== "VALID") {
+      throw new Error("SALES_CYCLE_READBACK_INVALID");
+    }
+    const locked = await client.query<SalesCycleRow>(
+      `SELECT state_revision, conversation_id, page_id,
+              state_ciphertext, state_nonce, state_auth_tag,
+              state_encrypted_dek, state_key_ref, cart_expires_at, expires_at
+       FROM sales_cycle_states
+       WHERE conversation_id = $1 AND page_id = $2
+       FOR UPDATE`,
+      [input.conversationId, input.pageId],
+    );
+    const row = locked.rows[0];
+    if (!row || Number(row.state_revision) !== readback.expectedRevision) {
+      throw new Error("SALES_CYCLE_STATE_REVISION_CONFLICT");
+    }
+    const state = this.salesCycleRecord<{
+      cart?: { value?: CartV1 } | null;
+    }>(row).state;
+    const cart = state.cart?.value;
+    if (cart === undefined || cart.cartId !== readiness.cartId ||
+        cart.revision !== readiness.cartVersion ||
+        canonicalCartStateHashV1(cart) !== readiness.cartStateHash ||
+        (row.cart_expires_at?.getTime() ?? Number.NEGATIVE_INFINITY) <= now.getTime()) {
+      throw new Error("SALES_CYCLE_READBACK_CART_CHANGED");
+    }
+    return CartV1Schema.parse(cart);
   }
 
   private async commitSalesCyclePlan<TState>(
