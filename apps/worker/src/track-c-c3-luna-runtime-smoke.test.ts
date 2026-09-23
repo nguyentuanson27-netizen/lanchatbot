@@ -5,6 +5,7 @@ import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
+import { buildProductAttributesV1 } from "@lana/business-tools";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import { CONTEXT_V2_CANDIDATE_PROVIDER_VERSION } from "./context-v2-candidate.js";
 import {
@@ -157,7 +158,9 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
     const sourceFiles = ["apps/worker/src/realtime-runner.ts", "apps/worker/src/track-c-c3-strategy-contract-runner.ts",
       "apps/worker/src/track-c-c3-strategy-contract.ts", "apps/worker/src/track-c-c3-selectable-evidence.ts",
       "apps/worker/src/track-c-c3-fact-realization.ts", "apps/worker/src/track-c-c3-realization-style.ts",
-      "apps/worker/src/track-c-c3-v5-benchmark-runner.ts", "apps/worker/src/realtime-c3-input.ts"];
+      "apps/worker/src/track-c-c3-v5-benchmark-runner.ts", "apps/worker/src/realtime-c3-input.ts",
+      "apps/worker/src/realtime-sales-cycle.ts", "apps/worker/src/realtime-product-facts-v2.ts",
+      "apps/worker/src/track-c-c3-luna-runtime-smoke.test.ts"];
     const sourceFingerprints = Object.fromEntries(await Promise.all(sourceFiles.map(async (path) => [
       path, sha256(await readFile(join(repoDir, path), "utf8")),
     ] as const)));
@@ -264,6 +267,11 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       };
       const product = { productId: "CB182", parentProductId: "CB182", canonicalCode: "CB182", aliases: [],
         title: "Set Thiên Giao", colors: ["BE"], materials: ["COTTON"], silhouettes: [], occasions: [],
+        attributes: buildProductAttributesV1({ productId: "CB182", observedAt: baseAt.toISOString(), data: {
+          materials: ["cotton"], colors: ["be"], styles: [], silhouettes: [], occasions: [],
+          materialComponents: {}, designAttributes: null, careInstructions: null, wearProperties: null,
+          backCoverage: null, designComplexity: null,
+        } }),
         imageUrls: [], images: [], catalogVersion: "synthetic-catalog-v1" };
       const policyMetadata = { authority: "ADMIN_POLICY" as const, sourceVersion: "synthetic-policy-v1",
         observedAt: baseAt.toISOString(), expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const };
@@ -316,6 +324,28 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       const runner = new RealtimeRunner(inbox, runtime, model,
         {
           ready: async () => true,
+          // Exercise the production catalog -> ProductFactsV2 -> C3 producer.
+          // Legacy material arrays alone cannot authorize C3 attribute claims.
+          readCatalogSnapshot: async () => ({
+            schema_version: 3, release_id: "synthetic-release", catalog_version: "synthetic-catalog-v1",
+            policy_version: "synthetic-policy-v1", shop_alias: "SYNTHETIC", brand: "LANA",
+            product_id: "CB182", synced_at: baseAt.toISOString(), data_status: "OK",
+            fulfillment_policy: { tinh_trang: "READY_STOCK", can_order_when_zero: false,
+              prep_min_days: 0, prep_max_days: 1, zero_stock_policy: "",
+              zero_stock_prep_min_days: null, zero_stock_prep_max_days: null, eta_valid_until: "" },
+            selling_rules: { allow_mixed_sizes: true, allow_component_sale: false,
+              source_version: "synthetic-registry-v1" }, shipping_eta: {},
+            offers: { SET: { list_price: null, sale_price: 799000, price_status: "OK",
+              rows: ["M", "L"].map((size) => ({ offer_type: "SET", price_sku: "CB182-SET", color: "BE",
+                size, stock_quantity: 2, list_price: null, sale_price: 799000, stock_status: "IN_STOCK",
+                bom_status: "OK", parent_variation_id: `CB182-SET-BE-${size}`,
+                parent_variation_sku: `CB182-SET-BE-${size}`, components: [
+                  { component_id: "1", product_sku: "CB182_AO", variation_sku: `CB182_AO_BE_${size}`, quantity: 1 },
+                  { component_id: "2", product_sku: "CB182_CV", variation_sku: `CB182_CV_BE_${size}`, quantity: 1 },
+                ],
+              })),
+            } },
+          }),
           resolve: async () => ({ schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT", observedAt: baseAt.toISOString(),
             expiresAt: "2099-01-01T00:00:00.000Z", productId: "CB182", facts: { schemaVersion: 1, productId: "CB182",
               parentProductId: "CB182", offerType: "SET", listPriceVnd: null, salePriceVnd: 799000, sizes: ["M"], stockStatus: "IN_STOCK",
