@@ -366,6 +366,9 @@ const componentPaths = [
   'holdout-policy.json',
   '../../../src/track-c-c3-v5-benchmark-materialization.ts',
   '../../../src/track-c-c3-v5-benchmark-runner.ts',
+  '../../../src/track-c-c3-strategy-contract.ts',
+  '../../../src/track-c-c3-strategy-contract-runner.ts',
+  '../../../src/track-c-claim-reference-resolver.ts',
 ];
 const componentsGitSha1 = Object.fromEntries(
   componentPaths.map((path) => [path, gitBlobSha1(path)]),
