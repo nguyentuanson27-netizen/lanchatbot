@@ -5115,7 +5115,13 @@ export class RealtimeRunner {
         const selectedTypes = new Set(chosenClaims.map(({ type }) => type));
         const baselineTypes = salesProtectedOutbound?.claimTypes ??
           protectedClaimValidation.claimTypes;
-        if (baselineTypes.some((type) => !selectedTypes.has(type))) {
+        // A successful adaptive strategy owns which facts answer this turn.
+        // The legacy renderer's choice is not a second strategy: requiring its
+        // PRICE here made a price objection revert to the same quote. All
+        // selected facts were validated above; any C3 failure still retains the
+        // already-built baseline below. Preserve the fixed acquisition form.
+        if (chosen.conversationLane === "FIRST_CONTACT_FIXED" &&
+            baselineTypes.some((type) => !selectedTypes.has(type))) {
           throw new Error("TRACK_C_C3_BASELINE_FACT_PRESERVATION");
         }
         const cartSelected = chosenClaims.some((claim) => claim.scope.kind === "CART");

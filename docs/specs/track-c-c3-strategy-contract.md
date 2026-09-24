@@ -366,6 +366,10 @@ Keep extra structured output only if a deterministic final guard demonstrably ne
 
 ### Realization boundary and current implementation limit
 
+**Current adaptive wording:** the 2026-09-24 follow-up below supersedes the
+historical bounded nonfactual vocabulary in this section. Trusted first contact
+retains that fixed surface; selected factual projections retain their binding.
+
 Code owns which factual assertions are authorized; the Responder realizes the
 compiled task within the available safe wording surface. It must not replace
 the strategy, repair a bad evidence selection by choosing another fact, or
@@ -382,7 +386,7 @@ question-resolution requirements. If that surface cannot express a partial
 answer and its remaining uncertainty, record the realization capability gap;
 do not discard valid evidence or treat completion as successful resolution.
 
-The next bounded correction reuses that same vocabulary in the existing
+The earlier bounded correction reused that same vocabulary in the existing
 `answerText` slot for adaptive `ANSWER / SUPPORTED`: the Responder may choose null, an
 existing acknowledgement, or the existing uncertainty sentence when the
 compiled goal identifies an unanswered part. Code emits every selected factual
@@ -909,3 +913,49 @@ implicit return to BOT ownership. The Luna runtime journey exposed this missing
 entrypoint check; regression coverage exercises details, payment and confirmation
 after handoff. Automatic cart size editing remains a separate unmet capability;
 handoff preserves the cart and must not be reported as a successful size edit.
+
+
+### Follow-up: authored adaptive prose, preserved first quote (2026-09-24)
+
+Owner instruction: preserve the first-contact quote form and minimize templates
+on subsequent turns. This changes the temporary implementation limit; it does
+not change the Strategist contract or give either model commerce authority.
+
+- `FIRST_CONTACT_FIXED`: same trusted acquisition classifier, fact selection,
+  response schema and fixed price/useful-fact/single-question form.
+- `ADAPTIVE_FOLLOWUP`: the Responder authors `answerText` (up to 600 characters)
+  and the one requested `progressionText` (up to 300), using dialogue and the
+  compiled goal. Neither field has a sentence enum. Code no longer inserts
+  generic unresolved/partial-answer sentences into this lane. The writer names
+  the actual unanswered part, acknowledges reported context only when useful,
+  and asks for missing customer input that can advance the current decision.
+- `factualTexts` remains the lossless editorial projection of every selected
+  fact, in order, with claim hash, subject, scope, freshness and current-cart
+  checks. This slice enables free conversational prose, **not arbitrary factual
+  paraphrase**. The three existing fields are retained for that boundary.
+- Checkout requests remain code-owned exact missing fields/payment options;
+  both prose slots are null. KEEP_OPEN/HOLD_POSITION have no progression.
+  Model output cannot execute a cart, order, payment or messaging effect.
+- The existing PII/production/checkout guards also check authored prose. A small
+  conservative assertion/effect check rejects common unbound statements; it is
+  not a semantic proof for unrestricted Vietnamese. Question count is enforced,
+  but relevance, indirect requests, unsupported implications and tone remain
+  behavioral review responsibilities. Passing schema/guards does not certify
+  sales quality or readiness for customer traffic.
+
+Runtime ownership correction: after a successful, validated adaptive C3 reply,
+legacy reply claim types no longer dictate the evidence the Strategist must
+select. The old subset check forced a price objection back to a price card.
+The fixed acquisition lane still preserves baseline fact types. A failed C3
+call or rejected draft still uses the already-built verified fallback. This is
+an intentional C3-enabled behavior change, tested through `processOne`; C3-off
+r31.3 behavior and failure preservation are unchanged. No price-objection phrase
+list, benchmark-case switch, additional model judge or durable state is added.
+
+Complexity delta: reuse the existing three fields, remove adaptive sentence
+banks and generic text injection, retain existing fact/effect boundaries. The
+known two PII-free locality question exceptions are DLP compatibility only;
+they are not supplied as response choices. The remaining limitations (automatic
+size editing, older checkout opening payment wording, unsupported capabilities,
+heuristic prose safety and model-dependent relevance) must be reported with the
+new Luna histories, not hidden by compiler completion counts.

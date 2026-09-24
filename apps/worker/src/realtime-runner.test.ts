@@ -3307,7 +3307,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN"] as const)("builds C3 through realtime and respects %s checkout ownership", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE"] as const)("builds C3 through realtime and respects %s checkout ownership", async (checkoutOwner) => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
@@ -3692,13 +3692,38 @@ describe("RealtimeRunner inbound batching", () => {
 
     // An ordinary follow-up may leave commerce unchanged. It still needs C3;
     // requiring a new SalesCycle plan previously bypassed adaptive dialogue.
-    const followupEntry = item(40, "Chị vẫn đang cân nhắc mẫu này.");
+    const followupEntry = item(40, "Giá hơi cao với chị.");
     currentBatch = { ...batch, generation: 11, inboxIds: [followupEntry.inboxId],
       firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followupEntry] };
     vi.setSystemTime(followupEntry.occurredAt);
     const callsBeforeFollowup = c3Send.mock.calls.length;
+    const concernReply = "Chị đang cân nhắc khoản chi cho mẫu này. Điểm nào khiến chị còn phân vân nhất?";
+    c3Send.mockResolvedValueOnce({
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        replyAct: "CLARIFY", goal: "Understand the concern without repeating the known price.",
+        proposition: "NONE", evidenceRefs: [], canonicalAction: "NONE",
+        continuation: { type: "ASK", input: "DECISION_CRITERION" },
+      }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+    }).mockResolvedValueOnce({
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        answerText: checkoutOwner === "C3_FAILURE" ? "Mẫu này giá 1đ." :
+          "Chị đang cân nhắc khoản chi cho mẫu này.", factualTexts: [],
+        progressionText: "Điểm nào khiến chị còn phân vân nhất?",
+      }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+    });
     expect(await runner.processOne()).toBe(true);
     expect(c3Send.mock.calls.length - callsBeforeFollowup).toBe(2);
+    const followupCommit = commit.mock.calls.at(-1)![0] as {
+      metaPlan?: { messages: readonly { text: string }[] };
+    };
+    const followupText = followupCommit.metaPlan?.messages.map(({ text }) => text).join(" ");
+    if (checkoutOwner === "C3_FAILURE") {
+      // Invalid free prose must retain the already-built verified baseline.
+      expect(followupText).toContain("799.000");
+      expect(followupText).not.toContain("giá 1đ");
+    } else {
+      expect(followupText).toBe(concernReply);
+    }
     expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
     const cartEntry = item(41, "chốt CB182 size M");
     currentBatch = {

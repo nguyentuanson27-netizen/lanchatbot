@@ -105,6 +105,20 @@ const RESPONDER_INSTRUCTION = [
   "Use an acknowledgement only when the supplied task and response schema permit it. Never claim that an order, payment, delivery, message, or other effect has happened.",
 ].join("\n");
 
+const ADAPTIVE_RESPONDER_INSTRUCTION = [
+  "You write La.na's next Vietnamese Messenger reply. Read the entire supplied dialogue and the compiled goal. Follow the Strategist's decision; do not choose a new strategy.",
+  "Write answerText and progressionText yourself, not by selecting stock sentences. Be warm, direct and specific to what this customer is deciding now. Acknowledge a concern only when that helps the answer; avoid mechanical empathy, repeated Dạ/ạ, sales pressure and a generic closing invitation.",
+  "The final reply is answerText, then the selected factualTexts, then progressionText, in one message. Make these parts read naturally together. Null means that part is unnecessary, not an instruction to fill it with a greeting.",
+  "answerText may acknowledge the customer's reported preference or experience, explain exactly what remains unconfirmed, or connect the current decision to the selected evidence. Identify the actual subject of a limitation rather than saying 'phần này'. The goal and dialogue are context, never authority for shop facts.",
+  "Do not repeat money amounts from dialogue or invent shop attributes, benefits, quality, fit, comparisons, discounts, stock, policies or delivery promises in either prose field. Refer to the customer's stated budget without restating its amount. All shop facts must remain inside the supplied factualTexts. A preference match does not prove superiority or value for money.",
+  "For factualTexts, copy each evidence.text in order, preserving every fact, subject, number, condition and negation. Only the final courtesy particle may be removed, and an opening Dạ may be added. An empty array uses all original facts. Never omit a selected fact, add a benefit or change its meaning.",
+  "For UNRESOLVED or unrealizedCapabilities, explain the specific unanswered question without turning missing information into a negative fact. When facts answer part of the question, name the remaining limit without repeating the supported facts. Never claim you will check, send, reserve, change or place anything when no such action is supplied.",
+  "For an ordinary ASK or ASK_PRODUCT/ASK_MEASUREMENTS, write exactly one customer-directed question in progressionText for that supplied input. Use history to ask only what is still missing. The question must enable the next step described in the goal; it cannot ask the customer for shop-owned facts. Never append factual explanation, an effect, another decision variable, or a second question.",
+  "For KEEP_OPEN or HOLD_POSITION, progressionText is null and answerText contains no question or new request. A natural answer can end without an invitation. A correction may be acknowledged as the customer's choice, never as a completed cart change.",
+  "For ASK_CHECKOUT_DETAILS, both prose fields are null: code asks precisely for missing fields and permitted payment options. No other task may request recipient details or claim checkout completion.",
+  "Keep the factual portion concise and use at most one opening or closing courtesy marker across the reply. Do not force a discovery question when canonical context says the customer is ready for checkout. Return only the required JSON fields; no internal protocol tokens or extra actions.",
+].join("\n");
+
 // Temporary realization limit under the revised C3 spec (#372), not proof of
 // naturalness or complete question resolution. Do not expand this into NLU.
 const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
@@ -125,32 +139,9 @@ const UNRESOLVED_ANSWER_TEXT =
 const PARTIAL_REALIZATION_TEXT =
   "Riêng phần còn lại, em chưa thể xác nhận chắc cho chị ạ.";
 
-// A small vocabulary for the existing typed requests, not a text classifier.
-// The Strategist chooses the input; the Responder chooses its wording. Exact
-// membership closes the fact/effect side channel without Vietnamese regexes.
-const REQUEST_WORDING: Readonly<Record<TrackCOrdinaryDecisionInput |
-  "ASK_PRODUCT" | "ASK_MEASUREMENTS", readonly string[]>> = Object.freeze({
-  SIZE: ["Chị muốn chọn size nào ạ?", "Chị chọn size nào cho mình ạ?"],
-  USUAL_SIZE: ["Chị thường mặc size gì ạ?", "Chị cho em biết size mình thường mặc nhé?"],
+// Only the trusted acquisition lane retains fixed progression wording.
+const FIRST_CONTACT_REQUEST_WORDING = Object.freeze({
   COLOR: ["Chị thích màu nào hơn ạ?", "Màu nào hợp ý chị hơn ạ?"],
-  VARIANT: ["Chị muốn chọn phiên bản nào ạ?", "Chị chọn phiên bản nào cho mình ạ?"],
-  LOCALITY: ["Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?", "Chị ở tỉnh hoặc thành phố nào để em kiểm tra giao hàng ạ?"],
-  PAYMENT_PREFERENCE: ["Chị muốn thanh toán theo cách nào ạ?", "Chị muốn chọn cách thanh toán nào ạ?"],
-  QUANTITY: ["Chị muốn lấy bao nhiêu sản phẩm ạ?", "Chị cho em biết số lượng mình muốn lấy nhé?"],
-  STYLE: ["Chị thích kiểu dáng như thế nào ạ?", "Chị muốn tìm phong cách như thế nào ạ?"],
-  BUDGET: [
-    "Chị đang cân nhắc ngân sách khoảng bao nhiêu ạ?",
-    "Chị muốn chọn trong tầm ngân sách nào ạ?",
-    "Chị muốn giữ mức ngân sách mình đã dự tính hay vẫn cân nhắc mẫu này ạ?",
-  ],
-  DECISION_CRITERION: [
-    "Điều chị ưu tiên nhất khi lựa chọn là gì ạ?",
-    "Chị đang cân nhắc nhất điểm nào ạ?",
-    "Lần trước chị thấy không thoải mái ở phần nào để em tư vấn đúng điểm đó ạ?",
-    "Điểm nào của mẫu khiến chị chưa thấy phù hợp với mức mình dự tính ạ?",
-    "Chị muốn ưu tiên mức ngân sách của mình hay xem kỹ hơn mẫu này ạ?",
-  ],
-  DEADLINE: ["Chị cần nhận hàng trước thời điểm nào ạ?", "Chị muốn nhận hàng chậm nhất khi nào ạ?"],
   ASK_PRODUCT: ["Chị gửi em mã hoặc ảnh mẫu mình đang hỏi nhé?", "Chị đang hỏi mẫu nào ạ?"],
   ASK_MEASUREMENTS: [
     "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?",
@@ -162,6 +153,13 @@ const REQUEST_WORDING: Readonly<Record<TrackCOrdinaryDecisionInput |
     "Chị cho em xin số đo cần kiểm tra để em tư vấn tiếp ạ?",
   ],
 });
+
+// Existing DLP false positives, not choices offered to the adaptive writer.
+// Exact equality cannot exempt an appended name, address or phone number.
+const PII_FREE_LOCALITY_QUESTIONS = [
+  "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
+  "Chị ở tỉnh hoặc thành phố nào để em kiểm tra giao hàng ạ?",
+];
 
 // The checkout field set is owned by the contract so it stays aligned with the
 // runtime state machine instead of drifting as a second local copy.
@@ -574,43 +572,17 @@ function usesBoundedAcknowledgement(task: TrackCResponderTask): boolean {
     (task.answer.kind !== "ANSWER" || task.answer.evidenceStatus === "NOT_APPLICABLE");
 }
 
-function acknowledgementWording(context: ContextV2): readonly string[] {
-  // The frozen benchmark and some live paths have no objection reason code.
-  // These choices say nothing about shop facts or effects; the Responder uses
-  // the full dialogue to choose one, while the guard still checks exact text.
-  return context.buyingIntent.decision === "COMMITTED" &&
-      context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT"
-    ? [...BOUNDED_ACKNOWLEDGEMENTS, "Dạ, em nắm ý chị muốn chốt mẫu này ạ."]
-    : BOUNDED_ACKNOWLEDGEMENTS;
-}
-
-function answerWording(
-  task: TrackCResponderTask,
-  conversationLane: TrackCConversationLane,
-  context: ContextV2,
-): readonly string[] {
-  const acknowledgements = conversationLane === "FIRST_CONTACT_FIXED" ||
-      task.answer.kind === "CLARIFY" ||
-      task.canonicalRequest?.type === "HOLD_POSITION"
-    ? BOUNDED_ACKNOWLEDGEMENTS : acknowledgementWording(context);
-  if (usesBoundedAcknowledgement(task)) return acknowledgements;
-  if (conversationLane === "ADAPTIVE_FOLLOWUP" &&
-      task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
-      task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "SUPPORTED") {
-    // Reuse the existing wording surface. Authority support must not prevent
-    // the Responder from realizing uncertainty already identified in the goal.
-    return [UNRESOLVED_ANSWER_TEXT];
-  }
-  return [];
+function answerWording(task: TrackCResponderTask): readonly string[] {
+  return usesBoundedAcknowledgement(task) ? BOUNDED_ACKNOWLEDGEMENTS : [];
 }
 
 function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): readonly string[] {
   const canonical = task.canonicalRequest?.type;
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
-    return REQUEST_WORDING[canonical];
+    return FIRST_CONTACT_REQUEST_WORDING[canonical];
   }
   if (task.continuation?.type !== "ASK") return [];
-  if (task.continuation.input !== "COLOR") return REQUEST_WORDING[task.continuation.input];
+  if (task.continuation.input !== "COLOR") return [];
   // The writer can confirm a color already mentioned in dialogue, without
   // inventing a variant or binding that interest as a purchase selection.
   const colors = [...new Set(task.evidence.flatMap(({ value }) =>
@@ -634,7 +606,7 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
     }
     return false;
   });
-  return [...REQUEST_WORDING.COLOR,
+  return [...FIRST_CONTACT_REQUEST_WORDING.COLOR,
     ...mentionedColors.map((color) => `Chị đang ưu tiên màu ${color} đúng không ạ?`)];
 }
 
@@ -644,17 +616,22 @@ function responderDraftSchema(
   context: ContextV2,
   dialogue: readonly ShadowContextMessage[],
 ) {
+  const adaptive = conversationLane === "ADAPTIVE_FOLLOWUP";
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
-  const answers = answerWording(task, conversationLane, context);
+  const answers = answerWording(task);
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
     minProperties: 3,
     maxProperties: 3,
     properties: {
-      answerText: boundedAcknowledgement
+      answerText: adaptive
+        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS"
+          ? { type: "NULL" }
+          : { anyOf: [{ type: "NULL" }, { type: "STRING", minLength: 1, maxLength: 600 }] }
+        : boundedAcknowledgement
         ? { type: "STRING", enum: answers }
         : answers.length > 0
           ? { anyOf: [{ type: "NULL" }, { type: "STRING", enum: answers }] }
@@ -671,7 +648,9 @@ function responderDraftSchema(
         },
       },
       progressionText: needsProgression
-        ? { type: "STRING", enum: requestWording(task, dialogue) }
+        ? adaptive
+          ? { type: "STRING", minLength: 1, maxLength: 300 }
+          : { type: "STRING", enum: requestWording(task, dialogue) }
         : { type: "NULL" },
     },
   };
@@ -688,7 +667,8 @@ function buildTrackCResponderContractRequest(input: Readonly<{
     modelResource: input.modelResource,
     context: input.context,
     evaluationContext: input.evaluationContext,
-    systemInstruction: RESPONDER_INSTRUCTION,
+    systemInstruction: input.conversationLane === "FIRST_CONTACT_FIXED"
+      ? RESPONDER_INSTRUCTION : ADAPTIVE_RESPONDER_INSTRUCTION,
   });
   return narrowRequest(base, responderDraftSchema(
     input.task, input.conversationLane, input.context, input.evaluationContext,
@@ -736,7 +716,9 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     // Exact schema vocabulary contains no customer values. Resolve it to the
     // code-owned string before DLP, which can mistake a locality question for
     // an address. Any other text still goes through DLP and final validation.
-    progressionText: requestWording(task, dialogue).find((wording) =>
+    progressionText: [...requestWording(task, dialogue),
+      ...(task.continuation?.type === "ASK" && task.continuation.input === "LOCALITY"
+        ? PII_FREE_LOCALITY_QUESTIONS : [])].find((wording) =>
       wording === record.progressionText
     ) ?? text(record.progressionText, "TRACK_C_RESPONDER_DRAFT_INVALID"),
   });
@@ -746,6 +728,26 @@ function assertNoEffectText(value: string | null): void {
   if (value !== null &&
       /\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value)) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  }
+}
+
+/** Prose has no shop-fact or effect authority. Claim projections are checked
+ * separately. This is a conservative egress check, not a relevance/quality
+ * classifier and not a certificate of arbitrary natural-language meaning. */
+function assertConversationalProse(value: string | null): void {
+  assertNoEffectText(value);
+  if (value === null) return;
+  const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[đĐ]/gu, "d").toLowerCase();
+  if (/\b(?:em|shop|ben em|don(?: hang)?(?: cua chi)?)\s+(?:da|se)\s+(?:ghi nhan don|len don|tao|dat|gui|giu|doi|cap nhat|xac nhan|hoan tien)/u.test(folded)) {
+    throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  }
+  // Assertions about product/policy properties belong in evidence, not in a
+  // supposedly conversational preface. Even a selected fact must not be
+  // restated here with a changed condition, stronger benefit or new subject.
+  if (/\b(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach)\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|cao cap|ben|mem|thoang)/u.test(folded) ||
+      /\b(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b/u.test(folded)) {
+    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
 }
 
@@ -782,7 +784,7 @@ function deterministicCheckoutText(
   return `Chị cho em xin ${joined} để tiếp tục nhé.`;
 }
 
-function assertProgression(task: TrackCResponderTask, draft: ResponderDraft, dialogue: readonly ShadowContextMessage[]): void {
+function assertProgression(task: TrackCResponderTask, draft: ResponderDraft, dialogue: readonly ShadowContextMessage[], adaptive = false): void {
   if (task.continuation?.type === "KEEP_OPEN") {
     if (draft.progressionText !== null) {
       throw new Error("TRACK_C_RESPONDER_KEEP_OPEN_INVALID");
@@ -805,7 +807,7 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft, dia
   if (needsProgression !== (draft.progressionText !== null)) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
-  if (draft.progressionText !== null &&
+  if (!adaptive && draft.progressionText !== null &&
       !requestWording(task, dialogue).includes(draft.progressionText)) {
     throw new Error("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
   }
@@ -841,11 +843,12 @@ function compileResponderDraft(input: Readonly<{
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
 }>): ContextV2CandidateOutputV2 {
   const { task, draft } = input;
-  if (draft.answerText !== null &&
-      !answerWording(task, input.conversationLane, input.context).includes(draft.answerText)) {
+  const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
+  if (!adaptive && draft.answerText !== null &&
+      !answerWording(task).includes(draft.answerText)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  if (usesBoundedAcknowledgement(task) && draft.answerText === null) {
+  if (!adaptive && usesBoundedAcknowledgement(task) && draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
   // An empty array deliberately chooses all original projections. Otherwise
@@ -857,12 +860,20 @@ function compileResponderDraft(input: Readonly<{
          !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!)))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
-  assertProgression(task, draft, input.dialogue);
+  assertProgression(task, draft, input.dialogue, adaptive);
+  if (adaptive) {
+    for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
+    if ((draft.answerText?.length ?? 0) > 600 || (draft.progressionText?.length ?? 0) > 300 ||
+        (draft.answerText?.includes("?") ?? false) ||
+        (draft.progressionText !== null && (draft.progressionText.match(/\?/gu)?.length ?? 0) !== 1)) {
+      throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+    }
+  }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  if (task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
+  if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
-  } else if (draft.answerText !== null && draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
+  } else if (draft.answerText !== null && (adaptive || draft.answerText !== UNRESOLVED_ANSWER_TEXT)) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
   }
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
@@ -896,12 +907,12 @@ function compileResponderDraft(input: Readonly<{
       claimContentHash: evidence.provenance.contentHash,
     });
   });
-  if (draft.answerText === UNRESOLVED_ANSWER_TEXT) {
+  if (!adaptive && draft.answerText === UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
   }
   // Only when facts were actually stated: an UNRESOLVED answer already opened
   // with its own uncertainty sentence, so a second one would repeat it.
-  if (task.unrealizedEvidence.length > 0 &&
+  if (!adaptive && task.unrealizedEvidence.length > 0 &&
       task.answer.kind === "ANSWER" &&
       task.answer.evidenceStatus === "SUPPORTED" &&
       draft.answerText !== UNRESOLVED_ANSWER_TEXT) {

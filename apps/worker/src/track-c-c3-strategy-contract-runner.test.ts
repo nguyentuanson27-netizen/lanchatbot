@@ -137,6 +137,47 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it.each([
+    { answer: "Chị từng mặc chưa thoải mái nên lần này muốn cân nhắc kỹ hơn.",
+      question: "Lần trước chị thấy khó chịu ở eo hay ở phần nào khác?", valid: true },
+    { answer: "Mình xem đúng điểm chị còn lăn tăn trước nhé.",
+      question: "Với mẫu đang xem, điều gì khiến chị chưa quyết định được?", valid: true },
+    { answer: "Em chưa có thông tin xác nhận về độ nhăn để trả lời chắc cho chị.",
+      question: "Chị dự định mặc trong dịp nào?", valid: true },
+    { answer: "Mẫu này cao cấp và bền đẹp.", question: "Chị muốn xem thêm gì?", valid: false },
+    { answer: "Em sẽ giữ mẫu này cho chị.", question: "Chị muốn xem thêm gì?", valid: false },
+    { answer: "Dạ chị.", question: "Chị muốn màu nào? Chị lấy mấy bộ?", valid: false },
+    { answer: "Dạ chị.", question: "Chị cho em số điện thoại nhận hàng?", valid: false },
+    { answer: "Số của chị là 0901234567.", question: "Chị muốn xem thêm gì?", valid: false },
+  ])("adaptive prose is authored and still checked: $answer", async ({ answer, question, valid }) => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "CLARIFY", goal: "Ask about the remaining concern using the customer's reported experience.",
+        proposition: "NONE", evidenceRefs: [], canonicalAction: "NONE",
+        continuation: { type: "ASK", input: "DECISION_CRITERION" },
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: answer, factualTexts: [], progressionText: question,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Lần trước mặc khó chịu nên chị đang phân vân.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send },
+    });
+    if (valid) {
+      const resolved = await result;
+      expect(resolved.output.segments[0]?.text).toBe(answer);
+      expect(resolved.reply).toContain(question);
+      const schema = JSON.parse(send.mock.calls[1]![0].body).generationConfig.responseSchema;
+      expect(JSON.stringify(schema.properties.answerText)).not.toContain("enum");
+      expect(schema.properties.progressionText).not.toHaveProperty("enum");
+    } else {
+      await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
+    }
+  });
+
   it.each(["Ib", "Mẫu có màu đen không em?"])("only offers color confirmation when the customer mentioned that catalog color: %s", async (customerText) => {
     const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
       payload: payload(responderDraft()), providerModelVersion: "gemini-3.5-flash-lite",
@@ -432,7 +473,7 @@ describe("Track C C3 strategy-contract runner", () => {
           continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
         }), providerModelVersion: "gemini-3.5-flash-lite" })
         .mockResolvedValueOnce({ payload: payload({
-          answerText: null, factualTexts: [], progressionText: null,
+          answerText: ref === null ? expected : null, factualTexts: [], progressionText: null,
         }), providerModelVersion: "gemini-3.5-flash-lite" });
       const result = await runTrackCStrategyContractCase({
         lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
@@ -503,14 +544,14 @@ describe("Track C C3 strategy-contract runner", () => {
           attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
         }], transport: { send },
       });
-      if (answerText !== null && answerText !== uncertainty) {
+      if (answerText !== null && answerText !== uncertainty && answerText !== "Dạ em hiểu ý chị ạ.") {
         await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
         continue;
       }
       const completed = await result;
       const body = JSON.parse(send.mock.calls[1]![0].body);
       expect(body.generationConfig.responseSchema.properties.answerText).toMatchObject({
-        anyOf: [{ type: "NULL" }, { type: "STRING", enum: expect.arrayContaining([uncertainty]) }],
+        anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }],
       });
       expect(completed.responderTask.answer).toMatchObject({ evidenceStatus: "SUPPORTED" });
       expect(completed.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM"))
@@ -519,7 +560,7 @@ describe("Track C C3 strategy-contract runner", () => {
       expect(completed.reply.match(/\?/gu)).toHaveLength(1);
       if (answerText === uncertainty) {
         expect(completed.output.segments.map(({ text }) => text)).toEqual([
-          "Giá hiện tại của mẫu này là 415.000đ ạ.", uncertainty,
+          uncertainty, "Giá hiện tại của mẫu này là 415.000đ ạ.",
           "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
         ]);
       } else {
@@ -537,7 +578,7 @@ describe("Track C C3 strategy-contract runner", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
-        payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        payload: payload({ answerText: "Em chưa có thông tin xác nhận về bảo hành để trả lời chị.", factualTexts: [], progressionText: null }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
     const result = await runTrackCStrategyContractCase({
@@ -568,7 +609,7 @@ describe("Track C C3 strategy-contract runner", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
-        payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        payload: payload({ answerText: "Về bảo hành, em chưa có thông tin xác nhận để trả lời chị.", factualTexts: [], progressionText: null }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
 
@@ -591,7 +632,7 @@ describe("Track C C3 strategy-contract runner", () => {
     // instead of answering half the question silently.
     const texts = result.output.segments.map(({ text }) => text);
     expect(texts.some((text) => text.includes("Giá hiện tại"))).toBe(true);
-    expect(texts.some((text) => text.includes("phần còn lại"))).toBe(true);
+    expect(texts.some((text) => text.includes("bảo hành"))).toBe(true);
   });
 
   it("projects simulation facts once into selectable evidence without effect authority", () => {
@@ -990,7 +1031,7 @@ describe("Track C C3 strategy-contract runner", () => {
     }
   });
 
-  it("code-realizes a bounded answer for unresolved factual propositions", async () => {
+  it("lets the writer explain uncertainty for unresolved factual propositions", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({
@@ -1005,7 +1046,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: null,
+          answerText: "Em chưa có thông tin xác nhận tình trạng hàng của mẫu chị hỏi.",
           factualTexts: [],
           progressionText: null,
         }),
@@ -1031,13 +1072,13 @@ describe("Track C C3 strategy-contract runner", () => {
       };
     };
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({ type: "NULL" });
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(result.conversationPlan).toMatchObject({
       replyAct: "ANSWER",
       proposition: "STOCK",
     });
     expect(result.reply).toBe(
-      "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.",
+      "Em chưa có thông tin xác nhận tình trạng hàng của mẫu chị hỏi.",
     );
   });
 
@@ -1242,8 +1283,8 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     expect(result.reply).toBe(specific);
     const request = JSON.parse(send.mock.calls[1]![0].body);
-    expect(request.generationConfig.responseSchema.properties.answerText.enum)
-      .toContain(specific);
+    expect(request.generationConfig.responseSchema.properties.answerText)
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(request.generationConfig.responseSchema.properties.factualTexts.maxItems)
       .toBe(0);
   });
@@ -1371,7 +1412,7 @@ describe("Track C C3 strategy-contract runner", () => {
       input: "COLOR",
     });
     expect(responderBody.systemInstruction.parts[0].text).toContain(
-      "choose one of the response schema's customer-directed questions",
+      "write exactly one customer-directed question",
     );
     expect(responderBody.systemInstruction.parts[0].text).toContain(
       "Never append factual explanation, an effect, another decision variable, or a second question",
@@ -1415,7 +1456,7 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
+    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
   });
 
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
@@ -1462,10 +1503,7 @@ describe("Track C C3 strategy-contract runner", () => {
       };
     };
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toMatchObject({ type: "STRING", enum: expect.arrayContaining([
-        "Dạ em hiểu ý chị ạ.",
-        "Dạ em hiểu băn khoăn của chị ạ.",
-      ]) });
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(responderRequest.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "NULL" });
     expect(result.output.strategy).toBe("ANSWER_VERIFIED_FACTS");
@@ -1557,10 +1595,7 @@ describe("Track C C3 strategy-contract runner", () => {
     ) as { responderTask: { evidence: unknown[] } };
 
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toMatchObject({ type: "STRING", enum: expect.arrayContaining([
-        "Dạ em hiểu ý chị ạ.",
-        "Dạ em hiểu băn khoăn của chị ạ.",
-      ]) });
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
       .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
     // Editorial factual realizations stay bound to each selected projection;
