@@ -144,6 +144,12 @@ describe("Track C C3 strategy-contract runner", () => {
       question: "Với mẫu đang xem, điều gì khiến chị chưa quyết định được?", valid: true },
     { answer: "Em chưa có thông tin xác nhận về độ nhăn để trả lời chắc cho chị.",
       question: "Chị dự định mặc trong dịp nào?", valid: true },
+    { answer: "Em chưa có thông tin để xác nhận mẫu này có phù hợp với chị không.",
+      question: "Chị đang lo ở phần nào nhất?", valid: true },
+    { answer: "Em hiểu chị đang so mẫu đang xem với một mẫu rẻ hơn.",
+      question: "Chị quan tâm điểm nào khi so hai mẫu?", valid: true },
+    { answer: " Em hiểu chị muốn cân nhắc kỹ hơn. ",
+      question: "Chị còn phân vân ở điểm nào?", valid: true },
     { answer: "Mẫu này cao cấp và bền đẹp.", question: "Chị muốn xem thêm gì?", valid: false },
     { answer: "Em sẽ giữ mẫu này cho chị.", question: "Chị muốn xem thêm gì?", valid: false },
     { answer: "Dạ chị.", question: "Chị muốn màu nào? Chị lấy mấy bộ?", valid: false },
@@ -168,7 +174,7 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     if (valid) {
       const resolved = await result;
-      expect(resolved.output.segments[0]?.text).toBe(answer);
+      expect(resolved.output.segments[0]?.text).toBe(answer.trim());
       expect(resolved.reply).toContain(question);
       const schema = JSON.parse(send.mock.calls[1]![0].body).generationConfig.responseSchema;
       expect(JSON.stringify(schema.properties.answerText)).not.toContain("enum");

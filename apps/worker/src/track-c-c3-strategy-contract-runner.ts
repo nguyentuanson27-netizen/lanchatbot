@@ -108,6 +108,7 @@ const RESPONDER_INSTRUCTION = [
 const ADAPTIVE_RESPONDER_INSTRUCTION = [
   "You write La.na's next Vietnamese Messenger reply. Read the entire supplied dialogue and the compiled goal. Follow the Strategist's decision; do not choose a new strategy.",
   "Write answerText and progressionText yourself, not by selecting stock sentences. Be warm, direct and specific to what this customer is deciding now. Acknowledge a concern only when that helps the answer; avoid mechanical empathy, repeated Dạ/ạ, sales pressure and a generic closing invitation.",
+  "Speak as em to chị. answerText is an optional conversational preface, NOT the factual answer: the code inserts factualTexts immediately after it. When those facts already answer the question, use answerText null. Never summarize or repeat them in the preface, even accurately. Do not put a request in the preface; only progressionText may request the assigned customer input.",
   "The final reply is answerText, then the selected factualTexts, then progressionText, in one message. Make these parts read naturally together. Null means that part is unnecessary, not an instruction to fill it with a greeting.",
   "answerText may acknowledge the customer's reported preference or experience, explain exactly what remains unconfirmed, or connect the current decision to the selected evidence. Identify the actual subject of a limitation rather than saying 'phần này'. The goal and dialogue are context, never authority for shop facts.",
   "Do not repeat money amounts from dialogue or invent shop attributes, benefits, quality, fit, comparisons, discounts, stock, policies or delivery promises in either prose field. Refer to the customer's stated budget without restating its amount. All shop facts must remain inside the supplied factualTexts. A preference match does not prove superiority or value for money.",
@@ -630,7 +631,8 @@ function responderDraftSchema(
       answerText: adaptive
         ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS"
           ? { type: "NULL" }
-          : { anyOf: [{ type: "NULL" }, { type: "STRING", minLength: 1, maxLength: 600 }] }
+          : { description: "Optional nonfactual context or specific remaining uncertainty. Null when supplied facts suffice. No factual answer, quantities, sizes, claims or requests here.",
+            anyOf: [{ type: "NULL" }, { type: "STRING", minLength: 1, maxLength: 600 }] }
         : boundedAcknowledgement
         ? { type: "STRING", enum: answers }
         : answers.length > 0
@@ -697,7 +699,7 @@ function text(value: unknown, errorCode: string): string | null {
   return value;
 }
 
-function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): ResponderDraft {
+function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[], adaptive: boolean): ResponderDraft {
   const record = plainObject(value, "TRACK_C_RESPONDER_DRAFT_INVALID");
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -706,8 +708,12 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
        record.factualTexts.length !== modelAuthoredEvidence(task).length)) {
     throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
   }
+  // Prose whitespace has no authority meaning. Keep factual text byte-exact
+  // and perform the same PII check after trimming only the adaptive slots.
+  const prose = (value: unknown): unknown => adaptive && typeof value === "string"
+    ? value.trim() : value;
   return Object.freeze({
-    answerText: text(record.answerText, "TRACK_C_RESPONDER_DRAFT_INVALID"),
+    answerText: text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
     factualTexts: Object.freeze(record.factualTexts.map((item) => {
       const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -719,8 +725,8 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     progressionText: [...requestWording(task, dialogue),
       ...(task.continuation?.type === "ASK" && task.continuation.input === "LOCALITY"
         ? PII_FREE_LOCALITY_QUESTIONS : [])].find((wording) =>
-      wording === record.progressionText
-    ) ?? text(record.progressionText, "TRACK_C_RESPONDER_DRAFT_INVALID"),
+      wording === prose(record.progressionText)
+    ) ?? text(prose(record.progressionText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
   });
 }
 
@@ -745,8 +751,9 @@ function assertConversationalProse(value: string | null): void {
   // Assertions about product/policy properties belong in evidence, not in a
   // supposedly conversational preface. Even a selected fact must not be
   // restated here with a changed condition, stronger benefit or new subject.
-  if (/\b(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach)\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|cao cap|ben|mem|thoang)/u.test(folded) ||
-      /\b(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b/u.test(folded)) {
+  // Match an asserted clause, not the embedded topic in "em chưa xác nhận
+  // mẫu này có..." or the customer's reported comparison with a cheaper item.
+  if (/(?:^|[.!?;\n])\s*(?:da[, ]+)?(?:(?:em|shop|ben em)\s+(?:thay\s+)?)?(?:(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach)\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|thiet ke|cao cap|ben|mem|thoang)|(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b)/u.test(folded)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
 }
@@ -1260,6 +1267,7 @@ async function runTrackCStrategyContractCore(
       providerJson(responderPayload, "TRACK_C_RESPONDER_DRAFT_INVALID"),
       task,
       input.evaluationContext,
+      lane === "ADAPTIVE_FOLLOWUP",
     );
   } catch (error) {
     throw stageFailure("RESPONDER", responderPayload, error);

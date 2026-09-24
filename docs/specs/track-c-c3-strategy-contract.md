@@ -959,3 +959,16 @@ they are not supplied as response choices. The remaining limitations (automatic
 size editing, older checkout opening payment wording, unsupported capabilities,
 heuristic prose safety and model-dependent relevance) must be reported with the
 new Luna histories, not hidden by compiler completion counts.
+
+
+The first free-prose Luna run exposed a boundary mismatch: the writer sometimes
+repeated selected facts in `answerText`, and a mention of unconfirmed promotion
+triggered the legacy offer guard. The corrected prompt/schema labels this field
+as an optional nonfactual preface, uses em/chị, and explicitly leaves direct
+answers to the selected fact slots. Product assertion checks use clause starts,
+not a nested topic inside a reported concern or uncertainty. Only C3 GENERAL
+text may pass the promotion keyword check when **every** promotion mention is
+inside a bounded uncertainty clause; any amount/percentage, promise or separate
+affirmative offer remains rejected, as do all other guard reasons. No promotion
+authority is created, and the shared legacy guard is unchanged. This remains a
+conservative syntactic check with disclosed limits, not a semantic safety proof.

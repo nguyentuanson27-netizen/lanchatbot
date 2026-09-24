@@ -38,6 +38,30 @@ const EMPTY: ProductAttributesDataV1 = {
 
 const PRODUCT_ID = "SQ9012";
 
+describe("C3 promotion uncertainty versus offer authority", () => {
+  it.each([
+    ["Em chưa có thông tin xác nhận mẫu này có ưu đãi giảm thêm.", true],
+    ["Hiện em chưa thể xác nhận giá đã bao gồm ưu đãi hay chưa.", true],
+    ["Chị cứ cân nhắc thêm nhé; hiện chưa có thông tin xác nhận lựa chọn khác hay ưu đãi cho mẫu SQ9012.", true],
+    ["Mẫu này có ưu đãi giảm thêm.", false],
+    ["Em chưa có thông tin xác nhận ưu đãi. Nhưng shop vẫn giảm giá cho chị.", false],
+    ["Em chưa xác nhận ưu đãi nhưng shop có voucher.", false],
+    ["Em chưa xác nhận ưu đãi và shop đang giảm giá.", false],
+    ["Em chưa xác nhận ưu đãi giảm 10%.", false],
+    ["Em chưa xác nhận ưu đãi. 10%.", false],
+    ["Em chưa xác nhận ưu đãi, giá chỉ 690k.", false],
+    ["Em chưa xác nhận ưu đãi. Mẫu này còn hàng.", false],
+    ["Em chưa xác nhận ưu đãi. Giao trong 2 ngày.", false],
+    ["Em chưa xác nhận ưu đãi sẽ áp dụng cho chị.", false],
+  ] as const)("checks the complete reply: %s", (text, accepted) => {
+    const run = () => validateResponderOutput(baseContext([]), {
+      segments: [{ kind: "GENERAL", text }], strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    }, "PRODUCTION_CONTRACT", new Date(recipe.evaluation_at));
+    if (accepted) expect(run).not.toThrow();
+    else expect(run).toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
+  });
+});
+
 function baseContext(claimRefs: readonly string[]): ContextV2 {
   const capture = materializeTrackCV5CaseCapture({
     lane: "BEHAVIOR_SIMULATION",
