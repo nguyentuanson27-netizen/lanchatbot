@@ -536,15 +536,28 @@ export function isPreSalePolicyQuestion(value: string): boolean {
   return classifyPreSalePolicyIntent(value) !== null;
 }
 
-export function isPostSaleRequest(value: string): boolean {
+export function isPostSaleRequest(value: string, hasOpenCart = false): boolean {
   const text = asciiFold(value);
   if (isPreSalePolicyQuestion(value)) return false;
+  // Editing an unconfirmed cart is still pre-sale. An explicit existing order
+  // or delivered item remains after-sales even when a second cart is open.
+  const existingOrder = /\b(?:da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|don (?:hang )?(?:cua|nay|do)|van don|ma van don|tracking|chua giao|dang giao|giao nham|giao sai)\b/u.test(text) &&
+    !/\b(?:chua|khong)\s+(?:dat|chot|mua)\s+(?:don|hang)?\b/u.test(text);
+  if (hasOpenCart && !existingOrder) return false;
   return (
-    /\b(van don|ma van don|tracking|don (?:hang )?(?:cua|nay|do)|da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|chua giao|dang giao|giao nham|giao sai|shipper)\b/u.test(text) ||
+    existingOrder || /\bshipper\b/u.test(text) ||
     /\b(hang bi loi|san pham bi loi|loi vai|loi duong may)\b/u.test(text) ||
     /\b(doi dia chi|doi sdt|doi so dien thoai|sua dia chi|huy don|hoan tien|refund)\b/u.test(text) ||
     /\b(cho (?:chi|em|minh) doi|(?:chi|em|minh) (?:muon|can) doi|doi (?:size|mau|hang) (?:cho|cua) (?:chi|em|minh))\b/u.test(text)
   );
+}
+
+function requestsHuman(text: string): boolean {
+  const folded = asciiFold(text);
+  if (/\b(?:khong|ko|k|chua)\s+(?:can|muon|gap|goi|noi chuyen voi)\s+(?:nhan vien|nguoi tu van|shop)\b/u.test(folded)) {
+    return false;
+  }
+  return /\b(?:nhan vien|nguoi tu van|gap shop|goi cho)\b/u.test(folded);
 }
 
 /** Only after-sales receives one holding reply; every other handoff stays silent. */
@@ -3153,7 +3166,8 @@ export class RealtimeRunner {
     const resolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
-        isPostSaleRequest(message.text ?? "") ||
+        isPostSaleRequest(message.text ?? "", salesCycleRecord?.state.stage === "CART_OPEN" ||
+          salesCycleRecord?.state.stage === "ORDER_PREVIEW") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
       : combinedCustomerUrlResolution ?? await this.resolveProducts(
@@ -3228,6 +3242,8 @@ export class RealtimeRunner {
         ? authorityState.salesStage
         : undefined,
       commerceRuntimeContext?.status === "READY" ? "NONE" : undefined,
+      salesCycleRecord?.state.stage === "CART_OPEN" ||
+        salesCycleRecord?.state.stage === "ORDER_PREVIEW",
     );
     const applied = applyInboundEvent({
       state: authorityState,
@@ -6763,10 +6779,11 @@ export class RealtimeRunner {
     customerUrlRequiresHandoff = false,
     commerceDerivedStage?: SalesStage,
     commerceDerivedObjectionType?: ObjectionType,
+    hasOpenCart = false,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
-    const postSale = isPostSaleRequest(message.text ?? "");
-    const humanRequest = /(nhân viên|người tư vấn|gặp shop|gọi cho)/iu.test(text);
+    const postSale = isPostSaleRequest(message.text ?? "", hasOpenCart);
+    const humanRequest = requestsHuman(text);
     return {
       eventKey: message.eventKey,
       messageId: message.messageId,

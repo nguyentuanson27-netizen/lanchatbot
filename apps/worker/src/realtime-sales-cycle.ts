@@ -503,6 +503,14 @@ function modelCheckoutValue(
     !exactEvidence(text, field.evidenceText)
   ) return undefined;
   const value = field.value.trim();
+  // Evidence must identify the value itself. A nearby word (for example COD)
+  // cannot authorize recipient details supplied only by the model.
+  const evidence = field.evidenceText!.trim();
+  const sameValue = kind === "PHONE"
+    ? evidence.replace(/[\s().-]/gu, "") === value.replace(/[\s().-]/gu, "")
+    : evidence.normalize("NFC").replace(/\s+/gu, " ") ===
+      value.normalize("NFC").replace(/\s+/gu, " ");
+  if (!sameValue) return undefined;
   if (
     kind === "FULL_NAME" &&
     (value.length < 2 || value.length > 160 || /\d/u.test(value))
@@ -518,17 +526,33 @@ function modelCheckoutValue(
   return value;
 }
 
-function modelPaymentMethod(
-  text: string,
-  field: AgentSalesSignalsV1["checkoutExtraction"]["paymentMethod"] | undefined,
-): "COD" | "BANK_TRANSFER" | undefined {
-  if (
-    !field ||
-    field.confidence < 0.85 ||
-    !field.value ||
-    !exactEvidence(text, field.evidenceText)
-  ) return undefined;
-  return field.value;
+function selectedPaymentMethod(text: string): "COD" | "BANK_TRANSFER" | undefined {
+  const folded = asciiFold(text).replace(/\s+/gu, " ").trim();
+  if (/\b(?:neu|gia su|vi du|hoi|co the|can lam gi|nhu the nao)\b/u.test(folded) ||
+      /\?\s*$/u.test(text)) return undefined;
+  const cod = /\b(?:cod|tien mat|nhan hang tra|thanh toan khi nhan hang)\b/u.test(folded);
+  const bank = /\b(?:chuyen khoan|ck|bank)\b/u.test(folded);
+  const rejectCod = /\b(?:khong|ko|k|chua)\s+(?:chon\s+)?(?:cod|tien mat|nhan hang tra)/u.test(folded);
+  const rejectBank = /\b(?:khong|ko|k|chua)\s+(?:chon\s+)?(?:chuyen khoan|ck|bank)/u.test(folded);
+  if (cod && !rejectCod && (!bank || rejectBank)) return "COD";
+  if (bank && !rejectBank && (!cod || rejectCod)) return "BANK_TRANSFER";
+  return undefined;
+}
+
+function privateUnlabelledRecipient(text: string): Pick<CheckoutDetails, "fullName" | "address"> {
+  const candidate = text.trim().match(
+    /^([\p{L}][\p{L}\s]{1,79})\s+((?:\+?84|0)\d{8,10})\s+((?:\d{1,5}\s+)?[^\n]{8,300}?)\s*(?:ship\s+)?(?:cod|tiền mặt|tien mat|chuyển khoản|chuyen khoan)?\s*$/iu,
+  );
+  if (!candidate) return {};
+  const name = candidate[1]?.trim();
+  const address = candidate[3]?.trim();
+  if (!name || !address || !/\d/u.test(address)) return {};
+  return { fullName: name, address };
+}
+
+function recipientSourceAmbiguous(text: string): boolean {
+  const folded = asciiFold(text);
+  return /\b(?:vi du|so cu|dia chi cu|dung dung|khong dung|khong phai|so cua ban|so cua nguoi khac|dia chi cua ban|dia chi cua nguoi khac)\b/u.test(folded);
 }
 
 function checkoutDetails(
@@ -536,20 +560,24 @@ function checkoutDetails(
   salesSignals: AgentSalesSignalsV1 | null | undefined,
 ): CheckoutDetails {
   const extracted = salesSignals?.checkoutExtraction;
-  const phone = labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
+  const localRecipient = privateUnlabelledRecipient(text);
+  const ambiguousRecipient = recipientSourceAmbiguous(text);
+  const phone = ambiguousRecipient ? undefined : (
+    labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
-    modelCheckoutValue(text, extracted?.phone, "PHONE");
-  const paymentMethod = /(chuyển khoản|chuyen khoan|\bck\b|bank)/iu.test(text)
-    ? "BANK_TRANSFER" as const
-    : /(?:^|\s)(?:cod|tiền mặt|tien mat|nhận hàng trả|nhan hang tra)(?:\s|$)/iu.test(text)
-      ? "COD" as const
-      : modelPaymentMethod(text, extracted?.paymentMethod);
-  const fullName =
+    modelCheckoutValue(text, extracted?.phone, "PHONE")
+  );
+  const paymentMethod = selectedPaymentMethod(text);
+  const fullName = ambiguousRecipient ? undefined : (
     labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]) ??
-    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME");
-  const address =
+    localRecipient.fullName ??
+    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME")
+  );
+  const address = ambiguousRecipient ? undefined : (
     labeledValue(text, ["địa chỉ", "dia chi", "đ/c", "dc"]) ??
-    modelCheckoutValue(text, extracted?.address, "ADDRESS");
+    localRecipient.address ??
+    modelCheckoutValue(text, extracted?.address, "ADDRESS")
+  );
   return {
     ...(fullName ? { fullName } : {}),
     ...(phone ? { phone } : {}),

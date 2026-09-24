@@ -527,6 +527,21 @@ property, or a fit.
 
 ## 6c. Checkout completeness
 
+For a current inbound checkout message, payment is a **selection** only when
+the customer chooses one supported method. Merely asking about bank transfer,
+mentioning it hypothetically, or rejecting it does not fill the field. If the
+customer rejects transfer and selects COD, the current selection is COD. The
+same current-message rule applies to recipient values: an evidence substring
+must identify the actual value, not a nearby payment word. Clear unlabelled
+recipient input may be parsed locally inside the private SalesCycle boundary;
+ambiguous recipient roles remain missing. Neither the Strategist nor the
+Responder receives raw recipient PII to compensate for redaction.
+
+An open, unconfirmed cart is pre-sale for edits to that cart. The same words
+can be after-sales when the customer explicitly refers to an existing order or
+delivered item. This routing distinction preserves HUMAN ownership once a
+handoff has actually occurred.
+
 The checkout field set mirrors the runtime `missingCheckout` set, payment
 method included. A missing payment choice is a missing field like any other.
 

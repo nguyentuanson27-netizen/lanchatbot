@@ -4115,4 +4115,13 @@ describe("policy question versus after-sales routing", () => {
     expect(isPreSalePolicyQuestion(text)).toBe(false);
     expect(isPostSaleRequest(text)).toBe(true);
   });
+
+  it("keeps edits to an open, unconfirmed cart in pre-sale", () => {
+    expect(isPostSaleRequest("Chị muốn đổi size trong giỏ sang L, chưa đặt hàng.", true))
+      .toBe(false);
+    expect(isPostSaleRequest("Chị muốn sửa địa chỉ trong giỏ trước khi chốt.", true))
+      .toBe(false);
+    expect(isPostSaleRequest("Đơn cũ chị đã nhận rồi, muốn đổi size.", true))
+      .toBe(true);
+  });
 });

@@ -2159,6 +2159,79 @@ describe("realtime Phase 3 sales cycle", () => {
     });
   });
 
+  it("does not accept recipient values invented from unrelated in-message evidence", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-invented-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị chọn COD nhé.", "event-invented-details"),
+      salesSignals: signals({
+        fullName: { value: "Lan", evidenceText: "COD" },
+        phone: { value: "0987654321", evidenceText: "COD" },
+        address: { value: "123 Lê Lợi, Quận 1", evidenceText: "COD" },
+      }),
+    });
+    expect(output.plan?.state.stage).toBe("CART_OPEN");
+    expect(output.telemetry).toMatchObject({
+      checkoutCapturedFields: ["PAYMENT_METHOD"],
+      checkoutMissingFields: ["FULL_NAME", "PHONE", "ADDRESS"],
+    });
+  });
+
+  it.each([
+    ["Không chuyển khoản, chị chọn COD.", "COD"],
+    ["Nếu chuyển khoản thì cần làm gì? Chị chưa chọn nhé.", null],
+    ["Chị chọn chuyển khoản nhé.", "BANK_TRANSFER"],
+  ] as const)("uses explicit payment choice: %s", async (text, expected) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      `event-payment-open-${text.length}`,
+    ));
+    const output = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state, text, `event-payment-${text.length}`,
+    ));
+    expect(output.plan?.state.checkoutDraft?.paymentMethod ?? null).toBe(expected);
+  });
+
+  it("captures a clear unlabelled recipient locally without model PII", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-local-recipient-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "Lan 0987654321 123 Lê Lợi P.Bến Nghé Q1 HCM ship cod",
+      "event-local-recipient-details",
+    ));
+    expect(output.plan?.state.checkoutDraft).toMatchObject({
+      fullName: "Lan", phone: "0987654321",
+      address: "123 Lê Lợi P.Bến Nghé Q1 HCM", paymentMethod: "COD",
+    });
+  });
+
+  it.each([
+    "Số của bạn chị là 0987654321, đừng dùng nhé.",
+    "Ví dụ địa chỉ: 123 Lê Lợi, Quận 1; tên Lan.",
+    "Số cũ 0987654321, không dùng nữa.",
+  ])("does not capture ambiguous or rejected recipient input: %s", async (text) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      `event-role-open-${text.length}`,
+    ));
+    const output = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state, text, `event-role-${text.length}`,
+    ));
+    expect(output.plan?.state.checkoutDraft?.fullName).toBeUndefined();
+    expect(output.plan?.state.checkoutDraft?.phone).toBeUndefined();
+    expect(output.plan?.state.checkoutDraft?.address).toBeUndefined();
+    expect(output.plan?.state.stage ?? opened.plan?.state.stage).toBe("CART_OPEN");
+  });
+
   it.each([
     "cho chị lấy nha",
     "vâng em chốt đơn",
