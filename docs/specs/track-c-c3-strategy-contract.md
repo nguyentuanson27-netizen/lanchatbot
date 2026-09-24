@@ -982,3 +982,47 @@ syntactic check cannot prove that a sentence contains only one semantic request.
 Free-prose slots trim outer whitespace before their existing validation; factual
 projection strings remain exact. These changes have focused regression evidence;
 a fresh full Luna run is still required after the recorded provider usage limit.
+
+### Follow-up: current fit evidence and task-shaped prose (2026-09-24)
+
+Root-cause review starts from `7c6623a`, retaining the reviewed PR371 ancestry.
+The original permission rule remains: adaptive `ASK_MEASUREMENTS` requires a
+canonical `MEASUREMENTS_REQUIRED` barrier; a resolved product is insufficient.
+
+- Realtime passes its existing verified Size Engine claim to the C3 producer.
+  The producer uses the existing protected-claim builder, expected product and
+  freshness checks. It must not discard that claim by supplying `sizeClaim: null`.
+- For a current fit request identified by existing typed runtime intent, the
+  producer also consumes the current Size Engine decision. `ASK_MORE` with a
+  verified chart for the bound product and missing body measurements contributes
+  an ephemeral `MEASUREMENTS_REQUIRED` barrier. No chart, a preference-only
+  question, a successful recommendation, or an unrelated turn does not grant
+  this permission. The captured context retains the same measurement blocker.
+  This does not advance commerce, infer commitment, or persist a new state.
+- Only the commerce clarification reason `CHECKOUT_DETAILS_MISSING` contributes
+  `CHECKOUT_DETAILS_REQUIRED`. A product/variant clarification is not missing
+  recipient details. Existing stage, current-cart and commitment checks remain.
+- On an adaptive ASK with no selected factual text, `answerText` is null and
+  `progressionText` is the entire authored reply. It can briefly give customer
+  context before its one assigned request. This removes two competing prose
+  slots for one question without supplying any sentence bank. With selected
+  facts, prose may identify a remaining unanswered part; `SUPPORTED` never
+  means the entire customer request has been answered.
+- Strategist instructions distinguish missing customer criteria from missing
+  shop evidence. Qualification can establish which available evidence matters;
+  it cannot promise a lookup, alternative or effect the runtime cannot execute.
+  ETA estimates establish neither guaranteed arrival nor impossibility.
+
+The first-contact quote schema and wording are unchanged. Lossless factual
+projection, exact checkout fields and authority guards remain code-owned. No
+DEV70 case identifiers, new phrase templates, model judge or durable state are
+added. Prompt changes require fresh model-output review; deterministic tests do
+not establish naturalness, sales effectiveness or semantic completeness.
+
+Known limit: the previous Luna fit journey provided no size chart and disabled
+customer profiles. It does not prove that a measurement request should have
+been permitted. The runtime regression now distinguishes verified-chart missing
+measurements, a usable recommendation, absent shop evidence and unrelated turns.
+Body-part-specific concerns beyond the Size Engine's present recommendation
+basis, automatic cart size editing and the original checkout payment wording
+remain separate capabilities; this follow-up does not claim to complete them.

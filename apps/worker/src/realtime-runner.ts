@@ -3352,6 +3352,7 @@ export class RealtimeRunner {
       rejectedCount: 0,
     };
     let verifiedSizeClaimForTurn: SizeRecommendationProtectedClaimV1 | null = null;
+    let c3FitMeasurementsRequired = false;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
     let preGenerationWave2StrategyDecision: Wave2StrategyDecision | null = null;
     let modelStrategyAnalysis: Wave2ModelAnalysis | null = null;
@@ -5075,6 +5076,13 @@ export class RealtimeRunner {
           productId: resolvedProduct?.productId ?? nextState.currentProductId,
           catalogVersion: resolvedProduct?.catalogVersion ?? null,
           facts: businessFactEnvelopes,
+          sizeClaim: verifiedSizeClaimForTurn,
+          fitDecision: resolvedProduct && customerProfile &&
+              (event.requestedSalesStage === "FIT_CONSULTING" ||
+               event.objectionType === "SIZE_FIT" ||
+               proposal?.businessFactQuery.intent === "SIZE")
+            ? resolveSizeEngineDecision(resolvedProduct, customerProfile, policyResolution, now).decision
+            : null,
           productFacts: productFactsV2,
           policyResolution,
           cartReadiness: [
@@ -5083,6 +5091,7 @@ export class RealtimeRunner {
           ],
           now: new Date(),
         });
+        c3FitMeasurementsRequired = c3Input.context.barriers.active.includes("MEASUREMENTS_REQUIRED");
         const chosen = await runTrackCStrategyLive({
           ...c3Input,
           modelResource: this.options.c3.modelResource,
@@ -5569,6 +5578,7 @@ export class RealtimeRunner {
                 canonicalEvidence,
                 verifiedClaims: protectedOutboundClaims,
                 finalCommerceState,
+                fitMeasurementsRequired: c3FitMeasurementsRequired,
                 readiness: readinessObservations,
                 finalTurnEvidence: finalTurnEvidence.data,
                 productBinding: productBinding.data,

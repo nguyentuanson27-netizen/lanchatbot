@@ -3307,7 +3307,8 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE"] as const)("builds C3 through realtime and respects %s checkout ownership", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+    const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
@@ -3349,6 +3350,15 @@ describe("RealtimeRunner inbound batching", () => {
     );
     let persistedState = state;
     let persistedCommerce = commerceState;
+    const profile: CustomerProfileV1 = {
+      schemaVersion: 1, profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      customerKey: { namespace: "lana-customer-v1", algorithm: "HMAC_SHA256", digest: "a".repeat(64) },
+      revision: 1, measurements: checkoutOwner === "FIT_READY" ? [{
+        kind: "WAIST_CM", value: 72,
+        provenance: { source: "CUSTOMER_MESSAGE", sourceEventHash: "b".repeat(64), observedAt: occurredAt, confidence: 1 },
+      }] : [], fitPreference: null, preferences: { colors: [], styles: [], materials: [] },
+      sizeHistory: [], createdAt: occurredAt, updatedAt: occurredAt,
+    };
     const commit = vi.fn(async (input: unknown) => {
       const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState } };
       persistedState = written.state;
@@ -3364,6 +3374,12 @@ describe("RealtimeRunner inbound batching", () => {
       });
     });
     const runtime: RealtimeRuntimePort = {
+      loadOrCreateCustomerProfile: async <TProfile, TEvidence>() => ({
+        pageId, customerHash: conversationHash, revision: profile.revision,
+        profile: profile as TProfile, fieldEvidence: {} as TEvidence,
+        expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+      }),
+      compareAndSwapCustomerProfile: async () => true,
       loadOrCreate: vi.fn(async () => ({
         conversationId,
         pageId,
@@ -3507,9 +3523,26 @@ describe("RealtimeRunner inbound batching", () => {
             metadata: policyMetadata,
           },
         },
-        versionReferences: [],
+        versionReferences: !fitMode || checkoutOwner === "FIT_NO_CHART" ? [] : [{
+          artifactKey: "fit-chart", artifactKind: "SIZE_CHART", lifecycle: "PUBLISHED",
+        }],
         artifacts: {
-          shopPolicy: {}, offerPolicy: {}, closingStrategy: {}, sizeCharts: {},
+          shopPolicy: {}, offerPolicy: {}, closingStrategy: {},
+          sizeCharts: !fitMode || checkoutOwner === "FIT_NO_CHART" ? {} : {
+            "fit-chart": {
+              chart: {
+                schemaVersion: 1,
+                reference: { chartId: "fit-chart", version: "1", source: "IMAGE_EXTRACTION",
+                  sourceArtifactRef: "https://cdn.example/fit-chart.jpg", sourceContentSha256: "d".repeat(64),
+                  verificationStatus: "VERIFIED", verifiedByRef: "admin:owner", verifiedAt: occurredAt },
+                brand: "LANA", category: "QUAN", componentRole: "PANTS", boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
+                bands: [{ size: "M", ranges: [{ kind: "WAIST_CM", minInclusive: 70, maxInclusive: 76 }], note: null }],
+              },
+              scope: { level: "COMPONENT", parentProductIds: ["CB182"], categories: ["QUAN"], componentRole: "PANTS", forms: [], materials: [] },
+              extraction: { measurementBasis: "BODY", confidence: 1, extractorVersion: "fixture" },
+              sourceMetadata: { sourceReference: "https://cdn.example/fit-chart.jpg" },
+            },
+          },
           handoffMatrix: null, paymentPolicy: null,
         },
       },
@@ -3622,6 +3655,7 @@ describe("RealtimeRunner inbound batching", () => {
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
+        customerProfileEnabled: fitMode,
         c3: {
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
           transport: { send: c3Send },
@@ -3690,6 +3724,59 @@ describe("RealtimeRunner inbound batching", () => {
       },
     });
 
+    if (fitMode) {
+      const fitEntry = item(40, checkoutOwner === "FIT_UNRELATED"
+        ? "Chị thích màu be." : "Chị cần tư vấn phần eo.");
+      currentBatch = { ...batch, generation: 11, inboxIds: [fitEntry.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [fitEntry] };
+      vi.setSystemTime(fitEntry.occurredAt);
+      const before = c3Send.mock.calls.length;
+      const question = "Chị cho em xin số đo vòng eo để đối chiếu nhé?";
+      c3Send.mockImplementationOnce(async (request) => {
+        const body = JSON.parse(request.body);
+        const prompt = JSON.parse(body.contents[0].parts[0].text);
+        const size = prompt.selectableEvidence.filter((entry: { capability: string }) => entry.capability === "SIZE_FIT");
+        const response = checkoutOwner === "FIT_REQUIRED"
+          ? { replyAct: "ANSWER", goal: "Ask the missing waist measurement for the current fit request.",
+              proposition: "SIZE_FIT", evidenceRefs: [], continuation: null, canonicalAction: "ASK_MEASUREMENTS" }
+          : checkoutOwner === "FIT_READY"
+            ? { replyAct: "ANSWER", goal: "State the Size Engine recommendation for the current waist measurement.",
+                proposition: "SIZE_FIT", evidenceRefs: size.map((entry: { ref: string }) => entry.ref),
+                continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+            : { replyAct: "ACKNOWLEDGE", goal: "Acknowledge without asking for unrelated or unusable customer input.",
+                proposition: "NONE", evidenceRefs: [], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" };
+        return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite" };
+      }).mockResolvedValueOnce({
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+          answerText: checkoutOwner === "FIT_NO_CHART" || checkoutOwner === "FIT_UNRELATED" ? "Em hiểu ý chị." : null,
+          factualTexts: [], progressionText: checkoutOwner === "FIT_REQUIRED" ? question : null,
+        }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+      });
+      expect(await runner.processOne()).toBe(true);
+      const fitBody = JSON.parse(c3Send.mock.calls[before]![0].body);
+      const fitPrompt = JSON.parse(fitBody.contents[0].parts[0].text);
+      expect(fitPrompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
+        .toBe(checkoutOwner === "FIT_REQUIRED");
+      expect(fitPrompt.selectableEvidence.some((entry: { capability: string }) => entry.capability === "SIZE_FIT"))
+        .toBe(checkoutOwner === "FIT_READY");
+      expect(c3Send.mock.calls.length - before).toBe(2);
+      const written = commit.mock.calls.at(-1)![0] as typeof commitInput;
+      expect(written.contextV2CapturePlan?.capture.context).toMatchObject({
+        barriers: { active: checkoutOwner === "FIT_REQUIRED" ? ["MEASUREMENTS_REQUIRED"] : [] },
+      });
+      const reply = written.metaPlan?.messages.map(({ text }) => text).join(" ");
+      if (checkoutOwner === "FIT_REQUIRED") expect(reply).toBe(question);
+      if (checkoutOwner === "FIT_READY") {
+        expect(reply).toBe("Size phù hợp với chị là M ạ.");
+        expect(written.metaPlan?.protectedClaimTypes).toContain("SIZE_FIT");
+      }
+      expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
+      expect(persistedCommerce.cart).toBeNull();
+      expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
+      return;
+    }
+
     // An ordinary follow-up may leave commerce unchanged. It still needs C3;
     // requiring a new SalesCycle plan previously bypassed adaptive dialogue.
     const followupEntry = item(40, "Giá hơi cao với chị.");
@@ -3706,9 +3793,9 @@ describe("RealtimeRunner inbound batching", () => {
       }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
     }).mockResolvedValueOnce({
       payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
-        answerText: checkoutOwner === "C3_FAILURE" ? "Mẫu này giá 1đ." :
-          "Chị đang cân nhắc khoản chi cho mẫu này.", factualTexts: [],
-        progressionText: "Điểm nào khiến chị còn phân vân nhất?",
+        answerText: null, factualTexts: [],
+        progressionText: checkoutOwner === "C3_FAILURE"
+          ? "Mẫu này giá 1đ. Điểm nào khiến chị còn phân vân nhất?" : concernReply,
       }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
     });
     expect(await runner.processOne()).toBe(true);

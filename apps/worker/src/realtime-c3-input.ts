@@ -2,6 +2,7 @@ import {
   buildProtectedClaimsFromVerifiedFactSetV1,
   buildProductPresentationEvidenceV1,
   type CanonicalDecisionEvidenceV1,
+  type SizeEngineDecision,
 } from "@lana/business-tools";
 import {
   FinalTurnEvidenceV2Schema,
@@ -11,6 +12,7 @@ import {
   type DeterministicEffectReadinessV1,
   type ProductFactsV2,
   type ProtectedClaimV1,
+  type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
 import {
   outboundRuntimePolicy,
@@ -36,6 +38,9 @@ export function buildRealtimeC3Input(input: Readonly<{
   productId: string | null;
   catalogVersion: string | null;
   facts: readonly BusinessFactEnvelopeV1[];
+  sizeClaim?: SizeRecommendationProtectedClaimV1 | null;
+  /** Current fit request's Size Engine result, never a persisted sales hint. */
+  fitDecision?: SizeEngineDecision | null;
   productFacts: ProductFactsV2 | null;
   policyResolution: RuntimePolicyResolution | null;
   cartReadiness: readonly DeterministicEffectReadinessV1[];
@@ -60,7 +65,8 @@ export function buildRealtimeC3Input(input: Readonly<{
   });
   const productClaims = buildProtectedClaimsFromVerifiedFactSetV1({
     facts: input.facts,
-    sizeClaim: null,
+    sizeClaim: input.sizeClaim ?? null,
+    expectedSizeProductId: input.productId,
   }).claims.filter((claim) =>
     claim.type !== "ETA" &&
     claim.scope.kind === "PRODUCT" &&
@@ -108,6 +114,10 @@ export function buildRealtimeC3Input(input: Readonly<{
     canonicalEvidence: input.canonicalEvidence,
     verifiedClaims: [...productClaims, ...cartClaims].slice(0, 32),
     finalCommerceState: input.commerceState,
+    fitMeasurementsRequired: input.fitDecision?.action === "ASK_MORE" &&
+      input.fitDecision.recommendation.parentProductId === input.productId &&
+      input.fitDecision.recommendation.chartRef?.verificationStatus === "VERIFIED" &&
+      input.fitDecision.missingInputs.some((kind) => kind !== "FIT_PREFERENCE"),
     readiness: [],
     finalTurnEvidence,
     productBinding,

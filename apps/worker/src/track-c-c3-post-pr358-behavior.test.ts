@@ -147,7 +147,7 @@ function responderFor(
   return {
     answerText: (task.answer.kind === "ANSWER" &&
         task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
-        canonical === "ASK_CHECKOUT_DETAILS"
+        canonical === "ASK_CHECKOUT_DETAILS" || (needsProgression && task.evidence.length === 0)
       ? null : answerText,
     // Factual wording is code-rendered from the selected evidence, so the
     // Responder authors none of it.

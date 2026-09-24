@@ -165,7 +165,7 @@ describe("Track C C3 strategy-contract runner", () => {
         continuation: { type: "ASK", input: "DECISION_CRITERION" },
       }), providerModelVersion: "gemini-3.5-flash-lite" })
       .mockResolvedValueOnce({ payload: payload({
-        answerText: answer, factualTexts: [], progressionText: question,
+        answerText: null, factualTexts: [], progressionText: `${answer.trim()} ${question}`,
       }), providerModelVersion: "gemini-3.5-flash-lite" });
     const result = runTrackCStrategyContractCase({
       lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
@@ -176,10 +176,10 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     if (valid) {
       const resolved = await result;
-      expect(resolved.output.segments[0]?.text).toBe(answer.trim());
+      expect(resolved.output.segments[0]?.text).toBe(`${answer.trim()} ${question}`);
       expect(resolved.reply).toContain(question);
       const schema = JSON.parse(send.mock.calls[1]![0].body).generationConfig.responseSchema;
-      expect(JSON.stringify(schema.properties.answerText)).not.toContain("enum");
+      expect(schema.properties.answerText).toEqual({ type: "NULL" });
       expect(schema.properties.progressionText).not.toHaveProperty("enum");
     } else {
       await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
@@ -447,7 +447,7 @@ describe("Track C C3 strategy-contract runner", () => {
           continuation: { type: "ASK", input: "LOCALITY" }, canonicalAction: "NONE",
         }), providerModelVersion: "gemini-3.5-flash-lite" })
         .mockResolvedValueOnce({ payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.", factualTexts: [], progressionText,
+          answerText: null, factualTexts: [], progressionText,
         }), providerModelVersion: "gemini-3.5-flash-lite" });
       const result = runTrackCStrategyContractCase({
         lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
@@ -1381,7 +1381,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: null,
           factualTexts: [],
           progressionText: "Chị thích màu nào hơn ạ?",
         }),
@@ -1446,7 +1446,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: null,
           factualTexts: [],
           progressionText: "Mẫu này giá 849.000đ, chị muốn chọn màu nào ạ?",
         }),
@@ -2146,7 +2146,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: null,
           factualTexts: [],
           progressionText: "Màu nào hợp ý chị hơn ạ?",
         }),
