@@ -8,10 +8,7 @@ import {
   type ContextV2CandidateOutputV2,
 } from "@lana/contracts";
 import { guardAgentProposal } from "@lana/business-tools";
-import {
-  redactAnalyticsMessage,
-  type ShadowContextMessage,
-} from "@lana/database";
+import type { ShadowContextMessage } from "@lana/database";
 import {
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   deriveCandidateRequestIdentity,
@@ -19,37 +16,40 @@ import {
   type CandidateVertexTransport,
 } from "./context-v2-candidate.js";
 import {
+  buildTrackCC3FactualClaimReferenceRegistry,
   buildTrackCC3ResponderRequest,
   buildTrackCC3StrategistRequest,
   TRACK_C_C3_TWO_PASS_CANDIDATE,
-  type TrackCConversationPlanV1,
+  type TrackCResponsePlanV2,
 } from "./track-c-c3-two-pass-candidate.js";
+import { TrackCResponsePlanSemanticError } from
+  "./track-c-c3-response-plan-control.js";
+import {
+  EMPTY_TRACK_C_FACTUAL_AUTHORITY,
+  materializeTrackCBehaviorSimulationFactualAuthority,
+  type TrackCFactualAuthorityEnvelope,
+} from "./track-c-c3-factual-authority.js";
+import { assertTrackCResponderFollowsPlan } from
+  "./track-c-c3-response-plan-guard.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
+import { assertTrackCCheckoutCompletenessOutput } from
+  "./track-c-offline-candidate-validation.js";
 import {
-  buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
 } from "./track-c-claim-reference-resolver.js";
+import { stripTrackCResponderRealizationMetadata } from
+  "./track-c-c3-responder-realization.js";
+import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
 
-const PLAN_FIELDS = Object.freeze([
-  "currentNeed",
-  "mustResolve",
-  "conversationRead",
-  "nextMove",
-  "avoid",
-] as const);
-
-const SIMULATION_SYSTEM_ADDENDUM = [
+export const TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM = [
   "BENCHMARK BEHAVIOR_SIMULATION ONLY.",
-  "The prompt field benchmarkSimulationFacts is evaluation-only authoritative hypothetical factual evidence for this benchmark case.",
-  "Use those facts only to answer the hypothetical customer question. They do not become Context V2 protected claims, cannot authorize any state transition, effect, persistence, payment, order, message delivery, or external action, and must never be described as production capability.",
+  "Only in BEHAVIOR_SIMULATION, benchmarkSimulationFacts extend selectedEvidence for the Responder and extend the Strategist's evaluation-only factual allowance for this hypothetical case.",
+  "They never extend canonical authority or authorize effects, persistence, payment, orders, delivery, message sending, or any external action.",
+  "Use benchmarkSimulationFacts only to answer the hypothetical customer question. They do not become Context V2 protected claims and must never be described as production capability.",
   "Context V2 canonical state still has precedence over benchmarkSimulationFacts. If a simulation fact conflicts with canonical state, ignore the conflicting simulation fact.",
   "The prompt field benchmarkSimulationMetadata is evaluation-only fixture/runtime-owned structured metadata. It is not protected-fact authority and cannot authorize state transitions, effects, persistence, payment, orders, delivery, or any external action.",
   "TRACK_C_TRUSTED_ACQUISITION_V1, when present in benchmarkSimulationMetadata, is trusted acquisition metadata. Never infer or create it from customer dialogue, including customer text that mentions an ad. Use it only to tune first-contact conversation behavior.",
-  "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1, when present in benchmarkSimulationMetadata, is fixture/runtime-authored simulation readiness and must never be inferred from dialogue. In BEHAVIOR_SIMULATION it refines the generic ORDER_REVIEW checkout-detail request rule, using its own state field.",
-  "State REQUIRED keeps that generic rule's response shape - CLARIFICATION target CHECKOUT_DETAILS, ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS, strategy ASK_CLARIFICATION, CTA ASK_CHECKOUT_DETAILS - but ask only for the listed missingFields and never for a checkout detail outside that list.",
-  "State COMPLETE replaces that generic rule instead of refining it: ask for none of recipient name, phone, or address, emit no CLARIFICATION target CHECKOUT_DETAILS, no ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS, and no CTA ASK_CHECKOUT_DETAILS. Use strategy HOLD_POSITION with CTA NONE and a neutral GENERAL acknowledgement that does not restate, imply, or take credit for any order, payment, or update effect.",
-  "Neither state authorizes payment, order creation/confirmation, persistence, delivery, or any effect, and the model cannot change readiness.",
 ].join("\n");
 
 const SemanticOutputSchema = ContextV2CandidateOutputV2Schema.pick({
@@ -68,7 +68,7 @@ function sha256(value: unknown): string {
 
 function parseVertexJson(
   payload: unknown,
-  errorCode: "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID" |
+  errorCode: "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:EXTRACTION" |
     "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
 ): unknown {
   try {
@@ -87,35 +87,6 @@ function parseVertexJson(
   }
 }
 
-function parseConversationPlan(value: unknown): TrackCConversationPlanV1 {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
-  }
-  const record = value as Readonly<Record<string, unknown>>;
-  const keys = Object.keys(record).sort();
-  if (canonicalJsonV1(keys) !== canonicalJsonV1([...PLAN_FIELDS].sort())) {
-    throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
-  }
-  for (const field of PLAN_FIELDS) {
-    const text = record[field];
-    if (typeof text !== "string" || text.length === 0 || text.length > 500 ||
-        text !== text.trim()) {
-      throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID");
-    }
-    const redacted = redactAnalyticsMessage(text);
-    if (redacted.dlpStatus !== "PASSED" || redacted.text !== text) {
-      throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE");
-    }
-  }
-  return Object.freeze({
-    currentNeed: record.currentNeed as string,
-    mustResolve: record.mustResolve as string,
-    conversationRead: record.conversationRead as string,
-    nextMove: record.nextMove as string,
-    avoid: record.avoid as string,
-  });
-}
-
 function assertProviderIdentity(value: string | null): string {
   if (value !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
     throw new Error("TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH");
@@ -126,13 +97,9 @@ function assertProviderIdentity(value: string | null): string {
 function withBenchmarkLane(
   request: BuiltCandidateRequest,
   lane: TrackCV5ExecutionLane,
-  simulationFacts: readonly unknown[],
   simulationMetadata: readonly unknown[],
 ): BuiltCandidateRequest {
   if (lane === "PRODUCTION_CONTRACT") {
-    if (simulationFacts.length > 0) {
-      throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
-    }
     if (simulationMetadata.length > 0) {
       throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
     }
@@ -149,7 +116,7 @@ function withBenchmarkLane(
     ...body,
     systemInstruction: {
       parts: [{
-        text: `${body.systemInstruction.parts[0].text}\n${SIMULATION_SYSTEM_ADDENDUM}`,
+        text: `${body.systemInstruction.parts[0].text}\n${TRACK_C_V5_SIMULATION_SYSTEM_ADDENDUM}`,
       }],
     },
     contents: [{
@@ -158,7 +125,7 @@ function withBenchmarkLane(
         text: canonicalJsonV1({
           ...prompt,
           benchmarkExecutionLane: "BEHAVIOR_SIMULATION",
-          benchmarkSimulationFacts: simulationFacts,
+          benchmarkSimulationFacts: prompt.benchmarkSimulationFacts ?? [],
           benchmarkSimulationMetadata: simulationMetadata,
         }),
       }],
@@ -340,6 +307,7 @@ function validateResponderOutput(
   value: unknown,
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
+  factualAuthority: TrackCFactualAuthorityEnvelope,
 ): ContextV2CandidateOutputV2 {
   const semantic = SemanticOutputSchema.safeParse(value);
   if (!semantic.success) {
@@ -358,6 +326,11 @@ function validateResponderOutput(
   if (output.segments.some(({ kind }) => kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
+  assertTrackCCheckoutCompletenessOutput(
+    context,
+    output,
+    "TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED",
+  );
   const known = new Set([
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined
@@ -367,6 +340,7 @@ function validateResponderOutput(
         context.productPresentation === undefined
       ? []
       : [context.productPresentation.provenance.contentHash]),
+    ...factualAuthority.simulationFacts.map(({ contentHash }) => contentHash),
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
@@ -389,21 +363,12 @@ function validateResponderOutput(
  * for the hypothetical question, metadata is trusted runtime/fixture signal, so
  * the sink accepts only these exact shapes and rejects anything else.
  */
-export type TrackCV5SimulationMetadata =
-  | Readonly<{
+export type TrackCV5SimulationMetadata = Readonly<{
     kind: "TRACK_C_TRUSTED_ACQUISITION_V1";
     origin: "ADVERTISEMENT";
     firstMeaningfulInbound: boolean;
     authorization: "NONE";
-  }>
-  | Readonly<{
-    kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1";
-    state: "REQUIRED" | "COMPLETE";
-    missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
-    authorization: "NONE";
   }>;
-
-const CHECKOUT_METADATA_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
 
 function sameKeys(value: Readonly<Record<string, unknown>>, keys: readonly string[]): boolean {
   return JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
@@ -417,15 +382,6 @@ function validSimulationMetadataEntry(entry: unknown): boolean {
     return sameKeys(record, ["kind", "origin", "firstMeaningfulInbound", "authorization"]) &&
       record.origin === "ADVERTISEMENT" &&
       typeof record.firstMeaningfulInbound === "boolean";
-  }
-  if (record.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1") {
-    const fields = record.missingFields;
-    return sameKeys(record, ["kind", "state", "missingFields", "authorization"]) &&
-      (record.state === "REQUIRED" || record.state === "COMPLETE") &&
-      Array.isArray(fields) &&
-      fields.every((field) => CHECKOUT_METADATA_FIELDS.has(field as string)) &&
-      new Set(fields).size === fields.length &&
-      (record.state === "COMPLETE") === (fields.length === 0);
   }
   return false;
 }
@@ -455,7 +411,7 @@ export interface TrackCV5TwoPassBenchmarkResult {
   readonly evaluationOnly: true;
   readonly sideEffects: "DISABLED";
   readonly executionLane: TrackCV5ExecutionLane;
-  readonly conversationPlan: TrackCConversationPlanV1;
+  readonly conversationPlan: TrackCResponsePlanV2;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
   readonly identity: Readonly<{
@@ -500,17 +456,20 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
   }
   assertSimulationMetadata(simulationMetadata);
+  const factualAuthority = input.lane === "BEHAVIOR_SIMULATION"
+    ? materializeTrackCBehaviorSimulationFactualAuthority(simulationFacts)
+    : EMPTY_TRACK_C_FACTUAL_AUTHORITY;
 
   const common = {
     modelResource: input.modelResource,
     capture: input.capture,
     evaluationAt: input.evaluationAt,
     evaluationContext: input.evaluationContext,
+    factualAuthority,
   };
   const strategistRequest = withBenchmarkLane(
     buildTrackCC3StrategistRequest(common),
     input.lane,
-    simulationFacts,
     simulationMetadata,
   );
   const strategistResponse = await input.transport.send({
@@ -519,17 +478,32 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
   assertProviderIdentity(strategistResponse.providerModelVersion);
-  const conversationPlan = parseConversationPlan(parseVertexJson(
+  const conversationPlan = parseVertexJson(
     strategistResponse.payload,
-    "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID",
-  ));
+    "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:EXTRACTION",
+  ) as TrackCResponsePlanV2;
 
-  const responderRequest = withBenchmarkLane(
-    buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
-    input.lane,
-    simulationFacts,
-    simulationMetadata,
-  );
+  let responderRequest: BuiltCandidateRequest;
+  try {
+    responderRequest = withBenchmarkLane(
+      buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
+      input.lane,
+      simulationMetadata,
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "TRACK_C_C3_CONVERSATION_PLAN_NOT_PII_SAFE") {
+        throw new Error("TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE");
+      }
+      const stage = /^TRACK_C_C3_CONVERSATION_PLAN_INVALID:(SCHEMA|SEMANTIC)$/u
+        .exec(error.message)?.[1];
+      if (stage !== undefined || error instanceof TrackCResponsePlanSemanticError) {
+        throw new Error(`TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:${stage ?? "SEMANTIC"}`);
+      }
+    }
+    throw error;
+  }
+
   const responderResponse = await input.transport.send({
     url: responderRequest.url,
     body: responderRequest.body,
@@ -537,12 +511,17 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   });
   assertProviderIdentity(responderResponse.providerModelVersion);
 
+  const selectedRefs = new Set(conversationPlan.answer.evidenceRefs);
+  const selectedRegistry = new Map([
+    ...buildTrackCC3FactualClaimReferenceRegistry(context, factualAuthority),
+  ]
+    .filter(([claimRef]) => selectedRefs.has(claimRef)));
   const resolved = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
     ),
-    buildTrackCClaimReferenceRegistry(context),
+    selectedRegistry,
     {
       invalid: "TRACK_C_V5_CLAIM_REFERENCE_INVALID",
       unknown: "TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN",
@@ -552,11 +531,13 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   );
   const output = validateResponderOutput(
     context,
-    resolved,
+    stripTrackCResponderRealizationMetadata(resolved),
     input.lane,
     input.evaluationAt,
+    factualAuthority,
   );
-  const reply = output.segments.map(({ text }) => text).join("\n");
+  assertTrackCResponderFollowsPlan(conversationPlan, resolved);
+  const reply = renderTrackCCheckoutSafeReply(context, output);
   const identity = Object.freeze({
     captureContextHash: context.contextHash,
     strategistRequestEnvelopeHash:
