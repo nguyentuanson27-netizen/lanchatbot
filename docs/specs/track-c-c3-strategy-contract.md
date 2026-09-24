@@ -972,3 +972,13 @@ inside a bounded uncertainty clause; any amount/percentage, promise or separate
 affirmative offer remains rejected, as do all other guard reasons. No promotion
 authority is created, and the shared legacy guard is unchanged. This remains a
 conservative syntactic check with disclosed limits, not a semantic safety proof.
+
+
+Final follow-up to that run: the same bounded uncertainty rule covers freeship
+mentions (not positive free-shipping claims). Polite Vietnamese requests may end
+with a period: the single progression slot is still required for ASK, but code
+rejects more than one question mark rather than requiring exactly one. This
+syntactic check cannot prove that a sentence contains only one semantic request.
+Free-prose slots trim outer whitespace before their existing validation; factual
+projection strings remain exact. These changes have focused regression evidence;
+a fresh full Luna run is still required after the recorded provider usage limit.

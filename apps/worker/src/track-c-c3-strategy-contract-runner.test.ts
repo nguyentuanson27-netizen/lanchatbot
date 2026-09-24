@@ -150,6 +150,8 @@ describe("Track C C3 strategy-contract runner", () => {
       question: "Chị quan tâm điểm nào khi so hai mẫu?", valid: true },
     { answer: " Em hiểu chị muốn cân nhắc kỹ hơn. ",
       question: "Chị còn phân vân ở điểm nào?", valid: true },
+    { answer: "Em hiểu chị muốn cân nhắc kỹ hơn.",
+      question: "Chị nói thêm điểm mình còn băn khoăn để em tư vấn đúng nhu cầu nhé.", valid: true },
     { answer: "Mẫu này cao cấp và bền đẹp.", question: "Chị muốn xem thêm gì?", valid: false },
     { answer: "Em sẽ giữ mẫu này cho chị.", question: "Chị muốn xem thêm gì?", valid: false },
     { answer: "Dạ chị.", question: "Chị muốn màu nào? Chị lấy mấy bộ?", valid: false },

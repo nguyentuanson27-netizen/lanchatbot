@@ -114,7 +114,7 @@ const ADAPTIVE_RESPONDER_INSTRUCTION = [
   "Do not repeat money amounts from dialogue or invent shop attributes, benefits, quality, fit, comparisons, discounts, stock, policies or delivery promises in either prose field. Refer to the customer's stated budget without restating its amount. All shop facts must remain inside the supplied factualTexts. A preference match does not prove superiority or value for money.",
   "For factualTexts, copy each evidence.text in order, preserving every fact, subject, number, condition and negation. Only the final courtesy particle may be removed, and an opening Dạ may be added. An empty array uses all original facts. Never omit a selected fact, add a benefit or change its meaning.",
   "For UNRESOLVED or unrealizedCapabilities, explain the specific unanswered question without turning missing information into a negative fact. When facts answer part of the question, name the remaining limit without repeating the supported facts. Never claim you will check, send, reserve, change or place anything when no such action is supplied.",
-  "For an ordinary ASK or ASK_PRODUCT/ASK_MEASUREMENTS, write exactly one customer-directed question in progressionText for that supplied input. Use history to ask only what is still missing. The question must enable the next step described in the goal; it cannot ask the customer for shop-owned facts. Never append factual explanation, an effect, another decision variable, or a second question.",
+  "For an ordinary ASK or ASK_PRODUCT/ASK_MEASUREMENTS, write exactly one customer-directed question or polite request in progressionText for that supplied input. Use history to ask only what is still missing. The request must enable the next step described in the goal; it cannot ask the customer for shop-owned facts. Never append factual explanation, an effect, another decision variable, or a second question.",
   "For KEEP_OPEN or HOLD_POSITION, progressionText is null and answerText contains no question or new request. A natural answer can end without an invitation. A correction may be acknowledged as the customer's choice, never as a completed cart change.",
   "For ASK_CHECKOUT_DETAILS, both prose fields are null: code asks precisely for missing fields and permitted payment options. No other task may request recipient details or claim checkout completion.",
   "Keep the factual portion concise and use at most one opening or closing courtesy marker across the reply. Do not force a discovery question when canonical context says the customer is ready for checkout. Return only the required JSON fields; no internal protocol tokens or extra actions.",
@@ -872,7 +872,10 @@ function compileResponderDraft(input: Readonly<{
     for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
     if ((draft.answerText?.length ?? 0) > 600 || (draft.progressionText?.length ?? 0) > 300 ||
         (draft.answerText?.includes("?") ?? false) ||
-        (draft.progressionText !== null && (draft.progressionText.match(/\?/gu)?.length ?? 0) !== 1)) {
+        // Vietnamese polite requests need not end in a question mark. The
+        // canonical single progression slot owns cardinality; punctuation
+        // only rejects an obvious second question, not grammatical requests.
+        (draft.progressionText !== null && (draft.progressionText.match(/\?/gu)?.length ?? 0) > 1)) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
   }

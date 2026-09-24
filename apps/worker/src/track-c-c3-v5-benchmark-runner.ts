@@ -291,19 +291,24 @@ function sizeGuardInputForClaim(
   };
 }
 
-/** The legacy guard treats every offer-topic mention as an offer. C3 may
+/** The legacy guard treats promotion/free-shipping topic mentions as assertions. C3 may
  * explicitly say that information is unconfirmed. Admit only a bounded
  * uncertainty clause with no values/promise; never infer promotion authority.
  * This is not a relevance check or a general natural-language certificate. */
-function onlyUnconfirmedPromotionMentions(value: string): boolean {
+function onlyUnconfirmedTopicMentions(value: string, reason: string): boolean {
+  const topic = reason === "UNAUTHORIZED_PROMOTION"
+    ? /\b(?:khuyen mai|uu dai|giam gia|giam\s+\d|voucher|ma giam)\b/u
+    : reason === "UNAUTHORIZED_FREESHIP"
+      ? /\b(?:freeship|free ship|mien phi (?:giao|ship))\b/u
+      : null;
+  if (topic === null) return false;
   const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d").toLowerCase();
   // An uncertainty preface cannot shield a value or promise in another clause.
   if (/[\d%₫]/u.test(folded.replace(/\b[a-z]{1,6}\d{1,8}[a-z0-9]*\b/gu, "")) ||
       /\b(?:se|chac chan|cam ket|dam bao)\b/u.test(folded)) return false;
-  const promotion = /\b(?:khuyen mai|uu dai|giam gia|giam\s+\d|voucher|ma giam)\b/u;
   const clauses = folded.split(/[.!?;,\n]|\b(?:nhung|tuy nhien|dong thoi|vi vay|nen|va)\b/u)
-    .map((clause) => clause.trim()).filter((clause) => promotion.test(clause));
+    .map((clause) => clause.trim()).filter((clause) => topic.test(clause));
   return clauses.length > 0 && clauses.every((clause) =>
     /^(?:(?:da|em|minh|hien|tai|ben|shop)\s+){0,4}(?:chua|khong)\s+(?:co\s+(?:du\s+)?thong tin\s+(?:(?:de\s+)?xac nhan\s+)?|(?:the\s+)?xac nhan\s+)/u.test(clause)
   );
@@ -430,8 +435,7 @@ function guardProductionOutput(
       now: evaluationAt,
     });
     const blocked = guard.blockedReasonCodes.filter((reason) =>
-      !(reason === "UNAUTHORIZED_PROMOTION" && segment.kind === "GENERAL" &&
-        onlyUnconfirmedPromotionMentions(segment.text))
+      !(segment.kind === "GENERAL" && onlyUnconfirmedTopicMentions(segment.text, reason))
     );
     if (blocked.length > 0) {
       throw new Error(

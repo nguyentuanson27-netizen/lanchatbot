@@ -53,6 +53,12 @@ describe("C3 promotion uncertainty versus offer authority", () => {
     ["Em chưa xác nhận ưu đãi. Mẫu này còn hàng.", false],
     ["Em chưa xác nhận ưu đãi. Giao trong 2 ngày.", false],
     ["Em chưa xác nhận ưu đãi sẽ áp dụng cho chị.", false],
+    ["Em chưa xác nhận được điều kiện freeship cho đơn này.", true],
+    ["Hiện chưa có thông tin xác nhận miễn phí giao hàng cho giỏ này.", true],
+    ["Giỏ này được freeship.", false],
+    ["Em chưa xác nhận freeship, nhưng shop miễn phí giao hàng.", false],
+    ["Em chưa xác nhận ưu đãi. Giỏ này được freeship.", false],
+    ["Em chưa xác nhận freeship từ 500k.", false],
   ] as const)("checks the complete reply: %s", (text, accepted) => {
     const run = () => validateResponderOutput(baseContext([]), {
       segments: [{ kind: "GENERAL", text }], strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
