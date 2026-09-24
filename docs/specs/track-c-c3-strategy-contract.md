@@ -1026,3 +1026,16 @@ measurements, a usable recommendation, absent shop evidence and unrelated turns.
 Body-part-specific concerns beyond the Size Engine's present recommendation
 basis, automatic cart size editing and the original checkout payment wording
 remain separate capabilities; this follow-up does not claim to complete them.
+
+The subsequent actual Luna run exposed a typed bypass: an unresolved `SIZE_FIT`
+decision selected ordinary `ASK SIZE` and asked for body measurements. The
+compiler rejects that combination; it does not turn all purchase size choices
+into canonical requests. `ASK_MEASUREMENTS` remains the only measurement path.
+This finite check is not a semantic classifier for arbitrary prose.
+
+Money detection also uses Unicode token boundaries for Vietnamese currency
+units, so a product code followed by `kỹ` is not read as a `k` amount. The
+bare-price keyword fallback masks whole verified product identifiers only;
+currency parsing still inspects the original text. Actual and invented price
+amounts remain subject to the same source authority. No sentence whitelist is
+introduced.

@@ -66,3 +66,34 @@ Status: candidate for controlled offline evaluation and review; no claim of
 readiness for customer traffic. Complexity delta is optional producer inputs
 and one task-shape restriction, reusing existing claims, barriers and validators;
 no new durable workflow, approval layer or operational gate.
+
+## Actual Luna follow-up on 304e214
+
+The full run completed without quota failures: 70 records, 55 guarded replies,
+13 final-guard rejections, 2 expected stale preflight rejections; 133 actual Luna
+stage calls. These are execution counts, not sales-quality scores. Retained at
+`LUNA6_DEV70_C3_304e214_20260924T091647Z`.
+
+Nine realtime journeys / 29 turns also completed and are retained at
+`LUNA6_RUNTIME_304E214_ROOTCAUSE_20260924`. The size-edit acceptance remains RED:
+the cart stays open after handoff. Ordinary checkout reaches confirmation.
+The prior-experience follow-up now produces one relevant question, but several
+objections still terminate in empathy or source limitations. New evidence also
+exposed two boundary defects requiring correction before another evaluation:
+
+- A price concern mentioning a product code before `kỹ` was interpreted as
+  money: ASCII `k\b` matches the beginning of the Vietnamese word. Money units
+  now require a Unicode token boundary. The bare-price keyword fallback also
+  excludes whole verified catalog identifiers, while currency-bearing amounts
+  are still parsed from the original text. No response phrase is allowlisted;
+  regression cases retain rejection of invented amounts and unknown identifiers.
+- A fit question without canonical measurement permission was labeled ordinary
+  `ASK SIZE`, then realized as a waist measurement request. The existing compiler
+  now rejects `SIZE_FIT` without supporting evidence combined with `ASK SIZE`.
+  `SIZE` still means a purchase size selection; measurement requests retain
+  their canonical permission path. This typed check does not claim to detect
+  every possible semantic mislabeling in unrestricted prose.
+
+Final code HEAD and the second fresh Luna evaluation are recorded in the PR
+handoff. The 304e214 outputs remain intact and are not relabeled as final-HEAD
+results. A higher completion count alone cannot establish improved selling.

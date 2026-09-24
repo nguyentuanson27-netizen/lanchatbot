@@ -384,6 +384,12 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   const evidenceStatus = decision.proposition === "NONE"
     ? "NOT_APPLICABLE" as const
     : supportsProposition ? "SUPPORTED" as const : "UNRESOLVED" as const;
+  // SIZE selects a purchase size. It cannot substitute for the canonical
+  // measurement request while the declared fit question is still unresolved.
+  if (decision.proposition === "SIZE_FIT" && !supportsProposition &&
+      decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
+    throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  }
   const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
     ? Object.freeze({
         kind: "ANSWER", evidenceStatus, goal: decision.goal,

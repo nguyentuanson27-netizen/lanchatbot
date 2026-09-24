@@ -389,6 +389,24 @@ describe("facts and deterministic policy guard", () => {
     });
   });
 
+  it.each([
+    ["Em hiểu mức giá này khiến chị cân nhắc SD396 kỹ hơn.", false],
+    ["Em hiểu mức giá này khiến chị cân nhắc sd396 kỹ hơn.", false],
+    ["Giá SD396 là 599k.", true],
+    ["Giá SD396 599000.", true],
+    ["Giá SD396 là 599 nghìn.", true],
+    ["Giá SD396 là 599 đồng.", true],
+    ["Giá SD396 là 0,599 triệu.", true],
+    ["Giá SD396 là 599VND.", true],
+    ["Giá SD396.", false],
+    ["Giá ABC599000.", true],
+    ["Giá 396.", true],
+  ] as const)("distinguishes verified product identifiers from money: %s", (reply, blocked) => {
+    const result = guardAgentProposal({ proposal: proposal(reply), facts: null,
+      verifiedProductIds: new Set(["SD396"]), now });
+    expect(result.blockedReasonCodes.includes("UNAUTHORIZED_PRICE")).toBe(blocked);
+  });
+
   it("blocks invented price, promotion, freeship and ship fee", () => {
     const result = guardAgentProposal({
       proposal: proposal("Giá 599k, đang giảm giá, freeship và phí ship 30k ạ"),

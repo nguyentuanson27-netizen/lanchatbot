@@ -13,7 +13,9 @@ import type { GuardInput, GuardResult } from "./types.js";
 import { foldVietnameseForRecall } from "./vietnamese-text.js";
 
 const RAW_URL_PATTERN = /https?:\/\/\S+/iu;
-const PRICE_PATTERN = /(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|triệu\b|đồng\b|đ(?![\p{L}\p{M}])|₫)/giu;
+// ASCII word boundaries treat "kỹ" as the currency suffix "k". Currency
+// units must end at a Unicode token boundary in Vietnamese prose.
+const PRICE_PATTERN = /(?:\d[\d.,]*)\s*(?:(?:k|nghìn|vnd|triệu|đồng|đ)(?![\p{L}\p{M}\p{N}])|₫)/giu;
 const PRICE_CLAIM_PATTERN = /\b(?:giá|price)\D{0,16}\d[\d.,]*/iu;
 const STOCK_PATTERN = /\b(?:còn\s+hàng|còn\s+(?:size|sz)|hết\s+hàng|hết\s+(?:size|sz)|sẵn\s+hàng|pre[- ]?order|đặt\s+trước|sắp\s+về|còn\s+(?:áo|quần|chân\s+váy|set|mẫu))\b/iu;
 const ETA_PATTERN = /\b\d+\s*(?:-|–|đến)?\s*\d*\s*(?:ngày|day)\b/iu;
@@ -659,8 +661,14 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
   }
 
   const prices = parseMoney(textWithoutShippingFee);
+  // A verified catalog identifier is not a bare price. Keep currency parsing
+  // on the original text; mask only whole known identifiers for the keyword
+  // fallback so digits inside a product code cannot become a price claim.
+  const priceClaimText = textWithoutShippingFee.replace(/[\p{L}\p{N}_-]+/gu,
+    (token) => /\p{L}/u.test(token) && input.verifiedProductIds.has(token.toUpperCase())
+      ? "PRODUCT" : token);
   const hasPriceClaim =
-    prices.length > 0 || PRICE_CLAIM_PATTERN.test(textWithoutShippingFee);
+    prices.length > 0 || PRICE_CLAIM_PATTERN.test(priceClaimText);
   if (hasPriceClaim) {
     observedProtectedClaims.add("PRICE");
     const allowed = new Set([facts?.listPriceVnd, facts?.salePriceVnd].filter((value): value is number => value !== null && value !== undefined));
