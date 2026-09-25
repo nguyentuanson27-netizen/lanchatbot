@@ -784,7 +784,8 @@ describe("Track C C3 strategy-contract runner", () => {
         continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
       }), providerModelVersion: "gemini-3.5-flash-lite" })
       .mockResolvedValueOnce({ payload: payload({
-        answerText: null, factualTexts: [shopFact], progressionText: null,
+        answerText: "Chị đang cân nhắc mẫu SQ9012 và muốn biết địa chỉ shop trước khi mua.",
+        factualTexts: [shopFact], progressionText: null,
       }), providerModelVersion: "gemini-3.5-flash-lite" });
 
     const result = await runTrackCStrategyContractCase({
