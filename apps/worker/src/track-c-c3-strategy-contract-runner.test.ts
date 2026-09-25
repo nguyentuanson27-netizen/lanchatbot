@@ -1747,6 +1747,44 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
   });
 
+  it("acknowledges a canonical stop when the responder leaves every prose slot empty", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "The customer thanked us; do not reopen checkout or assert an order effect.",
+        proposition: "NONE", evidenceRefs: [], continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_EMPTY_HOLD_ACK", latest_customer_message: "Ok em cảm ơn nhé.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "ORDER_CONFIRMED", canonical_flags: [],
+            buying_intent: { decision: "NONE", requested_action: "NONE",
+              quantity: null, evidence: null },
+            source_stage: "PURCHASE_CONFIRMED", runtime_claim_refs: [],
+          },
+        }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+      }), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em cảm ơn nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    });
+
+    expect(result.output.strategy).toBe("HOLD_POSITION");
+    expect(result.output.cta).toBe("NONE");
+    expect(result.reply).toBe("Dạ vâng chị ạ.");
+  });
+
   it("rejects an order confirmation inferred from customer dialogue", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({ payload: payload({

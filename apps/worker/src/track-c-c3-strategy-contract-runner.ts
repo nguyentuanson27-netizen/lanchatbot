@@ -867,8 +867,16 @@ function compileResponderDraft(input: Readonly<{
   currentCart?: TrackCCurrentCartBinding | null;
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
 }>): ContextV2CandidateOutputV2 {
-  const { task, draft } = input;
+  const { task } = input;
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
+  // A hard stop still needs an accepted acknowledgement. The model can choose
+  // null when it sees no new question; use only a fact-free, effect-free reply.
+  const draft = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
+      task.canonicalRequest?.type === "HOLD_POSITION" &&
+      task.evidence.length === 0 && input.draft.answerText === null &&
+      input.draft.progressionText === null
+    ? { ...input.draft, answerText: "Dạ vâng chị ạ." }
+    : input.draft;
   if (!adaptive && draft.answerText !== null &&
       !answerWording(task).includes(draft.answerText)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");

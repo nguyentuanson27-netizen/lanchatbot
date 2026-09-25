@@ -1137,3 +1137,12 @@ never invokes the delivery sender or changes Outbox acceptance. Pending,
 ambiguous and failed units are excluded. Payloads past their encryption
 retention cannot be reconstructed by this path, so a real PostgreSQL fault
 injection and retention audit remain required before declaring T10 complete.
+
+### Follow-up: empty hard-stop acknowledgement (2026-09-25)
+
+For an adaptive `ACKNOWLEDGE` with canonical `HOLD_POSITION`, no selected
+evidence and no model prose, the compiler emits the bounded neutral reply
+“Dạ vâng chị ạ.” The continuation stays empty and the normal final guard
+still checks the result. This covers a customer's closing thanks without
+echoing an unverified order claim or reopening checkout. Model-authored
+effect claims remain rejected; this fallback does not prove a POS order exists.
