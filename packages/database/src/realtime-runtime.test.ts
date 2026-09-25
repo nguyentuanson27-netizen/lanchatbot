@@ -1886,6 +1886,75 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
 
+    const variantLine = { ...beforeCart.lines[0]!,
+      components: beforeCart.lines[0]!.components.map((component) => ({ ...component,
+        size: "L", componentSku: component.componentSku.replace(/-M$/u, "-L") })) };
+    const variantMutation = { kind: "SET_LINE_VARIANT" as const,
+      lineId: mutationLineId, line: variantLine };
+    const variantReplay = applyCanonicalCartDecisionV2({
+      cart: beforeCart, expectedCartVersion: beforeCart.revision,
+      mutation: variantMutation, shopId: "LANA", policy,
+      customerState: "READY", readyForConfirmation: false, now,
+    });
+    if (variantReplay.status !== "APPLIED") throw new Error("TEST_VARIANT_REPLAY_FAILED");
+    const variantCart = variantReplay.cart;
+    const variantPolicyLines = canonicalCartPolicyLinesV2(variantCart.lines, "LANA");
+    if (variantPolicyLines === null) throw new Error("TEST_VARIANT_POLICY_LINES_INVALID");
+    const variantNegotiation = replayCanonicalCartRepriceNegotiationV1({
+      state: beforeNegotiation, commandId: mutationCommandId,
+      mutationReasonCode: "VARIANT_CHANGED",
+      cart: { cartId, cartVersion: variantCart.revision, lines: variantPolicyLines },
+      policy, occurredAt: now,
+    });
+    if (variantNegotiation.status !== "APPLIED") throw new Error("TEST_VARIANT_NEGOTIATION_FAILED");
+    const variantPayloadHash = sha256({ mutation: variantMutation });
+    const variantAuthorityDraft = { ...authority,
+      action: "SET_LINE_VARIANT" as const,
+      authorityKind: "DETERMINISTIC_VARIANT_EDIT" as const,
+      authorityEvidenceHash: sha256([
+        "DETERMINISTIC_VARIANT_EDIT_V1", sourceMessageIdHash, variantPayloadHash,
+      ]), bindingHash: "0".repeat(64) };
+    const variantAuthority = { ...variantAuthorityDraft,
+      bindingHash: rawSha256(cartMutationAuthorityBindingHashPreimageV1(variantAuthorityDraft)) };
+    const variantReceiptDraft = { ...mutationEvidence,
+      mutation: variantMutation, mutationPayloadHash: variantPayloadHash,
+      mutationReasonCode: "VARIANT_CHANGED" as const,
+      authority: variantAuthority, afterCartStateHash: cartHash(variantCart),
+      evidenceHash: "0".repeat(64) };
+    const variantReceipt = { ...variantReceiptDraft,
+      evidenceHash: rawSha256(cartMutationReceiptHashPreimageV1(variantReceiptDraft)) };
+    const variantBatchDraft = { ...mutationBatchEvidence,
+      finalCartStateHash: cartHash(variantCart), receipts: [variantReceipt],
+      evidenceHash: "0".repeat(64) };
+    const variantBatch = { ...variantBatchDraft,
+      evidenceHash: rawSha256(cartMutationBatchEvidenceHashPreimageV1(variantBatchDraft)) };
+    const variantCommit = { ...exactMutation, salesCyclePlan: {
+      ...exactMutation.salesCyclePlan,
+      state: { ...exactMutation.salesCyclePlan.state,
+        cart: { value: variantCart, expiresAt: salesExpiresAt.toISOString() },
+        negotiation: variantNegotiation.state },
+      events: exactMutation.salesCyclePlan.events.map((event) => ({ ...event,
+        mutationAction: "SET_LINE_VARIANT" as const,
+        mutationPayloadHash: variantPayloadHash })),
+      cartMutationBatchEvidence: variantBatch,
+      effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) =>
+        resealReadinessV1(readiness, {
+          cartStateHash: cartHash(variantCart),
+          buyingIntentHash: null,
+          deterministicEvidenceHash: variantReceipt.evidenceHash,
+        }, { offerBindings: canonicalCartOfferBindingsV1(variantCart.lines) })),
+    } };
+    await expect(store.commit(variantCommit, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+    await expect(store.commit({ ...variantCommit, salesCyclePlan: {
+      ...variantCommit.salesCyclePlan,
+      state: { ...variantCommit.salesCyclePlan.state,
+        cart: { ...variantCommit.salesCyclePlan.state.cart,
+          value: { ...variantCart, grandTotalVnd: (variantCart.grandTotalVnd ?? 0) + 1 } } },
+    } }, now)).rejects.toThrow();
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
     const mismatchedSetIntent = { ...canonicalIntent, quantity: 3 };
     const mismatchedSetAuthorityDraft = {
       ...authority,

@@ -8,6 +8,7 @@ import {
   CanonicalCartStateV1Schema,
   CanonicalProductIdV1Schema,
   CartMutationBatchEvidenceV1Schema,
+  CartMutationReceiptV1Schema,
   CartOpenEvidenceV1Schema,
   NegotiationTransitionEvidenceV1Schema,
   EffectBindingV1Schema,
@@ -293,6 +294,30 @@ describe("EffectBindingV1", () => {
 });
 
 describe("CartMutationBatchEvidenceV1", () => {
+  it("binds a variant replacement to its exact line and deterministic edit authority", () => {
+    const original = cart().lines[0]!;
+    const replacement = { ...original, components: original.components.map((component) =>
+      ({ ...component, size: "L", componentSku: "AO-001-DO-L" })) };
+    const receipt = {
+      schemaVersion: 1, contractVersion: "CART_MUTATION_RECEIPT_V1",
+      sequence: 0, commandIdHash: HASH_A,
+      mutation: { kind: "SET_LINE_VARIANT", lineId: original.lineId, line: replacement },
+      mutationPayloadHash: HASH_B, mutationReasonCode: "VARIANT_CHANGED",
+      authority: { schemaVersion: 1, contractVersion: "CART_MUTATION_AUTHORITY_BINDING_V1",
+        sourceMessageIdHash: HASH_A, action: "SET_LINE_VARIANT",
+        productId: original.parentProductId, offerId: original.offerId,
+        authorityKind: "DETERMINISTIC_VARIANT_EDIT", authorityEvidenceHash: HASH_B,
+        bindingHash: HASH_C },
+      beforeCartStateHash: HASH_A, afterCartStateHash: HASH_B,
+      customerState: "READY", appliedAt: "2026-08-14T01:00:00.000Z",
+      evaluatedAt: "2026-08-14T01:00:00.000Z", evidenceHash: HASH_C,
+      contributor: "DETERMINISTIC_RUNTIME", authorization: "NONE",
+    };
+    expect(CartMutationReceiptV1Schema.safeParse(receipt).success).toBe(true);
+    expect(CartMutationReceiptV1Schema.safeParse({ ...receipt,
+      mutation: { ...receipt.mutation, lineId: "1b884806-7c77-4410-bc47-a3d2bb51c936" },
+    }).success).toBe(false);
+  });
   const authority = (action: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY", productId: string, offerId: string) => ({
     schemaVersion: 1 as const,
     contractVersion: "CART_MUTATION_AUTHORITY_BINDING_V1" as const,

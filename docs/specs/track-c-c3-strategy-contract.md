@@ -1054,3 +1054,25 @@ bare-price keyword fallback masks whole verified product identifiers only;
 currency parsing still inspects the original text. Actual and invented price
 amounts remain subject to the same source authority. No sentence whitelist is
 introduced.
+
+### Follow-up: current-cart variant edits and preview renewal (2026-09-25)
+
+A customer correction to the size or color of an open cart is a cart edit, not
+a new buying commitment. The runtime identifies a unique cart line, resolves
+the requested variant through the current POS snapshot, and submits a
+`SET_LINE_VARIANT` mutation with the complete POS-resolved replacement line.
+The older `SET_COMPONENT_VARIANT` kernel operation cannot atomically replace a
+multi-component offer and its authoritative unit price, so it is not used for
+this flow. The new operation preserves line, parent product, offer and quantity
+identity, while the cart kernel recalculates the policy totals. A deterministic
+authority receipt binds the source message, exact mutation and resulting cart;
+the locked transaction replays the mutation and negotiation before commit.
+Ambiguous product/color requests, unavailable variants and stale source facts
+leave the existing cart unchanged.
+
+Any edit invalidates the prior order preview. The reply presents the revised
+cart and asks only for missing checkout fields. When a complete existing
+recipient draft is still current, the customer can explicitly confirm those
+details to produce a new preview bound to the revised cart. Purchase
+confirmation requires this new preview; an old preview cannot authorize a
+later confirmation. The variant edit does not create a POS order or receipt.

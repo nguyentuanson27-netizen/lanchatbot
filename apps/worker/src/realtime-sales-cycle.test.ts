@@ -413,6 +413,131 @@ async function previewState(eventPrefix: string) {
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it("changes a single cart line to a POS-resolved size, reprices and binds one receipt", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "event-variant-open",
+    ));
+    const before = opened.plan!.state.cart!.value;
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi sang size L nhé.", "event-variant-edit"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        const base = await facts.resolveCartSelection!(query, at);
+        if (base.status !== "READY" || query.size !== "L") return base;
+        return { ...base, versions: { ...base.versions, price: "price-v2" },
+          line: { ...base.line, lineId: query.lineId,
+            components: base.line.components.map((component) => ({ ...component,
+              size: "L", componentSku: component.componentSku.replace(/_M$/u, "_L") })),
+            posUnitPriceVnd: 729_000, lineTotalVnd: 729_000 * query.quantity,
+            priceAuthority: { ...base.line.priceAuthority!, priceFactRef: "price-v2" },
+          } };
+      } },
+    });
+    expect(output.transferToHuman).toBe(false);
+    expect(output.plan?.state.cart?.value).toMatchObject({ revision: before.revision + 1,
+      subtotalVnd: 729_000, lines: [{ components: [{ size: "L" }, { size: "L" }] }],
+    });
+    expect(output.plan?.state.preview).toBeNull();
+    expect(output.plan?.cartMutationBatchEvidence?.receipts).toHaveLength(1);
+    expect(output.plan?.cartMutationBatchEvidence?.receipts[0]).toMatchObject({
+      mutation: { kind: "SET_LINE_VARIANT" }, mutationReasonCode: "VARIANT_CHANGED",
+      authority: { authorityKind: "DETERMINISTIC_VARIANT_EDIT" },
+    });
+    expect(output.messages.map((message) => message.kind === "TEXT" ? message.text : "").join(" "))
+      .toContain("size L");
+  });
+
+  it("keeps the old cart when the requested size is unavailable", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "event-variant-unavailable-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi sang size L nhé.", "event-variant-unavailable"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => query.size === "L"
+        ? { status: "OUT_OF_STOCK", reasonCode: "OUT_OF_STOCK", availableSizes: ["M"], availableColors: ["BE"] }
+        : facts.resolveCartSelection!(query, at) },
+    });
+    expect(output.transferToHuman).toBe(false);
+    expect(output.plan).toBeNull();
+    expect(opened.plan!.state.cart!.value.lines[0]!.components[0]!.size).toBe("M");
+  });
+  it("invalidates a preview after a size correction and rebuilds it from the current cart", async () => {
+    const preview = await previewState("variant-preview");
+    const originalPreviewHash = preview.preview!.previewHash;
+    const variantFacts = { ...facts, resolveCartSelection: async (
+      query: Parameters<NonNullable<BusinessFactsReader["resolveCartSelection"]>>[0],
+      at: Date,
+    ) => {
+      const base = await facts.resolveCartSelection!(query, at);
+      if (base.status !== "READY" || query.size !== "L") return base;
+      return { ...base, line: { ...base.line, lineId: query.lineId,
+        components: base.line.components.map((component) => ({ ...component,
+          size: "L", componentSku: component.componentSku.replace(/_M$/u, "_L") })),
+      } };
+    } };
+    const changed = await evaluateRealtimeSalesCycle({
+      ...input(preview, "Chị đổi size M sang L nhé.", "variant-preview-change"),
+      facts: variantFacts,
+    });
+    expect(changed.plan?.state.stage).toBe("CART_OPEN");
+    expect(changed.plan?.state.preview).toBeNull();
+    expect(changed.plan?.state.cart?.value.lines[0]?.components[0]?.size).toBe("L");
+    expect(changed.messages[0]).toMatchObject({ kind: "TEXT",
+      text: expect.stringContaining("thông tin nhận hàng đã gửi còn đúng") });
+    const rebuilt = await evaluateRealtimeSalesCycle({
+      ...input(changed.plan!.state, "Đúng rồi", "variant-preview-rebuild"),
+      facts: variantFacts,
+    });
+    expect(rebuilt.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(rebuilt.plan?.state.preview?.previewHash).not.toBe(originalPreviewHash);
+    expect(rebuilt.plan?.state.preview?.cartVersion).toBe(
+      changed.plan!.state.cart!.value.revision + 1);
+    expect(rebuilt.plan?.events.some(({ commandKind }) => commandKind === "CHECKOUT_DETAILS_CAPTURED"))
+      .toBe(false);
+  });
+
+  it("asks which product to edit when a size request could affect two cart lines", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "variant-ambiguous-open",
+    ));
+    const current = opened.plan!.state;
+    const another = { ...current.cart!.value.lines[0]!,
+      lineId: "13000000-0000-4000-8000-000000000002", parentProductId: "CB183" };
+    const ambiguous = { ...current, cart: { ...current.cart!,
+      value: { ...current.cart!.value, lines: [...current.cart!.value.lines, another] } } };
+    const output = await evaluateRealtimeSalesCycle(input(
+      ambiguous, "Chị đổi sang size L nhé.", "variant-ambiguous-request",
+    ));
+    expect(output.plan).toBeNull();
+    expect(output.messages[0]).toMatchObject({ kind: "TEXT",
+      text: expect.stringContaining("mẫu nào trong giỏ") });
+  });
+  it("changes color only after matching a color offered by POS", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "variant-color-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi màu xanh nhé.", "variant-color-edit"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        if (query.color === null) return { status: "COLOR_REQUIRED" as const,
+          reasonCode: "CART_COLOR_REQUIRED", availableSizes: ["M"],
+          availableColors: ["BE", "XANH"] };
+        const base = await facts.resolveCartSelection!(query, at);
+        if (base.status !== "READY" || query.color !== "XANH") return base;
+        return { ...base, line: { ...base.line, lineId: query.lineId,
+          components: base.line.components.map((component) => ({ ...component,
+            color: "XANH", componentSku: component.componentSku.replace(/_BE_/u, "_XANH_") })),
+        } };
+      } },
+    });
+    expect(output.plan?.state.cart?.value.lines[0]?.components.map(({ color }) => color))
+      .toEqual(["XANH", "XANH"]);
+    expect(output.plan?.cartMutationBatchEvidence?.receipts[0]?.mutation.kind)
+      .toBe("SET_LINE_VARIANT");
+  });
   it.each([
     "Được, size M nhé",
     "ship cho chị mẫu trên",

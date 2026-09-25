@@ -34,6 +34,10 @@ function asciiFold(value: string): string {
     .trim();
 }
 
+export function isVariantEditRequest(value: string): boolean {
+  return /\b(?:doi|sua|thay)\s+(?:sang\s+)?(?:size|sz|mau)\b/u.test(asciiFold(value));
+}
+
 function negativeOrHesitantOnly(text: string): boolean {
   const negative = /(?:^|\s)(?:khong|ko|k|chua)\s+(?:lay|mua|chot|dat)(?:\s|$)/u.test(text);
   const hesitant = /(?:de\s+(?:chi|minh|em)\s+(?:xem|nghi)|suy\s+nghi|chua\s+quyet|tham\s+khao\s+them)/u.test(text);
@@ -46,7 +50,7 @@ export function detectBuyingSignal(
   context: BuyingSignalContext = {},
 ): BuyingSignalDetection {
   const text = asciiFold(value);
-  if (!text || negativeOrHesitantOnly(text)) {
+  if (!text || negativeOrHesitantOnly(text) || isVariantEditRequest(value)) {
     return { isBuyingSignal: false, reasons: [] };
   }
 
@@ -136,6 +140,11 @@ export function resolveHybridBuyingSignal(
   context: BuyingSignalContext = {},
   modelSignal: AgentBuyingIntentV1 | null | undefined = null,
 ): HybridBuyingSignalDetection {
+  // An edit to a selection already under discussion is not permission to
+  // open another cart or change quantity, even when a model says COMMITTED.
+  if (isVariantEditRequest(value)) {
+    return { isBuyingSignal: false, reasons: [], decision: "NONE", source: null, quantity: null };
+  }
   const deterministic = detectBuyingSignal(value, context);
   const matchedModelSignal =
     context.hasProductContext === true &&

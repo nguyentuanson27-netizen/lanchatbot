@@ -5,6 +5,7 @@ import {
   evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
   hashCanonicalBuyingIntentV1,
+  isVariantEditRequest,
 } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
@@ -310,8 +311,9 @@ function money(value: number): string {
 function explicitSize(text: string): string | null {
   // Vietnamese accented letters are letters too: "sẽ" and "lấy" must
   // never become S or L before the customer's actual size token is read.
-  return text.normalize("NFC").toUpperCase()
-    .match(/(?:^|[^\p{L}\p{N}])(XL|S|M|L)(?=$|[^\p{L}\p{N}])/u)?.[1] ?? null;
+  const sizes = [...text.normalize("NFC").toUpperCase()
+    .matchAll(/(?:^|[^\p{L}\p{N}])(XL|S|M|L)(?=$|[^\p{L}\p{N}])/gu)];
+  return sizes.at(-1)?.[1] ?? null;
 }
 
 function requestedQuantityValue(
@@ -679,8 +681,19 @@ function cartSummary(cart: CartV1): string {
   ].join("\n");
 }
 
-function checkoutTemplate(cart: CartV1): string {
-  return `${cartSummary(cart)}\nChị gửi giúp em các thông tin nhận hàng:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nhé.`;
+function checkoutTemplate(
+  cart: CartV1,
+  draft: SalesCycleRuntimeState["checkoutDraft"] = null,
+): string {
+  const missing = [
+    ...(draft?.fullName ? [] : ["Tên:" as const]),
+    ...(draft?.phone ? [] : ["SĐT:" as const]),
+    ...(draft?.address ? [] : ["Địa chỉ:" as const]),
+    ...(draft?.paymentMethod ? [] : ["Thanh toán: COD hoặc chuyển khoản nhé." as const]),
+  ];
+  return missing.length > 0
+    ? `${cartSummary(cart)}\nChị gửi giúp em các thông tin nhận hàng:\n${missing.join("\n")}`
+    : `${cartSummary(cart)}\nEm đã cập nhật giỏ. Chị xác nhận thông tin nhận hàng đã gửi còn đúng để em lên bản xem đơn mới nhé.`;
 }
 
 function trustedInbound(input: RealtimeSalesCycleInput): VerifiedInboundMessageV1 {
@@ -939,7 +952,8 @@ export async function evaluateRealtimeSalesCycle(
       : undefined;
     const readinessMutationAction = resolvedMutation?.mutation.kind === "ADD_LINE" ||
         resolvedMutation?.mutation.kind === "REMOVE_LINE" ||
-        resolvedMutation?.mutation.kind === "SET_QUANTITY"
+        resolvedMutation?.mutation.kind === "SET_QUANTITY" ||
+        resolvedMutation?.mutation.kind === "SET_LINE_VARIANT"
       ? resolvedMutation.mutation.kind
       : null;
     const result = applySalesCycleCommand({
@@ -1136,7 +1150,8 @@ export async function evaluateRealtimeSalesCycle(
       orderPreviewId: preview?.previewId ?? null,
       orderPreviewHash: preview?.previewHash.replace(/^sha256:/u, "") ?? null,
       buyingIntent: effect === "CART_OPEN" || (
-        effect === "CART_MUTATION" && mutationAction !== "REMOVE_LINE"
+        effect === "CART_MUTATION" && mutationAction !== "REMOVE_LINE" &&
+          mutationAction !== "SET_LINE_VARIANT"
       )
         ? input.canonicalBuyingIntent
         : null,
@@ -1163,7 +1178,7 @@ export async function evaluateRealtimeSalesCycle(
     checkedAt: Date,
     mutation: CanonicalCartMutationPayloadV1,
     mutationPayloadHash: string,
-    authorityKind: "CANONICAL_BUYING_INTENT" | "DETERMINISTIC_REMOVE_CLASSIFIER",
+    authorityKind: "CANONICAL_BUYING_INTENT" | "DETERMINISTIC_REMOVE_CLASSIFIER" | "DETERMINISTIC_VARIANT_EDIT",
     authorityEvidenceHash: string,
     customerState: "READY" | "HESITANT" | "CAUTIOUS",
   ): DeterministicEffectReadinessV1 => {
@@ -1206,7 +1221,9 @@ export async function evaluateRealtimeSalesCycle(
         ? "LINE_ADDED" as const
         : action === "REMOVE_LINE"
           ? "LINE_REMOVED" as const
-          : "QUANTITY_CHANGED" as const,
+          : action === "SET_LINE_VARIANT"
+            ? "VARIANT_CHANGED" as const
+            : "QUANTITY_CHANGED" as const,
       authority,
       beforeCartStateHash: cartHash(beforeCart),
       afterCartStateHash: cartHash(state.cart.value),
@@ -1766,6 +1783,132 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (state.cart && (state.stage === "CART_OPEN" || state.stage === "ORDER_PREVIEW")) {
+    if (isVariantEditRequest(input.text)) {
+      const cart = state.cart.value;
+      const colorEdit = /\b(?:doi|sua|thay)\s+(?:sang\s+)?mau\b/u
+        .test(foldVietnameseForRecall(input.text));
+      const size = explicitSize(input.text);
+      const namesExactProduct = input.productId !== null &&
+        input.text.toLocaleUpperCase("vi").includes(input.productId.toLocaleUpperCase("vi"));
+      const targets = cart.lines.filter(({ parentProductId }) =>
+        (cart.lines.length === 1 &&
+          (!namesExactProduct || parentProductId === input.productId)) ||
+          (namesExactProduct && parentProductId === input.productId)
+      );
+      if ((!colorEdit && size === null) || targets.length !== 1) {
+        return {
+          handled: true,
+          messages: [{ kind: "TEXT", text: size === null && !colorEdit
+            ? "Chị cho em biết size muốn đổi để em kiểm tra trên mẫu trong giỏ nhé."
+            : "Chị cho em biết mẫu nào trong giỏ cần đổi size nhé." }],
+          plan: null, transferToHuman: false, desiredTag: null, reasonCode: null,
+        };
+      }
+      const current = targets[0]!;
+      const currentSizes = [...new Set(current.components.map(({ size }) => size))];
+      const currentColors = [...new Set(current.components.map(({ color }) => color))];
+      if (colorEdit && currentSizes.length !== 1) {
+        return { handled: true, messages: [{ kind: "TEXT",
+          text: "Bộ trong giỏ có nhiều size. Chị cho em biết size và màu muốn đổi cho mẫu này nhé." }],
+          plan: null, transferToHuman: false, desiredTag: null, reasonCode: null };
+      }
+      if (!colorEdit && current.components.every((component) => component.size === size)) {
+        return { handled: true, messages: [], plan: null, transferToHuman: false,
+          desiredTag: null, reasonCode: "CART_VARIANT_UNCHANGED" };
+      }
+      let requestedColor: string | null = currentColors.length === 1
+        ? currentColors[0] ?? null : null;
+      if (colorEdit) {
+        const options = await input.facts.resolveCartSelection!({
+          shopAlias: input.shopAlias, productId: current.parentProductId,
+          offerType: current.offerId, size: size ?? currentSizes[0] ?? null,
+          color: null, quantity: current.quantity, lineId: current.lineId,
+          deliveryAddress: state.checkoutDraft?.address ?? "",
+        }, effectNow());
+        const availableColors = options.status === "READY"
+          ? [...new Set(options.line.components.map(({ color }) => color).filter(
+              (value): value is string => value !== null))]
+          : options.availableColors;
+        const folded = foldVietnameseForRecall(input.text);
+        const matches = availableColors.filter((color) => {
+          const token = foldVietnameseForRecall(color).replace(/[^a-z0-9]+/gu, " ").trim();
+          return token !== "" && new RegExp(`\\bmau\\s+${token.replace(/\s+/gu, "\\s+")}\\b`, "u")
+            .test(folded);
+        });
+        if (matches.length !== 1) {
+          return { handled: true, messages: [{ kind: "TEXT",
+            text: availableColors.length > 0
+              ? `Chị chọn giúp em một màu trong các màu ${availableColors.join("/")} cho mẫu này nhé.`
+              : "Em chưa xác minh được màu khác cho mẫu này. Chị cho em mã màu muốn đổi nhé." }],
+            plan: null, transferToHuman: false, desiredTag: null, reasonCode: "CART_COLOR_UNRESOLVED" };
+        }
+        requestedColor = matches[0]!;
+        if (current.components.every((component) => component.color === requestedColor) &&
+          (size === null || current.components.every((component) => component.size === size))) {
+          return { handled: true, messages: [], plan: null, transferToHuman: false,
+            desiredTag: null, reasonCode: "CART_VARIANT_UNCHANGED" };
+        }
+      }
+      const selected = await input.facts.resolveCartSelection!({
+        shopAlias: input.shopAlias, productId: current.parentProductId,
+        offerType: current.offerId, size: size ?? currentSizes[0] ?? null,
+        color: requestedColor,
+        quantity: current.quantity, lineId: current.lineId,
+        deliveryAddress: state.checkoutDraft?.address ?? "",
+      }, effectNow());
+      if (selected.status !== "READY") {
+        return { handled: true, messages: [{ kind: "TEXT",
+          text: colorEdit
+            ? `Em chưa xác minh được màu ${requestedColor} cho mẫu trong giỏ. Chị chọn màu khác để em kiểm tra nhé.`
+            : `Em chưa xác minh được size ${size} cho mẫu trong giỏ. Chị chọn size khác để em kiểm tra nhé.` }],
+          plan: null, transferToHuman: false, desiredTag: null,
+          reasonCode: selected.reasonCode ?? "VARIANT_UNAVAILABLE" };
+      }
+      if (selected.line.parentProductId !== current.parentProductId ||
+        selected.line.offerId !== current.offerId ||
+        selected.line.lineId !== current.lineId ||
+        selected.line.quantity !== current.quantity ||
+        !selected.line.components.every((component) =>
+          (colorEdit ? component.color === requestedColor : component.size === size))) {
+        return failedOutput("CART_VARIANT_SCOPE_MISMATCH");
+      }
+      const otherSelections = await currentSelections(input, state.cart.value,
+        state.checkoutDraft?.address ?? "", effectNow());
+      const verifiedOthers = otherSelections.filter((value): value is ReadyCartSelection =>
+        value.status === "READY" && value.line.lineId !== current.lineId);
+      if (!selectionsMatchCartLines(
+        state.cart.value.lines.filter(({ lineId }) => lineId !== current.lineId),
+        verifiedOthers,
+      )) return failedOutput("CART_VARIANT_SNAPSHOT_CHANGED");
+      const beforeCart = state.cart.value;
+      const beforeCustomerState = state.negotiation?.customerState;
+      if (beforeCustomerState === undefined) return failedOutput("NEGOTIATION_STATE_MISSING");
+      const resolved = { mutation: { kind: "SET_LINE_VARIANT" as const,
+        lineId: current.lineId, line: selected.line } };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
+      const reference = { id: `cart-mutation:${beforeCart.cartId}`,
+        version: `${beforeCart.revision + 1}`,
+        contentHash: computeBusinessContentHash(resolved) };
+      references.set(canonicalJson(reference), resolved);
+      const result = apply({ kind: "CART_MUTATED", commandId: commandId("set-line-variant"),
+        expectedCartVersion: beforeCart.revision, mutationRef: reference,
+        mutationReasonCode: "VARIANT_CHANGED" });
+      if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_VARIANT_CHANGE_FAILED");
+      const authorityEvidenceHash = createHash("sha256").update(canonicalJson([
+        "DETERMINISTIC_VARIANT_EDIT_V1",
+        input.canonicalBuyingIntent.sourceMessageIdHash,
+        mutationPayloadHash,
+      ]), "utf8").digest("hex");
+      const readiness = acceptCartMutationReadiness("SET_LINE_VARIANT",
+        commandId("set-line-variant"), beforeCart, [...verifiedOthers, selected],
+        effectNow(), resolved.mutation, mutationPayloadHash,
+        "DETERMINISTIC_VARIANT_EDIT", authorityEvidenceHash, beforeCustomerState);
+      if (readiness.outcome !== "READY") {
+        return failedOutput(readiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+      }
+      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+        { selections: [...verifiedOthers, selected] });
+    }
     if (removeItem(input.text)) {
       const productId = input.productId ?? state.cart.value.lines.at(-1)?.parentProductId ?? null;
       const line = state.cart.value.lines.find(({ parentProductId }) => parentProductId === productId);
@@ -1905,7 +2048,12 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     const details = checkoutDetails(input.text, input.salesSignals);
-    const hasDetails = Object.keys(details).length > 0;
+    const capturedAnyDetails = Object.keys(details).length > 0;
+    const previewRequested = state.stage === "CART_OPEN" &&
+      missingCheckout(state).length === 0 &&
+      /^(?:đúng(?: rồi)?|dung(?: roi)?|ok|xem đơn|xem don|lên đơn|len don|kiểm tra đơn|kiem tra don)(?: nhé| nhe| ạ| a)?[.!]?$/iu
+        .test(input.text.trim());
+    const hasDetails = capturedAnyDetails || previewRequested;
     if (hasDetails) {
       const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };
       const capturedFields = checkoutCapturedFields(details);
@@ -1956,12 +2104,14 @@ export async function evaluateRealtimeSalesCycle(
           preflightReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED",
         );
       }
-      const captured = apply({
-        kind: "CHECKOUT_DETAILS_CAPTURED",
-        commandId: commandId("checkout-details"),
-        details,
-      });
-      if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED");
+      if (capturedAnyDetails) {
+        const captured = apply({
+          kind: "CHECKOUT_DETAILS_CAPTURED",
+          commandId: commandId("checkout-details"),
+          details,
+        });
+        if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED");
+      }
       if (state.clarification) {
         const resolved = apply({
           kind: "CLARIFICATION_RESOLVED",
@@ -2143,7 +2293,8 @@ export async function evaluateRealtimeSalesCycle(
       if (mutationReadiness.outcome !== "READY") {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
-      return protectedCartReply(checkoutTemplate, { selections: readySelections });
+      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+        { selections: readySelections });
     }
 
     if (
@@ -2227,7 +2378,8 @@ export async function evaluateRealtimeSalesCycle(
       if (mutationReadiness.outcome !== "READY") {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
-      return protectedCartReply(checkoutTemplate, { selections: readySelections });
+      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+        { selections: readySelections });
     }
 
     if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
@@ -2355,7 +2507,8 @@ export async function evaluateRealtimeSalesCycle(
     if (!acceptReadiness(cartOpenReadiness)) {
       return failedOutput(cartOpenReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
     }
-    return protectedCartReply(checkoutTemplate, { selections: [selected] });
+    return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+      { selections: [selected] });
   }
 
   if (

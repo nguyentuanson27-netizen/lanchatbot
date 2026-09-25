@@ -168,7 +168,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly cartId: string | null;
   readonly cartVersion: number | null;
   readonly reasonCode: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_LINE_VARIANT" | null;
   readonly mutationPayloadHash?: string | null;
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
@@ -725,13 +725,16 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       receipt.authority.productId !== receipt.mutation.line.parentProductId ||
       receipt.authority.offerId !== receipt.mutation.line.offerId
     )) throw new Error("CART_MUTATION_AUTHORITY_SCOPE_MISMATCH");
-    if (receipt.authority.action === "REMOVE_LINE") {
-      const removalAuthority = sha256CanonicalV1([
-        "DETERMINISTIC_REMOVE_CLASSIFIER_V1",
+    if (receipt.authority.action === "REMOVE_LINE" ||
+      receipt.authority.action === "SET_LINE_VARIANT") {
+      const deterministicAuthority = sha256CanonicalV1([
+        receipt.authority.action === "REMOVE_LINE"
+          ? "DETERMINISTIC_REMOVE_CLASSIFIER_V1"
+          : "DETERMINISTIC_VARIANT_EDIT_V1",
         receipt.authority.sourceMessageIdHash,
         receipt.mutationPayloadHash,
       ]);
-      if (receipt.authority.authorityEvidenceHash !== removalAuthority) {
+      if (receipt.authority.authorityEvidenceHash !== deterministicAuthority) {
         throw new Error("CART_MUTATION_AUTHORITY_MISMATCH");
       }
     } else if (

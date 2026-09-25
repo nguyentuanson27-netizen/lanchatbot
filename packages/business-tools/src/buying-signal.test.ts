@@ -6,6 +6,14 @@ import {
 } from "./buying-signal.js";
 
 describe("buying-signal detection", () => {
+  it("does not turn a cart variant edit into a new purchase commitment", () => {
+    const text = "Chị đổi sang size L nhé.";
+    expect(detectBuyingSignal(text, { hasProductContext: true }).isBuyingSignal).toBe(false);
+    expect(resolveHybridBuyingSignal(text, { hasProductContext: true }, {
+      decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+      evidenceText: text, confidence: 0.99,
+    })).toMatchObject({ decision: "NONE", isBuyingSignal: false });
+  });
   it.each([
     "Ok lấy màu đen",
     "Chốt mẫu này",

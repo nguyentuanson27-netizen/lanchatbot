@@ -472,14 +472,13 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       expect(journey.finalCommerceState.stage).toBe("PURCHASE_CONFIRMED");
       expect(journey.turns.some(({ c3Outcome }) => c3Outcome === "C3_CHOSEN")).toBe(true);
     }
-    const sizeEdit = records.find((record) => (record as { journeyId: string }).journeyId === "cart_size_checkout") as { turns: readonly { selectedCartSize: string; stateAfter: { commerce: unknown } }[]; finalCommerceState: unknown } | undefined;
+    const sizeEdit = records.find((record) => (record as { journeyId: string }).journeyId === "cart_size_checkout") as { turns: readonly { stateAfter: { commerce: unknown } }[]; finalCommerceState: unknown } | undefined;
     if (sizeEdit) {
-    expect(sizeEdit.turns[2]?.selectedCartSize).toBe("L");
-    for (const turn of sizeEdit.turns.slice(2, 6)) {
-      expect(JSON.stringify(turn.stateAfter.commerce)).toContain('"size":"L"');
-    }
-    expect(JSON.stringify(sizeEdit.finalCommerceState)).toContain('"size":"L"');
-    expect(sizeEdit.turns).toHaveLength(7);
+      for (const turn of sizeEdit.turns.slice(2, 6)) {
+        expect(JSON.stringify(turn.stateAfter.commerce)).toContain('"size":"L"');
+      }
+      expect(JSON.stringify(sizeEdit.finalCommerceState)).toContain('"size":"L"');
+      expect(sizeEdit.turns).toHaveLength(7);
     }
     const objectionCheckout = records.find((record) => (record as { journeyId: string }).journeyId === "objection_fact_checkout") as { turns: readonly unknown[] } | undefined;
     if (objectionCheckout) expect(objectionCheckout.turns).toHaveLength(8);
