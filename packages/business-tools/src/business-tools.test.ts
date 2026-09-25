@@ -498,6 +498,20 @@ describe("facts and deterministic policy guard", () => {
     );
   });
 
+  it.each([
+    "Chị gửi em tên hoặc ảnh mẫu chị đã xem hôm qua nhé.",
+    "Chị gửi em tên hay mã mẫu chị đang xem nhé.",
+  ])("keeps product identification outside checkout PII: %s", (reply) => {
+    const result = guardAgentProposal({
+      proposal: proposal(reply),
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      buyingSignal: false,
+      now,
+    });
+    expect(result.blockedReasonCodes).not.toContain("PREMATURE_ORDER_INFO_REQUEST");
+  });
+
   it("still blocks a bare recipient-name request before a buying signal", () => {
     const result = guardAgentProposal({
       proposal: proposal(

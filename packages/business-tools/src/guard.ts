@@ -25,7 +25,9 @@ const PROMOTION_PATTERN = /(?:khuyến\s*mãi|ưu\s*đãi|giảm\s*giá|giảm\s
 const FREESHIP_PATTERN = /\b(?:freeship|free\s*ship|miễn\s+phí\s+(?:giao|ship))\b/iu;
 const SHIP_FEE_PATTERN = /(?:phí\s*(?:ship|giao)|ship)\D{0,12}(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|đồng\b|đ(?![\p{L}\p{M}])|₫)/iu;
 const ETA_VALUES_PATTERN = /\b(\d+)\s*(?:(?:-|–|đến)\s*(\d+))?\s*(?:ngày|day)\b/giu;
-const RECIPIENT_NAME_PATTERN = String.raw`tên(?!\s+(?:mẫu|sản\s*phẩm|sp)\b)`;
+// A request for the model's name, code or image is product clarification.
+// Keep recipient-name requests guarded, including "tên người nhận".
+const RECIPIENT_NAME_PATTERN = String.raw`tên(?!\s+(?:(?:mẫu|sản\s*phẩm|sp)|(?:hoặc|hay)\s+(?:ảnh|hình|mã|code))(?![\p{L}\p{M}\p{N}]))`;
 const ORDER_INFO_REQUEST_PATTERN = new RegExp(
   String.raw`(?:xin|gửi|cho\s+(?:em|shop))[^.!?\n]{0,36}(?:${RECIPIENT_NAME_PATTERN}|họ\s*tên|số\s*điện\s*thoại|sđt|địa\s*chỉ)|(?:${RECIPIENT_NAME_PATTERN}|sđt|địa\s*chỉ)[^.!?\n]{0,24}(?:nhận\s*hàng|đặt\s*hàng)`,
   "iu",

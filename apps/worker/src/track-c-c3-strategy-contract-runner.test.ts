@@ -137,6 +137,55 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("asks for a stale product by name or image without requesting recipient PII", async () => {
+    const staleCapture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_STALE_PRODUCT_CLARIFICATION",
+        latest_customer_message: "Mẫu này còn không em?",
+        context: {
+          product_binding: { status: "STALE", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "NONE", requested_action: "NONE", quantity: null, evidence: null,
+          },
+          source_stage: null,
+          runtime_claim_refs: [],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER",
+        goal: "Ask which product the customer means before checking stock.",
+        proposition: "STOCK",
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "ASK_PRODUCT",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [],
+        progressionText: "Chị gửi em tên hoặc ảnh mẫu chị đã xem hôm qua nhé.",
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: staleCapture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này còn không em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T02:00:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe("Chị gửi em tên hoặc ảnh mẫu chị đã xem hôm qua nhé.");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     { answer: "Chị từng mặc chưa thoải mái nên lần này muốn cân nhắc kỹ hơn.",
       question: "Lần trước chị thấy khó chịu ở eo hay ở phần nào khác?", valid: true },
