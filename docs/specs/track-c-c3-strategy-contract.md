@@ -1158,3 +1158,12 @@ guard distinguishes these product-identification alternatives while still
 rejecting requests for “họ tên”, “tên người nhận”, phone or delivery address
 before a buying signal. The product remains unresolved until a later verified
 binding; this wording change grants no stock or cart authority.
+
+### Follow-up: unconfirmed dispatch wording (2026-09-25)
+
+An ETA claim describes delivery time only; it does not establish when the
+shop will dispatch the item. The Responder may say that the dispatch date is
+unknown, including a subordinate mention of when the shop will send it. The
+effect guard distinguishes that bounded uncertainty from an assertion that
+the shop will send it. An affirmative shipping promise in the same or a later
+clause remains rejected. This wording does not grant fulfillment authority.

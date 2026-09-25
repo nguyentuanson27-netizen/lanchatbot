@@ -772,7 +772,17 @@ function assertConversationalProse(value: string | null): void {
   if (value === null) return;
   const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d").toLowerCase();
-  if (/\b(?:em|shop|ben em|don(?: hang)?(?: cua chi)?)\s+(?:da|se)\s+(?:ghi nhan don|len don|tao|dat|gui|giu|doi|cap nhat|xac nhan|hoan tien)/u.test(folded)) {
+  const effectClaim = /\b(?:em|shop|ben em|don(?: hang)?(?: cua chi)?)\s+(?:da|se)\s+(?:ghi nhan don|len don|tao|dat|gui|giu|doi|cap nhat|xac nhan|hoan tien)/gu;
+  for (const match of folded.matchAll(effectClaim)) {
+    const clauseStart = Math.max(...[".", ";", "!", "?", "\n"].map((mark) =>
+      folded.lastIndexOf(mark, match.index)));
+    const prefix = folded.slice(clauseStart + 1, match.index);
+    // A question about an unconfirmed dispatch time may mention a future
+    // shipment. It is not a promise that the shop will ship the order.
+    if (/shop\s+se\s+gui\b/u.test(match[0]) &&
+        /\b(?:chua|khong)\s+(?:co\s+)?(?:thong tin|lich|xac nhan)\b[^.;!?\n]{0,60}\b(?:ngay|luc|thoi diem)\s*$/u.test(prefix)) {
+      continue;
+    }
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
   // Assertions about product/policy properties belong in evidence, not in a

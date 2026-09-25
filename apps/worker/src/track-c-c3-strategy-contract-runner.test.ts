@@ -1914,6 +1914,50 @@ describe("Track C C3 strategy-contract runner", () => {
     } });
   });
 
+  it("distinguishes an unknown dispatch date from a promise to ship", async () => {
+    const dispatchCapture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_DISPATCH_UNCONFIRMED",
+        latest_customer_message: "Bao giờ shop gửi hàng cho chị?",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING", canonical_flags: [],
+          buying_intent: { decision: "NONE", requested_action: "NONE",
+            quantity: null, evidence: null },
+          source_stage: null, runtime_claim_refs: ["RC_ETA_HN"],
+        },
+      }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const run = (answerText: string) => runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: dispatchCapture, evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Bao giờ shop gửi hàng cho chị?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send: vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Clarify that the dispatch date is unconfirmed.",
+          proposition: "ETA", evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText, factualTexts: [], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" }) },
+    });
+
+    const safe = await run("Em chưa có thông tin xác nhận ngày shop sẽ gửi SQ9012; thời gian giao dự kiến chưa cho biết ngày gửi hàng.");
+    expect(safe.reply).toContain("chưa có thông tin xác nhận ngày shop sẽ gửi");
+    await expect(run("Shop sẽ gửi SQ9012 hôm nay.")).rejects.toMatchObject({
+      diagnostic: { stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" },
+    });
+    await expect(run("Em chưa có thông tin xác nhận ngày shop sẽ gửi SQ9012; shop sẽ gửi hôm nay.")).rejects.toMatchObject({
+      diagnostic: { stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" },
+    });
+  });
+
   it("returns redacted diagnostic text for phone email and address", async () => {
     const rawDraft = {
       answerText: null,
