@@ -3689,6 +3689,8 @@ describe("RealtimeRunner inbound batching", () => {
 
     expect(await runner.processOne()).toBe(true);
     expect(c3Send).toHaveBeenCalledTimes(2);
+    expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
+    expect(persistedCommerce.cart).toBeNull();
     const commitInput = commit.mock.calls[0]![0] as {
       state: { revision: number };
       metaPlan?: {
@@ -3828,6 +3830,7 @@ describe("RealtimeRunner inbound batching", () => {
       expect(followupText).toBe(concernReply);
     }
     expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
+    expect(persistedCommerce.cart).toBeNull();
     const cartEntry = item(41, "chốt CB182 size M");
     currentBatch = {
       ...batch, generation: 11, inboxIds: [cartEntry.inboxId],
@@ -3840,6 +3843,7 @@ describe("RealtimeRunner inbound batching", () => {
     vi.setSystemTime(cartEntry.occurredAt);
     expect(await runner.processOne()).toBe(true);
     expect(persistedCommerce.stage).toBe("CART_OPEN");
+    expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
     const cartRevision = persistedCommerce.cart!.value.revision;
 
     const feeEntry = item(42, "Giỏ này tính tiền giao thế nào?");

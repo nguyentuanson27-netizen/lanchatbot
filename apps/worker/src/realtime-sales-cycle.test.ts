@@ -259,6 +259,48 @@ describe("Unicode size selection at the commerce boundary", () => {
   );
 });
 
+describe("no-cart buying journey", () => {
+  it("keeps discovery and variant choice outside the cart, then opens one cart on commitment", async () => {
+    const initial = createRealtimeSalesState(conversationId, pageId, now);
+    const price = await evaluateRealtimeSalesCycle(input(initial, "CB182 giá bao nhiêu?", "journey-price"));
+    const afterPrice = price.plan?.state ?? initial;
+    expect(afterPrice.cart).toBeNull();
+
+    const choice = await evaluateRealtimeSalesCycle(input(afterPrice, "Chị chọn size M nhé.", "journey-choice"));
+    const afterChoice = choice.plan?.state ?? afterPrice;
+    expect(afterChoice.cart).toBeNull();
+
+    const commitment = input(afterChoice, "Chị lấy CB182 size M.", "journey-commit");
+    const opened = await evaluateRealtimeSalesCycle(commitment);
+    expect(opened.plan?.state.stage).toBe("CART_OPEN");
+    expect(opened.plan?.state.cart?.value.lines).toHaveLength(1);
+
+    const duplicate = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state, "Chị lấy CB182 size M.", "journey-commit",
+    ));
+    expect(duplicate.plan?.state.cart?.value.cartId ?? opened.plan!.state.cart!.value.cartId)
+      .toBe(opened.plan!.state.cart!.value.cartId);
+    expect(duplicate.plan?.state.cart?.value.lines ?? opened.plan!.state.cart!.value.lines)
+      .toHaveLength(1);
+    expect(duplicate.plan?.cartOpenEvidence).toBeUndefined();
+    expect(duplicate.plan?.cartMutationBatchEvidence).toBeUndefined();
+
+    const preview = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD",
+      "journey-details",
+    ));
+    expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(preview.plan?.state.cart?.value.cartId).toBe(opened.plan!.state.cart!.value.cartId);
+
+    const confirmed = await evaluateRealtimeSalesCycle(input(
+      preview.plan!.state, "ok", "journey-confirm",
+    ));
+    expect(confirmed.plan?.state.stage).toBe("PURCHASE_CONFIRMED");
+    expect(confirmed.plan?.state.cart?.value.cartId).toBe(opened.plan!.state.cart!.value.cartId);
+  });
+});
+
 function signals(input: {
   fullName?: { value: string; evidenceText?: string; confidence?: number };
   phone?: { value: string; evidenceText?: string; confidence?: number };

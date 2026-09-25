@@ -1064,6 +1064,15 @@ introduced.
 
 ### Follow-up: current-cart variant edits and preview renewal (2026-09-25)
 
+Before a cart exists, a bare size/color answer or an explicit “chọn size/màu”
+choice remains a variant selection, even with a polite closing particle or a
+model `COMMITTED` label. It cannot authorize `OPEN_CART`. An explicit purchase
+verb in the same message, or a separate positive buying commitment, can still
+advance the commerce flow after product and POS checks. This intentionally
+narrows the earlier deterministic `CONFIRMED_SIZE`/`CONFIRMED_COLOR` inference
+for variant-only utterances; the no-cart journey and direct-purchase controls
+cover the difference.
+
 A customer correction to the size or color of an open cart is a cart edit, not
 a new buying commitment. The runtime identifies a unique cart line, resolves
 the requested variant through the current POS snapshot, and submits a

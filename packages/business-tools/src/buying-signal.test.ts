@@ -14,6 +14,15 @@ describe("buying-signal detection", () => {
       evidenceText: text, confidence: 0.99,
     })).toMatchObject({ decision: "NONE", isBuyingSignal: false });
   });
+  it.each(["Chị chọn size M nhé.", "Chi chon mau be nhe.", "size M nhé", "màu kem nha"])(
+    "does not turn a variant-only choice into cart authority: %s", (text) => {
+      expect(detectBuyingSignal(text, { hasProductContext: true }).isBuyingSignal).toBe(false);
+      expect(resolveHybridBuyingSignal(text, { hasProductContext: true }, {
+        decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+        evidenceText: text, confidence: 0.99,
+      })).toMatchObject({ decision: "NONE", isBuyingSignal: false });
+    },
+  );
   it.each([
     "Ok lấy màu đen",
     "Chốt mẫu này",
@@ -28,7 +37,6 @@ describe("buying-signal detection", () => {
   it.each([
     "Được, size M nhé",
     "ok màu đen",
-    "màu kem nha",
   ])("uses verified product context for a confirmed selection: %s", (text) => {
     expect(containsBuyingSignal(text, { hasProductContext: true })).toBe(true);
     expect(containsBuyingSignal(text, { hasProductContext: false })).toBe(false);

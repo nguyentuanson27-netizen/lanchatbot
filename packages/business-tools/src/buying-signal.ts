@@ -38,6 +38,14 @@ export function isVariantEditRequest(value: string): boolean {
   return /\b(?:doi|sua|thay)\s+(?:sang\s+)?(?:size|sz|mau)\b/u.test(asciiFold(value));
 }
 
+function isVariantSelectionOnly(value: string): boolean {
+  const text = asciiFold(value);
+  return (
+    /(?:^|\s)(?:chon|lua|uu tien)\s+(?:size|sz|mau)(?:\s|$)/u.test(text) &&
+      !/(?:^|\s)(?:lay|mua|chot|dat|ship)(?:\s|$)/u.test(text)
+  ) || /^(?:(?:chi|minh|em)\s+)?(?:size|sz|mau)\s+[a-z0-9]+(?:\s+(?:nhe|nha|a))?$/u.test(text);
+}
+
 function negativeOrHesitantOnly(text: string): boolean {
   const negative = /(?:^|\s)(?:khong|ko|k|chua)\s+(?:lay|mua|chot|dat)(?:\s|$)/u.test(text);
   const hesitant = /(?:de\s+(?:chi|minh|em)\s+(?:xem|nghi)|suy\s+nghi|chua\s+quyet|tham\s+khao\s+them)/u.test(text);
@@ -50,7 +58,8 @@ export function detectBuyingSignal(
   context: BuyingSignalContext = {},
 ): BuyingSignalDetection {
   const text = asciiFold(value);
-  if (!text || negativeOrHesitantOnly(text) || isVariantEditRequest(value)) {
+  if (!text || negativeOrHesitantOnly(text) || isVariantEditRequest(value) ||
+      isVariantSelectionOnly(value)) {
     return { isBuyingSignal: false, reasons: [] };
   }
 
@@ -79,16 +88,15 @@ export function detectBuyingSignal(
     const confirmation =
       /(?:^|\s)(?:ok|oke|duoc|dong\s+y|lay|chot)(?:\s|$)/u.test(text) &&
       !/(?:^|\s)(?:duoc|ok|oke)\s+(?:khong|ko|k)(?:\s|$)/u.test(text);
-    const closingParticle = /(?:\s|^)(?:nhe|nha|a)$/u.test(text);
     if (
       /(?:^|\s)(?:size|sz)\s*(?:s|m|l|xl)(?:\s|$)/u.test(text) &&
-      (confirmation || closingParticle)
+      confirmation
     ) {
       reasons.add("CONFIRMED_SIZE");
     }
     if (
       /(?:^|\s)mau\s+(?!(?:nay|do|kia|nao)(?:\s|$))[a-z0-9]{2,}(?:\s|$)/u.test(text) &&
-      (confirmation || closingParticle)
+      confirmation
     ) {
       reasons.add("CONFIRMED_COLOR");
     }
@@ -142,7 +150,7 @@ export function resolveHybridBuyingSignal(
 ): HybridBuyingSignalDetection {
   // An edit to a selection already under discussion is not permission to
   // open another cart or change quantity, even when a model says COMMITTED.
-  if (isVariantEditRequest(value)) {
+  if (isVariantEditRequest(value) || isVariantSelectionOnly(value)) {
     return { isBuyingSignal: false, reasons: [], decision: "NONE", source: null, quantity: null };
   }
   const deterministic = detectBuyingSignal(value, context);
