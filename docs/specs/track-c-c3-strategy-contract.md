@@ -1148,3 +1148,13 @@ a customer's closing thanks without echoing an unverified order claim or
 reopening checkout. A model-authored effect claim, including a passive
 “đơn đã được shop xác nhận”, remains rejected; this acknowledgement does
 not prove a POS order exists.
+
+### Follow-up: product identification versus recipient details (2026-09-25)
+
+When the current product binding is stale, `ASK_PRODUCT` may request the
+model name, code or image, including “tên hoặc ảnh mẫu”. That request does
+not collect the recipient's name for checkout. The shared premature-order
+guard distinguishes these product-identification alternatives while still
+rejecting requests for “họ tên”, “tên người nhận”, phone or delivery address
+before a buying signal. The product remains unresolved until a later verified
+binding; this wording change grants no stock or cart authority.
