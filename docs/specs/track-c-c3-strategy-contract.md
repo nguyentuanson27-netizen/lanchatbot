@@ -1074,6 +1074,13 @@ narrows the earlier deterministic `CONFIRMED_SIZE`/`CONFIRMED_COLOR` inference
 for variant-only utterances; the no-cart journey and direct-purchase controls
 cover the difference.
 
+The verified variant selected on a no-cart turn remains in conversation
+state. A later explicit commitment may use that selection when the customer
+does not repeat the size or colour. POS selection still checks the current
+product and variant before opening the cart; a selection alone remains
+insufficient to buy. The runtime journey covers this cross-turn case through
+checkout, preview and internal confirmation.
+
 A customer correction to the size or color of an open cart is a cart edit, not
 a new buying commitment. The runtime identifies a unique cart line, resolves
 the requested variant through the current POS snapshot, and submits a
@@ -1135,8 +1142,12 @@ idempotent history writer, then reads the resulting PostgreSQL history for
 model context. Redis remains a projection and a read fallback. Recovery
 never invokes the delivery sender or changes Outbox acceptance. Pending,
 ambiguous and failed units are excluded. Payloads past their encryption
-retention cannot be reconstructed by this path, so a real PostgreSQL fault
-injection and retention audit remain required before declaring T10 complete.
+retention cannot be reconstructed by this path. An isolated PostgreSQL fault
+injection verifies rollback and idempotent recovery; a runtime test verifies
+that a failed Redis projection append does not displace the canonical
+PostgreSQL read. The encrypted Outbox recovery window is at most 20 days,
+while canonical message retention is six months. Recovery after Outbox
+payload expiry remains impossible if the canonical write never succeeded.
 
 ### Follow-up: empty hard-stop acknowledgement (2026-09-25)
 

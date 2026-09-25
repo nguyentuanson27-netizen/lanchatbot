@@ -3137,7 +3137,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(harness.commit).not.toHaveBeenCalled();
   });
 
-  it("uses one product/tool/model decision and one reply plan for a three-message burst", async () => {
+  it("uses recovered canonical history when Redis projection writes fail during a three-message burst", async () => {
     const middle = item(32, "em muốn hỏi");
     const items = [
       item(31, "chị ơi"),
@@ -3218,18 +3218,10 @@ describe("RealtimeRunner inbound batching", () => {
         messagePk: `00000000-0000-4000-8000-${String(recordedMessageCount).padStart(12, "0")}`,
       };
     });
-    const retryProjection = items.map((entry) => ({
-      direction: "INBOUND" as const,
-      senderType: "CUSTOMER" as const,
-      messageType: "TEXT" as const,
-      text: entry.envelope.message.text ?? "",
-      attachmentCount: 0,
-      occurredAt: entry.envelope.message.occurredAt,
-    }));
     const history = {
       ready: vi.fn(async () => true),
-      load: vi.fn(async () => retryProjection),
-      append: vi.fn(async () => false),
+      load: vi.fn(async () => { throw new Error("REDIS_UNAVAILABLE"); }),
+      append: vi.fn(async () => { throw new Error("REDIS_UNAVAILABLE"); }),
       close: vi.fn(async () => undefined),
     };
     const recoverAcceptedOutboundBotMessages = vi.fn(async () => 1);
@@ -3286,6 +3278,7 @@ describe("RealtimeRunner inbound batching", () => {
       ),
     ).toEqual([false, false, true]);
     expect(history.append).toHaveBeenCalledTimes(3);
+    expect(history.load).not.toHaveBeenCalled();
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = commit.mock.calls[0]![0] as {
       inboxBatchGuard?: unknown;
@@ -3323,7 +3316,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3422,13 +3415,24 @@ describe("RealtimeRunner inbound batching", () => {
       const body = JSON.parse(request.body) as { contents: [{ parts: [{ text: string }] }] };
       const prompt = JSON.parse(body.contents[0].parts[0].text) as {
         contractVersion: string;
+        dialogue?: Array<{ direction: string; text: string }>;
         selectableEvidence?: Array<{ ref: string; capability: string }>;
         constraints?: { checkoutRequestedFields?: string[] };
       };
+      const variantChoice = checkoutOwner === "VARIANT_RECALL" &&
+        prompt.dialogue?.some(({ direction, text }) =>
+          direction === "INBOUND" && text === "Chị chọn size M nhé.") === true;
       const shipping = prompt.selectableEvidence?.filter(({ capability }) =>
         capability === "SHIPPING_FEE"
       ) ?? [];
-      const response = prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+      const response = variantChoice
+        ? prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+          ? { replyAct: "ACKNOWLEDGE", goal: "Keep the customer's size M choice for this product.",
+              proposition: "NONE", evidenceRefs: [],
+              continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+          : { answerText: "Dạ, em theo lựa chọn chị vừa nói ạ.",
+              factualTexts: [], progressionText: null }
+        : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
         ? prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
           ? {
               replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
@@ -3564,6 +3568,7 @@ describe("RealtimeRunner inbound batching", () => {
       },
     } as unknown as RuntimePolicyResolution;
     const baseModel = replyModel();
+    const cartSelectionSizes: (string | null)[] = [];
     const runner = new RealtimeRunner(
       inbox,
       runtime,
@@ -3593,7 +3598,9 @@ describe("RealtimeRunner inbound batching", () => {
           },
           reasonCode: null,
         })),
-        resolveCartSelection: vi.fn(async (query: { quantity: number; deliveryAddress?: string | null }) => ({
+        resolveCartSelection: vi.fn(async (query: { quantity: number; size: string | null; deliveryAddress?: string | null }) => {
+          cartSelectionSizes.push(query.size);
+          return ({
           status: "READY" as const,
           line: {
             lineId: "13000000-0000-4000-8000-000000000001",
@@ -3649,6 +3656,23 @@ describe("RealtimeRunner inbound batching", () => {
           stockAvailableQuantity: 2,
           sourceObservedAt: occurredAt,
           sourceExpiresAt: "2099-01-01T00:00:00.000Z",
+          });
+        }),
+        resolveVerifiedVariant: vi.fn(async (query: { productId: string; mentionedSize: string | null }) => ({
+          resolution: "VERIFIED" as const,
+          parentProductId: query.productId,
+          selectedVariantId: "CB182_BE_M",
+          selectedColorId: "BE",
+          selectedColorLabel: "BE",
+          selectedSizeCode: query.mentionedSize,
+          selectedOfferType: "SET",
+          selectedComponentProductId: null,
+          mentionedColorText: null,
+          mentionedSizeText: query.mentionedSize,
+          availableColors: ["BE"],
+          availableSizes: ["M"],
+          sourceVersion: "snapshot-v1",
+          verifiedAt: occurredAt,
         })),
         close: vi.fn(async () => undefined),
       },
@@ -3672,6 +3696,7 @@ describe("RealtimeRunner inbound batching", () => {
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
+        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
         c3: {
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
           transport: { send: c3Send },
@@ -3792,6 +3817,50 @@ describe("RealtimeRunner inbound batching", () => {
       expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
       expect(persistedCommerce.cart).toBeNull();
       expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
+      return;
+    }
+
+    if (checkoutOwner === "VARIANT_RECALL") {
+      const choiceEntry = item(40, "Chị chọn size M nhé.");
+      currentBatch = { ...batch, generation: 11, inboxIds: [choiceEntry.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [choiceEntry] };
+      vi.setSystemTime(choiceEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(persistedCommerce.cart).toBeNull();
+      expect(persistedState.consideredVariant).toMatchObject({ size: "M", offerType: "SET" });
+      const choiceReply = commit.mock.calls.at(-1)![0] as { metaPlan?: {
+        messages: readonly { text: string }[] } };
+      expect(choiceReply.metaPlan?.messages.map(({ text }) => text).join(" "))
+        .toBe("Dạ, em theo lựa chọn chị vừa nói ạ.");
+
+      const commitEntry = item(41, "Chị lấy mẫu này.");
+      currentBatch = { ...batch, generation: 12, inboxIds: [commitEntry.inboxId],
+        firstReceiveSequence: 41, lastReceiveSequence: 41, items: [commitEntry] };
+      vi.mocked(baseModel.generate).mockImplementationOnce(replyModel({
+        decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+        evidenceText: "Chị lấy mẫu này.",
+      }).generate);
+      vi.setSystemTime(commitEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(cartSelectionSizes.at(-1)).toBe("M");
+      expect(persistedCommerce.stage).toBe("CART_OPEN");
+      expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+      const cartId = persistedCommerce.cart!.value.cartId;
+      for (const [offset, text, expectedStage] of [
+        [0, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh", "CART_OPEN"],
+        [1, "COD", "ORDER_PREVIEW"],
+        [2, "ok", "PURCHASE_CONFIRMED"],
+      ] as const) {
+        const next = item(42 + offset, text);
+        currentBatch = { ...batch, generation: 13 + offset, inboxIds: [next.inboxId],
+          firstReceiveSequence: 42 + offset, lastReceiveSequence: 42 + offset,
+          items: [next] };
+        vi.setSystemTime(next.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        expect(persistedCommerce.stage).toBe(expectedStage);
+        expect(persistedCommerce.cart?.value.cartId).toBe(cartId);
+      }
+      expect(commit).toHaveBeenCalledTimes(6);
       return;
     }
 
