@@ -4,6 +4,7 @@ import {
   buildCanonicalDecisionEvidenceV1,
   selectProductMediaV2,
   buildProductAttributesV1,
+  resolveCatalogFacts,
   type CatalogSnapshotV3,
   type StableProductDocument,
 } from "@lana/business-tools";
@@ -173,6 +174,38 @@ function buildMediaFacts(
 }
 
 describe("realtime ProductFactsV2 media projection", () => {
+  it("does not present preparation days as destination delivery ETA", () => {
+    const observedAt = "2026-08-10T00:00:00.000Z";
+    const snapshot = { ...mediaSnapshot("SD375", ["TOP", "SKIRT"], observedAt),
+      fulfillment_policy: {
+        ...mediaSnapshot("SD375", ["TOP", "SKIRT"], observedAt).fulfillment_policy!,
+        prep_min_days: 1, prep_max_days: 2,
+        eta_valid_until: "2026-08-12T00:00:00.000Z",
+      },
+      shipping_eta: {
+        HANOI: { transit_min_days: 2, transit_max_days: 3 },
+        HCM: { transit_min_days: 3, transit_max_days: 5 },
+      },
+    } as CatalogSnapshotV3;
+    const now = new Date("2026-08-10T00:10:00.000Z");
+    const productFacts = buildRealtimeProductFactsV2({
+      snapshot, product: mediaProduct("SD375", observedAt, []), policy: null, now,
+    });
+    expect(productFacts?.fulfillment.etaToCustomer).toBeNull();
+    const query = { shopAlias: "LANA", productId: "SD375", intent: "ETA",
+      offerType: "SET", color: "BE", size: "M" } as const;
+    const hanoi = resolveCatalogFacts(snapshot,
+      { ...query, deliveryRegion: "HANOI" }, now);
+    const hcm = resolveCatalogFacts(snapshot,
+      { ...query, deliveryRegion: "HCM" }, now);
+    const unknown = resolveCatalogFacts(snapshot,
+      { ...query, deliveryRegion: null }, now);
+    expect(hanoi.status, hanoi.reasonCode ?? "").toBe("OK");
+    expect(hanoi.facts?.deliveryEta).toEqual({ minDays: 3, maxDays: 5 });
+    expect(hcm.facts?.deliveryEta).toEqual({ minDays: 4, maxDays: 7 });
+    expect(unknown.status).toBe("NOT_FOUND");
+  });
+
   it("preserves registry-owned content and attributes in ProductFacts V2", () => {
     const observedAt = "2026-08-10T00:00:00.000Z";
     const product = {

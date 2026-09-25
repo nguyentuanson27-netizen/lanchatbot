@@ -1076,3 +1076,13 @@ recipient draft is still current, the customer can explicitly confirm those
 details to produce a new preview bound to the revised cart. Purchase
 confirmation requires this new preview; an old preview cannot authorize a
 later confirmation. The variant edit does not create a POS order or receipt.
+
+### Follow-up: destination-bound ETA (2026-09-25)
+
+The catalog fulfillment policy's preparation days are not a customer delivery
+estimate. The static ProductFacts V2 producer has no destination region, so
+its `etaToCustomer` is null. An ETA reply requires a current region-bound
+catalog lookup that combines preparation and carrier transit ranges, including
+the preorder preparation rule when applicable. A missing region, transit range
+or expired source cannot be presented as a delivery promise. Media wording
+remains subject to the existing verified attachment/effect boundary.
