@@ -742,6 +742,10 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       notAfter,
       signal: new AbortController().signal,
     });
+    // Terminating the backend can reject before the polling loop reaches its
+    // assertion. Observe the promise immediately so the injected failure is
+    // a test result rather than an unhandled process rejection.
+    const pendingFailure = pending.then(() => null, (error: unknown) => error);
     let terminated = false;
     for (let attempt = 0; attempt < 100 && !terminated; attempt += 1) {
       const active = await pool.query<{ pid: number }>(
@@ -758,7 +762,9 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       }
     }
     expect(terminated).toBe(true);
-    await expect(pending).rejects.toThrow("GATE_E_EVIDENCE_COMMIT_AMBIGUOUS");
+    expect(await pendingFailure).toMatchObject({
+      message: "GATE_E_EVIDENCE_COMMIT_AMBIGUOUS",
+    });
     await ambiguousStore.close();
     await pool.query("DROP TRIGGER gate_e_test_delay_commit_v2 ON gate_e_evidence_records_v2");
     await pool.query("DROP FUNCTION gate_e_test_delay_commit_v2()");
