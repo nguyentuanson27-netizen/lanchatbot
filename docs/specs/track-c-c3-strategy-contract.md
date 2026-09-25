@@ -961,6 +961,9 @@ not change the Strategist contract or give either model commerce authority.
   but relevance, indirect requests, unsupported implications and tone remain
   behavioral review responsibilities. Passing schema/guards does not certify
   sales quality or readiness for customer traffic.
+- Customer dialogue describing an order is context, not an effect receipt.
+  Authored prose must not convert “chị đã xác nhận đơn” or a passive order
+  confirmation into a completed order claim without a bound external receipt.
 
 Runtime ownership correction: after a successful, validated adaptive C3 reply,
 legacy reply claim types no longer dictate the evidence the Strategist must

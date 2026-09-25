@@ -1746,6 +1746,44 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
   });
 
+  it("rejects an order confirmation inferred from customer dialogue", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge the customer without asserting an order effect.",
+        proposition: "NONE", evidenceRefs: [], continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "Em vui vì chị đã xác nhận đơn với shop và có đủ thông tin rồi.",
+        factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_UNVERIFIED_ORDER_ECHO",
+          latest_customer_message: "Ok em cảm ơn nhé.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "ORDER_CONFIRMED", canonical_flags: [],
+            buying_intent: { decision: "NONE", requested_action: "NONE",
+              quantity: null, evidence: null },
+            source_stage: "PURCHASE_CONFIRMED", runtime_claim_refs: [],
+          },
+        }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+      }), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em cảm ơn nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    })).rejects.toMatchObject({ diagnostic: {
+      stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN",
+    } });
+  });
+
   it("returns redacted diagnostic text for phone email and address", async () => {
     const rawDraft = {
       answerText: null,

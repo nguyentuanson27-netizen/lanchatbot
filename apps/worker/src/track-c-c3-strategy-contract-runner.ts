@@ -752,7 +752,9 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
 
 function assertNoEffectText(value: string | null): void {
   if (value !== null &&
-      /\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value)) {
+      (/\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value) ||
+       /(?:^|[\s,.;:])(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)\s+đơn(?:\b|$)/iu.test(value) ||
+       /(?:^|[\s,.;:])đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)(?:\b|$)/iu.test(value))) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
 }
