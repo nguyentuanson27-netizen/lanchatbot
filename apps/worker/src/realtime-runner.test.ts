@@ -3232,6 +3232,14 @@ describe("RealtimeRunner inbound batching", () => {
       append: vi.fn(async () => false),
       close: vi.fn(async () => undefined),
     };
+    const recoverAcceptedOutboundBotMessages = vi.fn(async () => 1);
+    const listConversationHistory = vi.fn(async () => [{
+      messagePk: "00000000-0000-4000-8000-000000000099",
+      direction: "OUTBOUND" as const, senderType: "BOT" as const,
+      messageType: "TEXT" as const, text: "Em đã xác nhận mẫu trước đó ạ.",
+      attachmentCount: 0, productId: null, salesStage: null, intent: null,
+      occurredAt: new Date(Date.parse(occurredAt) - 60_000),
+    }]);
     const runner = new RealtimeRunner(
       inbox,
       runtime,
@@ -3252,6 +3260,8 @@ describe("RealtimeRunner inbound batching", () => {
       {
         recordInboundCustomerMessage,
         recordOutboundHumanMessage: vi.fn(),
+        recoverAcceptedOutboundBotMessages,
+        listConversationHistory,
       },
     );
 
@@ -3262,6 +3272,10 @@ describe("RealtimeRunner inbound batching", () => {
     const modelContext = vi.mocked(model.generate).mock.calls[0]![0];
     expect(modelContext.filter((entry) => entry.senderType === "CUSTOMER").map((entry) => entry.text))
       .toEqual(["chị ơi", "em muốn hỏi", "mẫu nào đẹp"]);
+    expect(modelContext.some((entry) => entry.senderType === "BOT" &&
+      entry.text === "Em đã xác nhận mẫu trước đó ạ.")).toBe(true);
+    expect(recoverAcceptedOutboundBotMessages).toHaveBeenCalledWith(conversationId, 30);
+    expect(listConversationHistory).toHaveBeenCalledWith(conversationId, { limit: 30 });
     expect(recordInboundCustomerMessage).toHaveBeenCalledTimes(3);
     expect(recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({
       providerMessageId: `event:${middle.envelope.message.eventKey}`,

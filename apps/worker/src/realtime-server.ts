@@ -296,6 +296,7 @@ if (
 }
 const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
   ? new PostgresChatHistoryStore(databaseUrl, {
+      outboxCipher: cipher,
       analyticsHashSalt: secretOrEnvironment(
         "ANALYTICS_HASH_SALT",
         "ANALYTICS_HASH_SALT_FILE",

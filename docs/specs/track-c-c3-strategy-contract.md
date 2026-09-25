@@ -1108,3 +1108,15 @@ values in its existing profile context. These preferences guide retrieval and
 conversation; they never authorize product facts, checkout details or effects.
 Temporary budget, occasion and rejected-product context remains a separate
 session capability and is not silently written into the durable profile.
+
+### Follow-up: accepted history recovery (2026-09-25)
+
+On the next customer turn, the canonical history reader scans a bounded set
+of accepted Outbox units that have no history identity. It decrypts only the
+still-retained accepted payload, records each unit through the existing
+idempotent history writer, then reads the resulting PostgreSQL history for
+model context. Redis remains a projection and a read fallback. Recovery
+never invokes the delivery sender or changes Outbox acceptance. Pending,
+ambiguous and failed units are excluded. Payloads past their encryption
+retention cannot be reconstructed by this path, so a real PostgreSQL fault
+injection and retention audit remain required before declaring T10 complete.

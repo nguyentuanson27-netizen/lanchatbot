@@ -95,15 +95,16 @@ const dataKey = secretOrEnvironment(
   "REALTIME_DATA_KEY",
   "REALTIME_DATA_KEY_FILE",
 );
+const outboxCipher = new LocalEnvelopeCipher(
+  dataKey,
+  process.env.REALTIME_DATA_KEY_REF?.trim() || "local-kek-v1",
+);
 const store = new PostgresRealtimeRuntimeStore(
-  required("DATABASE_URL"),
-  new LocalEnvelopeCipher(
-    dataKey,
-    process.env.REALTIME_DATA_KEY_REF?.trim() || "local-kek-v1",
-  ),
+  required("DATABASE_URL"), outboxCipher,
 );
 const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
   ? new PostgresChatHistoryStore(required("DATABASE_URL"), {
+      outboxCipher,
       analyticsHashSalt: secretOrEnvironment(
         "ANALYTICS_HASH_SALT",
         "ANALYTICS_HASH_SALT_FILE",

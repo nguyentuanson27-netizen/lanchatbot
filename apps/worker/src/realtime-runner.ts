@@ -94,6 +94,7 @@ import type {
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
   RealtimeSalesCyclePlan,
+  ChatHistoryItem,
   ShadowContextMessage,
 } from "@lana/database";
 import { redactAnalyticsMessage } from "@lana/database";
@@ -1972,6 +1973,11 @@ export interface RealtimeModelPort {
 }
 
 export interface CanonicalChatHistoryPort {
+  recoverAcceptedOutboundBotMessages?(conversationId: string, limit?: number): Promise<number>;
+  listConversationHistory?(
+    conversationId: string,
+    options?: { readonly limit?: number; readonly before?: Date },
+  ): Promise<readonly ChatHistoryItem[]>;
   recordInboundCustomerMessage(input: {
     pageId: string;
     conversationId: string;
@@ -3035,26 +3041,45 @@ export class RealtimeRunner {
       occurredAt: original.occurredAt,
     }));
     let context: ShadowContextMessage[] = currentContexts;
-    if (this.history) {
+    if (this.history || this.canonicalHistory?.listConversationHistory) {
       const currentFingerprints = new Set(currentContexts.map(contextFingerprint));
-      const priorContext = [...await this.history.load(
-        record.conversationId,
-        this.options.contextHistoryLimit,
-      )
-        .catch(() => [])]
+      let canonicalPrior: readonly ShadowContextMessage[] | null = null;
+      if (this.canonicalHistory?.listConversationHistory) {
+        try {
+          await this.canonicalHistory.recoverAcceptedOutboundBotMessages?.(
+            record.conversationId, this.options.contextHistoryLimit,
+          );
+          const rows = await this.canonicalHistory.listConversationHistory(
+            record.conversationId, { limit: this.options.contextHistoryLimit },
+          );
+          canonicalPrior = rows.map((row) => ({
+            direction: row.direction, senderType: row.senderType,
+            messageType: row.messageType, text: row.text,
+            attachmentCount: row.attachmentCount,
+            occurredAt: row.occurredAt.toISOString(),
+          }));
+        } catch {
+          canonicalPrior = null;
+        }
+      }
+      const priorContext = [...(canonicalPrior ?? await this.history?.load(
+        record.conversationId, this.options.contextHistoryLimit,
+      ).catch(() => []) ?? [])]
         .map((entry) => ({
           ...entry,
           text: redactCustomerUrlsForModel(entry.text),
         }))
         .filter((entry) => !currentFingerprints.has(contextFingerprint(entry)));
-      for (let index = 0; index < currentContexts.length; index += 1) {
-        const currentContext = currentContexts[index];
-        const original = sourceMessages[index];
-        if (!currentContext || !original) continue;
-        await this.history.append(record.conversationId, {
-          ...currentContext,
-          identityKey: original.eventKey,
-        }).catch(() => false);
+      if (this.history) {
+        for (let index = 0; index < currentContexts.length; index += 1) {
+          const currentContext = currentContexts[index];
+          const original = sourceMessages[index];
+          if (!currentContext || !original) continue;
+          await this.history.append(record.conversationId, {
+            ...currentContext,
+            identityKey: original.eventKey,
+          }).catch(() => false);
+        }
       }
       context = [...priorContext, ...currentContexts];
     }
