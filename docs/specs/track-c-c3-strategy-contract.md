@@ -1096,3 +1096,15 @@ alternative. Candidate admission still uses the existing search thresholds.
 This retrieval correction does not authorize a price, stock or comparative
 claim for the new product. Those claims require separate current evidence and
 product binding.
+
+### Follow-up: explicit durable customer preferences (2026-09-25)
+
+When the customer explicitly states a color, material or style preference,
+the existing pseudonymous profile records the bounded value with source event
+hash and time. An explicit rejection removes that value; an explicit change of
+mind replaces the old value for that field. A cart variant edit by itself is
+not a durable preference. The model receives only the minimized preference
+values in its existing profile context. These preferences guide retrieval and
+conversation; they never authorize product facts, checkout details or effects.
+Temporary budget, occasion and rejected-product context remains a separate
+session capability and is not silently written into the durable profile.

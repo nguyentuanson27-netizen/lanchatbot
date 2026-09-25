@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractCustomerMeasurements } from "./customer-profile-extractor.js";
+import { extractCustomerMeasurements, extractCustomerPreferences } from "./customer-profile-extractor.js";
 
 const input = (text: string) => ({
   text,
@@ -68,5 +68,27 @@ describe("extractCustomerMeasurements", () => {
     expect(extractCustomerMeasurements(input(
       "cao 260cm nặng 290kg eo 12",
     ))).toEqual([]);
+  });
+});
+
+describe("extractCustomerPreferences", () => {
+  it("takes explicit color, material and style preferences with message evidence", () => {
+    const signals = extractCustomerPreferences(input(
+      "Chị thích màu be, ưu tiên vải lụa và chị thích kiểu tối giản.",
+    ));
+    expect(signals.map(({ field, value, action }) => [field, value, action]))
+      .toEqual([["colors", "BE", "ADD"], ["materials", "LUA", "ADD"],
+        ["styles", "TOI GIAN", "ADD"]]);
+    expect(signals.every(({ evidence }) =>
+      evidence.sourceEventHash === "a".repeat(64))).toBe(true);
+  });
+
+  it("keeps correction and negation separate from adding a preference", () => {
+    expect(extractCustomerPreferences(input("Giờ chị thích màu xanh hơn.")))
+      .toMatchObject([{ field: "colors", value: "XANH", action: "REPLACE" }]);
+    expect(extractCustomerPreferences(input("Chị không thích màu be nữa.")))
+      .toMatchObject([{ field: "colors", value: "BE", action: "REMOVE" }]);
+    expect(extractCustomerPreferences(input("Chị đổi màu sản phẩm sang xanh.")))
+      .toEqual([]);
   });
 });

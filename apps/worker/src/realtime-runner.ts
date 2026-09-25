@@ -7,6 +7,7 @@ import {
   evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
   extractCustomerMeasurements,
+  extractCustomerPreferences,
   assembleReply,
   buildVerifiedFactBlocks,
   mergeCustomerProfile,
@@ -1209,6 +1210,7 @@ function customerProfileSummary(profile: CustomerProfileV1 | null): {
   readonly profileRevision: number | null;
   readonly measurements: Readonly<Record<string, number>>;
   readonly fitPreference: CustomerProfileV1["fitPreference"] | null;
+  readonly preferences: CustomerProfileV1["preferences"];
 } {
   return {
     profileRevision: profile?.revision ?? null,
@@ -1216,6 +1218,7 @@ function customerProfileSummary(profile: CustomerProfileV1 | null): {
       (profile?.measurements ?? []).map(({ kind, value }) => [kind, value]),
     ),
     fitPreference: profile?.fitPreference ?? null,
+    preferences: profile?.preferences ?? { colors: [], styles: [], materials: [] },
   };
 }
 
@@ -2489,6 +2492,13 @@ export class RealtimeRunner {
             .digest("hex"),
         })
       );
+    const preferenceSignals = messages
+      .filter((message) => !message.isEcho && Boolean(message.text?.trim()))
+      .flatMap((message) => extractCustomerPreferences({
+        text: message.text ?? "",
+        observedAt: message.occurredAt,
+        sourceEventHash: createHash("sha256").update(message.eventKey).digest("hex"),
+      }));
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const record = await this.runtime.loadOrCreateCustomerProfile<
@@ -2504,7 +2514,26 @@ export class RealtimeRunner {
         }),
         now,
       );
-      if (measurements.length === 0) return record.profile;
+      if (measurements.length === 0 && preferenceSignals.length === 0) return record.profile;
+      const nextPreferences = {
+        colors: [...record.profile.preferences.colors],
+        styles: [...record.profile.preferences.styles],
+        materials: [...record.profile.preferences.materials],
+      };
+      const preferencePatch: Partial<Record<"colors" | "styles" | "materials", {
+        value: readonly string[]; evidence: CustomerProfileFieldEvidence;
+      }>> = {};
+      for (const signal of preferenceSignals) {
+        const values = nextPreferences[signal.field];
+        const updated = signal.action === "REPLACE"
+          ? [signal.value]
+          : signal.action === "REMOVE"
+            ? values.filter((value) => value !== signal.value)
+            : [...new Set([...values, signal.value])];
+        if (updated.join("\u0000") === values.join("\u0000")) continue;
+        nextPreferences[signal.field] = updated;
+        preferencePatch[signal.field] = { value: updated, evidence: signal.evidence };
+      }
       const merged = mergeCustomerProfile(
         {
           profile: record.profile,
@@ -2514,6 +2543,7 @@ export class RealtimeRunner {
           profileId: record.profile.profileId,
           expectedRevision: record.profile.revision,
           measurements,
+          preferences: preferencePatch,
         },
       );
       if (merged.cas.nextRevision === merged.cas.expectedRevision) {
