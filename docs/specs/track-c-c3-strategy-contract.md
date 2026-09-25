@@ -1140,9 +1140,11 @@ injection and retention audit remain required before declaring T10 complete.
 
 ### Follow-up: empty hard-stop acknowledgement (2026-09-25)
 
-For an adaptive `ACKNOWLEDGE` with canonical `HOLD_POSITION`, no selected
-evidence and no model prose, the compiler emits the bounded neutral reply
-“Dạ vâng chị ạ.” The continuation stays empty and the normal final guard
-still checks the result. This covers a customer's closing thanks without
-echoing an unverified order claim or reopening checkout. Model-authored
-effect claims remain rejected; this fallback does not prove a POS order exists.
+For an adaptive `ACKNOWLEDGE` with canonical `HOLD_POSITION` and no selected
+evidence, the response schema permits only “Dạ vâng chị ạ.” or “Dạ em cảm
+ơn chị ạ.” The compiler checks the same bound and uses the first phrase if
+the model leaves all prose empty. The continuation stays empty. This covers
+a customer's closing thanks without echoing an unverified order claim or
+reopening checkout. A model-authored effect claim, including a passive
+“đơn đã được shop xác nhận”, remains rejected; this acknowledgement does
+not prove a POS order exists.

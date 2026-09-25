@@ -1701,7 +1701,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: "Dạ vâng chị ạ.",
           factualTexts: [],
           progressionText: null,
         }),
@@ -1744,7 +1744,12 @@ describe("Track C C3 strategy-contract runner", () => {
 
     expect(result.output.strategy).toBe("HOLD_POSITION");
     expect(result.output.cta).toBe("NONE");
-    expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
+    expect(result.reply).toBe("Dạ vâng chị ạ.");
+    const responderSchema = JSON.parse(send.mock.calls[1]![0].body)
+      .generationConfig.responseSchema;
+    expect(responderSchema.properties.answerText.enum).toEqual([
+      "Dạ vâng chị ạ.", "Dạ em cảm ơn chị ạ.",
+    ]);
   });
 
   it("acknowledges a canonical stop when the responder leaves every prose slot empty", async () => {
@@ -1804,6 +1809,43 @@ describe("Track C C3 strategy-contract runner", () => {
         fixture: {
           id: "C3_UNVERIFIED_ORDER_ECHO",
           latest_customer_message: "Ok em cảm ơn nhé.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "ORDER_CONFIRMED", canonical_flags: [],
+            buying_intent: { decision: "NONE", requested_action: "NONE",
+              quantity: null, evidence: null },
+            source_stage: "PURCHASE_CONFIRMED", runtime_claim_refs: [],
+          },
+        }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+      }), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em cảm ơn nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    })).rejects.toMatchObject({ diagnostic: {
+      stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN",
+    } });
+  });
+
+  it("rejects a passive shop order confirmation inside a hard-stop acknowledgement", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Thank the customer without confirming an order.",
+        proposition: "NONE", evidenceRefs: [], continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "Em cảm ơn chị đã xác nhận, em ghi nhận đơn đã được shop xác nhận rồi nhé.",
+        factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_PASSIVE_ORDER_ECHO", latest_customer_message: "Ok em cảm ơn nhé.",
           context: {
             product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
             phase: "ORDER_CONFIRMED", canonical_flags: [],

@@ -113,11 +113,11 @@ function responderPayload(
   const keepOpen = task.continuation?.type === "KEEP_OPEN";
   const needsProgression = canonical === "ASK_PRODUCT" ||
     canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
+  const noAnswer = (task.answer.kind === "ANSWER" &&
+    task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
+    canonical === "ASK_CHECKOUT_DETAILS";
   return modelPayload({
-    answerText: (task.answer.kind === "ANSWER" &&
-        task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
-        canonical === "ASK_CHECKOUT_DETAILS"
-      ? null : reply,
+    answerText: hold ? "Dạ vâng chị ạ." : noAnswer ? null : reply,
     // Factual wording is code-rendered from the selected evidence, so the
     // Responder authors none of it.
     factualTexts: [],

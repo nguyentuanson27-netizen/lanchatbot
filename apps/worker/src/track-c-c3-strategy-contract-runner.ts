@@ -133,6 +133,10 @@ const BOUNDED_ACKNOWLEDGEMENTS = Object.freeze([
   "Dạ, em hiểu chị đang cân nhắc mốc nhận hàng ạ.",
   "Dạ, em theo thông tin chị vừa sửa ạ.",
 ] as const);
+const NEUTRAL_HOLD_ACKNOWLEDGEMENTS = Object.freeze([
+  "Dạ vâng chị ạ.",
+  "Dạ em cảm ơn chị ạ.",
+] as const);
 const UNRESOLVED_ANSWER_TEXT =
   "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.";
 // Code-owned limit sentence for a selection that was only partly realizable.
@@ -627,6 +631,8 @@ function responderDraftSchema(
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
   const answers = answerWording(task);
+  const neutralHold = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
+    task.canonicalRequest?.type === "HOLD_POSITION" && task.evidence.length === 0;
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -636,6 +642,8 @@ function responderDraftSchema(
       answerText: adaptive
         ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
           ? { type: "NULL" }
+          : neutralHold
+            ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
           : { description: "Customer context or specific unanswered part from the goal. SUPPORTED does not imply complete coverage. No shop facts, quantities, sizes or requests here.",
             anyOf: [{ type: "NULL" }, { type: "STRING", minLength: 1, maxLength: 600 }] }
         : boundedAcknowledgement
@@ -749,8 +757,9 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
 function assertNoEffectText(value: string | null): void {
   if (value !== null &&
       (/\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value) ||
+       /\b(?:em|shop)\s+(?:ghi\s*nhận|tiếp\s*nhận)\s+đơn\b/iu.test(value) ||
        /(?:^|[\s,.;:])(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)\s+đơn(?:\b|$)/iu.test(value) ||
-       /(?:^|[\s,.;:])đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)(?:\b|$)/iu.test(value))) {
+       /(?:^|[\s,.;:])đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:shop\s+)?(?:xác\s*nhận|tạo|đặt|chốt)(?:\b|$)/iu.test(value))) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
 }
@@ -818,6 +827,13 @@ function assertProgression(task: TrackCResponderTask, draft: ResponderDraft, dia
   }
   if (task.canonicalRequest?.type === "HOLD_POSITION") {
     if (draft.progressionText !== null || draft.answerText === null) {
+      throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
+    }
+    assertNoEffectText(draft.answerText);
+    if (adaptive && task.answer.kind === "ACKNOWLEDGE" && task.evidence.length === 0 &&
+        !NEUTRAL_HOLD_ACKNOWLEDGEMENTS.includes(
+          draft.answerText as typeof NEUTRAL_HOLD_ACKNOWLEDGEMENTS[number]
+        )) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
     return;
