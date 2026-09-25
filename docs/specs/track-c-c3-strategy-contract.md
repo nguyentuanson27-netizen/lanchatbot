@@ -1086,3 +1086,13 @@ catalog lookup that combines preparation and carrier transit ranges, including
 the preorder preparation rule when applicable. A missing region, transit range
 or expired source cannot be presented as a delivery promise. Media wording
 remains subject to the existing verified attachment/effect boundary.
+
+### Follow-up: explicit alternative search (2026-09-25)
+
+An explicit request to find another product bypasses current-product
+continuation. Semantic search excludes the currently bound product before it
+chooses the best candidate, so the same product cannot be returned as its own
+alternative. Candidate admission still uses the existing search thresholds.
+This retrieval correction does not authorize a price, stock or comparative
+claim for the new product. Those claims require separate current evidence and
+product binding.

@@ -159,6 +159,16 @@ describe("stable product search", () => {
     expect(port.calls).toEqual(["text:đầm đi tiệc"]);
   });
 
+  it("excludes a rejected current product before choosing a semantic alternative", async () => {
+    const port = new FakeStableCatalogSearchPort([sd396, sd397], [
+      { document: sd396, score: 0.98 },
+      { document: sd397, score: 0.90 },
+    ]);
+    const result = await new ProductSearchService(port, thresholds)
+      .searchText("tìm mẫu khác", "SD396");
+    expect(result).toMatchObject({ status: "MATCHED", product: { productId: "SD397" } });
+  });
+
   it("returns up to three candidates when top score is low or top gap is too small", async () => {
     const lowPort = new FakeStableCatalogSearchPort([], [
       { document: sd396, score: 0.7 },

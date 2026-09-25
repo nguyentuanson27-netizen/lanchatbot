@@ -493,6 +493,12 @@ export function explicitCustomerImageIntent(value: string): CustomerImageIntent 
  * genuine product follow-up. An explicit/new product code always wins and an
  * unknown new code must never silently fall back to the old product.
  */
+function isAlternativeProductRequest(value: string): boolean {
+  const text = asciiFold(value);
+  return /\b(?:tim|goi y|tu van)\b.*\b(?:mau|sp|san pham|set|ao|vay|quan)\b.*\bkhac\b/u.test(text) ||
+    /\b(?:co|con|xem)\s+(?:mau|sp|san pham|set|ao|vay|quan)\s+khac\b/u.test(text);
+}
+
 export function currentProductContinuationId(
   value: string,
   currentProductId: string | null,
@@ -500,6 +506,7 @@ export function currentProductContinuationId(
   if (!currentProductId) return null;
   if (hasExplicitProductReference(value)) return null;
   const text = asciiFold(value);
+  if (isAlternativeProductRequest(value)) return null;
   const refersToCurrentProduct =
     hasCustomerMeasurementSignal(value) ||
     hasSizeOnlyContinuationSignal(value) ||
@@ -6726,7 +6733,11 @@ export class RealtimeRunner {
     }
 
     if (text) {
-      const result = await this.productSearch.searchText(text);
+      const excludeProductId = isAlternativeProductRequest(text)
+        ? state.currentProductId : null;
+      const result = excludeProductId
+        ? await this.productSearch.searchText(text, excludeProductId)
+        : await this.productSearch.searchText(text);
       if (result.status === "MATCHED") {
         return this.singleResolution(result.product, "TEXT_SEMANTIC");
       }

@@ -754,6 +754,8 @@ describe("RealtimeRunner", () => {
     expect(currentProductContinuationId("M nhé", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("màu trắng", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("CB182", "SV695")).toBeNull();
+    expect(currentProductContinuationId("Chị muốn tìm váy màu xanh khác mẫu này", "SV695")).toBeNull();
+    expect(currentProductContinuationId("Có mẫu khác hợp đi làm không?", "SV695")).toBeNull();
     expect(currentProductContinuationId("shop ở đâu", "SV695")).toBeNull();
     expect(hasCustomerMeasurementSignal("90-60-90")).toBe(true);
     expect(hasCustomerMeasurementSignal("1m60 52kg")).toBe(true);
