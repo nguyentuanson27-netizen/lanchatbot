@@ -707,6 +707,20 @@ function text(value: unknown, errorCode: string): string | null {
   return value;
 }
 
+function boundFactualText(value: unknown, evidence: TrackCSelectableEvidence, errorCode: string): string {
+  if (typeof value !== "string" || !value.trim() || value !== value.trim() ||
+      value.length > 1_000) throw new Error(errorCode);
+  // A public shop address resembles customer PII to the generic DLP filter.
+  // Permit it only after exact, lossless binding to a code-owned projection;
+  // free prose and every other factual slot keep the normal PII check.
+  if (evidence.capability === "BUSINESS_LOCATION" &&
+      evidence.deterministicText !== undefined &&
+      trackCRealizationMatches(value, evidence.deterministicText)) return value;
+  const safe = text(value, errorCode);
+  if (safe === null) throw new Error(errorCode);
+  return safe;
+}
+
 function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[], adaptive: boolean): ResponderDraft {
   const record = plainObject(value, "TRACK_C_RESPONDER_DRAFT_INVALID");
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
@@ -722,11 +736,9 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     ? value.trim() : value;
   return Object.freeze({
     answerText: text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
-    factualTexts: Object.freeze(record.factualTexts.map((item) => {
-      const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
-      if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
-      return result;
-    })),
+    factualTexts: Object.freeze(record.factualTexts.map((item, index) =>
+      boundFactualText(item, modelAuthoredEvidence(task)[index]!, "TRACK_C_RESPONDER_DRAFT_INVALID")
+    )),
     // Exact schema vocabulary contains no customer values. Resolve it to the
     // code-owned string before DLP, which can mistake a locality question for
     // an address. Any other text still goes through DLP and final validation.
@@ -903,8 +915,9 @@ function compileResponderDraft(input: Readonly<{
   task.evidence.forEach((evidence, index) => {
     const factualText = evidence.deterministicText === undefined
       ? null
-      : text(
+      : boundFactualText(
           draft.factualTexts[index] ?? evidence.deterministicText,
+          evidence,
           "TRACK_C_DETERMINISTIC_EVIDENCE_NOT_PII_SAFE",
         );
     if (factualText === null) {

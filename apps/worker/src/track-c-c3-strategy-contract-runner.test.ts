@@ -775,6 +775,32 @@ describe("Track C C3 strategy-contract runner", () => {
       .map(({ capability }) => capability)).toEqual(["POLICY"]);
   });
 
+  it("delivers a verified public shop address without treating it as customer PII", async () => {
+    const shopFact = "Cửa hàng của shop ở 212 Nguyễn Trãi, Hà Nội. Shop mở cửa 09:00–21:00. Chị qua thử trực tiếp được ạ.";
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Answer the shop address from the selected store evidence.",
+        proposition: "BUSINESS_LOCATION", evidenceRefs: ["SIMULATION_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [shopFact], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Shop ở Hà Nội địa chỉ đâu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], simulationFacts: [facts.simulation_fact_catalog.SF_STORE],
+      transport: { send },
+    });
+    expect(result.reply).toBe(shopFact);
+    expect(result.output.segments).toMatchObject([{ kind: "VERIFIED_CLAIM", text: shopFact }]);
+  });
+
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
     const request = buildTrackCStrategistContractRequest({
       modelResource: MODEL_RESOURCE,

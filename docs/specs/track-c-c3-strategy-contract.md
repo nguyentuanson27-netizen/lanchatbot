@@ -948,6 +948,10 @@ not change the Strategist contract or give either model commerce authority.
   fact, in order, with claim hash, subject, scope, freshness and current-cart
   checks. This slice enables free conversational prose, **not arbitrary factual
   paraphrase**. The three existing fields are retained for that boundary.
+- A public shop address selected as `BUSINESS_LOCATION` may pass the generic
+  customer-PII detector only after byte-level/lossless binding to the
+  code-owned factual projection. Other factual slots and all free prose keep
+  the usual PII check. This does not authorize a model-provided address.
 - Checkout requests remain code-owned exact missing fields/payment options;
   both prose slots are null. KEEP_OPEN/HOLD_POSITION have no progression.
   Model output cannot execute a cart, order, payment or messaging effect.
