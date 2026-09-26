@@ -162,6 +162,10 @@ import {
   buildContextV2Capture,
 } from "./context-v2.js";
 import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import {
+  hasSessionDecisionContext,
+  updateSessionDecisionContext,
+} from "./realtime-session-decision-context.js";
 import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
@@ -3084,16 +3088,20 @@ export class RealtimeRunner {
       context = [...priorContext, ...currentContexts];
     }
     const authorityModelState = commerceRuntimeContext?.status === "READY"
-      ? serializeDf13CommerceAuthorityModelState({
+      ? {
+          ...serializeDf13CommerceAuthorityModelState({
           context: commerceRuntimeContext.context,
           sourceContextHash: commerceRuntimeContext.sourceContextHash,
           customerProfile:
             this.options.customerProfileEnabled
               ? customerProfileSummary(customerProfile)
               : null,
-        })
+          }),
+          customerSessionContext: state.sessionDecisionContext ?? null,
+        }
       : {
           type: "CONVERSATION_STATE",
+          customerSessionContext: state.sessionDecisionContext ?? null,
           currentProductId: state.currentProductId,
           consideredVariant: state.consideredVariant,
           verifiedVariant:
@@ -3318,6 +3326,15 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
+    if (!message.isEcho && event.actor === "CUSTOMER") {
+      const session = updateSessionDecisionContext(
+        nextState.sessionDecisionContext, message.text ?? "",
+      );
+      if (nextState.sessionDecisionContext !== undefined ||
+          hasSessionDecisionContext(session)) {
+        nextState = { ...nextState, sessionDecisionContext: session };
+      }
+    }
     const initialAuthorityStrategyStage = commerceRuntimeContext?.status === "READY" && salesCycleRecord
       ? commerceStrategyStage(salesCycleRecord.state.stage)
       : nextState.salesStage;
@@ -5180,12 +5197,37 @@ export class RealtimeRunner {
           ...c3Input,
           modelResource: this.options.c3.modelResource,
           decisionAt: new Date(),
-          dialogue: context.map((entry) => ({
+          // The shared Track C request accepts at most 15 dialogue messages.
+          // Keep the newest window, including this inbound, when the runtime
+          // history store returns its larger 30-message context window.
+          dialogue: [
+            ...(nextState.sessionDecisionContext &&
+                hasSessionDecisionContext(nextState.sessionDecisionContext)
+              ? [{
+                  direction: "INBOUND" as const,
+                  senderType: "SYSTEM" as const,
+                  messageType: "EVENT" as const,
+                  text: JSON.stringify({
+                    type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
+                    budgetCustomerReported: nextState.sessionDecisionContext.budgetVnd === null
+                      ? null
+                      : `${nextState.sessionDecisionContext.budgetVnd / 1_000}k`,
+                    occasion: nextState.sessionDecisionContext.occasion,
+                    rejectedProductIds: nextState.sessionDecisionContext.rejectedProductIds,
+                  }),
+                  attachmentCount: 0,
+                  occurredAt: context[0]?.occurredAt ?? now.toISOString(),
+                }]
+              : []),
+            ...context.slice(nextState.sessionDecisionContext &&
+              hasSessionDecisionContext(nextState.sessionDecisionContext)
+              ? -14 : -15).map((entry) => ({
             ...entry,
             text: redactCustomerUrlsForModel(
               redactAnalyticsMessage(entry.text).text,
             ),
-          })),
+            })),
+          ],
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
               "CHECKOUT_DETAILS_MISSING",

@@ -1134,6 +1134,22 @@ conversation; they never authorize product facts, checkout details or effects.
 Temporary budget, occasion and rejected-product context remains a separate
 session capability and is not silently written into the durable profile.
 
+### Follow-up: bounded session decision context (2026-09-26)
+
+The existing conversation-state transaction may retain only explicitly stated
+session budget, occasion and rejected product codes. Corrections replace the
+previous budget or occasion; explicit re-selection removes a rejected code.
+This context is customer-reported, never a shop price, product attribute,
+checkout field or effect authority. It is not copied into the durable customer
+profile. The C3 runtime receives a typed, PII-safe session note plus the most
+recent 14 dialogue messages when such context exists, or the most recent 15
+messages otherwise. This respects the existing 15-message provider contract
+while preserving a previously stated decision input beyond the 30-message
+history read. The ordinary model sees the session context in its existing
+state payload. Unresolved-question memory and richer free-form corrections
+remain open; neither can be inferred from a reply without tracking whether
+the question was actually answered.
+
 ### Follow-up: accepted history recovery (2026-09-25)
 
 On the next customer turn, the canonical history reader scans a bounded set

@@ -3316,12 +3316,14 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
-    const entry = item(34, "Mẫu CB182 bao nhiêu?");
+    const entry = item(34, checkoutOwner === "LONG_HISTORY"
+      ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
+      : "Mẫu CB182 bao nhiêu?");
     const batch = {
       pageId,
       conversationHash,
@@ -3357,7 +3359,12 @@ describe("RealtimeRunner inbound batching", () => {
       pageId,
       new Date(occurredAt),
     );
-    let persistedState = state;
+    let persistedState = checkoutOwner === "LONG_HISTORY"
+      ? { ...state, sessionDecisionContext: {
+          budgetVnd: 600_000, occasion: "WORK" as const,
+          rejectedProductIds: ["SV9031"],
+        } }
+      : state;
     let persistedCommerce = commerceState;
     const profile: CustomerProfileV1 = {
       schemaVersion: 1, profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
@@ -3707,7 +3714,18 @@ describe("RealtimeRunner inbound batching", () => {
         },
       },
       undefined,
-      undefined,
+      checkoutOwner === "LONG_HISTORY" ? {
+        ready: vi.fn(async () => true),
+        load: vi.fn(async () => Array.from({ length: 30 }, (_, index) => ({
+          direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
+          senderType: index % 2 === 0 ? "CUSTOMER" as const : "BOT" as const,
+          messageType: "TEXT" as const,
+          text: `Lượt trước ${index + 1}`,
+          attachmentCount: 0,
+          occurredAt: new Date(Date.parse(occurredAt) - (30 - index) * 60_000).toISOString(),
+        }))),
+        append: vi.fn(async () => true), close: vi.fn(async () => undefined),
+      } : undefined,
       {
         recordInboundCustomerMessage: vi.fn(async () => ({ messagePk: sourceMessagePk })),
         recordOutboundHumanMessage: vi.fn(),
@@ -3770,6 +3788,24 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+
+    if (checkoutOwner === "LONG_HISTORY") {
+      const body = JSON.parse(c3Send.mock.calls[0]![0].body);
+      const strategistInput = JSON.parse(body.contents[0].parts[0].text);
+      expect(strategistInput.dialogue).toHaveLength(15);
+      expect(JSON.parse(strategistInput.dialogue[0].text)).toEqual({
+        type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
+        budgetCustomerReported: "700k", occasion: "WORK",
+        rejectedProductIds: ["SV9031"],
+      });
+      expect(strategistInput.dialogue.at(-1).text)
+        .toBe("Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?");
+      expect(persistedState.sessionDecisionContext?.budgetVnd).toBe(700_000);
+      expect(commitInput.metaPlan?.messages).toContainEqual({
+        kind: "TEXT", text: "Giá hiện tại của mẫu này là 799.000đ ạ.",
+      });
+      return;
+    }
 
     if (checkoutOwner === "MULTI_PRICE") {
       const compare = item(40, "So sánh giá CB182 và SV9031 giúp chị.");
