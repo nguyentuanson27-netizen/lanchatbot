@@ -41,6 +41,7 @@ import {
   splitRealtimeMetaMessages,
   unavailableFactsRequireHandoff,
   composeSizeEngineAdvice,
+  classifyCustomerUrlsForInbound,
   withProactiveSizeAdvice,
   unresolvedProductRequiresHandoff,
   verifiedProductInfoProposal,
@@ -63,6 +64,15 @@ import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 describe("RealtimeRunner", () => {
+  it("accepts a standalone checkout phone only with an open cart", () => {
+    const phone = "0984997797";
+    expect(classifyCustomerUrlsForInbound(phone, "CLASSIFIED_ALLOWLIST_V1", false)
+      .disposition).not.toBe("CONTINUE");
+    expect(classifyCustomerUrlsForInbound(phone, "CLASSIFIED_ALLOWLIST_V1", false,
+      undefined, true)).toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(classifyCustomerUrlsForInbound(`${phone}/admin`, "CLASSIFIED_ALLOWLIST_V1",
+      false, undefined, true).disposition).not.toBe("CONTINUE");
+  });
   it("binds distinct pre-transition and final revisions without temporal skew", () => {
     expect(bindContextV2FinalTurnEvidence({
       sourceMessagePk: "00000000-0000-4000-8000-000000000003",
@@ -744,6 +754,8 @@ describe("RealtimeRunner", () => {
     expect(currentProductContinuationId("M nhé", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("màu trắng", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("CB182", "SV695")).toBeNull();
+    expect(currentProductContinuationId("Chị muốn tìm váy màu xanh khác mẫu này", "SV695")).toBeNull();
+    expect(currentProductContinuationId("Có mẫu khác hợp đi làm không?", "SV695")).toBeNull();
     expect(currentProductContinuationId("shop ở đâu", "SV695")).toBeNull();
     expect(hasCustomerMeasurementSignal("90-60-90")).toBe(true);
     expect(hasCustomerMeasurementSignal("1m60 52kg")).toBe(true);
@@ -3125,7 +3137,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(harness.commit).not.toHaveBeenCalled();
   });
 
-  it("uses one product/tool/model decision and one reply plan for a three-message burst", async () => {
+  it("uses recovered canonical history when Redis projection writes fail during a three-message burst", async () => {
     const middle = item(32, "em muốn hỏi");
     const items = [
       item(31, "chị ơi"),
@@ -3206,20 +3218,20 @@ describe("RealtimeRunner inbound batching", () => {
         messagePk: `00000000-0000-4000-8000-${String(recordedMessageCount).padStart(12, "0")}`,
       };
     });
-    const retryProjection = items.map((entry) => ({
-      direction: "INBOUND" as const,
-      senderType: "CUSTOMER" as const,
-      messageType: "TEXT" as const,
-      text: entry.envelope.message.text ?? "",
-      attachmentCount: 0,
-      occurredAt: entry.envelope.message.occurredAt,
-    }));
     const history = {
       ready: vi.fn(async () => true),
-      load: vi.fn(async () => retryProjection),
-      append: vi.fn(async () => false),
+      load: vi.fn(async () => { throw new Error("REDIS_UNAVAILABLE"); }),
+      append: vi.fn(async () => { throw new Error("REDIS_UNAVAILABLE"); }),
       close: vi.fn(async () => undefined),
     };
+    const recoverAcceptedOutboundBotMessages = vi.fn(async () => 1);
+    const listConversationHistory = vi.fn(async () => [{
+      messagePk: "00000000-0000-4000-8000-000000000099",
+      direction: "OUTBOUND" as const, senderType: "BOT" as const,
+      messageType: "TEXT" as const, text: "Em đã xác nhận mẫu trước đó ạ.",
+      attachmentCount: 0, productId: null, salesStage: null, intent: null,
+      occurredAt: new Date(Date.parse(occurredAt) - 60_000),
+    }]);
     const runner = new RealtimeRunner(
       inbox,
       runtime,
@@ -3240,6 +3252,8 @@ describe("RealtimeRunner inbound batching", () => {
       {
         recordInboundCustomerMessage,
         recordOutboundHumanMessage: vi.fn(),
+        recoverAcceptedOutboundBotMessages,
+        listConversationHistory,
       },
     );
 
@@ -3250,6 +3264,10 @@ describe("RealtimeRunner inbound batching", () => {
     const modelContext = vi.mocked(model.generate).mock.calls[0]![0];
     expect(modelContext.filter((entry) => entry.senderType === "CUSTOMER").map((entry) => entry.text))
       .toEqual(["chị ơi", "em muốn hỏi", "mẫu nào đẹp"]);
+    expect(modelContext.some((entry) => entry.senderType === "BOT" &&
+      entry.text === "Em đã xác nhận mẫu trước đó ạ.")).toBe(true);
+    expect(recoverAcceptedOutboundBotMessages).toHaveBeenCalledWith(conversationId, 30);
+    expect(listConversationHistory).toHaveBeenCalledWith(conversationId, { limit: 30 });
     expect(recordInboundCustomerMessage).toHaveBeenCalledTimes(3);
     expect(recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({
       providerMessageId: `event:${middle.envelope.message.eventKey}`,
@@ -3260,6 +3278,7 @@ describe("RealtimeRunner inbound batching", () => {
       ),
     ).toEqual([false, false, true]);
     expect(history.append).toHaveBeenCalledTimes(3);
+    expect(history.load).not.toHaveBeenCalled();
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = commit.mock.calls[0]![0] as {
       inboxBatchGuard?: unknown;
@@ -3297,8 +3316,14 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it("builds a hash-valid Context V2 capture from the final realtime commerce snapshot", async () => {
-    const entry = item(34, "chốt CB182 size M");
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+    const fitMode = checkoutOwner.startsWith("FIT_");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
+    try {
+    const entry = item(34, checkoutOwner === "LONG_HISTORY"
+      ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
+      : "Mẫu CB182 bao nhiêu?");
     const batch = {
       pageId,
       conversationHash,
@@ -3312,9 +3337,10 @@ describe("RealtimeRunner inbound batching", () => {
       attemptCount: 1,
       items: [entry],
     };
+    let currentBatch = batch;
     const inbox: RealtimeInboxPort = {
       claimNext: vi.fn(async () => null),
-      claimNextBatch: vi.fn(async () => batch),
+      claimNextBatch: vi.fn(async () => currentBatch),
       complete: vi.fn(async () => true),
       completeBatch: vi.fn(async () => true),
       isBatchCurrent: vi.fn(async () => true),
@@ -3333,7 +3359,27 @@ describe("RealtimeRunner inbound batching", () => {
       pageId,
       new Date(occurredAt),
     );
-    const commit = vi.fn(async (_input: unknown) => ({
+    let persistedState = checkoutOwner === "LONG_HISTORY"
+      ? { ...state, sessionDecisionContext: {
+          budgetVnd: 600_000, occasion: "WORK" as const,
+          rejectedProductIds: ["SV9031"],
+        } }
+      : state;
+    let persistedCommerce = commerceState;
+    const profile: CustomerProfileV1 = {
+      schemaVersion: 1, profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      customerKey: { namespace: "lana-customer-v1", algorithm: "HMAC_SHA256", digest: "a".repeat(64) },
+      revision: 1, measurements: checkoutOwner === "FIT_READY" ? [{
+        kind: "WAIST_CM", value: 72,
+        provenance: { source: "CUSTOMER_MESSAGE", sourceEventHash: "b".repeat(64), observedAt: occurredAt, confidence: 1 },
+      }] : [], fitPreference: null, preferences: { colors: [], styles: [], materials: [] },
+      sizeHistory: [], createdAt: occurredAt, updatedAt: occurredAt,
+    };
+    const commit = vi.fn(async (input: unknown) => {
+      const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState } };
+      persistedState = written.state;
+      if (written.salesCyclePlan) persistedCommerce = written.salesCyclePlan.state;
+      return ({
       stateCommitted: true,
       metaOutboxCreated: 1,
       pancakeTagOutboxCreated: false,
@@ -3341,14 +3387,21 @@ describe("RealtimeRunner inbound batching", () => {
       sendAuthorized: true,
       reasonCodes: [],
       inboxBatchStatus: "COMMITTED" as const,
-    }));
+      });
+    });
     const runtime: RealtimeRuntimePort = {
+      loadOrCreateCustomerProfile: async <TProfile, TEvidence>() => ({
+        pageId, customerHash: conversationHash, revision: profile.revision,
+        profile: profile as TProfile, fieldEvidence: {} as TEvidence,
+        expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+      }),
+      compareAndSwapCustomerProfile: async () => true,
       loadOrCreate: vi.fn(async () => ({
         conversationId,
         pageId,
         customerHash: conversationHash,
-        stateVersion: state.revision,
-        state,
+        stateVersion: persistedState.revision,
+        state: persistedState,
         routingOwner: "APP" as const,
         appSendEnabled: true,
         killSwitch: false,
@@ -3356,8 +3409,8 @@ describe("RealtimeRunner inbound batching", () => {
       loadOrCreateSalesCycle: async <TState>() => ({
         conversationId,
         pageId,
-        stateRevision: commerceState.revision,
-        state: commerceState as unknown as TState,
+        stateRevision: persistedCommerce.revision,
+        state: persistedCommerce as unknown as TState,
         cartExpiresAt: null,
         expiresAt: new Date("2026-08-22T02:00:00.000Z"),
       }),
@@ -3365,6 +3418,50 @@ describe("RealtimeRunner inbound batching", () => {
       linkProviderConversation: vi.fn(async () => undefined),
     };
     const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    const c3Send = vi.fn(async (request: { body: string }) => {
+      const body = JSON.parse(request.body) as { contents: [{ parts: [{ text: string }] }] };
+      const prompt = JSON.parse(body.contents[0].parts[0].text) as {
+        contractVersion: string;
+        dialogue?: Array<{ direction: string; text: string }>;
+        selectableEvidence?: Array<{ ref: string; capability: string }>;
+        constraints?: { checkoutRequestedFields?: string[] };
+      };
+      const variantChoice = checkoutOwner === "VARIANT_RECALL" &&
+        prompt.dialogue?.some(({ direction, text }) =>
+          direction === "INBOUND" && text === "Chị chọn size M nhé.") === true;
+      const shipping = prompt.selectableEvidence?.filter(({ capability }) =>
+        capability === "SHIPPING_FEE"
+      ) ?? [];
+      const response = variantChoice
+        ? prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+          ? { replyAct: "ACKNOWLEDGE", goal: "Keep the customer's size M choice for this product.",
+              proposition: "NONE", evidenceRefs: [],
+              continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+          : { answerText: "Dạ, em theo lựa chọn chị vừa nói ạ.",
+              factualTexts: [], progressionText: null }
+        : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+        ? prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
+          ? {
+              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              proposition: "PRICE", evidenceRefs: [], continuation: null,
+              canonicalAction: "ASK_CHECKOUT_DETAILS",
+            }
+          : {
+            replyAct: "ANSWER", goal: shipping.length > 0
+              ? "Answer the verified cart delivery fee." : "Answer the verified price.",
+            proposition: shipping.length > 0 ? "SHIPPING_FEE" : "PRICE",
+            evidenceRefs: shipping.length > 0 ? shipping.map(({ ref }) => ref) :
+              prompt.selectableEvidence?.filter(({ capability }) =>
+              capability === "PRICE"
+            ).map(({ ref }) => ref) ?? [],
+            continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+          }
+        : { answerText: null, factualTexts: [], progressionText: null };
+      return {
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+        providerModelVersion: "gemini-3.5-flash-lite",
+      };
+    });
     const product = {
       productId: "CB182",
       parentProductId: "CB182",
@@ -3453,38 +3550,52 @@ describe("RealtimeRunner inbound batching", () => {
             metadata: policyMetadata,
           },
         },
-        versionReferences: [],
+        versionReferences: !fitMode || checkoutOwner === "FIT_NO_CHART" ? [] : [{
+          artifactKey: "fit-chart", artifactKind: "SIZE_CHART", lifecycle: "PUBLISHED",
+        }],
         artifacts: {
-          shopPolicy: {}, offerPolicy: {}, closingStrategy: {}, sizeCharts: {},
+          shopPolicy: {}, offerPolicy: {}, closingStrategy: {},
+          sizeCharts: !fitMode || checkoutOwner === "FIT_NO_CHART" ? {} : {
+            "fit-chart": {
+              chart: {
+                schemaVersion: 1,
+                reference: { chartId: "fit-chart", version: "1", source: "IMAGE_EXTRACTION",
+                  sourceArtifactRef: "https://cdn.example/fit-chart.jpg", sourceContentSha256: "d".repeat(64),
+                  verificationStatus: "VERIFIED", verifiedByRef: "admin:owner", verifiedAt: occurredAt },
+                brand: "LANA", category: "QUAN", componentRole: "PANTS", boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
+                bands: [{ size: "M", ranges: [{ kind: "WAIST_CM", minInclusive: 70, maxInclusive: 76 }], note: null }],
+              },
+              scope: { level: "COMPONENT", parentProductIds: ["CB182"], categories: ["QUAN"], componentRole: "PANTS", forms: [], materials: [] },
+              extraction: { measurementBasis: "BODY", confidence: 1, extractorVersion: "fixture" },
+              sourceMetadata: { sourceReference: "https://cdn.example/fit-chart.jpg" },
+            },
+          },
           handoffMatrix: null, paymentPolicy: null,
         },
       },
     } as unknown as RuntimePolicyResolution;
+    const baseModel = replyModel();
+    const cartSelectionSizes: (string | null)[] = [];
     const runner = new RealtimeRunner(
       inbox,
       runtime,
-      replyModel({
-        decision: "COMMITTED",
-        requestedAction: "OPEN_CART",
-        quantity: 1,
-        evidenceText: "chốt CB182 size M",
-      }),
+      baseModel,
       {
         ready: vi.fn(async () => true),
-        resolve: vi.fn(async () => ({
+        resolve: vi.fn(async (query: { productId: string }) => ({
           schemaVersion: 1 as const,
           status: "OK" as const,
           source: "POS_SNAPSHOT" as const,
           observedAt: occurredAt,
           expiresAt: "2099-01-01T00:00:00.000Z",
-          productId: "CB182",
+          productId: query.productId,
           facts: {
             schemaVersion: 1 as const,
-            productId: "CB182",
-            parentProductId: "CB182",
+            productId: query.productId,
+            parentProductId: query.productId,
             offerType: "SET",
             listPriceVnd: null,
-            salePriceVnd: 799_000,
+            salePriceVnd: query.productId === "CB182" ? 799_000 : 699_000,
             sizes: ["M"],
             stockStatus: "IN_STOCK" as const,
             stockQuantity: 2,
@@ -3494,7 +3605,9 @@ describe("RealtimeRunner inbound batching", () => {
           },
           reasonCode: null,
         })),
-        resolveCartSelection: vi.fn(async (query: { quantity: number }) => ({
+        resolveCartSelection: vi.fn(async (query: { quantity: number; size: string | null; deliveryAddress?: string | null }) => {
+          cartSelectionSizes.push(query.size);
+          return ({
           status: "READY" as const,
           line: {
             lineId: "13000000-0000-4000-8000-000000000001",
@@ -3503,14 +3616,21 @@ describe("RealtimeRunner inbound batching", () => {
             offerKind: "SET" as const,
             quantity: query.quantity,
             components: [{
-              componentProductId: "CB182",
-              componentSku: "CB182_BE_M",
+              componentProductId: "CB182_AO",
+              componentSku: "CB182_AO_BE_M",
               componentRole: "TOP" as const,
               color: "BE",
               size: "M",
               quantity: 1,
+            }, {
+              componentProductId: "CB182_CV",
+              componentSku: "CB182_CV_BE_M",
+              componentRole: "SKIRT" as const,
+              color: "BE",
+              size: "M",
+              quantity: 1,
             }],
-            allowMixedSizes: false,
+            allowMixedSizes: true,
             allowComponentSale: false,
             posUnitPriceVnd: 799_000,
             priceAuthority: {
@@ -3524,8 +3644,8 @@ describe("RealtimeRunner inbound batching", () => {
                 authority: "PANCAKE_POS" as const,
                 sourceVersion: "snapshot-v1",
                 observedAt: occurredAt,
-                expiresAt: "2099-01-01T00:00:00.000Z",
-                freshForSeconds: 60,
+                expiresAt: "2026-07-24T02:00:00.000Z",
+                freshForSeconds: 172_800,
                 freshnessState: "FRESH" as const,
               },
             },
@@ -3533,25 +3653,46 @@ describe("RealtimeRunner inbound batching", () => {
           },
           shopId: "LANA",
           versions: {
-            price: "price-v1", inventory: "inventory-v1", size: "size-v1", eta: null,
+            price: "price-v1", inventory: "inventory-v1", size: "size-v1",
+            eta: query.deliveryAddress ? "eta-v1" : null,
           },
-          eta: null,
-          etaExpiresAt: null,
+          eta: query.deliveryAddress ? { minDays: 3, maxDays: 6 } : null,
+          etaExpiresAt: query.deliveryAddress ? "2026-07-24T02:00:00.000Z" : null,
           sourceAuthority: "POS_SNAPSHOT" as const,
           stockStatus: "IN_STOCK" as const,
           stockAvailableQuantity: 2,
           sourceObservedAt: occurredAt,
           sourceExpiresAt: "2099-01-01T00:00:00.000Z",
+          });
+        }),
+        resolveVerifiedVariant: vi.fn(async (query: { productId: string; mentionedSize: string | null }) => ({
+          resolution: "VERIFIED" as const,
+          parentProductId: query.productId,
+          selectedVariantId: "CB182_BE_M",
+          selectedColorId: "BE",
+          selectedColorLabel: "BE",
+          selectedSizeCode: query.mentionedSize,
+          selectedOfferType: "SET",
+          selectedComponentProductId: null,
+          mentionedColorText: null,
+          mentionedSizeText: query.mentionedSize,
+          availableColors: ["BE"],
+          availableSizes: ["M"],
+          sourceVersion: "snapshot-v1",
+          verifiedAt: occurredAt,
         })),
         close: vi.fn(async () => undefined),
       },
       {
-        searchText: vi.fn(async () => ({
+        searchText: vi.fn(async (query: string) => ({
           status: "MATCHED" as const,
           matchKind: "EXACT_CODE" as const,
           score: 1,
           gap: null,
-          product,
+          product: query.includes("SV9031")
+            ? { ...product, productId: "SV9031", parentProductId: "SV9031",
+                canonicalCode: "SV9031", title: "Set SV9031" }
+            : product,
         })),
         searchImage: vi.fn(),
       },
@@ -3564,9 +3705,27 @@ describe("RealtimeRunner inbound batching", () => {
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
+        customerProfileEnabled: fitMode,
+        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
+        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE",
+        c3: {
+          modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+          transport: { send: c3Send },
+        },
       },
       undefined,
-      undefined,
+      checkoutOwner === "LONG_HISTORY" ? {
+        ready: vi.fn(async () => true),
+        load: vi.fn(async () => Array.from({ length: 30 }, (_, index) => ({
+          direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
+          senderType: index % 2 === 0 ? "CUSTOMER" as const : "BOT" as const,
+          messageType: "TEXT" as const,
+          text: `Lượt trước ${index + 1}`,
+          attachmentCount: 0,
+          occurredAt: new Date(Date.parse(occurredAt) - (30 - index) * 60_000).toISOString(),
+        }))),
+        append: vi.fn(async () => true), close: vi.fn(async () => undefined),
+      } : undefined,
       {
         recordInboundCustomerMessage: vi.fn(async () => ({ messagePk: sourceMessagePk })),
         recordOutboundHumanMessage: vi.fn(),
@@ -3576,8 +3735,15 @@ describe("RealtimeRunner inbound batching", () => {
     );
 
     expect(await runner.processOne()).toBe(true);
+    expect(c3Send).toHaveBeenCalledTimes(2);
+    expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
+    expect(persistedCommerce.cart).toBeNull();
     const commitInput = commit.mock.calls[0]![0] as {
       state: { revision: number };
+      metaPlan?: {
+        messages: readonly { kind: string; text: string }[];
+        protectedClaimTypes?: readonly string[];
+      };
       salesCyclePlan?: {
         expectedRevision: number;
         state: { revision: number };
@@ -3589,6 +3755,11 @@ describe("RealtimeRunner inbound batching", () => {
       } };
     };
     expect(commitInput.salesCyclePlan?.expectedRevision).toBe(commerceState.revision);
+    expect(commitInput.metaPlan?.messages).toContainEqual({
+      kind: "TEXT", text: "Giá hiện tại của mẫu này là 799.000đ ạ.",
+    });
+    expect(commitInput.metaPlan?.protectedClaimTypes).toContain("PRICE");
+    expect(commit).toHaveBeenCalledTimes(1);
     const finalSalesCycleRevision = commitInput.salesCyclePlan!.state.revision;
     expect(finalSalesCycleRevision).toBeGreaterThan(commerceState.revision);
     const finalConversationRevision = commitInput.state.revision;
@@ -3617,6 +3788,285 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+
+    if (checkoutOwner === "LONG_HISTORY") {
+      const body = JSON.parse(c3Send.mock.calls[0]![0].body);
+      const strategistInput = JSON.parse(body.contents[0].parts[0].text);
+      expect(strategistInput.dialogue).toHaveLength(15);
+      expect(JSON.parse(strategistInput.dialogue[0].text)).toEqual({
+        type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
+        budgetCustomerReported: "700k", occasion: "WORK",
+        rejectedProductIds: ["SV9031"],
+      });
+      expect(strategistInput.dialogue.at(-1).text)
+        .toBe("Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?");
+      expect(persistedState.sessionDecisionContext?.budgetVnd).toBe(700_000);
+      expect(commitInput.metaPlan?.messages).toContainEqual({
+        kind: "TEXT", text: "Giá hiện tại của mẫu này là 799.000đ ạ.",
+      });
+      return;
+    }
+
+    if (checkoutOwner === "MULTI_PRICE") {
+      const compare = item(40, "So sánh giá CB182 và SV9031 giúp chị.");
+      currentBatch = { ...batch, generation: 11, inboxIds: [compare.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [compare] };
+      vi.setSystemTime(compare.occurredAt);
+      const callsBefore = c3Send.mock.calls.length;
+      expect(await runner.processOne()).toBe(true);
+      expect(c3Send.mock.calls.length - callsBefore).toBe(2);
+      const written = commit.mock.calls.at(-1)![0] as typeof commitInput;
+      const reply = written.metaPlan?.messages.map(({ text }) => text).join(" ");
+      expect(reply).toContain("CB182");
+      expect(reply).toContain("SV9031");
+      expect(reply).toContain("799.000");
+      expect(reply).toContain("699.000");
+      expect(written.metaPlan?.protectedClaimTypes).toContain("PRICE");
+      const strategistRequest = JSON.parse(c3Send.mock.calls[callsBefore]![0].body);
+      const strategistInput = JSON.parse(strategistRequest.contents[0].parts[0].text);
+      expect(strategistInput.selectableEvidence.filter(
+        (entry: { capability: string }) => entry.capability === "PRICE",
+      ).map((entry: { subject: { productId: string } }) => entry.subject.productId))
+        .toEqual(["CB182", "SV9031"]);
+      expect(written.contextV2CapturePlan?.capture.context).toMatchObject({
+        productBinding: { status: "RESOLVED", productIds: ["CB182", "SV9031"],
+          catalogVersion: null },
+      });
+      expect(persistedCommerce.cart).toBeNull();
+      return;
+    }
+
+    if (fitMode) {
+      const fitEntry = item(40, checkoutOwner === "FIT_UNRELATED"
+        ? "Chị thích màu be." : "Chị cần tư vấn phần eo.");
+      currentBatch = { ...batch, generation: 11, inboxIds: [fitEntry.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [fitEntry] };
+      vi.setSystemTime(fitEntry.occurredAt);
+      const before = c3Send.mock.calls.length;
+      const question = "Chị cho em xin số đo vòng eo để đối chiếu nhé?";
+      c3Send.mockImplementationOnce(async (request) => {
+        const body = JSON.parse(request.body);
+        const prompt = JSON.parse(body.contents[0].parts[0].text);
+        const size = prompt.selectableEvidence.filter((entry: { capability: string }) => entry.capability === "SIZE_FIT");
+        const response = checkoutOwner === "FIT_REQUIRED"
+          ? { replyAct: "ANSWER", goal: "Ask the missing waist measurement for the current fit request.",
+              proposition: "SIZE_FIT", evidenceRefs: [], continuation: null, canonicalAction: "ASK_MEASUREMENTS" }
+          : checkoutOwner === "FIT_READY"
+            ? { replyAct: "ANSWER", goal: "State the Size Engine recommendation for the current waist measurement.",
+                proposition: "SIZE_FIT", evidenceRefs: size.map((entry: { ref: string }) => entry.ref),
+                continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+            : { replyAct: "ACKNOWLEDGE", goal: "Acknowledge without asking for unrelated or unusable customer input.",
+                proposition: "NONE", evidenceRefs: [], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" };
+        return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite" };
+      }).mockResolvedValueOnce({
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+          answerText: checkoutOwner === "FIT_NO_CHART" || checkoutOwner === "FIT_UNRELATED" ? "Em hiểu ý chị." : null,
+          factualTexts: [], progressionText: checkoutOwner === "FIT_REQUIRED" ? question : null,
+        }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+      });
+      expect(await runner.processOne()).toBe(true);
+      const fitBody = JSON.parse(c3Send.mock.calls[before]![0].body);
+      const fitPrompt = JSON.parse(fitBody.contents[0].parts[0].text);
+      expect(fitPrompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
+        .toBe(checkoutOwner === "FIT_REQUIRED");
+      expect(fitPrompt.selectableEvidence.some((entry: { capability: string }) => entry.capability === "SIZE_FIT"))
+        .toBe(checkoutOwner === "FIT_READY");
+      expect(c3Send.mock.calls.length - before).toBe(2);
+      const written = commit.mock.calls.at(-1)![0] as typeof commitInput;
+      expect(written.contextV2CapturePlan?.capture.context).toMatchObject({
+        barriers: { active: checkoutOwner === "FIT_REQUIRED" ? ["MEASUREMENTS_REQUIRED"] : [] },
+      });
+      const reply = written.metaPlan?.messages.map(({ text }) => text).join(" ");
+      if (checkoutOwner === "FIT_REQUIRED") expect(reply).toBe(question);
+      if (checkoutOwner === "FIT_READY") {
+        expect(reply).toBe("Size phù hợp với chị là M ạ.");
+        expect(written.metaPlan?.protectedClaimTypes).toContain("SIZE_FIT");
+      }
+      expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
+      expect(persistedCommerce.cart).toBeNull();
+      expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
+      return;
+    }
+
+    if (checkoutOwner === "VARIANT_RECALL") {
+      const choiceEntry = item(40, "Chị chọn size M nhé.");
+      currentBatch = { ...batch, generation: 11, inboxIds: [choiceEntry.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [choiceEntry] };
+      vi.setSystemTime(choiceEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(persistedCommerce.cart).toBeNull();
+      expect(persistedState.consideredVariant).toMatchObject({ size: "M", offerType: "SET" });
+      const choiceReply = commit.mock.calls.at(-1)![0] as { metaPlan?: {
+        messages: readonly { text: string }[] } };
+      expect(choiceReply.metaPlan?.messages.map(({ text }) => text).join(" "))
+        .toBe("Dạ, em theo lựa chọn chị vừa nói ạ.");
+
+      const commitEntry = item(41, "Chị lấy mẫu này.");
+      currentBatch = { ...batch, generation: 12, inboxIds: [commitEntry.inboxId],
+        firstReceiveSequence: 41, lastReceiveSequence: 41, items: [commitEntry] };
+      vi.mocked(baseModel.generate).mockImplementationOnce(replyModel({
+        decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+        evidenceText: "Chị lấy mẫu này.",
+      }).generate);
+      vi.setSystemTime(commitEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(cartSelectionSizes.at(-1)).toBe("M");
+      expect(persistedCommerce.stage).toBe("CART_OPEN");
+      expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+      const cartId = persistedCommerce.cart!.value.cartId;
+      const committedTurns = commit.mock.calls.length;
+      expect(await runner.processOne()).toBe(true);
+      expect(commit).toHaveBeenCalledTimes(committedTurns);
+      expect(persistedCommerce.cart?.value.cartId).toBe(cartId);
+      for (const [offset, text, expectedStage] of [
+        [0, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh", "CART_OPEN"],
+        [1, "COD", "ORDER_PREVIEW"],
+        [2, "ok", "PURCHASE_CONFIRMED"],
+      ] as const) {
+        const next = item(42 + offset, text);
+        currentBatch = { ...batch, generation: 13 + offset, inboxIds: [next.inboxId],
+          firstReceiveSequence: 42 + offset, lastReceiveSequence: 42 + offset,
+          items: [next] };
+        vi.setSystemTime(next.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        expect(persistedCommerce.stage).toBe(expectedStage);
+        expect(persistedCommerce.cart?.value.cartId).toBe(cartId);
+      }
+      expect(commit).toHaveBeenCalledTimes(6);
+      return;
+    }
+
+    // An ordinary follow-up may leave commerce unchanged. It still needs C3;
+    // requiring a new SalesCycle plan previously bypassed adaptive dialogue.
+    const followupEntry = item(40, "Giá hơi cao với chị.");
+    currentBatch = { ...batch, generation: 11, inboxIds: [followupEntry.inboxId],
+      firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followupEntry] };
+    vi.setSystemTime(followupEntry.occurredAt);
+    const callsBeforeFollowup = c3Send.mock.calls.length;
+    const concernReply = "Chị đang cân nhắc khoản chi cho mẫu này. Điểm nào khiến chị còn phân vân nhất?";
+    c3Send.mockResolvedValueOnce({
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        replyAct: "CLARIFY", goal: "Understand the concern without repeating the known price.",
+        proposition: "NONE", evidenceRefs: [], canonicalAction: "NONE",
+        continuation: { type: "ASK", input: "DECISION_CRITERION" },
+      }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+    }).mockResolvedValueOnce({
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        answerText: null, factualTexts: [],
+        progressionText: checkoutOwner === "C3_FAILURE"
+          ? "Mẫu này giá 1đ. Điểm nào khiến chị còn phân vân nhất?" : concernReply,
+      }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    expect(await runner.processOne()).toBe(true);
+    expect(c3Send.mock.calls.length - callsBeforeFollowup).toBe(2);
+    const followupCommit = commit.mock.calls.at(-1)![0] as {
+      metaPlan?: { messages: readonly { text: string }[] };
+    };
+    const followupText = followupCommit.metaPlan?.messages.map(({ text }) => text).join(" ");
+    if (checkoutOwner === "C3_FAILURE") {
+      // Invalid free prose must retain the already-built verified baseline.
+      expect(followupText).toContain("799.000");
+      expect(followupText).not.toContain("giá 1đ");
+    } else {
+      expect(followupText).toBe(concernReply);
+    }
+    expect(persistedCommerce.revision).toBe(finalSalesCycleRevision);
+    expect(persistedCommerce.cart).toBeNull();
+    const cartEntry = item(41, "chốt CB182 size M");
+    currentBatch = {
+      ...batch, generation: 11, inboxIds: [cartEntry.inboxId],
+      firstReceiveSequence: 35, lastReceiveSequence: 35, items: [cartEntry],
+    };
+    vi.mocked(baseModel.generate).mockImplementationOnce(replyModel({
+      decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+      evidenceText: "chốt CB182 size M",
+    }).generate);
+    vi.setSystemTime(cartEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("CART_OPEN");
+    expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+    const cartRevision = persistedCommerce.cart!.value.revision;
+
+    const feeEntry = item(42, "Giỏ này tính tiền giao thế nào?");
+    currentBatch = {
+      ...batch, generation: 12, inboxIds: [feeEntry.inboxId],
+      firstReceiveSequence: 36, lastReceiveSequence: 36, items: [feeEntry],
+    };
+    vi.setSystemTime(feeEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    const feeCommit = commit.mock.calls[3]![0] as {
+      metaPlan?: { messages: readonly { text: string }[];
+        protectedClaimTypes?: readonly string[] };
+      salesCycleReadback?: { expectedRevision: number; readiness: {
+        effect: string; cartVersion: number } };
+    };
+    expect(feeCommit.salesCycleReadback).toMatchObject({
+      expectedRevision: persistedCommerce.revision,
+      readiness: { effect: "CART_READY", cartVersion: cartRevision },
+    });
+    expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
+    expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
+    if (checkoutOwner === "HUMAN") {
+      persistedState = { ...persistedState, conversationOwner: "HUMAN",
+        ownerReason: "AGENT_HANDOFF", ownerLeaseUntil: "2026-07-22T03:00:00.000Z" };
+      const beforeCommerce = structuredClone(persistedCommerce);
+      const beforeModelCalls = c3Send.mock.calls.length;
+      for (const [offset, text] of [
+        "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh", "COD", "ok",
+      ].entries()) {
+        const humanEntry = item(43 + offset, text);
+        currentBatch = { ...batch, generation: 13 + offset,
+          inboxIds: [humanEntry.inboxId], firstReceiveSequence: 43 + offset,
+          lastReceiveSequence: 43 + offset, items: [humanEntry] };
+        vi.setSystemTime(humanEntry.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const written = commit.mock.calls.at(-1)![0] as {
+          salesCyclePlan?: unknown; metaPlan?: { messages: readonly unknown[] };
+        };
+        expect(written.salesCyclePlan).toBeUndefined();
+        expect(written.metaPlan?.messages ?? []).toEqual([]);
+        expect(persistedCommerce).toEqual(beforeCommerce);
+      }
+      expect(c3Send.mock.calls.length).toBe(beforeModelCalls);
+      return;
+    }
+    const detailsEntry = item(43, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh");
+    currentBatch = {
+      ...batch, generation: 13, inboxIds: [detailsEntry.inboxId],
+      firstReceiveSequence: 37, lastReceiveSequence: 37, items: [detailsEntry],
+    };
+    vi.setSystemTime(detailsEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("CART_OPEN");
+    const detailsCommit = commit.mock.calls[4]![0] as {
+      metaPlan?: { messages: readonly { text: string }[] };
+    };
+    expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
+      .toContain("hình thức thanh toán COD");
+    expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
+      .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
+
+    const paymentEntry = item(44, "COD");
+    currentBatch = {
+      ...batch, generation: 14, inboxIds: [paymentEntry.inboxId],
+      firstReceiveSequence: 38, lastReceiveSequence: 38, items: [paymentEntry],
+    };
+    vi.setSystemTime(paymentEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("ORDER_PREVIEW");
+    const confirmationEntry = item(45, "ok");
+    currentBatch = {
+      ...batch, generation: 15, inboxIds: [confirmationEntry.inboxId],
+      firstReceiveSequence: 39, lastReceiveSequence: 39, items: [confirmationEntry],
+    };
+    vi.setSystemTime(confirmationEntry.occurredAt);
+    expect(await runner.processOne()).toBe(true);
+    expect(persistedCommerce.stage).toBe("PURCHASE_CONFIRMED");
+    expect(commit).toHaveBeenCalledTimes(7);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not separately complete a batch whose atomic commit is superseded", async () => {
@@ -3826,5 +4276,14 @@ describe("policy question versus after-sales routing", () => {
   ])("routes an actual after-sales request to Vận Đơn: %s", (text) => {
     expect(isPreSalePolicyQuestion(text)).toBe(false);
     expect(isPostSaleRequest(text)).toBe(true);
+  });
+
+  it("keeps edits to an open, unconfirmed cart in pre-sale", () => {
+    expect(isPostSaleRequest("Chị muốn đổi size trong giỏ sang L, chưa đặt hàng.", true))
+      .toBe(false);
+    expect(isPostSaleRequest("Chị muốn sửa địa chỉ trong giỏ trước khi chốt.", true))
+      .toBe(false);
+    expect(isPostSaleRequest("Đơn cũ chị đã nhận rồi, muốn đổi size.", true))
+      .toBe(true);
   });
 });

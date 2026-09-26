@@ -204,6 +204,7 @@ export type ConversationBarriersV2 = z.infer<
 >;
 
 export interface DeriveConversationBarriersV2Input {
+  readonly fitMeasurementsRequired?: boolean;
   readonly productScope: z.infer<typeof ProductScopeV2Schema>;
   readonly commerceStage: z.infer<typeof SalesCycleStageV1Schema>;
   readonly hasCart: boolean;
@@ -246,7 +247,8 @@ export function deriveConversationBarriersV2(
         : "EFFECT_READINESS_BLOCKED",
     );
   }
-  if (input.commerceStage === "MEASUREMENTS_REQUIRED") {
+  if (input.commerceStage === "MEASUREMENTS_REQUIRED" ||
+      (input.productScope === "RESOLVED" && input.fitMeasurementsRequired === true)) {
     active.push("MEASUREMENTS_REQUIRED");
   }
   if ((input.commerceStage === "CART_OPEN" ||

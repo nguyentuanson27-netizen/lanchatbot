@@ -1,6 +1,6 @@
 {
   "benchmark_id": "TRACK_C_C2_QUALITY_BENCHMARK_V2",
-  "benchmark_revision": "R2.8",
+  "benchmark_revision": "R2.9",
   "status": "EXECUTABLE_QUALITY_AND_OWNER_OBSERVATION_GATES_CAPABILITY_PORT_PENDING",
   "evaluation_at": "2026-09-10T02:00:00.000Z",
   "ownership": {
@@ -30,23 +30,23 @@
     "positive_capability_probes_require_real_port": true
   },
   "content_hashes": {
-    "dev_70_expanded_sha256": "714d803526d38993b0504997feea01590db1ce3b636c32efb6fc4b92f849d37f",
+    "dev_70_expanded_sha256": "9256db31a3155e642afe9f9dbaeef7cf7f5818c764dbdc5933cb31dff231f643",
     "holdout_30_expanded_sha256": "c68a079f50f565045f81098a9b7a2ecc0a1dbcf8b09007bd46005fb72adbecc6",
     "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e",
-    "bundle_fingerprint_sha256": "5fc84756535a040fbebd2576fc1fb022156f59d1d2de8b210e0318975e7b795b",
-    "quality_harness_fingerprint_sha256": "b289278c980fa4d074f7c7b761832d88a87288068ff7a9fd38892a569437f8a6"
+    "bundle_fingerprint_sha256": "21fc2e3afa2ab894e72a095c84fbeec7f037179beb0a7f1dbe1626c6145b7266",
+    "quality_harness_fingerprint_sha256": "78744a5081d54853bae5857993a8e400913058fac64e4218ef72e11ef31cfaa6"
   },
   "bundle_components_git_sha1": {
     "facts.json": "93cc14dc49e20f37fdf60bfeacdc5c6563317a45",
     "rubric.json": "4a06598f1d0cab43fa539a6ecc38fc23aaa22cc5",
     "contract-gaps.json": "17cb1b48aa037fa4f65c8729b71a65ab2df34181",
-    "contract-reachability.json": "24a6e7ea67dacc97157e76515a386e314638ceb1",
+    "contract-reachability.json": "2bed3066061136b9c5f77d2af0010cd4f513731f",
     "runtime-materialization.json": "e65216c2f61c03f4c10d09c3394dbfc3798410e3",
     "owner-safety.json": "384a1f4e495d8f8ffe917ff4d2b9409a019ee9e2",
     "owner-safety-route-map.json": "f7e988838ce259d7ab55dd09803353cf9dc29648",
     "owner-safety-capability-matrix.json": "0a92e7e552fb7bb92822bebeb039fd9637c1ea49",
     "holdout-policy.json": "f6398e60a3bbbd02b58ba32cdc2441afd8a398be",
-    "../../../src/track-c-c3-v5-benchmark-materialization.ts": "6c4e8ac9dbed9380d1a1cd12b1bfbacf2a729d47"
+    "../../../src/track-c-c3-v5-benchmark-materialization.ts": "b25f009ef121574bd77cd42e7511d40255da424b"
   },
   "quality_harness_components_git_sha1": {
     "../../../src/track-c-c3-v5-benchmark-scoring.ts": "b61743d0d7ec397e64ffa2ebeaaa8696fb3b207c",

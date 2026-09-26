@@ -50,6 +50,7 @@ const {
   ensureSlash,
   forwardedOriginHeaders,
   isAllowedRedirect,
+  isAllowedMcpUser,
   normalizeRepositoryPath,
   parseScopes,
   publicTool,
@@ -102,6 +103,12 @@ test("scope parser supports OAuth scope and scp claims", () => {
     [...scopes].sort(),
     ["mcp:read", "mcp:write", "openid"].sort(),
   );
+});
+
+test("OAuth membership fails closed when the user allowlist is empty", () => {
+  assert.equal(isAllowedMcpUser("owner@example.com", new Set()), false);
+  assert.equal(isAllowedMcpUser("owner@example.com", new Set(["owner@example.com"])), true);
+  assert.equal(isAllowedMcpUser("other@example.com", new Set(["owner@example.com"])), false);
 });
 
 test("all remote tools advertise OAuth and safety annotations", () => {

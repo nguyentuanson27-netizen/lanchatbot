@@ -4,6 +4,7 @@ import {
 import {
   PolicyBundleV1Schema,
   CartV1Schema,
+  BusinessFactEnvelopeV1Schema,
   type AgentBuyingIntentV1,
   type AgentSalesSignalsV1,
   type CartLineV1,
@@ -18,10 +19,15 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  missingRealtimeCheckoutFields,
   buildGuardedModelNegotiationProposalV1,
   prepareHandoffStatePlanV1,
   type ModelNegotiationProposalV1,
 } from "./realtime-sales-cycle.js";
+import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import { buildTrackCSelectableEvidence } from "./track-c-c3-selectable-evidence.js";
+import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
+import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import {
   finalizeModelOwnedRealtimePostGenerationReply,
   runRealtimeReplyDifferential,
@@ -236,6 +242,182 @@ function input(
   } as const;
 }
 
+describe("Unicode size selection at the commerce boundary", () => {
+  it.each(["Chị sẽ lấy một bộ size M.", "Chị lấy một bộ size M.",
+    "Chị sẽ lấy một bộ size M.".normalize("NFD"), "Chốt CB182, size XL nhé."])(
+    "passes the actual size token to POS: %s", async (text) => {
+      let queriedSize: string | null | undefined;
+      const result = await evaluateRealtimeSalesCycle({
+        ...input(createRealtimeSalesState(conversationId, pageId, now), text, "unicode-size"),
+        facts: { ...facts, resolveCartSelection: async (query, at) => {
+          queriedSize = query.size;
+          return facts.resolveCartSelection!(query, at);
+        } },
+      });
+      expect(queriedSize).toBe(text.includes("XL") ? "XL" : "M");
+      expect(result.plan?.state.stage).toBe("CART_OPEN");
+    },
+  );
+});
+
+describe("no-cart buying journey", () => {
+  it("advertises transfer at cart opening only with a resolved transfer policy", async () => {
+    const initial = createRealtimeSalesState(conversationId, pageId, now);
+    const noTransfer = await evaluateRealtimeSalesCycle(input(initial, "Chị lấy CB182 size M.", "cod-only"));
+    expect(noTransfer.plan?.state.stage).toBe("CART_OPEN");
+    expect(noTransfer.messages[0]).toMatchObject({ kind: "TEXT", text: expect.stringContaining("Thanh toán: COD nhé.") });
+    expect(noTransfer.messages[0]).not.toMatchObject({ text: expect.stringContaining("chuyển khoản") });
+
+    const transferPolicyResolution = {
+      ...policyResolution,
+      bundle: {
+        ...policyResolution.bundle!,
+        versionReferences: [{
+          artifactKey: "payment-policy", artifactKind: "PAYMENT_POLICY", versionId: "payment-v1",
+          versionNumber: 1, contentHash: `sha256:${"b".repeat(64)}`,
+          pointerId: "payment-pointer", pointerRevision: 1,
+        }],
+        artifacts: {
+          ...policyResolution.bundle!.artifacts,
+          paymentPolicy: {
+            schemaVersion: 1, kind: "PAYMENT_POLICY", methods: ["COD", "BANK_TRANSFER"],
+            bankTransfer: {
+              bankName: "Example Bank", accountNumber: "1234567890", accountHolder: "EXAMPLE SHOP",
+              qrAssetUrl: "https://example.com/payment.png", receiptInstruction: "Gửi biên nhận",
+              receiptRequiresHumanReview: true,
+            },
+            sourceMetadata: metadata,
+          },
+        },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const withTransfer = await evaluateRealtimeSalesCycle({
+      ...input(initial, "Chị lấy CB182 size M.", "transfer-enabled"),
+      policyResolution: transferPolicyResolution,
+    });
+    expect(withTransfer.plan?.state.stage).toBe("CART_OPEN");
+    expect(withTransfer.messages[0]).toMatchObject({
+      kind: "TEXT", text: expect.stringContaining("Thanh toán: COD hoặc chuyển khoản nhé."),
+    });
+  });
+
+  it("keeps discovery and variant choice outside the cart, then opens one cart on commitment", async () => {
+    const initial = createRealtimeSalesState(conversationId, pageId, now);
+    const price = await evaluateRealtimeSalesCycle(input(initial, "CB182 giá bao nhiêu?", "journey-price"));
+    const afterPrice = price.plan?.state ?? initial;
+    expect(afterPrice.cart).toBeNull();
+
+    const choice = await evaluateRealtimeSalesCycle(input(afterPrice, "Chị chọn size M nhé.", "journey-choice"));
+    const afterChoice = choice.plan?.state ?? afterPrice;
+    expect(afterChoice.cart).toBeNull();
+
+    const commitment = input(afterChoice, "Chị lấy CB182 size M.", "journey-commit");
+    const opened = await evaluateRealtimeSalesCycle(commitment);
+    expect(opened.plan?.state.stage).toBe("CART_OPEN");
+    expect(opened.plan?.state.cart?.value.lines).toHaveLength(1);
+
+    const duplicate = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state, "Chị lấy CB182 size M.", "journey-commit",
+    ));
+    expect(duplicate.plan?.state.cart?.value.cartId ?? opened.plan!.state.cart!.value.cartId)
+      .toBe(opened.plan!.state.cart!.value.cartId);
+    expect(duplicate.plan?.state.cart?.value.lines ?? opened.plan!.state.cart!.value.lines)
+      .toHaveLength(1);
+    expect(duplicate.plan?.cartOpenEvidence).toBeUndefined();
+    expect(duplicate.plan?.cartMutationBatchEvidence).toBeUndefined();
+
+    const preview = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD",
+      "journey-details",
+    ));
+    expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(preview.plan?.state.cart?.value.cartId).toBe(opened.plan!.state.cart!.value.cartId);
+
+    const confirmed = await evaluateRealtimeSalesCycle(input(
+      preview.plan!.state, "ok", "journey-confirm",
+    ));
+    expect(confirmed.plan?.state.stage).toBe("PURCHASE_CONFIRMED");
+    expect(confirmed.plan?.state.cart?.value.cartId).toBe(opened.plan!.state.cart!.value.cartId);
+  });
+});
+
+describe("multi-product C3 evidence binding", () => {
+  it("keeps two POS prices on their own products through the live C3 reply", async () => {
+    const fact = (productId: string, price: number) =>
+      BusinessFactEnvelopeV1Schema.parse({
+        schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+        observedAt: "2026-07-23T02:00:00.000Z",
+        expiresAt: "2026-07-25T02:00:00.000Z", productId,
+        facts: {
+          schemaVersion: 1, productId, parentProductId: productId,
+          offerType: "SET", listPriceVnd: price, salePriceVnd: null,
+          sizes: ["M"], stockStatus: "IN_STOCK", stockQuantity: 2,
+          deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [],
+        }, reasonCode: null,
+      });
+    const commerceState = createRealtimeSalesState(conversationId, pageId, now);
+    const live = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000092",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "So sánh giá CB182 và SV9031 giúp chị.",
+        sourceMessageId: "mid-compare-two", productId: "CB182",
+        modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 2, finalConversationRevision: 3,
+      preSalesRevision: commerceState.revision, commerceState,
+      productId: "CB182", productIds: ["SV9031", "CB182"],
+      catalogVersion: "first-product-only", facts: [
+        fact("CB182", 699_000), fact("SV9031", 799_000),
+        fact("ZX999", 599_000),
+      ], productFacts: null, policyResolution: null, cartReadiness: [], now,
+    });
+    expect(live.context.productBinding).toMatchObject({
+      status: "RESOLVED", productIds: ["CB182", "SV9031"], catalogVersion: null,
+    });
+    const prices = buildTrackCSelectableEvidence({
+      context: live.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT", evaluationAt: now,
+    }).filter(({ capability }) => capability === "PRICE");
+    expect(prices.map(({ subject }) => subject?.productId))
+      .toEqual(["CB182", "SV9031"]);
+    expect(() => validateResponderOutput(live.context, {
+      segments: [{ kind: "VERIFIED_CLAIM",
+        text: prices[1]!.deterministicText!,
+        claimContentHash: prices[0]!.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    }, "PRODUCTION_CONTRACT", now)).toThrow(
+      "TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH",
+    );
+    let stage = 0;
+    const result = await runTrackCStrategyLive({
+      ...live, modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      decisionAt: now,
+      dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER",
+        messageType: "TEXT", text: "So sánh giá CB182 và SV9031 giúp chị.",
+        attachmentCount: 0, occurredAt: now.toISOString() }],
+      checkoutClarificationActive: false,
+      transport: { send: async () => ({
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
+          stage++ === 0
+            ? { replyAct: "ANSWER", goal: "Compare the two verified prices.",
+                proposition: "PRICE", evidenceRefs: prices.map(({ ref }) => ref),
+                continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+            : { answerText: null, factualTexts: [], progressionText: null },
+        ) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+      }) },
+    });
+    expect(stage).toBe(2);
+    expect(result.reply).toContain("CB182");
+    expect(result.reply).toContain("SV9031");
+    expect(result.reply).toContain("699.000");
+    expect(result.reply).toContain("799.000");
+    expect(result.reply).not.toContain("ZX999");
+    expect(result.reply).not.toContain("599.000");
+    expect(commerceState.cart).toBeNull();
+  });
+});
+
 function signals(input: {
   fullName?: { value: string; evidenceText?: string; confidence?: number };
   phone?: { value: string; evidenceText?: string; confidence?: number };
@@ -390,6 +572,131 @@ async function previewState(eventPrefix: string) {
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it("changes a single cart line to a POS-resolved size, reprices and binds one receipt", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "event-variant-open",
+    ));
+    const before = opened.plan!.state.cart!.value;
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi sang size L nhé.", "event-variant-edit"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        const base = await facts.resolveCartSelection!(query, at);
+        if (base.status !== "READY" || query.size !== "L") return base;
+        return { ...base, versions: { ...base.versions, price: "price-v2" },
+          line: { ...base.line, lineId: query.lineId,
+            components: base.line.components.map((component) => ({ ...component,
+              size: "L", componentSku: component.componentSku.replace(/_M$/u, "_L") })),
+            posUnitPriceVnd: 729_000, lineTotalVnd: 729_000 * query.quantity,
+            priceAuthority: { ...base.line.priceAuthority!, priceFactRef: "price-v2" },
+          } };
+      } },
+    });
+    expect(output.transferToHuman).toBe(false);
+    expect(output.plan?.state.cart?.value).toMatchObject({ revision: before.revision + 1,
+      subtotalVnd: 729_000, lines: [{ components: [{ size: "L" }, { size: "L" }] }],
+    });
+    expect(output.plan?.state.preview).toBeNull();
+    expect(output.plan?.cartMutationBatchEvidence?.receipts).toHaveLength(1);
+    expect(output.plan?.cartMutationBatchEvidence?.receipts[0]).toMatchObject({
+      mutation: { kind: "SET_LINE_VARIANT" }, mutationReasonCode: "VARIANT_CHANGED",
+      authority: { authorityKind: "DETERMINISTIC_VARIANT_EDIT" },
+    });
+    expect(output.messages.map((message) => message.kind === "TEXT" ? message.text : "").join(" "))
+      .toContain("size L");
+  });
+
+  it("keeps the old cart when the requested size is unavailable", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "event-variant-unavailable-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi sang size L nhé.", "event-variant-unavailable"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => query.size === "L"
+        ? { status: "OUT_OF_STOCK", reasonCode: "OUT_OF_STOCK", availableSizes: ["M"], availableColors: ["BE"] }
+        : facts.resolveCartSelection!(query, at) },
+    });
+    expect(output.transferToHuman).toBe(false);
+    expect(output.plan).toBeNull();
+    expect(opened.plan!.state.cart!.value.lines[0]!.components[0]!.size).toBe("M");
+  });
+  it("invalidates a preview after a size correction and rebuilds it from the current cart", async () => {
+    const preview = await previewState("variant-preview");
+    const originalPreviewHash = preview.preview!.previewHash;
+    const variantFacts = { ...facts, resolveCartSelection: async (
+      query: Parameters<NonNullable<BusinessFactsReader["resolveCartSelection"]>>[0],
+      at: Date,
+    ) => {
+      const base = await facts.resolveCartSelection!(query, at);
+      if (base.status !== "READY" || query.size !== "L") return base;
+      return { ...base, line: { ...base.line, lineId: query.lineId,
+        components: base.line.components.map((component) => ({ ...component,
+          size: "L", componentSku: component.componentSku.replace(/_M$/u, "_L") })),
+      } };
+    } };
+    const changed = await evaluateRealtimeSalesCycle({
+      ...input(preview, "Chị đổi size M sang L nhé.", "variant-preview-change"),
+      facts: variantFacts,
+    });
+    expect(changed.plan?.state.stage).toBe("CART_OPEN");
+    expect(changed.plan?.state.preview).toBeNull();
+    expect(changed.plan?.state.cart?.value.lines[0]?.components[0]?.size).toBe("L");
+    expect(changed.messages[0]).toMatchObject({ kind: "TEXT",
+      text: expect.stringContaining("thông tin nhận hàng đã gửi còn đúng") });
+    const rebuilt = await evaluateRealtimeSalesCycle({
+      ...input(changed.plan!.state, "Đúng rồi", "variant-preview-rebuild"),
+      facts: variantFacts,
+    });
+    expect(rebuilt.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(rebuilt.plan?.state.preview?.previewHash).not.toBe(originalPreviewHash);
+    expect(rebuilt.plan?.state.preview?.cartVersion).toBe(
+      changed.plan!.state.cart!.value.revision + 1);
+    expect(rebuilt.plan?.events.some(({ commandKind }) => commandKind === "CHECKOUT_DETAILS_CAPTURED"))
+      .toBe(false);
+  });
+
+  it("asks which product to edit when a size request could affect two cart lines", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "variant-ambiguous-open",
+    ));
+    const current = opened.plan!.state;
+    const another = { ...current.cart!.value.lines[0]!,
+      lineId: "13000000-0000-4000-8000-000000000002", parentProductId: "CB183" };
+    const ambiguous = { ...current, cart: { ...current.cart!,
+      value: { ...current.cart!.value, lines: [...current.cart!.value.lines, another] } } };
+    const output = await evaluateRealtimeSalesCycle(input(
+      ambiguous, "Chị đổi sang size L nhé.", "variant-ambiguous-request",
+    ));
+    expect(output.plan).toBeNull();
+    expect(output.messages[0]).toMatchObject({ kind: "TEXT",
+      text: expect.stringContaining("mẫu nào trong giỏ") });
+  });
+  it("changes color only after matching a color offered by POS", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "variant-color-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi màu xanh nhé.", "variant-color-edit"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        if (query.color === null) return { status: "COLOR_REQUIRED" as const,
+          reasonCode: "CART_COLOR_REQUIRED", availableSizes: ["M"],
+          availableColors: ["BE", "XANH"] };
+        const base = await facts.resolveCartSelection!(query, at);
+        if (base.status !== "READY" || query.color !== "XANH") return base;
+        return { ...base, line: { ...base.line, lineId: query.lineId,
+          components: base.line.components.map((component) => ({ ...component,
+            color: "XANH", componentSku: component.componentSku.replace(/_BE_/u, "_XANH_") })),
+        } };
+      } },
+    });
+    expect(output.plan?.state.cart?.value.lines[0]?.components.map(({ color }) => color))
+      .toEqual(["XANH", "XANH"]);
+    expect(output.plan?.cartMutationBatchEvidence?.receipts[0]?.mutation.kind)
+      .toBe("SET_LINE_VARIANT");
+  });
   it.each([
     "Được, size M nhé",
     "ship cho chị mẫu trên",
@@ -1061,7 +1368,7 @@ describe("realtime Phase 3 sales cycle", () => {
     ]));
   });
 
-  it("r31.3 replays the live sales-cycle effect seam without changing the established cart-open transaction", async () => {
+  it("r31.3 records the policy-bound checkout wording deviation against the immutable cart-open baseline", async () => {
     const capturedInput = {
       text: "chốt CB182 size M",
       eventKey: "event-open",
@@ -1097,6 +1404,7 @@ describe("realtime Phase 3 sales cycle", () => {
         deliveredMessageCount: 1,
       },
     };
+    let currentSnapshot: RealtimeReplySnapshot | null = null;
     const result = await runRealtimeReplyDifferential({
       capturedInput,
       baseline: async () => preB23bBaseline,
@@ -1106,17 +1414,34 @@ describe("realtime Phase 3 sales cycle", () => {
           capture.text,
           capture.eventKey,
         ));
-        return salesCycleSnapshot(output, capture.eventKey);
+        currentSnapshot = salesCycleSnapshot(output, capture.eventKey);
+        return currentSnapshot;
       },
-      permittedDifferences: [],
+      permittedDifferences: [{
+        code: "OUTBOUND_MESSAGES_CHANGED",
+        reasonCode: "C3_CHECKOUT_PAYMENT_POLICY_ONLY_COD",
+      }],
     });
 
     expect(result).toEqual({
       contractVersion: "REALTIME_REPLY_DIFFERENTIAL_V1",
-      status: "MATCH",
+      status: "VIOLATION",
       sideEffects: "DISABLED",
-      differences: [],
+      differences: [
+        { code: "OUTBOUND_MESSAGES_CHANGED", disposition: "INTENTIONAL",
+          reasonCode: "C3_CHECKOUT_PAYMENT_POLICY_ONLY_COD" },
+        { code: "EFFECT_AUTHORIZATION_CHANGED", disposition: "VIOLATION",
+          reasonCode: null },
+      ],
     });
+    expect(currentSnapshot!.messages[0]).toMatchObject({
+      kind: "TEXT", text: expect.stringContaining("Thanh toán: COD nhé."),
+    });
+    expect(currentSnapshot!.messages[0]).not.toMatchObject({
+      text: expect.stringContaining("chuyển khoản"),
+    });
+    expect(currentSnapshot!.protectedClaimHashes).toEqual(preB23bBaseline.protectedClaimHashes);
+    expect(currentSnapshot!.commitOutcome).toBe("COMMITTABLE");
     expect(preB23bBaseline.effectAuthorizationHashes.length).toBeGreaterThan(0);
   });
 
@@ -1277,14 +1602,17 @@ describe("realtime Phase 3 sales cycle", () => {
       } else if (capture.name === "set") {
         expect(result.status).toBe("VIOLATION");
         expect(result.differences.map(({ code }) => code)).toEqual([
+          "OUTBOUND_MESSAGES_CHANGED",
           "EFFECT_AUTHORIZATION_CHANGED",
         ]);
         expect(candidate).toMatchObject({
-          messages: capture.baseline.messages,
           verifiedFactHashes: capture.baseline.verifiedFactHashes,
           protectedClaimHashes: capture.baseline.protectedClaimHashes,
           commitOutcome: "COMMITTABLE",
           protectedOutbound: capture.baseline.protectedOutbound,
+        });
+        expect(candidate.messages[0]).toMatchObject({
+          kind: "TEXT", text: expect.stringContaining("Thanh toán: COD nhé."),
         });
       } else {
         expect(result.status).toBe("VIOLATION");
@@ -1680,6 +2008,42 @@ describe("realtime Phase 3 sales cycle", () => {
       }),
     ]));
     expect(hesitant.messages[0]).toMatchObject({ text: expect.stringContaining("giảm 5% và freeship") });
+
+    const benefitText = "Giỏ hiện có quyền lợi gì?";
+    const benefitReadback = await evaluateRealtimeSalesCycle({
+      ...input(state, benefitText, "event-benefit-readback"),
+      c3CartReadback: true,
+    });
+    expect(benefitReadback.cartReadback).toMatchObject({
+      effect: "CART_READY", outcome: "READY",
+    });
+    const benefitInput = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000082",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: benefitText, sourceMessageId: "mid-event-benefit-readback",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 8, finalConversationRevision: 9,
+      preSalesRevision: state.revision, commerceState: state,
+      productId: "CB182", catalogVersion: null, facts: [],
+      productFacts: null, policyResolution,
+      cartReadiness: [benefitReadback.cartReadback!], now,
+    });
+    const benefitEvidence = buildTrackCSelectableEvidence({
+      context: benefitInput.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT",
+      currentCart: benefitInput.currentCart, evaluationAt: now,
+    });
+    for (const capability of ["FREESHIP", "PROMOTION_OFFER"] as const) {
+      const selected = benefitEvidence.find((entry) => entry.capability === capability);
+      expect(selected?.deterministicText).toBeTruthy();
+      expect(validateResponderOutput(benefitInput.context, {
+        segments: [{ kind: "VERIFIED_CLAIM", text: selected!.deterministicText!,
+          claimContentHash: selected!.provenance.contentHash }],
+        strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+      }, "PRODUCTION_CONTRACT", now, [], benefitInput.currentCart).segments)
+        .toHaveLength(1);
+    }
 
     const retry = await evaluateRealtimeSalesCycle({
       ...input(state, "đắt quá bớt đi", "event-objection-retry"),
@@ -2100,6 +2464,79 @@ describe("realtime Phase 3 sales cycle", () => {
     });
   });
 
+  it("does not accept recipient values invented from unrelated in-message evidence", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-invented-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị chọn COD nhé.", "event-invented-details"),
+      salesSignals: signals({
+        fullName: { value: "Lan", evidenceText: "COD" },
+        phone: { value: "0987654321", evidenceText: "COD" },
+        address: { value: "123 Lê Lợi, Quận 1", evidenceText: "COD" },
+      }),
+    });
+    expect(output.plan?.state.stage).toBe("CART_OPEN");
+    expect(output.telemetry).toMatchObject({
+      checkoutCapturedFields: ["PAYMENT_METHOD"],
+      checkoutMissingFields: ["FULL_NAME", "PHONE", "ADDRESS"],
+    });
+  });
+
+  it.each([
+    ["Không chuyển khoản, chị chọn COD.", "COD"],
+    ["Nếu chuyển khoản thì cần làm gì? Chị chưa chọn nhé.", null],
+    ["Chị chọn chuyển khoản nhé.", "BANK_TRANSFER"],
+  ] as const)("uses explicit payment choice: %s", async (text, expected) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      `event-payment-open-${text.length}`,
+    ));
+    const output = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state, text, `event-payment-${text.length}`,
+    ));
+    expect(output.plan?.state.checkoutDraft?.paymentMethod ?? null).toBe(expected);
+  });
+
+  it("captures a clear unlabelled recipient locally without model PII", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-local-recipient-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "Lan 0987654321 123 Lê Lợi P.Bến Nghé Q1 HCM ship cod",
+      "event-local-recipient-details",
+    ));
+    expect(output.plan?.state.checkoutDraft).toMatchObject({
+      fullName: "Lan", phone: "0987654321",
+      address: "123 Lê Lợi P.Bến Nghé Q1 HCM", paymentMethod: "COD",
+    });
+  });
+
+  it.each([
+    "Số của bạn chị là 0987654321, đừng dùng nhé.",
+    "Ví dụ địa chỉ: 123 Lê Lợi, Quận 1; tên Lan.",
+    "Số cũ 0987654321, không dùng nữa.",
+  ])("does not capture ambiguous or rejected recipient input: %s", async (text) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      `event-role-open-${text.length}`,
+    ));
+    const output = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state, text, `event-role-${text.length}`,
+    ));
+    expect(output.plan?.state.checkoutDraft?.fullName).toBeUndefined();
+    expect(output.plan?.state.checkoutDraft?.phone).toBeUndefined();
+    expect(output.plan?.state.checkoutDraft?.address).toBeUndefined();
+    expect(output.plan?.state.stage ?? opened.plan?.state.stage).toBe("CART_OPEN");
+  });
+
   it.each([
     "cho chị lấy nha",
     "vâng em chốt đơn",
@@ -2455,5 +2892,137 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.plan?.state.stage).not.toBe("PURCHASE_CONFIRMED");
     expect(output.plan?.state.confirmation ?? null).toBeNull();
     expect(output.desiredTag).not.toBe("DA_CHOT_DON");
+  });
+
+  it("derives C3 checkout fields and bound cart facts from real transitions", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "c3-open",
+    ));
+    expect(opened.plan?.state.stage).toBe("CART_OPEN");
+    const openState = opened.plan!.state;
+    expect(missingRealtimeCheckoutFields(openState)).toEqual([
+      "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
+    ]);
+    const readbackText = "Giỏ này tính tiền giao thế nào?";
+    const readback = await evaluateRealtimeSalesCycle({
+      ...input(openState, readbackText, "c3-cart-readback"),
+      c3CartReadback: true,
+    });
+    expect(readback.cartReadback).toEqual(expect.objectContaining({
+      effect: "CART_READY", outcome: "READY",
+    }));
+    const canonicalEvidence = buildCanonicalDecisionEvidenceV1({
+      text: readbackText, sourceMessageId: "mid-c3-cart-readback",
+      productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+    });
+    const live = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000077",
+      canonicalEvidence,
+      preConversationRevision: 7, finalConversationRevision: 8,
+      preSalesRevision: openState.revision,
+      commerceState: openState,
+      productId: "CB182", catalogVersion: null,
+      facts: [], productFacts: null, policyResolution,
+      cartReadiness: [readback.cartReadback!], now,
+    });
+    expect(live.currentCart).not.toBeNull();
+    expect(live.checkoutRequestedFields).toEqual([
+      "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
+    ]);
+    const evidence = buildTrackCSelectableEvidence({
+      context: live.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT",
+      currentCart: live.currentCart, evaluationAt: now,
+    });
+    const shipping = evidence.find(({ capability }) => capability === "SHIPPING_FEE");
+    expect(shipping?.deterministicText).toContain("Phí giao hàng của giỏ hiện tại");
+    const notFree = evidence.find(({ capability, value }) =>
+      capability === "FREESHIP" && value.eligible === false
+    );
+    expect(notFree?.deterministicText).toBe("Giỏ hiện tại vẫn tính phí giao hàng ạ.");
+    expect(validateResponderOutput(live.context, {
+      segments: [{ kind: "VERIFIED_CLAIM", text: notFree!.deterministicText!,
+        claimContentHash: notFree!.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    }, "PRODUCTION_CONTRACT", now, [], live.currentCart).segments).toHaveLength(1);
+    const semantic = {
+      segments: [{ kind: "VERIFIED_CLAIM", text: shipping!.deterministicText,
+        claimContentHash: shipping!.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    };
+    expect(validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT", now, [], live.currentCart,
+    ).segments).toHaveLength(1);
+    expect(() => validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT", now, [],
+      { ...live.currentCart!, cart: { ...live.currentCart!.cart,
+        revision: live.currentCart!.cart.revision + 1 } },
+    )).toThrow("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
+    expect(() => validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT", now, [],
+      { ...live.currentCart!, cart: { ...live.currentCart!.cart,
+        cartId: "00000000-0000-4000-8000-000000000099" } },
+    )).toThrow("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
+    expect(() => validateResponderOutput(
+      live.context, semantic, "PRODUCTION_CONTRACT",
+      new Date(Date.parse(live.currentCart!.claimExpiresAt) + 1), [],
+      live.currentCart,
+    )).toThrow("TRACK_C_CURRENT_CART_BINDING_STALE");
+
+    const partial = await evaluateRealtimeSalesCycle(input(
+      openState,
+      "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh",
+      "c3-details-without-payment",
+    ));
+    expect(partial.plan?.state.stage).toBe("CART_OPEN");
+    expect(missingRealtimeCheckoutFields(partial.plan!.state)).toEqual(["PAYMENT_METHOD"]);
+    const paymentInput = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000078",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "Em muốn tiếp tục thanh toán", sourceMessageId: "mid-c3-payment-only",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 8, finalConversationRevision: 9,
+      preSalesRevision: openState.revision,
+      commerceState: partial.plan!.state,
+      productId: "CB182", catalogVersion: null,
+      facts: [], productFacts: null, policyResolution,
+      cartReadiness: [], now,
+    });
+    expect(paymentInput.checkoutRequestedFields).toEqual(["PAYMENT_METHOD"]);
+    expect(paymentInput.paymentOptions).toEqual(["COD"]);
+    const paymentModel = async (_request: { body: string }) => ({
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
+        _request.body.includes("TRACK_C_C3_STRATEGIST_INPUT_V1")
+          ? {
+              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              proposition: "PRICE", evidenceRefs: [],
+              continuation: null, canonicalAction: "ASK_CHECKOUT_DETAILS",
+            }
+          : { answerText: null, factualTexts: [], progressionText: null },
+      ) }] } }] },
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    const paymentReply = await runTrackCStrategyLive({
+      ...paymentInput,
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      decisionAt: now, dialogue: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Em muốn tiếp tục thanh toán", attachmentCount: 0,
+        occurredAt: now.toISOString(),
+      }], checkoutClarificationActive: true,
+      transport: { send: paymentModel },
+    });
+    expect(paymentReply.output.cta).toBe("ASK_CHECKOUT_DETAILS");
+    expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
+      .toContain("hình thức thanh toán COD");
+    expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
+      .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
+    const preview = await evaluateRealtimeSalesCycle(input(
+      partial.plan!.state, "COD", "c3-payment",
+    ));
+    expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(missingRealtimeCheckoutFields(preview.plan!.state)).toEqual([]);
   });
 });

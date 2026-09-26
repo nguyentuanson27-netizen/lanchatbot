@@ -147,7 +147,7 @@ function responderFor(
   return {
     answerText: (task.answer.kind === "ANSWER" &&
         task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
-        canonical === "ASK_CHECKOUT_DETAILS"
+        canonical === "ASK_CHECKOUT_DETAILS" || (needsProgression && task.evidence.length === 0)
       ? null : answerText,
     // Factual wording is code-rendered from the selected evidence, so the
     // Responder authors none of it.
@@ -207,24 +207,32 @@ async function runFixture(
 }
 
 describe("Track C C3 post-PR358 behavior wiring", () => {
-  it("keeps fit clarification available and blocks checkout while measurements are required", async () => {
+  it("requires a canonical fit blocker before offering measurement clarification", async () => {
     for (const caseFixture of [
       fixture({ id: "FIT_WITHOUT_FLAG", message: "Chị cần thêm số đo nào để chọn vừa?" }),
       fixture({ id: "FIT_BEFORE_CHECKOUT", message: "Chị muốn kiểm tra vòng eo trước.",
         canonicalFlags: ["MEASUREMENTS_REQUIRED"], buyingIntent: "COMMITTED",
         checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] } }),
     ]) {
+      const measurementsRequired = caseFixture.context.canonical_flags
+        .includes("MEASUREMENTS_REQUIRED");
       const candidate = candidateTransport({ strategist: (prompt) => {
-        expect(prompt.constraints?.permittedCanonicalActions).toEqual(["NONE", "ASK_MEASUREMENTS"]);
+        expect(prompt.constraints?.permittedCanonicalActions).toEqual(
+          measurementsRequired ? ["NONE", "ASK_MEASUREMENTS"] : ["NONE"],
+        );
         expect(prompt).toMatchObject({ canonicalContext: {
           productBinding: { status: "RESOLVED", productIds: ["SQ9012"] },
           activeBarriers: caseFixture.context.canonical_flags,
           buyingIntent: { decision: caseFixture.context.buying_intent.decision },
         } });
-        return { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
+        return measurementsRequired
+          ? { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null }
+          : decisionFor(prompt);
       } });
       const result = await runFixture(caseFixture, candidate);
-      expect(result.output.cta).toBe("ASK_MEASUREMENTS");
+      expect(result.output.cta).toBe(
+        measurementsRequired ? "ASK_MEASUREMENTS" : "NONE",
+      );
       expect(result.reply).not.toContain("số điện thoại");
     }
   });
@@ -417,7 +425,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
     const candidate = candidateTransport({
       strategist: (prompt) => {
         expect(prompt.constraints?.permittedCanonicalActions)
-          .toEqual(["NONE", "ASK_MEASUREMENTS", "ASK_CHECKOUT_DETAILS"]);
+          .toEqual(["NONE", "ASK_CHECKOUT_DETAILS"]);
         expect(JSON.stringify(prompt)).not.toContain("090");
         return {
           ...decisionFor(prompt),
@@ -479,6 +487,6 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
 
     expect(result.output.cta).toBe("NONE");
     const strategist = promptOf(candidate.send.mock.calls[0]![0]);
-    expect(strategist.constraints?.permittedCanonicalActions).toEqual(["NONE", "ASK_MEASUREMENTS"]);
+    expect(strategist.constraints?.permittedCanonicalActions).toEqual(["NONE"]);
   });
 });

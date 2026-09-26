@@ -195,11 +195,7 @@ export function buildRealtimeProductFactsV2(input: {
   const stableObservedAt = validDate(input.product.observedAt, input.now);
   const posObservedAt = input.snapshot.synced_at;
   const policy = input.snapshot.fulfillment_policy;
-  const etaValidUntil = policy?.eta_valid_until &&
-      Number.isFinite(Date.parse(policy.eta_valid_until))
-    ? new Date(policy.eta_valid_until).toISOString()
-    : null;
-  const fulfillmentExpiresAt = etaValidUntil ?? plusSeconds(
+  const fulfillmentExpiresAt = plusSeconds(
     posObservedAt,
     FULFILLMENT_FRESH_FOR_SECONDS,
   );
@@ -264,22 +260,17 @@ export function buildRealtimeProductFactsV2(input: {
           appliesToParentProductId: input.product.productId,
           policyType: fulfillmentType(policy?.tinh_trang ?? "READY_STOCK"),
           canOrderWhenZero: policy?.can_order_when_zero ?? false,
-          etaToCustomer:
-            policy?.prep_min_days !== null && policy?.prep_min_days !== undefined &&
-              policy.prep_max_days !== null && policy.prep_max_days !== undefined
-              ? {
-                  minDays: policy.prep_min_days,
-                  maxDays: policy.prep_max_days,
-                  validUntil: etaValidUntil,
-                }
-              : null,
+          // ProductFactsV2 has no destination region. Preparation days alone
+          // are not an ETA to the customer; the region-bound catalog path
+          // adds verified transit days when an ETA is actually requested.
+          etaToCustomer: null,
           metadata: {
             authority: "GOOGLE_SHEETS_FULFILLMENT_POLICY",
             sourceVersion: input.snapshot.policy_version,
             observedAt: posObservedAt,
             expiresAt: fulfillmentExpiresAt,
-            expiryBasis: etaValidUntil ? "ETA_VALID_UNTIL" : "DEFAULT_7_DAY_TTL",
-            freshForSeconds: etaValidUntil ? null : FULFILLMENT_FRESH_FOR_SECONDS,
+            expiryBasis: "DEFAULT_7_DAY_TTL",
+            freshForSeconds: FULFILLMENT_FRESH_FOR_SECONDS,
             freshnessState:
               Date.parse(fulfillmentExpiresAt) > input.now.getTime() ? "FRESH" : "STALE",
           },

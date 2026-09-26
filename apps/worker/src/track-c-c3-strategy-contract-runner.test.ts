@@ -7,6 +7,7 @@ import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
   buildTrackCStrategistContractRequest,
   runTrackCStrategyContractCase,
+  runTrackCStrategyLive,
   TrackCStrategyContractFailure,
 } from "./track-c-c3-strategy-contract-runner.js";
 import { buildTrackCSelectableEvidence } from
@@ -15,6 +16,7 @@ import { trackCEvidenceHasSafeFactualEgress } from
   "./track-c-c3-strategy-contract.js";
 import {
   materializeTrackCV5CaseCapture,
+  type TrackCV5CompactCase,
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
@@ -47,7 +49,7 @@ const UNREALIZABLE_POLICY_FACT = Object.freeze({
   data: Object.freeze({ months: 12 }),
 });
 
-function capture(amountVnd?: number) {
+function capture(amountVnd?: number, canonicalFlags: string[] = []) {
   return materializeTrackCV5CaseCapture({
     lane: "BEHAVIOR_SIMULATION",
     fixture: {
@@ -56,7 +58,7 @@ function capture(amountVnd?: number) {
       context: {
         product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
         phase: "BROWSING",
-        canonical_flags: [],
+        canonical_flags: canonicalFlags,
         buying_intent: {
           decision: "NONE",
           requested_action: "NONE",
@@ -136,6 +138,226 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
+  it("asks for a stale product by name or image without requesting recipient PII", async () => {
+    const staleCapture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_STALE_PRODUCT_CLARIFICATION",
+        latest_customer_message: "Mẫu này còn không em?",
+        context: {
+          product_binding: { status: "STALE", product_ids: ["SQ9012"] },
+          phase: "BROWSING",
+          canonical_flags: [],
+          buying_intent: {
+            decision: "NONE", requested_action: "NONE", quantity: null, evidence: null,
+          },
+          source_stage: null,
+          runtime_claim_refs: [],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER",
+        goal: "Ask which product the customer means before checking stock.",
+        proposition: "STOCK",
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "ASK_PRODUCT",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [],
+        progressionText: "Chị gửi em tên hoặc ảnh mẫu chị đã xem hôm qua nhé.",
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: staleCapture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này còn không em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T02:00:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe("Chị gửi em tên hoặc ảnh mẫu chị đã xem hôm qua nhé.");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { answer: "Chị từng mặc chưa thoải mái nên lần này muốn cân nhắc kỹ hơn.",
+      question: "Lần trước chị thấy khó chịu ở eo hay ở phần nào khác?", valid: true },
+    { answer: "Mình xem đúng điểm chị còn lăn tăn trước nhé.",
+      question: "Với mẫu đang xem, điều gì khiến chị chưa quyết định được?", valid: true },
+    { answer: "Em chưa có thông tin xác nhận về độ nhăn để trả lời chắc cho chị.",
+      question: "Chị dự định mặc trong dịp nào?", valid: true },
+    { answer: "Em chưa có thông tin để xác nhận mẫu này có phù hợp với chị không.",
+      question: "Chị đang lo ở phần nào nhất?", valid: true },
+    { answer: "Em hiểu chị đang so mẫu đang xem với một mẫu rẻ hơn.",
+      question: "Chị quan tâm điểm nào khi so hai mẫu?", valid: true },
+    { answer: "SQ9012 rẻ hơn SV9031.",
+      question: "Chị quan tâm điểm nào khi so hai mẫu?", valid: false },
+    { answer: "Mẫu này có giá thấp hơn mẫu kia.",
+      question: "Chị quan tâm điểm nào khi so hai mẫu?", valid: false },
+    { answer: " Em hiểu chị muốn cân nhắc kỹ hơn. ",
+      question: "Chị còn phân vân ở điểm nào?", valid: true },
+    { answer: "Em hiểu chị muốn cân nhắc kỹ hơn.",
+      question: "Chị nói thêm điểm mình còn băn khoăn để em tư vấn đúng nhu cầu nhé.", valid: true },
+    { answer: "Mẫu này cao cấp và bền đẹp.", question: "Chị muốn xem thêm gì?", valid: false },
+    { answer: "Em sẽ giữ mẫu này cho chị.", question: "Chị muốn xem thêm gì?", valid: false },
+    { answer: "Dạ chị.", question: "Chị muốn màu nào? Chị lấy mấy bộ?", valid: false },
+    { answer: "Dạ chị.", question: "Chị cho em số điện thoại nhận hàng?", valid: false },
+    { answer: "Số của chị là 0901234567.", question: "Chị muốn xem thêm gì?", valid: false },
+  ])("adaptive prose is authored and still checked: $answer", async ({ answer, question, valid }) => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "CLARIFY", goal: "Ask about the remaining concern using the customer's reported experience.",
+        proposition: "NONE", evidenceRefs: [], canonicalAction: "NONE",
+        continuation: { type: "ASK", input: "DECISION_CRITERION" },
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: `${answer.trim()} ${question}`,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Lần trước mặc khó chịu nên chị đang phân vân.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send },
+    });
+    if (valid) {
+      const resolved = await result;
+      expect(resolved.output.segments[0]?.text).toBe(`${answer.trim()} ${question}`);
+      expect(resolved.reply).toContain(question);
+      const schema = JSON.parse(send.mock.calls[1]![0].body).generationConfig.responseSchema;
+      expect(schema.properties.answerText).toEqual({ type: "NULL" });
+      expect(schema.properties.progressionText).not.toHaveProperty("enum");
+    } else {
+      await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
+    }
+  });
+
+  it.each(["Ib", "Mẫu có màu đen không em?"])("only offers color confirmation when the customer mentioned that catalog color: %s", async (customerText) => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload(responderDraft()), providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{ direction: "INBOUND",
+        senderType: "CUSTOMER", messageType: "TEXT", text: customerText, attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }],
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: { kind: "TRACK_C_TRUSTED_ACQUISITION_V1", origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true, authorization: "NONE" }, transport: { send },
+    });
+    const choices = JSON.parse(send.mock.calls[0]![0].body).generationConfig.responseSchema.properties.progressionText.enum;
+    expect(choices.includes("Chị đang ưu tiên màu đen đúng không ạ?")).toBe(customerText.includes("đen"));
+    expect(choices).not.toContain("Chị đang ưu tiên màu kem đúng không ạ?");
+  });
+  it("labels two bound products by canonical code when catalog display names are absent", async () => {
+    const twoProducts = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", recipe, runtimeClaimCatalog: facts.runtime_claim_catalog,
+      fixture: { id: "MULTI_PRODUCT_CANONICAL_LABELS", latest_customer_message: "Giá từng mẫu thế nào?",
+        context: { product_binding: { status: "RESOLVED", product_ids: ["SQ9012", "SV9031"] },
+          phase: "BROWSING", canonical_flags: [], source_stage: null,
+          buying_intent: { decision: "NONE", requested_action: "NONE", quantity: null, evidence: null },
+          runtime_claim_refs: ["RC_PRICE_A", "RC_PRICE_B"] } },
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({ replyAct: "ANSWER", goal: "Give each product's verified price.",
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001", "CLAIM_002"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "PRODUCTION_CONTRACT", modelResource: MODEL_RESOURCE, capture: twoProducts,
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{ direction: "INBOUND",
+        senderType: "CUSTOMER", messageType: "TEXT", text: "Giá từng mẫu thế nào?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send },
+    });
+    expect(result.reply).toBe("Với mẫu SQ9012: Giá hiện tại của mẫu này là 849.000đ. Với mẫu SV9031: Giá hiện tại của mẫu này là 1.099.000đ ạ.");
+    expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(2);
+  });
+  it("accepts a writer's bound price realization and rejects a changed price or benefit through the live core", async () => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+    for (const [candidate, accepted] of [
+      ["Dạ, Giá hiện tại của mẫu này là 849.000đ.", true],
+      ["Giá hiện tại của mẫu này là 699.000đ.", false],
+      ["Giá hiện tại của mẫu này là 849.000đ, chất lượng cao cấp.", false],
+    ] as const) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Answer the current price.", proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText: null, factualTexts: [candidate], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" });
+      const run = runTrackCStrategyLive({
+        context, modelResource: MODEL_RESOURCE, decisionAt,
+        dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Giá mẫu này bao nhiêu?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }],
+        checkoutRequestedFields: [], checkoutClarificationActive: false,
+        currentCart: null, paymentOptions: ["COD"], transport: { send },
+      });
+      if (accepted) expect((await run).reply).toBe(candidate);
+      else await expect(run).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+      expect(send).toHaveBeenCalledTimes(2);
+    }
+  });
+  it("runs the shared core from a live context and rejects replay fields", async () => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({
+      capture: capture(), evaluationAt: decisionAt,
+    });
+    const dialogue = [{
+      direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+      messageType: "TEXT" as const, text: "Mẫu này giá bao nhiêu?",
+      attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+    }];
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Answer the verified price.",
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const input = {
+      context, modelResource: MODEL_RESOURCE, decisionAt, dialogue,
+      checkoutRequestedFields: [], checkoutClarificationActive: false,
+      currentCart: null, paymentOptions: ["COD"] as const, transport: { send },
+    };
+    const result = await runTrackCStrategyLive(input);
+    expect(result.output.segments).toContainEqual(expect.objectContaining({
+      kind: "VERIFIED_CLAIM", text: "Giá hiện tại của mẫu này là 849.000đ ạ.",
+    }));
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(result).not.toHaveProperty("evaluationOnly");
+    const strategistRequest = JSON.parse(send.mock.calls[0]![0].body);
+    const strategistPrompt = JSON.parse(strategistRequest.contents[0].parts[0].text);
+    expect(strategistPrompt.canonicalContext.dialogueEvidence).toEqual({
+      act: context.dialogueEvidence.act,
+      confidenceBand: context.dialogueEvidence.confidenceBand,
+      reasonCodes: context.dialogueEvidence.reasonCodes,
+    });
+    expect(strategistPrompt.selectableEvidence[0].realizationText)
+      .toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
+    const responderRequest = JSON.parse(send.mock.calls[1]![0].body);
+    const responderPrompt = JSON.parse(responderRequest.contents[0].parts[0].text);
+    expect(responderPrompt.customerDecisionSignals).toEqual(
+      strategistPrompt.canonicalContext.dialogueEvidence,
+    );
+    await expect(runTrackCStrategyLive({
+      ...input, simulationMetadata: [],
+    } as unknown as Parameters<typeof runTrackCStrategyLive>[0]))
+      .rejects.toThrow("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  });
   it("uses one redacted decision for the task, plan and identity without changing fact authority", async () => {
     const goal = "Address the customer's reported budget 700000; recipient phone 0901234567, email lan@example.com. Answer only the verified shop price.";
     const decision = {
@@ -171,7 +393,7 @@ describe("Track C C3 strategy-contract runner", () => {
       text: result.responderTask.evidence[0]!.deterministicText,
     }]);
     expect(responderBody.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
+      .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
     for (const internal of ["CLAIM_001", "contentHash", "provenance", "amountVnd"]) {
       expect(JSON.stringify(prompt.responderTask.evidence)).not.toContain(internal);
     }
@@ -184,6 +406,53 @@ describe("Track C C3 strategy-contract runner", () => {
       text: result.responderTask.evidence[0]!.deterministicText,
       claimContentHash: result.responderTask.evidence[0]!.provenance.contentHash,
     })]);
+  });
+
+  it("offers adaptive measurement requests only for a canonical fit blocker", async () => {
+    const dialogue = [{ direction: "INBOUND" as const,
+      senderType: "CUSTOMER" as const, messageType: "TEXT" as const,
+      text: "Mẫu này còn hàng không?", attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z" }];
+    for (const [flags, expected] of [
+      [[], false], [["MEASUREMENTS_REQUIRED"], true],
+    ] as const) {
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockRejectedValue(new Error("CAPTURE_REQUEST"));
+      await expect(runTrackCStrategyContractCase({
+        lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+        capture: capture(undefined, [...flags]),
+        evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: dialogue, transport: { send },
+      })).rejects.toThrow();
+      const body = JSON.parse(send.mock.calls[0]![0].body);
+      const prompt = JSON.parse(body.contents[0].parts[0].text);
+      expect(prompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
+        .toBe(expected);
+    }
+  });
+
+  it("asks for the missing measurement without a generic uncertainty preamble", async () => {
+    const question = "Chị cho em xin thêm số đo vòng eo nhé?";
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Cần vòng eo để tư vấn đúng lo ngại chật bụng.",
+        proposition: "SIZE_FIT", evidenceRefs: [], continuation: null,
+        canonicalAction: "ASK_MEASUREMENTS",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: question,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(undefined, ["MEASUREMENTS_REQUIRED"]),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị cao 1m60, nặng 58kg nhưng hay chật bụng. Mẫu này vừa không em?",
+        attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    });
+    expect(result.reply).toBe(question);
   });
 
   it("preserves earlier known inputs in both model requests within the validated dialogue window", async () => {
@@ -232,7 +501,7 @@ describe("Track C C3 strategy-contract runner", () => {
           continuation: { type: "ASK", input: "LOCALITY" }, canonicalAction: "NONE",
         }), providerModelVersion: "gemini-3.5-flash-lite" })
         .mockResolvedValueOnce({ payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.", factualTexts: [], progressionText,
+          answerText: null, factualTexts: [], progressionText,
         }), providerModelVersion: "gemini-3.5-flash-lite" });
       const result = runTrackCStrategyContractCase({
         lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
@@ -257,7 +526,7 @@ describe("Track C C3 strategy-contract runner", () => {
     for (const [ref, expected] of [
       ["SIMULATION_001_MATERIAL", "Mẫu này có chất liệu tơ xước mềm, nhẹ ạ."],
       ["SIMULATION_001_DESIGN", "Thiết kế của mẫu gồm phom suông, quần cạp chun ạ."],
-      [null, "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ."],
+      [null, "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ."],
     ] as const) {
       const send = vi.fn<CandidateVertexTransport["send"]>()
         .mockResolvedValueOnce({ payload: payload({
@@ -266,7 +535,7 @@ describe("Track C C3 strategy-contract runner", () => {
           continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
         }), providerModelVersion: "gemini-3.5-flash-lite" })
         .mockResolvedValueOnce({ payload: payload({
-          answerText: null, factualTexts: [], progressionText: null,
+          answerText: ref === null ? expected : null, factualTexts: [], progressionText: null,
         }), providerModelVersion: "gemini-3.5-flash-lite" });
       const result = await runTrackCStrategyContractCase({
         lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
@@ -313,7 +582,7 @@ describe("Track C C3 strategy-contract runner", () => {
   });
 
   it("preserves supported facts while realizing bounded uncertainty without a second question", async () => {
-    const uncertainty = "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.";
+    const uncertainty = "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.";
     for (const answerText of [null, "Dạ em hiểu ý chị ạ.", uncertainty,
       "Dạ mẫu này bền đẹp và giá tương xứng ạ.",
       "Dạ em đã ghi nhận đơn của chị ạ.", "Chị muốn chốt luôn không ạ?",
@@ -344,16 +613,16 @@ describe("Track C C3 strategy-contract runner", () => {
       const completed = await result;
       const body = JSON.parse(send.mock.calls[1]![0].body);
       expect(body.generationConfig.responseSchema.properties.answerText).toMatchObject({
-        anyOf: [{ type: "NULL" }, { type: "STRING", enum: expect.arrayContaining([uncertainty]) }],
+        anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }],
       });
       expect(completed.responderTask.answer).toMatchObject({ evidenceStatus: "SUPPORTED" });
       expect(completed.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM"))
-        .toEqual([{ kind: "VERIFIED_CLAIM", text: "Dạ giá hiện tại của mẫu này là 415.000đ ạ.",
+        .toEqual([{ kind: "VERIFIED_CLAIM", text: "Giá hiện tại của mẫu này là 415.000đ ạ.",
           claimContentHash: completed.responderTask.evidence[0]!.provenance.contentHash }]);
       expect(completed.reply.match(/\?/gu)).toHaveLength(1);
       if (answerText === uncertainty) {
         expect(completed.output.segments.map(({ text }) => text)).toEqual([
-          "Dạ giá hiện tại của mẫu này là 415.000đ ạ.", uncertainty,
+          uncertainty, "Giá hiện tại của mẫu này là 415.000đ ạ.",
           "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
         ]);
       } else {
@@ -371,7 +640,7 @@ describe("Track C C3 strategy-contract runner", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
-        payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        payload: payload({ answerText: "Em chưa có thông tin xác nhận về bảo hành để trả lời chị.", factualTexts: [], progressionText: null }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
     const result = await runTrackCStrategyContractCase({
@@ -402,7 +671,7 @@ describe("Track C C3 strategy-contract runner", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
-        payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        payload: payload({ answerText: "Về bảo hành, em chưa có thông tin xác nhận để trả lời chị.", factualTexts: [], progressionText: null }),
         providerModelVersion: "gemini-3.5-flash-lite",
       });
 
@@ -424,8 +693,8 @@ describe("Track C C3 strategy-contract runner", () => {
     // ...and the reply states the price it can answer and names the rest,
     // instead of answering half the question silently.
     const texts = result.output.segments.map(({ text }) => text);
-    expect(texts.some((text) => text.includes("giá hiện tại"))).toBe(true);
-    expect(texts.some((text) => text.includes("phần còn lại"))).toBe(true);
+    expect(texts.some((text) => text.includes("Giá hiện tại"))).toBe(true);
+    expect(texts.some((text) => text.includes("bảo hành"))).toBe(true);
   });
 
   it("projects simulation facts once into selectable evidence without effect authority", () => {
@@ -450,7 +719,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
       deterministicText:
-        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
+        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       provenance: { authority: "SIMULATION" },
     });
     expect(JSON.stringify(evidence)).not.toContain("effect");
@@ -558,6 +827,33 @@ describe("Track C C3 strategy-contract runner", () => {
       ]);
     expect(evidence.filter((entry) => !trackCEvidenceHasSafeFactualEgress(entry))
       .map(({ capability }) => capability)).toEqual(["POLICY"]);
+  });
+
+  it("delivers a verified public shop address without treating it as customer PII", async () => {
+    const shopFact = "Cửa hàng của shop ở 212 Nguyễn Trãi, Hà Nội. Shop mở cửa 09:00–21:00. Chị qua thử trực tiếp được ạ.";
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Answer the shop address from the selected store evidence.",
+        proposition: "BUSINESS_LOCATION", evidenceRefs: ["SIMULATION_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "Chị đang cân nhắc mẫu SQ9012 và muốn biết địa chỉ shop trước khi mua.",
+        factualTexts: [shopFact], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Shop ở Hà Nội địa chỉ đâu em?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], simulationFacts: [facts.simulation_fact_catalog.SF_STORE],
+      transport: { send },
+    });
+    expect(result.reply).toBe(shopFact);
+    expect(result.output.segments).toMatchObject([{ kind: "VERIFIED_CLAIM", text: shopFact }]);
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
@@ -693,14 +989,14 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(request.generationConfig.responseSchema.properties.answerText)
       .toEqual({ type: "NULL" });
     expect(request.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
+      .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
     expect(request.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "STRING", enum: [
         "Chị thích màu nào hơn ạ?", "Màu nào hợp ý chị hơn ạ?",
       ] });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen ạ. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
+      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
         ? result.output.segments[1].claimContentHash
         : "",
@@ -769,7 +1065,7 @@ describe("Track C C3 strategy-contract runner", () => {
     const value = {
       segments: [{
         kind: "VERIFIED_CLAIM",
-        text: "Dạ mẫu này hiện hết size S ạ.",
+        text: "Mẫu này hiện hết size S ạ.",
         claimContentHash: claim.provenance.contentHash,
       }],
       strategy: "ANSWER_VERIFIED_FACTS",
@@ -824,7 +1120,7 @@ describe("Track C C3 strategy-contract runner", () => {
     }
   });
 
-  it("code-realizes a bounded answer for unresolved factual propositions", async () => {
+  it("lets the writer explain uncertainty for unresolved factual propositions", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: payload({
@@ -839,7 +1135,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: null,
+          answerText: "Em chưa có thông tin xác nhận tình trạng hàng của mẫu chị hỏi.",
           factualTexts: [],
           progressionText: null,
         }),
@@ -865,13 +1161,13 @@ describe("Track C C3 strategy-contract runner", () => {
       };
     };
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({ type: "NULL" });
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(result.conversationPlan).toMatchObject({
       replyAct: "ANSWER",
       proposition: "STOCK",
     });
     expect(result.reply).toBe(
-      "Dạ hiện em chưa có thông tin đã xác minh để trả lời chắc chắn phần này ạ.",
+      "Em chưa có thông tin xác nhận tình trạng hàng của mẫu chị hỏi.",
     );
   });
 
@@ -991,9 +1287,95 @@ describe("Track C C3 strategy-contract runner", () => {
       { kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ." },
       expect.objectContaining({
         kind: "VERIFIED_CLAIM",
-        text: "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
+        text: "Mẫu này hiện còn hàng nhưng số lượng không nhiều ạ.",
       }),
     ]);
+  });
+
+  it("can acknowledge a customer's decision context without repeating an unrelated shop fact", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ACKNOWLEDGE",
+          goal: "The customer is comparing the verified price with her own budget; no new shop fact resolves the gap.",
+          proposition: "NONE",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Dạ em hiểu băn khoăn của chị ạ.",
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị thích mẫu này nhưng đang cân đối ngân sách.",
+        attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe("Dạ em hiểu băn khoăn của chị ạ.");
+    expect(result.output.segments).toEqual([{
+      kind: "GENERAL", text: "Dạ em hiểu băn khoăn của chị ạ.",
+    }]);
+  });
+
+  it("offers a concern-specific acknowledgement without letting the model write facts", async () => {
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_PRICE_CONCERN_VOICE",
+        latest_customer_message: "Giá này cao quá em.",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING", canonical_flags: [],
+          buying_intent: {
+            decision: "CONSIDERING", requested_action: "NONE",
+            quantity: null, evidence: "customer is weighing the price",
+          },
+          source_stage: null, runtime_claim_refs: ["RC_PRICE_A"],
+        },
+      },
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const specific = "Dạ, em hiểu chị đang cân nhắc mức giá này ạ.";
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge the stated price concern.",
+        proposition: "NONE", evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: specific, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: captureValue, evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Giá này cao quá em.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+    expect(result.reply).toBe(specific);
+    const request = JSON.parse(send.mock.calls[1]![0].body);
+    expect(request.generationConfig.responseSchema.properties.answerText)
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
+    expect(request.generationConfig.responseSchema.properties.factualTexts.maxItems)
+      .toBe(0);
   });
 
   it("keeps preference or selection confirmation on ACKNOWLEDGE + KEEP_OPEN without checkout", async () => {
@@ -1080,7 +1462,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: null,
           factualTexts: [],
           progressionText: "Chị thích màu nào hơn ạ?",
         }),
@@ -1119,7 +1501,7 @@ describe("Track C C3 strategy-contract runner", () => {
       input: "COLOR",
     });
     expect(responderBody.systemInstruction.parts[0].text).toContain(
-      "choose one of the response schema's customer-directed questions",
+      "write exactly one customer-directed question",
     );
     expect(responderBody.systemInstruction.parts[0].text).toContain(
       "Never append factual explanation, an effect, another decision variable, or a second question",
@@ -1145,7 +1527,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: null,
           factualTexts: [],
           progressionText: "Mẫu này giá 849.000đ, chị muốn chọn màu nào ạ?",
         }),
@@ -1163,7 +1545,7 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_REQUEST_WORDING_INVALID");
+    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
   });
 
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {
@@ -1210,13 +1592,7 @@ describe("Track C C3 strategy-contract runner", () => {
       };
     };
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({
-        type: "STRING",
-        enum: [
-          "Dạ em hiểu ý chị ạ.",
-          "Dạ em hiểu băn khoăn của chị ạ.",
-        ],
-      });
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(responderRequest.generationConfig.responseSchema.properties.progressionText)
       .toEqual({ type: "NULL" });
     expect(result.output.strategy).toBe("ANSWER_VERIFIED_FACTS");
@@ -1308,18 +1684,11 @@ describe("Track C C3 strategy-contract runner", () => {
     ) as { responderTask: { evidence: unknown[] } };
 
     expect(responderRequest.generationConfig.responseSchema.properties.answerText)
-      .toEqual({
-        type: "STRING",
-        enum: [
-          "Dạ em hiểu ý chị ạ.",
-          "Dạ em hiểu băn khoăn của chị ạ.",
-        ],
-      });
+      .toMatchObject({ anyOf: [{ type: "NULL" }, { type: "STRING", maxLength: 600 }] });
     expect(responderRequest.generationConfig.responseSchema.properties.factualTexts)
-      .toMatchObject({ minItems: 0, maxItems: 0 });
-    // The Responder reads the code-rendered projections but cannot author
-    // factual wording: factualTexts stays pinned to zero items above, so the
-    // acknowledgement itself remains non-factual.
+      .toMatchObject({ minItems: 0, maxItems: result.responderTask.evidence.length });
+    // Editorial factual realizations stay bound to each selected projection;
+    // the acknowledgement remains a separate non-factual slot.
     expect(responderPrompt.responderTask.evidence).toEqual(
       result.responderTask.evidence.map(({ deterministicText }) =>
         ({ text: deterministicText })),
@@ -1386,7 +1755,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: "Dạ vâng chị ạ.",
           factualTexts: [],
           progressionText: null,
         }),
@@ -1429,7 +1798,208 @@ describe("Track C C3 strategy-contract runner", () => {
 
     expect(result.output.strategy).toBe("HOLD_POSITION");
     expect(result.output.cta).toBe("NONE");
-    expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
+    expect(result.reply).toBe("Dạ vâng chị ạ.");
+    const responderSchema = JSON.parse(send.mock.calls[1]![0].body)
+      .generationConfig.responseSchema;
+    expect(responderSchema.properties.answerText.enum).toEqual([
+      "Dạ vâng chị ạ.", "Dạ em cảm ơn chị ạ.",
+    ]);
+  });
+
+  it("allows a bare policy introduction before the bound fact but rejects a changed policy", async () => {
+    const fixture = (JSON.parse(readFileSync(
+      new URL("quality-08.json", EVAL_ROOT), "utf8",
+    )) as { cases: TrackCV5CompactCase[] })
+      .cases.find(({ id }) => id === "V5V4Q072")!;
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", fixture,
+      runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const evaluationContext = [{
+      direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+      messageType: "TEXT" as const,
+      text: "Không vừa thì chị đổi size được không em?", attachmentCount: 0,
+      occurredAt: recipe.evaluation_at,
+    }];
+    const run = (answerText: string) => runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext,
+      simulationFacts: [facts.simulation_fact_catalog.SF_EXCHANGE_STD],
+      transport: { send: vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Answer the size-exchange policy for this product.",
+          proposition: "POLICY", evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText, factualTexts: [], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" }) },
+    });
+    expect((await run("Chị hỏi việc đổi size; chính sách là:")).reply)
+      .toContain("Mẫu này đổi được trong 15 ngày");
+    await expect(run("Chính sách là đổi được 30 ngày.")).rejects.toThrow(
+      "TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT",
+    );
+  });
+
+  it("acknowledges a canonical stop when the responder leaves every prose slot empty", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "The customer thanked us; do not reopen checkout or assert an order effect.",
+        proposition: "NONE", evidenceRefs: [], continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_EMPTY_HOLD_ACK", latest_customer_message: "Ok em cảm ơn nhé.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "ORDER_CONFIRMED", canonical_flags: [],
+            buying_intent: { decision: "NONE", requested_action: "NONE",
+              quantity: null, evidence: null },
+            source_stage: "PURCHASE_CONFIRMED", runtime_claim_refs: [],
+          },
+        }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+      }), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em cảm ơn nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    });
+
+    expect(result.output.strategy).toBe("HOLD_POSITION");
+    expect(result.output.cta).toBe("NONE");
+    expect(result.reply).toBe("Dạ vâng chị ạ.");
+  });
+
+  it("rejects an order confirmation inferred from customer dialogue", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge the customer without asserting an order effect.",
+        proposition: "NONE", evidenceRefs: [], continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "Em vui vì chị đã xác nhận đơn với shop và có đủ thông tin rồi.",
+        factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_UNVERIFIED_ORDER_ECHO",
+          latest_customer_message: "Ok em cảm ơn nhé.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "ORDER_CONFIRMED", canonical_flags: [],
+            buying_intent: { decision: "NONE", requested_action: "NONE",
+              quantity: null, evidence: null },
+            source_stage: "PURCHASE_CONFIRMED", runtime_claim_refs: [],
+          },
+        }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+      }), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em cảm ơn nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    })).rejects.toMatchObject({ diagnostic: {
+      stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN",
+    } });
+  });
+
+  it("rejects a passive shop order confirmation inside a hard-stop acknowledgement", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ACKNOWLEDGE", goal: "Thank the customer without confirming an order.",
+        proposition: "NONE", evidenceRefs: [], continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "Em cảm ơn chị đã xác nhận, em ghi nhận đơn đã được shop xác nhận rồi nhé.",
+        factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+
+    await expect(runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture: {
+          id: "C3_PASSIVE_ORDER_ECHO", latest_customer_message: "Ok em cảm ơn nhé.",
+          context: {
+            product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+            phase: "ORDER_CONFIRMED", canonical_flags: [],
+            buying_intent: { decision: "NONE", requested_action: "NONE",
+              quantity: null, evidence: null },
+            source_stage: "PURCHASE_CONFIRMED", runtime_claim_refs: [],
+          },
+        }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+      }), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em cảm ơn nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    })).rejects.toMatchObject({ diagnostic: {
+      stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN",
+    } });
+  });
+
+  it("distinguishes an unknown dispatch date from a promise to ship", async () => {
+    const dispatchCapture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_DISPATCH_UNCONFIRMED",
+        latest_customer_message: "Bao giờ shop gửi hàng cho chị?",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING", canonical_flags: [],
+          buying_intent: { decision: "NONE", requested_action: "NONE",
+            quantity: null, evidence: null },
+          source_stage: null, runtime_claim_refs: ["RC_ETA_HN"],
+        },
+      }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const run = (answerText: string) => runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: dispatchCapture, evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Bao giờ shop gửi hàng cho chị?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send: vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Clarify that the dispatch date is unconfirmed.",
+          proposition: "ETA", evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText, factualTexts: [], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" }) },
+    });
+
+    const safe = await run("Em chưa có thông tin xác nhận ngày shop sẽ gửi SQ9012; thời gian giao dự kiến chưa cho biết ngày gửi hàng.");
+    expect(safe.reply).toContain("chưa có thông tin xác nhận ngày shop sẽ gửi");
+    await expect(run("Shop sẽ gửi SQ9012 hôm nay.")).rejects.toMatchObject({
+      diagnostic: { stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" },
+    });
+    await expect(run("Em chưa có thông tin xác nhận ngày shop sẽ gửi SQ9012; shop sẽ gửi hôm nay.")).rejects.toMatchObject({
+      diagnostic: { stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" },
+    });
   });
 
   it("returns redacted diagnostic text for phone email and address", async () => {
@@ -1599,7 +2169,7 @@ describe("Track C C3 strategy-contract runner", () => {
         authorization: "NONE",
       },
       transport: { send },
-    })).rejects.toThrow("TRACK_C_RESPONDER_DRAFT_INVALID");
+    })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   });
 
   it("code-realizes simulation price instead of exposing a factual text slot", async () => {
@@ -1858,7 +2428,7 @@ describe("Track C C3 strategy-contract runner", () => {
       })
       .mockResolvedValueOnce({
         payload: payload({
-          answerText: "Dạ em hiểu ý chị ạ.",
+          answerText: null,
           factualTexts: [],
           progressionText: "Màu nào hợp ý chị hơn ạ?",
         }),

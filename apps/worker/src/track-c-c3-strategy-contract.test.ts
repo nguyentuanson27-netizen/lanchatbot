@@ -32,6 +32,22 @@ const priceEvidence: TrackCSelectableEvidence = {
 };
 
 describe("Track C C3 clean strategy contract", () => {
+  it("rejects an unresolved fit question disguised as purchase-size selection", () => {
+    const input = {
+      decision: { replyAct: "ANSWER", goal: "Need a body measurement to assess fit.",
+        proposition: "SIZE_FIT", evidenceRefs: [], continuation: { type: "ASK", input: "SIZE" },
+        canonicalAction: "NONE" },
+      evidence: [], permittedCanonicalActions: ["NONE"] as const,
+      measurementsUnavailable: false, productResolved: true, hardStop: false,
+    };
+    expect(() => compileTrackCStrategistDecision(input)).toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+    // A purchase-size choice without a fit proposition is still an ordinary
+    // continuation; the repair does not make all SIZE requests canonical.
+    expect(compileTrackCStrategistDecision({ ...input,
+      decision: { ...input.decision, proposition: "NONE", goal: "Choose the purchase size." },
+    }).task.continuation).toEqual({ type: "ASK", input: "SIZE" });
+  });
+
   it("uses the fixed lane only for the exact trusted acquisition signal", () => {
     expect(selectTrackCConversationLane([])).toBe("ADAPTIVE_FOLLOWUP");
     expect(selectTrackCConversationLane([{

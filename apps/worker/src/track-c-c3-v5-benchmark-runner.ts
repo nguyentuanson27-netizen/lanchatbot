@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { trackCRealizationMatches } from "./track-c-c3-realization-style.js";
 import {
   BusinessFactEnvelopeV1Schema,
   ContextV2CandidateOutputV2Schema,
@@ -35,6 +36,10 @@ import { trackCCustomerFacingSizeFromVariantId } from
 import { trackCRuntimeClaimDeterministicText } from
   "./track-c-c3-selectable-evidence.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
+import {
+  trackCCartClaimIsCurrent,
+  type TrackCCurrentCartBinding,
+} from "./track-c-c3-cart-binding.js";
 import {
   buildTrackCClaimReferenceRegistry,
   resolveTrackCCandidateClaimReferences,
@@ -286,10 +291,34 @@ function sizeGuardInputForClaim(
   };
 }
 
+/** The legacy guard treats promotion/free-shipping topic mentions as assertions. C3 may
+ * explicitly say that information is unconfirmed. Admit only a bounded
+ * uncertainty clause with no values/promise; never infer promotion authority.
+ * This is not a relevance check or a general natural-language certificate. */
+function onlyUnconfirmedTopicMentions(value: string, reason: string): boolean {
+  const topic = reason === "UNAUTHORIZED_PROMOTION"
+    ? /\b(?:khuyen mai|uu dai|giam gia|giam\s+\d|voucher|ma giam)\b/u
+    : reason === "UNAUTHORIZED_FREESHIP"
+      ? /\b(?:freeship|free ship|mien phi (?:giao|ship))\b/u
+      : null;
+  if (topic === null) return false;
+  const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[đĐ]/gu, "d").toLowerCase();
+  // An uncertainty preface cannot shield a value or promise in another clause.
+  if (/[\d%₫]/u.test(folded.replace(/\b[a-z]{1,6}\d{1,8}[a-z0-9]*\b/gu, "")) ||
+      /\b(?:se|chac chan|cam ket|dam bao)\b/u.test(folded)) return false;
+  const clauses = folded.split(/[.!?;,\n]|\b(?:nhung|tuy nhien|dong thoi|vi vay|nen|va)\b/u)
+    .map((clause) => clause.trim()).filter((clause) => topic.test(clause));
+  return clauses.length > 0 && clauses.every((clause) =>
+    /^(?:(?:da|em|minh|hien|tai|ben|shop)\s+){0,4}(?:chua|khong)\s+(?:co\s+(?:du\s+)?thong tin\s+(?:(?:de\s+)?xac nhan\s+)?|(?:the\s+)?xac nhan\s+)/u.test(clause)
+  );
+}
+
 function guardProductionOutput(
   context: ContextV2,
   output: ContextV2CandidateOutputV2,
   evaluationAt: Date,
+  currentCart: TrackCCurrentCartBinding | null = null,
 ): void {
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
@@ -318,10 +347,10 @@ function guardProductionOutput(
       ? attributeProjections.get(segment.claimContentHash) ?? null
       : null;
     if (attributeProjection !== null) {
-      // Exact equality binds every word of the segment to the field this hash
-      // was derived from, so a projection cannot be reused for another value.
+      // Bound editorial variants preserve every factual word for the field
+      // this hash was derived from; no semantic paraphrase is accepted.
       if (attributeProjection.deterministicText === null ||
-          segment.text !== attributeProjection.deterministicText) {
+          !trackCRealizationMatches(segment.text, attributeProjection.deterministicText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }
       if (context.productBinding.status !== "RESOLVED" ||
@@ -330,7 +359,14 @@ function guardProductionOutput(
       }
     }
     if (claim?.scope.kind === "CART") {
-      throw new Error("TRACK_C_V5_PRODUCTION_CART_GUARD_UNSUPPORTED");
+      const cartText = trackCRuntimeClaimDeterministicText(
+        claim, undefined, currentCart, evaluationAt,
+      );
+      if (!trackCCartClaimIsCurrent(claim, currentCart, evaluationAt) ||
+          cartText === null || !trackCRealizationMatches(segment.text, cartText)) {
+        throw new Error("TRACK_C_V5_PRODUCTION_CART_BINDING_INVALID");
+      }
+      continue;
     }
     if (claim !== null) {
       // The projector resolves variant labels from the presentation, so the
@@ -341,13 +377,13 @@ function guardProductionOutput(
         claim,
         trackCBoundPresentationForClaim(context.productPresentation, claim.scope),
       );
-      if (deterministicText !== null && segment.text !== deterministicText) {
+      if (deterministicText !== null && !trackCRealizationMatches(segment.text, deterministicText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }
       if (deterministicText !== null &&
           (claim.type === "PRICE" || claim.type === "STOCK" || claim.type === "ETA")) {
         // These projections contain only typed numbers/enums and allowlisted
-        // size labels. Exact equality binds every word to this claim; a second
+        // size labels. Editorial equality binds every fact to this claim; a second
         // keyword classifier must not reinterpret STOCK as SIZE_FIT, etc.
         // Keep the authority, scope and freshness checks at this boundary.
         if (!ProtectedClaimV1Schema.safeParse(claim).success) {
@@ -398,9 +434,12 @@ function guardProductionOutput(
         : "STRUCTURED_REJECT_ONLY",
       now: evaluationAt,
     });
-    if (guard.blockedReasonCodes.length > 0) {
+    const blocked = guard.blockedReasonCodes.filter((reason) =>
+      !(segment.kind === "GENERAL" && onlyUnconfirmedTopicMentions(segment.text, reason))
+    );
+    if (blocked.length > 0) {
       throw new Error(
-        `TRACK_C_V5_PRODUCTION_GUARD_FAILED:${guard.blockedReasonCodes.join(",")}`,
+        `TRACK_C_V5_PRODUCTION_GUARD_FAILED:${blocked.join(",")}`,
       );
     }
   }
@@ -412,6 +451,7 @@ export function validateResponderOutput(
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
   simulationClaimContentHashes: readonly string[] = [],
+  currentCart: TrackCCurrentCartBinding | null = null,
 ): ContextV2CandidateOutputV2 {
   if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -462,7 +502,7 @@ export function validateResponderOutput(
     throw new Error("TRACK_C_V5_RESPONDER_PROVENANCE_INVALID");
   }
   if (lane === "PRODUCTION_CONTRACT") {
-    guardProductionOutput(context, output, evaluationAt);
+    guardProductionOutput(context, output, evaluationAt, currentCart);
   } else {
     const simulationHashes = new Set(simulationClaimContentHashes);
     const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
@@ -472,7 +512,9 @@ export function validateResponderOutput(
         !simulationHashes.has(segment.claimContentHash)
       ),
     };
-    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt);
+    // Simulation facts are excluded above; runtime cart claims still need the
+    // same pinned cart readback that production uses for their final guard.
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart);
   }
   return output;
 }

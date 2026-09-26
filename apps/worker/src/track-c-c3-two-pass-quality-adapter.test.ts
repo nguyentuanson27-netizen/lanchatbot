@@ -156,7 +156,7 @@ function successfulTransport() {
       payload: providerPayload({
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
+          text: "Giá hiện tại của mẫu này là 849.000đ ạ.",
           claimRef: "CLAIM_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -196,7 +196,7 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.output.segments).toEqual([{
       kind: "VERIFIED_CLAIM",
-      text: "Dạ giá hiện tại của mẫu này là 849.000đ ạ.",
+      text: "Giá hiện tại của mẫu này là 849.000đ ạ.",
       claimContentHash: capture.context.verifiedClaims[0]?.provenance.contentHash,
     }]);
     expect(result.identity.captureContextHash).toBe(capture.context.contextHash);

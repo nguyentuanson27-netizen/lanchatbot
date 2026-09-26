@@ -44,6 +44,10 @@ const ALLOWED_USERS = new Set(
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean),
 );
+
+export function isAllowedMcpUser(username, allowedUsers = ALLOWED_USERS) {
+  return Boolean(username) && allowedUsers.has(username.toLowerCase());
+}
 const HELPER =
   process.env.LANA_MCP_REMOTE_OPS_PATH ||
   "/app/plugins/lana-chatbot-ops/scripts/remote_ops.mjs";
@@ -217,7 +221,7 @@ export async function verifyAccessToken(token, nowSeconds = Date.now() / 1000) {
   const username = String(
     claims.preferred_username || claims.email || claims.sub || "",
   ).toLowerCase();
-  if (!username || (ALLOWED_USERS.size && !ALLOWED_USERS.has(username))) {
+  if (!isAllowedMcpUser(username)) {
     throw new Error("TOKEN_USER_FORBIDDEN");
   }
   return { claims, username, scopes: parseScopes(claims) };

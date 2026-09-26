@@ -1247,6 +1247,11 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
+  /** Shares the existing service-account token cache with the opt-in C3 transport. */
+  async candidateAccessToken(): Promise<string> {
+    return this.token();
+  }
+
   judgeSalesReplyV2Descriptor(): JudgeSalesReplyV2Descriptor {
     return judgeSalesReplyV2Descriptor(
       this.judgeLocation(),

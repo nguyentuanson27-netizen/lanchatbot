@@ -232,6 +232,85 @@ function resealReadinessV1(
 }
 
 describe("PostgresRealtimeRuntimeStore handoff commit", () => {
+  it("rolls back a cart reply when the locked SalesCycle revision changed during C3", async () => {
+    const calls: string[] = [];
+    const now = new Date("2026-08-13T05:00:00.000Z");
+    const conversationId = "33333333-3333-4333-8333-333333333333";
+    const sourceMessageId = "mid-c3-readback";
+    const sourceMessageIdHash = rawSha256(sourceMessageId);
+    const client = {
+      async query(sql: string) {
+        calls.push(sql.trim());
+        if (sql.includes("SELECT routing_owner")) return { rowCount: 1, rows: [{
+          routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+          transaction_now: now,
+        }] };
+        if (sql.includes("FROM conversation_ingress_heads")) return {
+          rowCount: 1, rows: [{ generation: "1" }],
+        };
+        if (sql.includes("FROM webhook_inbox")) return {
+          rowCount: 1, rows: [{ source_message_id: sourceMessageId }],
+        };
+        if (sql.includes("SELECT conversation_owner")) return {
+          rowCount: 1, rows: [{ conversation_owner: "BOT" }],
+        };
+        if (sql.includes("FROM sales_cycle_states")) return {
+          rowCount: 1, rows: [{ state_revision: "3" }],
+        };
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const offerBindings = [{
+      lineId: "10000000-0000-4000-8000-000000000002",
+      productId: "SP-001", offerId: "OFFER-001", quantity: 1,
+      unitPriceVnd: 100_000, priceFactRef: "price:1",
+    }];
+    const parent = sealReadinessV1({
+      schemaVersion: 1, rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+      effect: "CART_READY", outcome: "READY", pageId: "page-1",
+      conversationId, sourceMessageIdHash, conversationRevision: 4,
+      salesCycleRevision: 2, productIds: ["SP-001"],
+      cartId: "10000000-0000-4000-8000-000000000001",
+      cartVersion: 1, cartStateHash: "a".repeat(64),
+      orderPreviewId: null, orderPreviewHash: null, buyingIntentHash: null,
+      deterministicEvidenceHash: null, claimSetHash: sha256([]),
+      protectedClaimTypes: [], checkedAt: now.toISOString(),
+      expiresAt: "2026-08-13T05:01:00.000Z", reasonCodes: [], authorization: "NONE",
+    }, { offerBindings });
+    const messages = [{ kind: "TEXT" as const, text: "Giỏ hiện tại có phí giao hàng." }];
+    const outbound = sealReadinessV1({
+      ...parent, effect: "PROTECTED_OUTBOUND",
+      deterministicEvidenceHash: sha256(messages),
+    }, { offerBindings, parentReadinessHash: parent.readinessHash,
+      payloadHash: sha256(messages) });
+    await expect(store.commit({
+      pageId: "page-1", customerHash: "hash", conversationId,
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      inboxBatchGuard: {
+        generation: 1, leaseToken: "lease-c3-readback",
+        inboxIds: ["55555555-5555-4555-8555-555555555555"],
+      },
+      salesCycleReadback: { expectedRevision: 2, readiness: parent },
+      metaPlan: {
+        replyPlanId: "10000000-0000-4000-8000-000000000031",
+        responseGroupId: "10000000-0000-4000-8000-000000000032",
+        recipientId: "customer-1", messages, sourceMessageIdHash,
+        protectedClaims: [], protectedClaimTypes: [], effectReadiness: outbound,
+      },
+    }, now)).rejects.toThrow("SALES_CYCLE_STATE_REVISION_CONFLICT");
+    expect(calls.some((sql) => sql.includes("FROM sales_cycle_states") &&
+      sql.includes("FOR UPDATE"))).toBe(true);
+    expect(calls.at(-1)).toBe("ROLLBACK");
+    expect(calls.some((sql) => sql.includes("INSERT INTO meta_outbox"))).toBe(false);
+  });
+
   it("persists idempotent PII-free decision events in the state transaction", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {
@@ -1806,6 +1885,75 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(exactMutation, now))
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    const variantLine = { ...beforeCart.lines[0]!,
+      components: beforeCart.lines[0]!.components.map((component) => ({ ...component,
+        size: "L", componentSku: component.componentSku.replace(/-M$/u, "-L") })) };
+    const variantMutation = { kind: "SET_LINE_VARIANT" as const,
+      lineId: mutationLineId, line: variantLine };
+    const variantReplay = applyCanonicalCartDecisionV2({
+      cart: beforeCart, expectedCartVersion: beforeCart.revision,
+      mutation: variantMutation, shopId: "LANA", policy,
+      customerState: "READY", readyForConfirmation: false, now,
+    });
+    if (variantReplay.status !== "APPLIED") throw new Error("TEST_VARIANT_REPLAY_FAILED");
+    const variantCart = variantReplay.cart;
+    const variantPolicyLines = canonicalCartPolicyLinesV2(variantCart.lines, "LANA");
+    if (variantPolicyLines === null) throw new Error("TEST_VARIANT_POLICY_LINES_INVALID");
+    const variantNegotiation = replayCanonicalCartRepriceNegotiationV1({
+      state: beforeNegotiation, commandId: mutationCommandId,
+      mutationReasonCode: "VARIANT_CHANGED",
+      cart: { cartId, cartVersion: variantCart.revision, lines: variantPolicyLines },
+      policy, occurredAt: now,
+    });
+    if (variantNegotiation.status !== "APPLIED") throw new Error("TEST_VARIANT_NEGOTIATION_FAILED");
+    const variantPayloadHash = sha256({ mutation: variantMutation });
+    const variantAuthorityDraft = { ...authority,
+      action: "SET_LINE_VARIANT" as const,
+      authorityKind: "DETERMINISTIC_VARIANT_EDIT" as const,
+      authorityEvidenceHash: sha256([
+        "DETERMINISTIC_VARIANT_EDIT_V1", sourceMessageIdHash, variantPayloadHash,
+      ]), bindingHash: "0".repeat(64) };
+    const variantAuthority = { ...variantAuthorityDraft,
+      bindingHash: rawSha256(cartMutationAuthorityBindingHashPreimageV1(variantAuthorityDraft)) };
+    const variantReceiptDraft = { ...mutationEvidence,
+      mutation: variantMutation, mutationPayloadHash: variantPayloadHash,
+      mutationReasonCode: "VARIANT_CHANGED" as const,
+      authority: variantAuthority, afterCartStateHash: cartHash(variantCart),
+      evidenceHash: "0".repeat(64) };
+    const variantReceipt = { ...variantReceiptDraft,
+      evidenceHash: rawSha256(cartMutationReceiptHashPreimageV1(variantReceiptDraft)) };
+    const variantBatchDraft = { ...mutationBatchEvidence,
+      finalCartStateHash: cartHash(variantCart), receipts: [variantReceipt],
+      evidenceHash: "0".repeat(64) };
+    const variantBatch = { ...variantBatchDraft,
+      evidenceHash: rawSha256(cartMutationBatchEvidenceHashPreimageV1(variantBatchDraft)) };
+    const variantCommit = { ...exactMutation, salesCyclePlan: {
+      ...exactMutation.salesCyclePlan,
+      state: { ...exactMutation.salesCyclePlan.state,
+        cart: { value: variantCart, expiresAt: salesExpiresAt.toISOString() },
+        negotiation: variantNegotiation.state },
+      events: exactMutation.salesCyclePlan.events.map((event) => ({ ...event,
+        mutationAction: "SET_LINE_VARIANT" as const,
+        mutationPayloadHash: variantPayloadHash })),
+      cartMutationBatchEvidence: variantBatch,
+      effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) =>
+        resealReadinessV1(readiness, {
+          cartStateHash: cartHash(variantCart),
+          buyingIntentHash: null,
+          deterministicEvidenceHash: variantReceipt.evidenceHash,
+        }, { offerBindings: canonicalCartOfferBindingsV1(variantCart.lines) })),
+    } };
+    await expect(store.commit(variantCommit, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+    await expect(store.commit({ ...variantCommit, salesCyclePlan: {
+      ...variantCommit.salesCyclePlan,
+      state: { ...variantCommit.salesCyclePlan.state,
+        cart: { ...variantCommit.salesCyclePlan.state.cart,
+          value: { ...variantCart, grandTotalVnd: (variantCart.grandTotalVnd ?? 0) + 1 } } },
+    } }, now)).rejects.toThrow();
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const mismatchedSetIntent = { ...canonicalIntent, quantity: 3 };
     const mismatchedSetAuthorityDraft = {

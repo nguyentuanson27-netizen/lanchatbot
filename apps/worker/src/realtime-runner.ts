@@ -7,6 +7,7 @@ import {
   evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
   extractCustomerMeasurements,
+  extractCustomerPreferences,
   assembleReply,
   buildVerifiedFactBlocks,
   mergeCustomerProfile,
@@ -93,6 +94,7 @@ import type {
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
   RealtimeSalesCyclePlan,
+  ChatHistoryItem,
   ShadowContextMessage,
 } from "@lana/database";
 import { redactAnalyticsMessage } from "@lana/database";
@@ -159,6 +161,13 @@ import {
   blockedContextV2Capture,
   buildContextV2Capture,
 } from "./context-v2.js";
+import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import {
+  hasSessionDecisionContext,
+  updateSessionDecisionContext,
+} from "./realtime-session-decision-context.js";
+import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
+import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { mapWithBoundedConcurrency } from "./bounded-concurrency.js";
@@ -490,6 +499,12 @@ export function explicitCustomerImageIntent(value: string): CustomerImageIntent 
  * genuine product follow-up. An explicit/new product code always wins and an
  * unknown new code must never silently fall back to the old product.
  */
+function isAlternativeProductRequest(value: string): boolean {
+  const text = asciiFold(value);
+  return /\b(?:tim|goi y|tu van)\b.*\b(?:mau|sp|san pham|set|ao|vay|quan)\b.*\bkhac\b/u.test(text) ||
+    /\b(?:co|con|xem)\s+(?:mau|sp|san pham|set|ao|vay|quan)\s+khac\b/u.test(text);
+}
+
 export function currentProductContinuationId(
   value: string,
   currentProductId: string | null,
@@ -497,6 +512,7 @@ export function currentProductContinuationId(
   if (!currentProductId) return null;
   if (hasExplicitProductReference(value)) return null;
   const text = asciiFold(value);
+  if (isAlternativeProductRequest(value)) return null;
   const refersToCurrentProduct =
     hasCustomerMeasurementSignal(value) ||
     hasSizeOnlyContinuationSignal(value) ||
@@ -533,15 +549,28 @@ export function isPreSalePolicyQuestion(value: string): boolean {
   return classifyPreSalePolicyIntent(value) !== null;
 }
 
-export function isPostSaleRequest(value: string): boolean {
+export function isPostSaleRequest(value: string, hasOpenCart = false): boolean {
   const text = asciiFold(value);
   if (isPreSalePolicyQuestion(value)) return false;
+  // Editing an unconfirmed cart is still pre-sale. An explicit existing order
+  // or delivered item remains after-sales even when a second cart is open.
+  const existingOrder = /\b(?:da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|don (?:hang )?(?:cua|nay|do)|van don|ma van don|tracking|chua giao|dang giao|giao nham|giao sai)\b/u.test(text) &&
+    !/\b(?:chua|khong)\s+(?:dat|chot|mua)\s+(?:don|hang)?\b/u.test(text);
+  if (hasOpenCart && !existingOrder) return false;
   return (
-    /\b(van don|ma van don|tracking|don (?:hang )?(?:cua|nay|do)|da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|chua giao|dang giao|giao nham|giao sai|shipper)\b/u.test(text) ||
+    existingOrder || /\bshipper\b/u.test(text) ||
     /\b(hang bi loi|san pham bi loi|loi vai|loi duong may)\b/u.test(text) ||
     /\b(doi dia chi|doi sdt|doi so dien thoai|sua dia chi|huy don|hoan tien|refund)\b/u.test(text) ||
     /\b(cho (?:chi|em|minh) doi|(?:chi|em|minh) (?:muon|can) doi|doi (?:size|mau|hang) (?:cho|cua) (?:chi|em|minh))\b/u.test(text)
   );
+}
+
+function requestsHuman(text: string): boolean {
+  const folded = asciiFold(text);
+  if (/\b(?:khong|ko|k|chua)\s+(?:can|muon|gap|goi|noi chuyen voi)\s+(?:nhan vien|nguoi tu van|shop)\b/u.test(folded)) {
+    return false;
+  }
+  return /\b(?:nhan vien|nguoi tu van|gap shop|goi cho)\b/u.test(folded);
 }
 
 /** Only after-sales receives one holding reply; every other handoff stays silent. */
@@ -1186,6 +1215,7 @@ function customerProfileSummary(profile: CustomerProfileV1 | null): {
   readonly profileRevision: number | null;
   readonly measurements: Readonly<Record<string, number>>;
   readonly fitPreference: CustomerProfileV1["fitPreference"] | null;
+  readonly preferences: CustomerProfileV1["preferences"];
 } {
   return {
     profileRevision: profile?.revision ?? null,
@@ -1193,6 +1223,7 @@ function customerProfileSummary(profile: CustomerProfileV1 | null): {
       (profile?.measurements ?? []).map(({ kind, value }) => [kind, value]),
     ),
     fitPreference: profile?.fitPreference ?? null,
+    preferences: profile?.preferences ?? { colors: [], styles: [], materials: [] },
   };
 }
 
@@ -1340,7 +1371,12 @@ export function classifyCustomerUrlsForInbound(
   policy: CustomerUrlPolicyV1,
   mediaInputLimitExceeded: boolean,
   classify: typeof classifyCustomerUrls = classifyCustomerUrls,
+  checkoutPhoneAllowed = false,
 ): CustomerUrlDecision {
+  if (checkoutPhoneAllowed && /^0\d{9}$/u.test(text.trim())) {
+    return { policy, disposition: "CONTINUE", items: [], productCodes: [],
+      candidateProductCodes: [], reasonCodes: [], explanationAllowed: false };
+  }
   if (!mediaInputLimitExceeded) return classify(text, policy);
   return {
     policy,
@@ -1941,6 +1977,11 @@ export interface RealtimeModelPort {
 }
 
 export interface CanonicalChatHistoryPort {
+  recoverAcceptedOutboundBotMessages?(conversationId: string, limit?: number): Promise<number>;
+  listConversationHistory?(
+    conversationId: string,
+    options?: { readonly limit?: number; readonly before?: Date },
+  ): Promise<readonly ChatHistoryItem[]>;
   recordInboundCustomerMessage(input: {
     pageId: string;
     conversationId: string;
@@ -2159,6 +2200,11 @@ export interface RealtimeRunnerOptions {
   readonly wave2StrategyEnabled?: boolean;
   readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
   readonly adAcquisitionPageIds?: readonly string[];
+  /** Explicit test/composition opt-in. Source default stays on the baseline. */
+  readonly c3?: Readonly<{
+    modelResource: string;
+    transport: Parameters<typeof runTrackCStrategyLive>[0]["transport"];
+  }> | null;
 }
 
 export interface ContextV2CaptureTrigger {
@@ -2374,6 +2420,7 @@ export class RealtimeRunner {
       wave2StrategyEnabled: options.wave2StrategyEnabled ?? false,
       adAcquisitionAnalyticsMode: options.adAcquisitionAnalyticsMode ?? "OFF",
       adAcquisitionPageIds: [...(options.adAcquisitionPageIds ?? [])],
+      c3: options.c3 ?? null,
     };
   }
 
@@ -2455,6 +2502,13 @@ export class RealtimeRunner {
             .digest("hex"),
         })
       );
+    const preferenceSignals = messages
+      .filter((message) => !message.isEcho && Boolean(message.text?.trim()))
+      .flatMap((message) => extractCustomerPreferences({
+        text: message.text ?? "",
+        observedAt: message.occurredAt,
+        sourceEventHash: createHash("sha256").update(message.eventKey).digest("hex"),
+      }));
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const record = await this.runtime.loadOrCreateCustomerProfile<
@@ -2470,7 +2524,26 @@ export class RealtimeRunner {
         }),
         now,
       );
-      if (measurements.length === 0) return record.profile;
+      if (measurements.length === 0 && preferenceSignals.length === 0) return record.profile;
+      const nextPreferences = {
+        colors: [...record.profile.preferences.colors],
+        styles: [...record.profile.preferences.styles],
+        materials: [...record.profile.preferences.materials],
+      };
+      const preferencePatch: Partial<Record<"colors" | "styles" | "materials", {
+        value: readonly string[]; evidence: CustomerProfileFieldEvidence;
+      }>> = {};
+      for (const signal of preferenceSignals) {
+        const values = nextPreferences[signal.field];
+        const updated = signal.action === "REPLACE"
+          ? [signal.value]
+          : signal.action === "REMOVE"
+            ? values.filter((value) => value !== signal.value)
+            : [...new Set([...values, signal.value])];
+        if (updated.join("\u0000") === values.join("\u0000")) continue;
+        nextPreferences[signal.field] = updated;
+        preferencePatch[signal.field] = { value: updated, evidence: signal.evidence };
+      }
       const merged = mergeCustomerProfile(
         {
           profile: record.profile,
@@ -2480,6 +2553,7 @@ export class RealtimeRunner {
           profileId: record.profile.profileId,
           expectedRevision: record.profile.revision,
           measurements,
+          preferences: preferencePatch,
         },
       );
       if (merged.cas.nextRevision === merged.cas.expectedRevision) {
@@ -2875,6 +2949,9 @@ export class RealtimeRunner {
       message.text ?? "",
       activeCustomerUrlPolicy(policyResolution),
       mediaInputLimitExceeded,
+      classifyCustomerUrls,
+      salesCycleRecord?.state.stage === "CART_OPEN" ||
+        salesCycleRecord?.state.stage === "ORDER_PREVIEW",
     );
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
@@ -2968,40 +3045,63 @@ export class RealtimeRunner {
       occurredAt: original.occurredAt,
     }));
     let context: ShadowContextMessage[] = currentContexts;
-    if (this.history) {
+    if (this.history || this.canonicalHistory?.listConversationHistory) {
       const currentFingerprints = new Set(currentContexts.map(contextFingerprint));
-      const priorContext = [...await this.history.load(
-        record.conversationId,
-        this.options.contextHistoryLimit,
-      )
-        .catch(() => [])]
+      let canonicalPrior: readonly ShadowContextMessage[] | null = null;
+      if (this.canonicalHistory?.listConversationHistory) {
+        try {
+          await this.canonicalHistory.recoverAcceptedOutboundBotMessages?.(
+            record.conversationId, this.options.contextHistoryLimit,
+          );
+          const rows = await this.canonicalHistory.listConversationHistory(
+            record.conversationId, { limit: this.options.contextHistoryLimit },
+          );
+          canonicalPrior = rows.map((row) => ({
+            direction: row.direction, senderType: row.senderType,
+            messageType: row.messageType, text: row.text,
+            attachmentCount: row.attachmentCount,
+            occurredAt: row.occurredAt.toISOString(),
+          }));
+        } catch {
+          canonicalPrior = null;
+        }
+      }
+      const priorContext = [...(canonicalPrior ?? await this.history?.load(
+        record.conversationId, this.options.contextHistoryLimit,
+      ).catch(() => []) ?? [])]
         .map((entry) => ({
           ...entry,
           text: redactCustomerUrlsForModel(entry.text),
         }))
         .filter((entry) => !currentFingerprints.has(contextFingerprint(entry)));
-      for (let index = 0; index < currentContexts.length; index += 1) {
-        const currentContext = currentContexts[index];
-        const original = sourceMessages[index];
-        if (!currentContext || !original) continue;
-        await this.history.append(record.conversationId, {
-          ...currentContext,
-          identityKey: original.eventKey,
-        }).catch(() => false);
+      if (this.history) {
+        for (let index = 0; index < currentContexts.length; index += 1) {
+          const currentContext = currentContexts[index];
+          const original = sourceMessages[index];
+          if (!currentContext || !original) continue;
+          await this.history.append(record.conversationId, {
+            ...currentContext,
+            identityKey: original.eventKey,
+          }).catch(() => false);
+        }
       }
       context = [...priorContext, ...currentContexts];
     }
     const authorityModelState = commerceRuntimeContext?.status === "READY"
-      ? serializeDf13CommerceAuthorityModelState({
+      ? {
+          ...serializeDf13CommerceAuthorityModelState({
           context: commerceRuntimeContext.context,
           sourceContextHash: commerceRuntimeContext.sourceContextHash,
           customerProfile:
             this.options.customerProfileEnabled
               ? customerProfileSummary(customerProfile)
               : null,
-        })
+          }),
+          customerSessionContext: state.sessionDecisionContext ?? null,
+        }
       : {
           type: "CONVERSATION_STATE",
+          customerSessionContext: state.sessionDecisionContext ?? null,
           currentProductId: state.currentProductId,
           consideredVariant: state.consideredVariant,
           verifiedVariant:
@@ -3136,7 +3236,8 @@ export class RealtimeRunner {
     const resolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
-        isPostSaleRequest(message.text ?? "") ||
+        isPostSaleRequest(message.text ?? "", salesCycleRecord?.state.stage === "CART_OPEN" ||
+          salesCycleRecord?.state.stage === "ORDER_PREVIEW") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
       : combinedCustomerUrlResolution ?? await this.resolveProducts(
@@ -3211,6 +3312,8 @@ export class RealtimeRunner {
         ? authorityState.salesStage
         : undefined,
       commerceRuntimeContext?.status === "READY" ? "NONE" : undefined,
+      salesCycleRecord?.state.stage === "CART_OPEN" ||
+        salesCycleRecord?.state.stage === "ORDER_PREVIEW",
     );
     const applied = applyInboundEvent({
       state: authorityState,
@@ -3223,6 +3326,15 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
+    if (!message.isEcho && event.actor === "CUSTOMER") {
+      const session = updateSessionDecisionContext(
+        nextState.sessionDecisionContext, message.text ?? "",
+      );
+      if (nextState.sessionDecisionContext !== undefined ||
+          hasSessionDecisionContext(session)) {
+        nextState = { ...nextState, sessionDecisionContext: session };
+      }
+    }
     const initialAuthorityStrategyStage = commerceRuntimeContext?.status === "READY" && salesCycleRecord
       ? commerceStrategyStage(salesCycleRecord.state.stage)
       : nextState.salesStage;
@@ -3309,6 +3421,9 @@ export class RealtimeRunner {
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
     let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
+    let salesCartReadback: DeterministicEffectReadinessV1 | null = null;
+    let c3Chosen = false;
+    let c3CartSelected = false;
     let modelNegotiationProposal: ModelNegotiationProposalV1 | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
@@ -3332,6 +3447,7 @@ export class RealtimeRunner {
       rejectedCount: 0,
     };
     let verifiedSizeClaimForTurn: SizeRecommendationProtectedClaimV1 | null = null;
+    let c3FitMeasurementsRequired = false;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
     let preGenerationWave2StrategyDecision: Wave2StrategyDecision | null = null;
     let modelStrategyAnalysis: Wave2ModelAnalysis | null = null;
@@ -4957,6 +5073,7 @@ export class RealtimeRunner {
     if (
       salesCycleRecord &&
       !message.isEcho &&
+      nextState.conversationOwner === "BOT" &&
       preSalePolicyIntent === null &&
       !clarificationHandled &&
       handoff === null
@@ -5003,6 +5120,7 @@ export class RealtimeRunner {
         policyResolution,
         behaviorModeResolution,
         facts: this.factsReader,
+        c3CartReadback: this.options.c3 !== null,
         now,
         effectNow: () => new Date(),
       });
@@ -5011,6 +5129,7 @@ export class RealtimeRunner {
       salesTelemetry = sales.telemetry ?? null;
       salesProtectedOutbound = sales.protectedOutbound ?? null;
       salesReadinessAttempt = sales.readinessAttempt ?? null;
+      salesCartReadback = sales.cartReadback ?? null;
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -5029,6 +5148,183 @@ export class RealtimeRunner {
         );
         nextState = transitioned.state;
         handoff = transitioned.handoff;
+      }
+    }
+
+    // C3 composes one candidate after commerce has advanced canonical state.
+    // The transaction below remains the only owner of send and effects.
+    if (this.options.c3 !== null && triggerMessagePk !== null &&
+        salesCycleRecord !== null &&
+        !message.isEcho && handoff === null &&
+        nextState.conversationOwner === "BOT" &&
+        (resolution.products.length <= 1 ||
+          (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
+        !metaMessages.some((unit) => unit.kind === "IMAGE") &&
+        (!salesHandled || salesTelemetry?.clarificationCase === true)) {
+      try {
+        const c3Input = buildRealtimeC3Input({
+          sourceMessagePk: triggerMessagePk,
+          canonicalEvidence: canonicalDecisionEvidenceForTurn(),
+          preConversationRevision: record.stateVersion,
+          finalConversationRevision: nextState.revision,
+          preSalesRevision: salesCycleRecord.stateRevision,
+          commerceState: salesCyclePlan?.state ?? salesCycleRecord.state,
+          productId: shouldUseMultiFacts && resolution.products.length > 1
+            ? resolution.products[0]!.productId
+            : resolvedProduct?.productId ?? nextState.currentProductId,
+          ...(shouldUseMultiFacts && resolution.products.length > 1
+            ? { productIds: resolution.products.map(({ productId }) => productId) }
+            : {}),
+          catalogVersion: resolvedProduct?.catalogVersion ?? null,
+          facts: businessFactEnvelopes,
+          sizeClaim: verifiedSizeClaimForTurn,
+          fitDecision: resolvedProduct && customerProfile &&
+              (event.requestedSalesStage === "FIT_CONSULTING" ||
+               event.objectionType === "SIZE_FIT" ||
+               proposal?.businessFactQuery.intent === "SIZE")
+            ? resolveSizeEngineDecision(resolvedProduct, customerProfile, policyResolution, now).decision
+            : null,
+          productFacts: productFactsV2,
+          policyResolution,
+          cartReadiness: [
+            ...(salesCyclePlan?.effectReadiness ?? []),
+            ...(salesCartReadback === null ? [] : [salesCartReadback]),
+          ],
+          now: new Date(),
+        });
+        c3FitMeasurementsRequired = c3Input.context.barriers.active.includes("MEASUREMENTS_REQUIRED");
+        const chosen = await runTrackCStrategyLive({
+          ...c3Input,
+          modelResource: this.options.c3.modelResource,
+          decisionAt: new Date(),
+          // The shared Track C request accepts at most 15 dialogue messages.
+          // Keep the newest window, including this inbound, when the runtime
+          // history store returns its larger 30-message context window.
+          dialogue: [
+            ...(nextState.sessionDecisionContext &&
+                hasSessionDecisionContext(nextState.sessionDecisionContext)
+              ? [{
+                  direction: "INBOUND" as const,
+                  senderType: "SYSTEM" as const,
+                  messageType: "EVENT" as const,
+                  text: JSON.stringify({
+                    type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
+                    budgetCustomerReported: nextState.sessionDecisionContext.budgetVnd === null
+                      ? null
+                      : `${nextState.sessionDecisionContext.budgetVnd / 1_000}k`,
+                    occasion: nextState.sessionDecisionContext.occasion,
+                    rejectedProductIds: nextState.sessionDecisionContext.rejectedProductIds,
+                  }),
+                  attachmentCount: 0,
+                  occurredAt: context[0]?.occurredAt ?? now.toISOString(),
+                }]
+              : []),
+            ...context.slice(nextState.sessionDecisionContext &&
+              hasSessionDecisionContext(nextState.sessionDecisionContext)
+              ? -14 : -15).map((entry) => ({
+            ...entry,
+            text: redactCustomerUrlsForModel(
+              redactAnalyticsMessage(entry.text).text,
+            ),
+            })),
+          ],
+          checkoutClarificationActive:
+            (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
+              "CHECKOUT_DETAILS_MISSING",
+          transport: this.options.c3.transport,
+        });
+        validateResponderOutput(
+          c3Input.context, {
+            segments: chosen.output.segments,
+            strategy: chosen.output.strategy,
+            cta: chosen.output.cta,
+          }, "PRODUCTION_CONTRACT", new Date(),
+          [], c3Input.currentCart,
+        );
+        const hashes = new Set(chosen.output.segments.flatMap((segment) =>
+          segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
+        ));
+        const chosenClaims = c3Input.context.verifiedClaims.filter((claim) =>
+          hashes.has(claim.provenance.contentHash)
+        );
+        const selectedTypes = new Set(chosenClaims.map(({ type }) => type));
+        const baselineTypes = salesProtectedOutbound?.claimTypes ??
+          protectedClaimValidation.claimTypes;
+        // A successful adaptive strategy owns which facts answer this turn.
+        // The legacy renderer's choice is not a second strategy: requiring its
+        // PRICE here made a price objection revert to the same quote. All
+        // selected facts were validated above; any C3 failure still retains the
+        // already-built baseline below. Preserve the fixed acquisition form.
+        if (chosen.conversationLane === "FIRST_CONTACT_FIXED" &&
+            baselineTypes.some((type) => !selectedTypes.has(type))) {
+          throw new Error("TRACK_C_C3_BASELINE_FACT_PRESERVATION");
+        }
+        const cartSelected = chosenClaims.some((claim) => claim.scope.kind === "CART");
+        const cart = cartSelected
+          ? (salesCyclePlan?.state ?? salesCycleRecord.state).cart?.value ?? null
+          : null;
+        const parent = cart === null ? null :
+          [
+            ...(salesCyclePlan?.effectReadiness ?? []),
+            ...(salesCartReadback === null ? [] : [salesCartReadback]),
+          ].reverse().find((readiness) =>
+            readiness.outcome === "READY" &&
+            readiness.binding.cart?.cartId === cart.cartId &&
+            readiness.binding.cart?.cartRevision === cart.revision
+          ) ?? null;
+        if (cartSelected && (cart === null || parent === null)) {
+          throw new Error("TRACK_C_C3_CART_READINESS_UNAVAILABLE");
+        }
+        const candidateMessages = [{ kind: "TEXT" as const, text: chosen.reply }];
+        const payloadHash = canonicalSha256(candidateMessages);
+        const readiness = evaluateDeterministicEffectReadinessV1({
+          effect: "PROTECTED_OUTBOUND",
+          pageId: claim.pageId,
+          conversationId: record.conversationId,
+          sourceMessageIdHash: canonicalDecisionEvidenceForTurn().buyingIntent.sourceMessageIdHash,
+          conversationRevision: record.stateVersion,
+          salesCycleRevision: salesCycleRecord.stateRevision,
+          productIds: cart === null
+            ? c3Input.context.productBinding.productIds
+            : [...new Set(cart.lines.map(({ parentProductId }) => parentProductId))],
+          cartId: cart?.cartId ?? null,
+          cartVersion: cart?.revision ?? null,
+          cartStateHash: parent?.cartStateHash ?? null,
+          ...(cart === null ? {} : { cartLines: cart.lines }),
+          orderPreviewId: null,
+          orderPreviewHash: null,
+          buyingIntent: null,
+          claims: chosenClaims,
+          protectedClaimTypes: [...selectedTypes].sort(),
+          deterministicEvidenceHash: payloadHash,
+          parentReadinessHash: parent?.readinessHash ?? null,
+          payloadHash,
+          checkedAt: new Date(),
+        });
+        if (readiness.outcome !== "READY") {
+          throw new Error("TRACK_C_C3_OUTBOUND_READINESS_BLOCKED");
+        }
+        if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = candidateMessages;
+          salesProtectedOutbound = {
+            claims: chosenClaims,
+            claimTypes: [...selectedTypes].sort(),
+            readiness,
+          };
+          c3Chosen = true;
+          c3CartSelected = cartSelected;
+        }
+      } catch (error) {
+        const rawCode = error instanceof Error ? error.message : "TRACK_C_C3_UNKNOWN_ERROR";
+        const code = /^[A-Z][A-Z0-9_]{2,100}$/u.test(rawCode)
+          ? rawCode : "TRACK_C_C3_RUNTIME_FAILURE";
+        process.stderr.write(`${JSON.stringify({
+          level: "warn", code: "TRACK_C_C3_FALLBACK",
+          candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
+          reason: code,
+          conversationRevision: record.stateVersion,
+          salesCycleRevision: salesCycleRecord.stateRevision,
+        })}\n`);
       }
     }
 
@@ -5053,7 +5349,9 @@ export class RealtimeRunner {
         proposal?.businessFactQuery.intent === "PRICE"
       ),
     };
-    const postGenerationReply = wordingAuthority === "MODEL"
+    const postGenerationReply = c3Chosen
+      ? { messages: metaMessages }
+      : wordingAuthority === "MODEL"
       ? finalizeModelOwnedRealtimePostGenerationReply(postGenerationReplyInput)
       : finalizeLegacyRealtimePostGenerationReply(postGenerationReplyInput);
     metaMessages = [...postGenerationReply.messages];
@@ -5072,7 +5370,8 @@ export class RealtimeRunner {
             : []
         );
     if (protectedOutboundReadiness !== null) {
-      const salesCart = salesCyclePlan?.state.cart?.value ?? null;
+      const salesCart = c3Chosen && protectedOutboundReadiness.cartId === null
+        ? null : (salesCyclePlan?.state ?? salesCycleRecord?.state)?.cart?.value ?? null;
       const payloadHash = canonicalSha256(metaMessages);
       protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
         effect: "PROTECTED_OUTBOUND",
@@ -5353,7 +5652,9 @@ export class RealtimeRunner {
       const productIds = productBindingStatus === "AMBIGUOUS"
         ? candidateProductIds
         : productBindingStatus === "RESOLVED"
-          ? [observedProductId!]
+          ? shouldUseMultiFacts && candidateProductIds.length > 1
+            ? candidateProductIds
+            : [observedProductId!]
           : productBindingStatus === "STALE"
             ? [businessFacts!.productId]
             : [];
@@ -5372,7 +5673,9 @@ export class RealtimeRunner {
         contractVersion: "PRODUCT_BINDING_V2",
         status: productBindingStatus,
         productIds,
-        catalogVersion: resolvedProduct?.catalogVersion ?? null,
+        catalogVersion: productIds.length === 1
+          ? resolvedProduct?.catalogVersion ?? null
+          : null,
       });
       const productPresentation = productFactsV2 === null
         ? null
@@ -5405,6 +5708,7 @@ export class RealtimeRunner {
                 canonicalEvidence,
                 verifiedClaims: protectedOutboundClaims,
                 finalCommerceState,
+                fitMeasurementsRequired: c3FitMeasurementsRequired,
                 readiness: readinessObservations,
                 finalTurnEvidence: finalTurnEvidence.data,
                 productBinding: productBinding.data,
@@ -5925,6 +6229,13 @@ export class RealtimeRunner {
             }
           : {}),
         ...(salesCyclePlan ? { salesCyclePlan } : {}),
+        ...(c3Chosen && c3CartSelected && salesCyclePlan === null &&
+          salesCartReadback !== null && salesCycleRecord !== null
+          ? { salesCycleReadback: {
+              expectedRevision: salesCycleRecord.stateRevision,
+              readiness: salesCartReadback,
+            } }
+          : {}),
         ...(acquisitionAnalyticsEnabled
           ? {
               acquisitionPlan: {
@@ -6529,7 +6840,11 @@ export class RealtimeRunner {
     }
 
     if (text) {
-      const result = await this.productSearch.searchText(text);
+      const excludeProductId = isAlternativeProductRequest(text)
+        ? state.currentProductId : null;
+      const result = excludeProductId
+        ? await this.productSearch.searchText(text, excludeProductId)
+        : await this.productSearch.searchText(text);
       if (result.status === "MATCHED") {
         return this.singleResolution(result.product, "TEXT_SEMANTIC");
       }
@@ -6582,10 +6897,11 @@ export class RealtimeRunner {
     customerUrlRequiresHandoff = false,
     commerceDerivedStage?: SalesStage,
     commerceDerivedObjectionType?: ObjectionType,
+    hasOpenCart = false,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
-    const postSale = isPostSaleRequest(message.text ?? "");
-    const humanRequest = /(nhân viên|người tư vấn|gặp shop|gọi cho)/iu.test(text);
+    const postSale = isPostSaleRequest(message.text ?? "", hasOpenCart);
+    const humanRequest = requestsHuman(text);
     return {
       eventKey: message.eventKey,
       messageId: message.messageId,

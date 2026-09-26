@@ -17,6 +17,7 @@ export type CanonicalCartMutationV2 =
   | { readonly kind: "ADD_LINE"; readonly line: CartLineV1 }
   | { readonly kind: "REMOVE_LINE"; readonly lineId: string }
   | { readonly kind: "SET_QUANTITY"; readonly lineId: string; readonly quantity: number }
+  | { readonly kind: "SET_LINE_VARIANT"; readonly lineId: string; readonly line: CartLineV1 }
   | {
       readonly kind: "SET_COMPONENT_VARIANT";
       readonly lineId: string;
@@ -119,6 +120,17 @@ function mutate(
             : line.posUnitPriceVnd * mutation.quantity,
         }
       : line);
+  }
+  if (mutation.kind === "SET_LINE_VARIANT") {
+    const current = lines[index]!;
+    const replacement = CartLineV1Schema.safeParse(mutation.line);
+    if (!replacement.success ||
+      replacement.data.lineId !== current.lineId ||
+      replacement.data.parentProductId !== current.parentProductId ||
+      replacement.data.offerId !== current.offerId ||
+      replacement.data.quantity !== current.quantity ||
+      JSON.stringify(replacement.data.components) === JSON.stringify(current.components)) return null;
+    return lines.map((line, lineIndex) => lineIndex === index ? replacement.data : line);
   }
   const size = mutation.size.trim().normalize("NFC").toUpperCase();
   const componentSku = mutation.componentSku.trim().normalize("NFC").toUpperCase();
