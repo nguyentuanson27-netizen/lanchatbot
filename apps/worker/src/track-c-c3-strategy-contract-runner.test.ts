@@ -16,6 +16,7 @@ import { trackCEvidenceHasSafeFactualEgress } from
   "./track-c-c3-strategy-contract.js";
 import {
   materializeTrackCV5CaseCapture,
+  type TrackCV5CompactCase,
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
@@ -1799,6 +1800,45 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(responderSchema.properties.answerText.enum).toEqual([
       "Dạ vâng chị ạ.", "Dạ em cảm ơn chị ạ.",
     ]);
+  });
+
+  it("allows a bare policy introduction before the bound fact but rejects a changed policy", async () => {
+    const fixture = (JSON.parse(readFileSync(
+      new URL("quality-08.json", EVAL_ROOT), "utf8",
+    )) as { cases: TrackCV5CompactCase[] })
+      .cases.find(({ id }) => id === "V5V4Q072")!;
+    const captureValue = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", fixture,
+      runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const evaluationContext = [{
+      direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+      messageType: "TEXT" as const,
+      text: "Không vừa thì chị đổi size được không em?", attachmentCount: 0,
+      occurredAt: recipe.evaluation_at,
+    }];
+    const run = (answerText: string) => runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: captureValue,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext,
+      simulationFacts: [facts.simulation_fact_catalog.SF_EXCHANGE_STD],
+      transport: { send: vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Answer the size-exchange policy for this product.",
+          proposition: "POLICY", evidenceRefs: ["SIMULATION_001"],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText, factualTexts: [], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" }) },
+    });
+    expect((await run("Chị hỏi việc đổi size; chính sách là:")).reply)
+      .toContain("Mẫu này đổi được trong 15 ngày");
+    await expect(run("Chính sách là đổi được 30 ngày.")).rejects.toThrow(
+      "TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT",
+    );
   });
 
   it("acknowledges a canonical stop when the responder leaves every prose slot empty", async () => {

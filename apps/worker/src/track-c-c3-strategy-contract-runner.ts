@@ -788,9 +788,11 @@ function assertConversationalProse(value: string | null): void {
   // Assertions about product/policy properties belong in evidence, not in a
   // supposedly conversational preface. Even a selected fact must not be
   // restated here with a changed condition, stronger benefit or new subject.
+  // A bare "chính sách là:" only introduces the next bound fact slot; it
+  // asserts no policy property. A clause after "là" still needs evidence.
   // Match an asserted clause, not the embedded topic in "em chưa xác nhận
   // mẫu này có..." or the customer's reported comparison with a cheaper item.
-  if (/(?:^|[.!?;\n])\s*(?:da[, ]+)?(?:(?:em|shop|ben em)\s+(?:thay\s+)?)?(?:(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach)\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|thiet ke|cao cap|ben|mem|thoang)|(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b)/u.test(folded)) {
+  if (/(?:^|[.!?;\n])\s*(?:da[, ]+)?(?:(?:em|shop|ben em)\s+(?:thay\s+)?)?(?:(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach(?!\s+la\s*:))\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|thiet ke|cao cap|ben|mem|thoang)|(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b)/u.test(folded)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
 }
