@@ -575,6 +575,9 @@ appendix below describes the completed boundaries in detail.
   selection hashes. The shared legacy claim hash is unchanged. `ContextV2`
   still carries one `productAttributes` and one `productPresentation`, so
   attribute/presentation comparisons across several products remain open.
+  Two separately bound prices do not authorize a model-authored cheaper-than
+  conclusion; prose now rejects that assertion until code owns a dual-source
+  comparison realization.
 - **Negative freeship: implemented for C3 when known.** A canonical current
   cart with a positive shipping fee now yields a cart-bound `FREESHIP` false
   claim; a null fee yields no conclusion. The legacy claim set is unchanged.

@@ -795,6 +795,11 @@ function assertConversationalProse(value: string | null): void {
   if (/(?:^|[.!?;\n])\s*(?:da[, ]+)?(?:(?:em|shop|ben em)\s+(?:thay\s+)?)?(?:(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach(?!\s+la\s*:))\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|thiet ke|cao cap|ben|mem|thoang)|(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b)/u.test(folded)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
+  // Comparing two prices is a new claim about both products. Two selected
+  // price sentences do not give free prose authority to state their ordering.
+  if (/\b(?:[a-z]{1,5}\d{2,}|mau (?:nay|do))\s+(?:co gia\s+)?(?:re|dat|thap|cao)\s+hon\b/u.test(folded)) {
+    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  }
 }
 
 function expectedStrategy(task: TrackCResponderTask): ContextV2CandidateOutputV2["strategy"] {
