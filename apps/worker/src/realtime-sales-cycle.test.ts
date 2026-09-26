@@ -4,6 +4,7 @@ import {
 import {
   PolicyBundleV1Schema,
   CartV1Schema,
+  BusinessFactEnvelopeV1Schema,
   type AgentBuyingIntentV1,
   type AgentSalesSignalsV1,
   type CartLineV1,
@@ -298,6 +299,82 @@ describe("no-cart buying journey", () => {
     ));
     expect(confirmed.plan?.state.stage).toBe("PURCHASE_CONFIRMED");
     expect(confirmed.plan?.state.cart?.value.cartId).toBe(opened.plan!.state.cart!.value.cartId);
+  });
+});
+
+describe("multi-product C3 evidence binding", () => {
+  it("keeps two POS prices on their own products through the live C3 reply", async () => {
+    const fact = (productId: string, price: number) =>
+      BusinessFactEnvelopeV1Schema.parse({
+        schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+        observedAt: "2026-07-23T02:00:00.000Z",
+        expiresAt: "2026-07-25T02:00:00.000Z", productId,
+        facts: {
+          schemaVersion: 1, productId, parentProductId: productId,
+          offerType: "SET", listPriceVnd: price, salePriceVnd: null,
+          sizes: ["M"], stockStatus: "IN_STOCK", stockQuantity: 2,
+          deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [],
+        }, reasonCode: null,
+      });
+    const commerceState = createRealtimeSalesState(conversationId, pageId, now);
+    const live = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000092",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "So sánh giá CB182 và SV9031 giúp chị.",
+        sourceMessageId: "mid-compare-two", productId: "CB182",
+        modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 2, finalConversationRevision: 3,
+      preSalesRevision: commerceState.revision, commerceState,
+      productId: "CB182", productIds: ["SV9031", "CB182"],
+      catalogVersion: "first-product-only", facts: [
+        fact("CB182", 699_000), fact("SV9031", 799_000),
+        fact("ZX999", 599_000),
+      ], productFacts: null, policyResolution: null, cartReadiness: [], now,
+    });
+    expect(live.context.productBinding).toMatchObject({
+      status: "RESOLVED", productIds: ["CB182", "SV9031"], catalogVersion: null,
+    });
+    const prices = buildTrackCSelectableEvidence({
+      context: live.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT", evaluationAt: now,
+    }).filter(({ capability }) => capability === "PRICE");
+    expect(prices.map(({ subject }) => subject?.productId))
+      .toEqual(["CB182", "SV9031"]);
+    expect(() => validateResponderOutput(live.context, {
+      segments: [{ kind: "VERIFIED_CLAIM",
+        text: prices[1]!.deterministicText!,
+        claimContentHash: prices[0]!.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    }, "PRODUCTION_CONTRACT", now)).toThrow(
+      "TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH",
+    );
+    let stage = 0;
+    const result = await runTrackCStrategyLive({
+      ...live, modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      decisionAt: now,
+      dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER",
+        messageType: "TEXT", text: "So sánh giá CB182 và SV9031 giúp chị.",
+        attachmentCount: 0, occurredAt: now.toISOString() }],
+      checkoutClarificationActive: false,
+      transport: { send: async () => ({
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
+          stage++ === 0
+            ? { replyAct: "ANSWER", goal: "Compare the two verified prices.",
+                proposition: "PRICE", evidenceRefs: prices.map(({ ref }) => ref),
+                continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+            : { answerText: null, factualTexts: [], progressionText: null },
+        ) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
+      }) },
+    });
+    expect(stage).toBe(2);
+    expect(result.reply).toContain("CB182");
+    expect(result.reply).toContain("SV9031");
+    expect(result.reply).toContain("699.000");
+    expect(result.reply).toContain("799.000");
+    expect(result.reply).not.toContain("ZX999");
+    expect(result.reply).not.toContain("599.000");
+    expect(commerceState.cart).toBeNull();
   });
 });
 

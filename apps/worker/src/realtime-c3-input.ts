@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   buildProtectedClaimsFromVerifiedFactSetV1,
   buildProductPresentationEvidenceV1,
@@ -36,6 +37,8 @@ export function buildRealtimeC3Input(input: Readonly<{
   preSalesRevision: number;
   commerceState: SalesCycleRuntimeState;
   productId: string | null;
+  /** Resolved subjects of a multi-product fact request, when present. */
+  productIds?: readonly string[];
   catalogVersion: string | null;
   facts: readonly BusinessFactEnvelopeV1[];
   sizeClaim?: SizeRecommendationProtectedClaimV1 | null;
@@ -56,23 +59,42 @@ export function buildRealtimeC3Input(input: Readonly<{
     preTransitionSalesCycleRevision: input.preSalesRevision,
     finalSalesCycleRevision: input.commerceState.revision,
   });
+  const boundProductIds = [...new Set(input.productIds ??
+    (input.productId === null ? [] : [input.productId]))].sort();
+  if (input.productId !== null && !boundProductIds.includes(input.productId)) {
+    throw new Error("TRACK_C_PRODUCT_BINDING_PRIMARY_MISMATCH");
+  }
   const productBinding = ProductBindingV2Schema.parse({
     schemaVersion: 2,
     contractVersion: "PRODUCT_BINDING_V2",
-    status: input.productId === null ? "UNRESOLVED" : "RESOLVED",
-    productIds: input.productId === null ? [] : [input.productId],
-    catalogVersion: input.catalogVersion,
+    status: boundProductIds.length === 0 ? "UNRESOLVED" : "RESOLVED",
+    productIds: boundProductIds,
+    catalogVersion: boundProductIds.length === 1 ? input.catalogVersion : null,
   });
-  const productClaims = buildProtectedClaimsFromVerifiedFactSetV1({
+  const verifiedProductClaims = buildProtectedClaimsFromVerifiedFactSetV1({
     facts: input.facts,
     sizeClaim: input.sizeClaim ?? null,
     expectedSizeProductId: input.productId,
   }).claims.filter((claim) =>
     claim.type !== "ETA" &&
     claim.scope.kind === "PRODUCT" &&
-    claim.scope.productId === input.productId &&
+    boundProductIds.includes(claim.scope.productId) &&
     Date.parse(claim.provenance.expiresAt) > input.now.getTime()
   );
+  // Legacy protected-claim content hashes describe values alone, so two
+  // products with the same stock or price collide. Scope only C3's new
+  // multi-product selection identity; keep the shared legacy claim stable.
+  const productClaims = boundProductIds.length < 2
+    ? verifiedProductClaims
+    : verifiedProductClaims.map((claim) => ({
+        ...claim,
+        provenance: {
+          ...claim.provenance,
+          contentHash: createHash("sha256")
+            .update(canonicalJsonV1([claim.claimId, claim.provenance.contentHash]))
+            .digest("hex"),
+        },
+      }));
   const bundle = outboundRuntimePolicy(input.policyResolution);
   const cart = input.commerceState.cart;
   const pinnedPolicy = input.commerceState.commerceContext?.policyRef;

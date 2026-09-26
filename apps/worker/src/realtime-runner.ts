@@ -5140,7 +5140,8 @@ export class RealtimeRunner {
         salesCycleRecord !== null &&
         !message.isEcho && handoff === null &&
         nextState.conversationOwner === "BOT" &&
-        resolution.products.length <= 1 &&
+        (resolution.products.length <= 1 ||
+          (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
         !metaMessages.some((unit) => unit.kind === "IMAGE") &&
         (!salesHandled || salesTelemetry?.clarificationCase === true)) {
       try {
@@ -5151,7 +5152,12 @@ export class RealtimeRunner {
           finalConversationRevision: nextState.revision,
           preSalesRevision: salesCycleRecord.stateRevision,
           commerceState: salesCyclePlan?.state ?? salesCycleRecord.state,
-          productId: resolvedProduct?.productId ?? nextState.currentProductId,
+          productId: shouldUseMultiFacts && resolution.products.length > 1
+            ? resolution.products[0]!.productId
+            : resolvedProduct?.productId ?? nextState.currentProductId,
+          ...(shouldUseMultiFacts && resolution.products.length > 1
+            ? { productIds: resolution.products.map(({ productId }) => productId) }
+            : {}),
           catalogVersion: resolvedProduct?.catalogVersion ?? null,
           facts: businessFactEnvelopes,
           sizeClaim: verifiedSizeClaimForTurn,

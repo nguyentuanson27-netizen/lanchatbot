@@ -569,11 +569,12 @@ appendix below describes the completed boundaries in detail.
 - **Runtime call: implemented in the draft.** `realtime-runner.ts` calls the
   shared C3 core after canonical input construction when its gate permits it.
   The production model pin and traffic remain unchanged.
-- **Single-product context.** `ContextV2` carries one `productAttributes` and
-  one `productPresentation`. A reply covering several bound products cannot
-  name them all, so a multi-product answer stops rather than guessing. Closing
-  this needs product-keyed projections and matching producer/binding work, not
-  a field changed to an array.
+- **Multi-product scope: partial.** A text fact request can bind several
+  resolved products and their POS price/stock claims in C3. Each selected
+  claim retains its product scope, and equal values receive distinct C3-only
+  selection hashes. The shared legacy claim hash is unchanged. `ContextV2`
+  still carries one `productAttributes` and one `productPresentation`, so
+  attribute/presentation comparisons across several products remain open.
 - **Negative freeship: implemented for C3 when known.** A canonical current
   cart with a positive shipping fee now yields a cart-bound `FREESHIP` false
   claim; a null fee yields no conclusion. The legacy claim set is unchanged.
