@@ -5610,7 +5610,9 @@ export class RealtimeRunner {
       const productIds = productBindingStatus === "AMBIGUOUS"
         ? candidateProductIds
         : productBindingStatus === "RESOLVED"
-          ? [observedProductId!]
+          ? shouldUseMultiFacts && candidateProductIds.length > 1
+            ? candidateProductIds
+            : [observedProductId!]
           : productBindingStatus === "STALE"
             ? [businessFacts!.productId]
             : [];
@@ -5629,7 +5631,9 @@ export class RealtimeRunner {
         contractVersion: "PRODUCT_BINDING_V2",
         status: productBindingStatus,
         productIds,
-        catalogVersion: resolvedProduct?.catalogVersion ?? null,
+        catalogVersion: productIds.length === 1
+          ? resolvedProduct?.catalogVersion ?? null
+          : null,
       });
       const productPresentation = productFactsV2 === null
         ? null

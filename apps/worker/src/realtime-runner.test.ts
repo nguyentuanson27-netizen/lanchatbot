@@ -3792,6 +3792,10 @@ describe("RealtimeRunner inbound batching", () => {
         (entry: { capability: string }) => entry.capability === "PRICE",
       ).map((entry: { subject: { productId: string } }) => entry.subject.productId))
         .toEqual(["CB182", "SV9031"]);
+      expect(written.contextV2CapturePlan?.capture.context).toMatchObject({
+        productBinding: { status: "RESOLVED", productIds: ["CB182", "SV9031"],
+          catalogVersion: null },
+      });
       expect(persistedCommerce.cart).toBeNull();
       return;
     }
