@@ -578,15 +578,18 @@ appendix below describes the completed boundaries in detail.
 - **Negative freeship: implemented for C3 when known.** A canonical current
   cart with a positive shipping fee now yields a cart-bound `FREESHIP` false
   claim; a null fee yields no conclusion. The legacy claim set is unchanged.
+  Frozen Q024 can still phrase an uncertain negative without this cart-bound
+  source; the DEV70 review keeps that authority gap open.
 - **Current-cart binding: implemented in the runtime input.** C3 receives the
   cart identity, revision, hash, policy source and expiry outside `ContextV2`.
   The final guard and Outbox commit readback recheck that binding. Frozen
   cases without a complete cart cannot state cart-scoped facts.
-- **ETA semantics are inconsistent upstream.** `catalog-projection.ts` sums
-  preparation and transit, while `realtime-product-facts-v2.ts` assigns
-  `etaToCustomer` from preparation bounds alone. Fulfilment projections here
-  report preparation and delivery as separate spans, but the upstream
-  disagreement is unresolved and is a prerequisite for any deadline reasoning.
+- **ETA semantics: preparation and delivery are separated.** Static ProductFacts
+  no longer expose preparation days as `etaToCustomer`; a customer ETA needs a
+  current destination-bound runtime lookup with transit and preparation spans.
+  Deadline reasoning remains unavailable without that complete source. The
+  stateful Luna journey with a city but no transit source does not promise a
+  delivery date.
 - **Media has no transport binding.** Until an attachment result exists, a
   reply must not claim an image was sent.
 
