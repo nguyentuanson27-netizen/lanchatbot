@@ -3316,7 +3316,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3575,20 +3575,20 @@ describe("RealtimeRunner inbound batching", () => {
       baseModel,
       {
         ready: vi.fn(async () => true),
-        resolve: vi.fn(async () => ({
+        resolve: vi.fn(async (query: { productId: string }) => ({
           schemaVersion: 1 as const,
           status: "OK" as const,
           source: "POS_SNAPSHOT" as const,
           observedAt: occurredAt,
           expiresAt: "2099-01-01T00:00:00.000Z",
-          productId: "CB182",
+          productId: query.productId,
           facts: {
             schemaVersion: 1 as const,
-            productId: "CB182",
-            parentProductId: "CB182",
+            productId: query.productId,
+            parentProductId: query.productId,
             offerType: "SET",
             listPriceVnd: null,
-            salePriceVnd: 799_000,
+            salePriceVnd: query.productId === "CB182" ? 799_000 : 699_000,
             sizes: ["M"],
             stockStatus: "IN_STOCK" as const,
             stockQuantity: 2,
@@ -3677,12 +3677,15 @@ describe("RealtimeRunner inbound batching", () => {
         close: vi.fn(async () => undefined),
       },
       {
-        searchText: vi.fn(async () => ({
+        searchText: vi.fn(async (query: string) => ({
           status: "MATCHED" as const,
           matchKind: "EXACT_CODE" as const,
           score: 1,
           gap: null,
-          product,
+          product: query.includes("SV9031")
+            ? { ...product, productId: "SV9031", parentProductId: "SV9031",
+                canonicalCode: "SV9031", title: "Set SV9031" }
+            : product,
         })),
         searchImage: vi.fn(),
       },
@@ -3697,6 +3700,7 @@ describe("RealtimeRunner inbound batching", () => {
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
         verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
+        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE",
         c3: {
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
           transport: { send: c3Send },
@@ -3766,6 +3770,31 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+
+    if (checkoutOwner === "MULTI_PRICE") {
+      const compare = item(40, "So sánh giá CB182 và SV9031 giúp chị.");
+      currentBatch = { ...batch, generation: 11, inboxIds: [compare.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [compare] };
+      vi.setSystemTime(compare.occurredAt);
+      const callsBefore = c3Send.mock.calls.length;
+      expect(await runner.processOne()).toBe(true);
+      expect(c3Send.mock.calls.length - callsBefore).toBe(2);
+      const written = commit.mock.calls.at(-1)![0] as typeof commitInput;
+      const reply = written.metaPlan?.messages.map(({ text }) => text).join(" ");
+      expect(reply).toContain("CB182");
+      expect(reply).toContain("SV9031");
+      expect(reply).toContain("799.000");
+      expect(reply).toContain("699.000");
+      expect(written.metaPlan?.protectedClaimTypes).toContain("PRICE");
+      const strategistRequest = JSON.parse(c3Send.mock.calls[callsBefore]![0].body);
+      const strategistInput = JSON.parse(strategistRequest.contents[0].parts[0].text);
+      expect(strategistInput.selectableEvidence.filter(
+        (entry: { capability: string }) => entry.capability === "PRICE",
+      ).map((entry: { subject: { productId: string } }) => entry.subject.productId))
+        .toEqual(["CB182", "SV9031"]);
+      expect(persistedCommerce.cart).toBeNull();
+      return;
+    }
 
     if (fitMode) {
       const fitEntry = item(40, checkoutOwner === "FIT_UNRELATED"
