@@ -684,12 +684,15 @@ function cartSummary(cart: CartV1): string {
 function checkoutTemplate(
   cart: CartV1,
   draft: SalesCycleRuntimeState["checkoutDraft"] = null,
+  bankTransferAvailable = false,
 ): string {
   const missing = [
     ...(draft?.fullName ? [] : ["Tên:" as const]),
     ...(draft?.phone ? [] : ["SĐT:" as const]),
     ...(draft?.address ? [] : ["Địa chỉ:" as const]),
-    ...(draft?.paymentMethod ? [] : ["Thanh toán: COD hoặc chuyển khoản nhé." as const]),
+    ...(draft?.paymentMethod ? [] : [bankTransferAvailable
+      ? "Thanh toán: COD hoặc chuyển khoản nhé."
+      : "Thanh toán: COD nhé."]),
   ];
   return missing.length > 0
     ? `${cartSummary(cart)}\nChị gửi giúp em các thông tin nhận hàng:\n${missing.join("\n")}`
@@ -736,7 +739,7 @@ function paymentPolicy(
 } | null {
   const bundle = outboundRuntimePolicy(resolution);
   const artifact = bundle?.artifacts.paymentPolicy;
-  if (!bundle || !artifact?.bankTransfer) return null;
+  if (!bundle || !artifact?.bankTransfer || !artifact.methods.includes("BANK_TRANSFER")) return null;
   const ref = bundle.versionReferences.find(({ artifactKind }) =>
     artifact.kind === "PAYMENT_POLICY" && artifactKind === "PAYMENT_POLICY"
   );
@@ -1906,7 +1909,7 @@ export async function evaluateRealtimeSalesCycle(
       if (readiness.outcome !== "READY") {
         return failedOutput(readiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
-      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft, bank !== null),
         { selections: [...verifiedOthers, selected] });
     }
     if (removeItem(input.text)) {
@@ -2293,7 +2296,7 @@ export async function evaluateRealtimeSalesCycle(
       if (mutationReadiness.outcome !== "READY") {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
-      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft, bank !== null),
         { selections: readySelections });
     }
 
@@ -2378,7 +2381,7 @@ export async function evaluateRealtimeSalesCycle(
       if (mutationReadiness.outcome !== "READY") {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
-      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+      return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft, bank !== null),
         { selections: readySelections });
     }
 
@@ -2507,7 +2510,7 @@ export async function evaluateRealtimeSalesCycle(
     if (!acceptReadiness(cartOpenReadiness)) {
       return failedOutput(cartOpenReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
     }
-    return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft),
+    return protectedCartReply((cart) => checkoutTemplate(cart, state.checkoutDraft, bank !== null),
       { selections: [selected] });
   }
 

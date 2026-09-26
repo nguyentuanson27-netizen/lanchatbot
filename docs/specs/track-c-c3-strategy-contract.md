@@ -1048,8 +1048,21 @@ customer profiles. It does not prove that a measurement request should have
 been permitted. The runtime regression now distinguishes verified-chart missing
 measurements, a usable recommendation, absent shop evidence and unrelated turns.
 Body-part-specific concerns beyond the Size Engine's present recommendation
-basis, automatic cart size editing and the original checkout payment wording
-remain separate capabilities; this follow-up does not claim to complete them.
+basis and automatic cart size editing remain separate capabilities; this
+follow-up does not claim to complete them.
+
+### Follow-up: payment choices in the cart reply (2026-09-26)
+
+The cart-opening and cart-edit replies list only payment methods supported by
+the resolved policy. COD remains available; bank transfer appears only when a
+published payment artifact enables it and its version reference resolves. The
+checkout clarification and payment selection use the same resolved authority.
+This changes the older cart reply that listed transfer even with no payment
+artifact. Its protected outbound payload and effect-authorization hash therefore
+change together; the pre-B2.3b differential records that deliberate deviation
+as a violation against its immutable baseline while keeping the original claim
+hashes. A no-artifact and an enabled-transfer cart-opening test exercise both
+branches. No payment effect or payment instruction is created by this wording.
 
 The subsequent actual Luna run exposed a typed bypass: an unresolved `SIZE_FIT`
 decision selected ordinary `ASK SIZE` and asked for body measurements. The

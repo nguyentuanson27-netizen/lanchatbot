@@ -261,6 +261,46 @@ describe("Unicode size selection at the commerce boundary", () => {
 });
 
 describe("no-cart buying journey", () => {
+  it("advertises transfer at cart opening only with a resolved transfer policy", async () => {
+    const initial = createRealtimeSalesState(conversationId, pageId, now);
+    const noTransfer = await evaluateRealtimeSalesCycle(input(initial, "Chị lấy CB182 size M.", "cod-only"));
+    expect(noTransfer.plan?.state.stage).toBe("CART_OPEN");
+    expect(noTransfer.messages[0]).toMatchObject({ kind: "TEXT", text: expect.stringContaining("Thanh toán: COD nhé.") });
+    expect(noTransfer.messages[0]).not.toMatchObject({ text: expect.stringContaining("chuyển khoản") });
+
+    const transferPolicyResolution = {
+      ...policyResolution,
+      bundle: {
+        ...policyResolution.bundle!,
+        versionReferences: [{
+          artifactKey: "payment-policy", artifactKind: "PAYMENT_POLICY", versionId: "payment-v1",
+          versionNumber: 1, contentHash: `sha256:${"b".repeat(64)}`,
+          pointerId: "payment-pointer", pointerRevision: 1,
+        }],
+        artifacts: {
+          ...policyResolution.bundle!.artifacts,
+          paymentPolicy: {
+            schemaVersion: 1, kind: "PAYMENT_POLICY", methods: ["COD", "BANK_TRANSFER"],
+            bankTransfer: {
+              bankName: "Example Bank", accountNumber: "1234567890", accountHolder: "EXAMPLE SHOP",
+              qrAssetUrl: "https://example.com/payment.png", receiptInstruction: "Gửi biên nhận",
+              receiptRequiresHumanReview: true,
+            },
+            sourceMetadata: metadata,
+          },
+        },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const withTransfer = await evaluateRealtimeSalesCycle({
+      ...input(initial, "Chị lấy CB182 size M.", "transfer-enabled"),
+      policyResolution: transferPolicyResolution,
+    });
+    expect(withTransfer.plan?.state.stage).toBe("CART_OPEN");
+    expect(withTransfer.messages[0]).toMatchObject({
+      kind: "TEXT", text: expect.stringContaining("Thanh toán: COD hoặc chuyển khoản nhé."),
+    });
+  });
+
   it("keeps discovery and variant choice outside the cart, then opens one cart on commitment", async () => {
     const initial = createRealtimeSalesState(conversationId, pageId, now);
     const price = await evaluateRealtimeSalesCycle(input(initial, "CB182 giá bao nhiêu?", "journey-price"));
@@ -1328,7 +1368,7 @@ describe("realtime Phase 3 sales cycle", () => {
     ]));
   });
 
-  it("r31.3 replays the live sales-cycle effect seam without changing the established cart-open transaction", async () => {
+  it("r31.3 records the policy-bound checkout wording deviation against the immutable cart-open baseline", async () => {
     const capturedInput = {
       text: "chốt CB182 size M",
       eventKey: "event-open",
@@ -1364,6 +1404,7 @@ describe("realtime Phase 3 sales cycle", () => {
         deliveredMessageCount: 1,
       },
     };
+    let currentSnapshot: RealtimeReplySnapshot | null = null;
     const result = await runRealtimeReplyDifferential({
       capturedInput,
       baseline: async () => preB23bBaseline,
@@ -1373,17 +1414,34 @@ describe("realtime Phase 3 sales cycle", () => {
           capture.text,
           capture.eventKey,
         ));
-        return salesCycleSnapshot(output, capture.eventKey);
+        currentSnapshot = salesCycleSnapshot(output, capture.eventKey);
+        return currentSnapshot;
       },
-      permittedDifferences: [],
+      permittedDifferences: [{
+        code: "OUTBOUND_MESSAGES_CHANGED",
+        reasonCode: "C3_CHECKOUT_PAYMENT_POLICY_ONLY_COD",
+      }],
     });
 
     expect(result).toEqual({
       contractVersion: "REALTIME_REPLY_DIFFERENTIAL_V1",
-      status: "MATCH",
+      status: "VIOLATION",
       sideEffects: "DISABLED",
-      differences: [],
+      differences: [
+        { code: "OUTBOUND_MESSAGES_CHANGED", disposition: "INTENTIONAL",
+          reasonCode: "C3_CHECKOUT_PAYMENT_POLICY_ONLY_COD" },
+        { code: "EFFECT_AUTHORIZATION_CHANGED", disposition: "VIOLATION",
+          reasonCode: null },
+      ],
     });
+    expect(currentSnapshot!.messages[0]).toMatchObject({
+      kind: "TEXT", text: expect.stringContaining("Thanh toán: COD nhé."),
+    });
+    expect(currentSnapshot!.messages[0]).not.toMatchObject({
+      text: expect.stringContaining("chuyển khoản"),
+    });
+    expect(currentSnapshot!.protectedClaimHashes).toEqual(preB23bBaseline.protectedClaimHashes);
+    expect(currentSnapshot!.commitOutcome).toBe("COMMITTABLE");
     expect(preB23bBaseline.effectAuthorizationHashes.length).toBeGreaterThan(0);
   });
 
@@ -1544,14 +1602,17 @@ describe("realtime Phase 3 sales cycle", () => {
       } else if (capture.name === "set") {
         expect(result.status).toBe("VIOLATION");
         expect(result.differences.map(({ code }) => code)).toEqual([
+          "OUTBOUND_MESSAGES_CHANGED",
           "EFFECT_AUTHORIZATION_CHANGED",
         ]);
         expect(candidate).toMatchObject({
-          messages: capture.baseline.messages,
           verifiedFactHashes: capture.baseline.verifiedFactHashes,
           protectedClaimHashes: capture.baseline.protectedClaimHashes,
           commitOutcome: "COMMITTABLE",
           protectedOutbound: capture.baseline.protectedOutbound,
+        });
+        expect(candidate.messages[0]).toMatchObject({
+          kind: "TEXT", text: expect.stringContaining("Thanh toán: COD nhé."),
         });
       } else {
         expect(result.status).toBe("VIOLATION");
