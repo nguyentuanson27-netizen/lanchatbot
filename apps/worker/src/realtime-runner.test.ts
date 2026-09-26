@@ -3915,6 +3915,10 @@ describe("RealtimeRunner inbound batching", () => {
       expect(persistedCommerce.stage).toBe("CART_OPEN");
       expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
       const cartId = persistedCommerce.cart!.value.cartId;
+      const committedTurns = commit.mock.calls.length;
+      expect(await runner.processOne()).toBe(true);
+      expect(commit).toHaveBeenCalledTimes(committedTurns);
+      expect(persistedCommerce.cart?.value.cartId).toBe(cartId);
       for (const [offset, text, expectedStage] of [
         [0, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh", "CART_OPEN"],
         [1, "COD", "ORDER_PREVIEW"],

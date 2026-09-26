@@ -26,3 +26,6 @@ test still covers duplicate inbound and direct purchase.
 
 Verification: `realtime-runner.test.ts` passed 71/71; worker TypeScript
 check passed. The run used no live service.
+# Follow-up — 2026-09-26
+
+The stateful `RealtimeRunner` journey now replays the exact committed inbound batch immediately after opening the cart. The second processing attempt creates no additional commit and retains the same cart ID. The following checkout and confirmation turns still use that cart. The focused `VARIANT_RECALL` runtime test passed after this assertion.
