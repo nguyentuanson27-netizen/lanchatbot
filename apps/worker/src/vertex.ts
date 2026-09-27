@@ -655,6 +655,7 @@ export const SHADOW_SYSTEM_INSTRUCTION = [
   "Neu buyingIntent.decision=COMMITTED thi requestedAction bat buoc khac NONE: OPEN_CART cho lan mua dau, ADD_TO_CART khi them dong san pham vao gio da mo, SET_QUANTITY chi khi sua so luong gio da mo. Khong dung SET_QUANTITY de mo gio dau tien.",
   "Doi size/mau cua dong da co trong gio la sua lua chon variant, khong phai cam ket mua moi: dien buyingIntent.decision=NONE va requestedAction=NONE, trich size/mau khach chon vao businessFactQuery. Xac nhan ban xem truoc don dung purchaseConfirmation=CONFIRM, buyingIntent.decision=NONE va requestedAction=NONE; khong xem 'ok' la yeu cau mo gio moi.",
   "variantIntent chi phan loai LUA CHON size/mau trong tin khach moi nhat: CHANGE khi khach yeu cau doi lua chon dang co, SELECT khi chon cho lan dau, QUESTION khi chi hoi, COMMENT khi chi nhan xet, NONE neu khong co. size/color la gia tri khach CHON hoac DOI, khong lay size/mau chi duoc hoi hoac nhan xet. evidenceText la doan nguyen van chua lua chon/doi; neu NONE thi size/color/evidenceText deu null. Cau 'chon M nhung S con khong' co variantIntent.size=M va businessFactQuery.size=S.",
+  "routingIntent phan loai tin CUSTOMER moi nhat: POST_SALE neu hoi ve don cu/hang da nhan, HUMAN_REQUEST neu yeu cau nguoi tu van, PRE_SALE neu dang sua gio chua chot hoac tu van truoc mua; khong ro thi UNKNOWN. Tu choi nhan vien cu nhung doi gap nhan vien khac van la HUMAN_REQUEST. Gio dang mo khong che yeu cau hoan tien cho hang da nhan. evidenceText la menh de nguyen van quyet dinh routing; UNKNOWN thi null.",
   "quantity chi dien khi khach noi ro so luong tu 1 den 20; khong ro thi null. Moi buyingIntent khac NONE phai co evidenceText nguyen van trong tin customer moi nhat.",
   "Model chi cung cap evidence buyingIntent; app va guard deterministic moi duoc quyet dinh mo gio hay tao side effect.",
   "protectedClaimIds chi duoc chua ID claim da tin cay; o buoc semantic khong co claim Size Engine nao, nen bat buoc de mang rong.",
@@ -877,7 +878,7 @@ export const AGENT_RESPONSE_SCHEMA = {
     },
     salesSignals: {
       type: "OBJECT",
-      required: ["checkoutExtraction", "purchaseConfirmation", "buyingIntent", "variantIntent"],
+      required: ["checkoutExtraction", "purchaseConfirmation", "buyingIntent", "variantIntent", "routingIntent"],
       properties: {
         checkoutExtraction: {
           type: "OBJECT",
@@ -951,6 +952,15 @@ export const AGENT_RESPONSE_SCHEMA = {
             act: { type: "STRING", enum: ["NONE", "SELECT", "CHANGE", "QUESTION", "COMMENT"] },
             size: { type: "STRING", nullable: true },
             color: { type: "STRING", nullable: true },
+            evidenceText: { type: "STRING", nullable: true },
+            confidence: { type: "NUMBER" },
+          },
+        },
+        routingIntent: {
+          type: "OBJECT",
+          required: ["act", "evidenceText", "confidence"],
+          properties: {
+            act: { type: "STRING", enum: ["PRE_SALE", "POST_SALE", "HUMAN_REQUEST", "UNKNOWN"] },
             evidenceText: { type: "STRING", nullable: true },
             confidence: { type: "NUMBER" },
           },

@@ -352,6 +352,18 @@ export const AgentSalesSignalsV1Schema = z.object({
   buyingIntent: AgentBuyingIntentV1Schema.optional(),
   // Older persisted proposals remain readable; current producer emits it.
   variantIntent: AgentVariantIntentV1Schema.optional(),
+  // Earlier persisted proposals remain readable. New generations classify
+  // routing on the latest customer turn with an exact source span.
+  routingIntent: z.object({
+    act: z.enum(["PRE_SALE", "POST_SALE", "HUMAN_REQUEST", "UNKNOWN"]),
+    evidenceText: z.string().trim().min(1).max(1_000).nullable(),
+    confidence: z.number().min(0).max(1),
+  }).strict().superRefine((intent, context) => {
+    if ((intent.act === "UNKNOWN") !== (intent.evidenceText === null)) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["evidenceText"],
+        message: "known routing intent requires evidence; unknown has none" });
+    }
+  }).optional(),
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 

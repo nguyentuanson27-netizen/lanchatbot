@@ -3341,7 +3341,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3600,6 +3600,7 @@ describe("RealtimeRunner inbound batching", () => {
       },
     } as unknown as RuntimePolicyResolution;
     const baseModel = replyModel();
+    const quotaReserve = vi.fn(async () => true);
     const cartSelectionSizes: (string | null)[] = [];
     const runner = new RealtimeRunner(
       inbox,
@@ -3738,7 +3739,7 @@ describe("RealtimeRunner inbound batching", () => {
           transport: { send: c3Send },
         },
       },
-      undefined,
+      { reserve: quotaReserve, close: vi.fn(async () => undefined) },
       checkoutOwner === "LONG_HISTORY" ? {
         ready: vi.fn(async () => true),
         load: vi.fn(async () => Array.from({ length: 30 }, (_, index) => ({
@@ -4054,11 +4055,87 @@ describe("RealtimeRunner inbound batching", () => {
     });
     expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
     expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
+    if (checkoutOwner.startsWith("EARLY_")) {
+      const text = checkoutOwner === "EARLY_ROUTE"
+        ? "Đơn cũ chị nhận hôm qua bị lỗi, giỏ mới cứ để đó nhé."
+        : checkoutOwner === "EARLY_HUMAN"
+          ? "Không muốn gặp nhân viên cũ, cho tôi gặp người khác."
+          : checkoutOwner === "EARLY_FALSE_POST"
+            ? "Size L hơi rộng, chị đang cân nhắc."
+            : checkoutOwner === "EARLY_FALSE_HUMAN"
+              ? "Chị không muốn gặp nhân viên."
+              : checkoutOwner === "EARLY_QUOTA"
+                ? "Giỏ này giao về Hội An mất bao lâu?"
+                : "Chị còn phân vân mẫu trong giỏ.";
+      if (checkoutOwner === "EARLY_ROUTE") expect(isPostSaleRequest(text, true)).toBe(false);
+      const afterSaleEntry = item(43, text);
+      currentBatch = { ...batch, generation: 13,
+        inboxIds: [afterSaleEntry.inboxId], firstReceiveSequence: 43,
+        lastReceiveSequence: 43, items: [afterSaleEntry] };
+      const sourceModel = replyModel();
+      if (checkoutOwner === "EARLY_QUOTA") quotaReserve.mockResolvedValueOnce(false);
+      else if (checkoutOwner === "EARLY_PROVIDER_ERROR") {
+        vi.mocked(baseModel.generate).mockRejectedValueOnce(new Error("VERTEX_UNAVAILABLE"));
+      }
+      else vi.mocked(baseModel.generate).mockImplementationOnce(async (...args) => {
+        const generated = await sourceModel.generate(...args);
+        return { ...generated, proposal: { ...generated.proposal,
+          salesSignals: {
+            checkoutExtraction: {
+              fullName: { value: null, evidenceText: null, confidence: 0 },
+              phone: { value: null, evidenceText: null, confidence: 0 },
+              address: { value: null, evidenceText: null, confidence: 0 },
+              paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+            },
+            purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null,
+              confidence: 0 },
+            routingIntent: checkoutOwner === "EARLY_ROUTE"
+              ? { act: "POST_SALE", evidenceText:
+                  "Đơn cũ chị nhận hôm qua bị lỗi", confidence: 0.99 }
+              : checkoutOwner === "EARLY_HUMAN"
+                ? { act: "HUMAN_REQUEST", evidenceText:
+                    "cho tôi gặp người khác", confidence: 0.99 }
+                : checkoutOwner === "EARLY_FALSE_POST"
+                  ? { act: "POST_SALE", evidenceText:
+                      "Size L hơi rộng", confidence: 0.99 }
+                  : { act: "HUMAN_REQUEST", evidenceText:
+                      "không muốn gặp nhân viên", confidence: 0.99 },
+          },
+        } };
+      });
+      const beforeProducer = vi.mocked(baseModel.generate).mock.calls.length;
+      const beforeQuota = quotaReserve.mock.calls.length;
+      const beforeC3 = c3Send.mock.calls.length;
+      const beforeCart = structuredClone(persistedCommerce);
+      vi.setSystemTime(afterSaleEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(vi.mocked(baseModel.generate).mock.calls.length - beforeProducer)
+        .toBe(checkoutOwner === "EARLY_QUOTA" ? 0 : 1);
+      expect(quotaReserve.mock.calls.length - beforeQuota).toBe(1);
+      expect(persistedCommerce).toEqual(beforeCart);
+      if (checkoutOwner === "EARLY_QUOTA") {
+        expect(c3Send.mock.calls.length).toBe(beforeC3);
+        expect(persistedState.conversationOwner).toBe("BOT");
+        return;
+      }
+      if (checkoutOwner === "EARLY_ROUTE" || checkoutOwner === "EARLY_HUMAN") {
+        expect(c3Send.mock.calls.length).toBe(beforeC3);
+        expect(persistedState.conversationOwner).toBe("HUMAN");
+      } else {
+        expect(persistedState.conversationOwner).toBe("BOT");
+      }
+      if (checkoutOwner === "EARLY_ROUTE") {
+        expect(persistedState.salesStage).toBe("POST_SALE");
+      }
+      return;
+    }
     if (checkoutOwner === "HUMAN") {
       persistedState = { ...persistedState, conversationOwner: "HUMAN",
         ownerReason: "AGENT_HANDOFF", ownerLeaseUntil: "2026-07-22T03:00:00.000Z" };
       const beforeCommerce = structuredClone(persistedCommerce);
       const beforeModelCalls = c3Send.mock.calls.length;
+      const beforeProducerCalls = vi.mocked(baseModel.generate).mock.calls.length;
+      const beforeQuotaCalls = quotaReserve.mock.calls.length;
       for (const [offset, text] of [
         "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh", "COD", "ok",
       ].entries()) {
@@ -4076,6 +4153,8 @@ describe("RealtimeRunner inbound batching", () => {
         expect(persistedCommerce).toEqual(beforeCommerce);
       }
       expect(c3Send.mock.calls.length).toBe(beforeModelCalls);
+      expect(vi.mocked(baseModel.generate).mock.calls.length).toBe(beforeProducerCalls);
+      expect(quotaReserve.mock.calls.length).toBe(beforeQuotaCalls);
       return;
     }
     const detailsEntry = item(43, "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh");

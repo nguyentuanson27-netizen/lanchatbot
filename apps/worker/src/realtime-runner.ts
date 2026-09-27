@@ -567,10 +567,35 @@ export function isPostSaleRequest(value: string, hasOpenCart = false): boolean {
 
 function requestsHuman(text: string): boolean {
   const folded = asciiFold(text);
-  if (/\b(?:khong|ko|k|chua)\s+(?:can|muon|gap|goi|noi chuyen voi)\s+(?:nhan vien|nguoi tu van|shop)\b/u.test(folded)) {
+  if (/\b(?:khong|ko|k|chua)\s+(?:can|muon|gap|goi|noi chuyen voi|(?:can|muon)\s+gap)\s+(?:nhan vien|nguoi tu van|shop)\b/u.test(folded)) {
     return false;
   }
   return /\b(?:nhan vien|nguoi tu van|gap shop|goi cho)\b/u.test(folded);
+}
+
+type CustomerRoutingAct = "POST_SALE" | "HUMAN_REQUEST";
+
+function validatedCustomerRouting(
+  text: string,
+  signals: AgentProposalV1["salesSignals"] | null | undefined,
+  hasOpenCart: boolean,
+): CustomerRoutingAct | null {
+  const intent = signals?.routingIntent;
+  // A PRE_SALE model label never vetoes an existing safety handoff.
+  if (!intent || (intent.act !== "POST_SALE" &&
+      intent.act !== "HUMAN_REQUEST") || intent.confidence < 0.85 ||
+      !intent.evidenceText ||
+      !text.normalize("NFC").includes(intent.evidenceText.normalize("NFC"))) {
+    return null;
+  }
+  if (intent.act === "POST_SALE" && hasOpenCart &&
+      !/\b(?:don cu|don truoc|don da|hang da nhan|da nhan|moi nhan|nhan hom qua|giao roi|da giao|van don)\b/u
+        .test(asciiFold(intent.evidenceText))) return null;
+  if (intent.act === "HUMAN_REQUEST" &&
+      !requestsHuman(intent.evidenceText) &&
+      !/\b(?:gap|noi chuyen voi)\s+(?:nguoi|ban|tu van vien)\s+khac\b/u
+        .test(asciiFold(intent.evidenceText))) return null;
+  return intent.act;
 }
 
 /** Only after-sales receives one holding reply; every other handoff stays silent. */
@@ -3200,6 +3225,54 @@ export class RealtimeRunner {
       );
       return batchCommitStatus(result);
     }
+    // On the transferred open-cart branch, use the existing producer before
+    // post-sale routing and product resolution. The pure conversation-engine
+    // preflight applies the observed tag and HUMAN lease first, so a human-
+    // owned turn never reaches the model. The generated proposal is reused
+    // later in this turn; there is no second producer call.
+    const earlyCartInput = this.options.c3 !== null && !message.isEcho &&
+      (salesCycleRecord?.state.stage === "CART_OPEN" ||
+        salesCycleRecord?.state.stage === "ORDER_PREVIEW") &&
+      message.attachments.length === 0 && !message.adsContext &&
+      !mediaInputLimitExceeded && preSalePolicyIntent === null &&
+      customerUrlDecision.disposition === "CONTINUE" &&
+      customerUrlDecision.items.length === 0 &&
+      !hasExplicitProductReference(message.text ?? "") &&
+      explicitCustomerBusinessIntent(message.text ?? "") !== "PRICE";
+    const earlyPreflight = earlyCartInput ? applyInboundEvent({
+      state: authorityState,
+      expectedRevision: authorityState.revision,
+      fence: Math.max(authorityState.lastFence + 1, batch.lastReceiveSequence),
+      event: {
+        eventKey: message.eventKey, messageId: message.messageId,
+        occurredAt: message.occurredAt,
+        receiveSequence: batch.lastReceiveSequence,
+        actor: "CUSTOMER", journey: "PRE_SALE",
+        requestedHandoffReason: null, requestedSalesStage: null,
+        salesStageTrigger: "NORMAL", productId: null, objectionType: "NONE",
+      },
+      tagObservation: observation,
+      now,
+    }) : null;
+    let earlyInitial: Awaited<ReturnType<RealtimeModelPort["generate"]>> | null = null;
+    let earlyInitialError: unknown = null;
+    let earlyAttempted = false;
+    let earlyQuotaDenied = false;
+    if (earlyPreflight?.status === "APPLIED" && earlyPreflight.authorization.allowEvaluate) {
+      if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+        earlyQuotaDenied = true;
+      } else {
+        earlyAttempted = true;
+        try {
+          earlyInitial = await this.model.generate(modelContext, this.options.promptVersion);
+        } catch (error) {
+          earlyInitialError = error;
+        }
+      }
+    }
+    const earlyRouting = earlyInitial === null ? null : validatedCustomerRouting(
+      message.text ?? "", earlyInitial.proposal.salesSignals, true,
+    );
     const mediaPartialResolutionPolicy =
       activeMediaPartialResolutionPolicy(policyResolution);
     let customerUrlDisposition: CustomerUrlDisposition = customerUrlDecision.disposition;
@@ -3252,8 +3325,10 @@ export class RealtimeRunner {
     const resolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
-        isPostSaleRequest(message.text ?? "", salesCycleRecord?.state.stage === "CART_OPEN" ||
-          salesCycleRecord?.state.stage === "ORDER_PREVIEW") ||
+        (earlyRouting === "POST_SALE" || earlyRouting === "HUMAN_REQUEST" ||
+          (earlyRouting === null && isPostSaleRequest(message.text ?? "",
+            salesCycleRecord?.state.stage === "CART_OPEN" ||
+              salesCycleRecord?.state.stage === "ORDER_PREVIEW"))) ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
       : combinedCustomerUrlResolution ?? await this.resolveProducts(
@@ -3330,6 +3405,7 @@ export class RealtimeRunner {
       commerceRuntimeContext?.status === "READY" ? "NONE" : undefined,
       salesCycleRecord?.state.stage === "CART_OPEN" ||
         salesCycleRecord?.state.stage === "ORDER_PREVIEW",
+      earlyRouting,
     );
     const applied = applyInboundEvent({
       state: authorityState,
@@ -3443,13 +3519,24 @@ export class RealtimeRunner {
     let c3CartSelected = false;
     let modelNegotiationProposal: ModelNegotiationProposalV1 | null = null;
     let buyingSignalOverride = false;
-    let modelCalled = false;
+    let modelCalled = earlyAttempted;
     let modelVersion: string | null = null;
     let modelLatencyMs = 0;
     let modelPromptTokens = 0;
     let modelOutputTokens = 0;
     let modelTotalTokens = 0;
     let hasModelTokenUsage = false;
+    if (earlyInitial) {
+      modelVersion = earlyInitial.modelVersion;
+      modelLatencyMs = earlyInitial.latencyMs;
+      modelPromptTokens = earlyInitial.tokenUsage.promptTokenCount ?? 0;
+      modelOutputTokens = earlyInitial.tokenUsage.candidatesTokenCount ?? 0;
+      modelTotalTokens = earlyInitial.tokenUsage.totalTokenCount ??
+        modelPromptTokens + modelOutputTokens;
+      hasModelTokenUsage = Object.values(earlyInitial.tokenUsage).some(
+        (value) => typeof value === "number" && Number.isFinite(value),
+      );
+    }
     let initialVertexFallbackUsed = false;
     let groundedFallbackUsed = false;
     let groundedDraftFallbackUsed = false;
@@ -4138,8 +4225,9 @@ export class RealtimeRunner {
         const skipsModel = directProductInfo || imageRequest !== null;
         if (
           !skipsModel &&
-          this.quota &&
-          !(await this.quota.reserve(claim.pageId, now))
+          (earlyQuotaDenied ||
+            (!earlyAttempted && this.quota &&
+              !(await this.quota.reserve(claim.pageId, now))))
         ) {
           const result = await this.runtime.commit(
             {
@@ -4169,20 +4257,22 @@ export class RealtimeRunner {
         } else {
           modelCalled = true;
           try {
-            const initial = await this.model.generate(
-              modelContext,
-              this.options.promptVersion,
+            if (earlyAttempted && earlyInitial === null) throw earlyInitialError;
+            const initial = earlyInitial ?? await this.model.generate(
+              modelContext, this.options.promptVersion,
             );
-            modelVersion = initial.modelVersion;
-            modelLatencyMs += initial.latencyMs;
-            modelPromptTokens += initial.tokenUsage.promptTokenCount ?? 0;
-            modelOutputTokens += initial.tokenUsage.candidatesTokenCount ?? 0;
-            modelTotalTokens += initial.tokenUsage.totalTokenCount ??
-              (initial.tokenUsage.promptTokenCount ?? 0) +
-                (initial.tokenUsage.candidatesTokenCount ?? 0);
-            hasModelTokenUsage ||= Object.values(initial.tokenUsage).some(
-              (value) => typeof value === "number" && Number.isFinite(value),
-            );
+            if (earlyInitial === null) {
+              modelVersion = initial.modelVersion;
+              modelLatencyMs += initial.latencyMs;
+              modelPromptTokens += initial.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += initial.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += initial.tokenUsage.totalTokenCount ??
+                (initial.tokenUsage.promptTokenCount ?? 0) +
+                  (initial.tokenUsage.candidatesTokenCount ?? 0);
+              hasModelTokenUsage ||= Object.values(initial.tokenUsage).some(
+                (value) => typeof value === "number" && Number.isFinite(value),
+              );
+            }
             proposal = {
               ...initial.proposal,
               productId:
@@ -6952,10 +7042,13 @@ export class RealtimeRunner {
     commerceDerivedStage?: SalesStage,
     commerceDerivedObjectionType?: ObjectionType,
     hasOpenCart = false,
+    routingAct: CustomerRoutingAct | null = null,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
-    const postSale = isPostSaleRequest(message.text ?? "", hasOpenCart);
-    const humanRequest = requestsHuman(text);
+    const postSale = routingAct === "POST_SALE" ||
+      (routingAct === null && isPostSaleRequest(message.text ?? "", hasOpenCart));
+    const humanRequest = routingAct === "HUMAN_REQUEST" ||
+      (routingAct === null && requestsHuman(text));
     return {
       eventKey: message.eventKey,
       messageId: message.messageId,

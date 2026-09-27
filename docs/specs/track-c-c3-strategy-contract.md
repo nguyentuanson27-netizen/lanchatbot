@@ -1284,3 +1284,29 @@ candidate with `READY` outbound readiness emits one structured diagnostic
 containing the reply hash, selected claim types and source revisions. The
 candidate remains unsent. Human ownership still prevents both model calls
 and cart mutations on later turns.
+
+### Follow-up: early routing on the open-cart C3 branch (2026-09-27)
+
+When C3 is enabled and a plain customer text arrives with an open cart or
+preview, the ordinary typed producer may run before post-sale routing and
+product resolution. A pure conversation-engine preflight first applies the
+observed tag, lease, duplicate/stale check and ownership rules; a human-owned
+turn never calls the producer. Its result is reused by later model consumers,
+and the generation quota is reserved once. Explicit product-code, price-card,
+media, customer-URL and pre-sale-policy routes retain their existing no-call
+boundaries.
+
+`routingIntent` is optional in persisted proposals and required in new
+generations. Only a high-confidence `POST_SALE` or `HUMAN_REQUEST` with an exact
+customer span can add an early handoff. With a cart open, post-sale evidence
+must refer to an existing order or received item; a size comment about the
+current cart cannot become after-sales by model label alone. A human request
+must express a positive request, including one for another person after
+rejecting a previous employee. `PRE_SALE` and `UNKNOWN` cannot veto an existing
+deterministic safety handoff. The conversation engine still owns the handoff
+and subsequent no-call HUMAN state. These source checks are authority guards
+for the model result, not a second classifier of the full conversation.
+
+This is a bounded first transfer. Other early routing paths, same-turn
+budget/preference/rejection context and product-resolution decisions still
+use their prior consumers and need P06 work and runtime Luna verification.
