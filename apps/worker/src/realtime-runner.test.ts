@@ -18,6 +18,7 @@ import {
   explicitCustomerBusinessIntent,
   explicitCustomerBusinessIntents,
   explicitCustomerImageIntent,
+  extractVariantMentions,
   isLegacyUnaccentedProductInfoReply,
   isPostSaleRequest,
   groupRealtimeMetaMessagesV2,
@@ -64,6 +65,30 @@ import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 describe("RealtimeRunner", () => {
+  it("keeps a chosen variant separate from a different size question", () => {
+    const text = "Chị chọn size M, nhưng size S còn không?";
+    const proposal = {
+      schemaVersion: 1, intent: "variant_selection", conversationStage: "PRODUCT_MATCHED",
+      productId: "CB182", action: "REPLY", reply: "Dạ chị.", attachments: [],
+      handoffReason: null,
+      businessFactQuery: { intent: "SIZE", offerType: null,
+        color: null, size: "S", deliveryRegion: null },
+      salesSignals: { checkoutExtraction: {
+        fullName: { value: null, evidenceText: null, confidence: 0 },
+        phone: { value: null, evidenceText: null, confidence: 0 },
+        address: { value: null, evidenceText: null, confidence: 0 },
+        paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+      }, purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null, confidence: 0 },
+      variantIntent: { act: "SELECT", size: "M", color: null,
+        evidenceText: "Chị chọn size M", confidence: 0.99 } },
+    } satisfies AgentProposalV1;
+    expect(extractVariantMentions(text, proposal)).toEqual({ size: "M", color: null });
+    expect(extractVariantMentions("Size L hơi rộng, chị chỉ đang hỏi thôi.", {
+      ...proposal, salesSignals: { ...proposal.salesSignals,
+        variantIntent: { act: "COMMENT", size: null, color: null,
+          evidenceText: "Size L hơi rộng", confidence: 0.99 } },
+    })).toEqual({ size: null, color: null });
+  });
   it("accepts a standalone checkout phone only with an open cart", () => {
     const phone = "0984997797";
     expect(classifyCustomerUrlsForInbound(phone, "CLASSIFIED_ALLOWLIST_V1", false)

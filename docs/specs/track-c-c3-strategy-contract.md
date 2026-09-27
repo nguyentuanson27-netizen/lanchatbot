@@ -1251,7 +1251,10 @@ chosen size/color and exact text span. Legacy persisted proposals may omit
 it. On a cart edit, a validated change narrows the size/color used by the
 existing deterministic edit branch. A question or comment must not trigger
 that branch even if the old edit phrase detector matches the words. The
-existing deterministic edit authorization, POS selection, cart line binding,
+same selected clause scopes the considered-variant readback, so “chọn M,
+nhưng S còn không?” keeps M as the customer's choice while S remains the
+stock question. Question and comment acts do not set a considered variant.
+The existing deterministic edit authorization, POS selection, cart line binding,
 revision check, preview invalidation and receipt remain required. A model
 label and text span alone do not authorize a new edit phrasing; broader
 semantic authorization requires a separate authority contract.

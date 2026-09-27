@@ -1239,8 +1239,24 @@ function profileHasBodyMeasurements(profile: CustomerProfileV1 | null): boolean 
 
 export function extractVariantMentions(
   text: string,
-  _proposal: AgentProposalV1,
+  proposal: AgentProposalV1,
 ): { readonly size: string | null; readonly color: string | null } {
+  const chosen = proposal.salesSignals?.variantIntent;
+  if (chosen) {
+    if ((chosen.act !== "SELECT" && chosen.act !== "CHANGE") ||
+        chosen.evidenceText === null || !text.includes(chosen.evidenceText)) {
+      return { size: null, color: null };
+    }
+    const size = chosen.size?.trim().toUpperCase() ?? null;
+    const color = chosen.color?.trim().toLocaleLowerCase("vi-VN") ?? null;
+    const span = normalizedVietnamese(chosen.evidenceText);
+    const sizeMentioned = size === null || [...span.matchAll(
+      /(?:^|[^\p{L}\p{N}])(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})(?=$|[^\p{L}\p{N}])/giu,
+    )].some((match) => match[1]?.toUpperCase() === size);
+    const colorMentioned = color === null || span.includes(normalizedVietnamese(color));
+    return sizeMentioned && colorMentioned
+      ? { size, color } : { size: null, color: null };
+  }
   const normalized = normalizedVietnamese(text);
   const labelledSize = normalized.match(
     /(?:\bsize|\bsz|\bkich\s*co|\bco)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
