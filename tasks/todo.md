@@ -6,6 +6,8 @@ Các task P là việc còn phải thực hiện theo kế hoạch mới; checkb
 
 Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. Chỉ hoàn thành cập nhật tài liệu; các lỗi ứng dụng dưới đây chưa được sửa.
 
+Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
+
 ## Chuẩn bị đã làm trong lượt lập kế hoạch
 
 - [x] Kiểm tra local/remote HEAD, main và ancestry `88a1ce4`.
@@ -29,22 +31,24 @@ Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), 
 
 ## 3. Hành trình bán hàng
 
-- [ ] P05 — Luna chạy intent/extraction và C3 thật; external fake ports, full history/calls.
+- [ ] P05 — Luna chạy producer/C3 thật trên nhánh được gọi; fake ports, full history/state/calls/skip reasons; tái hiện lỗi baseline được phép, không đòi P06 pass.
 - [ ] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness.
 - [ ] P06 — Một owner trên nhánh chuyển; no-cart→commitment→edit→checkout→confirm đúng state.
+- [ ] P06 — Extraction trước routing hậu mãi/handoff, giữ/loại current product và session update; consumer dùng kết quả đã validate, trusted ownership/no-call vẫn đi trước.
+- [ ] P06 — Context cùng lượt đúng trong state/prompt trước P07: budget/preference/correction/rejection; differential C3-off cho timing, không đợi P09.
 - [ ] P06 — Typed edit producer → kernel `SET_LINE_VARIANT` hiện có, đúng line/value/source/revision; nhận xét không sửa giỏ, sửa rõ phải làm được.
 - [ ] P06 — Giữ chọn M + hỏi S theo từng mệnh đề; không dùng dấu hỏi/phủ định toàn tin để xóa commitment hợp lệ.
 - [ ] P06 — Checkout đúng recipient role và payment selection; field label không thành tên, địa chỉ Hội An không xóa COD; không khôi phục fallback cũ thiếu semantic checks.
 - [ ] P06 — Handoff đúng phạm vi phủ định/đối tượng; giỏ mở không che hậu mãi; giữ human-owner no-call preflight.
 - [ ] P07 — Chê giá/trải nghiệm/fit: hỏi hữu ích, evidence liên quan, lời đáp tự nhiên.
 - [ ] P08a — Tìm phương án theo budget/tiêu chí, lookup thật, no-result đúng.
-- [ ] P08a/P09 — Màu khác ≠ mẫu khác, bộ ≠ bỏ: bind đúng current/rejected product từ input tới memory/search/prompt.
+- [ ] P06/P08a — P06 sửa màu/mẫu, bộ/bỏ từ input tới context/product resolution; P08a tái dùng khi mở retrieval nhiều phương án, không phân loại lại bằng regex.
 - [ ] P08b — Comparison đúng subject/offer, code derivation, đổi product giữ binding.
 
 ## 4. Hội thoại dài và sự cố
 
 - [ ] P09 — Preferences/correction/referent/câu hỏi đang dở qua window; giữ history recovery.
-- [ ] P09 — Structured context nhận update hợp lệ cùng lượt; differential C3-off cho timing/history recovery, ghi deviation có chủ đích.
+- [ ] P09 — Tái dùng updater P06 qua window/recovery/multi-product; differential C3-off cho history recovery, ghi deviation có chủ đích.
 - [ ] P10 — Fallback đúng nhu cầu/partial facts/compatibility, detailed reason và call telemetry.
 
 ## 5. Đánh giá và bàn giao

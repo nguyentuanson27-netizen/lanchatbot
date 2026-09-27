@@ -14,15 +14,15 @@ Số finding giữ theo comment. Ví dụ dùng dữ liệu tổng hợp; chi ti
 | Finding | Quan sát và giới hạn | Task |
 |---|---|---|
 | 1 — thấy/đổi size | Hàm nhận “Chị thấy size L hơi rộng” là edit. Evaluator với giỏ M/facts hợp lệ tạo planned L, giống control “Chị đổi sang size L nhé”. Đã tái hiện tại hàm và evaluator; chưa có effect live. | P06 |
-| 2 — màu/mẫu | “Có màu khác không?” và “Có mẫu khác không?” đều alternative=true. Source dùng kết quả để loại current product khi search; chưa chạy full product-resolution journey trong review. | P08a |
-| 3 — bộ/bỏ | “Bộ LN123 còn size M không?” thêm LN123 vào rejectedProductIds, giống control từ chối. Đã tái hiện memory updater; đường prompt đọc field xác minh bằng source. | P08a/P09 |
+| 2 — màu/mẫu | “Có màu khác không?” và “Có mẫu khác không?” đều alternative=true. Source dùng kết quả để loại current product khi search; chưa chạy full product-resolution journey trong review. | P06; P08a mở retrieval |
+| 3 — bộ/bỏ | “Bộ LN123 còn size M không?” thêm LN123 vào rejectedProductIds, giống control từ chối. Đã tái hiện memory updater; đường prompt đọc field xác minh bằng source. | P06; P09 kiểm qua window |
 | 4 — payment | Địa chỉ Hội An + “COD nhé” làm mất payment selection; evaluator giữ paymentMethod=null. “COD nhé” riêng nhận đúng, hỏi có COD không không tự chọn. | P06 |
 | 6 — recipient | Câu có nhãn “Số điện thoại”, số synthetic và địa chỉ bị ghi tên “Số điện thoại” vào planned checkoutDraft. Positive input có tên người nhận synthetic định dạng tự nhiên nhận đúng. | P06 |
 | 5 — hậu mãi | Hàm trả false cho “Hàng bị lỗi đường may, chị muốn hoàn tiền” khi hasOpenCart=true. Đây là lỗi classifier đã tái hiện, chưa chạy full handoff journey. | P06 |
 | 7 — human request | Câu gốc “Chị không muốn gặp shop qua bot, cho chị gặp nhân viên” trả true, không tái hiện finding như viết. Biến thể “Chị không cần nhân viên cũ, cho chị gặp nhân viên khác” trả false: họ lỗi phạm vi phủ định có thật. | P06 |
 | 8 — last size | Parser chọn S cho “Lấy size M nhé, size S còn không?”. Qua canonical producer→evaluator, decision=NONE, không mở giỏ; vẫn vậy khi cấp COMMITTED signal đúng mệnh đề đầu. Không kết luận đã mở giỏ S. Cần sửa cả subject binding lẫn question veto toàn tin. | P06 |
 | 9 — server wiring | Source server chỉ cấp C3 ở DRY_RUN + flag, runner chỉ adopt reply ở LIVE + sendEnabled. Chưa có phép thử server composition trong review. Calls/cart read phụ thuộc admission/lane/state; không khẳng định mọi lượt hai calls. | P05 |
-| 10 — history/context | Source cho history recovery khi C3-off; legacy dựng structured summary từ state trước update, C3 dùng nextState. Tin mới vẫn có trong dialogue; chưa đủ kết luận model chắc chắn quên. Recovery không tự là regression cần revert. | P09 |
+| 10 — history/context | Source cho history recovery khi C3-off; legacy dựng structured summary từ state trước update, C3 dùng nextState. Tin mới vẫn có trong dialogue; chưa đủ kết luận model chắc chắn quên. Recovery không tự là regression cần revert. | P06 timing; P09 recovery |
 
 ## Hiệu chỉnh nhận định và thiết kế
 
@@ -42,5 +42,7 @@ Số finding giữ theo comment. Ví dụ dùng dữ liệu tổng hợp; chi ti
 - [Spec C3](../../docs/specs/track-c-c3-strategy-contract.md): adaptive owner/single progression, checkout completeness, variant edits, explicit alternative search và session context.
 
 ## Complexity delta
+
+Self-review PR375 tại `d36f213` bổ sung thứ tự extraction trước routing/search/context ngữ nghĩa; P05 chỉ nghiệm thu harness/quan sát, P06 sửa quyết định và context cùng lượt trước P07, P09 kiểm độ bền lịch sử. Đây là hiệu chỉnh kế hoạch, không bổ sung kết quả runtime mới.
 
 Amendment bổ sung acceptance vào P00/P05/P06/P08a/P09/P11 sẵn có. Không thêm task family, eval framework, online reviewer, durable state, approval gate hoặc mẫu câu. Chưa thay code/spec runtime; các checkbox implementation vẫn mở trong [todo](../todo.md). Mẫu báo giá lần đầu và quyền nghiệp vụ theo spec được giữ.
