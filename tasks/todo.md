@@ -18,6 +18,8 @@ Amendment `f5034c7` xử lý lựa chọn COD có câu hỏi giao hàng ở mệ
 
 Amendment `3bebb9f` đưa producer hiện có lên trước routing hậu mãi/gặp nhân viên và resolve product **trên nhánh C3 giỏ mở, text thường**; preflight dùng engine để giữ human-owner no-call, proposal và quota dùng đúng một lần. Kiểm thử hai trường hợp chuyển nhánh và các đối chứng lỗi/nhãn sai đã qua; P06 vẫn mở cho các nhánh khác, context cùng lượt và quyết định product/search. Chưa có Luna trên source này.
 
+Amendment `470c174` mở cùng preflight/producer cho C3 text thường, đưa budget, occasion và mã bị từ chối đã kiểm chứng vào state và prompt Strategist cùng lượt. Từ chối sản phẩm đang tư vấn sẽ bỏ binding khi chưa có giỏ; mã vừa từ chối không được resolve ngược lại trong cùng tin. Đây là một lát P06; style/color, loại dòng giỏ, tìm phương án thay thế và Luna trên source này còn mở. Worker 1.814 pass, 1 skip; contracts 221 pass; typecheck pass.
+
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
 ## Chuẩn bị đã làm trong lượt lập kế hoạch

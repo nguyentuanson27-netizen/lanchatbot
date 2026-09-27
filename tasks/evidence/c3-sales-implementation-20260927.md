@@ -334,3 +334,30 @@ but no accessible authoritative `product_registry` sheet for this worker;
 one likely product-planning sheet allowed metadata read but refused export.
 These sheets were not promoted to catalog authority. The isolated Qdrant
 SQ149 result remains the only new source-to-index readback here.
+
+### Executable amendment: 470c174
+
+Source/spec commit `470c17415dfbdd0dca19c86f9695c1ba77014a1a`
+extends the preflighted, reused producer to ordinary C3 text turns outside
+the open cart. It projects a typed latest-turn budget, occasion and explicit
+product rejection/restoration into the existing session state before product
+resolution and the same-turn C3 Strategist input. Exact customer spans,
+confidence, numeric values and negation checks bound these updates; a price
+objection alone cannot set budget, and “bộ” cannot reject a product. A newly
+rejected code is filtered from same-turn product resolution. Without an open
+cart, rejecting the current product clears its conversation binding. An open
+cart remains under SalesCycle authority and is not edited by this projection.
+
+The focused runtime integration proves one producer/quota call, persisted
+budget/occasion/rejection and the same values in the actual Strategist
+request. A second case first failed because “Không lấy CB182 nữa” left
+`currentProductId=CB182`; the correction now clears it. The unit tests also
+check a supported restore and unsupported budget or rejection updates.
+Current tests do not prove a recommendation of another product, cart-line
+removal or a live-provider interpretation of these clauses.
+
+On this exact executable source, worker `vitest run` passed 1,814 tests
+with one opt-in Luna test skipped; contracts passed 221 tests; worker
+`tsc --noEmit` and `git diff --check` passed. The opt-in Luna DEV70, rubric,
+real server DRY_RUN boot and full-intent journey have **not** run on this
+source. No live customer, catalog/index, POS, deploy or merge action occurred.
