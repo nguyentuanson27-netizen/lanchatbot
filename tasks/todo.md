@@ -4,7 +4,7 @@ Kế hoạch: [plan.md](plan.md). Baseline `ce558e6d4028dd06bd6efc960286464425a2
 
 Các task P là việc còn phải thực hiện theo kế hoạch mới; checkbox chưa tick không có nghĩa toàn bộ code cũ chưa tồn tại.
 
-Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. Chỉ hoàn thành cập nhật tài liệu; các lỗi ứng dụng dưới đây chưa được sửa.
+Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. Implementation candidate `c2b22d3` và bằng chứng [ở đây](evidence/c3-sales-implementation-20260927.md) mới đóng các lát current-cart/checkout/C3 cart opening; các checkbox P còn để mở cho đến khi đủ nghiệm thu toàn mục.
 
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
