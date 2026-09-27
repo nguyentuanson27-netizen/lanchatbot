@@ -309,6 +309,34 @@ describe("Track C C3 strategy-contract runner", () => {
       expect(send).toHaveBeenCalledTimes(2);
     }
   });
+  it("fills omitted trailing facts from verified evidence after a bound partial realization", async () => {
+    const twoProducts = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", recipe, runtimeClaimCatalog: facts.runtime_claim_catalog,
+      fixture: { id: "MULTI_PRODUCT_PARTIAL_REALIZATION", latest_customer_message: "Giá từng mẫu thế nào?",
+        context: { product_binding: { status: "RESOLVED", product_ids: ["SQ9012", "SV9031"] },
+          phase: "BROWSING", canonical_flags: [], source_stage: null,
+          buying_intent: { decision: "NONE", requested_action: "NONE", quantity: null, evidence: null },
+          runtime_claim_refs: ["RC_PRICE_A", "RC_PRICE_B"] } },
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Give the two verified prices.", proposition: "PRICE",
+        evidenceRefs: ["CLAIM_001", "CLAIM_002"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: null, factualTexts: ["Giá hiện tại của mẫu này là 849.000đ ạ."],
+        progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "PRODUCTION_CONTRACT", modelResource: MODEL_RESOURCE, capture: twoProducts,
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{ direction: "INBOUND",
+        senderType: "CUSTOMER", messageType: "TEXT", text: "Giá từng mẫu thế nào?",
+        attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send },
+    });
+    expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(2);
+    expect(result.reply).toContain("1.099.000đ");
+  });
   it("runs the shared core from a live context and rejects replay fields", async () => {
     const decisionAt = new Date(recipe.evaluation_at);
     const context = contextFromFrozenTrackCCapture({

@@ -572,6 +572,48 @@ async function previewState(eventPrefix: string) {
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it("uses the validated variant act for a cart edit and leaves a question unchanged", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "typed-variant-open",
+    ));
+    const variantSignals = (act: "CHANGE" | "QUESTION", evidenceText: string): AgentSalesSignalsV1 => ({
+      checkoutExtraction: {
+        fullName: { value: null, evidenceText: null, confidence: 0 },
+        phone: { value: null, evidenceText: null, confidence: 0 },
+        address: { value: null, evidenceText: null, confidence: 0 },
+        paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+      },
+      purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null, confidence: 0 },
+      variantIntent: { act, size: "L", color: null, evidenceText, confidence: 0.99 },
+    });
+    const variantFacts = { ...facts, resolveCartSelection: async (
+      query: Parameters<NonNullable<BusinessFactsReader["resolveCartSelection"]>>[0], at: Date,
+    ) => {
+      const base = await facts.resolveCartSelection!(query, at);
+      return base.status === "READY" && query.size === "L"
+        ? { ...base, line: { ...base.line, lineId: query.lineId,
+          components: base.line.components.map((component) => ({ ...component,
+            size: "L", componentSku: component.componentSku.replace(/_M$/u, "_L") })) } }
+        : base;
+    } };
+    const question = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị hỏi đổi size L được không?", "typed-variant-question"),
+      salesSignals: variantSignals("QUESTION", "đổi size L"),
+      facts: variantFacts,
+    });
+    expect(question.plan?.state.cart?.value.revision ?? opened.plan!.state.cart?.value.revision)
+      .toBe(opened.plan!.state.cart?.value.revision);
+    const change = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "Chị đổi size M sang L nhé.", "typed-variant-change"),
+      salesSignals: variantSignals("CHANGE", "đổi size M sang L"),
+      facts: variantFacts,
+    });
+    expect(change.plan?.state.cart?.value.revision)
+      .toBe(opened.plan!.state.cart!.value.revision + 1);
+    expect(change.plan?.cartMutationBatchEvidence?.receipts[0]?.mutation.kind)
+      .toBe("SET_LINE_VARIANT");
+  });
   it("changes a single cart line to a POS-resolved size, reprices and binds one receipt", async () => {
     const opened = await evaluateRealtimeSalesCycle(input(
       createRealtimeSalesState(conversationId, pageId, now),

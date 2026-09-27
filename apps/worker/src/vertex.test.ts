@@ -343,12 +343,14 @@ describe("Vertex shadow client", () => {
         .digest("hex");
     }
 
-    // Frozen from exact source baseline d9de77f283553f7eae8991a06c756908a35199e5.
+    // d9de77f baseline remains pinned for unchanged methods. The three
+    // proposal-schema requests changed for the 64-character intent/stage bound
+    // and typed variant intent; generate also changed for its producer instruction.
     expect(observed).toEqual({
-      generate: "9b9dfc7d9a79a01a2bea28ecd221e1cc40cc8ae9562b02f89a4e7f1ce94f3dbb",
-      groundWithFacts: "86a1ebd9d713835af480e42457a46d8755f1c37c4e299d09ce14ffef6b6fb36a",
+      generate: "72c2e6531d5b25fcd03059f7f547bbf7beb35ba266ce076014fc579a7f35b466",
+      groundWithFacts: "332a89524d8c6b84a0d84472acd47cb0dcc7374b9996a27b0845ea17428fbc73",
       groundDraftWithFacts: "63a94583c26f4f31997a89daac606b2d311ded592f3449d3210527d670ed3072",
-      repairSizeClaimDraft: "e03a55762493ab6c2874ff0eae8c0f90e171052fb67e87bfdb96d48f7bb9aafe",
+      repairSizeClaimDraft: "66fb05c6a8cc7f4307ec1f3802cca1c18f19cf6693d19a453622ba279ad971ad",
       draftMultiProductClarification: "eed16e8dbd463ba7564580609b7ebba2aa151ce84210ed19d21465aa64c420de",
       draftCustomerUrlExplanation: "98535ebb6169c3720559436265593250cc0228d7fdbb62efa9662f2061db80e4",
       judgeSalesReply: "be94a69e7f31146e95a51c0e70054837f1609b78cecba20f39f5324757747f68",

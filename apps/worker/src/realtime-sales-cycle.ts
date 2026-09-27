@@ -323,6 +323,20 @@ function explicitSize(text: string): string | null {
   return explicitSizes(text).at(-1) ?? null;
 }
 
+function validatedVariantEdit(input: RealtimeSalesCycleInput):
+  { size: string | null; color: string | null } | null {
+  const intent = input.salesSignals?.variantIntent;
+  if (!intent || intent.act !== "CHANGE" || !intent.evidenceText ||
+      !input.text.includes(intent.evidenceText)) return null;
+  const size = intent.size?.trim().toUpperCase() ?? null;
+  const color = intent.color?.trim() ?? null;
+  if (size === null && color === null) return null;
+  if (size !== null && !explicitSizes(intent.evidenceText).includes(size)) return null;
+  if (color !== null && !foldVietnameseForRecall(intent.evidenceText)
+    .includes(foldVietnameseForRecall(color))) return null;
+  return { size, color };
+}
+
 function purchaseSize(input: RealtimeSalesCycleInput): { size: string | null; ambiguous: boolean } {
   const selectedClause = input.canonicalBuyingIntent.decision === "COMMITTED"
     ? scopedCommitmentClause(input.text, input.salesSignals?.buyingIntent)
@@ -1815,11 +1829,18 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (state.cart && (state.stage === "CART_OPEN" || state.stage === "ORDER_PREVIEW")) {
-    if (isVariantEditRequest(input.text)) {
+    const typedVariantEdit = validatedVariantEdit(input);
+    // Existing deterministic edit authorization still owns the effect. The
+    // structured result narrows its scope and chosen value; it cannot alone
+    // authorize a new mutation kind or bypass the current authority binding.
+    if (isVariantEditRequest(input.text) &&
+        (!input.salesSignals?.variantIntent || typedVariantEdit !== null)) {
       const cart = state.cart.value;
-      const colorEdit = /\b(?:doi|sua|thay)\s+(?:sang\s+)?mau\b/u
-        .test(foldVietnameseForRecall(input.text));
-      const size = explicitSize(input.text);
+      const colorEdit = typedVariantEdit
+        ? typedVariantEdit.color !== null
+        : /\b(?:doi|sua|thay)\s+(?:sang\s+)?mau\b/u
+          .test(foldVietnameseForRecall(input.text));
+      const size = typedVariantEdit?.size ?? explicitSize(input.text);
       const namesExactProduct = input.productId !== null &&
         input.text.toLocaleUpperCase("vi").includes(input.productId.toLocaleUpperCase("vi"));
       const targets = cart.lines.filter(({ parentProductId }) =>
@@ -1861,12 +1882,14 @@ export async function evaluateRealtimeSalesCycle(
           ? [...new Set(options.line.components.map(({ color }) => color).filter(
               (value): value is string => value !== null))]
           : options.availableColors;
-        const folded = foldVietnameseForRecall(input.text);
-        const matches = availableColors.filter((color) => {
-          const token = foldVietnameseForRecall(color).replace(/[^a-z0-9]+/gu, " ").trim();
-          return token !== "" && new RegExp(`\\bmau\\s+${token.replace(/\s+/gu, "\\s+")}\\b`, "u")
-            .test(folded);
-        });
+        const matches = typedVariantEdit
+          ? availableColors.filter((color) =>
+            foldVietnameseForRecall(color) === foldVietnameseForRecall(typedVariantEdit.color!))
+          : availableColors.filter((color) => {
+            const token = foldVietnameseForRecall(color).replace(/[^a-z0-9]+/gu, " ").trim();
+            return token !== "" && new RegExp(`\\bmau\\s+${token.replace(/\s+/gu, "\\s+")}\\b`, "u")
+              .test(foldVietnameseForRecall(input.text));
+          });
         if (matches.length !== 1) {
           return { handled: true, messages: [{ kind: "TEXT",
             text: availableColors.length > 0

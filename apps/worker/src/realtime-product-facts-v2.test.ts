@@ -5,6 +5,7 @@ import {
   selectProductMediaV2,
   buildProductAttributesV1,
   resolveCatalogFacts,
+  stableProductDocumentFromQdrantPayload,
   type CatalogSnapshotV3,
   type StableProductDocument,
 } from "@lana/business-tools";
@@ -12,6 +13,9 @@ import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { buildRealtimeProductFactsV2, productMediaView } from "./realtime-product-facts-v2.js";
 import { buildRealtimeC3Input } from "./realtime-c3-input.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
+import { buildApprovedQdrantJobs, buildRegistryMap } from "./p23c-jobs.js";
+import { buildXmlProfiles, groupXmlItems, normalizeStructuredExtraction } from "./p23c-profiles.js";
+import { buildTrackCSelectableEvidence } from "./track-c-c3-selectable-evidence.js";
 
 type ProductImage = StableProductDocument["images"][number];
 
@@ -257,6 +261,57 @@ describe("realtime ProductFactsV2 media projection", () => {
       productId: "SD375", materials: ["LỤA"], silhouettes: ["CHIẾT EO"],
     });
     expect(live.context.productPresentation).not.toBeNull();
+  });
+
+  it("carries registry attributes through an isolated publish payload and readback into C3 evidence", () => {
+    const observedAt = "2026-08-10T00:00:00.000Z";
+    const productId = "SQ149";
+    const registry = buildRegistryMap([{
+      MA_SP: productId, ACTIVE: "TRUE", MATERIAL_OVERRIDE: "LỤA SATIN",
+      DESIGN_ATTRIBUTES_JSON: JSON.stringify({ waist: ["CẠP CAO"] }),
+      WEAR_PROPERTIES_JSON: JSON.stringify({ wrinkleResistance: "UNKNOWN" }),
+      DESCRIPTION_OVERRIDE: "Set SQ149 mô tả đã duyệt.",
+    }]);
+    const profiles = normalizeStructuredExtraction(buildXmlProfiles(registry.registry,
+      groupXmlItems([{ "g:item_group_id": productId, "g:title": "Set SQ149 - M",
+        "g:description": "Mô tả XML không có authority Sheet.",
+        "g:image_link": "https://cdn.example/sq149.jpg" }]), observedAt));
+    const [job] = buildApprovedQdrantJobs(profiles, [{
+      IMAGE_ID: "sq149-approved-image", MA_SP: productId,
+      IMAGE_URL: "https://cdn.example/sq149.jpg", REVIEW_STATUS: "APPROVED", ACTIVE: "TRUE",
+    }], { run_id: "isolated-sq149", started_at: observedAt, shard_count: 1,
+      shard_index: 0, shard_label: "1/1" });
+    expect(job).toBeDefined();
+    const readback = stableProductDocumentFromQdrantPayload(
+      JSON.parse(JSON.stringify(job!.payload)) as unknown,
+    );
+    expect(readback?.attributes?.materials).toEqual(["LỤA SATIN"]);
+    expect(readback?.attributes?.wearProperties?.wrinkleResistance ?? null).toBeNull();
+    const now = new Date("2026-08-10T01:00:00.000Z");
+    const productFacts = buildRealtimeProductFactsV2({
+      snapshot: mediaSnapshot(productId, ["TOP", "SKIRT"], observedAt),
+      product: readback!, policy: null, now,
+    });
+    expect(productFacts?.attributes?.metadata.contentHash)
+      .toBe(readback?.attributes?.metadata.contentHash);
+    const c3 = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000082",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "Mẫu SQ149 có chất liệu gì?", sourceMessageId: "mid-sq149-attributes",
+        productId, modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 2, finalConversationRevision: 3, preSalesRevision: 0,
+      commerceState: createRealtimeSalesState(
+        "33333333-3333-4333-8333-333333333333", "page-1", now,
+      ),
+      productId, catalogVersion: readback!.catalogVersion,
+      facts: [], productFacts, policyResolution: null, cartReadiness: [], now,
+    });
+    const evidence = buildTrackCSelectableEvidence({ context: c3.context,
+      executionLane: "PRODUCTION_CONTRACT", simulationFacts: [], evaluationAt: now });
+    expect(evidence.some(({ deterministicText }) => deterministicText?.includes("LỤA SATIN")))
+      .toBe(true);
+    expect(JSON.stringify(evidence)).not.toMatch(/chống nhăn|bền|mát|đáng tiền/iu);
   });
 
   it("classifies approved front views of a full set or dress as FULL_LOOK", () => {

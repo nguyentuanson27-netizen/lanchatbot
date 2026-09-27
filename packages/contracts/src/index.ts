@@ -311,6 +311,30 @@ export const AgentBuyingIntentV1Schema = z.object({
 });
 export type AgentBuyingIntentV1 = z.infer<typeof AgentBuyingIntentV1Schema>;
 
+export const AgentVariantIntentV1Schema = z.object({
+  act: z.enum(["NONE", "SELECT", "CHANGE", "QUESTION", "COMMENT"]),
+  size: z.string().trim().min(1).max(16).nullable(),
+  color: z.string().trim().min(1).max(64).nullable(),
+  evidenceText: z.string().trim().min(1).max(1_000).nullable(),
+  confidence: z.number().min(0).max(1),
+}).strict().superRefine((intent, context) => {
+  if (intent.act === "NONE" &&
+      (intent.size !== null || intent.color !== null || intent.evidenceText !== null)) {
+    context.addIssue({ code: z.ZodIssueCode.custom,
+      message: "NONE variant intent cannot contain a selection or evidence" });
+  }
+  if (intent.act !== "NONE" && intent.evidenceText === null) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["evidenceText"],
+      message: "variant intent requires exact customer evidence" });
+  }
+  if ((intent.act === "SELECT" || intent.act === "CHANGE") &&
+      intent.size === null && intent.color === null) {
+    context.addIssue({ code: z.ZodIssueCode.custom,
+      message: "variant selection requires a size or color" });
+  }
+});
+export type AgentVariantIntentV1 = z.infer<typeof AgentVariantIntentV1Schema>;
+
 export const AgentSalesSignalsV1Schema = z.object({
   checkoutExtraction: z.object({
     fullName: AgentExtractedTextFieldV1Schema,
@@ -326,6 +350,8 @@ export const AgentSalesSignalsV1Schema = z.object({
   // Optional keeps persisted/replay proposals from earlier releases readable.
   // The current Vertex response schema requires this field for new generations.
   buyingIntent: AgentBuyingIntentV1Schema.optional(),
+  // Older persisted proposals remain readable; current producer emits it.
+  variantIntent: AgentVariantIntentV1Schema.optional(),
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 

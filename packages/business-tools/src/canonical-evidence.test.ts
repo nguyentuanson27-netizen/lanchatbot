@@ -102,6 +102,31 @@ describe("DF05 canonical decision evidence", () => {
     ]);
   });
 
+  it("scopes a model quantity action to opening the first cart only for a direct purchase", () => {
+    const text = "Chị sẽ lấy 2 bộ size M.";
+    const base = {
+      text, sourceMessageId: "mid.first-cart-action", productId: "SP-001",
+      modelBuyingIntent: {
+        decision: "COMMITTED" as const, requestedAction: "SET_QUANTITY" as const,
+        quantity: 2, evidenceText: text, confidence: 0.99,
+      },
+      evaluatedAt: new Date("2026-08-13T05:00:00.000Z"),
+    };
+    const firstCart = buildCanonicalDecisionEvidenceV1({ ...base, cartOpen: false });
+    const existingCart = buildCanonicalDecisionEvidenceV1({ ...base, cartOpen: true });
+    expect(firstCart.buyingIntent).toMatchObject({
+      decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 2,
+      authorization: "NONE",
+    });
+    expect(existingCart.buyingIntent.requestedAction).toBe("SET_QUANTITY");
+    const quantityOnly = buildCanonicalDecisionEvidenceV1({
+      ...base, text: "Đổi số lượng thành 2.",
+      modelBuyingIntent: { ...base.modelBuyingIntent, evidenceText: "Đổi số lượng thành 2." },
+      cartOpen: false,
+    });
+    expect(quantityOnly.buyingIntent.requestedAction).not.toBe("OPEN_CART");
+  });
+
   it.each([
     { text: "chốt mẫu này", requestedAction: "SET_QUANTITY" as const, quantity: 2 },
     { text: "chốt 2 set mẫu này", requestedAction: "SET_QUANTITY" as const, quantity: 3 },

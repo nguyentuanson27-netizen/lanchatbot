@@ -16,6 +16,7 @@ export interface BuildCanonicalDecisionEvidenceV1Input {
   readonly sourceMessageId: string;
   readonly productId: string | null;
   readonly modelBuyingIntent: AgentBuyingIntentV1 | null | undefined;
+  readonly cartOpen?: boolean;
   readonly evaluatedAt: Date;
 }
 
@@ -131,11 +132,20 @@ export function buildCanonicalDecisionEvidenceV1(
       : resolved.source === "DETERMINISTIC"
         ? ["DETERMINISTIC_RUNTIME"] as const
         : [];
-  const requestedAction = decision === "COMMITTED"
+  const modelRequestedAction = decision === "COMMITTED"
     ? resolved.source === "MODEL_STRUCTURED_OUTPUT"
       ? input.modelBuyingIntent?.requestedAction ?? "OPEN_CART"
       : "OPEN_CART"
     : "NONE";
+  // A quantity belongs to the first cart opening when the customer also
+  // explicitly commits to buy. A model's SET_QUANTITY label cannot turn that
+  // first purchase into a mutation of a cart that does not exist.
+  const initialCartActionMismatch = input.cartOpen === false &&
+    decision === "COMMITTED" &&
+    modelRequestedAction === "SET_QUANTITY" &&
+    deterministic.decision === "COMMITTED";
+  const requestedAction = initialCartActionMismatch
+    ? "OPEN_CART" as const : modelRequestedAction;
   const observedQuantity = explicitQuantity(input.text);
   const modelQuantityMismatch =
     decision === "COMMITTED" &&
@@ -151,8 +161,8 @@ export function buildCanonicalDecisionEvidenceV1(
       : observedQuantity
     : null;
   const reasonCodes = observed
-    ? modelQuantityMismatch
-      ? [...resolved.reasons, "MODEL_REQUEST_EVIDENCE_MISMATCH" as const]
+    ? modelQuantityMismatch || initialCartActionMismatch
+      ? [...new Set([...resolved.reasons, "MODEL_REQUEST_EVIDENCE_MISMATCH" as const])]
       : resolved.reasons
     : [];
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse({

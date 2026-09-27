@@ -222,5 +222,15 @@ describe("phase 1 contracts", () => {
         confidence: 0.99,
       },
     }).success).toBe(false);
+    expect(AgentSalesSignalsV1Schema.safeParse({
+      ...base,
+      variantIntent: { act: "CHANGE", size: "L", color: null,
+        evidenceText: "đổi size M sang L", confidence: 0.99 },
+    }).success).toBe(true);
+    expect(AgentSalesSignalsV1Schema.safeParse({
+      ...base,
+      variantIntent: { act: "NONE", size: "L", color: null,
+        evidenceText: null, confidence: 0.99 },
+    }).success).toBe(false);
   });
 });

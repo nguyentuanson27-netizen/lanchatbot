@@ -1242,3 +1242,30 @@ unknown, including a subordinate mention of when the shop will send it. The
 effect guard distinguishes that bounded uncertainty from an assertion that
 the shop will send it. An affirmative shipping promise in the same or a later
 clause remains rejected. This wording does not grant fulfillment authority.
+
+### Follow-up: source-bound variant and first-cart intent (2026-09-27)
+
+The ordinary producer's `salesSignals.variantIntent` records the latest
+customer clause as selection, change, question, comment or none, with its
+chosen size/color and exact text span. Legacy persisted proposals may omit
+it. On a cart edit, a validated change narrows the size/color used by the
+existing deterministic edit branch. A question or comment must not trigger
+that branch even if the old edit phrase detector matches the words. The
+existing deterministic edit authorization, POS selection, cart line binding,
+revision check, preview invalidation and receipt remain required. A model
+label and text span alone do not authorize a new edit phrasing; broader
+semantic authorization requires a separate authority contract.
+
+For a first purchase, a model `SET_QUANTITY` request is scoped back to
+`OPEN_CART` only when the deterministic customer commitment agrees and no
+cart is open. This does not bypass quantity, product or effect checks. The
+producer must keep cart opening, extra-line addition, quantity edits and
+preview confirmation distinct. On a committed buying turn, the model's
+pre-business reply is reduced to a neutral acknowledgement before the size
+advice guard; SalesCycle alone writes the verified cart receipt.
+
+The C3 Responder may supply a positional prefix of bounded factual
+realizations. Each supplied sentence still has to match its selected fact;
+code inserts the original verified wording for any trailing facts. This
+prevents a partial model array from forcing a fallback that discards a
+current-cart answer, without allowing a new factual claim.

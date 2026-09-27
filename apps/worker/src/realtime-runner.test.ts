@@ -2979,7 +2979,7 @@ describe("RealtimeRunner inbound batching", () => {
     requestedAction: "OPEN_CART";
     quantity: number;
     evidenceText: string;
-  }>): RealtimeModelPort {
+  }>, draftReply = "Em đang hỗ trợ chị đây ạ."): RealtimeModelPort {
     return {
       generate: vi.fn(async () => ({
         proposal: {
@@ -2988,7 +2988,7 @@ describe("RealtimeRunner inbound batching", () => {
           conversationStage: "consulting",
           productId: null,
           action: "REPLY" as const,
-          reply: "Em đang hỗ trợ chị đây ạ.",
+          reply: draftReply,
           attachments: [],
           handoffReason: null,
           businessFactQuery: {
@@ -3908,12 +3908,16 @@ describe("RealtimeRunner inbound batching", () => {
       vi.mocked(baseModel.generate).mockImplementationOnce(replyModel({
         decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
         evidenceText: "Chị lấy mẫu này.",
-      }).generate);
+      }, "Chị hợp size M nên em lên giỏ ngay nhé.").generate);
       vi.setSystemTime(commitEntry.occurredAt);
       expect(await runner.processOne()).toBe(true);
       expect(cartSelectionSizes.at(-1)).toBe("M");
       expect(persistedCommerce.stage).toBe("CART_OPEN");
       expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+      const cartReply = commit.mock.calls.at(-1)![0] as { metaPlan?: {
+        messages: readonly { text: string }[] } };
+      expect(cartReply.metaPlan?.messages.map(({ text }) => text).join(" "))
+        .not.toContain("Chị hợp size M");
       const cartId = persistedCommerce.cart!.value.cartId;
       const committedTurns = commit.mock.calls.length;
       expect(await runner.processOne()).toBe(true);

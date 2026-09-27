@@ -3463,6 +3463,7 @@ export class RealtimeRunner {
         productId:
           resolvedProduct?.productId ?? nextState.currentProductId,
         modelBuyingIntent: proposal?.salesSignals?.buyingIntent ?? null,
+        ...(salesCycleRecord ? { cartOpen: salesCycleRecord.state.cart !== null } : {}),
         evaluatedAt: now,
       });
       return canonicalDecisionEvidence;
@@ -4659,6 +4660,18 @@ export class RealtimeRunner {
         modelStrategyAnalysis = postGenerationAuthority.modelStrategyAnalysis;
         wave2StrategyDecision =
           postGenerationAuthority.deterministicStrategyDecision;
+        const committedCustomerChoice = canonicalDecisionEvidenceForTurn();
+        if (
+          salesCycleRecord &&
+          committedCustomerChoice.buyingIntent.decision === "COMMITTED" &&
+          committedCustomerChoice.dialogueEvidence.act === "CONFIRMATION" &&
+          proposal.action === "REPLY"
+        ) {
+          // The model supplies intent evidence, while SalesCycle owns the
+          // effect and its customer-facing receipt. Its draft must not turn a
+          // stated size choice into an unverified size recommendation first.
+          proposal = { ...proposal, reply: "Dạ vâng chị ạ.", attachments: [] };
+        }
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
         if (facts?.status === "OK") verifiedProductIds.add(facts.productId);

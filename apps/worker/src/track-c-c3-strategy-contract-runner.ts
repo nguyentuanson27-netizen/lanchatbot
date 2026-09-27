@@ -720,8 +720,7 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
   if (!Array.isArray(record.factualTexts) ||
-      (record.factualTexts.length !== 0 &&
-       record.factualTexts.length !== modelAuthoredEvidence(task).length)) {
+      record.factualTexts.length > modelAuthoredEvidence(task).length) {
     throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
   }
   // Prose whitespace has no authority meaning. Keep factual text byte-exact
@@ -917,13 +916,11 @@ function compileResponderDraft(input: Readonly<{
   if (!adaptive && usesBoundedAcknowledgement(task) && draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
-  // An empty array deliberately chooses all original projections. Otherwise
-  // every selected claim needs its own positional, lossless realization.
+  // Missing trailing realizations use their verified code-owned wording. Every
+  // supplied realization still has to match the same positional claim.
   const authoredEvidence = modelAuthoredEvidence(task);
-  if (draft.factualTexts.length !== 0 &&
-      (draft.factualTexts.length !== authoredEvidence.length ||
-       draft.factualTexts.some((value, index) =>
-         !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!)))) {
+  if (draft.factualTexts.some((value, index) =>
+    !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
   assertProgression(task, draft, input.dialogue, adaptive);

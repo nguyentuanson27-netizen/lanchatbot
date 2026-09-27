@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import { buildProductAttributesV1 } from "@lana/business-tools";
+import { AgentProposalV1Schema } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import { CONTEXT_V2_CANDIDATE_PROVIDER_VERSION } from "./context-v2-candidate.js";
 import {
@@ -16,6 +17,10 @@ import {
   type RealtimeRuntimePort,
 } from "./realtime-runner.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
+import {
+  AGENT_RESPONSE_SCHEMA, buildGroundedPrompt, buildShadowPrompt,
+  GROUNDED_SYSTEM_INSTRUCTION, SHADOW_SYSTEM_INSTRUCTION,
+} from "./vertex.js";
 import type { ChatHistoryAppendInput, ChatHistoryPort } from "./redis-chat-history.js";
 
 const enabled = process.env.LUNA_REALTIME_SMOKE === "1";
@@ -62,14 +67,17 @@ function toLunaSchema(value: unknown): unknown {
   if (!value || typeof value !== "object") return value;
   const result: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(value)) {
-    if (["minProperties", "maxProperties", "minItems", "maxItems", "minLength", "maxLength"].includes(key)) continue;
+    if (["minProperties", "maxProperties", "minItems", "maxItems", "minLength"].includes(key)) continue;
     if (key === "type") result.type = String(entry).toLowerCase();
     else if (key === "properties" && entry && typeof entry === "object") {
       result.properties = Object.fromEntries(Object.entries(entry).map(([name, schema]) => [name, toLunaSchema(schema)]));
       result.additionalProperties = false;
     } else if (key === "anyOf" && Array.isArray(entry)) result.anyOf = entry.map(toLunaSchema);
     else if (key === "items") result.items = toLunaSchema(entry);
-    else result[key] = entry;
+    else if (key !== "nullable") result[key] = entry;
+  }
+  if ((value as { nullable?: boolean }).nullable === true) {
+    return { anyOf: [result, { type: "null" }] };
   }
   return result;
 }
@@ -166,6 +174,8 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       "apps/worker/src/track-c-c3-fact-realization.ts", "apps/worker/src/track-c-c3-realization-style.ts",
       "apps/worker/src/track-c-c3-v5-benchmark-runner.ts", "apps/worker/src/realtime-c3-input.ts",
       "apps/worker/src/realtime-sales-cycle.ts", "apps/worker/src/realtime-product-facts-v2.ts",
+      "apps/worker/src/vertex.ts", "packages/business-tools/src/canonical-evidence.ts",
+      "packages/contracts/src/index.ts",
       "apps/worker/src/track-c-c3-luna-runtime-smoke.test.ts"];
     const sourceFingerprints = Object.fromEntries(await Promise.all(sourceFiles.map(async (path) => [
       path, sha256(await readFile(join(repoDir, path), "utf8")),
@@ -298,34 +308,45 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
           }, versionReferences: [], artifacts: { shopPolicy: {}, offerPolicy: {}, closingStrategy: {}, sizeCharts: {}, handoffMatrix: null, paymentPolicy: null } },
       } as unknown as RuntimePolicyResolution;
       const history = inMemoryHistory();
+      const runProducer = async (stage: "input" | "grounded", prompt: string) => {
+          const stem = `${journey.id}.turn-${currentBatch.items[0].receiveSequence}.${stage}`;
+          const promptPath = join(outputDir!, `${stem}.prompt.txt`);
+          const schemaPath = join(outputDir!, `${stem}.schema.json`);
+          const outputPath = join(outputDir!, `${stem}.output.json`);
+          await Promise.all([
+            writeFile(promptPath, prompt, "utf8"),
+            writeFile(schemaPath, JSON.stringify(toLunaSchema(AGENT_RESPONSE_SCHEMA), null, 2), "utf8"),
+          ]);
+          const call: Record<string, unknown> = { journeyId: journey.id,
+            sequence: currentBatch.items[0].receiveSequence, stage, status: "RUNNING",
+            promptPath, promptSha256: sha256(prompt), schemaPath, outputPath,
+            exitCode: null, output: null, actualOutputModel: "gpt-6-luna",
+            providerIdentityAdapter: "TEST_ONLY: runtime producer schema and prompt; generated content is from GPT-6 Luna" };
+          modelCalls.push(call);
+          await persistModelCalls();
+          const started = Date.now();
+          try {
+            const exitCode = await invokeLuna(prompt, schemaPath, outputPath);
+            call.exitCode = exitCode;
+            if (exitCode !== 0) throw new Error(`LUNA_${stage.toUpperCase()}_CLI_FAILED`);
+            const raw = JSON.parse(await readFile(outputPath, "utf8")) as unknown;
+            const proposal = AgentProposalV1Schema.parse(raw);
+            call.output = safeJson(proposal);
+            call.status = "COMPLETED";
+            await persistModelCalls();
+            return { proposal, modelVersion: "gpt-6-luna/test-only-adapter", latencyMs: Date.now() - started, tokenUsage: {} };
+          } catch (error) {
+            call.status = "FAILED";
+            call.failure = { exitCode: call.exitCode, code: error instanceof Error ? error.message : "LUNA_PRODUCER_UNKNOWN_FAILURE" };
+            await persistModelCalls();
+            throw error;
+          }
+      };
       const model: RealtimeModelPort = {
-        generate: async () => {
-          const text = String(currentBatch.items[0].envelope.message.text);
-          const isConfirm = /\b(?:ok|đồng ý|xác nhận)\b/iu.test(text.trim());
-          const isCommit = !isConfirm && (/\b(?:lấy|chốt)\b|đổi\s+sang\s+size/iu.test(text));
-          const name = text.match(/Tên:\s*([^\n]+)/iu)?.[1] ?? null;
-          const phone = text.match(/SĐT:\s*([^\n]+)/iu)?.[1] ?? null;
-          const address = text.match(/Địa chỉ:\s*([^\n]+)/iu)?.[1] ?? null;
-          const paymentMethod = /\bCOD\b/iu.test(text) ? "COD" as const : null;
-          const none = { value: null, evidenceText: null, confidence: 0 };
-          const textField = (value: string | null) => value === null ? none : { value, evidenceText: value, confidence: 0.99 };
-          const proposal = {
-            schemaVersion: 1, intent: "tu_van", conversationStage: "consulting", productId: "CB182",
-            action: "REPLY", reply: "Em đang hỗ trợ chị đây ạ.", attachments: [], handoffReason: null,
-            businessFactQuery: { intent: "NONE", offerType: null, color: null, size: null, deliveryRegion: null },
-            salesSignals: {
-              checkoutExtraction: { fullName: textField(name), phone: textField(phone), address: textField(address),
-                paymentMethod: paymentMethod === null ? none : { value: paymentMethod, evidenceText: paymentMethod, confidence: 0.99 } },
-              purchaseConfirmation: { decision: isConfirm ? "CONFIRM" as const : "UNCLEAR" as const,
-                evidenceText: isConfirm ? text : null, confidence: isConfirm ? 0.99 : 0 },
-              buyingIntent: isCommit ? { decision: "COMMITTED" as const, requestedAction: "OPEN_CART" as const,
-                quantity: 1, evidenceText: text, confidence: 0.99 }
-                : { decision: "NONE" as const, requestedAction: "NONE" as const, quantity: null, evidenceText: null, confidence: 0 },
-            },
-          };
-          return { proposal, modelVersion: "synthetic-baseline", latencyMs: 1, tokenUsage: {} } as never;
-        },
-        groundWithFacts: async () => undefined as never,
+        generate: async (context, promptVersion) => runProducer("input",
+          `${SHADOW_SYSTEM_INSTRUCTION}\n\n${buildShadowPrompt(context, promptVersion)}`),
+        groundWithFacts: async (context, proposal, facts, promptVersion) => runProducer("grounded",
+          `${GROUNDED_SYSTEM_INSTRUCTION}\n\n${buildGroundedPrompt(context, proposal, facts, promptVersion)}`),
       };
       const runner = new RealtimeRunner(inbox, runtime, model,
         {
@@ -423,6 +444,10 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
         const turnSnapshots = snapshots.slice(priorCommits);
         const turnEvents = runtimeEvents.slice(priorEvents);
         const turnCalls = modelCalls.slice(priorCalls);
+        const c3Calls = turnCalls.filter((call) =>
+          (call as { stage?: string }).stage === "strategist" ||
+          (call as { stage?: string }).stage === "responder"
+        );
         const reply = (turnSnapshots.at(-1) as { metaPlan?: { messages?: readonly { text: string }[] } } | undefined)?.metaPlan?.messages?.map(({ text }) => text).join("\n") ?? null;
         // This in-memory transport accepts every generated outbound unit. The
         // history projection follows that synthetic acceptance, never plan creation.
@@ -431,12 +456,12 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
         turns.push({ sequence, customerText: entry.envelope.message.text, processed,
           historyBefore: before.history, stateBefore: before, stateAfter: { conversation: safeJson(persistedState), commerce: safeJson(persistedCommerce), history: safeJson(await history.load(conversationId)) },
           metaPlan: turnSnapshots.map((snapshot) => (snapshot as { metaPlan: unknown }).metaPlan),
-          runtimeEvents: turnEvents, c3Calls: turnCalls, c3FallbackReasons: fallbackReasons,
-          c3Outcome: fallbackReasons.length ? "FALLBACK" : turnCalls.length ? "C3_CHOSEN" : "C3_NOT_CALLED",
+          runtimeEvents: turnEvents, modelCalls: turnCalls, c3FallbackReasons: fallbackReasons,
+          c3Outcome: fallbackReasons.length ? "FALLBACK" : c3Calls.length ? "C3_CHOSEN" : "C3_NOT_CALLED",
           selectedCartSize: selectedSize, fakeDelivery, reply });
         await writeFile(join(outputDir!, "runtime-smoke-artifacts.json"), JSON.stringify({
           model: "gpt-6-luna", reasoningEffort: "medium", sourceHead, sourceFingerprints, startedAt,
-          execution: "RealtimeRunner.processOne; C3 Strategist/Responder outputs generated by Codex CLI Luna; test-only provider identity adapter; all business/runtime ports mocked in memory; no outbound sender or live service",
+          execution: "RealtimeRunner.processOne; initial and grounded producer plus C3 Strategist/Responder generated by Codex CLI Luna when called; test-only provider identity adapter; all business/runtime ports mocked in memory; no outbound sender or live service",
           journeyCount: records.length + 1, journeys: [...records, { journeyId: journey.id, syntheticOnly: true, turns,
             finalConversationState: safeJson(persistedState), finalCommerceState: safeJson(persistedCommerce), commitSnapshots: snapshots }], calls: modelCalls,
         }, null, 2), "utf8");
@@ -444,7 +469,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
       records.push({ journeyId: journey.id, syntheticOnly: true, turns, finalConversationState: safeJson(persistedState), finalCommerceState: safeJson(persistedCommerce), commitSnapshots: snapshots });
       await writeFile(join(outputDir!, "runtime-smoke-artifacts.json"), JSON.stringify({
         model: "gpt-6-luna", reasoningEffort: "medium", sourceHead, sourceFingerprints, startedAt,
-        execution: "RealtimeRunner.processOne; C3 Strategist/Responder outputs generated by Codex CLI Luna; test-only provider identity adapter; all business/runtime ports mocked in memory; no outbound sender or live service",
+        execution: "RealtimeRunner.processOne; initial and grounded producer plus C3 Strategist/Responder generated by Codex CLI Luna when called; test-only provider identity adapter; all business/runtime ports mocked in memory; no outbound sender or live service",
         journeyCount: records.length, journeys: records, calls: modelCalls,
       }, null, 2), "utf8");
     }
@@ -455,22 +480,29 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
     for (const record of records) {
       const journey = record as { turns: readonly {
         stateBefore: { conversation: { conversationOwner: string }; commerce: unknown };
-        stateAfter: { commerce: unknown }; reply: string | null; c3Calls: unknown[];
+        stateAfter: { commerce: unknown }; reply: string | null; c3Outcome: string;
       }[] };
       for (const turn of journey.turns) {
         if (turn.stateBefore.conversation.conversationOwner === "HUMAN") {
           expect(turn.stateAfter.commerce).toEqual(turn.stateBefore.commerce);
           expect(turn.reply).toBeNull();
-          expect(turn.c3Calls).toHaveLength(0);
+          expect(turn.c3Outcome).toBe("C3_NOT_CALLED");
         }
       }
     }
     for (const id of ["cart_size_checkout", "objection_fact_checkout"]) {
       if (!journeys.some((journey) => journey.id === id)) continue;
-      const journey = records.find((record) => (record as { journeyId: string }).journeyId === id) as { turns: readonly { processed: boolean; c3Outcome: string }[]; finalCommerceState: { stage: string } };
+      const journey = records.find((record) => (record as { journeyId: string }).journeyId === id) as { turns: readonly {
+        processed: boolean; c3Outcome: string; modelCalls: readonly { stage: string; status: string }[];
+      }[]; finalCommerceState: { stage: string } };
       expect(journey.turns.every(({ processed }) => processed)).toBe(true);
       expect(journey.finalCommerceState.stage).toBe("PURCHASE_CONFIRMED");
       expect(journey.turns.some(({ c3Outcome }) => c3Outcome === "C3_CHOSEN")).toBe(true);
+      expect(journey.turns.every(({ c3Outcome }) => c3Outcome !== "FALLBACK")).toBe(true);
+      const producerCalls = journey.turns.flatMap(({ modelCalls }) => modelCalls)
+        .filter(({ stage }) => stage === "input");
+      expect(producerCalls.length).toBeGreaterThan(0);
+      expect(producerCalls.every(({ status }) => status === "COMPLETED")).toBe(true);
     }
     const sizeEdit = records.find((record) => (record as { journeyId: string }).journeyId === "cart_size_checkout") as { turns: readonly { stateAfter: { commerce: unknown } }[]; finalCommerceState: unknown } | undefined;
     if (sizeEdit) {
