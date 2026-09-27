@@ -259,6 +259,43 @@ for (const caseItem of cases) {
     }
   }
   ok(cartVersions.size <= 1, `${caseItem.id}: mixed cart versions`);
+  if (ctx.cart_snapshot !== undefined) {
+    const snapshot = ctx.cart_snapshot;
+    ok(Object.keys(snapshot).length === 1 && Object.hasOwn(snapshot, 'shipping_fee_vnd'),
+      `${caseItem.id}: cart snapshot shape`);
+    ok(snapshot.shipping_fee_vnd === null ||
+      (Number.isInteger(snapshot.shipping_fee_vnd) && snapshot.shipping_fee_vnd >= 0),
+      `${caseItem.id}: cart snapshot fee`);
+    const cartRefs = ctx.runtime_claim_refs.filter((ref) => runtime[ref].scope.kind === 'CART');
+    ok(cartRefs.length === 1 && runtime[cartRefs[0]].freshness === 'FRESH',
+      `${caseItem.id}: cart snapshot requires one fresh cart claim`);
+    ok(ctx.product_binding.status === 'RESOLVED' && bound.size > 0,
+      `${caseItem.id}: cart snapshot product binding`);
+    const claim = runtime[cartRefs[0]];
+    if (claim.type === 'FREESHIP') {
+      ok((snapshot.shipping_fee_vnd === 0) === claim.value.eligible,
+        `${caseItem.id}: cart snapshot freeship decision`);
+    }
+    if (claim.type === 'SHIPPING_FEE') {
+      ok(snapshot.shipping_fee_vnd === claim.value.amountVnd,
+        `${caseItem.id}: cart snapshot shipping fee`);
+    }
+  }
+  if (ctx.checkout_completeness !== undefined) {
+    const checkout = ctx.checkout_completeness;
+    const fields = ['FULL_NAME', 'PHONE', 'ADDRESS', 'PAYMENT_METHOD'];
+    ok(['CART_OPEN', 'ORDER_PREVIEW'].includes(ctx.source_stage),
+      `${caseItem.id}: checkout source stage`);
+    ok(Object.keys(checkout).sort().join(',') === 'missing_fields,state' &&
+      Array.isArray(checkout.missing_fields) &&
+      checkout.missing_fields.every((field) => fields.includes(field)) &&
+      new Set(checkout.missing_fields).size === checkout.missing_fields.length,
+      `${caseItem.id}: checkout completeness shape`);
+    ok((checkout.state === 'COMPLETE' && checkout.missing_fields.length === 0) ||
+      (checkout.state === 'REQUIRED' && checkout.missing_fields.length > 0 &&
+       ctx.source_stage === 'CART_OPEN'),
+      `${caseItem.id}: checkout completeness reachability`);
+  }
 
   for (const ref of ctx.simulation_fact_refs) {
     const fact = sim[ref];

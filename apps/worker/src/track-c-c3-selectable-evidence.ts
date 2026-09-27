@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
+  trackCCartClaimIsCurrent,
+  type TrackCCurrentCartBinding,
+} from "./track-c-c3-cart-binding.js";
+import {
   TRACK_C_PROTECTED_PROPOSITIONS,
   trackCCustomerFacingSizeFromVariantId,
   type TrackCProtectedProposition,
@@ -121,18 +125,27 @@ function arrayOfStrings(value: unknown, limit: number): readonly string[] | null
 export function trackCRuntimeClaimDeterministicText(
   claim: ContextV2["verifiedClaims"][number],
   presentation?: ContextV2["productPresentation"],
+  cartBinding: TrackCCurrentCartBinding | null = null,
+  at: Date = new Date(),
 ): string | null {
-  // Cart adjustments (shipping fee, freeship, promotion offer) are deliberately
-  // left without wording. Stating one means asserting it about the cart as it
-  // is now, and the input contract carries no current cart identity or revision
-  // to check the claim against, so a fee could be quoted from a cart the
-  // customer has since changed. Adding a formatter alone would not close that,
-  // so the group stays unrealizable and is reported as a realization limit
-  // until the input contract carries the binding. The subject already keeps
-  // cartId/cartVersion for that revalidation.
+  if (claim.scope.kind === "CART") {
+    if (!trackCCartClaimIsCurrent(claim, cartBinding, at)) return null;
+    if (claim.type === "SHIPPING_FEE") {
+      return `Phí giao hàng của giỏ hiện tại là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
+    }
+    if (claim.type === "FREESHIP") {
+      return claim.value.eligible
+        ? "Giỏ hiện tại được miễn phí giao hàng ạ."
+        : "Giỏ hiện tại vẫn tính phí giao hàng ạ.";
+    }
+    if (claim.type === "PROMOTION_OFFER") {
+      return `Ưu đãi đã áp dụng cho giỏ hiện tại là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
+    }
+    return null;
+  }
   if (claim.scope.kind !== "PRODUCT") return null;
   if (claim.type === "PRICE") {
-    return `Dạ giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
+    return `Giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
   }
   if (claim.type === "STOCK") {
     // Prefer the authoritative variant mapping; fall back to the ID convention
@@ -155,36 +168,36 @@ export function trackCRuntimeClaimDeterministicText(
     const subject = variant === "" ? "mẫu này" : `${variant} của mẫu này`;
     if (claim.value.status === "IN_STOCK") {
       return variant === ""
-        ? "Dạ mẫu này hiện còn hàng ạ."
-        : `Dạ mẫu này hiện còn ${variant} ạ.`;
+        ? "Mẫu này hiện còn hàng ạ."
+        : `Mẫu này hiện còn ${variant} ạ.`;
     }
     if (claim.value.status === "LOW_STOCK") {
       return variant === ""
-        ? "Dạ mẫu này hiện còn hàng nhưng số lượng không nhiều ạ."
-        : `Dạ mẫu này hiện còn ${variant} nhưng số lượng không nhiều ạ.`;
+        ? "Mẫu này hiện còn hàng nhưng số lượng không nhiều ạ."
+        : `Mẫu này hiện còn ${variant} nhưng số lượng không nhiều ạ.`;
     }
     if (claim.value.status === "OUT_OF_STOCK") {
       return variant === ""
-        ? "Dạ mẫu này hiện hết hàng ạ."
-        : `Dạ mẫu này hiện hết ${variant} ạ.`;
+        ? "Mẫu này hiện hết hàng ạ."
+        : `Mẫu này hiện hết ${variant} ạ.`;
     }
     if (claim.value.status === "PRE_ORDER") {
-      return `Dạ ${subject} hiện nhận đặt trước ạ.`;
+      return `${subject[0]!.toUpperCase()}${subject.slice(1)} hiện nhận đặt trước ạ.`;
     }
     if (claim.value.status === "COMING_SOON") {
-      return `Dạ ${subject} hiện sắp về ạ.`;
+      return `${subject[0]!.toUpperCase()}${subject.slice(1)} hiện sắp về ạ.`;
     }
     return null;
   }
   if (claim.type === "SIZE_FIT") {
     const alternative = claim.value.alternativeSizes.length === 0 ? "" :
-      ` Size thay thế đã được xác minh: ${claim.value.alternativeSizes.join(" hoặc ")} ạ.`;
-    return `Dạ theo thông tin size đã xác minh, size phù hợp là ${claim.value.recommendedSizes.join(" hoặc ")} ạ.${alternative}`;
+      ` Chị cũng có thể cân nhắc size ${claim.value.alternativeSizes.join(" hoặc ")} ạ.`;
+    return `Size phù hợp với chị là ${claim.value.recommendedSizes.join(" hoặc ")}${alternative.length === 0 ? " ạ" : ""}.${alternative}`;
   }
   if (claim.type === "ETA") {
     return claim.value.minDays === claim.value.maxDays
-      ? `Dạ thời gian giao dự kiến hiện khoảng ${claim.value.minDays} ngày ạ.`
-      : `Dạ thời gian giao dự kiến hiện là ${claim.value.minDays}–${claim.value.maxDays} ngày ạ. Em chưa thể cam kết chính xác một ngày cụ thể trong khoảng này ạ.`;
+      ? `Thời gian giao dự kiến hiện khoảng ${claim.value.minDays} ngày ạ.`
+      : `Thời gian giao dự kiến là ${claim.value.minDays}–${claim.value.maxDays} ngày. Em chưa thể hẹn chính xác ngày nhận trong khoảng này ạ.`;
   }
   return null;
 }
@@ -232,7 +245,7 @@ function boundedSimulationEvidence(
       ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
       : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
     const deterministicText = design.length === 0 ? profileText :
-      `${profileText} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
+      `${profileText.replace(/ ạ\.$/u, ".")} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {
       displayName,
       material,
@@ -291,7 +304,7 @@ function boundedSimulationEvidence(
       "PRICE",
       { chatVnd: data.chatVnd },
       { scope: "PRODUCT", productId: subjectProductId },
-      `Dạ giá trên kênh chat hiện là ${trackCFormatVnd(data.chatVnd)} ạ.`,
+      `Giá trên kênh chat hiện là ${trackCFormatVnd(data.chatVnd)} ạ.`,
     );
   }
   if (kind === "FULFILLMENT_SNAPSHOT") {
@@ -364,6 +377,8 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   context: ContextV2;
   simulationFacts: readonly unknown[];
   executionLane: TrackCV5ExecutionLane;
+  currentCart?: TrackCCurrentCartBinding | null;
+  evaluationAt?: Date;
 }>): readonly TrackCSelectableEvidence[] {
   if (input.executionLane !== "BEHAVIOR_SIMULATION" &&
       input.simulationFacts.length > 0) {
@@ -378,7 +393,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       );
       const subject = claimSubject(claim.scope, boundPresentation);
       const deterministicText = trackCRuntimeClaimDeterministicText(
-        claim, boundPresentation,
+        claim, boundPresentation, input.currentCart ?? null, input.evaluationAt,
       );
       evidence.push(Object.freeze({
         ref: `CLAIM_${String(index + 1).padStart(3, "0")}`,

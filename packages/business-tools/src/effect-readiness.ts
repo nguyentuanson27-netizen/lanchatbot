@@ -39,7 +39,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly deterministicEvidenceHash?: string | null;
   readonly parentReadinessHash?: string | null;
   readonly payloadHash?: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_LINE_VARIANT" | null;
   readonly mutationQuantity?: number | null;
   readonly checkedAt: Date;
 }
@@ -59,7 +59,8 @@ export function evaluateDeterministicEffectReadinessV1(
   }
 
   const requiresIntent = input.effect === "CART_OPEN" || (
-    input.effect === "CART_MUTATION" && input.mutationAction !== "REMOVE_LINE"
+    input.effect === "CART_MUTATION" && input.mutationAction !== "REMOVE_LINE" &&
+      input.mutationAction !== "SET_LINE_VARIANT"
   );
   if (requiresIntent) {
     if (input.buyingIntent?.decision !== "COMMITTED") {
@@ -87,6 +88,7 @@ export function evaluateDeterministicEffectReadinessV1(
     input.mutationAction !== null &&
     input.mutationAction !== undefined &&
     input.mutationAction !== "REMOVE_LINE" &&
+    input.mutationAction !== "SET_LINE_VARIANT" &&
     input.buyingIntent !== null &&
     input.buyingIntent.productId !== null &&
     !canonicalBuyingIntentAuthorizesCartMutationV1(

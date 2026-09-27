@@ -78,16 +78,21 @@ export class ProductSearchService {
     }
   }
 
-  public async searchText(query: string): Promise<ProductSearchResult> {
+  public async searchText(
+    query: string,
+    excludeProductId?: string,
+  ): Promise<ProductSearchResult> {
     const normalized = normalizeProductCode(query);
+    const excluded = excludeProductId ? normalizeProductCode(excludeProductId) : null;
     const codeLike = /^[A-Z]{1,6}\d{1,8}(?:[A-Z0-9]*)$/u.test(normalized);
     if (codeLike) {
       const exact = await this.port.findByExactCode(normalized);
-      if (exact !== null) {
+      if (exact !== null && normalizeProductCode(exact.productId) !== excluded) {
         return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateDocument(exact), score: 1, gap: null };
       }
 
-      const aliases = (await this.port.findByAlias(normalized)).map(validateDocument);
+      const aliases = (await this.port.findByAlias(normalized)).map(validateDocument)
+        .filter((product) => normalizeProductCode(product.productId) !== excluded);
       if (aliases.length === 1 && aliases[0] !== undefined) {
         return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
       }
@@ -103,7 +108,7 @@ export class ProductSearchService {
     const candidates = validateAndSortCandidates(
       await this.port.searchStableText(query, this.thresholds.maxCandidates),
       this.thresholds.maxCandidates,
-    );
+    ).filter(({ document }) => normalizeProductCode(document.productId) !== excluded);
     return this.decideSemantic(candidates, this.thresholds.textMinScore);
   }
 

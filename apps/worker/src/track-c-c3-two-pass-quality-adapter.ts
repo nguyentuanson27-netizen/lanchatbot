@@ -12,6 +12,7 @@ import {
 } from "./track-c-c3-v5-benchmark-runner.js";
 import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materialization.js";
 import type { TrackCCheckoutField } from "./track-c-c3-strategy-contract.js";
+import type { TrackCCurrentCartBinding } from "./track-c-c3-cart-binding.js";
 import {
   runTrackCStrategyContractCase,
   type TrackCStrategyContractCaseResult,
@@ -35,6 +36,7 @@ export type TrackCC3TwoPassQualityCandidateInput = Omit<
   "simulationMetadata"
 > & Readonly<{
   readonly fixture: TrackCC3TwoPassQualityFixture;
+  readonly currentCart?: TrackCCurrentCartBinding | null;
 }>;
 
 export type TrackCC3TwoPassQualityCandidateResult =
@@ -108,6 +110,10 @@ export async function runTrackCC3TwoPassQualityCandidate(
 ): Promise<TrackCC3TwoPassQualityCandidateResult> {
   if (Object.hasOwn(input, "simulationMetadata")) {
     throw new Error("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
+  }
+  if ((input.fixture.context.cart_snapshot !== undefined) !==
+      (input.currentCart !== undefined && input.currentCart !== null)) {
+    throw new Error("TRACK_C_C3_CURRENT_CART_BINDING_REQUIRED");
   }
   const metadata = trustedSimulationMetadata(input.fixture);
   const acquisitionMetadata = metadata.find((entry) =>

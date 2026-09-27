@@ -50,6 +50,14 @@ describe("BF-08 classified customer URL policy", () => {
       .toMatchObject({ disposition: "CONTINUE", items: [] });
   });
 
+  it("lets a labeled checkout phone through while retaining numeric-host blocking", () => {
+    const checkout = "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh";
+    expect(classifyCustomerUrls(checkout, "CLASSIFIED_ALLOWLIST_V1"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(classifyCustomerUrls("0984997797/admin", "CLASSIFIED_ALLOWLIST_V1").disposition)
+      .not.toBe("CONTINUE");
+  });
+
   it.each([
     "ch\u1ecb ch\u1ecdn m\u1eabu 1?",
     "size 2?",

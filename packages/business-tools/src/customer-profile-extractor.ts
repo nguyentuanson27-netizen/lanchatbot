@@ -4,6 +4,18 @@ import {
   type MeasurementKind,
 } from "@lana/contracts";
 
+export interface CustomerPreferenceSignal {
+  readonly field: "colors" | "styles" | "materials";
+  readonly value: string;
+  readonly action: "ADD" | "REMOVE" | "REPLACE";
+  readonly evidence: {
+    readonly source: "CUSTOMER_MESSAGE";
+    readonly sourceEventHash: string;
+    readonly observedAt: string;
+    readonly confidence: number;
+  };
+}
+
 export interface CustomerMeasurementExtractionInput {
   readonly text: string;
   readonly observedAt: string;
@@ -36,6 +48,32 @@ const foldVietnamese = (value: string): string =>
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/đ/gu, "d")
     .toLocaleLowerCase("vi-VN");
+
+/** Explicit preference statements only; a cart variant choice is not a durable preference. */
+export function extractCustomerPreferences(
+  input: CustomerMeasurementExtractionInput,
+): readonly CustomerPreferenceSignal[] {
+  const text = foldVietnamese(input.text);
+  const patterns: readonly [CustomerPreferenceSignal["field"], RegExp][] = [
+    ["colors", /\b(khong\s+)?(?:thich|uu\s+tien)\s+mau\s+(xanh\s+reu|xanh|do|den|trang|hong|be|vang|tim|nau)\b/gu],
+    ["materials", /\b(khong\s+)?(?:thich|uu\s+tien)\s+(?:chat\s+lieu|vai)\s+(cotton|linen|lua|ren|kaki)\b/gu],
+    ["styles", /\b(khong\s+)?(?:thich|uu\s+tien)\s+(?:phong\s+cach|kieu|form)\s+(toi\s+gian|nu\s+tinh|suong|om)\b/gu],
+  ];
+  const signals: CustomerPreferenceSignal[] = [];
+  for (const [field, pattern] of patterns) {
+    for (const match of text.matchAll(pattern)) {
+      const prefix = text.slice(Math.max(0, match.index - 18), match.index);
+      const action = match[1]
+        ? "REMOVE"
+        : /\b(?:gio|bay\s+gio|doi\s+y|thay\s+vi)\b/u.test(prefix)
+          ? "REPLACE" : "ADD";
+      signals.push({ field, value: match[2]!.toUpperCase(), action,
+        evidence: { source: "CUSTOMER_MESSAGE", sourceEventHash: input.sourceEventHash,
+          observedAt: input.observedAt, confidence: 0.98 } });
+    }
+  }
+  return signals;
+}
 
 function normalizeHeight(value: number): number {
   return value < 3 ? Math.round(value * 100) : Math.round(value);

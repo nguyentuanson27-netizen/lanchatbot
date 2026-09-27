@@ -3,6 +3,7 @@ import {
   type InboundCustomerMessageInput,
   PostgresChatHistoryStore,
 } from "./chat-history.js";
+import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 
 const input: InboundCustomerMessageInput = {
   pageId: "page-1",
@@ -141,5 +142,40 @@ describe("PostgresChatHistoryStore shadow evaluation capture", () => {
     expect(
       calls.some(({ sql }) => sql.includes("INSERT INTO shadow_evaluations")),
     ).toBe(false);
+  });
+});
+
+describe("accepted Outbox history recovery", () => {
+  it("decrypts only accepted payloads and reuses the canonical outbox identity", async () => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1");
+    const outboxId = "8ba8a4ee-bc9f-4210-96c9-0d3213def222";
+    const pageId = "page-1";
+    const payload = cipher.encryptJson({ kind: "TEXT", text: "Em đã báo giá 799.000đ." },
+      `lana:meta-payload:v2:${pageId}:${outboxId}`,
+      new Date("2026-08-20T00:00:00.000Z"));
+    const queries: string[] = [];
+    const store = new PostgresChatHistoryStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      { analyticsHashSalt: "a".repeat(32), outboxCipher: cipher },
+    );
+    (store as unknown as { pool: unknown }).pool = { async query(sql: string) {
+      queries.push(sql);
+      return { rows: [{ outbox_id: outboxId, page_id: pageId,
+        payload_ciphertext: payload.ciphertext,
+        payload_nonce: payload.nonce, payload_auth_tag: payload.authTag,
+        payload_encrypted_dek: payload.encryptedDek,
+        payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] };
+    } };
+    const record = vi.spyOn(store, "recordAcceptedOutboundBotMessage")
+      .mockResolvedValueOnce({ inserted: true, identityKey: `history:outbound:v1:${outboxId}`,
+        messagePk: outboxId, occurredAt: new Date("2026-08-13T00:00:00.000Z") })
+      .mockResolvedValueOnce({ inserted: false, identityKey: `history:outbound:v1:${outboxId}`,
+        messagePk: outboxId, occurredAt: new Date("2026-08-13T00:00:00.000Z") });
+    expect(await store.recoverAcceptedOutboundBotMessages(input.conversationId)).toBe(1);
+    expect(await store.recoverAcceptedOutboundBotMessages(input.conversationId)).toBe(0);
+    expect(record).toHaveBeenCalledWith({ outboxId,
+      text: "Em đã báo giá 799.000đ.", attachmentCount: 0 });
+    expect(queries[0]).toContain("status IN ('SENT_ACCEPTED', 'DELIVERED', 'READ')");
+    expect(queries[0]).toContain("NOT EXISTS");
   });
 });

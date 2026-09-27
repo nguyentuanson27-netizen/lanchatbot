@@ -27,6 +27,8 @@ export interface BuildContextV2Input {
   readonly canonicalEvidence: CanonicalDecisionEvidenceV1;
   readonly verifiedClaims: readonly ProtectedClaimV1[];
   readonly finalCommerceState: SalesCycleRuntimeState;
+  /** Ephemeral current-turn Size Engine blocker; does not advance commerce. */
+  readonly fitMeasurementsRequired?: boolean;
   readonly readiness: readonly DeterministicEffectReadinessV1[];
   readonly finalTurnEvidence: FinalTurnEvidenceV2;
   readonly productBinding: ProductBindingV2;
@@ -197,10 +199,12 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     salesCycleRevision: input.finalTurnEvidence.finalSalesCycleRevision,
   });
   const barriers = deriveConversationBarriersV2({
+    fitMeasurementsRequired: input.fitMeasurementsRequired ?? false,
     productScope: input.productBinding.status,
     commerceStage: input.finalCommerceState.stage,
     hasCart: input.finalCommerceState.cart !== null,
-    hasActiveClarification: input.finalCommerceState.clarification !== null,
+    hasActiveClarification:
+      input.finalCommerceState.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING",
     readiness: {
       outcome: readinessOutcome,
       reasonCodes: readinessReasonCodes,

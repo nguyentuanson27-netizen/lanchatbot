@@ -123,6 +123,39 @@ async function run(
 }
 
 describe("Track C C3 checkout reachability", () => {
+  it("uses the frozen DEV checkout completeness for Q092 and Q100", async () => {
+    const chunk = JSON.parse(readFileSync(
+      new URL("quality-10.json", EVAL_ROOT), "utf8",
+    )) as { cases: TrackCC3TwoPassQualityFixture[] };
+    const q092 = chunk.cases.find(({ id }) => id === "V5V4Q092")!;
+    const q100 = chunk.cases.find(({ id }) => id === "V5V4Q100")!;
+    expect(q092.context.source_stage).toBe("CART_OPEN");
+    expect(q092.context.checkout_completeness).toEqual({
+      state: "REQUIRED",
+      missing_fields: ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"],
+    });
+    expect(q100.context.checkout_completeness).toEqual({
+      state: "COMPLETE", missing_fields: [],
+    });
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", fixture: q092,
+      runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const result = await runTrackCC3TwoPassQualityCandidate({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture, evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Ok em", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      fixture: q092, transport: { send: transport([]) },
+    } as never);
+    expect(result.responderTask.canonicalRequest).toMatchObject({
+      type: "ASK_CHECKOUT_DETAILS",
+      requestedFields: ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"],
+    });
+  });
   it("reaches the runner from an open cart through the adapter", async () => {
     const result = await run(["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"]);
     expect(result.responderTask.canonicalRequest).toMatchObject({

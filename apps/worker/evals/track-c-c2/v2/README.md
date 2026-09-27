@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.7
+### Benchmark revision R2.9
 
-`benchmark_revision` is **R2.7**. Corpus, splits, rubric, scoring weights, lane cardinality and materialization are unchanged from R2.6. The benchmark-owner comparison fact now carries an explicit bounded Vietnamese `customerText` projection so PRODUCT_COMPARISON is executable without candidate-side translation or generic rendering. This factual-input semantic change is registered in the bundle hashes; candidate runner, prompt, and request identities remain outside the C2 bundle fingerprint.
+`benchmark_revision` is **R2.9**. The 70 DEV case IDs and rubric remain fixed. Four fresh cart cases now carry a frozen shipping-fee snapshot. The offline materializer constructs one canonical cart and policy binding, then derives the selected claim from that same binding; the C3 candidate requires the readback before it can state a cart fact. Q024 remains blocked by the missing negative-freeship producer, and Q027 remains an expired capture. Q092 uses the reachable open-cart stage and declares its missing checkout fields; Q100 declares checkout complete. Production-contract reachability remains separately classified and does not gain authority from these simulation inputs.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 

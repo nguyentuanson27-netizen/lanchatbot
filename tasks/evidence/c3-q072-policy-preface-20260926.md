@@ -1,0 +1,5 @@
+# Q072 policy preface guard correction — 2026-09-26
+
+The exact-source `a8424f7` Luna DEV70 rejected Q072 after both model stages. Its Responder wrote a bare “chính sách là:” introduction, then copied the selected 15-day exchange policy into the factual slot with only the permitted final politeness removal. The free-prose guard treated the introduction as a policy assertion because its coarse pattern matched `chính sách là` without requiring a property.
+
+The guard now exempts only `chính sách là:` with a colon; an asserted property following `là` remains blocked. A two-stage contract regression checks both outcomes. Worker strategy suite **70/70** and TypeScript passed. Replaying the **exact recorded Luna Strategist and Responder outputs** from `LUNA6_DEV70_C3_a8424f7_20260926T024145Z` against the new built code passed Q072. Q071 and Q073 replayed to the same replies as before. This is offline replay of a previously recorded output, not a fresh Luna DEV70 score or proof that all policy wording is safe.

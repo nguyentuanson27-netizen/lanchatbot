@@ -205,6 +205,29 @@ function productAttributes(): ProductAttributesV1 {
 }
 
 describe("DF09 final Context V2 capture", () => {
+  it("recomputes an advisory fit blocker without advancing commerce or granting it to an unresolved product", () => {
+    const source = input();
+    const commerce = { ...source.finalCommerceState, stage: "FACTS_PRESENTED" as const, cart: null };
+    for (const [resolved, required, expected] of [
+      [true, true, true], [true, false, false], [false, true, false],
+    ] as const) {
+      const context = buildContextV2({ ...source, finalCommerceState: commerce,
+        readiness: [], fitMeasurementsRequired: required,
+        canonicalEvidence: { ...source.canonicalEvidence, buyingIntent: {
+          ...source.canonicalEvidence.buyingIntent, decision: "NONE", requestedAction: "NONE",
+          productId: resolved ? "SD398" : null, quantity: null,
+        } },
+        productBinding: resolved ? source.productBinding : {
+          ...source.productBinding, status: "UNRESOLVED", productIds: [],
+        },
+      });
+      expect(context.barriers.active.includes("MEASUREMENTS_REQUIRED")).toBe(expected);
+      expect(context.phase.sourceStage).toBe("FACTS_PRESENTED");
+      expect(context.phase.salesCycleRevision).toBe(commerce.revision);
+      expect(parseContextV2WithIntegrity(context)).toEqual(context);
+    }
+  });
+
   it("normalizes nullable optional evidence to the legacy omitted shape", () => {
     const omitted = buildContextV2(input());
     const nullable = buildContextV2({

@@ -159,6 +159,16 @@ describe("stable product search", () => {
     expect(port.calls).toEqual(["text:đầm đi tiệc"]);
   });
 
+  it("excludes a rejected current product before choosing a semantic alternative", async () => {
+    const port = new FakeStableCatalogSearchPort([sd396, sd397], [
+      { document: sd396, score: 0.98 },
+      { document: sd397, score: 0.90 },
+    ]);
+    const result = await new ProductSearchService(port, thresholds)
+      .searchText("tìm mẫu khác", "SD396");
+    expect(result).toMatchObject({ status: "MATCHED", product: { productId: "SD397" } });
+  });
+
   it("returns up to three candidates when top score is low or top gap is too small", async () => {
     const lowPort = new FakeStableCatalogSearchPort([], [
       { document: sd396, score: 0.7 },
@@ -389,6 +399,24 @@ describe("facts and deterministic policy guard", () => {
     });
   });
 
+  it.each([
+    ["Em hiểu mức giá này khiến chị cân nhắc SD396 kỹ hơn.", false],
+    ["Em hiểu mức giá này khiến chị cân nhắc sd396 kỹ hơn.", false],
+    ["Giá SD396 là 599k.", true],
+    ["Giá SD396 599000.", true],
+    ["Giá SD396 là 599 nghìn.", true],
+    ["Giá SD396 là 599 đồng.", true],
+    ["Giá SD396 là 0,599 triệu.", true],
+    ["Giá SD396 là 599VND.", true],
+    ["Giá SD396.", false],
+    ["Giá ABC599000.", true],
+    ["Giá 396.", true],
+  ] as const)("distinguishes verified product identifiers from money: %s", (reply, blocked) => {
+    const result = guardAgentProposal({ proposal: proposal(reply), facts: null,
+      verifiedProductIds: new Set(["SD396"]), now });
+    expect(result.blockedReasonCodes.includes("UNAUTHORIZED_PRICE")).toBe(blocked);
+  });
+
   it("blocks invented price, promotion, freeship and ship fee", () => {
     const result = guardAgentProposal({
       proposal: proposal("Giá 599k, đang giảm giá, freeship và phí ship 30k ạ"),
@@ -468,6 +496,20 @@ describe("facts and deterministic policy guard", () => {
     expect(result.blockedReasonCodes).not.toContain(
       "PREMATURE_ORDER_INFO_REQUEST",
     );
+  });
+
+  it.each([
+    "Chị gửi em tên hoặc ảnh mẫu chị đã xem hôm qua nhé.",
+    "Chị gửi em tên hay mã mẫu chị đang xem nhé.",
+  ])("keeps product identification outside checkout PII: %s", (reply) => {
+    const result = guardAgentProposal({
+      proposal: proposal(reply),
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      buyingSignal: false,
+      now,
+    });
+    expect(result.blockedReasonCodes).not.toContain("PREMATURE_ORDER_INFO_REQUEST");
   });
 
   it("still blocks a bare recipient-name request before a buying signal", () => {

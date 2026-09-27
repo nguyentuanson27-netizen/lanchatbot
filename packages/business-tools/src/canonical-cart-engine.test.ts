@@ -66,4 +66,24 @@ describe("canonical cart engine", () => {
     const missing = created([missingSizeLine]);
     expect(applyCanonicalCartDecisionV2({ cart: missing, expectedCartVersion: 1, mutation: null, shopId: "LANA_DESIGN", policy, customerState: "READY", readyForConfirmation: true, now })).toMatchObject({ status: "BLOCKED", reasonCode: "CART_MUTATION_INVALID" });
   });
+
+  it("replaces a POS-resolved line variant and reprices the whole cart", () => {
+    const cart = created([line("13000000-0000-4000-8000-000000000001", "CB182")]);
+    const replacement = {
+      ...cart.lines[0]!, posUnitPriceVnd: 800_000, lineTotalVnd: 800_000,
+      components: [{ ...cart.lines[0]!.components[0]!, componentSku: "CB182-L", size: "L" }],
+    };
+    const changed = applyCanonicalCartDecisionV2({ cart, expectedCartVersion: 1,
+      mutation: { kind: "SET_LINE_VARIANT", lineId: replacement.lineId, line: replacement },
+      shopId: "LANA_DESIGN", policy, customerState: "READY", now });
+    expect(changed).toMatchObject({ status: "APPLIED", cart: { revision: 2,
+      subtotalVnd: 800_000, grandTotalVnd: 830_000,
+      lines: [{ components: [{ size: "L" }] }],
+    } });
+    expect(applyCanonicalCartDecisionV2({ cart, expectedCartVersion: 1,
+      mutation: { kind: "SET_LINE_VARIANT", lineId: replacement.lineId,
+        line: { ...replacement, parentProductId: "OTHER" } },
+      shopId: "LANA_DESIGN", policy, customerState: "READY", now,
+    })).toMatchObject({ status: "BLOCKED", reasonCode: "CART_MUTATION_INVALID" });
+  });
 });

@@ -38,13 +38,13 @@ function verifiedFacts(productId: string, salePriceVnd: number) {
 
 describe("DF05 typed protected-claim provenance", () => {
   it("adapts canonical cart policy decisions into shipping and promotion claims", () => {
-    const claims = buildProtectedCartPolicyClaimsV1({
+    const input = {
       cart: {
         cartId: "10000000-0000-4000-8000-000000000001",
         revision: 2,
         adjustments: [{
           adjustmentId: "10000000-0000-4000-8000-000000000004",
-          kind: "FIXED_DISCOUNT",
+          kind: "FIXED_DISCOUNT" as const,
           amountVnd: 20_000,
           percentageBps: null,
           policyAuthorization: {
@@ -61,9 +61,23 @@ describe("DF05 typed protected-claim provenance", () => {
       policySourceVersion: "policy-1:v1",
       policyEvidenceRef: "policy:sha256:safe-ref",
       expiresAt: "2026-08-13T05:05:00.000Z",
-    });
+    };
+    const claims = buildProtectedCartPolicyClaimsV1(input);
     expect(claims.map(({ type }) => type)).toEqual(["PROMOTION_OFFER", "SHIPPING_FEE"]);
     expect(claims.every(({ scope }) => scope.kind === "CART")).toBe(true);
+    const c3Claims = buildProtectedCartPolicyClaimsV1({
+      ...input, includeNegativeFreeShipping: true,
+    });
+    expect(c3Claims.map(({ type }) => type)).toEqual([
+      "FREESHIP", "PROMOTION_OFFER", "SHIPPING_FEE",
+    ]);
+    expect(c3Claims.find(({ type }) => type === "FREESHIP")?.value)
+      .toEqual({ eligible: false });
+    expect(buildProtectedCartPolicyClaimsV1({
+      ...input,
+      cart: { ...input.cart, shippingFeeVnd: null },
+      includeNegativeFreeShipping: true,
+    }).some(({ type }) => type === "FREESHIP")).toBe(false);
   });
 
   it("hashes verified media identity without retaining its URL or credentials", () => {

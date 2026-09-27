@@ -144,6 +144,7 @@ export const CartMutationActionV1Schema = z.enum([
   "ADD_LINE",
   "REMOVE_LINE",
   "SET_QUANTITY",
+  "SET_LINE_VARIANT",
 ]);
 export type CartMutationActionV1 = z.infer<typeof CartMutationActionV1Schema>;
 
@@ -154,6 +155,11 @@ export const CanonicalCartMutationPayloadV1Schema = z.discriminatedUnion("kind",
     kind: z.literal("SET_QUANTITY"),
     lineId: z.string().uuid(),
     quantity: z.number().int().positive().max(20),
+  }).strict(),
+  z.object({
+    kind: z.literal("SET_LINE_VARIANT"),
+    lineId: z.string().uuid(),
+    line: CartLineV1Schema,
   }).strict(),
 ]);
 export type CanonicalCartMutationPayloadV1 = z.infer<
@@ -170,13 +176,16 @@ export const CartMutationAuthorityBindingV1Schema = z.object({
   authorityKind: z.enum([
     "CANONICAL_BUYING_INTENT",
     "DETERMINISTIC_REMOVE_CLASSIFIER",
+    "DETERMINISTIC_VARIANT_EDIT",
   ]),
   authorityEvidenceHash: Sha256Schema,
   bindingHash: Sha256Schema,
 }).strict().superRefine((value, context) => {
   const expected = value.action === "REMOVE_LINE"
     ? "DETERMINISTIC_REMOVE_CLASSIFIER"
-    : "CANONICAL_BUYING_INTENT";
+    : value.action === "SET_LINE_VARIANT"
+      ? "DETERMINISTIC_VARIANT_EDIT"
+      : "CANONICAL_BUYING_INTENT";
   if (value.authorityKind !== expected) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["authorityKind"], message: "authority kind must match mutation action" });
   }
@@ -203,6 +212,7 @@ export const CartMutationReceiptV1Schema = z.object({
     "LINE_ADDED",
     "LINE_REMOVED",
     "QUANTITY_CHANGED",
+    "VARIANT_CHANGED",
   ]),
   authority: CartMutationAuthorityBindingV1Schema,
   beforeCartStateHash: Sha256Schema,
@@ -223,11 +233,20 @@ export const CartMutationReceiptV1Schema = z.object({
   )) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["authority"], message: "receipt authority must bind the exact added product and offer" });
   }
+  if (value.mutation.kind === "SET_LINE_VARIANT" && (
+    value.mutation.lineId !== value.mutation.line.lineId ||
+    value.authority.productId !== value.mutation.line.parentProductId ||
+    value.authority.offerId !== value.mutation.line.offerId
+  )) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["authority"], message: "variant edit must bind the replacement line" });
+  }
   const expectedReason = value.mutation.kind === "ADD_LINE"
     ? "LINE_ADDED"
     : value.mutation.kind === "REMOVE_LINE"
       ? "LINE_REMOVED"
-      : "QUANTITY_CHANGED";
+      : value.mutation.kind === "SET_LINE_VARIANT"
+        ? "VARIANT_CHANGED"
+        : "QUANTITY_CHANGED";
   if (value.mutationReasonCode !== expectedReason) {
     context.addIssue({
       code: z.ZodIssueCode.custom,

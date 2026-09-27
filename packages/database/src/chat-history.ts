@@ -1,6 +1,7 @@
 import { createHmac, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import { withTransaction } from "./repositories.js";
+import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import { redactAnalyticsMessage } from "./shadow-mirror.js";
 import { attributeInboundToRecentOutreach } from "./outreach.js";
 import {
@@ -102,6 +103,7 @@ export interface ChatHistoryItem {
 
 export interface PostgresChatHistoryOptions {
   readonly analyticsHashSalt: string;
+  readonly outboxCipher?: LocalEnvelopeCipher;
   readonly maxConnections?: number;
   readonly adAcquisition?: AdAcquisitionAnalyticsOptions;
 }
@@ -171,6 +173,7 @@ function messageType(text: string | null, attachmentCount: number): ChatHistoryI
 export class PostgresChatHistoryStore {
   private readonly pool: Pool;
   private readonly analyticsHashSalt: string;
+  private readonly outboxCipher: LocalEnvelopeCipher | null;
 
   private readonly adAcquisition: AdAcquisitionConfig;
   constructor(connectionString: string, options: PostgresChatHistoryOptions) {
@@ -179,6 +182,7 @@ export class PostgresChatHistoryStore {
       throw new Error("ANALYTICS_HASH_SALT_TOO_SHORT");
     }
     this.analyticsHashSalt = options.analyticsHashSalt;
+    this.outboxCipher = options.outboxCipher ?? null;
     this.pool = new Pool({
       connectionString,
       max: options.maxConnections ?? 5,
@@ -511,6 +515,56 @@ export class PostgresChatHistoryStore {
         occurredAt: row.accepted_at,
       };
     });
+  }
+
+  /** Rebuilds missing canonical rows from accepted encrypted Outbox, without sending. */
+  async recoverAcceptedOutboundBotMessages(
+    conversationId: string,
+    limit = 150,
+  ): Promise<number> {
+    if (!this.outboxCipher) return 0;
+    const safeLimit = Math.max(1, Math.min(150, Math.trunc(limit)));
+    const result = await this.pool.query<{
+      outbox_id: string; page_id: string;
+      payload_ciphertext: Buffer; payload_nonce: Buffer;
+      payload_auth_tag: Buffer; payload_encrypted_dek: Buffer;
+      payload_key_ref: string; payload_expires_at: Date;
+    }>(
+      `SELECT outbox_id, page_id, payload_ciphertext, payload_nonce,
+              payload_auth_tag, payload_encrypted_dek, payload_key_ref,
+              payload_expires_at
+       FROM meta_outbox AS outbox
+       WHERE conversation_id = $1
+         AND status IN ('SENT_ACCEPTED', 'DELIVERED', 'READ')
+         AND meta_message_id IS NOT NULL AND accepted_at IS NOT NULL
+         AND payload_expires_at > now()
+         AND NOT EXISTS (
+           SELECT 1 FROM message_identities AS identity
+           WHERE identity.identity_key = 'history:outbound:v1:' || outbox.outbox_id::text
+         )
+       ORDER BY accepted_at ASC, outbox_id ASC
+       LIMIT $2`,
+      [conversationId, safeLimit],
+    );
+    let recovered = 0;
+    for (const row of result.rows) {
+      const message = this.outboxCipher.decryptJson<
+        { kind: "TEXT"; text: string } | { kind: "IMAGE" }
+      >({ ciphertext: row.payload_ciphertext, nonce: row.payload_nonce,
+        authTag: row.payload_auth_tag, encryptedDek: row.payload_encrypted_dek,
+        keyRef: row.payload_key_ref, expiresAt: row.payload_expires_at },
+      `lana:meta-payload:v2:${row.page_id}:${row.outbox_id}`);
+      if (message.kind !== "TEXT" && message.kind !== "IMAGE") {
+        throw new Error("CHAT_HISTORY_OUTBOX_PAYLOAD_INVALID");
+      }
+      const recorded = await this.recordAcceptedOutboundBotMessage({
+        outboxId: row.outbox_id,
+        text: message.kind === "TEXT" ? message.text : null,
+        attachmentCount: message.kind === "IMAGE" ? 1 : 0,
+      });
+      if (recorded.inserted) recovered += 1;
+    }
+    return recovered;
   }
 
   /** Records an unmatched page echo as a real human-agent message. */

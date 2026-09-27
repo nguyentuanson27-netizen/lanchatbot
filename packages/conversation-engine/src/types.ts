@@ -106,6 +106,13 @@ export interface MediaClarificationState {
   readonly openedAt: string;
 }
 
+/** Customer-reported, session-only decision inputs; never shop fact authority. */
+export interface SessionDecisionContext {
+  readonly budgetVnd: number | null;
+  readonly occasion: "WORK" | "PARTY" | "EVERYDAY" | null;
+  readonly rejectedProductIds: readonly string[];
+}
+
 export interface ConversationState {
   readonly schemaVersion: 1;
   readonly conversationId: string;
@@ -127,6 +134,7 @@ export interface ConversationState {
   }[];
   /** Bounded state for resolving an uncertain customer image without immediate handoff. */
   readonly mediaClarification?: MediaClarificationState | null;
+  readonly sessionDecisionContext?: SessionDecisionContext;
   readonly consideredVariant: ConsideredVariant;
   /** Additive Wave-2 state; absent snapshots remain valid while the flag is off. */
   readonly verifiedVariant?: VerifiedVariantV2 | null;

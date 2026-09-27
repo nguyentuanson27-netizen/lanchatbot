@@ -98,8 +98,13 @@ function extractCandidates(value: string): readonly string[] {
   const candidates: string[] = [];
   for (const match of value.matchAll(URL_CANDIDATE)) {
     const candidate = trimCandidate(match[0]);
+    const linePrefix = match.index === undefined ? "" :
+      value.slice(value.lastIndexOf("\n", match.index - 1) + 1, match.index);
+    const labeledCheckoutPhone = /^0\d{9}$/u.test(candidate) &&
+      /(?:sđt|số\s*điện\s*thoại|so\s*dien\s*thoai|phone)\s*:\s*$/iu.test(linePrefix);
     if (
       candidate &&
+      !labeledCheckoutPhone &&
       !(match.index !== undefined && isExplicitVndPriceCandidate(value, match[0], match.index))
     ) candidates.push(candidate);
   }

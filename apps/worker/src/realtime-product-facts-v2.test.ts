@@ -1,13 +1,17 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  buildCanonicalDecisionEvidenceV1,
   selectProductMediaV2,
   buildProductAttributesV1,
+  resolveCatalogFacts,
   type CatalogSnapshotV3,
   type StableProductDocument,
 } from "@lana/business-tools";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { buildRealtimeProductFactsV2, productMediaView } from "./realtime-product-facts-v2.js";
+import { buildRealtimeC3Input } from "./realtime-c3-input.js";
+import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 type ProductImage = StableProductDocument["images"][number];
 
@@ -170,6 +174,38 @@ function buildMediaFacts(
 }
 
 describe("realtime ProductFactsV2 media projection", () => {
+  it("does not present preparation days as destination delivery ETA", () => {
+    const observedAt = "2026-08-10T00:00:00.000Z";
+    const snapshot = { ...mediaSnapshot("SD375", ["TOP", "SKIRT"], observedAt),
+      fulfillment_policy: {
+        ...mediaSnapshot("SD375", ["TOP", "SKIRT"], observedAt).fulfillment_policy!,
+        prep_min_days: 1, prep_max_days: 2,
+        eta_valid_until: "2026-08-12T00:00:00.000Z",
+      },
+      shipping_eta: {
+        HANOI: { transit_min_days: 2, transit_max_days: 3 },
+        HCM: { transit_min_days: 3, transit_max_days: 5 },
+      },
+    } as CatalogSnapshotV3;
+    const now = new Date("2026-08-10T00:10:00.000Z");
+    const productFacts = buildRealtimeProductFactsV2({
+      snapshot, product: mediaProduct("SD375", observedAt, []), policy: null, now,
+    });
+    expect(productFacts?.fulfillment.etaToCustomer).toBeNull();
+    const query = { shopAlias: "LANA", productId: "SD375", intent: "ETA",
+      offerType: "SET", color: "BE", size: "M" } as const;
+    const hanoi = resolveCatalogFacts(snapshot,
+      { ...query, deliveryRegion: "HANOI" }, now);
+    const hcm = resolveCatalogFacts(snapshot,
+      { ...query, deliveryRegion: "HCM" }, now);
+    const unknown = resolveCatalogFacts(snapshot,
+      { ...query, deliveryRegion: null }, now);
+    expect(hanoi.status, hanoi.reasonCode ?? "").toBe("OK");
+    expect(hanoi.facts?.deliveryEta).toEqual({ minDays: 3, maxDays: 5 });
+    expect(hcm.facts?.deliveryEta).toEqual({ minDays: 4, maxDays: 7 });
+    expect(unknown.status).toBe("NOT_FOUND");
+  });
+
   it("preserves registry-owned content and attributes in ProductFacts V2", () => {
     const observedAt = "2026-08-10T00:00:00.000Z";
     const product = {
@@ -201,6 +237,26 @@ describe("realtime ProductFactsV2 media projection", () => {
       } },
       attributes: { productId: "SD375", materials: ["LỤA"] },
     });
+    const decisionAt = new Date("2026-08-10T01:00:00.000Z");
+    const live = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000081",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "Mẫu SD375 có chất liệu gì?", sourceMessageId: "mid-sd375-attributes",
+        productId: "SD375", modelBuyingIntent: null, evaluatedAt: decisionAt,
+      }),
+      preConversationRevision: 2, finalConversationRevision: 3,
+      preSalesRevision: 0,
+      commerceState: createRealtimeSalesState(
+        "33333333-3333-4333-8333-333333333333", "page-1", decisionAt,
+      ),
+      productId: "SD375", catalogVersion: "bf09-catalog-v1",
+      facts: [], productFacts: facts, policyResolution: null,
+      cartReadiness: [], now: decisionAt,
+    });
+    expect(live.context.productAttributes).toMatchObject({
+      productId: "SD375", materials: ["LỤA"], silhouettes: ["CHIẾT EO"],
+    });
+    expect(live.context.productPresentation).not.toBeNull();
   });
 
   it("classifies approved front views of a full set or dress as FULL_LOOK", () => {

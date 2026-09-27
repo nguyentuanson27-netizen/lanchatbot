@@ -13,10 +13,10 @@ completeness against the real runtime state machine (§6c), and the known
 implementation gaps (§6d). It retains the six-field Strategist decision, the
 two lanes, the progression invariant and every authority boundary.
 
-Sections 6b and 6c describe contracts the implementation now follows. Section
-6d records requirements this spec makes that the code does not yet meet; those
-are implementation gaps, and the requirement is not weakened to match the
-current code.
+Sections 6b and 6c describe the input and checkout contracts. The runtime
+implementation and remaining limits are recorded in the integration appendix
+below. Historical gap notes in §6d describe the PR371 baseline; use the
+appendix for the current implementation status.
 
 ## Objective
 
@@ -366,6 +366,10 @@ Keep extra structured output only if a deterministic final guard demonstrably ne
 
 ### Realization boundary and current implementation limit
 
+**Current adaptive wording:** the 2026-09-24 follow-up below supersedes the
+historical bounded nonfactual vocabulary in this section. Trusted first contact
+retains that fixed surface; selected factual projections retain their binding.
+
 Code owns which factual assertions are authorized; the Responder realizes the
 compiled task within the available safe wording surface. It must not replace
 the strategy, repair a bad evidence selection by choosing another fact, or
@@ -382,7 +386,7 @@ question-resolution requirements. If that surface cannot express a partial
 answer and its remaining uncertainty, record the realization capability gap;
 do not discard valid evidence or treat completion as successful resolution.
 
-The next bounded correction reuses that same vocabulary in the existing
+The earlier bounded correction reused that same vocabulary in the existing
 `answerText` slot for adaptive `ANSWER / SUPPORTED`: the Responder may choose null, an
 existing acknowledgement, or the existing uncertainty sentence when the
 compiled goal identifies an unanswered part. Code emits every selected factual
@@ -523,6 +527,21 @@ property, or a fit.
 
 ## 6c. Checkout completeness
 
+For a current inbound checkout message, payment is a **selection** only when
+the customer chooses one supported method. Merely asking about bank transfer,
+mentioning it hypothetically, or rejecting it does not fill the field. If the
+customer rejects transfer and selects COD, the current selection is COD. The
+same current-message rule applies to recipient values: an evidence substring
+must identify the actual value, not a nearby payment word. Clear unlabelled
+recipient input may be parsed locally inside the private SalesCycle boundary;
+ambiguous recipient roles remain missing. Neither the Strategist nor the
+Responder receives raw recipient PII to compensate for redaction.
+
+An open, unconfirmed cart is pre-sale for edits to that cart. The same words
+can be after-sales when the customer explicitly refers to an existing order or
+delivered item. This routing distinction preserves HUMAN ownership once a
+handoff has actually occurred.
+
 The checkout field set mirrors the runtime `missingCheckout` set, payment
 method included. A missing payment choice is a missing field like any other.
 
@@ -542,31 +561,38 @@ complete information -> valid preview -> customer confirmation -> successful eff
 C3 states only outcomes for which the runtime produced evidence. Model text is
 never an effect receipt, and C3 does not host a second checkout state machine.
 
-## 6d. Known implementation gaps
+## 6d. Implementation gap status
 
-Recorded as gaps against this spec, not as revisions to it.
+This inventory records status against the contract; the runtime integration
+appendix below describes the completed boundaries in detail.
 
-- **C3 is not wired into the runtime.** Neither `realtime-server.ts` nor
-  `realtime-runner.ts` calls the contract runner; the legacy path still owns
-  live replies. Until an integration slice exists, no offline result is
-  evidence of live behaviour.
-- **Single-product context.** `ContextV2` carries one `productAttributes` and
-  one `productPresentation`. A reply covering several bound products cannot
-  name them all, so a multi-product answer stops rather than guessing. Closing
-  this needs product-keyed projections and matching producer/binding work, not
-  a field changed to an array.
-- **Negative freeship is not producible.** The cart-policy producer emits
-  `FREESHIP` only with `eligible: true`; a non-free cart is represented by
-  `SHIPPING_FEE` when the fee is known.
-- **Cart answers need a current-cart binding.** `ContextV2` carries no cart
-  identity or revision, so no cart-scoped fact can be revalidated before egress
-  and none is stated. Closing this needs that binding in the input contract,
-  not a renderer.
-- **ETA semantics are inconsistent upstream.** `catalog-projection.ts` sums
-  preparation and transit, while `realtime-product-facts-v2.ts` assigns
-  `etaToCustomer` from preparation bounds alone. Fulfilment projections here
-  report preparation and delivery as separate spans, but the upstream
-  disagreement is unresolved and is a prerequisite for any deadline reasoning.
+- **Runtime call: implemented in the draft.** `realtime-runner.ts` calls the
+  shared C3 core after canonical input construction when its gate permits it.
+  The production model pin and traffic remain unchanged.
+- **Multi-product scope: partial.** A text fact request can bind several
+  resolved products and their POS price/stock claims in C3. Each selected
+  claim retains its product scope, and equal values receive distinct C3-only
+  selection hashes. The shared legacy claim hash is unchanged. `ContextV2`
+  still carries one `productAttributes` and one `productPresentation`, so
+  attribute/presentation comparisons across several products remain open.
+  Two separately bound prices do not authorize a model-authored cheaper-than
+  conclusion; prose now rejects that assertion until code owns a dual-source
+  comparison realization.
+- **Negative freeship: implemented for C3 when known.** A canonical current
+  cart with a positive shipping fee now yields a cart-bound `FREESHIP` false
+  claim; a null fee yields no conclusion. The legacy claim set is unchanged.
+  Frozen Q024 can still phrase an uncertain negative without this cart-bound
+  source; the DEV70 review keeps that authority gap open.
+- **Current-cart binding: implemented in the runtime input.** C3 receives the
+  cart identity, revision, hash, policy source and expiry outside `ContextV2`.
+  The final guard and Outbox commit readback recheck that binding. Frozen
+  cases without a complete cart cannot state cart-scoped facts.
+- **ETA semantics: preparation and delivery are separated.** Static ProductFacts
+  no longer expose preparation days as `etaToCustomer`; a customer ETA needs a
+  current destination-bound runtime lookup with transit and preparation spans.
+  Deadline reasoning remains unavailable without that complete source. The
+  stateful Luna journey with a city but no transit source does not promise a
+  delivery date.
 - **Media has no transport binding.** Until an attachment result exists, a
   reply must not claim an image was sent.
 
@@ -674,3 +700,517 @@ Resolve these before implementation rather than guessing:
 - **Always:** agent chooses adaptive strategy; code owns authority; preserve fail-closed validation.
 - **Ask first:** widening acquisition metadata, changing checkout/PII authority, adding effect capability, or changing benchmark semantics.
 - **Never:** infer trusted acquisition origin from dialogue wording, add case-specific benchmark branches, create duplicate representations for the same request, add a fake Strategist call, or weaken guards to raise completion.
+
+## Runtime integration appendix (stacked on PR371 at 88a1ce4)
+
+The realtime runner now composes C3 after inbound canonical decision evidence,
+product/business fact resolution and the SalesCycle transition for the turn.
+`buildRealtimeC3Input` produces the pre-decision Context V2 from the resulting
+commerce state and independently verified product and cart evidence. The
+existing end-of-turn Context V2 capture remains a separate historical artifact.
+The offline capture/simulation adapter and live adapter call the same C3 core,
+including lane selection, projectors, compilers and final guard. Live input
+rejects simulation and capture-only fields.
+
+| Input | Authority and binding | Consumer and last check |
+| --- | --- | --- |
+| Turn identity, buying intent, barriers | Inbound canonical decision producer; conversation and SalesCycle revisions | Context V2, action compiler; transaction conversation CAS |
+| Product price and stock | Business fact envelopes and protected-claim producer; product ID, provenance and expiry | Selectable evidence, Responder guard, protected outbound readiness |
+| Design and care attributes | ProductFacts V2 presentation/attribute projector; product and catalog scope | Selectable evidence and projection equality guard |
+| Checkout completeness | SalesCycle checkout draft in CART_OPEN/ORDER_PREVIEW; four presence flags only | Canonical action compiler; SalesCycle owns draft and preview |
+| Cart fee and offer | Canonical cart plus pinned policy and CART_READY; cart ID, revision, hash, expiry | Cart claim producer, exact formatter/guard equality; locked SalesCycle readback or mutation CAS at Outbox commit |
+
+The model receives presence and missing-field names, not recipient name,
+phone or address values. The allowed payment options are COD plus bank transfer
+only when the pinned policy has a bank-transfer artifact. A clarification that
+remains active in CART_OPEN can ask only the fields still missing even when the
+next message no longer repeats a proceed-to-payment intent. The code-owned
+checkout transition remains responsible for capture, revalidation and preview.
+The inbound URL classifier permits a labeled Vietnamese checkout phone and a
+standalone phone only while CART_OPEN or ORDER_PREVIEW; a numeric host with a path remains
+subject to the existing URL policy. Dialogue is redacted before the live C3
+adapter receives it.
+
+Cart claims are enabled only when the pinned policy matches the current
+bundle, a fresh CART_READY result binds the current cart, and the existing
+cart-policy producer can reconstruct the exact claim. The final guard checks
+the same cart identity/revision and producer value. A read-only cart turn
+passes a SalesCycle readback through the existing atomic commit transaction;
+it locks the row and checks revision, cart hash, expiry and readiness before
+the Outbox row can be created. Cart mutation turns use the existing SalesCycle
+plan CAS. A changed cart rejects the transaction and follows the ordinary
+bounded inbox retry path.
+
+The realtime runner owns the one response group and calls the shared C3 core
+only when a single product is bound, the bot still owns the conversation, and
+the current commerce branch can safely replace its text reply. The existing
+SalesCycle owns all mutations, preview, confirmation and effects. The existing
+Inbox/Outbox and delivery gate own deduplication and send. Provider failure,
+invalid model output, projection/guard failure or unavailable canonical input
+falls back to the existing guarded reply; the candidate cannot bypass the
+verified-fact preservation check. `REALTIME_C3_LOCAL_TEST_ENABLED` wires a
+model transport only in `DRY_RUN`; injected transport supports deterministic
+LIVE-mode runner tests. No production activation is part of this change.
+
+Enabled in this slice: a guarded product price reply and current-cart
+shipping/free-shipping/promotion wording when the canonical producer supplies
+those claims. ETA remains excluded because upstream delivery semantics are
+unresolved. Multi-product and media replies retain their existing paths.
+Trusted first-contact acquisition is still unavailable to this live adapter,
+so it uses the adaptive lane; it never infers ad origin from dialogue. The
+bounded realization surface remains in place, and no behavioral conversion
+claim follows from deterministic integration tests. R2.8 benchmark ownership
+review remains separate; this change does not edit the bundle, rubric or
+historical runs.
+
+## Sales-quality follow-up (after `afcd5cb`)
+
+The C3 decision boundary must distinguish a newly requested shop fact from a
+customer weighing a fact she already knows. In particular, a value objection
+after a known price is not resolved by repeating the price. The Strategist now
+receives the canonical dialogue act and reason codes as decision hints and is
+instructed to select only relevant verified evidence for the exact question.
+Those hints cannot grant factual or effect authority. The Responder still
+selects only bounded nonfactual wording; an overly specific acknowledgement
+that can misstate the customer's concern is not admitted.
+The Strategist also sees the exact code-owned realization sentence of each
+selectable evidence entry when one exists. This lets it compare the actual
+sentences for overlap and question scope before selecting refs; it does not
+grant new authority or permit the model to author factual wording.
+
+The existing Google Sheets product registry feeds typed design, occasion, wear,
+care and material attributes through ProductAttributes V1. Field-scoped,
+deterministic projections of populated attributes are an authorized
+selling-point surface under section 1; no separate approved-selling-point
+column is required for those projections. `DESCRIPTION_OVERRIDE` also comes
+from the registry, but description authority alone does not approve each
+benefit in free-form prose. Any new promotional claim sourced from that prose
+needs an explicit verified/curated claim with exact wording and product/source
+binding before C3 can use it. Do not infer benefits from materials or model
+knowledge. The registry's derived `AUTO_OK`/`NEED_REVIEW` extraction status is
+not a human approval of promotional wording.
+
+An exploratory `gemini-3.5-flash` run is not a model migration: held-out sales
+probes still found an unconvincing reply to a prior poor-fit experience, and
+provider timeout/transient errors prevented two of six outcomes from being
+judged. The realtime server and C3 model pin remain unchanged. Compiler
+success and response completion do not satisfy the behavioral acceptance
+criterion above.
+
+### Follow-up: adaptive measurement permission
+
+On adaptive turns, product binding alone no longer makes
+`ASK_MEASUREMENTS` available. The canonical pre-decision context must carry
+`MEASUREMENTS_REQUIRED`, and the customer must still be able to provide the
+measurement. This prevents a permitted but unrelated fit request from being
+attached to a price, stock, policy, offer or delivery answer. Trusted fixed
+first contact retains its separately specified measurement progression.
+
+The decision prompt asks the Strategist to identify what the customer already
+knows, the exact property or event still open, and why a proposed input would
+change the current decision. These checks guide model choice; they do not turn
+compiler acceptance into a semantic-quality certificate. If a real fit need
+arrives without a canonical measurement blocker, the owning producer/state
+transition must be corrected. C3 must not recover by allowing measurement
+requests after every product-bound turn.
+
+### Follow-up: request resolution and bounded voice
+
+An adaptive request for media, an alternative, or a purchase step remains a
+request when the available evidence cannot realize it. The Strategist must
+select the relevant capability and report the unresolved part rather than
+turning the turn into a content-free acknowledgement. A known budget gap is
+not a reason to repeat the price or invent a value claim; a decision question
+is useful only when its answer changes the next advice.
+
+The Responder may choose from a slightly wider set of code-owned, nonfactual
+acknowledgements and questions using the full redacted dialogue. Some frozen
+and live turns lack a reliable objection reason code, so absence of that code
+does not remove safe wording choices. The model still cannot author factual
+text or effect claims. The uncertainty sentence now uses ordinary shop
+language, while provenance, binding, exact checkout fields and the final guard
+remain unchanged. This is a realization improvement, not proof that the
+customer's question was answered or that a sale progressed.
+
+### Follow-up: known non-free current cart
+
+When the canonical cart has a known positive shipping fee, the cart-policy
+producer can now expose a `FREESHIP` claim with `eligible: false` to C3, bound
+to the same cart ID, revision, policy source and expiry as the fee. A null fee
+does not imply a negative eligibility claim. C3 states the negative conclusion
+through a code-owned sentence and revalidates it at the existing current-cart
+boundary. The legacy protected outbound path does not request this additional
+claim, so its claim set and reply path are unchanged. Frozen cases without a
+full current-cart binding remain unable to state either positive or negative
+cart claims.
+
+### Follow-up: compound requests and composed voice
+
+For a question with several requested parts, the Strategist declares one
+supported proposition when any part has relevant, realizable evidence, selects
+the evidence for each supported part, and names the unresolved parts in its
+existing goal. This applies to stock plus a request for an alternative just as
+it does to price plus another property. The current decision shape stays
+minimal; `evidenceStatus` still reports authority for the declared capability
+and is not a certificate that every part was answered. With no supported part,
+the unresolved answer remains. No model-authored factual text is introduced.
+
+Customer-facing factual projections omit an automatic opening `Dạ`, so a
+concern acknowledgement followed by a verified fact does not repeat that word
+across adjacent sentences. The exact projection equality check still binds the
+full sentence to its source claim. When a fit answer is blocked specifically by
+a canonical measurement request, the requested missing measurement itself is
+the response; a generic uncertainty preamble adds no information. Confirmation,
+thanks and purchase intent have bounded, nonfactual acknowledgement choices;
+none is an order or payment effect receipt.
+
+The unjudged `e695677` Luna DEV70 run is recorded in the sales-quality
+evidence note. It showed the stock fact survives one compound stock/alternative
+request, but the Responder can still omit the unavailable alternative even
+when the goal names it. This remains an open behavioral gap under this
+contract; `SUPPORTED` is not whole-question resolution. Frozen fit and
+checkout cases with inconsistent canonical state remain producer/fixture work.
+
+### Follow-up: editorial realization and stateful sales smoke (2026-09-23)
+
+The six-field strategy contract and canonical authority remain unchanged. The
+Strategist starts from the latest request, uses history to recover known inputs,
+and asks a follow-up only when its answer enables an available recommendation
+or a permitted transaction step. A missing shop fact cannot be obtained by
+asking the customer another preference question. A lower-price conditional offer
+does not establish commitment at the verified shop price.
+
+The Responder's existing `factualTexts` now accepts either all selected evidence
+texts, in order, or an empty array to use all original projections. A partial
+array fails closed. For each supplied text the guard permits only removal of
+the final politeness particle and an optional opening `Dạ, `; every factual word,
+number, subject, negation, condition and punctuation stays bound to the source.
+This supersedes the zero-length-only slot described above. It does **not** yet
+provide unrestricted natural factual paraphrasing or prove naturalness acceptance.
+Acknowledgements, uncertainty and progression remain bounded choices. Color
+confirmation questions may name colors present in selected authoritative
+evidence; this neither binds a variant nor establishes buying commitment.
+
+The shared core composes validated segments into one customer-facing text,
+removing only the final politeness particle of non-final segments. Runtime hashes
+that actual outgoing text at the existing protected outbound boundary. Evidence
+segments and claim hashes remain available for validation and diagnostics.
+Multi-product facts without display names use their canonical product IDs as
+labels, never an invented product name. Refund reason alternatives use `hoặc`;
+the reporting deadline remains a required condition.
+
+The opt-in Luna runtime smoke uses `RealtimeRunner.processOne`, persisted
+in-memory conversation/commerce state and mock business ports. It retains every
+synthetic turn, model request/response, fallback reason and state transition.
+It is runtime-entrypoint evidence, not live integration or conversion evidence.
+Luna uses a test-only identity adapter; the production model pin is unchanged.
+Frozen DEV70 remains unmodified and is a separate behavioral probe. Neither
+completion nor passing the schema is a sales-quality score. Full question
+coverage, useful next steps and customer-facing tone must be reviewed from the
+resulting transcripts, with remaining gaps reported explicitly.
+
+The response schema enumerates the same editorial variants accepted by the
+guard, closing a mismatch where a writer obeyed the voice instruction but
+removed repeated particles inside a multi-sentence policy. Those policies are
+now composed at their typed projector, retaining every condition and amount.
+For a supported ANSWER, `answerText` selects null (request covered) or the
+existing uncertainty sentence (a requested part remains uncovered). A generic
+acknowledgement cannot replace that choice. This reduces the competing wording
+choices; whole-question coverage still requires behavioral evaluation.
+
+Runtime follow-ups do not require a new commerce mutation: a persisted canonical
+SalesCycle record is sufficient to build a fresh decision context. Existing
+ownership, media, handled-effect, cart-readback and protected-outbound checks
+still apply. This closes the gap where advisory turns silently bypassed C3
+because the cart had not changed. Size token extraction at the commerce
+boundary uses Unicode letter boundaries so Vietnamese words such as `sẽ` and
+`lấy` cannot become sizes S and L. Color confirmation wording is offered only
+for a catalog color literally mentioned in the latest inbound; it does not
+infer interest from catalog availability alone.
+
+Commerce advancement shares the conversation ownership boundary: after a
+handoff, a HUMAN-owned conversation cannot capture checkout details, create a
+preview or confirm purchase through SalesCycle. A later inbound is not an
+implicit return to BOT ownership. The Luna runtime journey exposed this missing
+entrypoint check; regression coverage exercises details, payment and confirmation
+after handoff. Automatic cart size editing remains a separate unmet capability;
+handoff preserves the cart and must not be reported as a successful size edit.
+
+
+### Follow-up: authored adaptive prose, preserved first quote (2026-09-24)
+
+Owner instruction: preserve the first-contact quote form and minimize templates
+on subsequent turns. This changes the temporary implementation limit; it does
+not change the Strategist contract or give either model commerce authority.
+
+- `FIRST_CONTACT_FIXED`: same trusted acquisition classifier, fact selection,
+  response schema and fixed price/useful-fact/single-question form.
+- `ADAPTIVE_FOLLOWUP`: the Responder authors `answerText` (up to 600 characters)
+  and the one requested `progressionText` (up to 300), using dialogue and the
+  compiled goal. Neither field has a sentence enum. Code no longer inserts
+  generic unresolved/partial-answer sentences into this lane. The writer names
+  the actual unanswered part, acknowledges reported context only when useful,
+  and asks for missing customer input that can advance the current decision.
+- `factualTexts` remains the lossless editorial projection of every selected
+  fact, in order, with claim hash, subject, scope, freshness and current-cart
+  checks. This slice enables free conversational prose, **not arbitrary factual
+  paraphrase**. The three existing fields are retained for that boundary.
+- A direct, fully sourced `BUSINESS_LOCATION` answer uses the selected
+  code-owned projection without a model preface. The generic customer-PII
+  detector can misread “địa chỉ shop” in that redundant preface as a customer
+  address. The selected factual text still passes the normal PII, exact
+  realization and provenance checks; no model-provided address is authorized.
+- Checkout requests remain code-owned exact missing fields/payment options;
+  both prose slots are null. KEEP_OPEN/HOLD_POSITION have no progression.
+  Model output cannot execute a cart, order, payment or messaging effect.
+- The existing PII/production/checkout guards also check authored prose. A small
+  conservative assertion/effect check rejects common unbound statements; it is
+  not a semantic proof for unrestricted Vietnamese. Question count is enforced,
+  but relevance, indirect requests, unsupported implications and tone remain
+  behavioral review responsibilities. Passing schema/guards does not certify
+  sales quality or readiness for customer traffic.
+- Customer dialogue describing an order is context, not an effect receipt.
+  Authored prose must not convert “chị đã xác nhận đơn” or a passive order
+  confirmation into a completed order claim without a bound external receipt.
+
+Runtime ownership correction: after a successful, validated adaptive C3 reply,
+legacy reply claim types no longer dictate the evidence the Strategist must
+select. The old subset check forced a price objection back to a price card.
+The fixed acquisition lane still preserves baseline fact types. A failed C3
+call or rejected draft still uses the already-built verified fallback. This is
+an intentional C3-enabled behavior change, tested through `processOne`; C3-off
+r31.3 behavior and failure preservation are unchanged. No price-objection phrase
+list, benchmark-case switch, additional model judge or durable state is added.
+
+Complexity delta: reuse the existing three fields, remove adaptive sentence
+banks and generic text injection, retain existing fact/effect boundaries. The
+known two PII-free locality question exceptions are DLP compatibility only;
+they are not supplied as response choices. The remaining limitations (automatic
+size editing, older checkout opening payment wording, unsupported capabilities,
+heuristic prose safety and model-dependent relevance) must be reported with the
+new Luna histories, not hidden by compiler completion counts.
+
+
+The first free-prose Luna run exposed a boundary mismatch: the writer sometimes
+repeated selected facts in `answerText`, and a mention of unconfirmed promotion
+triggered the legacy offer guard. The corrected prompt/schema labels this field
+as an optional nonfactual preface, uses em/chị, and explicitly leaves direct
+answers to the selected fact slots. Product assertion checks use clause starts,
+not a nested topic inside a reported concern or uncertainty. Only C3 GENERAL
+text may pass the promotion keyword check when **every** promotion mention is
+inside a bounded uncertainty clause; any amount/percentage, promise or separate
+affirmative offer remains rejected, as do all other guard reasons. No promotion
+authority is created, and the shared legacy guard is unchanged. This remains a
+conservative syntactic check with disclosed limits, not a semantic safety proof.
+
+
+Final follow-up to that run: the same bounded uncertainty rule covers freeship
+mentions (not positive free-shipping claims). Polite Vietnamese requests may end
+with a period: the single progression slot is still required for ASK, but code
+rejects more than one question mark rather than requiring exactly one. This
+syntactic check cannot prove that a sentence contains only one semantic request.
+Free-prose slots trim outer whitespace before their existing validation; factual
+projection strings remain exact. These changes have focused regression evidence;
+a fresh full Luna run is still required after the recorded provider usage limit.
+
+### Follow-up: current fit evidence and task-shaped prose (2026-09-24)
+
+Root-cause review starts from `7c6623a`, retaining the reviewed PR371 ancestry.
+The original permission rule remains: adaptive `ASK_MEASUREMENTS` requires a
+canonical `MEASUREMENTS_REQUIRED` barrier; a resolved product is insufficient.
+
+- Realtime passes its existing verified Size Engine claim to the C3 producer.
+  The producer uses the existing protected-claim builder, expected product and
+  freshness checks. It must not discard that claim by supplying `sizeClaim: null`.
+- For a current fit request identified by existing typed runtime intent, the
+  producer also consumes the current Size Engine decision. `ASK_MORE` with a
+  verified chart for the bound product and missing body measurements contributes
+  an ephemeral `MEASUREMENTS_REQUIRED` barrier. No chart, a preference-only
+  question, a successful recommendation, or an unrelated turn does not grant
+  this permission. The captured context retains the same measurement blocker.
+  This does not advance commerce, infer commitment, or persist a new state.
+- Only the commerce clarification reason `CHECKOUT_DETAILS_MISSING` contributes
+  `CHECKOUT_DETAILS_REQUIRED`. A product/variant clarification is not missing
+  recipient details. Existing stage, current-cart and commitment checks remain.
+- On an adaptive ASK with no selected factual text, `answerText` is null and
+  `progressionText` is the entire authored reply. It can briefly give customer
+  context before its one assigned request. This removes two competing prose
+  slots for one question without supplying any sentence bank. With selected
+  facts, prose may identify a remaining unanswered part; `SUPPORTED` never
+  means the entire customer request has been answered.
+- Strategist instructions distinguish missing customer criteria from missing
+  shop evidence. Qualification can establish which available evidence matters;
+  it cannot promise a lookup, alternative or effect the runtime cannot execute.
+  ETA estimates establish neither guaranteed arrival nor impossibility.
+
+The first-contact quote schema and wording are unchanged. Lossless factual
+projection, exact checkout fields and authority guards remain code-owned. No
+DEV70 case identifiers, new phrase templates, model judge or durable state are
+added. Prompt changes require fresh model-output review; deterministic tests do
+not establish naturalness, sales effectiveness or semantic completeness.
+
+Known limit: the previous Luna fit journey provided no size chart and disabled
+customer profiles. It does not prove that a measurement request should have
+been permitted. The runtime regression now distinguishes verified-chart missing
+measurements, a usable recommendation, absent shop evidence and unrelated turns.
+Body-part-specific concerns beyond the Size Engine's present recommendation
+basis and automatic cart size editing remain separate capabilities; this
+follow-up does not claim to complete them.
+
+### Follow-up: payment choices in the cart reply (2026-09-26)
+
+The cart-opening and cart-edit replies list only payment methods supported by
+the resolved policy. COD remains available; bank transfer appears only when a
+published payment artifact enables it and its version reference resolves. The
+checkout clarification and payment selection use the same resolved authority.
+This changes the older cart reply that listed transfer even with no payment
+artifact. Its protected outbound payload and effect-authorization hash therefore
+change together; the pre-B2.3b differential records that deliberate deviation
+as a violation against its immutable baseline while keeping the original claim
+hashes. A no-artifact and an enabled-transfer cart-opening test exercise both
+branches. No payment effect or payment instruction is created by this wording.
+
+The subsequent actual Luna run exposed a typed bypass: an unresolved `SIZE_FIT`
+decision selected ordinary `ASK SIZE` and asked for body measurements. The
+compiler rejects that combination; it does not turn all purchase size choices
+into canonical requests. `ASK_MEASUREMENTS` remains the only measurement path.
+This finite check is not a semantic classifier for arbitrary prose.
+
+Money detection also uses Unicode token boundaries for Vietnamese currency
+units, so a product code followed by `kỹ` is not read as a `k` amount. The
+bare-price keyword fallback masks whole verified product identifiers only;
+currency parsing still inspects the original text. Actual and invented price
+amounts remain subject to the same source authority. No sentence whitelist is
+introduced.
+
+### Follow-up: current-cart variant edits and preview renewal (2026-09-25)
+
+Before a cart exists, a bare size/color answer or an explicit “chọn size/màu”
+choice remains a variant selection, even with a polite closing particle or a
+model `COMMITTED` label. It cannot authorize `OPEN_CART`. An explicit purchase
+verb in the same message, or a separate positive buying commitment, can still
+advance the commerce flow after product and POS checks. This intentionally
+narrows the earlier deterministic `CONFIRMED_SIZE`/`CONFIRMED_COLOR` inference
+for variant-only utterances; the no-cart journey and direct-purchase controls
+cover the difference.
+
+The verified variant selected on a no-cart turn remains in conversation
+state. A later explicit commitment may use that selection when the customer
+does not repeat the size or colour. POS selection still checks the current
+product and variant before opening the cart; a selection alone remains
+insufficient to buy. The runtime journey covers this cross-turn case through
+checkout, preview and internal confirmation.
+
+A customer correction to the size or color of an open cart is a cart edit, not
+a new buying commitment. The runtime identifies a unique cart line, resolves
+the requested variant through the current POS snapshot, and submits a
+`SET_LINE_VARIANT` mutation with the complete POS-resolved replacement line.
+The older `SET_COMPONENT_VARIANT` kernel operation cannot atomically replace a
+multi-component offer and its authoritative unit price, so it is not used for
+this flow. The new operation preserves line, parent product, offer and quantity
+identity, while the cart kernel recalculates the policy totals. A deterministic
+authority receipt binds the source message, exact mutation and resulting cart;
+the locked transaction replays the mutation and negotiation before commit.
+Ambiguous product/color requests, unavailable variants and stale source facts
+leave the existing cart unchanged.
+
+Any edit invalidates the prior order preview. The reply presents the revised
+cart and asks only for missing checkout fields. When a complete existing
+recipient draft is still current, the customer can explicitly confirm those
+details to produce a new preview bound to the revised cart. Purchase
+confirmation requires this new preview; an old preview cannot authorize a
+later confirmation. The variant edit does not create a POS order or receipt.
+
+### Follow-up: destination-bound ETA (2026-09-25)
+
+The catalog fulfillment policy's preparation days are not a customer delivery
+estimate. The static ProductFacts V2 producer has no destination region, so
+its `etaToCustomer` is null. An ETA reply requires a current region-bound
+catalog lookup that combines preparation and carrier transit ranges, including
+the preorder preparation rule when applicable. A missing region, transit range
+or expired source cannot be presented as a delivery promise. Media wording
+remains subject to the existing verified attachment/effect boundary.
+
+### Follow-up: explicit alternative search (2026-09-25)
+
+An explicit request to find another product bypasses current-product
+continuation. Semantic search excludes the currently bound product before it
+chooses the best candidate, so the same product cannot be returned as its own
+alternative. Candidate admission still uses the existing search thresholds.
+This retrieval correction does not authorize a price, stock or comparative
+claim for the new product. Those claims require separate current evidence and
+product binding.
+
+### Follow-up: explicit durable customer preferences (2026-09-25)
+
+When the customer explicitly states a color, material or style preference,
+the existing pseudonymous profile records the bounded value with source event
+hash and time. An explicit rejection removes that value; an explicit change of
+mind replaces the old value for that field. A cart variant edit by itself is
+not a durable preference. The model receives only the minimized preference
+values in its existing profile context. These preferences guide retrieval and
+conversation; they never authorize product facts, checkout details or effects.
+Temporary budget, occasion and rejected-product context remains a separate
+session capability and is not silently written into the durable profile.
+
+### Follow-up: bounded session decision context (2026-09-26)
+
+The existing conversation-state transaction may retain only explicitly stated
+session budget, occasion and rejected product codes. Corrections replace the
+previous budget or occasion; explicit re-selection removes a rejected code.
+This context is customer-reported, never a shop price, product attribute,
+checkout field or effect authority. It is not copied into the durable customer
+profile. The C3 runtime receives a typed, PII-safe session note plus the most
+recent 14 dialogue messages when such context exists, or the most recent 15
+messages otherwise. This respects the existing 15-message provider contract
+while preserving a previously stated decision input beyond the 30-message
+history read. The ordinary model sees the session context in its existing
+state payload. Unresolved-question memory and richer free-form corrections
+remain open; neither can be inferred from a reply without tracking whether
+the question was actually answered.
+
+### Follow-up: accepted history recovery (2026-09-25)
+
+On the next customer turn, the canonical history reader scans a bounded set
+of accepted Outbox units that have no history identity. It decrypts only the
+still-retained accepted payload, records each unit through the existing
+idempotent history writer, then reads the resulting PostgreSQL history for
+model context. Redis remains a projection and a read fallback. Recovery
+never invokes the delivery sender or changes Outbox acceptance. Pending,
+ambiguous and failed units are excluded. Payloads past their encryption
+retention cannot be reconstructed by this path. An isolated PostgreSQL fault
+injection verifies rollback and idempotent recovery; a runtime test verifies
+that a failed Redis projection append does not displace the canonical
+PostgreSQL read. The encrypted Outbox recovery window is at most 20 days,
+while canonical message retention is six months. Recovery after Outbox
+payload expiry remains impossible if the canonical write never succeeded.
+
+### Follow-up: empty hard-stop acknowledgement (2026-09-25)
+
+For an adaptive `ACKNOWLEDGE` with canonical `HOLD_POSITION` and no selected
+evidence, the response schema permits only “Dạ vâng chị ạ.” or “Dạ em cảm
+ơn chị ạ.” The compiler checks the same bound and uses the first phrase if
+the model leaves all prose empty. The continuation stays empty. This covers
+a customer's closing thanks without echoing an unverified order claim or
+reopening checkout. A model-authored effect claim, including a passive
+“đơn đã được shop xác nhận”, remains rejected; this acknowledgement does
+not prove a POS order exists.
+
+### Follow-up: product identification versus recipient details (2026-09-25)
+
+When the current product binding is stale, `ASK_PRODUCT` may request the
+model name, code or image, including “tên hoặc ảnh mẫu”. That request does
+not collect the recipient's name for checkout. The shared premature-order
+guard distinguishes these product-identification alternatives while still
+rejecting requests for “họ tên”, “tên người nhận”, phone or delivery address
+before a buying signal. The product remains unresolved until a later verified
+binding; this wording change grants no stock or cart authority.
+
+### Follow-up: unconfirmed dispatch wording (2026-09-25)
+
+An ETA claim describes delivery time only; it does not establish when the
+shop will dispatch the item. The Responder may say that the dispatch date is
+unknown, including a subordinate mention of when the shop will send it. The
+effect guard distinguishes that bounded uncertainty from an assertion that
+the shop will send it. An affirmative shipping promise in the same or a later
+clause remains rejected. This wording does not grant fulfillment authority.

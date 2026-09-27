@@ -49,7 +49,7 @@
     "V5V4Q092": {
       "production_contract": "BLOCKED_BY_CONTRACT",
       "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
-      "reason": "A real ORDER_PREVIEW already contains recipient, payment and eligible revalidation. Treating that stage as missing checkout details is not reachable from the current sales-cycle contract."
+      "reason": "The behavior-simulation fixture now carries CART_OPEN and required checkout fields. Production-contract materialization still does not construct the authoritative checkout draft, cart readback, and policy binding for this case."
     },
     "V5V4Q093": {
       "production_contract": "BLOCKED_BY_CONTRACT",

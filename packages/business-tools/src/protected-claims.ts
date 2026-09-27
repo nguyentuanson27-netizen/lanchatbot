@@ -54,6 +54,8 @@ export interface BuildProtectedCartPolicyClaimsV1Input {
   readonly policySourceVersion: string;
   readonly policyEvidenceRef: string;
   readonly expiresAt: string;
+  /** C3 may state a known non-free cart; legacy outbound keeps its claim set. */
+  readonly includeNegativeFreeShipping?: boolean;
 }
 
 const canonicalJson = canonicalJsonV1;
@@ -107,6 +109,20 @@ export function buildProtectedCartPolicyClaimsV1(
       authorization: "NONE",
     }));
   } else if (cart.shippingFeeVnd !== null) {
+    // A known nonzero fee proves that this exact cart is not free-shipping
+    // eligible. Keep that conclusion bound to the same cart/policy revision;
+    // an unknown fee still says nothing about eligibility.
+    if (input.includeNegativeFreeShipping === true) {
+      claims.push(ProtectedClaimV1Schema.parse({
+        schemaVersion: 1,
+        claimId: deterministicUuid([cart.cartId, cart.revision, "FREESHIP"]),
+        type: "FREESHIP",
+        scope,
+        provenance: provenance("freeship", false),
+        value: { eligible: false },
+        authorization: "NONE",
+      }));
+    }
     claims.push(ProtectedClaimV1Schema.parse({
       schemaVersion: 1,
       claimId: deterministicUuid([cart.cartId, cart.revision, "SHIPPING_FEE", cart.shippingFeeVnd]),
