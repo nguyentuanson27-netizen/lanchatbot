@@ -8,7 +8,7 @@ import {
   type CanonicalBuyingIntentV1,
   type CanonicalDialogueEvidenceV1,
 } from "@lana/contracts";
-import { resolveHybridBuyingSignal } from "./buying-signal.js";
+import { resolveHybridBuyingSignal, scopedCommitmentClause } from "./buying-signal.js";
 import { foldVietnameseForRecall, normalizeVietnameseNfc } from "./vietnamese-text.js";
 
 export interface BuildCanonicalDecisionEvidenceV1Input {
@@ -81,7 +81,7 @@ export function hasGuardedModelBuyingCommitmentEvidence(
     signal.requestedAction === "NONE" ||
     signal.confidence < 0.9 ||
     signal.evidenceText === null ||
-    isInformationQuestion(text)
+    (isInformationQuestion(text) && scopedCommitmentClause(text, signal) === null)
   ) return false;
   return normalizeVietnameseNfc(text).includes(
     normalizeVietnameseNfc(signal.evidenceText),
@@ -112,12 +112,13 @@ export function buildCanonicalDecisionEvidenceV1(
   );
   // A question/commitment conflict always chooses the less aggressive
   // interpretation before any commerce consumer sees the canonical result.
-  const decision = resolved.decision === "COMMITTED" && isInformationQuestion(input.text)
+  const decision = resolved.decision === "COMMITTED" && isInformationQuestion(input.text) &&
+      scopedCommitmentClause(input.text, input.modelBuyingIntent) === null
     ? "NONE" as const
     : resolved.decision;
   const observed = decision !== "NONE";
   const deterministic = resolveHybridBuyingSignal(
-    input.text,
+    scopedCommitmentClause(input.text, input.modelBuyingIntent) ?? input.text,
     { hasProductContext: input.productId !== null },
     null,
   );

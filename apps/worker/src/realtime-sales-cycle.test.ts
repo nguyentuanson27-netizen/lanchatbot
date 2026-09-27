@@ -716,6 +716,42 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.messages).not.toHaveLength(0);
   });
 
+  it("binds the chosen size to the purchase clause in a mixed question", async () => {
+    const text = "Lấy size M nhé, size S còn không?";
+    const buyingIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: null,
+      evidenceText: "Lấy size M nhé", confidence: 0.99,
+    };
+    const requestedSizes: Array<string | null> = [];
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(createRealtimeSalesState(conversationId, pageId, now), text, "mixed-size"),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, buyingIntent),
+      salesSignals: signals({ buyingIntent }),
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        requestedSizes.push(query.size);
+        return facts.resolveCartSelection!(query, at);
+      } },
+    });
+    expect(output.plan?.state.stage).toBe("CART_OPEN");
+    expect(requestedSizes).toContain("M");
+    expect(requestedSizes).not.toContain("S");
+  });
+
+  it("asks for the selected size before POS lookup when two sizes lack scoped commitment", async () => {
+    const text = "Chốt size M hoặc size S";
+    let posLookups = 0;
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(createRealtimeSalesState(conversationId, pageId, now), text, "ambiguous-size"),
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        posLookups += 1;
+        return facts.resolveCartSelection!(query, at);
+      } },
+    });
+    expect(output.plan?.state.cart ?? null).toBeNull();
+    expect(output.reasonCode).toBe("PURCHASE_SIZE_AMBIGUOUS");
+    expect(posLookups).toBe(0);
+  });
+
   it.each([
     ["làm đơn mẫu này cho mình", "OPEN_CART"],
     ["gửi mẫu này về Hà Nội giúp chị", "OPEN_CART"],
@@ -2020,10 +2056,10 @@ describe("realtime Phase 3 sales cycle", () => {
     const benefitInput = buildRealtimeC3Input({
       sourceMessagePk: "00000000-0000-4000-8000-000000000082",
       canonicalEvidence: buildCanonicalDecisionEvidenceV1({
-        text: benefitText, sourceMessageId: "mid-event-benefit-readback",
+        text: benefitText, sourceMessageId: `mid:${benefitText}`,
         productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
       }),
-      preConversationRevision: 8, finalConversationRevision: 9,
+      preConversationRevision: 7, finalConversationRevision: 9,
       preSalesRevision: state.revision, commerceState: state,
       productId: "CB182", catalogVersion: null, facts: [],
       productFacts: null, policyResolution,
@@ -2489,6 +2525,7 @@ describe("realtime Phase 3 sales cycle", () => {
     ["Không chuyển khoản, chị chọn COD.", "COD"],
     ["Nếu chuyển khoản thì cần làm gì? Chị chưa chọn nhé.", null],
     ["Chị chọn chuyển khoản nhé.", "BANK_TRANSFER"],
+    ["Tên: Lan\nSĐT: 0987654321\nĐịa chỉ: Hội An, Quảng Nam\nChị chọn COD nhé.", "COD"],
   ] as const)("uses explicit payment choice: %s", async (text, expected) => {
     const opened = await evaluateRealtimeSalesCycle(input(
       createRealtimeSalesState(conversationId, pageId, now),
@@ -2499,6 +2536,20 @@ describe("realtime Phase 3 sales cycle", () => {
       opened.plan!.state, text, `event-payment-${text.length}`,
     ));
     expect(output.plan?.state.checkoutDraft?.paymentMethod ?? null).toBe(expected);
+  });
+
+  it("never captures a checkout field label as the recipient's name", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "event-label-open",
+    ));
+    const text = "Số điện thoại 0987654321 123 Lê Lợi, Hội An, Quảng Nam COD";
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, text, "event-label-details"),
+      salesSignals: signals({ fullName: { value: "Số điện thoại" } }),
+    });
+    expect(output.plan?.state.checkoutDraft?.fullName ?? null).toBeNull();
+    expect(output.plan?.state.stage).toBe("CART_OPEN");
   });
 
   it("captures a clear unlabelled recipient locally without model PII", async () => {
@@ -2895,12 +2946,62 @@ describe("realtime Phase 3 sales cycle", () => {
   });
 
   it("derives C3 checkout fields and bound cart facts from real transitions", async () => {
+    const initial = createRealtimeSalesState(conversationId, pageId, now);
     const opened = await evaluateRealtimeSalesCycle(input(
-      createRealtimeSalesState(conversationId, pageId, now),
+      initial,
       "chốt CB182 size M", "c3-open",
     ));
     expect(opened.plan?.state.stage).toBe("CART_OPEN");
     const openState = opened.plan!.state;
+    const openingInput = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000076",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "chốt CB182 size M", sourceMessageId: "mid:chốt CB182 size M",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 7, finalConversationRevision: 8,
+      preSalesRevision: initial.revision, commerceState: openState,
+      productId: "CB182", catalogVersion: null, facts: [], productFacts: null,
+      policyResolution, cartReadiness: opened.plan!.effectReadiness ?? [], now,
+    });
+    expect(openingInput.context.cartReadiness).toMatchObject({
+      effect: "CART_OPEN", outcome: "READY",
+    });
+    expect(openingInput.currentCart?.cart.cartId).toBe(openState.cart?.value.cartId);
+    expect(openingInput.checkoutRequestedFields).toEqual([
+      "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
+    ]);
+    const openingReadiness = opened.plan!.effectReadiness!.find((entry) =>
+      entry.effect === "CART_OPEN"
+    )!;
+    const forgedOpening = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000075",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "chốt CB182 size M", sourceMessageId: "mid:another-turn",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 7, finalConversationRevision: 8,
+      preSalesRevision: initial.revision, commerceState: openState,
+      productId: "CB182", catalogVersion: null, facts: [], productFacts: null,
+      policyResolution, cartReadiness: [openingReadiness], now,
+    });
+    expect(forgedOpening.context.cartReadiness).toBeNull();
+    expect(forgedOpening.currentCart).toBeNull();
+    const staleCartReadiness = buildRealtimeC3Input({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000074",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({
+        text: "chốt CB182 size M", sourceMessageId: "mid:chốt CB182 size M",
+        productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
+      }),
+      preConversationRevision: 7, finalConversationRevision: 8,
+      preSalesRevision: initial.revision,
+      commerceState: { ...openState, cart: { ...openState.cart!,
+        value: { ...openState.cart!.value, revision: openState.cart!.value.revision + 1 } } },
+      productId: "CB182", catalogVersion: null, facts: [], productFacts: null,
+      policyResolution, cartReadiness: [openingReadiness], now,
+    });
+    expect(staleCartReadiness.context.cartReadiness).toBeNull();
+    expect(staleCartReadiness.currentCart).toBeNull();
     expect(missingRealtimeCheckoutFields(openState)).toEqual([
       "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
     ]);
@@ -2913,7 +3014,7 @@ describe("realtime Phase 3 sales cycle", () => {
       effect: "CART_READY", outcome: "READY",
     }));
     const canonicalEvidence = buildCanonicalDecisionEvidenceV1({
-      text: readbackText, sourceMessageId: "mid-c3-cart-readback",
+      text: readbackText, sourceMessageId: `mid:${readbackText}`,
       productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
     });
     const live = buildRealtimeC3Input({

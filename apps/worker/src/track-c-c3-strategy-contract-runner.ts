@@ -1142,6 +1142,8 @@ function constraintsFor(
     context.phase.sourceStage === "CART_OPEN" ||
     context.phase.sourceStage === "ORDER_PREVIEW";
   const checkoutAuthorized = (checkoutClarificationActive ||
+      (context.cartReadiness?.outcome === "READY" &&
+        context.cartReadiness.effect === "CART_OPEN") ||
       (context.buyingIntent.decision === "COMMITTED" &&
        context.buyingIntent.requestedAction === "PROCEED_TO_PAYMENT")) &&
     checkoutStageReached &&

@@ -201,6 +201,45 @@ describe("DF05 canonical decision evidence", () => {
     expect(result.dialogueEvidence.act).toBe("QUESTION");
   });
 
+  it("keeps a selected commitment when a separate clause asks about another size", () => {
+    const text = "Lấy size M nhé, size S còn không?";
+    const modelBuyingIntent = {
+      decision: "COMMITTED" as const,
+      requestedAction: "OPEN_CART" as const,
+      quantity: null,
+      evidenceText: "Lấy size M nhé",
+      confidence: 0.99,
+    };
+    expect(hasGuardedModelBuyingCommitmentEvidence(text, modelBuyingIntent)).toBe(true);
+    const result = buildCanonicalDecisionEvidenceV1({
+      text, sourceMessageId: "mid.mixed-size", productId: "SP-001",
+      modelBuyingIntent, evaluatedAt: new Date("2026-08-13T05:00:00.000Z"),
+    });
+    expect(result.buyingIntent).toMatchObject({
+      decision: "COMMITTED", requestedAction: "OPEN_CART",
+      contributors: ["DETERMINISTIC_RUNTIME"], authorization: "NONE",
+    });
+    expect(result.dialogueEvidence.act).toBe("QUESTION");
+  });
+
+  it.each([
+    ["Nếu lấy size M, size S còn không?", "Nếu lấy size M"],
+    ["Lấy size M được không?", "Lấy size M được không?"],
+    ["Chị thấy size M đẹp, size S còn không?", "size M đẹp"],
+    ["Lấy size M nhé, size S còn không?", "Lấy size M"],
+  ])("does not authorize a fragment or conditional as a commitment: %s", (text, evidenceText) => {
+    const modelBuyingIntent = {
+      decision: "COMMITTED" as const,
+      requestedAction: "OPEN_CART" as const,
+      quantity: null, evidenceText, confidence: 0.99,
+    };
+    const result = buildCanonicalDecisionEvidenceV1({
+      text, sourceMessageId: `mid.unsafe-${text}`, productId: "SP-001",
+      modelBuyingIntent, evaluatedAt: new Date("2026-08-13T05:00:00.000Z"),
+    });
+    expect(result.buyingIntent.decision).toBe("NONE");
+  });
+
   it("produces stable PII-safe hashes without retaining raw message identifiers", () => {
     const result = buildCanonicalDecisionEvidenceV1({
       text: "chốt mẫu này",

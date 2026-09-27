@@ -1121,6 +1121,34 @@ details to produce a new preview bound to the revised cart. Purchase
 confirmation requires this new preview; an old preview cannot authorize a
 later confirmation. The variant edit does not create a POS order or receipt.
 
+### Amendment: mixed purchase/size questions and checkout input (2026-09-27)
+
+A message can contain a purchase decision and a separate question about another
+variant. The size sent to POS for a cart action must come from the purchase
+evidence span, not the last size token in the whole message. If two distinct
+sizes remain in scope and the selected one cannot be bound, no cart lookup or
+mutation occurs; ask which size the customer wants. A model's `COMMITTED`
+label alone does not grant a cart effect. The current implementation checks an
+exact complete purchase clause and the existing POS/policy gates. This is a
+bounded repair, not the planned typed multi-intent producer or proof that
+arbitrary compound Vietnamese messages are understood.
+
+Checkout capture must treat field labels as labels, not recipient values. A
+place name such as Hội An must not veto a separate explicit COD selection.
+These checks preserve the current checkout draft/preview authority; they do
+not make the existing whole-message parser a general semantic extractor.
+
+On a newly opened cart, C3 may choose the next conversational step after
+SalesCycle has produced an exact `CART_OPEN` readiness result. The cart's
+line items, amounts and total remain code-rendered from that same verified
+selection; C3's reply follows that factual summary and cannot replace it.
+The C3 input binds the current cart and the checkout fields still missing
+at this revision. The final combined message receives a new outbound
+readiness check before the transaction commits. This path does not extend to
+size edits or order preview yet: a customer-choice acknowledgement can still
+be misread by the current size guard as an unsupported fit assertion. Reusing
+the cart-open path there would silently fall back to the old wording.
+
 ### Follow-up: destination-bound ETA (2026-09-25)
 
 The catalog fulfillment policy's preparation days are not a customer delivery

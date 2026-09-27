@@ -6,6 +6,7 @@ import {
   foldVietnameseForRecall,
   hashCanonicalBuyingIntentV1,
   isVariantEditRequest,
+  scopedCommitmentClause,
 } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
@@ -172,6 +173,8 @@ export function buildGuardedModelNegotiationProposalV1(input: Readonly<{
 
 export interface RealtimeSalesCycleOutput {
   readonly handled: boolean;
+  /** Code-rendered factual cart summary from the same ready selection. */
+  readonly verifiedCartSummary?: string;
   /** Final delivery may preserve model wording only for an accepted proposal. */
   readonly wordingAuthority?: "MODEL" | "LEGACY_DETERMINISTIC";
   readonly messages: readonly (
@@ -308,12 +311,27 @@ function money(value: number): string {
   return `${new Intl.NumberFormat("vi-VN").format(value)}đ`;
 }
 
-function explicitSize(text: string): string | null {
+function explicitSizes(text: string): string[] {
   // Vietnamese accented letters are letters too: "sẽ" and "lấy" must
   // never become S or L before the customer's actual size token is read.
-  const sizes = [...text.normalize("NFC").toUpperCase()
-    .matchAll(/(?:^|[^\p{L}\p{N}])(XL|S|M|L)(?=$|[^\p{L}\p{N}])/gu)];
-  return sizes.at(-1)?.[1] ?? null;
+  return [...text.normalize("NFC").toUpperCase()
+    .matchAll(/(?:^|[^\p{L}\p{N}])(XL|S|M|L)(?=$|[^\p{L}\p{N}])/gu)]
+    .map((match) => match[1]!);
+}
+
+function explicitSize(text: string): string | null {
+  return explicitSizes(text).at(-1) ?? null;
+}
+
+function purchaseSize(input: RealtimeSalesCycleInput): { size: string | null; ambiguous: boolean } {
+  const selectedClause = input.canonicalBuyingIntent.decision === "COMMITTED"
+    ? scopedCommitmentClause(input.text, input.salesSignals?.buyingIntent)
+    : null;
+  const sizes = [...new Set(explicitSizes(selectedClause ?? input.text))];
+  return {
+    size: sizes.length === 1 ? sizes[0]! : sizes.length === 0 ? input.size : null,
+    ambiguous: sizes.length > 1,
+  };
 }
 
 function requestedQuantityValue(
@@ -489,6 +507,12 @@ function labeledValue(text: string, labels: readonly string[]): string | undefin
   return value || undefined;
 }
 
+function isCheckoutFieldLabel(value: string): boolean {
+  const normalized = foldVietnameseForRecall(value).replace(/[^a-z]+/gu, " ").trim();
+  return ["so dien thoai", "dien thoai", "sdt", "phone", "dia chi",
+    "ten", "ho ten", "nguoi nhan", "thanh toan"].includes(normalized);
+}
+
 function modelCheckoutValue(
   text: string,
   field: {
@@ -515,7 +539,8 @@ function modelCheckoutValue(
   if (!sameValue) return undefined;
   if (
     kind === "FULL_NAME" &&
-    (value.length < 2 || value.length > 160 || /\d/u.test(value))
+    (value.length < 2 || value.length > 160 || /\d/u.test(value) ||
+      isCheckoutFieldLabel(value))
   ) return undefined;
   if (
     kind === "PHONE" &&
@@ -530,7 +555,8 @@ function modelCheckoutValue(
 
 function selectedPaymentMethod(text: string): "COD" | "BANK_TRANSFER" | undefined {
   const folded = asciiFold(text).replace(/\s+/gu, " ").trim();
-  if (/\b(?:neu|gia su|vi du|hoi|co the|can lam gi|nhu the nao)\b/u.test(folded) ||
+  if (/\b(?:neu|gia su|vi du|co the|can lam gi|nhu the nao)\b/u.test(folded) ||
+      /\b(?:hỏi|hoi)\b/iu.test(text.normalize("NFC")) ||
       /\?\s*$/u.test(text)) return undefined;
   const cod = /\b(?:cod|tien mat|nhan hang tra|thanh toan khi nhan hang)\b/u.test(folded);
   const bank = /\b(?:chuyen khoan|ck|bank)\b/u.test(folded);
@@ -548,7 +574,7 @@ function privateUnlabelledRecipient(text: string): Pick<CheckoutDetails, "fullNa
   if (!candidate) return {};
   const name = candidate[1]?.trim();
   const address = candidate[3]?.trim();
-  if (!name || !address || !/\d/u.test(address)) return {};
+  if (!name || isCheckoutFieldLabel(name) || !address || !/\d/u.test(address)) return {};
   return { fullName: name, address };
 }
 
@@ -1416,6 +1442,9 @@ export async function evaluateRealtimeSalesCycle(
     return {
       handled: true,
       messages: [message],
+      ...(state.stage === "CART_OPEN"
+        ? { verifiedCartSummary: cartSummary(state.cart.value) }
+        : {}),
       plan: plan(),
       transferToHuman: false,
       desiredTag: null,
@@ -2314,11 +2343,18 @@ export async function evaluateRealtimeSalesCycle(
       if (state.cart.value.lines.length >= MAX_CART_LINES_V1) {
         return failedOutput("CART_CAPACITY_EXCEEDED", plan());
       }
+      const chosenSize = purchaseSize(input);
+      if (chosenSize.ambiguous) {
+        return { handled: true, messages: [{ kind: "TEXT",
+          text: "Chị muốn lấy size nào cho mẫu này để em lên giỏ đúng ý chị?" }],
+          plan: null, transferToHuman: false, desiredTag: null,
+          reasonCode: "PURCHASE_SIZE_AMBIGUOUS" };
+      }
       const selected = await input.facts.resolveCartSelection({
         shopAlias: input.shopAlias,
         productId: input.productId,
         offerType: input.offerType,
-        size: explicitSize(input.text) ?? input.size,
+        size: chosenSize.size,
         color: input.color,
         quantity: requestedQuantity(input.canonicalBuyingIntent),
         lineId: deterministicUuid(`${state.cart.value.cartId}:${input.productId}:${input.eventKey}`),
@@ -2405,11 +2441,18 @@ export async function evaluateRealtimeSalesCycle(
     purchaseReady(input.canonicalBuyingIntent) &&
     input.productId
   ) {
+    const chosenSize = purchaseSize(input);
+    if (chosenSize.ambiguous) {
+      return { handled: true, messages: [{ kind: "TEXT",
+        text: "Chị muốn lấy size nào cho mẫu này để em lên giỏ đúng ý chị?" }],
+        plan: null, transferToHuman: false, desiredTag: null,
+        reasonCode: "PURCHASE_SIZE_AMBIGUOUS" };
+    }
     const selected = await input.facts.resolveCartSelection({
       shopAlias: input.shopAlias,
       productId: input.productId,
       offerType: input.offerType,
-      size: explicitSize(input.text) ?? input.size,
+      size: chosenSize.size,
       color: input.color,
       quantity: requestedQuantity(input.canonicalBuyingIntent),
       lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),

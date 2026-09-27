@@ -129,6 +129,25 @@ function informationQuestion(value: string): boolean {
   );
 }
 
+/** A mixed turn needs an exact, complete commitment clause, not a model-picked
+ * fragment from a question or a hypothetical. This only scopes evidence; it
+ * does not authorize a cart effect. */
+export function scopedCommitmentClause(
+  value: string,
+  modelSignal: AgentBuyingIntentV1 | null | undefined,
+): string | null {
+  if (modelSignal?.decision !== "COMMITTED" ||
+      modelSignal.evidenceText === null ||
+      !exactEvidence(value, modelSignal.evidenceText)) return null;
+  const evidence = modelSignal.evidenceText.trim();
+  const clauses = value.split(/[?!.,;\n]+/u).map((part) => part.trim());
+  if (!clauses.some((part) => part.normalize("NFC") === evidence.normalize("NFC")) ||
+      informationQuestion(evidence) ||
+      /^(?:neu|gia su|vi du|nho|khi)\b/u.test(asciiFold(evidence))) return null;
+  return detectBuyingSignal(evidence, { hasProductContext: true }).isBuyingSignal
+    ? evidence : null;
+}
+
 function validCommittedAction(
   action: AgentBuyingIntentV1["requestedAction"],
 ): boolean {
@@ -148,12 +167,16 @@ export function resolveHybridBuyingSignal(
   context: BuyingSignalContext = {},
   modelSignal: AgentBuyingIntentV1 | null | undefined = null,
 ): HybridBuyingSignalDetection {
+  const mixedQuestion = informationQuestion(value);
+  const commitmentClause = mixedQuestion
+    ? scopedCommitmentClause(value, modelSignal) : null;
+  const decisionText = commitmentClause ?? value;
   // An edit to a selection already under discussion is not permission to
   // open another cart or change quantity, even when a model says COMMITTED.
-  if (isVariantEditRequest(value) || isVariantSelectionOnly(value)) {
+  if (isVariantEditRequest(decisionText) || isVariantSelectionOnly(decisionText)) {
     return { isBuyingSignal: false, reasons: [], decision: "NONE", source: null, quantity: null };
   }
-  const deterministic = detectBuyingSignal(value, context);
+  const deterministic = detectBuyingSignal(decisionText, context);
   const matchedModelSignal =
     context.hasProductContext === true &&
     modelSignal !== null &&
@@ -199,7 +222,7 @@ export function resolveHybridBuyingSignal(
     usableModelSignal &&
     modelSignal.decision === "COMMITTED" &&
     validCommittedAction(modelSignal.requestedAction) &&
-    !informationQuestion(value)
+    (!mixedQuestion || commitmentClause !== null)
   ) {
     return {
       isBuyingSignal: true,
@@ -233,7 +256,7 @@ export function resolveHybridBuyingSignal(
   if (
     modelSignal.decision !== "COMMITTED" ||
     !validCommittedAction(modelSignal.requestedAction) ||
-    informationQuestion(value)
+    (mixedQuestion && commitmentClause === null)
   ) {
     return {
       isBuyingSignal: false,

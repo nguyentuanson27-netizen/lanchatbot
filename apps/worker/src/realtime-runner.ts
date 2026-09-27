@@ -3420,6 +3420,7 @@ export class RealtimeRunner {
     let salesHandoffReasonCode: string | null = null;
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
+    let salesVerifiedCartSummary: string | null = null;
     let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
     let salesCartReadback: DeterministicEffectReadinessV1 | null = null;
     let c3Chosen = false;
@@ -5128,6 +5129,7 @@ export class RealtimeRunner {
       salesHandled = sales.handled;
       salesTelemetry = sales.telemetry ?? null;
       salesProtectedOutbound = sales.protectedOutbound ?? null;
+      salesVerifiedCartSummary = sales.verifiedCartSummary ?? null;
       salesReadinessAttempt = sales.readinessAttempt ?? null;
       salesCartReadback = sales.cartReadback ?? null;
       if (sales.handled) {
@@ -5160,7 +5162,10 @@ export class RealtimeRunner {
         (resolution.products.length <= 1 ||
           (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
         !metaMessages.some((unit) => unit.kind === "IMAGE") &&
-        (!salesHandled || salesTelemetry?.clarificationCase === true)) {
+        (!salesHandled || salesTelemetry?.clarificationCase === true ||
+          (salesCyclePlan?.cartOpenEvidence !== undefined &&
+            salesVerifiedCartSummary !== null &&
+            salesProtectedOutbound?.readiness.outcome === "READY"))) {
       try {
         const c3Input = buildRealtimeC3Input({
           sourceMessagePk: triggerMessagePk,
@@ -5247,7 +5252,14 @@ export class RealtimeRunner {
         const chosenClaims = c3Input.context.verifiedClaims.filter((claim) =>
           hashes.has(claim.provenance.contentHash)
         );
-        const selectedTypes = new Set(chosenClaims.map(({ type }) => type));
+        const cartSummary = salesHandled && salesVerifiedCartSummary !== null &&
+            salesCyclePlan?.cartOpenEvidence !== undefined
+          ? salesVerifiedCartSummary : null;
+        const outputClaims = cartSummary === null || salesProtectedOutbound === null
+          ? chosenClaims
+          : [...new Map([...salesProtectedOutbound.claims, ...chosenClaims]
+              .map((claim) => [claim.claimId, claim] as const)).values()];
+        const selectedTypes = new Set(outputClaims.map(({ type }) => type));
         const baselineTypes = salesProtectedOutbound?.claimTypes ??
           protectedClaimValidation.claimTypes;
         // A successful adaptive strategy owns which facts answer this turn.
@@ -5259,7 +5271,8 @@ export class RealtimeRunner {
             baselineTypes.some((type) => !selectedTypes.has(type))) {
           throw new Error("TRACK_C_C3_BASELINE_FACT_PRESERVATION");
         }
-        const cartSelected = chosenClaims.some((claim) => claim.scope.kind === "CART");
+        const cartSelected = cartSummary !== null ||
+          chosenClaims.some((claim) => claim.scope.kind === "CART");
         const cart = cartSelected
           ? (salesCyclePlan?.state ?? salesCycleRecord.state).cart?.value ?? null
           : null;
@@ -5275,7 +5288,8 @@ export class RealtimeRunner {
         if (cartSelected && (cart === null || parent === null)) {
           throw new Error("TRACK_C_C3_CART_READINESS_UNAVAILABLE");
         }
-        const candidateMessages = [{ kind: "TEXT" as const, text: chosen.reply }];
+        const candidateMessages = [{ kind: "TEXT" as const,
+          text: cartSummary === null ? chosen.reply : `${cartSummary}\n${chosen.reply}` }];
         const payloadHash = canonicalSha256(candidateMessages);
         const readiness = evaluateDeterministicEffectReadinessV1({
           effect: "PROTECTED_OUTBOUND",
@@ -5294,7 +5308,7 @@ export class RealtimeRunner {
           orderPreviewId: null,
           orderPreviewHash: null,
           buyingIntent: null,
-          claims: chosenClaims,
+          claims: outputClaims,
           protectedClaimTypes: [...selectedTypes].sort(),
           deterministicEvidenceHash: payloadHash,
           parentReadinessHash: parent?.readinessHash ?? null,
@@ -5307,7 +5321,7 @@ export class RealtimeRunner {
         if (this.options.mode === "LIVE" && this.options.sendEnabled) {
           metaMessages = candidateMessages;
           salesProtectedOutbound = {
-            claims: chosenClaims,
+            claims: outputClaims,
             claimTypes: [...selectedTypes].sort(),
             readiness,
           };

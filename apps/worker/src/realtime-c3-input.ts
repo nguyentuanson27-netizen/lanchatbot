@@ -9,6 +9,7 @@ import {
   FinalTurnEvidenceV2Schema,
   ProductBindingV2Schema,
   canonicalJsonV1,
+  validateEffectReadinessTemporalWindowV1,
   type BusinessFactEnvelopeV1,
   type DeterministicEffectReadinessV1,
   type ProductFactsV2,
@@ -99,8 +100,21 @@ export function buildRealtimeC3Input(input: Readonly<{
   const cart = input.commerceState.cart;
   const pinnedPolicy = input.commerceState.commerceContext?.policyRef;
   const currentPolicy = bundle === null ? null : runtimePolicyBundleReference(bundle);
-  const readbackReady = cart !== null && input.cartReadiness.some((readiness) =>
-    readiness.effect === "CART_READY" && readiness.outcome === "READY" &&
+  const sameTurnReadiness = input.cartReadiness.filter((readiness) =>
+    readiness.sourceMessageIdHash === input.canonicalEvidence.buyingIntent.sourceMessageIdHash &&
+    readiness.conversationRevision === input.preConversationRevision &&
+    readiness.salesCycleRevision === input.preSalesRevision &&
+    validateEffectReadinessTemporalWindowV1({
+      checkedAt: readiness.checkedAt, expiresAt: readiness.expiresAt, now: input.now,
+    }) === "VALID" &&
+    ((readiness.effect !== "CART_OPEN" && readiness.effect !== "CART_READY") ||
+      (cart !== null &&
+        readiness.cartId === cart.value.cartId &&
+        readiness.cartVersion === cart.value.revision))
+  );
+  const readbackReady = cart !== null && sameTurnReadiness.some((readiness) =>
+    (readiness.effect === "CART_READY" || readiness.effect === "CART_OPEN") &&
+    readiness.outcome === "READY" &&
     readiness.cartId === cart.value.cartId &&
     readiness.cartVersion === cart.value.revision
   );
@@ -140,7 +154,7 @@ export function buildRealtimeC3Input(input: Readonly<{
       input.fitDecision.recommendation.parentProductId === input.productId &&
       input.fitDecision.recommendation.chartRef?.verificationStatus === "VERIFIED" &&
       input.fitDecision.missingInputs.some((kind) => kind !== "FIT_PREFERENCE"),
-    readiness: [],
+    readiness: sameTurnReadiness,
     finalTurnEvidence,
     productBinding,
     ...(input.productFacts?.attributes === undefined
