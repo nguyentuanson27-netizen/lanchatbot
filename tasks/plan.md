@@ -1,6 +1,8 @@
-# Kế hoạch sửa C3 và năng lực bán hàng — 26/09/2026
+# Kế hoạch sửa C3 và năng lực bán hàng — cập nhật 27/09/2026
 
 **Bản hiện hành. Trạng thái: kế hoạch triển khai; chưa thực hiện P00–P12.** Các sửa đổi đã có được ghi riêng bên dưới. Kế hoạch này thay thế thứ tự triển khai cũ, không tuyên bố thiết kế guard đã được chứng minh. Checklist hiện hành ở [todo.md](todo.md). Review Astra 24/09 là review kế hoạch cũ, không phải review bản này hoặc code hiện tại.
+
+Bản cập nhật tiếp thu và hiệu chỉnh [comment 5847545097](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/375#issuecomment-5847545097); [đối chiếu findings](evidence/c3-plan-review-comment-5847545097.md) ghi rõ phạm vi từng bằng chứng. Chỉ sửa tài liệu; chưa sửa hành vi ứng dụng hoặc chạy lại Luna.
 
 ## 1. Mục tiêu, nguồn và giới hạn
 
@@ -17,8 +19,10 @@ Bot phải hiểu quyết định hiện tại của khách, dùng đúng dữ l
 
 | Nguồn | Giá trị |
 |---|---|
-| Repo/branch | `lanchatbot-c3-runtime-integration` / `codex/c3-runtime-canonical-integration` |
-| Local + remote HEAD | `ce558e6d4028dd06bd6efc960286464425a26a85` |
+| Repo / application baseline branch | `lanchatbot-c3-runtime-integration` / `codex/c3-runtime-canonical-integration` |
+| Plan PR/branch | PR375 / `docs/c3-sales-fix-plan-20260926` |
+| Application baseline / remote PR374 head | `ce558e6d4028dd06bd6efc960286464425a26a85` |
+| PR375 head trước amendment này | `d0c8a3119009baded942c77c7d045c402b4a8a22`, chỉ thêm plan/checklist trên application baseline; local/remote khớp khi bắt đầu |
 | Remote main | `a28bd12a8b15c4bbf65914c52236adac4ac41594` |
 | PR371 | `88a1ce4` đã xác minh là ancestor của HEAD |
 | DEV70 mới nhất | source `92612ad182bc4b2540cd741a6278b4ed76928049`; tới HEAD chỉ thêm evidence docs |
@@ -30,11 +34,13 @@ Yêu cầu người dùng ưu tiên. Spec trực tiếp: `docs/specs/track-c-c3-
 
 Kế thừa candidate branch vì người dùng yêu cầu giữ fix đã review; không bắt đầu lại từ main/cherry-pick mù. Đầu lượt implementation kiểm tra HEAD/status/remote; nếu baseline đổi, ghi diff và tái kiểm chứng phần bị ảnh hưởng.
 
-## 2. Hiện trạng: bảo toàn phần đã sửa
+## 2. Hiện trạng: bảo toàn năng lực và invariants đã đúng
+
+“Kế thừa fix” nghĩa là giữ kernel/capability và ràng buộc đã chứng minh, **không giữ nguyên regex kích hoạt đang hiểu sai ý khách**. Typed input phải thay những quyết định ngữ nghĩa này tại đúng boundary. Không mở rộng regex trên chữ bỏ dấu hoặc thêm câu mẫu để vá từng ví dụ. Parser định dạng và tìm kiếm có thể tái sử dụng; chúng không tự cấp quyền sửa giỏ, ghi preference, chọn payment hoặc quyết định handoff.
 
 | Phần | Đã có | Còn thiếu |
 |---|---|---|
-| Cart/size/payment | Runtime synthetic mở giỏ, đổi M→L, preview, COD, confirmation; retest payment tại 8cd20ab | Model hiểu ý định đầu luồng đang mock; regression khi chuyển owner |
+| Cart/size/payment | Runtime synthetic mở giỏ, đổi M→L, preview, COD, confirmation; retest payment tại 8cd20ab | Trigger nhầm nhận xét thành đổi size; mất commitment ở câu ghép; chọn payment bị nhiễu địa chỉ; model hiểu ý định đầu luồng đang mock |
 | Checkout private/binding | Code/test ràng buộc value/evidence và capture trước redaction | Model thật, vai trò recipient, phủ định/correction xuyên lượt |
 | History/profile | Accepted Outbox recovery, bounded preference/session context | Câu hỏi đang dở, referent nhiều sản phẩm, hội thoại dài |
 | Catalog | Producer và source-path tests; khảo sát 25/09 ghi thiếu typed attributes ở index | Producer→readback→canonical trong môi trường thử nghiệm |
@@ -44,6 +50,8 @@ Kế thừa candidate branch vì người dùng yêu cầu giữ fix đã review
 | MCP | Allowlist fix f448911 và focused evidence | Giữ nguyên nếu không chạm ranh giới này |
 
 DEV70 hiện là **52 COMPLETED_NOT_JUDGED, 16 fail, 2 expected stale reject**, chưa phải quality passes. Runtime 9 journeys tại baff6a5 và 2 retest tại 8cd20ab không phải toàn bộ chạy trên HEAD mới nhất.
+
+Happy path M→L ở `8cd20ab` đã thành công; không ghi thành “đổi size đang RED”. Positive đó chưa chứng minh không đổi nhầm giỏ hoặc full-intent model. Probes ở `d0c8a31` tái hiện planned M→L từ “Chị thấy size L hơi rộng”; câu “Lấy size M nhé, size S còn không?” bị parser chọn S nhưng canonical hạ decision thành NONE, chưa mở giỏ S qua đường đã thử. Đây là lỗi intent/binding, không phải bằng chứng live effect.
 
 ## 3. Thiết kế đích và các quyết định bắt buộc
 
@@ -75,6 +83,8 @@ Lookup mới có đường resolve hữu hạn; nếu kết quả đổi lựa c
 Giữ sáu trường `replyAct`, `goal`, `proposition`, `evidenceRefs`, `continuation`, `canonicalAction`. Goal cần nêu nhu cầu, known customer inputs, giới hạn và lý do bước tiếp theo; không thêm taxonomy/state machine chỉ để chia đoạn văn thành nhiều trường.
 
 Typed intent hiện đến từ proposal call. Phương án đầu: giữ producer cần thiết nhưng bỏ quyền chọn lại chiến lược trên nhánh chuyển. Chỉ hợp nhất extraction với call khác sau khi schema/PII/evidence được chứng minh bằng amendment/test. Không xóa producer để làm đẹp con số hai calls. Hai vai trò hội thoại không đồng nghĩa mọi lượt runtime đúng hai calls.
+
+Typed input phân biệt hỏi/chọn/nhận xét/từ chối/sửa ý theo mệnh đề và đối tượng. Tái dùng fields hiện có, bổ sung tối thiểu operation, product/cart-line, attribute/value và nguồn còn thiếu; bind revision ở code. Span/confidence/JSON hợp lệ chưa chứng minh hiểu đúng. Kernel đã có `SET_LINE_VARIANT`: sửa giỏ không cần biến thành commitment mua mới hoặc mặc định thêm action vào `AgentBuyingIntentV1`. Một tin chọn M và hỏi S phải giữ cả hai ý nhưng chỉ một progression theo spec; khi đối tượng còn mơ hồ, hỏi rõ phần đó và không tự mutation.
 
 ### Guard và quyền diễn đạt
 
@@ -108,6 +118,7 @@ Quy mô S: 1–2 file chức năng; M: khoảng 3–5. Files là điểm bắt �
 - Đối chiếu đủ 70 cases: request, raw outputs, task/evidence, detailed guard reason, actual reply nếu có. Fail phân loại input/contract, model, guard false positive, capability, provider; completed cases vẫn kiểm tra false negative và chất lượng.
 - Pin source/build/benchmark/rubric/model; kiểm tra admission/stage cardinality và tương thích goal với stage judge. Mismatch phải có amendment/version mapping; không sửa rubric sau khi thấy điểm.
 - Giữ raw runs; thêm findings vào evidence hiện có. Sửa chẩn đoán Q035/Q063 trong addendum dẫn raw output, không ghi đè lịch sử.
+- Dùng bảng đối chiếu comment làm đầu vào, phân biệt reproduced ở hàm/evaluator, source-only và kết luận đã hiệu chỉnh. Sửa ví dụ handoff #7, hệ quả mở giỏ #8 và cách gọi M→L “RED”; không coi mọi finding là full-runtime failure hoặc đã đóng. Review này không thay phần audit guard/data chưa được comment kiểm tra.
 
 **Nghiệm thu/kiểm chứng:** mỗi họ lỗi có replay/trace; missing input không chấm thành lỗi model; UNKNOWN được giữ. Replay full output cho họ bị ảnh hưởng, ghi rõ nếu chỉ replay một slot.
 
@@ -163,27 +174,30 @@ Quy mô S: 1–2 file chức năng; M: khoảng 3–5. Files là điểm bắt �
 
 **Kiểm chứng/files:** focused contract/egress tests và runtime compound question; contract runner, realization/style/projection + tests, chia theo nhóm nhỏ.
 
-### P05 — Harness với model hiểu ý định thật
+### P05 — Model hiểu ý định thật và đường gọi từ server
 
 **Phụ thuộc:** P00. **Quy mô:** M. **Kế thừa:** T01/T15.
 
 - Mở rộng harness hiện có để thay `synthetic-baseline` bằng transport model thật cho proposal/typed extraction. Giữ scripted mode cho test deterministic, gắn nhãn rõ.
 - Fake external ports, local state; không seed committed intent/checkout đủ trong lượt chứng minh model hiểu. Reuse COMMERCE admission/fence/policy helpers, không bypass preflight.
 - Ghi mọi call/prompt/schema/output/error, before/after state, task/evidence, detailed guard reason và actual accepted reply. Synthetic raw history ngoài repo; bản commit redact, không lộ secret/PII.
+- Kiểm tra server config → C3 admission/invocation → quan sát candidate ở DRY_RUN, với fake external ports. Server hiện chỉ cấp C3 khi DRY_RUN nhưng runner chỉ chọn reply C3 khi LIVE + sendEnabled; sửa khả năng quan sát bằng kết quả/diagnostics hiện có, không bật LIVE để vượt mismatch. Phân biệt candidate, reply được chọn và send; C3-off/no-call/human-owner paths vẫn có controls.
 
-**Nghiệm thu:** tin khách qua intent producer thật; hỏi/chọn/phủ định đổi quyết định đúng; calls không bị báo thành hai khi thực tế nhiều hơn.
+**Nghiệm thu:** tin khách qua intent producer thật; hỏi/chọn/phủ định đổi quyết định đúng; runtime trace từ server composition chứng minh DRY_RUN gọi/ghi nhận candidate và không gửi thật. LIVE + fake ports trong harness không thay bằng chứng server composition. Ghi calls theo nhánh thực tế, không mặc định mỗi lượt hai calls/cart read.
 
-**Kiểm chứng/files:** Luna sớm trên no-cart→commitment→checkout; `track-c-c3-luna-runtime-smoke.test.ts`, provider/schema adapter hiện có. Không thêm eval framework.
+**Kiểm chứng/files:** focused server config/runner tests cho wiring; Luna sớm trên no-cart→commitment→checkout; `realtime-server.ts`, `realtime-runner.ts`, `track-c-c3-luna-runtime-smoke.test.ts`, provider/schema adapter hiện có. Không thêm eval framework.
 
 ### P06 — Một owner trên hành trình một sản phẩm
 
 **Phụ thuộc:** P01/P05; P04 cho wording được mở. **Quy mô:** M theo nhánh. **Kế thừa:** T02–T05/T11a.
 
 - Chốt typed intent producer cùng lượt; proposal/legacy không chọn lại next step trên nhánh chuyển. Mutation vẫn từ kernel/source-bound input.
+- Nối producer sửa variant tới `SET_LINE_VARIANT` hiện có, xác minh đúng dòng/thuộc tính/giá trị/source/current revision rồi reprice/revalidate. Nhận xét “thấy size L” không sửa giỏ; yêu cầu đổi sang L phải sửa được. Câu chọn M + hỏi S giữ lựa chọn M và câu hỏi S; dấu hỏi/phủ định ở một mệnh đề không xóa ý hợp lệ ở mệnh đề khác.
 - No-cart: chọn size chưa phải mua; commitment mở đúng một giỏ; đổi size reprice/invalidate preview; hỏi payment không tự chọn; checkout hỏi đúng phần thiếu.
-- State cập nhật hợp lệ trước compile; atomic commit/receipt xác định lời công bố. Giữ phủ định handoff, human owner và group delivery safety.
+- Capture checkout tại boundary riêng tư, phân biệt tên người nhận với nhãn trường/người được nhắc tới; lựa chọn COD không bị địa chỉ Hội An làm mất. Không khôi phục nguyên trạng model fallback cũ chỉ vì có enum/confidence/span; không để parser tên không nhãn ưu tiên ghi đè role evidence đã xác minh.
+- State cập nhật hợp lệ trước compile; atomic commit/receipt xác định lời công bố. Giữ human owner, no-call preflight và group delivery safety; thay quyết định ngữ nghĩa phủ định handoff theo mệnh đề/đối tượng. Yêu cầu gặp nhân viên khác vẫn có hiệu lực dù từ chối người cũ; giỏ mở không loại yêu cầu hoàn tiền cho hàng đã nhận. Không đưa model vào đường đã xác định human ownership chỉ để phân loại lại.
 
-**Nghiệm thu:** trace có một owner hội thoại; correction cập nhật ngay; duplicate/old preview/ambiguous confirm không effect sai.
+**Nghiệm thu:** trace có một owner hội thoại; correction cập nhật ngay; cả cho phép đúng và chặn nhầm được kiểm tra. Các cặp nhận xét/đổi size, hỏi/chọn payment, recipient/field label, từ chối người cũ/yêu cầu người mới đi qua đúng producer→consumer; duplicate/old preview/ambiguous confirm không effect sai.
 
 **Kiểm chứng/files:** model runtime thật + sales/intent regressions; DB integration nếu chạm CAS/commit/history. Runner, canonical evidence/input, sales cycle và tests; chia extraction/orchestration/cart khi cần. Differential với r31.3/r32.2, ghi deviation mới vào spec/evidence.
 
@@ -204,6 +218,7 @@ Quy mô S: 1–2 file chức năng; M: khoảng 3–5. Files là điểm bắt �
 **Phụ thuộc:** P01/P02/P06; chốt retrieval contract trước consumer. **Quy mô:** hai lát M. **Kế thừa:** T08/T11b.
 
 - P08a dùng search hiện có cho yêu cầu tìm mẫu theo budget/tiêu chí; loại current/rejected products; verify giá/tồn. No result được nói thật; “giá cao” không tự là lệnh tìm hàng/giảm giá.
+- Phân biệt đổi màu của sản phẩm hiện tại với tìm mẫu khác trước khi loại current product. Chỉ loại rejected products khi có ý từ chối đúng đối tượng; “Bộ LN123” không phải “bỏ LN123”. Kiểm tra cả product resolution/search result, không dừng ở classifier.
 - P08b bind mỗi evidence theo subject; code tính ordering/difference từ cùng offer/unit/currency. Thuộc tính/policy cần evidence riêng; rẻ hơn không suy tốt hơn.
 - Lookup request/result tái dùng boundary hiện có; nếu cần enum/envelope mới có amendment tối thiểu, không nhét vào goal. Resolve hữu hạn và chọn lại sau kết quả nếu cần.
 
@@ -217,7 +232,9 @@ Quy mô S: 1–2 file chức năng; M: khoảng 3–5. Files là điểm bắt �
 
 - Reuse profile/session/history; giữ preference/correction và câu hỏi đang dở tối thiểu qua window. Không thêm durable state nếu fields/history hiện có đủ.
 - Tách customer report khỏi shop facts; referent theo binding. Sửa nhu cầu vô hiệu dữ liệu phụ thuộc, giữ facts độc lập.
+- Update hợp lệ cùng lượt trước khi dựng structured session context cho consumer liên quan; không để legacy đọc summary cũ trong khi C3 đọc bản mới. Tin khách vẫn có trong history chưa chứng minh summary đúng; kiểm tra state và prompt thực tế, gồm corrected/rejected product.
 - Bảo toàn accepted Outbox recovery; pending/failed send không được coi bot đã nói, không resend để sửa history.
+- Differential C3-off cho canonical history recovery và timing session context; ghi thay đổi có chủ đích theo compatibility/deviation hiện hành, không rollback recovery hữu ích chỉ vì khác baseline. Đo phần chi phí recovery khi đường đọc bị thay đổi; không tạo thêm history store hoặc gate.
 
 **Nghiệm thu:** không hỏi lại dữ kiện còn hợp lệ; correction/referent đúng; mất Redis projection không gây gửi trùng trong đường đã hỗ trợ.
 
@@ -242,6 +259,7 @@ Quy mô S: 1–2 file chức năng; M: khoảng 3–5. Files là điểm bắt �
 - Frozen DEV70 đúng revision, gpt-6-luna/effort ghi rõ (baseline medium); giữ mọi case/error/retry/stage. Diagnostic fixtures báo riêng. Amendment bundle có identity/mapping; không gọi khác bundle là cải thiện model thuần túy.
 - Chấm theo rubric/stage judge hiện có; COMPLETED_NOT_JUDGED không nâng PASS. Đọc cả 70 lịch sử, accepted/rejected và final reply; mỗi họ lỗi còn lại có nguyên nhân, không chỉ label.
 - Runtime full-intent giữ state trên họ mục 7 và wording ngoài DEV70. Lượt khách phân nhánh theo vấn đề được giải quyết, không luôn tự mua; scripted branches vẫn không phải chứng minh conversion khách thật.
+- Regression deterministic chứng minh boundary parser/state/wiring; Luna kiểm chứng hành trình hiểu ý định và bán hàng tích hợp. Không ép một lần gọi Luna riêng cho từng finding; một câu Luna đúng cũng không thay controls. Giữ khác biệt planned state, synthetic commit, external receipt và live effect trong báo cáo.
 
 **Nghiệm thu:** scores/errors/history truy về source; compiler simulation không thay commerce evidence; đạt mục 8 hoặc báo chưa đạt/blocker.
 
@@ -272,6 +290,8 @@ pnpm --config.enable-pre-post-scripts=false -r --no-bail test
 
 Focused `exec vitest` không tự build dependencies; build package/dependencies liên quan trước nếu source đổi. Không chạy toàn workspace sau mỗi sửa tài liệu. Full build/test cho candidate tích hợp; DB integration khi transaction/history/CAS bị ảnh hưởng. Required CI/secret/data checks theo repo vẫn giữ.
 
+Ví dụ từ comment là seeds cho cặp positive/negative theo invariant; biến đổi mệnh đề, thứ tự, dấu, đối tượng và trạng thái giỏ độc lập. Không thêm route theo câu/case ID, template, gate hoặc durable state để làm các seed xanh. Chỉ chạy lại tầng bị ảnh hưởng rồi nghiệm thu hành trình tích hợp.
+
 Runtime opt-in hiện dùng `LUNA_REALTIME_SMOKE=1`, `LUNA_REALTIME_SMOKE_ARTIFACT_DIR` tuyệt đối ngoài repo và `LUNA_REALTIME_SMOKE_JOURNEY_IDS` cho debug. **Flag hiện tại chưa chứng minh full-intent mode**; chỉ gọi evidence full-intent sau P05, mode phải có trong artifact. Không ghi credentials vào lệnh/tài liệu.
 
 ## 7. Hành trình bắt buộc
@@ -285,6 +305,8 @@ Runtime opt-in hiện dùng `LUNA_REALTIME_SMOKE=1`, `LUNA_REALTIME_SMOKE_ARTIFA
 | Giao hàng | Địa bàn có/thiếu, dispatch khác ETA, deadline | Không biến dự kiến thành cam kết |
 | Tìm/so sánh | Budget, rejected item, nhiều offer, no result | Lookup thật, subject/derivation đúng |
 | Mua/checkout | No-cart, chọn chưa mua, mua rõ, đổi size, hỏi/chọn payment, nhập tự nhiên | Transitions/source/fields/preview/confirm đúng |
+| Ý định nhiều mệnh đề | Chọn M + hỏi S; nhận xét size; tên địa bàn + chọn COD; nhãn trường + dữ liệu người nhận | Giữ ý hợp lệ, đúng subject/role; không mutation từ token cuối hoặc chữ bỏ dấu |
+| Handoff/hậu mãi | Từ chối người cũ + yêu cầu người khác; lỗi hàng/hoàn tiền khi có giỏ mở | Phạm vi phủ định đúng, không kéo khách vào pre-sale sai; human-owner no-call giữ nguyên |
 | Nhớ/sửa ý | Đổi budget/size/mẫu, referent, vượt window | Context không reset, dữ liệu phụ thuộc cập nhật |
 | Sự cố | Model/guard/lookup/history error, duplicate/stale preview | Fallback đúng, no duplicate effect |
 
@@ -329,8 +351,9 @@ Không hứa số phiên trước P03/P06. Ước lượng lại sau thử nghi�
 
 ## 10. Nguồn để bắt đầu
 
+- [Đối chiếu comment 5847545097](evidence/c3-plan-review-comment-5847545097.md): findings đã hiệu chỉnh, source anchors, phạm vi probes và mapping tới task; không phải acceptance implementation.
 - [DEV70 review](evidence/c3-luna-dev70-92612ad-report.md) and [ordered history](evidence/c3-luna-dev70-92612ad-full-history.md). Focused guard/cart replay remains owner-local; the failure classification and result are summarized here and in P00 rather than linked to a workstation-only file.
-- [Audit 24/09](../../LANCHATBOT_INDEPENDENT_AUDIT_20260924/AUDIT.md): kiến trúc/probes, không chứng nhận bao phủ mọi guard error.
+- Audit 24/09 ở owner-local `LANCHATBOT_INDEPENDENT_AUDIT_20260924/AUDIT.md`: kiến trúc/probes, không chứng nhận bao phủ mọi guard error; không có bản audit này trong PR.
 - [DEV70 report](evidence/c3-luna-dev70-92612ad-report.md), [full history](evidence/c3-luna-dev70-92612ad-full-history.md); raw `../../LUNA6_DEV70_C3_92612ad_20260926T033240Z/case-records.json`.
 - [Runtime 9 journeys](evidence/c3-luna-stateful-runtime-baff6a5-report.md), [checkout retest](evidence/c3-luna-stateful-runtime-8cd20ab-checkout-history.md).
 - [Catalog lịch sử](evidence/catalog-field-path-20260925.md), [owner/source map](t00-source-map.md), [F01–F10 status](evidence/c3-f01-f10-status-20260926.md).
@@ -338,7 +361,7 @@ Không hứa số phiên trước P03/P06. Ước lượng lại sau thử nghi�
 
 ## 11. Self-review bản kế hoạch này
 
-- Bảo toàn fix đã có; checkbox cũ chưa tick không bị coi là chưa có code.
+- Bảo toàn capability/invariants đã đúng; thay trigger ngữ nghĩa sai. Checkbox cũ chưa tick không bị coi là chưa có code; positive M→L không chứng minh negative/full-intent coverage.
 - Guard là thử nghiệm hữu hạn có đầu ra/điểm rẽ; không hứa semantics bằng typed data/claim annotations.
 - Full-intent model khác với mock proposal giữ state; nguồn customer-script mua không được gọi bằng chứng thuyết phục.
 - Source, fixture và runtime authority không bị đánh đồng; frozen rubric không đổi để làm đẹp điểm.
