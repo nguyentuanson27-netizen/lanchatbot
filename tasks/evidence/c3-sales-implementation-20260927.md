@@ -290,3 +290,15 @@ decision, and no Luna DEV70/rubric run exists on this exact source.
   `UNKNOWN` wrinkle resistance remains null. The local server was stopped.
   This proves transport for one synthetic item, not live Sheets/catalog
   coverage or authorization to publish live Qdrant data. P02 remains open.
+
+### Executable amendment: f5034c7
+
+SalesCycle now accepts a producer-scoped payment selection when the exact
+customer clause independently passes the existing local method selector. This
+recovers "Chị chọn COD, ship Hội An được không?" without treating the separate
+delivery question as uncertainty about COD. Conditional, negated, missing and
+bare-question evidence remain unselected. Older proposals retain the
+conservative local selection path; the producer still runs too late for all
+early semantic routing, so P06 remains open. The change adds no payment effect
+and reuses the existing checkout authority boundary. Focused SalesCycle and
+Vertex tests: 126 passed; worker typecheck and `git diff --check` passed.
