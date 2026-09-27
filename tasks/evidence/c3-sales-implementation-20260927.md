@@ -246,3 +246,47 @@ legacy proposals without the new field. All 75 RealtimeRunner tests and
 worker TypeScript checking passed on this amendment. This is a local
 consumer fix; the producer is still not before every semantic routing
 decision, and no Luna DEV70/rubric run exists on this exact source.
+
+### Continuation on f0b93c2 (2026-09-27)
+
+- `84527e0` preserves selected verified facts when optional model prose fails
+  the effect or production guard. The compiler removes that optional prose and
+  runs the same guards again; it does not admit the rejected wording. The
+  Strategist prompt distinguishes a general price concern from a stated
+  numeric budget. The synthetic runtime fixture now offers both M and L, as
+  the fixture catalog and Qdrant results do.
+- `f0b93c2` accepts an empty Strategist evidence list for routine COD
+  selection when no relevant evidence enum exists. The Responder cannot supply
+  factual sentences without selected evidence. Deterministic checkout asks
+  separately for missing recipient fields and confirms COD when that is the
+  only allowed method. Focused worker suites passed (200 tests), contracts
+  passed (11 tests), worker typecheck passed, then the complete worker suite
+  passed: 1,799 tests, 1 skipped across 128 files.
+- GPT-6 Luna on `84527e0` passed a two-turn budget probe and a seven-turn
+  cart/size/checkout probe. The latter answered the verified 30,000đ shipping
+  fee with C3 selected and reached internal `PURCHASE_CONFIRMED`. The
+  eight-turn objection/fact/checkout probe failed at COD because the then
+  schema rejected a valid empty evidence list; `f0b93c2` fixes that local
+  contract. The corresponding owner-local `runtime-smoke-artifacts.json`
+  SHA-256 hashes are, respectively,
+  `1C4BED24C69F5E6E2247404070F4DAEF24E9AB7717639D2A68FF88AE6CFF8AE2`,
+  `EDDF590C93457B9442F7CA5B23DED3DC38C3C3BD714BF4934F42E6D20E64AB4D`,
+  and `EC7AE664E204FFEC27428809E565F84AF927F8D8FE320E3DB6C7E3C7F4F1DC55`.
+- The exact-source `f0b93c2` objection/checkout rerun was attempted. Luna
+  reached its CLI usage limit immediately after the first Strategist call,
+  so all C3 assertions failed for provider availability; it supplies **no
+  quality judgment**. Its owner-local archive
+  `LUNA_C3_f0b93c2_OBJECTION_R3_20260927/runtime-smoke-artifacts.json` has
+  SHA-256 `46C028F5FE3D470550AF3125538F09553E94D4040D0C46CF1A3140F10F15FD3B`.
+  The frozen DEV70 and rubric still have no result on this source.
+- A separate isolated **real Qdrant** round trip for one synthetic SQ149
+  fixture now passes on `f0b93c2`: registry row → profiles → approved job
+  payload → Qdrant v1.19.1 local collection write/readback → stable product
+  adapter → ProductFacts V2 → selectable C3 material evidence. Payload and
+  readback hashes both equal
+  `55b424384f9a3b618cb3848d05ad123a10712bcef35f1f7dd786aa7d3230cbc3`;
+  owner-local result `c3-qdrant-roundtrip-f0b93c2.json` hashes to
+  `B1FE3B2CFE03389C484ADF1D706C641BDD28997225AC4A6CF5C663DE60D9D089`.
+  `UNKNOWN` wrinkle resistance remains null. The local server was stopped.
+  This proves transport for one synthetic item, not live Sheets/catalog
+  coverage or authorization to publish live Qdrant data. P02 remains open.

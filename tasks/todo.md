@@ -12,6 +12,8 @@ Amendment executable `c93635c` bổ sung diagnostic candidate đã guard trong D
 
 Amendment executable `c2804ac` đưa variant đã chọn từ producer vào consumer considered-variant: chọn M và hỏi S không lưu S thành lựa chọn; nhận xét L không sửa lựa chọn. Test runner và typecheck qua, nhưng producer vẫn sau một số routing nên P06 chưa đóng.
 
+Tiếp tục ở `f0b93c2`: guard giữ fact đã chọn khi lời ghi nhận tùy chọn bị từ chối; checkout COD cho phép evidence rỗng và hỏi đủ trường còn thiếu. Worker 1.799 test pass, 1 skip. Luna trên `84527e0` qua hành trình budget và cart/size/checkout; hành trình dài gặp schema COD đã sửa sau đó. Rerun trên `f0b93c2` bị giới hạn lượt Luna nên chưa có điểm quality/DEV70. Đã readback thật qua Qdrant cục bộ cho **một fixture tổng hợp**; coverage nguồn/live còn mở. Chi tiết và hash ở [evidence](evidence/c3-sales-implementation-20260927.md).
+
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
 ## Chuẩn bị đã làm trong lượt lập kế hoạch
