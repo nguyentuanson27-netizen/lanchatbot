@@ -1269,3 +1269,9 @@ realizations. Each supplied sentence still has to match its selected fact;
 code inserts the original verified wording for any trailing facts. This
 prevents a partial model array from forcing a fallback that discards a
 current-cart answer, without allowing a new factual claim.
+
+When the existing local-test C3 server switch runs in `DRY_RUN`, a guarded
+candidate with `READY` outbound readiness emits one structured diagnostic
+containing the reply hash, selected claim types and source revisions. The
+candidate remains unsent. Human ownership still prevents both model calls
+and cart mutations on later turns.

@@ -5331,6 +5331,17 @@ export class RealtimeRunner {
         if (readiness.outcome !== "READY") {
           throw new Error("TRACK_C_C3_OUTBOUND_READINESS_BLOCKED");
         }
+        if (this.options.mode === "DRY_RUN") {
+          process.stderr.write(`${JSON.stringify({
+            level: "info", code: "TRACK_C_C3_DRY_RUN_CANDIDATE",
+            candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
+            replySha256: createHash("sha256").update(chosen.reply, "utf8").digest("hex"),
+            protectedClaimTypes: [...selectedTypes].sort(),
+            readiness: readiness.outcome,
+            conversationRevision: record.stateVersion,
+            salesCycleRevision: salesCycleRecord.stateRevision,
+          })}\n`);
+        }
         if (this.options.mode === "LIVE" && this.options.sendEnabled) {
           metaMessages = candidateMessages;
           salesProtectedOutbound = {

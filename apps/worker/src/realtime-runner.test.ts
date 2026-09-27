@@ -3316,7 +3316,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3699,8 +3699,8 @@ describe("RealtimeRunner inbound batching", () => {
       clearTagObservation(),
       {
         workerId: "worker-1",
-        mode: "LIVE",
-        sendEnabled: true,
+        mode: checkoutOwner === "DRY_RUN_C3" ? "DRY_RUN" : "LIVE",
+        sendEnabled: checkoutOwner !== "DRY_RUN_C3",
         salesCycleEnabled: true,
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
@@ -3734,7 +3734,15 @@ describe("RealtimeRunner inbound batching", () => {
       { resolve: vi.fn(async () => policyResolution) },
     );
 
-    expect(await runner.processOne()).toBe(true);
+    const diagnostics: string[] = [];
+    const stderrWrite = checkoutOwner === "DRY_RUN_C3"
+      ? vi.spyOn(process.stderr, "write").mockImplementation(((chunk: string | Uint8Array) => {
+        diagnostics.push(String(chunk));
+        return true;
+      }) as typeof process.stderr.write)
+      : null;
+    try { expect(await runner.processOne()).toBe(true); }
+    finally { stderrWrite?.mockRestore(); }
     expect(c3Send).toHaveBeenCalledTimes(2);
     expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
     expect(persistedCommerce.cart).toBeNull();
@@ -3755,6 +3763,16 @@ describe("RealtimeRunner inbound batching", () => {
       } };
     };
     expect(commitInput.salesCyclePlan?.expectedRevision).toBe(commerceState.revision);
+    if (checkoutOwner === "DRY_RUN_C3") {
+      const candidate = diagnostics.map((line) => {
+        try { return JSON.parse(line) as Record<string, unknown>; }
+        catch { return null; }
+      }).find((event) => event?.code === "TRACK_C_C3_DRY_RUN_CANDIDATE");
+      expect(candidate).toMatchObject({ readiness: "READY", protectedClaimTypes: ["PRICE"] });
+      expect(candidate?.replySha256).toMatch(/^[a-f0-9]{64}$/u);
+      expect(commitInput.metaPlan?.messages ?? []).toEqual([]);
+      return;
+    }
     expect(commitInput.metaPlan?.messages).toContainEqual({
       kind: "TEXT", text: "Giá hiện tại của mẫu này là 799.000đ ạ.",
     });
