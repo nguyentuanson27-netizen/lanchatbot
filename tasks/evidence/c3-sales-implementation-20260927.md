@@ -217,3 +217,21 @@ semantic producer/consumer convergence, broader variant phrasing authority,
 handoff/post-sale and preference timing, search/comparison, resilient
 fallback, long-history journeys, two-sided free-prose guard review and exact
 source Luna DEV70 remain open. No live write, deployment or merge occurred.
+
+### Later executable amendment: c93635c
+
+Source/spec commit `c93635c41f44f6154e718dd385edb4ee7cd005e6` adds one
+bounded DRY_RUN observation at the existing guarded C3 candidate boundary:
+reply SHA-256, claim types, READY result and source revisions are logged; no
+reply text or customer identifiers are logged. The RealtimeRunner test runs
+that path with `mode=DRY_RUN`, `sendEnabled=false`, a fake C3 transport and
+asserts the candidate diagnostic while the committed outbound message list
+stays empty. The existing human-owner test asserts later turns make no C3
+calls and do not mutate commerce state. The server already connects C3 only
+under its local DRY_RUN test switch; this test exercises its runner path, not
+an entire booted server with real Vertex credentials.
+
+For this amendment, all 74 RealtimeRunner tests and worker TypeScript
+checking passed. The earlier 1,795-test worker and 379-test business-tools
+runs belong to `c782e90`; only the runner diagnostic and its test changed
+afterward. No Luna or rubric result exists on `c93635c`.
