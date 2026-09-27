@@ -66,6 +66,28 @@ prices lacks a separately bound comparison claim. Q096's acknowledgement of
 a size change was rejected as an unverified size recommendation. The 11
 failures require per-case guard/input review before changing the verifier.
 
+The 11 rejected DEV cases split by the observed owning boundary, based on
+the raw responder output and frozen expected behavior:
+
+| Cases | Observed boundary | Current judgment |
+| --- | --- | --- |
+| Q017 | Responder draft schema/validation | Conditional 690k offer was expressed safely but no final reply was realized; inspect draft rule. |
+| Q026 | Current-cart promotion with two products | Guard rejected the verified 100.000đ cart adjustment; inspect cart binding and policy scope. |
+| Q034, Q035, Q036 | Fit wording/guard | Alternative or uncertainty was blocked; retain unsupported fit claims as negative controls. |
+| Q043 | Variant stock mapping/guard | Cautious exact-variant uncertainty was blocked; authoritative color/size label mapping is still required. |
+| Q063 | ETA deadline wording/guard | “Có thể kịp” needs a bounded temporal rule; a 2–4 day range must not become a delivery promise. |
+| Q081 | Derived comparison | Two price claims do not authorize an unbound “rẻ hơn” statement; code must derive and bind the ordering. |
+| Q086 | Split-size selection | Model chose S/M from body shape without verified size evidence; rejection protects a real invariant. |
+| Q096 | Variant edit/effect receipt | Acknowledging a conversational change collided with the size advice guard; no persisted mutation was proven in this fixture. |
+| Q100 | Checkout completeness/effect receipt | Details in history did not provide an authorized order effect; the model must not imply completion. |
+
+This table is a triage, not an assertion that every rejected answer should be
+allowed. In particular Q086 and any Q100 order-completion claim must remain
+blocked. The 57 completed cases also need rubric review: the first-contact
+price form was preserved in Q001–Q003, but Q013–Q016 and the runtime price
+objection demonstrate that execution success alone does not create sales
+progression.
+
 The stateful RealtimeRunner rerun on the same commit used `gpt-6-luna` for
 `cart_size_checkout` and `objection_fact_checkout`. Both finished at internal
 `PURCHASE_CONFIRMED` with no external order. The cart-opening turn selected C3
