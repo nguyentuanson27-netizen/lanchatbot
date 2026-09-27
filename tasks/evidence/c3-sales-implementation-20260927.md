@@ -101,5 +101,12 @@ runtime entrypoint decisions.
   in 0/107 indexed products despite source registry fields; the new candidate
   has not published or read back a local isolated index. A completed Luna
   smoke test is not a sales quality score.
+- Source inspection confirms `p23c-profiles.ts` builds typed attributes from
+  explicit registry fields, `p23c-jobs.ts` copies them into `product_attributes`,
+  and `qdrant.ts` validates that field on read. This code path cannot supply
+  approved value propositions to current indexed products until an authorized
+  publish/readback occurs. Registry `AUTO_OK` and `NEED_REVIEW` are extraction
+  states, not approval to claim a benefit; this PR does not infer selling
+  points from material names or publish to the live index.
 - No conversion evidence, blind holdout, real customer smoke, or POS receipt
   was observed. The current candidate is **not ready for customer smoke**.
