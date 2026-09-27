@@ -72,18 +72,31 @@ the raw responder output and frozen expected behavior:
 | Cases | Observed boundary | Current judgment |
 | --- | --- | --- |
 | Q017 | Responder draft schema/validation | Conditional 690k offer was expressed safely but no final reply was realized; inspect draft rule. |
-| Q026 | Current-cart promotion with two products | Guard rejected the verified 100.000đ cart adjustment; inspect cart binding and policy scope. |
-| Q034, Q035, Q036 | Fit wording/guard | Alternative or uncertainty was blocked; retain unsupported fit claims as negative controls. |
-| Q043 | Variant stock mapping/guard | Cautious exact-variant uncertainty was blocked; authoritative color/size label mapping is still required. |
-| Q063 | ETA deadline wording/guard | “Có thể kịp” needs a bounded temporal rule; a 2–4 day range must not become a delivery promise. |
+| Q026 | Current-cart promotion with two products | Replayed `UNAUTHORIZED_PROMOTION` despite a selected 100.000đ cart adjustment. Check that the selected cart claim, current revision and authorization are bound through the final guard. |
+| Q034, Q035, Q036 | Fit wording/guard | All replay as `SIZE_RECOMMENDATION_UNDECLARED`. Q034 includes a positive alternative; Q035 is uncertainty about XL; Q036 mixes verified M advice with an unverified waist-fit limitation. Each needs a two-sided guard test. |
+| Q043 | Variant stock mapping/guard | Cautious exact-variant stock uncertainty replayed as `SIZE_RECOMMENDATION_UNDECLARED`; no authoritative color/size stock mapping was provided. Do not convert missing mapping to out of stock. |
+| Q063 | ETA deadline wording/guard | Replayed `UNAUTHORIZED_ETA`. “Có thể kịp” needs a bounded temporal rule; a 2–4 day range must not become a delivery promise. |
 | Q081 | Derived comparison | Two price claims do not authorize an unbound “rẻ hơn” statement; code must derive and bind the ordering. |
-| Q086 | Split-size selection | Model chose S/M from body shape without verified size evidence; rejection protects a real invariant. |
-| Q096 | Variant edit/effect receipt | Acknowledging a conversational change collided with the size advice guard; no persisted mutation was proven in this fixture. |
-| Q100 | Checkout completeness/effect receipt | Details in history did not provide an authorized order effect; the model must not imply completion. |
+| Q086 | Split-size question and fit wording | The customer explicitly requested top S and bottom M. The model did not choose those sizes. The responder's "Vì thân trên chị nhỏ hơn phần dưới" implies that these choices suit her body without verified fit evidence; the separate split-size policy claim is available. The replayed `SIZE_RECOMMENDATION_UNDECLARED` reason does not isolate which clause triggered it. |
+| Q096 | Variant edit/effect receipt | Replayed `SIZE_RECOMMENDATION_UNDECLARED` for acknowledging a conversational change; no persisted mutation was proven in this fixture. |
+| Q100 | Checkout completeness and final guard | The raw reply says it cannot finalize the order or process payment; it does not claim an order was created. It does assert that contact and address details are sufficient, though the visible history only contains the customer's statement that they were sent above. Replayed guard reason: `SIZE_RECOMMENDATION_UNDECLARED`, apparently triggered by the mention of the customer's previously chosen size M; the unverified completeness assertion is a separate concern. |
+
+An offline replay of the archived raw strategist/responder outputs against the
+unchanged C3 compiler and guard recovered the reason suffix that the DEV70
+recorder had truncated. It made no provider call or state mutation. The precise
+reasons were: Q026 `UNAUTHORIZED_PROMOTION`; Q034, Q035, Q036, Q043, Q086,
+Q096 and Q100 `SIZE_RECOMMENDATION_UNDECLARED`; Q063 `UNAUTHORIZED_ETA`.
+Q017 failed draft validation and Q081 failed unbound factual text before that
+guard. These are **detector reasons**, not proof that the whole rejected sentence
+was unsafe. Q100 is a size-detector collision with a reported prior selection;
+Q043 is a size-detector collision with cautious stock uncertainty. Q086 still
+contains an unsupported body-to-fit implication even though the size labels
+were supplied by the customer. The replay does not identify which individual
+clause triggered a detector when a segment contains several clauses.
 
 This table is a triage, not an assertion that every rejected answer should be
-allowed. In particular Q086 and any Q100 order-completion claim must remain
-blocked. The 57 completed cases also need rubric review: the first-contact
+allowed. Unsupported fit inference in Q086 and any actual order-completion claim
+must remain blocked; Q100's raw reply contains no such completion claim. The 57 completed cases also need rubric review: the first-contact
 price form was preserved in Q001–Q003, but Q013–Q016 and the runtime price
 objection demonstrate that execution success alone does not create sales
 progression.
@@ -132,3 +145,75 @@ runtime entrypoint decisions.
   points from material names or publish to the live index.
 - No conversion evidence, blind holdout, real customer smoke, or POS receipt
   was observed. The current candidate is **not ready for customer smoke**.
+
+## Continuation on executable source c782e90 (2026-09-27)
+
+Executable source and the C3 spec were committed at
+`c782e905e47277ee8f2ae939e47023a3fd8c9663` after the following local checks. Later evidence-only edits do not
+change that source. The branch still inherits PR371 and PR375; PR376 stays
+draft against `codex/c3-runtime-canonical-integration`.
+
+- The opt-in RealtimeRunner harness now calls GPT-6 Luna for the initial
+  `RealtimeModelPort.generate()` and `groundWithFacts()` stages, using the
+  production prompt/schema adapters. It records these separately from C3
+  Strategist/Responder calls, plus full prompt/output files, state, commits,
+  guard fallback and sent-by-fake-transport replies. It does not use the old
+  regex `synthetic-baseline` proposal on called producer turns. The provider
+  identity adapter is test-only; the business, history, POS and send ports
+  remain in-memory fakes. The initial direct product-price turn still bypasses
+  this producer by existing runtime design, so this is not an early producer
+  for every routing decision.
+- The producer prompt/schema now bounds intent and stage labels and describes
+  first-cart purchase, quantity edit, variant choice and preview confirmation
+  separately. `variantIntent` is optional in persisted contract data but
+  required in new Vertex generations. A validated `CHANGE` narrows an edit
+  already authorized by the existing deterministic edit phrase boundary;
+  `QUESTION`/`COMMENT` suppress a false edit. The new type does not by itself
+  authorize a mutation or solve all alternative phrasings. A first-cart
+  `SET_QUANTITY` model label is rescoped to `OPEN_CART` only with independent
+  deterministic commitment and no open cart.
+- A C3 Responder may omit a trailing factual realization: the compiler fills
+  it from the selected, verified sentence. Any model-supplied sentence still
+  has to match its positional fact. This resolved the observed current-cart
+  shipping fallback in the local replay, without relaxing factual authority.
+- An isolated source-path test runs a registry row through profile producer,
+  approved Qdrant job payload, JSON readback, stable product adapter,
+  ProductFacts V2 and C3 selectable evidence. It proves transport and
+  authority preservation for one synthetic SQ149 fixture, not current live
+  coverage or an actual Qdrant write/read. `UNKNOWN` wrinkle resistance does
+  not become a wrinkle or value claim. The historical 0/107 indexed figure
+  remains a 25/09 observation, not a new measurement.
+
+The raw local probes before the final commit remain separate from final-source
+acceptance. `LUNA_C3_FULL_INTENT_CART_R4_20260927/runtime-smoke-artifacts.json`
+(SHA-256 `4215EEA7A4FEB11C0FE0226D8686C6BFEA61D7B5208B1FAF975C9908F18C4AB9`)
+reached internal `PURCHASE_CONFIRMED`, but 3 of 6 producer calls failed schema
+validation and the shipping turn fell back despite a verified 30.000đ fee.
+`LUNA_C3_FULL_INTENT_CART_R5_20260927/runtime-smoke-artifacts.json`
+(SHA-256 `AD75379665A60B3BDF7A765BFE053D216ED02641F32EACBFF27C7A252FA120A0`)
+showed valid producer calls for purchase, variant edit and shipping inquiry;
+the shipping answer used the verified 30.000đ fee with C3 selected. Its later
+Strategist and producer calls failed because the Codex CLI returned a usage
+limit, so the strengthened harness correctly failed. Both archives label
+their pre-commit HEAD as `bf80d205` and include source-file fingerprints for
+their actual uncommitted test snapshots. Neither is evidence on `c782e90`.
+The earlier two-turn budget probe also had a weak `KEEP_OPEN` reply that did
+not resolve the price objection.
+
+On source `c782e90`: worker 1,795 tests passed and one opt-in test skipped;
+business tools 379 tests passed; contracts focused tests 10 passed; worker
+typecheck and `git diff --check` passed. No DEV70 Luna rerun, rubric judge,
+full-intent run on this exact source, DRY_RUN server candidate check, live
+catalog/index readback, POS order or customer send has been completed. The
+provider usage limit is a current obstacle for Luna evaluation only; it does
+not close the independent implementation items below. There is no new quality
+score. `COMPLETED_NOT_JUDGED` remains unscored, and reaching an internal
+purchase stage in a scripted journey is not conversion evidence.
+
+Current acceptance judgment: the tested cart/variant kernel boundaries are
+correct for their covered cases; sales dialogue quality has not passed the
+frozen rubric; this candidate is **not ready for customer smoke**. The early
+semantic producer/consumer convergence, broader variant phrasing authority,
+handoff/post-sale and preference timing, search/comparison, resilient
+fallback, long-history journeys, two-sided free-prose guard review and exact
+source Luna DEV70 remain open. No live write, deployment or merge occurred.

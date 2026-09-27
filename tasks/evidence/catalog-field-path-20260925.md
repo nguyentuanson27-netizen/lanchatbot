@@ -21,6 +21,13 @@ checks all populated field projections and missing-field omission. The C3
 runner tests bind selected projections to their content hashes and final
 egress. These are source-path checks, not a measurement of live data coverage.
 
+At executable source `c782e90`, an additional isolated test serializes one
+approved SQ149 job payload and reads it through the stable product adapter,
+ProductFacts V2 and C3 selectable evidence. Registry-owned material remains
+claimable; an `UNKNOWN` wear property stays absent. This completes an in-memory
+producer/payload/readback chain for that fixture. It does not exercise a
+Qdrant server or refresh the 25/09 live-index denominator below.
+
 ## Read-only source coverage on the supplied VPS
 
 At 2026-09-25 10:08–10:13 UTC, the owner-supplied VPS was inspected without

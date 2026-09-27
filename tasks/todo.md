@@ -6,6 +6,8 @@ Các task P là việc còn phải thực hiện theo kế hoạch mới; checkb
 
 Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. Implementation candidate `c2b22d3` và bằng chứng [ở đây](evidence/c3-sales-implementation-20260927.md) mới đóng các lát current-cart/checkout/C3 cart opening; các checkbox P còn để mở cho đến khi đủ nghiệm thu toàn mục.
 
+Tiếp tục ở executable source `c782e90`: harness đã gọi Luna ở producer khi runtime gọi model; đã thêm typed `variantIntent`, phân biệt hỏi/đổi trong nhánh sửa giỏ hiện hành, sửa fallback C3 bỏ sót fact cuối và kiểm tra một đường registry→payload→readback→C3 cách ly. Đây là các lát kiểm chứng, chưa đóng P02/P05/P06/P11: Luna hết hạn mức trong hành trình cuối, chưa có DEV70/rubric trên source này, chưa có producer trước các quyết định routing đầu tiên hay readback index thật. Chi tiết và hash artifact ở [evidence](evidence/c3-sales-implementation-20260927.md).
+
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
 ## Chuẩn bị đã làm trong lượt lập kế hoạch
