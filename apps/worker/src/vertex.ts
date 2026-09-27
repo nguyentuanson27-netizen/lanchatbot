@@ -656,6 +656,7 @@ export const SHADOW_SYSTEM_INSTRUCTION = [
   "Doi size/mau cua dong da co trong gio la sua lua chon variant, khong phai cam ket mua moi: dien buyingIntent.decision=NONE va requestedAction=NONE, trich size/mau khach chon vao businessFactQuery. Xac nhan ban xem truoc don dung purchaseConfirmation=CONFIRM, buyingIntent.decision=NONE va requestedAction=NONE; khong xem 'ok' la yeu cau mo gio moi.",
   "variantIntent chi phan loai LUA CHON size/mau trong tin khach moi nhat: CHANGE khi khach yeu cau doi lua chon dang co, SELECT khi chon cho lan dau, QUESTION khi chi hoi, COMMENT khi chi nhan xet, NONE neu khong co. size/color la gia tri khach CHON hoac DOI, khong lay size/mau chi duoc hoi hoac nhan xet. evidenceText la doan nguyen van chua lua chon/doi; neu NONE thi size/color/evidenceText deu null. Cau 'chon M nhung S con khong' co variantIntent.size=M va businessFactQuery.size=S.",
   "routingIntent phan loai tin CUSTOMER moi nhat: POST_SALE neu hoi ve don cu/hang da nhan, HUMAN_REQUEST neu yeu cau nguoi tu van, PRE_SALE neu dang sua gio chua chot hoac tu van truoc mua; khong ro thi UNKNOWN. Tu choi nhan vien cu nhung doi gap nhan vien khac van la HUMAN_REQUEST. Gio dang mo khong che yeu cau hoan tien cho hang da nhan. evidenceText la menh de nguyen van quyet dinh routing; UNKNOWN thi null.",
+  "sessionIntent chi trich THAY DOI trong tin CUSTOMER moi nhat, khong lap lai lich su: budget SET khi khach noi muc tien ro (amountVnd la so dong dung voi menh de), CLEAR khi bo gioi han, khac thi KEEP; occasion SET/CLEAR cho di lam, di tiec, hang ngay, khac thi KEEP. productDecisions chi gom ma san pham khach ro rang BO/KHONG LAY/LOAI hoac LAY LAI/CHON LAI; 'Bo LN123' la bo quan ao, khong phai bo san pham. Moi thay doi can evidenceText nguyen van va confidence; KEEP de gia tri/evidenceText null. Khong tu suy ngan sach tu nhan xet 'gia cao'.",
   "quantity chi dien khi khach noi ro so luong tu 1 den 20; khong ro thi null. Moi buyingIntent khac NONE phai co evidenceText nguyen van trong tin customer moi nhat.",
   "Model chi cung cap evidence buyingIntent; app va guard deterministic moi duoc quyet dinh mo gio hay tao side effect.",
   "protectedClaimIds chi duoc chua ID claim da tin cay; o buoc semantic khong co claim Size Engine nao, nen bat buoc de mang rong.",
@@ -878,7 +879,7 @@ export const AGENT_RESPONSE_SCHEMA = {
     },
     salesSignals: {
       type: "OBJECT",
-      required: ["checkoutExtraction", "purchaseConfirmation", "buyingIntent", "variantIntent", "routingIntent"],
+      required: ["checkoutExtraction", "purchaseConfirmation", "buyingIntent", "variantIntent", "routingIntent", "sessionIntent"],
       properties: {
         checkoutExtraction: {
           type: "OBJECT",
@@ -963,6 +964,41 @@ export const AGENT_RESPONSE_SCHEMA = {
             act: { type: "STRING", enum: ["PRE_SALE", "POST_SALE", "HUMAN_REQUEST", "UNKNOWN"] },
             evidenceText: { type: "STRING", nullable: true },
             confidence: { type: "NUMBER" },
+          },
+        },
+        sessionIntent: {
+          type: "OBJECT",
+          required: ["budget", "occasion", "productDecisions"],
+          properties: {
+            budget: {
+              type: "OBJECT", required: ["operation", "amountVnd", "evidenceText", "confidence"],
+              properties: {
+                operation: { type: "STRING", enum: ["KEEP", "SET", "CLEAR"] },
+                amountVnd: { type: "NUMBER", nullable: true },
+                evidenceText: { type: "STRING", nullable: true },
+                confidence: { type: "NUMBER" },
+              },
+            },
+            occasion: {
+              type: "OBJECT", required: ["operation", "value", "evidenceText", "confidence"],
+              properties: {
+                operation: { type: "STRING", enum: ["KEEP", "SET", "CLEAR"] },
+                value: { type: "STRING", enum: ["WORK", "PARTY", "EVERYDAY"], nullable: true },
+                evidenceText: { type: "STRING", nullable: true },
+                confidence: { type: "NUMBER" },
+              },
+            },
+            productDecisions: {
+              type: "ARRAY", items: {
+                type: "OBJECT", required: ["operation", "productId", "evidenceText", "confidence"],
+                properties: {
+                  operation: { type: "STRING", enum: ["REJECT", "RESTORE"] },
+                  productId: { type: "STRING" },
+                  evidenceText: { type: "STRING" },
+                  confidence: { type: "NUMBER" },
+                },
+              },
+            },
           },
         },
       },

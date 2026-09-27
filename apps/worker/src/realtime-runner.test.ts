@@ -3341,7 +3341,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3832,6 +3832,42 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+    if (checkoutOwner === "EARLY_REJECT_CURRENT") {
+      const text = "Không lấy CB182 nữa.";
+      const rejection = item(40, text);
+      currentBatch = { ...batch, generation: 11, inboxIds: [rejection.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [rejection] };
+      const sourceModel = replyModel();
+      vi.mocked(baseModel.generate).mockImplementationOnce(async (...args) => {
+        const generated = await sourceModel.generate(...args);
+        return { ...generated, proposal: { ...generated.proposal,
+          salesSignals: {
+            checkoutExtraction: {
+              fullName: { value: null, evidenceText: null, confidence: 0 },
+              phone: { value: null, evidenceText: null, confidence: 0 },
+              address: { value: null, evidenceText: null, confidence: 0 },
+              paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+            },
+            purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null,
+              confidence: 0 },
+            sessionIntent: {
+              budget: { operation: "KEEP", amountVnd: null,
+                evidenceText: null, confidence: 0 },
+              occasion: { operation: "KEEP", value: null,
+                evidenceText: null, confidence: 0 },
+              productDecisions: [{ operation: "REJECT", productId: "CB182",
+                evidenceText: "Không lấy CB182", confidence: 0.99 }],
+            },
+          },
+        } };
+      });
+      vi.setSystemTime(rejection.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(persistedState.sessionDecisionContext?.rejectedProductIds)
+        .toContain("CB182");
+      expect(persistedState.currentProductId).toBeNull();
+      return;
+    }
 
     if (checkoutOwner === "LONG_HISTORY") {
       const body = JSON.parse(c3Send.mock.calls[0]![0].body);
@@ -4055,6 +4091,61 @@ describe("RealtimeRunner inbound batching", () => {
     });
     expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
     expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
+    if (checkoutOwner === "EARLY_SESSION") {
+      const text = "Ngân sách tối đa 700k, chị mặc đi làm. Không lấy SV9031 nữa.";
+      const sessionEntry = item(43, text);
+      currentBatch = { ...batch, generation: 13,
+        inboxIds: [sessionEntry.inboxId], firstReceiveSequence: 43,
+        lastReceiveSequence: 43, items: [sessionEntry] };
+      const sourceModel = replyModel();
+      vi.mocked(baseModel.generate).mockImplementationOnce(async (...args) => {
+        const generated = await sourceModel.generate(...args);
+        return { ...generated, proposal: { ...generated.proposal,
+          salesSignals: {
+            checkoutExtraction: {
+              fullName: { value: null, evidenceText: null, confidence: 0 },
+              phone: { value: null, evidenceText: null, confidence: 0 },
+              address: { value: null, evidenceText: null, confidence: 0 },
+              paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+            },
+            purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null,
+              confidence: 0 },
+            sessionIntent: {
+              budget: { operation: "SET", amountVnd: 700_000,
+                evidenceText: "Ngân sách tối đa 700k", confidence: 0.99 },
+              occasion: { operation: "SET", value: "WORK",
+                evidenceText: "mặc đi làm", confidence: 0.99 },
+              productDecisions: [{ operation: "REJECT", productId: "SV9031",
+                evidenceText: "Không lấy SV9031", confidence: 0.99 }],
+            },
+          },
+        } };
+      });
+      const beforeProducer = vi.mocked(baseModel.generate).mock.calls.length;
+      const beforeQuota = quotaReserve.mock.calls.length;
+      const beforeC3 = c3Send.mock.calls.length;
+      vi.setSystemTime(sessionEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(vi.mocked(baseModel.generate).mock.calls.length - beforeProducer).toBe(1);
+      expect(quotaReserve.mock.calls.length - beforeQuota).toBe(1);
+      expect(persistedState.sessionDecisionContext).toEqual({
+        budgetVnd: 700_000, occasion: "WORK", rejectedProductIds: ["SV9031"],
+      });
+      expect(persistedState.currentProductId).toBe("CB182");
+      expect(c3Send.mock.calls.length - beforeC3).toBe(2);
+      const strategistRequest = JSON.parse(c3Send.mock.calls[beforeC3]![0].body);
+      const strategistInput = JSON.parse(strategistRequest.contents[0].parts[0].text);
+      expect(JSON.parse(strategistInput.dialogue[0].text)).toEqual({
+        type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
+        budgetCustomerReported: "700k", occasion: "WORK",
+        rejectedProductIds: ["SV9031"],
+      });
+      expect(strategistInput.dialogue.at(-1).text).toBe(text);
+      expect(strategistInput.selectableEvidence.map(
+        (entry: { subject?: { productId?: string } }) => entry.subject?.productId,
+      )).not.toContain("SV9031");
+      return;
+    }
     if (checkoutOwner.startsWith("EARLY_")) {
       const text = checkoutOwner === "EARLY_ROUTE"
         ? "Đơn cũ chị nhận hôm qua bị lỗi, giỏ mới cứ để đó nhé."

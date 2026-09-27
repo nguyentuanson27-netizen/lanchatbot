@@ -335,6 +335,39 @@ export const AgentVariantIntentV1Schema = z.object({
 });
 export type AgentVariantIntentV1 = z.infer<typeof AgentVariantIntentV1Schema>;
 
+export const AgentSessionIntentV1Schema = z.object({
+  budget: z.object({
+    operation: z.enum(["KEEP", "SET", "CLEAR"]),
+    amountVnd: z.number().int().min(100_000).max(100_000_000).nullable(),
+    evidenceText: z.string().trim().min(1).max(500).nullable(),
+    confidence: z.number().min(0).max(1),
+  }).strict(),
+  occasion: z.object({
+    operation: z.enum(["KEEP", "SET", "CLEAR"]),
+    value: z.enum(["WORK", "PARTY", "EVERYDAY"]).nullable(),
+    evidenceText: z.string().trim().min(1).max(500).nullable(),
+    confidence: z.number().min(0).max(1),
+  }).strict(),
+  productDecisions: z.array(z.object({
+    operation: z.enum(["REJECT", "RESTORE"]),
+    productId: z.string().trim().min(1).max(128),
+    evidenceText: z.string().trim().min(1).max(500),
+    confidence: z.number().min(0).max(1),
+  }).strict()).max(8),
+}).strict().superRefine((signal, context) => {
+  for (const key of ["budget", "occasion"] as const) {
+    const item = signal[key];
+    const value = key === "budget" ? signal.budget.amountVnd : signal.occasion.value;
+    if ((item.operation === "KEEP" && (value !== null || item.evidenceText !== null)) ||
+        (item.operation === "SET" && (value === null || item.evidenceText === null)) ||
+        (item.operation === "CLEAR" && (value !== null || item.evidenceText === null))) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: [key],
+        message: "session operation value/evidence mismatch" });
+    }
+  }
+});
+export type AgentSessionIntentV1 = z.infer<typeof AgentSessionIntentV1Schema>;
+
 export const AgentSalesSignalsV1Schema = z.object({
   checkoutExtraction: z.object({
     fullName: AgentExtractedTextFieldV1Schema,
@@ -364,6 +397,7 @@ export const AgentSalesSignalsV1Schema = z.object({
         message: "known routing intent requires evidence; unknown has none" });
     }
   }).optional(),
+  sessionIntent: AgentSessionIntentV1Schema.optional(),
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 

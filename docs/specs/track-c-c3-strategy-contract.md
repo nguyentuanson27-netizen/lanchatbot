@@ -1307,6 +1307,25 @@ deterministic safety handoff. The conversation engine still owns the handoff
 and subsequent no-call HUMAN state. These source checks are authority guards
 for the model result, not a second classifier of the full conversation.
 
-This is a bounded first transfer. Other early routing paths, same-turn
-budget/preference/rejection context and product-resolution decisions still
-use their prior consumers and need P06 work and runtime Luna verification.
+This is a bounded first transfer. A later P06 slice extends the same preflight
+and reused producer to C3 plain-text turns without an open cart. The model
+cannot create a post-sale handoff from a label alone: its exact evidence clause
+must also pass the existing after-sales boundary or name an earlier order or
+received item. Standalone product codes, media, customer URLs and pre-sale
+policy replies keep their existing paths.
+
+New producer generations include `sessionIntent`; persisted proposals may omit
+it. Budget, occasion and rejected product changes use exact spans from the
+latest customer text, confidence and narrow value/negation checks before the
+session projection changes. A numeric price objection alone does not set a
+budget, and the word “bộ” does not reject a product. On an ordinary C3 text
+turn, this validated projection is available to product resolution and the
+Strategist in the same turn. A newly rejected product cannot be rebound from
+its code in that message; outside an open cart, rejecting the current product
+also clears that conversation binding. Cart lines and preview remain under
+the commerce kernel, so this context update does not delete a cart item.
+
+Legacy proposals without `sessionIntent` keep the earlier bounded format
+updater. Color/style preferences, broader search over alternatives, and
+semantic cart-line removal still require P06/P08 work and runtime Luna
+verification on exact executable source.

@@ -345,12 +345,12 @@ describe("Vertex shadow client", () => {
 
     // d9de77f baseline remains pinned for unchanged methods. The three
     // Proposal requests include customer-clause payment selection and typed
-    // routing; the shared schema changes the grounded and repair envelopes.
+    // routing/session updates; shared fields change grounded/repair envelopes.
     expect(observed).toEqual({
-      generate: "621df612cfcb418feb8ea3076aa57cac4d641718b389b443ae2b971056c36fcf",
-      groundWithFacts: "cdd08bfb46d6761a7dfe9151b09af9fc93fe832112403e25917f8e5279cff7ec",
+      generate: "213f88f4962d91627fe8d2c91bc1991e8470bfb8a3475430d8d0fdfd289a35f8",
+      groundWithFacts: "0d31e4973d62847630cbbbb7d14ffd35b4d47ab7eea6091817984d4975fad108",
       groundDraftWithFacts: "63a94583c26f4f31997a89daac606b2d311ded592f3449d3210527d670ed3072",
-      repairSizeClaimDraft: "327820234030e9221aadd7ff5b08ec740dbd5741f44f043278fba01f319d8601",
+      repairSizeClaimDraft: "a41291c8de6e5b35e9191f11165e387a50cad5d1930046d6992b4c8f6498c947",
       draftMultiProductClarification: "eed16e8dbd463ba7564580609b7ebba2aa151ce84210ed19d21465aa64c420de",
       draftCustomerUrlExplanation: "98535ebb6169c3720559436265593250cc0228d7fdbb62efa9662f2061db80e4",
       judgeSalesReply: "be94a69e7f31146e95a51c0e70054837f1609b78cecba20f39f5324757747f68",

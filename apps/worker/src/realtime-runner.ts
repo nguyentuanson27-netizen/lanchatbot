@@ -165,6 +165,7 @@ import { buildRealtimeC3Input } from "./realtime-c3-input.js";
 import {
   hasSessionDecisionContext,
   updateSessionDecisionContext,
+  updateSessionDecisionContextFromModel,
 } from "./realtime-session-decision-context.js";
 import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
@@ -588,7 +589,8 @@ function validatedCustomerRouting(
       !text.normalize("NFC").includes(intent.evidenceText.normalize("NFC"))) {
     return null;
   }
-  if (intent.act === "POST_SALE" && hasOpenCart &&
+  if (intent.act === "POST_SALE" &&
+      !isPostSaleRequest(intent.evidenceText, hasOpenCart) &&
       !/\b(?:don cu|don truoc|don da|hang da nhan|da nhan|moi nhan|nhan hom qua|giao roi|da giao|van don)\b/u
         .test(asciiFold(intent.evidenceText))) return null;
   if (intent.act === "HUMAN_REQUEST" &&
@@ -3225,21 +3227,20 @@ export class RealtimeRunner {
       );
       return batchCommitStatus(result);
     }
-    // On the transferred open-cart branch, use the existing producer before
-    // post-sale routing and product resolution. The pure conversation-engine
+    // On plain-text C3 turns, use the existing producer before post-sale
+    // routing and product resolution. The pure conversation-engine
     // preflight applies the observed tag and HUMAN lease first, so a human-
     // owned turn never reaches the model. The generated proposal is reused
     // later in this turn; there is no second producer call.
-    const earlyCartInput = this.options.c3 !== null && !message.isEcho &&
-      (salesCycleRecord?.state.stage === "CART_OPEN" ||
-        salesCycleRecord?.state.stage === "ORDER_PREVIEW") &&
+    const hasOpenCartForTurn = salesCycleRecord?.state.stage === "CART_OPEN" ||
+      salesCycleRecord?.state.stage === "ORDER_PREVIEW";
+    const earlySemanticInput = this.options.c3 !== null && !message.isEcho &&
       message.attachments.length === 0 && !message.adsContext &&
       !mediaInputLimitExceeded && preSalePolicyIntent === null &&
       customerUrlDecision.disposition === "CONTINUE" &&
       customerUrlDecision.items.length === 0 &&
-      !hasExplicitProductReference(message.text ?? "") &&
-      explicitCustomerBusinessIntent(message.text ?? "") !== "PRICE";
-    const earlyPreflight = earlyCartInput ? applyInboundEvent({
+      productCodeOnly(message.text ?? "") === null;
+    const earlyPreflight = earlySemanticInput ? applyInboundEvent({
       state: authorityState,
       expectedRevision: authorityState.revision,
       fence: Math.max(authorityState.lastFence + 1, batch.lastReceiveSequence),
@@ -3271,8 +3272,33 @@ export class RealtimeRunner {
       }
     }
     const earlyRouting = earlyInitial === null ? null : validatedCustomerRouting(
-      message.text ?? "", earlyInitial.proposal.salesSignals, true,
+      message.text ?? "", earlyInitial.proposal.salesSignals, hasOpenCartForTurn,
     );
+    const earlySessionIntent = earlyInitial?.proposal.salesSignals?.sessionIntent;
+    const sameTurnSession = earlySessionIntent
+      ? updateSessionDecisionContextFromModel(
+          authorityState.sessionDecisionContext, message.text ?? "", earlySessionIntent,
+        ) : null;
+    const newlyRejectedProductIds = new Set(
+      sameTurnSession?.rejectedProductIds.filter((productId) =>
+        !authorityState.sessionDecisionContext?.rejectedProductIds.includes(productId)
+      ) ?? [],
+    );
+    const sessionState = sameTurnSession &&
+        (authorityState.sessionDecisionContext !== undefined ||
+          hasSessionDecisionContext(sameTurnSession))
+      ? { ...authorityState, sessionDecisionContext: sameTurnSession }
+      : authorityState;
+    const semanticState = !hasOpenCartForTurn &&
+        sessionState.currentProductId !== null &&
+        newlyRejectedProductIds.has(sessionState.currentProductId)
+      ? { ...sessionState, currentProductId: null }
+      : sessionState;
+    if (sameTurnSession && modelContext[0]) {
+      modelContext[0] = { ...modelContext[0], text: JSON.stringify({
+        ...authorityModelState, customerSessionContext: semanticState.sessionDecisionContext ?? null,
+      }) };
+    }
     const mediaPartialResolutionPolicy =
       activeMediaPartialResolutionPolicy(policyResolution);
     let customerUrlDisposition: CustomerUrlDisposition = customerUrlDecision.disposition;
@@ -3322,7 +3348,7 @@ export class RealtimeRunner {
           residualCustomerUrlResolution ?? this.emptyResolution(),
         )
       : null;
-    const resolution = mediaInputLimitExceeded || message.isEcho ||
+    const rawResolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
         (earlyRouting === "POST_SALE" || earlyRouting === "HUMAN_REQUEST" ||
@@ -3333,10 +3359,22 @@ export class RealtimeRunner {
       ? this.emptyResolution()
       : combinedCustomerUrlResolution ?? await this.resolveProducts(
           message,
-          authorityState,
+          semanticState,
           claim.pageId,
           mediaPartialResolutionPolicy,
         );
+    // A newly rejected code may still be found by exact lookup in this same
+    // message. Do not promote it back into the current-product binding.
+    const remainingProducts = rawResolution.products.filter((product) =>
+      !newlyRejectedProductIds.has(product.productId));
+    const resolution = remainingProducts.length === rawResolution.products.length
+      ? rawResolution
+      : remainingProducts.length === 0
+        ? this.emptyResolution()
+        : { ...rawResolution, primary: remainingProducts[0] ?? null,
+            products: remainingProducts,
+            references: rawResolution.references.filter(({ product }) =>
+              product === null || !newlyRejectedProductIds.has(product.productId)) };
     const multiFactQueries =
       this.options.multiFactQueryEnabled && !message.isEcho
         ? buildBusinessFactQueries(
@@ -3408,9 +3446,9 @@ export class RealtimeRunner {
       earlyRouting,
     );
     const applied = applyInboundEvent({
-      state: authorityState,
-      expectedRevision: authorityState.revision,
-      fence: Math.max(authorityState.lastFence + 1, batch.lastReceiveSequence),
+      state: semanticState,
+      expectedRevision: semanticState.revision,
+      fence: Math.max(semanticState.lastFence + 1, batch.lastReceiveSequence),
       event,
       tagObservation: observation,
       now,
@@ -3418,7 +3456,7 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
-    if (!message.isEcho && event.actor === "CUSTOMER") {
+    if (!message.isEcho && event.actor === "CUSTOMER" && !earlySessionIntent) {
       const session = updateSessionDecisionContext(
         nextState.sessionDecisionContext, message.text ?? "",
       );
