@@ -75,7 +75,7 @@ const STRATEGIST_INSTRUCTION = [
   "When a customer has already provided a preference, budget, measurement, concern, or correction, make the current goal reflect that known context. Do not reset the conversation with a generic ACKNOWLEDGE or ask for a known input; if a relevant question remains, answer it under the updated binding. Select evidence for the decision the customer actually faces, not merely the most available claim.",
   "When the customer states a delivery deadline or cutoff and verified ETA evidence is available, treat deadline feasibility as the current decision. Use the verified ETA evidence; an estimate alone proves neither guaranteed arrival nor impossibility of meeting a deadline. Do not invent expedited shipping. Do not open unrelated discovery once that decision is resolved.",
   "A request to see a product, compare alternatives, or complete a purchase remains a request even when the available evidence cannot realize it. Do not turn it into a bare acknowledgement. Select the matching capability when it exists but cannot be stated, so code can report the limit; for a compound question, answer the supported part and identify the unanswered part in goal. Never claim an image was sent, an alternative exists, or a transaction happened without its own authority.",
-  "A known budget below the shop price is an established gap. Look for approved evidence relevant to why this customer is hesitant, including prior reported experience. Without that evidence or an available alternative, another budget-versus-product question cannot resolve the gap: do not imply an alternative exists or a concession is possible. A conditional offer to buy at a lower price is not commitment at the shop price.",
+  "A feeling that the price is high is not a known budget amount. If no amount was given and it would determine the next recommendation or search, ask for the customer's target budget without claiming another product or concession exists. A stated numeric budget below the shop price is an established gap: do not ask for that amount again. Look for approved evidence relevant to the hesitation, including prior reported experience. Without that evidence or an available alternative, do not imply an alternative exists or a concession is possible. A conditional offer to buy at a lower price is not commitment at the shop price.",
   "BUDGET asks for an amount only when missing and needed for an executable recommendation. A known amount needs no repeat question. Do not repeat an unchanged price unless the latest turn asks to confirm it. If the current verified price differs and matters, state the current price without treating the old one as authority.",
   "For a question with several requested parts, when any part has relevant realizable evidence, set proposition to one supported part and select evidence for every supported part. Name the unsupported requested parts in goal so the Responder preserves the limit alongside the supported facts. Use an unsupported proposition with empty evidenceRefs only when no requested part has relevant realizable evidence. This applies to any compound request, including availability plus an alternative; do not turn the entire turn into uncertainty when one part is verified.",
   "Missing evidence is not negative evidence. A proposition may be unresolved with no evidenceRefs. Never invent a fact, discount, availability, policy, effect, PII, or external action.",
@@ -1338,7 +1338,7 @@ async function runTrackCStrategyContractCore(
   }
   let output: ContextV2CandidateOutputV2;
   try {
-    output = compileResponderDraft({
+    const compilationInput = {
       context,
       dialogue: input.evaluationContext,
       task,
@@ -1348,7 +1348,24 @@ async function runTrackCStrategyContractCore(
       evaluationAt: input.evaluationAt,
       currentCart: input.currentCart ?? null,
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
-    });
+    };
+    try {
+      output = compileResponderDraft(compilationInput);
+    } catch (error) {
+      // A free-form acknowledgement is optional when the selected verified
+      // facts answer the turn. Revalidate the entire output without that
+      // sentence so an unrelated effect claim cannot erase those facts.
+      // Any unsafe factual realization still fails the second validation.
+      if (draft.answerText === null || task.evidence.length === 0 ||
+          task.continuation?.type !== "KEEP_OPEN" ||
+          !(error instanceof Error) ||
+          !["TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN", "TRACK_C_V5_PRODUCTION_GUARD_FAILED"]
+            .includes(error.message)) throw error;
+      output = compileResponderDraft({
+        ...compilationInput,
+        draft: { ...draft, answerText: null },
+      });
+    }
   } catch (error) {
     throw stageFailure("FINAL_GUARD", responderPayload, error);
   }

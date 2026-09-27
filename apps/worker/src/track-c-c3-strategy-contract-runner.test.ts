@@ -1320,6 +1320,48 @@ describe("Track C C3 strategy-contract runner", () => {
     ]);
   });
 
+  it("keeps verified facts when optional acknowledgement claims an unverified cart effect", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Answer the current price question with the verified price.",
+          proposition: "PRICE",
+          evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Em đã đổi size L trong giỏ cho chị rồi ạ.",
+          factualTexts: [],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Giá mẫu này hiện bao nhiêu?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send },
+    });
+
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(result.output.segments).toEqual([expect.objectContaining({
+      kind: "VERIFIED_CLAIM", text: expect.stringContaining("849.000đ"),
+    })]);
+    expect(result.reply).not.toContain("đổi size");
+  });
+
   it("can acknowledge a customer's decision context without repeating an unrelated shop fact", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({

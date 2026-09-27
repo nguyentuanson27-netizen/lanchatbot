@@ -375,7 +375,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
           }),
           resolve: async () => ({ schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT", observedAt: baseAt.toISOString(),
             expiresAt: "2099-01-01T00:00:00.000Z", productId: "CB182", facts: { schemaVersion: 1, productId: "CB182",
-              parentProductId: "CB182", offerType: "SET", listPriceVnd: null, salePriceVnd: 799000, sizes: ["M"], stockStatus: "IN_STOCK",
+              parentProductId: "CB182", offerType: "SET", listPriceVnd: null, salePriceVnd: 799000, sizes: ["M", "L"], stockStatus: "IN_STOCK",
               stockQuantity: 2, deliveryEta: { minDays: 2, maxDays: 4 }, fulfillmentPolicy: "READY_STOCK", imageUrls: [] }, reasonCode: null }),
           resolveCartSelection: async (query: { quantity: number; lineId?: string; size?: string | null; deliveryAddress?: string | null }) => {
             // The provider resolves the requested selection. It must not
