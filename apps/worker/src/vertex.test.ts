@@ -344,10 +344,9 @@ describe("Vertex shadow client", () => {
     }
 
     // d9de77f baseline remains pinned for unchanged methods. The three
-    // Proposal-schema requests changed for typed variant intent and the
-    // optional strategy-analysis evidence list on routine checkout turns.
+    // Proposal requests also scope a payment choice to its own customer clause.
     expect(observed).toEqual({
-      generate: "9434eb3025e1078c5bb5c57e83a99f6afe242891a44d4aae263096ccd63279ac",
+      generate: "334a264c736488288a0ba67327f7a8171106af7b203f3cab212fb0cafd8d4e8f",
       groundWithFacts: "47e71576188a5dfa9b1651a3483fe029457fecf2de5f4b0a2d748bc15b61bd6e",
       groundDraftWithFacts: "63a94583c26f4f31997a89daac606b2d311ded592f3449d3210527d670ed3072",
       repairSizeClaimDraft: "b15a25768c86c587e8ceae34252426e9a75dca81b543fd2fc00daaa5da64376f",
@@ -364,6 +363,7 @@ describe("Vertex shadow client", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khong chuyen HANDOFF chi vi khach hoi gia");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Tuyet doi khong NO_REPLY");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("salesSignals chi trich");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("evidenceText chi lay menh de khach CHON COD");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("evidenceText");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khong dua ten, so dien thoai hay dia chi");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("buyingIntent.decision=COMMITTED");

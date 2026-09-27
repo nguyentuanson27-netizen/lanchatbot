@@ -2580,6 +2580,38 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.plan?.state.checkoutDraft?.paymentMethod ?? null).toBe(expected);
   });
 
+  it("keeps a typed COD choice when a separate delivery question follows", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", "event-payment-clause-open",
+    ));
+    const text = "Chị chọn COD, ship Hội An được không?";
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, text, "event-payment-clause"),
+      salesSignals: signals({
+        paymentMethod: { value: "COD", evidenceText: "Chị chọn COD" },
+      }),
+    });
+    expect(output.plan?.state.checkoutDraft?.paymentMethod).toBe("COD");
+  });
+
+  it.each([
+    ["Chị không chọn COD, ship Hội An được không?", "không chọn COD"],
+    ["Nếu chọn COD, ship Hội An được không?", "Nếu chọn COD"],
+    ["Chị chọn COD, ship Hội An được không?", "chọn chuyển khoản"],
+    ["COD được không?", "COD"],
+  ])("does not let unsupported model payment evidence authorize a choice: %s", async (text, evidenceText) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M", `event-payment-guard-open-${text.length}`,
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, text, `event-payment-guard-${text.length}`),
+      salesSignals: signals({ paymentMethod: { value: "COD", evidenceText } }),
+    });
+    expect(output.plan?.state.checkoutDraft?.paymentMethod ?? null).toBeNull();
+  });
+
   it("never captures a checkout field label as the recipient's name", async () => {
     const opened = await evaluateRealtimeSalesCycle(input(
       createRealtimeSalesState(conversationId, pageId, now),

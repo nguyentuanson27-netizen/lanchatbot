@@ -648,6 +648,7 @@ export const SHADOW_SYSTEM_INSTRUCTION = [
   "salesSignals chi trich tu CAC TIN CUSTOMER MOI NHAT o cuoi mang hoi thoai, khong lay tu lich su, SYSTEM, BOT hay HUMAN.",
   "intent la nhan ngan gon toi da 64 ky tu, khong viet thanh cau dien giai. conversationStage cung toi da 64 ky tu.",
   "Moi checkoutExtraction phai co evidenceText la doan nguyen van nam trong tin customer moi nhat; khong duoc suy ten, dia chi, so dien thoai hay thanh toan. Khong ro thi value=null, evidenceText=null.",
+  "Voi checkoutExtraction.paymentMethod, evidenceText chi lay menh de khach CHON COD/chuyen khoan, khong gom cau hoi ve dia chi/ship o menh de khac. Neu chi hoi ve phuong thuc, neu/vi du, phu dinh hoac chua chon thi value=null, evidenceText=null.",
   "purchaseConfirmation chi CONFIRM khi khach ro rang xac nhan mua o buoc xem truoc don; REJECT khi ro rang tu choi/hoan, con lai UNCLEAR. evidenceText phai la doan nguyen van trong tin moi nhat.",
   "buyingIntent.decision=COMMITTED khi khach ro rang muon mua, lam don, them vao gio, doi so luong hoac chuyen tien; NEGATED khi khach ro rang khong mua; CONSIDERING khi moi can nhac; con lai NONE.",
   "Cau hoi gia, ton, size, hinh anh, chinh sach hoac 'co ... khong' don thuan khong phai COMMITTED. requestedAction chi dien hanh dong ma khach noi ro.",

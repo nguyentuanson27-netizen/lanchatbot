@@ -581,6 +581,23 @@ function selectedPaymentMethod(text: string): "COD" | "BANK_TRANSFER" | undefine
   return undefined;
 }
 
+function selectedModelPaymentMethod(
+  text: string,
+  field: AgentSalesSignalsV1["checkoutExtraction"]["paymentMethod"] | undefined,
+): "COD" | "BANK_TRANSFER" | undefined {
+  if (!field || field.confidence < 0.85 || !field.value ||
+      !exactEvidence(text, field.evidenceText)) return undefined;
+  // The model scopes a choice to its clause. The existing conservative
+  // selector still has to independently accept that exact clause.
+  const scoped = field.evidenceText!;
+  const hasSelectionWords = /\b(?:chon|lay|thanh toan|tra)\b/u.test(asciiFold(scoped));
+  // Bare "COD" inside a question does not become a customer choice merely
+  // because the model selected that substring as evidence.
+  return (hasSelectionWords || selectedPaymentMethod(text) === field.value) &&
+      selectedPaymentMethod(scoped) === field.value
+    ? field.value : undefined;
+}
+
 function privateUnlabelledRecipient(text: string): Pick<CheckoutDetails, "fullName" | "address"> {
   const candidate = text.trim().match(
     /^([\p{L}][\p{L}\s]{1,79})\s+((?:\+?84|0)\d{8,10})\s+((?:\d{1,5}\s+)?[^\n]{8,300}?)\s*(?:ship\s+)?(?:cod|tiền mặt|tien mat|chuyển khoản|chuyen khoan)?\s*$/iu,
@@ -609,7 +626,9 @@ function checkoutDetails(
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
     modelCheckoutValue(text, extracted?.phone, "PHONE")
   );
-  const paymentMethod = selectedPaymentMethod(text);
+  const paymentMethod = selectedModelPaymentMethod(
+    text, extracted?.paymentMethod,
+  ) ?? selectedPaymentMethod(text);
   const fullName = ambiguousRecipient ? undefined : (
     labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]) ??
     localRecipient.fullName ??

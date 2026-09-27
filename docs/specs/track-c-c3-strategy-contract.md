@@ -531,7 +531,13 @@ For a current inbound checkout message, payment is a **selection** only when
 the customer chooses one supported method. Merely asking about bank transfer,
 mentioning it hypothetically, or rejecting it does not fill the field. If the
 customer rejects transfer and selects COD, the current selection is COD. The
-same current-message rule applies to recipient values: an evidence substring
+producer may scope a payment selection to one exact customer clause when a
+different clause asks a question (for example, selecting COD while asking about
+delivery). SalesCycle checks that the clause is present and independently
+expresses the selected method; a bare payment word inside a question is not
+a selection. Earlier proposals without this evidence retain the conservative
+local selection path. The same current-message rule applies to recipient
+values: an evidence substring
 must identify the actual value, not a nearby payment word. Clear unlabelled
 recipient input may be parsed locally inside the private SalesCycle boundary;
 ambiguous recipient roles remain missing. Neither the Strategist nor the
