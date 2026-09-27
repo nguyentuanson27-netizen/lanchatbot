@@ -839,7 +839,7 @@ export const AGENT_RESPONSE_SCHEMA = {
         confidence: { type: "NUMBER", minimum: 0, maximum: 1 },
         evidence: {
           type: "ARRAY",
-          minItems: 1,
+          minItems: 0,
           maxItems: 8,
           items: {
             type: "STRING",

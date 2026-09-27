@@ -172,7 +172,7 @@ describe("Track C C3 checkout reachability", () => {
     const action = result.output.segments.find(
       ({ kind }) => kind === "ACTION_REQUEST",
     );
-    expect(action?.text).toContain("hình thức thanh toán");
+    expect(action?.text).toContain("thanh toán COD hay chuyển khoản");
     expect(action?.text).not.toContain("họ tên");
   });
 

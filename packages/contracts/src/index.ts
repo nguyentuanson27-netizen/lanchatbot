@@ -405,7 +405,7 @@ export const AgentStrategyAnalysisV1Schema = z.object({
     "STATE_BUYING_SIGNAL",
     "STATE_MEASUREMENTS_PRESENT",
     "DETERMINISTIC_FALLBACK",
-  ])).min(1).max(8),
+  ])).max(8),
 }).strict();
 export type AgentStrategyAnalysisV1 = z.infer<
   typeof AgentStrategyAnalysisV1Schema

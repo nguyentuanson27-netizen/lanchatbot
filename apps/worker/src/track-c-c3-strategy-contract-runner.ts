@@ -719,8 +719,15 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   const record = plainObject(value, "TRACK_C_RESPONDER_DRAFT_INVALID");
   exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
-  if (!Array.isArray(record.factualTexts) ||
-      record.factualTexts.length > modelAuthoredEvidence(task).length) {
+  if (!Array.isArray(record.factualTexts)) {
+    throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
+  }
+  // With zero selected facts, the model has no factual slot authority. Drop
+  // stray entries before parsing; only code-selected evidence can be emitted.
+  // The remaining prose still passes the full output guard below.
+  const selectedFactCount = modelAuthoredEvidence(task).length;
+  const factualTexts = selectedFactCount === 0 ? [] : record.factualTexts;
+  if (factualTexts.length > selectedFactCount) {
     throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
   }
   // Prose whitespace has no authority meaning. Keep factual text byte-exact
@@ -737,7 +744,7 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     task.evidence.every(({ capability }) => capability === "BUSINESS_LOCATION");
   return Object.freeze({
     answerText: directLocationFact ? null : text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
-    factualTexts: Object.freeze(record.factualTexts.map((item) => {
+    factualTexts: Object.freeze(factualTexts.map((item) => {
       const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
       return result;
@@ -823,15 +830,20 @@ function deterministicCheckoutText(
     FULL_NAME: "họ tên",
     PHONE: "số điện thoại",
     ADDRESS: "địa chỉ nhận hàng",
-    PAYMENT_METHOD: paymentOptions.includes("BANK_TRANSFER")
-      ? "hình thức thanh toán (COD hoặc chuyển khoản)"
-      : "hình thức thanh toán COD",
+    PAYMENT_METHOD: "hình thức thanh toán",
   };
-  const names = fields.map((field) => labels[field]);
+  const names = fields.filter((field) => field !== "PAYMENT_METHOD")
+    .map((field) => labels[field]);
+  const paymentQuestion = paymentOptions.includes("BANK_TRANSFER")
+    ? "Chị muốn thanh toán COD hay chuyển khoản ạ?"
+    : "Chị xác nhận thanh toán khi nhận hàng (COD) giúp em nhé.";
+  if (names.length === 0) return paymentQuestion;
   const joined = names.length === 1 ? names[0]! : names.length === 2
     ? `${names[0]!} và ${names[1]!}`
     : `${names.slice(0, -1).join(", ")} và ${names.at(-1)!}`;
-  return `Chị cho em xin ${joined} để tiếp tục nhé.`;
+  return fields.includes("PAYMENT_METHOD")
+    ? `Chị cho em xin ${joined}. ${paymentQuestion}`
+    : `Chị cho em xin ${joined} để tiếp tục nhé.`;
 }
 
 function assertProgression(task: TrackCResponderTask, draft: ResponderDraft, dialogue: readonly ShadowContextMessage[], adaptive = false): void {

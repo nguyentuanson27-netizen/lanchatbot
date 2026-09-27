@@ -344,13 +344,13 @@ describe("Vertex shadow client", () => {
     }
 
     // d9de77f baseline remains pinned for unchanged methods. The three
-    // proposal-schema requests changed for the 64-character intent/stage bound
-    // and typed variant intent; generate also changed for its producer instruction.
+    // Proposal-schema requests changed for typed variant intent and the
+    // optional strategy-analysis evidence list on routine checkout turns.
     expect(observed).toEqual({
-      generate: "72c2e6531d5b25fcd03059f7f547bbf7beb35ba266ce076014fc579a7f35b466",
-      groundWithFacts: "332a89524d8c6b84a0d84472acd47cb0dcc7374b9996a27b0845ea17428fbc73",
+      generate: "9434eb3025e1078c5bb5c57e83a99f6afe242891a44d4aae263096ccd63279ac",
+      groundWithFacts: "47e71576188a5dfa9b1651a3483fe029457fecf2de5f4b0a2d748bc15b61bd6e",
       groundDraftWithFacts: "63a94583c26f4f31997a89daac606b2d311ded592f3449d3210527d670ed3072",
-      repairSizeClaimDraft: "66fb05c6a8cc7f4307ec1f3802cca1c18f19cf6693d19a453622ba279ad971ad",
+      repairSizeClaimDraft: "b15a25768c86c587e8ceae34252426e9a75dca81b543fd2fc00daaa5da64376f",
       draftMultiProductClarification: "eed16e8dbd463ba7564580609b7ebba2aa151ce84210ed19d21465aa64c420de",
       draftCustomerUrlExplanation: "98535ebb6169c3720559436265593250cc0228d7fdbb62efa9662f2061db80e4",
       judgeSalesReply: "be94a69e7f31146e95a51c0e70054837f1609b78cecba20f39f5324757747f68",

@@ -1362,6 +1362,41 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.reply).not.toContain("đổi size");
   });
 
+  it("drops an unauthorized factual slot when no evidence was selected", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: payload({
+          replyAct: "ANSWER",
+          goal: "Explain that the customer's lower conditional price has no verified acceptance.",
+          proposition: "PROMOTION_OFFER",
+          evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" },
+          canonicalAction: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: payload({
+          answerText: "Em chưa có xác nhận mức giá chị đề nghị để chốt đơn theo mức đó.",
+          factualTexts: ["Giá mẫu này là 849.000đ."],
+          progressionText: null,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER",
+        messageType: "TEXT", text: "690k chị chốt luôn nhé em", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }],
+      transport: { send },
+    });
+    expect(result.reply).toBe(
+      "Em chưa có xác nhận mức giá chị đề nghị để chốt đơn theo mức đó.",
+    );
+    expect(result.output.segments).toHaveLength(1);
+  });
+
   it("can acknowledge a customer's decision context without repeating an unrelated shop fact", async () => {
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({

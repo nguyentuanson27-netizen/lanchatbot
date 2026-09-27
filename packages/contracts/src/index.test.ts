@@ -4,6 +4,7 @@ import {
   BusinessFactEnvelopeV1Schema,
   GuardedReplyPlanV1Schema,
   AgentSalesSignalsV1Schema,
+  AgentStrategyAnalysisV1Schema,
   MetaOutboxStatusSchema,
   RoutingOwnerSchema,
 } from "./index.js";
@@ -232,5 +233,16 @@ describe("phase 1 contracts", () => {
       variantIntent: { act: "NONE", size: "L", color: null,
         evidenceText: null, confidence: 0.99 },
     }).success).toBe(false);
+  });
+
+  it("accepts no strategy evidence when a routine checkout choice has no matching label", () => {
+    expect(AgentStrategyAnalysisV1Schema.safeParse({
+      need: "NOT_ENOUGH_CONTEXT",
+      barrier: "NONE",
+      decisionFactor: "UNKNOWN",
+      recommendedStrategy: "STRATEGY_CLOSE",
+      confidence: 0.99,
+      evidence: [],
+    }).success).toBe(true);
   });
 });

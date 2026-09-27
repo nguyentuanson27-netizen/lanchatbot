@@ -3159,7 +3159,7 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(paymentReply.output.cta).toBe("ASK_CHECKOUT_DETAILS");
     expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
-      .toContain("hình thức thanh toán COD");
+      .toContain("thanh toán khi nhận hàng (COD)");
     expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
       .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
     const preview = await evaluateRealtimeSalesCycle(input(
