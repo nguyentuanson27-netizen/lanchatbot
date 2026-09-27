@@ -10,6 +10,8 @@ Tiếp tục ở executable source `c782e90`: harness đã gọi Luna ở produc
 
 Amendment executable `c93635c` bổ sung diagnostic candidate đã guard trong DRY_RUN; runner test xác nhận C3 được gọi và không tạo outbound message. Đây chưa phải server boot thực với Vertex hay điểm quality; các checkbox P05/P11 vẫn mở.
 
+Amendment executable `c2804ac` đưa variant đã chọn từ producer vào consumer considered-variant: chọn M và hỏi S không lưu S thành lựa chọn; nhận xét L không sửa lựa chọn. Test runner và typecheck qua, nhưng producer vẫn sau một số routing nên P06 chưa đóng.
+
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
 ## Chuẩn bị đã làm trong lượt lập kế hoạch

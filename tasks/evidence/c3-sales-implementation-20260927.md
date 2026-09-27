@@ -235,3 +235,14 @@ For this amendment, all 74 RealtimeRunner tests and worker TypeScript
 checking passed. The earlier 1,795-test worker and 379-test business-tools
 runs belong to `c782e90`; only the runner diagnostic and its test changed
 afterward. No Luna or rubric result exists on `c93635c`.
+
+### Later executable amendment: c2804ac
+
+Source/spec commit `c2804ac82e9a8352061c4162c6778adfa90c4ec5` makes the
+considered-variant consumer use the validated selected clause when
+`variantIntent` is present. “Chọn M, nhưng S còn không?” now keeps M as the
+choice; a comment about L does not set L. The old format parser remains for
+legacy proposals without the new field. All 75 RealtimeRunner tests and
+worker TypeScript checking passed on this amendment. This is a local
+consumer fix; the producer is still not before every semantic routing
+decision, and no Luna DEV70/rubric run exists on this exact source.
