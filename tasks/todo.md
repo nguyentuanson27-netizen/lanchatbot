@@ -16,6 +16,8 @@ Tiếp tục ở `f0b93c2`: guard giữ fact đã chọn khi lời ghi nhận t�
 
 Amendment `f5034c7` xử lý lựa chọn COD có câu hỏi giao hàng ở mệnh đề khác bằng evidence do producer khoanh vùng và kiểm tra lựa chọn ngay trên mệnh đề đó. 126 test SalesCycle/Vertex pass, typecheck pass; chưa đóng P06 vì routing đầu luồng và context cùng lượt vẫn chưa dùng extraction này.
 
+Amendment `3bebb9f` đưa producer hiện có lên trước routing hậu mãi/gặp nhân viên và resolve product **trên nhánh C3 giỏ mở, text thường**; preflight dùng engine để giữ human-owner no-call, proposal và quota dùng đúng một lần. Kiểm thử hai trường hợp chuyển nhánh và các đối chứng lỗi/nhãn sai đã qua; P06 vẫn mở cho các nhánh khác, context cùng lượt và quyết định product/search. Chưa có Luna trên source này.
+
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
 ## Chuẩn bị đã làm trong lượt lập kế hoạch

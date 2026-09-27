@@ -302,3 +302,35 @@ conservative local selection path; the producer still runs too late for all
 early semantic routing, so P06 remains open. The change adds no payment effect
 and reuses the existing checkout authority boundary. Focused SalesCycle and
 Vertex tests: 126 passed; worker typecheck and `git diff --check` passed.
+
+### Executable amendment: 3bebb9f
+
+The existing typed `generate()` producer is now called before the first
+post-sale/human-routing and product-resolution decision on the C3 open-cart,
+plain-text branch. A pure `applyInboundEvent` preflight checks the current
+Pancake observation, owner lease and duplicate/stale status before that model
+call. Its proposal is reused later in the turn, with one quota reservation.
+The optional persisted `routingIntent` contract is required for new Vertex
+generations. A high-confidence exact customer clause may add `POST_SALE` or
+`HUMAN_REQUEST` routing; current-cart after-sales needs evidence of an old
+order or received item, and a human request needs a positive request clause.
+Model `PRE_SALE` never cancels an existing deterministic handoff. The engine
+still owns the handoff, tag and later HUMAN no-call state.
+
+Runner integration covers two positive transfers with an open cart, invalid
+post-sale/human model labels, current HUMAN ownership, a denied generation
+quota and a producer error. It checks a single producer/quota call and no C3
+call on transferred turns, with cart state unchanged. After the final small
+guard adjustments, 81 focused runner tests, 221 contracts tests and worker
+typecheck passed. A full worker run on the earlier shape of this amendment
+passed 1,809 tests with one skipped; it precedes the final two additional
+runner cases and the narrow negative-request guard correction. No exact-source
+Luna or rubric result exists yet. The transfer covers only the stated branch;
+same-turn session context, broader product decisions and other P06 work remain
+open.
+
+Read-only Google Drive discovery found La.na media and product planning sheets
+but no accessible authoritative `product_registry` sheet for this worker;
+one likely product-planning sheet allowed metadata read but refused export.
+These sheets were not promoted to catalog authority. The isolated Qdrant
+SQ149 result remains the only new source-to-index readback here.
