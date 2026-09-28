@@ -122,6 +122,46 @@ function arrayOfStrings(value: unknown, limit: number): readonly string[] | null
     : null;
 }
 
+/** A comparison is available only for two current product-level unit prices. */
+export function trackCPriceComparisonEvidence(
+  context: ContextV2,
+  at: Date,
+): TrackCSelectableEvidence | null {
+  if (context.productBinding.status !== "RESOLVED" ||
+      context.productBinding.productIds.length !== 2 ||
+      !Number.isFinite(at.getTime())) return null;
+  const products = context.productBinding.productIds;
+  const prices = products.map((productId) => context.verifiedClaims.filter((claim) =>
+    claim.type === "PRICE" && claim.scope.kind === "PRODUCT" &&
+    claim.scope.productId === productId && claim.scope.variantId === null &&
+    Date.parse(claim.provenance.observedAt) <= at.getTime() &&
+    Date.parse(claim.provenance.expiresAt) > at.getTime()
+  ));
+  if (prices.some((matches) => matches.length !== 1)) return null;
+  const [left, right] = [prices[0]![0]!, prices[1]![0]!];
+  if (left.type !== "PRICE" || right.type !== "PRICE" ||
+      left.value.currency !== right.value.currency) return null;
+  const differenceVnd = Math.abs(left.value.amountVnd - right.value.amountVnd);
+  const conclusion = differenceVnd === 0
+    ? "Hai mẫu có cùng mức giá hiện tại"
+    : `${left.value.amountVnd < right.value.amountVnd ? products[0] : products[1]} thấp hơn ${trackCFormatVnd(differenceVnd)}`;
+  const deterministicText = `Giá hiện tại của ${products[0]} là ${trackCFormatVnd(left.value.amountVnd)}, ` +
+    `của ${products[1]} là ${trackCFormatVnd(right.value.amountVnd)}; ${conclusion} ạ.`;
+  return Object.freeze({
+    ref: "DERIVED_PRICE_COMPARISON_001",
+    capability: "PRODUCT_COMPARISON",
+    value: Object.freeze({ products, amountsVnd: [left.value.amountVnd, right.value.amountVnd],
+      currency: left.value.currency, differenceVnd,
+      sourceClaimHashes: [left.provenance.contentHash, right.provenance.contentHash] }),
+    deterministicText,
+    provenance: Object.freeze({
+      contentHash: sha256(["C3_PRICE_COMPARISON_V1", products,
+        left.provenance.contentHash, right.provenance.contentHash]),
+      authority: "RUNTIME" as const,
+    }),
+  });
+}
+
 export function trackCRuntimeClaimDeterministicText(
   claim: ContextV2["verifiedClaims"][number],
   presentation?: ContextV2["productPresentation"],
@@ -408,6 +448,10 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       }));
     }
   });
+  const priceComparison = trackCPriceComparisonEvidence(
+    input.context, input.evaluationAt ?? new Date(),
+  );
+  if (priceComparison !== null) evidence.push(priceComparison);
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
     // Every verified attribute group, one selectable entry per field. The

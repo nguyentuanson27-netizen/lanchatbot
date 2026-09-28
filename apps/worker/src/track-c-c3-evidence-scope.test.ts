@@ -8,6 +8,7 @@ import {
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import {
   buildTrackCSelectableEvidence,
+  trackCPriceComparisonEvidence,
   trackCRuntimeClaimDeterministicText,
 } from "./track-c-c3-selectable-evidence.js";
 import { trackCEvidenceHasSafeFactualEgress } from
@@ -63,6 +64,33 @@ function evidenceFor(claimRefs: readonly string[]) {
 }
 
 describe("Track C C3 evidence subject scope", () => {
+  it("derives a cheaper conclusion from two current product prices and binds its exact wording", () => {
+    const chunk = JSON.parse(readFileSync(new URL("quality-09.json", EVAL_ROOT), "utf8")) as {
+      cases: Array<{ id: string }>;
+    };
+    const fixture = chunk.cases.find(({ id }) => id === "V5V4Q081")!;
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", fixture: fixture as never,
+      runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const at = new Date(recipe.evaluation_at);
+    const comparison = trackCPriceComparisonEvidence(capture.context!, at)!;
+    expect(comparison.deterministicText).toContain("SQ9012 thấp hơn 250.000đ");
+    expect(comparison.deterministicText).toContain("1.099.000đ");
+    const output = (text: string) => ({
+      segments: [{ kind: "VERIFIED_CLAIM", text,
+        claimContentHash: comparison.provenance.contentHash }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    });
+    expect(validateResponderOutput(capture.context!, output(comparison.deterministicText!),
+      "BEHAVIOR_SIMULATION", at).segments).toHaveLength(1);
+    expect(() => validateResponderOutput(capture.context!,
+      output(comparison.deterministicText!.replace("SQ9012 thấp", "SV9031 thấp")),
+      "BEHAVIOR_SIMULATION", at)).toThrow("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+    expect(trackCPriceComparisonEvidence(capture.context!,
+      new Date(at.getTime() + 7 * 24 * 60 * 60 * 1000))).toBeNull();
+  });
+
   it("states a known non-free cart without changing legacy cart claims", () => {
     const chunk = JSON.parse(readFileSync(
       new URL("quality-03.json", EVAL_ROOT), "utf8",

@@ -168,6 +168,7 @@ import {
   updateSessionDecisionContextFromModel,
 } from "./realtime-session-decision-context.js";
 import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
+import { trackCPriceComparisonEvidence } from "./track-c-c3-selectable-evidence.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
@@ -5432,8 +5433,13 @@ export class RealtimeRunner {
         const hashes = new Set(chosen.output.segments.flatMap((segment) =>
           segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
         ));
+        const priceComparison = trackCPriceComparisonEvidence(c3Input.context, new Date());
+        const comparisonSourceHashes = priceComparison !== null &&
+            hashes.has(priceComparison.provenance.contentHash)
+          ? new Set(priceComparison.value.sourceClaimHashes as string[]) : null;
         const chosenClaims = c3Input.context.verifiedClaims.filter((claim) =>
-          hashes.has(claim.provenance.contentHash)
+          hashes.has(claim.provenance.contentHash) ||
+          (claim.type === "PRICE" && comparisonSourceHashes?.has(claim.provenance.contentHash))
         );
         const cartSummary = salesHandled && salesVerifiedCartSummary !== null &&
             salesCyclePlan?.cartOpenEvidence !== undefined

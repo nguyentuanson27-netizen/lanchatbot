@@ -27,7 +27,7 @@ import {
   type TrackCConversationPlanV1,
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
-import { trackCBoundPresentationForClaim } from
+import { trackCBoundPresentationForClaim, trackCPriceComparisonEvidence } from
   "./track-c-c3-selectable-evidence.js";
 import { trackCProductAttributeProjectionRegistry } from
   "./track-c-c3-attribute-projection.js";
@@ -335,7 +335,16 @@ function guardProductionOutput(
     context.productAttributes === null || context.productAttributes === undefined
       ? new Map()
       : trackCProductAttributeProjectionRegistry(context.productAttributes);
+  const priceComparison = trackCPriceComparisonEvidence(context, evaluationAt);
   for (const segment of output.segments) {
+    if (segment.kind === "VERIFIED_CLAIM" && priceComparison !== null &&
+        segment.claimContentHash === priceComparison.provenance.contentHash) {
+      if (priceComparison.deterministicText === undefined ||
+          !trackCRealizationMatches(segment.text, priceComparison.deterministicText)) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      continue;
+    }
     const usesProductPresentationEvidence =
       segment.kind === "VERIFIED_CLAIM" &&
       productPresentationHash !== null &&
@@ -480,6 +489,7 @@ export function validateResponderOutput(
     context.productAttributes === null || context.productAttributes === undefined
       ? new Map()
       : trackCProductAttributeProjectionRegistry(context.productAttributes);
+  const priceComparison = trackCPriceComparisonEvidence(context, evaluationAt);
   const known = new Set([
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined
@@ -491,6 +501,7 @@ export function validateResponderOutput(
       ? []
       : [context.productPresentation.provenance.contentHash]),
     ...simulationClaimContentHashes,
+    ...(priceComparison === null ? [] : [priceComparison.provenance.contentHash]),
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
