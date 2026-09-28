@@ -111,6 +111,11 @@ export interface SessionDecisionContext {
   readonly budgetVnd: number | null;
   readonly occasion: "WORK" | "PARTY" | "EVERYDAY" | null;
   readonly rejectedProductIds: readonly string[];
+  readonly preferences?: Readonly<{
+    colors: readonly string[];
+    styles: readonly string[];
+    materials: readonly string[];
+  }>;
 }
 
 export interface ConversationState {

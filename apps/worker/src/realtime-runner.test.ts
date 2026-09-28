@@ -4092,7 +4092,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(feeCommit.metaPlan?.protectedClaimTypes).toContain("SHIPPING_FEE");
     expect(feeCommit.metaPlan?.messages[0]?.text).toContain("30.000");
     if (checkoutOwner === "EARLY_SESSION") {
-      const text = "Ngân sách tối đa 700k, chị mặc đi làm. Không lấy SV9031 nữa.";
+      const text = "Ngân sách tối đa 700k, chị mặc đi làm. Không lấy SV9031 nữa. Chị thích màu be.";
       const sessionEntry = item(43, text);
       currentBatch = { ...batch, generation: 13,
         inboxIds: [sessionEntry.inboxId], firstReceiveSequence: 43,
@@ -4117,6 +4117,8 @@ describe("RealtimeRunner inbound batching", () => {
                 evidenceText: "mặc đi làm", confidence: 0.99 },
               productDecisions: [{ operation: "REJECT", productId: "SV9031",
                 evidenceText: "Không lấy SV9031", confidence: 0.99 }],
+              preferenceChanges: [{ field: "colors", action: "ADD", value: "BE",
+                evidenceText: "thích màu be", confidence: 0.99 }],
             },
           },
         } };
@@ -4130,6 +4132,7 @@ describe("RealtimeRunner inbound batching", () => {
       expect(quotaReserve.mock.calls.length - beforeQuota).toBe(1);
       expect(persistedState.sessionDecisionContext).toEqual({
         budgetVnd: 700_000, occasion: "WORK", rejectedProductIds: ["SV9031"],
+        preferences: { colors: ["BE"], styles: [], materials: [] },
       });
       expect(persistedState.currentProductId).toBe("CB182");
       expect(c3Send.mock.calls.length - beforeC3).toBe(2);
@@ -4139,6 +4142,7 @@ describe("RealtimeRunner inbound batching", () => {
         type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
         budgetCustomerReported: "700k", occasion: "WORK",
         rejectedProductIds: ["SV9031"],
+        preferences: { colors: ["BE"], styles: [], materials: [] },
       });
       expect(strategistInput.dialogue.at(-1).text).toBe(text);
       expect(strategistInput.selectableEvidence.map(

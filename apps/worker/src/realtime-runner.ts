@@ -3295,8 +3295,12 @@ export class RealtimeRunner {
       ? { ...sessionState, currentProductId: null }
       : sessionState;
     if (sameTurnSession && modelContext[0]) {
+      const projectedPreferences = semanticState.sessionDecisionContext?.preferences;
       modelContext[0] = { ...modelContext[0], text: JSON.stringify({
         ...authorityModelState, customerSessionContext: semanticState.sessionDecisionContext ?? null,
+        customerProfile: projectedPreferences && authorityModelState.customerProfile
+          ? { ...authorityModelState.customerProfile, preferences: projectedPreferences }
+          : authorityModelState.customerProfile,
       }) };
     }
     const mediaPartialResolutionPolicy =
@@ -5376,6 +5380,9 @@ export class RealtimeRunner {
                       : `${nextState.sessionDecisionContext.budgetVnd / 1_000}k`,
                     occasion: nextState.sessionDecisionContext.occasion,
                     rejectedProductIds: nextState.sessionDecisionContext.rejectedProductIds,
+                    ...(nextState.sessionDecisionContext.preferences
+                      ? { preferences: nextState.sessionDecisionContext.preferences }
+                      : {}),
                   }),
                   attachmentCount: 0,
                   occurredAt: context[0]?.occurredAt ?? now.toISOString(),

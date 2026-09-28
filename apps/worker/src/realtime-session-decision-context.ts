@@ -59,12 +59,14 @@ export function updateSessionDecisionContext(
   return Object.freeze({
     budgetVnd, occasion,
     rejectedProductIds: Object.freeze([...rejected].sort().slice(0, 8)),
+    ...(current.preferences ? { preferences: current.preferences } : {}),
   });
 }
 
 export function hasSessionDecisionContext(value: SessionDecisionContext): boolean {
   return value.budgetVnd !== null || value.occasion !== null ||
-    value.rejectedProductIds.length > 0;
+    value.rejectedProductIds.length > 0 ||
+    Object.values(value.preferences ?? {}).some((items) => items.length > 0);
 }
 
 function exactCustomerEvidence(text: string, evidence: string | null): evidence is string {
@@ -141,6 +143,50 @@ export function updateSessionDecisionContextFromModel(
       rejected.delete(productId);
     }
   }
+  const preferences = {
+    colors: [...(current.preferences?.colors ?? [])],
+    styles: [...(current.preferences?.styles ?? [])],
+    materials: [...(current.preferences?.materials ?? [])],
+  };
+  let changedPreferences = false;
+  for (const change of intent.preferenceChanges ?? []) {
+    if (change.confidence < 0.85 ||
+        !exactCustomerEvidence(customerText, change.evidenceText)) continue;
+    const evidence = fold(change.evidenceText);
+    const value = fold(change.value).trim();
+    const field = change.field === "colors" ? "mau"
+      : change.field === "styles" ? "(?:phong cach|kieu|form)"
+        : "(?:chat lieu|vai)";
+    const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    const fieldValue = `${field}\\s+${escapedValue}(?=$|[^a-z0-9])`;
+    const positive = new RegExp(
+      `\\b(?:thich|uu tien|muon)\\s+${fieldValue}`, "u").test(evidence) &&
+      !new RegExp(`\\b(?:khong|chua)\\s+(?:thich|uu tien|muon)\\s+${fieldValue}`, "u")
+        .test(evidence);
+    const negative = new RegExp(
+      `\\b(?:khong|chua)\\s+(?:thich|uu tien|muon)\\s+${fieldValue}`, "u")
+      .test(evidence);
+    const replacement = new RegExp(
+      `\\b(?:gio\\s+(?:chi\\s+)?thich|doi so thich sang)\\s+${fieldValue}`, "u")
+      .test(evidence);
+    if ((change.action === "ADD" && !positive) ||
+        (change.action === "REMOVE" && !negative) ||
+        (change.action === "REPLACE" && !replacement)) continue;
+    const values = preferences[change.field];
+    const next = change.action === "REPLACE" ? [change.value.toUpperCase()]
+      : change.action === "REMOVE"
+        ? values.filter((item) => fold(item) !== value)
+        : [...new Set([...values, change.value.toUpperCase()])];
+    if (next.join("\u0000") === values.join("\u0000")) continue;
+    preferences[change.field] = next.slice(0, 8);
+    changedPreferences = true;
+  }
   return Object.freeze({ budgetVnd, occasion,
-    rejectedProductIds: Object.freeze([...rejected].sort().slice(0, 8)) });
+    rejectedProductIds: Object.freeze([...rejected].sort().slice(0, 8)),
+    ...(changedPreferences || current.preferences ? { preferences: Object.freeze({
+      colors: Object.freeze(preferences.colors),
+      styles: Object.freeze(preferences.styles),
+      materials: Object.freeze(preferences.materials),
+    }) } : {}),
+  });
 }

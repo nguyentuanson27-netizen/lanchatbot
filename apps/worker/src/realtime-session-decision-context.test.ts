@@ -75,4 +75,46 @@ describe("customer-reported session decision context", () => {
         evidenceText: "Ngân sách 700k", confidence: 0.99 },
     })).toEqual(prior);
   });
+
+  it("applies explicit preference corrections without treating variant comments as preferences", () => {
+    const first = updateSessionDecisionContextFromModel(undefined,
+      "Chị thích màu be và ưu tiên kiểu tối giản.", {
+        ...noChange,
+        preferenceChanges: [
+          { field: "colors", action: "ADD", value: "BE",
+            evidenceText: "thích màu be", confidence: 0.99 },
+          { field: "styles", action: "ADD", value: "TỐI GIẢN",
+            evidenceText: "ưu tiên kiểu tối giản", confidence: 0.99 },
+        ],
+      });
+    expect(first.preferences).toEqual({
+      colors: ["BE"], styles: ["TỐI GIẢN"], materials: [],
+    });
+    const revised = updateSessionDecisionContextFromModel(first,
+      "Giờ chị thích màu đen. Không thích kiểu tối giản nữa.", {
+        ...noChange,
+        preferenceChanges: [
+          { field: "colors", action: "REPLACE", value: "ĐEN",
+            evidenceText: "Giờ chị thích màu đen", confidence: 0.99 },
+          { field: "styles", action: "REMOVE", value: "TỐI GIẢN",
+            evidenceText: "Không thích kiểu tối giản", confidence: 0.99 },
+        ],
+      });
+    expect(revised.preferences).toEqual({
+      colors: ["ĐEN"], styles: [], materials: [],
+    });
+    expect(updateSessionDecisionContextFromModel(revised,
+      "Size M màu be có còn không?", {
+        ...noChange,
+        preferenceChanges: [{ field: "colors", action: "ADD", value: "BE",
+          evidenceText: "màu be", confidence: 0.99 }],
+      }).preferences).toEqual(revised.preferences);
+    expect(updateSessionDecisionContextFromModel(first,
+      "Chị thích màu be, không thích kiểu tối giản.", {
+        ...noChange,
+        preferenceChanges: [{ field: "colors", action: "REMOVE", value: "BE",
+          evidenceText: "Chị thích màu be, không thích kiểu tối giản",
+          confidence: 0.99 }],
+      }).preferences).toEqual(first.preferences);
+  });
 });

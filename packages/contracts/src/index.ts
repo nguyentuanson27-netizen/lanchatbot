@@ -354,6 +354,13 @@ export const AgentSessionIntentV1Schema = z.object({
     evidenceText: z.string().trim().min(1).max(500),
     confidence: z.number().min(0).max(1),
   }).strict()).max(8),
+  preferenceChanges: z.array(z.object({
+    field: z.enum(["colors", "styles", "materials"]),
+    action: z.enum(["ADD", "REMOVE", "REPLACE"]),
+    value: z.string().trim().min(1).max(64),
+    evidenceText: z.string().trim().min(1).max(500),
+    confidence: z.number().min(0).max(1),
+  }).strict()).max(8).optional(),
 }).strict().superRefine((signal, context) => {
   for (const key of ["budget", "occasion"] as const) {
     const item = signal[key];

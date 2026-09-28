@@ -1325,7 +1325,13 @@ its code in that message; outside an open cart, rejecting the current product
 also clears that conversation binding. Cart lines and preview remain under
 the commerce kernel, so this context update does not delete a cart item.
 
-Legacy proposals without `sessionIntent` keep the earlier bounded format
-updater. Color/style preferences, broader search over alternatives, and
-semantic cart-line removal still require P06/P08 work and runtime Luna
-verification on exact executable source.
+The same `sessionIntent` may add, remove or replace an explicitly stated
+color, style or material preference. Its exact clause must bind the action,
+field and value; a color/size question or comment does not create a preference.
+The preference projection remains in the existing conversation state and is
+included in the same-turn Strategist context. It overlays any older profile
+summary shown to later model stages for this turn; it does not grant product
+or stock authority. Legacy proposals without `sessionIntent` keep the earlier
+bounded format updater. Broader search over alternatives, durable customer
+profile reconciliation and semantic cart-line removal still require P06/P08
+work and runtime Luna verification on exact executable source.

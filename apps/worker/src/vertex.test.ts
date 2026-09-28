@@ -347,10 +347,10 @@ describe("Vertex shadow client", () => {
     // Proposal requests include customer-clause payment selection and typed
     // routing/session updates; shared fields change grounded/repair envelopes.
     expect(observed).toEqual({
-      generate: "213f88f4962d91627fe8d2c91bc1991e8470bfb8a3475430d8d0fdfd289a35f8",
-      groundWithFacts: "0d31e4973d62847630cbbbb7d14ffd35b4d47ab7eea6091817984d4975fad108",
+      generate: "1a3dbfb82a0b4922c62ae0a106240c25632002efd6a0f9d65c1309fcb3145e3d",
+      groundWithFacts: "7135c52a6dc4bc0c016139fcf6bc13fd6f6973eedd28987d6b4673d4a35c7362",
       groundDraftWithFacts: "63a94583c26f4f31997a89daac606b2d311ded592f3449d3210527d670ed3072",
-      repairSizeClaimDraft: "a41291c8de6e5b35e9191f11165e387a50cad5d1930046d6992b4c8f6498c947",
+      repairSizeClaimDraft: "5468c2948fcffac519ae73c48a0ac4b9c54bdb49294383977901d57dd429553d",
       draftMultiProductClarification: "eed16e8dbd463ba7564580609b7ebba2aa151ce84210ed19d21465aa64c420de",
       draftCustomerUrlExplanation: "98535ebb6169c3720559436265593250cc0228d7fdbb62efa9662f2061db80e4",
       judgeSalesReply: "be94a69e7f31146e95a51c0e70054837f1609b78cecba20f39f5324757747f68",
