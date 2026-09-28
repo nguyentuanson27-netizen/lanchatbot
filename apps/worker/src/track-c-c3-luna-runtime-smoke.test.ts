@@ -19,7 +19,7 @@ import {
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 import {
   AGENT_RESPONSE_SCHEMA, buildGroundedPrompt, buildShadowPrompt,
-  GROUNDED_SYSTEM_INSTRUCTION, SHADOW_SYSTEM_INSTRUCTION,
+  GROUNDED_SYSTEM_INSTRUCTION, sanitizeAgentProposalPayload, SHADOW_SYSTEM_INSTRUCTION,
 } from "./vertex.js";
 import type { ChatHistoryAppendInput, ChatHistoryPort } from "./redis-chat-history.js";
 
@@ -334,7 +334,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
             const exitCode = await invokeLuna(prompt, schemaPath, outputPath);
             call.exitCode = exitCode;
             if (exitCode !== 0) throw new Error(`LUNA_${stage.toUpperCase()}_CLI_FAILED`);
-            const raw = JSON.parse(await readFile(outputPath, "utf8")) as unknown;
+            const raw = sanitizeAgentProposalPayload(JSON.parse(await readFile(outputPath, "utf8")));
             const proposal = AgentProposalV1Schema.parse(raw);
             call.output = safeJson(proposal);
             call.status = "COMPLETED";

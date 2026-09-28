@@ -1323,6 +1323,44 @@ function parseSalesRubric(value: unknown): SalesRubricAssessment {
   };
 }
 
+/**
+ * Normalizes minor model formatting edges before strict schema validation:
+ * - If routingIntent has a non-UNKNOWN act without non-empty evidenceText, normalizes act to UNKNOWN.
+ * - If productSearchIntent has a non-NONE act without non-empty evidenceText, normalizes act to NONE.
+ * - If action is REPLY/ASK_PRODUCT_SELECTION and reply text is empty, supplies a safe holding message.
+ */
+export function sanitizeAgentProposalPayload(payload: unknown): unknown {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return payload;
+  const raw = { ...(payload as Record<string, unknown>) };
+  const salesSignals = raw.salesSignals;
+  if (salesSignals && typeof salesSignals === "object" && !Array.isArray(salesSignals)) {
+    const signals = { ...(salesSignals as Record<string, unknown>) };
+    const routing = signals.routingIntent;
+    if (routing && typeof routing === "object" && !Array.isArray(routing)) {
+      const r = { ...(routing as Record<string, unknown>) };
+      if (r.act !== "UNKNOWN" && (!r.evidenceText || typeof r.evidenceText !== "string" || r.evidenceText.trim().length === 0)) {
+        r.act = "UNKNOWN";
+        r.evidenceText = null;
+      }
+      signals.routingIntent = r;
+    }
+    const search = signals.productSearchIntent;
+    if (search && typeof search === "object" && !Array.isArray(search)) {
+      const s = { ...(search as Record<string, unknown>) };
+      if (s.act !== "NONE" && (!s.evidenceText || typeof s.evidenceText !== "string" || s.evidenceText.trim().length === 0)) {
+        s.act = "NONE";
+        s.evidenceText = null;
+      }
+      signals.productSearchIntent = s;
+    }
+    raw.salesSignals = signals;
+  }
+  if ((raw.action === "REPLY" || raw.action === "ASK_PRODUCT_SELECTION") && typeof raw.reply === "string" && raw.reply.trim().length === 0) {
+    raw.reply = "Em kiểm tra thông tin gửi chị ngay ạ.";
+  }
+  return raw;
+}
+
 export class VertexShadowModel implements MultimodalEmbeddingPort {
   private readonly options: VertexShadowModelOptions;
   private readonly fetchImpl: typeof fetch;
@@ -1484,7 +1522,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
         throw new VertexShadowError(errorCode, retryable);
       }
       const candidate = parseCandidateText(body);
-      const payload = safeJson(candidate.text);
+      const payload = sanitizeAgentProposalPayload(safeJson(candidate.text));
       const parsed = (() => {
         if (proposalFromPayload) return proposalFromPayload(payload);
         const proposal = AgentProposalV1Schema.safeParse(payload);
