@@ -3341,7 +3341,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "EARLY_CONDITIONAL", "EARLY_COLOR_CURRENT", "EARLY_COLOR_WRONG_ALTERNATIVE", "EARLY_PRODUCT_ALTERNATIVE", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "EARLY_CONDITIONAL", "EARLY_COLOR_CURRENT", "EARLY_COLOR_WRONG_ALTERNATIVE", "EARLY_PRODUCT_ALTERNATIVE", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_PRICE_COMPARE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3457,6 +3457,9 @@ describe("RealtimeRunner inbound batching", () => {
       const shipping = prompt.selectableEvidence?.filter(({ capability }) =>
         capability === "SHIPPING_FEE"
       ) ?? [];
+      const comparison = checkoutOwner === "MULTI_PRICE_COMPARE"
+        ? prompt.selectableEvidence?.find(({ capability }) => capability === "PRODUCT_COMPARISON")
+        : undefined;
       const response = variantChoice
         ? prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
           ? { replyAct: "ACKNOWLEDGE", goal: "Keep the customer's size M choice for this product.",
@@ -3465,7 +3468,11 @@ describe("RealtimeRunner inbound batching", () => {
           : { answerText: "Dạ, em theo lựa chọn chị vừa nói ạ.",
               factualTexts: [], progressionText: null }
         : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
-        ? prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
+        ? comparison !== undefined
+          ? { replyAct: "ANSWER", goal: "Compare the two verified current prices.",
+              proposition: "PRODUCT_COMPARISON", evidenceRefs: [comparison.ref],
+              continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+          : prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
           ? {
               replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
               proposition: "PRICE", evidenceRefs: [], continuation: null,
@@ -3734,7 +3741,8 @@ describe("RealtimeRunner inbound batching", () => {
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
         verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
-        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE",
+        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE" ||
+          checkoutOwner === "MULTI_PRICE_COMPARE",
         c3: {
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
           transport: { send: c3Send },
@@ -3944,7 +3952,7 @@ describe("RealtimeRunner inbound batching", () => {
       return;
     }
 
-    if (checkoutOwner === "MULTI_PRICE") {
+    if (checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_PRICE_COMPARE") {
       const compare = item(40, "So sánh giá CB182 và SV9031 giúp chị.");
       currentBatch = { ...batch, generation: 11, inboxIds: [compare.inboxId],
         firstReceiveSequence: 40, lastReceiveSequence: 40, items: [compare] };
@@ -3958,6 +3966,9 @@ describe("RealtimeRunner inbound batching", () => {
       expect(reply).toContain("SV9031");
       expect(reply).toContain("799.000");
       expect(reply).toContain("699.000");
+      if (checkoutOwner === "MULTI_PRICE_COMPARE") {
+        expect(reply).toContain("SV9031 thấp hơn 100.000đ");
+      }
       expect(written.metaPlan?.protectedClaimTypes).toContain("PRICE");
       const strategistRequest = JSON.parse(c3Send.mock.calls[callsBefore]![0].body);
       const strategistInput = JSON.parse(strategistRequest.contents[0].parts[0].text);
