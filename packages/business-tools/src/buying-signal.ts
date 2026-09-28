@@ -35,7 +35,7 @@ function asciiFold(value: string): string {
 }
 
 export function isVariantEditRequest(value: string): boolean {
-  return /\b(?:doi|sua|thay)\s+(?:sang\s+)?(?:size|sz|mau)\b/u.test(asciiFold(value));
+  return /\b(?:doi|sua|thay|chuyen)\s+(?:sang\s+|qua\s+)?(?:size\s+|sz\s+|mau\s+)?(?:s|m|l|xl|2xl|xxl|3xl|[0-9]+|size|sz|mau)\b/u.test(asciiFold(value));
 }
 
 function isVariantSelectionOnly(value: string): boolean {

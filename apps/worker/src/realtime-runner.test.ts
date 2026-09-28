@@ -21,6 +21,7 @@ import {
   extractVariantMentions,
   isLegacyUnaccentedProductInfoReply,
   isPostSaleRequest,
+  requestsHuman,
   groupRealtimeMetaMessagesV2,
   IMAGE_INTENT_REPLIES,
   isPreSalePolicyQuestion,
@@ -4574,5 +4575,22 @@ describe("policy question versus after-sales routing", () => {
       .toBe(false);
     expect(isPostSaleRequest("Đơn cũ chị đã nhận rồi, muốn đổi size.", true))
       .toBe(true);
+    expect(isPostSaleRequest("Đơn hàng đã nhận bị lỗi đường may, hoàn tiền cho chị nhé.", true))
+      .toBe(true);
+    expect(isPostSaleRequest("Hàng đã nhận bị lỗi vải rồi em ơi.", true))
+      .toBe(true);
+  });
+
+  it("handles requests for another staff member when rejecting the previous one", () => {
+    expect(requestsHuman("Không muốn gặp nhân viên cũ, cho tôi gặp người khác."))
+      .toBe(true);
+    expect(requestsHuman("Chị không muốn gặp bạn nhân viên đó, đổi bạn khác tư vấn cho chị."))
+      .toBe(true);
+    expect(requestsHuman("Đổi cho chị người khác tư vấn."))
+      .toBe(true);
+    expect(requestsHuman("Chị không muốn gặp nhân viên."))
+      .toBe(false);
+    expect(requestsHuman("Không cần nhân viên tư vấn đâu."))
+      .toBe(false);
   });
 });

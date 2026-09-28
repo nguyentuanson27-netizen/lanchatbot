@@ -512,19 +512,43 @@ function acceptedModelNegotiationProposal(
 }
 
 function removeItem(text: string): boolean {
-  return /(bỏ|bo|bớt|bot|không lấy|khong lay)\s+(?:mẫu|mau|sp|sản phẩm|san pham|set|bộ|bo)/iu.test(text);
+  const hasAccents = /[áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/iu.test(text);
+  if (hasAccents) {
+    if (/\b(?:đắt|mắc|giá\s+cao)\b/iu.test(text) || /\b(?:bớt\s+(?:đi|giá|chút|ít|tiền)|có\s+bớt\s+không)\b/iu.test(text)) {
+      return false;
+    }
+    return /\b(?:bỏ|bớt|không lấy)\s+(?:bớt\s+)?(?:mẫu|sp|sản phẩm|set|bộ|cái|món|item)(?:\s+(?:này|đó|kia|ra|đi))?\b/iu.test(text) ||
+      /\b(?:bỏ|không lấy)\s+(?:ra|đi)\b/iu.test(text) ||
+      /\b(?:bỏ\s+bớt)\s+(?:ra|đi)?\b/iu.test(text) ||
+      /\b(?:bỏ|bớt|không lấy)\s+(?:mẫu|sp|sản phẩm)\b/iu.test(text);
+  }
+  const folded = asciiFold(text);
+  if (/\b(?:dat|mac|gia\s+cao)\b/u.test(folded) || /\b(?:bot\s+(?:di|gia|chut|it|tien)|co\s+bot\s+khong)\b/u.test(folded)) {
+    return false;
+  }
+  if (/\b(?:lay|mua|chon|them|xem|co|dat|\d+|mot|hai|ba)\s+bo\b/u.test(folded)) {
+    return false;
+  }
+  return /\b(?:bo|khong lay)\s+(?:bot\s+)?(?:sp|san pham|set|cai|mon|item)(?:\s+(?:nay|do|kia|ra|di))?\b/u.test(folded) ||
+    /\b(?:bo|khong lay)\s+(?:ra|di)\b/u.test(folded) ||
+    /\b(?:bo\s+bot)\s+(?:ra|di)?\b/u.test(folded) ||
+    /\b(?:bo|khong lay)\s+(?:mau\s+(?:nay|do|kia|ra|di)|sp|san pham)\b/u.test(folded);
 }
 
 function labeledValue(text: string, labels: readonly string[]): string | undefined {
   const pattern = new RegExp(`^(?:${labels.join("|")})\\s*[:\\-]\\s*(.+)$`, "imu");
-  const value = text.match(pattern)?.[1]?.trim();
+  const raw = text.match(pattern)?.[1]?.trim();
+  if (!raw) return undefined;
+  const beforeNextLabel = raw.split(/\s*(?:số\s+điện\s+thoại|so\s+dien\s+thoai|sđt|sdt|điện\s+thoại|dien\s+thoai|phone|địa\s+chỉ|dia\s+chi|đ\/c|dc|họ\s+và\s+tên|ho\s+va\s+ten|họ\s+tên|ho\s+ten|tên|ten|thanh\s+toán|thanh\s+toan)\s*[:\-]/iu)[0]?.trim();
+  const value = (beforeNextLabel || raw).replace(/[,;:. -]+$/u, "").trim();
+  if (isCheckoutFieldLabel(value)) return undefined;
   return value || undefined;
 }
 
 function isCheckoutFieldLabel(value: string): boolean {
   const normalized = foldVietnameseForRecall(value).replace(/[^a-z]+/gu, " ").trim();
   return ["so dien thoai", "dien thoai", "sdt", "phone", "dia chi",
-    "ten", "ho ten", "nguoi nhan", "thanh toan"].includes(normalized);
+    "ten", "ho ten", "nguoi nhan", "thanh toan", "so"].includes(normalized);
 }
 
 function modelCheckoutValue(
@@ -572,6 +596,11 @@ function selectedPaymentMethod(text: string): "COD" | "BANK_TRANSFER" | undefine
   if (/\b(?:neu|gia su|vi du|co the|can lam gi|nhu the nao)\b/u.test(folded) ||
       /\b(?:hỏi|hoi)\b/iu.test(text.normalize("NFC")) ||
       /\?\s*$/u.test(text)) return undefined;
+  if (/\b(?:shop|ben minh|ben shop)?\s*(?:co|co the|duoc)\s+(?:nhan|ho tro|cho|ap dung)?\s*(?:chuyen khoan|ck|bank|cod|tien mat)\s+(?:khong|ko|k|chua|duoc khong|duoc k|duoc ko|a)?\b/u.test(folded) ||
+      /\b(?:chuyen khoan|ck|bank|cod|tien mat)\s+(?:duoc khong|duoc k|duoc ko|the nao|nhu the nao|ra sao|co duoc khong)\b/u.test(folded) ||
+      /\b(?:chuyen khoan|ck|bank|cod|tien mat)\s+.*?\b(?:khong|ko|k|chua|the nao|nhu the nao|nhi)\s*(?:a|nha)?$/u.test(folded)) {
+    return undefined;
+  }
   const cod = /\b(?:cod|tien mat|nhan hang tra|thanh toan khi nhan hang)\b/u.test(folded);
   const bank = /\b(?:chuyen khoan|ck|bank)\b/u.test(folded);
   const rejectCod = /\b(?:khong|ko|k|chua)\s+(?:chon\s+)?(?:cod|tien mat|nhan hang tra)/u.test(folded);
@@ -621,24 +650,33 @@ function checkoutDetails(
   const extracted = salesSignals?.checkoutExtraction;
   const localRecipient = privateUnlabelledRecipient(text);
   const ambiguousRecipient = recipientSourceAmbiguous(text);
-  const phone = ambiguousRecipient ? undefined : (
+  const rawPhone = ambiguousRecipient ? undefined : (
     labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
     modelCheckoutValue(text, extracted?.phone, "PHONE")
   );
+  const phone = rawPhone && /^(?:\+?84|0)\d{8,10}$/u.test(rawPhone.replace(/[\s().-]/gu, ""))
+    ? rawPhone : undefined;
   const paymentMethod = selectedModelPaymentMethod(
     text, extracted?.paymentMethod,
   ) ?? selectedPaymentMethod(text);
-  const fullName = ambiguousRecipient ? undefined : (
+  const rawFullName = ambiguousRecipient ? undefined : (
     labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]) ??
     localRecipient.fullName ??
     modelCheckoutValue(text, extracted?.fullName, "FULL_NAME")
   );
-  const address = ambiguousRecipient ? undefined : (
+  const fullName = rawFullName && (
+    rawFullName.length >= 2 && rawFullName.length <= 160 &&
+    !/\d/u.test(rawFullName) && !isCheckoutFieldLabel(rawFullName)
+  ) ? rawFullName : undefined;
+  const rawAddress = ambiguousRecipient ? undefined : (
     labeledValue(text, ["địa chỉ", "dia chi", "đ/c", "dc"]) ??
     localRecipient.address ??
     modelCheckoutValue(text, extracted?.address, "ADDRESS")
   );
+  const address = rawAddress && rawAddress.length >= 8 && rawAddress.length <= 1000 &&
+    !isCheckoutFieldLabel(rawAddress)
+    ? rawAddress : undefined;
   return {
     ...(fullName ? { fullName } : {}),
     ...(phone ? { phone } : {}),
@@ -1851,9 +1889,9 @@ export async function evaluateRealtimeSalesCycle(
     const typedVariantEdit = validatedVariantEdit(input);
     // Existing deterministic edit authorization still owns the effect. The
     // structured result narrows its scope and chosen value; it cannot alone
-    // authorize a new mutation kind or bypass the current authority binding.
-    if (isVariantEditRequest(input.text) &&
-        (!input.salesSignals?.variantIntent || typedVariantEdit !== null)) {
+    const isEdit = typedVariantEdit !== null ||
+      (isVariantEditRequest(input.text) && !input.salesSignals?.variantIntent);
+    if (isEdit) {
       const cart = state.cart.value;
       const colorEdit = typedVariantEdit
         ? typedVariantEdit.color !== null

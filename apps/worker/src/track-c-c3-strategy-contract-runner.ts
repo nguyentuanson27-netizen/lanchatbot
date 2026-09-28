@@ -790,12 +790,19 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
 }
 
 function assertNoEffectText(value: string | null): void {
-  if (value !== null &&
-      (/\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value) ||
-       /\b(?:em|shop)\s+(?:ghi\s*nhận|tiếp\s*nhận)\s+đơn\b/iu.test(value) ||
-       /(?:^|[\s,.;:])(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)\s+đơn(?:\b|$)/iu.test(value) ||
-       /(?:^|[\s,.;:])đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:shop\s+)?(?:xác\s*nhận|tạo|đặt|chốt)(?:\b|$)/iu.test(value))) {
-    throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  if (value === null) return;
+  const clauses = value.split(/[.!?;:\n]+/gu).map((s) => s.trim()).filter(Boolean);
+  for (const clause of clauses) {
+    if (/\b(?:chưa|khong|không)\s+(?:có\s+thể|có|thể|được)?\s*(?:xác\s*nhận|báo|ghi\s*nhận|xử\s*lý)?\s*(?:chốt\s+đơn|tạo\s+đơn|đặt\s+đơn|thanh\s+toán|đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:shop\s+)?(?:xác\s*nhận|tạo|đặt|chốt))\b/iu.test(clause) ||
+        /\bchưa\s+(?:có\s+)?xác\s*nhận\s+đơn\b/iu.test(clause)) {
+      continue;
+    }
+    if (/\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(clause) ||
+        /\b(?:em|shop)\s+(?:ghi\s*nhận|tiếp\s*nhận)\s+đơn\b/iu.test(clause) ||
+        /(?:^|[\s,.;:])(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)\s+đơn(?:\b|$)/iu.test(clause) ||
+        /(?:^|[\s,.;:])đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:shop\s+)?(?:xác\s*nhận|tạo|đặt|chốt)(?:\b|$)/iu.test(clause)) {
+      throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+    }
   }
 }
 
@@ -816,6 +823,9 @@ function assertConversationalProse(value: string | null): void {
     // shipment. It is not a promise that the shop will ship the order.
     if (/shop\s+se\s+gui\b/u.test(match[0]) &&
         /\b(?:chua|khong)\s+(?:co\s+)?(?:thong tin|lich|xac nhan)\b[^.;!?\n]{0,60}\b(?:ngay|luc|thoi diem)\s*$/u.test(prefix)) {
+      continue;
+    }
+    if (/\b(?:chua|khong)\s+(?:co|the|duoc)?\s*(?:xac nhan|bao|ghi nhan)?\s*$/u.test(prefix.trim())) {
       continue;
     }
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");

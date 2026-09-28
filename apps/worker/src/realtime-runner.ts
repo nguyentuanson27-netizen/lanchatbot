@@ -567,12 +567,18 @@ export function isPostSaleRequest(value: string, hasOpenCart = false): boolean {
   );
 }
 
-function requestsHuman(text: string): boolean {
+export function requestsHuman(text: string): boolean {
   const folded = asciiFold(text);
+  const wantsOtherHuman =
+    /\b(?:doi\s+(?:cho\s+)?(?:chi|em|minh\s+)?(?:sang\s+)?|cho\s+(?:chi|em|minh\s+)?(?:gap\s+|noi chuyen voi\s+)?|gap\s+|noi chuyen voi\s+)(?:nguoi|ban|nhan vien|tu van vien)\s+khac\b/u.test(folded) ||
+    /\b(?:nguoi|ban|nhan vien|tu van vien)\s+khac\s+(?:tu van|ho tro|tra loi)\b/u.test(folded) ||
+    /\b(?:doi|chuyen)\s+(?:nguoi|ban|nhan vien|tu van vien)\s+khac\b/u.test(folded);
+  if (wantsOtherHuman) return true;
   if (/\b(?:khong|ko|k|chua)\s+(?:can|muon|gap|goi|noi chuyen voi|(?:can|muon)\s+gap)\s+(?:nhan vien|nguoi tu van|shop)\b/u.test(folded)) {
     return false;
   }
-  return /\b(?:nhan vien|nguoi tu van|gap shop|goi cho)\b/u.test(folded);
+  return /\b(?:nhan vien|nguoi tu van|gap shop|goi cho)\b/u.test(folded) ||
+    /\b(?:gap|noi chuyen voi)\s+(?:nguoi|ban|tu van vien)\b/u.test(folded);
 }
 
 type CustomerRoutingAct = "POST_SALE" | "HUMAN_REQUEST";
@@ -596,7 +602,7 @@ function validatedCustomerRouting(
         .test(asciiFold(intent.evidenceText))) return null;
   if (intent.act === "HUMAN_REQUEST" &&
       !requestsHuman(intent.evidenceText) &&
-      !/\b(?:gap|noi chuyen voi)\s+(?:nguoi|ban|tu van vien)\s+khac\b/u
+      !/\b(?:gap|noi chuyen voi|doi|cho)\s+(?:(?:chi|em|minh)\s+)?(?:nguoi|ban|nhan vien|tu van vien)\s+khac\b/u
         .test(asciiFold(intent.evidenceText))) return null;
   return intent.act;
 }
@@ -3278,17 +3284,18 @@ export class RealtimeRunner {
     const earlySessionIntent = earlyInitial?.proposal.salesSignals?.sessionIntent;
     const searchIntent = earlyInitial?.proposal.salesSignals?.productSearchIntent;
     const searchEvidence = searchIntent?.evidenceText?.normalize("NFC").toLocaleLowerCase("vi") ?? "";
+    const hasColorAlt = /\bmàu khác\b/iu.test(searchEvidence);
+    const hasModelAlt = /\b(?:mẫu|set|bộ|kiểu|dáng)\s+khác\b/iu.test(searchEvidence);
     const contradictoryProductSearch = (
-      searchEvidence.includes("màu khác") && !searchEvidence.includes("mẫu khác") &&
-      searchIntent?.act === "FIND_ALTERNATIVE"
+      hasColorAlt && !hasModelAlt && searchIntent?.act === "FIND_ALTERNATIVE"
     ) || (
-      searchEvidence.includes("mẫu khác") && searchIntent?.act === "KEEP_CURRENT"
+      hasModelAlt && !hasColorAlt && searchIntent?.act === "KEEP_CURRENT"
     );
     const productSearchAct = searchIntent && searchIntent.act !== "NONE" &&
         searchIntent.confidence >= 0.85 && searchIntent.evidenceText !== null &&
         (message.text ?? "").normalize("NFC").includes(searchIntent.evidenceText.normalize("NFC"))
       ? contradictoryProductSearch
-        ? searchEvidence.includes("màu khác") && !searchEvidence.includes("mẫu khác")
+        ? hasColorAlt && !hasModelAlt
           ? "KEEP_CURRENT" : "FIND_ALTERNATIVE"
         : searchIntent.act
       : null;

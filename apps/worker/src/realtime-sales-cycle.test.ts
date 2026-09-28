@@ -3200,4 +3200,132 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
     expect(missingRealtimeCheckoutFields(preview.plan!.state)).toEqual([]);
   });
+
+  it("does not mistake purchasing a 'bộ' for cart item removal", async () => {
+    let state = createRealtimeSalesState(conversationId, pageId, now);
+    const opened = await evaluateRealtimeSalesCycle(input(
+      state, "lấy 2 set CB182 size M", "event-open-bo-1",
+    ));
+    state = opened.plan!.state;
+    expect(state.cart?.value.lines.length).toBe(1);
+
+    // Customer saying "lấy 1 bộ mẫu nhé" must not trigger removeItem
+    const buyingBo = await evaluateRealtimeSalesCycle(input(
+      state, "chị lấy 1 bộ mẫu nhé", "event-buy-bo-2",
+    ));
+    // Not treated as removeItem
+    expect(buyingBo.messages.some((msg) => msg.kind === "TEXT" && msg.text.includes("Giỏ hiện chỉ còn một sản phẩm"))).toBe(false);
+
+    // Unaccented "lay 1 bo mau do" must not trigger removeItem
+    const buyingBoUnaccented = await evaluateRealtimeSalesCycle(input(
+      state, "lay 1 bo mau do", "event-buy-bo-3",
+    ));
+    expect(buyingBoUnaccented.messages.some((msg) => msg.kind === "TEXT" && msg.text.includes("Giỏ hiện chỉ còn một sản phẩm"))).toBe(false);
+  });
+
+  it("does not treat payment inquiries as payment selection", async () => {
+    let state = createRealtimeSalesState(conversationId, pageId, now);
+    const opened = await evaluateRealtimeSalesCycle(input(
+      state, "chốt CB182 size M", "event-open-pay-inquiry",
+    ));
+    state = opened.plan!.state;
+
+    const askTransfer = await evaluateRealtimeSalesCycle(input(
+      state, "Shop có nhận chuyển khoản không", "event-ask-bank",
+    ));
+    expect(askTransfer.plan?.state.checkoutDraft?.paymentMethod ?? null).toBeNull();
+
+    const askTransfer2 = await evaluateRealtimeSalesCycle(input(
+      state, "Chuyển khoản được không shop", "event-ask-bank-2",
+    ));
+    expect(askTransfer2.plan?.state.checkoutDraft?.paymentMethod ?? null).toBeNull();
+
+    const askCod = await evaluateRealtimeSalesCycle(input(
+      state, "Có cho thanh toán COD không", "event-ask-cod",
+    ));
+    expect(askCod.plan?.state.checkoutDraft?.paymentMethod ?? null).toBeNull();
+
+    const chooseBank = await evaluateRealtimeSalesCycle(input(
+      state, "Chị chọn chuyển khoản nhé", "event-choose-bank",
+    ));
+    expect(chooseBank.plan?.state.checkoutDraft?.paymentMethod).toBe("BANK_TRANSFER");
+  });
+
+  it("rejects field labels and label prefixes leaking into recipient fullName", async () => {
+    let state = createRealtimeSalesState(conversationId, pageId, now);
+    const opened = await evaluateRealtimeSalesCycle(input(
+      state, "chốt CB182 size M", "event-open-label-leak",
+    ));
+    state = opened.plan!.state;
+
+    const leakedLabel = await evaluateRealtimeSalesCycle(input(
+      state, "Tên: Số điện thoại: 0987654321", "event-leak-label",
+    ));
+    expect(leakedLabel.plan?.state.checkoutDraft?.fullName ?? null).toBeNull();
+    expect(leakedLabel.plan?.state.checkoutDraft?.phone).toBe("0987654321");
+
+    const validDetails = await evaluateRealtimeSalesCycle(input(
+      state, "Tên: Nguyễn Thị Lan, SĐT: 0987654321", "event-valid-label",
+    ));
+    expect(validDetails.plan?.state.checkoutDraft?.fullName).toBe("Nguyễn Thị Lan");
+    expect(validDetails.plan?.state.checkoutDraft?.phone).toBe("0987654321");
+  });
+
+  it("executes variant edit on 'Đổi sang L nhé' but ignores comments", async () => {
+    let state = createRealtimeSalesState(conversationId, pageId, now);
+    const opened = await evaluateRealtimeSalesCycle(input(
+      state, "chốt CB182 size M", "event-open-edit-l",
+    ));
+    state = opened.plan!.state;
+    expect(state.cart?.value.lines[0]?.components[0]?.size).toBe("M");
+
+    const variantFacts = { ...facts, resolveCartSelection: async (query: any, at: any) => {
+      const base = await facts.resolveCartSelection!(query, at);
+      if (base.status !== "READY" || query.size !== "L") return base;
+      return { ...base, versions: { ...base.versions, price: "price-v2" },
+        line: { ...base.line, lineId: query.lineId,
+          components: base.line.components.map((component: any) => ({ ...component,
+            size: "L", componentSku: component.componentSku.replace(/_M$/u, "_L") })),
+          posUnitPriceVnd: 729_000, lineTotalVnd: 729_000 * query.quantity,
+          priceAuthority: { ...base.line.priceAuthority!, priceFactRef: "price-v2" },
+        } };
+    } };
+
+    // Comment with variantIntent act=COMMENT must NOT change cart variant
+    const comment = await evaluateRealtimeSalesCycle({
+      ...input(state, "Chị thấy size L hơi rộng", "event-comment-l"),
+      facts: variantFacts,
+      salesSignals: {
+        checkoutExtraction: {
+          fullName: { value: null, evidenceText: null, confidence: 0 },
+          phone: { value: null, evidenceText: null, confidence: 0 },
+          address: { value: null, evidenceText: null, confidence: 0 },
+          paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+        },
+        purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null, confidence: 0 },
+        variantIntent: { act: "COMMENT", size: "L", color: null, evidenceText: "size L hơi rộng", confidence: 0.99 },
+      },
+    });
+    expect(comment.plan?.state.cart?.value.lines[0]?.components[0]?.size ?? state.cart!.value.lines[0]?.components[0]?.size).toBe("M");
+    expect(comment.plan?.state.cart?.value.revision ?? state.cart!.value.revision).toBe(state.cart!.value.revision);
+
+    // "Đổi sang L nhé" without literal keyword 'size' executes the edit
+    const edit = await evaluateRealtimeSalesCycle({
+      ...input(state, "Đổi sang L nhé", "event-edit-l"),
+      facts: variantFacts,
+      salesSignals: {
+        checkoutExtraction: {
+          fullName: { value: null, evidenceText: null, confidence: 0 },
+          phone: { value: null, evidenceText: null, confidence: 0 },
+          address: { value: null, evidenceText: null, confidence: 0 },
+          paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+        },
+        purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null, confidence: 0 },
+        variantIntent: { act: "CHANGE", size: "L", color: null, evidenceText: "Đổi sang L", confidence: 0.99 },
+      },
+    });
+    expect(edit.plan?.state.cart?.value.lines[0]?.components[0]?.size).toBe("L");
+    expect(edit.plan?.state.cart?.value.revision).toBe(state.cart!.value.revision + 1);
+    expect(edit.plan?.cartMutationBatchEvidence?.receipts[0]?.mutation.kind).toBe("SET_LINE_VARIANT");
+  });
 });

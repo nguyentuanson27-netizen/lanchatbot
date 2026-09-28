@@ -2294,6 +2294,48 @@ describe("Track C C3 strategy-contract runner", () => {
     });
   });
 
+  it("does not reject negated order effect assertions as affirmative effect claims", async () => {
+    const unconfirmedCapture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: {
+        id: "C3_UNCONFIRMED_ORDER_STATUS",
+        latest_customer_message: "Chốt giúp chị nhé.",
+        context: {
+          product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "ORDER_PREVIEW", canonical_flags: [],
+          buying_intent: { decision: "COMMITTED", requested_action: "PROCEED_TO_PAYMENT",
+            quantity: 1, evidence: "Chốt giúp chị nhé." },
+          source_stage: "ORDER_PREVIEW", runtime_claim_refs: [],
+        },
+      }, runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+    });
+    const run = (answerText: string) => runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: unconfirmedCapture, evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chốt giúp chị nhé.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      transport: { send: vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ payload: payload({
+          replyAct: "ANSWER", goal: "Explain that order cannot be finalized yet.",
+          proposition: "NONE", evidenceRefs: [],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }), providerModelVersion: "gemini-3.5-flash-lite" })
+        .mockResolvedValueOnce({ payload: payload({
+          answerText, factualTexts: [], progressionText: null,
+        }), providerModelVersion: "gemini-3.5-flash-lite" }) },
+    });
+
+    const safe = await run("Hiện em chưa có xác nhận đơn đã được đặt nên chưa thể báo đơn hoàn tất.");
+    expect(safe.reply).toContain("chưa có xác nhận đơn đã được đặt");
+
+    await expect(run("Em đã xác nhận đơn đã được đặt cho chị rồi nhé.")).rejects.toMatchObject({
+      diagnostic: { stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" },
+    });
+  });
+
   it("returns redacted diagnostic text for phone email and address", async () => {
     const rawDraft = {
       answerText: null,
