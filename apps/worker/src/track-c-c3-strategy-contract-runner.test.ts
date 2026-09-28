@@ -944,6 +944,23 @@ describe("Track C C3 strategy-contract runner", () => {
     });
   });
 
+  it("omits budget questions when this turn has no executable budget search", () => {
+    const request = buildTrackCStrategistContractRequest({
+      modelResource: MODEL_RESOURCE, capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER",
+        messageType: "TEXT", text: "Giá hơi cao với chị.", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z" }], evidence: [],
+      constraints: { permittedCanonicalActions: ["NONE"], measurementsUnavailable: false,
+        productResolved: true, hardStop: false, budgetSearchAvailable: false },
+    });
+    const body = JSON.parse(request.body);
+    const inputs = body.generationConfig.responseSchema.anyOf[0]
+      .properties.continuation.anyOf[0].properties.input.enum;
+    expect(inputs).not.toContain("BUDGET");
+    expect(JSON.parse(body.contents[0].parts[0].text).constraints.budgetSearchAvailable)
+      .toBe(false);
+  });
+
   it("offers USUAL_SIZE to Vertex only after the latest measurement state is unavailable", () => {
     const request = buildTrackCStrategistContractRequest({
       modelResource: MODEL_RESOURCE,
@@ -1360,6 +1377,36 @@ describe("Track C C3 strategy-contract runner", () => {
       kind: "VERIFIED_CLAIM", text: expect.stringContaining("849.000đ"),
     })]);
     expect(result.reply).not.toContain("đổi size");
+  });
+
+  it("drops optional stock prose rejected by the production guard while retaining the verified stock claim", async () => {
+    const stockCapture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION", recipe, runtimeClaimCatalog: facts.runtime_claim_catalog,
+      fixture: { id: "OPTIONAL_STOCK_PROSE", latest_customer_message: "Mẫu này còn hàng không?",
+        context: { product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
+          phase: "BROWSING", canonical_flags: [], source_stage: null,
+          buying_intent: { decision: "NONE", requested_action: "NONE", quantity: null,
+            evidence: null }, runtime_claim_refs: ["RC_STOCK_A_IN"] } },
+    });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({ replyAct: "ANSWER",
+        goal: "Answer the verified product stock question.", proposition: "STOCK",
+        evidenceRefs: ["CLAIM_001"], continuation: { type: "KEEP_OPEN" },
+        canonicalAction: "NONE" }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "SQ9012 hiện còn hàng. Tình trạng theo từng biến thể chưa được xác nhận.",
+        factualTexts: ["Mẫu này hiện còn hàng ạ."], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: stockCapture,
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu này còn hàng không?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send },
+    });
+    expect(result.reply).toBe("Mẫu này hiện còn hàng ạ.");
+    expect(result.output.segments).toEqual([expect.objectContaining({ kind: "VERIFIED_CLAIM" })]);
   });
 
   it("drops an unauthorized factual slot when no evidence was selected", async () => {

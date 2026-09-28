@@ -350,6 +350,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   measurementsUnavailable: boolean;
   productResolved: boolean;
   hardStop: boolean;
+  budgetSearchAvailable?: boolean;
   boundProductIds?: readonly string[];
   checkoutRequestedFields?: readonly TrackCCheckoutField[];
 }>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
@@ -372,7 +373,10 @@ export function compileTrackCStrategistDecision(input: Readonly<{
         (decision.replyAct !== "ACKNOWLEDGE" || decision.evidenceRefs.length !== 0)) ||
       (decision.continuation?.type === "ASK" &&
         decision.continuation.input === "USUAL_SIZE" &&
-        !input.measurementsUnavailable)) {
+        !input.measurementsUnavailable) ||
+      (decision.continuation?.type === "ASK" &&
+        decision.continuation.input === "BUDGET" &&
+        input.budgetSearchAvailable === false)) {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
   const { realizable, unrealizable } =

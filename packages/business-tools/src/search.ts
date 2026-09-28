@@ -80,19 +80,22 @@ export class ProductSearchService {
 
   public async searchText(
     query: string,
-    excludeProductId?: string,
+    excludeProductIds?: string | readonly string[],
   ): Promise<ProductSearchResult> {
     const normalized = normalizeProductCode(query);
-    const excluded = excludeProductId ? normalizeProductCode(excludeProductId) : null;
+    const excluded = new Set((typeof excludeProductIds === "string"
+      ? [excludeProductIds] : excludeProductIds ?? [])
+      .map(normalizeProductCode).filter(Boolean).slice(0, 8));
+    const isExcluded = (productId: string) => excluded.has(normalizeProductCode(productId));
     const codeLike = /^[A-Z]{1,6}\d{1,8}(?:[A-Z0-9]*)$/u.test(normalized);
     if (codeLike) {
       const exact = await this.port.findByExactCode(normalized);
-      if (exact !== null && normalizeProductCode(exact.productId) !== excluded) {
+      if (exact !== null && !isExcluded(exact.productId)) {
         return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateDocument(exact), score: 1, gap: null };
       }
 
       const aliases = (await this.port.findByAlias(normalized)).map(validateDocument)
-        .filter((product) => normalizeProductCode(product.productId) !== excluded);
+        .filter((product) => !isExcluded(product.productId));
       if (aliases.length === 1 && aliases[0] !== undefined) {
         return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
       }
@@ -106,9 +109,10 @@ export class ProductSearchService {
     }
 
     const candidates = validateAndSortCandidates(
-      await this.port.searchStableText(query, this.thresholds.maxCandidates),
-      this.thresholds.maxCandidates,
-    ).filter(({ document }) => normalizeProductCode(document.productId) !== excluded);
+      await this.port.searchStableText(query, this.thresholds.maxCandidates + excluded.size),
+      this.thresholds.maxCandidates + excluded.size,
+    ).filter(({ document }) => !isExcluded(document.productId))
+      .slice(0, this.thresholds.maxCandidates);
     return this.decideSemantic(candidates, this.thresholds.textMinScore);
   }
 

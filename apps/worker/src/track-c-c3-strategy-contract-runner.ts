@@ -184,6 +184,7 @@ export type TrackCStrategistConstraints = Readonly<{
   measurementsUnavailable: boolean;
   productResolved: boolean;
   hardStop: boolean;
+  budgetSearchAvailable?: boolean;
   checkoutRequestedFields?: readonly CheckoutField[];
 }>;
 
@@ -394,9 +395,11 @@ function strategistResponseSchema(
   // contract until the code-derived, latest-relevant dialogue state says that
   // measurements are unavailable; the compiler retains the same check as a
   // defense at the provider boundary.
+  const availableInputs = constraints.budgetSearchAvailable === false
+    ? ORDINARY_INPUTS.filter((input) => input !== "BUDGET") : ORDINARY_INPUTS;
   const continuationInputs = constraints.measurementsUnavailable
-    ? ORDINARY_INPUTS
-    : ORDINARY_INPUTS.filter((input) => input !== "USUAL_SIZE");
+    ? availableInputs
+    : availableInputs.filter((input) => input !== "USUAL_SIZE");
   const shared = {
     replyAct: { type: "STRING", enum: constraints.hardStop
       ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
@@ -517,6 +520,7 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
       measurementsUnavailable: input.constraints.measurementsUnavailable,
       productResolved: input.constraints.productResolved,
       hardStop: input.constraints.hardStop,
+      budgetSearchAvailable: input.constraints.budgetSearchAvailable ?? true,
       checkoutRequestedFields: input.constraints.checkoutRequestedFields ?? [],
     },
   });
@@ -1254,11 +1258,11 @@ async function runTrackCStrategyContractCore(
   const lane = selectTrackCConversationLane(
     trustedAcquisition === undefined ? [] : [trustedAcquisition],
   );
-  const constraints = constraintsFor(
+  const constraints = { ...constraintsFor(
     context, simulationMetadata, input.evaluationContext,
     input.canonicalCheckoutRequestedFields,
     input.checkoutClarificationActive,
-  );
+  ), budgetSearchAvailable: false } as const;
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
   let task: TrackCResponderTask;
@@ -1304,6 +1308,7 @@ async function runTrackCStrategyContractCore(
         measurementsUnavailable: constraints.measurementsUnavailable,
         productResolved: constraints.productResolved,
         hardStop: constraints.hardStop,
+        budgetSearchAvailable: constraints.budgetSearchAvailable,
         boundProductIds: context.productBinding.productIds,
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
@@ -1371,8 +1376,8 @@ async function runTrackCStrategyContractCore(
       if (draft.answerText === null || task.evidence.length === 0 ||
           task.continuation?.type !== "KEEP_OPEN" ||
           !(error instanceof Error) ||
-          !["TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN", "TRACK_C_V5_PRODUCTION_GUARD_FAILED"]
-            .includes(error.message)) throw error;
+          !(error.message === "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" ||
+            error.message.startsWith("TRACK_C_V5_PRODUCTION_GUARD_FAILED:"))) throw error;
       output = compileResponderDraft({
         ...compilationInput,
         draft: { ...draft, answerText: null },

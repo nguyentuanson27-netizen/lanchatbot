@@ -169,6 +169,19 @@ describe("stable product search", () => {
     expect(result).toMatchObject({ status: "MATCHED", product: { productId: "SD397" } });
   });
 
+  it("retrieves beyond rejected top hits before applying the candidate limit", async () => {
+    const sd398 = { ...sd397, productId: "SD398", parentProductId: "SD398",
+      canonicalCode: "SD398" };
+    const port = new FakeStableCatalogSearchPort([sd396, sd397, sd398], [
+      { document: sd396, score: 0.99 },
+      { document: sd397, score: 0.97 },
+      { document: sd398, score: 0.91 },
+    ]);
+    const result = await new ProductSearchService(port, { ...thresholds, maxCandidates: 1 })
+      .searchText("tìm mẫu phù hợp hơn", ["SD396", "SD397"]);
+    expect(result).toMatchObject({ status: "MATCHED", product: { productId: "SD398" } });
+  });
+
   it("returns up to three candidates when top score is low or top gap is too small", async () => {
     const lowPort = new FakeStableCatalogSearchPort([], [
       { document: sd396, score: 0.7 },

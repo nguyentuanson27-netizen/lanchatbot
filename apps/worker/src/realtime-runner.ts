@@ -3275,6 +3275,22 @@ export class RealtimeRunner {
       message.text ?? "", earlyInitial.proposal.salesSignals, hasOpenCartForTurn,
     );
     const earlySessionIntent = earlyInitial?.proposal.salesSignals?.sessionIntent;
+    const searchIntent = earlyInitial?.proposal.salesSignals?.productSearchIntent;
+    const searchEvidence = searchIntent?.evidenceText?.normalize("NFC").toLocaleLowerCase("vi") ?? "";
+    const contradictoryProductSearch = (
+      searchEvidence.includes("màu khác") && !searchEvidence.includes("mẫu khác") &&
+      searchIntent?.act === "FIND_ALTERNATIVE"
+    ) || (
+      searchEvidence.includes("mẫu khác") && searchIntent?.act === "KEEP_CURRENT"
+    );
+    const productSearchAct = searchIntent && searchIntent.act !== "NONE" &&
+        searchIntent.confidence >= 0.85 && searchIntent.evidenceText !== null &&
+        (message.text ?? "").normalize("NFC").includes(searchIntent.evidenceText.normalize("NFC"))
+      ? contradictoryProductSearch
+        ? searchEvidence.includes("màu khác") && !searchEvidence.includes("mẫu khác")
+          ? "KEEP_CURRENT" : "FIND_ALTERNATIVE"
+        : searchIntent.act
+      : null;
     const sameTurnSession = earlySessionIntent
       ? updateSessionDecisionContextFromModel(
           authorityState.sessionDecisionContext, message.text ?? "", earlySessionIntent,
@@ -3366,6 +3382,7 @@ export class RealtimeRunner {
           semanticState,
           claim.pageId,
           mediaPartialResolutionPolicy,
+          productSearchAct,
         );
     // A newly rejected code may still be found by exact lookup in this same
     // message. Do not promote it back into the current-product binding.
@@ -5327,6 +5344,7 @@ export class RealtimeRunner {
           (salesCyclePlan?.cartOpenEvidence !== undefined &&
             salesVerifiedCartSummary !== null &&
             salesProtectedOutbound?.readiness.outcome === "READY"))) {
+      let c3ReadinessReasons: readonly string[] = [];
       try {
         const c3Input = buildRealtimeC3Input({
           sourceMessagePk: triggerMessagePk,
@@ -5480,6 +5498,7 @@ export class RealtimeRunner {
           checkedAt: new Date(),
         });
         if (readiness.outcome !== "READY") {
+          c3ReadinessReasons = readiness.reasonCodes;
           throw new Error("TRACK_C_C3_OUTBOUND_READINESS_BLOCKED");
         }
         if (this.options.mode === "DRY_RUN") {
@@ -5511,6 +5530,7 @@ export class RealtimeRunner {
           level: "warn", code: "TRACK_C_C3_FALLBACK",
           candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
           reason: code,
+          ...(c3ReadinessReasons.length === 0 ? {} : { readinessReasonCodes: c3ReadinessReasons }),
           conversationRevision: record.stateVersion,
           salesCycleRevision: salesCycleRecord.stateRevision,
         })}\n`);
@@ -6756,6 +6776,7 @@ export class RealtimeRunner {
     state: ConversationState,
     pageId: string,
     mediaPartialResolutionPolicy: MediaPartialResolutionPolicy,
+    productSearchAct: "KEEP_CURRENT" | "FIND_ALTERNATIVE" | null = null,
   ): Promise<ProductResolution> {
     const text = message.text?.trim() ?? "";
     const imageAttachments = message.attachments
@@ -7022,17 +7043,26 @@ export class RealtimeRunner {
       };
     }
 
-    const stateProductId = currentProductContinuationId(text, state.currentProductId);
+    const stateProductId = productSearchAct === "KEEP_CURRENT" &&
+        !hasExplicitProductReference(text)
+      ? state.currentProductId
+      : productSearchAct === "FIND_ALTERNATIVE" ? null
+        : currentProductContinuationId(text, state.currentProductId);
     if (stateProductId) {
       const product = await this.exactProduct(stateProductId);
       if (product) return this.singleResolution(product, "STATE");
     }
 
     if (text) {
-      const excludeProductId = isAlternativeProductRequest(text)
-        ? state.currentProductId : null;
-      const result = excludeProductId
-        ? await this.productSearch.searchText(text, excludeProductId)
+      const excludedProductIds = [...new Set([
+        ...(state.sessionDecisionContext?.rejectedProductIds ?? []),
+        ...((productSearchAct === "FIND_ALTERNATIVE" ||
+            (productSearchAct === null && isAlternativeProductRequest(text))) &&
+            state.currentProductId
+          ? [state.currentProductId] : []),
+      ])];
+      const result = excludedProductIds.length > 0
+        ? await this.productSearch.searchText(text, excludedProductIds)
         : await this.productSearch.searchText(text);
       if (result.status === "MATCHED") {
         return this.singleResolution(result.product, "TEXT_SEMANTIC");

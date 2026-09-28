@@ -392,6 +392,18 @@ export const AgentSalesSignalsV1Schema = z.object({
   buyingIntent: AgentBuyingIntentV1Schema.optional(),
   // Older persisted proposals remain readable; current producer emits it.
   variantIntent: AgentVariantIntentV1Schema.optional(),
+  // Current generations distinguish a different product from a different
+  // colour of the bound product before product search. Older proposals remain readable.
+  productSearchIntent: z.object({
+    act: z.enum(["NONE", "KEEP_CURRENT", "FIND_ALTERNATIVE"]),
+    evidenceText: z.string().trim().min(1).max(1_000).nullable(),
+    confidence: z.number().min(0).max(1),
+  }).strict().superRefine((intent, context) => {
+    if ((intent.act === "NONE") !== (intent.evidenceText === null)) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["evidenceText"],
+        message: "product search decision requires exact customer evidence" });
+    }
+  }).optional(),
   // Earlier persisted proposals remain readable. New generations classify
   // routing on the latest customer turn with an exact source span.
   routingIntent: z.object({

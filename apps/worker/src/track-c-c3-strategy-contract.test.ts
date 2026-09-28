@@ -124,6 +124,16 @@ describe("Track C C3 clean strategy contract", () => {
     expect(task.requiredEvidenceRefs).toEqual([]);
   });
 
+  it("rejects a budget question without an executable budget search", () => {
+    expect(() => compileTrackCStrategistDecision({
+      decision: { replyAct: "ACKNOWLEDGE", goal: "Ask the customer for a budget.",
+        proposition: "NONE", evidenceRefs: [],
+        continuation: { type: "ASK", input: "BUDGET" }, canonicalAction: "NONE" },
+      evidence: [], permittedCanonicalActions: ["NONE"], measurementsUnavailable: false,
+      productResolved: true, hardStop: false, budgetSearchAvailable: false,
+    })).toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  });
+
   it("allows acknowledgement-only intent without factual evidence", () => {
     const { task } = compileTrackCStrategistDecision({
       decision: {

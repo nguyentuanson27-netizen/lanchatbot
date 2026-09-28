@@ -3341,7 +3341,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "EARLY_COLOR_CURRENT", "EARLY_COLOR_WRONG_ALTERNATIVE", "EARLY_PRODUCT_ALTERNATIVE", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3602,6 +3602,16 @@ describe("RealtimeRunner inbound batching", () => {
     const baseModel = replyModel();
     const quotaReserve = vi.fn(async () => true);
     const cartSelectionSizes: (string | null)[] = [];
+    const productSearchText = vi.fn(async (query: string) => ({
+      status: "MATCHED" as const,
+      matchKind: "EXACT_CODE" as const,
+      score: 1,
+      gap: null,
+      product: query.includes("SV9031")
+        ? { ...product, productId: "SV9031", parentProductId: "SV9031",
+            canonicalCode: "SV9031", title: "Set SV9031" }
+        : product,
+    }));
     const runner = new RealtimeRunner(
       inbox,
       runtime,
@@ -3710,16 +3720,7 @@ describe("RealtimeRunner inbound batching", () => {
         close: vi.fn(async () => undefined),
       },
       {
-        searchText: vi.fn(async (query: string) => ({
-          status: "MATCHED" as const,
-          matchKind: "EXACT_CODE" as const,
-          score: 1,
-          gap: null,
-          product: query.includes("SV9031")
-            ? { ...product, productId: "SV9031", parentProductId: "SV9031",
-                canonicalCode: "SV9031", title: "Set SV9031" }
-            : product,
-        })),
+        searchText: productSearchText,
         searchImage: vi.fn(),
       },
       clearTagObservation(),
@@ -3832,6 +3833,38 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+    if (checkoutOwner === "EARLY_COLOR_CURRENT" ||
+        checkoutOwner === "EARLY_COLOR_WRONG_ALTERNATIVE" ||
+        checkoutOwner === "EARLY_PRODUCT_ALTERNATIVE") {
+      const colorQuestion = checkoutOwner !== "EARLY_PRODUCT_ALTERNATIVE";
+      const text = colorQuestion ? "Có màu khác không?" : "Có mẫu khác không?";
+      const followup = item(40, text);
+      currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+      const sourceModel = replyModel();
+      vi.mocked(baseModel.generate).mockImplementationOnce(async (...args) => {
+        const generated = await sourceModel.generate(...args);
+        return { ...generated, proposal: { ...generated.proposal,
+          salesSignals: { ...generated.proposal.salesSignals!, productSearchIntent: {
+            act: checkoutOwner === "EARLY_COLOR_CURRENT"
+              ? "KEEP_CURRENT" as const : "FIND_ALTERNATIVE" as const,
+            evidenceText: text, confidence: 0.99,
+          } },
+        } };
+      });
+      const searchCallsBefore = productSearchText.mock.calls.length;
+      vi.setSystemTime(followup.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      const calls = productSearchText.mock.calls.slice(searchCallsBefore);
+      if (colorQuestion) {
+        expect(calls.some(([query]) => query === "CB182")).toBe(true);
+        expect(calls.some(([query]) => query === text)).toBe(false);
+      } else {
+        expect(calls).toContainEqual([text, ["CB182"]]);
+      }
+      return;
+    }
+
     if (checkoutOwner === "EARLY_REJECT_CURRENT") {
       const text = "Không lấy CB182 nữa.";
       const rejection = item(40, text);
