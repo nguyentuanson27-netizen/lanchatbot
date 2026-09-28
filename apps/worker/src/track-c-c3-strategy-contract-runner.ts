@@ -32,6 +32,7 @@ import {
   type TrackCCanonicalAction,
   type TrackCConversationLane,
   type TrackCOrdinaryDecisionInput,
+  type TrackCProtectedProposition,
   type TrackCResponderTask,
   type TrackCSelectableEvidence,
   type TrackCStrategistDecision,
@@ -141,6 +142,14 @@ const NEUTRAL_HOLD_ACKNOWLEDGEMENTS = Object.freeze([
 ] as const);
 const UNRESOLVED_ANSWER_TEXT =
   "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.";
+// When unbound prose fails the final guard, keep the Strategist's declared
+// unanswered property. These sentences assert no shop fact or order effect.
+const UNRESOLVED_LIMIT_TEXT: Partial<Record<TrackCProtectedProposition, string>> = {
+  STOCK: "Em chưa thể xác nhận tình trạng hàng cho lựa chọn chị hỏi ạ.",
+  SIZE_FIT: "Em chưa thể xác nhận độ vừa của size chị hỏi ạ.",
+  FREESHIP: "Em chưa thể xác nhận điều kiện miễn phí giao hàng cho đơn này ạ.",
+  FULFILLMENT_STATUS: "Hiện chưa có kết quả đặt đơn để em báo chị ạ.",
+};
 // Code-owned limit sentence for a selection that was only partly realizable.
 // Without it, a compound question could be answered with the part that has
 // wording while the rest disappeared silently. It carries no fact of its own.
@@ -641,6 +650,9 @@ function responderDraftSchema(
   const answers = answerWording(task);
   const neutralHold = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
     task.canonicalRequest?.type === "HOLD_POSITION" && task.evidence.length === 0;
+  const unresolvedOrderStatus = adaptive && task.answer.kind === "ANSWER" &&
+    task.answer.evidenceStatus === "UNRESOLVED" &&
+    task.answer.proposition === "FULFILLMENT_STATUS";
   return {
     type: "OBJECT",
     required: ["answerText", "factualTexts", "progressionText"],
@@ -651,6 +663,8 @@ function responderDraftSchema(
         ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" ||
             singleRequestBody(task) || multipleProductPrices
           ? { type: "NULL" }
+          : unresolvedOrderStatus
+            ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
           : { description: "Customer context or specific unanswered part from the goal. SUPPORTED does not imply complete coverage. No shop facts, quantities, sizes or requests here.",
@@ -743,6 +757,12 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   // and perform the same PII check after trimming only the adaptive slots.
   const prose = (value: unknown): unknown => adaptive && typeof value === "string"
     ? value.trim() : value;
+  if (adaptive && task.answer.kind === "ANSWER" &&
+      task.answer.evidenceStatus === "UNRESOLVED" &&
+      task.answer.proposition === "FULFILLMENT_STATUS" &&
+      prose(record.answerText) !== null) {
+    throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
+  }
   // The selected store fact answers a direct location request. A model preface
   // adds no information and may trip customer-address DLP on the word "địa chỉ".
   // Drop that untrusted prose; the bound fact still receives normal DLP checks.
@@ -966,7 +986,11 @@ function compileResponderDraft(input: Readonly<{
     }
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
+  if (adaptive && task.answer.kind === "ANSWER" &&
+      task.answer.evidenceStatus === "UNRESOLVED" &&
+      task.answer.proposition === "FULFILLMENT_STATUS") {
+    segments.push({ kind: "GENERAL", text: UNRESOLVED_LIMIT_TEXT.FULFILLMENT_STATUS! });
+  } else if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
   } else if (draft.answerText !== null && (adaptive || draft.answerText !== UNRESOLVED_ANSWER_TEXT)) {
@@ -1384,14 +1408,27 @@ async function runTrackCStrategyContractCore(
       // facts answer the turn. Revalidate the entire output without that
       // sentence so an unrelated effect claim cannot erase those facts.
       // Any unsafe factual realization still fails the second validation.
-      if (draft.answerText === null || task.evidence.length === 0 ||
-          task.continuation?.type !== "KEEP_OPEN" ||
-          !(error instanceof Error) ||
+      if (draft.answerText === null || !(error instanceof Error) ||
           !(error.message === "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" ||
             error.message.startsWith("TRACK_C_V5_PRODUCTION_GUARD_FAILED:"))) throw error;
+      const guardMismatch = error.message.startsWith("TRACK_C_V5_PRODUCTION_GUARD_FAILED:");
+      const unresolved = guardMismatch && task.answer.kind === "ANSWER" &&
+        task.answer.evidenceStatus === "UNRESOLVED" &&
+        task.continuation?.type === "KEEP_OPEN" &&
+        task.canonicalRequest === null;
+      const acknowledged = guardMismatch && task.answer.kind === "ACKNOWLEDGE" &&
+        task.evidence.length === 0 &&
+        task.continuation?.type === "KEEP_OPEN" &&
+        task.canonicalRequest === null;
+      const optionalPreface = task.evidence.length > 0 &&
+        task.continuation?.type === "KEEP_OPEN";
+      if (!unresolved && !acknowledged && !optionalPreface) throw error;
+      const fallbackAnswerText = task.answer.kind === "ANSWER" && unresolved
+        ? UNRESOLVED_LIMIT_TEXT[task.answer.proposition] ?? UNRESOLVED_ANSWER_TEXT
+        : acknowledged ? "Dạ, em đã hiểu lựa chọn của chị ạ." : null;
       output = compileResponderDraft({
         ...compilationInput,
-        draft: { ...draft, answerText: null },
+        draft: { ...draft, answerText: fallbackAnswerText },
       });
     }
   } catch (error) {
