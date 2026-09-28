@@ -1404,10 +1404,10 @@ async function runTrackCStrategyContractCore(
     try {
       output = compileResponderDraft(compilationInput);
     } catch (error) {
-      // A free-form acknowledgement is optional when the selected verified
-      // facts answer the turn. Revalidate the entire output without that
-      // sentence so an unrelated effect claim cannot erase those facts.
-      // Any unsafe factual realization still fails the second validation.
+      // Recover a safe reply only from the compiled task: a guarded factual
+      // preface may be dropped, while unresolved/acknowledgement prose can be
+      // replaced with code-owned wording. Never rescue an effect claim for a
+      // task without verified facts. Revalidate the complete replacement.
       if (draft.answerText === null || !(error instanceof Error) ||
           !(error.message === "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN" ||
             error.message.startsWith("TRACK_C_V5_PRODUCTION_GUARD_FAILED:"))) throw error;

@@ -4,7 +4,14 @@ Kế hoạch: [plan.md](plan.md). Baseline `ce558e6d4028dd06bd6efc960286464425a2
 
 Các task P là việc còn phải thực hiện theo kế hoạch mới; checkbox chưa tick không có nghĩa toàn bộ code cũ chưa tồn tại.
 
-**Tình trạng mới nhất:** executable source `81602079`; `1df6bc88` chỉ thêm test
+**Tình trạng mới nhất:** executable source `a7501694`; [lần chạy Luna tập trung](evidence/c3-luna-focused-a7501694-rootcause.md)
+đã hoàn tất sáu ca từng kẹt guard nhưng **chưa đạt quality**: 3 FAIL được chấm,
+3 chưa chấm do Luna hết hạn mức. Q024 thiếu current-cart readback, Q043 thiếu
+variantId→màu/size mapping, Q035 thiếu canonical measurement blocker trong
+frozen input; không suy ra fact/action từ text để qua benchmark. Worker 1.828
+test pass, 1 opt-in skip; typecheck pass. P03/P04/P07/P11 vẫn mở.
+
+**DEV70 gần nhất:** executable source `81602079`; `1df6bc88` chỉ thêm test
 runtime cho handoff claim so giá. Luna medium đã chạy DEV70 trên đúng executable
 source: 62 `COMPLETED_NOT_JUDGED`, 6 guard/seam failure, 2 stale reject đúng.
 Rubric diagnostic riêng ở [báo cáo](evidence/c3-luna-dev70-81602079-report.md)
