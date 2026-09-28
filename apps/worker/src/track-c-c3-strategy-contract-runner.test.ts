@@ -280,6 +280,27 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     expect(result.reply).toBe("Với mẫu SQ9012: Giá hiện tại của mẫu này là 849.000đ. Với mẫu SV9031: Giá hiện tại của mẫu này là 1.099.000đ ạ.");
     expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(2);
+    const responderRequest = JSON.parse(send.mock.calls[1]![0].body);
+    expect(responderRequest.generationConfig.responseSchema.properties.answerText)
+      .toEqual({ type: "NULL" });
+    const comparative = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({ replyAct: "ANSWER",
+        goal: "Give the two verified prices.", proposition: "PRICE",
+        evidenceRefs: ["CLAIM_001", "CLAIM_002"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
+        providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: "SQ9012 là mẫu chị đang hỏi có giá thấp hơn SV9031.",
+        factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    await expect(runTrackCStrategyContractCase({
+      lane: "PRODUCTION_CONTRACT", modelResource: MODEL_RESOURCE, capture: twoProducts,
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Mẫu nào rẻ hơn?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }], transport: { send: comparative },
+    })).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   });
   it("accepts a writer's bound price realization and rejects a changed price or benefit through the live core", async () => {
     const decisionAt = new Date(recipe.evaluation_at);

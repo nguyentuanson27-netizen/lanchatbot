@@ -633,6 +633,8 @@ function responderDraftSchema(
   const adaptive = conversationLane === "ADAPTIVE_FOLLOWUP";
   const needsProgression = responderNeedsModelProgression(task);
   const factualEvidenceCount = modelAuthoredEvidence(task).length;
+  const multipleProductPrices = task.evidence.filter(({ capability }) =>
+    capability === "PRICE").length >= 2;
   const boundedAcknowledgement = usesBoundedAcknowledgement(task);
   const answers = answerWording(task);
   const neutralHold = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
@@ -644,7 +646,8 @@ function responderDraftSchema(
     maxProperties: 3,
     properties: {
       answerText: adaptive
-        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
+        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" ||
+            singleRequestBody(task) || multipleProductPrices
           ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
@@ -941,6 +944,12 @@ function compileResponderDraft(input: Readonly<{
   }
   assertProgression(task, draft, input.dialogue, adaptive);
   if (adaptive) {
+    // Separate price claims do not authorize a prose comparison of different
+    // offers. The code-owned fact slots can still report each bound price.
+    if (task.evidence.filter(({ capability }) => capability === "PRICE").length >= 2 &&
+        draft.answerText !== null) {
+      throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+    }
     for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
     if (singleRequestBody(task) && draft.answerText !== null) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
