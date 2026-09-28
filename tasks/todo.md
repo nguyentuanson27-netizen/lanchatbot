@@ -1,8 +1,21 @@
-# Checklist hiện hành — C3 sales root-cause fix, cập nhật 27/09/2026
+# Checklist hiện hành — C3 sales root-cause fix, cập nhật 28/09/2026
 
 Kế hoạch: [plan.md](plan.md). Baseline `ce558e6d4028dd06bd6efc960286464425a26a85`.
 
 Các task P là việc còn phải thực hiện theo kế hoạch mới; checkbox chưa tick không có nghĩa toàn bộ code cũ chưa tồn tại.
+
+**Tình trạng mới nhất:** executable source `81602079`; `1df6bc88` chỉ thêm test
+runtime cho handoff claim so giá. Luna medium đã chạy DEV70 trên đúng executable
+source: 62 `COMPLETED_NOT_JUDGED`, 6 guard/seam failure, 2 stale reject đúng.
+Rubric diagnostic riêng ở [báo cáo](evidence/c3-luna-dev70-81602079-report.md)
+chấm 62 ca: 24 PASS, 9 PASS_WITH_NOTE, 29 FAIL; không suy chất lượng từ số ca
+completed. Worker 1.823 test pass, 1 opt-in skip;
+typecheck pass. Hành trình conditional 700k không mở giỏ 799k; hành trình
+băn khoăn → chất liệu → mở giỏ → checkout đủ 8 lượt đã qua với C3 ở lượt mở
+giỏ. P08b có phép so sánh hai giá sản phẩm do code tính và guarded egress.
+P02 coverage catalog live, P03 guard hai chiều, P07 chất lượng tư vấn,
+P08a tìm phương án đúng budget, P09/P10 toàn diện và P11 rubric đạt ngưỡng
+vẫn mở. Draft PR phải giữ trạng thái WIP và ghi rõ chưa đủ điều kiện smoke.
 
 Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. Implementation candidate `c2b22d3` và bằng chứng [ở đây](evidence/c3-sales-implementation-20260927.md) mới đóng các lát current-cart/checkout/C3 cart opening; các checkbox P còn để mở cho đến khi đủ nghiệm thu toàn mục.
 

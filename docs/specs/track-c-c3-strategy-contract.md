@@ -1335,3 +1335,29 @@ or stock authority. Legacy proposals without `sessionIntent` keep the earlier
 bounded format updater. Broader search over alternatives, durable customer
 profile reconciliation and semantic cart-line removal still require P06/P08
 work and runtime Luna verification on exact executable source.
+
+### Follow-up: early intent handoff and bounded price comparison (2026-09-28)
+
+The preflighted producer now supplies `productSearchIntent` before product
+resolution. A validated request to find another product excludes the current
+and rejected IDs from the existing search call. A current-color request keeps
+the product binding. A conditional purchase remains `CONSIDERING` through
+direct-product-info resolution even when that deterministic proposal has no
+`salesSignals`; the canonical commerce decision reuses the validated early
+signal. Search returning no candidate cannot authorize a cart.
+
+For exactly two bound products with one fresh, product-level VND price claim
+each, code derives one selectable comparison. It states both prices and the
+arithmetic difference. The final guard recomputes its hash and permitted
+wording from the same claims. Outbound readiness carries both underlying
+price claims when the comparison is selected. A changed subject or amount is
+rejected. Variant-scoped, missing, expired or multiple prices do not produce
+the comparison. The protected price claim has no explicit offer kind, so
+comparison across different offer configurations remains outside this path.
+
+When a verified buying commitment has opened a cart and required checkout
+fields remain, Strategist may choose the canonical checkout request. Code
+still supplies the exact first quote and requested fields; C3 cannot claim
+an order or mutate the cart from its own prose. Synthetic Luna histories and
+remaining guard and catalog limitations are recorded in implementation
+evidence.

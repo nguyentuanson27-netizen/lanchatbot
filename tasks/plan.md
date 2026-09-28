@@ -1,6 +1,17 @@
-# Kế hoạch sửa C3 và năng lực bán hàng — cập nhật 27/09/2026
+# Kế hoạch sửa C3 và năng lực bán hàng — cập nhật 28/09/2026
 
 **Bản hiện hành. Trạng thái: đang triển khai; P00–P12 chưa hoàn tất.** Candidate `c2b22d3` đã sửa một phần current-cart/checkout và đường gọi C3 khi mở giỏ; bằng chứng và phần chưa đạt ở [c3-sales-implementation-20260927.md](evidence/c3-sales-implementation-20260927.md). Kế hoạch này thay thế thứ tự triển khai cũ, không tuyên bố thiết kế guard đã được chứng minh. Checklist hiện hành ở [todo.md](todo.md). Review Astra 24/09 là review kế hoạch cũ, không phải review bản này hoặc code hiện tại.
+
+Implementation đến executable source `81602079` đã thêm early typed product-search
+intent, giữ buying intent có điều kiện qua product resolution, code-derived
+two-product price comparison, và C3 checkout request tại cart opening. Luna
+DEV70 cùng source có 62 completed ở bước execution, 6 guard/seam failures và 2
+expected stale rejects; hành trình full-intent synthetic và bằng chứng chi
+tiết ở [báo cáo 28/09](evidence/c3-luna-dev70-81602079-report.md). Đây là
+62 ca completed được chấm diagnostic riêng: 24 PASS, 9 PASS_WITH_NOTE,
+29 FAIL; không phải pinned Gemini judge. Đây là
+tiến độ triển khai, không phải nghiệm thu P00–P12 hay xác nhận đủ điều kiện
+customer smoke. Các acceptance và ranh giới trong kế hoạch dưới đây giữ nguyên.
 
 Bản cập nhật tiếp thu và hiệu chỉnh [comment 5847545097](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/375#issuecomment-5847545097); [đối chiếu findings](evidence/c3-plan-review-comment-5847545097.md) ghi rõ phạm vi từng bằng chứng. Chỉ sửa tài liệu; chưa sửa hành vi ứng dụng hoặc chạy lại Luna.
 

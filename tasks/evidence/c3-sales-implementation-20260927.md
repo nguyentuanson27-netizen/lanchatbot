@@ -361,3 +361,22 @@ with one opt-in Luna test skipped; contracts passed 221 tests; worker
 `tsc --noEmit` and `git diff --check` passed. The opt-in Luna DEV70, rubric,
 real server DRY_RUN boot and full-intent journey have **not** run on this
 source. No live customer, catalog/index, POS, deploy or merge action occurred.
+
+### Continuation through executable source 81602079 (2026-09-28)
+
+The later code path reuses the preflighted producer for typed alternative
+search, protects conditional buying intent through deterministic product
+resolution, and derives a two-product price comparison only from two fresh,
+product-level VND price claims. The comparison is rederived at final guard
+and carries both source price claims to outbound readiness. At cart opening,
+an already verified `COMMITTED`/`OPEN_CART` decision with missing checkout
+fields now gives Strategist a direct canonical checkout task while code owns
+the first quote. Commit `1df6bc88` adds only the runtime comparison handoff
+test after executable source `81602079`.
+
+[The current DEV70 and stateful runtime report](c3-luna-dev70-81602079-report.md)
+contains source-pinned full histories, execution counts, diagnostic rubric
+results and residuals. Worker verification at `81602079` passed 1,823 tests
+with one opt-in Luna test skipped; typecheck passed. The isolated synthetic
+Qdrant round trip remains a one-product transport proof, not a live catalog
+coverage measurement. No live data or traffic was changed.
