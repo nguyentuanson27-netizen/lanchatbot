@@ -3341,7 +3341,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "EARLY_COLOR_CURRENT", "EARLY_COLOR_WRONG_ALTERNATIVE", "EARLY_PRODUCT_ALTERNATIVE", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "EARLY_ROUTE", "EARLY_HUMAN", "EARLY_FALSE_POST", "EARLY_FALSE_HUMAN", "EARLY_QUOTA", "EARLY_PROVIDER_ERROR", "EARLY_SESSION", "EARLY_REJECT_CURRENT", "EARLY_CONDITIONAL", "EARLY_COLOR_CURRENT", "EARLY_COLOR_WRONG_ALTERNATIVE", "EARLY_PRODUCT_ALTERNATIVE", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "DRY_RUN_C3"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3833,6 +3833,30 @@ describe("RealtimeRunner inbound batching", () => {
         finalSalesCycleRevision,
       },
     });
+    if (checkoutOwner === "EARLY_CONDITIONAL") {
+      const text = "Ngân sách tối đa 700k; nếu có bộ khác phù hợp chị mới mua.";
+      const conditional = item(40, text);
+      currentBatch = { ...batch, generation: 11, inboxIds: [conditional.inboxId],
+        firstReceiveSequence: 40, lastReceiveSequence: 40, items: [conditional] };
+      const sourceModel = replyModel();
+      vi.mocked(baseModel.generate).mockImplementationOnce(async (...args) => {
+        const generated = await sourceModel.generate(...args);
+        return { ...generated, proposal: { ...generated.proposal,
+          salesSignals: { ...generated.proposal.salesSignals!, buyingIntent: {
+            decision: "CONSIDERING" as const, requestedAction: "NONE" as const,
+            quantity: null, evidenceText: "nếu có bộ khác phù hợp chị mới mua",
+            confidence: 0.99,
+          }, productSearchIntent: { act: "FIND_ALTERNATIVE" as const,
+            evidenceText: "nếu có bộ khác phù hợp chị mới mua", confidence: 0.99 } },
+        } };
+      });
+      vi.setSystemTime(conditional.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(persistedCommerce.cart).toBeNull();
+      expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
+      return;
+    }
+
     if (checkoutOwner === "EARLY_COLOR_CURRENT" ||
         checkoutOwner === "EARLY_COLOR_WRONG_ALTERNATIVE" ||
         checkoutOwner === "EARLY_PRODUCT_ALTERNATIVE") {

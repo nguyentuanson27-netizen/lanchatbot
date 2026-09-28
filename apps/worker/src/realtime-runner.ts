@@ -3624,7 +3624,8 @@ export class RealtimeRunner {
         sourceMessageId: message.messageId ?? message.eventKey,
         productId:
           resolvedProduct?.productId ?? nextState.currentProductId,
-        modelBuyingIntent: proposal?.salesSignals?.buyingIntent ?? null,
+        modelBuyingIntent: proposal?.salesSignals?.buyingIntent ??
+          earlyInitial?.proposal.salesSignals?.buyingIntent ?? null,
         ...(salesCycleRecord ? { cartOpen: salesCycleRecord.state.cart !== null } : {}),
         evaluatedAt: now,
       });

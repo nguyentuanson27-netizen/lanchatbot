@@ -410,7 +410,11 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
           },
           close: async () => undefined,
         } as never,
-        { searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", score: 1, gap: null, product }), searchImage: async () => undefined } as unknown as RealtimeProductSearchPort,
+        { searchText: async (_query: string, excluded?: string | readonly string[]) =>
+          (typeof excluded === "string" ? [excluded] : excluded ?? []).includes(product.productId)
+            ? { status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }
+            : { status: "MATCHED", matchKind: "EXACT_CODE", score: 1, gap: null, product },
+          searchImage: async () => undefined } as unknown as RealtimeProductSearchPort,
         { observe: async ({ now }: { now: Date }) => ({ schemaVersion: 1, verified: true, blockingTag: null, observedTagIds: [], observedAt: now.toISOString(), reasonCode: null }) },
         { workerId: "luna-smoke", mode: "LIVE", sendEnabled: true, salesCycleEnabled: true,
           recordedReplayCaptureEnabled: true, recordedReplayPageId: pageId, contextV2CaptureEnabled: true,
