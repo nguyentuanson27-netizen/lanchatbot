@@ -4,7 +4,17 @@ Kế hoạch: [plan.md](plan.md). Baseline `ce558e6d4028dd06bd6efc960286464425a2
 
 Các task P là việc còn phải thực hiện theo kế hoạch mới; checkbox chưa tick không có nghĩa toàn bộ code cũ chưa tồn tại.
 
-**Tình trạng mới nhất:** executable source `a7501694`; [lần chạy Luna tập trung](evidence/c3-luna-focused-a7501694-rootcause.md)
+**Tình trạng mới nhất:** executable source `591eb939`; [lần chạy Luna runtime smoke](evidence/c3-luna-runtime-smoke-20260928.md)
+đã hoàn tất 100% 3 hành trình tổng hợp với GPT-6 Luna medium (`cart_size_checkout` 7 lượt, `budget_no_option_stop` 3 lượt, `objection_fact_checkout` 8 lượt):
+- Sửa size không cần từ khóa "size" cập nhật đúng giỏ hàng sang L (`SET_LINE_VARIANT`).
+- Tách nhãn người nhận không rò rỉ `"Số"` vào họ tên.
+- Hỏi phí giao hàng không tự động chọn thanh toán.
+- Ngân sách 700k vs giá 799k không tự mở giỏ và dừng đúng lúc khi khách báo dừng mua (`FACTS_PRESENTED`).
+- Băn khoăn giá và hỏi chất liệu cotton được trả lời có căn cứ từ thuộc tính xac minh.
+- Chuẩn hóa formatting edge (`sanitizeAgentProposalPayload`) trước schema parse.
+Full worker Vitest: 1.834 pass, 1 opt-in skip; business-tools: 380 pass; contracts: 221 pass; typecheck pass.
+
+**Tình trạng trước đó:** executable source `a7501694`; [lần chạy Luna tập trung](evidence/c3-luna-focused-a7501694-rootcause.md)
 đã hoàn tất sáu ca từng kẹt guard nhưng **chưa đạt quality**: 3 FAIL được chấm,
 3 chưa chấm do Luna hết hạn mức. Q024 thiếu current-cart readback, Q043 thiếu
 variantId→màu/size mapping, Q035 thiếu canonical measurement blocker trong
@@ -70,13 +80,13 @@ Amendment `470c174` mở cùng preflight/producer cho C3 text thường, đưa b
 - [ ] P06 — Một owner trên nhánh chuyển; no-cart→commitment→edit→checkout→confirm đúng state.
 - [ ] P06 — Extraction trước routing hậu mãi/handoff, giữ/loại current product và session update; consumer dùng kết quả đã validate, trusted ownership/no-call vẫn đi trước.
 - [ ] P06 — Context cùng lượt đúng trong state/prompt trước P07: budget/preference/correction/rejection; differential C3-off cho timing, không đợi P09.
-- [ ] P06 — Typed edit producer → kernel `SET_LINE_VARIANT` hiện có, đúng line/value/source/revision; nhận xét không sửa giỏ, sửa rõ phải làm được.
+- [x] P06 — Typed edit producer → kernel `SET_LINE_VARIANT` hiện có, đúng line/value/source/revision; nhận xét không sửa giỏ, sửa rõ phải làm được (đã kiểm chứng trên `24a763cd` + smoke Luna `f63c8938`).
 - [ ] P06 — Giữ chọn M + hỏi S theo từng mệnh đề; không dùng dấu hỏi/phủ định toàn tin để xóa commitment hợp lệ.
-- [ ] P06 — Checkout đúng recipient role và payment selection; field label không thành tên, địa chỉ Hội An không xóa COD; không khôi phục fallback cũ thiếu semantic checks.
-- [ ] P06 — Handoff đúng phạm vi phủ định/đối tượng; giỏ mở không che hậu mãi; giữ human-owner no-call preflight.
+- [x] P06 — Checkout đúng recipient role và payment selection; field label không thành tên, địa chỉ Hội An không xóa COD; không khôi phục fallback cũ thiếu semantic checks (đã kiểm chứng trên `24a763cd` + smoke Luna `f63c8938`).
+- [x] P06 — Handoff đúng phạm vi phủ định/đối tượng; giỏ mở không che hậu mãi; giữ human-owner no-call preflight (đã kiểm chứng `24a763cd`).
 - [ ] P07 — Chê giá/trải nghiệm/fit: hỏi hữu ích, evidence liên quan, lời đáp tự nhiên.
 - [ ] P08a — Tìm phương án theo budget/tiêu chí, lookup thật, no-result đúng.
-- [ ] P06/P08a — P06 sửa màu/mẫu, bộ/bỏ từ input tới context/product resolution; P08a tái dùng khi mở retrieval nhiều phương án, không phân loại lại bằng regex.
+- [x] P06/P08a — P06 sửa màu/mẫu, bộ/bỏ từ input tới context/product resolution; P08a tái dùng khi mở retrieval nhiều phương án, không phân loại lại bằng regex (đã kiểm chứng `24a763cd`).
 - [ ] P08b — Comparison đúng subject/offer, code derivation, đổi product giữ binding.
 
 ## 4. Hội thoại dài và sự cố
