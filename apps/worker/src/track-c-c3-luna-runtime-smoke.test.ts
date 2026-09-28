@@ -32,6 +32,11 @@ const allJourneys = [
   { id: "delivery_question", turns: ["Mẫu CB182 giá bao nhiêu?", "Giao về Hà Nội mất bao lâu?"] },
   { id: "comparison", turns: ["Mẫu CB182 giá bao nhiêu?", "Chị đang so với mẫu khác rẻ hơn."] },
   { id: "prior_experience", turns: ["Mẫu CB182 giá bao nhiêu?", "Lần trước chị mặc chưa thoải mái lắm."] },
+  { id: "budget_no_option_stop", turns: [
+    "Mẫu CB182 giá bao nhiêu?",
+    "Ngân sách tối đa 700k; nếu có bộ khác phù hợp chị mới mua.",
+    "Chưa có bộ phù hợp thì chị dừng mua nhé.",
+  ] },
   { id: "cart_size_checkout", turns: [
     "Mẫu CB182 giá bao nhiêu?", "Chị sẽ lấy một bộ size M.", "Chị đổi sang size L nhé.",
     "Giỏ này tính phí giao thế nào?", "Tên: An Demo\nSĐT: 0900000000\nĐịa chỉ: 123 Đường Mẫu, Hà Nội",
@@ -421,7 +426,21 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
         const sequence = journeyIndex * 10 + turnIndex + 1;
         sourceMessagePk = `00000000-0000-4000-8000-${String(sequence).padStart(12, "0")}`;
         const at = new Date();
-        const entry = item({ sequence, text: journey.turns[turnIndex]!, journeyId: journey.id, occurredAt: at });
+        const materialResolved = journey.id === "objection_fact_checkout" && turnIndex === 3
+          ? ((turns[2] as { reply?: string } | undefined)?.reply ?? "")
+            .toLocaleLowerCase("vi").includes("cotton")
+          : true;
+        const lastConversation = (turns.at(-1) as {
+          stateAfter?: { conversation?: { currentProductId?: string | null } }
+        } | undefined)?.stateAfter?.conversation;
+        const customerText = !materialResolved
+          ? "Chất liệu chưa rõ nên chị dừng mua nhé."
+          : journey.id === "budget_no_option_stop" && turnIndex === 2 &&
+              typeof lastConversation?.currentProductId === "string" &&
+              lastConversation.currentProductId !== "CB182"
+            ? "Chị muốn xem giá của bộ khác đó trước."
+            : journey.turns[turnIndex]!;
+        const entry = item({ sequence, text: customerText, journeyId: journey.id, occurredAt: at });
         currentBatch = { ...currentBatch, generation: sequence, inboxIds: [entry.inboxId],
           firstReceiveSequence: sequence, lastReceiveSequence: sequence, items: [entry] };
         const before = { conversation: safeJson(persistedState), commerce: safeJson(persistedCommerce), history: safeJson(await history.load(conversationId)) };
@@ -465,6 +484,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
           journeyCount: records.length + 1, journeys: [...records, { journeyId: journey.id, syntheticOnly: true, turns,
             finalConversationState: safeJson(persistedState), finalCommerceState: safeJson(persistedCommerce), commitSnapshots: snapshots }], calls: modelCalls,
         }, null, 2), "utf8");
+        if (!materialResolved) break;
       }
       records.push({ journeyId: journey.id, syntheticOnly: true, turns, finalConversationState: safeJson(persistedState), finalCommerceState: safeJson(persistedCommerce), commitSnapshots: snapshots });
       await writeFile(join(outputDir!, "runtime-smoke-artifacts.json"), JSON.stringify({
@@ -514,6 +534,18 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
     }
     const objectionCheckout = records.find((record) => (record as { journeyId: string }).journeyId === "objection_fact_checkout") as { turns: readonly unknown[] } | undefined;
     if (objectionCheckout) expect(objectionCheckout.turns).toHaveLength(8);
+    const budgetStop = records.find((record) =>
+      (record as { journeyId: string }).journeyId === "budget_no_option_stop") as {
+        turns: readonly { customerText: string; c3Outcome: string }[];
+        finalCommerceState: { stage: string };
+      } | undefined;
+    if (budgetStop) {
+      expect(budgetStop.turns).toHaveLength(3);
+      expect(budgetStop.turns[2]!.customerText).toContain("dừng mua");
+      expect(budgetStop.finalCommerceState.stage).not.toBe("PURCHASE_CONFIRMED");
+      expect(budgetStop.turns.some(({ c3Outcome }) => c3Outcome === "C3_CHOSEN"))
+        .toBe(true);
+    }
     expect(modelCalls.length).toBeGreaterThan(0);
   }, 60 * 60 * 1000);
 });
