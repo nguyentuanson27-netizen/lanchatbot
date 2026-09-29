@@ -1559,7 +1559,7 @@ export async function evaluateRealtimeSalesCycle(
   const v2Action = v2Classification
     ? confirmationClarificationAction(v2Classification, state.stage)
     : null;
-  const confirmationDecision: ConfirmationDecision = v2Classification && (
+  const proposedConfirmationDecision: ConfirmationDecision = v2Classification && (
     behaviorMode === "V2_ACTIVE" || behaviorMode === "CLARIFY_ONLY"
   )
     ? {
@@ -1569,6 +1569,17 @@ export async function evaluateRealtimeSalesCycle(
         reasonCode: v2Classification.reasonCode,
       }
     : legacyConfirmationDecision;
+  // The typed lane owns the latest message's meaning. A legacy positive match
+  // must not overrule UNCLEAR/REJECT (for example an acknowledgement of size).
+  // A typed positive still needs the existing deterministic authority below.
+  const typedConfirmation = input.customerInput?.salesSignals.purchaseConfirmation;
+  const confirmationDecision: ConfirmationDecision = input.customerInput &&
+      proposedConfirmationDecision.decision === "CONFIRM" &&
+      (!typedConfirmation || typedConfirmation.decision !== "CONFIRM" ||
+        typedConfirmation.confidence < 0.85 || !exactEvidence(input.text, typedConfirmation.evidenceText))
+    ? { decision: "UNCLEAR", attempted: true, source: "MODEL_STRUCTURED_OUTPUT",
+        reasonCode: "CUSTOMER_INPUT_NOT_PURCHASE_CONFIRMATION" }
+    : proposedConfirmationDecision;
   const behaviorTelemetry = {
     confirmationBehaviorMode: behaviorMode,
     confirmationModeSource: behaviorModeResolution.source,

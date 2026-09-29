@@ -1545,7 +1545,10 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }],
       transport: { send },
-    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED");
+    })).rejects.toMatchObject({ diagnostic: {
+      stage: "FINAL_GUARD", errorCode: "TRACK_C_V5_PRODUCTION_GUARD_FAILED",
+      reasonCodes: expect.arrayContaining(["UNAUTHORIZED_PRICE"]),
+    } });
   });
 
   it("keeps KEEP_OPEN as a natural progression mechanism without a question", async () => {

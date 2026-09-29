@@ -1,3 +1,8 @@
+import { buildApprovedQdrantJobs, buildRegistryMap } from "./p23c-jobs.js";
+import { buildXmlProfiles, groupXmlItems, normalizeStructuredExtraction } from "./p23c-profiles.js";
+import { QdrantStableCatalogSearchAdapter } from "@lana/business-tools";
+import { buildTrackCSelectableEvidence } from "./track-c-c3-selectable-evidence.js";
+import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -543,5 +548,62 @@ describe("realtime ProductFactsV2 media projection", () => {
     });
     expect(globalFacts?.sizeChart?.sizeChartId).toBe("ao-dai-dress");
     expect(globalFacts?.sizeChartEligibility?.scope).toBe("MATCHED");
+  });
+});
+
+
+describe("registry producer to serialized index readback to C3", () => {
+  it.each([
+    ["APPROVED", "LỤA", true], ["APPROVED", "UNKNOWN", false], ["NEED_REVIEW", "LỤA", false],
+  ] as const)("respects image publication %s and explicit material %s", async (review, material, hasMaterial) => {
+    const now = new Date("2026-09-29T00:00:00.000Z");
+    const profiles = normalizeStructuredExtraction(buildXmlProfiles(buildRegistryMap([{
+      MA_SP: "SD375", ACTIVE: "TRUE", MATERIAL_OVERRIDE: material,
+    }]).registry, groupXmlItems([{ "g:item_group_id": "SD375", "g:title": "Mẫu SD375",
+      "g:description": "XML gọi vải chống nhăn, không phải thuộc tính đã duyệt.",
+      "g:image_link": "https://cdn.example/sd375.jpg" }]), now.toISOString()));
+    const jobs = buildApprovedQdrantJobs(profiles, [{ MA_SP: "SD375", ACTIVE: "TRUE",
+      REVIEW_STATUS: review, IMAGE_ID: "test-point", IMAGE_URL: "https://cdn.example/sd375.jpg" }],
+      { run_id: "isolated-test", started_at: now.toISOString(), shard_count: 1, shard_index: 0, shard_label: "1/1" });
+    // Isolated serialized store: only producer output crosses this boundary.
+    // The HTTP transport is simulated, not a claim of a live Qdrant write.
+    const indexed = JSON.stringify(jobs.filter((job) => job.publish_action === "UPSERT")
+      .map((job) => ({ id: job.point_id, payload: job.payload })));
+    const adapter = new QdrantStableCatalogSearchAdapter({ baseUrl: "https://isolated.invalid", apiKey: "test-only",
+      collection: "isolated", expectedDimension: 3,
+      embedding: { embedText: async () => [0, 0, 1], embedImageUrl: async () => [0, 0, 1] },
+      fetchImpl: async () => new Response(JSON.stringify({ result: { points: JSON.parse(indexed) } }),
+        { headers: { "content-type": "application/json" } }),
+    });
+    const product = await adapter.findByExactCode("SD375");
+    if (review !== "APPROVED") { expect(product).toBeNull(); return; }
+    expect(product).not.toBeNull();
+    const productFacts = buildRealtimeProductFactsV2({ product: product!,
+      snapshot: mediaSnapshot("SD375", ["TOP", "SKIRT"], now.toISOString()), policy: null, now });
+    const c3 = buildRealtimeC3Input({ sourceMessagePk: "00000000-0000-4000-8000-000000000098",
+      canonicalEvidence: buildCanonicalDecisionEvidenceV1({ text: "Chất liệu gì?", sourceMessageId: "m98",
+        productId: "SD375", modelBuyingIntent: null, evaluatedAt: now }),
+      preConversationRevision: 0, finalConversationRevision: 1, preSalesRevision: 0,
+      commerceState: createRealtimeSalesState("33333333-3333-4333-8333-333333333333", "page-1", now),
+      productId: "SD375", catalogVersion: product!.catalogVersion, facts: [], productFacts,
+      policyResolution: null, cartReadiness: [], now });
+    const evidence = buildTrackCSelectableEvidence({ context: c3.context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT", currentCart: null, evaluationAt: now });
+    const materials = evidence.filter((entry) => entry.capability === "PRODUCT_ATTRIBUTES" && entry.ref.endsWith("MATERIALS"));
+    expect(materials.length > 0).toBe(hasMaterial);
+    expect(JSON.stringify(evidence)).not.toContain("chống nhăn");
+    if (!hasMaterial) return;
+    const result = await runTrackCStrategyLive({ ...c3, decisionAt: now,
+      modelResource: "projects/test/locations/global/publishers/google/models/gemini-3.5-flash-lite",
+      dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT", text: "Chất liệu gì?", attachmentCount: 0, occurredAt: now.toISOString() }],
+      checkoutClarificationActive: false, transport: { send: async ({ body }) => {
+        const request = JSON.parse(JSON.parse(body).contents[0].parts[0].text);
+        const output = request.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+          ? { replyAct: "ANSWER", goal: "Trả lời chất liệu có nguồn.", proposition: "PRODUCT_ATTRIBUTES",
+              evidenceRefs: materials.map((entry) => entry.ref), continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
+          : { answerText: null, factualTexts: [], progressionText: null };
+        return { providerModelVersion: "gemini-3.5-flash-lite", payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(output) }] } }] } };
+      } } });
+    expect(result.reply).toContain("LỤA");
   });
 });

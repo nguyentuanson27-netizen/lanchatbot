@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { DECISION_GUARD_REASON_CODES_V1 } from "@lana/contracts";
 import {
   canonicalJsonV1,
   type ContextV2,
@@ -253,6 +254,7 @@ export type TrackCStrategyContractDiagnostic = Readonly<{
   stage: TrackCStrategyContractStage;
   sanitizedRawModelOutput: string | null;
   errorCode: string;
+  reasonCodes?: readonly string[];
 }>;
 
 /**
@@ -328,10 +330,16 @@ function stageFailure(
   payload: unknown,
   error: unknown,
 ): TrackCStrategyContractFailure {
+  const reasonCodes = error instanceof Error &&
+    error.message.startsWith("TRACK_C_V5_PRODUCTION_GUARD_FAILED:")
+    ? error.message.slice("TRACK_C_V5_PRODUCTION_GUARD_FAILED:".length).split(",")
+      .filter((code) => (DECISION_GUARD_REASON_CODES_V1 as readonly string[]).includes(code)).slice(0, 20)
+    : [];
   return new TrackCStrategyContractFailure(Object.freeze({
     stage,
     sanitizedRawModelOutput: sanitizedRawModelOutput(payload),
     errorCode: errorCode(error),
+    ...(reasonCodes.length ? { reasonCodes: Object.freeze(reasonCodes) } : {}),
   }));
 }
 

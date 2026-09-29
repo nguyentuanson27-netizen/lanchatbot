@@ -304,6 +304,7 @@ export interface RealtimeDecisionEventPlan {
       replyHash: string | null;
       redactedReply: string | null;
       reason: string | null;
+      reasonCodes?: readonly string[];
       selectedForOutbound: boolean;
     }>;
     modelCalled: boolean;

@@ -2594,6 +2594,23 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.plan?.state.confirmation ?? null).toBeNull();
   });
 
+  it.each(["UNCLEAR", "REJECT", "CONFIRM"] as const)("respects typed confirmation meaning before legacy positive match: %s", async (decision) => {
+    const state = await previewState(`event-typed-confirm-${decision}`);
+    const text = "ok";
+    const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(), salesSignals: {
+      ...signals({ confirmation: { decision, evidenceText: text } }),
+    } }, text);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, `event-typed-confirm-message-${decision}`), customerInput,
+      salesSignals: customerInput.salesSignals,
+    });
+    expect(output.plan?.state.confirmation != null).toBe(decision === "CONFIRM");
+    if (decision !== "CONFIRM") {
+      expect(output.telemetry?.confirmationConfirmed).toBe(false);
+      expect(output.telemetry?.confirmationReasonCode).toBe("CUSTOMER_INPUT_NOT_PURCHASE_CONFIRMATION");
+    }
+  });
+
   it("never lets model-only confirmation authorize purchase", async () => {
     const state = await previewState("event-model-confirm");
     const text = "triển khai giúp chị";

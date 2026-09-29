@@ -167,7 +167,7 @@ import {
   hasSessionDecisionContext,
   updateSessionDecisionContext,
 } from "./realtime-session-decision-context.js";
-import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
+import { runTrackCStrategyLive, TrackCStrategyContractFailure } from "./track-c-c3-strategy-contract-runner.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
@@ -5205,7 +5205,17 @@ export class RealtimeRunner {
 
     // C3 composes one candidate after commerce has advanced canonical state.
     // The transaction below remains the only owner of send and effects.
-    if (this.options.c3 !== null && triggerMessagePk !== null &&
+    if (customerInputFailure !== null && handoff === null &&
+        nextState.conversationOwner === "BOT" && businessFactEnvelopes.length === 0 &&
+        verifiedSizeClaimForTurn === null) {
+      // An unavailable input model cannot restart discovery or imply that a
+      // cart request succeeded. Keep verified facts when another branch has
+      // already supplied them; otherwise ask for one retry without changing commerce.
+      metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
+        ? [{ kind: "TEXT", text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé." }]
+        : [];
+    }
+    if (customerInputFailure === null && this.options.c3 !== null && triggerMessagePk !== null &&
         salesCycleRecord !== null &&
         !message.isEcho && handoff === null &&
         nextState.conversationOwner === "BOT" &&
@@ -5382,12 +5392,14 @@ export class RealtimeRunner {
         const rawCode = error instanceof Error ? error.message : "TRACK_C_C3_UNKNOWN_ERROR";
         const code = /^[A-Z][A-Z0-9_]{2,100}$/u.test(rawCode)
           ? rawCode : "TRACK_C_C3_RUNTIME_FAILURE";
+        const reasonCodes = error instanceof TrackCStrategyContractFailure ? error.diagnostic.reasonCodes ?? [] : [];
         c3Candidate = { status: "REJECTED", replyHash: null, redactedReply: null,
-          reason: code, selectedForOutbound: false };
+          reason: code, reasonCodes, selectedForOutbound: false };
         process.stderr.write(`${JSON.stringify({
           level: "warn", code: "TRACK_C_C3_FALLBACK",
           candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
           reason: code,
+          reasonCodes,
           conversationRevision: record.stateVersion,
           salesCycleRevision: salesCycleRecord.stateRevision,
         })}\n`);

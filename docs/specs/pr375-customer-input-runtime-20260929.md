@@ -62,6 +62,25 @@ of this implementation branch.
 
 ## Outstanding plan work
 
+### Follow-up boundaries (29 September)
+
+- A typed UNCLEAR/REJECT purchase-confirmation result cannot be overridden by a
+  legacy positive acknowledgement. A typed positive still requires the existing
+  deterministic confirmation authority and current-cart checks. This is a
+  conservative compatibility constraint, not complete semantic confirmation coverage.
+- Provider failure skips commerce and C3 generation; verified facts survive and
+  an admitted request without facts receives a recoverable retry response.
+- C3 failure diagnostics retain registered production-guard reason codes. The
+  harness preserves each attempt separately and records candidate selection from
+  runtime decision telemetry rather than counting a Responder call as acceptance.
+- Catalog tests cover registry/XML producer, serialized index payload, adapter
+  readback and C3 selection for approved/unknown/unapproved material. The index
+  HTTP transport is simulated. This is not a real isolated Qdrant collection or
+  a measurement of current catalog coverage; P02 remains open.
+- Runtime r3 at `fa8024b30444401903c605ccbd81b8e88dbe34b8` answered shipping from the
+  edited size-L cart. Luna provider quota failed at the final confirmation and
+  subsequent journey. It is incomplete evidence, not a sales-quality pass.
+
 P00 complete historical classification/judging; P02 isolated real producer/index
 readback coverage; P03/P04 guard editorial experiment and two-sided factual
 controls; remaining P06 consumer/confirmation/cart wording ownership; P07 sales
