@@ -828,13 +828,16 @@ function deterministicCheckoutText(
   fields: readonly CheckoutField[],
   paymentOptions: readonly ("COD" | "BANK_TRANSFER")[],
 ): string {
+  const methods = [...new Set(paymentOptions)].map((method) =>
+    method === "COD" ? "thanh toán khi nhận hàng (COD)" : "chuyển khoản").join(" hoặc ");
+  if (fields.length === 1 && fields[0] === "PAYMENT_METHOD") {
+    return `Chị chọn ${methods} nhé?`;
+  }
   const labels: Record<CheckoutField, string> = {
     FULL_NAME: "họ tên",
     PHONE: "số điện thoại",
     ADDRESS: "địa chỉ nhận hàng",
-    PAYMENT_METHOD: paymentOptions.includes("BANK_TRANSFER")
-      ? "hình thức thanh toán (COD hoặc chuyển khoản)"
-      : "hình thức thanh toán COD",
+    PAYMENT_METHOD: `lựa chọn thanh toán (${methods})`,
   };
   const names = fields.map((field) => labels[field]);
   const joined = names.length === 1 ? names[0]! : names.length === 2

@@ -23,7 +23,7 @@ Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), 
 
 ## 1. Bằng chứng và đầu vào
 
-- [ ] P00 — Phân loại đủ 70 output: input/guard/model/capability; pin source/contracts/rubric.
+- [x] P00 — Phân loại đủ 70 output: input/guard/model/capability; pin source/contracts/rubric. Xem `evidence/pr377-dev70-baseline-diagnostic.md`; đây là diagnostic, không phải quality pass.
 - [ ] P00 — Tích hợp findings đã hiệu chỉnh: ví dụ handoff #7, canonical NONE ở #8, positive M→L đã pass; ghi rõ hàm/evaluator/source-only/full runtime.
 - [ ] P01 — Current-cart snapshot/binding và variant mapping; frozen gaps có version rõ.
 - [ ] P02 — Catalog/Sheets producer → isolated readback → canonical, coverage thực.
@@ -37,7 +37,7 @@ Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), 
 ## 3. Hành trình bán hàng
 
 - [ ] P05 — Luna chạy producer/C3 thật trên nhánh được gọi; fake ports, full history/state/calls/skip reasons; tái hiện lỗi baseline được phép, không đòi P06 pass.
-- [ ] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness.
+- [x] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness. `realtime-server-c3.test.ts` import entrypoint thật, giữ hai BF wrapper, thay external IO, chạy `processOne`.
 - [ ] P06 — Một owner trên nhánh chuyển; no-cart→commitment→edit→checkout→confirm đúng state.
 - [ ] P06 — Extraction trước routing hậu mãi/handoff, giữ/loại current product và session update; consumer dùng kết quả đã validate, trusted ownership/no-call vẫn đi trước.
 - [ ] P06 — Context cùng lượt đúng trong state/prompt trước P07: budget/preference/correction/rejection; differential C3-off cho timing, không đợi P09.

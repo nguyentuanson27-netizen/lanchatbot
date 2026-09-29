@@ -2939,7 +2939,7 @@ describe("realtime Phase 3 sales cycle", () => {
       text: readbackText, sourceMessageId: "mid-c3-cart-readback",
       productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
     });
-    const live = buildRealtimeC3Input({
+    const c3Input = {
       sourceMessagePk: "00000000-0000-4000-8000-000000000077",
       canonicalEvidence,
       preConversationRevision: 7, finalConversationRevision: 8,
@@ -2948,8 +2948,26 @@ describe("realtime Phase 3 sales cycle", () => {
       productId: "CB182", catalogVersion: null,
       facts: [], productFacts: null, policyResolution,
       cartReadiness: [readback.cartReadback!], now,
-    });
+    };
+    const live = buildRealtimeC3Input(c3Input);
     expect(live.currentCart).not.toBeNull();
+    for (const invalidReadback of [
+      { ...readback.cartReadback!, sourceMessageIdHash: "f".repeat(64) },
+      { ...readback.cartReadback!, conversationRevision: 6 },
+      { ...readback.cartReadback!, salesCycleRevision: openState.revision + 1 },
+      { ...readback.cartReadback!, cartStateHash: "f".repeat(64) },
+      { ...readback.cartReadback!, cartVersion: openState.cart!.value.revision + 1 },
+      { ...readback.cartReadback!, checkedAt: new Date(now.getTime() + 1).toISOString() },
+      { ...readback.cartReadback!, expiresAt: now.toISOString() },
+    ]) {
+      const rejected = buildRealtimeC3Input({ ...c3Input, cartReadiness: [invalidReadback] });
+      expect(rejected.currentCart).toBeNull();
+      const rejectedEvidence = buildTrackCSelectableEvidence({ context: rejected.context,
+        simulationFacts: [], executionLane: "PRODUCTION_CONTRACT",
+        currentCart: rejected.currentCart, evaluationAt: now });
+      expect(rejectedEvidence.filter(({ capability }) =>
+        ["FREESHIP", "SHIPPING_FEE", "PROMOTION_OFFER"].includes(capability))).toEqual([]);
+    }
     expect(live.checkoutRequestedFields).toEqual([
       "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
     ]);
@@ -3039,7 +3057,7 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(paymentReply.output.cta).toBe("ASK_CHECKOUT_DETAILS");
     expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
-      .toContain("hình thức thanh toán COD");
+      .toContain("Chị chọn thanh toán khi nhận hàng (COD)");
     expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
       .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
     const preview = await evaluateRealtimeSalesCycle(input(

@@ -4088,7 +4088,7 @@ describe("RealtimeRunner inbound batching", () => {
       metaPlan?: { messages: readonly { text: string }[] };
     };
     expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
-      .toContain("hình thức thanh toán COD");
+      .toContain("Chị chọn thanh toán khi nhận hàng (COD)");
     expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
       .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
 

@@ -43,6 +43,7 @@ describe("Track C C3 typed fact realization", () => {
     }, "INSPECTION");
     expect(text).toContain("tuỳ theo từng đơn");
     expect(text).not.toContain("được thử tại chỗ");
+    expect(text).not.toContain("em cần kiểm tra");
   });
 
   it("states a negative selling rule instead of omitting it", () => {

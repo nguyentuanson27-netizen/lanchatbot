@@ -386,6 +386,13 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   }
   const evidence: TrackCSelectableEvidence[] = [];
   input.context.verifiedClaims.forEach((claim, index) => {
+    // Missing current-cart authority is not merely missing wording. Exposing
+    // the value as selectable lets a Strategist copy it into goal and the
+    // Responder restate it in free prose. Reuse the existing binding check at
+    // admission, before either model sees the value.
+    if (claim.scope.kind === "CART" && !trackCCartClaimIsCurrent(
+      claim, input.currentCart ?? null, input.evaluationAt ?? new Date(),
+    )) return;
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
       const boundPresentation = trackCBoundPresentationForClaim(

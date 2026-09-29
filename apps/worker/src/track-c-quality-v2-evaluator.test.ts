@@ -274,6 +274,20 @@ describe("Track C C3 V5 benchmark evaluator", () => {
     expect(assess).not.toHaveBeenCalled();
   });
 
+  it("reports a Strategist failure while Responder is still pending without an unhandled rejection", async () => {
+    let finishResponder!: (value: TrackCV5StageAssessmentInput) => void;
+    const responder = new Promise<TrackCV5StageAssessmentInput>((resolve) => { finishResponder = resolve; });
+    const assess = vi.fn((input: TrackCV5StageJudgeInput) => input.stage === "STRATEGIST"
+      ? Promise.reject(new Error("VERTEX_JSON_INVALID")) : responder);
+    try {
+      await expect(evaluateTrackCV5BenchmarkCase(evaluationInput(assess)))
+        .rejects.toThrow("VERTEX_JSON_INVALID");
+      expect(assess).toHaveBeenCalledTimes(2);
+    } finally {
+      finishResponder(assessment("RESPONDER"));
+    }
+  });
+
   it("rejects customer URLs before any judge provider call", async () => {
     const assess = vi.fn(async (input: TrackCV5StageJudgeInput) =>
       assessment(input.stage)

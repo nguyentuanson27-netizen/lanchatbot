@@ -64,6 +64,30 @@ of this implementation branch.
 
 ### Follow-up boundaries (29 September)
 
+- The server composition test now imports `realtime-server.ts`, retains the BF
+  wrappers, replaces external IO and executes one actual runner turn. ON/OFF/HUMAN
+  controls prove DRY_RUN candidate observability and no outbound plan. This is
+  process composition evidence with scripted model transport, not a live service.
+- Cart claims lacking an independently matched current-cart snapshot are omitted
+  from selectable evidence before either model sees their values. They are not
+  labelled merely as unsupported wording. This closes an observed goal/prose
+  leak while retaining valid bound cart claims and independent product facts.
+- Code-owned payment requests enumerate only allowed methods and request the
+  customer's choice; they do not treat COD as missing recipient data. Conditional
+  inspection policy no longer promises a lookup that the runtime cannot perform.
+- The stage evaluator attaches error handling to both concurrent judge calls
+  immediately. A faster Strategist error previously terminated the process while
+  the evaluator was awaiting Responder; it now propagates as a case error.
+- The server's Redis search wrapper now forwards the rejected product ID to
+  the existing text search service. Previously the service implemented exclusion
+  but the production composition silently dropped it. Real-service composition
+  controls cover another match and no result, including exact-code lookup.
+  This does not yet implement budget filtering or multi-product comparison.
+- A finite two-sided guard experiment at `5596631d` exposed five defects in twelve
+  controls, including both false positives and false negatives. See
+  `tasks/evidence/pr377-guard-finite-review.md`. Arbitrary factual prose is not
+  newly authorized; remaining guard/editorial acceptance stays open.
+
 - A typed UNCLEAR/REJECT purchase-confirmation result cannot be overridden by a
   legacy positive acknowledgement. A typed positive still requires the existing
   deterministic confirmation authority and current-cart checks. This is a
@@ -81,7 +105,7 @@ of this implementation branch.
   edited size-L cart. Luna provider quota failed at the final confirmation and
   subsequent journey. It is incomplete evidence, not a sales-quality pass.
 
-P00 complete historical classification/judging; P02 isolated real producer/index
+Remaining: P00 corrected-finding integration and incomplete judging; P02 isolated real producer/index
 readback coverage; P03/P04 guard editorial experiment and two-sided factual
 controls; remaining P06 consumer/confirmation/cart wording ownership; P07 sales
 objections/tone; P08 retrieval/comparison; P09 long-history recovery; P10 full

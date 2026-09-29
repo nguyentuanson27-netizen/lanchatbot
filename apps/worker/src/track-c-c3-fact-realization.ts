@@ -120,7 +120,7 @@ function policyText(
     const tryOnText = tryOn === true ? " Chị cũng được thử tại chỗ ạ."
       : tryOn === false ? " Phần thử đồ khi nhận hàng thì shop chưa hỗ trợ ạ."
       : tryOn === "ORDER_DEPENDENT"
-        ? " Riêng việc thử đồ còn tuỳ theo từng đơn, em cần kiểm tra lại giúp chị ạ."
+        ? " Riêng việc thử đồ còn tuỳ theo từng đơn ạ."
         : "";
     return trackCComposeReply([`Khi nhận hàng chị được kiểm tra ${joinVi(checks)} ạ.`,
       ...(tryOnText.length === 0 ? [] : [tryOnText.trim()])]);

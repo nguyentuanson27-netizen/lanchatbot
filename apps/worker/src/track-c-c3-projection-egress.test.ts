@@ -39,6 +39,20 @@ const EMPTY: ProductAttributesDataV1 = {
 const PRODUCT_ID = "SQ9012";
 
 describe("C3 promotion uncertainty versus offer authority", () => {
+  it("withholds unbound cart values from model evidence while preserving independent product facts", () => {
+    const cartRefs = Object.entries(facts.runtime_claim_catalog)
+      .filter(([, claim]) => (claim as unknown as { scope?: { kind?: string } }).scope?.kind === "CART")
+      .filter(([, claim]) => (claim as unknown as { freshness?: string }).freshness !== "EXPIRED")
+      .map(([ref]) => ref);
+    expect(cartRefs.length).toBeGreaterThan(0);
+    const context = baseContext(["RC_PRICE_A", ...cartRefs]);
+    const evidence = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT", currentCart: null,
+      evaluationAt: new Date(recipe.evaluation_at) });
+    expect(evidence.some(({ capability }) => capability === "PRICE")).toBe(true);
+    expect(evidence.some(({ subject }) => subject?.scope === "CART")).toBe(false);
+  });
+
   it.each([
     ["Em chưa có thông tin xác nhận mẫu này có ưu đãi giảm thêm.", true],
     ["Hiện em chưa thể xác nhận giá đã bao gồm ưu đãi hay chưa.", true],

@@ -79,8 +79,8 @@ export class RedisCachedProductSearch {
     }
   }
 
-  searchText(query: string): Promise<ProductSearchResult> {
-    return this.inner.searchText(query);
+  searchText(query: string, excludeProductId?: string): Promise<ProductSearchResult> {
+    return this.inner.searchText(query, excludeProductId);
   }
 
   async searchImage(imageUrl: string): Promise<ProductSearchResult> {
