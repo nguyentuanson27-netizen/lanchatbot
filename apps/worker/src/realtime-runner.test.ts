@@ -1,3 +1,4 @@
+import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -3316,12 +3317,12 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
-    const entry = item(34, checkoutOwner === "LONG_HISTORY"
+    const entry = item(34, (checkoutOwner === "LONG_HISTORY" || checkoutOwner.startsWith("TYPED_"))
       ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
       : "Mẫu CB182 bao nhiêu?");
     const batch = {
@@ -3426,6 +3427,12 @@ describe("RealtimeRunner inbound batching", () => {
         selectableEvidence?: Array<{ ref: string; capability: string }>;
         constraints?: { checkoutRequestedFields?: string[] };
       };
+      if (prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1") {
+        const response = { ...noCustomerSelection(),
+          budget: { operation: "SET", value: 700_000, evidenceText: "Ngân sách đổi thành 700k" } };
+        return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite" };
+      }
       const variantChoice = checkoutOwner === "VARIANT_RECALL" &&
         prompt.dialogue?.some(({ direction, text }) =>
           direction === "INBOUND" && text === "Chị chọn size M nhé.") === true;
@@ -3699,8 +3706,9 @@ describe("RealtimeRunner inbound batching", () => {
       clearTagObservation(),
       {
         workerId: "worker-1",
-        mode: "LIVE",
-        sendEnabled: true,
+        mode: checkoutOwner === "TYPED_DRY_RUN" ? "DRY_RUN" : "LIVE",
+        sendEnabled: checkoutOwner !== "TYPED_DRY_RUN",
+        decisionTelemetryEnabled: true,
         salesCycleEnabled: true,
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
@@ -3709,6 +3717,7 @@ describe("RealtimeRunner inbound batching", () => {
         verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
         multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE",
         c3: {
+          customerInputEnabled: checkoutOwner.startsWith("TYPED_"),
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
           transport: { send: c3Send },
         },
@@ -3735,7 +3744,33 @@ describe("RealtimeRunner inbound batching", () => {
     );
 
     expect(await runner.processOne()).toBe(true);
-    expect(c3Send).toHaveBeenCalledTimes(2);
+    expect(c3Send).toHaveBeenCalledTimes(checkoutOwner.startsWith("TYPED_") ? 3 : 2);
+    if (checkoutOwner.startsWith("TYPED_")) {
+      expect(persistedState.sessionDecisionContext?.budgetVnd).toBe(700_000);
+      const requests = c3Send.mock.calls.map(([request]) => JSON.parse(JSON.parse(request.body).contents[0].parts[0].text));
+      expect(requests.map((request) => request.contractVersion)).toEqual([
+        "REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1",
+      ]);
+      expect(JSON.stringify(requests[1])).toContain('700k');
+      const written = commit.mock.calls[0]![0] as { metaPlan?: unknown; decisionEvents?: { details: { c3Candidate?: unknown } }[] };
+      expect(written.decisionEvents?.find(({ details }) => details.c3Candidate)?.details.c3Candidate).toMatchObject({
+        status: "VALIDATED", selectedForOutbound: checkoutOwner !== "TYPED_DRY_RUN",
+        redactedReply: "Giá hiện tại của mẫu này là 799.000đ ạ.",
+      });
+      if (checkoutOwner === "TYPED_DRY_RUN") expect(written.metaPlan).toBeUndefined();
+      expect(persistedCommerce.cart).toBeNull();
+      persistedState = { ...persistedState, conversationOwner: "HUMAN",
+        ownerReason: "AGENT_HANDOFF", ownerLeaseUntil: "2026-07-22T03:00:00.000Z" };
+      const beforeCommerce = structuredClone(persistedCommerce);
+      const humanEntry = item(43, "Chị chốt size M, COD nhé");
+      currentBatch = { ...batch, generation: 13, inboxIds: [humanEntry.inboxId],
+        firstReceiveSequence: 43, lastReceiveSequence: 43, items: [humanEntry] };
+      vi.setSystemTime(humanEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(c3Send).toHaveBeenCalledTimes(3);
+      expect(persistedCommerce).toEqual(beforeCommerce);
+      return;
+    }
     expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
     expect(persistedCommerce.cart).toBeNull();
     const commitInput = commit.mock.calls[0]![0] as {

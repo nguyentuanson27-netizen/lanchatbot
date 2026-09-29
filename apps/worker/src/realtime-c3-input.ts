@@ -9,6 +9,8 @@ import {
   FinalTurnEvidenceV2Schema,
   ProductBindingV2Schema,
   canonicalJsonV1,
+  canonicalCartStateHashPreimageV1,
+  canonicalCartStateV1,
   type BusinessFactEnvelopeV1,
   type DeterministicEffectReadinessV1,
   type ProductFactsV2,
@@ -102,7 +104,14 @@ export function buildRealtimeC3Input(input: Readonly<{
   const readbackReady = cart !== null && input.cartReadiness.some((readiness) =>
     readiness.effect === "CART_READY" && readiness.outcome === "READY" &&
     readiness.cartId === cart.value.cartId &&
-    readiness.cartVersion === cart.value.revision
+    readiness.cartVersion === cart.value.revision &&
+    readiness.sourceMessageIdHash === input.canonicalEvidence.buyingIntent.sourceMessageIdHash &&
+    readiness.conversationRevision === input.preConversationRevision &&
+    readiness.salesCycleRevision === input.preSalesRevision &&
+    Date.parse(readiness.checkedAt) <= input.now.getTime() &&
+    Date.parse(readiness.expiresAt) > input.now.getTime() &&
+    readiness.cartStateHash === createHash("sha256")
+      .update(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart.value)), "utf8").digest("hex")
   );
   const currentCart: TrackCCurrentCartBinding | null = cart === null ||
       !readbackReady ||

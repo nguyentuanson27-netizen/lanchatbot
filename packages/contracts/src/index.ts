@@ -329,6 +329,36 @@ export const AgentSalesSignalsV1Schema = z.object({
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 
+const CustomerInputEvidenceSchema = z.string().trim().min(1).max(2_000);
+export const RealtimeCustomerInputSchema = z.object({
+  factQuery: AgentBusinessFactQueryV1Schema,
+  policyQuestion: z.enum(["EXCHANGE_AND_RETURN", "EXCHANGE_SIZE", "EXCHANGE_COLOR", "EXCHANGE_MODEL",
+    "RETURN_AND_REFUND", "TRY_ON", "REFUSED_PARCEL_FEE", "SHIPPING_FEE", "DELIVERY_TIME",
+    "SHOPEE_PRICE", "IMAGE_ACCURACY", "WASHING_CARE", "UNSUPPORTED_POLICY"]).nullable(),
+  route: z.enum(["PRE_SALE", "HUMAN", "POST_SALE"]),
+  routeEvidence: CustomerInputEvidenceSchema.nullable(),
+  product: z.object({
+    operation: z.enum(["CURRENT", "SELECT", "SEARCH", "REJECT"]),
+    productId: z.string().trim().min(1).max(64).nullable(),
+    evidenceText: CustomerInputEvidenceSchema.nullable(),
+  }).strict(),
+  variant: z.object({
+    operation: z.enum(["NONE", "SELECT", "CHANGE"]),
+    productId: z.string().trim().min(1).max(64).nullable(),
+    size: z.string().trim().min(1).max(32).nullable(),
+    color: z.string().trim().min(1).max(80).nullable(),
+    evidenceText: CustomerInputEvidenceSchema.nullable(),
+  }).strict(),
+  budget: z.object({ operation: z.enum(["KEEP", "SET", "CLEAR"]),
+    value: z.number().int().min(0).max(100_000_000).nullable(), evidenceText: CustomerInputEvidenceSchema.nullable() }).strict(),
+  occasion: z.object({ operation: z.enum(["KEEP", "SET", "CLEAR"]),
+    value: z.enum(["WORK", "PARTY", "EVERYDAY"]).nullable(), evidenceText: CustomerInputEvidenceSchema.nullable() }).strict(),
+  salesSignals: AgentSalesSignalsV1Schema,
+}).strict();
+export type RealtimeCustomerInput = z.infer<typeof RealtimeCustomerInputSchema>;
+
+
+
 export const AgentStrategyAnalysisV1Schema = z.object({
   need: z.enum([
     "NEED_OCCASION",

@@ -298,6 +298,14 @@ export interface RealtimeDecisionEventPlan {
     salesCycleStageBefore: string | null;
     salesCycleStageAfter: string | null;
     outboundMessageCount: number;
+    customerInputFailure?: string;
+    c3Candidate?: Readonly<{
+      status: "VALIDATED" | "REJECTED";
+      replyHash: string | null;
+      redactedReply: string | null;
+      reason: string | null;
+      selectedForOutbound: boolean;
+    }>;
     modelCalled: boolean;
     modelLatencyMs: number | null;
     modelTokenUsage: Readonly<{

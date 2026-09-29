@@ -1,5 +1,10 @@
 # Checklist hiện hành — C3 sales root-cause fix, cập nhật 27/09/2026
 
+Implementation mới từ merge PR375: branch `feat/pr375-sales-implementation-20260929`.
+PR376 đã đóng, không kế thừa commit của PR376. Tiến độ và thay đổi contract xem
+[runtime amendment](../docs/specs/pr375-customer-input-runtime-20260929.md).
+Các checkbox P dưới đây vẫn mở cho tới khi đủ acceptance của cả task.
+
 Kế hoạch: [plan.md](plan.md). Baseline `ce558e6d4028dd06bd6efc960286464425a26a85`.
 
 Các task P là việc còn phải thực hiện theo kế hoạch mới; checkbox chưa tick không có nghĩa toàn bộ code cũ chưa tồn tại.
