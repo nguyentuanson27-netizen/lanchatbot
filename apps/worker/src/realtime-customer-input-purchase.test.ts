@@ -53,8 +53,8 @@ describe("purchase intent alongside a variant correction", () => {
   });
 
   it("does not invent a purchase for a correction alone", () => {
-    const raw = correctionWithPurchase();
-    raw.salesSignals = noCustomerSelection().salesSignals;
+    const raw = { ...correctionWithPurchase(),
+      salesSignals: noCustomerSelection().salesSignals };
     expect(canonical(raw, { ...context, text: "Đổi sang L" })).toMatchObject({
       decision: "NONE", requestedAction: "NONE", quantity: null,
       productId: null, contributors: [], evidenceHash: null, authorization: "NONE",
@@ -62,14 +62,13 @@ describe("purchase intent alongside a variant correction", () => {
   });
 
   it("retains a conditional offer as considering, never a cart command", () => {
-    const raw = correctionWithPurchase();
-    raw.salesSignals = {
+    const raw = { ...correctionWithPurchase(), salesSignals: {
       ...noCustomerSelection().salesSignals,
       buyingIntent: {
         decision: "CONSIDERING", requestedAction: "NONE", quantity: null,
         evidenceText: "500k thì chị lấy", confidence: 0.99,
       },
-    };
+    } };
     expect(canonical(raw, { ...context, text: "Đổi sang L, 500k thì chị lấy." }))
       .toMatchObject({ decision: "CONSIDERING", requestedAction: "NONE",
         quantity: null, productId: null, authorization: "NONE" });
