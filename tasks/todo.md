@@ -3,7 +3,7 @@
 Implementation mới từ merge PR375: branch `feat/pr375-sales-implementation-20260929`.
 PR376 đã đóng, không kế thừa commit của PR376. Tiến độ và thay đổi contract xem
 [runtime amendment](../docs/specs/pr375-customer-input-runtime-20260929.md).
-PR378 chỉ cập nhật kế hoạch/checklist trên baseline PR377 `7576e6ec964aca0f22ca19c24eddc773030a0866`; chờ owner review trước khi fix. Mục [x] là evidence cụ thể đã ghi nhận, không đóng cả task hoặc chứng minh exact head mới.
+PR378 chỉ cập nhật kế hoạch/checklist trên baseline PR377 `7576e6ec964aca0f22ca19c24eddc773030a0866`. Owner đã yêu cầu self-review/fix lần cuối và thực hiện kế hoạch; checkpoint chờ review ở bản kế hoạch trước đã được đáp ứng, không cần xin lại quyền bắt đầu. Thực hiện P00 trước trên nhánh PR377; PR378 vẫn chỉ tài liệu, không merge/deploy/đổi provider live. Mục [x] là evidence cụ thể đã ghi nhận, không đóng cả task hoặc chứng minh exact head mới.
 
 Nguồn kế hoạch duy nhất: [plan.md](plan.md), mục 3 (mục tiêu model) và mục 4 (mapping trùng lặp). Baseline ce558e6d thuộc snapshot PR375, không phải điểm bắt đầu lại implementation.
 
@@ -24,7 +24,7 @@ Amendment lịch sử từ [comment review](evidence/c3-plan-review-comment-5847
 ## 1. Bằng chứng và đầu vào
 
 - [x] P00 — Phân loại đủ 70 output: input/guard/model/capability; pin source/contracts/rubric. Xem `evidence/pr377-dev70-baseline-diagnostic.md`; đây là diagnostic, không phải quality pass.
-- [ ] P00 — Tích hợp findings đã hiệu chỉnh; khóa source PR377 và phân loại CI fail 7576e6ec. Giữ hiệu chỉnh handoff #7, canonical NONE #8, positive M→L; tách source-only/reproduced/full runtime, không tính evidence cũ là exact-head pass.
+- [ ] P00 — Tích hợp findings đã hiệu chỉnh; khóa source PR377 và phân loại CI fail 7576e6ec/cc9f34cd. Khi log báo test không tồn tại trong blob đã xác minh, đối chiếu HEAD, blob tại HEAD và file thực tế trên runner trước khi sửa assertion; nguyên nhân chưa khớp giữ UNKNOWN, không bỏ test hoặc coi là guard/model defect đã chứng minh. Giữ hiệu chỉnh handoff #7, canonical NONE #8, positive M→L; tách source-only/reproduced/full runtime, không tính evidence cũ là exact-head pass.
 - [ ] P01 — Current-cart snapshot/binding và variant mapping; frozen gaps có version rõ.
 - [ ] P02 — Catalog/Sheets producer → isolated readback → canonical, coverage thực.
 
