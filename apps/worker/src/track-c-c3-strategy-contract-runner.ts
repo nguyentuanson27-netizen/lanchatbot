@@ -234,6 +234,8 @@ export interface TrackCStrategyContractCaseResult {
   readonly responderTask: TrackCResponderTask;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
+  /** Live-only facts preservation after rejected prose; never a quality pass. */
+  readonly recoveryDiagnostic?: TrackCStrategyContractDiagnostic;
   readonly identity: Readonly<{
     readonly captureContextHash: string;
     readonly strategistRequestEnvelopeHash: string | null;
@@ -1207,6 +1209,7 @@ function fixedTask(
 
 type TrackCStrategyCoreInput = Omit<TrackCStrategyContractCaseInput, "capture"> & Readonly<{
   context: ContextV2;
+  recoverSelectedFacts?: boolean;
   canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[];
   checkoutClarificationActive?: boolean;
   currentCart?: TrackCCurrentCartBinding | null;
@@ -1349,6 +1352,7 @@ async function runTrackCStrategyContractCore(
     throw stageFailure("RESPONDER", responderPayload, error);
   }
   let output: ContextV2CandidateOutputV2;
+  let recoveryDiagnostic: TrackCStrategyContractDiagnostic | undefined;
   try {
     output = compileResponderDraft({
       context,
@@ -1362,7 +1366,25 @@ async function runTrackCStrategyContractCore(
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
     });
   } catch (error) {
-    throw stageFailure("FINAL_GUARD", responderPayload, error);
+    const failure = stageFailure("FINAL_GUARD", responderPayload, error);
+    // Retain only already-selected code facts on the live failure path. Never
+    // recover a new strategy, a customer request, an effect or model-authored
+    // factual text. Frozen evaluation still exposes the original rejection.
+    if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" ||
+        task.answer.kind !== "ANSWER" || task.answer.evidenceStatus !== "SUPPORTED" ||
+        task.evidence.length === 0 || task.unrealizedEvidence.length > 0 ||
+        task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") throw failure;
+    try {
+      output = compileResponderDraft({
+        context, dialogue: input.evaluationContext, task,
+        draft: { answerText: null, factualTexts: [], progressionText: null },
+        lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
+        currentCart: input.currentCart ?? null,
+      });
+      recoveryDiagnostic = failure.diagnostic;
+    } catch {
+      throw failure;
+    }
   }
   const decisionHash = sha256(conversationPlan);
   const identity = Object.freeze({
@@ -1388,6 +1410,7 @@ async function runTrackCStrategyContractCore(
     responderTask: task,
     output,
     reply: trackCComposeReply(output.segments.map(({ text }) => text)),
+    ...(recoveryDiagnostic ? { recoveryDiagnostic } : {}),
     identity,
   });
 }
@@ -1408,7 +1431,7 @@ export async function runTrackCStrategyContractCase(
 export async function runTrackCStrategyLive(
   input: TrackCStrategyLiveInput,
 ): Promise<Pick<TrackCStrategyContractCaseResult,
-  "conversationLane" | "conversationPlan" | "responderTask" | "output" | "reply" | "identity">> {
+  "conversationLane" | "conversationPlan" | "responderTask" | "output" | "reply" | "identity" | "recoveryDiagnostic">> {
   if ("simulationFacts" in input || "simulationMetadata" in input ||
       "capture" in input) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -1424,6 +1447,7 @@ export async function runTrackCStrategyLive(
   }
   const result = await runTrackCStrategyContractCore({
     lane: "PRODUCTION_CONTRACT",
+    recoverSelectedFacts: true,
     context,
     modelResource: input.modelResource,
     evaluationAt: input.decisionAt,
@@ -1446,5 +1470,6 @@ export async function runTrackCStrategyLive(
     output: result.output,
     reply: result.reply,
     identity: result.identity,
+    ...(result.recoveryDiagnostic ? { recoveryDiagnostic: result.recoveryDiagnostic } : {}),
   });
 }

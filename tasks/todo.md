@@ -37,6 +37,7 @@ Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), 
 ## 3. Hành trình bán hàng
 
 - [ ] P05 — Luna chạy producer/C3 thật trên nhánh được gọi; fake ports, full history/state/calls/skip reasons; tái hiện lỗi baseline được phép, không đòi P06 pass.
+- [x] P05 — Luna stateful cart/size/checkout run `e76a9667`: 7 turns, 13 calls, current fee answer, size L retained, confirmed final state. Separate actual-server C3_RECOVERY control retains verified selected facts and guard reason. Synthetic/DRY_RUN only; not sales-quality or live smoke.
 - [x] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness. `realtime-server-c3.test.ts` import entrypoint thật, giữ hai BF wrapper, thay external IO, chạy `processOne`.
 - [ ] P06 — Một owner trên nhánh chuyển; no-cart→commitment→edit→checkout→confirm đúng state.
 - [ ] P06 — Extraction trước routing hậu mãi/handoff, giữ/loại current product và session update; consumer dùng kết quả đã validate, trusted ownership/no-call vẫn đi trước.
@@ -59,7 +60,8 @@ Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), 
 ## 5. Đánh giá và bàn giao
 
 - [ ] P11 — GPT-6 Luna DEV70 đúng revision + runtime full-intent ngoài wording DEV70; full history.
-- [ ] Chấm stage/quality theo rubric; đọc accepted/rejected; COMPLETED_NOT_JUDGED không là pass.
+- [x] Chấm stage/quality theo rubric trên candidate cache chính xác; ghi rõ 43 scored (14 PASS, 23 PASS_WITH_NOTE, 6 FAIL), 9 judge errors sau retry, 16 generation/guard failures và 2 expected pre-model rejects. COMPLETED không tự thành quality pass. Chi tiết và lỗi judge nằm trong `evidence/pr377-dev70-e76a9667-diagnostic.md` cùng artifact ngoài repo.
+- [x] Chấm exact `e76a9667` Luna DEV70 bundle with registered stage judge; the `5596631` result was kept separate. Nine provider judge errors remain unresolved and are not scored.
 - [ ] Báo input/contract/provider/judge failures và giới hạn blind holdout.
 - [ ] P11 — Controls theo invariant, Luna theo hành trình; giữ full history và phân biệt planned state/commit/receipt; không thêm gate Luna cho từng finding.
 - [ ] P12 — Self-review code/spec, required checks/CI, evidence đúng source, draft PR/residual.

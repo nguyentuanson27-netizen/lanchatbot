@@ -45,7 +45,8 @@ afterEach(() => {
 });
 
 describe("realtime server C3 DRY_RUN composition", () => {
-  it.each(["ON", "OFF", "HUMAN"] as const)("runs actual server with fake IO: %s", async (mode) => {
+  it.each(["ON", "OFF", "HUMAN", "REJECT_MATCH", "REJECT_MISSING", "REJECT_IGNORED", "C3_RECOVERY"] as const)("runs actual server with fake IO: %s", async (mode) => {
+    const rejection = mode.startsWith("REJECT_");
     vi.resetModules(); vi.clearAllMocks();
     // Override optional process flags as well as required synthetic endpoints.
     for (const key of Object.keys(process.env)) if (/^(REALTIME_|DF13_|RUNTIME_POLICY_|HISTORY_|AD_ACQUISITION_|PANCAKE_|APP_SEND_|CHATBOT_SEND_)/u.test(key)) vi.stubEnv(key, "");
@@ -62,6 +63,8 @@ describe("realtime server C3 DRY_RUN composition", () => {
     const now = new Date(); const at = now.toISOString(); const pageId = env.META_PAGE_ID;
     const conversationId = "43820fd4-daa7-4917-9835-a38cb5512001";
     const state = { ...createConversationState({ conversationId, routingOwner: "APP", now }),
+      currentProductId: rejection ? "CB182" : null,
+      consideredVariant: { offerType: rejection ? "SET" : null, color: rejection ? "BE" : null, size: rejection ? "M" : null },
       conversationOwner: mode === "HUMAN" ? "HUMAN" as const : "BOT" as const };
     const entry = { inboxId: "2a9afc47-978a-4b74-9653-3c89e75a8001", pageId,
       eventKey: "synthetic-server-event", conversationHash: "synthetic-server", occurredAt: now, receivedAt: now,
@@ -70,7 +73,8 @@ describe("realtime server C3 DRY_RUN composition", () => {
         routing: { mode: "APP", routingOwner: "APP", evaluationOnly: false, reason: "APP_OWNS" },
         message: { schemaVersion: 1, traceId: "synthetic-server", eventKey: "synthetic-server-event", pageId,
           messageId: "synthetic-server-message", senderId: "synthetic-customer", conversationId,
-          occurredAt: at, isEcho: false, appId: null, text: "Mẫu CB182 bao nhiêu?", attachments: [] } } };
+          occurredAt: at, isEcho: false, appId: null,
+          text: rejection ? "Chị không chọn CB182, tìm mẫu khác nhé." : "Mẫu CB182 bao nhiêu?", attachments: [] } } };
     const ready = async () => true; const close = async () => undefined;
     const commit = vi.fn(async () => ({ stateCommitted: true, metaOutboxCreated: 0,
       pancakeTagOutboxCreated: false, handoffEventCreated: false, sendAuthorized: false,
@@ -90,10 +94,16 @@ describe("realtime server C3 DRY_RUN composition", () => {
       recordOutboundHumanMessage: close };
     const product = { productId: "CB182", parentProductId: "CB182", canonicalCode: "CB182", aliases: [],
       title: "Set Thiên Giao", colors: ["BE"], materials: [], silhouettes: [], occasions: [], imageUrls: [], images: [], catalogVersion: "offline" };
-    ports.search = { ready, close, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", score: 1, gap: null, product }), searchImage: vi.fn() };
-    ports.facts = { ready, close, resolve: async () => ({ schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
-      observedAt: at, expiresAt: new Date(now.getTime() + 86400000).toISOString(), productId: "CB182",
-      facts: { schemaVersion: 1, productId: "CB182", parentProductId: "CB182", offerType: "SET", listPriceVnd: null,
+    const searchText = vi.fn(async (query: string, exclude?: string) => {
+      if (mode === "REJECT_MISSING" && exclude) return { status: "NOT_FOUND" };
+      const selected = mode === "REJECT_MATCH" && exclude ? { ...product,
+        productId: "SV9031", parentProductId: "SV9031", canonicalCode: "SV9031" } : product;
+      return { status: "MATCHED", matchKind: "EXACT_CODE", score: 1, gap: null, product: selected };
+    });
+    ports.search = { ready, close, searchText, searchImage: vi.fn() };
+    ports.facts = { ready, close, resolve: async (query: { productId: string }) => ({ schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+      observedAt: at, expiresAt: new Date(now.getTime() + 86400000).toISOString(), productId: query.productId,
+      facts: { schemaVersion: 1, productId: query.productId, parentProductId: query.productId, offerType: "SET", listPriceVnd: null,
         salePriceVnd: 799000, sizes: ["M"], stockStatus: "IN_STOCK", stockQuantity: 2,
         deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [] }, reasonCode: null }) };
     const generate = vi.fn(async () => ({ modelVersion: "synthetic", latencyMs: 1, tokenUsage: {}, proposal: {
@@ -105,12 +115,18 @@ describe("realtime server C3 DRY_RUN composition", () => {
     ports.send.mockImplementation(async ({ body }: { body: string }) => {
       const prompt = JSON.parse(JSON.parse(body).contents[0].parts[0].text);
       stages.push(prompt.contractVersion);
-      const response = prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1" ? noCustomerSelection()
+      const response = prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1" ? {
+        ...noCustomerSelection(), ...(rejection ? { product: {
+          operation: "REJECT", productId: "CB182", evidenceText: entry.envelope.message.text,
+        } } : {}),
+      }
         : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" ? {
           replyAct: "ANSWER", goal: "Answer the current price.", proposition: "PRICE",
           evidenceRefs: prompt.selectableEvidence.filter((v: { capability: string }) => v.capability === "PRICE").map((v: { ref: string }) => v.ref),
           continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
-        : { answerText: null, factualTexts: [], progressionText: null };
+        : mode === "C3_RECOVERY"
+          ? { answerText: "Size XL sẽ vừa với chị.", factualTexts: [], progressionText: null }
+          : { answerText: null, factualTexts: [], progressionText: null };
       return { providerModelVersion: "gemini-3.5-flash-lite", payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] } };
     });
     ports.loop.mockImplementation(async ({ runner, mode: runMode, sendEnabled }) => {
@@ -123,7 +139,29 @@ describe("realtime server C3 DRY_RUN composition", () => {
     expect(commit).toHaveBeenCalledOnce();
     const written = commit.mock.calls[0] as unknown as [{ metaPlan?: unknown; decisionEvents?: { details: { c3Candidate?: unknown } }[] }];
     expect(written[0].metaPlan).toBeUndefined();
-    if (mode === "ON") {
+    if (rejection) {
+      expect(searchText).toHaveBeenCalledWith(entry.envelope.message.text, "CB182");
+      const persisted = (commit.mock.calls[0] as unknown as [{ state: { currentProductId: string | null;
+        consideredVariant: { size: string | null };
+        sessionDecisionContext?: { rejectedProductIds: string[] } } }])[0].state;
+      expect(persisted.currentProductId).toBe(mode === "REJECT_MATCH" ? "SV9031" : null);
+      expect(persisted.consideredVariant.size).toBeNull();
+      expect(persisted.sessionDecisionContext?.rejectedProductIds).toContain("CB182");
+      expect(generate).not.toHaveBeenCalled();
+      return;
+    }
+    if (mode === "C3_RECOVERY") {
+      expect(stages).toEqual(["REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1"]);
+      expect(generate).not.toHaveBeenCalled();
+      const candidates = written[0].decisionEvents?.flatMap(({ details }) =>
+        details.c3Candidate ? [details.c3Candidate as { status: string; reason: string | null;
+          reasonCodes?: readonly string[]; redactedReply: string | null; selectedForOutbound: boolean }] : []) ?? [];
+      expect(candidates).toContainEqual(expect.objectContaining({
+        status: "VALIDATED", reason: "C3_SELECTED_FACTS_RECOVERY",
+        reasonCodes: expect.arrayContaining(["SIZE_RECOMMENDATION_UNDECLARED"]),
+        redactedReply: "Giá hiện tại của mẫu này là 799.000đ ạ.", selectedForOutbound: false,
+      }));
+    } else if (mode === "ON") {
       expect(stages).toEqual(["REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1"]);
       expect(written[0].decisionEvents?.some(({ details }) =>
         (details.c3Candidate as { status?: string; selectedForOutbound?: boolean } | undefined)?.status === "VALIDATED" &&

@@ -27,6 +27,11 @@ const allJourneys = [
   { id: "delivery_question", turns: ["Mẫu CB182 giá bao nhiêu?", "Giao về Hà Nội mất bao lâu?"] },
   { id: "comparison", turns: ["Mẫu CB182 giá bao nhiêu?", "Chị đang so với mẫu khác rẻ hơn."] },
   { id: "prior_experience", turns: ["Mẫu CB182 giá bao nhiêu?", "Lần trước chị mặc chưa thoải mái lắm."] },
+  { id: "product_rejection", turns: [
+    "Mẫu CB182 giá bao nhiêu?",
+    "Chị không chọn CB182, tìm mẫu khác nhé.",
+    "Chị chưa mua đâu, vẫn không chọn CB182 nhé.",
+  ] },
   { id: "cart_size_checkout", turns: [
     "Mẫu CB182 giá bao nhiêu?", "Chị sẽ lấy một bộ size M.", "Chị đổi sang size L nhé.",
     "Giỏ này tính phí giao thế nào?", "Tên: An Demo\nSĐT: 0900000000\nĐịa chỉ: 123 Đường Mẫu, Hà Nội",
@@ -413,7 +418,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
         const reply = (turnSnapshots.at(-1) as { metaPlan?: { messages?: readonly { text: string }[] } } | undefined)?.metaPlan?.messages?.map(({ text }) => text).join("\n") ?? null;
         const candidates = turnSnapshots.flatMap((snapshot) =>
           (snapshot as { fullCommitInput?: { decisionEvents?: { details?: { c3Candidate?: {
-            status: string; selectedForOutbound: boolean;
+            status: string; selectedForOutbound: boolean; reason?: string | null;
           } } }[] } }).fullCommitInput?.decisionEvents?.flatMap(({ details }) => details?.c3Candidate ? [details.c3Candidate] : []) ?? []);
         // This in-memory transport accepts every generated outbound unit. The
         // history projection follows that synthetic acceptance, never plan creation.
@@ -425,6 +430,7 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
           runtimeEvents: turnEvents, c3Calls: turnCalls, c3FallbackReasons: fallbackReasons,
           c3Candidates: candidates,
           c3Outcome: fallbackReasons.length || candidates.some(({ status }) => status === "REJECTED") ? "FALLBACK"
+            : candidates.some(({ reason }) => reason === "C3_SELECTED_FACTS_RECOVERY") ? "C3_RECOVERED_FACTS"
             : candidates.some(({ selectedForOutbound }) => selectedForOutbound) ? "C3_CHOSEN"
             : candidates.some(({ status }) => status === "VALIDATED") ? "C3_CANDIDATE_ONLY" : "C3_NOT_CALLED",
           selectedCartSize: selectedSize, fakeDelivery, reply });
@@ -478,6 +484,21 @@ describe.skipIf(!enabled)("Track C Luna RealtimeRunner smoke (opt in)", () => {
     }
     const objectionCheckout = records.find((record) => (record as { journeyId: string }).journeyId === "objection_fact_checkout") as { turns: readonly unknown[] } | undefined;
     if (objectionCheckout) expect(objectionCheckout.turns).toHaveLength(8);
+    const rejected = records.find((record) => (record as { journeyId: string }).journeyId === "product_rejection") as {
+      turns: readonly { reply: string | null; stateAfter: { conversation: {
+        currentProductId: string | null; sessionDecisionContext?: { rejectedProductIds: string[] };
+      }; commerce: { cart: unknown } } }[];
+    } | undefined;
+    if (rejected) {
+      expect(rejected.turns).toHaveLength(3);
+      for (const turn of rejected.turns.slice(1)) {
+        expect(turn.stateAfter.conversation.currentProductId).toBeNull();
+        expect(turn.stateAfter.conversation.sessionDecisionContext?.rejectedProductIds).toContain("CB182");
+        expect(turn.stateAfter.commerce.cart).toBeNull();
+        expect(turn.reply?.trim(), "A rejected product needs a response, not a recycled quotation").toBeTruthy();
+        expect(turn.reply).not.toContain("799.000");
+      }
+    }
     expect(modelCalls.length).toBeGreaterThan(0);
   }, 60 * 60 * 1000);
 });

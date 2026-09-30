@@ -83,6 +83,31 @@ of this implementation branch.
   but the production composition silently dropped it. Real-service composition
   controls cover another match and no result, including exact-code lookup.
   This does not yet implement budget filtering or multi-product comparison.
+- Typed text product selection/search/rejection now precedes legacy code scanning.
+  An explicit rejected code cannot reselect itself; failed search clears obsolete
+  current product/variant/clarification state without touching the separate cart.
+  Server tests cover alternatives, no result and an adapter ignoring exclusion.
+  Multi-fact references retain the existing bounded lookup. Media/URL semantic
+  resolution still has legacy branches and is not covered by this text slice.
+- In LIVE C3, if the Strategist selected supported evidence and the Responder's
+  final answer fails validation, the runtime may recompile only those selected
+  code facts. Recovery is unavailable for ACKNOWLEDGE, unresolved/partial
+  evidence, checkout/customer requests or effects. Telemetry labels
+  `C3_SELECTED_FACTS_RECOVERY` and preserves the original guard reasons. Frozen
+  evaluation remains a rejection. This protects the verified delivery fee from
+  disappearing after an unrelated size-prose false positive; it does not turn
+  the prose into an accepted answer or clear the guard defect.
+- Luna runtime at `e76a9667` re-ran the complete size-edit/checkout journey:
+  7 turns, 13 model calls, L remained selected, fee 30.000đ answered, final
+  state `PURCHASE_CONFIRMED`. In this run commerce answered the fee directly.
+  `C3_RECOVERY` at the actual server entrypoint separately injects an unauthorized
+  XL fit claim and confirms the candidate is rejected then recovered to the
+  already selected verified price with the guard reason retained. Both use fake
+  business/runtime ports and DRY_RUN; no outbound send.
+- CI at `e76a9667` exposed a stale evaluator fingerprint after the concurrent
+  promise fix. The manifest now pins evaluator blob `731a9029` and quality-harness
+  fingerprint `633d96fc2557bb1853ea01a30ab1ab133b2234d5d0a6e983c234730e7159e9b2`.
+  DEV70/holdout content, bundle facts, rubric and scoring thresholds are unchanged.
 - A finite two-sided guard experiment at `5596631d` exposed five defects in twelve
   controls, including both false positives and false negatives. See
   `tasks/evidence/pr377-guard-finite-review.md`. Arbitrary factual prose is not
@@ -105,7 +130,7 @@ of this implementation branch.
   edited size-L cart. Luna provider quota failed at the final confirmation and
   subsequent journey. It is incomplete evidence, not a sales-quality pass.
 
-Remaining: P00 corrected-finding integration and incomplete judging; P02 isolated real producer/index
+Remaining: P00 corrected-finding integration and Luna DEV70 judging; P02 isolated real producer/index
 readback coverage; P03/P04 guard editorial experiment and two-sided factual
 controls; remaining P06 consumer/confirmation/cart wording ownership; P07 sales
 objections/tone; P08 retrieval/comparison; P09 long-history recovery; P10 full

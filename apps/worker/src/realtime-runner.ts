@@ -3359,6 +3359,15 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
+    if (customerInput && customerInput.route === "PRE_SALE" &&
+        customerInput.product.operation !== "CURRENT") {
+      // An unresolved new selection/rejection must not revive the previous
+      // product via state fallback. The existing cart has its own identity.
+      nextState = { ...nextState, productSelections: [], mediaClarification: null,
+        ...(!resolvedProduct ? { currentProductId: null,
+          consideredVariant: { offerType: null, color: null, size: null },
+          verifiedVariant: null, orderDraft: null } : {}) };
+    }
     if (!message.isEcho && event.actor === "CUSTOMER") {
       const session = customerInput
         ? applyCustomerDecisionInput(nextState.sessionDecisionContext, customerInput)
@@ -5376,7 +5385,10 @@ export class RealtimeRunner {
           throw new Error("TRACK_C_C3_OUTBOUND_READINESS_BLOCKED");
         }
         c3Candidate = { status: "VALIDATED", replyHash: canonicalSha256(chosen.reply),
-          redactedReply: redactAnalyticsMessage(chosen.reply).text, reason: null,
+          redactedReply: redactAnalyticsMessage(chosen.reply).text,
+          reason: chosen.recoveryDiagnostic ? "C3_SELECTED_FACTS_RECOVERY" : null,
+          ...(chosen.recoveryDiagnostic ? { reasonCodes: [chosen.recoveryDiagnostic.errorCode,
+            ...chosen.recoveryDiagnostic.reasonCodes ?? []] } : {}),
           selectedForOutbound: this.options.mode === "LIVE" && this.options.sendEnabled };
         if (this.options.mode === "LIVE" && this.options.sendEnabled) {
           metaMessages = candidateMessages;
@@ -6660,6 +6672,32 @@ export class RealtimeRunner {
         Boolean(item.attachment.url)
       );
     const activeClarification = state.mediaClarification;
+    if (customerInput && imageAttachments.length === 0 && !message.adsContext) {
+      const operation = customerInput.product.operation;
+      if (operation === "SEARCH" || operation === "REJECT") {
+        const excluded = operation === "REJECT"
+          ? customerInput.product.productId ?? state.currentProductId : state.currentProductId;
+        const result = await this.productSearch.searchText(text, excluded ?? undefined);
+        // Recheck identity at the consuming boundary even if an adapter ignores
+        // the exclusion. A mentioned rejected code is not a new selection.
+        return result.status === "MATCHED" && (!excluded ||
+            normalizeProductCode(result.product.productId) !== normalizeProductCode(excluded))
+          ? this.singleResolution(result.product, "TEXT_SEMANTIC") : this.emptyResolution();
+      }
+      const selectedId = operation === "SELECT"
+        ? customerInput.product.productId : state.currentProductId;
+      const multipleFactSubjects = this.options.multiFactQueryEnabled &&
+        customerInput.factQuery.intent !== "NONE" && new Set(extractAdProductCodes(text)).size > 1;
+      if (!multipleFactSubjects && (selectedId || operation === "SELECT")) {
+        const product = selectedId ? await this.exactProduct(selectedId) : null;
+        if (!product) return this.emptyResolution();
+        return { ...this.singleResolution(product, operation === "SELECT" ? "SELECTION" : "STATE"),
+          ...(activeClarification?.status === "ACTIVE" ? { clarification: {
+            action: "CLEAR" as const, candidates: [], attemptCount: activeClarification.attemptCount,
+            maxAttempts: activeClarification.maxAttempts, reasonCode: "MEDIA_CLARIFICATION_SELECTED",
+          } } : {}) };
+      }
+    }
     if (activeClarification?.status === "ACTIVE" && imageAttachments.length === 0) {
       const explicitCodes = [...new Set([
         ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
@@ -6758,7 +6796,9 @@ export class RealtimeRunner {
         .map(({ product }) => product)
         .filter((product): product is StableProductDocument => product !== null);
       return {
-        primary: products[0] ?? null,
+        primary: (customerInput?.product.productId
+          ? products.find((product) => normalizeProductCode(product.productId) ===
+              normalizeProductCode(customerInput.product.productId!)) : undefined) ?? products[0] ?? null,
         products,
         references,
         media: aggregateMedia([]),

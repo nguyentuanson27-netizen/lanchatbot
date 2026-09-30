@@ -281,9 +281,12 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.reply).toBe("Với mẫu SQ9012: Giá hiện tại của mẫu này là 849.000đ. Với mẫu SV9031: Giá hiện tại của mẫu này là 1.099.000đ ạ.");
     expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(2);
   });
-  it("accepts a writer's bound price realization and rejects a changed price or benefit through the live core", async () => {
+  it("accepts a bound realization and recovers only the original code fact after rejecting changed price or benefit", async () => {
     const decisionAt = new Date(recipe.evaluation_at);
     const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+    const dialogue = [{ direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+      messageType: "TEXT" as const, text: "Giá mẫu này bao nhiêu?", attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z" }];
     for (const [candidate, accepted] of [
       ["Dạ, Giá hiện tại của mẫu này là 849.000đ.", true],
       ["Giá hiện tại của mẫu này là 699.000đ.", false],
@@ -304,10 +307,42 @@ describe("Track C C3 strategy-contract runner", () => {
         checkoutRequestedFields: [], checkoutClarificationActive: false,
         currentCart: null, paymentOptions: ["COD"], transport: { send },
       });
-      if (accepted) expect((await run).reply).toBe(candidate);
-      else await expect(run).rejects.toThrow("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+      const result = await run;
+      if (accepted) {
+        expect(result.reply).toBe(candidate);
+        expect(result.recoveryDiagnostic).toBeUndefined();
+      } else {
+        expect(result.reply).toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
+        expect(result.recoveryDiagnostic?.errorCode).toBe("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+        expect(result.reply).not.toBe(candidate);
+      }
       expect(send).toHaveBeenCalledTimes(2);
     }
+  });
+  it.each([true, false])("live recovery preserves selected facts but cannot invent a fallback without them (selected=%s)", async (selected) => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+    const dialogue = [{ direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+      messageType: "TEXT" as const, text: "Giá mẫu này bao nhiêu?", attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z" }];
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        replyAct: "ANSWER", goal: "Answer the price question without a size recommendation.", proposition: "PRICE",
+        evidenceRefs: selected ? ["CLAIM_001"] : [], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) })
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        answerText: "Chị mặc size XL sẽ vừa đẹp.", factualTexts: [], progressionText: null,
+      }) });
+    const run = runTrackCStrategyLive({ context, modelResource: MODEL_RESOURCE, decisionAt,
+      dialogue, checkoutRequestedFields: [], checkoutClarificationActive: false,
+      currentCart: null, paymentOptions: ["COD"], transport: { send } });
+    if (selected) {
+      const result = await run;
+      expect(result.reply).toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
+      expect(result.recoveryDiagnostic?.stage).toBe("FINAL_GUARD");
+      expect(result.recoveryDiagnostic?.reasonCodes).toContain("SIZE_RECOMMENDATION_UNDECLARED");
+    } else await expect(run).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
+    expect(send).toHaveBeenCalledTimes(2);
   });
   it("runs the shared core from a live context and rejects replay fields", async () => {
     const decisionAt = new Date(recipe.evaluation_at);
