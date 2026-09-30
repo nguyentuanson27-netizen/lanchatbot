@@ -56,8 +56,9 @@ not run against a live or substitute database.
 The first pushed amendment SHA `b23dde7b834322091830185b6c3e348e7a824b3d`
 failed CI build because the two `packages/business-tools` source files had not
 been included in that commit, although they were present in the locally tested
-working tree. They are now included in the follow-up commit; rerun exact-head CI
-before treating the patch as verified remotely.
+working tree. Follow-up SHA `11f045edefe6e6741c7a269b935940e12596616a` includes
+both files. Exact-head CI run `36773490314` passed, including workspace build,
+full repository regression, and isolated C3 catalog round-trip.
 
 ## Behavioral regression evidence
 
@@ -93,6 +94,6 @@ real-model/DEV70 and wider fault-injection acceptance stays open in the checklis
 
 ## Delivery status
 
-Source/test/spec patch applied locally. No merge, deploy, live traffic or provider
-change. New-head CI remains required; Definition of Done and full task acceptance
-are not declared complete before it.
+Source/test/spec patch is pushed to PR377. Exact-head CI passed, but Definition
+of Done and full task acceptance are not declared complete. No merge, deploy,
+live traffic or provider change.
