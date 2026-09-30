@@ -101,8 +101,9 @@ export function customerInputCanonicalEvidence(input: {
   }
   const base = buildCanonicalDecisionEvidenceV1({ ...input, modelBuyingIntent: null });
   const signal = value.salesSignals.buyingIntent;
-  const decision = !signal || signal.confidence < 0.9 || value.route !== "PRE_SALE" ||
-      value.variant.operation === "CHANGE" ? "NONE" : signal.decision;
+  // A correction alone has no buying signal; preserve an independent purchase clause.
+  const decision = !signal || signal.confidence < 0.9 || value.route !== "PRE_SALE"
+    ? "NONE" : signal.decision;
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse({
     ...base.buyingIntent, decision,
     requestedAction: decision === "COMMITTED" ? signal!.requestedAction : "NONE",
