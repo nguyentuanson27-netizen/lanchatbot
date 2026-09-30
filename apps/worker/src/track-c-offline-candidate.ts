@@ -12,6 +12,7 @@ import {
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
 } from "./context-v2-candidate.js";
+import { resolveTrackCC3SystemInstruction } from "./track-c-c3-prompts.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 
 function validEvaluationTime(value: Date): boolean {
@@ -210,6 +211,7 @@ export function buildTrackCSharedCandidateRequest(input: Readonly<{
   if (!input.systemInstruction.trim()) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_SYSTEM_INSTRUCTION_INVALID");
   }
+  const systemInstruction = resolveTrackCC3SystemInstruction(input.systemInstruction);
   const request = buildCandidateRequest({
     modelResource: input.modelResource,
     context: input.context,
@@ -242,7 +244,7 @@ export function buildTrackCSharedCandidateRequest(input: Readonly<{
   });
   const candidateBody = JSON.stringify({
     ...body,
-    systemInstruction: { parts: [{ text: input.systemInstruction }] },
+    systemInstruction: { parts: [{ text: systemInstruction }] },
     contents: [{
       ...body.contents[0],
       parts: [{
