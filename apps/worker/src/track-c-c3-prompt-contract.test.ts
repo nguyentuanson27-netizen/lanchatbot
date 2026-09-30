@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   ADAPTIVE_RESPONDER_INSTRUCTION,
@@ -13,6 +14,24 @@ function expectSectionsInOrder(text: string, sections: readonly string[]): void 
     expect(next, `${section} should be present`).toBeGreaterThan(cursor);
     cursor = next;
   }
+}
+
+const runnerSource = readFileSync(
+  new URL("./track-c-c3-strategy-contract-runner.ts", import.meta.url),
+  "utf8",
+);
+
+function legacyPrompt(name: string): string {
+  const marker = `const ${name} = [`;
+  const from = runnerSource.indexOf(marker);
+  const to = runnerSource.indexOf(`].join("\\n");`, from + marker.length);
+  if (from < 0 || to < 0) throw new Error(`legacy prompt block missing: ${name}`);
+  return runnerSource.slice(from + marker.length, to)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('"'))
+    .map((line) => JSON.parse(line.endsWith(",") ? line.slice(0, -1) : line) as string)
+    .join("\n");
 }
 
 describe("Track C C3 sales prompt contract", () => {
@@ -59,21 +78,21 @@ describe("Track C C3 sales prompt contract", () => {
     expect(ADAPTIVE_RESPONDER_INSTRUCTION).toContain(
       "Follow the Strategist's decision; do not choose a new strategy",
     );
+    expect(ADAPTIVE_RESPONDER_INSTRUCTION).toContain("Speak as em to chị");
     expect(ADAPTIVE_RESPONDER_INSTRUCTION).toContain(
       "All shop facts must remain inside the supplied factualTexts",
     );
   });
 
-  it("routes legacy C3 role prompts to the centralized prompt while leaving other Track C prompts unchanged", () => {
-    expect(resolveTrackCC3SystemInstruction(
-      "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.\nlegacy",
-    )).toBe(STRATEGIST_INSTRUCTION);
-    expect(resolveTrackCC3SystemInstruction(
-      "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.\nlegacy",
-    )).toBe(RESPONDER_INSTRUCTION);
-    expect(resolveTrackCC3SystemInstruction(
-      "You write La.na's next Vietnamese Messenger reply. Read the entire supplied dialogue and the compiled goal. Follow the Strategist's decision; do not choose a new strategy.\nlegacy",
-    )).toBe(ADAPTIVE_RESPONDER_INSTRUCTION);
+  it("routes only the exact legacy C3 prompt revisions to the centralized prompts", () => {
+    const legacyStrategist = legacyPrompt("STRATEGIST_INSTRUCTION");
+    const legacyResponder = legacyPrompt("RESPONDER_INSTRUCTION");
+    const legacyAdaptive = legacyPrompt("ADAPTIVE_RESPONDER_INSTRUCTION");
+    expect(resolveTrackCC3SystemInstruction(legacyStrategist)).toBe(STRATEGIST_INSTRUCTION);
+    expect(resolveTrackCC3SystemInstruction(legacyResponder)).toBe(RESPONDER_INSTRUCTION);
+    expect(resolveTrackCC3SystemInstruction(legacyAdaptive)).toBe(ADAPTIVE_RESPONDER_INSTRUCTION);
+    expect(resolveTrackCC3SystemInstruction(`${legacyStrategist}\ncustom experiment`))
+      .toBe(`${legacyStrategist}\ncustom experiment`);
     expect(resolveTrackCC3SystemInstruction("unrelated Track C evaluator prompt"))
       .toBe("unrelated Track C evaluator prompt");
   });
