@@ -3,6 +3,7 @@ import {
   ADAPTIVE_RESPONDER_INSTRUCTION,
   RESPONDER_INSTRUCTION,
   STRATEGIST_INSTRUCTION,
+  resolveTrackCC3SystemInstruction,
 } from "./track-c-c3-prompts.js";
 
 function expectSectionsInOrder(text: string, sections: readonly string[]): void {
@@ -61,5 +62,19 @@ describe("Track C C3 sales prompt contract", () => {
     expect(ADAPTIVE_RESPONDER_INSTRUCTION).toContain(
       "All shop facts must remain inside the supplied factualTexts",
     );
+  });
+
+  it("routes legacy C3 role prompts to the centralized prompt while leaving other Track C prompts unchanged", () => {
+    expect(resolveTrackCC3SystemInstruction(
+      "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.\nlegacy",
+    )).toBe(STRATEGIST_INSTRUCTION);
+    expect(resolveTrackCC3SystemInstruction(
+      "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.\nlegacy",
+    )).toBe(RESPONDER_INSTRUCTION);
+    expect(resolveTrackCC3SystemInstruction(
+      "You write La.na's next Vietnamese Messenger reply. Read the entire supplied dialogue and the compiled goal. Follow the Strategist's decision; do not choose a new strategy.\nlegacy",
+    )).toBe(ADAPTIVE_RESPONDER_INSTRUCTION);
+    expect(resolveTrackCC3SystemInstruction("unrelated Track C evaluator prompt"))
+      .toBe("unrelated Track C evaluator prompt");
   });
 });
