@@ -53,6 +53,12 @@ Qdrant tests. This patch does not execute DEV70 with a real model. The patch doe
 not change Qdrant/CI files. PostgreSQL-dependent external integration tests were
 not run against a live or substitute database.
 
+The first pushed amendment SHA `b23dde7b834322091830185b6c3e348e7a824b3d`
+failed CI build because the two `packages/business-tools` source files had not
+been included in that commit, although they were present in the locally tested
+working tree. They are now included in the follow-up commit; rerun exact-head CI
+before treating the patch as verified remotely.
+
 ## Behavioral regression evidence
 
 RED -> GREEN was observed for policy-plus-independent-purchase, combined/partial
