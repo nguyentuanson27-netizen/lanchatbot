@@ -53,6 +53,7 @@ describe("Track C C3 sales prompt contract", () => {
     expect(STRATEGIST_INSTRUCTION).toContain("selectableEvidence list is the only commercial factual authority");
     expect(STRATEGIST_INSTRUCTION).toContain("Never upgrade a buying signal into commitment");
     expect(STRATEGIST_INSTRUCTION).toContain("KEEP_OPEN is not a default escape hatch");
+    expect(STRATEGIST_INSTRUCTION).toContain("canonical hard stop requires HOLD_POSITION");
     expect(STRATEGIST_INSTRUCTION).toContain("Missing shop evidence cannot be supplied by a customer answer");
   });
 
