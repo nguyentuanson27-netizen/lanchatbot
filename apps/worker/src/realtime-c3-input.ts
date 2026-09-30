@@ -117,6 +117,9 @@ export function buildRealtimeC3Input(input: Readonly<{
       !readbackReady ||
       bundle === null || pinnedPolicy === undefined || pinnedPolicy === null ||
       currentPolicy === null ||
+      !Number.isFinite(Date.parse(cart.expiresAt)) ||
+      (bundle.policy.effectiveUntil !== null &&
+        !Number.isFinite(Date.parse(bundle.policy.effectiveUntil))) ||
       canonicalJsonV1(pinnedPolicy) !== canonicalJsonV1(currentPolicy)
     ? null
     : {

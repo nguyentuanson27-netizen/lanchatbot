@@ -291,7 +291,7 @@ function sizeGuardInputForClaim(
   };
 }
 
-/** The legacy guard treats promotion/free-shipping topic mentions as assertions. C3 may
+/** The legacy guard treats stock/fit/delivery/offer topic mentions as assertions. C3 may
  * explicitly say that information is unconfirmed. Admit only a bounded
  * uncertainty clause with no values/promise; never infer promotion authority.
  * This is not a relevance check or a general natural-language certificate. */
@@ -300,7 +300,13 @@ function onlyUnconfirmedTopicMentions(value: string, reason: string): boolean {
     ? /\b(?:khuyen mai|uu dai|giam gia|giam\s+\d|voucher|ma giam)\b/u
     : reason === "UNAUTHORIZED_FREESHIP"
       ? /\b(?:freeship|free ship|mien phi (?:giao|ship))\b/u
-      : null;
+      : reason === "UNAUTHORIZED_STOCK"
+        ? /\b(?:con hang|het hang|san hang|dat truoc|sap ve|(?:con|het) size)\b/u
+        : reason === "SIZE_RECOMMENDATION_UNDECLARED"
+          ? /\b(?:size|sz|vua|hop)\b/u
+          : reason === "UNAUTHORIZED_ETA"
+            ? /\b(?:giao|nhan|van chuyen)\b/u
+            : null;
   if (topic === null) return false;
   const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d").toLowerCase();
@@ -377,6 +383,10 @@ function guardProductionOutput(
         claim,
         trackCBoundPresentationForClaim(context.productPresentation, claim.scope),
       );
+      if (claim.type === "STOCK" && claim.scope.kind === "PRODUCT" &&
+          claim.scope.variantId !== null && deterministicText === null) {
+        throw new Error("TRACK_C_V5_PRODUCTION_VARIANT_MAPPING_UNAVAILABLE");
+      }
       if (deterministicText !== null && !trackCRealizationMatches(segment.text, deterministicText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }

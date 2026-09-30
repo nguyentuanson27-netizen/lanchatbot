@@ -2951,6 +2951,25 @@ describe("realtime Phase 3 sales cycle", () => {
     };
     const live = buildRealtimeC3Input(c3Input);
     expect(live.currentCart).not.toBeNull();
+    // Malformed persistence must not throw before the product evidence path.
+    const productFact = BusinessFactEnvelopeV1Schema.parse({
+      schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+      observedAt: "2026-07-23T02:00:00.000Z",
+      expiresAt: "2026-07-25T02:00:00.000Z", productId: "CB182",
+      facts: { schemaVersion: 1, productId: "CB182", parentProductId: "CB182",
+        offerType: "SET", listPriceVnd: 699_000, salePriceVnd: null,
+        sizes: ["M"], stockStatus: "IN_STOCK", stockQuantity: 2,
+        deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [] },
+      reasonCode: null,
+    });
+    for (const expiresAt of ["not-a-date", "", now.toISOString()]) {
+      const result = buildRealtimeC3Input({ ...c3Input, facts: [productFact],
+        commerceState: { ...openState, cart: { ...openState.cart!, expiresAt } } });
+      expect(result.currentCart).toBeNull();
+      expect(result.context.verifiedClaims.some(({ type }) => type === "PRICE")).toBe(true);
+      expect(result.context.verifiedClaims.some(({ scope }) => scope.kind === "CART")).toBe(false);
+    }
+
     for (const invalidReadback of [
       { ...readback.cartReadback!, sourceMessageIdHash: "f".repeat(64) },
       { ...readback.cartReadback!, conversationRevision: 6 },

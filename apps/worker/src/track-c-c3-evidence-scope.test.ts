@@ -4,6 +4,7 @@ import {
   materializeTrackCV5CaseCapture,
   materializeTrackCV5CaseCurrentCart,
   type TrackCV5MaterializationRecipe,
+  type TrackCV5CompactCase,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import {
@@ -62,11 +63,13 @@ function evidenceFor(claimRefs: readonly string[]) {
   });
 }
 
-function cartCaseEvidence(includeCurrentCart: boolean) {
+function cartCaseEvidence(includeCurrentCart: boolean, includeProduct = false) {
   const chunk = JSON.parse(readFileSync(
     new URL("quality-03.json", EVAL_ROOT), "utf8",
   )) as { cases: Array<{ id: string }> };
-  const fixture = chunk.cases.find((entry) => entry.id === "V5V4Q025")!;
+  const base = chunk.cases.find((entry) => entry.id === "V5V4Q025")! as TrackCV5CompactCase;
+  const fixture = includeProduct ? { ...base, context: { ...base.context,
+    runtime_claim_refs: [...base.context.runtime_claim_refs, "RC_PRICE_A"] } } : base;
   const input = { fixture: fixture as never,
     runtimeClaimCatalog: facts.runtime_claim_catalog, recipe };
   const capture = materializeTrackCV5CaseCapture({
@@ -74,6 +77,7 @@ function cartCaseEvidence(includeCurrentCart: boolean) {
   });
   const currentCart = materializeTrackCV5CaseCurrentCart(input)!;
   return {
+    context: capture.context!,
     currentCart,
     evidence: buildTrackCSelectableEvidence({
       context: capture.context!, simulationFacts: [],
@@ -85,6 +89,34 @@ function cartCaseEvidence(includeCurrentCart: boolean) {
 }
 
 describe("Track C C3 evidence subject scope", () => {
+  it.each(["not-a-date", "", "2026-09-10T00:00:00.000Z"])(
+    "rejects invalid or stale independent cart expiry %j", (cartExpiresAt) => {
+      const { currentCart } = cartCaseEvidence(true);
+      expect(() => trackCCurrentCartClaims({ ...currentCart, cartExpiresAt },
+        new Date(recipe.evaluation_at))).toThrow("TRACK_C_CURRENT_CART_BINDING_STALE");
+    },
+  );
+
+  it.each(["not-a-date", "", "2026-09-10T00:00:00.000Z"])(
+    "rejects invalid or stale claim expiry %j", (claimExpiresAt) => {
+      const { currentCart } = cartCaseEvidence(true);
+      expect(() => trackCCurrentCartClaims({ ...currentCart, claimExpiresAt },
+        new Date(recipe.evaluation_at))).toThrow("TRACK_C_CURRENT_CART_BINDING_STALE");
+    },
+  );
+  it.each(["not-a-date", "", "2026-09-10T00:00:00.000Z"])(
+    "excludes invalid cart readback %j before model admission without dropping product facts", (expiresAt) => {
+      const { context, currentCart } = cartCaseEvidence(true, true);
+      const valid = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+        executionLane: "PRODUCTION_CONTRACT", currentCart, evaluationAt: new Date(recipe.evaluation_at) });
+      const result = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+        executionLane: "PRODUCTION_CONTRACT", currentCart: { ...currentCart, cartExpiresAt: expiresAt },
+        evaluationAt: new Date(recipe.evaluation_at) });
+      expect(result.some(({ subject }) => subject?.scope === "CART")).toBe(false);
+      expect(result).toEqual(valid.filter(({ subject }) => subject?.scope !== "CART"));
+      expect(result.length).toBeGreaterThan(0);
+    });
+
   it("states a known non-free cart without changing legacy cart claims", () => {
     const chunk = JSON.parse(readFileSync(
       new URL("quality-03.json", EVAL_ROOT), "utf8",

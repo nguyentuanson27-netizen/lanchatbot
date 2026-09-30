@@ -235,4 +235,47 @@ describe("Track C C3 projection egress", () => {
       "Dạ mẫu này hiện còn màu trắng size L ạ.", entry!.provenance.contentHash,
     ))).toThrow("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
   });
+  it.each(["missing", "wrong-product", "missing-id", "duplicate-id"] as const)(
+    "does not infer stock labels from variant IDs (%s)", (mode) => {
+      const raw = baseContext(["RC_STOCK_SIZE_S_OUT"]);
+      let context = raw;
+      if (mode !== "missing") {
+        context = withPresentation(raw, mode === "missing-id"
+          ? [{ variantId: "OTHER", color: null, size: "S" }]
+          : [{ variantId: "SIZE_S", color: null, size: "S" },
+            ...(mode === "duplicate-id" ? [{ variantId: "SIZE_S", color: null, size: "M" }] : [])]);
+        if (mode === "wrong-product") context = { ...context,
+          productPresentation: { ...context.productPresentation!, productId: "OTHER" } };
+      }
+      const entry = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+        executionLane: "PRODUCTION_CONTRACT" }).find(({ capability }) => capability === "STOCK");
+      expect(entry?.deterministicText).toBeUndefined();
+      expect(() => validate(context, output(
+        "Mẫu này hiện hết size S ạ.", raw.verifiedClaims[0]!.provenance.contentHash,
+      ))).toThrow("TRACK_C_V5_PRODUCTION_VARIANT_MAPPING_UNAVAILABLE");
+    });
+
+  it("uses mapped labels even when the opaque ID suggests a different size", () => {
+    const context = withPresentation(baseContext(["RC_STOCK_SIZE_S_OUT"]), [
+      { variantId: "SIZE_S", color: null, size: "M" },
+    ]);
+    const entry = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT" }).find(({ capability }) => capability === "STOCK")!;
+    expect(entry.deterministicText).toContain("size M");
+    expect(() => validate(context, output(entry.deterministicText!, entry.provenance.contentHash)))
+      .not.toThrow();
+  });
+
+  it("does not invent an unmapped size beside a mapped color", () => {
+    const context = withPresentation(baseContext(["RC_STOCK_SIZE_S_OUT"]), [
+      { variantId: "SIZE_S", color: "đen", size: null },
+    ]);
+    const entry = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+      executionLane: "PRODUCTION_CONTRACT" }).find(({ capability }) => capability === "STOCK")!;
+    expect(entry.deterministicText).toContain("màu đen");
+    expect(entry.deterministicText).not.toContain("size");
+    expect(() => validate(context, output(entry.deterministicText!, entry.provenance.contentHash)))
+      .not.toThrow();
+  });
+
 });

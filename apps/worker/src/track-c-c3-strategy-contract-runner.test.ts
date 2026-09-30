@@ -338,7 +338,7 @@ describe("Track C C3 strategy-contract runner", () => {
       currentCart: null, paymentOptions: ["COD"], transport: { send } });
     if (selected) {
       const result = await run;
-      expect(result.reply).toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
+      expect(result.reply).toBe("Em chưa xác nhận được đầy đủ thông tin chị hỏi. Giá hiện tại của mẫu này là 849.000đ ạ.");
       expect(result.recoveryDiagnostic?.stage).toBe("FINAL_GUARD");
       expect(result.recoveryDiagnostic?.reasonCodes).toContain("SIZE_RECOMMENDATION_UNDECLARED");
     } else await expect(run).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
@@ -864,7 +864,10 @@ describe("Track C C3 strategy-contract runner", () => {
       .map(({ capability }) => capability)).toEqual(["POLICY"]);
   });
 
-  it("delivers a verified public shop address without treating it as customer PII", async () => {
+  it.each([
+    ["Chị đang cân nhắc mẫu SQ9012 và muốn biết địa chỉ shop trước khi mua.", "Em chưa xác nhận được đầy đủ thông tin chị hỏi."],
+    ["Em chưa xác nhận khả năng chống nhăn.", "Em chưa xác nhận khả năng chống nhăn."],
+  ])("keeps public shop facts and preserves or safely replaces the preface: %s", async (answerText, expected) => {
     const shopFact = "Cửa hàng của shop ở 212 Nguyễn Trãi, Hà Nội. Shop mở cửa 09:00–21:00. Chị qua thử trực tiếp được ạ.";
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({ payload: payload({
@@ -873,7 +876,7 @@ describe("Track C C3 strategy-contract runner", () => {
         continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
       }), providerModelVersion: "gemini-3.5-flash-lite" })
       .mockResolvedValueOnce({ payload: payload({
-        answerText: "Chị đang cân nhắc mẫu SQ9012 và muốn biết địa chỉ shop trước khi mua.",
+        answerText,
         factualTexts: [shopFact], progressionText: null,
       }), providerModelVersion: "gemini-3.5-flash-lite" });
 
@@ -887,8 +890,8 @@ describe("Track C C3 strategy-contract runner", () => {
       }], simulationFacts: [facts.simulation_fact_catalog.SF_STORE],
       transport: { send },
     });
-    expect(result.reply).toBe(shopFact);
-    expect(result.output.segments).toMatchObject([{ kind: "VERIFIED_CLAIM", text: shopFact }]);
+    expect(result.reply).toBe(`${expected} ${shopFact}`);
+    expect(result.output.segments).toContainEqual(expect.objectContaining({ kind: "VERIFIED_CLAIM", text: shopFact }));
   });
 
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
@@ -1096,6 +1099,13 @@ describe("Track C C3 strategy-contract runner", () => {
       capture: captureValue,
       evaluationAt: new Date(recipe.evaluation_at),
     });
+    // Diagnostic mapping supplied independently of the stock claim. Frozen
+    // benchmark IDs remain unchanged and never establish a garment size.
+    context.productPresentation = {
+      schemaVersion: 1, productId: "SQ9012", displayName: "Tuong Vi",
+      variants: [{ variantId: "SIZE_S", color: null, size: "S" }],
+      provenance: { contentHash: "b".repeat(64) },
+    } as unknown as typeof context.productPresentation;
     const claim = context.verifiedClaims[0]!;
     const value = {
       segments: [{
@@ -1878,8 +1888,10 @@ describe("Track C C3 strategy-contract runner", () => {
     });
     expect((await run("Chị hỏi việc đổi size; chính sách là:")).reply)
       .toContain("Mẫu này đổi được trong 15 ngày");
+    // The structured authority guard now rejects the unverified numeric
+    // claim before the supplementary product-declaration check.
     await expect(run("Chính sách là đổi được 30 ngày.")).rejects.toThrow(
-      "TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT",
+      "TRACK_C_V5_PRODUCTION_GUARD_FAILED",
     );
   });
 

@@ -1214,3 +1214,50 @@ unknown, including a subordinate mention of when the shop will send it. The
 effect guard distinguishes that bounded uncertainty from an assertion that
 the shop will send it. An affirmative shipping promise in the same or a later
 clause remains rejected. This wording does not grant fulfillment authority.
+
+### PR377 P00–P04 implementation amendment (2026-10-01)
+
+This amendment records the bounded implementation selected by the P00–P04
+root-cause pass. It does not change the six-field Strategist contract, the fixed
+first-contact policy, commerce authority, or the rule that model output is
+untrusted until code validates it.
+
+- **P00 evidence boundary:** exact-head CI remains the integration authority.
+  Historical failing runs remain historical; a later green head does not rewrite
+  their result or cause. Source-only findings, focused reproduction, and full
+  runtime evidence stay distinct.
+- **P01 cart/variant input:** malformed, stale, mismatched, or ambiguous cart
+  binding is fail-closed for cart evidence without deleting independent product
+  facts. Cart and claim expiry strings must parse as finite dates. Product
+  variant IDs are opaque identifiers: customer-facing color/size is emitted only
+  from one product-bound presentation mapping; missing, cross-product, or
+  duplicate mapping is a realization capability gap, never a cue to parse the
+  ID text.
+- **P02 catalog authority:** the acceptance path is producer -> isolated Qdrant
+  index -> production adapter -> ProductFacts/C3 selectable evidence. APPROVED
+  source fields may surface; `UNKNOWN` stays unknown and unapproved image rows
+  do not publish a product. XML description prose is not promoted into approved
+  wear properties, size fit, policy, or destination ETA. The integration test
+  owns a loopback Qdrant process and temporary collection and never writes a
+  live index.
+- **P03 bounded realization/guard:** `factualTexts` may reorder complete
+  source-owned realization units on adaptive turns, but every selected unit must
+  appear exactly once and remain lossless. It may not split, merge, paraphrase,
+  change subject/condition/negation, or use an ambiguous match to rebind a fact.
+  The bounded uncertainty exception covers only an unconfirmed mention with no
+  value or promise for the already guarded stock/fit/ETA/offer topics. This is a
+  conservative syntactic allowance, not a semantic certificate for Vietnamese
+  free prose.
+- **P04 compound coverage and recovery:** `SUPPORTED` describes the selected
+  proposition, not whole-turn completeness. A valid `answerText` that names an
+  unanswered part survives selected-facts recovery. If authored prose itself is
+  rejected, recovery may pair already-selected verified facts with the fixed
+  incomplete-answer limit; it may not invent the missing fact, strategy, effect,
+  or customer request. A public shop-location fact remains source-owned even
+  when a model preface is rejected by customer-PII DLP.
+
+Focused verification for this amendment covers cart expiry/binding, opaque
+variant mapping, production projection guard, adaptive Responder recovery and a
+real isolated Qdrant round-trip. Exact PR-head CI is still required after these
+changes are committed; this section does not claim that future head green in
+advance.

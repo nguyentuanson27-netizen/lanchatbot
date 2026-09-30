@@ -6,7 +6,6 @@ import {
 } from "./track-c-c3-cart-binding.js";
 import {
   TRACK_C_PROTECTED_PROPOSITIONS,
-  trackCCustomerFacingSizeFromVariantId,
   type TrackCProtectedProposition,
   type TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
@@ -104,10 +103,11 @@ export function trackCVariantLabel(
   presentation: ContextV2["productPresentation"] | null,
   variantId: string,
 ): Readonly<{ color?: string; size?: string }> | null {
-  const variant = presentation?.variants.find(
+  const variants = presentation?.variants.filter(
     (entry) => entry.variantId === variantId,
-  );
-  if (variant === undefined) return null;
+  ) ?? [];
+  if (variants.length !== 1) return null;
+  const variant = variants[0]!;
   if (variant.color === null && variant.size === null) return null;
   return Object.freeze({
     ...(variant.color === null ? {} : { color: variant.color }),
@@ -148,13 +148,12 @@ export function trackCRuntimeClaimDeterministicText(
     return `Giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
   }
   if (claim.type === "STOCK") {
-    // Prefer the authoritative variant mapping; fall back to the ID convention
-    // only when no presentation is available for this turn.
+    // Variant IDs are opaque. Missing or ambiguous mapping is an output
+    // capability gap, never evidence of a size or stock status.
     const label = claim.scope.variantId === null
       ? null
-      : trackCVariantLabel(presentation ?? null, claim.scope.variantId);
-    const size = label?.size
-      ?? trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+      : trackCVariantLabel(trackCBoundPresentationForClaim(presentation, claim.scope), claim.scope.variantId);
+    const size = label?.size ?? null;
     const color = label?.color ?? null;
     if (claim.scope.variantId !== null && size === null && color === null) {
       return null;
@@ -390,9 +389,16 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
     // the value as selectable lets a Strategist copy it into goal and the
     // Responder restate it in free prose. Reuse the existing binding check at
     // admission, before either model sees the value.
-    if (claim.scope.kind === "CART" && !trackCCartClaimIsCurrent(
-      claim, input.currentCart ?? null, input.evaluationAt ?? new Date(),
-    )) return;
+    if (claim.scope.kind === "CART") {
+      try {
+        if (!trackCCartClaimIsCurrent(
+          claim, input.currentCart ?? null, input.evaluationAt ?? new Date(),
+        )) return;
+      } catch {
+        // Bad cart input invalidates only cart evidence, not independent facts.
+        return;
+      }
+    }
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
       const boundPresentation = trackCBoundPresentationForClaim(

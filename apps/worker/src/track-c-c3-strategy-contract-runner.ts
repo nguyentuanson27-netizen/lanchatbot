@@ -21,7 +21,7 @@ import {
 } from "./track-c-offline-candidate.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 import type { TrackCCurrentCartBinding } from "./track-c-c3-cart-binding.js";
-import { trackCComposeReply, trackCRealizationMatches, trackCRealizationVariants } from "./track-c-c3-realization-style.js";
+import { trackCComposeReply, trackCOrderEvidence, trackCRealizationVariants } from "./track-c-c3-realization-style.js";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
@@ -46,6 +46,8 @@ import {
   validateResponderOutput,
   type TrackCV5SimulationMetadata,
 } from "./track-c-c3-v5-benchmark-runner.js";
+
+const INCOMPLETE_ANSWER_TEXT = "Em chưa xác nhận được đầy đủ thông tin chị hỏi.";
 
 const ORDINARY_INPUTS = Object.freeze([
   "SIZE", "USUAL_SIZE", "COLOR", "VARIANT", "LOCALITY",
@@ -738,16 +740,20 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   // and perform the same PII check after trimming only the adaptive slots.
   const prose = (value: unknown): unknown => adaptive && typeof value === "string"
     ? value.trim() : value;
-  // The selected store fact answers a direct location request. A model preface
-  // adds no information and may trip customer-address DLP on the word "địa chỉ".
-  // Drop that untrusted prose; the bound fact still receives normal DLP checks.
-  const directLocationFact = adaptive && task.answer.kind === "ANSWER" &&
-    task.answer.proposition === "BUSINESS_LOCATION" &&
-    task.answer.evidenceStatus === "SUPPORTED" &&
-    task.unrealizedEvidence.length === 0 && task.evidence.length > 0 &&
-    task.evidence.every(({ capability }) => capability === "BUSINESS_LOCATION");
+  let answerText: string | null;
+  try { answerText = text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"); }
+  catch (error) {
+    // Preserve the public shop fact without exposing DLP-rejected prose. Unlike
+    // the former blanket drop, safe compound-question limits survive unchanged.
+    const publicLocation = adaptive && task.answer.kind === "ANSWER" &&
+      task.answer.proposition === "BUSINESS_LOCATION" &&
+      task.answer.evidenceStatus === "SUPPORTED" && task.unrealizedEvidence.length === 0 &&
+      task.evidence.length > 0 && task.evidence.every(({ capability }) => capability === "BUSINESS_LOCATION");
+    if (!publicLocation || typeof record.answerText !== "string") throw error;
+    answerText = INCOMPLETE_ANSWER_TEXT;
+  }
   return Object.freeze({
-    answerText: directLocationFact ? null : text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
+    answerText,
     factualTexts: Object.freeze(record.factualTexts.map((item) => {
       const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -802,7 +808,14 @@ function assertConversationalProse(value: string | null): void {
   // asserts no policy property. A clause after "là" still needs evidence.
   // Match an asserted clause, not the embedded topic in "em chưa xác nhận
   // mẫu này có..." or the customer's reported comparison with a cheaper item.
-  if (/(?:^|[.!?;\n])\s*(?:da[, ]+)?(?:(?:em|shop|ben em)\s+(?:thay\s+)?)?(?:(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach(?!\s+la\s*:))\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|thiet ke|cao cap|ben|mem|thoang)|(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b)/u.test(folded)) {
+  const clauses = value.normalize("NFC").toLowerCase().split(/[.!?;,\n]|\s+(?:nh\u01b0ng|tuy nhi\u00ean|\u0111\u1ed3ng th\u1eddi|v\u00ec v\u1eady|n\u00ean|v\u00e0)\s+/u);
+  // Product/shop-subject declarations belong to the selected fact slots,
+  // regardless of the adjective or verb. Check each clause: an uncertainty
+  // preface must not license a separate benefit assertion after a conjunction.
+  const productDeclaration = /^\s*(?:d\u1ea1\s+)?(?:(?:em|shop|b\u00ean em)\s+(?:th\u1ea5y\s+)?)?(?:m\u1eabu|v\u1ea3i|s\u1ea3n ph\u1ea9m|set|b\u1ed9 \u0111\u1ed3|ch\u1ea5t li\u1ec7u|ch\u1ea5t v\u1ea3i|ch\u00ednh s\u00e1ch(?!\s+l\u00e0\s*:))\s+\S/u;
+  const bareClaim = /^\s*(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b/u;
+  if (clauses.some((clause) => productDeclaration.test(clause)) ||
+      folded.split(/[.!?;,\n]|\b(?:nhung|va)\b/u).some((clause) => bareClaim.test(clause))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
   }
   // Comparing two prices is a new claim about both products. Two selected
@@ -930,18 +943,12 @@ function compileResponderDraft(input: Readonly<{
   if (!adaptive && usesBoundedAcknowledgement(task) && draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
-  // An empty array deliberately chooses all original projections. Otherwise
-  // every selected claim needs its own positional, lossless realization.
-  const authoredEvidence = modelAuthoredEvidence(task);
-  if (draft.factualTexts.length !== 0 &&
-      (draft.factualTexts.length !== authoredEvidence.length ||
-       draft.factualTexts.some((value, index) =>
-         !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!)))) {
-    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
-  }
+  // Reorder only whole source-bound fact units; never paraphrase their claims.
+  const orderedEvidence = trackCOrderEvidence(
+    modelAuthoredEvidence(task), draft.factualTexts, adaptive,
+  );
   assertProgression(task, draft, input.dialogue, adaptive);
   if (adaptive) {
-    for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
     if (singleRequestBody(task) && draft.answerText !== null) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
@@ -964,7 +971,7 @@ function compileResponderDraft(input: Readonly<{
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
   )).size > 1;
-  task.evidence.forEach((evidence, index) => {
+  orderedEvidence.forEach((evidence, index) => {
     const factualText = evidence.deterministicText === undefined
       ? null
       : text(
@@ -1046,6 +1053,11 @@ function compileResponderDraft(input: Readonly<{
     simulationHashes,
     input.currentCart ?? null,
   );
+  // Preserve precise authority diagnostics before the extra prose boundary.
+  // Nothing is returned until both the structured and prose checks pass.
+  if (adaptive) {
+    for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
+  }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       validated.segments.some(({ text }) =>
         /(?:họ\s*(?:và\s*)?tên|số\s*điện\s*thoại|\bsđt\b|\bsdt\b|địa\s*chỉ\s*(?:nhận|giao)\s*hàng)/iu
@@ -1367,9 +1379,9 @@ async function runTrackCStrategyContractCore(
     });
   } catch (error) {
     const failure = stageFailure("FINAL_GUARD", responderPayload, error);
-    // Retain only already-selected code facts on the live failure path. Never
-    // recover a new strategy, a customer request, an effect or model-authored
-    // factual text. Frozen evaluation still exposes the original rejection.
+    // Restore source facts, but do not erase a valid unanswered-part statement.
+    // SUPPORTED certifies only the declared capability, not whole-turn coverage.
+    // Frozen evaluation still exposes the original rejection.
     if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" ||
         task.answer.kind !== "ANSWER" || task.answer.evidenceStatus !== "SUPPORTED" ||
         task.evidence.length === 0 || task.unrealizedEvidence.length > 0 ||
@@ -1377,13 +1389,24 @@ async function runTrackCStrategyContractCore(
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: null, factualTexts: [], progressionText: null },
+        draft: { answerText: draft.answerText, factualTexts: [], progressionText: null },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
       });
       recoveryDiagnostic = failure.diagnostic;
     } catch {
-      throw failure;
+      // If prose itself was unsafe, preserve verified facts with an explicit
+      // incomplete-answer limit. Do not copy a goal or infer a missing fact.
+      try {
+        output = compileResponderDraft({
+          context, dialogue: input.evaluationContext, task,
+          draft: { answerText: INCOMPLETE_ANSWER_TEXT,
+            factualTexts: [], progressionText: null },
+          lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
+          currentCart: input.currentCart ?? null,
+        });
+        recoveryDiagnostic = failure.diagnostic;
+      } catch { throw failure; }
     }
   }
   const decisionHash = sha256(conversationPlan);

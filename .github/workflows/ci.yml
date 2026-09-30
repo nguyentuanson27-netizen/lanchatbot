@@ -195,27 +195,21 @@ jobs:
         run: |
           time pnpm $PNPM_NO_PRE_POST -r test
 
-      # Temporary PR377-only dependency export; removed before final handoff.
-      - name: Prepare isolated catalog verification binary
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 377
+      # P02: real isolated producer -> Qdrant -> adapter -> C3 evidence round-trip.
+      # The binary is pinned and the test owns a temporary loopback index.
+      - name: Verify isolated C3 catalog round-trip
+        if: steps.ci-scope.outputs.mode != 'docs'
         run: |
           set -euo pipefail
-          bundle="$RUNNER_TEMP/c3-qdrant-${GITHUB_RUN_ID}"
-          mkdir -p "$bundle"
+          bundle="$(mktemp -d "$RUNNER_TEMP/c3-qdrant.XXXXXX")"
+          trap 'rm -rf "$bundle"' EXIT
           curl --fail --location --retry 2 --max-time 180 \
-            --output "$bundle/qdrant-v1.16.3.tar.gz" \
+            --output "$bundle/qdrant.tar.gz" \
             https://github.com/qdrant/qdrant/releases/download/v1.16.3/qdrant-x86_64-unknown-linux-musl.tar.gz
           printf '%s  %s\n' \
             52b21d0b31d7415c42e9dba8e5133459b8fa3ab264b192d41b20ec84c7623e1f \
-            "$bundle/qdrant-v1.16.3.tar.gz" | sha256sum --check
-          git rev-parse HEAD > "$bundle/source.txt"
-
-      - name: Upload isolated catalog verification binary
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 377
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: c3-qdrant-${{ github.event.pull_request.head.sha }}
-          path: ${{ runner.temp }}/c3-qdrant-${{ github.run_id }}/
-          retention-days: 1
-          compression-level: 0
-          if-no-files-found: error
+            "$bundle/qdrant.tar.gz" | sha256sum --check
+          tar -xzf "$bundle/qdrant.tar.gz" -C "$bundle"
+          export QDRANT_TEST_BINARY="$bundle/qdrant"
+          time pnpm $PNPM_NO_PRE_POST --filter @lana/worker exec vitest run \
+            src/realtime-c3-catalog-isolated.test.ts
