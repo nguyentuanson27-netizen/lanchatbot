@@ -195,34 +195,27 @@ jobs:
         run: |
           time pnpm $PNPM_NO_PRE_POST -r test
 
-      # Temporary PR377-only bridge for offline, credential-free verification.
-      # Removed once the isolated workspace has been downloaded.
-      - name: Export offline C3 verification inputs
+      # Temporary PR377-only dependency export; removed before final handoff.
+      - name: Prepare isolated catalog verification binary
         if: github.event_name == 'pull_request' && github.event.pull_request.number == 377
         run: |
           set -euo pipefail
-          bundle="$RUNNER_TEMP/c3-offline-${GITHUB_RUN_ID}"
+          bundle="$RUNNER_TEMP/c3-qdrant-${GITHUB_RUN_ID}"
           mkdir -p "$bundle"
-          git archive --format=tar.gz --output="$bundle/source.tar.gz" HEAD
-          shopt -s nullglob
-          tar -czf "$bundle/dependencies.tar.gz" \
-            node_modules apps/*/node_modules packages/*/node_modules \
-            apps/*/dist packages/*/dist
-          tar -czf "$bundle/pnpm.tar.gz" -C "$(npm root -g)" pnpm
-          {
-            git rev-parse HEAD
-            node --version
-            pnpm --version
-            sha256sum pnpm-lock.yaml "$bundle"/*.tar.gz
-          } > "$bundle/identity.txt"
-          du -h "$bundle"/*
+          curl --fail --location --retry 2 --max-time 180 \
+            --output "$bundle/qdrant-v1.16.3.tar.gz" \
+            https://github.com/qdrant/qdrant/releases/download/v1.16.3/qdrant-x86_64-unknown-linux-musl.tar.gz
+          printf '%s  %s\n' \
+            52b21d0b31d7415c42e9dba8e5133459b8fa3ab264b192d41b20ec84c7623e1f \
+            "$bundle/qdrant-v1.16.3.tar.gz" | sha256sum --check
+          git rev-parse HEAD > "$bundle/source.txt"
 
-      - name: Upload offline C3 verification inputs
+      - name: Upload isolated catalog verification binary
         if: github.event_name == 'pull_request' && github.event.pull_request.number == 377
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: c3-offline-${{ github.event.pull_request.head.sha }}
-          path: ${{ runner.temp }}/c3-offline-${{ github.run_id }}/
+          name: c3-qdrant-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/c3-qdrant-${{ github.run_id }}/
           retention-days: 1
           compression-level: 0
           if-no-files-found: error
