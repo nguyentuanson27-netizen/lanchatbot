@@ -1,3 +1,5 @@
+import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { trackCRealizationMatches } from "./track-c-c3-realization-style.js";
 import {
@@ -325,6 +327,7 @@ function guardProductionOutput(
   output: ContextV2CandidateOutputV2,
   evaluationAt: Date,
   currentCart: TrackCCurrentCartBinding | null = null,
+  comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
 ): void {
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
@@ -341,7 +344,16 @@ function guardProductionOutput(
     context.productAttributes === null || context.productAttributes === undefined
       ? new Map()
       : trackCProductAttributeProjectionRegistry(context.productAttributes);
+  const comparisons = new Map(trackCPriceComparisons(context, comparisonFacts, evaluationAt)
+    .map((entry) => [entry.provenance.contentHash, entry]));
   for (const segment of output.segments) {
+    const comparison = segment.kind === "VERIFIED_CLAIM" ? comparisons.get(segment.claimContentHash) : undefined;
+    if (comparison) {
+      if (!trackCRealizationMatches(segment.text, comparison.deterministicText!)) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      continue;
+    }
     const usesProductPresentationEvidence =
       segment.kind === "VERIFIED_CLAIM" &&
       productPresentationHash !== null &&
@@ -462,6 +474,7 @@ export function validateResponderOutput(
   evaluationAt: Date,
   simulationClaimContentHashes: readonly string[] = [],
   currentCart: TrackCCurrentCartBinding | null = null,
+  comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
 ): ContextV2CandidateOutputV2 {
   if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -491,6 +504,7 @@ export function validateResponderOutput(
       ? new Map()
       : trackCProductAttributeProjectionRegistry(context.productAttributes);
   const known = new Set([
+    ...trackCPriceComparisons(context, comparisonFacts, evaluationAt).map(({ provenance }) => provenance.contentHash),
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined
       ? []
@@ -512,7 +526,7 @@ export function validateResponderOutput(
     throw new Error("TRACK_C_V5_RESPONDER_PROVENANCE_INVALID");
   }
   if (lane === "PRODUCTION_CONTRACT") {
-    guardProductionOutput(context, output, evaluationAt, currentCart);
+    guardProductionOutput(context, output, evaluationAt, currentCart, comparisonFacts);
   } else {
     const simulationHashes = new Set(simulationClaimContentHashes);
     const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
@@ -524,7 +538,7 @@ export function validateResponderOutput(
     };
     // Simulation facts are excluded above; runtime cart claims still need the
     // same pinned cart readback that production uses for their final guard.
-    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart);
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart, comparisonFacts);
   }
   return output;
 }

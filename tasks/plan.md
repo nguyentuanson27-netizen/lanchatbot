@@ -422,3 +422,13 @@ Kết luận self-review PR375 được bảo toàn bên dưới, không phải 
 - Task có phụ thuộc, nơi sửa, nghiệm thu, kiểm chứng; ngưỡng runtime là đề xuất, khác rubric frozen.
 - Self-review `d36f213`: ba khoảng trống về thứ tự routing/extraction, acceptance P05/P06 và ownership context P06/P09 đã sửa trong tài liệu này. P05 chứng minh khả năng quan sát, P06 chứng minh quyết định/context đúng, P09 chứng minh độ bền lịch sử; chưa phải code đã đạt các acceptance đó.
 - Không thêm approval/gate/operator hoặc online reviewer mặc định. Đây là self-review tài liệu, chưa có code/model test mới trong lượt lập kế hoạch.
+
+## Candidate implementation P06-P09 - 2026-10-01
+
+Source changes and bounded verification are recorded in
+[the runtime amendment](../docs/specs/pr377-p06-p09-runtime-20261001.md) and
+[the verification record](evidence/pr377-p06-p09-verification-20261001.md).
+The P07 first-contact zero-question exception is explicit in spec section 1.
+No task is closed solely by changing the prompt or by scripted model responses.
+DEV70 remains deferred by owner instruction; P05/model-quality and exact-head
+CI requirements are recorded separately, not silently converted to PASS.

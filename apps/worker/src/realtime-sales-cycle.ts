@@ -703,6 +703,15 @@ function cartSummary(cart: CartV1): string {
   ].join("\n");
 }
 
+/** Only the exact missing inputs; no cart prices or completed-effect wording. */
+export function realtimeCheckoutInformationRequest(
+  state: SalesCycleRuntimeState,
+  resolution: RuntimePolicyResolution | null,
+): string | null {
+  const missing = missingCheckout(state);
+  return missing.length === 0 ? null : clarificationMessage(missing, 1, paymentPolicy(resolution) !== null);
+}
+
 function checkoutTemplate(
   cart: CartV1,
   draft: SalesCycleRuntimeState["checkoutDraft"] = null,
@@ -1926,8 +1935,15 @@ export async function evaluateRealtimeSalesCycle(
         selected.line.offerId !== current.offerId ||
         selected.line.lineId !== current.lineId ||
         selected.line.quantity !== current.quantity ||
-        !selected.line.components.every((component) =>
-          (colorEdit ? component.color === requestedColor : component.size === size))) {
+        selected.line.components.length !== current.components.length ||
+        !current.components.every((before) => {
+          const after = selected.line.components.filter((component) =>
+            component.componentProductId === before.componentProductId &&
+            component.componentRole === before.componentRole);
+          return after.length === 1 && after[0]!.quantity === before.quantity &&
+            after[0]!.size === (size ?? before.size) &&
+            after[0]!.color === (colorEdit ? requestedColor : before.color);
+        })) {
         return failedOutput("CART_VARIANT_SCOPE_MISMATCH");
       }
       const otherSelections = await currentSelections(input, state.cart.value,

@@ -41,14 +41,11 @@ function productEvidenceTimeInvalid(
       (!Number.isFinite(expiresAtMs) || expiresAtMs <= evaluationAtMs));
 }
 
-/**
- * Shared Track C offline-candidate dialogue bound: 1..15 messages for every
- * caller, not only the journey adapter. 15 is the accumulated dialogue of the
- * longest supported authored journey - 8 customer turns plus the 7 candidate
- * replies between them - so a bounded multi-turn journey never needs a
- * per-caller exception. Anything longer is rejected.
+/** Existing runtime history (30) + current inbound (1) + customer context (1).
+ * Authored offline journeys remain unchanged; every caller keeps the same
+ * finite boundary and PII validation. No second truncation loses open questions.
  */
-const MAX_FROZEN_DIALOGUE_MESSAGES = 15;
+const MAX_FROZEN_DIALOGUE_MESSAGES = 32;
 
 function frozenEvaluationContext(
   value: readonly ShadowContextMessage[],

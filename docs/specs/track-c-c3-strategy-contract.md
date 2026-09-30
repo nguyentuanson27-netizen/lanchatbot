@@ -36,6 +36,13 @@ The first lane is intentionally policy-driven. The second lane is where the Stra
 
 ## 1. First contact: fixed Messenger policy
 
+**P07 amendment, 2026-10-01 (candidate source change):** keep the fixed price/
+product-information form, but request only an input that is still missing. When
+all applicable first-contact inputs are already known, the reply ends without a
+new question. This deliberately changes the earlier mandatory-one-question rule;
+it does not change lane admission, the six-field Strategist schema, or effect
+authority. Implementation/evidence and limits: [P06-P09 amendment](pr377-p06-p09-runtime-20261001.md).
+
 Use `FIRST_CONTACT_FIXED` only when trusted metadata/canonical context says this is a first meaningful inbound such as ad/referral entry, a new customer asking price, or a new customer sending a single product image.
 
 Do not infer first-contact status from dialogue wording alone.
@@ -55,7 +62,7 @@ Dạ mẫu {PRODUCT} có giá {PRICE} ...
 
 {useful product information} + {one authorized selling point when available}
 
-{exactly one progression question}
+{one useful progression question when an input is missing; otherwise no question}
 ```
 
 Rules:
@@ -66,14 +73,19 @@ Rules:
 - use at most one selling point;
 - selling-point wording must come from an explicit verified/curated claim or an allowlisted deterministic projection;
 - if no authorized selling point exists, omit it rather than inventing a benefit;
-- use exactly one progression mechanism;
+- use at most one progression mechanism; do not repeat a known input;
 - do not invent discounts, availability, policy, benefits, or effects.
 
 First-contact progression priority:
 
 1. If product classification/variant must be resolved first, ask that classification.
-2. Else, when multiple colors are a meaningful choice, ask color.
-3. Else, ask for height + weight or the relevant measurements needed for fit guidance.
+2. Else, when multiple colors are a meaningful choice and no offered color has
+   already been selected, ask color.
+3. Else, ask only for missing height/weight, not measurements already in the
+   current customer profile. Existing verified fit guidance or all relevant
+   measurements can satisfy this input requirement.
+4. If no applicable input remains, use `KEEP_OPEN` with no question. Never
+   invent a new discovery topic to meet a question count.
 
 Do **not** ask usual worn size as the first fit question.
 

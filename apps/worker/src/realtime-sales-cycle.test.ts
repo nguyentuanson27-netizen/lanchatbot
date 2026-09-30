@@ -3089,6 +3089,36 @@ describe("realtime Phase 3 sales cycle", () => {
 
 
 describe("typed customer input consumed by commerce", () => {
+  it.each([
+    ["size and color", "L", "XANH", "M", "XANH"],
+    ["size preserves color", "L", null, "L", "XANH"],
+    ["color preserves size", null, "XANH", "L", "XANH"],
+  ])("rejects a POS variant outside the requested %s edit", async (_name, size, color, returnedSize, returnedColor) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now), "chot CB182 size M", "typed-scope-open",
+    ));
+    const text = `Doi CB182 ${size ?? ""} ${color ?? ""}`;
+    const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(),
+      variant: { operation: "CHANGE", productId: "CB182", size, color, evidenceText: text },
+    }, text);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, text, "typed-scope-edit"), customerInput,
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        if (query.color === null) return { status: "COLOR_REQUIRED" as const,
+          reasonCode: "CART_COLOR_REQUIRED", availableSizes: ["M", "L"], availableColors: ["BE", "XANH"] };
+        const base = await facts.resolveCartSelection!(query, at);
+        if (base.status !== "READY") return base;
+        return { ...base, line: { ...base.line, lineId: query.lineId,
+          components: base.line.components.map((part) => ({ ...part, size: returnedSize, color: returnedColor })),
+        } };
+      } },
+    });
+    expect(output.reasonCode).toBe("CART_VARIANT_SCOPE_MISMATCH");
+    expect(output.plan?.cartMutationBatchEvidence).toBeUndefined();
+    expect(opened.plan!.state.cart!.value.lines[0]!.components.map(({ size, color }) => [size, color]))
+      .toEqual([["M", "BE"], ["M", "BE"]]);
+  });
+
   it("opens the selected M while S is only a question", async () => {
     const state = createRealtimeSalesState(conversationId, pageId, now);
     const text = "Chị lấy một bộ size M, size S còn không?";

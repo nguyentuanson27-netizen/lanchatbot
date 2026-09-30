@@ -179,6 +179,7 @@ export type TrackCResponderTask = Readonly<{
     | Readonly<{
       type: Exclude<TrackCCanonicalAction, "NONE">;
       requestedFields?: readonly TrackCCheckoutField[];
+      measurementFields?: readonly ("HEIGHT_CM" | "WEIGHT_KG")[];
     }>
     | null;
   /** Code-derived before the Responder; never inferred from dialogue. */
@@ -421,6 +422,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
   productResolved: boolean;
   classificationOrVariantRequired: boolean;
   colorChoiceMeaningful: boolean;
+  missingMeasurements?: readonly ("HEIGHT_CM" | "WEIGHT_KG")[];
   evidence: readonly TrackCSelectableEvidence[];
   boundProductIds?: readonly string[];
 }>): TrackCResponderTask {
@@ -437,6 +439,12 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       canonicalRequest: Object.freeze({ type: "ASK_PRODUCT" }),
     });
   }
+  const progression: Pick<TrackCResponderTask, "continuation" | "canonicalRequest"> = input.colorChoiceMeaningful
+    ? { continuation: { type: "ASK", input: "COLOR" }, canonicalRequest: null }
+    : input.missingMeasurements?.length === 0
+      ? { continuation: { type: "KEEP_OPEN" }, canonicalRequest: null }
+      : { continuation: null, canonicalRequest: { type: "ASK_MEASUREMENTS",
+          ...(input.missingMeasurements === undefined ? {} : { measurementFields: input.missingMeasurements }) } };
   const bound = input.boundProductIds ?? [];
   const available = input.evidence.filter((entry) =>
     trackCEvidenceHasSafeFactualEgress(entry) &&
@@ -453,11 +461,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
       evidence: Object.freeze([]),
       requiredEvidenceRefs: Object.freeze([]),
       unrealizedEvidence: Object.freeze([]),
-      continuation: input.colorChoiceMeaningful
-        ? Object.freeze({ type: "ASK", input: "COLOR" })
-        : null,
-      canonicalRequest: input.colorChoiceMeaningful
-        ? null : Object.freeze({ type: "ASK_MEASUREMENTS" }),
+      ...progression,
     });
   }
   const useful = available.find(({ capability, ref }) =>
@@ -479,10 +483,6 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
     // The fixed lane only ever selects entries that already passed the
     // realization filter above, so nothing is left unstated here.
     unrealizedEvidence: Object.freeze([]),
-    continuation: input.colorChoiceMeaningful
-      ? Object.freeze({ type: "ASK", input: "COLOR" })
-      : null,
-    canonicalRequest: input.colorChoiceMeaningful
-      ? null : Object.freeze({ type: "ASK_MEASUREMENTS" }),
+    ...progression,
   });
 }

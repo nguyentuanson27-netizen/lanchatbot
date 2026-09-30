@@ -14,6 +14,20 @@ describe("production product search composition", () => {
   const rejected = product("SD396");
   const alternative = product("SD397");
 
+  it("forwards the full exclusion set for bounded alternative search without Redis IO", async () => {
+    const service = new ProductSearchService({
+      findByExactCode: async () => rejected, findByAlias: async () => [],
+      searchStableText: async () => [{ document: rejected, score: 0.99 },
+        { document: alternative, score: 0.98 }, { document: product("SD398"), score: 0.97 }],
+      searchStableImage: async () => [],
+    }, { textMinScore: 0.75, imageMinScore: 0.8, minTopGap: 0.05, maxCandidates: 3 });
+    const search = new RedisCachedProductSearch("redis://127.0.0.1:1", service);
+    try {
+      expect((await search.searchAlternatives("different style", ["SD396", "SD397"]))
+        .map(({ productId }) => productId)).toEqual(["SD398"]);
+    } finally { await search.close(); }
+  });
+
   it.each([true, false])("preserves rejection through the Redis wrapper (alternative=%s)", async (hasAlternative) => {
     const service = new ProductSearchService({
       findByExactCode: async () => rejected,

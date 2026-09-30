@@ -3317,7 +3317,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3419,6 +3419,7 @@ describe("RealtimeRunner inbound batching", () => {
       linkProviderConversation: vi.fn(async () => undefined),
     };
     const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    let typedOverride: unknown = null;
     const c3Send = vi.fn(async (request: { body: string }) => {
       const body = JSON.parse(request.body) as { contents: [{ parts: [{ text: string }] }] };
       const prompt = JSON.parse(body.contents[0].parts[0].text) as {
@@ -3429,7 +3430,7 @@ describe("RealtimeRunner inbound batching", () => {
       };
       if (prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1") {
         if (checkoutOwner === "TYPED_FAILURE") throw new Error("PROVIDER_UNAVAILABLE");
-        const response = { ...noCustomerSelection(),
+        const response = typedOverride ?? { ...noCustomerSelection(),
           budget: { operation: "SET", value: 700_000, evidenceText: "Ngân sách đổi thành 700k" } };
         return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
           providerModelVersion: "gemini-3.5-flash-lite" };
@@ -3440,6 +3441,15 @@ describe("RealtimeRunner inbound batching", () => {
       const shipping = prompt.selectableEvidence?.filter(({ capability }) =>
         capability === "SHIPPING_FEE"
       ) ?? [];
+      if (checkoutOwner === "MULTI_COMPARISON" && prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" &&
+          prompt.selectableEvidence?.some(({ capability }) => capability === "PRODUCT_COMPARISON")) {
+        return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+          replyAct: "ANSWER", goal: "Compare the verified unit prices without claiming superior quality.",
+          proposition: "PRODUCT_COMPARISON", evidenceRefs: prompt.selectableEvidence.filter(
+            ({ capability }) => capability === "PRODUCT_COMPARISON").map(({ ref }) => ref),
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite" };
+      }
       const response = variantChoice
         ? prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
           ? { replyAct: "ACKNOWLEDGE", goal: "Keep the customer's size M choice for this product.",
@@ -3562,7 +3572,34 @@ describe("RealtimeRunner inbound batching", () => {
           artifactKey: "fit-chart", artifactKind: "SIZE_CHART", lifecycle: "PUBLISHED",
         }],
         artifacts: {
-          shopPolicy: {}, offerPolicy: {}, closingStrategy: {},
+          shopPolicy: { customerCare: {
+  exchange: {
+    windowDaysFromReceipt: 15,
+    maxExchangesPerOrder: 1,
+    supportedActions: ["SIZE", "COLOR", "MODEL"],
+    saleRestriction: { discountThresholdBps: 3_000, allowedActions: ["SIZE", "COLOR"] },
+    requiredConditions: { originalTags: true, unused: true, unwashed: true, clean: true, undamaged: true },
+    totalTwoWayShippingFeeVnd: 30_000,
+    modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+    customerPaysPositivePriceDifference: true,
+    fulfillmentMethod: "COURIER_SWAP",
+  },
+  returns: {
+    eligibleReasons: ["MANUFACTURING_FABRIC_DEFECT", "MANUFACTURING_SEAM_DEFECT", "WRONG_PRODUCT_SENT"],
+    reportingWindowDaysFromReceipt: 5,
+    shopShippingCoveragePercent: 100,
+    refundBusinessDaysMin: 1,
+    refundBusinessDaysMax: 3,
+    refundStartsAfter: "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+  },
+  inspection: { tryOnMode: "HOLD_UP_ONLY", refusedParcelShippingFeeVnd: 30_000 },
+  marketplacePricing: { shopeePriceMatch: false, reason: "PLATFORM_SUBSIDY_AND_VOUCHERS" },
+  customerFaq: {
+    discloseLightingAndDisplayColorVariance: true,
+    handWashPreferred: true,
+    machineWashAllowedWithLaundryBagAndGentleCycle: true,
+  },
+} }, offerPolicy: {}, closingStrategy: {},
           sizeCharts: !fitMode || checkoutOwner === "FIT_NO_CHART" ? {} : {
             "fit-chart": {
               chart: {
@@ -3584,13 +3621,17 @@ describe("RealtimeRunner inbound batching", () => {
     } as unknown as RuntimePolicyResolution;
     const baseModel = replyModel();
     const cartSelectionSizes: (string | null)[] = [];
+    const alternativeSearch = vi.fn(async () => [product,
+      { ...product, productId: "SV9031", parentProductId: "SV9031", canonicalCode: "SV9031" },
+      { ...product, productId: "SD12", parentProductId: "SD12", canonicalCode: "SD12" },
+    ]);
     const runner = new RealtimeRunner(
       inbox,
       runtime,
       baseModel,
       {
         ready: vi.fn(async () => true),
-        resolve: vi.fn(async (query: { productId: string }) => ({
+        resolve: vi.fn(async (query: { productId: string; size?: string | null }) => ({
           schemaVersion: 1 as const,
           status: "OK" as const,
           source: "POS_SNAPSHOT" as const,
@@ -3603,10 +3644,11 @@ describe("RealtimeRunner inbound batching", () => {
             parentProductId: query.productId,
             offerType: "SET",
             listPriceVnd: null,
-            salePriceVnd: query.productId === "CB182" ? 799_000 : 699_000,
-            sizes: ["M"],
-            stockStatus: "IN_STOCK" as const,
-            stockQuantity: 2,
+            salePriceVnd: query.productId === "CB182" ? 799_000 :
+              query.productId === "SD12" && checkoutOwner === "TYPED_ALTERNATIVE" ? 599_000 : 699_000,
+            sizes: checkoutOwner === "TYPED_STOCK_BUY" && query.size === "S" ? ["S"] : ["M"],
+            stockStatus: checkoutOwner === "TYPED_STOCK_BUY" && query.size === "S" ? "OUT_OF_STOCK" as const : "IN_STOCK" as const,
+            stockQuantity: checkoutOwner === "TYPED_STOCK_BUY" && query.size === "S" ? 0 : 2,
             deliveryEta: null,
             fulfillmentPolicy: "READY_STOCK",
             imageUrls: [],
@@ -3625,17 +3667,17 @@ describe("RealtimeRunner inbound batching", () => {
             quantity: query.quantity,
             components: [{
               componentProductId: "CB182_AO",
-              componentSku: "CB182_AO_BE_M",
+              componentSku: `CB182_AO_BE_${query.size ?? "M"}`,
               componentRole: "TOP" as const,
               color: "BE",
-              size: "M",
+              size: query.size ?? "M",
               quantity: 1,
             }, {
               componentProductId: "CB182_CV",
-              componentSku: "CB182_CV_BE_M",
+              componentSku: `CB182_CV_BE_${query.size ?? "M"}`,
               componentRole: "SKIRT" as const,
               color: "BE",
-              size: "M",
+              size: query.size ?? "M",
               quantity: 1,
             }],
             allowMixedSizes: true,
@@ -3692,6 +3734,7 @@ describe("RealtimeRunner inbound batching", () => {
         close: vi.fn(async () => undefined),
       },
       {
+        searchAlternatives: alternativeSearch,
         searchText: vi.fn(async (query: string) => ({
           status: "MATCHED" as const,
           matchKind: "EXACT_CODE" as const,
@@ -3716,7 +3759,7 @@ describe("RealtimeRunner inbound batching", () => {
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
         verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
-        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE",
+        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_COMPARISON",
         c3: {
           customerInputEnabled: checkoutOwner.startsWith("TYPED_"),
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
@@ -3730,7 +3773,7 @@ describe("RealtimeRunner inbound batching", () => {
           direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
           senderType: index % 2 === 0 ? "CUSTOMER" as const : "BOT" as const,
           messageType: "TEXT" as const,
-          text: `Lượt trước ${index + 1}`,
+          text: index === 0 ? "Mẫu đó chất liệu gì?" : index === 1 ? "Chị đang hỏi mã nào?" : `Lượt trước ${index + 1}`,
           attachmentCount: 0,
           occurredAt: new Date(Date.parse(occurredAt) - (30 - index) * 60_000).toISOString(),
         }))),
@@ -3769,6 +3812,166 @@ describe("RealtimeRunner inbound batching", () => {
       });
       if (checkoutOwner === "TYPED_DRY_RUN") expect(written.metaPlan).toBeUndefined();
       expect(persistedCommerce.cart).toBeNull();
+      if (checkoutOwner.startsWith("TYPED_ALTERNATIVE")) {
+        persistedState = { ...persistedState, sessionDecisionContext: {
+          budgetVnd: 700_000, occasion: "WORK", rejectedProductIds: ["SD09"],
+        } };
+        const text = "Mau khac, ngan sach 650k";
+        typedOverride = { ...noCustomerSelection(), product: {
+          operation: "REJECT", productId: null, evidenceText: "Mau khac" },
+          budget: { operation: "SET", value: 650_000, evidenceText: "ngan sach 650k" },
+        };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const final = commit.mock.calls.at(-1)![0] as {
+          metaPlan?: { messages: { text: string }[]; protectedClaimTypes?: string[] } };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        expect(alternativeSearch).toHaveBeenCalledWith(expect.stringContaining("650000"), ["SD09", "CB182"]);
+        expect(persistedState.sessionDecisionContext).toEqual({
+          budgetVnd: 650_000, occasion: "WORK", rejectedProductIds: ["SD09", "CB182"],
+        });
+        expect(persistedCommerce.cart).toBeNull();
+        if (checkoutOwner === "TYPED_ALTERNATIVE") {
+          expect(persistedState.currentProductId).toBe("SD12");
+          expect(reply).toContain("599.000");
+          expect(final.metaPlan?.protectedClaimTypes).toContain("PRICE");
+          expect(reply).not.toContain("799.000");
+        } else {
+          expect(persistedState.currentProductId).toBeNull();
+          expect(reply).toContain("Trong các mẫu");
+          expect(c3Send).toHaveBeenCalledTimes(4);
+          expect(persistedState.conversationOwner).toBe("BOT");
+        }
+        return;
+      }
+      if (checkoutOwner === "TYPED_CHANGE_BUY") {
+        const text = "Đổi sang L, chị lấy một bộ nhé.";
+        typedOverride = { ...noCustomerSelection(),
+          variant: { operation: "CHANGE", productId: "CB182", size: "L", color: null, evidenceText: text },
+          salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: {
+            decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+            evidenceText: text, confidence: 0.99,
+          } },
+        };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+        expect(persistedCommerce.cart?.value.lines[0]?.components.map(({ size }) => size)).toEqual(["L", "L"]);
+        const final = commit.mock.calls.at(-1)![0] as { metaPlan?: { messages: { text: string }[] } };
+        expect(final.metaPlan?.messages.map(({ text }) => text).join(" ")).toContain("size L");
+        expect(cartSelectionSizes.at(-1)).toBe("L");
+        return;
+      }
+      if (checkoutOwner === "TYPED_STOCK_BUY") {
+        const purchase = "Chị lấy một bộ size M.";
+        const text = `${purchase} Size S còn không?`;
+        typedOverride = { ...noCustomerSelection(),
+          variant: { operation: "SELECT", productId: "CB182", size: "M", color: null, evidenceText: purchase },
+          factQuery: { ...noCustomerSelection().factQuery, intent: "STOCK", size: "S", offerType: "SET" },
+          salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: {
+            decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+            evidenceText: purchase, confidence: 0.99,
+          } },
+        };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const final = commit.mock.calls.at(-1)![0] as {
+          metaPlan?: { messages: { text: string }[]; protectedClaimTypes?: string[] };
+        };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+        expect(persistedCommerce.cart?.value.lines[0]?.components.every(({ size }) => size === "M")).toBe(true);
+        expect(reply).toContain("size S");
+        expect(reply).toContain("hết hàng");
+        expect(final.metaPlan?.protectedClaimTypes).toContain("STOCK");
+        expect(final.metaPlan?.protectedClaimTypes).not.toContain("PRICE");
+        expect(reply).toContain("tên người nhận");
+        expect(c3Send).toHaveBeenCalledTimes(4);
+        return;
+      }
+      if (checkoutOwner.startsWith("TYPED_POLICY_") || checkoutOwner.startsWith("TYPED_ROUTING_")) {
+        const committed = checkoutOwner === "TYPED_POLICY_BUY" || checkoutOwner.startsWith("TYPED_ROUTING_");
+        const conditional = checkoutOwner === "TYPED_POLICY_CONDITIONAL";
+        const purchaseClause = committed ? "Chị chốt một bộ CB182 size M."
+          : conditional ? "Nếu được mặc thử thì chị lấy CB182." : "";
+        const text = `${purchaseClause} Shop cho mặc thử không?`.trim();
+        typedOverride = { ...noCustomerSelection(), policyQuestion: "TRY_ON",
+          variant: committed ? { operation: "SELECT", productId: "CB182", size: "M",
+            color: null, evidenceText: purchaseClause } : noCustomerSelection().variant,
+          salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: {
+            decision: committed ? "COMMITTED" : conditional ? "CONSIDERING" : "NONE",
+            requestedAction: committed ? "OPEN_CART" : "NONE", quantity: committed ? 1 : null,
+            evidenceText: purchaseClause || null, confidence: 0.99,
+          } } };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const final = commit.mock.calls.at(-1)![0] as {
+          metaPlan?: { messages: { text: string }[] }; salesCyclePlan?: { state: typeof commerceState };
+        };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        expect(reply).toContain("chưa hỗ trợ mặc thử");
+        if (committed) {
+          expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+          expect(persistedCommerce.cart?.value.lines[0]?.components.every(({ size }) => size === "M")).toBe(true);
+          expect(reply).toContain("CB182");
+          expect(final.salesCyclePlan?.state.cart?.value.cartId).toBe(persistedCommerce.cart?.value.cartId);
+        } else {
+          expect(persistedCommerce.cart).toBeNull();
+          expect(final.salesCyclePlan).toBeUndefined();
+        }
+        // Policy and exact checkout fields are code-owned on this branch.
+        // Do not let a second generative answer overwrite either part.
+        expect(c3Send).toHaveBeenCalledTimes(4);
+        const nextTurn = async (text: string, seq: number) => {
+          const entry = item(seq, text);
+          currentBatch = { ...batch, generation: seq, inboxIds: [entry.inboxId],
+            firstReceiveSequence: seq, lastReceiveSequence: seq, items: [entry] };
+          vi.setSystemTime(entry.occurredAt);
+          expect(await runner.processOne()).toBe(true);
+        };
+        if (checkoutOwner.startsWith("TYPED_ROUTING_")) {
+          const postSale = checkoutOwner === "TYPED_ROUTING_POST_SALE";
+          const request = postSale ? "chị muốn hoàn tiền đơn đã nhận" : "cho chị gặp nhân viên khác";
+          const text = postSale ? `Không sửa giỏ này, ${request}.` : `Không gặp người cũ, ${request}.`;
+          typedOverride = { ...noCustomerSelection(), route: postSale ? "POST_SALE" : "HUMAN", routeEvidence: request };
+          await nextTurn(text, 43);
+          expect(persistedState.conversationOwner).toBe("HUMAN");
+          expect(c3Send).toHaveBeenCalledTimes(5); // input only; no sales model after handoff
+        } else if (committed) {
+          const name = "An Demo", phone = "0900000000", address = "123 Đường Mẫu, Hội An";
+          const details = `Tên: ${name}\nSĐT: ${phone}\nĐịa chỉ: ${address}\nChị chọn COD`;
+          const field = (value: string) => ({ value, evidenceText: details, confidence: 0.99 });
+          typedOverride = { ...noCustomerSelection(), salesSignals: { ...noCustomerSelection().salesSignals,
+            checkoutExtraction: { fullName: field(name), phone: field(phone), address: field(address), paymentMethod: field("COD") },
+          } };
+          await nextTurn(details, 43);
+          expect(persistedCommerce.stage).toBe("ORDER_PREVIEW");
+          expect(persistedCommerce.checkoutDraft).toMatchObject({ fullName: name, phone, address, paymentMethod: "COD" });
+          const confirm = "Đúng thông tin, chốt đơn giúp chị.";
+          typedOverride = { ...noCustomerSelection(), salesSignals: { ...noCustomerSelection().salesSignals,
+            purchaseConfirmation: { decision: "CONFIRM", evidenceText: confirm, confidence: 0.99 },
+          } };
+          await nextTurn(confirm, 46);
+          expect(persistedCommerce.stage).toBe("PURCHASE_CONFIRMED");
+          const final = commit.mock.calls.at(-1)![0] as { decisionEvents?: unknown; metaPlan?: unknown };
+          expect(final.metaPlan).toBeDefined();
+          expect(JSON.stringify(final.decisionEvents)).not.toContain(address);
+          expect(JSON.stringify(final.decisionEvents)).not.toContain(phone);
+        }
+        return;
+      }
       persistedState = { ...persistedState, conversationOwner: "HUMAN",
         ownerReason: "AGENT_HANDOFF", ownerLeaseUntil: "2026-07-22T03:00:00.000Z" };
       const beforeCommerce = structuredClone(persistedCommerce);
@@ -3837,7 +4040,9 @@ describe("RealtimeRunner inbound batching", () => {
     if (checkoutOwner === "LONG_HISTORY") {
       const body = JSON.parse(c3Send.mock.calls[0]![0].body);
       const strategistInput = JSON.parse(body.contents[0].parts[0].text);
-      expect(strategistInput.dialogue).toHaveLength(15);
+      expect(strategistInput.dialogue).toHaveLength(32);
+      expect(strategistInput.dialogue[1].text).toBe("Mẫu đó chất liệu gì?");
+      expect(strategistInput.dialogue[2].text).toBe("Chị đang hỏi mã nào?");
       expect(JSON.parse(strategistInput.dialogue[0].text)).toEqual({
         type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
         budgetCustomerReported: "700k", occasion: "WORK",
@@ -3852,7 +4057,7 @@ describe("RealtimeRunner inbound batching", () => {
       return;
     }
 
-    if (checkoutOwner === "MULTI_PRICE") {
+    if (checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_COMPARISON") {
       const compare = item(40, "So sánh giá CB182 và SV9031 giúp chị.");
       currentBatch = { ...batch, generation: 11, inboxIds: [compare.inboxId],
         firstReceiveSequence: 40, lastReceiveSequence: 40, items: [compare] };
@@ -3864,8 +4069,13 @@ describe("RealtimeRunner inbound batching", () => {
       const reply = written.metaPlan?.messages.map(({ text }) => text).join(" ");
       expect(reply).toContain("CB182");
       expect(reply).toContain("SV9031");
-      expect(reply).toContain("799.000");
-      expect(reply).toContain("699.000");
+      if (checkoutOwner === "MULTI_COMPARISON") {
+        expect(reply).toContain("100.000");
+        expect(reply).not.toContain("799.000");
+      } else {
+        expect(reply).toContain("799.000");
+        expect(reply).toContain("699.000");
+      }
       expect(written.metaPlan?.protectedClaimTypes).toContain("PRICE");
       const strategistRequest = JSON.parse(c3Send.mock.calls[callsBefore]![0].body);
       const strategistInput = JSON.parse(strategistRequest.contents[0].parts[0].text);

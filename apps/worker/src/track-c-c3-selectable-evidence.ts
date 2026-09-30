@@ -1,3 +1,5 @@
+import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
@@ -378,6 +380,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   executionLane: TrackCV5ExecutionLane;
   currentCart?: TrackCCurrentCartBinding | null;
   evaluationAt?: Date;
+  comparisonFacts?: readonly BusinessFactEnvelopeV1[];
 }>): readonly TrackCSelectableEvidence[] {
   if (input.executionLane !== "BEHAVIOR_SIMULATION" &&
       input.simulationFacts.length > 0) {
@@ -421,6 +424,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       }));
     }
   });
+  evidence.push(...trackCPriceComparisons(input.context, input.comparisonFacts ?? [], input.evaluationAt ?? new Date()));
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
     // Every verified attribute group, one selectable entry per field. The

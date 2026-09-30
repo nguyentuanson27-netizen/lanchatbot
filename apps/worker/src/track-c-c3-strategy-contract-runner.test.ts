@@ -523,6 +523,43 @@ describe("Track C C3 strategy-contract runner", () => {
     }
   });
 
+  it.each([true, false])("continues a clarified material question past the old window (evidence=%s)", async (supported) => {
+    const evaluationContext = [
+      { direction: "INBOUND" as const, senderType: "CUSTOMER" as const, text: "Mẫu đó chất liệu gì?" },
+      { direction: "OUTBOUND" as const, senderType: "BOT" as const, text: "Chị đang hỏi mã nào?" },
+      ...Array.from({ length: 18 }, (_, i) => ({ direction: "INBOUND" as const,
+        senderType: "CUSTOMER" as const, text: `Other context ${i}` })),
+      { direction: "INBOUND" as const, senderType: "CUSTOMER" as const, text: "À, SQ9012 nhé." },
+    ].map((message) => ({ ...message, messageType: "TEXT" as const, attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z" }));
+    // Scripted model decisions test the actual request/compile/egress path;
+    // they do not establish real-model intent accuracy or voice quality.
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ payload: payload({
+        replyAct: "ANSWER", goal: "Continue the unresolved material question for the clarified SQ9012.",
+        proposition: "PRODUCT_ATTRIBUTES", evidenceRefs: supported ? ["SIMULATION_001_MATERIAL"] : [],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }), providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({
+        answerText: supported ? null : "Em chưa có thông tin xác nhận chất liệu của mẫu này.",
+        factualTexts: [], progressionText: null,
+      }), providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE, capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at), evaluationContext,
+      simulationFacts: supported ? [facts.simulation_fact_catalog.SF_PRODUCT_A] : [], transport: { send },
+    });
+    for (const [request] of send.mock.calls) {
+      const body = JSON.parse(request.body);
+      expect(JSON.parse(body.contents[0].parts[0].text).dialogue).toEqual(evaluationContext);
+    }
+    expect(result.conversationPlan).toMatchObject({ replyAct: "ANSWER" });
+    expect(result.reply).toContain(supported ? "tơ xước" : "chưa có thông tin");
+    expect(result.reply).not.toContain("799.000");
+    expect(result.output.cta).toBe("NONE");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
   it("realizes bounded locality questions while rejecting appended customer PII", async () => {
     for (const progressionText of [
       "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
@@ -986,6 +1023,31 @@ describe("Track C C3 strategy-contract runner", () => {
       .properties.continuation.anyOf[0]!;
 
     expect(ask.properties.input?.enum).toContain("USUAL_SIZE");
+  });
+
+  it.each([true, false])("first contact keeps the quote and only requests missing input (complete=%s)", async (complete) => {
+    const weightQuestion = "Chị cho em xin thêm cân nặng nhé?";
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+      payload: payload({ answerText: null, factualTexts: [], progressionText: complete ? null : weightQuestion }),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    });
+    const result = await runTrackCStrategyContractCase({ lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị chọn màu kem.", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }],
+      firstContactInputs: { color: "kem", measurements: complete ? { HEIGHT_CM: 160, WEIGHT_KG: 54 } : { HEIGHT_CM: 160 } },
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      trustedAcquisition: { kind: "TRACK_C_TRUSTED_ACQUISITION_V1", origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true, authorization: "NONE" }, transport: { send },
+    });
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(result.conversationLane).toBe("FIRST_CONTACT_FIXED");
+    expect(result.reply).toContain("849.000");
+    const request = JSON.parse(send.mock.calls[0]![0].body);
+    expect(request.generationConfig.responseSchema.properties.progressionText).toEqual(complete
+      ? { type: "NULL" } : { type: "STRING", enum: [weightQuestion] });
+    expect(result.reply).not.toContain("chiều cao");
+    expect(result.responderTask.continuation).toEqual(complete ? { type: "KEEP_OPEN" } : null);
   });
 
   it("uses one Responder call for trusted first contact and does not expose code-owned transport metadata", async () => {

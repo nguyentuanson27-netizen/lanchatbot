@@ -1,3 +1,4 @@
+import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { DECISION_GUARD_REASON_CODES_V1 } from "@lana/contracts";
 import {
@@ -190,6 +191,11 @@ export type TrackCStrategistConstraints = Readonly<{
   checkoutRequestedFields?: readonly CheckoutField[];
 }>;
 
+type FirstContactInputs = Readonly<{
+  color: string | null;
+  measurements: Readonly<Record<string, number>>;
+}>;
+
 export interface TrackCStrategyContractCaseInput {
   readonly lane: TrackCV5ExecutionLane;
   readonly modelResource: string;
@@ -199,6 +205,8 @@ export interface TrackCStrategyContractCaseInput {
   readonly simulationFacts?: readonly unknown[];
   /** Runtime-owned; never inferred from dialogue or carried as model evidence. */
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
+  readonly firstContactInputs?: FirstContactInputs;
+  readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   /**
    * Code-owned structured decision constraint. Never derive this value from
    * customer dialogue text inside this contract runner.
@@ -221,6 +229,8 @@ export interface TrackCStrategyLiveInput {
   readonly currentCart: TrackCCurrentCartBinding | null;
   readonly paymentOptions: readonly ("COD" | "BANK_TRANSFER")[];
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
+  readonly firstContactInputs?: FirstContactInputs;
+  readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -381,7 +391,7 @@ function narrowRequest(
 function frozenDialogueWindow(
   evaluationContext: readonly ShadowContextMessage[],
 ): readonly ShadowContextMessage[] {
-  // The offline request builder already validates the full 1..15-message
+  // The offline request builder already validates the full bounded-message
   // window, including PII. Truncating again discards known inputs and blockers.
   return Object.freeze(evaluationContext.map((message) => Object.freeze({
     direction: message.direction,
@@ -600,6 +610,10 @@ function answerWording(task: TrackCResponderTask): readonly string[] {
 
 function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): readonly string[] {
   const canonical = task.canonicalRequest?.type;
+  if (canonical === "ASK_MEASUREMENTS" && task.canonicalRequest?.measurementFields?.length === 1) {
+    return task.canonicalRequest.measurementFields[0] === "HEIGHT_CM"
+      ? ["Chị cho em xin thêm chiều cao nhé?"] : ["Chị cho em xin thêm cân nặng nhé?"];
+  }
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
     return FIRST_CONTACT_REQUEST_WORDING[canonical];
   }
@@ -924,6 +938,7 @@ function compileResponderDraft(input: Readonly<{
   conversationLane: TrackCConversationLane;
   evaluationAt: Date;
   currentCart?: TrackCCurrentCartBinding | null;
+  comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
 }>): ContextV2CandidateOutputV2 {
   const { task } = input;
@@ -1052,6 +1067,7 @@ function compileResponderDraft(input: Readonly<{
     input.evaluationAt,
     simulationHashes,
     input.currentCart ?? null,
+    input.comparisonFacts ?? [],
   );
   // Preserve precise authority diagnostics before the extra prose boundary.
   // Nothing is returned until both the structured and prose checks pass.
@@ -1201,19 +1217,27 @@ function validatedDeliveryDeadlineConstraint(
 function fixedTask(
   context: ContextV2,
   evidence: readonly TrackCSelectableEvidence[],
+  known?: FirstContactInputs,
 ): TrackCResponderTask {
   const presentation = evidence.find(({ capability }) =>
     capability === "PRODUCT_PRESENTATION"
   );
   const colors = presentation?.value.colors;
   const colorChoiceMeaningful = Array.isArray(colors) &&
-    new Set(colors.filter((color) => typeof color === "string")).size > 1;
+    new Set(colors.filter((color) => typeof color === "string")).size > 1 &&
+    !colors.some((color) => typeof color === "string" && known?.color != null &&
+      color.normalize("NFC").toLocaleUpperCase("vi-VN") === known.color.normalize("NFC").toLocaleUpperCase("vi-VN"));
+  const measured = (kind: string) => Number.isFinite(known?.measurements[kind]) && (known?.measurements[kind] ?? 0) > 0;
+  const fitKnown = evidence.some(({ capability }) => capability === "SIZE_FIT") ||
+    ["BUST_CM", "WAIST_CM", "HIPS_CM"].every(measured);
+  const missingMeasurements = fitKnown ? [] : (["HEIGHT_CM", "WEIGHT_KG"] as const).filter((kind) => !measured(kind));
   return compileTrackCFixedFirstContactTask({
     productResolved: context.productBinding.status === "RESOLVED",
     classificationOrVariantRequired: context.productBinding.status !== "RESOLVED" ||
       context.productBinding.productIds.length !== 1 ||
       context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY"),
     colorChoiceMeaningful,
+    ...(known === undefined && !fitKnown ? {} : { missingMeasurements }),
     evidence,
     boundProductIds: context.productBinding.productIds,
   });
@@ -1256,6 +1280,7 @@ async function runTrackCStrategyContractCore(
       simulationFacts,
       executionLane: input.lane,
       currentCart: input.currentCart ?? null,
+      comparisonFacts: input.comparisonFacts ?? [],
       evaluationAt: input.evaluationAt,
     });
   } catch (error) {
@@ -1289,7 +1314,7 @@ async function runTrackCStrategyContractCore(
             canonicalAction: "HOLD_POSITION",
           },
         }).task
-      : fixedTask(context, evidence);
+      : fixedTask(context, evidence, input.firstContactInputs);
     conversationPlan = task;
   } else {
     const strategistRequest = buildTrackCStrategistContractRequest({
@@ -1375,6 +1400,7 @@ async function runTrackCStrategyContractCore(
       conversationLane: lane,
       evaluationAt: input.evaluationAt,
       currentCart: input.currentCart ?? null,
+      comparisonFacts: input.comparisonFacts ?? [],
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
     });
   } catch (error) {
@@ -1392,6 +1418,7 @@ async function runTrackCStrategyContractCore(
         draft: { answerText: draft.answerText, factualTexts: [], progressionText: null },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
+        comparisonFacts: input.comparisonFacts ?? [],
       });
       recoveryDiagnostic = failure.diagnostic;
     } catch {
@@ -1404,6 +1431,7 @@ async function runTrackCStrategyContractCore(
             factualTexts: [], progressionText: null },
           lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
           currentCart: input.currentCart ?? null,
+          comparisonFacts: input.comparisonFacts ?? [],
         });
         recoveryDiagnostic = failure.diagnostic;
       } catch { throw failure; }
@@ -1480,7 +1508,9 @@ export async function runTrackCStrategyLive(
     canonicalCheckoutRequestedFields: input.checkoutRequestedFields,
     checkoutClarificationActive: input.checkoutClarificationActive,
     currentCart: input.currentCart,
+    comparisonFacts: input.comparisonFacts ?? [],
     paymentOptions: input.paymentOptions,
+    ...(input.firstContactInputs === undefined ? {} : { firstContactInputs: input.firstContactInputs }),
     ...(input.trustedAcquisition === undefined
       ? {} : { trustedAcquisition: input.trustedAcquisition }),
     transport: input.transport,

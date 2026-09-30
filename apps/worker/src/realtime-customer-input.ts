@@ -79,10 +79,11 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
   return value;
 }
 
-export function applyCustomerDecisionInput(prior: SessionDecisionContext | undefined, value: RealtimeCustomerInput): SessionDecisionContext {
+export function applyCustomerDecisionInput(prior: SessionDecisionContext | undefined, value: RealtimeCustomerInput, currentProductId: string | null = null): SessionDecisionContext {
   const previous = prior ?? { budgetVnd: null, occasion: null, rejectedProductIds: [] };
   const rejected = new Set(previous.rejectedProductIds);
-  if (value.product.productId && value.product.operation === "REJECT") rejected.add(value.product.productId);
+  const rejectedId = value.product.productId ?? currentProductId;
+  if (rejectedId && value.product.operation === "REJECT") rejected.add(rejectedId);
   if (value.product.productId && value.product.operation === "SELECT") rejected.delete(value.product.productId);
   return { budgetVnd: value.budget.operation === "KEEP" ? previous.budgetVnd : value.budget.value,
     occasion: value.occasion.operation === "KEEP" ? previous.occasion : value.occasion.value,

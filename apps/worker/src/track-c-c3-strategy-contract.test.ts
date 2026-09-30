@@ -400,6 +400,26 @@ describe("Track C C3 clean strategy contract", () => {
     expect(measurements.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
   });
 
+  it.each([false, true])("asks only a missing measurement and never repeats a known color (price=%s)", (hasPrice) => {
+    const task = compileTrackCFixedFirstContactTask({ productResolved: true,
+      classificationOrVariantRequired: false, colorChoiceMeaningful: false,
+      evidence: hasPrice ? [priceEvidence] : [], boundProductIds: ["SQ9012"],
+      missingMeasurements: ["WEIGHT_KG"],
+    });
+    expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["WEIGHT_KG"] });
+    expect(task.continuation).toBeNull();
+  });
+
+  it("keeps the quote but omits redundant discovery when its inputs are already known", () => {
+    const task = compileTrackCFixedFirstContactTask({ productResolved: true,
+      classificationOrVariantRequired: false, colorChoiceMeaningful: false,
+      evidence: [priceEvidence], boundProductIds: ["SQ9012"], missingMeasurements: [],
+    });
+    expect(task.evidence).toContain(priceEvidence);
+    expect(task.canonicalRequest).toBeNull();
+    expect(task.continuation).toEqual({ type: "KEEP_OPEN" });
+  });
+
   it("keeps fixed progression priority when price is unresolved", () => {
     const task = compileTrackCFixedFirstContactTask({
       productResolved: true,

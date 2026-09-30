@@ -40,6 +40,32 @@ P03/P04 không đóng bằng whitelist wording, claimId annotations hoặc chỉ
 
 ## 3. Hành trình bán hàng
 
+### P06-P09 candidate source patch (2026-10-01)
+
+Base `8ce14b6e`; [amendment](../docs/specs/pr377-p06-p09-runtime-20261001.md)
+and [verification](evidence/pr377-p06-p09-verification-20261001.md).
+These are scoped implementation checks, not closure of the full tasks below.
+
+- [x] P06 consumer/runtime: independent purchase plus policy, CHANGE plus purchase,
+  selected M plus stock query S, recipient/COD/preview/confirm, human/post-sale
+  routing with an open cart; real runner with fake external ports.
+- [x] P06 variant binding: preserve unrequested size/color and validate both on a
+  combined edit; same-line/component/quantity checks retained.
+- [x] P07 request/egress: clarified open question and known first-contact inputs;
+  explicit spec amendment for no question when no applicable input is missing.
+- [x] P08a bounded search -> POS validation -> grounded reply/no-result; current
+  budget and rejected IDs applied without creating a cart or a discount.
+- [x] P08b code-owned same-offer price difference/order and independent final
+  guard; mismatched/stale/duplicate operands do not authorize a comparison.
+- [x] P09 existing accepted history retained up to 30 + inbound + context; current
+  customer inputs redacted and labelled; no new store/read/model summary.
+- [ ] Exact new-head CI after owner applies and pushes the bundle. Local full
+  worker run has five history-dependent Track B errors; PostgreSQL tests remain
+  environment-skipped. See evidence; no tests were removed or weakened.
+- [ ] Real-model understanding/voice/handoff/continuity acceptance and remaining
+  P05/P11 evaluation; DEV70 deferred, not passed. No conversion claim.
+
+
 - [ ] P05 — Hoàn thiện harness hiện có, fake ports/full history/state/calls/skip reasons; kiểm provider/schema/private boundary cho thử model theo mục 3 plan. CLI adaptation không tự chứng minh API đích; tái hiện lỗi baseline được phép, không đòi P06 pass.
 - [x] P05 — Luna stateful cart/size/checkout run `e76a9667`: 7 turns, 13 calls, current fee answer, size L retained, confirmed final state. Separate actual-server C3_RECOVERY control retains verified selected facts and guard reason. Synthetic/DRY_RUN only; not sales-quality or live smoke.
 - [x] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness. `realtime-server-c3.test.ts` import entrypoint thật, giữ hai BF wrapper, thay external IO, chạy `processOne`.

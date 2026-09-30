@@ -83,6 +83,10 @@ export class RedisCachedProductSearch {
     return this.inner.searchText(query, excludeProductId);
   }
 
+  searchAlternatives(query: string, excludedProductIds: readonly string[] = []) {
+    return this.inner.searchAlternatives(query, excludedProductIds);
+  }
+
   async searchImage(imageUrl: string): Promise<ProductSearchResult> {
     const result = (await this.searchImages([imageUrl]))[0];
     if (!result || result.status === "ERROR") {
