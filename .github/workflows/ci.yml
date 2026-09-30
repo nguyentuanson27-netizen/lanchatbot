@@ -194,3 +194,35 @@ jobs:
         if: steps.ci-scope.outputs.mode == 'full'
         run: |
           time pnpm $PNPM_NO_PRE_POST -r test
+
+      # Temporary PR377-only bridge for offline, credential-free verification.
+      # Removed once the isolated workspace has been downloaded.
+      - name: Export offline C3 verification inputs
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 377
+        run: |
+          set -euo pipefail
+          bundle="$RUNNER_TEMP/c3-offline-${GITHUB_RUN_ID}"
+          mkdir -p "$bundle"
+          git archive --format=tar.gz --output="$bundle/source.tar.gz" HEAD
+          shopt -s nullglob
+          tar -czf "$bundle/dependencies.tar.gz" \
+            node_modules apps/*/node_modules packages/*/node_modules \
+            apps/*/dist packages/*/dist
+          tar -czf "$bundle/pnpm.tar.gz" -C "$(npm root -g)" pnpm
+          {
+            git rev-parse HEAD
+            node --version
+            pnpm --version
+            sha256sum pnpm-lock.yaml "$bundle"/*.tar.gz
+          } > "$bundle/identity.txt"
+          du -h "$bundle"/*
+
+      - name: Upload offline C3 verification inputs
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 377
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: c3-offline-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/c3-offline-${{ github.run_id }}/
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
