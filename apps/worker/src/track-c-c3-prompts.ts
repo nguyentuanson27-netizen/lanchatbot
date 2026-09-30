@@ -95,3 +95,23 @@ export const ADAPTIVE_RESPONDER_INSTRUCTION = [
   "For ASK_CHECKOUT_DETAILS, both prose fields are null: code asks precisely for missing fields and permitted payment options. No other task may request recipient details or claim checkout completion.",
   "Keep the factual portion concise and use at most one opening or closing courtesy marker across the reply. Do not force a discovery question when canonical context says the customer is ready for checkout. Return only the required JSON fields; no internal protocol tokens or extra actions.",
 ].join("\n");
+
+const LEGACY_STRATEGIST_PREFIX =
+  "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.";
+const LEGACY_RESPONDER_PREFIX =
+  "You are the Responder for one Track C sales turn. Write concise, natural Vietnamese Messenger wording for the supplied responder task only.";
+const LEGACY_ADAPTIVE_RESPONDER_PREFIX =
+  "You write La.na's next Vietnamese Messenger reply. Read the entire supplied dialogue and the compiled goal. Follow the Strategist's decision; do not choose a new strategy.";
+
+/**
+ * Keeps legacy C3 callers source-compatible while the model-facing prompt is
+ * centralized here. Unknown Track C prompts pass through unchanged.
+ */
+export function resolveTrackCC3SystemInstruction(instruction: string): string {
+  if (instruction.startsWith(LEGACY_STRATEGIST_PREFIX)) return STRATEGIST_INSTRUCTION;
+  if (instruction.startsWith(LEGACY_RESPONDER_PREFIX)) return RESPONDER_INSTRUCTION;
+  if (instruction.startsWith(LEGACY_ADAPTIVE_RESPONDER_PREFIX)) {
+    return ADAPTIVE_RESPONDER_INSTRUCTION;
+  }
+  return instruction;
+}
