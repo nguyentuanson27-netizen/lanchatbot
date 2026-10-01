@@ -3327,7 +3327,7 @@ describe("RealtimeRunner inbound batching", () => {
     const entry = item(34, checkoutOwner === "TYPED_FAILURE"
       ? "Chị đang cân nhắc"
       : checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT"
-        ? "CB182 bao nhiêu?"
+        ? "Đổi sang mẫu kia, giá sao?"
         : (checkoutOwner === "LONG_HISTORY" || checkoutOwner.startsWith("TYPED_"))
           ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
           : "Mẫu CB182 bao nhiêu?");
@@ -3888,8 +3888,8 @@ describe("RealtimeRunner inbound batching", () => {
       }]);
       expect(written.metaPlan?.protectedClaimTypes ?? []).toEqual([]);
       if (checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
-        // Preserve prior state for a later retry, but never answer this turn
-        // with the prior product's facts after the Producer failed.
+        // Preserve prior state for a later retry, but never use it as the
+        // current turn's binding after the Producer failed.
         expect(persistedState.currentProductId).toBe("SV9031");
         expect(JSON.stringify(written.metaPlan)).not.toContain("699.000");
       }

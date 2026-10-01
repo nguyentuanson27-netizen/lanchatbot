@@ -3335,8 +3335,7 @@ export class RealtimeRunner {
           residualCustomerUrlResolution ?? this.emptyResolution(),
         )
       : null;
-    const resolution = customerInputFailure !== null ||
-        mediaInputLimitExceeded || message.isEcho ||
+    const resolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
         (customerInput ? customerInput.route !== "PRE_SALE" :
@@ -3350,6 +3349,7 @@ export class RealtimeRunner {
           claim.pageId,
           mediaPartialResolutionPolicy,
           customerInput,
+          customerInputFailure === null,
         );
     const multiFactQueries =
       this.options.multiFactQueryEnabled && !message.isEcho
@@ -6796,6 +6796,7 @@ export class RealtimeRunner {
     pageId: string,
     mediaPartialResolutionPolicy: MediaPartialResolutionPolicy,
     customerInput: RealtimeCustomerInput | null = null,
+    allowStateContinuation = true,
   ): Promise<ProductResolution> {
     const text = message.text?.trim() ?? "";
     const imageAttachments = message.attachments
@@ -6808,7 +6809,8 @@ export class RealtimeRunner {
         Boolean(item.attachment.url)
       );
     const activeClarification = state.mediaClarification;
-    if (customerInput && imageAttachments.length === 0 && !message.adsContext) {
+    if (allowStateContinuation && customerInput &&
+        imageAttachments.length === 0 && !message.adsContext) {
       const operation = customerInput.product.operation;
       const obligations = customerInputObligations(customerInput);
       const searchRequested = obligations.some(({ kind }) => kind === "PRODUCT_SEARCH");
@@ -7092,7 +7094,7 @@ export class RealtimeRunner {
       };
     }
 
-    const stateProductId = customerInput
+    const stateProductId = !allowStateContinuation ? null : customerInput
       ? customerInput.product.operation === "CURRENT" ? state.currentProductId
         : customerInput.product.operation === "SELECT" ? customerInput.product.productId : null
       : currentProductContinuationId(text, state.currentProductId);
@@ -7101,7 +7103,7 @@ export class RealtimeRunner {
       if (product) return this.singleResolution(product, "STATE");
     }
 
-    if (text) {
+    if (text && allowStateContinuation) {
       const excludeProductId = (customerInput
         ? ["SEARCH", "REJECT"].includes(customerInput.product.operation)
         : isAlternativeProductRequest(text)) ? state.currentProductId : null;
