@@ -1,0 +1,1648 @@
+{
+  "dataset_id": "TRACK_C_DEV70_REALISTIC",
+  "revision": "R2",
+  "source_revision": "R2.9",
+  "provenance": "SYNTHETIC_REAUTHORED_FOR_NATURAL_MESSENGER_STYLE_FROM_R1_NOT_CUSTOMER_LOGS",
+  "visibility": "EVALUATOR_ONLY_NEVER_MODEL_INPUT",
+  "cases": [
+    {
+      "id": "V5V4Q001",
+      "title": "Từ quảng cáo vào hỏi giá cả bộ hay riêng áo",
+      "category": "FIRST_CONTACT_AD",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Trả giá 849.000đ và làm rõ đây là set áo và quần từ dữ kiện được cấp.",
+          "Giữ sản phẩm quảng cáo đã được xác định; thông tin bổ sung ngắn và liên quan."
+        ],
+        "forbidden_behaviors": [
+          "Không bắt khách gửi lại mã khi nguồn quảng cáo đã xác định sản phẩm.",
+          "Không thêm ưu đãi, tồn theo size hoặc lời mời chốt đơn khi khách mới hỏi giá."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_COLOR",
+            "ASK_MEASUREMENTS",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q002",
+      "title": "Khách nhắn rất ngắn từ một quảng cáo đã gắn sản phẩm",
+      "category": "FIRST_CONTACT_AD",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Vào ngay thông tin hữu ích của bộ Tường Vi đã gắn với quảng cáo, không chỉ chào hỏi.",
+          "Có giá đã xác minh và thông tin sản phẩm gọn; tối đa một câu hỏi còn cần thiết."
+        ],
+        "forbidden_behaviors": [
+          "Không giả vờ đã gửi ảnh hoặc đã giữ hàng.",
+          "Không hỏi khách đang xem sản phẩm nào khi binding đã rõ."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_COLOR",
+            "ASK_MEASUREMENTS",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q003",
+      "title": "Hỏi giá và màu đen chưa phải chọn màu hay mua",
+      "category": "FIRST_CONTACT_AD",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Trả đủ giá và việc catalog có màu đen.",
+          "Hiểu câu hỏi về màu chưa phải xác nhận chọn màu đen, cũng chưa phải cam kết mua."
+        ],
+        "forbidden_behaviors": [
+          "Không bỏ sót câu hỏi màu.",
+          "Không suy màu có trong catalog thành tồn kho của mọi size.",
+          "Không hỏi lại giá hoặc bắt chốt để được tư vấn."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_COLOR",
+            "ASK_MEASUREMENTS",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q004",
+      "title": "Tin nhắn không kèm ảnh nên chưa xác định được bộ nào",
+      "category": "REFERENT",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Nói ngắn gọn chưa xác định được bộ khách muốn hỏi và xin ảnh, tên hoặc mã.",
+          "Giữ thái độ giúp khách tìm lại thay vì đọc giá một sản phẩm bất kỳ."
+        ],
+        "forbidden_behaviors": [
+          "Không tự đoán sản phẩm từ chữ 'cái bộ'.",
+          "Không báo giá trước khi xác định sản phẩm."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_PRODUCT"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q005",
+      "title": "Đã xác định Tường Vi, khách quay lại hỏi giá bằng viết tắt",
+      "category": "REFERENT",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Hiểu 'bn' là hỏi giá và trả giá của SQ9012.",
+          "Dùng referent đã rõ, không yêu cầu gửi lại mã hay chuyển sang sản phẩm khác."
+        ],
+        "forbidden_behaviors": [
+          "Không mặc định hỏi viết tắt là không đủ để hiểu.",
+          "Không coi '1 bộ' trong câu hỏi giá là lệnh mở giỏ."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q006",
+      "title": "So hai lựa chọn và muốn tách rõ giá từng bộ",
+      "category": "MULTI_PRODUCT_PRICE",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Gắn 849.000đ với SQ9012 và 1.099.000đ với SV9031.",
+          "Trả hai giá riêng, đúng nhu cầu chọn một bộ."
+        ],
+        "forbidden_behaviors": [
+          "Không đảo giá hoặc dùng 'mẫu này' cho cả hai mà không rõ chủ thể.",
+          "Không cộng thành đơn hai bộ hoặc tự đặt cả hai."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q007",
+      "title": "Quay lại sau một hôm nhưng tham chiếu cũ đã hết hiệu lực",
+      "category": "REFERENT",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Xin lại một dấu hiệu xác định sản phẩm vì binding hiện tại đã stale.",
+          "Không xem câu 'hôm qua' là bằng chứng tồn kho còn hiện hành."
+        ],
+        "forbidden_behaviors": [
+          "Không trả tồn hoặc giá theo sản phẩm cũ chưa được xác nhận lại.",
+          "Không nói hết hàng chỉ vì thiếu binding."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_PRODUCT"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q011",
+      "title": "Đang bàn màu nhưng khách chuyển sang hỏi giá trước",
+      "category": "PRICE",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Ưu tiên câu hỏi giá mới nhất và trả 849.000đ.",
+          "Không ép khách trả lời size của câu trước rồi mới báo giá."
+        ],
+        "forbidden_behaviors": [
+          "Không tự chọn màu hoặc size vào giỏ.",
+          "Không trả tồn thay cho giá."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q012",
+      "title": "Xen vài câu về nhu cầu rồi xác nhận lại giá đã báo",
+      "category": "PRICE",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Xác nhận lại giá hiện tại từ nguồn mới, không chỉ lặp giá do khách nhắc.",
+          "Nhắc giá là hợp lý vì khách chủ động hỏi lại."
+        ],
+        "forbidden_behaviors": [
+          "Không coi việc hỏi lại là khách đã đồng ý mua.",
+          "Không tự thêm giảm giá hoặc tổng tiền giao hàng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q013",
+      "title": "Thích bộ đồ nhưng nói giá cao mà chưa rõ nguyên nhân",
+      "category": "PRICE_OBJECTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Nhận ra đây là băn khoăn về quyết định mua, không phải hỏi lại giá.",
+          "Có thể hỏi một điều cụ thể về khoản chi hoặc điều khiến khách chưa yên tâm nếu câu trả lời giúp tư vấn tiếp; không chỉ nhắc lại 'giá cao'."
+        ],
+        "forbidden_behaviors": [
+          "Không bịa chất lượng vượt trội hoặc nói chắc chắn đáng tiền.",
+          "Không tự giảm giá hay mặc định khách muốn tìm mẫu khác."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_PRICE_BARRIER",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q014",
+      "title": "Sau hội thoại dài vẫn phải nhớ trần 700k và tôn trọng chưa mua",
+      "category": "PRICE_OBJECTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Nhớ mức tối đa 700k trong lịch sử, không hỏi lại ngân sách.",
+          "Tôn trọng khách chưa mua; không mở giỏ hoặc ép tăng chi.",
+          "Không tự hứa một mẫu khác khi chưa có kết quả tìm kiếm."
+        ],
+        "forbidden_behaviors": [
+          "Không hỏi khách nhắc lại số tiền đã nói.",
+          "Không nói cứ chốt rồi shop sẽ bớt.",
+          "Không kéo hội thoại bằng câu hỏi không giúp giải quyết khoảng chênh."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q015",
+      "title": "So với shop khác nhưng chưa có nguồn xác nhận hàng của đối thủ",
+      "category": "PRICE_OBJECTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Tách thông tin khách kể về đối thủ khỏi dữ kiện shop đã xác minh.",
+          "Có thể nêu chất liệu, thiết kế của SQ9012 đã cấp để khách đối chiếu, nhưng không suy ra đối thủ kém hơn.",
+          "Chỉ hỏi tiếp về điều khách ưu tiên nếu chưa có và thật sự giúp chọn."
+        ],
+        "forbidden_behaviors": [
+          "Không khẳng định hai bộ cùng chất hoặc bên mình tốt hơn khi chưa có chứng cứ.",
+          "Không đọc lại giá rồi kết thúc mà bỏ câu hỏi khác biệt."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_COMPARISON_CRITERION",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q016",
+      "title": "Lần mua trước chỉ thấy tạm ổn nên ngại chi cho bộ mới",
+      "category": "PRICE_OBJECTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Nối băn khoăn giá với trải nghiệm trước, không quy ngay là thiếu tiền.",
+          "Làm rõ một khía cạnh sử dụng hoặc phần chưa hài lòng để định hướng tư vấn; không mặc định có lỗi hậu mãi."
+        ],
+        "forbidden_behaviors": [
+          "Không tuyên bố bộ mới đã khắc phục vấn đề khi chưa biết vấn đề là gì.",
+          "Không tự mở quy trình hoàn tiền cho một trải nghiệm không có yêu cầu hậu mãi."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_PRICE_BARRIER",
+            "ASK_COMPARISON_CRITERION",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q017",
+      "title": "Khách trả giá kèm điều kiện mua ngay",
+      "category": "BARGAIN",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Hiểu mua chỉ có hiệu lực nếu giá 690k được chấp nhận; chưa có chấp thuận giá đó.",
+          "Giữ giá được xác minh và nêu không thể xác nhận mức đề nghị từ dữ kiện hiện có."
+        ],
+        "forbidden_behaviors": [
+          "Không nhận 690k, tạo chiết khấu hoặc mở giỏ như mua vô điều kiện.",
+          "Không coi việc nhắc giá đề nghị để từ chối là giá bán mới."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q021",
+      "title": "Hỏi giảm thêm khi đã biết giá hiện tại",
+      "category": "DISCOUNT",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Trả đúng câu hỏi giảm thêm và nói rõ chưa có ưu đãi nào được xác nhận trong dữ kiện.",
+          "Phân biệt chưa có thông tin với khẳng định shop tuyệt đối không có khuyến mãi."
+        ],
+        "forbidden_behaviors": [
+          "Không bịa mã giảm, thời hạn sale hoặc chiết khấu riêng.",
+          "Không yêu cầu khách chốt trước để tìm ưu đãi."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q022",
+      "title": "Khách đã có giỏ và muốn hiểu khoản giảm đang áp dụng",
+      "category": "PROMOTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Đọc đúng khoản 50.000đ đã áp dụng cho giỏ hiện tại.",
+          "Làm rõ đây là khoản đang có, không thực hiện thêm lần giảm mới."
+        ],
+        "forbidden_behaviors": [
+          "Không gán khoản giảm của giỏ thành mức giảm cho mỗi sản phẩm.",
+          "Không báo tổng thanh toán khi chưa có đầy đủ dữ kiện tổng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q023",
+      "title": "Muốn biết giỏ hiện tại có còn phải trả phí giao không",
+      "category": "FREESHIP",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Trả trực tiếp giỏ hiện tại được miễn phí giao theo readback hợp lệ.",
+          "Giới hạn câu trả lời vào giỏ đang đọc, không áp dụng cho mọi đơn sau này."
+        ],
+        "forbidden_behaviors": [
+          "Không bịa ngưỡng đơn hàng, khu vực hoặc lý do miễn ship.",
+          "Không công bố đã thanh toán hay đã gửi hàng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q024",
+      "title": "Khách đòi xác nhận miễn ship trong khi binding giỏ bị thiếu",
+      "category": "FREESHIP",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Nói chưa xác nhận được phí hoặc quyền miễn ship của giỏ hiện tại vì thiếu readback hợp lệ.",
+          "Không dùng claim âm không có binding để kết luận chắc chắn không được miễn ship."
+        ],
+        "forbidden_behaviors": [
+          "Không khẳng định có hoặc không freeship chỉ dựa vào câu khách hỏi hay claim mất binding.",
+          "Không bịa mức phí thay thế."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q025",
+      "title": "Đọc lại đúng phí giao của giỏ, không chuyển sang tư vấn sản phẩm",
+      "category": "SHIPPING_FEE",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Trả phí giao 30.000đ từ giỏ hiện tại.",
+          "Không đọc lại toàn bộ giá sản phẩm hoặc hỏi khám phá nhu cầu mới."
+        ],
+        "forbidden_behaviors": [
+          "Không sửa phí, gán phí theo từng món hay suy ra tổng đơn.",
+          "Không xác nhận hoàn tất mua hàng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q026",
+      "title": "Đọc ưu đãi giỏ hai món và hỏi nếu thay một món",
+      "category": "PROMOTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Trả khoản giảm 100.000đ đã xác minh cho giỏ hiện tại.",
+          "Giữ riêng phần ưu đãi sau thay món chưa được xác minh; không áp mức hiện tại cho một giỏ chưa hình thành."
+        ],
+        "forbidden_behaviors": [
+          "Không giảm thêm hoặc sửa giỏ từ câu hỏi giả định.",
+          "Không tự đặt điều kiện, ngưỡng hoặc hứa giữ nguyên ưu đãi sau đổi món."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q027",
+      "title": "Khách quay lại dùng ưu đãi cũ nhưng snapshot đã hết hạn",
+      "category": "PROMOTION_STALE",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Ở frozen candidate replay, chặn trước model vì capture ưu đãi hết hạn.",
+          "Không sử dụng dữ kiện quá hạn để phát biểu ưu đãi hiện tại."
+        ],
+        "forbidden_behaviors": [
+          "Không gọi model với capture stale rồi coi lời từ chối là ca trả lời đạt.",
+          "Không tự gia hạn ưu đãi từ lịch sử."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "PRE_MODEL_REJECT",
+      "expected_error": "TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE"
+    },
+    {
+      "id": "V5V4Q031",
+      "title": "Gửi cân nặng rồi hỏi size, vẫn thiếu chiều cao",
+      "category": "SIZE_FIT",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Nhận biết cân nặng đã có, chiều cao còn thiếu; hỏi đúng phần thiếu.",
+          "Không tự đoán size từ 56kg hoặc hỏi lại toàn bộ thông tin đã nhận."
+        ],
+        "forbidden_behaviors": [
+          "Không chọn ordinary SIZE khi nhiệm vụ là xin số đo cơ thể.",
+          "Không khẳng định một size vừa khi chưa có fit claim."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_MEASUREMENTS"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q032",
+      "title": "Sau nhiều lượt vẫn nhớ chiều cao, cân nặng và chỉ hỏi vòng bụng",
+      "category": "SIZE_FIT",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Nhớ chiều cao 158cm và cân nặng 57kg từ đầu lịch sử.",
+          "Yêu cầu số đo vòng bụng hoặc vòng eo liên quan đúng băn khoăn đang dang dở; không hỏi lại hai số đã biết."
+        ],
+        "forbidden_behaviors": [
+          "Không suy cạp chun bảo đảm ngồi thoải mái.",
+          "Không tư vấn size khi chưa có fit result."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_MEASUREMENTS"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q033",
+      "title": "Đã có kết quả tư vấn size, khách muốn câu trả lời dứt khoát",
+      "category": "SIZE_FIT",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Trả kết quả có nguồn: M được khuyến nghị, L là lựa chọn có thể cân nhắc.",
+          "Không yêu cầu gửi lại số đo đã đủ hoặc làm như chưa có kết quả."
+        ],
+        "forbidden_behaviors": [
+          "Không bảo đảm vừa tuyệt đối hay tự biến L thành lựa chọn chính.",
+          "Không suy stock của size từ fit claim."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q034",
+      "title": "Có fit M nhưng khách thích mặc rộng, không hỏi lại số đo",
+      "category": "SIZE_FIT",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Kết hợp sở thích rộng với kết quả M/L đã được cấp.",
+          "Nói đúng giới hạn nếu không có số đo thành phẩm hoặc dữ kiện về độ rộng thực tế; không làm mất khuyến nghị chính."
+        ],
+        "forbidden_behaviors": [
+          "Không hứa L chắc chắn rộng vừa đẹp hoặc suy độ rộng chỉ từ nhãn size.",
+          "Không hỏi lại chiều cao, cân nặng hoặc sở thích đã có."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q035",
+      "title": "Size thường mặc lớn hơn dải size sản phẩm, cần số đo để tư vấn",
+      "category": "SIZE_LIMIT",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Không kết luận XL vừa hoặc không vừa từ size XXL khách thường mặc.",
+          "Xin số đo đang thiếu để tư vấn, không hỏi khách tự chọn nhãn size thay cho đo."
+        ],
+        "forbidden_behaviors": [
+          "Không biến việc catalog có XL thành fit authority.",
+          "Không kết luận phải bỏ mẫu chỉ vì khác cách đặt size giữa hãng."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_MEASUREMENTS"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q036",
+      "title": "Đủ số đo và đã tư vấn M, khách quay lại nỗi lo bụng sau nhiều lượt",
+      "category": "BODY_FIT",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Nhớ băn khoăn bụng và việc số đo đã đủ; trả kết quả M/L đang được xác nhận.",
+          "Phân biệt kết quả size với bảo đảm thoải mái riêng vùng bụng khi không có dữ kiện chi tiết."
+        ],
+        "forbidden_behaviors": [
+          "Không yêu cầu đo lại toàn bộ chỉ để kéo dài hội thoại.",
+          "Không nói chắc chắn không chật hoặc coi cạp chun là bảo đảm độ vừa."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q037",
+      "title": "Hỏi nguyên tắc tách size chứ chưa quyết định mua",
+      "category": "SPLIT_SIZE",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Trả đúng chính sách cho phép tách size của set.",
+          "Giữ riêng chính sách tách size với stock và fit của tổ hợp S/M."
+        ],
+        "forbidden_behaviors": [
+          "Không tự chọn S/M hoặc mở giỏ từ câu hỏi chính sách.",
+          "Không hứa có đủ hàng S/M khi chưa kiểm tồn."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q041",
+      "title": "Hỏi còn hàng tổng quát trước khi chọn màu và size",
+      "category": "STOCK",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Trả còn hàng theo stock cấp sản phẩm.",
+          "Có thể hỏi màu hoặc size nếu cần kiểm tiếp đúng biến thể, không tự xác nhận mọi biến thể đều có."
+        ],
+        "forbidden_behaviors": [
+          "Không nói hết sạch hay sắp hết khi dữ kiện không cho phép.",
+          "Không gây áp lực chốt ngay."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_COLOR",
+            "ASK_SIZE",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q042",
+      "title": "Quay lại mã đã lưu nhưng sản phẩm hiện hết hàng",
+      "category": "STOCK",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Nói đúng mẫu hiện hết hàng từ dữ kiện mới.",
+          "Không dùng việc khách từng thấy bài đăng làm bằng chứng còn hàng."
+        ],
+        "forbidden_behaviors": [
+          "Không bịa ngày về lại, nhận đặt trước hoặc mẫu thay thế.",
+          "Không nói đã giữ hàng cho khách."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q043",
+      "title": "Hỏi đen M nhưng mapping biến thể trong input bị thiếu",
+      "category": "STOCK_VARIANT",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Giữ đúng yêu cầu tồn màu đen size M.",
+          "Khi fixture thiếu mapping độc lập của variant, nêu giới hạn xác nhận đúng biến thể, không thay bằng tồn tổng hoặc kết luận hết."
+        ],
+        "forbidden_behaviors": [
+          "Không đọc nhãn màu/size từ chuỗi BLACK_M rồi coi đó là mapping đã xác minh.",
+          "Không tự đặt hàng chỉ vì khách nêu M."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q044",
+      "title": "Đã biết giá, câu tiếp theo chỉ hỏi tồn",
+      "category": "STOCK",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Chuyển đúng sang câu hỏi tồn và trả còn hàng theo nguồn.",
+          "Không đọc lại giá hoặc quay về chào hỏi ban đầu."
+        ],
+        "forbidden_behaviors": [
+          "Không suy 'giá chị xem được' thành quyết định mua.",
+          "Không khẳng định mọi màu/size còn hàng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q045",
+      "title": "Khách hỏi số lượng vì cần cân nhắc, không yêu cầu giữ hàng",
+      "category": "STOCK",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Nêu tồn thấp theo dữ kiện, không thêm sức ép hoặc thời hạn giữ hàng.",
+          "Một câu hỏi tiếp chỉ cần khi thật sự phải làm rõ biến thể để trả phần chưa biết."
+        ],
+        "forbidden_behaviors": [
+          "Không nói giữ được tới tối hoặc sắp có người mua hết.",
+          "Không lặp cùng câu hỏi trong hai phần của reply.",
+          "Không tự tạo giỏ."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_COLOR",
+            "ASK_SIZE",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q046",
+      "title": "Mẫu hết, khách chủ động xin lựa chọn khác với tiêu chí rõ",
+      "category": "STOCK_ALTERNATIVE",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Hiểu yêu cầu tìm thay thế, nhớ ngân sách và sản phẩm đã từ chối.",
+          "Trong C3 fixture không có kết quả retrieval được xác minh, nói đúng giới hạn thay vì bịa mã mới hoặc chỉ đáp 'dạ vâng'."
+        ],
+        "forbidden_behaviors": [
+          "Không hứa mẫu khác chắc chắn không ôm bụng khi thiếu fit/design evidence.",
+          "Không giới thiệu lại mẫu hết đã bị loại.",
+          "Không tuyên bố đã tìm hết catalog."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q047",
+      "title": "Khách hỏi lại tồn sau khi rời cuộc trò chuyện",
+      "category": "STOCK_REPEAT",
+      "domain": "INVENTORY",
+      "expected": {
+        "required_behaviors": [
+          "Trả lại tình trạng hiện tại từ nguồn còn hiệu lực.",
+          "Không phê khách hỏi lại; đây là kiểm tra tồn có chủ đích."
+        ],
+        "forbidden_behaviors": [
+          "Không dùng lời đã nói trước đó thay cho stock hiện tại.",
+          "Không nói đã giữ hoặc khách đã mua."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q051",
+      "title": "Ngại chất liệu nên hỏi cụ thể set ren",
+      "category": "MATERIAL",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Nêu chất liệu ren Hàn đã được cấp.",
+          "Nếu nguồn không cho biết tỷ lệ hay phạm vi phối ren, giữ rõ giới hạn của phần đó."
+        ],
+        "forbidden_behaviors": [
+          "Không bịa thành phần sợi, tỷ lệ hoặc xuất xứ sản xuất từ tên 'ren Hàn'.",
+          "Không tự suy ren mềm, mát hoặc không ngứa."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q052",
+      "title": "Hỏi ghép giá và dễ nhăn vì phải ngồi xe lâu",
+      "category": "MATERIAL_BEHAVIOR",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả giá 849.000đ có nguồn và giữ riêng câu hỏi về nhăn.",
+          "Nói chưa có dữ kiện về khả năng nhăn; không trả lời về độ nhẵn, độ bóng hoặc chỉ lặp tên vải."
+        ],
+        "forbidden_behaviors": [
+          "Không suy chống nhăn từ tơ xước.",
+          "Không làm mất nửa câu hỏi dù đã trả được giá."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q053",
+      "title": "Hỏi cấu tạo cạp và dáng quần, chưa xin tư vấn size",
+      "category": "DESIGN_DETAIL",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả quần cạp chun và thông tin phom suông đã được cấp; không tự bổ sung kiểu ống hoặc cấu trúc may chi tiết hơn nguồn.",
+          "Phân biệt phom thiết kế chung với độ vừa cơ thể khách; không bắt đo eo khi khách chỉ hỏi thiết kế."
+        ],
+        "forbidden_behaviors": [
+          "Không khẳng định che bụng, co giãn bao nhiêu hoặc chắc chắn không bó.",
+          "Không đưa giới hạn fit dài dòng thay cho thông tin thiết kế đã có."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q054",
+      "title": "Thích dáng suông có nguồn nhưng còn cân nhắc mức giá",
+      "category": "PRICE_OBJECTION",
+      "domain": "PRICE_VALUE",
+      "expected": {
+        "required_behaviors": [
+          "Dùng đúng sở thích eo suông đã biết để chỉ ra chi tiết liên quan có nguồn.",
+          "Không biến đặc điểm phù hợp sở thích thành chứng minh giá trị vượt trội; có thể làm rõ một tiêu chí còn thiếu giúp khách quyết định."
+        ],
+        "forbidden_behaviors": [
+          "Không hỏi lại khách thích ôm hay suông.",
+          "Không nói chắc chắn đáng tiền, bền nhiều năm hay tốt hơn những bộ khách có."
+        ],
+        "next_step": {
+          "requirement": "OPTIONAL",
+          "allowed_actions": [
+            "ASK_PRICE_BARRIER",
+            "ASK_COMPARISON_CRITERION",
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q055",
+      "title": "Quan tâm giặt máy vì không có thời gian giặt tay",
+      "category": "CARE",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả hướng dẫn có nguồn: có thể giặt tay hoặc chế độ nhẹ, tránh vắt mạnh, phơi bóng râm.",
+          "Nối câu trả lời với thói quen dùng máy của khách, không hỏi lại thói quen."
+        ],
+        "forbidden_behaviors": [
+          "Không bịa nhiệt độ, chất tẩy, độ bền hoặc bảo đảm không hỏng ren.",
+          "Không khuyên chế độ vắt mạnh trái nguồn."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q056",
+      "title": "Khách thích mẫu nhưng muốn sửa tay dài hơn",
+      "category": "CUSTOMIZATION",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả rõ shop không nhận chỉnh sửa theo yêu cầu theo policy đang có.",
+          "Nhận ra điều kiện mua phụ thuộc dịch vụ không được hỗ trợ, không xem đây là mua vô điều kiện."
+        ],
+        "forbidden_behaviors": [
+          "Không hứa hỏi thợ hoặc nhận sửa riêng khi không có khả năng đó.",
+          "Không hỏi thêm chiều dài để tạo kỳ vọng sẽ sửa được."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q057",
+      "title": "Muốn xem ảnh mặt trước lần nữa để quyết định, không phải đổi mẫu",
+      "category": "MEDIA",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Giữ đúng sản phẩm và yêu cầu ảnh mặt trước.",
+          "Trong lane chỉ có text và chưa có effect gửi ảnh, nêu giới hạn của lần trả lời này; không tuyên bố ảnh đã được gửi."
+        ],
+        "forbidden_behaviors": [
+          "Không nói 'ảnh đây' hoặc 'em gửi rồi' khi không có attachment/receipt.",
+          "Không tuyên bố cả shop không có ảnh hoặc không thể gửi ảnh ở mọi kênh."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q061",
+      "title": "Đã rõ nơi nhận ở Hà Nội, cần thời gian giao dự kiến",
+      "category": "ETA",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Trả dự kiến 2–4 ngày cho địa bàn đã biết.",
+          "Nói đúng tính ước tính, không lặp lời giới hạn nhiều lần hoặc hỏi lại tỉnh/thành."
+        ],
+        "forbidden_behaviors": [
+          "Không hẹn một ngày hoặc giờ nhận chính xác.",
+          "Không nhầm thời gian giao với ngày shop bàn giao vận chuyển."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q062",
+      "title": "Ngày mai phải mặc nhưng thời gian giao dự kiến dài hơn",
+      "category": "DEADLINE",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Trả trực tiếp không thể xác nhận kịp ngày mai vì chỉ có ETA dự kiến 2–4 ngày.",
+          "Cho khách thông tin đủ để cân nhắc cách khác, không tiếp tục chốt như đã đáp ứng hạn."
+        ],
+        "forbidden_behaviors": [
+          "Không hứa giao nhanh, ship hỏa tốc hoặc chắc chắn kịp khi không có nguồn.",
+          "Không tự quyết rằng không bao giờ có thể giao sớm hơn nếu nguồn chỉ là khoảng dự kiến."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q063",
+      "title": "Hạn dùng còn năm ngày, phải diễn giải đúng khoảng 2–4 ngày",
+      "category": "DEADLINE",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Diễn giải đúng: khoảng dự kiến 2–4 ngày kết thúc trước mốc 5 ngày khách cần, nhưng không phải bảo đảm đúng hạn.",
+          "Không đảo thành '5 ngày nằm trong khoảng 2–4 ngày'."
+        ],
+        "forbidden_behaviors": [
+          "Không chốt chắc chắn giao đúng ngày.",
+          "Không chuyển câu hỏi về ngày nhận thành ngày gửi hoặc bỏ qua deadline."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q064",
+      "title": "Khách cần sắp lịch ở nhà và đòi ngày nhận chính xác",
+      "category": "ETA_EXACT_DATE",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Giải thích chưa có ngày nhận chính xác, chỉ có khoảng 2–4 ngày.",
+          "Hiểu lý do khách hỏi và không coi yêu cầu ngày nhận là yêu cầu chốt mua."
+        ],
+        "forbidden_behaviors": [
+          "Không biến dự kiến thành cam kết một ngày cụ thể.",
+          "Không bịa lịch nhân viên giao hàng hoặc hẹn sẽ gọi báo."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q065",
+      "title": "Chưa biết địa bàn nên hỏi tỉnh/thành, không xin địa chỉ đầy đủ",
+      "category": "ETA_MISSING",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Hỏi tỉnh hoặc thành phố nhận hàng vì đó là dữ kiện còn thiếu để tra thời gian.",
+          "Không hỏi tên, số điện thoại, số nhà hoặc địa chỉ đầy đủ ở bước tư vấn này."
+        ],
+        "forbidden_behaviors": [
+          "Không đoán ETA chung từ nơi shop đặt cửa hàng.",
+          "Không chặn câu hỏi địa bàn như thể đang thu PII giao hàng chi tiết."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_LOCALITY"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q066",
+      "title": "Hỏi lại thời gian vận chuyển nhưng nguồn ước tính đã cũ",
+      "category": "ETA_STALE",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Frozen candidate phải từ chối trước model khi capture ETA đã hết hạn.",
+          "Không dùng thời gian cũ làm cam kết cho lần hỏi hiện tại."
+        ],
+        "forbidden_behaviors": [
+          "Không bỏ qua freshness để luôn sinh một câu trả lời.",
+          "Không chấm stale rejection như câu tư vấn thành công."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "PRE_MODEL_REJECT",
+      "expected_error": "TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE"
+    },
+    {
+      "id": "V5V4Q067",
+      "title": "Phân biệt lúc shop gửi với lúc khách nhận hàng",
+      "category": "DISPATCH_VS_DELIVERY",
+      "domain": "LOGISTICS",
+      "expected": {
+        "required_behaviors": [
+          "Nhận ra khách hỏi ngày gửi/bàn giao, không phải ETA nhận hàng.",
+          "Nêu chưa có thông tin xác nhận ngày bàn giao cụ thể, không dùng 2–4 ngày làm ngày gửi."
+        ],
+        "forbidden_behaviors": [
+          "Không nói shop sẽ gửi hôm nay hoặc đã gửi.",
+          "Không lặp ETA như thể đã trả lời câu hỏi dispatch."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q071",
+      "title": "Khách lần đầu mua online muốn phân biệt kiểm hàng với mặc thử",
+      "category": "INSPECTION_POLICY",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Trả phần kiểm đúng mẫu, màu, size theo policy.",
+          "Tách mặc thử là phụ thuộc từng đơn, chưa xác nhận quyền mặc thử cho đơn cụ thể này."
+        ],
+        "forbidden_behaviors": [
+          "Không coi kiểm hàng đồng nghĩa được mặc thử.",
+          "Không hứa sẽ kiểm tra hoặc xác nhận thêm nếu không có tác vụ thật."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q072",
+      "title": "Lo chọn nhầm size, hỏi cả đổi và phí",
+      "category": "EXCHANGE_POLICY",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Trả đủ thời hạn 15 ngày, điều kiện chưa dùng/còn tag/chưa giặt, phí đổi theo nhu cầu 30.000đ và tối đa một lần.",
+          "Giữ đây là câu hỏi trước mua, không xử lý như khách đang yêu cầu đổi một đơn đã nhận."
+        ],
+        "forbidden_behaviors": [
+          "Không nói đổi thoải mái mọi lúc hoặc miễn phí.",
+          "Không bỏ điều kiện áp dụng khi rút gọn câu."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q073",
+      "title": "Phân biệt đổi màu/size với đổi mẫu trong nhóm giảm sâu",
+      "category": "EXCHANGE_SALE",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Nêu chính sách nhóm giảm từ 30% trở lên: đổi size/màu, không đổi sang mẫu khác.",
+          "Không tự kết luận sản phẩm đang xem thuộc nhóm giảm sâu nếu chưa có dữ kiện membership."
+        ],
+        "forbidden_behaviors": [
+          "Không áp chính sách nhóm thành lời khẳng định cho mọi sản phẩm.",
+          "Không đánh đồng đổi màu và đổi sang mẫu khác."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q074",
+      "title": "Hỏi tình huống shop gửi sai để yên tâm trước khi mua",
+      "category": "REFUND_POLICY",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Trả quyền hoàn trong trường hợp shop giao sai hoặc lỗi nhà sản xuất và hạn báo 5 ngày theo nguồn.",
+          "Giữ phạm vi câu hỏi giả định trước mua, không tạo hồ sơ hoàn tiền hiện tại."
+        ],
+        "forbidden_behaviors": [
+          "Không tự cấp hoàn tiền hoặc khẳng định đã chuyển nhân viên.",
+          "Không bịa thời điểm tiền về hoặc điều kiện ngoài nguồn."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q075",
+      "title": "Mua online lần đầu nên hỏi cách trả tiền và đặt cọc",
+      "category": "PAYMENT_POLICY",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Trả đúng hỗ trợ COD, chuyển khoản và không cần đặt cọc.",
+          "Hiểu thói quen COD không tự là lựa chọn thanh toán cho một giao dịch chưa có."
+        ],
+        "forbidden_behaviors": [
+          "Không chọn COD hộ khách hoặc xin thông tin nhận hàng ngay.",
+          "Không bịa tài khoản ngân hàng hoặc yêu cầu chuyển tiền."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q076",
+      "title": "Chỉ hỏi chuyển khoản, phủ định rõ việc chốt đơn",
+      "category": "PAYMENT_POLICY",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Trả chính sách nhận chuyển khoản.",
+          "Giữ đúng câu phủ định: đây không phải chọn phương thức hoặc xác nhận mua."
+        ],
+        "forbidden_behaviors": [
+          "Không đổi paymentMethod hoặc mở giỏ từ từ khóa chuyển khoản.",
+          "Không gửi lời xác nhận đơn hoặc chỉ dẫn thanh toán riêng tư."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q077",
+      "title": "Muốn tới cửa hàng thử đồ, cần địa chỉ và giờ mở cửa",
+      "category": "STORE_INFO",
+      "domain": "POLICY_SERVICE",
+      "expected": {
+        "required_behaviors": [
+          "Trả đủ địa chỉ 212 Nguyễn Trãi, Hà Nội; giờ 09:00–21:00; có thể thử trực tiếp theo fixture.",
+          "Không ép đặt lịch khi khách chưa xác định giờ tới."
+        ],
+        "forbidden_behaviors": [
+          "Không coi địa chỉ cửa hàng công khai là địa chỉ nhận hàng riêng của khách.",
+          "Không hứa có sẵn một size/màu ở cửa hàng chỉ từ thông tin địa điểm."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q081",
+      "title": "Chọn giữa hai bộ theo giá, không được đổi thành so trọng lượng",
+      "category": "PRODUCT_COMPARISON",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Giữ đúng thuộc tính cần so là giá; không trả lời về trọng lượng, độ nhẹ hay chất liệu.",
+          "Trả đúng hai giá gắn với từng mã; nếu có phép so sánh được code xác minh thì SQ9012 rẻ hơn. Khi comparison capability chưa được cấp, không tự tạo claim so sánh nhưng vẫn phải cung cấp hai giá hữu ích."
+        ],
+        "forbidden_behaviors": [
+          "Không nói thiếu thông tin trọng lượng vì khách không hỏi điều đó.",
+          "Không suy bộ đắt hơn tốt hơn hoặc đáng tiền hơn."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q082",
+      "title": "Qua nhiều lượt vẫn hiểu 'bộ thứ hai' là SV9031",
+      "category": "REFERENT",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Giải đúng 'bộ thứ hai' là SV9031 dựa trên thứ tự đã nêu, dù lịch sử đã dài.",
+          "Trả còn hàng từ RC_STOCK_B_IN; không cần hỏi lại mã hoặc trả tồn SQ9012."
+        ],
+        "forbidden_behaviors": [
+          "Không nhầm sản phẩm theo lần xuất hiện gần nhất của một mã.",
+          "Không tự chọn màu, size, giữ hàng hoặc lập giỏ."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q083",
+      "title": "Sửa mã sau khi shop hỏi nhầm, tiếp tục câu hỏi giá còn dang dở",
+      "category": "REFERENT_CORRECTION",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Nhận mã sửa SQ9012 và tiếp tục trả câu hỏi giá cả bộ chưa được giải quyết trong lịch sử.",
+          "Không chỉ 'dạ vâng' rồi bỏ câu hỏi, không giữ giá SV9031."
+        ],
+        "forbidden_behaviors": [
+          "Không tự suy khách hỏi chất liệu hay đã muốn mua.",
+          "Không coi lời shop nhận nhầm trước đó là binding đúng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q084",
+      "title": "Chỉ cần áo Miêu Vân vì đã có quần, hỏi bán lẻ và giá áo",
+      "category": "RETAIL_COMPONENT",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả có bán lẻ áo với giá 549.000đ.",
+          "Ưu tiên đúng phần áo khách cần; không bắt chọn nguyên set hoặc hỏi lại mua phần nào."
+        ],
+        "forbidden_behaviors": [
+          "Không dùng giá 899.000đ của full set làm giá áo.",
+          "Không khẳng định quần cũng bán lẻ.",
+          "Không đọc cả bảng cấu hình dài thay cho câu hỏi riêng áo."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q085",
+      "title": "Khách phân biệt bản hai món và ba món, hỏi đúng full combo",
+      "category": "COMBO",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả combo ba món gồm áo, chân váy và quần với giá 1.049.000đ.",
+          "Đặt đúng cấu hình được hỏi lên trước; không làm khách nhầm với bản 829.000đ."
+        ],
+        "forbidden_behaviors": [
+          "Không lấy giá hai món cho ba món.",
+          "Không tự bớt hoặc thêm thành phần combo.",
+          "Không hỏi lại khách muốn cấu hình nào khi đã nói rõ."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q086",
+      "title": "Muốn set áo S quần M nhưng quyết định mua còn phụ thuộc đủ hàng",
+      "category": "SPLIT_SIZE",
+      "domain": "FIT_SIZE",
+      "expected": {
+        "required_behaviors": [
+          "Trả chính sách cho phép tách size trong nguyên set.",
+          "Giữ riêng phần tồn S/M chưa được cấp dữ kiện; không biến quyền tách size thành xác nhận có đủ hàng.",
+          "Không biến quyết định có điều kiện thành mua vô điều kiện."
+        ],
+        "forbidden_behaviors": [
+          "Không chuyển sang đơn áo bán lẻ trái nhu cầu.",
+          "Không hứa S/M vừa hoặc đã giữ set.",
+          "Không bỏ câu hỏi tồn của tổ hợp cụ thể."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q087",
+      "title": "Tìm lại mẫu cũ và hỏi còn sản xuất, không chỉ hỏi hết tạm thời",
+      "category": "PRODUCT_LIFECYCLE",
+      "domain": "PRODUCT_EVIDENCE",
+      "expected": {
+        "required_behaviors": [
+          "Trả mẫu đã ngừng sản xuất theo lifecycle evidence.",
+          "Phân biệt ngừng sản xuất với một biến thể tạm hết hoặc một ngày về hàng chưa có."
+        ],
+        "forbidden_behaviors": [
+          "Không hứa sản xuất lại hoặc nhận đặt.",
+          "Không tự khẳng định mọi kho còn hoặc hết hàng chỉ từ lifecycle."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q091",
+      "title": "'Ok' sau khi hỏi giá và giao chỉ là đã hiểu, chưa mua",
+      "category": "AMBIGUOUS_COMMIT",
+      "domain": "CONVERSATION_CONTROL",
+      "expected": {
+        "required_behaviors": [
+          "Ghi nhận khách đã hiểu và còn cân nhắc.",
+          "Không biến 'ok' thành mua hàng, chọn payment hoặc yêu cầu thu thông tin nhận hàng."
+        ],
+        "forbidden_behaviors": [
+          "Không tạo giỏ, xác nhận đơn hoặc gây sức ép.",
+          "Không lặp toàn bộ giá và ETA khi khách không hỏi thêm."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q092",
+      "title": "'Ok' sau cam kết mua, chỉ hỏi đúng trường checkout còn thiếu",
+      "category": "COMMIT",
+      "domain": "TRANSACTION_STATE",
+      "expected": {
+        "required_behaviors": [
+          "Giữ cam kết mua đã có trong canonical context.",
+          "Chỉ yêu cầu ADDRESS và PAYMENT_METHOD do checkout completeness xác nhận còn thiếu; không hỏi lại tên và điện thoại."
+        ],
+        "forbidden_behaviors": [
+          "Không suy đã đủ checkout hoặc đơn đã tạo.",
+          "Không lộ tên, số điện thoại đã lưu riêng hoặc tự chọn COD."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_CHECKOUT_DETAILS"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q093",
+      "title": "Muốn mua nhưng ảnh chưa có nên sản phẩm vẫn chưa rõ",
+      "category": "CANONICAL_PRECEDENCE",
+      "domain": "TRANSACTION_STATE",
+      "expected": {
+        "required_behaviors": [
+          "Ghi nhận mong muốn mua nhưng xin xác định đúng sản phẩm trước.",
+          "Không coi chữ 'bộ này' là đủ binding để mở giỏ hoặc chốt."
+        ],
+        "forbidden_behaviors": [
+          "Không tự chọn sản phẩm đang nổi bật hoặc sản phẩm cũ.",
+          "Không giả tạo ORDER_PREVIEW khi chưa biết mặt hàng."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_PRODUCT"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q094",
+      "title": "Muốn mua nhưng vẫn thiếu một số đo để xác định size",
+      "category": "CANONICAL_PRECEDENCE",
+      "domain": "TRANSACTION_STATE",
+      "expected": {
+        "required_behaviors": [
+          "Giữ ý định mua và blocker size đang thiếu chiều cao.",
+          "Hỏi rõ chiều cao, không nói chung chung 'gửi số đo cần thiết' hoặc hỏi lại cân nặng."
+        ],
+        "forbidden_behaviors": [
+          "Không chốt size hoặc preview trước khi fit được xác minh.",
+          "Không tự bỏ cam kết mua chỉ vì phải hỏi thêm số đo."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_MEASUREMENTS"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q095",
+      "title": "Khách cảm ơn sau xác nhận nội bộ, không tự thêm cam kết giao",
+      "category": "ORDER_CONFIRMED",
+      "domain": "TRANSACTION_STATE",
+      "expected": {
+        "required_behaviors": [
+          "Kết thúc thân thiện, ngắn gọn và tôn trọng hard stop/canonical confirmed state.",
+          "Không mở thêm chủ đề bán hàng hoặc hỏi lại checkout."
+        ],
+        "forbidden_behaviors": [
+          "Không nói đã tạo đơn POS, đã nhận tiền hoặc đã gửi hàng nếu không có external receipt.",
+          "Không hứa ngày giao trong lời chào cuối."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q096",
+      "title": "Đã muốn mua nhưng sửa M thành L trước khi hoàn tất checkout",
+      "category": "ORDER_PREVIEW_CHANGE",
+      "domain": "TRANSACTION_STATE",
+      "expected": {
+        "required_behaviors": [
+          "Ghi nhận lựa chọn L, không tuyên bố đã sửa một đơn hoặc giỏ nếu chưa có receipt mutation.",
+          "Theo completeness còn thiếu, yêu cầu đúng checkout fields; không hỏi lại số đo đã được xử lý."
+        ],
+        "forbidden_behaviors": [
+          "Không lấy chính câu sửa size làm bằng chứng mới để mở thêm giỏ.",
+          "Không tiếp tục dùng M hoặc giữ preview cũ sau thay đổi.",
+          "Không coi ghi nhận lựa chọn L là tự tư vấn fit chưa có nguồn."
+        ],
+        "next_step": {
+          "requirement": "REQUIRED",
+          "allowed_actions": [
+            "ASK_CHECKOUT_DETAILS"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    },
+    {
+      "id": "V5V4Q100",
+      "title": "Đủ checkout và đã xem preview, không hỏi lại phương thức thanh toán",
+      "category": "CHECKOUT_BOUNDARY",
+      "domain": "TRANSACTION_STATE",
+      "expected": {
+        "required_behaviors": [
+          "Dùng checkout COMPLETE hiện có, không suy thiếu payment hoặc yêu cầu gửi lại thông tin.",
+          "Ghi nhận xác nhận trong giới hạn lane không có effect port; không tự công bố giao dịch bên ngoài đã thành công."
+        ],
+        "forbidden_behaviors": [
+          "Không biến việc thiếu PII trong prompt thành thiếu dữ liệu checkout.",
+          "Không yêu cầu chuyển tiền hay nói đã tạo đơn POS, đã thanh toán, đã gửi hàng."
+        ],
+        "next_step": {
+          "requirement": "NONE",
+          "allowed_actions": [
+            "NONE"
+          ]
+        }
+      },
+      "expected_admission": "MODEL_ELIGIBLE"
+    }
+  ]
+}

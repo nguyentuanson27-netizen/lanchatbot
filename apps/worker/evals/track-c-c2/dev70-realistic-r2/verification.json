@@ -1,0 +1,20 @@
+{
+  "revision": "R2",
+  "status": "STATIC_VALIDATION_PASS",
+  "case_count": 70,
+  "long_history_cases": 4,
+  "first_contact_cases": 3,
+  "pre_model_controls": 2,
+  "negative_validator_controls": 12,
+  "context_unchanged_from_r1": true,
+  "expectations_unchanged_from_r1": true,
+  "facts_used_byte_identical_to_r1": false,
+  "model_evaluation_run": false,
+  "source_revision": "R2.5",
+  "source_head": "a28bd12a8b15c4bbf65914c52236adac4ac41594",
+  "source_population_same_70_ids": true,
+  "source_used_facts_identical": true,
+  "source_context_amendment_count": 19,
+  "facts_values_identical_to_source": true,
+  "rebased_to_main": true
+}
