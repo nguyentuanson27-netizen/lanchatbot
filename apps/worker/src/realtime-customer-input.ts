@@ -164,12 +164,32 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
   return value;
 }
 
+function obligationExplicitlyNamesProduct(
+  obligation: RealtimeCustomerObligationV1,
+): boolean {
+  if (obligation.productId === null || obligation.evidenceText === null) return false;
+  const haystack = obligation.evidenceText.normalize("NFC").toLocaleUpperCase("vi-VN");
+  const needle = obligation.productId.normalize("NFC").toLocaleUpperCase("vi-VN");
+  let index = haystack.indexOf(needle);
+  while (index !== -1) {
+    const before = haystack[index - 1] ?? "";
+    const after = haystack[index + needle.length] ?? "";
+    if (!/[\p{L}\p{N}]/u.test(before) && !/[\p{L}\p{N}]/u.test(after)) {
+      return true;
+    }
+    index = haystack.indexOf(needle, index + 1);
+  }
+  return false;
+}
+
 export function applyCustomerDecisionInput(prior: SessionDecisionContext | undefined, value: RealtimeCustomerInput, currentProductId: string | null = null): SessionDecisionContext {
   const previous = prior ?? { budgetVnd: null, occasion: null, rejectedProductIds: [] };
   const rejected = new Set(previous.rejectedProductIds);
   for (const obligation of customerInputObligations(value)) {
     if (obligation.kind !== "PRODUCT_REJECT") continue;
-    const rejectedId = obligation.productId ?? currentProductId;
+    const rejectedId = obligationExplicitlyNamesProduct(obligation)
+      ? obligation.productId
+      : currentProductId;
     if (rejectedId) rejected.add(rejectedId);
   }
   if (value.product.productId && value.product.operation === "SELECT") rejected.delete(value.product.productId);

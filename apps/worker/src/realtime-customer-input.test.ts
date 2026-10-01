@@ -34,6 +34,22 @@ describe("source-bound customer input", () => {
       value, "CB182")).toEqual({ budgetVnd: 600_000, occasion: "WORK", rejectedProductIds: ["SQ149", "CB182"] });
   });
 
+  it("binds a referential typed rejection to code-owned current product", () => {
+    const text = "Mẫu này thôi không lấy";
+    const value = bindRealtimeCustomerInput({
+      ...noCustomerSelection(),
+      obligations: [{
+        kind: "PRODUCT_REJECT", capability: null, scope: null,
+        productId: "SV9031", evidenceText: text,
+      }],
+    }, text);
+    expect(applyCustomerDecisionInput(
+      { budgetVnd: null, occasion: null, rejectedProductIds: [] },
+      value,
+      "CB182",
+    ).rejectedProductIds).toEqual(["CB182"]);
+  });
+
   it("does not turn a product noun into a rejection", () => {
     const value = bindRealtimeCustomerInput(noCustomerSelection(), "Bộ CB182 chất liệu gì?");
     expect(applyCustomerDecisionInput(undefined, value).rejectedProductIds).toEqual([]);
