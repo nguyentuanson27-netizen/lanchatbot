@@ -3319,7 +3319,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["TYPED_SEMANTIC_SELECTION", "TYPED_SEMANTIC_UNSAFE_FIT", "TYPED_SEMANTIC_SCOPE_BLOCKED", "TYPED_SEMANTIC_PRICE", "TYPED_SEMANTIC_UNSAFE_PRICE", "TYPED_SEMANTIC_WRINKLE", "TYPED_SEMANTIC_WRONG_PROPERTY", "FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["TYPED_SEMANTIC_SELECTION", "TYPED_SEMANTIC_UNSAFE_FIT", "TYPED_SEMANTIC_PARENT_PRICE", "TYPED_SEMANTIC_PRICE", "TYPED_SEMANTIC_UNSAFE_PRICE", "TYPED_SEMANTIC_WRINKLE", "TYPED_SEMANTIC_WRONG_PROPERTY", "FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3804,7 +3804,7 @@ describe("RealtimeRunner inbound batching", () => {
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
-        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL" || checkoutOwner === "TYPED_SEMANTIC_SCOPE_BLOCKED",
+        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL" || checkoutOwner === "TYPED_SEMANTIC_PARENT_PRICE",
         multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_COMPARISON",
         c3: {
           customerInputEnabled: checkoutOwner.startsWith("TYPED_"),
@@ -3890,8 +3890,8 @@ describe("RealtimeRunner inbound batching", () => {
       if (checkoutOwner === "TYPED_DRY_RUN") expect(written.metaPlan).toBeUndefined();
       expect(persistedCommerce.cart).toBeNull();
       if (checkoutOwner.startsWith("TYPED_SEMANTIC_")) {
-        const scopeBlocked = checkoutOwner === "TYPED_SEMANTIC_SCOPE_BLOCKED";
-        const selection = scopeBlocked || checkoutOwner.endsWith("SELECTION") || checkoutOwner.endsWith("FIT");
+        const parentPriceWithVariant = checkoutOwner === "TYPED_SEMANTIC_PARENT_PRICE";
+        const selection = parentPriceWithVariant || checkoutOwner.endsWith("SELECTION") || checkoutOwner.endsWith("FIT");
         const wrinkle = checkoutOwner.endsWith("WRINKLE") || checkoutOwner.endsWith("PROPERTY");
         const unsafe = checkoutOwner.includes("UNSAFE") || checkoutOwner.includes("WRONG");
         const selectionSpan = "Chị chọn M";
@@ -3950,17 +3950,12 @@ describe("RealtimeRunner inbound batching", () => {
               JSON.parse(JSON.parse(request.body).contents[0].parts[0].text).contractVersion),
           }, null, 2) + "\n", "utf8");
         };
-        if (scopeBlocked) {
-          // Existing parent-price vs active-variant scope boundary fails closed
-          // before C3. Retain this control; do not waive binding for wording.
-          expect(reply).toBe("");
-          expect(JSON.stringify(final.decisionEvents)).toContain("PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH");
+        if (parentPriceWithVariant) {
+          // Parent facts stay parent-scoped even when the customer's selection
+          // has its own verified variant. Neither scope is promoted to the other.
           expect(persistedState.consideredVariant.size).toBe("M");
-          expect(persistedState.conversationOwner).toBe("HUMAN");
-          expect(persistedCommerce.cart).toEqual(before.cart);
-          expect(c3Send).toHaveBeenCalledTimes(4); // next turn Producer only
-          await recordControl();
-          return;
+          expect(persistedState.verifiedVariant?.selectedVariantId).toBe("CB182_BE_M");
+          expect(JSON.stringify(final.decisionEvents)).not.toContain("PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH");
         }
         expect(reply).toContain("799.000");
         expect(persistedState.currentProductId).toBe("CB182");
@@ -3971,7 +3966,7 @@ describe("RealtimeRunner inbound batching", () => {
         expect(cartSelectionSizes).toEqual([]);
         // No verified-variant path in these controls: acknowledgement is
         // customer context only, not permission to persist a verified choice.
-        expect(persistedState.consideredVariant).toEqual(priorVariant);
+        if (!parentPriceWithVariant) expect(persistedState.consideredVariant).toEqual(priorVariant);
         if (wrinkle) expect(reply).toContain("chống nhăn");
         if (unsafe) {
           expect(reply).not.toContain(answerText);

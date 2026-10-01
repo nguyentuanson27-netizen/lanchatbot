@@ -163,10 +163,11 @@ No merge, deploy, traffic, rubric or threshold change. PR377 remains draft.
   transport/JSON/wrong-property/dropped-limit controls preserve independent facts.
 - [x] Real Producer/RealtimeRunner scripted controls protect the final egress
   bridge. No cart/checkout/effect authority is inferred from acknowledgements.
-- [ ] Runtime scope residual: parent-price + active verified variant can fail
-  pre-C3 with PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH. Reproduced against Slice A;
-  preserved fail-closed, not waived or called a successful purchase journey.
-- [ ] Full Slice C journey matrix and outstanding runtime acceptance remain open.
+- [x] Runtime scope residual resolved by Slice C: parent facts now retain their
+  producer scope independently of the selected variant. The fit/cart fences
+  remain strict; paired boundary tests and the full runtime reproduce the fix.
+- [x] Full Slice C deterministic journey matrix added (see execution section below).
+- [ ] Stateful real-model runtime acceptance remains open.
 - [ ] Real-model runtime acceptance / DEV70 R2: NOT RUN here.
 - [ ] P11: OPEN. P12: BLOCKED pending remaining runtime work and Agent 2.
 
@@ -175,3 +176,26 @@ Source review, RED/GREEN and environment notes:
 VERIFICATION.json bind local exact HEAD and actual final commands. Remote CI on
 an ancestor is not evidence for this candidate. Keep PR377 draft; no merge,
 deploy, live traffic, rubric or threshold change.
+
+### PR377 quality closure - Slice C execution
+
+Base: `fbde9cd6cb8763ff8d27de0b6ce1f75f6a1d7abf` (Slice B).
+Scope: full RealtimeRunner/Producer deterministic controls with safe external
+ports, exact state/effect/receipt assertions, and owning-layer fixes only after RED.
+
+- [x] Twelve required journey families via 23 scripted full-runtime controls,
+  including branching checkout, failures, freshness and duplicate suppression.
+- [x] RED -> fix for parent-fact scope, stock-query subject label, single-product
+  compound query coverage, and partial lookup isolation. No authority waiver.
+- [x] Trace writer records actual replies, before/after state, reads, planned vs
+  committed effects, truthful fake receipts and real role-call topology.
+- [x] Self-review source diff across correctness/security/architecture/simplicity/performance.
+  Exact local candidate identity and command ledger are in the external handoff.
+- [x] Precommit focused/adjacent (458 tests) and full workspace (3,384 passed;
+  35 pre-existing opt-in/environment skips) checked. The external handoff
+  records subsequent exact-head re-verification, not ancestor CI.
+- [ ] Remote exact-head CI: pending publication; no prior CI result reused.
+- [ ] Real-model acceptance NOT RUN; DEV70 R2 NOT RUN; P11 OPEN;
+  P12 BLOCKED pending Agent 2. Do not merge/deploy or remove PR377 draft.
+
+Source evidence and residuals: `tasks/evidence/pr377-slice-c-20261001.md`.

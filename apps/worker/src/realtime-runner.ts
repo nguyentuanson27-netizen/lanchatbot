@@ -1463,7 +1463,10 @@ export function buildBusinessFactQueries(
         productId: reference.product?.productId ?? null,
         resolution: reference.resolution,
       },
-      requestedFacts: factsForProductClause(text, reference.raw, requestedFacts),
+      // With one subject, clauses need not repeat its code. Restrict by
+      // code-bearing clause only when there really are distinct subjects.
+      requestedFacts: distinctReferences.length === 1 ? requestedFacts
+        : factsForProductClause(text, reference.raw, requestedFacts),
       qualifiers: {
         offerType: null,
         color,
@@ -2366,6 +2369,22 @@ export function responseGroupHandoffOrdering(
     sendAfterOwnerHandoff: orderedHandoff,
     afterResponseGroupId: orderedHandoff ? responseGroupId : null,
   };
+}
+
+/** Legacy BusinessFactEnvelopeV1 and media producers are parent-scoped. A
+ * customer's selection cannot turn those facts into variant-specific authority.
+ * Fit keeps its independently selected-variant fence; cart claims use their own
+ * cart/version/readiness path. Both draft and final egress use this same mapping.
+ */
+function parentFactProtectedScopes(
+  productIds: readonly string[],
+  variant: ConversationState["verifiedVariant"],
+) {
+  return productIds.flatMap((productId) => [
+    { productId, variantId: variant?.parentProductId === productId ? variant.selectedVariantId : null },
+    ...(["PRICE", "STOCK", "ETA", "PRODUCT_MEDIA"] as const).map((claimType) =>
+      ({ productId, variantId: null, claimType })),
+  ]);
 }
 
 export class RealtimeRunner {
@@ -4004,11 +4023,18 @@ export class RealtimeRunner {
             observedAt: envelope.observedAt,
           }))
         );
-        businessFacts = flattened[0]?.envelope ?? null;
+        const successfulFacts = flattened.filter(({ envelope }) =>
+          envelope.status === "OK" && envelope.facts !== null);
+        businessFacts = successfulFacts[0]?.envelope ?? flattened[0]?.envelope ?? null;
         businessFactEnvelopes = flattened.map(({ envelope }) => envelope);
+        // A locally isolated transport failure is not authority and must not
+        // erase a successful sibling. Stale, missing, malformed and other
+        // unavailable sources keep their existing fail-closed behavior.
         const unsafe = flattened.some(({ envelope }) =>
           staleFactsRequireHandoff(message.text ?? "", envelope) ||
-          unavailableFactsRequireHandoff(envelope)
+          (unavailableFactsRequireHandoff(envelope) && !(successfulFacts.length > 0 &&
+            envelope.status === "ERROR" && envelope.facts === null &&
+            envelope.reasonCode === "BUSINESS_FACT_LOOKUP_FAILED"))
         );
         const reply = unsafe ? null : multiFactReply(resolutions);
         if (!reply) {
@@ -4025,7 +4051,7 @@ export class RealtimeRunner {
           nextState = transitioned.state;
           handoff = transitioned.handoff;
         } else {
-          deterministicProtectedClaimTypes = [...new Set(flattened.map(({ requestedFact }) => ({
+          deterministicProtectedClaimTypes = [...new Set(successfulFacts.map(({ requestedFact }) => ({
             PRICE: "PRICE" as const,
             STOCK: "STOCK" as const,
             SIZE: "SIZE_FIT" as const,
@@ -4034,7 +4060,8 @@ export class RealtimeRunner {
           deterministicProtectedClaimRequests = resolutions.flatMap((resolution) =>
             resolution.product === null
               ? []
-              : resolution.facts.map(({ requestedFact }) => ({
+              : resolution.facts.filter(({ envelope }) => envelope.status === "OK" && envelope.facts !== null)
+                .map(({ requestedFact }) => ({
                   type: ({
                     PRICE: "PRICE" as const,
                     STOCK: "STOCK" as const,
@@ -4829,13 +4856,9 @@ export class RealtimeRunner {
           ...businessFactEnvelopes.map(({ productId }) => productId),
           ...(proposal.productId === null ? [] : [proposal.productId]),
         ])].sort();
-        const expectedProtectedClaimProductScopes =
-          expectedProtectedClaimProductIds.map((productId) => ({
-            productId,
-            variantId: activeVerifiedVariant?.parentProductId === productId
-              ? activeVerifiedVariant.selectedVariantId
-              : null,
-          }));
+        const expectedProtectedClaimProductScopes = parentFactProtectedScopes(
+          expectedProtectedClaimProductIds, activeVerifiedVariant,
+        );
         const typedClaimsForProposal = buildProtectedClaimsFromVerifiedFactSetV1({
           facts: businessFactEnvelopes,
           sizeClaim: verifiedSizeClaimForTurn,
@@ -5280,8 +5303,15 @@ export class RealtimeRunner {
           // already-guarded answer as PRODUCT output, separately from CART effects.
           // Do not relabel it as cart stock or weaken the cart-readiness validator.
           const requestedSize = customerInput.factQuery.size;
+          // sizes lists AVAILABLE sizes, not the successful lookup's subject.
+          // An out-of-stock requested size is absent there; dropping its label
+          // would make the answer sound like the selected cart size is sold out.
+          // Scope comes from the exact typed query that produced this OK answer.
+          const queryMatchesSize = requestedSize !== null &&
+            proposal?.businessFactQuery.size?.toLocaleUpperCase("vi-VN") ===
+              requestedSize.toLocaleUpperCase("vi-VN");
           const answer = metaMessages.map((unit, index) => index === 0 && unit.kind === "TEXT" &&
-            requestedSize !== null && businessFacts.facts?.sizes.includes(requestedSize)
+            queryMatchesSize
               ? { ...unit, text: `Với size ${requestedSize}: ${unit.text}` } : unit);
           const messages = [...answer, { kind: "TEXT" as const, text: checkoutRequest }];
           const claims = protectedClaimSet.claims.filter(({ type }) => answerTypes.includes(type));
@@ -5599,12 +5629,9 @@ export class RealtimeRunner {
       const mediaProductId = expectedOutboundProductIds.length === 1
         ? expectedOutboundProductIds[0]!
         : null;
-      const expectedOutboundProductScopes = expectedOutboundProductIds.map((productId) => ({
-        productId,
-        variantId: nextState.verifiedVariant?.parentProductId === productId
-          ? nextState.verifiedVariant.selectedVariantId
-          : null,
-      }));
+      const expectedOutboundProductScopes = parentFactProtectedScopes(
+        expectedOutboundProductIds, nextState.verifiedVariant,
+      );
       if (mediaProductId !== null && outboundClaimTypes.includes("PRODUCT_MEDIA")) {
         protectedOutboundClaims = [
           ...protectedOutboundClaims,

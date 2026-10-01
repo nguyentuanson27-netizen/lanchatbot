@@ -1476,3 +1476,69 @@ selection acknowledgement controls.
 Evidence: `tasks/evidence/pr377-slice-b-20261001.md` and the external exact-source
 handoff/command ledger. Real-model runtime acceptance and DEV70 R2: NOT RUN;
 P11: OPEN; P12: BLOCKED pending remaining Slice C work and Agent 2.
+
+## PR377 Slice C - deterministic full-runtime closure (2026-10-01)
+
+This amendment supersedes only the Slice B deterministic runtime residuals
+above. It does not close P11/P12 or establish real-model acceptance.
+
+`realtime-c3-deterministic.test.ts` exercises the actual Customer Input Producer
+validation, RealtimeRunner, fact adapters, commerce kernel, C3 compiler/guard
+and commit planning. Only external model, POS/catalog/search, history, policy,
+Inbox and persistence ports are scripted/fake. No service is started and no
+customer message or real business write is sent. Fake receipts describe only
+what the isolated fake commit actually accepted, never a real POS/DB receipt.
+
+The twelve required families have controls for purchase with policy, variant
+correction with purchase, selected M with stock S, conditional lower-price offer,
+price with unsupported wrinkle resistance, budget/rejected-item alternatives,
+compatible-offer price comparison, long-history correction/pending question,
+recipient/payment to preview and confirmation, human/post-sale handoff with a
+cart, Responder transport/JSON/guard recovery, and partial read plus commit
+failure/retry. Extra controls reject stale/all-failed facts, obsolete previews,
+superseded commits and duplicate Inbox generations. The artifact writer records
+input, accepted reply, state, read envelopes, plans, receipts and actual calls.
+
+### Owning-layer repairs
+
+- Legacy parent-scoped PRICE/STOCK/ETA/media facts stay parent-scoped even when
+  the customer has an independently verified selected variant. Code supplies
+  expected scope per producer claim type; the guard still checks exact scope.
+  It rejects a purported variant price when the producer promises only parent
+  facts. SIZE_FIT keeps the selected-variant fence, and cart effects keep their
+  own revision/readiness checks. No model field can supply these expectations.
+- A successful stock lookup for size S labels its answer from the typed query,
+  not from the list of sizes currently available. Absence of S from that list
+  must not make a sold-out S answer appear to describe the selected M cart.
+- A compound question with one resolved product need not repeat the code in
+  every clause. All requested facts are retained for that one subject; distinct
+  product subjects still use the existing per-clause routing and bounds.
+- An isolated `BUSINESS_FACT_LOOKUP_FAILED` ERROR envelope has no authority and
+  does not erase independently successful sibling reads. Only OK/non-null
+  sources create protected claim requests. The first successful sibling is
+  the representative envelope, so a failure of the first read also works.
+  Stale/missing/invalid/unavailable envelopes outside that exact isolated error
+  and all-failed reads retain the existing fail-closed behavior.
+
+On a stale offer/price at confirmation, the offer-binding preflight may retain
+an old preview record for the human while refusing to confirm/send it. The
+control asserts HUMAN ownership, no protected reply or purchase effect, and no
+later model call/effect under that owner; it does not claim the record was erased.
+
+### Evidence boundaries
+
+The test-only `C3_DETERMINISTIC_ARTIFACT_DIR` must be an absolute directory
+outside the repository. Artifacts include the actual git HEAD and dirty flag;
+`C3_DETERMINISTIC_SOURCE_HEAD`, when supplied, must match that HEAD. Only clean,
+exact-head final captures are primary handoff evidence. Synthetic recipient
+values are deliberate fixtures. Private latest-message Producer input is not
+confused with redacted history or planning/telemetry input.
+
+These controls do not prove arbitrary Vietnamese interpretation, natural sales
+voice, correctness of a model-selected need, or real database/delivery behavior.
+Long-history data is seeded at the external history port; the real runtime
+selects/redacts the bounded context, while model responses remain scripted.
+Unknown limitation vocabulary can still recover with a generic bound rather
+than a property-specific sentence. Agent 2 must evaluate stateful branching with
+real intended models plus the separately pinned DEV70 R2 and registered judge.
+Frozen rubric/thresholds and the acceptance gates in tasks/plan.md are unchanged.

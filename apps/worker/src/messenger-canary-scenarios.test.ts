@@ -163,3 +163,11 @@ describe("30 deterministic Messenger canary scenarios", () => {
     });
   });
 });
+
+
+it("retains all requested fact clauses for one product rather than only the clause repeating its code", () => {
+  const queries = buildBusinessFactQueries("single-compound", "CB182 gi\u00e1 bao nhi\u00eau, c\u00f2n h\u00e0ng kh\u00f4ng?", [
+    { raw: "CB182", product: product("CB182"), resolution: "RESOLVED" },
+  ]);
+  expect(queries?.queries[0]?.requestedFacts).toEqual(["PRICE", "STOCK"]);
+});
