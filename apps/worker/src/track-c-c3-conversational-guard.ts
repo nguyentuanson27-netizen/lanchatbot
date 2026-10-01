@@ -155,7 +155,7 @@ function trackCIsBoundedUncertainty(value: string, context: ContextV2): boolean 
  * Unknown topics retain the legacy guard; no arbitrary trailing predicate
  * becomes safe merely by starting with "not confirmed". */
 function nominalTopic(value: string): boolean {
-  return /^(?:(?:kha nang )?chong nhan|do nhan|do min|trong luong|(?:ngay|lich|thoi diem) (?:(?:shop|ben em|em) )?(?:se )?gui(?: hang| product)?(?: cho chi)?)(?: cua (?:mau )?(?:nay|product))?$/u.test(value);
+  return /^(?:(?:kha nang )?chong nhan|do nhan|do min|trong luong|(?:vai|chat lieu) co de nhan(?: khi ngoi lau| hay khong)?|(?:ngay|lich|thoi diem) (?:(?:shop|ben em|em) )?(?:se )?gui(?: hang| product)?(?: cho chi)?)(?: cua (?:mau )?(?:nay|product))?$/u.test(value);
 }
 
 function closedTopicUncertainty(value: string, context: ContextV2): boolean {

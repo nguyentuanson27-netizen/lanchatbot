@@ -12,6 +12,31 @@ import {
 } from "./track-c-c3-strategy-contract-runner.js";
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
+
+describe("product selling unit survives factual egress", () => {
+  it("retains the authoritative unit when a customer distinguishes a set from a component", () => {
+    const value = capture();
+    if (value.status !== "BUILT" || value.context === null) throw new Error("TEST_CAPTURE_REQUIRED");
+    const evidence = buildTrackCSelectableEvidence({ context: value.context,
+      simulationFacts: [{ kind: "PRODUCT_PROFILE", productId: "SQ9012", displayName: "Demo",
+        offerType: "bộ áo và quần", material: "cotton", colors: [], design: [] }],
+      executionLane: "BEHAVIOR_SIMULATION" });
+    const presentation = evidence.find(({ capability }) => capability === "PRODUCT_PRESENTATION");
+    expect(presentation?.subject?.productId).toBe("SQ9012");
+    expect(presentation?.deterministicText).toContain("bộ áo và quần");
+    expect(presentation?.deterministicText).not.toContain("riêng áo");
+  });
+
+  it("does not invent a selling unit when the profile omits it", () => {
+    const value = capture();
+    if (value.status !== "BUILT" || value.context === null) throw new Error("TEST_CAPTURE_REQUIRED");
+    const evidence = buildTrackCSelectableEvidence({ context: value.context,
+      simulationFacts: [{ kind: "PRODUCT_PROFILE", productId: "SQ9012", displayName: "Demo",
+        material: "cotton", colors: [], design: [] }], executionLane: "BEHAVIOR_SIMULATION" });
+    const presentation = evidence.find(({ capability }) => capability === "PRODUCT_PRESENTATION");
+    expect(presentation?.deterministicText).not.toMatch(/bộ|set|riêng áo/u);
+  });
+});
 import { trackCEvidenceHasSafeFactualEgress } from
   "./track-c-c3-strategy-contract.js";
 import {
@@ -1104,7 +1129,7 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(evidence[1]).toMatchObject({
       subject: { productId: "SQ9012", displayName: "Tường Vi" },
       deterministicText:
-        "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
+        "Mẫu Tường Vi là set áo & quần, có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       provenance: { authority: "SIMULATION" },
     });
     expect(JSON.stringify(evidence)).not.toContain("effect");
@@ -1415,7 +1440,7 @@ describe("Track C C3 strategy-contract runner", () => {
       ] });
     expect(result.output.segments[1]).toEqual({
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu Tường Vi có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
+      text: "Mẫu Tường Vi là set áo & quần, có chất liệu tơ xước mềm, nhẹ, hiện có màu kem, đen. Thiết kế của mẫu gồm phom suông, quần cạp chun ạ.",
       claimContentHash: result.output.segments[1]?.kind === "VERIFIED_CLAIM"
         ? result.output.segments[1].claimContentHash
         : "",

@@ -242,9 +242,12 @@ function boundedSimulationEvidence(
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
     const offerType = typeof value.offerType === "string" ? value.offerType : null;
+    const profileSubject = offerType === null
+      ? `Mẫu ${displayName}`
+      : `Mẫu ${displayName} là ${offerType},`;
     const profileText = colors.length === 0
-      ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
-      : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
+      ? `${profileSubject} có chất liệu ${material} ạ.`
+      : `${profileSubject} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
     const deterministicText = design.length === 0 ? profileText :
       `${profileText.replace(/ ạ\.$/u, ".")} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {

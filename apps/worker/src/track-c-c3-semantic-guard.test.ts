@@ -49,6 +49,20 @@ function run(input: { inbound: string; answer: string | null; limit?: string; kn
 }
 
 describe("C3 two-sided semantic statement guard", () => {
+  it("accepts an unconfirmed wrinkle question complement without accepting an independent claim", async () => {
+    const input = { inbound: "Giá và vải có dễ nhăn không?", limit: "wrinkle resistance unverified" };
+    for (const answer of ["Hiện chưa có thông tin xác nhận vải có dễ nhăn khi ngồi lâu.",
+      "Em chưa xác nhận được chất liệu có dễ nhăn hay không."]) {
+      const result = await run({ ...input, answer }).promise;
+      expect(result.reply).toContain(answer);
+      expect(result.reply).toContain("849.000");
+    }
+    for (const answer of ["Hiện chưa có thông tin xác nhận vải có dễ nhăn khi ngồi lâu. Vải này chống nhăn.",
+      "Em chưa xác nhận được chất liệu có dễ nhăn hay không nên mẫu này không nhăn.",
+      "Hiện chưa có thông tin xác nhận vải có dễ nhăn khi ngồi lâu và bền hơn."]) {
+      await expect(run({ ...input, answer }).promise).rejects.toThrow();
+    }
+  });
   it.each(["625k", "690k", "735.000đ"])("keeps a customer amount reference, not an approved price (%s)", async (amount) => {
     const inbound = `Nếu ${amount} thì chị lấy.`;
     for (const answer of [`${amount} là mức chị đề xuất.`,
