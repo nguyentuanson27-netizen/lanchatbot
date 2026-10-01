@@ -357,7 +357,10 @@ export const RealtimeCustomerObligationV1Schema = z.object({
         "BREATHABILITY", "CARE_INSTRUCTIONS"].includes(value.scope);
     const offerScope = value.scope !== null &&
       ["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"].includes(value.scope);
-    if ((attributeScope && value.capability !== "PRODUCT_ATTRIBUTES") ||
+    const scopedCapability = value.capability === "PRODUCT_ATTRIBUTES" ||
+      value.capability === "OFFER_CONFIGURATION";
+    if ((scopedCapability && value.scope === null) ||
+        (attributeScope && value.capability !== "PRODUCT_ATTRIBUTES") ||
         (offerScope && value.capability !== "OFFER_CONFIGURATION") ||
         (value.scope !== null && !attributeScope && !offerScope)) {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ["scope"],

@@ -2,7 +2,11 @@ import {
   assertTrackCRequestedObligationCoverage,
   assertTrackCRequestedPropertyCoverage,
 } from "./track-c-c3-conversational-guard.js";
-import { MeasurementKindSchema, type MeasurementKind } from "@lana/contracts";
+import {
+  MeasurementKindSchema,
+  type MeasurementKind,
+  type RealtimeCustomerObligationV1,
+} from "@lana/contracts";
 import { redactAnalyticsMessage } from "@lana/database";
 
 export type TrackCConversationLane =
@@ -53,12 +57,10 @@ export const TRACK_C_PROTECTED_PROPOSITIONS = Object.freeze([
 export type TrackCProtectedProposition =
   typeof TRACK_C_PROTECTED_PROPOSITIONS[number];
 
-export type TrackCRequestedObligation = Readonly<{
-  kind: "FACT_REQUEST" | "PRODUCT_SEARCH" | "PRODUCT_REJECT";
-  capability: TrackCProtectedProposition | null;
-  scope: string | null;
-  productId: string | null;
-}>;
+export type TrackCRequestedObligation = Readonly<Pick<
+  RealtimeCustomerObligationV1,
+  "kind" | "capability" | "scope" | "productId"
+>>;
 
 /**
  * Mirrors the runtime `missingCheckout` field set. PAYMENT_METHOD was missing
@@ -462,6 +464,16 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
   if (input.requestedObligations !== undefined) {
+    const bound = input.boundProductIds ?? [];
+    if (bound.length > 0 && input.requestedObligations.some((entry) =>
+      entry.kind === "FACT_REQUEST" && entry.productId !== null &&
+      !bound.some((productId) =>
+        productId.normalize("NFC").toLocaleUpperCase("vi-VN") ===
+        entry.productId!.normalize("NFC").toLocaleUpperCase("vi-VN")
+      )
+    )) {
+      throw new Error("TRACK_C_REQUESTED_OBLIGATION_BINDING_INVALID");
+    }
     assertTrackCRequestedObligationCoverage(
       input.requestedObligations,
       input.evidence,

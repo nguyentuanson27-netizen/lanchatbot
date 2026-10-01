@@ -59,6 +59,23 @@ describe("source-bound customer input", () => {
     ]);
   });
 
+  it("requires a typed scope for scoped fact obligations", () => {
+    expect(() => bindRealtimeCustomerInput({
+      ...noCustomerSelection(),
+      obligations: [{
+        kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: null,
+        productId: null, evidenceText: "dễ nhăn không",
+      }],
+    }, "dễ nhăn không")).toThrow();
+    expect(() => bindRealtimeCustomerInput({
+      ...noCustomerSelection(),
+      obligations: [{
+        kind: "FACT_REQUEST", capability: "OFFER_CONFIGURATION", scope: null,
+        productId: null, evidenceText: "bán lẻ áo không",
+      }],
+    }, "bán lẻ áo không")).toThrow();
+  });
+
   it("keeps rejection and alternative search as independent obligations", () => {
     const text = "SV9031 thôi không lấy, tìm mẫu khác dưới 800k";
     const value = bindRealtimeCustomerInput({

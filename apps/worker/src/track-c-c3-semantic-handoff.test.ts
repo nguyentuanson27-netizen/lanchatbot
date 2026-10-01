@@ -121,6 +121,16 @@ describe("C3 structured goal semantic handoff", () => {
     } })).toThrow("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
   });
 
+  it("fails closed when a fact obligation points outside canonical product binding", () => {
+    expect(() => compileTrackCStrategistDecision({
+      ...input,
+      boundProductIds: ["ITEM42"],
+      requestedObligations: [{
+        kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "OTHER",
+      }],
+    })).toThrow("TRACK_C_REQUESTED_OBLIGATION_BINDING_INVALID");
+  });
+
   it("cannot mark wrinkle resistance answered by a smooth material field", () => {
     const attributes = buildProductAttributesV1({ productId: "ITEM42", observedAt: "2026-09-10T02:00:00Z",
       data: { materials: ["lụa mềm mịn"], materialComponents: {}, colors: [], styles: [],
