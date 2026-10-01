@@ -3380,15 +3380,19 @@ describe("RealtimeRunner inbound batching", () => {
     };
     const commit = vi.fn(async (input: unknown) => {
       if (checkoutOwner === "FAULT_COMMIT") throw new Error("COMMIT_FAILED: phone=0901234567 token=do-not-store");
-      const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState } };
+      const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState };
+        metaPlan?: { messages: readonly unknown[] }; handoffEventPlan?: unknown };
       persistedState = written.state;
       if (written.salesCyclePlan) persistedCommerce = written.salesCyclePlan.state;
+      // Semantic controls record the actual synthetic plan, not the legacy
+      // fixture's constant successful-send receipt (which masks a no-send).
+      const semanticControl = checkoutOwner.startsWith("TYPED_SEMANTIC_");
       return ({
       stateCommitted: true,
-      metaOutboxCreated: 1,
+      metaOutboxCreated: semanticControl ? written.metaPlan?.messages.length ?? 0 : 1,
       pancakeTagOutboxCreated: false,
-      handoffEventCreated: false,
-      sendAuthorized: true,
+      handoffEventCreated: semanticControl && written.handoffEventPlan !== undefined,
+      sendAuthorized: !semanticControl || written.metaPlan !== undefined,
       reasonCodes: [],
       inboxBatchStatus: "COMMITTED" as const,
       });
@@ -3928,6 +3932,10 @@ describe("RealtimeRunner inbound batching", () => {
         const final = commit.mock.calls.at(-1)![0] as { metaPlan?: { messages: { text: string }[];
           protectedClaimTypes?: string[] }; decisionEvents?: { details: { c3Candidate?: { status: string; reason?: string } } }[] };
         const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        const receipt = await commit.mock.results.at(-1)!.value;
+        expect(receipt.metaOutboxCreated).toBe(final.metaPlan?.messages.length ?? 0);
+        expect(receipt.handoffEventCreated).toBe("handoffEventPlan" in final);
+        expect(receipt.sendAuthorized).toBe(final.metaPlan !== undefined);
         const recordControl = async () => {
           const directory = process.env.C3_SEMANTIC_CONTROL_ARTIFACT_DIR;
           if (!directory) return;
@@ -3937,7 +3945,7 @@ describe("RealtimeRunner inbound batching", () => {
             control: checkoutOwner, input: text, reply,
             before: { conversation: priorState, commerce: before },
             after: { conversation: persistedState, commerce: persistedCommerce },
-            plannedAndCommitted: final, receipt: await commit.mock.results.at(-1)!.value,
+            plannedAndCommitted: final, receipt,
             modelRoles: c3Send.mock.calls.slice(3).map(([request]) =>
               JSON.parse(JSON.parse(request.body).contents[0].parts[0].text).contractVersion),
           }, null, 2) + "\n", "utf8");
