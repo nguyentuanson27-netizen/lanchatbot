@@ -38,6 +38,50 @@ describe("source-bound customer input", () => {
     const value = bindRealtimeCustomerInput(noCustomerSelection(), "Bộ CB182 chất liệu gì?");
     expect(applyCustomerDecisionInput(undefined, value).rejectedProductIds).toEqual([]);
   });
+
+  it("preserves independent fact obligations instead of collapsing a compound request", () => {
+    const text = "Bộ này giá bao nhiêu, có dễ nhăn không?";
+    const value = bindRealtimeCustomerInput({
+      ...noCustomerSelection(),
+      obligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null,
+          productId: null, evidenceText: "giá bao nhiêu" },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE", productId: null,
+          evidenceText: "có dễ nhăn không" },
+      ],
+    }, text);
+    expect(value.obligations.map(({ kind, capability, scope }) =>
+      ({ kind, capability, scope }))).toEqual([
+      { kind: "FACT_REQUEST", capability: "PRICE", scope: null },
+      { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+        scope: "WRINKLE_RESISTANCE" },
+    ]);
+  });
+
+  it("keeps rejection and alternative search as independent obligations", () => {
+    const text = "SV9031 thôi không lấy, tìm mẫu khác dưới 800k";
+    const value = bindRealtimeCustomerInput({
+      ...noCustomerSelection(),
+      product: { operation: "SEARCH", productId: null, evidenceText: "tìm mẫu khác" },
+      budget: { operation: "SET", value: 800_000, evidenceText: "dưới 800k" },
+      obligations: [
+        { kind: "PRODUCT_REJECT", capability: null, scope: null,
+          productId: "SV9031", evidenceText: "SV9031 thôi không lấy" },
+        { kind: "PRODUCT_SEARCH", capability: null, scope: null,
+          productId: null, evidenceText: "tìm mẫu khác" },
+      ],
+    }, text);
+    expect(applyCustomerDecisionInput(
+      { budgetVnd: null, occasion: null, rejectedProductIds: [] },
+      value,
+      "CB182",
+    )).toEqual({
+      budgetVnd: 800_000,
+      occasion: null,
+      rejectedProductIds: ["SV9031"],
+    });
+  });
 });
 
 

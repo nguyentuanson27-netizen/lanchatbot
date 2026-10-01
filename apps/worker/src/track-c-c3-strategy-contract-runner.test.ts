@@ -1275,6 +1275,45 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.output.segments).toContainEqual(expect.objectContaining({ kind: "VERIFIED_CLAIM", text: shopFact }));
   });
 
+  it("carries typed requested obligations to the Strategist without raw customer prose", () => {
+    const request = buildTrackCStrategistContractRequest({
+      modelResource: MODEL_RESOURCE,
+      capture: capture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: [{
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Bộ này giá bao nhiêu, có dễ nhăn không?", attachmentCount: 0,
+        occurredAt: "2026-09-10T01:59:00.000Z",
+      }],
+      evidence: [],
+      constraints: {
+        permittedCanonicalActions: ["NONE"],
+        measurementsUnavailable: false,
+        productResolved: true,
+        hardStop: false,
+      },
+      requestedObligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null,
+          productId: null, evidenceText: "giá bao nhiêu" },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE", productId: null,
+          evidenceText: "có dễ nhăn không" },
+      ],
+    } as never);
+    const body = JSON.parse(request.body) as {
+      contents: [{ parts: [{ text: string }] }];
+    };
+    const input = JSON.parse(body.contents[0].parts[0].text) as {
+      requestedObligations?: unknown;
+    };
+    expect(input.requestedObligations).toEqual([
+      { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: null },
+      { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+        scope: "WRINKLE_RESISTANCE", productId: null },
+    ]);
+    expect(JSON.stringify(input.requestedObligations)).not.toContain("dễ nhăn");
+  });
+
   it("gives Vertex the same discriminated continuation states accepted by the compiler", () => {
     const request = buildTrackCStrategistContractRequest({
       modelResource: MODEL_RESOURCE,

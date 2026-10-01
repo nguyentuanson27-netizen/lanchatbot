@@ -33,6 +33,33 @@ it("uses the same-turn budget and all rejected IDs before verifying a recommenda
   expect(result).toMatchObject({ status: "MATCHED", product: { productId: "SD11" }, facts: fact("SD11") });
 });
 
+it("applies same-turn reject and search obligations independently", async () => {
+  const inputText = "SV9031 thôi không lấy, tìm mẫu khác dưới 800k";
+  const input = bindRealtimeCustomerInput({
+    ...noCustomerSelection(),
+    product: { operation: "SEARCH", productId: null, evidenceText: "tìm mẫu khác" },
+    budget: { operation: "SET", value: 800_000, evidenceText: "dưới 800k" },
+    obligations: [
+      { kind: "PRODUCT_REJECT", capability: null, scope: null,
+        productId: "SV9031", evidenceText: "SV9031 thôi không lấy" },
+      { kind: "PRODUCT_SEARCH", capability: null, scope: null,
+        productId: null, evidenceText: "tìm mẫu khác" },
+    ],
+  }, inputText);
+  const searchAlternatives = vi.fn().mockResolvedValue([product("SV9031"), product("SD11")]);
+  const result = await findVerifiedAlternative({
+    text: inputText, customerInput: input,
+    currentProductId: "CB182", search: { searchAlternatives },
+    facts: { resolve: async ({ productId }) => fact(productId, 600_000) },
+    shopAlias: "LANA", now,
+  });
+  expect(searchAlternatives).toHaveBeenCalledWith(
+    expect.stringContaining("800000"),
+    ["SV9031", "CB182"],
+  );
+  expect(result).toMatchObject({ status: "MATCHED", product: { productId: "SD11" } });
+});
+
 describe("alternative lookup authority", () => {
   it.each(["stale", "future", "no-stock", "wrong-subject", "wrong-offer", "error"])("does not recommend %s facts", async (mode) => {
     const value = fact("SD11");

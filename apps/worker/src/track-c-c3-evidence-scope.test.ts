@@ -267,4 +267,36 @@ describe("Track C C3 evidence subject scope", () => {
     );
     expect(price?.subject).toMatchObject({ scope: "PRODUCT", productId: "SQ9012" });
   });
+
+  it.each([
+    ["V5V4Q084", ["FULL_SET", "TOP", "BOTTOM"], "TOP", "549.000", "899.000"],
+    ["V5V4Q085", ["TWO_PIECE", "THREE_PIECE"], "THREE_PIECE", "1.049.000", "829.000"],
+  ] as const)(
+    "projects offer configuration %s into atomic requested scopes",
+    (id, expectedScopes, targetScope, expectedText, forbiddenText) => {
+      const chunk = JSON.parse(readFileSync(
+        new URL("quality-09.json", EVAL_ROOT), "utf8",
+      )) as { cases: TrackCV5CompactCase[] };
+      const fixture = chunk.cases.find((entry) => entry.id === id)!;
+      const capture = materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture,
+        runtimeClaimCatalog: facts.runtime_claim_catalog,
+        recipe,
+      });
+      const simulationFacts = fixture.context.simulation_fact_refs.map(
+        (ref) => facts.simulation_fact_catalog[ref],
+      );
+      const evidence = buildTrackCSelectableEvidence({
+        context: capture.context!,
+        simulationFacts,
+        executionLane: "BEHAVIOR_SIMULATION",
+        evaluationAt: new Date(recipe.evaluation_at),
+      }).filter(({ capability }) => capability === "OFFER_CONFIGURATION");
+      expect(evidence.map(({ value }) => value.offerScope)).toEqual(expectedScopes);
+      const target = evidence.find(({ value }) => value.offerScope === targetScope);
+      expect(target?.deterministicText).toContain(expectedText);
+      expect(target?.deterministicText).not.toContain(forbiddenText);
+    },
+  );
 });
