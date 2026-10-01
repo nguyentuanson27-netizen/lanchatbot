@@ -271,7 +271,13 @@ describe("evidence and bounded recovery journeys", () => {
     }) });
     const reject = "Kh\u00f4ng ch\u1ecdn m\u1eabu n\u00e0y. T\u00ecm m\u1eabu kh\u00e1c, ng\u00e2n s\u00e1ch 800k.";
     const first = await runtime.turn({ text: reject, producer: inputDelta({
-      product: { operation: "REJECT", productId: null, evidenceText: "Kh\u00f4ng ch\u1ecdn m\u1eabu n\u00e0y" },
+      product: { operation: "CURRENT", productId: null, evidenceText: null },
+      obligations: [
+        { kind: "PRODUCT_REJECT", capability: null, scope: null,
+          productId: null, evidenceText: "Kh\u00f4ng ch\u1ecdn m\u1eabu n\u00e0y" },
+        { kind: "PRODUCT_SEARCH", capability: null, scope: null,
+          productId: null, evidenceText: "T\u00ecm m\u1eabu kh\u00e1c" },
+      ],
       budget: { operation: "SET", value: 800_000, evidenceText: "ng\u00e2n s\u00e1ch 800k" }, factQuery: priceQuery,
     }) });
     runtime.save("alternatives-budget-rejections");
@@ -279,7 +285,13 @@ describe("evidence and bounded recovery journeys", () => {
     committedOnce(first);
     const text = "M\u1eabu kh\u00e1c n\u1eefa, ng\u00e2n s\u00e1ch 650k.";
     const trace = await runtime.turn({ text, producer: inputDelta({
-      product: { operation: "REJECT", productId: null, evidenceText: "M\u1eabu kh\u00e1c n\u1eefa" },
+      product: { operation: "CURRENT", productId: null, evidenceText: null },
+      obligations: [
+        { kind: "PRODUCT_REJECT", capability: null, scope: null,
+          productId: null, evidenceText: "M\u1eabu kh\u00e1c n\u1eefa" },
+        { kind: "PRODUCT_SEARCH", capability: null, scope: null,
+          productId: null, evidenceText: "M\u1eabu kh\u00e1c n\u1eefa" },
+      ],
       budget: { operation: "SET", value: 650_000, evidenceText: "ng\u00e2n s\u00e1ch 650k" }, factQuery: priceQuery,
     }) });
     runtime.save("alternatives-budget-rejections");

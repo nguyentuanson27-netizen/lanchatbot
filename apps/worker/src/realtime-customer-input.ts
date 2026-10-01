@@ -87,6 +87,32 @@ export function customerInputObligations(
   return Object.freeze(obligations);
 }
 
+export function customerInputRequestsAlternativeSearch(
+  value: RealtimeCustomerInput,
+): boolean {
+  if (value.obligations !== undefined) {
+    return value.obligations.some(({ kind }) => kind === "PRODUCT_SEARCH");
+  }
+  return value.product.operation === "SEARCH" || value.product.operation === "REJECT";
+}
+
+export function customerInputRejectsProduct(
+  value: RealtimeCustomerInput,
+): boolean {
+  if (value.obligations !== undefined) {
+    return value.obligations.some(({ kind }) => kind === "PRODUCT_REJECT");
+  }
+  return value.product.operation === "REJECT";
+}
+
+export function customerInputChangesProductReference(
+  value: RealtimeCustomerInput,
+): boolean {
+  return value.product.operation !== "CURRENT" ||
+    customerInputRequestsAlternativeSearch(value) ||
+    customerInputRejectsProduct(value);
+}
+
 /** Validate source binding and shape; semantic correctness is evaluated with real model journeys. */
 export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeCustomerInput {
   const value = RealtimeCustomerInputSchema.parse(raw);
@@ -100,6 +126,12 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
   if (value.obligations !== undefined) {
     for (const obligation of value.obligations) {
       requireEvidence(true, obligation.evidenceText);
+    }
+    if ((value.product.operation === "SEARCH" &&
+         !value.obligations.some(({ kind }) => kind === "PRODUCT_SEARCH")) ||
+        (value.product.operation === "REJECT" &&
+         !value.obligations.some(({ kind }) => kind === "PRODUCT_REJECT"))) {
+      throw new Error("CUSTOMER_INPUT_OBLIGATION_MISMATCH");
     }
   }
   for (const field of [value.budget, value.occasion]) {

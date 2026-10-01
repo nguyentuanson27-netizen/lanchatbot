@@ -2,7 +2,17 @@ import { observeRealtimeC3Calls } from "./realtime-c3-call-telemetry.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
 import { buildRealtimeC3Dialogue } from "./realtime-c3-dialogue.js";
 import { findVerifiedAlternative } from "./realtime-alternatives.js";
-import { extractRealtimeCustomerInput, unresolvedRealtimeCustomerInput, applyCustomerDecisionInput, customerInputCanonicalEvidence, customerInputObligations, type RealtimeCustomerInput } from "./realtime-customer-input.js";
+import {
+  extractRealtimeCustomerInput,
+  unresolvedRealtimeCustomerInput,
+  applyCustomerDecisionInput,
+  customerInputCanonicalEvidence,
+  customerInputObligations,
+  customerInputRequestsAlternativeSearch,
+  customerInputRejectsProduct,
+  customerInputChangesProductReference,
+  type RealtimeCustomerInput,
+} from "./realtime-customer-input.js";
 import { createHash } from "node:crypto";
 import {
   buildCanonicalDecisionEvidenceV1,
@@ -3433,7 +3443,7 @@ export class RealtimeRunner {
 
     let nextState = applied.state;
     if (customerInput && customerInput.route === "PRE_SALE" &&
-        customerInput.product.operation !== "CURRENT") {
+        customerInputChangesProductReference(customerInput)) {
       // An unresolved new selection/rejection must not revive the previous
       // product via state fallback. The existing cart has its own identity.
       nextState = { ...nextState, productSelections: [], mediaClarification: null,
@@ -6813,9 +6823,9 @@ export class RealtimeRunner {
     if (allowStateContinuation && customerInput &&
         imageAttachments.length === 0 && !message.adsContext) {
       const operation = customerInput.product.operation;
-      const obligations = customerInputObligations(customerInput);
-      const searchRequested = obligations.some(({ kind }) => kind === "PRODUCT_SEARCH");
-      if (searchRequested || operation === "SEARCH" || operation === "REJECT") {
+      const searchRequested = customerInputRequestsAlternativeSearch(customerInput);
+      const rejectionRequested = customerInputRejectsProduct(customerInput);
+      if (searchRequested) {
         const result = await findVerifiedAlternative({ text, customerInput,
           session: state.sessionDecisionContext, currentProductId: state.currentProductId,
           search: this.productSearch, facts: this.factsReader,
@@ -6825,6 +6835,7 @@ export class RealtimeRunner {
               alternativeSearch: result.status, alternativeFacts: result.facts }
           : { ...this.emptyResolution(), alternativeSearch: result.status };
       }
+      if (rejectionRequested) return this.emptyResolution();
       const selectedId = operation === "SELECT"
         ? customerInput.product.productId : state.currentProductId;
       const multipleFactSubjects = this.options.multiFactQueryEnabled &&
@@ -7096,8 +7107,11 @@ export class RealtimeRunner {
     }
 
     const stateProductId = !allowStateContinuation ? null : customerInput
-      ? customerInput.product.operation === "CURRENT" ? state.currentProductId
-        : customerInput.product.operation === "SELECT" ? customerInput.product.productId : null
+      ? customerInputChangesProductReference(customerInput)
+        ? customerInput.product.operation === "SELECT"
+          ? customerInput.product.productId
+          : null
+        : state.currentProductId
       : currentProductContinuationId(text, state.currentProductId);
     if (stateProductId) {
       const product = await this.exactProduct(stateProductId);
@@ -7106,7 +7120,8 @@ export class RealtimeRunner {
 
     if (text && allowStateContinuation) {
       const excludeProductId = (customerInput
-        ? ["SEARCH", "REJECT"].includes(customerInput.product.operation)
+        ? customerInputRequestsAlternativeSearch(customerInput) ||
+          customerInputRejectsProduct(customerInput)
         : isAlternativeProductRequest(text)) ? state.currentProductId : null;
       const result = excludeProductId
         ? await this.productSearch.searchText(text, excludeProductId)
