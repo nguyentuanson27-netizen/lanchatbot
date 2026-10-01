@@ -125,7 +125,11 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
       explicitPurchaseQuantity(buying.evidenceText ?? "") !== buying.quantity) {
     throw new Error("CUSTOMER_INPUT_UNBOUND_QUANTITY");
   }
-  return { ...value, obligations: [...customerInputObligations(value)] };
+  // Preserve whether obligations were model-authored. Legacy/replay payloads
+  // intentionally keep the field absent; consumers call customerInputObligations()
+  // to derive compatibility obligations without turning them into source-bound
+  // model claims on a later validation pass.
+  return value;
 }
 
 export function applyCustomerDecisionInput(prior: SessionDecisionContext | undefined, value: RealtimeCustomerInput, currentProductId: string | null = null): SessionDecisionContext {
