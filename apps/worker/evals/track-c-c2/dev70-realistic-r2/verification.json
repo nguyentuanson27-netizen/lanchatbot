@@ -1,0 +1,39 @@
+{
+  "revision": "R2",
+  "status": "STATIC_VALIDATION_PASS",
+  "review_baseline_head": "6ae9ad3d33010e5262ae5eb303df75411974960e",
+  "r1_comparison_status": "UNVERIFIABLE_PARENT_NOT_AVAILABLE",
+  "context_unchanged_from_r1": null,
+  "expectations_unchanged_from_r1": null,
+  "facts_used_byte_identical_to_r1": null,
+  "case_count": 70,
+  "long_history_cases": 4,
+  "first_contact_cases": 3,
+  "pre_model_controls": 2,
+  "negative_validator_controls": 26,
+  "review_baseline": {
+    "head": "6ae9ad3d33010e5262ae5eb303df75411974960e",
+    "contextsAndSplitsUnchanged": true,
+    "expectationsByteIdentical": true,
+    "factsByteIdentical": true
+  },
+  "source": {
+    "sourceRevision": "R2.5",
+    "sourceFilesPinned": 3,
+    "sourceFactsIdentical": true
+  },
+  "commands_executed": [
+    "node apps/worker/evals/track-c-c2/dev70-realistic-r2/validate.mjs --self-test --repo .",
+    "pnpm --filter @lana/worker exec vitest run evals/track-c-c2/dev70-realistic-r2/validator-regressions.test.mjs"
+  ],
+  "regression_fixture_kind": "ISOLATED_SYNTHETIC_NOT_CUSTOMER_CORPUS",
+  "model_evaluation_run": false,
+  "memory_ablation_run": false,
+  "test_runner": "VITEST_WORKER_TEST_ENTRYPOINT",
+  "ci_status": "PENDING_NEW_HEAD_VERIFICATION",
+  "previous_ci_failure": {
+    "head": "188862eec5d8b00d2d727c04ac742db28a5680cb",
+    "run": "https://github.com/nguyentuanson27-netizen/lanchatbot/actions/runs/36840025621",
+    "cause": "Vitest discovered the node:test suite but no tests were registered with Vitest. The suite now imports the existing Vitest test API."
+  }
+}

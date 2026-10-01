@@ -1,0 +1,130 @@
+{
+  "dataset_id": "TRACK_C_DEV70_REALISTIC",
+  "revision": "R2",
+  "same_70_source_ids": true,
+  "all_histories_and_messages_rewritten": true,
+  "history_source": "AUTHORED_SYNTHETIC_PRETURN_SNAPSHOTS",
+  "measurements": {
+    "1": 3,
+    "2": 5,
+    "3": 18,
+    "4": 16,
+    "5": 5,
+    "6": 9,
+    "7": 7,
+    "8": 1,
+    "9": 2,
+    "17": 2,
+    "19": 2
+  },
+  "known_capability_limits": {
+    "V5V4Q046": "C3 snapshot has no verified alternative candidates. Safe refusal is not evidence that runtime retrieval works or that the sales need was resolved.",
+    "V5V4Q057": "Text-only candidate has no image delivery port. Safe limitation is not proof that actual product-image delivery works.",
+    "V5V4Q081": "Two prices do not add code-owned comparisonFacts. Price answer is useful; runtime comparison still needs independent offer/unit binding.",
+    "V5V4Q092": "Checkout field status is supplied as pre-turn canonical input; Producer/PII capture is not exercised.",
+    "V5V4Q096": "Canonical commitment and fit snapshot are supplied; changing a persisted cart still needs a runtime test.",
+    "V5V4Q100": "A complete checkout snapshot does not authorize an external order receipt."
+  },
+  "parent_revision": "R1",
+  "naturalness_metrics": {
+    "r1": {
+      "messages_including_latest": 385,
+      "shop_history_messages": 126,
+      "shop_history_question_messages": 72,
+      "shop_question_rate": 0.5714,
+      "latest_short_le_5_words": 4,
+      "latest_long_ge_15_words": 24,
+      "latest_average_words": 12.67,
+      "long_history_cases": [
+        "V5V4Q014",
+        "V5V4Q032",
+        "V5V4Q036",
+        "V5V4Q082"
+      ],
+      "first_contact_cases": [
+        "V5V4Q001",
+        "V5V4Q002",
+        "V5V4Q003"
+      ],
+      "max_exact_shop_repeat": 2,
+      "most_repeated_shop_line": "Dạ, giá hiện tại là 849.000đ."
+    },
+    "r2": {
+      "messages_including_latest": 357,
+      "shop_history_messages": 100,
+      "shop_history_question_messages": 7,
+      "shop_question_rate": 0.07,
+      "latest_short_le_5_words": 6,
+      "latest_long_ge_15_words": 17,
+      "latest_average_words": 11.57,
+      "long_history_cases": [
+        "V5V4Q014",
+        "V5V4Q032",
+        "V5V4Q036",
+        "V5V4Q082"
+      ],
+      "first_contact_cases": [
+        "V5V4Q001",
+        "V5V4Q002",
+        "V5V4Q003"
+      ],
+      "max_exact_shop_repeat": 3,
+      "most_repeated_shop_line": "Dạ chị."
+    }
+  },
+  "source_revision": "R2.5",
+  "source_head": "a28bd12a8b15c4bbf65914c52236adac4ac41594",
+  "source_population_same_70_ids": true,
+  "source_facts_same_for_used_refs": true,
+  "source_context_amended_cases": [
+    "V5V4Q013",
+    "V5V4Q014",
+    "V5V4Q015",
+    "V5V4Q017",
+    "V5V4Q022",
+    "V5V4Q023",
+    "V5V4Q025",
+    "V5V4Q026",
+    "V5V4Q032",
+    "V5V4Q035",
+    "V5V4Q036",
+    "V5V4Q052",
+    "V5V4Q056",
+    "V5V4Q086",
+    "V5V4Q092",
+    "V5V4Q093",
+    "V5V4Q094",
+    "V5V4Q096",
+    "V5V4Q100"
+  ],
+  "source_context_amendment_note": "19 cases intentionally amend R2.5 canonical context to remove benchmark contradictions; dialogue naturalness remains the only wording change.",
+  "review_baseline_head": "6ae9ad3d33010e5262ae5eb303df75411974960e",
+  "review_changed_cases": [
+    "V5V4Q014",
+    "V5V4Q036",
+    "V5V4Q063"
+  ],
+  "review_baseline_metrics": {
+    "messages_including_latest": 357,
+    "shop_history_messages": 102,
+    "shop_history_question_messages": 7,
+    "shop_question_rate": 0.0686,
+    "latest_short_le_5_words": 6,
+    "latest_long_ge_15_words": 19,
+    "latest_average_words": 11.84,
+    "long_history_cases": [
+      "V5V4Q014",
+      "V5V4Q032",
+      "V5V4Q036",
+      "V5V4Q082"
+    ],
+    "first_contact_cases": [
+      "V5V4Q001",
+      "V5V4Q002",
+      "V5V4Q003"
+    ],
+    "max_exact_shop_repeat": 2,
+    "most_repeated_shop_line": "Dạ, kem nha chị."
+  },
+  "historical_r1_metrics_status": "REPORTED_PREVIOUSLY_NOT_RECOMPUTABLE_WITHOUT_R1"
+}

@@ -1,0 +1,3304 @@
+{
+  "dataset_id": "TRACK_C_DEV70_REALISTIC",
+  "revision": "R2",
+  "source_revision": "R2.9",
+  "provenance": "SYNTHETIC_REAUTHORED_FOR_NATURAL_MESSENGER_STYLE_FROM_R1_NOT_CUSTOMER_LOGS",
+  "cases": [
+    {
+      "id": "V5V4Q001",
+      "split": "DEV",
+      "context": {
+        "origin": "ADVERTISEMENT",
+        "first_meaningful_inbound": true,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [],
+      "latest_customer_message": "Bộ trong ads này bn em? 849 là cả bộ hay riêng áo?"
+    },
+    {
+      "id": "V5V4Q002",
+      "split": "DEV",
+      "context": {
+        "origin": "ADVERTISEMENT",
+        "first_meaningful_inbound": true,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A",
+          "RC_MEDIA_A_FRONT"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [],
+      "latest_customer_message": "shop ơi tư vấn chị bộ này với"
+    },
+    {
+      "id": "V5V4Q003",
+      "split": "DEV",
+      "context": {
+        "origin": "ADVERTISEMENT",
+        "first_meaningful_inbound": true,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [],
+      "latest_customer_message": "Bộ này bao nhiêu em? Có màu đen ko, chị kiếm đồ đi làm."
+    },
+    {
+      "id": "V5V4Q004",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "UNRESOLVED",
+          "product_ids": []
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Shop ơi nãy chị lướt thấy một bộ khá ưng mà bấm ra mất rồi."
+        ],
+        [
+          "shop",
+          "Chị gửi lại ảnh hoặc mã nếu còn nha, em tìm đúng bộ cho chị."
+        ]
+      ],
+      "latest_customer_message": "Cái bộ nãy chị xem ấy giá bao nhiêu em?"
+    },
+    {
+      "id": "V5V4Q005",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị hỏi Tường Vi nha, mã SQ9012."
+        ],
+        [
+          "shop",
+          "Dạ chị, em đang xem đúng Tường Vi rồi ạ."
+        ]
+      ],
+      "latest_customer_message": "bn 1 bộ e?"
+    },
+    {
+      "id": "V5V4Q006",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012",
+            "SV9031"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A",
+          "RC_PRICE_B"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang cân SQ9012 với SV9031, chắc chỉ lấy một bộ thôi."
+        ],
+        [
+          "shop",
+          "Dạ chị, em báo riêng từng bộ nha."
+        ],
+        [
+          "customer",
+          "Ừ em báo từng mã giúp chị nha, chị chọn một trong hai thôi."
+        ]
+      ],
+      "latest_customer_message": "SQ9012 bao nhiêu, còn SV9031 bao nhiêu em?"
+    },
+    {
+      "id": "V5V4Q007",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "STALE",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Tối qua chị có xem một bộ bên em mà chưa chốt."
+        ],
+        [
+          "shop",
+          "Chị còn ảnh hay mã nào thì gửi em nha, em tìm lại cho nhanh."
+        ]
+      ],
+      "latest_customer_message": "Cái bộ hôm qua ấy giờ còn hàng ko em?"
+    },
+    {
+      "id": "V5V4Q011",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem SQ9012, chắc ưu tiên màu đen."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình xem màu sau cũng được ạ."
+        ]
+      ],
+      "latest_customer_message": "À báo chị giá cả bộ trước nhé em."
+    },
+    {
+      "id": "V5V4Q012",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 nãy em báo 849k đúng ko?"
+        ],
+        [
+          "shop",
+          "Dạ, giá hiện tại là 849.000đ chị nhé."
+        ],
+        [
+          "customer",
+          "Chị đang tính bộ này để đi họp, mà còn muốn mua quà cho mẹ nữa."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình cân khoản chi trước cũng được ạ."
+        ],
+        [
+          "customer",
+          "Ừ để chị tính chung đã, chưa chốt ngân sách riêng bộ này."
+        ]
+      ],
+      "latest_customer_message": "Giờ bộ này vẫn 849 hả em, chưa đổi giá chứ?"
+    },
+    {
+      "id": "V5V4Q013",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị tìm bộ mặc đi gặp khách, SQ9012 nhìn khá hợp."
+        ],
+        [
+          "shop",
+          "Dạ, bộ này hiện 849.000đ ạ."
+        ],
+        [
+          "customer",
+          "849 là cả áo quần luôn đúng không em?"
+        ],
+        [
+          "shop",
+          "Dạ đúng chị, giá nguyên set ạ."
+        ],
+        [
+          "customer",
+          "Chị ít mua đồ online lắm, thường phải ra xem tận nơi mới yên tâm."
+        ],
+        [
+          "shop",
+          "Em hiểu, chưa nhìn tận tay thì chị phân vân cũng bình thường ạ."
+        ]
+      ],
+      "latest_customer_message": "Giá hơi cao nhỉ... chị vẫn đang phân vân."
+    },
+    {
+      "id": "V5V4Q014",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị tính mua bộ đi họp, tầm 700k đổ lại thôi."
+        ],
+        [
+          "shop",
+          "Chị thích kiểu dáng nào ạ?"
+        ],
+        [
+          "customer",
+          "Dáng suông em. Chị đang xem Tường Vi SQ9012 này nè."
+        ],
+        [
+          "shop",
+          "Bộ này 849k chị ạ, cao hơn mức chị tính."
+        ],
+        [
+          "customer",
+          "Ừ, để chị xem thêm đã. Chị thấy dáng cũng được."
+        ],
+        [
+          "customer",
+          "Giá cả áo quần luôn hả em?"
+        ],
+        [
+          "shop",
+          "Dạ, cả bộ áo quần chị nhé."
+        ],
+        [
+          "customer",
+          "Quần cạp chun đúng ko?"
+        ],
+        [
+          "shop",
+          "Dạ đúng ạ."
+        ],
+        [
+          "customer",
+          "Ngồi làm cả ngày chị không thích cạp cứng."
+        ],
+        [
+          "customer",
+          "Ngoài đen còn màu nào em?"
+        ],
+        [
+          "shop",
+          "Có màu kem nữa chị nhé."
+        ],
+        [
+          "customer",
+          "Chị thích kem hơn, đồ đen ở nhà nhiều rồi."
+        ],
+        [
+          "shop",
+          "Dạ chị."
+        ],
+        [
+          "customer",
+          "Để chị mở ảnh trên máy tính xem lại."
+        ],
+        [
+          "shop",
+          "Vâng chị, chị xem đi ạ."
+        ]
+      ],
+      "latest_customer_message": "Thôi tháng này chị chưa lấy đâu em, còn nhiều khoản quá."
+    },
+    {
+      "id": "V5V4Q015",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 bên mình 849k đúng không em?"
+        ],
+        [
+          "shop",
+          "Dạ, hiện là 849.000đ ạ."
+        ],
+        [
+          "customer",
+          "Chị thấy bên khác có bộ nhìn gần giống, họ báo tầm 700k."
+        ],
+        [
+          "shop",
+          "Dạ chị. Mình đang so qua ảnh thôi đúng không ạ?"
+        ],
+        [
+          "customer",
+          "Ừ, chị chưa sờ tận tay bộ nào."
+        ],
+        [
+          "customer",
+          "Nhìn ảnh thì dáng bên kia cũng suông, chất chị không rõ."
+        ],
+        [
+          "shop",
+          "Ừ, vậy em chỉ nói phần bên mình có thông tin chắc để chị tự so nhé."
+        ],
+        [
+          "customer",
+          "Chị mặc đi làm là chính, muốn dùng được thường xuyên."
+        ]
+      ],
+      "latest_customer_message": "Nhìn na ná mà bên mình cao hơn, có điểm gì để chị cân nhắc thêm không em?"
+    },
+    {
+      "id": "V5V4Q016",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị từng mua bên em một bộ rồi, giờ đang xem SQ9012."
+        ],
+        [
+          "shop",
+          "Dạ, SQ9012 hiện 849.000đ ạ."
+        ],
+        [
+          "customer",
+          "Bộ trước mặc được nhưng nói thật là chị không mê lắm."
+        ],
+        [
+          "shop",
+          "Chị nhớ nhất lý do gì làm bộ trước ít được mặc vậy ạ?"
+        ],
+        [
+          "customer",
+          "Cũng không có lỗi cụ thể, mua về rồi cứ để tủ thôi."
+        ],
+        [
+          "customer",
+          "Nên lần này chị hơi ngại, tiền cũng không ít."
+        ]
+      ],
+      "latest_customer_message": "Giá này chị vẫn lăn tăn, sợ mua xong lại mặc đúng một lần."
+    },
+    {
+      "id": "V5V4Q017",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "CONSIDERING",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": "690k thì chị lấy luôn 1 bộ, được thì báo chị nha."
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 849k hả em?"
+        ],
+        [
+          "shop",
+          "Dạ, giá hiện tại là 849.000đ ạ."
+        ],
+        [
+          "customer",
+          "Chị tính mua cuối tháng, đang muốn giữ chi tiêu gọn thôi."
+        ]
+      ],
+      "latest_customer_message": "690k thì chị lấy luôn 1 bộ, được thì báo chị nha."
+    },
+    {
+      "id": "V5V4Q021",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem lại SQ9012, giá 849k em vừa báo ấy."
+        ]
+      ],
+      "latest_customer_message": "Có giảm thêm ko em?"
+    },
+    {
+      "id": "V5V4Q022",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "CART_ACTIVE",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": "CART_OPEN",
+        "runtime_claim_refs": [
+          "RC_PROMO_50"
+        ],
+        "simulation_fact_refs": [],
+        "cart_snapshot": {
+          "shipping_fee_vnd": null
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Chị lấy SQ9012, đang xem lại giỏ trước khi xác nhận."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình nhìn phần tính tiền trước nhé."
+        ],
+        [
+          "customer",
+          "Trên điện thoại chị thấy dòng giảm mà chữ bé quá."
+        ]
+      ],
+      "latest_customer_message": "Dòng ưu đãi trong giỏ đang trừ bao nhiêu vậy em?"
+    },
+    {
+      "id": "V5V4Q023",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "CART_ACTIVE",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": "CART_OPEN",
+        "runtime_claim_refs": [
+          "RC_FREESHIP_Y"
+        ],
+        "simulation_fact_refs": [],
+        "cart_snapshot": {
+          "shipping_fee_vnd": 0
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Chị chọn SQ9012 rồi, đang rà giỏ trước khi điền nốt."
+        ],
+        [
+          "customer",
+          "Chị muốn chắc phần ship thôi, sợ lúc nhận lại phát sinh."
+        ]
+      ],
+      "latest_customer_message": "Giỏ này đang freeship đúng không em, chị có trả thêm ship nữa ko?"
+    },
+    {
+      "id": "V5V4Q024",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_FREESHIP_N"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem SQ9012, chưa rõ phí giao thế nào."
+        ],
+        [
+          "shop",
+          "Dạ, để em kiểm tra đúng giỏ này cho chị nha."
+        ],
+        [
+          "customer",
+          "Ừ, chị hỏi trước cho khỏi tới lúc nhận mới bất ngờ."
+        ]
+      ],
+      "latest_customer_message": "Đơn này có được freeship không em?"
+    },
+    {
+      "id": "V5V4Q025",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "CART_ACTIVE",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": "CART_OPEN",
+        "runtime_claim_refs": [
+          "RC_SHIP_30"
+        ],
+        "simulation_fact_refs": [],
+        "cart_snapshot": {
+          "shipping_fee_vnd": 30000
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang mở giỏ SQ9012 trên điện thoại."
+        ]
+      ],
+      "latest_customer_message": "Ship giỏ này bn em?"
+    },
+    {
+      "id": "V5V4Q026",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012",
+            "SV9031"
+          ]
+        },
+        "phase": "CART_ACTIVE",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": "CART_OPEN",
+        "runtime_claim_refs": [
+          "RC_PROMO_100"
+        ],
+        "simulation_fact_refs": [],
+        "cart_snapshot": {
+          "shipping_fee_vnd": null
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Giỏ chị đang có SQ9012 với SV9031 nè."
+        ],
+        [
+          "shop",
+          "Dạ, giỏ chị đang có hai bộ đó ạ."
+        ],
+        [
+          "customer",
+          "Chị thấy có một dòng giảm giá mà không đọc rõ."
+        ],
+        [
+          "shop",
+          "Dạ, em xem dòng giảm cho chị nha."
+        ],
+        [
+          "customer",
+          "Chị vẫn đang phân vân SV9031, có khi đổi sang bộ khác."
+        ],
+        [
+          "shop",
+          "Dạ, giờ giỏ vẫn đang giữ nguyên ạ."
+        ]
+      ],
+      "latest_customer_message": "Giỏ giờ đang giảm bao nhiêu em? Với lát chị đổi 1 bộ thì còn mức đó ko?"
+    },
+    {
+      "id": "V5V4Q027",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PROMO_EXPIRED"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Bữa trước chị xem SQ9012 mà bận nên thôi chưa mua."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình xem lại thông tin hiện tại nhé."
+        ],
+        [
+          "customer",
+          "Hôm đó em có nói một ưu đãi, chị không biết giờ còn không."
+        ]
+      ],
+      "latest_customer_message": "Giờ chị mua thì ưu đãi bữa trước còn áp dụng không em?"
+    },
+    {
+      "id": "V5V4Q031",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [
+          "MEASUREMENTS_REQUIRED"
+        ],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem SQ9012 mà không biết chọn size."
+        ],
+        [
+          "shop",
+          "Chị cho em xin chiều cao với cân nặng hiện tại nhé."
+        ],
+        [
+          "customer",
+          "Chị 56kg."
+        ],
+        [
+          "customer",
+          "Chiều cao chị lâu rồi không đo nên không nhớ chuẩn."
+        ],
+        [
+          "shop",
+          "Dạ, lúc tiện chị đo lại giúp em chiều cao nhé."
+        ],
+        [
+          "customer",
+          "Giờ chị đang ngoài đường chưa đo được."
+        ]
+      ],
+      "latest_customer_message": "56kg thôi thì em chọn size cho chị được chưa, hay vẫn cần chiều cao?"
+    },
+    {
+      "id": "V5V4Q032",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [
+          "MEASUREMENTS_REQUIRED"
+        ],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị 1m58, 57kg, đang xem SQ9012 nha em."
+        ],
+        [
+          "shop",
+          "Dạ, 1m58 57kg em có rồi chị."
+        ],
+        [
+          "customer",
+          "Chị mặc đi làm, ngồi máy tính gần cả ngày."
+        ],
+        [
+          "shop",
+          "Dạ, ngồi lâu mà cấn bụng thì khó chịu thật chị."
+        ],
+        [
+          "customer",
+          "Chị hay bị chật phần bụng lúc ngồi, đứng thì lại bình thường."
+        ],
+        [
+          "shop",
+          "Dạ, vậy mình để ý phần bụng trước nha chị."
+        ],
+        [
+          "customer",
+          "Chị thích dáng suông, không thích bó."
+        ],
+        [
+          "shop",
+          "SQ9012 phom suông, quần cạp chun chị nhé."
+        ],
+        [
+          "customer",
+          "Mẫu này là kem hay trắng vậy em?"
+        ],
+        [
+          "shop",
+          "Mẫu có kem và đen ạ."
+        ],
+        [
+          "customer",
+          "Chắc chị chọn đen, dễ phối đồ đi làm hơn."
+        ],
+        [
+          "shop",
+          "Dạ chị. Giá bộ hiện là 849.000đ ạ."
+        ],
+        [
+          "customer",
+          "Giá đó chị cân được, chị chỉ sợ ngồi lâu bị cấn bụng."
+        ],
+        [
+          "shop",
+          "Nếu có thước dây, chị đo thêm vòng bụng giúp em nhé."
+        ],
+        [
+          "customer",
+          "Có thước mà nãy chị đang họp nên chưa tìm."
+        ],
+        [
+          "shop",
+          "Dạ, khi nào tiện mình đo sau cũng được chị."
+        ],
+        [
+          "customer",
+          "Chị tìm thấy rồi nè."
+        ],
+        [
+          "shop",
+          "Dạ, vậy chị đo giúp em vòng bụng nha."
+        ]
+      ],
+      "latest_customer_message": "Cao với cân nặng chị gửi rồi, giờ cần thêm vòng bụng đúng ko em?"
+    },
+    {
+      "id": "V5V4Q033",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_SIZE_A_M"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 nhé em. Chị gửi đủ số đo rồi."
+        ],
+        [
+          "shop",
+          "Dạ, em đang đối chiếu đúng mẫu này."
+        ],
+        [
+          "customer",
+          "Lần này chị muốn theo số đo hiện tại, không theo size bộ cũ nữa."
+        ]
+      ],
+      "latest_customer_message": "Vậy em nghiêng M hay L cho chị?"
+    },
+    {
+      "id": "V5V4Q034",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_SIZE_A_M"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Nãy em tư vấn M cho SQ9012 theo số đo chị rồi đúng không?"
+        ],
+        [
+          "shop",
+          "Dạ, M là khuyến nghị hiện tại; L cũng là phương án có thể cân nhắc ạ."
+        ],
+        [
+          "customer",
+          "Chị không thích mặc sát người, đi làm ngồi nhiều nữa."
+        ],
+        [
+          "customer",
+          "Chị thích rộng nhẹ thôi, chứ lên một size mà thùng thình thì cũng không đẹp."
+        ],
+        [
+          "customer",
+          "Mấy bộ cũ chị tăng size lúc ổn lúc lại rộng quá."
+        ],
+        [
+          "shop",
+          "Bộ cũ khác mẫu nên mình vẫn bám số đo của SQ9012 chị nhé."
+        ]
+      ],
+      "latest_customer_message": "Vậy chị cân L có hợp lý không, hay em vẫn nghiêng M hơn?"
+    },
+    {
+      "id": "V5V4Q035",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [
+          "MEASUREMENTS_REQUIRED"
+        ],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị thích Tường Vi SQ9012, mà bình thường hay mặc XXL."
+        ],
+        [
+          "shop",
+          "Mẫu này hiện có dải size tới XL chị nhé."
+        ],
+        [
+          "customer",
+          "Chị chưa gửi số đo, với mỗi hãng chị mặc một kiểu khác nhau."
+        ]
+      ],
+      "latest_customer_message": "XL bên em có khả năng vừa chị không, hay vẫn phải đo mới biết?"
+    },
+    {
+      "id": "V5V4Q036",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_SIZE_A_M",
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị gửi đủ số đo rồi nha. Bộ trước chị đứng thì vừa, ngồi xuống lại bị chật bụng."
+        ],
+        [
+          "shop",
+          "Dạ, với mẫu SQ9012 thì em tư vấn M theo số đo chị gửi. L chị cũng có thể cân nhắc."
+        ],
+        [
+          "customer",
+          "Chị ngồi máy tính cả ngày nên hơi ngại."
+        ],
+        [
+          "shop",
+          "Quần bộ này cạp chun, dáng suông chị nhé."
+        ],
+        [
+          "customer",
+          "Ngoài đen còn màu gì em?"
+        ],
+        [
+          "shop",
+          "Có màu kem nữa ạ."
+        ],
+        [
+          "customer",
+          "Kem nhìn sáng hơn, chị thích màu đó."
+        ],
+        [
+          "shop",
+          "Dạ chị."
+        ],
+        [
+          "customer",
+          "849 là cả áo quần hả?"
+        ],
+        [
+          "shop",
+          "Dạ, 849k cả bộ chị nhé."
+        ],
+        [
+          "customer",
+          "Ừ giá đó thì được."
+        ],
+        [
+          "customer",
+          "Để chị gửi ảnh cho mẹ xem cùng."
+        ],
+        [
+          "shop",
+          "Vâng chị."
+        ],
+        [
+          "customer",
+          "Mẹ chị cũng bảo kem."
+        ],
+        [
+          "customer",
+          "Nãy có điện thoại, giờ chị mới xem tiếp."
+        ],
+        [
+          "shop",
+          "Dạ, chị xem đi ạ."
+        ]
+      ],
+      "latest_customer_message": "Chị vẫn sợ lại như bộ cũ. Em xem giúp chị size nào ổn hơn với."
+    },
+    {
+      "id": "V5V4Q037",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_SPLIT_SIZE_Y"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem SQ9012, người chị trên nhỏ dưới to hơn chút."
+        ],
+        [
+          "customer",
+          "Áo chị thường S, quần thường M. Chị mới hỏi cách chọn thôi nha, chưa chốt."
+        ]
+      ],
+      "latest_customer_message": "Set này có lấy áo S quần M chung một bộ được ko em?"
+    },
+    {
+      "id": "V5V4Q041",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_A_IN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị vừa thấy SQ9012 trên trang."
+        ]
+      ],
+      "latest_customer_message": "Còn hàng ko em?"
+    },
+    {
+      "id": "V5V4Q042",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_A_OUT"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị lưu SQ9012 từ tuần trước, giờ mới có thời gian nhắn."
+        ],
+        [
+          "shop",
+          "Dạ chị, em kiểm tra theo tình trạng hiện tại nhé."
+        ],
+        [
+          "customer",
+          "Ừ, lần trước chị chưa kịp mua."
+        ]
+      ],
+      "latest_customer_message": "SQ9012 giờ còn không shop?"
+    },
+    {
+      "id": "V5V4Q043",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_BLACK_M_IN"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị hỏi SQ9012 nha, chị thích màu đen."
+        ],
+        [
+          "shop",
+          "Dạ, chị đang xem size nào ạ?"
+        ],
+        [
+          "customer",
+          "M em. Chị hỏi tồn trước thôi, chưa đặt nha."
+        ]
+      ],
+      "latest_customer_message": "đen M còn sẵn ko em?"
+    },
+    {
+      "id": "V5V4Q044",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_A_IN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 nhìn hợp đó, báo giá chị với."
+        ],
+        [
+          "shop",
+          "Bộ hiện 849.000đ ạ."
+        ]
+      ],
+      "latest_customer_message": "À quên, hàng còn ko em?"
+    },
+    {
+      "id": "V5V4Q045",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_A_LOW"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 còn thì chị gửi mẹ xem thêm rồi mới quyết."
+        ],
+        [
+          "shop",
+          "Dạ, chị cứ gửi mẹ xem thêm nha."
+        ],
+        [
+          "customer",
+          "Ừ, mẹ chị đang bận chưa xem được."
+        ],
+        [
+          "customer",
+          "Tối chị mới hỏi được, màu cũng chưa chọn."
+        ]
+      ],
+      "latest_customer_message": "Mẫu này giờ còn nhiều ko em?"
+    },
+    {
+      "id": "V5V4Q046",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_A_OUT"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị thích SQ9012 vì dáng suông, tính mua mặc đi làm."
+        ],
+        [
+          "shop",
+          "Dạ chị, mẫu đó hiện hết hàng ạ."
+        ],
+        [
+          "customer",
+          "Vậy chị không đợi đâu, đợt này chị cần đồ luôn."
+        ],
+        [
+          "shop",
+          "Dạ, vậy em tìm mẫu khác theo dáng chị thích nha."
+        ],
+        [
+          "customer",
+          "Chị cần dáng suông, đừng ôm bụng."
+        ],
+        [
+          "customer",
+          "Màu thì đen hay sáng đều được, không cần giống y hệt."
+        ],
+        [
+          "shop",
+          "Chị muốn giữ khoảng bao nhiêu để em lọc cho dễ ạ?"
+        ],
+        [
+          "customer",
+          "800k trở xuống thôi em."
+        ]
+      ],
+      "latest_customer_message": "Có bộ nào na ná vậy không em, dáng đừng ôm bụng nha. Tầm 800 đổ lại thôi."
+    },
+    {
+      "id": "V5V4Q047",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_A_IN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 giờ vẫn còn hàng chứ em?"
+        ],
+        [
+          "shop",
+          "Dạ, mẫu hiện còn hàng ạ."
+        ],
+        [
+          "customer",
+          "Chị chạy đi đón con chút, chưa quyết đâu nha."
+        ],
+        [
+          "shop",
+          "Dạ chị, lúc nào tiện chị nhắn em nhé."
+        ],
+        [
+          "customer",
+          "Chị quay lại rồi nè, vẫn xem bộ lúc nãy."
+        ]
+      ],
+      "latest_customer_message": "Giờ còn chứ shop?"
+    },
+    {
+      "id": "V5V4Q051",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9072"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_F"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem Miêu Vân SQ9072, nhìn phần áo khá ưng."
+        ]
+      ],
+      "latest_customer_message": "Mẫu này là ren gì em?"
+    },
+    {
+      "id": "V5V4Q052",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem Tường Vi SQ9012 để mặc đi gặp đối tác."
+        ],
+        [
+          "shop",
+          "Mẫu dùng tơ xước mềm, nhẹ chị nhé."
+        ],
+        [
+          "customer",
+          "Chị thường phải ngồi ô tô gần một tiếng trước khi tới nơi."
+        ]
+      ],
+      "latest_customer_message": "Bộ này bao nhiêu em? Với ngồi xe lâu vậy vải có dễ nhăn ko?"
+    },
+    {
+      "id": "V5V4Q053",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_A"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem SQ9012, quần ở nhà toàn cạp cứng nên mặc lâu khó chịu."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình xem phần thiết kế quần trước nhé."
+        ],
+        [
+          "customer",
+          "Ừ, size để sau. Chị cũng không thích dáng bó."
+        ]
+      ],
+      "latest_customer_message": "Quần bộ này cạp chun hay cạp cứng, dáng có suông ko em?"
+    },
+    {
+      "id": "V5V4Q054",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "CB9055"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_D"
+        ],
+        "simulation_fact_refs": [
+          "SF_PRODUCT_D"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị thích Hải Miên CB9055 vì nhìn không ôm eo."
+        ],
+        [
+          "shop",
+          "Mẫu có eo suông, tay lửng; giá hiện 999.000đ ạ."
+        ],
+        [
+          "customer",
+          "Chị có mấy bộ đi làm rồi nên không phải thiếu đồ."
+        ],
+        [
+          "customer",
+          "Chị chỉ mua nếu thấy dùng được nhiều, chứ mặc một lần thì phí."
+        ],
+        [
+          "customer",
+          "Kiểu ôm eo là chị bỏ luôn nha."
+        ],
+        [
+          "shop",
+          "Dạ, dáng suông vẫn là kiểu chị ưu tiên nha."
+        ],
+        [
+          "customer",
+          "Ừ, mặc đi làm là chính."
+        ]
+      ],
+      "latest_customer_message": "Gần 1tr thì chị cũng phải nghĩ em ạ. Bộ này có điểm gì hợp kiểu chị cần để mặc thường xuyên không?"
+    },
+    {
+      "id": "V5V4Q055",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9072"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_CARE_REN"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem set Miêu Vân, thấy ren nên hơi ngại khoản giặt."
+        ],
+        [
+          "customer",
+          "Chị toàn dùng máy giặt, đi làm về muộn chứ không có thời gian giặt tay."
+        ],
+        [
+          "customer",
+          "Đồ nào chăm cầu kỳ quá là chị hay để tủ luôn."
+        ],
+        [
+          "shop",
+          "Dạ, vậy em nói thẳng phần chăm đồ để chị cân nhắc nhé."
+        ],
+        [
+          "customer",
+          "Ừ, đẹp mà chăm mệt quá chị cũng ngại mua."
+        ]
+      ],
+      "latest_customer_message": "Set này giặt máy được ko em, có phải kiêng gì nhiều không?"
+    },
+    {
+      "id": "V5V4Q056",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9072"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "CONSIDERING",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": "Shop may tay dài thêm cho chị được không? Được thì chị mới tính lấy."
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_CUSTOM_NO"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem SQ9072, phần thân áo chị ưng rồi."
+        ],
+        [
+          "customer",
+          "Chị chỉ ngại tay hơi ngắn, muốn che tay thêm chút."
+        ],
+        [
+          "shop",
+          "Dạ, em hiểu chị muốn tay dài hơn mẫu gốc."
+        ],
+        [
+          "customer",
+          "Nếu phải mua xong mang đi sửa thì chị không tiện."
+        ],
+        [
+          "customer",
+          "Nên chị hỏi shop làm luôn được không đã."
+        ]
+      ],
+      "latest_customer_message": "Shop may tay dài thêm cho chị được không? Được thì chị mới tính lấy."
+    },
+    {
+      "id": "V5V4Q057",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_MEDIA_A_FRONT"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị vẫn xem SQ9012 nha, chưa đổi sang mẫu khác."
+        ],
+        [
+          "customer",
+          "Nãy nhìn trên điện thoại bé quá, chị chưa xem rõ phần áo."
+        ]
+      ],
+      "latest_customer_message": "Gửi lại ảnh mặt trước giúp chị với."
+    },
+    {
+      "id": "V5V4Q061",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_ETA_HN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị hỏi SQ9012, nhận ở Hà Nội nha em."
+        ],
+        [
+          "shop",
+          "Dạ, Hà Nội chị nha."
+        ],
+        [
+          "customer",
+          "Chị cần biết thời gian giao để sắp xếp người ở nhà nhận."
+        ],
+        [
+          "shop",
+          "Dạ, được chị."
+        ],
+        [
+          "customer",
+          "Ừ, không gấp. Địa chỉ chi tiết chị gửi lúc đặt sau."
+        ]
+      ],
+      "latest_customer_message": "Về HN thường mấy hôm tới em?"
+    },
+    {
+      "id": "V5V4Q062",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_ETA_HN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị ở Hà Nội, đang xem SQ9012 để mặc buổi gặp mặt."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình cần dùng khi nào ạ?"
+        ],
+        [
+          "customer",
+          "Ngày mai luôn, bên công ty vừa báo lịch."
+        ],
+        [
+          "shop",
+          "Dạ, em hiểu rồi ạ."
+        ],
+        [
+          "customer",
+          "Ừ, qua ngày mai thì bộ này không giúp được dịp đó nữa."
+        ],
+        [
+          "customer",
+          "Chị hỏi xem có kịp ko thôi, chưa chốt vội."
+        ]
+      ],
+      "latest_customer_message": "Đặt giờ thì mai kịp ko em? Ko kịp chị tìm bộ khác."
+    },
+    {
+      "id": "V5V4Q063",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_ETA_HN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị hỏi SQ9012 giao Hà Nội, cần mặc đi gặp đối tác."
+        ],
+        [
+          "customer",
+          "Còn 5 ngày nữa. Chị chỉ cần nhận trước buổi đó là được."
+        ]
+      ],
+      "latest_customer_message": "5 hôm nữa chị cần mặc rồi, giờ đặt có kịp không em?"
+    },
+    {
+      "id": "V5V4Q064",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_ETA_HN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 về Hà Nội dự kiến 2–4 ngày đúng không em?"
+        ],
+        [
+          "shop",
+          "Dạ, hiện em có khoảng dự kiến 2–4 ngày ạ."
+        ],
+        [
+          "customer",
+          "Chị đi làm cả ngày, phải nhờ người nhà nhận giúp."
+        ],
+        [
+          "customer",
+          "Mẹ chị cũng không thể ở nhà cả tuần để chờ."
+        ]
+      ],
+      "latest_customer_message": "Có chốt được chính xác ngày nào tới không em, để chị còn nhờ người?"
+    },
+    {
+      "id": "V5V4Q065",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem SQ9012 để gửi làm quà."
+        ],
+        [
+          "customer",
+          "Chị muốn biết người nhận phải chờ lâu không, mà chưa chốt gửi tỉnh nào."
+        ]
+      ],
+      "latest_customer_message": "Thường bao lâu tới em? Chị cần nói tỉnh/thành trước đúng không?"
+    },
+    {
+      "id": "V5V4Q066",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_ETA_EXPIRED"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Lần trước chị hỏi SQ9012 nhưng chưa đặt."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình xem lại thông tin hiện tại nhé."
+        ],
+        [
+          "customer",
+          "Chị muốn hỏi lại thời gian giao, bữa trước nghe rồi mà sợ giờ khác."
+        ]
+      ],
+      "latest_customer_message": "Giờ gửi bộ này thì tầm mấy ngày chị nhận được?"
+    },
+    {
+      "id": "V5V4Q067",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_ETA_HN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 giao Hà Nội em nói dự kiến nhận sau 2–4 ngày đúng không?"
+        ],
+        [
+          "shop",
+          "Dạ, đó là thời gian giao dự kiến ạ."
+        ],
+        [
+          "customer",
+          "Ừ nhưng chị đang hỏi lúc shop đưa hàng cho bên vận chuyển cơ."
+        ]
+      ],
+      "latest_customer_message": "Hôm nay shop có bàn giao cho bên vận chuyển được không em?"
+    },
+    {
+      "id": "V5V4Q071",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_INSPECTION"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem SQ9012, trước giờ ít mua quần áo online."
+        ],
+        [
+          "customer",
+          "Chị sợ nhận về màu khác ảnh nên muốn hỏi kỹ trước."
+        ]
+      ],
+      "latest_customer_message": "Lúc nhận chị được mở ra coi đúng màu đúng size chứ? Có mặc thử luôn được ko em?"
+    },
+    {
+      "id": "V5V4Q072",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_EXCHANGE_STD"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang cân SQ9012, mua online chị hay lo nhầm size."
+        ],
+        [
+          "customer",
+          "Bộ trước mua chỗ khác đổi rất mệt."
+        ],
+        [
+          "shop",
+          "Dạ chị, hỏi kỹ vụ đổi size trước cũng yên tâm hơn ạ."
+        ],
+        [
+          "customer",
+          "Chị quan tâm cả điều kiện lẫn phí."
+        ],
+        [
+          "customer",
+          "Chị muốn biết rõ trước rồi mới quyết."
+        ]
+      ],
+      "latest_customer_message": "Nhận về ko vừa thì đổi size được ko em? Phí đổi sao?"
+    },
+    {
+      "id": "V5V4Q073",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_EXCHANGE_SALE"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem mục sale, chưa chọn bộ cụ thể đâu."
+        ],
+        [
+          "customer",
+          "Chị thấy có nhóm giảm hơn 30%, muốn biết chính sách trước."
+        ]
+      ],
+      "latest_customer_message": "Nhóm giảm hơn 30% thì đổi mẫu khác được không, hay chỉ đổi size/màu thôi em?"
+    },
+    {
+      "id": "V5V4Q074",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_REFUND_DEFECT"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang tính chọn SQ9012 nhưng hỏi chính sách trước cho chắc."
+        ],
+        [
+          "customer",
+          "Nhỡ shop gửi nhầm bộ thì chị muốn biết xử lý sao."
+        ]
+      ],
+      "latest_customer_message": "Nếu giao nhầm mẫu thì chị có được hoàn tiền không, phải báo trong mấy ngày em?"
+    },
+    {
+      "id": "V5V4Q075",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_PAYMENT"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem SQ9012, lần đầu mua qua page bên em."
+        ]
+      ],
+      "latest_customer_message": "Bên em có COD với chuyển khoản không? Có cần cọc trước ko em?"
+    },
+    {
+      "id": "V5V4Q076",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_PAYMENT"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị vẫn đang xem SQ9012 thôi, chưa chốt mua nha."
+        ],
+        [
+          "customer",
+          "Chị ít khi cầm tiền mặt nên hỏi cách thanh toán trước."
+        ]
+      ],
+      "latest_customer_message": "Nếu lấy thì chuyển khoản được ko em?"
+    },
+    {
+      "id": "V5V4Q077",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_STORE"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị ở Hà Nội, đang xem SQ9012 mà muốn qua nhìn tận mắt."
+        ],
+        [
+          "customer",
+          "Chắc chị ghé sau giờ làm, nhưng chưa biết chính xác mấy giờ."
+        ]
+      ],
+      "latest_customer_message": "Shop ở đâu vậy em, mở tới mấy giờ? Qua đó chị thử đồ được chứ?"
+    },
+    {
+      "id": "V5V4Q081",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012",
+            "SV9031"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A",
+          "RC_PRICE_B"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem SQ9012 với SV9031, chỉ lấy một bộ thôi."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình so từng mã cho dễ ạ."
+        ],
+        [
+          "customer",
+          "Chị so giá trước. Mỗi bộ thì chị thích một điểm khác nhau."
+        ],
+        [
+          "shop",
+          "SQ9012 hiện 849.000đ, SV9031 là 1.099.000đ ạ."
+        ],
+        [
+          "customer",
+          "Chị đang lướt trên điện thoại nên cứ nhầm hai bộ."
+        ],
+        [
+          "customer",
+          "Chị so giá nguyên bộ nha em."
+        ]
+      ],
+      "latest_customer_message": "Hai bộ đó thì bộ nào rẻ hơn?"
+    },
+    {
+      "id": "V5V4Q082",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SV9031"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_STOCK_B_IN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang mở 2 bộ nè: SQ9012 trước, SV9031 sau nha em."
+        ],
+        [
+          "shop",
+          "Dạ chị."
+        ],
+        [
+          "customer",
+          "Chị đang so giá cả bộ, chỉ lấy một bộ thôi."
+        ],
+        [
+          "shop",
+          "SQ9012 hiện 849.000đ, SV9031 là 1.099.000đ ạ."
+        ],
+        [
+          "customer",
+          "Chị mua đi họp cuối năm, sau đó mặc gặp khách nữa."
+        ],
+        [
+          "shop",
+          "Dạ, vậy mình ưu tiên bộ hợp chị hơn nha."
+        ],
+        [
+          "customer",
+          "Hơn một triệu chút cũng được, không nhất thiết phải lấy bộ rẻ nhất."
+        ],
+        [
+          "shop",
+          "Vâng ạ."
+        ],
+        [
+          "customer",
+          "Trong hai bộ chị đang nghiêng bộ sau hơn."
+        ],
+        [
+          "shop",
+          "Ừ chị."
+        ],
+        [
+          "customer",
+          "Chị mặc chắc tháng vài lần, còn muốn hỏi mẹ xem màu nào kín đáo."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình cứ xem thêm rồi quyết."
+        ],
+        [
+          "customer",
+          "Ừ, size để sau, giờ chị chưa muốn đo."
+        ],
+        [
+          "shop",
+          "Size để sau cũng được chị."
+        ],
+        [
+          "customer",
+          "Giờ chị hỏi tồn trước thôi."
+        ],
+        [
+          "shop",
+          "Dạ."
+        ],
+        [
+          "customer",
+          "Màu thì chưa chốt, chị hỏi tình trạng chung nhé."
+        ],
+        [
+          "shop",
+          "Dạ, bộ thứ hai nha chị."
+        ]
+      ],
+      "latest_customer_message": "Bộ thứ hai chị nói lúc đầu ấy giờ còn hàng chứ em?"
+    },
+    {
+      "id": "V5V4Q083",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang hỏi giá cả bộ Tường Vi lúc nãy nha, không phải bộ bên cạnh."
+        ],
+        [
+          "shop",
+          "Ý chị là SV9031 hả?"
+        ],
+        [
+          "customer",
+          "Không em, nhầm rồi. Để chị mở lại mã."
+        ],
+        [
+          "shop",
+          "Dạ chị, gửi em đúng mã là được ạ."
+        ]
+      ],
+      "latest_customer_message": "SQ9012 em nhé, bộ này bao nhiêu?"
+    },
+    {
+      "id": "V5V4Q084",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9072"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_RETAIL_F"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem Miêu Vân SQ9072, áo nhìn hợp cái quần chị có sẵn ở nhà."
+        ],
+        [
+          "customer",
+          "Chị chỉ cần áo thôi, không muốn mua thêm quần."
+        ]
+      ],
+      "latest_customer_message": "Áo có bán riêng ko em? Nếu có thì bao nhiêu?"
+    },
+    {
+      "id": "V5V4Q085",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SV9088"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_COMBO_G"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị đang xem Bạch Liên SV9088, thấy có ảnh 2 món với 3 món."
+        ],
+        [
+          "customer",
+          "Chị hỏi bản đủ 3 món nha."
+        ],
+        [
+          "customer",
+          "Nãy chị nhìn nhầm giá bản 2 món."
+        ],
+        [
+          "shop",
+          "Dạ chị, bản đủ 3 món nha."
+        ],
+        [
+          "customer",
+          "Ừ nói rõ gồm gì giúp chị luôn."
+        ]
+      ],
+      "latest_customer_message": "Full 3 món gồm gì, giá trọn combo bao nhiêu em?"
+    },
+    {
+      "id": "V5V4Q086",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9072"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "CONSIDERING",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": "Nếu đủ áo S quần M thì chị mới lấy nguyên bộ. Shop cho tách vậy không, đã có đủ hàng chưa?"
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_SPLIT_SIZE_Y",
+          "SF_RETAIL_F"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem nguyên set Miêu Vân, người chị phần trên nhỏ hơn phần dưới."
+        ],
+        [
+          "customer",
+          "Chị tính áo S, quần M; chị hỏi nguyên set chứ không mua lẻ áo nha."
+        ]
+      ],
+      "latest_customer_message": "Nếu đủ áo S quần M thì chị mới lấy nguyên bộ. Shop cho tách vậy không, đã có đủ hàng chưa?"
+    },
+    {
+      "id": "V5V4Q087",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SV9088"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [
+          "SF_DISCONTINUED"
+        ]
+      },
+      "history": [
+        [
+          "customer",
+          "Chị tìm lại Bạch Liên SV9088, trước có xem mà chưa mua."
+        ],
+        [
+          "shop",
+          "Dạ, Bạch Liên SV9088 chị nha."
+        ]
+      ],
+      "latest_customer_message": "Mẫu này giờ còn làm nữa ko em?"
+    },
+    {
+      "id": "V5V4Q091",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [
+          "RC_PRICE_A",
+          "RC_ETA_HN"
+        ],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "SQ9012 849k phải không shop?"
+        ],
+        [
+          "shop",
+          "Dạ, hiện là 849.000đ ạ."
+        ],
+        [
+          "customer",
+          "Về Hà Nội tầm mấy ngày? Chị hỏi trước để tính thôi."
+        ],
+        [
+          "shop",
+          "Dự kiến 2–4 ngày, chưa hẹn chính xác ngày nhận được chị nhé."
+        ]
+      ],
+      "latest_customer_message": "ok em, để chị bàn mẹ thêm đã"
+    },
+    {
+      "id": "V5V4Q092",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "CART_ACTIVE",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "COMMITTED",
+          "requested_action": "PROCEED_TO_PAYMENT",
+          "quantity": 1,
+          "evidence": "Chị lấy một bộ SQ9012 size M, mình tiếp tục đặt nhé."
+        },
+        "source_stage": "CART_OPEN",
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [],
+        "checkout_completeness": {
+          "state": "REQUIRED",
+          "missing_fields": [
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ]
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Chị lấy một bộ SQ9012 size M, mình tiếp tục đặt nhé."
+        ],
+        [
+          "shop",
+          "Dạ, mình còn thiếu ít thông tin thôi chị."
+        ],
+        [
+          "customer",
+          "Tên với SĐT chị gửi rồi. Địa chỉ để chị hỏi chồng xem nhận ở nhà hay công ty."
+        ],
+        [
+          "shop",
+          "Dạ, hiện còn địa chỉ nhận và cách thanh toán chị nhé."
+        ]
+      ],
+      "latest_customer_message": "ok, còn thiếu gì em nhắc chị với"
+    },
+    {
+      "id": "V5V4Q093",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "UNRESOLVED",
+          "product_ids": []
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "COMMITTED",
+          "requested_action": "OPEN_CART",
+          "quantity": 1,
+          "evidence": "Chị lấy một bộ này nhé"
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị muốn lấy một bộ shop đang đăng, để chị gửi ảnh."
+        ],
+        [
+          "shop",
+          "Dạ, chị gửi ảnh hoặc mã bộ đó giúp em nhé."
+        ],
+        [
+          "customer",
+          "Ảnh đang tải mãi chưa lên, mạng chị yếu quá."
+        ]
+      ],
+      "latest_customer_message": "Chị lấy một bộ này nhé, chốt cho chị trước được không?"
+    },
+    {
+      "id": "V5V4Q094",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "BROWSING",
+        "canonical_flags": [
+          "MEASUREMENTS_REQUIRED"
+        ],
+        "buying_intent": {
+          "decision": "COMMITTED",
+          "requested_action": "OPEN_CART",
+          "quantity": 1,
+          "evidence": "Chị lấy một bộ nhé"
+        },
+        "source_stage": null,
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị muốn lấy SQ9012 mà chưa biết size."
+        ],
+        [
+          "shop",
+          "Chị cho em xin chiều cao với cân nặng hiện tại nhé."
+        ],
+        [
+          "customer",
+          "Chị 56kg, nãy bế con nên quên gửi chiều cao."
+        ]
+      ],
+      "latest_customer_message": "Chị lấy một bộ nhé, giờ còn thiếu chiều cao đúng ko em?"
+    },
+    {
+      "id": "V5V4Q095",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "ORDER_CONFIRMED",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "NONE",
+          "requested_action": "NONE",
+          "quantity": null,
+          "evidence": null
+        },
+        "source_stage": "PURCHASE_CONFIRMED",
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": []
+      },
+      "history": [
+        [
+          "customer",
+          "Chị xem lại phần xác nhận rồi, đúng hết nhé."
+        ],
+        [
+          "shop",
+          "Dạ, em nhận phần chị xác nhận rồi ạ."
+        ],
+        [
+          "customer",
+          "Vậy được rồi, chị không hỏi thêm gì nữa."
+        ]
+      ],
+      "latest_customer_message": "Cảm ơn em nha, chị quay lại làm việc đây 😊"
+    },
+    {
+      "id": "V5V4Q096",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "CART_ACTIVE",
+        "canonical_flags": [],
+        "buying_intent": {
+          "decision": "COMMITTED",
+          "requested_action": "PROCEED_TO_PAYMENT",
+          "quantity": 1,
+          "evidence": "Chị lấy một bộ SQ9012 nhé"
+        },
+        "source_stage": "CART_OPEN",
+        "runtime_claim_refs": [
+          "RC_SIZE_A_L"
+        ],
+        "simulation_fact_refs": [],
+        "checkout_completeness": {
+          "state": "REQUIRED",
+          "missing_fields": [
+            "FULL_NAME",
+            "PHONE",
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ]
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Chị lấy một bộ SQ9012 nhé, lúc đầu chị tính size M."
+        ],
+        [
+          "shop",
+          "Dạ chị, mình chốt lại size trước rồi đi tiếp phần nhận hàng nhé."
+        ],
+        [
+          "customer",
+          "Chị gửi lại số đo hiện tại rồi, bộ cũ lâu quá không tính nữa."
+        ],
+        [
+          "shop",
+          "Kết quả tư vấn hiện tại cho mẫu này là size L ạ."
+        ],
+        [
+          "customer",
+          "Chị chưa gửi thông tin nhận hàng, để chốt size trước đã."
+        ]
+      ],
+      "latest_customer_message": "Khoan M nhé, chị chọn L như vừa tư vấn. Mình cần gì nữa em?"
+    },
+    {
+      "id": "V5V4Q100",
+      "split": "DEV",
+      "context": {
+        "origin": "ORGANIC",
+        "first_meaningful_inbound": false,
+        "product_binding": {
+          "status": "RESOLVED",
+          "product_ids": [
+            "SQ9012"
+          ]
+        },
+        "phase": "ORDER_REVIEW",
+        "canonical_flags": [
+          "CHECKOUT_DETAILS_PRESENT"
+        ],
+        "buying_intent": {
+          "decision": "COMMITTED",
+          "requested_action": "PROCEED_TO_PAYMENT",
+          "quantity": 1,
+          "evidence": "Đúng hết rồi, chị đồng ý theo phần vừa xem nhé."
+        },
+        "source_stage": "ORDER_PREVIEW",
+        "runtime_claim_refs": [],
+        "simulation_fact_refs": [],
+        "checkout_completeness": {
+          "state": "COMPLETE",
+          "missing_fields": []
+        }
+      },
+      "history": [
+        [
+          "customer",
+          "Chị lấy SQ9012 size M, thông tin nhận hàng chị gửi đủ ở trên rồi."
+        ],
+        [
+          "shop",
+          "Dạ chị, chị xem lại giúp em lần cuối nha."
+        ],
+        [
+          "customer",
+          "Cách thanh toán chị cũng chọn rồi, không đổi nữa."
+        ],
+        [
+          "shop",
+          "Dạ, chị kiểm tra lại giúp em nha."
+        ],
+        [
+          "customer",
+          "Chị xem rồi, sản phẩm với thông tin đều đúng."
+        ]
+      ],
+      "latest_customer_message": "Đúng hết rồi, chị đồng ý theo phần vừa xem nhé."
+    }
+  ]
+}
