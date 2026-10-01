@@ -1,9 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildCanonicalDecisionEvidenceV1 } from "@lana/business-tools";
 import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { buildRealtimeC3Input } from "./realtime-c3-input.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import type { CandidateVertexTransport } from "./context-v2-candidate.js";
+import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 
 const now = new Date("2026-09-30T12:00:00Z");
@@ -53,4 +55,35 @@ describe("code-owned price comparison", () => {
     expect(trackCPriceComparisons(ctx, sources, now)).toEqual([]);
     expect(ctx.verifiedClaims.filter(({ type }) => type === "PRICE")).toHaveLength(2);
   });
+  it("realizes a code price comparison without converting cheaper into lighter, benefit or value", async () => {
+    const sources = [fact("SD10", 600_000), fact("SD11", 700_000)];
+    const ctx = context(sources);
+    const [comparison] = trackCPriceComparisons(ctx, sources, now);
+    for (const answerText of [null, "Nhẹ hơn chị nhé.", "SD10 nhẹ hơn SD11.",
+      "Như vậy đáng tiền hơn.", "Vậy sẽ thoải mái hơn."]) {
+      const respond = (value: unknown) => ({ providerModelVersion: "gemini-3.5-flash-lite",
+        payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] } });
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce(respond({ replyAct: "ANSWER", proposition: "PRODUCT_COMPARISON",
+          goal: "NEED: compare prices of these compatible offers\nKNOWN: NONE\nANSWER: code price comparison\nLIMIT: NONE\nNEXT: NONE",
+          evidenceRefs: [comparison!.ref], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }))
+        .mockResolvedValueOnce(respond({ answerText, factualTexts: [], progressionText: null }));
+      const result = await runTrackCStrategyLive({ context: ctx,
+        modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+        decisionAt: now, dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "So giá hai bộ này giúp chị.", attachmentCount: 0, occurredAt: now.toISOString() }],
+        checkoutRequestedFields: [], checkoutClarificationActive: false, currentCart: null,
+        paymentOptions: ["COD"], comparisonFacts: sources, transport: { send } });
+      expect(result.reply).toContain(comparison!.deterministicText);
+      expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(1);
+      expect(result.output.cta).toBe("NONE");
+      if (answerText === null) expect(result.recoveryDiagnostic).toBeUndefined();
+      else {
+        expect(result.recoveryDiagnostic).toBeDefined();
+        expect(result.reply).not.toContain(answerText);
+      }
+      expect(send).toHaveBeenCalledTimes(2);
+    }
+  });
+
 });

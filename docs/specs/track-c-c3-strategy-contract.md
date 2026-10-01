@@ -1369,12 +1369,10 @@ stop tasks have closed answer semantics: a goal with a LIMIT is rejected rather
 than silently dropping it or opening a checkout prose side channel. A Strategist
 must not hide an unresolved question in those closed slots.
 
-Coverage correspondence, wrongful attribute substitutions, unsafe inference,
-false-positive/false-negative claim classification, and whether a non-null
-answer truly expresses LIMIT remain Slice B and real-model acceptance work.
-The existing bounded recovery still restores selected independent facts and a
-generic incomplete-answer limit; this slice does not claim complete semantic
-recovery for every unsupported part after transport failure.
+At the Slice A checkpoint, coverage correspondence, wrongful attribute
+substitutions, unsafe inference and semantic recovery remained open. The Slice B
+amendment below supersedes that checkpoint for its finite guarded families only;
+arbitrary natural-language meaning and real-model acceptance remain unverified.
 
 ### Verification boundary
 
@@ -1385,3 +1383,96 @@ both reply parts retained. A null limitation is rejected. Existing scripted
 fixtures were migrated to the same grammar without changing their business
 assertions, facts, rubric or thresholds. These are deterministic controls only;
 no real model, DEV70 generation or judge was invoked.
+
+
+## PR377 quality-closure Slice B: two-sided semantic guard (2026-10-01)
+
+This amendment follows local Slice A `541c3e3ad414de4fc91920c6c719e278d452fef7`.
+It does not close P11/P12 or authorize real-model evaluation, merge, deployment,
+traffic, a different rubric or an authority transition.
+
+### Guard ownership and finite boundary
+
+The existing source-bound, immutable factual projections remain mandatory.
+`track-c-c3-conversational-guard.ts` distinguishes a small set of non-fact
+statements in GENERAL segments: customer price reference/refusal, customer
+size selection, bound product referent, locality request and bounded uncertainty.
+These are internal guard classifications, never model-authored permission tags.
+No exemption applies to VERIFIED_CLAIM, FACT_PROJECTION or EFFECT_CLAIM segments.
+
+A customer price mention repeats one complete amount token from both the latest
+customer inbound and the compiled KNOWN context. It does not approve that price,
+change a budget, authorize a discount or turn a conditional offer into commitment.
+Size acknowledgement requires the validated Producer selection and source span
+for that exact size/product; a stock question mentioning another size cannot
+select it. A reference may only name a currently bound product. Neither kind of
+acknowledgement asserts fit, a product attribute or a completed cart change.
+
+The existing runtime Producer output and redacted dialogue are passed to both
+C3 compilation and its final RealtimeRunner egress check. They do not enter the
+writer schema as new authority, and no extra model/history/business call occurs.
+
+Only complete finite statement forms can bypass keyword-level fact detection.
+Mixed reference plus unknown prose is rejected, not stripped. Mixed uncertainty
+with another clause retains all original guards. Unknown uncertainty vocabulary
+gets no new exemption. The supported epistemic forms use closed nominal topics,
+not a blacklist of conjunctions: a prefix such as "not confirmed" cannot license
+an independent positive/negative property claim later in the same sentence.
+
+The locality exception is full-string equality against a closed request grammar
+for an already assigned ASK LOCALITY. It contains no recipient values or address
+slot. Full address/name/phone requests remain subject to the existing PII and
+canonical-checkout boundaries; DLP and recipient capture are not disabled.
+
+### Requested-property coverage and recovery
+
+The six-field Strategist contract and Slice A structured-goal fallback stay
+unchanged. An internal LIMIT must be expressed epistemically and retain its
+assigned topic. The finite paired topic anchors are wrinkle resistance,
+smoothness, weight and dispatch time. They preserve Vietnamese diacritics so a
+receipt mention does not become a wrinkle topic. A generic acknowledgement or an
+uncertainty about another attribute is not coverage.
+
+For a NEED that explicitly requests wrinkle resistance, material/smoothness or
+price evidence alone cannot certify an answer with LIMIT NONE. Reuse the
+existing typed `wearWrinkleResistance=REDUCED_WRINKLING` field when selected and
+realizable, or keep the wrinkle limitation. The compiler neither chooses new
+facts nor derives wear properties from a fabric name.
+
+Supported selected facts survive eligible Responder transport/JSON/guard
+recovery. For the finite limitation families, recovery uses fixed topic labels,
+not raw model goal text, so price plus unsupported wrinkle still names both
+parts. Existing eligibility, cancellation, provider, effect, cart, freshness,
+provenance and unrealisable-evidence restrictions remain in force.
+
+Price ordering stays in the existing compatible-offer code derivation. ETA
+relations stay in the existing numeric deadline helper. Exact projected facts
+cannot be changed from cheaper to lighter; unrelated superiority/value or
+implicit arrival promises in prose remain unauthorized. An ETA of 2-4 days
+never licenses a model claim that a 5-day deadline is inside that interval.
+Unconfirmed dispatch is not a shop commitment, including passive dispatch wording.
+
+### Verification and explicit residuals
+
+Paired controls exercise shared C3 compilation/guard/recovery and the real
+Producer -> RealtimeRunner orchestration with safe scripted model and business
+ports. The added runtime trace option is test-only and stores synthetic input,
+reply, before/after state, commit payload/receipt and role calls outside the repo.
+This is not the full Slice C matrix and is not real-model acceptance.
+
+The guard does not certify arbitrary Vietnamese paraphrases, intent extraction
+or every possible property/relation. Unknown topic recovery remains generic.
+The finite grammar may conservatively reject safe wording; expand only with a
+structural owning-boundary fix and paired tests, not DEV case exceptions.
+
+A separate pre-existing runtime limitation was reproduced against Slice A:
+verified active-variant state plus a parent-scoped price can fail the pre-C3
+`PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH` guard. The runtime remains fail-closed
+with human ownership/no outbound in this control. Slice B preserves that
+boundary; resolving its intended scope belongs to the remaining runtime work,
+not a wording exemption. No completed variant/checkout journey is inferred from
+selection acknowledgement controls.
+
+Evidence: `tasks/evidence/pr377-slice-b-20261001.md` and the external exact-source
+handoff/command ledger. Real-model runtime acceptance and DEV70 R2: NOT RUN;
+P11: OPEN; P12: BLOCKED pending remaining Slice C work and Agent 2.

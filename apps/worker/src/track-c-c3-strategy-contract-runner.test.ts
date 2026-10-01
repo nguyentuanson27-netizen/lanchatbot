@@ -871,7 +871,7 @@ describe("Track C C3 strategy-contract runner", () => {
     for (const [ref, expected] of [
       ["SIMULATION_001_MATERIAL", "Mẫu này có chất liệu tơ xước mềm, nhẹ ạ."],
       ["SIMULATION_001_DESIGN", "Thiết kế của mẫu gồm phom suông, quần cạp chun ạ."],
-      [null, "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ."],
+      [null, "Em chưa có thông tin xác nhận về khả năng chống nhăn."],
     ] as const) {
       const send = vi.fn<CandidateVertexTransport["send"]>()
         .mockResolvedValueOnce({ payload: payload({
@@ -979,7 +979,7 @@ describe("Track C C3 strategy-contract runner", () => {
         await expect(result).rejects.toThrow("TRACK_C_RESPONDER_LIMIT_REQUIRED");
         continue;
       }
-      if (answerText !== uncertainty && answerText !== "Dạ em hiểu ý chị ạ.") {
+      if (answerText !== uncertainty) {
         await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
         continue;
       }

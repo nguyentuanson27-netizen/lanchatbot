@@ -1,3 +1,4 @@
+import { trackCUnclassifiedConversation, type TrackCConversationGuardContext } from "./track-c-c3-conversational-guard.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
 import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
@@ -328,6 +329,7 @@ function guardProductionOutput(
   evaluationAt: Date,
   currentCart: TrackCCurrentCartBinding | null = null,
   comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
+  conversation: TrackCConversationGuardContext | null = null,
 ): void {
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
@@ -435,6 +437,8 @@ function guardProductionOutput(
             context.productPresentation?.productId ?? null
           : null;
     const sizeClaimContext = sizeGuardInputForClaim(context, claim);
+    const guardText = segment.kind === "GENERAL"
+      ? trackCUnclassifiedConversation(segment.text, context, conversation) : segment.text;
     const guard = guardAgentProposal({
       proposal: {
         schemaVersion: 1,
@@ -442,7 +446,7 @@ function guardProductionOutput(
         conversationStage: context.phase.phase,
         productId,
         action: "REPLY",
-        reply: segment.text,
+        reply: guardText || "Dạ.",
         attachments: [],
         handoffReason: null,
         protectedClaimIds: sizeClaimContext.claims.map(({ id }) => id),
@@ -457,7 +461,7 @@ function guardProductionOutput(
       now: evaluationAt,
     });
     const blocked = guard.blockedReasonCodes.filter((reason) =>
-      !(segment.kind === "GENERAL" && onlyUnconfirmedTopicMentions(segment.text, reason))
+      !(segment.kind === "GENERAL" && onlyUnconfirmedTopicMentions(guardText, reason))
     );
     if (blocked.length > 0) {
       throw new Error(
@@ -475,6 +479,7 @@ export function validateResponderOutput(
   simulationClaimContentHashes: readonly string[] = [],
   currentCart: TrackCCurrentCartBinding | null = null,
   comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
+  conversation: TrackCConversationGuardContext | null = null,
 ): ContextV2CandidateOutputV2 {
   if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -526,7 +531,7 @@ export function validateResponderOutput(
     throw new Error("TRACK_C_V5_RESPONDER_PROVENANCE_INVALID");
   }
   if (lane === "PRODUCTION_CONTRACT") {
-    guardProductionOutput(context, output, evaluationAt, currentCart, comparisonFacts);
+    guardProductionOutput(context, output, evaluationAt, currentCart, comparisonFacts, conversation);
   } else {
     const simulationHashes = new Set(simulationClaimContentHashes);
     const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
@@ -538,7 +543,7 @@ export function validateResponderOutput(
     };
     // Simulation facts are excluded above; runtime cart claims still need the
     // same pinned cart readback that production uses for their final guard.
-    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart, comparisonFacts);
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart, comparisonFacts, conversation);
   }
   return output;
 }

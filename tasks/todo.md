@@ -139,10 +139,39 @@ Không bảo toàn regex kích hoạt sai chỉ vì thuộc fix trước. Thay h
 - [x] Compound handoff uses the five-section goal fallback from PR380, retaining
   the six-field Strategist contract and code-only authority. Structured presence,
   PII normalization and closed canonical slots have positive/negative controls.
-- [ ] Full quality closure: Slice B semantic guard and Slice C complete runtime
-  journey matrix are not claimed by this source increment.
+- [ ] Full quality closure: the Slice A checkpoint did not claim Slice B or
+  Slice C. See the later Slice B checkpoint below; Slice C remains open.
 - [ ] Real-model runtime acceptance / DEV70 R2: NOT RUN in this environment.
 - [ ] P11: OPEN. P12: BLOCKED pending remaining implementation and Agent 2.
 
 Source/verification details: `tasks/evidence/pr377-slice-a-20261001.md`.
 No merge, deploy, traffic, rubric or threshold change. PR377 remains draft.
+
+
+### PR377 quality-closure Slice B source candidate (2026-10-01)
+
+- [x] Paired GENERAL-statement guard controls: source-bound customer amount and
+  size, bound product referent, ETA locality and bounded uncertainty are not
+  treated as shop facts, fit authority, recipient capture or effects.
+- [x] Explicit unsupported topic coverage: wrinkle is not smoothness; finite
+  epistemic LIMIT checks reject wrong-property and acknowledgement-only wording.
+  Existing typed wear evidence is required to omit a requested wrinkle limit.
+- [x] Price comparison remains code-derived; prose cannot substitute weight,
+  superiority/value or a model-derived ETA/deadline relation. Passive dispatch
+  claims and epistemic-prefix laundering have paired regressions.
+- [x] Eligible recovery retains selected price plus a named wrinkle limitation;
+  transport/JSON/wrong-property/dropped-limit controls preserve independent facts.
+- [x] Real Producer/RealtimeRunner scripted controls protect the final egress
+  bridge. No cart/checkout/effect authority is inferred from acknowledgements.
+- [ ] Runtime scope residual: parent-price + active verified variant can fail
+  pre-C3 with PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH. Reproduced against Slice A;
+  preserved fail-closed, not waived or called a successful purchase journey.
+- [ ] Full Slice C journey matrix and outstanding runtime acceptance remain open.
+- [ ] Real-model runtime acceptance / DEV70 R2: NOT RUN here.
+- [ ] P11: OPEN. P12: BLOCKED pending remaining runtime work and Agent 2.
+
+Source review, RED/GREEN and environment notes:
+`tasks/evidence/pr377-slice-b-20261001.md`. The delivered SOURCE_IDENTITY.json and
+VERIFICATION.json bind local exact HEAD and actual final commands. Remote CI on
+an ancestor is not evidence for this candidate. Keep PR377 draft; no merge,
+deploy, live traffic, rubric or threshold change.

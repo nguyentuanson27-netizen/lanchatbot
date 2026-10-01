@@ -1,4 +1,8 @@
-import type { BusinessFactEnvelopeV1, MeasurementKind } from "@lana/contracts";
+import {
+  trackCPiiFreeLocalityRequest, trackCUnclassifiedConversation,
+  assertTrackCLimitationCoverage, trackCRecoveryLimitation,
+} from "./track-c-c3-conversational-guard.js";
+import type { BusinessFactEnvelopeV1, MeasurementKind, RealtimeCustomerInput } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { DECISION_GUARD_REASON_CODES_V1 } from "@lana/contracts";
 import {
@@ -165,13 +169,6 @@ const FIRST_CONTACT_REQUEST_WORDING = Object.freeze({
   ],
 });
 
-// Existing DLP false positives, not choices offered to the adaptive writer.
-// Exact equality cannot exempt an appended name, address or phone number.
-const PII_FREE_LOCALITY_QUESTIONS = [
-  "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
-  "Chị ở tỉnh hoặc thành phố nào để em kiểm tra giao hàng ạ?",
-];
-
 // The checkout field set is owned by the contract so it stays aligned with the
 // runtime state machine instead of drifting as a second local copy.
 type CheckoutField = TrackCCheckoutField;
@@ -214,6 +211,8 @@ export interface TrackCStrategyContractCaseInput {
   /** Current Size Engine missing fields; an empty array forbids the request. */
   readonly measurementRequestedFields?: readonly MeasurementKind[];
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
+  /** Validated Producer delta for customer-reference wording only. */
+  readonly customerVariant?: RealtimeCustomerInput["variant"];
   /**
    * Code-owned structured decision constraint. Never derive this value from
    * customer dialogue text inside this contract runner.
@@ -242,6 +241,8 @@ export interface TrackCStrategyLiveInput {
   /** Current Size Engine missing fields; an empty array forbids the request. */
   readonly measurementRequestedFields?: readonly MeasurementKind[];
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
+  /** Validated Producer delta for customer-reference wording only. */
+  readonly customerVariant?: RealtimeCustomerInput["variant"];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -787,6 +788,7 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     if (!publicLocation || typeof record.answerText !== "string") throw error;
     answerText = INCOMPLETE_ANSWER_TEXT;
   }
+  const progression = prose(record.progressionText);
   return Object.freeze({
     answerText,
     factualTexts: Object.freeze(record.factualTexts.map((item) => {
@@ -797,11 +799,10 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     // Exact schema vocabulary contains no customer values. Resolve it to the
     // code-owned string before DLP, which can mistake a locality question for
     // an address. Any other text still goes through DLP and final validation.
-    progressionText: [...requestWording(task, dialogue),
-      ...(task.continuation?.type === "ASK" && task.continuation.input === "LOCALITY"
-        ? PII_FREE_LOCALITY_QUESTIONS : [])].find((wording) =>
-      wording === prose(record.progressionText)
-    ) ?? text(prose(record.progressionText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
+    progressionText: trackCPiiFreeLocalityRequest(progression, task)
+      ? progression
+      : requestWording(task, dialogue).find((wording) => wording === progression)
+        ?? text(progression, "TRACK_C_RESPONDER_DRAFT_INVALID"),
   });
 }
 
@@ -847,11 +848,25 @@ function assertConversationalProse(value: string | null): void {
   // Product/shop-subject declarations belong to the selected fact slots,
   // regardless of the adjective or verb. Check each clause: an uncertainty
   // preface must not license a separate benefit assertion after a conjunction.
-  const productDeclaration = /^\s*(?:d\u1ea1\s+)?(?:(?:em|shop|b\u00ean em)\s+(?:th\u1ea5y\s+)?)?(?:m\u1eabu|v\u1ea3i|s\u1ea3n ph\u1ea9m|set|b\u1ed9 \u0111\u1ed3|ch\u1ea5t li\u1ec7u|ch\u1ea5t v\u1ea3i|ch\u00ednh s\u00e1ch(?!\s+l\u00e0\s*:))\s+\S/u;
-  const bareClaim = /^\s*(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b/u;
+  const productDeclaration = /^\s*(?:v\u1ec1\s+)?(?:d\u1ea1\s+)?(?:(?:em|shop|b\u00ean em)\s+(?:th\u1ea5y\s+)?)?(?:m\u1eabu|v\u1ea3i|s\u1ea3n ph\u1ea9m|set|b\u1ed9 \u0111\u1ed3|ch\u1ea5t li\u1ec7u|ch\u1ea5t v\u1ea3i|ch\u00ednh s\u00e1ch(?!\s+l\u00e0\s*:))\s+\S/u;
+  const bareClaim = /^\s*(?:(?:chac chan|chac la|nhu vay)\s+)?(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b/u;
   if (clauses.some((clause) => productDeclaration.test(clause)) ||
-      folded.split(/[.!?;,\n]|\b(?:nhung|va)\b/u).some((clause) => bareClaim.test(clause))) {
+      folded.split(/[.!?;,\n]|\b(?:nhung|va|vi vay|nen)\b/u).some((clause) => bareClaim.test(clause))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  }
+  // Relation/effect predicates remain code-owned even with an omitted
+  // subject. An exact evidence sentence is checked separately; the writer
+  // cannot translate cheaper into lighter/value or compute a time interval.
+  const proseClauses = folded.split(/[.!?;,\n]|\b(?:nhung|va|vi vay|nen)\b/u)
+    .map((clause) => clause.trim().replace(/^(?:(?:da|vay|nhu vay|chac chan|chac la|se)\s+)*/u, ""));
+  if (proseClauses.some((clause) =>
+    /^(?:(?:[a-z]{1,6}\d{1,8}[a-z0-9]*|gia|moc|han|thoi gian|khoang)\b[^.!?;]*\b(?:hon|bang|nam|thuoc|kip)\b|(?:nhe|nang|tot|re|dat|thap|cao|thoai mai|dang tien|hop)\s+hon\b|kip\b)/u.test(clause))) {
+    throw new Error("TRACK_C_RESPONDER_UNBOUND_RELATION");
+  }
+  // Passive/nominalized dispatch is still an effect; changing the grammatical
+  // subject cannot evade the active shop/em effect check above.
+  if (/\b(?:hang|viec gui hang)\s+(?:da|se|vua)\s+(?:duoc\s+)?(?:gui|dien ra)\b/u.test(folded)) {
+    throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
   // Comparing two prices is a new claim about both products. Two selected
   // price sentences do not give free prose authority to state their ordering.
@@ -961,8 +976,11 @@ function compileResponderDraft(input: Readonly<{
   currentCart?: TrackCCurrentCartBinding | null;
   comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
+  customerVariant?: RealtimeCustomerInput["variant"];
 }>): ContextV2CandidateOutputV2 {
   const { task } = input;
+  const conversation = { task, dialogue: input.dialogue,
+    ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }) };
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
   // A hard stop still needs an accepted acknowledgement. The model can choose
   // null when it sees no new question; use only a fact-free, effect-free reply.
@@ -996,9 +1014,6 @@ function compileResponderDraft(input: Readonly<{
         (draft.progressionText !== null && (draft.progressionText.match(/\?/gu)?.length ?? 0) > 1)) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
-  }
-  if (adaptive && responderHasAssignedLimit(task) && draft.answerText === null) {
-    throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
@@ -1092,11 +1107,17 @@ function compileResponderDraft(input: Readonly<{
     simulationHashes,
     input.currentCart ?? null,
     input.comparisonFacts ?? [],
+    conversation,
   );
   // Preserve precise authority diagnostics before the extra prose boundary.
   // Nothing is returned until both the structured and prose checks pass.
   if (adaptive) {
-    for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
+    for (const value of [draft.answerText, draft.progressionText]) {
+      assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation));
+    }
+  }
+  if (adaptive && responderHasAssignedLimit(task)) {
+    assertTrackCLimitationCoverage(task, draft.answerText, input.context);
   }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       validated.segments.some(({ text }) =>
@@ -1449,7 +1470,7 @@ async function runTrackCStrategyContractCore(
     recoveryDiagnostic = failure.diagnostic;
     // No trustworthy draft remains. Keep source facts and explicitly decline
     // whole-answer completeness; never parse goal text into a factual claim.
-    draft = { answerText: INCOMPLETE_ANSWER_TEXT, factualTexts: [], progressionText: null };
+    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null };
   }
   let output: ContextV2CandidateOutputV2;
   try {
@@ -1463,6 +1484,7 @@ async function runTrackCStrategyContractCore(
       evaluationAt: input.evaluationAt,
       currentCart: input.currentCart ?? null,
       comparisonFacts: input.comparisonFacts ?? [],
+      ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
     });
   } catch (error) {
@@ -1476,10 +1498,11 @@ async function runTrackCStrategyContractCore(
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: draft.answerText ?? INCOMPLETE_ANSWER_TEXT, factualTexts: [], progressionText: null },
+        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
+        ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
       });
       recoveryDiagnostic = failure.diagnostic;
     } catch {
@@ -1488,11 +1511,12 @@ async function runTrackCStrategyContractCore(
       try {
         output = compileResponderDraft({
           context, dialogue: input.evaluationContext, task,
-          draft: { answerText: INCOMPLETE_ANSWER_TEXT,
+          draft: { answerText: trackCRecoveryLimitation(task),
             factualTexts: [], progressionText: null },
           lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],
+          ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
         });
         recoveryDiagnostic = failure.diagnostic;
       } catch { throw failure; }
@@ -1570,6 +1594,7 @@ export async function runTrackCStrategyLive(
     checkoutClarificationActive: input.checkoutClarificationActive,
     currentCart: input.currentCart,
     comparisonFacts: input.comparisonFacts ?? [],
+    ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
     paymentOptions: input.paymentOptions,
     ...(input.firstContactInputs === undefined ? {} : { firstContactInputs: input.firstContactInputs }),
     ...(input.knownBudgetVnd === undefined ? {} : { knownBudgetVnd: input.knownBudgetVnd }),

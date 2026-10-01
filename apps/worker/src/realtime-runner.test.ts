@@ -1,5 +1,7 @@
 import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
 import { createHash } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   AFTER_SALES_HOLDING_REPLY_V2,
@@ -3317,7 +3319,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["TYPED_SEMANTIC_SELECTION", "TYPED_SEMANTIC_UNSAFE_FIT", "TYPED_SEMANTIC_SCOPE_BLOCKED", "TYPED_SEMANTIC_PRICE", "TYPED_SEMANTIC_UNSAFE_PRICE", "TYPED_SEMANTIC_WRINKLE", "TYPED_SEMANTIC_WRONG_PROPERTY", "FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3798,7 +3800,7 @@ describe("RealtimeRunner inbound batching", () => {
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
-        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
+        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL" || checkoutOwner === "TYPED_SEMANTIC_SCOPE_BLOCKED",
         multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_COMPARISON",
         c3: {
           customerInputEnabled: checkoutOwner.startsWith("TYPED_"),
@@ -3883,6 +3885,100 @@ describe("RealtimeRunner inbound batching", () => {
       });
       if (checkoutOwner === "TYPED_DRY_RUN") expect(written.metaPlan).toBeUndefined();
       expect(persistedCommerce.cart).toBeNull();
+      if (checkoutOwner.startsWith("TYPED_SEMANTIC_")) {
+        const scopeBlocked = checkoutOwner === "TYPED_SEMANTIC_SCOPE_BLOCKED";
+        const selection = scopeBlocked || checkoutOwner.endsWith("SELECTION") || checkoutOwner.endsWith("FIT");
+        const wrinkle = checkoutOwner.endsWith("WRINKLE") || checkoutOwner.endsWith("PROPERTY");
+        const unsafe = checkoutOwner.includes("UNSAFE") || checkoutOwner.includes("WRONG");
+        const selectionSpan = "Chị chọn M";
+        const text = selection ? `${selectionSpan}. Cho chị biết giá.` : wrinkle
+          ? "Giá bao nhiêu và có chống nhăn không?" : "Nếu 625k thì chị lấy.";
+        const answerText = selection ? unsafe ? "Size M chắc chắn vừa chị." : `${selectionSpan}.`
+          : wrinkle ? unsafe ? "Em chưa có thông tin về độ mịn."
+            : "Em chưa có thông tin xác nhận về khả năng chống nhăn."
+          : unsafe ? "Shop đồng ý giá 625k." : "Em chưa thể xác nhận giá 625k chị đề xuất.";
+        typedOverride = { ...noCustomerSelection(),
+          factQuery: { ...noCustomerSelection().factQuery, intent: "PRICE" },
+          ...(selection ? { variant: { operation: "SELECT", productId: "CB182", size: "M",
+            color: null, evidenceText: selectionSpan } } : {}),
+        };
+        const before = structuredClone(persistedCommerce);
+        const priorState = structuredClone(persistedState);
+        const priorVariant = priorState.consideredVariant;
+        c3Send.mockImplementation(async (request) => {
+          const prompt = JSON.parse(JSON.parse(request.body).contents[0].parts[0].text);
+          const response = prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1" ? typedOverride
+            : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" ? {
+              replyAct: "ANSWER", proposition: "PRICE", canonicalAction: "NONE", continuation: { type: "KEEP_OPEN" },
+              evidenceRefs: prompt.selectableEvidence.filter((fact: { capability: string }) => fact.capability === "PRICE")
+                .map((fact: { ref: string }) => fact.ref),
+              goal: [`NEED: ${wrinkle ? "price and wrinkle resistance" : "current price and customer context"}`,
+                `KNOWN: ${selection ? "selected M" : wrinkle ? "NONE" : "customer proposed 625k"}`,
+                "ANSWER: verified price", `LIMIT: ${wrinkle ? "wrinkle resistance not verified" : "NONE"}`, "NEXT: NONE"].join("\n"),
+            } : { answerText, factualTexts: [], progressionText: null };
+          return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+            providerModelVersion: "gemini-3.5-flash-lite" };
+        });
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        expect(commit).toHaveBeenCalledTimes(2);
+        const final = commit.mock.calls.at(-1)![0] as { metaPlan?: { messages: { text: string }[];
+          protectedClaimTypes?: string[] }; decisionEvents?: { details: { c3Candidate?: { status: string; reason?: string } } }[] };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        const recordControl = async () => {
+          const directory = process.env.C3_SEMANTIC_CONTROL_ARTIFACT_DIR;
+          if (!directory) return;
+          mkdirSync(directory, { recursive: true });
+          writeFileSync(join(directory, `${checkoutOwner}.json`), JSON.stringify({
+            kind: "DETERMINISTIC_CONTROL_ONLY", sourceRevision: process.env.C3_SEMANTIC_SOURCE_HEAD ?? "UNPINNED",
+            control: checkoutOwner, input: text, reply,
+            before: { conversation: priorState, commerce: before },
+            after: { conversation: persistedState, commerce: persistedCommerce },
+            plannedAndCommitted: final, receipt: await commit.mock.results.at(-1)!.value,
+            modelRoles: c3Send.mock.calls.slice(3).map(([request]) =>
+              JSON.parse(JSON.parse(request.body).contents[0].parts[0].text).contractVersion),
+          }, null, 2) + "\n", "utf8");
+        };
+        if (scopeBlocked) {
+          // Existing parent-price vs active-variant scope boundary fails closed
+          // before C3. Retain this control; do not waive binding for wording.
+          expect(reply).toBe("");
+          expect(JSON.stringify(final.decisionEvents)).toContain("PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH");
+          expect(persistedState.consideredVariant.size).toBe("M");
+          expect(persistedState.conversationOwner).toBe("HUMAN");
+          expect(persistedCommerce.cart).toEqual(before.cart);
+          expect(c3Send).toHaveBeenCalledTimes(4); // next turn Producer only
+          await recordControl();
+          return;
+        }
+        expect(reply).toContain("799.000");
+        expect(persistedState.currentProductId).toBe("CB182");
+        expect(persistedState.conversationOwner).toBe("BOT");
+        expect(persistedState.sessionDecisionContext?.budgetVnd).toBe(700_000);
+        expect(persistedCommerce.cart).toEqual(before.cart);
+        expect(persistedCommerce.checkoutDraft).toEqual(before.checkoutDraft);
+        expect(cartSelectionSizes).toEqual([]);
+        // No verified-variant path in these controls: acknowledgement is
+        // customer context only, not permission to persist a verified choice.
+        expect(persistedState.consideredVariant).toEqual(priorVariant);
+        if (wrinkle) expect(reply).toContain("chống nhăn");
+        if (unsafe) {
+          expect(reply).not.toContain(answerText);
+          expect(final.decisionEvents?.find(({ details }) => details.c3Candidate)?.details.c3Candidate)
+            .toMatchObject({ status: "VALIDATED", reason: "C3_SELECTED_FACTS_RECOVERY" });
+        } else expect(reply).toContain(answerText);
+        expect(final.metaPlan?.protectedClaimTypes).toEqual(["PRICE"]);
+        const roles = c3Send.mock.calls.slice(3).map(([request]) =>
+          JSON.parse(JSON.parse(request.body).contents[0].parts[0].text).contractVersion);
+        expect(roles).toEqual(["REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1"]);
+        expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+        expect(inbox.retryBatch).not.toHaveBeenCalled();
+        await recordControl();
+        return;
+      }
       if (checkoutOwner.startsWith("TYPED_ALTERNATIVE")) {
         persistedState = { ...persistedState, sessionDecisionContext: {
           budgetVnd: 700_000, occasion: "WORK", rejectedProductIds: ["SD09"],

@@ -1,3 +1,4 @@
+import { assertTrackCRequestedPropertyCoverage } from "./track-c-c3-conversational-guard.js";
 import { MeasurementKindSchema, type MeasurementKind } from "@lana/contracts";
 import { redactAnalyticsMessage } from "@lana/database";
 
@@ -492,6 +493,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       input.measurementRequestedFields,
     ),
   });
+  assertTrackCRequestedPropertyCoverage(task);
   // Return the validated, PII-safe decision used to compile this exact task.
   // Consumers must not reuse the provider's raw planning text for reporting.
   return Object.freeze({ decision, task });

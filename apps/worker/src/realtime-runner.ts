@@ -5382,6 +5382,11 @@ export class RealtimeRunner {
           now: new Date(),
         });
         c3FitMeasurementsRequired = c3Input.context.barriers.active.includes("MEASUREMENTS_REQUIRED");
+        const c3Dialogue = buildRealtimeC3Dialogue(context, nextState.sessionDecisionContext, {
+          ...customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null),
+          selection: { productId: nextState.currentProductId,
+            size: nextState.consideredVariant.size, color: nextState.consideredVariant.color },
+        });
         const chosen = await runTrackCStrategyLive({
           ...c3Input,
           modelResource: this.options.c3.modelResource,
@@ -5392,11 +5397,8 @@ export class RealtimeRunner {
             color: customerInput?.variant.color ?? nextState.consideredVariant.color,
             measurements: customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null).measurements,
           },
-          dialogue: buildRealtimeC3Dialogue(context, nextState.sessionDecisionContext, {
-            ...customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null),
-            selection: { productId: nextState.currentProductId,
-              size: nextState.consideredVariant.size, color: nextState.consideredVariant.color },
-          }),
+          dialogue: c3Dialogue,
+          ...(customerInput === null ? {} : { customerVariant: customerInput.variant }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
               "CHECKOUT_DETAILS_MISSING",
@@ -5409,6 +5411,8 @@ export class RealtimeRunner {
             cta: chosen.output.cta,
           }, "PRODUCTION_CONTRACT", new Date(),
           [], c3Input.currentCart, businessFactEnvelopes,
+          { task: chosen.responderTask, dialogue: c3Dialogue,
+            ...(customerInput === null ? {} : { customerVariant: customerInput.variant }) },
         );
         const hashes = new Set(chosen.output.segments.flatMap((segment) =>
           segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []

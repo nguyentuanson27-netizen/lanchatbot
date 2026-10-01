@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { buildProductAttributesV1 } from "@lana/business-tools";
+import { trackCProductAttributeEvidence } from "./track-c-c3-attribute-projection.js";
 import { compileTrackCStrategistDecision, type TrackCSelectableEvidence } from "./track-c-c3-strategy-contract.js";
 
 const price: TrackCSelectableEvidence = {
@@ -94,4 +96,28 @@ describe("C3 structured goal semantic handoff", () => {
     expect(compileTrackCStrategistDecision({ ...input, requireStructuredGoal: false,
       decision: { ...input.decision, goal: "Code-owned fixed-lane task." } }).task.semanticHandoff).toBeUndefined();
   });
+  it("cannot mark wrinkle resistance answered by a smooth material field", () => {
+    const attributes = buildProductAttributesV1({ productId: "ITEM42", observedAt: "2026-09-10T02:00:00Z",
+      data: { materials: ["lụa mềm mịn"], materialComponents: {}, colors: [], styles: [],
+        silhouettes: [], occasions: [], designAttributes: null, careInstructions: null,
+        wearProperties: { stretch: null, wrinkleResistance: "REDUCED_WRINKLING", opacity: null,
+          lining: null, breathability: null }, backCoverage: null, designComplexity: null } });
+    const fields = trackCProductAttributeEvidence({ attributes, refPrefix: "ATTR", authority: "RUNTIME" });
+    const material = fields.find(({ value }) => "materials" in value)!;
+    const wrinkle = fields.find(({ value }) => "wearWrinkleResistance" in value)!;
+    const selected = { ...input, evidence: [price, ...fields], decision: { ...input.decision,
+      goal: goal.replace("LIMIT: wrinkle resistance has no verified evidence", "LIMIT: NONE"),
+      evidenceRefs: [price.ref, wrinkle.ref] } };
+    const good = compileTrackCStrategistDecision(selected);
+    expect(good.task.evidence).toEqual([price, wrinkle]);
+    expect(good.task.canonicalRequest).toBeNull();
+    for (const refs of [[price.ref, material.ref], [price.ref]]) {
+      expect(() => compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
+        evidenceRefs: refs } })).toThrow("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
+    }
+    // The same independent price is retained when the limitation is explicit.
+    expect(compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
+      goal, evidenceRefs: [price.ref] } }).task.evidence).toEqual([price]);
+  });
+
 });
