@@ -2,7 +2,7 @@
 // Dataset checks only. No provider call, network request, or runtime mutation.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -58,8 +58,16 @@ function checkCases(cases = input.cases, expectations = judging.cases) {
     const bound = ctx.product_binding;
     fail(Array.isArray(bound.product_ids), `${c.id}:BINDING`);
     fail(new Set(bound.product_ids).size === bound.product_ids.length, `${c.id}:DUPLICATE_PRODUCT`);
-    if (bound.status === 'RESOLVED') fail(bound.product_ids.length > 0, `${c.id}:UNBOUND`);
-    if (bound.status === 'UNRESOLVED') fail(bound.product_ids.length === 0, `${c.id}:RESOLVED_CONFLICT`);
+    fail(bound.product_ids.every((id) => typeof id === 'string' && id.trim() === id && id.length > 0), `${c.id}:PRODUCT_ID`);
+    fail(['RESOLVED', 'AMBIGUOUS', 'STALE', 'UNRESOLVED', 'NOT_REQUIRED'].includes(bound.status), `${c.id}:BINDING_STATUS`);
+    const cardinality = bound.status === 'AMBIGUOUS' ? bound.product_ids.length > 1
+      : ['RESOLVED', 'STALE'].includes(bound.status) ? bound.product_ids.length > 0
+        : bound.product_ids.length === 0;
+    fail(cardinality, `${c.id}:BINDING_CARDINALITY`);
+    assert.deepEqual(bound.product_ids, [...bound.product_ids].sort(), `${c.id}:PRODUCT_ORDER`);
+    const phases = { CART_OPEN: 'CART_ACTIVE', ORDER_PREVIEW: 'ORDER_REVIEW', PURCHASE_CONFIRMED: 'ORDER_CONFIRMED' };
+    fail(ctx.source_stage === null || Object.hasOwn(phases, ctx.source_stage), `${c.id}:SOURCE_STAGE`);
+    fail(ctx.phase === (ctx.source_stage === null ? 'BROWSING' : phases[ctx.source_stage]), `${c.id}:PHASE_STAGE`);
     if (ctx.first_meaningful_inbound) {
       first++; fail(ctx.origin === 'ADVERTISEMENT' && c.history.length === 0, `${c.id}:FIRST_CONTACT`);
     }
@@ -70,6 +78,23 @@ function checkCases(cases = input.cases, expectations = judging.cases) {
         const productId = catalog === 'runtime_claim_catalog' ? value.scope?.productId : value.productId;
         if (productId) fail(bound.product_ids.includes(productId), `${c.id}:FACT_SUBJECT:${ref}`);
       }
+    }
+    // Missing readbacks remain permitted for deliberate capability-gap cases.
+    // A supplied snapshot, however, must be internally consistent with its claim.
+    const cartClaims = ctx.runtime_claim_refs.map((ref) => facts.runtime_claim_catalog[ref])
+      .filter((claim) => claim.scope?.kind === 'CART');
+    fail(new Set(cartClaims.map((claim) => claim.scope.cartVersion)).size <= 1, `${c.id}:MIXED_CART_VERSIONS`);
+    if (ctx.cart_snapshot !== undefined) {
+      const snapshot = ctx.cart_snapshot;
+      fail(snapshot !== null && typeof snapshot === 'object' && !Array.isArray(snapshot) &&
+        Object.keys(snapshot).sort().join(',') === 'shipping_fee_vnd', `${c.id}:CART_SNAPSHOT_SHAPE`);
+      const fee = snapshot.shipping_fee_vnd;
+      fail(fee === null || (Number.isSafeInteger(fee) && fee >= 0), `${c.id}:CART_SNAPSHOT_FEE`);
+      fail(bound.status === 'RESOLVED' && bound.product_ids.length > 0, `${c.id}:CART_SNAPSHOT_BINDING`);
+      fail(cartClaims.length === 1 && cartClaims[0].freshness === 'FRESH', `${c.id}:CART_SNAPSHOT_CLAIM`);
+      const claim = cartClaims[0];
+      if (claim.type === 'SHIPPING_FEE') fail(fee === claim.value.amountVnd, `${c.id}:CART_SNAPSHOT_SHIPPING`);
+      if (claim.type === 'FREESHIP') fail((fee === 0) === claim.value.eligible, `${c.id}:CART_SNAPSHOT_FREESHIP`);
     }
     const intent = ctx.buying_intent;
     fail(['NONE', 'CONSIDERING', 'COMMITTED', 'NEGATED'].includes(intent.decision), `${c.id}:INTENT`);
@@ -108,6 +133,19 @@ function checkCases(cases = input.cases, expectations = judging.cases) {
   return { caseCount: cases.length, longHistoryCases: long, firstContactCases: first, preModelControls: stale };
 }
 function checkFiles() {
+  const sumLines = readFileSync(join(root, 'SHA256SUMS'), 'utf8').trimEnd().split('\n');
+  const sumNames = [];
+  for (const line of sumLines) {
+    const match = /^([0-9a-f]{64})  ([A-Za-z0-9][A-Za-z0-9_.-]*)$/u.exec(line);
+    fail(match !== null, 'CHECKSUM_LINE');
+    const [, hash, name] = match;
+    fail(name !== 'SHA256SUMS' && !sumNames.includes(name), `CHECKSUM_DUPLICATE:${name}`);
+    sumNames.push(name);
+    fail(sha(readFileSync(join(root, name))) === hash, `CHECKSUM_CHANGED:${name}`);
+  }
+  const actualFiles = readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name !== 'SHA256SUMS').map((entry) => entry.name).sort();
+  assert.deepEqual(sumNames.sort(), actualFiles, 'CHECKSUM_COVERAGE');
   for (const [name, hash] of Object.entries(manifest.payload_sha256))
     fail(sha(readFileSync(join(root, name))) === hash, `PAYLOAD_CHANGED:${name}`);
   for (const catalog of ['runtime_claim_catalog', 'simulation_fact_catalog']) {
@@ -116,10 +154,26 @@ function checkFiles() {
   }
   fail(changes.changes.length === 70, 'CHANGE_MAP_COUNT');
   changes.changes.forEach((c, i) => {
-    fail(c.id === input.cases[i].id && c.r1_dialogue_sha256 !== c.new_dialogue_sha256, 'UNCHANGED_DIALOGUE');
+    fail(c.id === input.cases[i].id, 'CHANGE_MAP_ID');
     fail(c.new_dialogue_sha256 === canonicalHash([input.cases[i].history, input.cases[i].latest_customer_message]), 'CHANGE_MAP_HASH');
     fail(typeof c.source_dialogue_sha256 === 'string' && c.source_dialogue_sha256.length === 64, `${c.id}:SOURCE_HASH`);
   });
+}
+function checkReviewBaseline() {
+  // This pins only this review amendment to an available R2 commit. It does not
+  // recreate R1 or retroactively certify the historical R1 -> R2 comparison.
+  fail(typeof manifest.payload_sha256['review-baseline.json'] === 'string', 'BASELINE_NOT_PINNED');
+  const baseline = json('review-baseline.json');
+  fail(baseline.schema === 'DEV70_REVIEW_BASELINE_V1' &&
+    /^[0-9a-f]{40}$/u.test(baseline.head) && baseline.head === manifest.review_baseline_head, 'BASELINE_IDENTITY');
+  assert.deepEqual(baseline.cases.map((c) => c.id), manifest.expected_ids, 'BASELINE_POPULATION');
+  input.cases.forEach((c, i) => {
+    fail(canonicalHash({ id: c.id, split: c.split, context: c.context }) === baseline.cases[i].immutable_sha256,
+      `${c.id}:BASELINE_CONTEXT`);
+  });
+  fail(sha(readFileSync(join(root, 'dev70.expectations.json'))) === baseline.expectations_sha256, 'BASELINE_EXPECTATIONS');
+  fail(sha(readFileSync(join(root, 'facts-used.json'))) === baseline.facts_used_sha256, 'BASELINE_FACTS');
+  return { head: baseline.head, contextsAndSplitsUnchanged: true, expectationsByteIdentical: true, factsByteIdentical: true };
 }
 function checkSource(repo) {
   const source = join(repo, 'apps/worker/evals/track-c-c2/v2');
@@ -145,6 +199,20 @@ function checkSource(repo) {
 }
 function selfTest() {
   const tests = [
+    ['unknown binding status', (c) => { c[0].context.product_binding.status = 'BROKEN'; }, /BINDING_STATUS/],
+    ['empty stale binding', (c) => { c[0].context.product_binding = { status: 'STALE', product_ids: [] }; }, /BINDING_CARDINALITY/],
+    ['single ambiguous binding', (c) => { c[0].context.product_binding.status = 'AMBIGUOUS'; }, /BINDING_CARDINALITY/],
+    ['nonempty not-required binding', (c) => { c[0].context.product_binding.status = 'NOT_REQUIRED'; }, /BINDING_CARDINALITY/],
+    ['non-string product id', (c) => { c[0].context.product_binding.product_ids = [12]; }, /PRODUCT_ID/],
+    ['unknown source stage', (c) => { c[0].context.source_stage = 'BROKEN'; }, /SOURCE_STAGE/],
+    ['phase stage mismatch', (c) => { c[0].context.phase = 'CART_ACTIVE'; }, /PHASE_STAGE/],
+    ['negative shipping fee', (c) => { c.find((x) => x.id === 'V5V4Q025').context.cart_snapshot.shipping_fee_vnd = -1; }, /CART_SNAPSHOT_FEE/],
+    ['fractional shipping fee', (c) => { c.find((x) => x.id === 'V5V4Q025').context.cart_snapshot.shipping_fee_vnd = 0.5; }, /CART_SNAPSHOT_FEE/],
+    ['string shipping fee', (c) => { c.find((x) => x.id === 'V5V4Q025').context.cart_snapshot.shipping_fee_vnd = '30000'; }, /CART_SNAPSHOT_FEE/],
+    ['unknown snapshot field', (c) => { c.find((x) => x.id === 'V5V4Q025').context.cart_snapshot.extra = true; }, /CART_SNAPSHOT_SHAPE/],
+    ['missing snapshot field', (c) => { c.find((x) => x.id === 'V5V4Q025').context.cart_snapshot = {}; }, /CART_SNAPSHOT_SHAPE/],
+    ['shipping readback mismatch', (c) => { c.find((x) => x.id === 'V5V4Q025').context.cart_snapshot.shipping_fee_vnd = 0; }, /CART_SNAPSHOT_SHIPPING/],
+    ['freeship readback mismatch', (c) => { c.find((x) => x.id === 'V5V4Q023').context.cart_snapshot.shipping_fee_vnd = 30000; }, /CART_SNAPSHOT_FREESHIP/],
     ['duplicate id', (c) => { c[1].id = c[0].id; }],
     ['unknown fact', (c) => { c[0].context.runtime_claim_refs.push('NOT_A_FACT'); }],
     ['wrong fact subject', (c) => { c[0].context.product_binding.product_ids = ['OTHER']; }],
@@ -164,16 +232,16 @@ function selfTest() {
       c.find((x) => x.context.buying_intent.decision === 'CONSIDERING').context.buying_intent.requested_action = 'OPEN_CART';
     }],
   ];
-  for (const [name, mutate] of tests) {
+  for (const [name, mutate, expectedError] of tests) {
     const c = structuredClone(input.cases), e = structuredClone(judging.cases); mutate(c, e);
-    assert.throws(() => checkCases(c, e), undefined, `NEGATIVE_CONTROL_NOT_REJECTED:${name}`);
+    assert.throws(() => checkCases(c, e), expectedError, `NEGATIVE_CONTROL_NOT_REJECTED:${name}`);
   }
   assert.throws(() => new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from([0xc3, 0x28])));
   return tests.length + 1;
 }
 try {
   checkFiles();
-  const result = { kind: 'STATIC_DATA_VALIDATION_NOT_MODEL_EVAL', ...checkCases() };
+  const result = { kind: 'STATIC_DATA_VALIDATION_NOT_MODEL_EVAL', ...checkCases(), reviewBaseline: checkReviewBaseline() };
   const args = process.argv.slice(2);
   fail(args.every((a, i) => a === '--self-test' || a === '--repo' || args[i-1] === '--repo'), 'UNKNOWN_ARGUMENT');
   if (args.includes('--repo')) {

@@ -11,491 +11,633 @@
       "r1_dialogue_sha256": "55b3de0532ad6ecec34c23c1851603cdbcb45fea64190296282453afab82809a",
       "new_dialogue_sha256": "7c2fe1c2da23eafe8e65e9818b1088ca5452f712eeb0b840e9e3338bd748695f",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "fb6c38e0c695d34f3fdeddc3a62d5ee9003ffb71ac1830868f0071a3582e3ae6"
+      "source_dialogue_sha256": "fb6c38e0c695d34f3fdeddc3a62d5ee9003ffb71ac1830868f0071a3582e3ae6",
+      "review_baseline_dialogue_sha256": "7c2fe1c2da23eafe8e65e9818b1088ca5452f712eeb0b840e9e3338bd748695f",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q002",
       "r1_dialogue_sha256": "9314e44598b5d99b242898aec4a5388686b4fa171700740255396ebe78fc8964",
       "new_dialogue_sha256": "a325976ec16f64f700047cfb5947069231c71465cf7efc8da82206eb8fa97670",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "b7e27bc8111623c5f582e191802b5179e38db9994c09136837448a68bc768499"
+      "source_dialogue_sha256": "b7e27bc8111623c5f582e191802b5179e38db9994c09136837448a68bc768499",
+      "review_baseline_dialogue_sha256": "a325976ec16f64f700047cfb5947069231c71465cf7efc8da82206eb8fa97670",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q003",
       "r1_dialogue_sha256": "35132a75601106c0c009842318d745eacfb17828f332335b2e37ac734116dada",
       "new_dialogue_sha256": "6beb4ed5dc725cc0c17ed088c2966733ca8d958a456344873f0f7b50b640621f",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "44e0a5ea76937bfe96a8e1e2a1f62ae7292fe8ed6256e951c902607fb297a74e"
+      "source_dialogue_sha256": "44e0a5ea76937bfe96a8e1e2a1f62ae7292fe8ed6256e951c902607fb297a74e",
+      "review_baseline_dialogue_sha256": "6beb4ed5dc725cc0c17ed088c2966733ca8d958a456344873f0f7b50b640621f",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q004",
       "r1_dialogue_sha256": "d0b4923bacfe8b117bcba354cee5cf38383107ec51d7d5073c849336d318b9cf",
       "new_dialogue_sha256": "16ca4a2862ac75a62b676182a1511e3be1687fc1b2ecfa44155ef3f721573f22",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "e5c5f00538e8c86d418f583c4d3c4a7439fef59cf54acdd751b5023e9aec2fc8"
+      "source_dialogue_sha256": "e5c5f00538e8c86d418f583c4d3c4a7439fef59cf54acdd751b5023e9aec2fc8",
+      "review_baseline_dialogue_sha256": "16ca4a2862ac75a62b676182a1511e3be1687fc1b2ecfa44155ef3f721573f22",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q005",
       "r1_dialogue_sha256": "50bc9698e6c9557046e20102e435574368b8131d34f3a831475faaf95be51522",
       "new_dialogue_sha256": "926d664e14bc5e239ca8db7a2b15e256fd2347aa6412793a3224010e66ba5969",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "e4835ced5ca26035a526ce2e4d9c3f373b70ead287863dcc8b2382b4d3a6440e"
+      "source_dialogue_sha256": "e4835ced5ca26035a526ce2e4d9c3f373b70ead287863dcc8b2382b4d3a6440e",
+      "review_baseline_dialogue_sha256": "926d664e14bc5e239ca8db7a2b15e256fd2347aa6412793a3224010e66ba5969",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q006",
       "r1_dialogue_sha256": "9c676e754e192f0a936be7dc171856767d21aecfd11bd8ac20a5cbdcc069bf06",
       "new_dialogue_sha256": "2bc5ac1d8df45fcb3c06859a8becdc0d918bb16b0ba02f55f3561ccb1195e891",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "680f8b5171b92d510ed96828940a180509c102f5c7e55c9caf27be2f8c9127b8"
+      "source_dialogue_sha256": "680f8b5171b92d510ed96828940a180509c102f5c7e55c9caf27be2f8c9127b8",
+      "review_baseline_dialogue_sha256": "2bc5ac1d8df45fcb3c06859a8becdc0d918bb16b0ba02f55f3561ccb1195e891",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q007",
       "r1_dialogue_sha256": "5f8538ca83aec1faf50185b3a57ed5768da9c4938b47010dfd3c6caedce1313b",
       "new_dialogue_sha256": "5bbd6260d42b927bf1d30a5f1eef3d513169399553bf0dd29318dc59323d42b7",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "6abdfc05d88dd3ce94b34303bdbfa6b38b1c3d868e5e39a0b4c5ffa09cf51f0b"
+      "source_dialogue_sha256": "6abdfc05d88dd3ce94b34303bdbfa6b38b1c3d868e5e39a0b4c5ffa09cf51f0b",
+      "review_baseline_dialogue_sha256": "5bbd6260d42b927bf1d30a5f1eef3d513169399553bf0dd29318dc59323d42b7",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q011",
       "r1_dialogue_sha256": "0182d1e5b2e6674d6123a241add37cae037b7145522d0832e10c3a37cd135f52",
       "new_dialogue_sha256": "3b547076955927ba6aaebc8fa46e8e60af3b5b88f0e031275479a29037701fd8",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "3a6c0aab3feb4eae60c5c4d68c292483af63f42c1025804dd8103e0c363c3a6f"
+      "source_dialogue_sha256": "3a6c0aab3feb4eae60c5c4d68c292483af63f42c1025804dd8103e0c363c3a6f",
+      "review_baseline_dialogue_sha256": "3b547076955927ba6aaebc8fa46e8e60af3b5b88f0e031275479a29037701fd8",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q012",
       "r1_dialogue_sha256": "aee464e7cc133e6dfb97985cbadcedbfb680d3e02212fac4e814f9ecf614b70f",
       "new_dialogue_sha256": "ed04619c5264f50f40ab412c22d12ed89d16f4c4879ef4e020b95484319932cd",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "030154a6101adda8fb0db806679cc442b964d8befd1f7ee5296efdfca5ac5ad7"
+      "source_dialogue_sha256": "030154a6101adda8fb0db806679cc442b964d8befd1f7ee5296efdfca5ac5ad7",
+      "review_baseline_dialogue_sha256": "ed04619c5264f50f40ab412c22d12ed89d16f4c4879ef4e020b95484319932cd",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q013",
       "r1_dialogue_sha256": "2a4e2d738263cf7d322b01d8805c4ee962035c5b21b179a953d0f3535e332073",
       "new_dialogue_sha256": "193ae1ab2a865565fedd59866289576c17f9f3a5c97ca425c3510524577f9458",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "93aca89ccb58d792c928cc54dd305e46c7fdf8beb03fbb21f32665fd91f89e79"
+      "source_dialogue_sha256": "93aca89ccb58d792c928cc54dd305e46c7fdf8beb03fbb21f32665fd91f89e79",
+      "review_baseline_dialogue_sha256": "193ae1ab2a865565fedd59866289576c17f9f3a5c97ca425c3510524577f9458",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q014",
       "r1_dialogue_sha256": "bf7b9a3596e0e1868d326a798aa1ae35209d33766893d245f5cb047e3f968600",
-      "new_dialogue_sha256": "13f7ec831f75b76687559973820db2119a496543a05f9848eb05596cdfebfc15",
+      "new_dialogue_sha256": "5790290885d11b58be1b5f489f836bd089c92468557423495609cd396c96dd62",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "199b026c4cfbfe2d7209069243630c1e57a42c8536959df64f5b7c5053045cb6"
+      "source_dialogue_sha256": "199b026c4cfbfe2d7209069243630c1e57a42c8536959df64f5b7c5053045cb6",
+      "review_baseline_dialogue_sha256": "13f7ec831f75b76687559973820db2119a496543a05f9848eb05596cdfebfc15",
+      "review_change_kind": "DIALOGUE_REWRITE"
     },
     {
       "id": "V5V4Q015",
       "r1_dialogue_sha256": "c511d41cb6aa8a3131fb489f2bf9505dd8f56298b7500ae9dea9d4e779439213",
       "new_dialogue_sha256": "302ce8b52873201dc85bbeec36994d6df5afbc69fb206b7b46ee485241cdafe9",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "1c58b3e6387ead939b6aa2b7e466e02fa0453bda6df567a42f05dcabf52fa056"
+      "source_dialogue_sha256": "1c58b3e6387ead939b6aa2b7e466e02fa0453bda6df567a42f05dcabf52fa056",
+      "review_baseline_dialogue_sha256": "302ce8b52873201dc85bbeec36994d6df5afbc69fb206b7b46ee485241cdafe9",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q016",
       "r1_dialogue_sha256": "2d02f21daeb2ff8e85c4a3c75b14dedd66b36cf10cf5d8a4ce2305d84797af47",
       "new_dialogue_sha256": "f3acf014c7a4bd648b156a09911cc6de844cf7c8dd4d40fdedc39bb77b67368f",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "4a756754b226aee5087844128ac20961a873609cb11c86809aa433c7f80ea17e"
+      "source_dialogue_sha256": "4a756754b226aee5087844128ac20961a873609cb11c86809aa433c7f80ea17e",
+      "review_baseline_dialogue_sha256": "f3acf014c7a4bd648b156a09911cc6de844cf7c8dd4d40fdedc39bb77b67368f",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q017",
       "r1_dialogue_sha256": "1842e2be594065e8bed0528cdcdb26d5a95abef33bd93b6a19aab30bad2df757",
       "new_dialogue_sha256": "4a04a30bdb66e32d653319796dcdeea19d2c383961d7c42ec32ed22432e8f22b",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "6c1cae667a42e4c8ed6a50e5d3495e4a4f311b88622010af5c0c704d71068e88"
+      "source_dialogue_sha256": "6c1cae667a42e4c8ed6a50e5d3495e4a4f311b88622010af5c0c704d71068e88",
+      "review_baseline_dialogue_sha256": "4a04a30bdb66e32d653319796dcdeea19d2c383961d7c42ec32ed22432e8f22b",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q021",
       "r1_dialogue_sha256": "a58895599b2b5a9938a2b0c6471a09fe93988a4462c807f35ba83b74a6dcfcbb",
       "new_dialogue_sha256": "cc8325ff72b2e5035ba97220799e9e8c96af7479072716b35112997dd494667d",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "4e51bb1e62ad6b0f944fa2e0f8b55edd44aa325d59dbd03218afc301e920e513"
+      "source_dialogue_sha256": "4e51bb1e62ad6b0f944fa2e0f8b55edd44aa325d59dbd03218afc301e920e513",
+      "review_baseline_dialogue_sha256": "cc8325ff72b2e5035ba97220799e9e8c96af7479072716b35112997dd494667d",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q022",
       "r1_dialogue_sha256": "1a9b5d2dc8e42d1175ba131143d4c7802cd9d05afa26d9879569c8d31edac5d2",
       "new_dialogue_sha256": "d071eb4638b2432d2a60021863ab8c2c52c1bf3bf508f0f03476bdd23f3ad41e",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "856fce5570017178a2372f9dc4fe939f5b04984399df54bc8f44f7c2c678c09e"
+      "source_dialogue_sha256": "856fce5570017178a2372f9dc4fe939f5b04984399df54bc8f44f7c2c678c09e",
+      "review_baseline_dialogue_sha256": "d071eb4638b2432d2a60021863ab8c2c52c1bf3bf508f0f03476bdd23f3ad41e",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q023",
       "r1_dialogue_sha256": "8ed00fbecac849d125b1825b02cce8d300d55a6d244762a5ba8e3c1e27979343",
       "new_dialogue_sha256": "ceba3553b5ce4402a5b083a51ab9d2851da0cf63da8180cadef88b080e36cdc6",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "e7816077a5e84569a4cedc2a09c7fe4dc41bfded7022254db4ccc65f70acfe3a"
+      "source_dialogue_sha256": "e7816077a5e84569a4cedc2a09c7fe4dc41bfded7022254db4ccc65f70acfe3a",
+      "review_baseline_dialogue_sha256": "ceba3553b5ce4402a5b083a51ab9d2851da0cf63da8180cadef88b080e36cdc6",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q024",
       "r1_dialogue_sha256": "4639deba303130fc9dc62eb8a581a501ea36c15866cffe3beefac6fa94ab5c03",
       "new_dialogue_sha256": "06819845b1e3f93af9350f343e44983a7ed8e0b2e6440b62cfb63e2eee4ad0d5",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "f63bf4435970e5f2ed7de730f8d436a30272f89be7e7dd8f23590a488fe182ce"
+      "source_dialogue_sha256": "f63bf4435970e5f2ed7de730f8d436a30272f89be7e7dd8f23590a488fe182ce",
+      "review_baseline_dialogue_sha256": "06819845b1e3f93af9350f343e44983a7ed8e0b2e6440b62cfb63e2eee4ad0d5",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q025",
       "r1_dialogue_sha256": "57fde8bde3fa1dccbaaf638503f0185a612062ee08860ea2b65e7720b61db8d2",
       "new_dialogue_sha256": "da92dc3035f4bff9ee838d85c3625b7ba5fe451911818c2141c14efef820ef73",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "132d8c31812b9725b26c44e4c61d767214c1f291a7d66cff699ed2da12117b65"
+      "source_dialogue_sha256": "132d8c31812b9725b26c44e4c61d767214c1f291a7d66cff699ed2da12117b65",
+      "review_baseline_dialogue_sha256": "da92dc3035f4bff9ee838d85c3625b7ba5fe451911818c2141c14efef820ef73",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q026",
       "r1_dialogue_sha256": "233f2092d11f3d4f9067b4fd204bda98315220fe51879c338fa14c5b20798399",
       "new_dialogue_sha256": "9e1c7852e2ea378c442cc738f1693cf4fa3b2350ca8afeadba199612ee42e1f0",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "4d1713730c68e51e9da4a80505512364df9d242131267a4679eb0a9f4b87c789"
+      "source_dialogue_sha256": "4d1713730c68e51e9da4a80505512364df9d242131267a4679eb0a9f4b87c789",
+      "review_baseline_dialogue_sha256": "9e1c7852e2ea378c442cc738f1693cf4fa3b2350ca8afeadba199612ee42e1f0",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q027",
       "r1_dialogue_sha256": "e11dede20699b1c795ac1d7189568a3c0b4b32044ebe6c5c27293cf52a14d6c0",
       "new_dialogue_sha256": "633a675c66fecfd8c1773b17626866b8d6b7762cfcc9a090490e56b78929dc62",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "b183dd559122dc78353093d8bce5fa5e6826b43034ed8a39fca1fc19cea0f19b"
+      "source_dialogue_sha256": "b183dd559122dc78353093d8bce5fa5e6826b43034ed8a39fca1fc19cea0f19b",
+      "review_baseline_dialogue_sha256": "633a675c66fecfd8c1773b17626866b8d6b7762cfcc9a090490e56b78929dc62",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q031",
       "r1_dialogue_sha256": "06cdb613b0f523094f4bb1e3644f1ef2ad69b829bbee8036049c77dc0f495cbd",
       "new_dialogue_sha256": "db46e2e9b1ba9be69a046a6916b0b282915f17b3f55db8afb047740848fde005",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "6a9cce9beadd85581906e644a54062aa8977ee5cd49ba708133adaea2d87018e"
+      "source_dialogue_sha256": "6a9cce9beadd85581906e644a54062aa8977ee5cd49ba708133adaea2d87018e",
+      "review_baseline_dialogue_sha256": "db46e2e9b1ba9be69a046a6916b0b282915f17b3f55db8afb047740848fde005",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q032",
       "r1_dialogue_sha256": "1a9affeb45ce30a978fdb09e8c852632fd11577117c5643a00690981d121529f",
       "new_dialogue_sha256": "9f9cec74108bc8a6e16f4b6fe7aee4d9ec0b1d3a28b881eb8f44b3fa81cc6740",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "114c082ff3ee4b6e54e16524a4cb533b6dd0a41bbb0d4bfb07ef9da39b38c261"
+      "source_dialogue_sha256": "114c082ff3ee4b6e54e16524a4cb533b6dd0a41bbb0d4bfb07ef9da39b38c261",
+      "review_baseline_dialogue_sha256": "9f9cec74108bc8a6e16f4b6fe7aee4d9ec0b1d3a28b881eb8f44b3fa81cc6740",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q033",
       "r1_dialogue_sha256": "57ab9a3d1af64e66830fa0cf2d224853c8a03b2f958ce8ae3b1deb9e459550d1",
       "new_dialogue_sha256": "d1ed24eefb462533cba974a2e4788b2a593948d9ea7751d5999a3f153adaee47",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "aed7112fec19b087f7eb44f3a22bb175688c81c022541a5ed21214e8e9cb4fbc"
+      "source_dialogue_sha256": "aed7112fec19b087f7eb44f3a22bb175688c81c022541a5ed21214e8e9cb4fbc",
+      "review_baseline_dialogue_sha256": "d1ed24eefb462533cba974a2e4788b2a593948d9ea7751d5999a3f153adaee47",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q034",
       "r1_dialogue_sha256": "20b631d1fe9318a469d51f06bbcd80c7347f3aed8b3e58215b5bb4f91e39fa5e",
       "new_dialogue_sha256": "43254a3cdc9997a0f06243799d3afe23e1d845ba294b4ab872e599edf7a27175",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "af0f3986842398d589276aec951f69ff2e63a3a13143ee77bf3552d0a4179bec"
+      "source_dialogue_sha256": "af0f3986842398d589276aec951f69ff2e63a3a13143ee77bf3552d0a4179bec",
+      "review_baseline_dialogue_sha256": "43254a3cdc9997a0f06243799d3afe23e1d845ba294b4ab872e599edf7a27175",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q035",
       "r1_dialogue_sha256": "eebac2c331fcca4fd66e4b4f29ea7b8fd758186972c975ecb4d285cadae4713e",
       "new_dialogue_sha256": "932fdd7d5d0c3acb0a4372308536f952ec1adfcd66db66d2b83915afb410e1fc",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "1ca8e526096f9eea241ec425fa919d0206e7225b0255d3e4a0b2c9f1cd58cb7e"
+      "source_dialogue_sha256": "1ca8e526096f9eea241ec425fa919d0206e7225b0255d3e4a0b2c9f1cd58cb7e",
+      "review_baseline_dialogue_sha256": "932fdd7d5d0c3acb0a4372308536f952ec1adfcd66db66d2b83915afb410e1fc",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q036",
       "r1_dialogue_sha256": "1f1bd355b6887df5c50b67132bd42607f4d5daeba5ff002f2c4d113ad1cfeecb",
-      "new_dialogue_sha256": "611f01837e9fdc9a76e541e9a849cff77aed95c660c08319c236bd51e80660bf",
+      "new_dialogue_sha256": "1030c1c590d7b7018d6b18d30927b80038cfcb42bbb6dd7d9ed78fd46d2bcf59",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "a3fd7ddd285751f7f1602be02c0fc1f76303f751b2029bfd90875af7f4766d92"
+      "source_dialogue_sha256": "a3fd7ddd285751f7f1602be02c0fc1f76303f751b2029bfd90875af7f4766d92",
+      "review_baseline_dialogue_sha256": "611f01837e9fdc9a76e541e9a849cff77aed95c660c08319c236bd51e80660bf",
+      "review_change_kind": "DIALOGUE_REWRITE"
     },
     {
       "id": "V5V4Q037",
       "r1_dialogue_sha256": "d483f1ddc6b698aef704f1116c9a98f29e81f6bf11b1809c3358fdd4f0916449",
       "new_dialogue_sha256": "cc46df68300210a8a451c0591ad6f08f034722a2b10069f1eabc3d0ca0e589aa",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "aad07cd3200ee176b266b4eaf8a9967ec9195a48ecad5a4b7e114c128750084f"
+      "source_dialogue_sha256": "aad07cd3200ee176b266b4eaf8a9967ec9195a48ecad5a4b7e114c128750084f",
+      "review_baseline_dialogue_sha256": "cc46df68300210a8a451c0591ad6f08f034722a2b10069f1eabc3d0ca0e589aa",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q041",
       "r1_dialogue_sha256": "2fe2387dd66f702cd99fdb6860a6fdc548fa874762d5dc0896efe00e61211535",
       "new_dialogue_sha256": "5301bf5ad6d90f06477b9ca03e44ad3e622b936720fd484c4e98fe8ae35ffa67",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "545e5c7e74e9c30d1bc0410fbaa0b4a8963a991e58982cd0594ea705b8ea9f55"
+      "source_dialogue_sha256": "545e5c7e74e9c30d1bc0410fbaa0b4a8963a991e58982cd0594ea705b8ea9f55",
+      "review_baseline_dialogue_sha256": "5301bf5ad6d90f06477b9ca03e44ad3e622b936720fd484c4e98fe8ae35ffa67",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q042",
       "r1_dialogue_sha256": "62aca06ecdb3315b27277d3a9bb9f264cb97d842229e33dcf37a276fa9bd3338",
       "new_dialogue_sha256": "a22ccdc7638722e5b3baf36480ec6f33a4021ca06d9576190026964df8c14dec",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "41f01d051e596bfe77bfd38957e4d023bd52d5ba81f206338be75cab5db4214e"
+      "source_dialogue_sha256": "41f01d051e596bfe77bfd38957e4d023bd52d5ba81f206338be75cab5db4214e",
+      "review_baseline_dialogue_sha256": "a22ccdc7638722e5b3baf36480ec6f33a4021ca06d9576190026964df8c14dec",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q043",
       "r1_dialogue_sha256": "bbf704f4d5a1c688b94171cc204e2eebdaf61a5b1bba0131c60ec97a0fcec65e",
       "new_dialogue_sha256": "f1aafbe71406a9fd19f89cf3bf0a411bf3cf2d620b007c689b7ea9119758a040",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "d1610836cc06072487f1a0a70661b14593e31ed7ebb1b0d9a9ae451bdd466b79"
+      "source_dialogue_sha256": "d1610836cc06072487f1a0a70661b14593e31ed7ebb1b0d9a9ae451bdd466b79",
+      "review_baseline_dialogue_sha256": "f1aafbe71406a9fd19f89cf3bf0a411bf3cf2d620b007c689b7ea9119758a040",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q044",
       "r1_dialogue_sha256": "44cb29c202ab0ec11625abe53c8b304b880421ccc9858ffe36e9ee6f4dd06a74",
       "new_dialogue_sha256": "9aa0c7781c88a067e09dc863b911334879db1e6a87afaa9aac25cfabf2633333",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "4c1cc6496bb648e6b321fcb06d3ecd8d673300af24d1a4c054097f28a10728c6"
+      "source_dialogue_sha256": "4c1cc6496bb648e6b321fcb06d3ecd8d673300af24d1a4c054097f28a10728c6",
+      "review_baseline_dialogue_sha256": "9aa0c7781c88a067e09dc863b911334879db1e6a87afaa9aac25cfabf2633333",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q045",
       "r1_dialogue_sha256": "5c4ee3877f6b731e238ef09bb75dc749f7d79195e97eced3700a34ad8ebe8b07",
       "new_dialogue_sha256": "cce19edccf85dc7ae621021f7205860f89659b4e55cb1959eebca37f5e3758da",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "a9ccbc40d37771e6c3e347dec885ee3f0b834fff7adc17a40d5eb26f7c40e91f"
+      "source_dialogue_sha256": "a9ccbc40d37771e6c3e347dec885ee3f0b834fff7adc17a40d5eb26f7c40e91f",
+      "review_baseline_dialogue_sha256": "cce19edccf85dc7ae621021f7205860f89659b4e55cb1959eebca37f5e3758da",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q046",
       "r1_dialogue_sha256": "345aa665bf19dbe234c34e741314acd330d21c6bd2e169b5ec1649a7a3d65a15",
       "new_dialogue_sha256": "cdfcf507f91624f9192b99001acfea900212a83f294897ac40af6bc7a8cddc22",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "664765b2ea82cb0c085b587b26bb77c22572f1a65d654c73f9ad85954b9ceb23"
+      "source_dialogue_sha256": "664765b2ea82cb0c085b587b26bb77c22572f1a65d654c73f9ad85954b9ceb23",
+      "review_baseline_dialogue_sha256": "cdfcf507f91624f9192b99001acfea900212a83f294897ac40af6bc7a8cddc22",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q047",
       "r1_dialogue_sha256": "308ea0eb66595a92cec5d9d8d2242668ff3cf9f2c2205bbd5da187df88c12ead",
       "new_dialogue_sha256": "5d1d103f3d7b1eaff04618da3f6d6559116f6766a73a9ee2c3d01db0f2cfa05b",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "97b935c1c108ad463d99c6778f326cd1b624eb6356317230b3116d302d4ff521"
+      "source_dialogue_sha256": "97b935c1c108ad463d99c6778f326cd1b624eb6356317230b3116d302d4ff521",
+      "review_baseline_dialogue_sha256": "5d1d103f3d7b1eaff04618da3f6d6559116f6766a73a9ee2c3d01db0f2cfa05b",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q051",
       "r1_dialogue_sha256": "4e27c82c05f61e4349f3c6ac2ff5475e2123e5e2b04f15aaaf7aa92dbfef9316",
       "new_dialogue_sha256": "8779e8dace0a1d59d28daba928ee8979be19d2cfa7d0789f7c466c24f9c3ac32",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "2fb7e215e609c78dfdde3cc55fb4a728a9b4bbea670157245aefd5444353a653"
+      "source_dialogue_sha256": "2fb7e215e609c78dfdde3cc55fb4a728a9b4bbea670157245aefd5444353a653",
+      "review_baseline_dialogue_sha256": "8779e8dace0a1d59d28daba928ee8979be19d2cfa7d0789f7c466c24f9c3ac32",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q052",
       "r1_dialogue_sha256": "e3a98a512f358017f6e1e420c12076931f9991eb4dadb0b2f18589fe17177f91",
       "new_dialogue_sha256": "c097f5ec66a669d0553aaec0dea57d0db95b0238187e40361356f8e21b042821",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "78d55978684f79e85bc7b38867fe6a5180edf961e756bd30405758087d6a9c5c"
+      "source_dialogue_sha256": "78d55978684f79e85bc7b38867fe6a5180edf961e756bd30405758087d6a9c5c",
+      "review_baseline_dialogue_sha256": "c097f5ec66a669d0553aaec0dea57d0db95b0238187e40361356f8e21b042821",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q053",
       "r1_dialogue_sha256": "c427b1fab8314349a3aaf10c06e76f2b43b96abc2939bbed7d08eb788fc94834",
       "new_dialogue_sha256": "8282272d386976a4554b2e59601a1b1b614c95975e1f05cf526611517e21ca5c",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "60fe12033292965de9ba77afb72725f40705994ddb0eb84e75c792b17da9af0d"
+      "source_dialogue_sha256": "60fe12033292965de9ba77afb72725f40705994ddb0eb84e75c792b17da9af0d",
+      "review_baseline_dialogue_sha256": "8282272d386976a4554b2e59601a1b1b614c95975e1f05cf526611517e21ca5c",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q054",
       "r1_dialogue_sha256": "b1af676c13bce310d8c9fbdb89567a1efd1352f7fcf44d9429f409be4c2e91c8",
       "new_dialogue_sha256": "4fe806094f866ce532613eeac0add4818e697af7aa06ad90c7ba0642b2948dae",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "4d4f0fb5afa1cc09017ffc17ba5a4b6ca488b50232be278723eb72327668c92f"
+      "source_dialogue_sha256": "4d4f0fb5afa1cc09017ffc17ba5a4b6ca488b50232be278723eb72327668c92f",
+      "review_baseline_dialogue_sha256": "4fe806094f866ce532613eeac0add4818e697af7aa06ad90c7ba0642b2948dae",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q055",
       "r1_dialogue_sha256": "08364de09f339343d95dd9b4f7d0a483674a314a92ca771792ff7ce54ffdea2e",
       "new_dialogue_sha256": "9854b233d281c289589d8cb5ceb54d98ef7b33616005dbe30cbc311529882af1",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "9abbdcaa5357da9a1e93e580718bb59767901dfc8fc97586156272b4fe307345"
+      "source_dialogue_sha256": "9abbdcaa5357da9a1e93e580718bb59767901dfc8fc97586156272b4fe307345",
+      "review_baseline_dialogue_sha256": "9854b233d281c289589d8cb5ceb54d98ef7b33616005dbe30cbc311529882af1",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q056",
       "r1_dialogue_sha256": "7dc249b5df6a37046db8548ae565d60b2893dda320e7f40e1a62c2d745b15bf8",
       "new_dialogue_sha256": "d690c7acfacf2f49d162721318e90b1cbb1a2838e9e930c205ac9bf762ffecba",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "6cb51b55df92a2936016d332d73a65d1de43683e0858d618551d43e9e7929ace"
+      "source_dialogue_sha256": "6cb51b55df92a2936016d332d73a65d1de43683e0858d618551d43e9e7929ace",
+      "review_baseline_dialogue_sha256": "d690c7acfacf2f49d162721318e90b1cbb1a2838e9e930c205ac9bf762ffecba",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q057",
       "r1_dialogue_sha256": "ede3de9cf9a29cbfaa6de84d5233913fb908237c5695eebf81a4df328fd34afe",
       "new_dialogue_sha256": "eca04b0ea9601636b3325e346ea3353a5a64ca13f6808f2de27f5f8bb31d8d0e",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "865dcc52ad219bc9cdab30d5ae81ae044996df974f7af1caef196292ea081642"
+      "source_dialogue_sha256": "865dcc52ad219bc9cdab30d5ae81ae044996df974f7af1caef196292ea081642",
+      "review_baseline_dialogue_sha256": "eca04b0ea9601636b3325e346ea3353a5a64ca13f6808f2de27f5f8bb31d8d0e",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q061",
       "r1_dialogue_sha256": "f1ee1489f7924cd67a9d0b3b5732b15b5be203dd41f41062194f8bde592a17e8",
       "new_dialogue_sha256": "71ca627311b4b54c30f6351597631098ec914b6bd3a19120bd9fe78b67b83a2e",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "f855286732c2128686d3bcbbe2aa26c143423fe6348d84f42c49a6f7e79ca16e"
+      "source_dialogue_sha256": "f855286732c2128686d3bcbbe2aa26c143423fe6348d84f42c49a6f7e79ca16e",
+      "review_baseline_dialogue_sha256": "71ca627311b4b54c30f6351597631098ec914b6bd3a19120bd9fe78b67b83a2e",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q062",
       "r1_dialogue_sha256": "261c198d8898ee8cb04e86be457134218ff468a1cb5931ea20b4957025b3720c",
       "new_dialogue_sha256": "c41ec90012df8959ba25fa9ce09e9ab870341eb1459cd9df8447a04aa63e69a9",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "0d1059f6658d1a8d492c1e86dad54e997a51de8a252f65402cd7477ced4bc508"
+      "source_dialogue_sha256": "0d1059f6658d1a8d492c1e86dad54e997a51de8a252f65402cd7477ced4bc508",
+      "review_baseline_dialogue_sha256": "c41ec90012df8959ba25fa9ce09e9ab870341eb1459cd9df8447a04aa63e69a9",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q063",
       "r1_dialogue_sha256": "7c0e15675504da26c4b45e8ca1b6afe77c448fdc99885eca8865df66f5125287",
-      "new_dialogue_sha256": "b5fc41cf01ce7683e7b118ad3d98a1b48f0aefd2ba645238ba0dd184242f1767",
+      "new_dialogue_sha256": "e8e77ef01f9801f03ed5782a873978b324145fc8c14871d7aa92237f097f93cf",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "8bbff8d7299a4d6f7018944ccf2d42176c0d142867c874c110ab03329baf6053"
+      "source_dialogue_sha256": "8bbff8d7299a4d6f7018944ccf2d42176c0d142867c874c110ab03329baf6053",
+      "review_baseline_dialogue_sha256": "b5fc41cf01ce7683e7b118ad3d98a1b48f0aefd2ba645238ba0dd184242f1767",
+      "review_change_kind": "DIALOGUE_REWRITE"
     },
     {
       "id": "V5V4Q064",
       "r1_dialogue_sha256": "edcaa7e44447f44a7d9e447259815a9faab0535fdbc233dbf267def48bd8cc17",
       "new_dialogue_sha256": "182d5e630d9031fcb821239beb4fab3e6af4be78af52ee7519d14e29a71d7276",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "7f246b99cd8645d2c6cbb1834b7ceb94245ecb3314221983bc2261a17eb32069"
+      "source_dialogue_sha256": "7f246b99cd8645d2c6cbb1834b7ceb94245ecb3314221983bc2261a17eb32069",
+      "review_baseline_dialogue_sha256": "182d5e630d9031fcb821239beb4fab3e6af4be78af52ee7519d14e29a71d7276",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q065",
       "r1_dialogue_sha256": "89349652d7bb62a787edfa506638343e7850b5bfde714f4b9a6d6c1fa4b4db1a",
       "new_dialogue_sha256": "0cf199d37baff175076234b687e7bbd3261d8f53217b668e665c0d074a36dc07",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "c90fc29cf66e84c9d940e652388490ccf464dcc7468b0164b43142f2ddd0c055"
+      "source_dialogue_sha256": "c90fc29cf66e84c9d940e652388490ccf464dcc7468b0164b43142f2ddd0c055",
+      "review_baseline_dialogue_sha256": "0cf199d37baff175076234b687e7bbd3261d8f53217b668e665c0d074a36dc07",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q066",
       "r1_dialogue_sha256": "ee6c97bc914c11d3d8921c1d0cda591538d345344dfb2ba19601e9dcf6490fa5",
       "new_dialogue_sha256": "ac77fd50a922d424557dd5a4520fc3cfbd47e0fe41bd8e28ef2ff93b5e45cd1e",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "8f10162a9282a739c9d89a23e0c3effea4f2b9dac6aad6440b28a3019955e464"
+      "source_dialogue_sha256": "8f10162a9282a739c9d89a23e0c3effea4f2b9dac6aad6440b28a3019955e464",
+      "review_baseline_dialogue_sha256": "ac77fd50a922d424557dd5a4520fc3cfbd47e0fe41bd8e28ef2ff93b5e45cd1e",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q067",
       "r1_dialogue_sha256": "701b386b510b2a59ae5d539ca556f8ae965502bf73de4ef56aa5fe7426fa4dfa",
       "new_dialogue_sha256": "fa70256b325cac872bf093090d4b84f2bd798167fe86654ce537155abaa4d078",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "9b0653f31ba7c7bd76b677946266f442ef0e87af1aa8fa72f53fa18aad43073e"
+      "source_dialogue_sha256": "9b0653f31ba7c7bd76b677946266f442ef0e87af1aa8fa72f53fa18aad43073e",
+      "review_baseline_dialogue_sha256": "fa70256b325cac872bf093090d4b84f2bd798167fe86654ce537155abaa4d078",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q071",
       "r1_dialogue_sha256": "06610c3d35def398df52d48e1c262fc3c8f09371d22e733d74deae976ea30d22",
       "new_dialogue_sha256": "3a0c5c1000a1a7f47f5394e14d8c7b022a5cb0c33fe1736f0124f716e7dbf2b1",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "17c2812962a2d9b6c779ee9868427244ba4b5b3db5315770826d091a302c3dc3"
+      "source_dialogue_sha256": "17c2812962a2d9b6c779ee9868427244ba4b5b3db5315770826d091a302c3dc3",
+      "review_baseline_dialogue_sha256": "3a0c5c1000a1a7f47f5394e14d8c7b022a5cb0c33fe1736f0124f716e7dbf2b1",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q072",
       "r1_dialogue_sha256": "f32e4ddf726994f0fb54273a4613174b95c68ea18685d004cd5f797ad7514438",
       "new_dialogue_sha256": "e8f7c3d218266b2cd7f41ca4264efaadbe0119007100c9cb2d2758e763536a54",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "0f1f68f35df19ee908774f1f9428136806e599552f91506e796f035224e1d840"
+      "source_dialogue_sha256": "0f1f68f35df19ee908774f1f9428136806e599552f91506e796f035224e1d840",
+      "review_baseline_dialogue_sha256": "e8f7c3d218266b2cd7f41ca4264efaadbe0119007100c9cb2d2758e763536a54",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q073",
       "r1_dialogue_sha256": "472a74b4e6f0fc503177fa4274d0d0891e9120cd401dc804b5761574ae284206",
       "new_dialogue_sha256": "e3f7223b6434f76894132f0513c31e9736317b5cd695ed05172cbc202b0dd861",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "2c89dab63171ed4e5ba3c6e12ba32cf3d6e64db6bf17c12549bb4369bb98944f"
+      "source_dialogue_sha256": "2c89dab63171ed4e5ba3c6e12ba32cf3d6e64db6bf17c12549bb4369bb98944f",
+      "review_baseline_dialogue_sha256": "e3f7223b6434f76894132f0513c31e9736317b5cd695ed05172cbc202b0dd861",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q074",
       "r1_dialogue_sha256": "521b7199bb761c3c21415c2afbe8a1bd86b72500562db10e5f6946e32aaf1521",
       "new_dialogue_sha256": "e5a2737dc88861fc1f43d452fe9ab02863459397406c449fedffbe4d39d3c258",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "dade3bdbf3344b1c5c41d7e79882fc89293fa2fd52f3f3c263d54a93021789ae"
+      "source_dialogue_sha256": "dade3bdbf3344b1c5c41d7e79882fc89293fa2fd52f3f3c263d54a93021789ae",
+      "review_baseline_dialogue_sha256": "e5a2737dc88861fc1f43d452fe9ab02863459397406c449fedffbe4d39d3c258",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q075",
       "r1_dialogue_sha256": "a9bc60ee7b15c26161de7608f86a0456000c510b6483b38a4dbb71b1af7ab727",
       "new_dialogue_sha256": "cf85c07fcac0858dfbe77271da9d7f0b4f133fb9ed12874b70658eb232249bd8",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "5aef76472c63874fc144f7776cb792a18874da3c6259cf904fe56a050b45d023"
+      "source_dialogue_sha256": "5aef76472c63874fc144f7776cb792a18874da3c6259cf904fe56a050b45d023",
+      "review_baseline_dialogue_sha256": "cf85c07fcac0858dfbe77271da9d7f0b4f133fb9ed12874b70658eb232249bd8",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q076",
       "r1_dialogue_sha256": "7d93c97de74d849c356b8cdca56c7b1e06d9288fa26879306fab05ca37d8f2b9",
       "new_dialogue_sha256": "e38db182d4d14fbb77d0dd080df3d9db20ce5576e8d843e5df444355f70ba8e5",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "f88e5393e295fd66d12ab79b38efb9104a0856f47b69d598dae0251243ab2ba1"
+      "source_dialogue_sha256": "f88e5393e295fd66d12ab79b38efb9104a0856f47b69d598dae0251243ab2ba1",
+      "review_baseline_dialogue_sha256": "e38db182d4d14fbb77d0dd080df3d9db20ce5576e8d843e5df444355f70ba8e5",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q077",
       "r1_dialogue_sha256": "c74cf8da48e4d19675ec81dc14f76021dfa9f595cb2e7b620d2d6d1072bd2ad6",
       "new_dialogue_sha256": "51e990350ccf9cc4c0358614a007d43bb72ccf3f8fb231da272b9d171c89573f",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "d2ca9fa21b7753aabbb344c658aed9b60564e7c79c3ceee8344668e723d2a4d3"
+      "source_dialogue_sha256": "d2ca9fa21b7753aabbb344c658aed9b60564e7c79c3ceee8344668e723d2a4d3",
+      "review_baseline_dialogue_sha256": "51e990350ccf9cc4c0358614a007d43bb72ccf3f8fb231da272b9d171c89573f",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q081",
       "r1_dialogue_sha256": "4030a3658fb47d5c2a510abf7ab104484f2a8611da4fa78f7c0f0136bf41bf35",
       "new_dialogue_sha256": "6792a8afc688d419cc6894851703cdf2b53a510ab6830bbdadfbaff8845bf6a2",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "73faa3aadd62f799f9008faa782e30b75553b51a69843a115b4692ffd1fd55f9"
+      "source_dialogue_sha256": "73faa3aadd62f799f9008faa782e30b75553b51a69843a115b4692ffd1fd55f9",
+      "review_baseline_dialogue_sha256": "6792a8afc688d419cc6894851703cdf2b53a510ab6830bbdadfbaff8845bf6a2",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q082",
       "r1_dialogue_sha256": "3e68ebc081cf69be9be0a1ceedf8de15b32035a9e56d1141ea92651c0e48dcca",
       "new_dialogue_sha256": "a1a54499ee4b2475000354d7bf6e86b93530d8419066eb903dd86ecc5f869b2f",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "a714abc26d95b96a79158b367d1bdf44230e5d972f9850a511b43299c7d913ba"
+      "source_dialogue_sha256": "a714abc26d95b96a79158b367d1bdf44230e5d972f9850a511b43299c7d913ba",
+      "review_baseline_dialogue_sha256": "a1a54499ee4b2475000354d7bf6e86b93530d8419066eb903dd86ecc5f869b2f",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q083",
       "r1_dialogue_sha256": "b8bd5cd763b13440615efed8386d19ac1388419c06451967821dc07e3f009be3",
       "new_dialogue_sha256": "b625960a9e7b100e7d84530afe39171c210eefd239137f67ee83f7979c912061",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "c479b91493f903ab88ab16ec5a51b3bac41f76ab0947040ebd711b9ea6e85d77"
+      "source_dialogue_sha256": "c479b91493f903ab88ab16ec5a51b3bac41f76ab0947040ebd711b9ea6e85d77",
+      "review_baseline_dialogue_sha256": "b625960a9e7b100e7d84530afe39171c210eefd239137f67ee83f7979c912061",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q084",
       "r1_dialogue_sha256": "52e40f33cb5070cb1c98cf41a1dbe6814f8719baac54448ec000a3bbb89e5303",
       "new_dialogue_sha256": "d8e0452aeec88991ca5d74055fc8e6dcbfaf336401f27178b170eead1749a109",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "0c612fe3beb5887a823b942276d28242e2a2a20fa1c98a1a36e7a1d6bd071ddf"
+      "source_dialogue_sha256": "0c612fe3beb5887a823b942276d28242e2a2a20fa1c98a1a36e7a1d6bd071ddf",
+      "review_baseline_dialogue_sha256": "d8e0452aeec88991ca5d74055fc8e6dcbfaf336401f27178b170eead1749a109",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q085",
       "r1_dialogue_sha256": "78f44992e79e34dc79a35e05115e85312dc29d498a5308940260bf6e4bf7ec13",
       "new_dialogue_sha256": "afbd2541838a1e0c5502fcb334fd41b7dd6cac49cd86a7fcdb656cdc7b9d00b9",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "e28e06c73ab4d49a4b4e5c3f5515c233384e43159628a2cb3204b5ab425b439d"
+      "source_dialogue_sha256": "e28e06c73ab4d49a4b4e5c3f5515c233384e43159628a2cb3204b5ab425b439d",
+      "review_baseline_dialogue_sha256": "afbd2541838a1e0c5502fcb334fd41b7dd6cac49cd86a7fcdb656cdc7b9d00b9",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q086",
       "r1_dialogue_sha256": "41da34045c6deb3fe06378776b77bd892f8c8206cf9258408d20e23ac2701dc5",
       "new_dialogue_sha256": "56f627c37e574a41a854c03517cb0e5d22a04724fca1592fbfbc45f36cfa8d81",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "6012874a4f52690c5ac621c7fcc8cc7d7ad5d43e7cadf762e4ebd69a920e302e"
+      "source_dialogue_sha256": "6012874a4f52690c5ac621c7fcc8cc7d7ad5d43e7cadf762e4ebd69a920e302e",
+      "review_baseline_dialogue_sha256": "56f627c37e574a41a854c03517cb0e5d22a04724fca1592fbfbc45f36cfa8d81",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q087",
       "r1_dialogue_sha256": "df4be3bd448f74725f4181d3fc9096ce6c1cc20f98c243ca5e13d5905aa6b9dd",
       "new_dialogue_sha256": "ee97e1939dc6beeb772cd260fd5ccc3e078d63ca9261cf70d8d4a684b9b9acb5",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "ee94d088b75d28254ebb51f9af94ec08f7e0f6325d6092b36b3147f4c5063588"
+      "source_dialogue_sha256": "ee94d088b75d28254ebb51f9af94ec08f7e0f6325d6092b36b3147f4c5063588",
+      "review_baseline_dialogue_sha256": "ee97e1939dc6beeb772cd260fd5ccc3e078d63ca9261cf70d8d4a684b9b9acb5",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q091",
       "r1_dialogue_sha256": "f2ac257e7ff00cde6052cf056ffb6fdd3b86f3836e33c84c7e10d520bab73840",
       "new_dialogue_sha256": "b998a12102c1e57e8d723a038e83962333780650a6606882a8c2b479bec2e31e",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "d70f4da4c921c894df3f13c3a7dea987fe98ef59a0e568d13fe67f8927a1f5e3"
+      "source_dialogue_sha256": "d70f4da4c921c894df3f13c3a7dea987fe98ef59a0e568d13fe67f8927a1f5e3",
+      "review_baseline_dialogue_sha256": "b998a12102c1e57e8d723a038e83962333780650a6606882a8c2b479bec2e31e",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q092",
       "r1_dialogue_sha256": "bcd2045edb811293bf2050c281d35af0949d900d41d999d9c13542cb5eaaf582",
       "new_dialogue_sha256": "cf9ffdf04d010cc3521631584688c48a44bceae20d9feb3189f9530aa13a80a9",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "720c4108f09dc32e9a2f3cdc0840703be7d240b724258af4fd71a5ca73249770"
+      "source_dialogue_sha256": "720c4108f09dc32e9a2f3cdc0840703be7d240b724258af4fd71a5ca73249770",
+      "review_baseline_dialogue_sha256": "cf9ffdf04d010cc3521631584688c48a44bceae20d9feb3189f9530aa13a80a9",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q093",
       "r1_dialogue_sha256": "9d3f34e684eede7ac0db808150ae331e7b9a2c7120e47671a0388c02a18728df",
       "new_dialogue_sha256": "a0191feee1b24fb90b37574d2bf86fae217b77ab188ab94e39b89938a723c403",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "6eb0a6763d3f050e52cf9e1e5c459d8d90c94ad5232f663514b3bb56b927b426"
+      "source_dialogue_sha256": "6eb0a6763d3f050e52cf9e1e5c459d8d90c94ad5232f663514b3bb56b927b426",
+      "review_baseline_dialogue_sha256": "a0191feee1b24fb90b37574d2bf86fae217b77ab188ab94e39b89938a723c403",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q094",
       "r1_dialogue_sha256": "0a570360c35cfedb1f7b10d9af9c380d241d8c5e771abd25014131a26bc5dd7d",
       "new_dialogue_sha256": "70db4c14cf8ba570f42b4061c0bf29ed89d52d4f49ec477172c57c7c556e60f4",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "515e301ab4718ce620b7e472481af771fb9ec54aaf30046b39e6b34dbcf6be82"
+      "source_dialogue_sha256": "515e301ab4718ce620b7e472481af771fb9ec54aaf30046b39e6b34dbcf6be82",
+      "review_baseline_dialogue_sha256": "70db4c14cf8ba570f42b4061c0bf29ed89d52d4f49ec477172c57c7c556e60f4",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q095",
       "r1_dialogue_sha256": "f9fe6bf73283fa67bec2e575a362e70407f2bd7e4a1800357ec7e70c7abd63f0",
       "new_dialogue_sha256": "169085721eb81ac0b4391f882a2a71b7a187898dfcb89e895cdccf1ca2f03145",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "bcf8d888df4bd66ade1339844f3862a186aad4eb64bde880628b361d4330d615"
+      "source_dialogue_sha256": "bcf8d888df4bd66ade1339844f3862a186aad4eb64bde880628b361d4330d615",
+      "review_baseline_dialogue_sha256": "169085721eb81ac0b4391f882a2a71b7a187898dfcb89e895cdccf1ca2f03145",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q096",
       "r1_dialogue_sha256": "e278f512cb3c8d46b16be29f5967da3312e4a1def0ef0cec2cec74c6626a2bb4",
       "new_dialogue_sha256": "77253b0c1c2e0895863b114139c9129091f0efb463d1cd23df52a615f774c9fc",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "54fd4e9e25e554b0c823c197c06fdd7bec3f0ac9f6920e648bc37d336d9667a7"
+      "source_dialogue_sha256": "54fd4e9e25e554b0c823c197c06fdd7bec3f0ac9f6920e648bc37d336d9667a7",
+      "review_baseline_dialogue_sha256": "77253b0c1c2e0895863b114139c9129091f0efb463d1cd23df52a615f774c9fc",
+      "review_change_kind": "UNCHANGED"
     },
     {
       "id": "V5V4Q100",
       "r1_dialogue_sha256": "594dc5cc089d688fc864927d4a698855c7e8037ff9e5eec4f65e20fc17ae15a0",
       "new_dialogue_sha256": "fc138b1c893c51eb15eb5bf99a557dc0392a8cddcd851fbf560428a0875962dc",
       "change_kind": "NATURALNESS_REWRITE",
-      "source_dialogue_sha256": "a31a0e9c74f322c37a1f9eec1a385635f0a609659a6dd2fff7fe682b045cf63e"
+      "source_dialogue_sha256": "a31a0e9c74f322c37a1f9eec1a385635f0a609659a6dd2fff7fe682b045cf63e",
+      "review_baseline_dialogue_sha256": "fc138b1c893c51eb15eb5bf99a557dc0392a8cddcd851fbf560428a0875962dc",
+      "review_change_kind": "UNCHANGED"
     }
   ],
-  "source_dialogue_equivalence": "R2.5 and R2.9 DEV dialogue text was verified identical before the main rebase."
+  "source_dialogue_equivalence": "R2.5 and R2.9 DEV dialogue text was verified identical before the main rebase.",
+  "review_baseline_head": "6ae9ad3d33010e5262ae5eb303df75411974960e",
+  "r1_hash_status": "ARCHIVAL_ONLY_NOT_REVERIFIED"
 }

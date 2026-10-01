@@ -172,10 +172,11 @@
     "V5V4Q066": "EXPIRED_ETA_CAPTURE"
   },
   "payload_sha256": {
-    "dev70.cases.json": "e9bf0264b551b9cdc4286ac26519e5e679eb70bd0a350fd94ccdde3b1290035e",
+    "dev70.cases.json": "84fca03081250ef9bcf1585981a3cfcda1387dd3d48793dc58b1905df07007e1",
     "dev70.expectations.json": "14e05bfac4bc2e679f7407ff1b86b667baa62cd7e051f1a573313a73e8aabea0",
-    "change-map.json": "42cc6d63ac1f8609856b15550ab3ed9b6f4258c66647b1e11a545c153a2ca057",
-    "facts-used.json": "56a7cae137d23fc72a32208a33e880e2a6eea94cd84e932308d0815a8ceff307"
+    "change-map.json": "160ab1fda5815cadfa897ac50f0faa12f13369070b2ccd8044e7b261fe67d55a",
+    "facts-used.json": "56a7cae137d23fc72a32208a33e880e2a6eea94cd84e932308d0815a8ceff307",
+    "review-baseline.json": "0d3ec9ecbe74465a79dbc10b702daf5e0c4fe3b4eb82ef4d426f09792587e8b0"
   },
   "limits": [
     "No real customer corpus supplied; language is authored, not statistically representative.",
@@ -222,5 +223,7 @@
     "V5V4Q096",
     "V5V4Q100"
   ],
-  "context_amendment_policy": "These 19 cases intentionally amend R2.5 canonical context to make existing expected behavior reachable/consistent; they do not add facts outside facts-used.json."
+  "context_amendment_policy": "These 19 cases intentionally amend R2.5 canonical context to make existing expected behavior reachable/consistent; they do not add facts outside facts-used.json.",
+  "review_baseline_head": "6ae9ad3d33010e5262ae5eb303df75411974960e",
+  "r1_comparison_status": "UNVERIFIABLE_PARENT_NOT_AVAILABLE"
 }

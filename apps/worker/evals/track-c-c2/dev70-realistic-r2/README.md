@@ -16,7 +16,7 @@ R2 viết lại lớp hội thoại để giống Messenger bán hàng thật h�
 
 - Dataset: `TRACK_C_DEV70_REALISTIC`
 - Revision: `R2`
-- Parent: `R1`
+- Historical editorial parent: `R1` (artifact unavailable; comparison not verified).
 - Source frozen: R2.5 trên `main` tại `a28bd12a8b15c4bbf65914c52236adac4ac41594`
 - Lane: `BEHAVIOR_SIMULATION`
 
@@ -28,7 +28,7 @@ R2 là corpus opt-in và chưa đăng ký vào aggregate gate C2. Kết quả R2
 - `dev70.expectations.json`: tiêu chí evaluator; không đưa vào prompt.
 - `facts-used.json`: frozen fixture facts lấy từ main R2.5, không phải facts live.
 - `manifest.json`: identity, nguồn, hash và giới hạn.
-- `change-map.json`: mapping source R2.5 → R1 → R2 theo từng case.
+- `change-map.json`: source R2.5 dialogue hashes, archival R1 hashes (unverified), and the pinned R2 review baseline.
 - `coverage.json`: coverage và naturalness metrics trước/sau.
 - `DEV70_HOI_THOAI_R2.md`: bản đọc 70 hội thoại + kỳ vọng.
 - `validate.mjs`: static validator, không gọi mạng/model.
@@ -41,7 +41,7 @@ Từ folder này:
 node validate.mjs --self-test
 ```
 
-Từ repo root để đối chiếu frozen R2.9 source/facts:
+Từ repo root để đối chiếu frozen R2.5 source/facts:
 
 ```sh
 node apps/worker/evals/track-c-c2/dev70-realistic-r2/validate.mjs --self-test --repo .
@@ -54,3 +54,18 @@ Producer/Strategist/Responder ownership, fact values, stale controls Q027/Q066 v
 ## Giới hạn
 
 R2 vẫn là 70 snapshot hội thoại mô phỏng, không phải 70 journey tự rẽ nhánh. Chưa chứng minh conversion, khách thật, Producer full-runtime, live catalog, transaction hoặc transport encoding. Chưa chạy Luna/judge cho R2 trong commit này.
+
+## Review amendment baseline
+
+`review-baseline.json` pins the published R2 input at `6ae9ad3d33010e5262ae5eb303df75411974960e`. The validator checks all case IDs, splits and context hashes against it and checks the exact bytes of expectations and facts. This does not establish the unavailable R1 comparison. Historical R1 metrics and dialogue hashes are retained as archival claims, not newly verified results.
+
+The main source comparison remains R2.5 at `a28bd12a8b15c4bbf65914c52236adac4ac41594`; authoring metadata retained in older payloads must not be read as a new R1 verification.
+
+From repository root:
+
+```sh
+node apps/worker/evals/track-c-c2/dev70-realistic-r2/validate.mjs --self-test --repo .
+node --test apps/worker/evals/track-c-c2/dev70-realistic-r2/validator-regressions.test.mjs
+```
+
+The regression suite uses isolated synthetic fixtures, including deliberately invalid inputs with refreshed payload hashes. It is separate from validation of the real 70-case corpus. No model evaluation or memory-ablation result is claimed.

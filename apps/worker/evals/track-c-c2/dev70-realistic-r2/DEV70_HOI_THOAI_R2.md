@@ -108,23 +108,23 @@ R2 dùng cùng 70 DEV ID và fact values của main R2.5, viết lại hội tho
 
 ## 11. V5V4Q014 — Sau hội thoại dài vẫn phải nhớ trần 700k và tôn trọng chưa mua
 
-- **Khách:** Chị cần một bộ đi họp, mà mặc đi làm ngày thường được thì càng tốt.
-- **Shop:** Chị tính khoảng nào cho bộ này ạ?
-- **Khách:** Tối đa 700k thôi em, chị không muốn vượt khoản đó.
-- **Shop:** Dạ chị, mình giữ trong 700k nha.
-- **Khách:** Chị thích dáng suông, ngồi làm cả ngày mặc ôm khó chịu.
-- **Shop:** Tường Vi SQ9012 là phom suông, quần cạp chun chị nhé.
-- **Khách:** À đây là áo với quần đi chung một set hả em?
-- **Shop:** Dạ đúng rồi chị.
-- **Khách:** Set đó giá bao nhiêu?
-- **Shop:** Hiện là 849.000đ ạ.
-- **Khách:** Có màu kem không? Chị thấy kem dễ mặc.
-- **Shop:** Mẫu có kem và đen chị nhé.
-- **Khách:** Chị nghiêng kem hơn, đen ở nhà nhiều rồi.
-- **Shop:** Dạ, kem nha chị.
-- **Khách:** Để chị mở máy tính xem ảnh cho rõ, điện thoại bé quá.
-- **Shop:** Vâng chị, chị xem từ từ nhé.
-- **Khách (lượt đánh giá):** Chị xem kỹ rồi, vẫn thích kem mà 849 vượt mức 700 chị nói lúc đầu. Chắc chị chưa lấy đâu.
+- **Khách:** Chị tính mua bộ đi họp, tầm 700k đổ lại thôi.
+- **Shop:** Chị thích kiểu dáng nào ạ?
+- **Khách:** Dáng suông em. Chị đang xem Tường Vi SQ9012 này nè.
+- **Shop:** Bộ này 849k chị ạ, cao hơn mức chị tính.
+- **Khách:** Ừ, để chị xem thêm đã. Chị thấy dáng cũng được.
+- **Khách:** Giá cả áo quần luôn hả em?
+- **Shop:** Dạ, cả bộ áo quần chị nhé.
+- **Khách:** Quần cạp chun đúng ko?
+- **Shop:** Dạ đúng ạ.
+- **Khách:** Ngồi làm cả ngày chị không thích cạp cứng.
+- **Khách:** Ngoài đen còn màu nào em?
+- **Shop:** Có màu kem nữa chị nhé.
+- **Khách:** Chị thích kem hơn, đồ đen ở nhà nhiều rồi.
+- **Shop:** Dạ chị.
+- **Khách:** Để chị mở ảnh trên máy tính xem lại.
+- **Shop:** Vâng chị, chị xem đi ạ.
+- **Khách (lượt đánh giá):** Thôi tháng này chị chưa lấy đâu em, còn nhiều khoản quá.
 
 **Kỳ vọng:**
 - Nhớ mức tối đa 700k trong lịch sử, không hỏi lại ngân sách.
@@ -326,23 +326,23 @@ R2 dùng cùng 70 DEV ID và fact values của main R2.5, viết lại hội tho
 
 ## 27. V5V4Q036 — Đủ số đo và đã tư vấn M, khách quay lại nỗi lo bụng sau nhiều lượt
 
-- **Khách:** Chị gửi đủ số đo cho SQ9012 rồi nhé, vẫn lo nhất phần bụng.
-- **Shop:** Dạ, kết quả hiện khuyến nghị M và có thể cân nhắc L.
-- **Khách:** Hồi trước chị mặc M chỗ khác, đứng thì vừa mà ngồi lại chật.
-- **Shop:** Dạ, em hiểu chỗ chị đang ngại rồi.
-- **Khách:** Nên lần này chị mới đo lại hết số hiện tại đó.
-- **Shop:** Em hiểu, nên lần này mình bám số đo hiện tại của chị.
-- **Khách:** Mà bộ này có màu gì em?
-- **Shop:** Tường Vi có kem và đen ạ.
-- **Khách:** Kem nha, đen chị có nhiều rồi.
-- **Shop:** Dạ, kem nha chị.
-- **Khách:** Quần nhìn ảnh là cạp chun phải không?
-- **Shop:** Đúng chị, quần cạp chun và phom suông ạ.
-- **Khách:** Giá cả set vẫn 849 chứ?
-- **Shop:** Dạ, hiện 849.000đ ạ.
-- **Khách:** Giá thì ok. Chị chỉ sợ mua xong ngồi làm lại bị tức bụng.
-- **Shop:** Dạ, em hiểu chị ngại nhất phần bụng lúc ngồi.
-- **Khách (lượt đánh giá):** Chị gửi đủ số đo rồi mà vẫn hơi rén phần bụng 😅 Em vẫn nghiêng M như lúc đầu à?
+- **Khách:** Chị gửi đủ số đo rồi nha. Bộ trước chị đứng thì vừa, ngồi xuống lại bị chật bụng.
+- **Shop:** Dạ, với mẫu SQ9012 thì em tư vấn M theo số đo chị gửi. L chị cũng có thể cân nhắc.
+- **Khách:** Chị ngồi máy tính cả ngày nên hơi ngại.
+- **Shop:** Quần bộ này cạp chun, dáng suông chị nhé.
+- **Khách:** Ngoài đen còn màu gì em?
+- **Shop:** Có màu kem nữa ạ.
+- **Khách:** Kem nhìn sáng hơn, chị thích màu đó.
+- **Shop:** Dạ chị.
+- **Khách:** 849 là cả áo quần hả?
+- **Shop:** Dạ, 849k cả bộ chị nhé.
+- **Khách:** Ừ giá đó thì được.
+- **Khách:** Để chị gửi ảnh cho mẹ xem cùng.
+- **Shop:** Vâng chị.
+- **Khách:** Mẹ chị cũng bảo kem.
+- **Khách:** Nãy có điện thoại, giờ chị mới xem tiếp.
+- **Shop:** Dạ, chị xem đi ạ.
+- **Khách (lượt đánh giá):** Chị vẫn sợ lại như bộ cũ. Em xem giúp chị size nào ổn hơn với.
 
 **Kỳ vọng:**
 - Nhớ băn khoăn bụng và việc số đo đã đủ; trả kết quả M/L đang được xác nhận.
@@ -553,7 +553,7 @@ R2 dùng cùng 70 DEV ID và fact values của main R2.5, viết lại hội tho
 
 - **Khách:** Chị hỏi SQ9012 giao Hà Nội, cần mặc đi gặp đối tác.
 - **Khách:** Còn 5 ngày nữa. Chị chỉ cần nhận trước buổi đó là được.
-- **Khách (lượt đánh giá):** Thế ETA hiện tại 2–4 ngày thì mốc 5 ngày của chị có khả năng kịp ko em?
+- **Khách (lượt đánh giá):** 5 hôm nữa chị cần mặc rồi, giờ đặt có kịp không em?
 
 **Kỳ vọng:**
 - Diễn giải đúng: khoảng dự kiến 2–4 ngày kết thúc trước mốc 5 ngày khách cần, nhưng không phải bảo đảm đúng hạn.

@@ -1,27 +1,11 @@
-# Self-review — DEV70 realistic R2
+# Review amendment: DEV70 R2
 
-## Correctness
+Baseline: `6ae9ad3d33010e5262ae5eb303df75411974960e`. This is a same-session self-review, not an isolated independent reviewer.
 
-- 70/70 DEV IDs are the same population as main R2.5.
-- Used fact values are identical to the main R2.5 source.
-- 19 context amendments are explicit rather than hidden; they fix reachability/checkout/intent contradictions and are enumerated in `coverage.json`.
-- Buying-intent evidence remains source-bound to customer dialogue.
-- Q027/Q066 remain stale pre-model controls; Q024/Q043 retain intentional capability/binding gaps.
-- Four histories remain >15 messages, preserving the continuity objective.
+Q014 now has the customer select SQ9012; the shop states its price is above the stated budget rather than promising to stay within it. The final refusal does not repeat the budget. Q036 keeps measurements and the old fit concern early in history and refers back to the old garment without repeating the size result. Q063 asks about the customer's deadline without supplying an ETA answer. Only these three dialogues change; expectations, facts and canonical case context do not.
 
-## Naturalness
+Binding status/cardinality, source-stage consistency and supplied cart readbacks now fail closed on malformed inputs. The intentional missing-readback Q024 and missing-mapping Q043 controls remain permitted.
 
-After the owner's PR379 fixes:
+An executable baseline pins this amendment to the published R2 commit. The earlier R1 comparison is explicitly unavailable; it is neither a PASS nor a FAIL. Counts and naturalness diagnostics are regenerated in coverage.json, not used as quality scores.
 
-- Shop history messages: 126 (R1) → 102 (R2).
-- Shop question rate: 57.1% → 6.9%.
-- Latest <=5 words: 4 → 6.
-- Latest >=15 words: 24 → 19.
-- Average latest length: 12.67 → 11.84 words.
-- Maximum exact repeated shop line remains 2.
-
-The previously flagged evaluator-facing phrases were removed or rewritten. Q036/Q082 remain long but no longer read like a questionnaire. Q095/Q096 no longer use system-like wording. No new blocking naturalness finding was found in this review.
-
-## Scope
-
-This rebase changes benchmark corpus/provenance only. Runtime, prompt, guard, aggregate gate and HOLDOUT are intentionally untouched. No model output was used to tune R2.
+Naturalness remains an editorial judgment. No real-customer corpus, human panel, model judge, conversion result or measured long-memory result is supplied. See verification.json for checks actually executed by the applicator.
