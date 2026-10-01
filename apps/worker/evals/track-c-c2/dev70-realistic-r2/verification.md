@@ -13,3 +13,5 @@ Verified after rebase review against `main` `a28bd12a8b15c4bbf65914c52236adac4ac
 Static validator contract after this rebase pins the main R2.5 manifest/facts/rubric hashes and the source DEV population hash. It does not call a provider, network service, catalog, transaction port, or customer channel.
 
 Not run in this change: GPT-6 Luna, judge scoring, live catalog, transaction runtime, or customer smoke. CI on the rebased exact head is required after the branch rewrite.
+
+Rebase verification note: PR379 is now based directly on `main`; this follow-up commit exists only to create a normal synchronize event so repository CI can evaluate the rebased corpus on its exact head.
