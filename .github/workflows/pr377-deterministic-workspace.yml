@@ -1,0 +1,56 @@
+name: PR377 deterministic workspace snapshot
+
+# Temporary source/dependency transport for the offline deterministic workspace.
+# Remove this workflow from the final source candidate. No model or live ports.
+on:
+  pull_request:
+    branches:
+      - codex/c3-runtime-canonical-integration
+    paths:
+      - .github/workflows/pr377-deterministic-workspace.yml
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    if: github.event.pull_request.number == 377
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 15
+    env:
+      CI: true
+    steps:
+      - name: Checkout exact source without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "22"
+      - name: Install pinned package manager and frozen dependencies
+        run: |
+          npm install --global pnpm@10.12.4
+          pnpm install --frozen-lockfile
+      - name: Archive source and installed dependencies only
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle="$RUNNER_TEMP/pr377-deterministic-workspace"
+          mkdir -p "$bundle"
+          git rev-parse HEAD > "$bundle/source-head.txt"
+          git bundle create "$bundle/source.bundle" HEAD
+          find . -type d -name node_modules -prune -print0 > "$RUNNER_TEMP/pr377-node-dirs.txt"
+          tar -czf "$bundle/dependencies.tar.gz" --null -T "$RUNNER_TEMP/pr377-node-dirs.txt"
+          tar -czf "$bundle/package-manager.tar.gz" -C "$(npm root --global)" pnpm
+          (cd "$bundle" && sha256sum source.bundle dependencies.tar.gz package-manager.tar.gz > SHA256SUMS)
+      - name: Retain isolated workspace briefly
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pr377-deterministic-workspace-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/pr377-deterministic-workspace/
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
