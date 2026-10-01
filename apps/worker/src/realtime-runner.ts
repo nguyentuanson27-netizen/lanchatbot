@@ -3973,6 +3973,19 @@ export class RealtimeRunner {
             ? "Em chưa xác minh được giá và tình trạng hàng của các mẫu vừa tìm, nên chưa thể đề xuất mẫu khác lúc này."
             : "Trong các mẫu vừa tìm, em chưa xác minh được mẫu còn hàng phù hợp với yêu cầu của chị." }];
         }
+      } else if (customerInputFailure !== null) {
+        // The Producer is the only semantic authority for this latest text.
+        // Do not let downstream text/model reasoning revive a stale product or
+        // manufacture a new fact/action after that boundary failed. Earlier
+        // URL/media branches may still complete because their bindings are
+        // independently verified.
+        clarificationHandled = true;
+        if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = [{
+            kind: "TEXT",
+            text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé.",
+          }];
+        }
       } else if (
         customerInputFailure === null &&
         unresolvedProductRequiresHandoff(message.text ?? "", {

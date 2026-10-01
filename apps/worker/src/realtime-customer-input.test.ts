@@ -55,6 +55,17 @@ describe("source-bound customer input", () => {
     expect(applyCustomerDecisionInput(undefined, value).rejectedProductIds).toEqual([]);
   });
 
+  it("keeps legacy factQuery as a lookup hint rather than semantic coverage", () => {
+    const value = bindRealtimeCustomerInput({
+      ...noCustomerSelection(),
+      factQuery: {
+        intent: "PRICE", offerType: "SET", color: null, size: null,
+        deliveryRegion: null,
+      },
+    }, "Mẫu này giá bao nhiêu?");
+    expect(customerInputObligations(value)).toEqual([]);
+  });
+
   it("preserves independent fact obligations instead of collapsing a compound request", () => {
     const text = "Bộ này giá bao nhiêu, có dễ nhăn không?";
     const value = bindRealtimeCustomerInput({

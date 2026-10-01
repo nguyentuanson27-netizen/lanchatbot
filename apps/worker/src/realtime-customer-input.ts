@@ -68,14 +68,6 @@ export function customerInputObligations(
 ): readonly RealtimeCustomerObligationV1[] {
   if (value.obligations !== undefined) return Object.freeze([...value.obligations]);
   const obligations: RealtimeCustomerObligationV1[] = [];
-  const capability = value.factQuery.intent === "PRICE" ? "PRICE" :
-    value.factQuery.intent === "STOCK" ? "STOCK" :
-    value.factQuery.intent === "SIZE" ? "SIZE_FIT" :
-    value.factQuery.intent === "ETA" ? "ETA" : null;
-  if (capability !== null) {
-    obligations.push({ kind: "FACT_REQUEST", capability, scope: null,
-      productId: value.product.productId, evidenceText: null });
-  }
   if (value.product.operation === "SEARCH") {
     obligations.push({ kind: "PRODUCT_SEARCH", capability: null, scope: null,
       productId: value.product.productId, evidenceText: value.product.evidenceText });
