@@ -68,6 +68,6 @@
     "SF_ORDER_TOTAL": {"kind":"CART_TOTAL","data":{"totalVnd":1718000,"currency":"VND","cartVersion":12}},
     "SF_DISCONTINUED": {"kind":"PRODUCT_LIFECYCLE","productId":"SV9088","data":{"status":"DISCONTINUED"}},
     "SF_BACK_COVERAGE": {"kind":"PRODUCT_ATTRIBUTE","productId":"SQ9012","data":{"backCoverage":"closed_back"}},
-    "SF_OCCASION": {"kind":"PRODUCT_COMPARISON","products":["SQ9012","SV9031"],"data":{"SQ9012":"minimal, easy-going silhouette","SV9031":"more structured and dressy"}}
+    "SF_OCCASION": {"kind":"PRODUCT_COMPARISON","products":["SQ9012","SV9031"],"data":{"SQ9012":"minimal, easy-going silhouette","SV9031":"more structured and dressy"},"customerText":"Tường Vi thiên về dáng tối giản, dễ mặc; Nguyệt Hà có phom chỉn chu hơn ạ."}
   }
 }

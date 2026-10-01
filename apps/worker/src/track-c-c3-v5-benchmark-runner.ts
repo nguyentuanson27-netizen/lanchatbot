@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   BusinessFactEnvelopeV1Schema,
   ContextV2CandidateOutputV2Schema,
+  ProtectedClaimV1Schema,
   SizeRecommendationProtectedClaimV1Schema,
   canonicalJsonV1,
   type ContextV2,
@@ -25,6 +26,14 @@ import {
   type TrackCConversationPlanV1,
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
+import { trackCBoundPresentationForClaim } from
+  "./track-c-c3-selectable-evidence.js";
+import { trackCProductAttributeProjectionRegistry } from
+  "./track-c-c3-attribute-projection.js";
+import { trackCCustomerFacingSizeFromVariantId } from
+  "./track-c-c3-strategy-contract.js";
+import { trackCRuntimeClaimDeterministicText } from
+  "./track-c-c3-selectable-evidence.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import {
   buildTrackCClaimReferenceRegistry,
@@ -209,7 +218,13 @@ function factEnvelopeForClaim(claim: VerifiedClaim) {
       offerType: "DIRECT",
       listPriceVnd,
       salePriceVnd,
-      sizes: [],
+      sizes: claim.type === "STOCK" &&
+          (claim.value.status === "IN_STOCK" || claim.value.status === "LOW_STOCK")
+        ? (() => {
+            const size = trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+            return size === null ? [] : [size];
+          })()
+        : [],
       stockStatus,
       stockQuantity,
       deliveryEta,
@@ -286,6 +301,11 @@ function guardProductionOutput(
   const productAttributesHash = context.productAttributes?.metadata.contentHash ?? null;
   const productPresentationHash =
     context.productPresentation?.provenance.contentHash ?? null;
+  // Derived from the authoritative attributes on this side of the boundary.
+  const attributeProjections =
+    context.productAttributes === null || context.productAttributes === undefined
+      ? new Map()
+      : trackCProductAttributeProjectionRegistry(context.productAttributes);
   for (const segment of output.segments) {
     const usesProductPresentationEvidence =
       segment.kind === "VERIFIED_CLAIM" &&
@@ -294,17 +314,68 @@ function guardProductionOutput(
     const claim = segment.kind === "VERIFIED_CLAIM"
       ? claims.get(segment.claimContentHash) ?? null
       : null;
+    const attributeProjection = segment.kind === "VERIFIED_CLAIM"
+      ? attributeProjections.get(segment.claimContentHash) ?? null
+      : null;
+    if (attributeProjection !== null) {
+      // Exact equality binds every word of the segment to the field this hash
+      // was derived from, so a projection cannot be reused for another value.
+      if (attributeProjection.deterministicText === null ||
+          segment.text !== attributeProjection.deterministicText) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      if (context.productBinding.status !== "RESOLVED" ||
+          !verifiedProductIds.has(attributeProjection.productId)) {
+        throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_BINDING_INVALID");
+      }
+    }
     if (claim?.scope.kind === "CART") {
       throw new Error("TRACK_C_V5_PRODUCTION_CART_GUARD_UNSUPPORTED");
     }
+    if (claim !== null) {
+      // The projector resolves variant labels from the presentation, so the
+      // guard must rebuild the text from the same input or it compares two
+      // different strings. The presentation is only usable for this claim when
+      // it describes the same product.
+      const deterministicText = trackCRuntimeClaimDeterministicText(
+        claim,
+        trackCBoundPresentationForClaim(context.productPresentation, claim.scope),
+      );
+      if (deterministicText !== null && segment.text !== deterministicText) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      if (deterministicText !== null &&
+          (claim.type === "PRICE" || claim.type === "STOCK" || claim.type === "ETA")) {
+        // These projections contain only typed numbers/enums and allowlisted
+        // size labels. Exact equality binds every word to this claim; a second
+        // keyword classifier must not reinterpret STOCK as SIZE_FIT, etc.
+        // Keep the authority, scope and freshness checks at this boundary.
+        if (!ProtectedClaimV1Schema.safeParse(claim).success) {
+          throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_AUTHORITY_INVALID");
+        }
+        if (claim.scope.kind !== "PRODUCT" ||
+            context.productBinding.status !== "RESOLVED" ||
+            !verifiedProductIds.has(claim.scope.productId)) {
+          throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_BINDING_INVALID");
+        }
+        if (!Number.isFinite(evaluationAt.getTime()) ||
+            Date.parse(claim.provenance.observedAt) > evaluationAt.getTime() ||
+            Date.parse(claim.provenance.expiresAt) <= evaluationAt.getTime()) {
+          throw new Error("TRACK_C_V5_PRODUCTION_CLAIM_STALE");
+        }
+        continue;
+      }
+    }
     const productId = claim?.scope.kind === "PRODUCT"
       ? claim.scope.productId
-      : segment.kind === "VERIFIED_CLAIM" &&
-          (segment.claimContentHash === productAttributesHash ||
-           segment.claimContentHash === productPresentationHash)
-        ? context.productAttributes?.productId ??
-          context.productPresentation?.productId ?? null
-        : null;
+      : attributeProjection !== null
+        ? attributeProjection.productId
+        : segment.kind === "VERIFIED_CLAIM" &&
+            (segment.claimContentHash === productAttributesHash ||
+             segment.claimContentHash === productPresentationHash)
+          ? context.productAttributes?.productId ??
+            context.productPresentation?.productId ?? null
+          : null;
     const sizeClaimContext = sizeGuardInputForClaim(context, claim);
     const guard = guardAgentProposal({
       proposal: {
@@ -322,7 +393,7 @@ function guardProductionOutput(
       verifiedProductIds,
       buyingSignal: context.buyingIntent.decision === "COMMITTED",
       sizeClaimContext,
-      sizeClaimTextMode: usesProductPresentationEvidence
+      sizeClaimTextMode: usesProductPresentationEvidence || claim?.type === "STOCK"
         ? "LEGACY_SEMANTIC"
         : "STRUCTURED_REJECT_ONLY",
       now: evaluationAt,
@@ -335,12 +406,16 @@ function guardProductionOutput(
   }
 }
 
-function validateResponderOutput(
+export function validateResponderOutput(
   context: ReturnType<typeof contextFromFrozenTrackCCapture>,
   value: unknown,
   lane: TrackCV5ExecutionLane,
   evaluationAt: Date,
+  simulationClaimContentHashes: readonly string[] = [],
 ): ContextV2CandidateOutputV2 {
+  if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  }
   const semantic = SemanticOutputSchema.safeParse(value);
   if (!semantic.success) {
     throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
@@ -358,15 +433,24 @@ function validateResponderOutput(
   if (output.segments.some(({ kind }) => kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
+  // Rebuilt from the authoritative attributes, never from the candidate: a
+  // field-level projection is recognised only if this side derives the same
+  // hash from the same source.
+  const attributeProjections =
+    context.productAttributes === null || context.productAttributes === undefined
+      ? new Map()
+      : trackCProductAttributeProjectionRegistry(context.productAttributes);
   const known = new Set([
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined
       ? []
       : [context.productAttributes.metadata.contentHash]),
+    ...attributeProjections.keys(),
     ...(context.productPresentation === null ||
         context.productPresentation === undefined
       ? []
       : [context.productPresentation.provenance.contentHash]),
+    ...simulationClaimContentHashes,
   ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
@@ -379,6 +463,16 @@ function validateResponderOutput(
   }
   if (lane === "PRODUCTION_CONTRACT") {
     guardProductionOutput(context, output, evaluationAt);
+  } else {
+    const simulationHashes = new Set(simulationClaimContentHashes);
+    const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
+      ...output,
+      segments: output.segments.filter((segment) =>
+        segment.kind !== "VERIFIED_CLAIM" ||
+        !simulationHashes.has(segment.claimContentHash)
+      ),
+    };
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt);
   }
   return output;
 }

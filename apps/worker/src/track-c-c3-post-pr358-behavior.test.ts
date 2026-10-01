@@ -3,22 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 import type { ShadowContextMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
-  TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
-  TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION,
-} from "./track-c-c3-two-pass-candidate.js";
-import {
   runTrackCC3TwoPassQualityCandidate,
+  type TrackCC3TwoPassQualityFixture,
 } from "./track-c-c3-two-pass-quality-adapter.js";
 import {
   materializeTrackCV5CaseCapture,
-  type TrackCV5CompactCase,
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
-import {
-  runTrackCV5TwoPassBenchmarkCase,
-  type TrackCV5SimulationMetadata,
-} from "./track-c-c3-v5-benchmark-runner.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -41,13 +33,7 @@ type CheckoutCompleteness = Readonly<{
   missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
 }>;
 
-type SimulationFixture = TrackCV5CompactCase & Readonly<{
-  context: TrackCV5CompactCase["context"] & Readonly<{
-    origin: "ADVERTISEMENT" | "ORGANIC";
-    first_meaningful_inbound: boolean;
-    checkout_completeness?: CheckoutCompleteness;
-  }>;
-}>;
+type SimulationFixture = TrackCC3TwoPassQualityFixture;
 
 function fixture(input: Readonly<{
   id: string;
@@ -57,8 +43,10 @@ function fixture(input: Readonly<{
   canonicalFlags?: readonly string[];
   runtimeClaimRefs?: readonly string[];
   checkoutCompleteness?: CheckoutCompleteness;
+  buyingIntent?: "NONE" | "NEGATED" | "COMMITTED";
 }>): SimulationFixture {
-  const hasCheckoutState = input.checkoutCompleteness !== undefined;
+  const checkout = input.checkoutCompleteness;
+  const hasCheckoutState = checkout !== undefined;
   return {
     id: input.id,
     latest_customer_message: input.message,
@@ -68,24 +56,25 @@ function fixture(input: Readonly<{
       product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
       phase: hasCheckoutState ? "ORDER_REVIEW" : "BROWSING",
       canonical_flags: input.canonicalFlags ?? [],
-      buying_intent: hasCheckoutState
-        ? {
-            decision: "COMMITTED",
-            requested_action: "PROCEED_TO_PAYMENT",
-            quantity: 1,
-            evidence: "test checkout commitment",
-          }
-        : {
-            decision: "NONE",
-            requested_action: "NONE",
-            quantity: null,
-            evidence: null,
-          },
+      buying_intent: input.buyingIntent === "NEGATED" ? {
+        decision: "NEGATED",
+        requested_action: "NONE",
+        quantity: null,
+        evidence: "test explicit rejection",
+      } : input.buyingIntent === "COMMITTED" ? {
+        decision: "COMMITTED",
+        requested_action: "PROCEED_TO_PAYMENT",
+        quantity: 1,
+        evidence: input.message,
+      } : {
+        decision: "NONE",
+        requested_action: "NONE",
+        quantity: null,
+        evidence: null,
+      },
       source_stage: hasCheckoutState ? "ORDER_PREVIEW" : null,
       runtime_claim_refs: input.runtimeClaimRefs ?? [],
-      ...(input.checkoutCompleteness === undefined
-        ? {}
-        : { checkout_completeness: input.checkoutCompleteness }),
+      ...(checkout === undefined ? {} : { checkout_completeness: checkout }),
     },
   };
 }
@@ -107,65 +96,93 @@ function providerPayload(value: unknown) {
   };
 }
 
-function planPayload(overrides: Partial<Record<
-  "currentNeed" | "mustResolve" | "conversationRead" | "nextMove" | "avoid",
-  string
->> = {}) {
-  return providerPayload({
-    currentNeed: "Resolve the current customer need.",
-    mustResolve: "Stay within supplied authority.",
-    conversationRead: "Use the trusted structured context and dialogue correctly.",
-    nextMove: "NONE",
-    avoid: "Do not invent facts or effects.",
-    ...overrides,
-  });
-}
+type ContractPrompt = Readonly<{
+  contractVersion: "TRACK_C_C3_STRATEGIST_INPUT_V1" | "TRACK_C_C3_RESPONDER_INPUT_V1";
+  dialogue: readonly ShadowContextMessage[];
+  constraints?: Readonly<{
+    permittedCanonicalActions: readonly string[];
+    measurementsUnavailable: boolean;
+  }>;
+  responderTask?: Readonly<{
+    answer: Readonly<{ kind: string; evidenceStatus?: string }>;
+    evidence: readonly unknown[];
+    continuation: Readonly<{ type: string; input?: string }> | null;
+    canonicalRequest: Readonly<{
+      type: string;
+      requestedFields?: readonly string[];
+    }> | null;
+  }>;
+}>;
 
-function generalReply(text = "Dạ em nắm rồi chị ạ.") {
-  return providerPayload({
-    segments: [{ kind: "GENERAL", text }],
-    strategy: "HOLD_POSITION",
-    cta: "NONE",
-  });
-}
-
-function successfulTransport(responder = generalReply()) {
-  return vi.fn<CandidateVertexTransport["send"]>()
-    .mockResolvedValueOnce({
-      payload: planPayload(),
-      providerModelVersion: "gemini-3.5-flash-lite",
-    })
-    .mockResolvedValueOnce({
-      payload: responder,
-      providerModelVersion: "gemini-3.5-flash-lite",
-    });
-}
-
-function promptBody(body: string) {
-  const parsed = JSON.parse(body) as {
-    systemInstruction: { parts: [{ text: string }] };
+function promptOf(request: { body: string }): ContractPrompt {
+  const body = JSON.parse(request.body) as {
     contents: [{ parts: [{ text: string }] }];
   };
+  return JSON.parse(body.contents[0].parts[0].text) as ContractPrompt;
+}
+
+function decisionFor(prompt: ContractPrompt) {
+  const permitted = prompt.constraints?.permittedCanonicalActions ?? [];
+  const canonicalAction = permitted[0] ?? "NONE";
   return {
-    systemInstruction: parsed.systemInstruction.parts[0].text,
-    prompt: parsed.contents[0].parts[0].text,
+    replyAct: "ANSWER",
+    goal: "Resolve the current customer decision without inventing facts.",
+    proposition: "NONE",
+    evidenceRefs: [],
+    continuation: canonicalAction === "NONE" ? { type: "KEEP_OPEN" } : null,
+    canonicalAction,
   };
 }
 
-function structuredPrompt(body: string) {
-  const parsed = promptBody(body);
+function responderFor(
+  prompt: ContractPrompt,
+  answerText = "Dạ em hiểu ý chị ạ.",
+) {
+  const task = prompt.responderTask;
+  if (task === undefined) throw new Error("TEST_RESPONDER_TASK_REQUIRED");
+  const canonical = task.canonicalRequest?.type;
+  const keepOpen = task.continuation?.type === "KEEP_OPEN";
+  const needsProgression = canonical === "ASK_PRODUCT" ||
+    canonical === "ASK_MEASUREMENTS" || task.continuation?.type === "ASK";
   return {
-    ...parsed,
-    structured: JSON.parse(parsed.prompt) as {
-      benchmarkSimulationFacts?: readonly unknown[];
-      benchmarkSimulationMetadata?: readonly unknown[];
-    },
+    answerText: (task.answer.kind === "ANSWER" &&
+        task.answer.evidenceStatus !== "NOT_APPLICABLE") ||
+        canonical === "ASK_CHECKOUT_DETAILS"
+      ? null : answerText,
+    // Factual wording is code-rendered from the selected evidence, so the
+    // Responder authors none of it.
+    factualTexts: [],
+    progressionText: keepOpen ? null
+      : canonical === "ASK_MEASUREMENTS"
+        ? "Chị cho em xin chiều cao và cân nặng để em tư vấn tiếp ạ?"
+        : task.continuation?.type === "ASK" && task.continuation.input === "COLOR"
+          ? "Màu nào hợp ý chị hơn ạ?"
+          : task.continuation?.type === "ASK" && task.continuation.input === "USUAL_SIZE"
+            ? "Chị thường mặc size gì ạ?"
+          : needsProgression ? "Chị cho em biết thêm để em hỗ trợ sát hơn nhé?" : null,
   };
+}
+
+function candidateTransport(input: Readonly<{
+  strategist?: (prompt: ContractPrompt) => unknown;
+  responder?: (prompt: ContractPrompt) => unknown;
+}> = {}) {
+  const send = vi.fn<CandidateVertexTransport["send"]>(async (request) => {
+    const prompt = promptOf(request);
+    const output = prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
+      ? input.strategist?.(prompt) ?? decisionFor(prompt)
+      : input.responder?.(prompt) ?? responderFor(prompt);
+    return {
+      payload: providerPayload(output),
+      providerModelVersion: "gemini-3.5-flash-lite",
+    };
+  });
+  return { send };
 }
 
 async function runFixture(
   simulationFixture: SimulationFixture,
-  send: ReturnType<typeof successfulTransport>,
+  candidate: ReturnType<typeof candidateTransport>,
   simulationFacts: readonly unknown[] = [],
   evaluationContext: readonly ShadowContextMessage[] = dialogue(
     simulationFixture.latest_customer_message,
@@ -177,21 +194,73 @@ async function runFixture(
     runtimeClaimCatalog: facts.runtime_claim_catalog,
     recipe,
   });
-  const input = {
-    lane: "BEHAVIOR_SIMULATION" as const,
+  return runTrackCC3TwoPassQualityCandidate({
+    lane: "BEHAVIOR_SIMULATION",
     modelResource: MODEL_RESOURCE,
     capture,
     evaluationAt: new Date(recipe.evaluation_at),
     evaluationContext,
     simulationFacts,
-    transport: { send },
+    transport: candidate,
     fixture: simulationFixture,
-  };
-  return runTrackCC3TwoPassQualityCandidate(input);
+  });
 }
 
-describe("Track C post-PR358 C3 behavior wiring", () => {
-  it("passes trusted ad origin and first-meaningful-inbound metadata to both candidate passes without mixing it into facts", async () => {
+describe("Track C C3 post-PR358 behavior wiring", () => {
+  it("keeps fit clarification available and blocks checkout while measurements are required", async () => {
+    for (const caseFixture of [
+      fixture({ id: "FIT_WITHOUT_FLAG", message: "Chị cần thêm số đo nào để chọn vừa?" }),
+      fixture({ id: "FIT_BEFORE_CHECKOUT", message: "Chị muốn kiểm tra vòng eo trước.",
+        canonicalFlags: ["MEASUREMENTS_REQUIRED"], buyingIntent: "COMMITTED",
+        checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] } }),
+    ]) {
+      const candidate = candidateTransport({ strategist: (prompt) => {
+        expect(prompt.constraints?.permittedCanonicalActions).toEqual(["NONE", "ASK_MEASUREMENTS"]);
+        expect(prompt).toMatchObject({ canonicalContext: {
+          productBinding: { status: "RESOLVED", productIds: ["SQ9012"] },
+          activeBarriers: caseFixture.context.canonical_flags,
+          buyingIntent: { decision: caseFixture.context.buying_intent.decision },
+        } });
+        return { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
+      } });
+      const result = await runFixture(caseFixture, candidate);
+      expect(result.output.cta).toBe("ASK_MEASUREMENTS");
+      expect(result.reply).not.toContain("số điện thoại");
+    }
+  });
+
+  it("allows an objection to KEEP_OPEN despite missing measurements or checkout fields", async () => {
+    for (const caseFixture of [
+      fixture({ id: "MEASUREMENT_OBJECTION", message: "Chị còn lăn tăn.",
+        canonicalFlags: ["MEASUREMENTS_REQUIRED"] }),
+      fixture({ id: "CHECKOUT_OBJECTION", message: "Chị muốn nghĩ thêm.",
+        checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] },
+        buyingIntent: "COMMITTED" }),
+    ]) {
+      const candidate = candidateTransport({ strategist: () => ({
+        replyAct: "ACKNOWLEDGE", goal: "Acknowledge hesitation without more discovery.",
+        proposition: "NONE", evidenceRefs: [],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) });
+      const result = await runFixture(caseFixture, candidate);
+      expect(result.output.cta).toBe("NONE");
+      expect(result.reply).not.toMatch(/chiều cao|cân nặng|số điện thoại/u);
+    }
+  });
+
+  it("gives canonical hard stop precedence over trusted first-contact acquisition", async () => {
+    const candidate = candidateTransport();
+    const result = await runFixture(fixture({
+      id: "FIRST_CONTACT_STOP", message: "Không cần nữa em.",
+      origin: "ADVERTISEMENT", firstMeaningfulInbound: true,
+      buyingIntent: "NEGATED", runtimeClaimRefs: ["RC_PRICE_A"],
+    }), candidate, [facts.simulation_fact_catalog.SF_PRODUCT_A]);
+    expect(candidate.send).toHaveBeenCalledTimes(1);
+    expect(result.output.strategy).toBe("HOLD_POSITION");
+    expect(result.reply).toBe("Dạ em hiểu ý chị ạ.");
+  });
+
+  it("uses only trusted acquisition metadata to select the fixed first-contact lane", async () => {
     const caseFixture = fixture({
       id: "AD_ORIGIN",
       message: "Bộ này bao nhiêu em?",
@@ -199,106 +268,49 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       firstMeaningfulInbound: true,
       runtimeClaimRefs: ["RC_PRICE_A"],
     });
-    const send = successfulTransport();
+    const candidate = candidateTransport();
 
-    await runFixture(caseFixture, send);
+    const result = await runFixture(
+      caseFixture,
+      candidate,
+      [facts.simulation_fact_catalog.SF_PRODUCT_A],
+    );
 
-    expect(send).toHaveBeenCalledTimes(2);
-    for (const [request] of send.mock.calls) {
-      const { structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([
-        expect.objectContaining({
-          kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
-          origin: "ADVERTISEMENT",
-          firstMeaningfulInbound: true,
-          authorization: "NONE",
-        }),
-      ]);
-      expect(structured.benchmarkSimulationFacts).toEqual([]);
-    }
+    expect(result.conversationLane).toBe("FIRST_CONTACT_FIXED");
+    expect(candidate.send).toHaveBeenCalledTimes(1);
+    const responderPrompt = promptOf(candidate.send.mock.calls[0]![0]);
+    expect(responderPrompt.contractVersion).toBe("TRACK_C_C3_RESPONDER_INPUT_V1");
+    expect(JSON.stringify(responderPrompt)).not.toContain("TRACK_C_TRUSTED_ACQUISITION_V1");
+    expect(JSON.stringify(responderPrompt)).not.toContain("ADVERTISEMENT");
   });
 
-  it("does not create trusted ad origin from organic dialogue that says quảng cáo", async () => {
+  it("does not infer acquisition from dialogue wording", async () => {
     const caseFixture = fixture({
       id: "AD_SPOOF",
       message: "Em thấy mẫu này từ quảng cáo nè.",
       origin: "ORGANIC",
+      firstMeaningfulInbound: false,
     });
-    const send = successfulTransport();
+    const candidate = candidateTransport();
 
-    await runFixture(caseFixture, send);
+    const result = await runFixture(caseFixture, candidate);
 
-    for (const [request] of send.mock.calls) {
-      const { structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([]);
-    }
+    expect(result.conversationLane).toBe("ADAPTIVE_FOLLOWUP");
+    expect(candidate.send).toHaveBeenCalledTimes(2);
   });
 
-  it("rejects simulation metadata outside the closed kind union at the runner sink", async () => {
-    const caseFixture = fixture({
-      id: "METADATA_SINK",
-      message: "Bộ này bao nhiêu em?",
-    });
+  it("rejects caller-supplied simulation metadata before provider execution", async () => {
+    const caseFixture = fixture({ id: "AD_METADATA_SPOOF", message: "Bộ này bao nhiêu em?" });
+    const candidate = candidateTransport();
     const capture = materializeTrackCV5CaseCapture({
       lane: "BEHAVIOR_SIMULATION",
       fixture: caseFixture,
       runtimeClaimCatalog: facts.runtime_claim_catalog,
       recipe,
     });
-    const rejected: readonly unknown[] = [
-      { kind: "TRACK_C_UNKNOWN_METADATA_V1", authorization: "NONE" },
-      {
-        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
-        origin: "ADVERTISEMENT",
-        firstMeaningfulInbound: true,
-        authorization: "GRANTED",
-      },
-      {
-        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
-        origin: "ADVERTISEMENT",
-        firstMeaningfulInbound: true,
-        authorization: "NONE",
-        extraField: "smuggled",
-      },
-      {
-        kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-        state: "COMPLETE",
-        missingFields: ["PHONE"],
-        authorization: "NONE",
-      },
-      "TRACK_C_TRUSTED_ACQUISITION_V1",
-    ];
 
-    for (const entry of rejected) {
-      const send = successfulTransport();
-      await expect(runTrackCV5TwoPassBenchmarkCase({
-        lane: "BEHAVIOR_SIMULATION",
-        modelResource: MODEL_RESOURCE,
-        capture,
-        evaluationAt: new Date(recipe.evaluation_at),
-        evaluationContext: dialogue(caseFixture.latest_customer_message),
-        simulationMetadata: [entry as TrackCV5SimulationMetadata],
-        transport: { send },
-      })).rejects.toThrow("TRACK_C_V5_SIMULATION_METADATA_INVALID");
-      expect(send).not.toHaveBeenCalled();
-    }
-  });
-
-  it("rejects caller-supplied trusted simulation metadata before provider execution", async () => {
-    const caseFixture = fixture({
-      id: "AD_METADATA_SPOOF",
-      message: "Bộ này bao nhiêu em?",
-      origin: "ORGANIC",
-    });
-    const capture = materializeTrackCV5CaseCapture({
+    await expect(runTrackCC3TwoPassQualityCandidate({
       lane: "BEHAVIOR_SIMULATION",
-      fixture: caseFixture,
-      runtimeClaimCatalog: facts.runtime_claim_catalog,
-      recipe,
-    });
-    const send = successfulTransport();
-    const spoofedInput = {
-      lane: "BEHAVIOR_SIMULATION" as const,
       modelResource: MODEL_RESOURCE,
       capture,
       evaluationAt: new Date(recipe.evaluation_at),
@@ -309,321 +321,164 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         origin: "ADVERTISEMENT",
         firstMeaningfulInbound: true,
       }],
-      transport: { send },
+      transport: candidate,
       fixture: caseFixture,
-    };
-
-    await expect(runTrackCC3TwoPassQualityCandidate(
-      spoofedInput as unknown as Parameters<
-        typeof runTrackCC3TwoPassQualityCandidate
-      >[0],
-    )).rejects.toThrow("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
-    expect(send).not.toHaveBeenCalled();
+    } as unknown as Parameters<typeof runTrackCC3TwoPassQualityCandidate>[0]))
+      .rejects.toThrow("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
+    expect(candidate.send).not.toHaveBeenCalled();
   });
 
-  it("does not let acquisition metadata authorize protected facts or effects", async () => {
+  it("does not let acquisition metadata authorize unbound facts or effects", async () => {
     const caseFixture = fixture({
       id: "AD_AUTHORITY",
       message: "Chốt giúp chị nhé.",
       origin: "ADVERTISEMENT",
       firstMeaningfulInbound: true,
     });
-    const protectedSend = successfulTransport(providerPayload({
-      segments: [{
-        kind: "VERIFIED_CLAIM",
-        text: "Mẫu này 849k chị ạ.",
-        claimRef: "CLAIM_001",
-      }],
-      strategy: "ANSWER_VERIFIED_FACTS",
-      cta: "NONE",
-    }));
-
-    await expect(runFixture(caseFixture, protectedSend)).rejects.toThrow(
-      "TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN",
-    );
-
-    const effectSend = successfulTransport(providerPayload({
-      segments: [{
-        kind: "EFFECT_CLAIM",
-        text: "Em đã chốt đơn cho chị.",
-        effect: "ORDER_PLACED",
-      }],
-      strategy: "HOLD_POSITION",
-      cta: "NONE",
-    }));
-    await expect(runFixture(caseFixture, effectSend)).rejects.toThrow(
-      "TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN",
-    );
-  });
-
-  it("handles the no-SIZE_FIT behavior class without re-asking a known measurement", async () => {
-    const caseFixture = fixture({
-      id: "SIZE_FIT_WITH_KNOWN_HEIGHT",
-      message: "Bình thường chị mặc XXL, mẫu này XL có vừa không?",
+    const factCandidate = candidateTransport({
+      responder: (prompt) => ({
+        ...responderFor(prompt),
+        answerText: "Mẫu này 849.000đ chị ạ.",
+      }),
     });
-    const evaluationContext: readonly ShadowContextMessage[] = [{
-      direction: "INBOUND",
-      senderType: "CUSTOMER",
-      messageType: "TEXT",
-      text: "Chị cao 1m60 rồi nhé.",
-      attachmentCount: 0,
-      occurredAt: "2026-09-10T01:58:00.000Z",
-    }, {
-      direction: "OUTBOUND",
-      senderType: "BOT",
-      messageType: "TEXT",
-      text: "Em có chiều cao rồi chị.",
-      attachmentCount: 0,
-      occurredAt: "2026-09-10T01:58:30.000Z",
-    }, {
-      direction: "INBOUND",
-      senderType: "CUSTOMER",
-      messageType: "TEXT",
-      text: caseFixture.latest_customer_message,
-      attachmentCount: 0,
-      occurredAt: "2026-09-10T01:59:00.000Z",
-    }];
-    const send = vi.fn<CandidateVertexTransport["send"]>()
-      .mockResolvedValueOnce({
-        payload: planPayload({
-          currentNeed: "Determine fit without guessing from catalog size existence.",
-          mustResolve: "Ask only for the missing relevant measurement.",
-          nextMove: "ASK_MEASUREMENTS",
-          avoid: "Do not promise XL fits and do not repeat known height.",
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      })
-      .mockResolvedValueOnce({
-        payload: providerPayload({
-          segments: [{
-            kind: "CLARIFICATION",
-            text: "XL có trong dải size nhưng chưa đủ để kết luận vừa chị nhé. Chị cho em xin cân nặng ạ?",
-            target: "MEASUREMENTS",
-          }, {
-            kind: "ACTION_REQUEST",
-            text: "Em dựa đúng số đo còn thiếu để kiểm tra fit cho mình ạ.",
-            action: "PROVIDE_MEASUREMENTS",
-          }],
-          strategy: "ASK_CLARIFICATION",
-          cta: "ASK_MEASUREMENTS",
-        }),
-        providerModelVersion: "gemini-3.5-flash-lite",
-      });
+    await expect(runFixture(caseFixture, factCandidate)).rejects.toBeInstanceOf(Error);
 
-    const result = await runFixture(
-      caseFixture,
-      send as ReturnType<typeof successfulTransport>,
-      [facts.simulation_fact_catalog.SF_PRODUCT_A],
-      evaluationContext,
-    );
+    const effectCandidate = candidateTransport({
+      responder: (prompt) => ({
+        ...responderFor(prompt),
+        answerText: "Em đã tạo đơn cho chị rồi ạ.",
+      }),
+    });
+    await expect(runFixture(caseFixture, effectCandidate)).rejects.toBeInstanceOf(Error);
 
-    expect(caseFixture.context.canonical_flags).toEqual([]);
-    expect(caseFixture.context.runtime_claim_refs).toEqual([]);
-    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
-      .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
-      .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
-      .toContain("overrides the generic unverified-protected-fact response shape only for fit qualification");
-    expect(result.conversationPlan.nextMove).toBe("ASK_MEASUREMENTS");
-    expect(result.reply).toContain("cân nặng");
-    expect(result.reply).not.toContain("chiều cao");
-    expect(send).toHaveBeenCalledTimes(2);
-    // The rule is carried by both passes, but each pass states its own half of
-    // it: the strategist picks the missing direction, the responder owns the
-    // segment/strategy/CTA shape.
-    const [strategistCall, responderCall] = send.mock.calls;
-    const strategistPrompt = promptBody(strategistCall![0].body);
-    const responderPrompt = promptBody(responderCall![0].body);
-    expect(strategistPrompt.systemInstruction)
-      .toContain("choose one missing measurement direction");
-    expect(responderPrompt.systemInstruction)
-      .toContain("ask only that one missing measurement");
-    for (const [request] of send.mock.calls) {
-      const { prompt, systemInstruction } = promptBody(request.body);
-      expect(prompt).toContain("Chị cao 1m60 rồi nhé.");
-      expect(systemInstruction).toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
-      expect(systemInstruction).not.toContain("Q035");
-    }
+    expect(factCandidate.send).toHaveBeenCalled();
+    expect(effectCandidate.send).toHaveBeenCalled();
   });
 
-  it("lets the strategist name the checkout objective without tripping the plan PII guard", async () => {
+  it("uses latest-relevant measurement state before allowing the usual-size fallback", async () => {
     const caseFixture = fixture({
-      id: "CHECKOUT_PLAN_GUARD",
-      message: "Ok em",
-      checkoutCompleteness: {
-        state: "REQUIRED",
-        missing_fields: ["FULL_NAME", "PHONE", "ADDRESS"],
+      id: "SIZE_FIT_LATEST_STATE",
+      message: "Mẫu này XL có vừa không em?",
+      canonicalFlags: ["MEASUREMENTS_REQUIRED"],
+    });
+    const staleUnavailable: readonly ShadowContextMessage[] = [{
+      direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+      text: "Chị chưa có số đo.", attachmentCount: 0,
+      occurredAt: "2026-09-10T01:57:00.000Z",
+    }, {
+      direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+      text: "Chị cao 1m60 rồi nhé.", attachmentCount: 0,
+      occurredAt: "2026-09-10T01:58:00.000Z",
+    }, ...dialogue(caseFixture.latest_customer_message)];
+    const measuredCandidate = candidateTransport({
+      strategist: (prompt) => {
+        expect(prompt.constraints).toMatchObject({
+          permittedCanonicalActions: ["NONE", "ASK_MEASUREMENTS"],
+          measurementsUnavailable: false,
+        });
+        return { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
       },
     });
-    const planTransport = (nextMove: string) =>
-      vi.fn<CandidateVertexTransport["send"]>()
-        .mockResolvedValueOnce({
-          payload: planPayload({ nextMove }),
-          providerModelVersion: "gemini-3.5-flash-lite",
-        })
-        .mockResolvedValueOnce({
-          payload: providerPayload({
-            segments: [{
-              kind: "CLARIFICATION",
-              text: "Dạ chị cho em xin tên, số điện thoại và địa chỉ nhận hàng nhé.",
-              target: "CHECKOUT_DETAILS",
-            }, {
-              kind: "ACTION_REQUEST",
-              text: "Em cần đủ ba thông tin này để chuẩn bị đơn cho chị ạ.",
-              action: "PROVIDE_CHECKOUT_DETAILS",
-            }],
-            strategy: "ASK_CLARIFICATION",
-            cta: "ASK_CHECKOUT_DETAILS",
-          }),
-          providerModelVersion: "gemini-3.5-flash-lite",
+    const measured = await runFixture(caseFixture, measuredCandidate, [], staleUnavailable);
+    expect(measured.output.cta).toBe("ASK_MEASUREMENTS");
+
+    const latestUnavailable: readonly ShadowContextMessage[] = [
+      ...dialogue(caseFixture.latest_customer_message), {
+        direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Chị chưa có số đo.", attachmentCount: 0,
+        occurredAt: "2026-09-10T02:00:00.000Z",
+      },
+    ];
+    const fallbackCandidate = candidateTransport({
+      strategist: (prompt) => {
+        expect(prompt.constraints).toMatchObject({
+          permittedCanonicalActions: ["NONE"],
+          measurementsUnavailable: true,
         });
-
-    // A plan carrying the customer's actual address is still rejected before
-    // the Responder runs.
-    const realAddress = planTransport("Giao tới địa chỉ 12 Nguyễn Trãi cho khách.");
-    await expect(runFixture(caseFixture, realAddress)).rejects.toThrow(
-      "TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE",
-    );
-    expect(realAddress).toHaveBeenCalledTimes(1);
-
-    // Naming the checkout fields carries no identifier, so the plan now reaches
-    // the Responder instead of failing the turn.
-    const spelledOut = planTransport("Lấy tên, số điện thoại và địa chỉ nhận hàng.");
-    await expect(runFixture(caseFixture, spelledOut)).resolves.toBeDefined();
-    expect(spelledOut).toHaveBeenCalledTimes(2);
-
-    const abstract = planTransport("Lấy thông tin nhận hàng còn thiếu của khách.");
-    const result = await runFixture(caseFixture, abstract);
-
-    expect(abstract).toHaveBeenCalledTimes(2);
-    expect(result.reply).toContain("địa chỉ nhận hàng");
-    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
-      .toContain("CHECKOUT_OBJECTIVE_IS_NAMED_ABSTRACTLY");
+        return {
+          ...decisionFor(prompt),
+          continuation: { type: "ASK", input: "USUAL_SIZE" },
+        };
+      },
+    });
+    const fallback = await runFixture(caseFixture, fallbackCandidate, [], latestUnavailable);
+    expect(fallback.conversationPlan.continuation).toEqual({
+      type: "ASK", input: "USUAL_SIZE",
+    });
   });
 
-  it("projects checkout REQUIRED missing fields and COMPLETE without raw PII", async () => {
-    const requiredFixture = fixture({
+  it("derives exact missing checkout fields without placing PII in the Strategist contract", async () => {
+    const caseFixture = fixture({
       id: "CHECKOUT_REQUIRED",
       message: "Chị chốt nhé.",
-      checkoutCompleteness: {
-        state: "REQUIRED",
-        missing_fields: ["PHONE"],
+      checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] },
+      buyingIntent: "COMMITTED",
+    });
+    const candidate = candidateTransport({
+      strategist: (prompt) => {
+        expect(prompt.constraints?.permittedCanonicalActions)
+          .toEqual(["NONE", "ASK_MEASUREMENTS", "ASK_CHECKOUT_DETAILS"]);
+        expect(JSON.stringify(prompt)).not.toContain("090");
+        return {
+          ...decisionFor(prompt),
+          replyAct: "ACKNOWLEDGE",
+          canonicalAction: "ASK_CHECKOUT_DETAILS",
+          continuation: null,
+          goal: "Acknowledge the commitment and request only required details.",
+        };
       },
     });
-    const requiredSend = successfulTransport(providerPayload({
-      segments: [{
-        kind: "CLARIFICATION",
-        text: "Chị cho em xin số điện thoại nhận hàng ạ?",
-        target: "CHECKOUT_DETAILS",
-      }, {
-        kind: "ACTION_REQUEST",
-        text: "Em cần đúng số điện thoại còn thiếu để tiếp tục ạ.",
-        action: "PROVIDE_CHECKOUT_DETAILS",
-      }],
-      strategy: "ASK_CLARIFICATION",
-      cta: "ASK_CHECKOUT_DETAILS",
-    }));
-    const requiredResult = await runFixture(requiredFixture, requiredSend);
-    expect(requiredResult.reply).toContain("số điện thoại");
-    expect(requiredResult.reply).not.toContain("tên người nhận");
-    expect(requiredResult.reply).not.toContain("địa chỉ");
-    for (const [request] of requiredSend.mock.calls) {
-      const { systemInstruction, structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([
-        expect.objectContaining({
-          kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-          state: "REQUIRED",
-          missingFields: ["PHONE"],
-          authorization: "NONE",
-        }),
-      ]);
-      expect(structured.benchmarkSimulationFacts).toEqual([]);
-      expect(JSON.stringify(structured.benchmarkSimulationMetadata))
-        .not.toContain("FULL_NAME");
-      expect(JSON.stringify(structured.benchmarkSimulationMetadata))
-        .not.toContain("ADDRESS");
-      // The addendum names the state it actually projects, not a symbol that
-      // never appears in benchmarkSimulationMetadata.
-      expect(systemInstruction).toContain("State REQUIRED keeps that generic rule");
-      expect(systemInstruction).toContain("ask only for the listed missingFields");
-      expect(systemInstruction).not.toContain("CHECKOUT_DETAILS_REQUIRED means");
-    }
 
-    // Customer wording stays inside what the frozen-dialogue PII guard accepts
-    // verbatim, so this exercises the projection instead of the guard.
-    const completeFixture = fixture({
-      id: "CHECKOUT_COMPLETE",
-      message: "Tên và số điện thoại chị gửi đủ rồi, thông tin nhận hàng đủ hết nhé.",
-      checkoutCompleteness: {
-        state: "COMPLETE",
-        missing_fields: [],
-      },
+    const result = await runFixture(caseFixture, candidate);
+
+    expect(result.reply).toContain("số điện thoại");
+    expect(result.reply).not.toContain("họ tên");
+    expect(result.reply).not.toContain("địa chỉ nhận hàng");
+    const responder = promptOf(candidate.send.mock.calls[1]![0]);
+    expect(responder.responderTask?.canonicalRequest).toEqual({
+      type: "ASK_CHECKOUT_DETAILS", requestedFields: ["PHONE"],
     });
-    const completeSend = successfulTransport(generalReply(
-      "Dạ em đã có đủ thông tin nhận hàng chị nhé.",
-    ));
-    const completeResult = await runFixture(completeFixture, completeSend);
-    expect(completeResult.reply).not.toContain("gửi em tên");
-    expect(completeResult.reply).not.toContain("số điện thoại?");
-    expect(completeResult.reply).not.toContain("địa chỉ?");
-    for (const [request] of completeSend.mock.calls) {
-      const { prompt, systemInstruction, structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([
-        expect.objectContaining({
-          kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-          state: "COMPLETE",
-          missingFields: [],
-          authorization: "NONE",
-        }),
-      ]);
-      // The readiness projection is the only place recipient data could enter
-      // this lane, so pin its exact shape rather than scanning for literals
-      // that a BEHAVIOR_SIMULATION capture never materializes.
-      const [projected] = structured.benchmarkSimulationMetadata as
-        readonly Record<string, unknown>[];
-      expect(Object.keys(projected!).sort())
-        .toEqual(["authorization", "kind", "missingFields", "state"]);
-      expect(prompt).not.toMatch(/fullName|recipient|"phone"|"address"/i);
-      expect(systemInstruction).toContain("State COMPLETE replaces that generic rule");
-      expect(systemInstruction).toContain("strategy HOLD_POSITION with CTA NONE");
-      expect(systemInstruction).not.toContain("CHECKOUT_DETAILS_COMPLETE");
-    }
+    const responderRequest = JSON.parse(candidate.send.mock.calls[1]![0].body) as {
+      generationConfig: { responseSchema: { properties: { answerText: unknown } } };
+    };
+    expect(responderRequest.generationConfig.responseSchema.properties.answerText)
+      .toEqual({ type: "NULL" });
   });
 
-  it("rejects raw checkout PII fields instead of copying them into readiness projection", async () => {
-    const checkoutWithRawPii = {
-      state: "COMPLETE",
-      missing_fields: [],
-      fullName: "Nguyen Test",
-      phone: "0900000000",
-      address: "123 Test Street",
-    } as unknown as CheckoutCompleteness;
+  it("enforces canonical NEGATED as a hard stop instead of reopening the turn", async () => {
     const caseFixture = fixture({
-      id: "CHECKOUT_RAW_PII_REJECT",
-      message: "Chốt giúp chị nhé.",
-      checkoutCompleteness: checkoutWithRawPii,
+      id: "NEGATED_STOP",
+      message: "Không cần nữa em.",
+      buyingIntent: "NEGATED",
     });
-    const send = successfulTransport();
+    const candidate = candidateTransport({
+      strategist: () => ({
+        replyAct: "ANSWER",
+        goal: "Reopen with a color question.",
+        proposition: "NONE",
+        evidenceRefs: [],
+        continuation: { type: "ASK", input: "COLOR" },
+        canonicalAction: "NONE",
+      }),
+    });
 
-    await expect(runFixture(caseFixture, send)).rejects.toThrow(
-      "TRACK_C_C3_CHECKOUT_COMPLETENESS_INVALID",
+    await expect(runFixture(caseFixture, candidate)).rejects.toThrow(
+      "TRACK_C_STRATEGIST_PROGRESSION_INVALID",
     );
-    expect(send).not.toHaveBeenCalled();
+    expect(candidate.send).toHaveBeenCalledTimes(1);
   });
 
-  it("does not infer checkout COMPLETE from dialogue alone", async () => {
+  it("does not infer checkout completion from dialogue alone", async () => {
     const caseFixture = fixture({
       id: "CHECKOUT_DIALOGUE_ONLY",
       message: "Tên và số điện thoại chị gửi đủ rồi, thông tin nhận hàng đủ hết nhé.",
     });
-    const send = successfulTransport();
+    const candidate = candidateTransport();
 
-    await runFixture(caseFixture, send);
+    const result = await runFixture(caseFixture, candidate);
 
-    for (const [request] of send.mock.calls) {
-      const { structured } = structuredPrompt(request.body);
-      expect(structured.benchmarkSimulationMetadata).toEqual([]);
-    }
+    expect(result.output.cta).toBe("NONE");
+    const strategist = promptOf(candidate.send.mock.calls[0]![0]);
+    expect(strategist.constraints?.permittedCanonicalActions).toEqual(["NONE", "ASK_MEASUREMENTS"]);
   });
 });

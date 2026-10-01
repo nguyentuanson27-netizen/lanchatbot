@@ -20,6 +20,7 @@ function score(outcome: "PASS" | "PASS_WITH_NOTE" | "FAIL"): TrackCV5CaseScoreRe
     contractVersion: "TRACK_C_V5_RUBRIC_SCORE_V1",
     lane: "PRODUCTION_CONTRACT",
     domain: "PRICE_VALUE",
+    generatorCallShape: "ADAPTIVE_FOLLOWUP",
     strategist: { stage: "STRATEGIST", ...stage },
     responder: { stage: "RESPONDER", ...stage },
     outcome,
@@ -138,8 +139,29 @@ describe("Track C C3 V5 benchmark aggregate gate", () => {
     expect(() => gate([q1])).toThrow("TRACK_C_V5_BLOCKED_CASE_NOT_SKIPPED:Q001");
   });
 
-  it("requires exactly two provider calls for a scored two-pass case", () => {
+  it("requires two provider calls for an adaptive scored case", () => {
     const q1 = record("Q001", { providerCallCount: 0 });
+    expect(() => gate([q1])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
+  });
+
+  it("accepts exactly one provider call for a scored fixed first-contact case", () => {
+    const q1 = record("Q001", {
+      providerCallCount: 1,
+      score: {
+        ...score("PASS"),
+        generatorCallShape: "FIRST_CONTACT_FIXED",
+        strategist: null,
+      },
+    });
+
+    expect(gate([q1]).passed).toBe(true);
+  });
+
+  it("rejects caller cardinality that disagrees with the evaluated candidate shape", () => {
+    const q1 = record("Q001", {
+      providerCallCount: 1,
+      score: score("PASS"),
+    });
     expect(() => gate([q1])).toThrow("TRACK_C_V5_SCORED_RESULT_INVALID:Q001");
   });
 

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { describe, expect, it, vi } from "vitest";
 import type { ShadowContextMessage } from "@lana/database";
-import type { TrackCV5TwoPassBenchmarkResult } from "./track-c-c3-v5-benchmark-runner.js";
+import type { TrackCStrategyContractCaseResult } from "./track-c-c3-strategy-contract-runner.js";
 import type {
   TrackCV5RubricConfig,
   TrackCV5StageAssessmentInput,
@@ -15,7 +15,7 @@ import {
 } from "./track-c-c3-v5-benchmark-evaluator.js";
 
 const RUBRIC = JSON.parse(readFileSync(
-  new URL("../evals/track-c-c3-v5/v4/rubric.json", import.meta.url),
+  new URL("../evals/track-c-c2/v2/rubric.json", import.meta.url),
   "utf8",
 )) as TrackCV5RubricConfig;
 const HASH = "a".repeat(64);
@@ -36,18 +36,31 @@ function dialogue(text = "Mẫu này bao nhiêu em?"): readonly ShadowContextMes
   }];
 }
 
-function candidate(): TrackCV5TwoPassBenchmarkResult {
+function candidate(): TrackCStrategyContractCaseResult {
   return {
-    contractVersion: "TRACK_C_V5_TWO_PASS_BENCHMARK_RESULT_V1",
+    contractVersion: "TRACK_C_C3_STRATEGY_CONTRACT_RESULT_V1",
     evaluationOnly: true,
     sideEffects: "DISABLED",
     executionLane: "PRODUCTION_CONTRACT",
+    conversationLane: "ADAPTIVE_FOLLOWUP",
     conversationPlan: {
-      currentNeed: "Answer the price question.",
-      mustResolve: "Give the verified price.",
-      conversationRead: "Product is resolved.",
-      nextMove: "NONE",
-      avoid: "Do not invent facts.",
+      replyAct: "ANSWER",
+      goal: "Answer the verified price.",
+      proposition: "PRICE",
+      evidenceRefs: ["CLAIM_001"],
+      continuation: { type: "KEEP_OPEN" },
+      canonicalAction: "NONE",
+    },
+    responderTask: {
+      answer: { kind: "ANSWER", evidenceStatus: "SUPPORTED", proposition: "PRICE",
+        goal: "Answer the verified price." },
+      evidence: [{ ref: "CLAIM_001", capability: "PRICE",
+        value: { amount: 849000, currency: "VND" },
+        deterministicText: "Mẫu này hiện 849k chị ạ.",
+        provenance: { contentHash: HASH, authority: "RUNTIME" } }],
+      requiredEvidenceRefs: ["CLAIM_001"],
+      unrealizedEvidence: [],
+      continuation: { type: "KEEP_OPEN" }, canonicalRequest: null,
     },
     output: {
       schemaVersion: 2,
@@ -66,7 +79,7 @@ function candidate(): TrackCV5TwoPassBenchmarkResult {
     identity: {
       captureContextHash: HASH,
       strategistRequestEnvelopeHash: HASH,
-      conversationPlanHash: HASH,
+      decisionHash: HASH,
       responderRequestEnvelopeHash: HASH,
       responseOutputHash: HASH,
       compositionHash: HASH,
@@ -175,6 +188,42 @@ describe("Track C C3 V5 benchmark evaluator", () => {
     expect(result.runIdentity.candidateSourceRevision).toBe(SOURCE_REVISION);
     expect(result.runIdentity.rubricHash).toBe(RUBRIC_HASH);
     expect(result.runIdentity.runFingerprint).toMatch(/^[a-f0-9]{64}$/u);
+  });
+
+  it("judges responder only for fixed first contact", async () => {
+    const assess = vi.fn(async (input: TrackCV5StageJudgeInput) =>
+      assessment(input.stage)
+    );
+    const fixedCandidate: TrackCStrategyContractCaseResult = {
+      ...candidate(),
+      conversationLane: "FIRST_CONTACT_FIXED",
+      conversationPlan: {
+        answer: {
+          kind: "ANSWER",
+          evidenceStatus: "SUPPORTED",
+          goal: "Answer verified price.",
+          proposition: "PRICE",
+        },
+        evidence: [],
+        requiredEvidenceRefs: [],
+        unrealizedEvidence: [],
+        continuation: null,
+        canonicalRequest: { type: "ASK_MEASUREMENTS" },
+      },
+      identity: {
+        ...candidate().identity,
+        strategistRequestEnvelopeHash: null,
+      },
+    };
+
+    const result = await evaluateTrackCV5BenchmarkCase(evaluationInput(assess, {
+      candidate: fixedCandidate,
+    }));
+
+    expect(assess).toHaveBeenCalledTimes(1);
+    expect(assess.mock.calls[0]![0].stage).toBe("RESPONDER");
+    expect(result.score.generatorCallShape).toBe("FIRST_CONTACT_FIXED");
+    expect(result.score.strategist).toBeNull();
   });
 
   it("rejects a judge rubric label that does not match the rubric actually scored", async () => {

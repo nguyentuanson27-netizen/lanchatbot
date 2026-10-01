@@ -7,16 +7,19 @@
  * revisions without changing benchmark ownership.
  */
 import {
-  runTrackCV5TwoPassBenchmarkCase,
   type TrackCV5SimulationMetadata,
   type TrackCV5TwoPassBenchmarkInput,
-  type TrackCV5TwoPassBenchmarkResult,
 } from "./track-c-c3-v5-benchmark-runner.js";
 import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materialization.js";
+import type { TrackCCheckoutField } from "./track-c-c3-strategy-contract.js";
+import {
+  runTrackCStrategyContractCase,
+  type TrackCStrategyContractCaseResult,
+} from "./track-c-c3-strategy-contract-runner.js";
 
 export type TrackCC3CheckoutCompleteness = Readonly<{
   readonly state: "REQUIRED" | "COMPLETE";
-  readonly missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+  readonly missing_fields: readonly TrackCCheckoutField[];
 }>;
 
 export type TrackCC3TwoPassQualityFixture = TrackCV5CompactCase & Readonly<{
@@ -35,9 +38,12 @@ export type TrackCC3TwoPassQualityCandidateInput = Omit<
 }>;
 
 export type TrackCC3TwoPassQualityCandidateResult =
-  TrackCV5TwoPassBenchmarkResult;
+  TrackCStrategyContractCaseResult;
 
-const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+// Mirrors the runtime missingCheckout field set, payment included.
+const CHECKOUT_FIELDS = new Set<string>(
+  ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"] satisfies TrackCCheckoutField[],
+);
 const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
 
 function trustedSimulationMetadata(
@@ -64,7 +70,11 @@ function trustedSimulationMetadata(
   if (checkout !== undefined) {
     const fields = checkout.missing_fields;
     const keys = Object.keys(checkout).sort();
-    if (fixture.context.source_stage !== "ORDER_PREVIEW" ||
+    // The runner permits a checkout request at either reachable state, so the
+    // adapter must let both through: requiring ORDER_PREVIEW here rejected the
+    // open-cart case before it could reach the runner at all.
+    if ((fixture.context.source_stage !== "ORDER_PREVIEW" &&
+         fixture.context.source_stage !== "CART_OPEN") ||
         JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
         !Array.isArray(fields) ||
         fields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
@@ -100,9 +110,23 @@ export async function runTrackCC3TwoPassQualityCandidate(
     throw new Error("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
   }
   const metadata = trustedSimulationMetadata(input.fixture);
+  const acquisitionMetadata = metadata.find((entry) =>
+    entry.kind === "TRACK_C_TRUSTED_ACQUISITION_V1"
+  );
+  const trustedAcquisition = acquisitionMetadata !== undefined &&
+    acquisitionMetadata.kind === "TRACK_C_TRUSTED_ACQUISITION_V1" &&
+    acquisitionMetadata.firstMeaningfulInbound
+    ? acquisitionMetadata
+    : undefined;
+  const checkoutMetadata = metadata.filter((entry) =>
+    entry.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1"
+  );
   const { fixture: _fixture, ...runnerInput } = input;
-  return runTrackCV5TwoPassBenchmarkCase({
+  return runTrackCStrategyContractCase({
     ...runnerInput,
-    simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? metadata : [],
+    simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? checkoutMetadata : [],
+    ...(input.lane === "BEHAVIOR_SIMULATION" && trustedAcquisition !== undefined
+      ? { trustedAcquisition }
+      : {}),
   });
 }

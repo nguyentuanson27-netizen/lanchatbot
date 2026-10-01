@@ -7,7 +7,7 @@ import {
 } from "./track-c-c3-v5-benchmark-scoring.js";
 
 const RUBRIC = JSON.parse(readFileSync(
-  new URL("../evals/track-c-c3-v5/v4/rubric.json", import.meta.url),
+  new URL("../evals/track-c-c2/v2/rubric.json", import.meta.url),
   "utf8",
 )) as TrackCV5RubricConfig;
 
@@ -44,15 +44,16 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "PRICE_VALUE",
       strategist: strategist(),
       responder: responder(),
     });
 
     expect(result.outcome).toBe("PASS");
-    expect(result.strategist.passed).toBe(true);
+    expect(result.strategist?.passed).toBe(true);
     expect(result.responder.passed).toBe(true);
-    expect(result.strategist.weightedScore).toBe(4);
+    expect(result.strategist?.weightedScore).toBe(4);
     expect(result.responder.weightedScore).toBe(4);
   });
 
@@ -61,6 +62,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "CONVERSATION_CONTROL",
       strategist: {
         ...weakStrategist,
@@ -73,8 +75,8 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("FAIL");
-    expect(result.strategist.passed).toBe(false);
-    expect(result.strategist.failedDimensions).toContain("QUESTION_RESOLUTION");
+    expect(result.strategist?.passed).toBe(false);
+    expect(result.strategist?.failedDimensions).toContain("QUESTION_RESOLUTION");
     expect(result.responder.passed).toBe(true);
   });
 
@@ -83,6 +85,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "PRICE_VALUE",
       strategist: strategist(),
       responder: {
@@ -101,6 +104,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "PRODUCTION_CONTRACT",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "PRICE_VALUE",
       strategist: {
         ...stage,
@@ -110,14 +114,15 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("FAIL");
-    expect(result.strategist.failedDimensions).toContain("FACT_GROUNDING");
-    expect(result.strategist.weightedScore).toBeGreaterThan(3.2);
+    expect(result.strategist?.failedDimensions).toContain("FACT_GROUNDING");
+    expect(result.strategist?.weightedScore).toBeGreaterThan(3.2);
   });
 
   it("allows an all-3 simulation case when its domain floors are satisfied", () => {
     const result = scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "BEHAVIOR_SIMULATION",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "CONVERSATION_CONTROL",
       strategist: strategist(3),
       responder: {
@@ -127,7 +132,21 @@ describe("Track C C3 V5 benchmark scoring", () => {
     });
 
     expect(result.outcome).toBe("PASS_WITH_NOTE");
-    expect(result.strategist.passed).toBe(true);
+    expect(result.strategist?.passed).toBe(true);
+    expect(result.responder.passed).toBe(true);
+  });
+
+  it("scores fixed first contact with responder only", () => {
+    const result = scoreTrackCV5BenchmarkCase({
+      rubric: RUBRIC,
+      lane: "BEHAVIOR_SIMULATION",
+      generatorCallShape: "FIRST_CONTACT_FIXED",
+      domain: "PRICE_VALUE",
+      responder: responder(),
+    });
+
+    expect(result.outcome).toBe("PASS");
+    expect(result.strategist).toBeNull();
     expect(result.responder.passed).toBe(true);
   });
 
@@ -136,6 +155,7 @@ describe("Track C C3 V5 benchmark scoring", () => {
     expect(() => scoreTrackCV5BenchmarkCase({
       rubric: RUBRIC,
       lane: "BEHAVIOR_SIMULATION",
+      generatorCallShape: "ADAPTIVE_FOLLOWUP",
       domain: "CONVERSATION_CONTROL",
       strategist: strategist(3),
       responder: {

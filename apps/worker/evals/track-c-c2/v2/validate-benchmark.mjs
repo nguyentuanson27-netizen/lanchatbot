@@ -73,6 +73,21 @@ const productNames = new Map(
     .map((fact) => [fact.displayName.toLocaleLowerCase('vi-VN'), fact.productId]),
 );
 
+for (const [ref, fact] of Object.entries(sim)) {
+  if (fact.kind !== 'PRODUCT_COMPARISON') continue;
+  ok(
+    typeof fact.customerText === 'string' &&
+      fact.customerText === fact.customerText.trim() &&
+      fact.customerText.length > 0 &&
+      fact.customerText.length <= 500,
+    `${ref}: comparison requires bounded customerText`,
+  );
+  ok(
+    !fact.products.some((productId) => fact.customerText.includes(productId)),
+    `${ref}: comparison customerText leaks internal product id`,
+  );
+}
+
 function validateBinding(caseId, binding) {
   const ids = binding.product_ids;
   ok(Array.isArray(ids), `${caseId}: product ids`);
@@ -365,7 +380,6 @@ const componentPaths = [
   'owner-safety-capability-matrix.json',
   'holdout-policy.json',
   '../../../src/track-c-c3-v5-benchmark-materialization.ts',
-  '../../../src/track-c-c3-v5-benchmark-runner.ts',
 ];
 const componentsGitSha1 = Object.fromEntries(
   componentPaths.map((path) => [path, gitBlobSha1(path)]),
@@ -380,6 +394,30 @@ const bundleFingerprint = hash({
 });
 ok(manifest.content_hashes.bundle_fingerprint_sha256 === bundleFingerprint, `bundle fingerprint mismatch: actual=${bundleFingerprint}`);
 
+const qualityHarnessPaths = [
+  '../../../src/track-c-c3-v5-benchmark-scoring.ts',
+  '../../../src/track-c-c3-v5-benchmark-evaluator.ts',
+  '../../../src/track-c-c3-v5-benchmark-gate.ts',
+];
+const qualityHarnessComponentsGitSha1 = Object.fromEntries(
+  qualityHarnessPaths.map((path) => [path, gitBlobSha1(path)]),
+);
+ok(
+  stable(qualityHarnessComponentsGitSha1) ===
+    stable(manifest.quality_harness_components_git_sha1),
+  'quality harness component Git SHA mismatch',
+);
+const qualityHarnessFingerprint = hash({
+  benchmarkId: manifest.benchmark_id,
+  benchmarkRevision: manifest.benchmark_revision,
+  qualityHarnessComponentsGitSha1,
+});
+ok(
+  manifest.content_hashes.quality_harness_fingerprint_sha256 ===
+    qualityHarnessFingerprint,
+  `quality harness fingerprint mismatch: actual=${qualityHarnessFingerprint}`,
+);
+
 console.log(JSON.stringify({
   ok: true,
   cases: cases.length,
@@ -388,5 +426,9 @@ console.log(JSON.stringify({
   ownerSafety: { cases: owner.cases.length, expandedProbes: expandedOwnerProbeCount },
   nextSteps,
   domains,
-  hashes: { ...qualityContent, bundle_fingerprint_sha256: bundleFingerprint },
+  hashes: {
+    ...qualityContent,
+    bundle_fingerprint_sha256: bundleFingerprint,
+    quality_harness_fingerprint_sha256: qualityHarnessFingerprint,
+  },
 }, null, 2));
