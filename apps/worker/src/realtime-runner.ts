@@ -3335,7 +3335,8 @@ export class RealtimeRunner {
           residualCustomerUrlResolution ?? this.emptyResolution(),
         )
       : null;
-    const resolution = mediaInputLimitExceeded || message.isEcho ||
+    const resolution = customerInputFailure !== null ||
+        mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
         (customerInput ? customerInput.route !== "PRE_SALE" :
@@ -5370,7 +5371,8 @@ export class RealtimeRunner {
         (resolution.products.length <= 1 ||
           (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
         !metaMessages.some((unit) => unit.kind === "IMAGE") &&
-        (!salesHandled || (salesTelemetry?.clarificationCase === true && !commerceFactReplyPreserved))) {
+        (!salesHandled || resolution.alternativeSearch === "MATCHED" ||
+          (salesTelemetry?.clarificationCase === true && !commerceFactReplyPreserved))) {
       try {
         if (salesCartReadback === null) {
           salesCartReadback = await readRealtimeCurrentCart({

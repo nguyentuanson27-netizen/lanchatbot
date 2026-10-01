@@ -3319,14 +3319,18 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["TYPED_SEMANTIC_SELECTION", "TYPED_SEMANTIC_UNSAFE_FIT", "TYPED_SEMANTIC_PARENT_PRICE", "TYPED_SEMANTIC_PRICE", "TYPED_SEMANTIC_UNSAFE_PRICE", "TYPED_SEMANTIC_WRINKLE", "TYPED_SEMANTIC_WRONG_PROPERTY", "FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["TYPED_SEMANTIC_SELECTION", "TYPED_SEMANTIC_UNSAFE_FIT", "TYPED_SEMANTIC_PARENT_PRICE", "TYPED_SEMANTIC_PRICE", "TYPED_SEMANTIC_UNSAFE_PRICE", "TYPED_SEMANTIC_WRINKLE", "TYPED_SEMANTIC_WRONG_PROPERTY", "FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_FAILURE_STALE_PRODUCT", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
-    const entry = item(34, checkoutOwner === "TYPED_FAILURE" ? "Chị đang cân nhắc" : (checkoutOwner === "LONG_HISTORY" || checkoutOwner.startsWith("TYPED_"))
-      ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
-      : "Mẫu CB182 bao nhiêu?");
+    const entry = item(34, checkoutOwner === "TYPED_FAILURE"
+      ? "Chị đang cân nhắc"
+      : checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT"
+        ? "CB182 bao nhiêu?"
+        : (checkoutOwner === "LONG_HISTORY" || checkoutOwner.startsWith("TYPED_"))
+          ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
+          : "Mẫu CB182 bao nhiêu?");
     const batch = {
       pageId,
       conversationHash,
@@ -3367,7 +3371,9 @@ describe("RealtimeRunner inbound batching", () => {
           budgetVnd: 600_000, occasion: "WORK" as const,
           rejectedProductIds: ["SV9031"],
         } }
-      : state;
+      : checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT"
+        ? { ...state, currentProductId: "SV9031" }
+        : state;
     let persistedCommerce = commerceState;
     const profile: CustomerProfileV1 = {
       schemaVersion: 1, profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
@@ -3446,7 +3452,10 @@ describe("RealtimeRunner inbound batching", () => {
         };
       }
       if (prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1") {
-        if (checkoutOwner === "TYPED_FAILURE") throw new Error("PROVIDER_UNAVAILABLE");
+        if (checkoutOwner === "TYPED_FAILURE" ||
+            checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
+          throw new Error("PROVIDER_UNAVAILABLE");
+        }
         const response = typedOverride ?? { ...noCustomerSelection(),
           budget: { operation: "SET", value: 700_000, evidenceText: "Ngân sách đổi thành 700k" } };
         return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
@@ -3865,11 +3874,25 @@ describe("RealtimeRunner inbound batching", () => {
       expect(c3Send).toHaveBeenCalledTimes(checkoutOwner === "FAULT_STRATEGIST" ? 1 : 2);
       return;
     }
-    if (checkoutOwner === "TYPED_FAILURE") {
+    if (checkoutOwner === "TYPED_FAILURE" ||
+        checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
       expect(c3Send).toHaveBeenCalledTimes(1);
-      const written = commit.mock.calls[0]![0] as { metaPlan?: { messages: { text: string }[] }; salesCyclePlan?: unknown };
+      const written = commit.mock.calls[0]![0] as {
+        metaPlan?: { messages: { text: string }[]; protectedClaimTypes?: string[] };
+        salesCyclePlan?: unknown;
+      };
       expect(written.salesCyclePlan).toBeUndefined();
-      expect(written.metaPlan?.messages).toEqual([{ kind: "TEXT", text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé." }]);
+      expect(written.metaPlan?.messages).toEqual([{
+        kind: "TEXT",
+        text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé.",
+      }]);
+      expect(written.metaPlan?.protectedClaimTypes ?? []).toEqual([]);
+      if (checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
+        // Preserve prior state for a later retry, but never answer this turn
+        // with the prior product's facts after the Producer failed.
+        expect(persistedState.currentProductId).toBe("SV9031");
+        expect(JSON.stringify(written.metaPlan)).not.toContain("699.000");
+      }
       expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
       expect(persistedCommerce.cart).toBeNull();
       return;
@@ -3986,10 +4009,33 @@ describe("RealtimeRunner inbound batching", () => {
         persistedState = { ...persistedState, sessionDecisionContext: {
           budgetVnd: 700_000, occasion: "WORK", rejectedProductIds: ["SD09"],
         } };
-        const text = "Mau khac, ngan sach 650k";
-        typedOverride = { ...noCustomerSelection(), product: {
-          operation: "REJECT", productId: null, evidenceText: "Mau khac" },
-          budget: { operation: "SET", value: 650_000, evidenceText: "ngan sach 650k" },
+        const text = "Mẫu này thôi không lấy, tìm mẫu khác, ngân sách 650k";
+        typedOverride = { ...noCustomerSelection(),
+          product: {
+            operation: "REJECT", productId: null,
+            evidenceText: "Mẫu này thôi không lấy",
+          },
+          budget: {
+            operation: "SET", value: 650_000,
+            evidenceText: "ngân sách 650k",
+          },
+          obligations: [
+            {
+              kind: "PRODUCT_REJECT", capability: null, scope: null,
+              productId: null, evidenceText: "Mẫu này thôi không lấy",
+            },
+            {
+              kind: "PRODUCT_SEARCH", capability: null, scope: null,
+              productId: null, evidenceText: "tìm mẫu khác",
+            },
+          ],
+          salesSignals: {
+            ...noCustomerSelection().salesSignals,
+            buyingIntent: {
+              decision: "NEGATED", requestedAction: "NONE", quantity: null,
+              evidenceText: "Mẫu này thôi không lấy", confidence: 0.99,
+            },
+          },
         };
         const followup = item(40, text);
         currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
