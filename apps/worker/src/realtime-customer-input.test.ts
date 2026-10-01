@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { bindRealtimeCustomerInput, applyCustomerDecisionInput, extractRealtimeCustomerInput, customerInputCanonicalEvidence } from "./realtime-customer-input.js";
+import { bindRealtimeCustomerInput, applyCustomerDecisionInput, extractRealtimeCustomerInput, customerInputCanonicalEvidence, customerInputObligations } from "./realtime-customer-input.js";
 
 import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
 

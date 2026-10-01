@@ -1301,8 +1301,12 @@ describe("Track C C3 strategy-contract runner", () => {
       ],
     } as never);
     const body = JSON.parse(request.body) as {
+      systemInstruction: { parts: [{ text: string }] };
       contents: [{ parts: [{ text: string }] }];
     };
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "Preserve every independent requestedObligations item",
+    );
     const input = JSON.parse(body.contents[0].parts[0].text) as {
       requestedObligations?: unknown;
     };
