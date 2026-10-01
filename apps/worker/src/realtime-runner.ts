@@ -3964,6 +3964,7 @@ export class RealtimeRunner {
             : "Trong các mẫu vừa tìm, em chưa xác minh được mẫu còn hàng phù hợp với yêu cầu của chị." }];
         }
       } else if (
+        customerInputFailure === null &&
         unresolvedProductRequiresHandoff(message.text ?? "", {
           isEcho: message.isEcho,
           hasAdsContext: Boolean(message.adsContext),

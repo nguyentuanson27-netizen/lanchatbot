@@ -8,7 +8,6 @@ export function noCustomerSelection() {
     variant: { operation: "NONE", productId: null, size: null, color: null, evidenceText: null },
     budget: { operation: "KEEP", value: null, evidenceText: null },
     occasion: { operation: "KEEP", value: null, evidenceText: null },
-    obligations: [],
     salesSignals: {
       buyingIntent: { decision: "NONE", requestedAction: "NONE", quantity: null, evidenceText: null, confidence: 0 },
       checkoutExtraction: { fullName: empty, phone: empty, address: empty, paymentMethod: empty },

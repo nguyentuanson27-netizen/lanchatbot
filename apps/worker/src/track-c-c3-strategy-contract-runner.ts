@@ -541,7 +541,12 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
     selectableEvidence: presentableEvidence(input.evidence),
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
-        Object.freeze({ ...entry })
+        Object.freeze({
+          kind: entry.kind,
+          capability: entry.capability,
+          scope: entry.scope,
+          productId: entry.productId,
+        })
       )),
     }),
     canonicalContext: {
