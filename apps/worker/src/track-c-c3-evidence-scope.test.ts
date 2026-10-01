@@ -284,8 +284,11 @@ describe("Track C C3 evidence subject scope", () => {
         runtimeClaimCatalog: facts.runtime_claim_catalog,
         recipe,
       });
-      const simulationFacts = fixture.context.simulation_fact_refs.map(
-        (ref) => facts.simulation_fact_catalog[ref],
+      const simulationRefs = ((fixture as unknown as {
+        context: { simulation_fact_refs: readonly string[] };
+      }).context.simulation_fact_refs);
+      const simulationFacts = simulationRefs.map(
+        (ref: string) => facts.simulation_fact_catalog[ref],
       );
       const evidence = buildTrackCSelectableEvidence({
         context: capture.context!,

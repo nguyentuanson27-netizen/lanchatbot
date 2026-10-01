@@ -41,6 +41,7 @@ import {
   type TrackCOrdinaryDecisionInput,
   type TrackCResponderTask,
   type TrackCSelectableEvidence,
+  type TrackCRequestedObligation,
   type TrackCStrategistDecision,
   type TrackCTrustedAcquisitionMetadata,
 } from "./track-c-c3-strategy-contract.js";
@@ -213,6 +214,8 @@ export interface TrackCStrategyContractCaseInput {
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   /** Validated Producer delta for customer-reference wording only. */
   readonly customerVariant?: RealtimeCustomerInput["variant"];
+  /** Source-bound current-turn obligations; evidenceText is deliberately excluded. */
+  readonly requestedObligations?: readonly TrackCRequestedObligation[];
   /**
    * Code-owned structured decision constraint. Never derive this value from
    * customer dialogue text inside this contract runner.
@@ -243,6 +246,8 @@ export interface TrackCStrategyLiveInput {
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   /** Validated Producer delta for customer-reference wording only. */
   readonly customerVariant?: RealtimeCustomerInput["variant"];
+  /** Source-bound current-turn obligations; evidenceText is deliberately excluded. */
+  readonly requestedObligations?: readonly TrackCRequestedObligation[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -518,6 +523,7 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   evaluationContext: readonly ShadowContextMessage[];
   evidence: readonly TrackCSelectableEvidence[];
   constraints: TrackCStrategistConstraints;
+  requestedObligations?: readonly TrackCRequestedObligation[];
 }>): BuiltCandidateRequest {
   const context = input.context ?? contextFromFrozenTrackCCapture({
     capture: input.capture,
@@ -533,6 +539,11 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
     contractVersion: "TRACK_C_C3_STRATEGIST_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
     selectableEvidence: presentableEvidence(input.evidence),
+    ...(input.requestedObligations === undefined ? {} : {
+      requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
+        Object.freeze({ ...entry })
+      )),
+    }),
     canonicalContext: {
       productBinding: context.productBinding,
       dialogueEvidence: {
@@ -1388,6 +1399,8 @@ async function runTrackCStrategyContractCore(
       evaluationContext: input.evaluationContext,
       evidence,
       constraints,
+      ...(input.requestedObligations === undefined
+        ? {} : { requestedObligations: input.requestedObligations }),
     });
     let strategistPayload: unknown = null;
     try {
@@ -1412,6 +1425,7 @@ async function runTrackCStrategyContractCore(
         hardStop: constraints.hardStop,
         budgetKnown: constraints.budgetKnown ?? false,
         measurementRequestedFields: constraints.measurementRequestedFields ?? [],
+        requestedObligations: input.requestedObligations,
         boundProductIds: context.productBinding.productIds,
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
@@ -1595,6 +1609,9 @@ export async function runTrackCStrategyLive(
     currentCart: input.currentCart,
     comparisonFacts: input.comparisonFacts ?? [],
     ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+    ...(input.requestedObligations === undefined ? {} : {
+      requestedObligations: input.requestedObligations,
+    }),
     paymentOptions: input.paymentOptions,
     ...(input.firstContactInputs === undefined ? {} : { firstContactInputs: input.firstContactInputs }),
     ...(input.knownBudgetVnd === undefined ? {} : { knownBudgetVnd: input.knownBudgetVnd }),

@@ -2,7 +2,7 @@ import { observeRealtimeC3Calls } from "./realtime-c3-call-telemetry.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
 import { buildRealtimeC3Dialogue } from "./realtime-c3-dialogue.js";
 import { findVerifiedAlternative } from "./realtime-alternatives.js";
-import { extractRealtimeCustomerInput, unresolvedRealtimeCustomerInput, applyCustomerDecisionInput, customerInputCanonicalEvidence, type RealtimeCustomerInput } from "./realtime-customer-input.js";
+import { extractRealtimeCustomerInput, unresolvedRealtimeCustomerInput, applyCustomerDecisionInput, customerInputCanonicalEvidence, customerInputObligations, type RealtimeCustomerInput } from "./realtime-customer-input.js";
 import { createHash } from "node:crypto";
 import {
   buildCanonicalDecisionEvidenceV1,
@@ -5428,7 +5428,13 @@ export class RealtimeRunner {
             measurements: customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null).measurements,
           },
           dialogue: c3Dialogue,
-          ...(customerInput === null ? {} : { customerVariant: customerInput.variant }),
+          ...(customerInput === null ? {} : {
+            customerVariant: customerInput.variant,
+            requestedObligations: customerInputObligations(customerInput).map(
+              ({ kind, capability, scope, productId }) =>
+                ({ kind, capability, scope, productId })
+            ),
+          }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
               "CHECKOUT_DETAILS_MISSING",
@@ -6802,7 +6808,9 @@ export class RealtimeRunner {
     const activeClarification = state.mediaClarification;
     if (customerInput && imageAttachments.length === 0 && !message.adsContext) {
       const operation = customerInput.product.operation;
-      if (operation === "SEARCH" || operation === "REJECT") {
+      const obligations = customerInputObligations(customerInput);
+      const searchRequested = obligations.some(({ kind }) => kind === "PRODUCT_SEARCH");
+      if (searchRequested || operation === "SEARCH" || operation === "REJECT") {
         const result = await findVerifiedAlternative({ text, customerInput,
           session: state.sessionDecisionContext, currentProductId: state.currentProductId,
           search: this.productSearch, facts: this.factsReader,

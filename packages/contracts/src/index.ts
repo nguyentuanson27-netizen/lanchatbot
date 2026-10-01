@@ -330,6 +330,47 @@ export const AgentSalesSignalsV1Schema = z.object({
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 
 const CustomerInputEvidenceSchema = z.string().trim().min(1).max(2_000);
+
+export const RealtimeCustomerObligationV1Schema = z.object({
+  kind: z.enum(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT"]),
+  capability: z.enum([
+    "PRICE", "STOCK", "SIZE_FIT", "ETA", "PRODUCT_ATTRIBUTES",
+    "OFFER_CONFIGURATION",
+  ]).nullable(),
+  scope: z.enum([
+    "MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
+    "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
+    "BREATHABILITY", "CARE_INSTRUCTIONS",
+    "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
+  ]).nullable(),
+  productId: z.string().trim().min(1).max(64).nullable(),
+  evidenceText: CustomerInputEvidenceSchema.nullable(),
+}).strict().superRefine((value, context) => {
+  if (value.kind === "FACT_REQUEST") {
+    if (value.capability === null) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["capability"],
+        message: "FACT_REQUEST requires capability" });
+    }
+    const attributeScope = value.scope !== null &&
+      ["MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
+        "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
+        "BREATHABILITY", "CARE_INSTRUCTIONS"].includes(value.scope);
+    const offerScope = value.scope !== null &&
+      ["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"].includes(value.scope);
+    if ((attributeScope && value.capability !== "PRODUCT_ATTRIBUTES") ||
+        (offerScope && value.capability !== "OFFER_CONFIGURATION") ||
+        (value.scope !== null && !attributeScope && !offerScope)) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["scope"],
+        message: "obligation scope does not match capability" });
+    }
+  } else if (value.capability !== null || value.scope !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom,
+      message: "search/reject obligations cannot carry fact capability or scope" });
+  }
+});
+export type RealtimeCustomerObligationV1 =
+  z.infer<typeof RealtimeCustomerObligationV1Schema>;
+
 export const RealtimeCustomerInputSchema = z.object({
   factQuery: AgentBusinessFactQueryV1Schema,
   policyQuestion: z.enum(["EXCHANGE_AND_RETURN", "EXCHANGE_SIZE", "EXCHANGE_COLOR", "EXCHANGE_MODEL",
@@ -353,6 +394,9 @@ export const RealtimeCustomerInputSchema = z.object({
     value: z.number().int().min(0).max(100_000_000).nullable(), evidenceText: CustomerInputEvidenceSchema.nullable() }).strict(),
   occasion: z.object({ operation: z.enum(["KEEP", "SET", "CLEAR"]),
     value: z.enum(["WORK", "PARTY", "EVERYDAY"]).nullable(), evidenceText: CustomerInputEvidenceSchema.nullable() }).strict(),
+  // Optional keeps old persisted/replay payloads readable. New model generations
+  // require this field through CUSTOMER_INPUT_RESPONSE_SCHEMA.
+  obligations: z.array(RealtimeCustomerObligationV1Schema).max(8).optional(),
   salesSignals: AgentSalesSignalsV1Schema,
 }).strict();
 export type RealtimeCustomerInput = z.infer<typeof RealtimeCustomerInputSchema>;

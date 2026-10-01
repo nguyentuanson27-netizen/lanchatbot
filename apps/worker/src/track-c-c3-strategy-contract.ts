@@ -50,6 +50,13 @@ export const TRACK_C_PROTECTED_PROPOSITIONS = Object.freeze([
 export type TrackCProtectedProposition =
   typeof TRACK_C_PROTECTED_PROPOSITIONS[number];
 
+export type TrackCRequestedObligation = Readonly<{
+  kind: "FACT_REQUEST" | "PRODUCT_SEARCH" | "PRODUCT_REJECT";
+  capability: TrackCProtectedProposition | null;
+  scope: string | null;
+  productId: string | null;
+}>;
+
 /**
  * Mirrors the runtime `missingCheckout` field set. PAYMENT_METHOD was missing
  * here, so a cart that only lacked a payment choice could not be asked for
@@ -163,6 +170,7 @@ export type TrackCSemanticHandoff = Readonly<{
 
 export type TrackCResponderTask = Readonly<{
   semanticHandoff?: TrackCSemanticHandoff;
+  requestedObligations?: readonly TrackCRequestedObligation[];
   answer:
     | Readonly<{
         kind: "ANSWER";
@@ -422,6 +430,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   checkoutRequestedFields?: readonly TrackCCheckoutField[];
   budgetKnown?: boolean;
   measurementRequestedFields?: readonly MeasurementKind[];
+  requestedObligations?: readonly TrackCRequestedObligation[];
   /** Required at the model boundary; omitted only for code-owned direct calls. */
   requireStructuredGoal?: boolean;
 }>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
@@ -477,6 +486,11 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
   const task: TrackCResponderTask = Object.freeze({
     ...(semanticHandoff === undefined ? {} : { semanticHandoff }),
+    ...(input.requestedObligations === undefined ? {} : {
+      requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
+        Object.freeze({ ...entry })
+      )),
+    }),
     answer,
     evidence: realizable,
     requiredEvidenceRefs: Object.freeze(
