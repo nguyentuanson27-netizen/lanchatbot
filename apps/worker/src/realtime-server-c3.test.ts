@@ -9,7 +9,7 @@ const ports = vi.hoisted(() => ({
   inbox: {} as Record<string, unknown>, runtime: {} as Record<string, unknown>,
   facts: {} as Record<string, unknown>, search: {} as Record<string, unknown>,
   history: {} as Record<string, unknown>, model: {} as Record<string, unknown>,
-  send: vi.fn(), loop: vi.fn(),
+  send: vi.fn(), loop: vi.fn(), reserve: vi.fn(),
 }));
 vi.mock("node:fs", async (load) => ({ ...await load<typeof import("node:fs")>(),
   readFileSync: (path: unknown, ...args: unknown[]) => {
@@ -26,7 +26,7 @@ vi.mock("@lana/database", async (load) => ({ ...await load<typeof import("@lana/
 vi.mock("./redis-business-facts.js", () => ({ RedisBusinessFactsReader: class { constructor() { return ports.facts; } } }));
 vi.mock("./redis-product-search-cache.js", () => ({ RedisCachedProductSearch: class { constructor() { return ports.search; } } }));
 vi.mock("./realtime-quota.js", () => ({ RedisRealtimeGenerationQuota: class {
-  reserve = async () => true; close = async () => undefined;
+  reserve = ports.reserve; close = async () => undefined;
 } }));
 vi.mock("./vertex.js", async (load) => ({ ...await load<typeof import("./vertex.js")>(),
   VertexShadowModel: class { constructor() { return ports.model; } },
@@ -45,9 +45,12 @@ afterEach(() => {
 });
 
 describe("realtime server C3 DRY_RUN composition", () => {
-  it.each(["ON", "OFF", "HUMAN", "REJECT_MATCH", "REJECT_MISSING", "REJECT_IGNORED", "C3_RECOVERY"] as const)("runs actual server with fake IO: %s", async (mode) => {
+  it.each(["ON", "OFF", "HUMAN", "REJECT_MATCH", "REJECT_MISSING", "REJECT_IGNORED", "C3_RECOVERY", "QUOTA_DENIED", "QUOTA_ERROR"] as const)("runs actual server with fake IO: %s", async (mode) => {
     const rejection = mode.startsWith("REJECT_");
     vi.resetModules(); vi.clearAllMocks();
+    ports.reserve.mockReset();
+    if (mode === "QUOTA_ERROR") ports.reserve.mockRejectedValue(new Error("quota token=private"));
+    else ports.reserve.mockResolvedValue(mode !== "QUOTA_DENIED");
     // Override optional process flags as well as required synthetic endpoints.
     for (const key of Object.keys(process.env)) if (/^(REALTIME_|DF13_|RUNTIME_POLICY_|HISTORY_|AD_ACQUISITION_|PANCAKE_|APP_SEND_|CHATBOT_SEND_)/u.test(key)) vi.stubEnv(key, "");
     const env = { REALTIME_MODE: "DRY_RUN", APP_SEND_ENABLED: "false", CHATBOT_SEND_ENABLED: "false",
@@ -127,7 +130,9 @@ describe("realtime server C3 DRY_RUN composition", () => {
         : mode === "C3_RECOVERY"
           ? { answerText: "Size XL sẽ vừa với chị.", factualTexts: [], progressionText: null }
           : { answerText: null, factualTexts: [], progressionText: null };
-      return { providerModelVersion: "gemini-3.5-flash-lite", payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] } };
+      return { providerModelVersion: "gemini-3.5-flash-lite", payload: {
+        usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5, thoughtsTokenCount: 2, totalTokenCount: 17 },
+        candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] } };
     });
     ports.loop.mockImplementation(async ({ runner, mode: runMode, sendEnabled }) => {
       expect(runMode).toBe("DRY_RUN"); expect(sendEnabled).toBe(false);
@@ -139,6 +144,30 @@ describe("realtime server C3 DRY_RUN composition", () => {
     expect(commit).toHaveBeenCalledOnce();
     const written = commit.mock.calls[0] as unknown as [{ metaPlan?: unknown; decisionEvents?: { details: { c3Candidate?: unknown } }[] }];
     expect(written[0].metaPlan).toBeUndefined();
+    const observed = (commit.mock.calls[0] as unknown as [{ decisionEvents?: {
+      details: { c3ModelCalls?: { role: string; status: string; latencyMs: number;
+        tokenUsage: { prompt: number | null; output: number | null; thinking: number | null; total: number | null } }[] }
+    }[] }])[0].decisionEvents?.find(({ details }) => details.c3ModelCalls)?.details.c3ModelCalls;
+    if (mode === "ON" || mode === "C3_RECOVERY") {
+      expect(ports.reserve).toHaveBeenCalledTimes(1);
+      expect(observed?.map(({ role }) => role)).toEqual(["CUSTOMER_INPUT", "STRATEGIST", "RESPONDER"]);
+      for (const call of observed ?? []) {
+        expect(call).toMatchObject({ status: "RETURNED", tokenUsage: { prompt: 10, output: 5, thinking: 2, total: 17 } });
+        expect(call.latencyMs).toBeGreaterThanOrEqual(0);
+      }
+      expect(JSON.stringify(observed)).not.toContain("synthetic-customer");
+    } else if (mode === "HUMAN" || mode === "OFF") expect(observed).toBeUndefined();
+    if (mode === "QUOTA_DENIED" || mode === "QUOTA_ERROR") {
+      expect(stages).toEqual([]);
+      expect(observed).toBeUndefined();
+      expect(generate).not.toHaveBeenCalled();
+      expect(ports.reserve).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(written)).toContain(mode === "QUOTA_DENIED"
+        ? "REALTIME_GENERATION_QUOTA_EXCEEDED" : "REALTIME_GENERATION_QUOTA_UNAVAILABLE");
+      expect(JSON.stringify(written)).not.toContain("token=private");
+      return;
+    }
+    if (mode === "HUMAN") expect(ports.reserve).not.toHaveBeenCalled();
     if (rejection) {
       expect(searchText).toHaveBeenCalledWith(entry.envelope.message.text, "CB182");
       const persisted = (commit.mock.calls[0] as unknown as [{ state: { currentProductId: string | null;

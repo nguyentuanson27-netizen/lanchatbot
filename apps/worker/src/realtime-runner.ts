@@ -1,3 +1,4 @@
+import { observeRealtimeC3Calls } from "./realtime-c3-call-telemetry.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
 import { buildRealtimeC3Dialogue } from "./realtime-c3-dialogue.js";
 import { findVerifiedAlternative } from "./realtime-alternatives.js";
@@ -1309,6 +1310,21 @@ function requestedProtectedClaimTypes(
   return [];
 }
 
+/** A failed read contributes no authority. Keep the error local to this
+ * requested fact so independent facts/media can still reach compatibility fallback.
+ */
+async function resolveBusinessFactOrError(
+  resolveFact: BusinessFactsReader["resolve"],
+  query: CatalogFactQuery,
+): Promise<BusinessFactEnvelopeV1> {
+  try { return await resolveFact(query); }
+  catch {
+    return { schemaVersion: 1, status: "ERROR", source: "POS_SNAPSHOT",
+      observedAt: new Date().toISOString(), expiresAt: null, productId: query.productId,
+      facts: null, reasonCode: "BUSINESS_FACT_LOOKUP_FAILED" };
+  }
+}
+
 export async function resolveBusinessFactQueriesBounded(
   queries: BusinessFactQueriesV2,
   products: readonly StableProductDocument[],
@@ -1333,7 +1349,7 @@ export async function resolveBusinessFactQueriesBounded(
       }
       const facts: MultiFactResolution["facts"][number][] = [];
       for (const requestedFact of query.requestedFacts) {
-        const envelope = await resolveFact({
+        const envelope = await resolveBusinessFactOrError(resolveFact, {
           shopAlias,
           productId,
           intent: requestedFact,
@@ -2620,10 +2636,11 @@ export class RealtimeRunner {
       await this.completeWork(batch, status === "INBOX_ONLY");
       return true;
     } catch (error) {
-      const code =
-        error instanceof Error && error.message
-          ? error.message.slice(0, 128)
-          : "REALTIME_PROCESSING_FAILED";
+      // Keep machine codes, not raw provider/database exceptions containing
+      // query parameters, customer details or credentials, in durable retry state.
+      const message = error instanceof Error ? error.message : "";
+      const code = /^[A-Z][A-Z0-9_]{2,127}$/u.test(message)
+        ? message : "REALTIME_PROCESSING_FAILED";
       const retrySeed = batch.items.at(-1)?.eventKey ?? batch.conversationHash;
       const delaySeconds = inboxRetryDelaySeconds(
         batch.attemptCount,
@@ -3195,6 +3212,27 @@ export class RealtimeRunner {
       );
       return batchCommitStatus(result);
     }
+    // The existing quota counts AI turns, not transport calls. Share one
+    // admission across C3 roles/retries and any legacy contribution in this turn.
+    // Leave the C3-off path's existing reservation behavior unchanged.
+    let c3TurnAdmission: Promise<boolean> | null = null;
+    const reserveModelTurn = (): Promise<boolean> => {
+      const reserve = () => this.quota?.reserve(claim.pageId, now) ?? Promise.resolve(true);
+      if (this.options.c3 === null) return reserve();
+      return c3TurnAdmission ??= reserve();
+    };
+    const c3ModelCalls: NonNullable<RealtimeDecisionEventPlan["details"]["c3ModelCalls"]>[number][] = [];
+    const observedC3Transport = this.options.c3 === null ? null
+      : observeRealtimeC3Calls(this.options.c3.transport, c3ModelCalls);
+    const c3Transport = observedC3Transport === null ? null : {
+      send: async (request: Parameters<typeof observedC3Transport.send>[0]) => {
+        const allowed = await reserveModelTurn().catch(() => {
+          throw new Error("REALTIME_GENERATION_QUOTA_UNAVAILABLE");
+        });
+        if (!allowed) throw new Error("REALTIME_GENERATION_QUOTA_EXCEEDED");
+        return observedC3Transport.send(request);
+      },
+    };
     let customerInput: RealtimeCustomerInput | null = null;
     let customerInputFailure: string | null = null;
     if (this.options.c3?.customerInputEnabled && !message.isEcho && !record.killSwitch &&
@@ -3212,9 +3250,9 @@ export class RealtimeRunner {
           customerInput = await extractRealtimeCustomerInput({ text: message.text ?? "", history: context,
           state: { ...authorityModelState, cart: salesCycleRecord?.state.cart?.value ?? null,
             checkoutMissingFields: salesCycleRecord ? missingRealtimeCheckoutFields(salesCycleRecord.state) : [] },
-          modelResource: this.options.c3.modelResource, transport: this.options.c3.transport });
+          modelResource: this.options.c3.modelResource, transport: c3Transport ?? this.options.c3.transport });
         } catch (error) {
-          customerInputFailure = error instanceof Error && /^CUSTOMER_INPUT_[A-Z_]+$/u.test(error.message)
+          customerInputFailure = error instanceof Error && /^(CUSTOMER_INPUT_[A-Z_]+|REALTIME_GENERATION_QUOTA_(EXCEEDED|UNAVAILABLE))$/u.test(error.message)
             ? error.message : "CUSTOMER_INPUT_PROVIDER_FAILURE";
           customerInput = unresolvedRealtimeCustomerInput();
         }
@@ -3672,7 +3710,7 @@ export class RealtimeRunner {
           explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_MODEL_UNAVAILABLE"];
         } else {
           for (let attempt = 0; attempt < 2; attempt += 1) {
-            if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+            if (this.quota && !(await reserveModelTurn())) {
               explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_QUOTA_DENIED"];
               break;
             }
@@ -3827,7 +3865,7 @@ export class RealtimeRunner {
           rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_UNAVAILABLE"];
         } else {
           for (let attempt = 0; attempt < 2; attempt += 1) {
-            if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+            if (this.quota && !(await reserveModelTurn())) {
               rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_QUOTA_DENIED"];
               break;
             }
@@ -4203,7 +4241,7 @@ export class RealtimeRunner {
         if (
           !skipsModel &&
           this.quota &&
-          !(await this.quota.reserve(claim.pageId, now))
+          !(await reserveModelTurn())
         ) {
           const result = await this.runtime.commit(
             {
@@ -5361,7 +5399,7 @@ export class RealtimeRunner {
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
               "CHECKOUT_DETAILS_MISSING",
-          transport: this.options.c3.transport,
+          transport: c3Transport ?? this.options.c3.transport,
         });
         validateResponderOutput(
           c3Input.context, {
@@ -5442,7 +5480,8 @@ export class RealtimeRunner {
         c3Candidate = { status: "VALIDATED", replyHash: canonicalSha256(chosen.reply),
           redactedReply: redactAnalyticsMessage(chosen.reply).text,
           reason: chosen.recoveryDiagnostic ? "C3_SELECTED_FACTS_RECOVERY" : null,
-          ...(chosen.recoveryDiagnostic ? { reasonCodes: [chosen.recoveryDiagnostic.errorCode,
+          ...(chosen.recoveryDiagnostic ? { failureStage: chosen.recoveryDiagnostic.stage,
+            reasonCodes: [chosen.recoveryDiagnostic.errorCode,
             ...chosen.recoveryDiagnostic.reasonCodes ?? []] } : {}),
           selectedForOutbound: this.options.mode === "LIVE" && this.options.sendEnabled };
         if (this.options.mode === "LIVE" && this.options.sendEnabled) {
@@ -5461,7 +5500,8 @@ export class RealtimeRunner {
           ? rawCode : "TRACK_C_C3_RUNTIME_FAILURE";
         const reasonCodes = error instanceof TrackCStrategyContractFailure ? error.diagnostic.reasonCodes ?? [] : [];
         c3Candidate = { status: "REJECTED", replyHash: null, redactedReply: null,
-          reason: code, reasonCodes, selectedForOutbound: false };
+          reason: code, reasonCodes, selectedForOutbound: false,
+          ...(error instanceof TrackCStrategyContractFailure ? { failureStage: error.diagnostic.stage } : {}) };
         process.stderr.write(`${JSON.stringify({
           level: "warn", code: "TRACK_C_C3_FALLBACK",
           candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
@@ -6075,6 +6115,7 @@ export class RealtimeRunner {
           salesCycleStageAfter: salesStageAfter,
           outboundMessageCount: metaMessages.length,
           ...(customerInputFailure ? { customerInputFailure } : {}),
+          ...(c3ModelCalls.length > 0 ? { c3ModelCalls } : {}),
           ...(c3Candidate ? { c3Candidate } : {}),
           modelCalled,
           modelLatencyMs: modelCalled ? modelLatencyMs : null,
@@ -7052,7 +7093,7 @@ export class RealtimeRunner {
       size: proposal.businessFactQuery.size,
       deliveryRegion: proposal.businessFactQuery.deliveryRegion,
     };
-    const facts = await this.factsReader.resolve(query);
+    const facts = await resolveBusinessFactOrError(this.factsReader.resolve.bind(this.factsReader), query);
     if (
       product &&
       facts.status === "OK" &&

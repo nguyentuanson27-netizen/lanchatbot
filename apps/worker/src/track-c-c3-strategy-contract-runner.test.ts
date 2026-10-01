@@ -312,7 +312,8 @@ describe("Track C C3 strategy-contract runner", () => {
         expect(result.reply).toBe(candidate);
         expect(result.recoveryDiagnostic).toBeUndefined();
       } else {
-        expect(result.reply).toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
+        expect(result.output.segments.map(({ kind }) => kind)).toEqual(["GENERAL", "VERIFIED_CLAIM"]);
+        expect(result.reply).toContain("Giá hiện tại của mẫu này là 849.000đ ạ.");
         expect(result.recoveryDiagnostic?.errorCode).toBe("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
         expect(result.reply).not.toBe(candidate);
       }
@@ -344,6 +345,87 @@ describe("Track C C3 strategy-contract runner", () => {
     } else await expect(run).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
     expect(send).toHaveBeenCalledTimes(2);
   });
+  it.each(["timeout", "malformed-json", "missing-payload", "bad-shape", "unsafe-prose"])(
+    "recovers selected facts and a coverage limit after Responder %s, without another model call",
+    async (fault) => {
+      const decisionAt = new Date(recipe.evaluation_at);
+      const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+          replyAct: "ANSWER", goal: "Answer price; wrinkle resistance has no verified source.",
+          proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }) });
+      if (fault === "timeout") send.mockRejectedValueOnce(new Error("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT"));
+      else send.mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite",
+        payload: fault === "missing-payload" ? null
+          : fault === "malformed-json" ? { candidates: [{ content: { parts: [{ text: "not JSON" }] } }] }
+          : payload(fault === "unsafe-prose"
+            ? { answerText: "Phone 0901234567", factualTexts: [], progressionText: null }
+            : { unexpected: "do not use as an answer" }),
+      });
+      const result = await runTrackCStrategyLive({ context, modelResource: MODEL_RESOURCE, decisionAt,
+        dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+          text: "Price and wrinkle resistance?", attachmentCount: 0, occurredAt: decisionAt.toISOString() }],
+        checkoutRequestedFields: [], checkoutClarificationActive: false, currentCart: null,
+        paymentOptions: ["COD"], transport: { send },
+      });
+      expect(result.output.segments.map(({ kind }) => kind)).toEqual(["GENERAL", "VERIFIED_CLAIM"]);
+      expect(result.reply).toContain("849.000");
+      expect(result.reply).not.toMatch(/0901234567|not JSON|do not use/);
+      expect(result.recoveryDiagnostic).toMatchObject({ stage: "RESPONDER",
+        errorCode: fault === "timeout" ? "CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT" : "TRACK_C_RESPONDER_DRAFT_INVALID" });
+      expect(send).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it.each(["no-evidence", "identity", "aborted", "evaluation"])(
+    "does not recover across the %s boundary", async (boundary) => {
+      const decisionAt = new Date(recipe.evaluation_at);
+      const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+      const controller = new AbortController();
+      const send = vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+          replyAct: "ANSWER", goal: "Answer price.", proposition: "PRICE",
+          evidenceRefs: boundary === "no-evidence" ? [] : ["CLAIM_001"],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }) }).mockImplementationOnce(async () => {
+          if (boundary === "aborted") controller.abort();
+          return { providerModelVersion: boundary === "identity" ? "wrong-model" : "gemini-3.5-flash-lite", payload: null };
+        });
+      const evaluationContext = [{ direction: "INBOUND" as const, senderType: "CUSTOMER" as const,
+        messageType: "TEXT" as const, text: "Price?", attachmentCount: 0, occurredAt: decisionAt.toISOString() }];
+      const run = boundary === "evaluation"
+        ? runTrackCStrategyContractCase({ lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+            capture: capture(), evaluationAt: decisionAt, evaluationContext, transport: { send } })
+        : runTrackCStrategyLive({ context, modelResource: MODEL_RESOURCE, decisionAt,
+            dialogue: evaluationContext, checkoutRequestedFields: [], checkoutClarificationActive: false,
+            currentCart: null, paymentOptions: ["COD"], transport: { send }, signal: controller.signal });
+      await expect(run).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
+      expect(send).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it("does not mistake null answerText plus SUPPORTED for full compound-question coverage during guard recovery", async () => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        replyAct: "ANSWER", goal: "Answer price; wrinkle resistance is still unconfirmed.",
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001"], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) }).mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        answerText: null, factualTexts: ["Unsupported replacement price 1 dong"], progressionText: null,
+      }) });
+    const result = await runTrackCStrategyLive({ context, modelResource: MODEL_RESOURCE, decisionAt,
+      dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Price and wrinkle resistance?", attachmentCount: 0, occurredAt: decisionAt.toISOString() }],
+      checkoutRequestedFields: [], checkoutClarificationActive: false,
+      currentCart: null, paymentOptions: ["COD"], transport: { send } });
+    expect(result.output.segments.map(({ kind }) => kind)).toEqual(["GENERAL", "VERIFIED_CLAIM"]);
+    expect(result.reply).toContain("849.000");
+    expect(result.recoveryDiagnostic?.stage).toBe("FINAL_GUARD");
+  });
+
   it("runs the shared core from a live context and rejects replay fields", async () => {
     const decisionAt = new Date(recipe.evaluation_at);
     const context = contextFromFrozenTrackCCapture({

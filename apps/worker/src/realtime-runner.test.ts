@@ -3317,7 +3317,7 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
@@ -3377,6 +3377,7 @@ describe("RealtimeRunner inbound batching", () => {
       sizeHistory: [], createdAt: occurredAt, updatedAt: occurredAt,
     };
     const commit = vi.fn(async (input: unknown) => {
+      if (checkoutOwner === "FAULT_COMMIT") throw new Error("COMMIT_FAILED: phone=0901234567 token=do-not-store");
       const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState } };
       persistedState = written.state;
       if (written.salesCyclePlan) persistedCommerce = written.salesCyclePlan.state;
@@ -3428,6 +3429,16 @@ describe("RealtimeRunner inbound batching", () => {
         selectableEvidence?: Array<{ ref: string; capability: string }>;
         constraints?: { checkoutRequestedFields?: string[] };
       };
+      if (checkoutOwner === "FAULT_STRATEGIST" && prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1") {
+        throw new Error("PROVIDER_UNAVAILABLE");
+      }
+      if (prompt.contractVersion === "TRACK_C_C3_RESPONDER_INPUT_V1") {
+        if (checkoutOwner === "FAULT_RESPONDER_TIMEOUT") throw new Error("PROVIDER_TIMEOUT");
+        if (checkoutOwner === "FAULT_RESPONDER_MALFORMED") return {
+          payload: { candidates: [{ content: { parts: [{ text: "{broken" }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite",
+        };
+      }
       if (prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1") {
         if (checkoutOwner === "TYPED_FAILURE") throw new Error("PROVIDER_UNAVAILABLE");
         const response = typedOverride ?? { ...noCustomerSelection(),
@@ -3787,7 +3798,38 @@ describe("RealtimeRunner inbound batching", () => {
       { resolve: vi.fn(async () => policyResolution) },
     );
 
+    // A malformed/failed model at the final Inbox attempt must still produce
+    // verified fallback, not turn a recoverable wording fault into permanent loss.
+    if (checkoutOwner.startsWith("FAULT_") && checkoutOwner !== "FAULT_COMMIT") currentBatch.attemptCount = 5;
     expect(await runner.processOne()).toBe(true);
+    if (checkoutOwner === "FAULT_COMMIT") {
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(persistedState).toBe(state);
+      expect(persistedCommerce).toBe(commerceState);
+      expect(inbox.retryBatch).toHaveBeenCalledWith(expect.any(Object), "REALTIME_PROCESSING_FAILED", expect.any(Number));
+      expect(inbox.completeBatch).not.toHaveBeenCalled();
+      expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+      expect(JSON.stringify(vi.mocked(inbox.retryBatch!).mock.calls)).not.toContain("0901234567");
+      return;
+    }
+    if (checkoutOwner.startsWith("FAULT_")) {
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(inbox.retryBatch).not.toHaveBeenCalled();
+      expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+      const written = commit.mock.calls[0]![0] as {
+        metaPlan?: { messages: { text?: string }[] };
+        decisionEvents?: { details: { c3Candidate?: { status: string; failureStage?: string } } }[];
+      };
+      const reply = written.metaPlan?.messages.map(({ text }) => text ?? "").join(" ") ?? "";
+      expect(reply).toContain("799.000");
+      expect(persistedCommerce.cart).toBeNull();
+      const candidate = written.decisionEvents?.find(({ details }) => details.c3Candidate)?.details.c3Candidate;
+      expect(candidate).toMatchObject(checkoutOwner === "FAULT_STRATEGIST"
+        ? { status: "REJECTED", failureStage: "STRATEGIST" }
+        : { status: "VALIDATED", failureStage: "RESPONDER", reason: "C3_SELECTED_FACTS_RECOVERY" });
+      expect(c3Send).toHaveBeenCalledTimes(checkoutOwner === "FAULT_STRATEGIST" ? 1 : 2);
+      return;
+    }
     if (checkoutOwner === "TYPED_FAILURE") {
       expect(c3Send).toHaveBeenCalledTimes(1);
       const written = commit.mock.calls[0]![0] as { metaPlan?: { messages: { text: string }[] }; salesCyclePlan?: unknown };

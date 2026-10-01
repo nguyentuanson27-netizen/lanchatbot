@@ -59,9 +59,9 @@ These are scoped implementation checks, not closure of the full tasks below.
   guard; mismatched/stale/duplicate operands do not authorize a comparison.
 - [x] P09 existing accepted history retained up to 30 + inbound + context; current
   customer inputs redacted and labelled; no new store/read/model summary.
-- [ ] Exact new-head CI after owner applies and pushes the bundle. Local full
-  worker run has five history-dependent Track B errors; PostgreSQL tests remain
-  environment-skipped. See evidence; no tests were removed or weakened.
+- [x] P06-P09 source head `11f045ed`: remote CI `36773490314` succeeded.
+  `bff00e05` records that result; it is not CI evidence for the P10-P12 patch.
+  The local snapshot's history-related limits remain in its own verification record.
 - [ ] Real-model understanding/voice/handoff/continuity acceptance and remaining
   P05/P11 evaluation; DEV70 deferred, not passed. No conversion claim.
 
@@ -85,6 +85,29 @@ These are scoped implementation checks, not closure of the full tasks below.
 
 - [ ] P09 — Giữ preferences/correction/referent/câu hỏi đang dở và tiêu chí cần thiết qua window; tái dùng updater P06/profile/session/history, không thêm store mặc định. Giữ accepted Outbox recovery; differential C3-off và deviation có chủ đích.
 - [ ] P10 — Fallback đúng nhu cầu/partial facts/compatibility, detailed reason/call telemetry; recovery giữ phần chưa biết của câu giá + chống nhăn, không coi `unrealizedEvidence=[]` là trả lời đủ.
+
+### P10-P12 source increment (2026-10-01)
+
+Baseline `bff00e05`. See [spec](../docs/specs/pr377-p10-p12-runtime-20261001.md),
+[verification](evidence/pr377-p10-p12-verification-20261001.md) and
+[whole-PR self-review](evidence/pr377-full-pr-self-review-20261001.md).
+
+- [x] P10 bounded Responder transport/JSON/guard recovery preserves selected facts
+  and an incomplete-answer limit without an extra model call or effect.
+- [x] P10 independent fact-read failures are isolated; original stage/machine
+  reasons remain visible. Raw exception prose is not stored in Inbox reasons.
+- [x] P10 actual runner tests inject model/lookup/commit faults; no permanent Inbox
+  loss for recoverable wording faults and no accepted state from a failed commit.
+- [x] P10/P12 quota finding: reuse existing turn quota across C3 roles; denied/error
+  quota and human ownership prevent model calls. No new budget service.
+- [x] P10 event call/latency/token observations are role-specific, nullable and
+  payload-free; RETURNED is not a successful answer or business effect.
+- [x] P12 complete-PR diff self-review and source/spec/export checks performed.
+- [ ] P11 real-model DEV70/judge/full-history quality and A/B: DEFERRED by owner,
+  not passed. Frozen validators and scripted tests do not close this task.
+- [ ] P12 exact new-head CI after owner commit/push, and remaining task acceptance.
+  Local full worker run: 1,912 passed, 0 failed, 4 opt-in skips. See the
+  verification record for exact commands and the deferred model evaluation.
 
 ## 5. Đánh giá và bàn giao
 

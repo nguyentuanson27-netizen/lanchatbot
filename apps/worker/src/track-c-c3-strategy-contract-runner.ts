@@ -1369,6 +1369,17 @@ async function runTrackCStrategyContractCore(
     task,
     conversationLane: lane,
   });
+  // Recovery only re-renders an already-validated answer task. It must not
+  // choose a strategy, manufacture missing evidence, or finish an action.
+  const assertRecoveryAllowed = (failure: TrackCStrategyContractFailure): void => {
+    if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" || input.signal?.aborted ||
+        failure.diagnostic.errorCode === "TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH" ||
+        failure.diagnostic.errorCode === "CONTEXT_V2_CANDIDATE_CALLER_ABORTED" ||
+        task.answer.kind !== "ANSWER" || task.answer.evidenceStatus !== "SUPPORTED" ||
+        task.evidence.length === 0 || task.unrealizedEvidence.length > 0 ||
+        task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") throw failure;
+  };
+  let recoveryDiagnostic: TrackCStrategyContractDiagnostic | undefined;
   let responderPayload: unknown = null;
   let draft: ResponderDraft;
   try {
@@ -1386,10 +1397,14 @@ async function runTrackCStrategyContractCore(
       lane === "ADAPTIVE_FOLLOWUP",
     );
   } catch (error) {
-    throw stageFailure("RESPONDER", responderPayload, error);
+    const failure = stageFailure("RESPONDER", responderPayload, error);
+    assertRecoveryAllowed(failure);
+    recoveryDiagnostic = failure.diagnostic;
+    // No trustworthy draft remains. Keep source facts and explicitly decline
+    // whole-answer completeness; never parse goal text into a factual claim.
+    draft = { answerText: INCOMPLETE_ANSWER_TEXT, factualTexts: [], progressionText: null };
   }
   let output: ContextV2CandidateOutputV2;
-  let recoveryDiagnostic: TrackCStrategyContractDiagnostic | undefined;
   try {
     output = compileResponderDraft({
       context,
@@ -1404,18 +1419,17 @@ async function runTrackCStrategyContractCore(
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
     });
   } catch (error) {
-    const failure = stageFailure("FINAL_GUARD", responderPayload, error);
+    const failure = recoveryDiagnostic === undefined
+      ? stageFailure("FINAL_GUARD", responderPayload, error)
+      : new TrackCStrategyContractFailure(recoveryDiagnostic);
     // Restore source facts, but do not erase a valid unanswered-part statement.
     // SUPPORTED certifies only the declared capability, not whole-turn coverage.
     // Frozen evaluation still exposes the original rejection.
-    if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" ||
-        task.answer.kind !== "ANSWER" || task.answer.evidenceStatus !== "SUPPORTED" ||
-        task.evidence.length === 0 || task.unrealizedEvidence.length > 0 ||
-        task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") throw failure;
+    assertRecoveryAllowed(failure);
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: draft.answerText, factualTexts: [], progressionText: null },
+        draft: { answerText: draft.answerText ?? INCOMPLETE_ANSWER_TEXT, factualTexts: [], progressionText: null },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],

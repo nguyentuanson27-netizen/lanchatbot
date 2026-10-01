@@ -323,6 +323,17 @@ Quy mô S: 1–2 file chức năng; M: khoảng 3–5. Files là điểm bắt �
 
 **Nghiệm thu/kiểm chứng:** code/spec/tests/evidence/PR đúng source, residual đọc được, diff self-review và required CI; không merge/deploy/live. Independent reviewer không là gate mặc định.
 
+### P10-P12 execution amendment - 2026-10-01
+
+The owner requested this source patch be applied to PR377 after whole-PR
+self-review. [P10-P12 spec](../docs/specs/pr377-p10-p12-runtime-20261001.md)
+records narrow recovery, lookup isolation, existing-quota admission and call
+observations. [Verification](evidence/pr377-p10-p12-verification-20261001.md) and
+[review](evidence/pr377-full-pr-self-review-20261001.md) separate implementation
+proof from model quality. P11 real-model DEV70 and related quality evaluation stay
+DEFERRED under the earlier owner instruction; P12 source review may proceed, but
+this does not waive P11 or exact-head CI for full-plan acceptance. No new roadmap.
+
 ## 6. Kiểm chứng theo ranh giới
 
 Lệnh hiện có, dùng từ repo root sau thay đổi tương ứng:
