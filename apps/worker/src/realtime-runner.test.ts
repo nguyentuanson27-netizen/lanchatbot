@@ -3455,7 +3455,13 @@ describe("RealtimeRunner inbound batching", () => {
       if (checkoutOwner === "MULTI_COMPARISON" && prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" &&
           prompt.selectableEvidence?.some(({ capability }) => capability === "PRODUCT_COMPARISON")) {
         return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
-          replyAct: "ANSWER", goal: "Compare the verified unit prices without claiming superior quality.",
+          replyAct: "ANSWER", goal: [
+            "NEED: Compare the verified unit prices without claiming superior quality.",
+            "KNOWN: NONE",
+            "ANSWER: selected evidence for the current request",
+            "LIMIT: NONE",
+            "NEXT: NONE",
+          ].join("\n"),
           proposition: "PRODUCT_COMPARISON", evidenceRefs: prompt.selectableEvidence.filter(
             ({ capability }) => capability === "PRODUCT_COMPARISON").map(({ ref }) => ref),
           continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
@@ -3463,7 +3469,13 @@ describe("RealtimeRunner inbound batching", () => {
       }
       const response = variantChoice
         ? prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
-          ? { replyAct: "ACKNOWLEDGE", goal: "Keep the customer's size M choice for this product.",
+          ? { replyAct: "ACKNOWLEDGE", goal: [
+            "NEED: Keep the customer's size M choice for this product.",
+            "KNOWN: NONE",
+            "ANSWER: NONE",
+            "LIMIT: NONE",
+            "NEXT: NONE",
+          ].join("\n"),
               proposition: "NONE", evidenceRefs: [],
               continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
           : { answerText: "Dạ, em theo lựa chọn chị vừa nói ạ.",
@@ -3471,13 +3483,30 @@ describe("RealtimeRunner inbound batching", () => {
         : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
         ? prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
           ? {
-              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              replyAct: "ACKNOWLEDGE", goal: [
+                "NEED: Collect the missing payment choice.",
+                "KNOWN: NONE",
+                "ANSWER: NONE",
+                "LIMIT: NONE",
+                "NEXT: missing checkout fields enable the canonical transaction",
+              ].join("\n"),
               proposition: "PRICE", evidenceRefs: [], continuation: null,
               canonicalAction: "ASK_CHECKOUT_DETAILS",
             }
           : {
-            replyAct: "ANSWER", goal: shipping.length > 0
-              ? "Answer the verified cart delivery fee." : "Answer the verified price.",
+            replyAct: "ANSWER", goal: shipping.length > 0 ? [
+              "NEED: Answer the verified cart delivery fee.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n") : [
+              "NEED: Answer the verified price.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
             proposition: shipping.length > 0 ? "SHIPPING_FEE" : "PRICE",
             evidenceRefs: shipping.length > 0 ? shipping.map(({ ref }) => ref) :
               prompt.selectableEvidence?.filter(({ capability }) =>
@@ -4083,6 +4112,7 @@ describe("RealtimeRunner inbound batching", () => {
       const body = JSON.parse(c3Send.mock.calls[0]![0].body);
       const strategistInput = JSON.parse(body.contents[0].parts[0].text);
       expect(strategistInput.dialogue).toHaveLength(32);
+      expect(strategistInput.constraints.budgetKnown).toBe(true);
       expect(strategistInput.dialogue[1].text).toBe("Mẫu đó chất liệu gì?");
       expect(strategistInput.dialogue[2].text).toBe("Chị đang hỏi mã nào?");
       expect(JSON.parse(strategistInput.dialogue[0].text)).toEqual({
@@ -4146,13 +4176,31 @@ describe("RealtimeRunner inbound batching", () => {
         const prompt = JSON.parse(body.contents[0].parts[0].text);
         const size = prompt.selectableEvidence.filter((entry: { capability: string }) => entry.capability === "SIZE_FIT");
         const response = checkoutOwner === "FIT_REQUIRED"
-          ? { replyAct: "ANSWER", goal: "Ask the missing waist measurement for the current fit request.",
+          ? { replyAct: "ANSWER", goal: [
+            "NEED: Ask the missing waist measurement for the current fit request.",
+            "KNOWN: NONE",
+            "ANSWER: NONE",
+            "LIMIT: requested fact has no verified evidence",
+            "NEXT: missing measurements enable the current fit decision",
+          ].join("\n"),
               proposition: "SIZE_FIT", evidenceRefs: [], continuation: null, canonicalAction: "ASK_MEASUREMENTS" }
           : checkoutOwner === "FIT_READY"
-            ? { replyAct: "ANSWER", goal: "State the Size Engine recommendation for the current waist measurement.",
+            ? { replyAct: "ANSWER", goal: [
+              "NEED: State the Size Engine recommendation for the current waist measurement.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
                 proposition: "SIZE_FIT", evidenceRefs: size.map((entry: { ref: string }) => entry.ref),
                 continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
-            : { replyAct: "ACKNOWLEDGE", goal: "Acknowledge without asking for unrelated or unusable customer input.",
+            : { replyAct: "ACKNOWLEDGE", goal: [
+              "NEED: Acknowledge without asking for unrelated or unusable customer input.",
+              "KNOWN: NONE",
+              "ANSWER: NONE",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
                 proposition: "NONE", evidenceRefs: [], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" };
         return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
           providerModelVersion: "gemini-3.5-flash-lite" };
@@ -4167,6 +4215,13 @@ describe("RealtimeRunner inbound batching", () => {
       const fitPrompt = JSON.parse(fitBody.contents[0].parts[0].text);
       expect(fitPrompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
         .toBe(checkoutOwner === "FIT_REQUIRED");
+      expect(fitPrompt.constraints.measurementRequestedFields)
+        .toEqual(checkoutOwner === "FIT_REQUIRED" ? ["WAIST_CM"] : []);
+      if (checkoutOwner === "FIT_REQUIRED") {
+        const responderPrompt = JSON.parse(JSON.parse(c3Send.mock.calls[before + 1]![0].body).contents[0].parts[0].text);
+        expect(responderPrompt.responderTask.canonicalRequest)
+          .toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["WAIST_CM"] });
+      }
       expect(fitPrompt.selectableEvidence.some((entry: { capability: string }) => entry.capability === "SIZE_FIT"))
         .toBe(checkoutOwner === "FIT_READY");
       expect(c3Send.mock.calls.length - before).toBe(2);
@@ -4244,7 +4299,13 @@ describe("RealtimeRunner inbound batching", () => {
     const concernReply = "Chị đang cân nhắc khoản chi cho mẫu này. Điểm nào khiến chị còn phân vân nhất?";
     c3Send.mockResolvedValueOnce({
       payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
-        replyAct: "CLARIFY", goal: "Understand the concern without repeating the known price.",
+        replyAct: "CLARIFY", goal: [
+          "NEED: Understand the concern without repeating the known price.",
+          "KNOWN: NONE",
+          "ANSWER: NONE",
+          "LIMIT: NONE",
+          "NEXT: assigned customer input changes the next executable decision",
+        ].join("\n"),
         proposition: "NONE", evidenceRefs: [], canonicalAction: "NONE",
         continuation: { type: "ASK", input: "DECISION_CRITERION" },
       }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",

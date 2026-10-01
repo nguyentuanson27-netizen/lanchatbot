@@ -1,4 +1,4 @@
-import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
+import type { BusinessFactEnvelopeV1, MeasurementKind } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { DECISION_GUARD_REASON_CODES_V1 } from "@lana/contracts";
 import {
@@ -26,6 +26,7 @@ import { trackCComposeReply, trackCOrderEvidence, trackCRealizationVariants } fr
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
+  validatedTrackCMeasurementFields,
   isTrackCTrustedAcquisitionMetadata,
   selectTrackCConversationLane,
   TRACK_C_PROTECTED_PROPOSITIONS,
@@ -189,6 +190,8 @@ export type TrackCStrategistConstraints = Readonly<{
   productResolved: boolean;
   hardStop: boolean;
   checkoutRequestedFields?: readonly CheckoutField[];
+  budgetKnown?: boolean;
+  measurementRequestedFields?: readonly MeasurementKind[];
 }>;
 
 type FirstContactInputs = Readonly<{
@@ -206,6 +209,10 @@ export interface TrackCStrategyContractCaseInput {
   /** Runtime-owned; never inferred from dialogue or carried as model evidence. */
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
   readonly firstContactInputs?: FirstContactInputs;
+  /** Current source-bound session preference; never inferred from goal. */
+  readonly knownBudgetVnd?: number | null;
+  /** Current Size Engine missing fields; an empty array forbids the request. */
+  readonly measurementRequestedFields?: readonly MeasurementKind[];
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   /**
    * Code-owned structured decision constraint. Never derive this value from
@@ -230,6 +237,10 @@ export interface TrackCStrategyLiveInput {
   readonly paymentOptions: readonly ("COD" | "BANK_TRANSFER")[];
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
   readonly firstContactInputs?: FirstContactInputs;
+  /** Current source-bound session preference; never inferred from goal. */
+  readonly knownBudgetVnd?: number | null;
+  /** Current Size Engine missing fields; an empty array forbids the request. */
+  readonly measurementRequestedFields?: readonly MeasurementKind[];
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
@@ -416,13 +427,15 @@ function strategistResponseSchema(
   // contract until the code-derived, latest-relevant dialogue state says that
   // measurements are unavailable; the compiler retains the same check as a
   // defense at the provider boundary.
-  const continuationInputs = constraints.measurementsUnavailable
-    ? ORDINARY_INPUTS
-    : ORDINARY_INPUTS.filter((input) => input !== "USUAL_SIZE");
+  const continuationInputs = ORDINARY_INPUTS.filter((input) =>
+    (input !== "USUAL_SIZE" || constraints.measurementsUnavailable) &&
+    (input !== "BUDGET" || !constraints.budgetKnown)
+  );
   const shared = {
     replyAct: { type: "STRING", enum: constraints.hardStop
       ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
-    goal: { type: "STRING", minLength: 1, maxLength: 500 },
+    goal: { type: "STRING", minLength: 1, maxLength: 500,
+      description: "Exactly five lines in order: NEED: ...; KNOWN: ...; ANSWER: ...; LIMIT: ...; NEXT: ... . Use NONE for absent sections, never NEED. NEXT states the decision impact of the single assigned request, otherwise NONE. LIMIT preserves every unsupported requested part." },
     proposition: { type: "STRING", enum: TRACK_C_PROTECTED_PROPOSITIONS },
     evidenceRefs: {
       type: "ARRAY",
@@ -540,6 +553,8 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
       productResolved: input.constraints.productResolved,
       hardStop: input.constraints.hardStop,
       checkoutRequestedFields: input.constraints.checkoutRequestedFields ?? [],
+      budgetKnown: input.constraints.budgetKnown ?? false,
+      measurementRequestedFields: input.constraints.measurementRequestedFields ?? [],
     },
   });
 }
@@ -571,8 +586,10 @@ function modelAuthoredEvidence(
 }
 
 function responderTaskPrompt(task: TrackCResponderTask) {
+  const { goal, ...answer } = task.answer;
   return Object.freeze({
-    answer: task.answer,
+    answer: task.semanticHandoff === undefined ? { ...answer, goal } : answer,
+    ...(task.semanticHandoff === undefined ? {} : { semanticHandoff: task.semanticHandoff }),
     evidence: responderReadableEvidence(task),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
@@ -611,8 +628,11 @@ function answerWording(task: TrackCResponderTask): readonly string[] {
 function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): readonly string[] {
   const canonical = task.canonicalRequest?.type;
   if (canonical === "ASK_MEASUREMENTS" && task.canonicalRequest?.measurementFields?.length === 1) {
-    return task.canonicalRequest.measurementFields[0] === "HEIGHT_CM"
-      ? ["Chị cho em xin thêm chiều cao nhé?"] : ["Chị cho em xin thêm cân nặng nhé?"];
+    const labels: Record<MeasurementKind, string> = {
+      HEIGHT_CM: "chiều cao", WEIGHT_KG: "cân nặng",
+      BUST_CM: "số đo vòng ngực", WAIST_CM: "số đo vòng eo", HIPS_CM: "số đo vòng mông",
+    };
+    return [`Chị cho em xin thêm ${labels[task.canonicalRequest.measurementFields[0]!]} nhé?`];
   }
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
     return FIRST_CONTACT_REQUEST_WORDING[canonical];
@@ -646,6 +666,11 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
     ...mentionedColors.map((color) => `Chị đang ưu tiên màu ${color} đúng không ạ?`)];
 }
 
+function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
+  return task.semanticHandoff?.limit != null && !singleRequestBody(task) &&
+    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
+}
+
 function responderDraftSchema(
   task: TrackCResponderTask,
   conversationLane: TrackCConversationLane,
@@ -670,8 +695,9 @@ function responderDraftSchema(
           ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
-          : { description: "Customer context or specific unanswered part from the goal. SUPPORTED does not imply complete coverage. No shop facts, quantities, sizes or requests here.",
-            anyOf: [{ type: "NULL" }, { type: "STRING", minLength: 1, maxLength: 600 }] }
+          : { description: "Word the assigned semanticHandoff context/limit only. SUPPORTED is not complete coverage. No shop facts, quantities, sizes or requests here.",
+            anyOf: [...(responderHasAssignedLimit(task) ? [] : [{ type: "NULL" }]),
+              { type: "STRING", minLength: 1, maxLength: 600 }] }
         : boundedAcknowledgement
         ? { type: "STRING", enum: answers }
         : answers.length > 0
@@ -719,11 +745,6 @@ function buildTrackCResponderContractRequest(input: Readonly<{
   ), {
     contractVersion: "TRACK_C_C3_RESPONDER_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
-    customerDecisionSignals: {
-      act: input.context.dialogueEvidence.act,
-      confidenceBand: input.context.dialogueEvidence.confidenceBand,
-      reasonCodes: input.context.dialogueEvidence.reasonCodes,
-    },
     responderTask: responderTaskPrompt(input.task),
   });
 }
@@ -976,6 +997,9 @@ function compileResponderDraft(input: Readonly<{
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
   }
+  if (adaptive && responderHasAssignedLimit(task) && draft.answerText === null) {
+    throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
+  }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
@@ -1131,6 +1155,8 @@ function constraintsFor(
   dialogue: readonly ShadowContextMessage[],
   canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[],
   checkoutClarificationActive = false,
+  measurementRequestedFields: readonly MeasurementKind[] = ["HEIGHT_CM", "WEIGHT_KG"],
+  budgetKnown = false,
 ): TrackCStrategistConstraints {
   if (!metadata.every(validMetadata)) {
     throw new Error("TRACK_C_V5_SIMULATION_METADATA_INVALID");
@@ -1152,6 +1178,8 @@ function constraintsFor(
       measurementsUnavailable: false,
       productResolved,
       hardStop: true,
+      budgetKnown,
+      measurementRequestedFields: [],
     });
   }
   if (!productResolved) {
@@ -1160,6 +1188,8 @@ function constraintsFor(
       measurementsUnavailable: false,
       productResolved: false,
       hardStop: false,
+      budgetKnown,
+      measurementRequestedFields: [],
     });
   }
   const unavailable = measurementsUnavailable(dialogue);
@@ -1168,7 +1198,8 @@ function constraintsFor(
   // canonical fit readiness must identify a measurement blocker before this
   // action is offered; a resolved product alone does not authorize a new fit
   // funnel after an unrelated question.
-  if (!unavailable && context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
+  if (!unavailable && measurementRequestedFields.length > 0 &&
+      context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
     permittedCanonicalActions.push("ASK_MEASUREMENTS");
   }
   // Ask for the missing details at the state the runtime actually reaches.
@@ -1196,6 +1227,8 @@ function constraintsFor(
     measurementsUnavailable: unavailable,
     productResolved: true,
     hardStop: false,
+    budgetKnown,
+    measurementRequestedFields,
     ...(checkoutAuthorized ? {
       checkoutRequestedFields: Object.freeze([...checkoutRequestedFields]),
     } : {}),
@@ -1294,10 +1327,21 @@ async function runTrackCStrategyContractCore(
   const lane = selectTrackCConversationLane(
     trustedAcquisition === undefined ? [] : [trustedAcquisition],
   );
+  if (input.knownBudgetVnd != null &&
+      (!Number.isSafeInteger(input.knownBudgetVnd) || input.knownBudgetVnd < 0)) {
+    throw new Error("TRACK_C_CUSTOMER_INPUTS_INVALID");
+  }
+  const measurementRequestedFields = validatedTrackCMeasurementFields(input.measurementRequestedFields)
+    .filter((kind) => {
+      const value = input.firstContactInputs?.measurements[kind];
+      return value === undefined || !Number.isFinite(value) || value <= 0;
+    });
   const constraints = constraintsFor(
     context, simulationMetadata, input.evaluationContext,
     input.canonicalCheckoutRequestedFields,
     input.checkoutClarificationActive,
+    measurementRequestedFields,
+    input.knownBudgetVnd != null,
   );
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
@@ -1340,10 +1384,13 @@ async function runTrackCStrategyContractCore(
       const compiled = compileTrackCStrategistDecision({
         decision,
         evidence,
+        requireStructuredGoal: true,
         permittedCanonicalActions: constraints.permittedCanonicalActions,
         measurementsUnavailable: constraints.measurementsUnavailable,
         productResolved: constraints.productResolved,
         hardStop: constraints.hardStop,
+        budgetKnown: constraints.budgetKnown ?? false,
+        measurementRequestedFields: constraints.measurementRequestedFields ?? [],
         boundProductIds: context.productBinding.productIds,
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
@@ -1525,6 +1572,9 @@ export async function runTrackCStrategyLive(
     comparisonFacts: input.comparisonFacts ?? [],
     paymentOptions: input.paymentOptions,
     ...(input.firstContactInputs === undefined ? {} : { firstContactInputs: input.firstContactInputs }),
+    ...(input.knownBudgetVnd === undefined ? {} : { knownBudgetVnd: input.knownBudgetVnd }),
+    // Live execution never invents a measurement blocker from missing metadata.
+    measurementRequestedFields: input.measurementRequestedFields ?? [],
     ...(input.trustedAcquisition === undefined
       ? {} : { trustedAcquisition: input.trustedAcquisition }),
     transport: input.transport,

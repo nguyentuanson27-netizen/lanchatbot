@@ -1,3 +1,4 @@
+import { MeasurementKindSchema, type MeasurementKind } from "@lana/contracts";
 import { redactAnalyticsMessage } from "@lana/database";
 
 export type TrackCConversationLane =
@@ -150,7 +151,17 @@ export type TrackCStrategistDecision = Readonly<{
   canonicalAction: TrackCCanonicalAction;
 }>;
 
+/** Structured semantic instructions, never commercial evidence or action authority. */
+export type TrackCSemanticHandoff = Readonly<{
+  need: string;
+  known: string | null;
+  answer: string | null;
+  limit: string | null;
+  next: string | null;
+}>;
+
 export type TrackCResponderTask = Readonly<{
+  semanticHandoff?: TrackCSemanticHandoff;
   answer:
     | Readonly<{
         kind: "ANSWER";
@@ -179,7 +190,7 @@ export type TrackCResponderTask = Readonly<{
     | Readonly<{
       type: Exclude<TrackCCanonicalAction, "NONE">;
       requestedFields?: readonly TrackCCheckoutField[];
-      measurementFields?: readonly ("HEIGHT_CM" | "WEIGHT_KG")[];
+      measurementFields?: readonly MeasurementKind[];
     }>
     | null;
   /** Code-derived before the Responder; never inferred from dialogue. */
@@ -296,11 +307,29 @@ function readDecision(value: unknown): TrackCStrategistDecision {
   });
 }
 
+/** Canonical field names only; neither dialogue nor model goal selects them. */
+export function validatedTrackCMeasurementFields(
+  fields: readonly MeasurementKind[] = ["HEIGHT_CM", "WEIGHT_KG"],
+): readonly MeasurementKind[] {
+  if (!Array.isArray(fields) || fields.length > 5 ||
+      new Set(fields).size !== fields.length ||
+      fields.some((field) => !MeasurementKindSchema.safeParse(field).success)) {
+    throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  }
+  return Object.freeze([...fields]);
+}
+
 function canonicalRequest(
   action: TrackCCanonicalAction,
   requestedFields: readonly TrackCCheckoutField[],
+  measurementFields?: readonly MeasurementKind[],
 ): TrackCResponderTask["canonicalRequest"] {
   if (action === "NONE") return null;
+  if (action === "ASK_MEASUREMENTS") {
+    const fields = validatedTrackCMeasurementFields(measurementFields);
+    if (fields.length === 0) throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+    return Object.freeze({ type: action, measurementFields: fields });
+  }
   if (action === "ASK_CHECKOUT_DETAILS") {
     if (requestedFields.length === 0) {
       throw new Error("TRACK_C_CHECKOUT_FIELDS_UNRESOLVED");
@@ -344,6 +373,43 @@ function selectedEvidence(
   return Object.freeze(values);
 }
 
+/**
+ * Bounded fallback for the existing single-intent Producer request. Parse only
+ * fixed section syntax; prose is never interpreted into facts or permissions.
+ * The model path opts in after normal decision/PII/authority validation. Fixed
+ * code-owned tasks and historical direct compiler callers retain their API.
+ */
+function structuredGoal(
+  decision: TrackCStrategistDecision,
+  requiresLimit: boolean,
+): TrackCSemanticHandoff {
+  const keys = ["NEED", "KNOWN", "ANSWER", "LIMIT", "NEXT"] as const;
+  const lines = decision.goal.split(/\r?\n/u);
+  const invalid = () => new Error("TRACK_C_STRATEGIST_GOAL_INVALID");
+  if (lines.length !== keys.length) throw invalid();
+  const parts = keys.map((key, index) => {
+    const prefix = `${key}: `;
+    const line = lines[index]!;
+    if (!line.startsWith(prefix)) throw invalid();
+    const value = line.slice(prefix.length);
+    if (!value || value !== value.trim()) throw invalid();
+    return value === "NONE" ? null : value;
+  });
+  const [need, known, answer, limit, next] = parts;
+  const hasRequest = decision.continuation?.type === "ASK" ||
+    (decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION");
+  // These canonical tasks expose no open answer slot. Reject an incompatible
+  // plan instead of silently dropping its limit or opening checkout prose.
+  const closedAnswerSlot = decision.canonicalAction === "ASK_CHECKOUT_DETAILS" ||
+    decision.canonicalAction === "HOLD_POSITION";
+  if (need == null || (next != null) !== hasRequest || (requiresLimit && limit == null) ||
+      (closedAnswerSlot && limit != null)) {
+    throw invalid();
+  }
+  return Object.freeze({ need, known: known ?? null, answer: answer ?? null,
+    limit: limit ?? null, next: next ?? null });
+}
+
 export function compileTrackCStrategistDecision(input: Readonly<{
   decision: unknown;
   evidence: readonly TrackCSelectableEvidence[];
@@ -353,6 +419,10 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   hardStop: boolean;
   boundProductIds?: readonly string[];
   checkoutRequestedFields?: readonly TrackCCheckoutField[];
+  budgetKnown?: boolean;
+  measurementRequestedFields?: readonly MeasurementKind[];
+  /** Required at the model boundary; omitted only for code-owned direct calls. */
+  requireStructuredGoal?: boolean;
 }>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
   const decision = readDecision(input.decision);
   const evidence = selectedEvidence(
@@ -365,7 +435,9 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   )) {
     throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
   }
-  if (!input.permittedCanonicalActions.includes(decision.canonicalAction) ||
+  if ((input.budgetKnown && decision.continuation?.type === "ASK" &&
+       decision.continuation.input === "BUDGET") ||
+      !input.permittedCanonicalActions.includes(decision.canonicalAction) ||
       (decision.canonicalAction === "NONE" && decision.continuation === null) ||
       (decision.canonicalAction !== "NONE" && decision.continuation !== null) ||
       (input.hardStop && decision.canonicalAction !== "HOLD_POSITION") ||
@@ -391,6 +463,11 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
+  const semanticHandoff = input.requireStructuredGoal === true
+    ? structuredGoal(decision, unrealizable.length > 0 ||
+        (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
+          decision.continuation?.type === "KEEP_OPEN"))
+    : undefined;
   const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
     ? Object.freeze({
         kind: "ANSWER", evidenceStatus, goal: decision.goal,
@@ -398,6 +475,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       })
     : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
   const task: TrackCResponderTask = Object.freeze({
+    ...(semanticHandoff === undefined ? {} : { semanticHandoff }),
     answer,
     evidence: realizable,
     requiredEvidenceRefs: Object.freeze(
@@ -411,6 +489,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     canonicalRequest: canonicalRequest(
       decision.canonicalAction,
       input.checkoutRequestedFields ?? [],
+      input.measurementRequestedFields,
     ),
   });
   // Return the validated, PII-safe decision used to compile this exact task.
@@ -444,7 +523,7 @@ export function compileTrackCFixedFirstContactTask(input: Readonly<{
     : input.missingMeasurements?.length === 0
       ? { continuation: { type: "KEEP_OPEN" }, canonicalRequest: null }
       : { continuation: null, canonicalRequest: { type: "ASK_MEASUREMENTS",
-          ...(input.missingMeasurements === undefined ? {} : { measurementFields: input.missingMeasurements }) } };
+          measurementFields: validatedTrackCMeasurementFields(input.missingMeasurements) } };
   const bound = input.boundProductIds ?? [];
   const available = input.evidence.filter((entry) =>
     trackCEvidenceHasSafeFactualEgress(entry) &&

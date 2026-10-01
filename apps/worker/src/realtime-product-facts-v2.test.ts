@@ -599,7 +599,13 @@ describe("registry producer to serialized index readback to C3", () => {
       checkoutClarificationActive: false, transport: { send: async ({ body }) => {
         const request = JSON.parse(JSON.parse(body).contents[0].parts[0].text);
         const output = request.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
-          ? { replyAct: "ANSWER", goal: "Trả lời chất liệu có nguồn.", proposition: "PRODUCT_ATTRIBUTES",
+          ? { replyAct: "ANSWER", goal: [
+            "NEED: Trả lời chất liệu có nguồn.",
+            "KNOWN: NONE",
+            "ANSWER: selected evidence for the current request",
+            "LIMIT: NONE",
+            "NEXT: NONE",
+          ].join("\n"), proposition: "PRODUCT_ATTRIBUTES",
               evidenceRefs: materials.map((entry) => entry.ref), continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
           : { answerText: null, factualTexts: [], progressionText: null };
         return { providerModelVersion: "gemini-3.5-flash-lite", payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(output) }] } }] } };

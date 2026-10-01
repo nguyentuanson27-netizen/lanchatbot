@@ -127,3 +127,22 @@ Baseline `bff00e05`. See [spec](../docs/specs/pr377-p10-p12-runtime-20261001.md)
 - Evidence cũ có phiên bản; không ghi đè bằng kết quả candidate mới.
 
 Không bảo toàn regex kích hoạt sai chỉ vì thuộc fix trước. Thay hiểu ý định tại producer/consumer tương ứng; không fit câu ví dụ/DEV70 hoặc thêm template. Typed JSON/span/confidence không tự cấp quyền nghiệp vụ. Giữ form báo giá đầu và sáu trường Strategist theo spec.
+
+
+### PR377 quality-closure Slice A source candidate (2026-10-01)
+
+- [x] Prompt ownership and KEEP_OPEN contradiction: centralized prompts assign
+  semantic choice to Strategist and wording only to Responder; concern signals
+  no longer enter the Responder request.
+- [x] Known budget and exact missing measurement checks: provider schema plus
+  compiler checks; runtime session/Size Engine bridges have regression assertions.
+- [x] Compound handoff uses the five-section goal fallback from PR380, retaining
+  the six-field Strategist contract and code-only authority. Structured presence,
+  PII normalization and closed canonical slots have positive/negative controls.
+- [ ] Full quality closure: Slice B semantic guard and Slice C complete runtime
+  journey matrix are not claimed by this source increment.
+- [ ] Real-model runtime acceptance / DEV70 R2: NOT RUN in this environment.
+- [ ] P11: OPEN. P12: BLOCKED pending remaining implementation and Agent 2.
+
+Source/verification details: `tasks/evidence/pr377-slice-a-20261001.md`.
+No merge, deploy, traffic, rubric or threshold change. PR377 remains draft.

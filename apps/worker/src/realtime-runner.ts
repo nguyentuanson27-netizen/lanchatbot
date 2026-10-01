@@ -5387,6 +5387,7 @@ export class RealtimeRunner {
           modelResource: this.options.c3.modelResource,
           decisionAt: new Date(),
           comparisonFacts: businessFactEnvelopes,
+          knownBudgetVnd: nextState.sessionDecisionContext?.budgetVnd ?? null,
           firstContactInputs: {
             color: customerInput?.variant.color ?? nextState.consideredVariant.color,
             measurements: customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null).measurements,

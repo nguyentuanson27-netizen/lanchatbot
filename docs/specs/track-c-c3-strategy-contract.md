@@ -1,6 +1,6 @@
 # Draft Spec: Track C C3 strategy contract simplification
 
-**Status:** Draft / evidence input contract, scope and checkout alignment
+**Status:** Draft / PR377 Slice A prompt ownership and semantic handoff; real-model acceptance OPEN
 
 **Source:** PR #369, clarified in merged PR #372, extended here alongside the
 implementation on PR #371.
@@ -163,6 +163,24 @@ concern. The Strategist may choose `ANSWER` to address a concern directly.
 
 ### `goal`
 
+The PR377 quality-closure Slice A amendment below now requires every adaptive
+**model** decision to encode this existing string as exactly five ordered lines:
+
+```text
+NEED: current need
+KNOWN: relevant customer context, or NONE
+ANSWER: supported requested parts, or NONE
+LIMIT: unsupported requested parts and their limit, or NONE
+NEXT: the single missing input and decision it changes, or NONE
+```
+
+The six public fields do not change. Code splits the normalized, PII-safe string
+into an internal `semanticHandoff`; the Responder receives those sections rather
+than a free-text goal from which it must discover question coverage. The 500
+character total limit stays in force. Direct code-owned compiler calls retain
+the prior API; both adaptive live and frozen-evaluation model paths require the
+new grammar and reject noncompliant output before the Responder.
+
 `goal` describes the current conversational objective and, when asking for an
 input, the specific missing input and why it matters. It is never factual,
 checkout, or effect authority. Commercial facts and their exact values come
@@ -191,7 +209,7 @@ diagnostic copy must pass the same PII-safe logging boundary.
 `continuation` replaces `nextMove.action + target + purpose + decisionInput`.
 
 - `ASK` means one ordinary customer input would materially change what happens next;
-- `KEEP_OPEN` means keep the conversation naturally open without introducing a new decision variable; the answer itself can do this and no closing sentence is mandatory;
+- `KEEP_OPEN` means no further customer input or canonical action is useful for this turn. It is valid after a resolved need **or** a bounded limitation for missing shop-owned information the customer cannot supply; no closing sentence is mandatory;
 - `null` means a canonical action owns the progression for this turn.
 
 `PRODUCT` and `MEASUREMENTS` are **not** ordinary continuation inputs. They remain canonical actions through `ASK_PRODUCT` and `ASK_MEASUREMENTS`, so there is only one representation for those requests.
@@ -284,7 +302,7 @@ wrinkle resistance; delivery ETA does not establish dispatch time. Retain
 verified evidence that directly answers part of a compound question; leave the
 selection empty only when no eligible evidence answers any part. For example,
 for price plus wrinkle resistance, retain verified price and use the existing
-goal to identify the unanswered wrinkle question. Do not substitute material
+`goal` LIMIT section to identify the unanswered wrinkle question for the internal handoff. Do not substitute material
 for wrinkle evidence or invent a negative answer. No extra decision field or
 per-question taxonomy is needed.
 
@@ -323,6 +341,14 @@ A small shape is enough:
 
 ```ts
 type ResponderTask = {
+  // Internal semantic instructions only, not factual or action authority.
+  semanticHandoff?: {
+    need: string;
+    known: string | null;
+    answer: string | null;
+    limit: string | null;
+    next: string | null;
+  };
   answer:
     | {
         kind: "ANSWER";
@@ -355,6 +381,11 @@ replyAct = ACKNOWLEDGE
 replyAct = CLARIFY
   -> CLARIFY
 ```
+
+For adaptive model-facing requests, `answer.goal` is omitted when the compiled
+`semanticHandoff` is present. Internal task/decision records retain the normalized
+goal for identity and diagnostics. Fixed code-owned tasks keep their existing
+wording surface. `customerDecisionSignals` is not sent to the Responder.
 
 Responder responsibilities:
 
@@ -1273,3 +1304,84 @@ variant mapping, production projection guard, adaptive Responder recovery and a
 real isolated Qdrant round-trip. Exact PR-head CI is still required after these
 changes are committed; this section does not claim that future head green in
 advance.
+
+
+## PR377 quality-closure Slice A amendment (2026-10-01)
+
+This implements only Slice A of PR380 at `c26c7d7a20b8461937dd3080b592c47caccd32f2`.
+It does not close semantic guard Slice B, the twelve-journey Slice C matrix,
+real-model runtime acceptance, DEV70 R2, P11 or P12. PR377 remains draft.
+
+### Ownership and precedence
+
+Strategist owns the current need, history referent, evidence selection,
+unsupported requested parts and one justified progression. Latest inbound has
+focus precedence; a correction may complete an immediately pending question;
+older context cannot reopen answered topics. Canonical code context owns
+state/action authority, selected evidence owns shop facts, and dialogue owns
+customer-reported context only. Hard stops precede ordinary progression.
+
+Both fixed and adaptive Responders own wording only. The compiled task fixes
+intent, concern, evidence and progression. Dialogue can help tone and reference,
+not re-route the task. The writer cannot derive a preference-to-benefit bridge,
+price comparison, ETA relation, fit or business effect. Complete selected factual
+units and existing derivation/guard paths remain unchanged. Legacy prompt
+identity specimens remain frozen; the shared instruction resolver maps them to
+the current centralized prompts, as tested by the prompt-contract suite.
+
+### Known inputs are compiled, not re-interpreted by the writer
+
+The current validated session budget reaches C3 as `knownBudgetVnd`; only its
+presence (`budgetKnown`) is added to Strategist constraints. When known, BUDGET
+is absent from the provider continuation schema and is rejected independently
+by the compiler. The compiler does not invent a substitute progression. This
+also holds when the product is unresolved.
+
+Current verified, product-bound Size Engine `ASK_MORE.missingInputs` supplies
+`measurementRequestedFields` using the existing MeasurementKind enum. Code
+removes already-known positive finite measurements and excludes FIT_PREFERENCE.
+An empty field list cannot authorize ASK_MEASUREMENTS. The canonical responder
+task carries the exact remaining fields; neither goal nor dialogue selects them.
+No measurement metadata in the live adapter means no adaptive measurement
+request. Historical direct/frozen callers retain the height/weight default;
+stateful real-runtime evaluation uses the actual Producer/Size Engine bridge.
+Fixed first-contact selection and its known-input checks stay code-owned.
+
+### Why the bounded goal fallback, not a new typed subsystem
+
+The existing Producer fact query has one intent (NONE/PRICE/STOCK/SIZE/ETA),
+plus a separate single policy question. It cannot represent price plus an
+unsupported product attribute without changing the Producer contract and its
+consumers. Therefore this slice uses the closure plan's five-section goal
+fallback, not a new request taxonomy, store or orchestration layer.
+
+The compiler validates section count/order/nonemptiness after the existing PII
+redaction. NEED cannot be NONE. NEXT is present exactly when the validated
+decision requests an input; it cannot authorize that request. A terminal
+UNRESOLVED answer or selected unrealizable evidence requires LIMIT. All evidence,
+permission, binding and freshness checks remain independent of those strings.
+
+A supplied limitation requires a non-null answer slot when the task has an open
+answer slot. This is a **structural presence check**, not proof that arbitrary
+Vietnamese text states the correct limitation. With a question-only task, its
+single progression slot remains the only prose slot. Checkout-details and hard
+stop tasks have closed answer semantics: a goal with a LIMIT is rejected rather
+than silently dropping it or opening a checkout prose side channel. A Strategist
+must not hide an unresolved question in those closed slots.
+
+Coverage correspondence, wrongful attribute substitutions, unsafe inference,
+false-positive/false-negative claim classification, and whether a non-null
+answer truly expresses LIMIT remain Slice B and real-model acceptance work.
+The existing bounded recovery still restores selected independent facts and a
+generic incomplete-answer limit; this slice does not claim complete semantic
+recovery for every unsupported part after transport failure.
+
+### Verification boundary
+
+New regressions cover prompt ownership, KEEP_OPEN, signal removal, known budget
+schema/compiler rejection, exact missing measurement handoff, structured goal
+validation/PII/closed slots, and a price plus unsupported-attribute request with
+both reply parts retained. A null limitation is rejected. Existing scripted
+fixtures were migrated to the same grammar without changing their business
+assertions, facts, rubric or thresholds. These are deterministic controls only;
+no real model, DEV70 generation or judge was invoked.

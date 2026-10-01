@@ -87,7 +87,13 @@ function transport(fields: readonly string[]) {
   return vi.fn<CandidateVertexTransport["send"]>()
     .mockResolvedValueOnce({
       payload: payload({
-        replyAct: "ACKNOWLEDGE", goal: "Collect the missing checkout details.",
+        replyAct: "ACKNOWLEDGE", goal: [
+          "NEED: Collect the missing checkout details.",
+          "KNOWN: NONE",
+          "ANSWER: NONE",
+          "LIMIT: NONE",
+          "NEXT: missing checkout fields enable the canonical transaction",
+        ].join("\n"),
         proposition: "NONE", evidenceRefs: [], continuation: null,
         canonicalAction: "ASK_CHECKOUT_DETAILS",
       }),

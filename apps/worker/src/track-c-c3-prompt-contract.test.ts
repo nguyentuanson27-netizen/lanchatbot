@@ -37,22 +37,19 @@ function legacyPrompt(name: string): string {
 describe("Track C C3 sales prompt contract", () => {
   it("gives the Strategist an ordered sales decision procedure without weakening authority", () => {
     expectSectionsInOrder(STRATEGIST_INSTRUCTION, [
-      "# ROLE",
-      "# SALES OBJECTIVE",
-      "# AUTHORITY",
-      "# DECISION PROCEDURE",
-      "# OBJECTIONS AND BUYING SIGNALS",
-      "# EVIDENCE",
-      "# PROGRESSION",
-      "# OUTPUT CONTRACT",
+      "# ROLE AND OWNERSHIP",
+      "# PRECEDENCE",
+      "# DECISION ALGORITHM",
+      "# OUTPUT FIELD RULES",
       "# HARD INVARIANTS",
-      "# EXAMPLES",
     ]);
     expect(STRATEGIST_INSTRUCTION).toContain("Resolve the customer's current decision first");
     expect(STRATEGIST_INSTRUCTION).toContain("smallest real remaining buying friction");
     expect(STRATEGIST_INSTRUCTION).toContain("selectableEvidence list is the only commercial factual authority");
     expect(STRATEGIST_INSTRUCTION).toContain("Never upgrade a buying signal into commitment");
-    expect(STRATEGIST_INSTRUCTION).toContain("KEEP_OPEN is not a default escape hatch");
+    expect(STRATEGIST_INSTRUCTION).toContain("No further customer input or canonical action is useful for this turn");
+    expect(STRATEGIST_INSTRUCTION).toContain("bounded limitation for missing shop-owned information");
+    expect(STRATEGIST_INSTRUCTION).not.toContain("use it only after the current need is resolved");
     expect(STRATEGIST_INSTRUCTION).toContain("canonical hard stop requires HOLD_POSITION");
     expect(STRATEGIST_INSTRUCTION).toContain("Missing shop evidence cannot be supplied by a customer answer");
   });
@@ -83,6 +80,21 @@ describe("Track C C3 sales prompt contract", () => {
     expect(ADAPTIVE_RESPONDER_INSTRUCTION).toContain(
       "All shop facts must remain inside the supplied factualTexts",
     );
+  });
+
+  it.each([
+    ["fixed", RESPONDER_INSTRUCTION],
+    ["adaptive", ADAPTIVE_RESPONDER_INSTRUCTION],
+  ])("removes semantic routing and inference from the %s writer", (_lane, prompt) => {
+    expect(prompt).toContain("The compiled task already represents the current decision");
+    expect(prompt).toContain("Do not reinterpret intent, choose a different concern, select or drop evidence");
+    expect(prompt).toContain("Code supplies missing input fields");
+    expect(prompt).toContain("Never infer preference-to-benefit");
+    expect(prompt).toContain("Never calculate a comparison or time relation");
+    for (const old of ["Read the entire dialogue", "Prefer the latest concern",
+      "customerDecisionSignals", "if dialogue already gives an amount",
+      "Briefly connect the customer's stated preference"])
+      expect(prompt).not.toContain(old);
   });
 
   it("routes only the exact legacy C3 prompt revisions to the centralized prompts", () => {

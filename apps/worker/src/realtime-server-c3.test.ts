@@ -124,7 +124,13 @@ describe("realtime server C3 DRY_RUN composition", () => {
         } } : {}),
       }
         : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" ? {
-          replyAct: "ANSWER", goal: "Answer the current price.", proposition: "PRICE",
+          replyAct: "ANSWER", goal: [
+            "NEED: Answer the current price.",
+            "KNOWN: NONE",
+            "ANSWER: selected evidence for the current request",
+            "LIMIT: NONE",
+            "NEXT: NONE",
+          ].join("\n"), proposition: "PRICE",
           evidenceRefs: prompt.selectableEvidence.filter((v: { capability: string }) => v.capability === "PRICE").map((v: { ref: string }) => v.ref),
           continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
         : mode === "C3_RECOVERY"

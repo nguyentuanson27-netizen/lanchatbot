@@ -402,7 +402,13 @@ describe("multi-product C3 evidence binding", () => {
       transport: { send: async () => ({
         payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
           stage++ === 0
-            ? { replyAct: "ANSWER", goal: "Compare the two verified prices.",
+            ? { replyAct: "ANSWER", goal: [
+              "NEED: Compare the two verified prices.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
                 proposition: "PRICE", evidenceRefs: prices.map(({ ref }) => ref),
                 continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
             : { answerText: null, factualTexts: [], progressionText: null },
@@ -3056,7 +3062,13 @@ describe("realtime Phase 3 sales cycle", () => {
       payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
         _request.body.includes("TRACK_C_C3_STRATEGIST_INPUT_V1")
           ? {
-              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              replyAct: "ACKNOWLEDGE", goal: [
+                "NEED: Collect the missing payment choice.",
+                "KNOWN: NONE",
+                "ANSWER: NONE",
+                "LIMIT: NONE",
+                "NEXT: missing checkout fields enable the canonical transaction",
+              ].join("\n"),
               proposition: "PRICE", evidenceRefs: [],
               continuation: null, canonicalAction: "ASK_CHECKOUT_DETAILS",
             }
