@@ -425,7 +425,49 @@ For each journey assert:
 - no stale preview/duplicate effect;
 - no permanent Inbox failure for a recoverable wording failure.
 
-Fake POS/model/delivery ports are acceptable here; the purpose is orchestration correctness, not live commerce proof.
+Fake POS/model/delivery ports are acceptable **only for this deterministic orchestration layer**. These journeys prove wiring, state, authority and failure handling; they do **not** close the real-model interpretation/voice/full-intent acceptance for P05/P06/P07/P08/P09/P10/P11.
+
+### 10.1 Real-model full-runtime acceptance is a separate required gate
+
+Before P12 closure, reuse the existing stateful runtime harness with:
+
+- the real Customer Input Producer model path;
+- the intended Strategist/Responder model configuration;
+- synthetic/fake POS, delivery, database/external business ports where required for safety;
+- persistent conversation state across turns;
+- customer turns that branch according to the previous accepted reply instead of following a fixed always-purchase script.
+
+Run a bounded subset of the highest-risk journeys with the real model in the loop. At minimum cover:
+
+1. independent purchase plus a policy question;
+2. conditional lower-price offer;
+3. selected M plus stock query for S;
+4. price plus unsupported wrinkle-resistance question;
+5. alternative search under a stated budget/rejected product;
+6. recipient/payment interpretation through preview/confirmation;
+7. one long-history correction or resumed pending question;
+8. one failure/recovery case where the final customer reply still comes from the integrated runtime.
+
+For every real-model journey retain:
+
+- exact source/head/model identity and reasoning configuration;
+- full customer/assistant history supplied to each role;
+- Producer/Strategist/Responder call topology;
+- parsed Producer interpretation and compiler decision;
+- final accepted customer-facing reply;
+- canonical/cart/checkout state before and after each turn;
+- planned versus committed effects/receipts;
+- guard/recovery stage and reason codes;
+- branch decision for the next customer turn;
+- calls/tokens/latency where available.
+
+Acceptance rules:
+
+- scripted/fake-model journeys remain mandatory deterministic controls but cannot substitute for this gate;
+- a correct scripted interpretation does not close an intent case if the real Producer misreads it;
+- a model-authored planned state is not evidence of a committed transaction or external receipt;
+- unresolved real-model failures keep the corresponding P05–P10/P11 acceptance item open;
+- these synthetic business-port journeys are still not conversion evidence or live commerce smoke.
 
 ## 11. DEV70 R2 and evaluation closure
 
@@ -460,6 +502,36 @@ Report separately:
 - provider/judge errors.
 
 Do not report “guard accepted / 70” as a quality score.
+
+### 11.1 Evaluation completed versus P11 accepted
+
+These are different states.
+
+**Evaluation completed** means the required generations/judging/reporting ran and the artifact is complete enough to review. It does **not** close P11.
+
+**P11 accepted** requires the applicable frozen gates from `tasks/plan.md` §8 to pass:
+
+- rubric scale and weighted thresholds remain the frozen registered values;
+- BEHAVIOR_SIMULATION weighted threshold: **>= 3.0**;
+- PRODUCTION_CONTRACT weighted threshold: **>= 3.2**;
+- QUESTION_RESOLUTION and FACT_GROUNDING: **>= 3** where applicable;
+- production grounding and any domain/stage-specific floors/overrides from the registered rubric remain mandatory;
+- hard failures are FAIL;
+- every mandatory stage must pass;
+- expected stale rejects must make zero generator calls;
+- ADAPTER_ERROR, PROVIDER_ERROR, JUDGE_ERROR and CONTRACT_SKIP are **not passes**;
+- every required frozen DEV regression must be PASS, PASS_WITH_NOTE, or the registered expected rejection.
+
+The runtime sales smoke target from `tasks/plan.md` §8 also remains applicable to the real-model stateful journeys where those dimensions apply: QUESTION_RESOLUTION, CONTEXT_USE, NEXT_MOVE_QUALITY and NATURALNESS_LANA >= 3, no hard failure, and grounding 4 in domains that require it.
+
+If a required case/stage fails, judge/provider evidence is missing, or a mandatory real-model runtime journey remains unresolved:
+
+- the evaluation may be marked **completed with blockers**;
+- P11 remains **OPEN / NOT ACCEPTED**;
+- P12 closure is blocked;
+- PR377 must remain draft and must not be described as ready for smoke/merge because the report is merely complete.
+
+Do not weaken, average away, remove, relabel or reclassify a required case after seeing the result in order to satisfy closure.
 
 ## 12. Execution slices and dependencies
 
@@ -523,25 +595,35 @@ Acceptance:
 - long-history cases preserve relevant context;
 - failures preserve independent facts and do not invent success.
 
-### Slice D — P00/P11: clean evaluation chain + DEV70 R2
+### Slice D — P00/P11: real-model runtime + clean evaluation chain + DEV70 R2
 
 **Depends on:** source candidate from A–C and frozen PR379 R2 identity.
 
 Work:
 
-- verify UTF-8;
-- run all 70;
-- judge all eligible cases;
-- classify every reject/error and accepted semantic failure;
-- compare against the pre-fix run only where population/source conditions are compatible.
+1. run the stateful real-model full-runtime acceptance subset from section 10.1;
+2. verify UTF-8 before provider invocation and artifact decoding;
+3. run all 70 DEV70 R2 cases;
+4. judge all eligible cases;
+5. classify every reject/error and accepted semantic failure;
+6. compare against the pre-fix run only where population/source conditions are compatible.
 
-Acceptance:
+Acceptance has two levels:
 
-- every case traceable to exact source/model/role calls;
+**D1 — evidence complete**
+- every runtime journey and DEV case is traceable to exact source/model/role calls;
 - no unexplained encoding ambiguity;
 - no silent missing stage/reason;
 - frozen rubric unchanged;
-- required regressions pass or remain explicit blockers.
+- failed/missing evidence is reported without being hidden.
+
+**D2 — P11 accepted**
+- real-model full-runtime journeys required by section 10.1 pass their applicable acceptance;
+- required frozen DEV cases/stages satisfy section 11.1 and `tasks/plan.md` §8;
+- provider/judge/adapter errors required for a gate are resolved or rerun successfully;
+- no unresolved required blocker remains.
+
+D1 without D2 means the evaluation is complete but P11 is still open. Slice E must not close PR377 in that state.
 
 ### Slice E — P12: closure
 
@@ -697,8 +779,11 @@ PR377 can move beyond draft only when all applicable conditions are true:
 
 - DEV70 R2 source identity is pinned;
 - UTF-8 chain is verified;
+- stateful real-model full-runtime journeys from section 10.1 are complete and pass their applicable acceptance;
 - all 70 generations and eligible judge results are retained;
 - rejects, judge/provider errors and accepted semantic failures are reported explicitly;
+- **P11 acceptance gates from section 11.1 / `tasks/plan.md` §8 pass**, not merely the reporting run;
+- unresolved required failures or missing mandatory provider/judge evidence block P11/P12 closure;
 - quality claims use judge/manual evidence, not guard admission rate.
 
 ### Documentation / ship readiness
@@ -725,7 +810,7 @@ The simplest acceptable end state is preferred over a more “intelligent” arc
 
 ## 20. Planned handoff
 
-After this docs-only PR is reviewed, implementation should proceed on PR377 in the Slice A → B → C → D → E order.
+After this docs-only PR is reviewed, implementation should proceed on PR377 in the Slice A → B → C → D → E order. Slice D explicitly contains both the stateful real-model full-runtime gate and DEV70 R2/judge gate; neither can be replaced by the deterministic Slice C controls.
 
 Every progress update must state separately:
 
