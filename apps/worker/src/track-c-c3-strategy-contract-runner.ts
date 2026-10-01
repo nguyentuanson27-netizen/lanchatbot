@@ -1425,7 +1425,9 @@ async function runTrackCStrategyContractCore(
         hardStop: constraints.hardStop,
         budgetKnown: constraints.budgetKnown ?? false,
         measurementRequestedFields: constraints.measurementRequestedFields ?? [],
-        requestedObligations: input.requestedObligations,
+        ...(input.requestedObligations === undefined ? {} : {
+          requestedObligations: input.requestedObligations,
+        }),
         boundProductIds: context.productBinding.productIds,
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),

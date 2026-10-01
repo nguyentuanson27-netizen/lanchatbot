@@ -125,7 +125,7 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
       explicitPurchaseQuantity(buying.evidenceText ?? "") !== buying.quantity) {
     throw new Error("CUSTOMER_INPUT_UNBOUND_QUANTITY");
   }
-  return Object.freeze({ ...value, obligations: customerInputObligations(value) });
+  return { ...value, obligations: [...customerInputObligations(value)] };
 }
 
 export function applyCustomerDecisionInput(prior: SessionDecisionContext | undefined, value: RealtimeCustomerInput, currentProductId: string | null = null): SessionDecisionContext {

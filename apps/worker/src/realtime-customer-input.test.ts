@@ -51,7 +51,7 @@ describe("source-bound customer input", () => {
           evidenceText: "có dễ nhăn không" },
       ],
     }, text);
-    expect(value.obligations.map(({ kind, capability, scope }) =>
+    expect(customerInputObligations(value).map(({ kind, capability, scope }) =>
       ({ kind, capability, scope }))).toEqual([
       { kind: "FACT_REQUEST", capability: "PRICE", scope: null },
       { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
