@@ -24,10 +24,16 @@
   },
   "commands_executed": [
     "node apps/worker/evals/track-c-c2/dev70-realistic-r2/validate.mjs --self-test --repo .",
-    "node --test apps/worker/evals/track-c-c2/dev70-realistic-r2/validator-regressions.test.mjs"
+    "pnpm --filter @lana/worker exec vitest run evals/track-c-c2/dev70-realistic-r2/validator-regressions.test.mjs"
   ],
   "regression_fixture_kind": "ISOLATED_SYNTHETIC_NOT_CUSTOMER_CORPUS",
   "model_evaluation_run": false,
   "memory_ablation_run": false,
-  "ci_status": "NOT_CHECKED"
+  "test_runner": "VITEST_WORKER_TEST_ENTRYPOINT",
+  "ci_status": "PENDING_NEW_HEAD_VERIFICATION",
+  "previous_ci_failure": {
+    "head": "188862eec5d8b00d2d727c04ac742db28a5680cb",
+    "run": "https://github.com/nguyentuanson27-netizen/lanchatbot/actions/runs/36840025621",
+    "cause": "Vitest discovered the node:test suite but no tests were registered with Vitest. The suite now imports the existing Vitest test API."
+  }
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { makeFixture, seal } from './fixture-harness.mjs';
 const source=resolve(process.env.VALIDATOR_SOURCE ?? fileURLToPath(new URL('./validate.mjs', import.meta.url)));

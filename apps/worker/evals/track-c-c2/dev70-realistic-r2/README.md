@@ -65,7 +65,7 @@ From repository root:
 
 ```sh
 node apps/worker/evals/track-c-c2/dev70-realistic-r2/validate.mjs --self-test --repo .
-node --test apps/worker/evals/track-c-c2/dev70-realistic-r2/validator-regressions.test.mjs
+pnpm --filter @lana/worker exec vitest run evals/track-c-c2/dev70-realistic-r2/validator-regressions.test.mjs
 ```
 
-The regression suite uses isolated synthetic fixtures, including deliberately invalid inputs with refreshed payload hashes. It is separate from validation of the real 70-case corpus. No model evaluation or memory-ablation result is claimed.
+The regression suite uses the worker's existing Vitest runner and is included in `pnpm --filter @lana/worker test`. It uses isolated synthetic fixtures, including deliberately invalid inputs with refreshed payload hashes. It is separate from validation of the real 70-case corpus. No model evaluation or memory-ablation result is claimed.
