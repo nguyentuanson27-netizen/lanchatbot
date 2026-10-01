@@ -136,8 +136,14 @@ function obligationMatchesEvidence(
   if (obligation.kind !== "FACT_REQUEST" ||
       obligation.capability === null ||
       evidence.capability !== obligation.capability) return false;
-  if (obligation.productId !== null &&
-      evidence.subject?.productId !== obligation.productId) return false;
+  if (obligation.productId !== null) {
+    const evidenceProductId = evidence.subject?.productId;
+    if (evidenceProductId === undefined ||
+        evidenceProductId.normalize("NFC").toLocaleUpperCase("vi-VN") !==
+        obligation.productId.normalize("NFC").toLocaleUpperCase("vi-VN")) {
+      return false;
+    }
+  }
   if (obligation.scope === null) return true;
   if (obligation.capability === "PRODUCT_ATTRIBUTES") {
     const field = ATTRIBUTE_SCOPE_FIELD[

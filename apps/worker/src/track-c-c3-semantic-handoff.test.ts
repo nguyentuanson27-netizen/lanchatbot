@@ -107,7 +107,7 @@ describe("C3 structured goal semantic handoff", () => {
     const wrinkle = fields.find(({ value }) => "wearWrinkleResistance" in value)!;
     const requestedObligations = [{
       kind: "FACT_REQUEST" as const, capability: "PRODUCT_ATTRIBUTES" as const,
-      scope: "WRINKLE_RESISTANCE", productId: "ITEM42",
+      scope: "WRINKLE_RESISTANCE", productId: "item42",
     }];
     const base = { ...input, evidence: [price, ...fields], requestedObligations,
       decision: { ...input.decision, proposition: "PRODUCT_ATTRIBUTES",
