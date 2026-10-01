@@ -1,6 +1,10 @@
 import type { ContextV2, RealtimeCustomerInput } from "@lana/contracts";
 import type { ShadowContextMessage } from "@lana/database";
-import type { TrackCResponderTask } from "./track-c-c3-strategy-contract.js";
+import type {
+  TrackCRequestedObligation,
+  TrackCResponderTask,
+  TrackCSelectableEvidence,
+} from "./track-c-c3-strategy-contract.js";
 
 /** Only the compiler/runtime can supply this context, never the output schema.
  * These references authorize no fact, fit advice, cart change or other effect. */
@@ -111,11 +115,80 @@ function limitationTopics(value: string) {
   return LIMIT_TOPICS.filter(({ pattern }) => pattern.test(value.normalize("NFC")));
 }
 
+const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
+  MATERIALS: "materials",
+  COLORS: "colors",
+  STYLES: "styles",
+  SILHOUETTE: "silhouettes",
+  OCCASION: "occasions",
+  WRINKLE_RESISTANCE: "wearWrinkleResistance",
+  STRETCH: "wearStretch",
+  OPACITY: "wearOpacity",
+  LINING: "wearLining",
+  BREATHABILITY: "wearBreathability",
+  CARE_INSTRUCTIONS: "careInstructions",
+} as const);
+
+function obligationMatchesEvidence(
+  obligation: TrackCRequestedObligation,
+  evidence: TrackCSelectableEvidence,
+): boolean {
+  if (obligation.kind !== "FACT_REQUEST" ||
+      obligation.capability === null ||
+      evidence.capability !== obligation.capability) return false;
+  if (obligation.productId !== null &&
+      evidence.subject?.productId !== obligation.productId) return false;
+  if (obligation.scope === null) return true;
+  if (obligation.capability === "PRODUCT_ATTRIBUTES") {
+    const field = ATTRIBUTE_SCOPE_FIELD[
+      obligation.scope as keyof typeof ATTRIBUTE_SCOPE_FIELD
+    ];
+    return field !== undefined && Object.hasOwn(evidence.value, field);
+  }
+  if (obligation.capability === "OFFER_CONFIGURATION") {
+    return evidence.value.offerScope === obligation.scope;
+  }
+  return false;
+}
+
+/** Typed semantic admission: the compiler already knows the requested
+ * capability/scope. Never infer that scope back from Vietnamese prose. */
+export function assertTrackCRequestedObligationCoverage(
+  requested: readonly TrackCRequestedObligation[],
+  available: readonly TrackCSelectableEvidence[],
+  selected: readonly TrackCSelectableEvidence[],
+): void {
+  const facts = requested.filter((entry) =>
+    entry.kind === "FACT_REQUEST" && entry.capability !== null
+  );
+  if (facts.length === 0) return;
+  for (const capability of new Set(facts.map(({ capability }) => capability))) {
+    const allowed = facts.filter((entry) => entry.capability === capability);
+    if (selected.some((entry) =>
+      entry.capability === capability &&
+      !allowed.some((obligation) => obligationMatchesEvidence(obligation, entry))
+    )) {
+      throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
+    }
+  }
+  for (const obligation of facts) {
+    const hasAvailable = available.some((entry) =>
+      obligationMatchesEvidence(obligation, entry)
+    );
+    if (hasAvailable && !selected.some((entry) =>
+      obligationMatchesEvidence(obligation, entry)
+    )) {
+      throw new Error("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
+    }
+  }
+}
+
 /** Validate a declared request against the existing typed wear field; do
  * not choose evidence or infer an attribute from materials/smoothness. The
  * structured-goal fallback supplies scope, not factual authority. Other
  * vocabulary is not claimed to be a complete intent/quality validator. */
 export function assertTrackCRequestedPropertyCoverage(task: TrackCResponderTask): void {
+  if (task.requestedObligations?.some(({ kind }) => kind === "FACT_REQUEST")) return;
   const handoff = task.semanticHandoff;
   if (!handoff || task.answer.kind !== "ANSWER") return;
   const wrinkleRequested = limitationTopics(handoff.need).some(({ id }) => id === "WRINKLE_RESISTANCE");

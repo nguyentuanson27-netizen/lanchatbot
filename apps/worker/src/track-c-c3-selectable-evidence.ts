@@ -17,6 +17,7 @@ import { trackCProductAttributeEvidence } from
   "./track-c-c3-attribute-projection.js";
 import {
   trackCFormatVnd,
+  trackCOfferConfigurationProjections,
   trackCSimulationFactText,
 } from "./track-c-c3-fact-realization.js";
 
@@ -486,6 +487,30 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       input.context.productBinding.productIds,
     );
     if (projected === null) return;
+    if (projected.capability === "OFFER_CONFIGURATION") {
+      const data = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      for (const projection of trackCOfferConfigurationProjections(data)) {
+        evidence.push(Object.freeze({
+          ref: `${projected.ref}_${projection.scope}`,
+          capability: "OFFER_CONFIGURATION" as const,
+          ...(projected.subject === undefined ? {} : { subject: projected.subject }),
+          value: Object.freeze({
+            offerScope: projection.scope,
+            ...projection.value,
+          }),
+          deterministicText: projection.text,
+          provenance: Object.freeze({
+            authority: "SIMULATION" as const,
+            contentHash: sha256({
+              sourceContentHash: projected.provenance.contentHash,
+              offerScope: projection.scope,
+              value: projection.value,
+            }),
+          }),
+        }));
+      }
+      return;
+    }
     evidence.push(projected);
     if (projected.capability === "PRODUCT_PRESENTATION") {
       // Preserve the overview for fixed first contact, while adaptive turns

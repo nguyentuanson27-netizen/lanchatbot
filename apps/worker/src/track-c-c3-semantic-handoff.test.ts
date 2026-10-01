@@ -96,6 +96,31 @@ describe("C3 structured goal semantic handoff", () => {
     expect(compileTrackCStrategistDecision({ ...input, requireStructuredGoal: false,
       decision: { ...input.decision, goal: "Code-owned fixed-lane task." } }).task.semanticHandoff).toBeUndefined();
   });
+  it("uses typed obligations to reject the wrong product-attribute scope without reading goal prose", () => {
+    const attributes = buildProductAttributesV1({ productId: "ITEM42", observedAt: "2026-09-10T02:00:00Z",
+      data: { materials: ["lụa mềm mịn"], materialComponents: {}, colors: [], styles: [],
+        silhouettes: [], occasions: [], designAttributes: null, careInstructions: null,
+        wearProperties: { stretch: null, wrinkleResistance: "REDUCED_WRINKLING", opacity: null,
+          lining: null, breathability: null }, backCoverage: null, designComplexity: null } });
+    const fields = trackCProductAttributeEvidence({ attributes, refPrefix: "ATTR", authority: "RUNTIME" });
+    const material = fields.find(({ value }) => "materials" in value)!;
+    const wrinkle = fields.find(({ value }) => "wearWrinkleResistance" in value)!;
+    const requestedObligations = [{
+      kind: "FACT_REQUEST" as const, capability: "PRODUCT_ATTRIBUTES" as const,
+      scope: "WRINKLE_RESISTANCE", productId: "ITEM42",
+    }];
+    const base = { ...input, evidence: [price, ...fields], requestedObligations,
+      decision: { ...input.decision, proposition: "PRODUCT_ATTRIBUTES",
+        goal: goal.replace("ANSWER: current price", "ANSWER: requested product attribute")
+          .replace("LIMIT: wrinkle resistance has no verified evidence", "LIMIT: NONE") } };
+    expect(compileTrackCStrategistDecision({ ...base, decision: {
+      ...base.decision, evidenceRefs: [wrinkle.ref],
+    } }).task.evidence).toEqual([wrinkle]);
+    expect(() => compileTrackCStrategistDecision({ ...base, decision: {
+      ...base.decision, evidenceRefs: [material.ref],
+    } })).toThrow("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
+  });
+
   it("cannot mark wrinkle resistance answered by a smooth material field", () => {
     const attributes = buildProductAttributesV1({ productId: "ITEM42", observedAt: "2026-09-10T02:00:00Z",
       data: { materials: ["lụa mềm mịn"], materialComponents: {}, colors: [], styles: [],

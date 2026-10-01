@@ -195,6 +195,68 @@ function policyText(
  * `null` means the group has authority but no safe wording for this shape, and
  * the caller reports that as an unmet realization rather than dropping it.
  */
+export type TrackCOfferConfigurationScope =
+  | "FULL_SET" | "TOP" | "BOTTOM" | "TWO_PIECE" | "THREE_PIECE";
+
+export function trackCOfferConfigurationProjections(
+  data: Readonly<Record<string, unknown>>,
+): readonly Readonly<{
+  scope: TrackCOfferConfigurationScope;
+  value: Readonly<Record<string, unknown>>;
+  text: string;
+}>[] {
+  const projections: Array<Readonly<{
+    scope: TrackCOfferConfigurationScope;
+    value: Readonly<Record<string, unknown>>;
+    text: string;
+  }>> = [];
+  const fullSet = numberField(data, "fullSetVnd");
+  if (fullSet !== null) projections.push(Object.freeze({
+    scope: "FULL_SET",
+    value: Object.freeze({ fullSetVnd: fullSet }),
+    text: `Nguyên set có giá ${trackCFormatVnd(fullSet)} ạ.`,
+  }));
+  const twoPiece = numberField(data, "twoPieceVnd");
+  if (twoPiece !== null) projections.push(Object.freeze({
+    scope: "TWO_PIECE",
+    value: Object.freeze({ twoPieceVnd: twoPiece }),
+    text: `Bộ 2 món có giá ${trackCFormatVnd(twoPiece)} ạ.`,
+  }));
+  const threePiece = numberField(data, "threePieceVnd");
+  const threeItems = stringList(data, "threePieceItems");
+  if (threePiece !== null) projections.push(Object.freeze({
+    scope: "THREE_PIECE",
+    value: Object.freeze({
+      threePieceVnd: threePiece,
+      ...(threeItems === null ? {} : { threePieceItems: Object.freeze([...threeItems]) }),
+    }),
+    text: threeItems === null
+      ? `Bộ 3 món có giá ${trackCFormatVnd(threePiece)} ạ.`
+      : `Bộ 3 món gồm ${joinVi(threeItems)} có giá ${trackCFormatVnd(threePiece)} ạ.`,
+  }));
+  for (const [key, label, scope] of [
+    ["top", "áo", "TOP"],
+    ["bottom", "quần/chân váy", "BOTTOM"],
+  ] as const) {
+    const item = data[key];
+    if (item === null || typeof item !== "object" || Array.isArray(item)) continue;
+    const record = item as Readonly<Record<string, unknown>>;
+    const available = booleanField(record, "available");
+    if (available === null) continue;
+    const priceVnd = numberField(record, "priceVnd");
+    projections.push(Object.freeze({
+      scope,
+      value: Object.freeze({ available, priceVnd }),
+      text: available && priceVnd !== null
+        ? `Mua lẻ ${label} có giá ${trackCFormatVnd(priceVnd)} ạ.`
+        : available
+          ? `${label[0]!.toUpperCase()}${label.slice(1)} có bán lẻ ạ.`
+          : `${label[0]!.toUpperCase()}${label.slice(1)} hiện chưa bán lẻ riêng ạ.`,
+    }));
+  }
+  return Object.freeze(projections);
+}
+
 export function trackCSimulationFactText(
   kind: string,
   data: Readonly<Record<string, unknown>>,

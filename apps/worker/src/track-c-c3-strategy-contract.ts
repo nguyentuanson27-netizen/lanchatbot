@@ -1,4 +1,7 @@
-import { assertTrackCRequestedPropertyCoverage } from "./track-c-c3-conversational-guard.js";
+import {
+  assertTrackCRequestedObligationCoverage,
+  assertTrackCRequestedPropertyCoverage,
+} from "./track-c-c3-conversational-guard.js";
 import { MeasurementKindSchema, type MeasurementKind } from "@lana/contracts";
 import { redactAnalyticsMessage } from "@lana/database";
 
@@ -457,6 +460,13 @@ export function compileTrackCStrategistDecision(input: Readonly<{
         decision.continuation.input === "USUAL_SIZE" &&
         !input.measurementsUnavailable)) {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  }
+  if (input.requestedObligations !== undefined) {
+    assertTrackCRequestedObligationCoverage(
+      input.requestedObligations,
+      input.evidence,
+      evidence,
+    );
   }
   const { realizable, unrealizable } =
     trackCPartitionEvidenceRealization(evidence);
