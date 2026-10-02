@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
+import type { TrackCRequestedObligation } from "./track-c-c3-strategy-contract.js";
 import { runTrackCStrategyContractCase, runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import { materializeTrackCV5CaseCapture,
@@ -18,7 +19,7 @@ const modelResource = "projects/test/locations/us-central1/publishers/google/mod
 function payload(value: unknown) {
   return { candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] };
 }
-function run(input: { inbound: string; answer: string | null; limit?: string; known?: string;
+function run(input: { inbound: string; answer: string | null; limit?: string; known?: string; scope?: TrackCRequestedObligation["scope"];
   request?: "LOCALITY"; progression?: string; productId?: string; selectedSize?: string; selectionSpan?: string; etaDeadline?: number }) {
   const productId = input.productId ?? "SQ9012";
   const capture = materializeTrackCV5CaseCapture({ lane: "BEHAVIOR_SIMULATION", recipe,
@@ -40,6 +41,10 @@ function run(input: { inbound: string; answer: string | null; limit?: string; kn
       answerText: input.answer, factualTexts: [], progressionText: input.progression ?? null }) });
   const promise = runTrackCStrategyContractCase({ lane: "BEHAVIOR_SIMULATION", modelResource, capture,
     evaluationAt: at,
+    ...(input.scope === undefined ? {} : { requestedObligations: [
+      { kind: "FACT_REQUEST" as const, capability: "PRICE" as const, scope: null, productId },
+      { kind: "FACT_REQUEST" as const, capability: "PRODUCT_ATTRIBUTES" as const, scope: input.scope, productId },
+    ] }),
     ...(input.etaDeadline === undefined ? {} : { deliveryDeadlineConstraint: { maxDeliveryDays: input.etaDeadline } }),
     ...(input.selectedSize ? { customerVariant: { operation: "SELECT" as const, productId,
       size: input.selectedSize, color: null, evidenceText: input.selectionSpan ?? input.inbound } } : {}),
@@ -50,11 +55,10 @@ function run(input: { inbound: string; answer: string | null; limit?: string; kn
 
 describe("C3 two-sided semantic statement guard", () => {
   it("accepts an unconfirmed wrinkle question complement without accepting an independent claim", async () => {
-    const input = { inbound: "Giá và vải có dễ nhăn không?", limit: "wrinkle resistance unverified" };
-    for (const answer of ["Hiện chưa có thông tin xác nhận vải có dễ nhăn khi ngồi lâu.",
-      "Em chưa xác nhận được chất liệu có dễ nhăn hay không."]) {
+    const input = { inbound: "Giá và vải có dễ nhăn không?", limit: "wrinkle resistance unverified", scope: "WRINKLE_RESISTANCE" as const };
+    for (const answer of [null, "Em chưa có thông tin xác nhận về khả năng chống nhăn của mẫu SQ9012."]) {
       const result = await run({ ...input, answer }).promise;
-      expect(result.reply).toContain(answer);
+      expect(result.reply).toContain("khả năng chống nhăn của mẫu SQ9012");
       expect(result.reply).toContain("849.000");
     }
     for (const answer of ["Hiện chưa có thông tin xác nhận vải có dễ nhăn khi ngồi lâu. Vải này chống nhăn.",
@@ -126,26 +130,26 @@ describe("C3 two-sided semantic statement guard", () => {
   });
 
   it.each([
-    ["wrinkle resistance", "khả năng chống nhăn", "độ mịn"],
-    ["smoothness", "độ mịn", "khả năng chống nhăn"],
-    ["weight", "trọng lượng", "giá"],
-  ])("checks the assigned unsupported property, not merely non-null wording (%s)", async (topic, correct, wrong) => {
+    ["wrinkle resistance", "khả năng chống nhăn", "độ mịn", "WRINKLE_RESISTANCE"],
+    ["smoothness", "độ mịn", "khả năng chống nhăn", "SMOOTHNESS"],
+    ["weight", "trọng lượng", "giá", "WEIGHT"],
+  ] as const)("checks the assigned unsupported property, not merely non-null wording (%s)", async (topic, correct, wrong, scope) => {
     const inbound = `Giá bao nhiêu và ${correct} thế nào?`;
     const limit = `${topic} has no verified evidence`;
-    const answer = `Em chưa có dữ liệu xác nhận về ${correct}.`;
-    const result = await run({ inbound, answer, limit }).promise;
+    const answer = `Em chưa có thông tin xác nhận về ${correct} của mẫu SQ9012.`;
+    const result = await run({ inbound, answer, limit, scope }).promise;
     expect(result.reply).toContain(answer);
     expect(result.reply).toContain("849.000");
     expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(1);
-    for (const bad of [`Em chưa có dữ liệu xác nhận về ${wrong}.`,
-      "Dạ em hiểu ý chị.", `${answer} Vì vậy chắc chắn tốt hơn.`]) {
-      await expect(run({ inbound, answer: bad, limit }).promise).rejects.toThrow();
+    for (const bad of [`Em chưa có dữ liệu xác nhận về ${wrong}.`, `${answer} Vì vậy chắc chắn tốt hơn.`]) {
+      await expect(run({ inbound, answer: bad, limit, scope }).promise).rejects.toThrow();
     }
+    expect((await run({ inbound, answer: null, limit, scope }).promise).reply).toContain(correct);
   });
 
   it("missing wrinkle evidence is not a negative wrinkle fact", async () => {
-    const input = { inbound: "Chị hỏi giá và độ nhăn.", limit: "wrinkle resistance unverified" };
-    expect((await run({ ...input, answer: "Em chưa xác nhận được khả năng chống nhăn." }).promise).reply).toContain("chống nhăn");
+    const input = { inbound: "Chị hỏi giá và độ nhăn.", limit: "wrinkle resistance unverified", scope: "WRINKLE_RESISTANCE" as const };
+    expect((await run({ ...input, answer: null }).promise).reply).toContain("chống nhăn");
     for (const answer of ["Không có khả năng chống nhăn đâu chị.",
       "Chắc là dễ nhăn.", "Em chưa có dữ liệu, nên chắc là dễ nhăn."]) {
       await expect(run({ ...input, answer }).promise).rejects.toThrow();
@@ -164,7 +168,7 @@ describe("C3 two-sided semantic statement guard", () => {
 
   it.each(["timeout", "json", "wrong-property", "dropped-limit"])("recovery keeps price AND the named wrinkle limitation after %s", async (fault) => {
     const inbound = "Giá bao nhiêu và vải có chống nhăn không?";
-    const seed = run({ inbound, answer: "Em chưa có dữ liệu xác nhận về khả năng chống nhăn.",
+    const seed = run({ inbound, answer: null, scope: "WRINKLE_RESISTANCE",
       limit: "wrinkle resistance is not verified" });
     await seed.promise;
     const context = contextFromFrozenTrackCCapture({ capture: seed.capture, evaluationAt: at });
@@ -177,6 +181,10 @@ describe("C3 two-sided semantic statement guard", () => {
       : payload({ answerText: fault === "dropped-limit" ? null : "Em chưa có thông tin về độ mịn.",
         factualTexts: [], progressionText: null }) });
     const result = await runTrackCStrategyLive({ context, modelResource, decisionAt: at,
+      requestedObligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "SQ9012" },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE", productId: "SQ9012" },
+      ],
       dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT", text: inbound,
         attachmentCount: 0, occurredAt: at.toISOString() }], checkoutRequestedFields: [],
       checkoutClarificationActive: false, currentCart: null, paymentOptions: ["COD"], transport: { send } });
@@ -185,7 +193,8 @@ describe("C3 two-sided semantic statement guard", () => {
     expect(result.reply).not.toContain("độ mịn");
     expect(result.output.cta).toBe("NONE");
     expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(1);
-    expect(result.recoveryDiagnostic).toBeDefined();
+    if (fault !== "dropped-limit") expect(result.recoveryDiagnostic).toBeDefined();
+    else expect(result.recoveryDiagnostic).toBeUndefined(); // Code supplies the limit without a failure.
     expect(send).toHaveBeenCalledTimes(2);
   });
 
@@ -226,8 +235,8 @@ describe("C3 two-sided semantic statement guard", () => {
   });
 
   it("does not let an epistemic prefix license an independent predicate without punctuation", async () => {
-    const input = { inbound: "Giá và khả năng chống nhăn?", limit: "wrinkle resistance unverified" };
-    const good = "Em chưa có dữ liệu xác nhận về khả năng chống nhăn.";
+    const input = { inbound: "Giá và khả năng chống nhăn?", limit: "wrinkle resistance unverified", scope: "WRINKLE_RESISTANCE" as const };
+    const good = "Em chưa có thông tin xác nhận về khả năng chống nhăn của mẫu SQ9012.";
     expect((await run({ ...input, answer: good }).promise).reply).toContain(good);
     for (const answer of [
       "Em chưa có dữ liệu tức là mẫu này không chống nhăn.",

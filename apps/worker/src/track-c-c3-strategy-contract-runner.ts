@@ -1,6 +1,6 @@
 import {
   trackCPiiFreeLocalityRequest, trackCUnclassifiedConversation,
-  assertTrackCLimitationCoverage, trackCRecoveryLimitation,
+  trackCRecoveryLimitation,
 } from "./track-c-c3-conversational-guard.js";
 import type { BusinessFactEnvelopeV1, MeasurementKind, RealtimeCustomerInput } from "@lana/contracts";
 import { createHash } from "node:crypto";
@@ -844,9 +844,16 @@ function assertNoEffectText(value: string | null): void {
 /** Prose has no shop-fact or effect authority. Claim projections are checked
  * separately. This is a conservative egress check, not a relevance/quality
  * classifier and not a certificate of arbitrary natural-language meaning. */
-function assertConversationalProse(value: string | null): void {
+function assertConversationalProse(value: string | null, codeOwnsLimitation = false): void {
   assertNoEffectText(value);
   if (value === null) return;
+  // The compiler owns uncertainty wording. The model may acknowledge or
+  // repeat a source-bound customer reference, never replace that typed slot
+  // with arbitrary property prose. No grammatical status inference is needed.
+  if (codeOwnsLimitation && value.trim() !== "" &&
+      !BOUNDED_ACKNOWLEDGEMENTS.includes(value as typeof BOUNDED_ACKNOWLEDGEMENTS[number])) {
+    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  }
   const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d").toLowerCase();
   const effectClaim = /\b(?:em|shop|ben em|don(?: hang)?(?: cua chi)?)\s+(?:da|se)\s+(?:ghi nhan don|len don|tao|dat|gui|giu|doi|cap nhat|xac nhan|hoan tien)/gu;
@@ -1143,11 +1150,9 @@ function compileResponderDraft(input: Readonly<{
   // Nothing is returned until both the structured and prose checks pass.
   if (adaptive) {
     for (const value of [draft.answerText, draft.progressionText]) {
-      assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation));
+      assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation),
+        value === draft.answerText && trackCLimitationTexts(task).length > 0);
     }
-  }
-  if (adaptive && responderHasAssignedLimit(task)) {
-    assertTrackCLimitationCoverage(task, draft.answerText, input.context);
   }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       validated.segments.some(({ text }) =>
@@ -1394,6 +1399,12 @@ async function runTrackCStrategyContractCore(
     measurementRequestedFields,
     input.knownBudgetVnd != null,
   );
+  // Canonical CART_OPEN state already owns commerce authority. Recovery may
+  // repeat its existing missing-field request, never create a transaction.
+  const recoverCheckoutRequest = context.phase.sourceStage === "CART_OPEN" &&
+    context.buyingIntent.decision === "COMMITTED" &&
+    (input.canonicalCheckoutRequestedFields?.length ?? 0) > 0 &&
+    constraints.permittedCanonicalActions.includes("ASK_CHECKOUT_DETAILS");
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
   let task: TrackCResponderTask;
@@ -1475,7 +1486,8 @@ async function runTrackCStrategyContractCore(
         requestedObligations: requested, boundProductIds: context.productBinding.productIds,
         decision: { replyAct: "ANSWER", proposition: selected[0]?.capability ??
           requested.find(({ kind }) => kind === "FACT_REQUEST")?.capability ?? "NONE",
-          evidenceRefs: selected.map(({ ref }) => ref), canonicalAction: "NONE", continuation: { type: "KEEP_OPEN" },
+          evidenceRefs: selected.map(({ ref }) => ref), canonicalAction: recoverCheckoutRequest ? "ASK_CHECKOUT_DETAILS" : "NONE",
+          continuation: recoverCheckoutRequest ? null : { type: "KEEP_OPEN" },
           goal: "NEED: current obligations\nKNOWN: NONE\nANSWER: current evidence\nLIMIT: unverified requested parts\nNEXT: NONE" },
       });
       task = compiled.task;
@@ -1504,7 +1516,8 @@ async function runTrackCStrategyContractCore(
         task.answer.kind !== "ANSWER" ||
         (task.obligationResolutions?.length ? false : task.answer.evidenceStatus !== "SUPPORTED" ||
           task.evidence.length === 0 || task.unrealizedEvidence.length > 0) ||
-        task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") throw failure;
+        (task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") &&
+          !(recoverCheckoutRequest && task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS")) throw failure;
   };
   let responderPayload: unknown = null;
   let draft: ResponderDraft;

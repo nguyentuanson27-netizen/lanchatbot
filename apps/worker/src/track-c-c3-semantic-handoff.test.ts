@@ -16,6 +16,10 @@ const input = {
   evidence: [price], permittedCanonicalActions: ["NONE"] as const,
   measurementsUnavailable: false, productResolved: true, hardStop: false,
   requireStructuredGoal: true,
+  requestedObligations: [
+    { kind: "FACT_REQUEST" as const, capability: "PRICE" as const, scope: null, productId: "ITEM42" },
+    { kind: "FACT_REQUEST" as const, capability: "PRODUCT_ATTRIBUTES" as const, scope: "WRINKLE_RESISTANCE" as const, productId: "ITEM42" },
+  ],
 };
 
 describe("C3 structured goal semantic handoff", () => {
@@ -25,8 +29,8 @@ describe("C3 structured goal semantic handoff", () => {
       "canonicalAction", "continuation", "evidenceRefs", "goal", "proposition", "replyAct",
     ]);
     expect(result.task.semanticHandoff).toEqual({
-      need: "ANSWER", known: null, answer: "PRICE supported",
-      limit: "WRINKLE_RESISTANCE unsupported", next: null,
+      need: "PRICE; PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE", known: null, answer: "PRICE supported",
+      limit: "PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE unsupported", next: null,
     });
     expect(result.task.evidence).toEqual([price]);
     expect(result.task.requiredEvidenceRefs).toEqual([price.ref]);
@@ -38,7 +42,7 @@ describe("C3 structured goal semantic handoff", () => {
     "Answer the price and limit the unsupported part.",
     goal.replace("KNOWN: NONE\n", ""),
     goal.replace("KNOWN: NONE", "NEED: another need"),
-    goal.replace("NEED: price and wrinkle resistance", "NEED: NONE"),
+    goal.replace("NEED: price and wrinkle resistance", "NEED: "),
     goal.replace("LIMIT: wrinkle resistance has no verified evidence", "LIMIT: "),
     goal + "\nNEXT: ask a new question",
   ])("rejects malformed semantic handoff rather than making the writer infer it: %s", (invalid) => {
@@ -46,24 +50,22 @@ describe("C3 structured goal semantic handoff", () => {
       .toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
   });
 
-  it("requires a limitation for an unsupported terminal factual request", () => {
-    const unsupported = { ...input, decision: { ...input.decision, evidenceRefs: [],
+  it("derives a limitation for an unsupported terminal factual request", () => {
+    const unsupported = { ...input, requestedObligations: input.requestedObligations.slice(1), decision: { ...input.decision, evidenceRefs: [],
       proposition: "PRODUCT_ATTRIBUTES", goal: goal.replace("ANSWER: current price", "ANSWER: NONE") } };
     expect(compileTrackCStrategistDecision(unsupported).task.answer).toMatchObject({ evidenceStatus: "UNRESOLVED" });
-    expect(() => compileTrackCStrategistDecision({ ...unsupported, decision: {
+    expect(compileTrackCStrategistDecision({ ...unsupported, decision: {
       ...unsupported.decision, goal: unsupported.decision.goal.replace("LIMIT: wrinkle resistance has no verified evidence", "LIMIT: NONE"),
-    } })).toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
+    } }).task.obligationResolutions?.at(-1)).toMatchObject({ status: "UNSUPPORTED", scope: "WRINKLE_RESISTANCE" });
   });
 
-  it("requires NEXT to agree with the single compiled request, not authorize it", () => {
+  it("derives NEXT from the single typed request, independently of diagnostics", () => {
     const nextGoal = goal.replace("NEXT: NONE", "NEXT: locality changes the available ETA lookup");
     const ask = { ...input.decision, continuation: { type: "ASK", input: "LOCALITY" }, goal: nextGoal };
     expect(compileTrackCStrategistDecision({ ...input, decision: ask }).task.continuation)
       .toEqual({ type: "ASK", input: "LOCALITY" });
-    expect(() => compileTrackCStrategistDecision({ ...input, decision: { ...ask, goal } }))
-      .toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
-    expect(() => compileTrackCStrategistDecision({ ...input, decision: { ...input.decision, goal: nextGoal } }))
-      .toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
+    expect(compileTrackCStrategistDecision({ ...input, decision: { ...ask, goal } }).task.semanticHandoff?.next).toBe("LOCALITY");
+    expect(compileTrackCStrategistDecision({ ...input, decision: { ...input.decision, goal: nextGoal } }).task.semanticHandoff?.next).toBeNull();
   });
 
   it("redacts planning PII before splitting and never promotes goal text to commercial authority", () => {
@@ -78,17 +80,17 @@ describe("C3 structured goal semantic handoff", () => {
   });
 
   it.each(["ASK_CHECKOUT_DETAILS", "HOLD_POSITION"] as const)(
-    "rejects a limitation that the %s prose slots cannot realize", (action) => {
+    "derives %s independently of LIMIT diagnostics", (action) => {
       const next = action === "ASK_CHECKOUT_DETAILS" ? "checkout fields enable the transaction" : "NONE";
-      const closed = { ...input, decision: { ...input.decision, replyAct: "ACKNOWLEDGE",
+      const closed = { ...input, requestedObligations: [], decision: { ...input.decision, replyAct: "ACKNOWLEDGE",
         proposition: "NONE", evidenceRefs: [], continuation: null, canonicalAction: action,
         goal: ["NEED: canonical request", "KNOWN: NONE", "ANSWER: NONE", "LIMIT: NONE", `NEXT: ${next}`].join("\n") },
         permittedCanonicalActions: [action], checkoutRequestedFields: ["PHONE"] as const,
       };
       expect(compileTrackCStrategistDecision(closed).task.canonicalRequest?.type).toBe(action);
-      expect(() => compileTrackCStrategistDecision({ ...closed, decision: {
+      expect(compileTrackCStrategistDecision({ ...closed, decision: {
         ...closed.decision, goal: closed.decision.goal.replace("LIMIT: NONE", "LIMIT: an unanswered shop property"),
-      } })).toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
+      } }).task.canonicalRequest?.type).toBe(action);
     },
   );
 

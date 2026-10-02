@@ -100,30 +100,6 @@ export function trackCUnclassifiedConversation(value: string, context: ContextV2
   return value;
 }
 
-// Finite semantic anchors for the requested attribute/event distinctions.
-// Preserve Vietnamese diacritics: nhan (receipt) must not become nhan (wrinkle).
-// These names describe a limitation, NEVER an evidence capability or permission.
-const LIMIT_TOPICS = Object.freeze([
-  { id: "WRINKLE_RESISTANCE", label: "khả năng chống nhăn",
-    pattern: /(?<![\p{L}\p{N}])(?:wrinkle(?: resistance)?|wrinkling|nhăn)(?![\p{L}\p{N}])/iu },
-  { id: "SMOOTHNESS", label: "độ mịn",
-    pattern: /(?<![\p{L}\p{N}])(?:smoothness|smooth|mịn|nhẵn)(?![\p{L}\p{N}])/iu },
-  { id: "WEIGHT", label: "trọng lượng",
-    pattern: /(?<![\p{L}\p{N}])(?:weight|lighter|lightweight|trọng lượng|nhẹ hơn)(?![\p{L}\p{N}])/iu },
-  { id: "DISPATCH_TIME", label: "thời điểm shop gửi hàng",
-    pattern: /(?<![\p{L}\p{N}])(?:dispatch|(?:ngày|lịch|thời điểm) (?:(?:em|shop|bên em) )?(?:sẽ )?gửi)(?![\p{L}\p{N}])/iu },
-] as const);
-
-function limitationTopics(value: string) {
-  return LIMIT_TOPICS.filter(({ id, pattern }) => value.includes(id) || pattern.test(value.normalize("NFC")));
-}
-
-/** Transitional diagnostics for callers without Producer obligations. Values
- * are discarded; only the existing finite topic identities survive planning. */
-export function trackCPlanningLimitTopics(value: string): readonly string[] {
-  return limitationTopics(value).map(({ id }) => id);
-}
-
 const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
   MATERIALS: "materials",
   COLORS: "colors",
@@ -203,23 +179,6 @@ export function assertTrackCRequestedObligationCoverage(
   }
 }
 
-/** Validate a declared request against the existing typed wear field; do
- * not choose evidence or infer an attribute from materials/smoothness. The
- * structured-goal fallback supplies scope, not factual authority. Other
- * vocabulary is not claimed to be a complete intent/quality validator. */
-export function assertTrackCRequestedPropertyCoverage(task: TrackCResponderTask): void {
-  if (task.requestedObligations?.some(({ kind }) => kind === "FACT_REQUEST")) return;
-  const handoff = task.semanticHandoff;
-  if (!handoff || task.answer.kind !== "ANSWER") return;
-  const wrinkleRequested = limitationTopics(handoff.need).some(({ id }) => id === "WRINKLE_RESISTANCE");
-  const wrinkleLimited = limitationTopics(handoff.limit ?? "").some(({ id }) => id === "WRINKLE_RESISTANCE");
-  const wrinkleEvidence = task.evidence.some(({ capability, value }) =>
-    capability === "PRODUCT_ATTRIBUTES" && value.wearWrinkleResistance === "REDUCED_WRINKLING");
-  if (wrinkleRequested && !wrinkleLimited && !wrinkleEvidence) {
-    throw new Error("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
-  }
-}
-
 function sentences(value: string): readonly string[] {
   return value.split(/(?<=[.!?;])(?:\s+|$)|\r?\n/u).filter((text) => text.trim());
 }
@@ -260,37 +219,7 @@ function closedTopicUncertainty(value: string, context: ContextV2): boolean {
   return nominalTopic(topic);
 }
 
-/** A limitation must be epistemic AND cover the assigned property. Matching
- * a capability name, an empathetic sentence or an unrelated uncertainty is
- * not coverage. Unknown vocabulary stays bounded but is not certified here. */
-export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
-  value: string | null, context: ContextV2): void {
-  if (task.obligationResolutions !== undefined) return;
-  if (task.semanticHandoff?.limit == null) return;
-  if (value === null) throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
-  const expected = limitationTopics(task.semanticHandoff.limit);
-  const uncertainty = sentences(value).filter((sentence) => {
-    // A fronted nominal topic is coverage, not an authority exemption.
-    const fronted = /^về ([^,:;.!?\n]{1,60}),\s*(.*)$/iu.exec(sentence);
-    const predicate = fronted?.[2] ?? sentence;
-    if (expected.length === 0) return trackCIsBoundedUncertainty(predicate, context);
-    return closedTopicUncertainty(sentence, context) ||
-      (fronted !== null && nominalTopic(body(fronted[1]!)) &&
-        /^(?:em )?(?:chua|khong) co (?:du )?(?:thong tin|du lieu) xac nhan(?: de tra loi chi)?$/u.test(body(predicate)));
-  });
-  if (uncertainty.length === 0) throw new Error("TRACK_C_RESPONDER_LIMIT_MISMATCH");
-  const stated = limitationTopics(uncertainty.join(" "));
-  if (expected.length > 0 && (expected.some(({ id }) => !stated.some((topic) => topic.id === id)) ||
-      stated.some(({ id }) => !expected.some((topic) => topic.id === id)))) {
-    throw new Error("TRACK_C_RESPONDER_LIMIT_MISMATCH");
-  }
-}
-
-/** Recovery derives only fixed uncertainty labels, not claims or arbitrary
- * goal prose. Preserve every selected fact separately in its bound fact slot. */
+/** Legacy callers without typed requests receive an explicit completeness limit. */
 export function trackCRecoveryLimitation(task: TrackCResponderTask): string | null {
-  if (task.obligationResolutions !== undefined) return null; // Compiler renders typed limitations.
-  const topics = limitationTopics(task.semanticHandoff?.limit ?? "");
-  return topics.length === 0 ? "Em chưa xác nhận được đầy đủ thông tin chị hỏi."
-    : topics.map(({ label }) => `Em chưa có thông tin xác nhận về ${label}.`).join(" ");
+  return task.obligationResolutions !== undefined ? null : "Em chưa xác nhận được đầy đủ thông tin chị hỏi.";
 }

@@ -169,10 +169,10 @@ function responderDraft() {
 }
 
 describe("Track C C3 strategy-contract runner", () => {
-  it.each([true, false])("hands off both requested parts and rejects a dropped limitation (kept=%s)", async (kept) => {
+  it.each([true, false])("code retains both requested parts even when the writer omits the limitation (kept=%s)", async (kept) => {
     const goal = ["NEED: price and wrinkle resistance", "KNOWN: NONE", "ANSWER: current price",
       "LIMIT: wrinkle resistance has no verified evidence", "NEXT: NONE"].join("\n");
-    const limit = "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn kh\u1ea3 n\u0103ng ch\u1ed1ng nh\u0103n.";
+    const limit = "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn về kh\u1ea3 n\u0103ng ch\u1ed1ng nh\u0103n của mẫu SQ9012.";
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({ payload: payload({ replyAct: "ANSWER", goal,
         proposition: "PRICE", evidenceRefs: ["CLAIM_001"], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
@@ -181,21 +181,21 @@ describe("Track C C3 strategy-contract runner", () => {
         providerModelVersion: "gemini-3.5-flash-lite" });
     const run = runTrackCStrategyContractCase({ lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
       capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
+      requestedObligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "SQ9012" },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE", productId: "SQ9012" },
+      ],
       evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
         text: "Price and wrinkle resistance?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send } });
-    if (kept) {
       const result = await run;
-      expect(result.reply).toContain(limit);
+      expect(result.reply).toContain("khả năng chống nhăn của mẫu SQ9012");
       expect(result.reply).toContain("849.000");
       expect(result.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM")).toHaveLength(1);
       expect(result.output.cta).toBe("NONE");
-    } else {
-      await expect(run).rejects.toThrow("TRACK_C_RESPONDER_LIMIT_REQUIRED");
-    }
     expect(send).toHaveBeenCalledTimes(2);
     const prompt = JSON.parse(JSON.parse(send.mock.calls[1]![0].body).contents[0].parts[0].text);
-    expect(prompt.responderTask.semanticHandoff).toEqual({ need: "ANSWER", known: null,
-      answer: "PRICE supported", limit: "WRINKLE_RESISTANCE unsupported", next: null });
+    expect(prompt.responderTask.semanticHandoff).toEqual({ need: "PRICE; PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE", known: null,
+      answer: "PRICE supported", limit: "PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE unsupported", next: null });
     expect(prompt.responderTask.answer).not.toHaveProperty("goal");
     expect(prompt).not.toHaveProperty("customerDecisionSignals");
   });
@@ -970,7 +970,7 @@ describe("Track C C3 strategy-contract runner", () => {
   });
 
   it("preserves supported facts while realizing bounded uncertainty without a second question", async () => {
-    const uncertainty = "Dạ, phần này em chưa thể xác nhận chắc cho chị ạ.";
+    const uncertainty = "Em chưa có thông tin xác nhận về chính sách.";
     for (const answerText of [null, "Dạ em hiểu ý chị ạ.", uncertainty,
       "Dạ mẫu này bền đẹp và giá tương xứng ạ.",
       "Dạ em đã ghi nhận đơn của chị ạ.", "Chị muốn chốt luôn không ạ?",
@@ -994,38 +994,35 @@ describe("Track C C3 strategy-contract runner", () => {
       const result = runTrackCStrategyContractCase({
         lane: "PRODUCTION_CONTRACT", modelResource: MODEL_RESOURCE,
         capture: capture(415_000), evaluationAt: new Date(recipe.evaluation_at),
+        requestedObligations: [
+          { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "SQ9012" },
+          { kind: "FACT_REQUEST", capability: "POLICY", scope: null, productId: null },
+        ],
         evaluationContext: [{
           direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
           text: "Giá mẫu này thế nào, không vừa có trả được không, giao tới chỗ chị được chứ?",
           attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z",
         }], transport: { send },
       });
-      if (answerText === null) {
-        await expect(result).rejects.toThrow("TRACK_C_RESPONDER_LIMIT_REQUIRED");
-        continue;
-      }
-      if (answerText !== uncertainty) {
+      if (answerText !== null && answerText !== "Dạ em hiểu ý chị ạ." && answerText !== uncertainty) {
         await expect(result).rejects.toBeInstanceOf(TrackCStrategyContractFailure);
         continue;
       }
       const completed = await result;
       const body = JSON.parse(send.mock.calls[1]![0].body);
-      expect(body.generationConfig.responseSchema.properties.answerText).toMatchObject({
-        anyOf: [{ type: "STRING", maxLength: 600 }],
-      });
+      expect(body.generationConfig.responseSchema.properties.answerText).toHaveProperty("anyOf");
       expect(completed.responderTask.answer).toMatchObject({ evidenceStatus: "SUPPORTED" });
       expect(completed.output.segments.filter(({ kind }) => kind === "VERIFIED_CLAIM"))
         .toEqual([{ kind: "VERIFIED_CLAIM", text: "Giá hiện tại của mẫu này là 415.000đ ạ.",
           claimContentHash: completed.responderTask.evidence[0]!.provenance.contentHash }]);
       expect(completed.reply.match(/\?/gu)).toHaveLength(1);
-      if (answerText === uncertainty) {
+      expect(completed.reply).toContain(uncertainty);
+      if (answerText === uncertainty || answerText === null) {
         expect(completed.output.segments.map(({ text }) => text)).toEqual([
           uncertainty, "Giá hiện tại của mẫu này là 415.000đ ạ.",
           "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
         ]);
-      } else {
-        expect(completed.reply).not.toContain(uncertainty);
-      }
+      } else expect(completed.output.segments).toContainEqual({ kind: "GENERAL", text: "Dạ em hiểu ý chị ạ." });
     }
   });
 

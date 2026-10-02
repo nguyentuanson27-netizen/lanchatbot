@@ -115,7 +115,6 @@ import type {
 import { redactAnalyticsMessage } from "@lana/database";
 import type { InboundEnvelopeV1 } from "@lana/meta-webhook";
 import type { PancakeHandoffAdapter } from "@lana/pancake-handoff";
-import { trackCObligationTopic } from "./track-c-c3-obligation-resolution.js";
 import type { TrackCRequestedObligation } from "./track-c-c3-strategy-contract.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { VerifiedVariantResult } from "./realtime-sales-catalog.js";
@@ -5378,19 +5377,6 @@ export class RealtimeRunner {
             ? [...(policyReplyForTurn === null ? [] : [{ kind: "TEXT" as const, text: policyReplyForTurn }]),
                 ...sales.messages] : [];
         }
-        if (this.options.c3 !== null && customerInput !== null && !sales.transferToHuman) {
-          const pending = customerInputObligations(customerInput).filter(({ kind, capability }) =>
-            kind === "FACT_REQUEST" && (capability === "PRODUCT_ATTRIBUTES" || capability === "OFFER_CONFIGURATION" ||
-              (customerInput.factQuery.intent !== "NONE" && businessFacts?.status !== "OK")));
-          const limits = pending.map((entry) => {
-            const variant = entry.capability === "STOCK" && customerInput.factQuery.size !== null
-              ? ` của size ${customerInput.factQuery.size}` : "";
-            return { kind: "TEXT" as const, text: `Em chưa có thông tin xác nhận về ${trackCObligationTopic(entry)}${variant}.` };
-          });
-          if (limits.length > 0 && this.options.mode === "LIVE" && this.options.sendEnabled) {
-            metaMessages = [...limits, ...metaMessages];
-          }
-        }
       }
       const independentSupportedAnswer = this.options.c3 !== null && customerInput !== null && customerInput.factQuery.intent !== "NONE" &&
         businessFacts?.status === "OK" && !sales.plan?.state.cart;
@@ -5436,6 +5422,8 @@ export class RealtimeRunner {
           (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
         !metaMessages.some((unit) => unit.kind === "IMAGE") &&
         (!salesHandled || resolution.alternativeSearch === "MATCHED" ||
+          (!commerceFactReplyPreserved && customerInput !== null && customerInputObligations(customerInput)
+            .some(({ kind }) => kind === "FACT_REQUEST")) ||
           (salesTelemetry?.clarificationCase === true && !commerceFactReplyPreserved))) {
       try {
         if (salesCartReadback === null) {
@@ -5517,7 +5505,8 @@ export class RealtimeRunner {
           }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
-              "CHECKOUT_DETAILS_MISSING",
+              "CHECKOUT_DETAILS_MISSING" || (salesHandled && c3Input.checkoutRequestedFields.length > 0 &&
+                canonicalDecisionEvidenceForTurn().buyingIntent.decision === "COMMITTED"),
           transport: c3Transport ?? this.options.c3.transport,
         });
         validateResponderOutput(

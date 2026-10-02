@@ -15,7 +15,8 @@ export type TrackCObligationResolution = Readonly<{
 export function trackCResolveObligations(requested: readonly TrackCRequestedObligation[],
   evidence: readonly TrackCSelectableEvidence[], boundProductIds: readonly string[] = []): readonly TrackCObligationResolution[] {
   return Object.freeze(requested.map((entry, index) => {
-    const productId = entry.productId ?? (boundProductIds.length === 1 ? boundProductIds[0]! : null);
+    const shopScope = entry.capability === "POLICY" || entry.capability === "PROMOTION_OFFER";
+    const productId = entry.productId ?? (!shopScope && boundProductIds.length === 1 ? boundProductIds[0]! : null);
     const matches = entry.lookupStatus !== undefined ? [] : evidence.filter((fact) =>
       entry.kind === "PRODUCT_SEARCH"
         ? fact.subject?.productId !== undefined && fact.subject.productId !== entry.productId &&

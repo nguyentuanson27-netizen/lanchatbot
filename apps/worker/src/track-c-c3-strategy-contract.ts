@@ -1,8 +1,6 @@
 import {
   assertTrackCRequestedObligationCoverage,
-  assertTrackCRequestedPropertyCoverage,
   trackCObligationMatchesEvidence,
-  trackCPlanningLimitTopics,
 } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
@@ -398,40 +396,21 @@ function selectedEvidence(
 }
 
 /**
- * Bounded fallback for the existing single-intent Producer request. Parse only
- * fixed section syntax; prose is never interpreted into facts or permissions.
- * The model path opts in after normal decision/PII/authority validation. Fixed
- * code-owned tasks and historical direct compiler callers retain their API.
+ * Diagnostic structure only. Typed state owns semantics; the five prose
+ * sections cannot contradict an action, status or continuation.
  */
-function structuredGoal(
-  decision: TrackCStrategistDecision,
-  requiresLimit: boolean,
-): TrackCSemanticHandoff {
+function validateStructuredGoal(decision: TrackCStrategistDecision): void {
   const keys = ["NEED", "KNOWN", "ANSWER", "LIMIT", "NEXT"] as const;
   const lines = decision.goal.split(/\r?\n/u);
   const invalid = () => new Error("TRACK_C_STRATEGIST_GOAL_INVALID");
   if (lines.length !== keys.length) throw invalid();
-  const parts = keys.map((key, index) => {
+  keys.forEach((key, index) => {
     const prefix = `${key}: `;
     const line = lines[index]!;
     if (!line.startsWith(prefix)) throw invalid();
     const value = line.slice(prefix.length);
     if (!value || value !== value.trim()) throw invalid();
-    return value === "NONE" ? null : value;
   });
-  const [need, known, answer, limit, next] = parts;
-  const hasRequest = decision.continuation?.type === "ASK" ||
-    (decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION");
-  // These canonical tasks expose no open answer slot. Reject an incompatible
-  // plan instead of silently dropping its limit or opening checkout prose.
-  const closedAnswerSlot = decision.canonicalAction === "ASK_CHECKOUT_DETAILS" ||
-    decision.canonicalAction === "HOLD_POSITION";
-  if (need == null || (next != null) !== hasRequest || (requiresLimit && limit == null) ||
-      (closedAnswerSlot && limit != null)) {
-    throw invalid();
-  }
-  return Object.freeze({ need, known: known ?? null, answer: answer ?? null,
-    limit: limit ?? null, next: next ?? null });
 }
 
 export function compileTrackCStrategistDecision(input: Readonly<{
@@ -505,11 +484,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
-  const parsedHandoff = input.requireStructuredGoal === true
-    ? structuredGoal(decision, unrealizable.length > 0 ||
-        (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
-          decision.continuation?.type === "KEEP_OPEN"))
-    : undefined;
+  if (input.requireStructuredGoal === true) validateStructuredGoal(decision);
   // Planning is a control plane. Never carry provider-authored factual values
   // into the decision/task, even if the provider repeated an authorized fact.
   const facts = input.requestedObligations?.filter(({ kind }) => kind === "FACT_REQUEST") ?? [];
@@ -517,14 +492,15 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     [entry.capability ?? entry.kind, entry.scope].filter(Boolean).join("/");
   const unsupported = facts.filter((entry) =>
     !realizable.some((fact) => trackCObligationMatchesEvidence(entry, fact)));
-  const semanticHandoff = parsedHandoff === undefined ? undefined : Object.freeze({
+  const semanticHandoff = input.requireStructuredGoal !== true ? undefined : Object.freeze({
     need: facts.length > 0 ? facts.map(describe).join("; ") : decision.replyAct,
     known: null,
     answer: realizable.length > 0 ? [...new Set(realizable.map(({ capability }) => capability))]
       .map((capability) => `${capability} supported`).join("; ") : null,
     limit: unsupported.length > 0 ? unsupported.map((entry) => `${describe(entry)} unsupported`).join("; ")
-      : parsedHandoff.limit === null ? null
-        : trackCPlanningLimitTopics(parsedHandoff.limit).map((id) => `${id} unsupported`).join("; ") || "Requested part unsupported",
+      : unrealizable.length > 0 ? [...new Set(unrealizable.map(({ capability }) => capability))]
+          .map((capability) => `${capability} unrealized`).join("; ")
+        : decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" ? `${decision.proposition} unsupported` : null,
     next: decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION"
       ? decision.canonicalAction : decision.continuation?.type === "ASK" ? decision.continuation.input : null,
   });
@@ -564,7 +540,6 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       input.measurementRequestedFields,
     ),
   });
-  assertTrackCRequestedPropertyCoverage(task);
   // Return the validated, PII-safe decision used to compile this exact task.
   // Consumers must not reuse the provider's raw planning text for reporting.
   return Object.freeze({ decision, task });

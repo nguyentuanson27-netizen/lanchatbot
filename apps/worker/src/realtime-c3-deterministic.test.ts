@@ -507,6 +507,20 @@ describe("adversarial freshness, isolation and atomicity controls", () => {
 
 
 describe("independent commerce and response obligations", () => {
+  it("answers a supported attribute during purchase instead of declaring it unavailable", async () => {
+    const runtime = deterministicRuntime();
+    await quote(runtime);
+    const purchase = "Chị lấy một bộ CB182 size M màu be.";
+    const question = "Chất liệu gì?";
+    const trace = await runtime.turn({ text: `${purchase} ${question}`, producer: { ...buy(purchase, "M"), obligations: [
+      { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "MATERIALS", productId: "CB182", evidenceText: question },
+    ] } });
+    expect(cartSizes(trace)).toEqual(["M", "M"]);
+    expect(trace.reply.toLowerCase()).toContain("cotton");
+    expect(trace.reply).not.toContain("chưa có thông tin");
+    expect(trace.reply.match(/Chị cho em xin/g)).toHaveLength(1);
+    committedOnce(trace);
+  });
   it("commits selected M when the independent S stock lookup fails", async () => {
     const runtime = deterministicRuntime();
     await quote(runtime);
