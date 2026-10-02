@@ -3,6 +3,7 @@ import type { ShadowContextMessage } from "@lana/database";
 import type {
   TrackCRequestedObligation,
   TrackCResponderTask,
+  TrackCTypedLimitation,
   TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
 
@@ -55,8 +56,7 @@ function classify(value: string, context: ContextV2,
   const latest = [...source.dialogue].reverse().find(({ direction, senderType, messageType }) =>
     direction === "INBOUND" && senderType === "CUSTOMER" && messageType === "TEXT")?.text ?? "";
   const amounts = amountTokens(value);
-  const known = source.task.semanticHandoff?.known ?? "";
-  if (amounts.length === 1 && amountTokens(latest).includes(amounts[0]!) && amountTokens(known).includes(amounts[0]!)) {
+  if (amounts.length === 1 && amountTokens(latest).includes(amounts[0]!)) {
     // Substitute just the source-bound numeric token. The remaining entire
     // sentence must be a reference/refusal, never a shop price declaration.
     const shape = phrase.replace(/\d[\d.,]{0,14}\s*(?:k|nghin|trieu|vnd|dong|d|₫)(?![a-z0-9])/u, "AMOUNT");
@@ -129,7 +129,7 @@ const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
   CARE_INSTRUCTIONS: "careInstructions",
 } as const);
 
-function obligationMatchesEvidence(
+export function trackCObligationMatchesEvidence(
   obligation: TrackCRequestedObligation,
   evidence: TrackCSelectableEvidence,
 ): boolean {
@@ -172,17 +172,17 @@ export function assertTrackCRequestedObligationCoverage(
     const allowed = facts.filter((entry) => entry.capability === capability);
     if (selected.some((entry) =>
       entry.capability === capability &&
-      !allowed.some((obligation) => obligationMatchesEvidence(obligation, entry))
+      !allowed.some((obligation) => trackCObligationMatchesEvidence(obligation, entry))
     )) {
       throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
     }
   }
   for (const obligation of facts) {
     const hasAvailable = available.some((entry) =>
-      obligationMatchesEvidence(obligation, entry)
+      trackCObligationMatchesEvidence(obligation, entry)
     );
     if (hasAvailable && !selected.some((entry) =>
-      obligationMatchesEvidence(obligation, entry)
+      trackCObligationMatchesEvidence(obligation, entry)
     )) {
       throw new Error("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
     }
@@ -251,6 +251,9 @@ function closedTopicUncertainty(value: string, context: ContextV2): boolean {
  * not coverage. Unknown vocabulary stays bounded but is not certified here. */
 export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
   value: string | null, context: ContextV2): void {
+  // Typed limitations are compiler-owned coverage. Do not reverse-engineer
+  // their meaning from Vietnamese writer prose.
+  if ((task.limitations?.length ?? 0) > 0) return;
   if (task.semanticHandoff?.limit == null) return;
   if (value === null) throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
   const expected = limitationTopics(task.semanticHandoff.limit);
@@ -271,9 +274,42 @@ export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
   }
 }
 
-/** Recovery derives only fixed uncertainty labels, not claims or arbitrary
- * goal prose. Preserve every selected fact separately in its bound fact slot. */
+const TYPED_LIMIT_LABELS = Object.freeze({
+  "PRODUCT_ATTRIBUTES:WRINKLE_RESISTANCE": "khả năng chống nhăn",
+  "PRODUCT_ATTRIBUTES:MATERIALS": "chất liệu",
+  "PRODUCT_ATTRIBUTES:COLORS": "màu sắc",
+  "PRODUCT_ATTRIBUTES:STYLES": "kiểu dáng",
+  "PRODUCT_ATTRIBUTES:SILHOUETTE": "phom dáng",
+  "PRODUCT_ATTRIBUTES:STRETCH": "độ co giãn",
+  "PRODUCT_ATTRIBUTES:OPACITY": "độ xuyên thấu",
+  "PRODUCT_ATTRIBUTES:LINING": "lớp lót",
+  "PRODUCT_ATTRIBUTES:BREATHABILITY": "độ thoáng",
+  "PRODUCT_ATTRIBUTES:CARE_INSTRUCTIONS": "hướng dẫn bảo quản",
+  "OFFER_CONFIGURATION:FULL_SET": "giá nguyên set",
+  "OFFER_CONFIGURATION:TOP": "giá mua lẻ áo",
+  "OFFER_CONFIGURATION:BOTTOM": "giá mua lẻ quần/chân váy",
+  "OFFER_CONFIGURATION:TWO_PIECE": "giá bộ 2 món",
+  "OFFER_CONFIGURATION:THREE_PIECE": "giá bộ 3 món",
+  "STOCK:ALL": "tình trạng còn hàng",
+  "PRICE:ALL": "giá",
+  "ETA:ALL": "thời gian giao hàng",
+  "SIZE_FIT:ALL": "thông tin size/độ vừa",
+} as const);
+
+export function trackCTypedLimitationText(value: TrackCTypedLimitation): string {
+  const key = `${value.capability ?? "DECLARED"}:${value.scope ?? "ALL"}` as
+    keyof typeof TYPED_LIMIT_LABELS;
+  const label = TYPED_LIMIT_LABELS[key];
+  return label === undefined
+    ? "Phần thông tin còn lại em chưa có dữ liệu xác nhận để trả lời chị ạ."
+    : `Em chưa có thông tin xác nhận về ${label} để trả lời chị ạ.`;
+}
+
+/** Recovery is compiled from typed unresolved obligations, never from goal prose. */
 export function trackCRecoveryLimitation(task: TrackCResponderTask): string {
+  if ((task.limitations?.length ?? 0) > 0) {
+    return task.limitations!.map(trackCTypedLimitationText).join(" ");
+  }
   const topics = limitationTopics(task.semanticHandoff?.limit ?? "");
   return topics.length === 0 ? "Em chưa xác nhận được đầy đủ thông tin chị hỏi."
     : topics.map(({ label }) => `Em chưa có thông tin xác nhận về ${label}.`).join(" ");

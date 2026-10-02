@@ -1,6 +1,7 @@
 import {
   trackCPiiFreeLocalityRequest, trackCUnclassifiedConversation,
   assertTrackCLimitationCoverage, trackCRecoveryLimitation,
+  trackCTypedLimitationText,
 } from "./track-c-c3-conversational-guard.js";
 import type { BusinessFactEnvelopeV1, MeasurementKind, RealtimeCustomerInput } from "@lana/contracts";
 import { createHash } from "node:crypto";
@@ -68,8 +69,8 @@ const CHECKOUT_FIELDS = new Set<string>(
 
 const STRATEGIST_INSTRUCTION = [
   "You are the Strategist for one Track C sales turn. Decide only the conversational intent; do not write customer-facing text.",
-  "The selectableEvidence list is the only commercial factual authority. Customer-reported budget, measurements and preferences in dialogue may inform your choice and PII-safe goal as customer-provided context; they never establish shop price, stock, verified fit, policy, checkout completion, an effect, or permission. Do not copy recipient PII into goal.",
-  "Read the latest inbound first to identify the current question, correction or buying decision. Read prior dialogue to recover relevant known inputs and the customer's reason, never to resume an older topic instead of answering the latest turn. In goal state the current need, known relevant inputs, the supported answer and any remaining limitation. Then choose the smallest evidence set and at most one progression mechanism. Handle an objection before progression; do not follow a fixed sales funnel.",
+  "The selectableEvidence list is the only commercial factual authority. Customer-reported context in dialogue may inform the decision, but goal is control metadata only: never copy prices, stock values, measurements, recipient PII, product facts or evidence realization text into goal.",
+  "Read the latest inbound first to identify the current question, correction or buying decision. Read prior dialogue only as customer context. Keep goal as five-line structural metadata; code derives the authoritative need/answer/limit/next tokens from your typed fields and selected evidence. Then choose the smallest evidence set and at most one progression mechanism.",
   "Address the customer's objection or concern before progression. Choose ANSWER when addressing it directly, ACKNOWLEDGE for acknowledgement, or CLARIFY when the current need itself is unclear. An objection does not force ACKNOWLEDGE.",
   "Distinguish a request to confirm a fact from resistance to that fact. Do not select a fact solely because its topic matches the objection: a price already stated does not answer whether the purchase is worthwhile; an attribute does not establish a benefit or repair a previous bad experience. Select a verified detail only if it helps with the customer's stated decision. When the cause of a previous bad experience is unknown, ask for the specific failed aspect only if that answer would change the next recommendation. Otherwise acknowledge the concern without recycling known facts or inventing a benefit, concession, or comparison. Apply this test to fit, stock, delivery, and trust concerns as well.",
   "Choose an ordinary ASK or a canonical input request only when the missing input is directly relevant to the customer's current decision or to an immediate next decision already established by the latest turn or authoritative context, and its answer would materially change the next recommendation, comparison, qualification, or transaction. In goal, identify that missing input and why it matters. Do not invent a new discovery dimension merely because it could be useful later. If the current question is resolved and no such blocker or immediate decision remains, use NONE with KEEP_OPEN unless the canonical hard stop requires HOLD_POSITION.",
@@ -441,7 +442,7 @@ function strategistResponseSchema(
     replyAct: { type: "STRING", enum: constraints.hardStop
       ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
     goal: { type: "STRING", minLength: 1, maxLength: 500,
-      description: "Exactly five lines in order: NEED: ...; KNOWN: ...; ANSWER: ...; LIMIT: ...; NEXT: ... . Use NONE for absent sections, never NEED. NEXT states the decision impact of the single assigned request, otherwise NONE. LIMIT preserves every unsupported requested part." },
+      description: "Exactly five lines in order: NEED: ...; KNOWN: ...; ANSWER: ...; LIMIT: ...; NEXT: ... . This is non-authoritative control metadata only. Do not copy any factual value, price, stock, measurements, recipient PII or realization text. Code derives final semantic handoff from typed fields." },
     proposition: { type: "STRING", enum: TRACK_C_PROTECTED_PROPOSITIONS },
     evidenceRefs: {
       type: "ARRAY",
@@ -684,7 +685,8 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
 }
 
 function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
-  return task.semanticHandoff?.limit != null && !singleRequestBody(task) &&
+  return ((task.limitations?.length ?? 0) > 0 || task.semanticHandoff?.limit != null) &&
+    !singleRequestBody(task) &&
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
 
@@ -712,9 +714,11 @@ function responderDraftSchema(
           ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
-          : { description: "Word the assigned semanticHandoff context/limit only. SUPPORTED is not complete coverage. No shop facts, quantities, sizes or requests here.",
-            anyOf: [...(responderHasAssignedLimit(task) ? [] : [{ type: "NULL" }]),
-              { type: "STRING", minLength: 1, maxLength: 600 }] }
+          : (task.limitations?.length ?? 0) > 0
+            ? { type: "NULL" }
+            : { description: "Word only non-factual acknowledgement/context assigned by the task. No shop facts, quantities, sizes, limitations or requests here.",
+              anyOf: [{ type: "NULL" },
+                { type: "STRING", minLength: 1, maxLength: 600 }] }
         : boundedAcknowledgement
         ? { type: "STRING", enum: answers }
         : answers.length > 0
@@ -1041,6 +1045,9 @@ function compileResponderDraft(input: Readonly<{
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
   )).size > 1;
+  const productSearchRequested = task.requestedObligations?.some(({ kind }) =>
+    kind === "PRODUCT_SEARCH"
+  ) ?? false;
   orderedEvidence.forEach((evidence, index) => {
     const factualText = evidence.deterministicText === undefined
       ? null
@@ -1056,9 +1063,24 @@ function compileResponderDraft(input: Readonly<{
       );
     }
     assertNoEffectText(factualText);
-    if (multipleSubjects && evidence.subject?.productId !== undefined) {
-      const label = text(evidence.subject.displayName ?? evidence.subject.productId,
-        "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
+    const variantSize = evidence.subject?.variantLabel?.size;
+    const variantColor = evidence.subject?.variantLabel?.color;
+    if (variantSize !== undefined || variantColor !== undefined) {
+      const variant = [
+        variantSize === undefined ? null : `size ${variantSize}`,
+        variantColor === undefined ? null : `màu ${variantColor}`,
+      ].filter((value): value is string => value !== null).join(" ");
+      const safeVariant = text(variant, "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
+      if (safeVariant === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
+      segments.push({ kind: "GENERAL", text: `Với ${safeVariant}:` });
+    } else if ((multipleSubjects || productSearchRequested) &&
+        evidence.subject?.productId !== undefined) {
+      // Product search recovery must keep a stable identity even when a
+      // display name is unavailable or resembles recipient PII.
+      const rawLabel = productSearchRequested
+        ? evidence.subject.productId
+        : evidence.subject.displayName ?? evidence.subject.productId;
+      const label = text(rawLabel, "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       if (label === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       assertNoEffectText(label);
       segments.push({ kind: "GENERAL", text: `Với mẫu ${label}:` });
@@ -1079,6 +1101,9 @@ function compileResponderDraft(input: Readonly<{
       task.answer.evidenceStatus === "SUPPORTED" &&
       draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: PARTIAL_REALIZATION_TEXT });
+  }
+  for (const limitation of task.limitations ?? []) {
+    segments.push({ kind: "GENERAL", text: trackCTypedLimitationText(limitation) });
   }
   if (task.deliveryDeadlineText !== undefined) {
     segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });
@@ -1132,7 +1157,7 @@ function compileResponderDraft(input: Readonly<{
       assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation));
     }
   }
-  if (adaptive && responderHasAssignedLimit(task)) {
+  if (adaptive && responderHasAssignedLimit(task) && (task.limitations?.length ?? 0) === 0) {
     assertTrackCLimitationCoverage(task, draft.answerText, input.context);
   }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&

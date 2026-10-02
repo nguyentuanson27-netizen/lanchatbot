@@ -1,6 +1,7 @@
 import {
   assertTrackCRequestedObligationCoverage,
   assertTrackCRequestedPropertyCoverage,
+  trackCObligationMatchesEvidence,
 } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
@@ -173,9 +174,17 @@ export type TrackCSemanticHandoff = Readonly<{
   next: string | null;
 }>;
 
+export type TrackCTypedLimitation = Readonly<{
+  capability: TrackCProtectedProposition | null;
+  scope: string | null;
+  productId: string | null;
+}>;
+
 export type TrackCResponderTask = Readonly<{
   semanticHandoff?: TrackCSemanticHandoff;
   requestedObligations?: readonly TrackCRequestedObligation[];
+  /** Code-owned unresolved factual obligations. Responder prose cannot alter these. */
+  limitations?: readonly TrackCTypedLimitation[];
   answer:
     | Readonly<{
         kind: "ANSWER";
@@ -393,35 +402,65 @@ function selectedEvidence(
  * The model path opts in after normal decision/PII/authority validation. Fixed
  * code-owned tasks and historical direct compiler callers retain their API.
  */
-function structuredGoal(
-  decision: TrackCStrategistDecision,
-  requiresLimit: boolean,
-): TrackCSemanticHandoff {
+type TrackCGoalEnvelope = Readonly<{ declaredLimit: boolean }>;
+
+function goalEnvelope(decision: TrackCStrategistDecision): TrackCGoalEnvelope {
   const keys = ["NEED", "KNOWN", "ANSWER", "LIMIT", "NEXT"] as const;
   const lines = decision.goal.split(/\r?\n/u);
   const invalid = () => new Error("TRACK_C_STRATEGIST_GOAL_INVALID");
   if (lines.length !== keys.length) throw invalid();
-  const parts = keys.map((key, index) => {
+  const values = keys.map((key, index) => {
     const prefix = `${key}: `;
     const line = lines[index]!;
     if (!line.startsWith(prefix)) throw invalid();
     const value = line.slice(prefix.length);
     if (!value || value !== value.trim()) throw invalid();
-    return value === "NONE" ? null : value;
+    return value;
   });
-  const [need, known, answer, limit, next] = parts;
-  const hasRequest = decision.continuation?.type === "ASK" ||
-    (decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION");
-  // These canonical tasks expose no open answer slot. Reject an incompatible
-  // plan instead of silently dropping its limit or opening checkout prose.
-  const closedAnswerSlot = decision.canonicalAction === "ASK_CHECKOUT_DETAILS" ||
-    decision.canonicalAction === "HOLD_POSITION";
-  if (need == null || (next != null) !== hasRequest || (requiresLimit && limit == null) ||
-      (closedAnswerSlot && limit != null)) {
-    throw invalid();
-  }
-  return Object.freeze({ need, known: known ?? null, answer: answer ?? null,
-    limit: limit ?? null, next: next ?? null });
+  // Provider prose is only an envelope compatibility check. It never owns
+  // facts, requested coverage or progression semantics.
+  return Object.freeze({ declaredLimit: values[3] !== "NONE" });
+}
+
+function limitationToken(value: TrackCTypedLimitation): string {
+  return [
+    value.capability ?? "DECLARED",
+    value.scope ?? "ALL",
+    value.productId ?? "BOUND",
+  ].join(":");
+}
+
+function codeOwnedSemanticHandoff(
+  decision: TrackCStrategistDecision,
+  evidenceStatus: "SUPPORTED" | "UNRESOLVED" | "NOT_APPLICABLE",
+  limitations: readonly TrackCTypedLimitation[],
+): TrackCSemanticHandoff {
+  const next = decision.continuation?.type === "ASK"
+    ? `ASK:${decision.continuation.input}`
+    : decision.canonicalAction !== "NONE"
+      ? `ACTION:${decision.canonicalAction}`
+      : null;
+  return Object.freeze({
+    need: `${decision.replyAct}:${decision.proposition}`,
+    known: null,
+    answer: decision.replyAct === "ANSWER"
+      ? `${evidenceStatus}:${decision.proposition}`
+      : null,
+    limit: limitations.length === 0
+      ? null
+      : limitations.map(limitationToken).join(","),
+    next,
+  });
+}
+
+function serializeSemanticHandoff(value: TrackCSemanticHandoff): string {
+  return [
+    `NEED: ${value.need}`,
+    `KNOWN: ${value.known ?? "NONE"}`,
+    `ANSWER: ${value.answer ?? "NONE"}`,
+    `LIMIT: ${value.limit ?? "NONE"}`,
+    `NEXT: ${value.next ?? "NONE"}`,
+  ].join("\n");
 }
 
 export function compileTrackCStrategistDecision(input: Readonly<{
@@ -495,19 +534,43 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
-  const semanticHandoff = input.requireStructuredGoal === true
-    ? structuredGoal(decision, unrealizable.length > 0 ||
-        (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
-          decision.continuation?.type === "KEEP_OPEN"))
-    : undefined;
-  const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
+  const envelope = input.requireStructuredGoal === true
+    ? goalEnvelope(decision)
+    : null;
+  const requestedFacts = input.requestedObligations?.filter((entry) =>
+    entry.kind === "FACT_REQUEST" && entry.capability !== null
+  ) ?? [];
+  const unresolvedRequested = requestedFacts.filter((obligation) =>
+    !realizable.some((entry) => trackCObligationMatchesEvidence(obligation, entry))
+  ).map(({ capability, scope, productId }) => Object.freeze({
+    capability, scope, productId,
+  }));
+  const limitations: readonly TrackCTypedLimitation[] = unresolvedRequested.length > 0
+    ? Object.freeze(unresolvedRequested)
+    : envelope !== null && (envelope.declaredLimit || unrealizable.length > 0 ||
+        (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED"))
+      ? Object.freeze([Object.freeze({
+          capability: decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED"
+            ? decision.proposition : null,
+          scope: null,
+          productId: null,
+        })])
+      : Object.freeze([]);
+  const semanticHandoff = envelope === null
+    ? undefined
+    : codeOwnedSemanticHandoff(decision, evidenceStatus, limitations);
+  const normalizedDecision = semanticHandoff === undefined
+    ? decision
+    : Object.freeze({ ...decision, goal: serializeSemanticHandoff(semanticHandoff) });
+  const answer: TrackCResponderTask["answer"] = normalizedDecision.replyAct === "ANSWER"
     ? Object.freeze({
-        kind: "ANSWER", evidenceStatus, goal: decision.goal,
-        proposition: decision.proposition,
+        kind: "ANSWER", evidenceStatus, goal: normalizedDecision.goal,
+        proposition: normalizedDecision.proposition,
       })
-    : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
+    : Object.freeze({ kind: normalizedDecision.replyAct, goal: normalizedDecision.goal });
   const task: TrackCResponderTask = Object.freeze({
     ...(semanticHandoff === undefined ? {} : { semanticHandoff }),
+    ...(limitations.length === 0 ? {} : { limitations }),
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
         Object.freeze({ ...entry })
@@ -532,7 +595,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   assertTrackCRequestedPropertyCoverage(task);
   // Return the validated, PII-safe decision used to compile this exact task.
   // Consumers must not reuse the provider's raw planning text for reporting.
-  return Object.freeze({ decision, task });
+  return Object.freeze({ decision: normalizedDecision, task });
 }
 
 export function compileTrackCFixedFirstContactTask(input: Readonly<{

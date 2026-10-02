@@ -1052,6 +1052,8 @@ export function enforceProtectedOutboundReadinessV1<
   readonly readiness: TReadiness | null;
   readonly salesCyclePlan: TSalesCyclePlan | null;
   readonly salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
+  /** Preserve a separately authorized cart transition when only reply egress failed. */
+  readonly preserveIndependentlyReadyPlan?: boolean;
 }): {
   readonly messages: readonly TMessage[];
   readonly claims: readonly TClaim[];
@@ -1072,7 +1074,9 @@ export function enforceProtectedOutboundReadinessV1<
     // Preserve the denial as telemetry evidence. It is never attached to a
     // Meta plan because only READY readiness can cross that boundary.
     readiness: input.readiness,
-    salesCyclePlan: null,
+    salesCyclePlan: input.preserveIndependentlyReadyPlan
+      ? input.salesCyclePlan
+      : null,
     salesDesiredTag: null,
     blockedReasonCodes: [...new Set(input.readiness.reasonCodes)],
   };
@@ -5387,6 +5391,10 @@ export class RealtimeRunner {
         ? [{ kind: "TEXT", text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé." }]
         : [];
     }
+    const hasIndependentResponseObligation = customerInput !== null &&
+      customerInputObligations(customerInput).some(({ kind }) =>
+        kind === "FACT_REQUEST" || kind === "PRODUCT_SEARCH"
+      );
     if (customerInputFailure === null && this.options.c3 !== null && triggerMessagePk !== null &&
         preSalePolicyIntent === null && resolution.alternativeSearch !== "NO_MATCH" &&
         resolution.alternativeSearch !== "UNAVAILABLE" && salesCycleRecord !== null &&
@@ -5395,7 +5403,8 @@ export class RealtimeRunner {
         (resolution.products.length <= 1 ||
           (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
         !metaMessages.some((unit) => unit.kind === "IMAGE") &&
-        (!salesHandled || resolution.alternativeSearch === "MATCHED" ||
+        (!salesHandled || hasIndependentResponseObligation ||
+          resolution.alternativeSearch === "MATCHED" ||
           (salesTelemetry?.clarificationCase === true && !commerceFactReplyPreserved))) {
       try {
         if (salesCartReadback === null) {
@@ -5742,12 +5751,17 @@ export class RealtimeRunner {
       });
     }
 
+    const preserveIndependentlyReadyPlan = salesCyclePlan?.effectReadiness.some((entry) =>
+      entry.outcome === "READY" &&
+      (entry.effect === "CART_OPEN" || entry.effect === "CART_MUTATION")
+    ) ?? false;
     const protectedOutboundGate = enforceProtectedOutboundReadinessV1({
       messages: metaMessages,
       claims: protectedOutboundClaims,
       readiness: protectedOutboundReadiness,
       salesCyclePlan,
       salesDesiredTag,
+      preserveIndependentlyReadyPlan,
     });
     metaMessages = [...protectedOutboundGate.messages];
     protectedOutboundClaims = [...protectedOutboundGate.claims];
