@@ -71,7 +71,7 @@ export type TrackCRequestedObligation = Readonly<Pick<
 
 export type TrackCObligationResolution = Readonly<{
   kind: "FACT_REQUEST";
-  capability: TrackCProtectedProposition;
+  capability: Exclude<TrackCRequestedObligation["capability"], null>;
   scope: string | null;
   productId: string | null;
   offerType?: string | null;
@@ -539,7 +539,7 @@ function structuredGoal(
   if ((requiresLimit && limit == null) || (closedAnswerSlot && limit != null)) {
     throw invalid();
   }
-  return Object.freeze({ need, known: known ?? null, answer: answer ?? null,
+  return Object.freeze({ need: need ?? null, known: known ?? null, answer: answer ?? null,
     limit: limit ?? null, next: next ?? null });
 }
 

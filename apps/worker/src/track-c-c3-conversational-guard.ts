@@ -203,7 +203,7 @@ export function assertTrackCRequestedPropertyCoverage(task: TrackCResponderTask)
   if (task.requestedObligations?.some(({ kind }) => kind === "FACT_REQUEST")) return;
   const handoff = task.semanticHandoff;
   if (!handoff || task.answer.kind !== "ANSWER") return;
-  const wrinkleRequested = limitationTopics(handoff.need).some(({ id }) => id === "WRINKLE_RESISTANCE");
+  const wrinkleRequested = limitationTopics(handoff.need ?? "").some(({ id }) => id === "WRINKLE_RESISTANCE");
   const wrinkleLimited = limitationTopics(handoff.limit ?? "").some(({ id }) => id === "WRINKLE_RESISTANCE");
   const wrinkleEvidence = task.evidence.some(({ capability, value }) =>
     capability === "PRODUCT_ATTRIBUTES" && value.wearWrinkleResistance === "REDUCED_WRINKLING");
