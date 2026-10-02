@@ -118,6 +118,10 @@ export function trackCObligationMatchesEvidence(
   obligation: TrackCRequestedObligation,
   evidence: TrackCSelectableEvidence,
 ): boolean {
+  if (obligation.kind === "PRODUCT_SEARCH") {
+    return obligation.lookupStatus === undefined && evidence.subject?.productId !== undefined &&
+      evidence.subject.productId !== obligation.productId && ["PRICE", "PRODUCT_PRESENTATION"].includes(evidence.capability);
+  }
   if (obligation.lookupStatus !== undefined || obligation.kind !== "FACT_REQUEST" ||
       obligation.capability === null ||
       evidence.capability !== obligation.capability) return false;
@@ -154,24 +158,12 @@ export function assertTrackCRequestedObligationCoverage(
   available: readonly TrackCSelectableEvidence[],
   selected: readonly TrackCSelectableEvidence[],
 ): void {
-  const facts = requested.filter((entry) =>
-    entry.kind === "FACT_REQUEST" && entry.capability !== null
-  );
-  if (facts.length === 0) return;
-  if (!requested.some(({ kind }) => kind === "PRODUCT_SEARCH") && selected.some((entry) =>
-      !facts.some((obligation) => trackCObligationMatchesEvidence(obligation, entry)))) {
+  const answers = requested.filter(({ kind }) => kind === "FACT_REQUEST" || kind === "PRODUCT_SEARCH");
+  if (answers.length === 0) return;
+  if (selected.some((entry) => !answers.some((obligation) => trackCObligationMatchesEvidence(obligation, entry)))) {
     throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
   }
-  for (const capability of new Set(facts.map(({ capability }) => capability))) {
-    const allowed = facts.filter((entry) => entry.capability === capability);
-    if (selected.some((entry) =>
-      entry.capability === capability &&
-      !allowed.some((obligation) => trackCObligationMatchesEvidence(obligation, entry))
-    )) {
-      throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
-    }
-  }
-  for (const obligation of facts) {
+  for (const obligation of answers) {
     const hasAvailable = available.some((entry) =>
       trackCObligationMatchesEvidence(obligation, entry)
     );

@@ -17,11 +17,8 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
   return Object.freeze(requested.map((entry, index) => {
     const shopScope = entry.capability === "POLICY" || entry.capability === "PROMOTION_OFFER";
     const productId = entry.productId ?? (!shopScope && boundProductIds.length === 1 ? boundProductIds[0]! : null);
-    const matches = entry.lookupStatus !== undefined ? [] : evidence.filter((fact) =>
-      entry.kind === "PRODUCT_SEARCH"
-        ? fact.subject?.productId !== undefined && fact.subject.productId !== entry.productId &&
-          ["PRICE", "PRODUCT_PRESENTATION"].includes(fact.capability)
-        : trackCObligationMatchesEvidence({ ...entry, productId }, fact));
+    const matches = evidence.filter((fact) => trackCObligationMatchesEvidence(
+      entry.kind === "PRODUCT_SEARCH" ? entry : { ...entry, productId }, fact));
     const status = entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
       : entry.lookupStatus ?? (matches.length > 0 ? "SUPPORTED" as const : "UNSUPPORTED" as const);
     return Object.freeze({

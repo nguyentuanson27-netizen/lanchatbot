@@ -9,16 +9,34 @@ async function bound(runtime: ReturnType<typeof deterministicRuntime>) {
     product: { operation: "SELECT", productId: "CB182", evidenceText: "CB182" }, factQuery: price,
   }) });
 }
-const compound = () => inputDelta({ factQuery: price, obligations: [
+const compound = (stockSpan = "còn hàng") => inputDelta({ factQuery: price, obligations: [
   { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "CB182", evidenceText: "giá bao nhiêu" },
-  { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "CB182", evidenceText: "còn hàng" },
+  { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "CB182", evidenceText: stockSpan },
 ] });
 
 describe("obligation-aware runtime recovery", () => {
+  it("keeps a verified alternative when Strategist incorrectly declares the search unsupported", async () => {
+    const runtime = deterministicRuntime();
+    await bound(runtime);
+    const trace = await runtime.turn({ text: "Không lấy CB182. Tìm mẫu khác dưới 700k.", producer: inputDelta({
+      budget: { operation: "SET", value: 700_000, evidenceText: "dưới 700k" },
+      obligations: [
+        { kind: "PRODUCT_REJECT", capability: null, scope: null, productId: "CB182", evidenceText: "Không lấy CB182" },
+        { kind: "PRODUCT_SEARCH", capability: null, scope: null, productId: null, evidenceText: "Tìm mẫu khác dưới 700k" },
+      ],
+    }), strategist: (input) => ({ ...answerPlan("PRODUCT_COMPARISON")(input), evidenceRefs: [] }) });
+    expect(trace.reply).toContain("SV9031");
+    expect(trace.reply).toContain("699.000");
+    expect(trace.reply).not.toContain("799.000");
+    const metadata = trace.roleCalls.find(({ role }) => role === "STRATEGIST")!.input.selectableEvidence;
+    expect(metadata?.find(({ capability }) => capability === "PRICE")).toMatchObject({ requestedObligationIndexes: [1] });
+    expect(trace.after.commerce.cart).toBeNull();
+  });
   it("retains S stock alongside price when the primary lookup hint is PRICE", async () => {
     const runtime = deterministicRuntime({ multiFact: true });
     await bound(runtime);
-    const trace = await runtime.turn({ text: "CB182 giá bao nhiêu, size S còn hàng không?", producer: compound(),
+    const producer = compound("size S còn hàng");
+    const trace = await runtime.turn({ text: "CB182 giá bao nhiêu, size S còn hàng không?", producer,
       strategist: answerPlan("PRICE"), responderFailure: "TRANSPORT" });
     expect(trace.reply).toContain("799.000");
     expect(trace.reply).toContain("size S");

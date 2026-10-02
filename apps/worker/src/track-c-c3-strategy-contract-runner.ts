@@ -1491,9 +1491,7 @@ async function runTrackCStrategyContractCore(
       // A failed model cannot supply a strategy. Recover only the original
       // source-bound obligations from current evidence, with no new action.
       const selected = evidence.filter((entry) => trackCEvidenceHasSafeFactualEgress(entry) &&
-        requested.some((obligation) => obligation.kind === "PRODUCT_SEARCH"
-          ? ["PRICE", "PRODUCT_PRESENTATION"].includes(entry.capability)
-          : trackCObligationMatchesEvidence(obligation, entry)));
+        requested.some((obligation) => trackCObligationMatchesEvidence(obligation, entry)));
       const compiled = compileTrackCStrategistDecision({ ...constraints, evidence,
         requestedObligations: requested, boundProductIds: context.productBinding.productIds,
         decision: { replyAct: "ANSWER", proposition: selected[0]?.capability ??
