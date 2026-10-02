@@ -5478,7 +5478,7 @@ export class RealtimeRunner {
               }
             ),
             customerBuyingIntentEvidenceText:
-              customerInput.salesSignals.buyingIntent.evidenceText,
+              customerInput.salesSignals.buyingIntent?.evidenceText ?? null,
           }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
