@@ -1,3 +1,5 @@
+import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
+import { bindRealtimeCustomerInput, customerInputCanonicalEvidence } from "./realtime-customer-input.js";
 import {
   buildCanonicalDecisionEvidenceV1,
 } from "@lana/business-tools";
@@ -400,7 +402,13 @@ describe("multi-product C3 evidence binding", () => {
       transport: { send: async () => ({
         payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
           stage++ === 0
-            ? { replyAct: "ANSWER", goal: "Compare the two verified prices.",
+            ? { replyAct: "ANSWER", goal: [
+              "NEED: Compare the two verified prices.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
                 proposition: "PRICE", evidenceRefs: prices.map(({ ref }) => ref),
                 continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
             : { answerText: null, factualTexts: [], progressionText: null },
@@ -2012,6 +2020,8 @@ describe("realtime Phase 3 sales cycle", () => {
     const benefitText = "Giỏ hiện có quyền lợi gì?";
     const benefitReadback = await evaluateRealtimeSalesCycle({
       ...input(state, benefitText, "event-benefit-readback"),
+      canonicalBuyingIntent: buildCanonicalDecisionEvidenceV1({ text: benefitText,
+        sourceMessageId: "mid-event-benefit-readback", productId: "CB182", modelBuyingIntent: null, evaluatedAt: now }).buyingIntent,
       c3CartReadback: true,
     });
     expect(benefitReadback.cartReadback).toMatchObject({
@@ -2023,7 +2033,7 @@ describe("realtime Phase 3 sales cycle", () => {
         text: benefitText, sourceMessageId: "mid-event-benefit-readback",
         productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
       }),
-      preConversationRevision: 8, finalConversationRevision: 9,
+      preConversationRevision: 7, finalConversationRevision: 8,
       preSalesRevision: state.revision, commerceState: state,
       productId: "CB182", catalogVersion: null, facts: [],
       productFacts: null, policyResolution,
@@ -2590,6 +2600,23 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.plan?.state.confirmation ?? null).toBeNull();
   });
 
+  it.each(["UNCLEAR", "REJECT", "CONFIRM"] as const)("respects typed confirmation meaning before legacy positive match: %s", async (decision) => {
+    const state = await previewState(`event-typed-confirm-${decision}`);
+    const text = "ok";
+    const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(), salesSignals: {
+      ...signals({ confirmation: { decision, evidenceText: text } }),
+    } }, text);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, `event-typed-confirm-message-${decision}`), customerInput,
+      salesSignals: customerInput.salesSignals,
+    });
+    expect(output.plan?.state.confirmation != null).toBe(decision === "CONFIRM");
+    if (decision !== "CONFIRM") {
+      expect(output.telemetry?.confirmationConfirmed).toBe(false);
+      expect(output.telemetry?.confirmationReasonCode).toBe("CUSTOMER_INPUT_NOT_PURCHASE_CONFIRMATION");
+    }
+  });
+
   it("never lets model-only confirmation authorize purchase", async () => {
     const state = await previewState("event-model-confirm");
     const text = "triển khai giúp chị";
@@ -2907,6 +2934,8 @@ describe("realtime Phase 3 sales cycle", () => {
     const readbackText = "Giỏ này tính tiền giao thế nào?";
     const readback = await evaluateRealtimeSalesCycle({
       ...input(openState, readbackText, "c3-cart-readback"),
+      canonicalBuyingIntent: buildCanonicalDecisionEvidenceV1({ text: readbackText,
+        sourceMessageId: "mid-c3-cart-readback", productId: "CB182", modelBuyingIntent: null, evaluatedAt: now }).buyingIntent,
       c3CartReadback: true,
     });
     expect(readback.cartReadback).toEqual(expect.objectContaining({
@@ -2916,7 +2945,7 @@ describe("realtime Phase 3 sales cycle", () => {
       text: readbackText, sourceMessageId: "mid-c3-cart-readback",
       productId: "CB182", modelBuyingIntent: null, evaluatedAt: now,
     });
-    const live = buildRealtimeC3Input({
+    const c3Input = {
       sourceMessagePk: "00000000-0000-4000-8000-000000000077",
       canonicalEvidence,
       preConversationRevision: 7, finalConversationRevision: 8,
@@ -2925,8 +2954,45 @@ describe("realtime Phase 3 sales cycle", () => {
       productId: "CB182", catalogVersion: null,
       facts: [], productFacts: null, policyResolution,
       cartReadiness: [readback.cartReadback!], now,
-    });
+    };
+    const live = buildRealtimeC3Input(c3Input);
     expect(live.currentCart).not.toBeNull();
+    // Malformed persistence must not throw before the product evidence path.
+    const productFact = BusinessFactEnvelopeV1Schema.parse({
+      schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+      observedAt: "2026-07-23T02:00:00.000Z",
+      expiresAt: "2026-07-25T02:00:00.000Z", productId: "CB182",
+      facts: { schemaVersion: 1, productId: "CB182", parentProductId: "CB182",
+        offerType: "SET", listPriceVnd: 699_000, salePriceVnd: null,
+        sizes: ["M"], stockStatus: "IN_STOCK", stockQuantity: 2,
+        deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [] },
+      reasonCode: null,
+    });
+    for (const expiresAt of ["not-a-date", "", now.toISOString()]) {
+      const result = buildRealtimeC3Input({ ...c3Input, facts: [productFact],
+        commerceState: { ...openState, cart: { ...openState.cart!, expiresAt } } });
+      expect(result.currentCart).toBeNull();
+      expect(result.context.verifiedClaims.some(({ type }) => type === "PRICE")).toBe(true);
+      expect(result.context.verifiedClaims.some(({ scope }) => scope.kind === "CART")).toBe(false);
+    }
+
+    for (const invalidReadback of [
+      { ...readback.cartReadback!, sourceMessageIdHash: "f".repeat(64) },
+      { ...readback.cartReadback!, conversationRevision: 6 },
+      { ...readback.cartReadback!, salesCycleRevision: openState.revision + 1 },
+      { ...readback.cartReadback!, cartStateHash: "f".repeat(64) },
+      { ...readback.cartReadback!, cartVersion: openState.cart!.value.revision + 1 },
+      { ...readback.cartReadback!, checkedAt: new Date(now.getTime() + 1).toISOString() },
+      { ...readback.cartReadback!, expiresAt: now.toISOString() },
+    ]) {
+      const rejected = buildRealtimeC3Input({ ...c3Input, cartReadiness: [invalidReadback] });
+      expect(rejected.currentCart).toBeNull();
+      const rejectedEvidence = buildTrackCSelectableEvidence({ context: rejected.context,
+        simulationFacts: [], executionLane: "PRODUCTION_CONTRACT",
+        currentCart: rejected.currentCart, evaluationAt: now });
+      expect(rejectedEvidence.filter(({ capability }) =>
+        ["FREESHIP", "SHIPPING_FEE", "PROMOTION_OFFER"].includes(capability))).toEqual([]);
+    }
     expect(live.checkoutRequestedFields).toEqual([
       "FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD",
     ]);
@@ -2996,7 +3062,13 @@ describe("realtime Phase 3 sales cycle", () => {
       payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(
         _request.body.includes("TRACK_C_C3_STRATEGIST_INPUT_V1")
           ? {
-              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              replyAct: "ACKNOWLEDGE", goal: [
+                "NEED: Collect the missing payment choice.",
+                "KNOWN: NONE",
+                "ANSWER: NONE",
+                "LIMIT: NONE",
+                "NEXT: missing checkout fields enable the canonical transaction",
+              ].join("\n"),
               proposition: "PRICE", evidenceRefs: [],
               continuation: null, canonicalAction: "ASK_CHECKOUT_DETAILS",
             }
@@ -3016,7 +3088,7 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(paymentReply.output.cta).toBe("ASK_CHECKOUT_DETAILS");
     expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
-      .toContain("hình thức thanh toán COD");
+      .toContain("Chị chọn thanh toán khi nhận hàng (COD)");
     expect(paymentReply.output.segments.map(({ text }) => text).join(" "))
       .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
     const preview = await evaluateRealtimeSalesCycle(input(
@@ -3024,5 +3096,80 @@ describe("realtime Phase 3 sales cycle", () => {
     ));
     expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
     expect(missingRealtimeCheckoutFields(preview.plan!.state)).toEqual([]);
+  });
+});
+
+
+describe("typed customer input consumed by commerce", () => {
+  it.each([
+    ["size and color", "L", "XANH", "M", "XANH"],
+    ["size preserves color", "L", null, "L", "XANH"],
+    ["color preserves size", null, "XANH", "L", "XANH"],
+  ])("rejects a POS variant outside the requested %s edit", async (_name, size, color, returnedSize, returnedColor) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now), "chot CB182 size M", "typed-scope-open",
+    ));
+    const text = `Doi CB182 ${size ?? ""} ${color ?? ""}`;
+    const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(),
+      variant: { operation: "CHANGE", productId: "CB182", size, color, evidenceText: text },
+    }, text);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, text, "typed-scope-edit"), customerInput,
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        if (query.color === null) return { status: "COLOR_REQUIRED" as const,
+          reasonCode: "CART_COLOR_REQUIRED", availableSizes: ["M", "L"], availableColors: ["BE", "XANH"] };
+        const base = await facts.resolveCartSelection!(query, at);
+        if (base.status !== "READY") return base;
+        return { ...base, line: { ...base.line, lineId: query.lineId,
+          components: base.line.components.map((part) => ({ ...part, size: returnedSize, color: returnedColor })),
+        } };
+      } },
+    });
+    expect(output.reasonCode).toBe("CART_VARIANT_SCOPE_MISMATCH");
+    expect(output.plan?.cartMutationBatchEvidence).toBeUndefined();
+    expect(opened.plan!.state.cart!.value.lines[0]!.components.map(({ size, color }) => [size, color]))
+      .toEqual([["M", "BE"], ["M", "BE"]]);
+  });
+
+  it("opens the selected M while S is only a question", async () => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const text = "Chị lấy một bộ size M, size S còn không?";
+    const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(),
+      variant: { operation: "SELECT", productId: "CB182", size: "M", color: null, evidenceText: "Chị lấy một bộ size M" },
+      salesSignals: { ...noCustomerSelection().salesSignals,
+        buyingIntent: { decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+          evidenceText: "Chị lấy một bộ size M", confidence: 0.99 } },
+    }, text);
+    const requestedSizes: (string | null)[] = [];
+    const output = await evaluateRealtimeSalesCycle({ ...input(state, text, "typed-mixed-size"), customerInput,
+      canonicalBuyingIntent: customerInputCanonicalEvidence({ text, sourceMessageId: "mid-typed-mixed-size", productId: "CB182", evaluatedAt: now }, customerInput).buyingIntent,
+      facts: { ...facts, resolveCartSelection: async (query, at) => {
+        requestedSizes.push(query.size); return facts.resolveCartSelection!(query, at);
+      } },
+    });
+    expect(requestedSizes).toEqual(["M"]);
+    expect(output.plan?.state.cart?.value.lines[0]?.components.map((part) => part.size)).toEqual(["M", "M"]);
+  });
+
+  it("captures COD alongside Hội An without mistaking labels for a name", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now),
+      "Chị lấy CB182 size M.", "typed-open"));
+    const text = "Tên: An Demo\nSĐT: 0900000000\nĐịa chỉ: 123 Đường Mẫu, Hội An\nChị chọn COD";
+    const field = (value: string, evidenceText: string) => ({ value, evidenceText, confidence: 0.99 });
+    const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(), salesSignals: {
+      ...noCustomerSelection().salesSignals, checkoutExtraction: {
+        fullName: field("An Demo", "Tên: An Demo"), phone: field("0900000000", "SĐT: 0900000000"),
+        address: field("123 Đường Mẫu, Hội An", "Địa chỉ: 123 Đường Mẫu, Hội An"),
+        paymentMethod: field("COD", "Chị chọn COD"),
+      },
+    } }, text);
+    const output = await evaluateRealtimeSalesCycle({ ...input(opened.plan!.state, text, "typed-checkout"), customerInput });
+    expect(output.plan?.state.checkoutDraft).toMatchObject({ fullName: "An Demo", address: "123 Đường Mẫu, Hội An", paymentMethod: "COD" });
+    expect(output.plan?.state.stage).toBe("ORDER_PREVIEW");
+    const mislabeled = { ...customerInput, salesSignals: { ...customerInput.salesSignals,
+      checkoutExtraction: { ...customerInput.salesSignals.checkoutExtraction, fullName: field("Tên", "Tên: An Demo") } } };
+    const rejected = await evaluateRealtimeSalesCycle({ ...input(opened.plan!.state, text, "typed-label"), customerInput: mislabeled });
+    expect(rejected.plan?.state.checkoutDraft?.fullName).toBeNull();
+    expect(rejected.plan?.state.stage).toBe("CART_OPEN");
   });
 });

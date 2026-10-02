@@ -790,6 +790,7 @@ const runnerOptions = {
   contextV2CaptureEnabled: df13CommerceStartupInput.mode === "COMMERCE",
   ...(mode === "DRY_RUN" && process.env.REALTIME_C3_LOCAL_TEST_ENABLED === "true"
     ? { c3: {
+        customerInputEnabled: true,
         modelResource: `projects/${required("VERTEX_PROJECT_ID")}/locations/${
           process.env.VERTEX_LOCATION?.trim() || credential.region
         }/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,

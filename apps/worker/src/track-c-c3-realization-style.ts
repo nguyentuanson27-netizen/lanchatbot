@@ -28,3 +28,24 @@ export function trackCComposeReply(texts: readonly string[]): string {
     return final ? value : value.replace(/ (?:ạ|nhé|nha)([.!?])$/u, "$1");
   }).join(" ");
 }
+
+/** Match a complete, lossless permutation to source units, not model claim IDs.
+ * Fixed first-contact still uses its positional layout. Ambiguous cross-subject
+ * wording cannot be used to choose another source unit. */
+export function trackCOrderEvidence<T extends { deterministicText?: string }>(
+  evidence: readonly T[], texts: readonly string[], allowReorder: boolean,
+): readonly T[] {
+  if (texts.length === 0) return evidence;
+  if (texts.length !== evidence.length) throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  const remaining = new Set(evidence.map((_, index) => index));
+  return texts.map((value, index) => {
+    const matches = [...remaining].filter((position) =>
+      evidence[position]!.deterministicText !== undefined &&
+      trackCRealizationMatches(value, evidence[position]!.deterministicText!));
+    const position = matches.includes(index) ? index
+      : allowReorder && matches.length === 1 ? matches[0]! : -1;
+    if (position < 0) throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+    remaining.delete(position);
+    return evidence[position]!;
+  });
+}

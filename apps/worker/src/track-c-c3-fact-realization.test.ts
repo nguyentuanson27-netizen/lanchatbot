@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { trackCSimulationFactText } from "./track-c-c3-fact-realization.js";
+import {
+  trackCOfferConfigurationProjections,
+  trackCSimulationFactText,
+} from "./track-c-c3-fact-realization.js";
 import {
   trackCPartitionEvidenceRealization,
   type TrackCSelectableEvidence,
@@ -43,6 +46,7 @@ describe("Track C C3 typed fact realization", () => {
     }, "INSPECTION");
     expect(text).toContain("tuỳ theo từng đơn");
     expect(text).not.toContain("được thử tại chỗ");
+    expect(text).not.toContain("em cần kiểm tra");
   });
 
   it("states a negative selling rule instead of omitting it", () => {
@@ -83,6 +87,24 @@ describe("Track C C3 typed fact realization", () => {
       active: false,
     }, null);
     expect(text).toContain("chưa có chương trình ưu đãi");
+  });
+
+  it("projects offer configuration into atomic customer-request scopes", () => {
+    const projections = trackCOfferConfigurationProjections({
+      fullSetVnd: 899_000,
+      top: { available: true, priceVnd: 549_000 },
+      bottom: { available: false, priceVnd: null },
+      twoPieceVnd: 829_000,
+      threePieceVnd: 1_049_000,
+      threePieceItems: ["áo", "chân váy", "quần"],
+    });
+    expect(projections.map(({ scope }) => scope)).toEqual([
+      "FULL_SET", "TWO_PIECE", "THREE_PIECE", "TOP", "BOTTOM",
+    ]);
+    expect(projections.find(({ scope }) => scope === "TOP")?.text)
+      .toBe("Mua lẻ áo có giá 549.000đ ạ.");
+    expect(projections.find(({ scope }) => scope === "THREE_PIECE")?.text)
+      .toContain("1.049.000đ");
   });
 
   it("says an item is not sold separately instead of leaving it out", () => {

@@ -9,6 +9,8 @@ import {
   FinalTurnEvidenceV2Schema,
   ProductBindingV2Schema,
   canonicalJsonV1,
+  canonicalCartStateHashPreimageV1,
+  canonicalCartStateV1,
   type BusinessFactEnvelopeV1,
   type DeterministicEffectReadinessV1,
   type ProductFactsV2,
@@ -102,12 +104,22 @@ export function buildRealtimeC3Input(input: Readonly<{
   const readbackReady = cart !== null && input.cartReadiness.some((readiness) =>
     readiness.effect === "CART_READY" && readiness.outcome === "READY" &&
     readiness.cartId === cart.value.cartId &&
-    readiness.cartVersion === cart.value.revision
+    readiness.cartVersion === cart.value.revision &&
+    readiness.sourceMessageIdHash === input.canonicalEvidence.buyingIntent.sourceMessageIdHash &&
+    readiness.conversationRevision === input.preConversationRevision &&
+    readiness.salesCycleRevision === input.preSalesRevision &&
+    Date.parse(readiness.checkedAt) <= input.now.getTime() &&
+    Date.parse(readiness.expiresAt) > input.now.getTime() &&
+    readiness.cartStateHash === createHash("sha256")
+      .update(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart.value)), "utf8").digest("hex")
   );
   const currentCart: TrackCCurrentCartBinding | null = cart === null ||
       !readbackReady ||
       bundle === null || pinnedPolicy === undefined || pinnedPolicy === null ||
       currentPolicy === null ||
+      !Number.isFinite(Date.parse(cart.expiresAt)) ||
+      (bundle.policy.effectiveUntil !== null &&
+        !Number.isFinite(Date.parse(bundle.policy.effectiveUntil))) ||
       canonicalJsonV1(pinnedPolicy) !== canonicalJsonV1(currentPolicy)
     ? null
     : {
@@ -132,14 +144,15 @@ export function buildRealtimeC3Input(input: Readonly<{
   }
   const productPresentation = input.productFacts === null ? null :
     buildProductPresentationEvidenceV1(input.productFacts, input.now);
+  const measurementRequestedFields = input.fitDecision?.action === "ASK_MORE" &&
+    input.fitDecision.recommendation.parentProductId === input.productId &&
+    input.fitDecision.recommendation.chartRef?.verificationStatus === "VERIFIED"
+    ? input.fitDecision.missingInputs.filter((kind) => kind !== "FIT_PREFERENCE") : [];
   const context = buildContextV2({
     canonicalEvidence: input.canonicalEvidence,
     verifiedClaims: [...productClaims, ...cartClaims].slice(0, 32),
     finalCommerceState: input.commerceState,
-    fitMeasurementsRequired: input.fitDecision?.action === "ASK_MORE" &&
-      input.fitDecision.recommendation.parentProductId === input.productId &&
-      input.fitDecision.recommendation.chartRef?.verificationStatus === "VERIFIED" &&
-      input.fitDecision.missingInputs.some((kind) => kind !== "FIT_PREFERENCE"),
+    fitMeasurementsRequired: measurementRequestedFields.length > 0,
     readiness: [],
     finalTurnEvidence,
     productBinding,
@@ -152,6 +165,7 @@ export function buildRealtimeC3Input(input: Readonly<{
   });
   return Object.freeze({
     context,
+    measurementRequestedFields: Object.freeze(measurementRequestedFields),
     currentCart: cartClaims.length === 0 ? null : currentCart,
     checkoutRequestedFields: input.commerceState.stage === "CART_OPEN" ||
         input.commerceState.stage === "ORDER_PREVIEW"

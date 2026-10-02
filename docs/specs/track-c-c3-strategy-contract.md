@@ -1,6 +1,6 @@
 # Draft Spec: Track C C3 strategy contract simplification
 
-**Status:** Draft / evidence input contract, scope and checkout alignment
+**Status:** Draft / PR377 Slice A prompt ownership and semantic handoff; real-model acceptance OPEN
 
 **Source:** PR #369, clarified in merged PR #372, extended here alongside the
 implementation on PR #371.
@@ -36,6 +36,13 @@ The first lane is intentionally policy-driven. The second lane is where the Stra
 
 ## 1. First contact: fixed Messenger policy
 
+**P07 amendment, 2026-10-01 (candidate source change):** keep the fixed price/
+product-information form, but request only an input that is still missing. When
+all applicable first-contact inputs are already known, the reply ends without a
+new question. This deliberately changes the earlier mandatory-one-question rule;
+it does not change lane admission, the six-field Strategist schema, or effect
+authority. Implementation/evidence and limits: [P06-P09 amendment](pr377-p06-p09-runtime-20261001.md).
+
 Use `FIRST_CONTACT_FIXED` only when trusted metadata/canonical context says this is a first meaningful inbound such as ad/referral entry, a new customer asking price, or a new customer sending a single product image.
 
 Do not infer first-contact status from dialogue wording alone.
@@ -55,7 +62,7 @@ Dạ mẫu {PRODUCT} có giá {PRICE} ...
 
 {useful product information} + {one authorized selling point when available}
 
-{exactly one progression question}
+{one useful progression question when an input is missing; otherwise no question}
 ```
 
 Rules:
@@ -66,14 +73,19 @@ Rules:
 - use at most one selling point;
 - selling-point wording must come from an explicit verified/curated claim or an allowlisted deterministic projection;
 - if no authorized selling point exists, omit it rather than inventing a benefit;
-- use exactly one progression mechanism;
+- use at most one progression mechanism; do not repeat a known input;
 - do not invent discounts, availability, policy, benefits, or effects.
 
 First-contact progression priority:
 
 1. If product classification/variant must be resolved first, ask that classification.
-2. Else, when multiple colors are a meaningful choice, ask color.
-3. Else, ask for height + weight or the relevant measurements needed for fit guidance.
+2. Else, when multiple colors are a meaningful choice and no offered color has
+   already been selected, ask color.
+3. Else, ask only for missing height/weight, not measurements already in the
+   current customer profile. Existing verified fit guidance or all relevant
+   measurements can satisfy this input requirement.
+4. If no applicable input remains, use `KEEP_OPEN` with no question. Never
+   invent a new discovery topic to meet a question count.
 
 Do **not** ask usual worn size as the first fit question.
 
@@ -151,6 +163,24 @@ concern. The Strategist may choose `ANSWER` to address a concern directly.
 
 ### `goal`
 
+The PR377 quality-closure Slice A amendment below now requires every adaptive
+**model** decision to encode this existing string as exactly five ordered lines:
+
+```text
+NEED: current need
+KNOWN: relevant customer context, or NONE
+ANSWER: supported requested parts, or NONE
+LIMIT: unsupported requested parts and their limit, or NONE
+NEXT: the single missing input and decision it changes, or NONE
+```
+
+The six public fields do not change. Code splits the normalized, PII-safe string
+into an internal `semanticHandoff`; the Responder receives those sections rather
+than a free-text goal from which it must discover question coverage. The 500
+character total limit stays in force. Direct code-owned compiler calls retain
+the prior API; both adaptive live and frozen-evaluation model paths require the
+new grammar and reject noncompliant output before the Responder.
+
 `goal` describes the current conversational objective and, when asking for an
 input, the specific missing input and why it matters. It is never factual,
 checkout, or effect authority. Commercial facts and their exact values come
@@ -179,7 +209,7 @@ diagnostic copy must pass the same PII-safe logging boundary.
 `continuation` replaces `nextMove.action + target + purpose + decisionInput`.
 
 - `ASK` means one ordinary customer input would materially change what happens next;
-- `KEEP_OPEN` means keep the conversation naturally open without introducing a new decision variable; the answer itself can do this and no closing sentence is mandatory;
+- `KEEP_OPEN` means no further customer input or canonical action is useful for this turn. It is valid after a resolved need **or** a bounded limitation for missing shop-owned information the customer cannot supply; no closing sentence is mandatory;
 - `null` means a canonical action owns the progression for this turn.
 
 `PRODUCT` and `MEASUREMENTS` are **not** ordinary continuation inputs. They remain canonical actions through `ASK_PRODUCT` and `ASK_MEASUREMENTS`, so there is only one representation for those requests.
@@ -272,7 +302,7 @@ wrinkle resistance; delivery ETA does not establish dispatch time. Retain
 verified evidence that directly answers part of a compound question; leave the
 selection empty only when no eligible evidence answers any part. For example,
 for price plus wrinkle resistance, retain verified price and use the existing
-goal to identify the unanswered wrinkle question. Do not substitute material
+`goal` LIMIT section to identify the unanswered wrinkle question for the internal handoff. Do not substitute material
 for wrinkle evidence or invent a negative answer. No extra decision field or
 per-question taxonomy is needed.
 
@@ -311,6 +341,14 @@ A small shape is enough:
 
 ```ts
 type ResponderTask = {
+  // Internal semantic instructions only, not factual or action authority.
+  semanticHandoff?: {
+    need: string;
+    known: string | null;
+    answer: string | null;
+    limit: string | null;
+    next: string | null;
+  };
   answer:
     | {
         kind: "ANSWER";
@@ -343,6 +381,11 @@ replyAct = ACKNOWLEDGE
 replyAct = CLARIFY
   -> CLARIFY
 ```
+
+For adaptive model-facing requests, `answer.goal` is omitted when the compiled
+`semanticHandoff` is present. Internal task/decision records retain the normalized
+goal for identity and diagnostics. Fixed code-owned tasks keep their existing
+wording surface. `customerDecisionSignals` is not sent to the Responder.
 
 Responder responsibilities:
 
@@ -1214,3 +1257,288 @@ unknown, including a subordinate mention of when the shop will send it. The
 effect guard distinguishes that bounded uncertainty from an assertion that
 the shop will send it. An affirmative shipping promise in the same or a later
 clause remains rejected. This wording does not grant fulfillment authority.
+
+### PR377 P00–P04 implementation amendment (2026-10-01)
+
+This amendment records the bounded implementation selected by the P00–P04
+root-cause pass. It does not change the six-field Strategist contract, the fixed
+first-contact policy, commerce authority, or the rule that model output is
+untrusted until code validates it.
+
+- **P00 evidence boundary:** exact-head CI remains the integration authority.
+  Historical failing runs remain historical; a later green head does not rewrite
+  their result or cause. Source-only findings, focused reproduction, and full
+  runtime evidence stay distinct.
+- **P01 cart/variant input:** malformed, stale, mismatched, or ambiguous cart
+  binding is fail-closed for cart evidence without deleting independent product
+  facts. Cart and claim expiry strings must parse as finite dates. Product
+  variant IDs are opaque identifiers: customer-facing color/size is emitted only
+  from one product-bound presentation mapping; missing, cross-product, or
+  duplicate mapping is a realization capability gap, never a cue to parse the
+  ID text.
+- **P02 catalog authority:** the acceptance path is producer -> isolated Qdrant
+  index -> production adapter -> ProductFacts/C3 selectable evidence. APPROVED
+  source fields may surface; `UNKNOWN` stays unknown and unapproved image rows
+  do not publish a product. XML description prose is not promoted into approved
+  wear properties, size fit, policy, or destination ETA. The integration test
+  owns a loopback Qdrant process and temporary collection and never writes a
+  live index.
+- **P03 bounded realization/guard:** `factualTexts` may reorder complete
+  source-owned realization units on adaptive turns, but every selected unit must
+  appear exactly once and remain lossless. It may not split, merge, paraphrase,
+  change subject/condition/negation, or use an ambiguous match to rebind a fact.
+  The bounded uncertainty exception covers only an unconfirmed mention with no
+  value or promise for the already guarded stock/fit/ETA/offer topics. This is a
+  conservative syntactic allowance, not a semantic certificate for Vietnamese
+  free prose.
+- **P04 compound coverage and recovery:** `SUPPORTED` describes the selected
+  proposition, not whole-turn completeness. A valid `answerText` that names an
+  unanswered part survives selected-facts recovery. If authored prose itself is
+  rejected, recovery may pair already-selected verified facts with the fixed
+  incomplete-answer limit; it may not invent the missing fact, strategy, effect,
+  or customer request. A public shop-location fact remains source-owned even
+  when a model preface is rejected by customer-PII DLP.
+
+Focused verification for this amendment covers cart expiry/binding, opaque
+variant mapping, production projection guard, adaptive Responder recovery and a
+real isolated Qdrant round-trip. Exact PR-head CI is still required after these
+changes are committed; this section does not claim that future head green in
+advance.
+
+
+## PR377 quality-closure Slice A amendment (2026-10-01)
+
+This implements only Slice A of PR380 at `c26c7d7a20b8461937dd3080b592c47caccd32f2`.
+It does not close semantic guard Slice B, the twelve-journey Slice C matrix,
+real-model runtime acceptance, DEV70 R2, P11 or P12. PR377 remains draft.
+
+### Ownership and precedence
+
+Strategist owns the current need, history referent, evidence selection,
+unsupported requested parts and one justified progression. Latest inbound has
+focus precedence; a correction may complete an immediately pending question;
+older context cannot reopen answered topics. Canonical code context owns
+state/action authority, selected evidence owns shop facts, and dialogue owns
+customer-reported context only. Hard stops precede ordinary progression.
+
+Both fixed and adaptive Responders own wording only. The compiled task fixes
+intent, concern, evidence and progression. Dialogue can help tone and reference,
+not re-route the task. The writer cannot derive a preference-to-benefit bridge,
+price comparison, ETA relation, fit or business effect. Complete selected factual
+units and existing derivation/guard paths remain unchanged. Legacy prompt
+identity specimens remain frozen; the shared instruction resolver maps them to
+the current centralized prompts, as tested by the prompt-contract suite.
+
+### Known inputs are compiled, not re-interpreted by the writer
+
+The current validated session budget reaches C3 as `knownBudgetVnd`; only its
+presence (`budgetKnown`) is added to Strategist constraints. When known, BUDGET
+is absent from the provider continuation schema and is rejected independently
+by the compiler. The compiler does not invent a substitute progression. This
+also holds when the product is unresolved.
+
+Current verified, product-bound Size Engine `ASK_MORE.missingInputs` supplies
+`measurementRequestedFields` using the existing MeasurementKind enum. Code
+removes already-known positive finite measurements and excludes FIT_PREFERENCE.
+An empty field list cannot authorize ASK_MEASUREMENTS. The canonical responder
+task carries the exact remaining fields; neither goal nor dialogue selects them.
+No measurement metadata in the live adapter means no adaptive measurement
+request. Historical direct/frozen callers retain the height/weight default;
+stateful real-runtime evaluation uses the actual Producer/Size Engine bridge.
+Fixed first-contact selection and its known-input checks stay code-owned.
+
+### Why the bounded goal fallback, not a new typed subsystem
+
+The existing Producer fact query has one intent (NONE/PRICE/STOCK/SIZE/ETA),
+plus a separate single policy question. It cannot represent price plus an
+unsupported product attribute without changing the Producer contract and its
+consumers. Therefore this slice uses the closure plan's five-section goal
+fallback, not a new request taxonomy, store or orchestration layer.
+
+The compiler validates section count/order/nonemptiness after the existing PII
+redaction. NEED cannot be NONE. NEXT is present exactly when the validated
+decision requests an input; it cannot authorize that request. A terminal
+UNRESOLVED answer or selected unrealizable evidence requires LIMIT. All evidence,
+permission, binding and freshness checks remain independent of those strings.
+
+A supplied limitation requires a non-null answer slot when the task has an open
+answer slot. This is a **structural presence check**, not proof that arbitrary
+Vietnamese text states the correct limitation. With a question-only task, its
+single progression slot remains the only prose slot. Checkout-details and hard
+stop tasks have closed answer semantics: a goal with a LIMIT is rejected rather
+than silently dropping it or opening a checkout prose side channel. A Strategist
+must not hide an unresolved question in those closed slots.
+
+At the Slice A checkpoint, coverage correspondence, wrongful attribute
+substitutions, unsafe inference and semantic recovery remained open. The Slice B
+amendment below supersedes that checkpoint for its finite guarded families only;
+arbitrary natural-language meaning and real-model acceptance remain unverified.
+
+### Verification boundary
+
+New regressions cover prompt ownership, KEEP_OPEN, signal removal, known budget
+schema/compiler rejection, exact missing measurement handoff, structured goal
+validation/PII/closed slots, and a price plus unsupported-attribute request with
+both reply parts retained. A null limitation is rejected. Existing scripted
+fixtures were migrated to the same grammar without changing their business
+assertions, facts, rubric or thresholds. These are deterministic controls only;
+no real model, DEV70 generation or judge was invoked.
+
+
+## PR377 quality-closure Slice B: two-sided semantic guard (2026-10-01)
+
+This amendment follows local Slice A `541c3e3ad414de4fc91920c6c719e278d452fef7`.
+It does not close P11/P12 or authorize real-model evaluation, merge, deployment,
+traffic, a different rubric or an authority transition.
+
+### Guard ownership and finite boundary
+
+The existing source-bound, immutable factual projections remain mandatory.
+`track-c-c3-conversational-guard.ts` distinguishes a small set of non-fact
+statements in GENERAL segments: customer price reference/refusal, customer
+size selection, bound product referent, locality request and bounded uncertainty.
+These are internal guard classifications, never model-authored permission tags.
+No exemption applies to VERIFIED_CLAIM, FACT_PROJECTION or EFFECT_CLAIM segments.
+
+A customer price mention repeats one complete amount token from both the latest
+customer inbound and the compiled KNOWN context. It does not approve that price,
+change a budget, authorize a discount or turn a conditional offer into commitment.
+Size acknowledgement requires the validated Producer selection and source span
+for that exact size/product; a stock question mentioning another size cannot
+select it. A reference may only name a currently bound product. Neither kind of
+acknowledgement asserts fit, a product attribute or a completed cart change.
+
+The existing runtime Producer output and redacted dialogue are passed to both
+C3 compilation and its final RealtimeRunner egress check. They do not enter the
+writer schema as new authority, and no extra model/history/business call occurs.
+
+Only complete finite statement forms can bypass keyword-level fact detection.
+Mixed reference plus unknown prose is rejected, not stripped. Mixed uncertainty
+with another clause retains all original guards. Unknown uncertainty vocabulary
+gets no new exemption. The supported epistemic forms use closed nominal topics,
+not a blacklist of conjunctions: a prefix such as "not confirmed" cannot license
+an independent positive/negative property claim later in the same sentence.
+
+The locality exception is full-string equality against a closed request grammar
+for an already assigned ASK LOCALITY. It contains no recipient values or address
+slot. Full address/name/phone requests remain subject to the existing PII and
+canonical-checkout boundaries; DLP and recipient capture are not disabled.
+
+### Requested-property coverage and recovery
+
+The six-field Strategist contract and Slice A structured-goal fallback stay
+unchanged. An internal LIMIT must be expressed epistemically and retain its
+assigned topic. The finite paired topic anchors are wrinkle resistance,
+smoothness, weight and dispatch time. They preserve Vietnamese diacritics so a
+receipt mention does not become a wrinkle topic. A generic acknowledgement or an
+uncertainty about another attribute is not coverage.
+
+For a NEED that explicitly requests wrinkle resistance, material/smoothness or
+price evidence alone cannot certify an answer with LIMIT NONE. Reuse the
+existing typed `wearWrinkleResistance=REDUCED_WRINKLING` field when selected and
+realizable, or keep the wrinkle limitation. The compiler neither chooses new
+facts nor derives wear properties from a fabric name.
+
+Supported selected facts survive eligible Responder transport/JSON/guard
+recovery. For the finite limitation families, recovery uses fixed topic labels,
+not raw model goal text, so price plus unsupported wrinkle still names both
+parts. Existing eligibility, cancellation, provider, effect, cart, freshness,
+provenance and unrealisable-evidence restrictions remain in force.
+
+Price ordering stays in the existing compatible-offer code derivation. ETA
+relations stay in the existing numeric deadline helper. Exact projected facts
+cannot be changed from cheaper to lighter; unrelated superiority/value or
+implicit arrival promises in prose remain unauthorized. An ETA of 2-4 days
+never licenses a model claim that a 5-day deadline is inside that interval.
+Unconfirmed dispatch is not a shop commitment, including passive dispatch wording.
+
+### Verification and explicit residuals
+
+Paired controls exercise shared C3 compilation/guard/recovery and the real
+Producer -> RealtimeRunner orchestration with safe scripted model and business
+ports. The added runtime trace option is test-only and stores synthetic input,
+reply, before/after state, commit payload/receipt and role calls outside the repo.
+This is not the full Slice C matrix and is not real-model acceptance.
+
+The guard does not certify arbitrary Vietnamese paraphrases, intent extraction
+or every possible property/relation. Unknown topic recovery remains generic.
+The finite grammar may conservatively reject safe wording; expand only with a
+structural owning-boundary fix and paired tests, not DEV case exceptions.
+
+A separate pre-existing runtime limitation was reproduced against Slice A:
+verified active-variant state plus a parent-scoped price can fail the pre-C3
+`PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH` guard. The runtime remains fail-closed
+with human ownership/no outbound in this control. Slice B preserves that
+boundary; resolving its intended scope belongs to the remaining runtime work,
+not a wording exemption. No completed variant/checkout journey is inferred from
+selection acknowledgement controls.
+
+Evidence: `tasks/evidence/pr377-slice-b-20261001.md` and the external exact-source
+handoff/command ledger. Real-model runtime acceptance and DEV70 R2: NOT RUN;
+P11: OPEN; P12: BLOCKED pending remaining Slice C work and Agent 2.
+
+## PR377 Slice C - deterministic full-runtime closure (2026-10-01)
+
+This amendment supersedes only the Slice B deterministic runtime residuals
+above. It does not close P11/P12 or establish real-model acceptance.
+
+`realtime-c3-deterministic.test.ts` exercises the actual Customer Input Producer
+validation, RealtimeRunner, fact adapters, commerce kernel, C3 compiler/guard
+and commit planning. Only external model, POS/catalog/search, history, policy,
+Inbox and persistence ports are scripted/fake. No service is started and no
+customer message or real business write is sent. Fake receipts describe only
+what the isolated fake commit actually accepted, never a real POS/DB receipt.
+
+The twelve required families have controls for purchase with policy, variant
+correction with purchase, selected M with stock S, conditional lower-price offer,
+price with unsupported wrinkle resistance, budget/rejected-item alternatives,
+compatible-offer price comparison, long-history correction/pending question,
+recipient/payment to preview and confirmation, human/post-sale handoff with a
+cart, Responder transport/JSON/guard recovery, and partial read plus commit
+failure/retry. Extra controls reject stale/all-failed facts, obsolete previews,
+superseded commits and duplicate Inbox generations. The artifact writer records
+input, accepted reply, state, read envelopes, plans, receipts and actual calls.
+
+### Owning-layer repairs
+
+- Legacy parent-scoped PRICE/STOCK/ETA/media facts stay parent-scoped even when
+  the customer has an independently verified selected variant. Code supplies
+  expected scope per producer claim type; the guard still checks exact scope.
+  It rejects a purported variant price when the producer promises only parent
+  facts. SIZE_FIT keeps the selected-variant fence, and cart effects keep their
+  own revision/readiness checks. No model field can supply these expectations.
+- A successful stock lookup for size S labels its answer from the typed query,
+  not from the list of sizes currently available. Absence of S from that list
+  must not make a sold-out S answer appear to describe the selected M cart.
+- A compound question with one resolved product need not repeat the code in
+  every clause. All requested facts are retained for that one subject; distinct
+  product subjects still use the existing per-clause routing and bounds.
+- An isolated `BUSINESS_FACT_LOOKUP_FAILED` ERROR envelope has no authority and
+  does not erase independently successful sibling reads. Only OK/non-null
+  sources create protected claim requests. The first successful sibling is
+  the representative envelope, so a failure of the first read also works.
+  Stale/missing/invalid/unavailable envelopes outside that exact isolated error
+  and all-failed reads retain the existing fail-closed behavior.
+
+On a stale offer/price at confirmation, the offer-binding preflight may retain
+an old preview record for the human while refusing to confirm/send it. The
+control asserts HUMAN ownership, no protected reply or purchase effect, and no
+later model call/effect under that owner; it does not claim the record was erased.
+
+### Evidence boundaries
+
+The test-only `C3_DETERMINISTIC_ARTIFACT_DIR` must be an absolute directory
+outside the repository. Artifacts include the actual git HEAD and dirty flag;
+`C3_DETERMINISTIC_SOURCE_HEAD`, when supplied, must match that HEAD. Only clean,
+exact-head final captures are primary handoff evidence. Synthetic recipient
+values are deliberate fixtures. Private latest-message Producer input is not
+confused with redacted history or planning/telemetry input.
+
+These controls do not prove arbitrary Vietnamese interpretation, natural sales
+voice, correctness of a model-selected need, or real database/delivery behavior.
+Long-history data is seeded at the external history port; the real runtime
+selects/redacts the bounded context, while model responses remain scripted.
+Unknown limitation vocabulary can still recover with a generic bound rather
+than a property-specific sentence. Agent 2 must evaluate stateful branching with
+real intended models plus the separately pinned DEV70 R2 and registered judge.
+Frozen rubric/thresholds and the acceptance gates in tasks/plan.md are unchanged.

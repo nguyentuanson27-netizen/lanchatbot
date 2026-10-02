@@ -220,7 +220,7 @@ describe("Track C offline candidate boundary", () => {
     expect(first.identity.requestEnvelopeHash).not.toBe(second.identity.requestEnvelopeHash);
   });
 
-  it("accepts the shared 15-message dialogue bound and rejects anything longer", () => {
+  it("accepts the shared 32-message dialogue bound and rejects anything longer", () => {
     const dialogue = (count: number) => Array.from({ length: count }, (_, index) => ({
       ...evaluationContext[0],
       direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
@@ -231,7 +231,7 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: capture(),
       evaluationAt: snapshotAt,
-      evaluationContext: dialogue(15),
+      evaluationContext: dialogue(32),
       systemInstruction: candidatePrompt,
     });
 
@@ -240,7 +240,7 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: capture(),
       evaluationAt: snapshotAt,
-      evaluationContext: dialogue(16),
+      evaluationContext: dialogue(33),
       systemInstruction: candidatePrompt,
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_INVALID");
     expect(() => buildTrackCOfflineCandidateRequest({

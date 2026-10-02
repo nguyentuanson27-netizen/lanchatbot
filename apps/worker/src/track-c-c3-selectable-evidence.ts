@@ -1,3 +1,5 @@
+import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
@@ -6,7 +8,6 @@ import {
 } from "./track-c-c3-cart-binding.js";
 import {
   TRACK_C_PROTECTED_PROPOSITIONS,
-  trackCCustomerFacingSizeFromVariantId,
   type TrackCProtectedProposition,
   type TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
@@ -16,6 +17,7 @@ import { trackCProductAttributeEvidence } from
   "./track-c-c3-attribute-projection.js";
 import {
   trackCFormatVnd,
+  trackCOfferConfigurationProjections,
   trackCSimulationFactText,
 } from "./track-c-c3-fact-realization.js";
 
@@ -104,10 +106,11 @@ export function trackCVariantLabel(
   presentation: ContextV2["productPresentation"] | null,
   variantId: string,
 ): Readonly<{ color?: string; size?: string }> | null {
-  const variant = presentation?.variants.find(
+  const variants = presentation?.variants.filter(
     (entry) => entry.variantId === variantId,
-  );
-  if (variant === undefined) return null;
+  ) ?? [];
+  if (variants.length !== 1) return null;
+  const variant = variants[0]!;
   if (variant.color === null && variant.size === null) return null;
   return Object.freeze({
     ...(variant.color === null ? {} : { color: variant.color }),
@@ -148,13 +151,12 @@ export function trackCRuntimeClaimDeterministicText(
     return `Giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
   }
   if (claim.type === "STOCK") {
-    // Prefer the authoritative variant mapping; fall back to the ID convention
-    // only when no presentation is available for this turn.
+    // Variant IDs are opaque. Missing or ambiguous mapping is an output
+    // capability gap, never evidence of a size or stock status.
     const label = claim.scope.variantId === null
       ? null
-      : trackCVariantLabel(presentation ?? null, claim.scope.variantId);
-    const size = label?.size
-      ?? trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+      : trackCVariantLabel(trackCBoundPresentationForClaim(presentation, claim.scope), claim.scope.variantId);
+    const size = label?.size ?? null;
     const color = label?.color ?? null;
     if (claim.scope.variantId !== null && size === null && color === null) {
       return null;
@@ -241,9 +243,12 @@ function boundedSimulationEvidence(
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
     const offerType = typeof value.offerType === "string" ? value.offerType : null;
+    const profileSubject = offerType === null
+      ? `Mẫu ${displayName}`
+      : `Mẫu ${displayName} là ${offerType},`;
     const profileText = colors.length === 0
-      ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
-      : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
+      ? `${profileSubject} có chất liệu ${material} ạ.`
+      : `${profileSubject} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
     const deterministicText = design.length === 0 ? profileText :
       `${profileText.replace(/ ạ\.$/u, ".")} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {
@@ -379,6 +384,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   executionLane: TrackCV5ExecutionLane;
   currentCart?: TrackCCurrentCartBinding | null;
   evaluationAt?: Date;
+  comparisonFacts?: readonly BusinessFactEnvelopeV1[];
 }>): readonly TrackCSelectableEvidence[] {
   if (input.executionLane !== "BEHAVIOR_SIMULATION" &&
       input.simulationFacts.length > 0) {
@@ -386,6 +392,20 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   }
   const evidence: TrackCSelectableEvidence[] = [];
   input.context.verifiedClaims.forEach((claim, index) => {
+    // Missing current-cart authority is not merely missing wording. Exposing
+    // the value as selectable lets a Strategist copy it into goal and the
+    // Responder restate it in free prose. Reuse the existing binding check at
+    // admission, before either model sees the value.
+    if (claim.scope.kind === "CART") {
+      try {
+        if (!trackCCartClaimIsCurrent(
+          claim, input.currentCart ?? null, input.evaluationAt ?? new Date(),
+        )) return;
+      } catch {
+        // Bad cart input invalidates only cart evidence, not independent facts.
+        return;
+      }
+    }
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
       const boundPresentation = trackCBoundPresentationForClaim(
@@ -408,6 +428,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       }));
     }
   });
+  evidence.push(...trackCPriceComparisons(input.context, input.comparisonFacts ?? [], input.evaluationAt ?? new Date()));
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
     // Every verified attribute group, one selectable entry per field. The
@@ -466,6 +487,30 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       input.context.productBinding.productIds,
     );
     if (projected === null) return;
+    if (projected.capability === "OFFER_CONFIGURATION") {
+      const data = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      for (const projection of trackCOfferConfigurationProjections(data)) {
+        evidence.push(Object.freeze({
+          ref: `${projected.ref}_${projection.scope}`,
+          capability: "OFFER_CONFIGURATION" as const,
+          ...(projected.subject === undefined ? {} : { subject: projected.subject }),
+          value: Object.freeze({
+            offerScope: projection.scope,
+            ...projection.value,
+          }),
+          deterministicText: projection.text,
+          provenance: Object.freeze({
+            authority: "SIMULATION" as const,
+            contentHash: sha256({
+              sourceContentHash: projected.provenance.contentHash,
+              offerScope: projection.scope,
+              value: projection.value,
+            }),
+          }),
+        }));
+      }
+      return;
+    }
     evidence.push(projected);
     if (projected.capability === "PRODUCT_PRESENTATION") {
       // Preserve the overview for fixed first contact, while adaptive turns
