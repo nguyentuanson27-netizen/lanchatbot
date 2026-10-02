@@ -5465,8 +5465,9 @@ export class RealtimeRunner {
                 const matchesLookup = kind === "FACT_REQUEST" && capability === factIntent;
                 return {
                   kind, capability, scope, productId,
-                  ...(matchesLookup && (customerInput.factQuery.size !== null ||
-                      customerInput.factQuery.color !== null) ? {
+                  ...(matchesLookup && capability === "STOCK" &&
+                      (customerInput.factQuery.size !== null ||
+                       customerInput.factQuery.color !== null) ? {
                     variant: {
                       ...(customerInput.factQuery.size === null
                         ? {} : { size: customerInput.factQuery.size }),
