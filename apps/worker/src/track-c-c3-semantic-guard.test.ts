@@ -189,6 +189,35 @@ describe("C3 two-sided semantic statement guard", () => {
     expect(send).toHaveBeenCalledTimes(2);
   });
 
+  it("typed recovery derives the unresolved property from obligations, not free goal prose", async () => {
+    const inbound = "Giá bao nhiêu và vải có chống nhăn không?";
+    const seed = run({ inbound, answer: null, limit: "NONE" });
+    const context = contextFromFrozenTrackCCapture({ capture: seed.capture, evaluationAt: at });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        replyAct: "ANSWER", proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+        goal: "NEED: 849.000đ and wrinkle\nKNOWN: NONE\nANSWER: 849.000đ\nLIMIT: NONE\nNEXT: NONE",
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) })
+      .mockRejectedValueOnce(new Error("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT"));
+    const result = await runTrackCStrategyLive({
+      context, modelResource, decisionAt: at,
+      dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: inbound, attachmentCount: 0, occurredAt: at.toISOString() }],
+      requestedObligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "SQ9012" },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE", productId: "SQ9012" },
+      ],
+      checkoutRequestedFields: [], checkoutClarificationActive: false,
+      currentCart: null, paymentOptions: ["COD"], transport: { send },
+    });
+    expect(result.reply).toContain("849.000");
+    expect(result.reply).toContain("chống nhăn");
+    expect(result.reply).not.toContain("849.000đ and wrinkle");
+    expect(result.recoveryDiagnostic).toBeDefined();
+  });
+
   it.each([3, 5, 7])("keeps ETA facts and code-only feasibility; never lets prose calculate a range (%s)", async (deadline) => {
     const inbound = `Chị cần nhận trong ${deadline} ngày.`;
     const good = await run({ inbound, answer: null, etaDeadline: deadline }).promise;

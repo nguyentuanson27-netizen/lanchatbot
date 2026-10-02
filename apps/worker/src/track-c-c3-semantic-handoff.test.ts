@@ -121,6 +121,48 @@ describe("C3 structured goal semantic handoff", () => {
     } })).toThrow("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
   });
 
+  it("canonicalizes typed planning into fact-free control state and derives obligation resolution", () => {
+    const result = compileTrackCStrategistDecision({
+      ...input,
+      requestedObligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "ITEM42" },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE", productId: "ITEM42" },
+      ],
+      boundProductIds: ["ITEM42"],
+      decision: { ...input.decision,
+        goal: "NEED: price 725.000đ and wrinkle\nKNOWN: ITEM42\nANSWER: 725.000đ\nLIMIT: NONE\nNEXT: NONE" },
+    });
+    expect(result.decision.goal).not.toMatch(/725|ITEM42/u);
+    expect(result.task.obligationResolutions).toEqual([
+      expect.objectContaining({ status: "SUPPORTED",
+        obligation: expect.objectContaining({ capability: "PRICE" }) }),
+      expect.objectContaining({ status: "UNRESOLVED",
+        obligation: expect.objectContaining({ capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE" }) }),
+    ]);
+    expect(result.task.semanticHandoff).toMatchObject({
+      answer: "SUPPORTED:PRICE",
+      limit: "UNRESOLVED:PRODUCT_ATTRIBUTES:WRINKLE_RESISTANCE",
+    });
+  });
+
+  it("does not make model goal prose a second authority gate for typed hard-stop tasks", () => {
+    const result = compileTrackCStrategistDecision({
+      ...input,
+      requestedObligations: [],
+      permittedCanonicalActions: ["HOLD_POSITION"],
+      hardStop: true,
+      decision: {
+        replyAct: "ACKNOWLEDGE", proposition: "NONE", evidenceRefs: [],
+        goal: "NEED: NONE\nKNOWN: NONE\nANSWER: NONE\nLIMIT: some prose that should not control code\nNEXT: contradictory prose",
+        continuation: null, canonicalAction: "HOLD_POSITION",
+      },
+    });
+    expect(result.task.canonicalRequest?.type).toBe("HOLD_POSITION");
+    expect(result.decision.goal).toContain("ACTION:HOLD_POSITION");
+  });
+
   it("fails closed when a fact obligation points outside canonical product binding", () => {
     expect(() => compileTrackCStrategistDecision({
       ...input,

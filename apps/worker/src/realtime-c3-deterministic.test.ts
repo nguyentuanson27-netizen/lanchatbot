@@ -132,6 +132,8 @@ describe("canonical buying and checkout journeys with real Producer validation",
     const text = `${purchase} Size S c\u00f2n kh\u00f4ng?`;
     const trace = await runtime.turn({ text, producer: { ...buy(purchase, "M"),
       factQuery: { intent: "STOCK", offerType: "SET", color: "be", size: "S", deliveryRegion: null },
+      obligations: [{ kind: "FACT_REQUEST", capability: "STOCK", scope: null,
+        productId: "CB182", evidenceText: "Size S còn không" }],
     } });
     runtime.save("selection-m-stock-s");
     committedOnce(trace);
@@ -300,6 +302,7 @@ describe("evidence and bounded recovery journeys", () => {
     expect(trace.after.conversation.sessionDecisionContext).toMatchObject({ budgetVnd: 650_000, rejectedProductIds: ["SV9031", "CB182"] });
     expect(trace.after.conversation.currentProductId).toBe("SD12");
     expect(trace.reply).toContain("599.000");
+    expect(trace.reply).toContain("SD12");
     expect(trace.reply).not.toMatch(/799\.000|699\.000/);
     expect(trace.after.commerce.cart).toBeNull();
     expect(roles(trace)).toEqual(["PRODUCER", "STRATEGIST", "RESPONDER"]);
