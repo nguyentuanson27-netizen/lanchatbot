@@ -129,7 +129,7 @@ const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
   CARE_INSTRUCTIONS: "careInstructions",
 } as const);
 
-function obligationMatchesEvidence(
+export function trackCRequestedObligationMatchesEvidence(
   obligation: TrackCRequestedObligation,
   evidence: TrackCSelectableEvidence,
 ): boolean {
@@ -172,17 +172,17 @@ export function assertTrackCRequestedObligationCoverage(
     const allowed = facts.filter((entry) => entry.capability === capability);
     if (selected.some((entry) =>
       entry.capability === capability &&
-      !allowed.some((obligation) => obligationMatchesEvidence(obligation, entry))
+      !allowed.some((obligation) => trackCRequestedObligationMatchesEvidence(obligation, entry))
     )) {
       throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
     }
   }
   for (const obligation of facts) {
     const hasAvailable = available.some((entry) =>
-      obligationMatchesEvidence(obligation, entry)
+      trackCRequestedObligationMatchesEvidence(obligation, entry)
     );
     if (hasAvailable && !selected.some((entry) =>
-      obligationMatchesEvidence(obligation, entry)
+      trackCRequestedObligationMatchesEvidence(obligation, entry)
     )) {
       throw new Error("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
     }
@@ -273,7 +273,46 @@ export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
 
 /** Recovery derives only fixed uncertainty labels, not claims or arbitrary
  * goal prose. Preserve every selected fact separately in its bound fact slot. */
+function typedObligationLabel(obligation: TrackCRequestedObligation): string {
+  if (obligation.capability === "PRODUCT_ATTRIBUTES") {
+    const labels: Readonly<Record<string, string>> = {
+      MATERIALS: "chất liệu", COLORS: "màu sắc", STYLES: "phong cách",
+      SILHOUETTE: "phom dáng", OCCASION: "dịp sử dụng",
+      WRINKLE_RESISTANCE: "khả năng chống nhăn", STRETCH: "độ co giãn",
+      OPACITY: "độ xuyên thấu", LINING: "lớp lót",
+      BREATHABILITY: "độ thoáng", CARE_INSTRUCTIONS: "cách bảo quản",
+    };
+    return obligation.scope === null ? "thuộc tính sản phẩm"
+      : labels[obligation.scope] ?? "thuộc tính sản phẩm";
+  }
+  if (obligation.capability === "OFFER_CONFIGURATION") {
+    const labels: Readonly<Record<string, string>> = {
+      FULL_SET: "giá nguyên set", TOP: "giá mua lẻ áo",
+      BOTTOM: "giá mua lẻ quần/chân váy", TWO_PIECE: "giá bộ 2 món",
+      THREE_PIECE: "giá bộ 3 món",
+    };
+    return obligation.scope === null ? "cấu hình bán" : labels[obligation.scope] ?? "cấu hình bán";
+  }
+  const labels: Readonly<Record<string, string>> = {
+    PRICE: "giá", STOCK: "tình trạng hàng", SIZE_FIT: "độ phù hợp size",
+    ETA: "thời gian giao dự kiến",
+  };
+  return obligation.capability === null ? "thông tin chị hỏi"
+    : labels[obligation.capability] ?? "thông tin chị hỏi";
+}
+
+export function trackCTypedLimitationTexts(task: TrackCResponderTask): readonly string[] {
+  if (task.obligationResolutions === undefined) return Object.freeze([]);
+  return Object.freeze(task.obligationResolutions
+    .filter(({ status }) => status === "UNRESOLVED")
+    .map(({ obligation }) =>
+      `Em chưa có thông tin xác nhận về ${typedObligationLabel(obligation)} ạ.`
+    ));
+}
+
 export function trackCRecoveryLimitation(task: TrackCResponderTask): string {
+  const typed = trackCTypedLimitationTexts(task);
+  if (typed.length > 0) return typed.join(" ");
   const topics = limitationTopics(task.semanticHandoff?.limit ?? "");
   return topics.length === 0 ? "Em chưa xác nhận được đầy đủ thông tin chị hỏi."
     : topics.map(({ label }) => `Em chưa có thông tin xác nhận về ${label}.`).join(" ");

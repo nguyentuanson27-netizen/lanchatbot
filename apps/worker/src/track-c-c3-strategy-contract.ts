@@ -1,6 +1,7 @@
 import {
   assertTrackCRequestedObligationCoverage,
   assertTrackCRequestedPropertyCoverage,
+  trackCRequestedObligationMatchesEvidence,
 } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
@@ -61,6 +62,12 @@ export type TrackCRequestedObligation = Readonly<Pick<
   RealtimeCustomerObligationV1,
   "kind" | "capability" | "scope" | "productId"
 >>;
+
+export type TrackCObligationResolution = Readonly<{
+  obligation: TrackCRequestedObligation;
+  status: "SUPPORTED" | "UNRESOLVED" | "NOT_APPLICABLE";
+  evidenceRefs: readonly string[];
+}>;
 
 /**
  * Mirrors the runtime `missingCheckout` field set. PAYMENT_METHOD was missing
@@ -176,6 +183,7 @@ export type TrackCSemanticHandoff = Readonly<{
 export type TrackCResponderTask = Readonly<{
   semanticHandoff?: TrackCSemanticHandoff;
   requestedObligations?: readonly TrackCRequestedObligation[];
+  obligationResolutions?: readonly TrackCObligationResolution[];
   answer:
     | Readonly<{
         kind: "ANSWER";
@@ -387,6 +395,80 @@ function selectedEvidence(
   return Object.freeze(values);
 }
 
+function obligationControlKey(obligation: TrackCRequestedObligation): string {
+  if (obligation.kind !== "FACT_REQUEST") return obligation.kind;
+  return obligation.scope === null
+    ? `FACT_REQUEST:${obligation.capability ?? "NONE"}`
+    : `FACT_REQUEST:${obligation.capability ?? "NONE"}:${obligation.scope}`;
+}
+
+function typedObligationResolutions(
+  requested: readonly TrackCRequestedObligation[],
+  realizable: readonly TrackCSelectableEvidence[],
+): readonly TrackCObligationResolution[] {
+  return Object.freeze(requested.map((obligation) => {
+    if (obligation.kind !== "FACT_REQUEST" || obligation.capability === null) {
+      return Object.freeze({
+        obligation: Object.freeze({ ...obligation }),
+        status: "NOT_APPLICABLE" as const,
+        evidenceRefs: Object.freeze([]),
+      });
+    }
+    const refs = realizable.filter((entry) =>
+      trackCRequestedObligationMatchesEvidence(obligation, entry)
+    ).map(({ ref }) => ref);
+    return Object.freeze({
+      obligation: Object.freeze({ ...obligation }),
+      status: refs.length > 0 ? "SUPPORTED" as const : "UNRESOLVED" as const,
+      evidenceRefs: Object.freeze(refs),
+    });
+  }));
+}
+
+function typedControlGoal(
+  decision: TrackCStrategistDecision,
+  resolutions: readonly TrackCObligationResolution[],
+): string {
+  const requested = resolutions.length === 0
+    ? [`ACT:${decision.replyAct}`]
+    : resolutions.map(({ obligation }) => obligationControlKey(obligation));
+  const supported = resolutions.filter(({ status }) => status === "SUPPORTED")
+    .map(({ obligation }) => `SUPPORTED:${obligationControlKey(obligation).replace(/^FACT_REQUEST:/u, "")}`);
+  const unresolved = resolutions.filter(({ status }) => status === "UNRESOLVED")
+    .map(({ obligation }) => `UNRESOLVED:${obligationControlKey(obligation).replace(/^FACT_REQUEST:/u, "")}`);
+  const next = decision.canonicalAction !== "NONE"
+    ? `ACTION:${decision.canonicalAction}`
+    : decision.continuation?.type === "ASK"
+      ? `ASK:${decision.continuation.input}`
+      : decision.continuation?.type === "KEEP_OPEN" ? "KEEP_OPEN" : "NONE";
+  return [
+    `NEED: ${requested.join("|")}`,
+    "KNOWN: NONE",
+    `ANSWER: ${supported.length === 0 ? "NONE" : supported.join("|")}`,
+    `LIMIT: ${unresolved.length === 0 ? "NONE" : unresolved.join("|")}`,
+    `NEXT: ${next}`,
+  ].join("\n");
+}
+
+function typedSemanticHandoff(
+  decision: TrackCStrategistDecision,
+  resolutions: readonly TrackCObligationResolution[],
+): TrackCSemanticHandoff {
+  const goal = typedControlGoal(decision, resolutions).split("\n");
+  const value = (prefix: string): string | null => {
+    const line = goal.find((entry) => entry.startsWith(prefix));
+    const part = line?.slice(prefix.length) ?? "NONE";
+    return part === "NONE" ? null : part;
+  };
+  return Object.freeze({
+    need: value("NEED: ") ?? `ACT:${decision.replyAct}`,
+    known: null,
+    answer: value("ANSWER: "),
+    limit: value("LIMIT: "),
+    next: value("NEXT: "),
+  });
+}
+
 /**
  * Bounded fallback for the existing single-intent Producer request. Parse only
  * fixed section syntax; prose is never interpreted into facts or permissions.
@@ -495,23 +577,36 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
+  const obligationResolutions = input.requestedObligations === undefined
+    ? undefined
+    : typedObligationResolutions(input.requestedObligations, realizable);
+  const typedPlanning = input.requireStructuredGoal === true &&
+    obligationResolutions !== undefined;
+  const compiledDecision = typedPlanning
+    ? Object.freeze({ ...decision, goal: typedControlGoal(decision, obligationResolutions) })
+    : decision;
   const semanticHandoff = input.requireStructuredGoal === true
-    ? structuredGoal(decision, unrealizable.length > 0 ||
-        (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
-          decision.continuation?.type === "KEEP_OPEN"))
+    ? typedPlanning
+      ? typedSemanticHandoff(compiledDecision, obligationResolutions)
+      : structuredGoal(compiledDecision, unrealizable.length > 0 ||
+          (compiledDecision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
+            compiledDecision.continuation?.type === "KEEP_OPEN"))
     : undefined;
-  const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
+  const answer: TrackCResponderTask["answer"] = compiledDecision.replyAct === "ANSWER"
     ? Object.freeze({
-        kind: "ANSWER", evidenceStatus, goal: decision.goal,
-        proposition: decision.proposition,
+        kind: "ANSWER", evidenceStatus, goal: compiledDecision.goal,
+        proposition: compiledDecision.proposition,
       })
-    : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
+    : Object.freeze({ kind: compiledDecision.replyAct, goal: compiledDecision.goal });
   const task: TrackCResponderTask = Object.freeze({
     ...(semanticHandoff === undefined ? {} : { semanticHandoff }),
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
         Object.freeze({ ...entry })
       )),
+    }),
+    ...(obligationResolutions === undefined ? {} : {
+      obligationResolutions,
     }),
     answer,
     evidence: realizable,
@@ -532,7 +627,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   assertTrackCRequestedPropertyCoverage(task);
   // Return the validated, PII-safe decision used to compile this exact task.
   // Consumers must not reuse the provider's raw planning text for reporting.
-  return Object.freeze({ decision, task });
+  return Object.freeze({ decision: compiledDecision, task });
 }
 
 export function compileTrackCFixedFirstContactTask(input: Readonly<{

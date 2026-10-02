@@ -1,6 +1,7 @@
 import {
   trackCPiiFreeLocalityRequest, trackCUnclassifiedConversation,
   assertTrackCLimitationCoverage, trackCRecoveryLimitation,
+  trackCTypedLimitationTexts,
 } from "./track-c-c3-conversational-guard.js";
 import type { BusinessFactEnvelopeV1, MeasurementKind, RealtimeCustomerInput } from "@lana/contracts";
 import { createHash } from "node:crypto";
@@ -607,6 +608,14 @@ function responderTaskPrompt(task: TrackCResponderTask) {
   return Object.freeze({
     answer: task.semanticHandoff === undefined ? { ...answer, goal } : answer,
     ...(task.semanticHandoff === undefined ? {} : { semanticHandoff: task.semanticHandoff }),
+    ...(task.obligationResolutions === undefined ? {} : {
+      obligationResolutions: task.obligationResolutions.map(({ obligation, status }) => ({
+        kind: obligation.kind,
+        capability: obligation.capability,
+        scope: obligation.scope,
+        status,
+      })),
+    }),
     evidence: responderReadableEvidence(task),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
@@ -684,7 +693,8 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
 }
 
 function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
-  return task.semanticHandoff?.limit != null && !singleRequestBody(task) &&
+  const typed = task.obligationResolutions?.some(({ status }) => status === "UNRESOLVED") ?? false;
+  return (typed || task.semanticHandoff?.limit != null) && !singleRequestBody(task) &&
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
 
@@ -708,7 +718,8 @@ function responderDraftSchema(
     maxProperties: 3,
     properties: {
       answerText: adaptive
-        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
+        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task) ||
+            (task.obligationResolutions?.some(({ status }) => status === "UNRESOLVED") ?? false)
           ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
@@ -1041,6 +1052,9 @@ function compileResponderDraft(input: Readonly<{
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
   )).size > 1;
+  const identifySearchSubject = task.requestedObligations?.some(
+    ({ kind }) => kind === "PRODUCT_SEARCH"
+  ) ?? false;
   orderedEvidence.forEach((evidence, index) => {
     const factualText = evidence.deterministicText === undefined
       ? null
@@ -1056,7 +1070,8 @@ function compileResponderDraft(input: Readonly<{
       );
     }
     assertNoEffectText(factualText);
-    if (multipleSubjects && evidence.subject?.productId !== undefined) {
+    if ((multipleSubjects || identifySearchSubject) &&
+        evidence.subject?.productId !== undefined) {
       const label = text(evidence.subject.displayName ?? evidence.subject.productId,
         "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       if (label === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
@@ -1079,6 +1094,9 @@ function compileResponderDraft(input: Readonly<{
       task.answer.evidenceStatus === "SUPPORTED" &&
       draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: PARTIAL_REALIZATION_TEXT });
+  }
+  for (const limitation of trackCTypedLimitationTexts(task)) {
+    segments.push({ kind: "GENERAL", text: limitation });
   }
   if (task.deliveryDeadlineText !== undefined) {
     segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });
@@ -1132,7 +1150,8 @@ function compileResponderDraft(input: Readonly<{
       assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation));
     }
   }
-  if (adaptive && responderHasAssignedLimit(task)) {
+  if (adaptive && responderHasAssignedLimit(task) &&
+      task.obligationResolutions === undefined) {
     assertTrackCLimitationCoverage(task, draft.answerText, input.context);
   }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
@@ -1491,7 +1510,12 @@ async function runTrackCStrategyContractCore(
     recoveryDiagnostic = failure.diagnostic;
     // No trustworthy draft remains. Keep source facts and explicitly decline
     // whole-answer completeness; never parse goal text into a factual claim.
-    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null };
+    draft = {
+      answerText: task.obligationResolutions === undefined
+        ? trackCRecoveryLimitation(task) : null,
+      factualTexts: [],
+      progressionText: null,
+    };
   }
   let output: ContextV2CandidateOutputV2;
   try {
@@ -1519,7 +1543,12 @@ async function runTrackCStrategyContractCore(
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null },
+        draft: {
+          answerText: draft.answerText ?? (task.obligationResolutions === undefined
+            ? trackCRecoveryLimitation(task) : null),
+          factualTexts: [],
+          progressionText: null,
+        },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
@@ -1532,8 +1561,11 @@ async function runTrackCStrategyContractCore(
       try {
         output = compileResponderDraft({
           context, dialogue: input.evaluationContext, task,
-          draft: { answerText: trackCRecoveryLimitation(task),
-            factualTexts: [], progressionText: null },
+          draft: {
+            answerText: task.obligationResolutions === undefined
+              ? trackCRecoveryLimitation(task) : null,
+            factualTexts: [], progressionText: null,
+          },
           lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],

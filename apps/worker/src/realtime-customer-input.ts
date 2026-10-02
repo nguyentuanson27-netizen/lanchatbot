@@ -125,6 +125,20 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
          !value.obligations.some(({ kind }) => kind === "PRODUCT_REJECT"))) {
       throw new Error("CUSTOMER_INPUT_OBLIGATION_MISMATCH");
     }
+    const legacyCapability = value.factQuery.intent === "PRICE" ? "PRICE"
+      : value.factQuery.intent === "STOCK" ? "STOCK"
+      : value.factQuery.intent === "SIZE" ? "SIZE_FIT"
+      : value.factQuery.intent === "ETA" ? "ETA" : null;
+    const representable = value.obligations.filter(({ kind, capability }) =>
+      kind === "FACT_REQUEST" &&
+      (capability === "PRICE" || capability === "STOCK" ||
+       capability === "SIZE_FIT" || capability === "ETA")
+    );
+    if (representable.length > 0 &&
+        (legacyCapability === null ||
+         !representable.some(({ capability }) => capability === legacyCapability))) {
+      throw new Error("CUSTOMER_INPUT_FACT_QUERY_MISMATCH");
+    }
   }
   for (const field of [value.budget, value.occasion]) {
     requireEvidence(field.operation !== "KEEP", field.evidenceText);
