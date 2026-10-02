@@ -36,6 +36,7 @@ describe("factual-free Strategist planning", () => {
       const goals = variant.properties.goal.enum;
       expect(goals).toHaveLength(1);
       expect(goals[0]).not.toMatch(/\d/u);
+      expect(goals[0]).not.toMatch(/[\r\n]/u);
       expect(goals[0]).not.toContain(evidence.deterministicText);
     }
     expect(prompt.selectableEvidence[0]).not.toHaveProperty("value");

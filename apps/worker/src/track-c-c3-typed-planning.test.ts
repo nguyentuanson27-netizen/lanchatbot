@@ -12,6 +12,13 @@ const base = { evidence: [fact], boundProductIds: ["ITEM42"], measurementsUnavai
   productResolved: true, hardStop: false, requireStructuredGoal: true };
 
 describe("typed task is the sole planning authority", () => {
+  it("derives a canonical measurement request from typed fields with an opaque goal marker", () => {
+    const result = compileTrackCStrategistDecision({ ...base, permittedCanonicalActions: ["ASK_MEASUREMENTS"],
+      measurementRequestedFields: ["WAIST_CM"], decision: { replyAct: "ACKNOWLEDGE", proposition: "NONE", evidenceRefs: [],
+        goal: "TYPED_DECISION", canonicalAction: "ASK_MEASUREMENTS", continuation: null } });
+    expect(result.task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["WAIST_CM"] });
+    expect(result.task.semanticHandoff?.next).toBe("ASK_MEASUREMENTS");
+  });
   it("rejects an unrelated price when only an unsupported property was requested", () => {
     expect(() => compileTrackCStrategistDecision({ ...base, permittedCanonicalActions: ["NONE"],
       requestedObligations: requests.slice(1), decision: { replyAct: "ANSWER", proposition: "PRICE", evidenceRefs: [fact.ref],

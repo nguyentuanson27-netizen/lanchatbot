@@ -395,24 +395,6 @@ function selectedEvidence(
   return Object.freeze(values);
 }
 
-/**
- * Diagnostic structure only. Typed state owns semantics; the five prose
- * sections cannot contradict an action, status or continuation.
- */
-function validateStructuredGoal(decision: TrackCStrategistDecision): void {
-  const keys = ["NEED", "KNOWN", "ANSWER", "LIMIT", "NEXT"] as const;
-  const lines = decision.goal.split(/\r?\n/u);
-  const invalid = () => new Error("TRACK_C_STRATEGIST_GOAL_INVALID");
-  if (lines.length !== keys.length) throw invalid();
-  keys.forEach((key, index) => {
-    const prefix = `${key}: `;
-    const line = lines[index]!;
-    if (!line.startsWith(prefix)) throw invalid();
-    const value = line.slice(prefix.length);
-    if (!value || value !== value.trim()) throw invalid();
-  });
-}
-
 export function compileTrackCStrategistDecision(input: Readonly<{
   decision: unknown;
   evidence: readonly TrackCSelectableEvidence[];
@@ -425,7 +407,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   budgetKnown?: boolean;
   measurementRequestedFields?: readonly MeasurementKind[];
   requestedObligations?: readonly TrackCRequestedObligation[];
-  /** Required at the model boundary; omitted only for code-owned direct calls. */
+  /** Include code-derived handoff at the model boundary; retain the legacy flag name for direct callers. */
   requireStructuredGoal?: boolean;
 }>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
   let decision = readDecision(input.decision);
@@ -484,7 +466,6 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
-  if (input.requireStructuredGoal === true) validateStructuredGoal(decision);
   // Planning is a control plane. Never carry provider-authored factual values
   // into the decision/task, even if the provider repeated an authorized fact.
   const facts = input.requestedObligations?.filter(({ kind }) => kind === "FACT_REQUEST") ?? [];

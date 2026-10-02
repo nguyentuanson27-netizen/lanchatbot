@@ -200,17 +200,20 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(prompt).not.toHaveProperty("customerDecisionSignals");
   });
 
-  it("rejects an unstructured model goal before invoking the Responder", async () => {
-    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValue({
+  it("derives the handoff from typed fields instead of rejecting diagnostic goal syntax", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>().mockResolvedValueOnce({
       payload: payload({ replyAct: "ANSWER", goal: "Legacy unstructured goal.", proposition: "PRICE",
         evidenceRefs: ["CLAIM_001"], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
-      providerModelVersion: "gemini-3.5-flash-lite" });
-    await expect(runTrackCStrategyContractCase({ lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
+      providerModelVersion: "gemini-3.5-flash-lite" })
+      .mockResolvedValueOnce({ payload: payload({ answerText: null, factualTexts: [], progressionText: null }),
+        providerModelVersion: "gemini-3.5-flash-lite" });
+    const result = await runTrackCStrategyContractCase({ lane: "BEHAVIOR_SIMULATION", modelResource: MODEL_RESOURCE,
       capture: capture(), evaluationAt: new Date(recipe.evaluation_at),
       evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
-        text: "Current price?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send } }))
-      .rejects.toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
-    expect(send).toHaveBeenCalledTimes(1);
+        text: "Current price?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }], transport: { send } });
+    expect(result.reply).toContain("849.000");
+    expect(result.responderTask.semanticHandoff?.answer).toBe("PRICE supported");
+    expect(send).toHaveBeenCalledTimes(2);
   });
 
   it.each([true, false])("derives budget permission from code inputs (known=%s)", async (known) => {

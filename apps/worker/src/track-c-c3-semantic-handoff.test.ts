@@ -45,9 +45,11 @@ describe("C3 structured goal semantic handoff", () => {
     goal.replace("NEED: price and wrinkle resistance", "NEED: "),
     goal.replace("LIMIT: wrinkle resistance has no verified evidence", "LIMIT: "),
     goal + "\nNEXT: ask a new question",
-  ])("rejects malformed semantic handoff rather than making the writer infer it: %s", (invalid) => {
-    expect(() => compileTrackCStrategistDecision({ ...input, decision: { ...input.decision, goal: invalid } }))
-      .toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
+  ])("derives the same typed handoff independent of diagnostic syntax: %s", (diagnostic) => {
+    const expected = compileTrackCStrategistDecision(input);
+    const actual = compileTrackCStrategistDecision({ ...input, decision: { ...input.decision, goal: diagnostic } });
+    expect(actual.task).toEqual(expected.task);
+    expect(actual.decision.goal).toBe(expected.decision.goal);
   });
 
   it("derives a limitation for an unsupported terminal factual request", () => {

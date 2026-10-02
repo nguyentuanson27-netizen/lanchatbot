@@ -442,9 +442,8 @@ function strategistResponseSchema(
   const shared = {
     replyAct: { type: "STRING", enum: constraints.hardStop
       ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
-    goal: { type: "STRING", enum: [
-      "NEED: typed obligations\nKNOWN: NONE\nANSWER: typed evidence references\nLIMIT: typed support status\nNEXT: typed action and continuation",
-    ], description: "Return the fixed planning marker. Code derives semantic handoff from the other typed fields; this slot cannot carry factual literals or a second decision." },
+    goal: { type: "STRING", enum: ["TYPED_DECISION"],
+      description: "Return the fixed planning marker. Code derives semantic handoff from the other typed fields; this slot cannot carry factual literals or a second decision." },
     proposition: { type: "STRING", enum: TRACK_C_PROTECTED_PROPOSITIONS },
     evidenceRefs: {
       type: "ARRAY",
