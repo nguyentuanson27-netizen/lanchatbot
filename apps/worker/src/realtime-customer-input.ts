@@ -31,13 +31,14 @@ export const CUSTOMER_INPUT_RESPONSE_SCHEMA = object({
       kind: enumField(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT"]),
       capability: nullableEnumField([
         "PRICE", "STOCK", "SIZE_FIT", "ETA", "PRODUCT_ATTRIBUTES",
-        "OFFER_CONFIGURATION",
+        "OFFER_CONFIGURATION", "PROMOTION_OFFER", "POLICY", "PRODUCT_COMPARISON",
       ]),
       scope: nullableEnumField([
         "MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
         "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
-        "BREATHABILITY", "CARE_INSTRUCTIONS",
+        "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
         "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
+        "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY",
       ]),
       productId: nullableText,
       evidenceText: nullableText,

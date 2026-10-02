@@ -335,13 +335,14 @@ export const RealtimeCustomerObligationV1Schema = z.object({
   kind: z.enum(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT"]),
   capability: z.enum([
     "PRICE", "STOCK", "SIZE_FIT", "ETA", "PRODUCT_ATTRIBUTES",
-    "OFFER_CONFIGURATION",
+    "OFFER_CONFIGURATION", "PROMOTION_OFFER", "POLICY", "PRODUCT_COMPARISON",
   ]).nullable(),
   scope: z.enum([
     "MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
     "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
-    "BREATHABILITY", "CARE_INSTRUCTIONS",
+    "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
     "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
+    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY",
   ]).nullable(),
   productId: z.string().trim().min(1).max(64).nullable(),
   evidenceText: CustomerInputEvidenceSchema.nullable(),
@@ -354,15 +355,19 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     const attributeScope = value.scope !== null &&
       ["MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
         "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
-        "BREATHABILITY", "CARE_INSTRUCTIONS"].includes(value.scope);
+        "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT"].includes(value.scope);
     const offerScope = value.scope !== null &&
       ["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"].includes(value.scope);
+    const otherScopeValid = value.scope !== null && (
+      (["DISPATCH_TIME", "DELIVERY_DEADLINE"].includes(value.scope) && value.capability === "ETA") ||
+      (["CUSTOMER_OFFER", "FUTURE_PROMOTION"].includes(value.scope) && value.capability === "PROMOTION_OFFER") ||
+      (value.scope === "COMPARATIVE_PROPERTY" && value.capability === "PRODUCT_COMPARISON"));
     const scopedCapability = value.capability === "PRODUCT_ATTRIBUTES" ||
       value.capability === "OFFER_CONFIGURATION";
     if ((scopedCapability && value.scope === null) ||
         (attributeScope && value.capability !== "PRODUCT_ATTRIBUTES") ||
         (offerScope && value.capability !== "OFFER_CONFIGURATION") ||
-        (value.scope !== null && !attributeScope && !offerScope)) {
+        (value.scope !== null && !attributeScope && !offerScope && !otherScopeValid)) {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ["scope"],
         message: "obligation scope does not match capability" });
     }

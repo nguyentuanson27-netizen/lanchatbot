@@ -10,6 +10,7 @@ import {
   type RealtimeCustomerObligationV1,
 } from "@lana/contracts";
 import { redactAnalyticsMessage } from "@lana/database";
+import { trackCResolveObligations, type TrackCObligationResolution } from "./track-c-c3-obligation-resolution.js";
 
 export type TrackCConversationLane =
   | "FIRST_CONTACT_FIXED"
@@ -62,7 +63,13 @@ export type TrackCProtectedProposition =
 export type TrackCRequestedObligation = Readonly<Pick<
   RealtimeCustomerObligationV1,
   "kind" | "capability" | "scope" | "productId"
->>;
+> & {
+  /** Source-bound lookup subject, independent of a selected commerce variant. */
+  variantId?: string;
+  size?: string;
+  color?: string;
+  lookupStatus?: "FAILED" | "STALE";
+}>;
 
 /**
  * Mirrors the runtime `missingCheckout` field set. PAYMENT_METHOD was missing
@@ -178,6 +185,7 @@ export type TrackCSemanticHandoff = Readonly<{
 export type TrackCResponderTask = Readonly<{
   semanticHandoff?: TrackCSemanticHandoff;
   requestedObligations?: readonly TrackCRequestedObligation[];
+  obligationResolutions?: readonly TrackCObligationResolution[];
   answer:
     | Readonly<{
         kind: "ANSWER";
@@ -534,6 +542,8 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   const task: TrackCResponderTask = Object.freeze({
     ...(semanticHandoff === undefined ? {} : { semanticHandoff }),
     ...(input.requestedObligations === undefined ? {} : {
+      obligationResolutions: trackCResolveObligations(input.requestedObligations, realizable,
+        input.boundProductIds ?? []),
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
         Object.freeze({ ...entry })
       )),

@@ -1,4 +1,5 @@
 import { trackCUnclassifiedConversation, type TrackCConversationGuardContext } from "./track-c-c3-conversational-guard.js";
+import { assertTrackCResolutionCoverage } from "./track-c-c3-obligation-resolution.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
 import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
@@ -331,6 +332,7 @@ function guardProductionOutput(
   comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
   conversation: TrackCConversationGuardContext | null = null,
 ): void {
+  if (conversation !== null) assertTrackCResolutionCoverage(conversation.task, context.productBinding.productIds, output.segments);
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
       claim.provenance.contentHash,
@@ -461,7 +463,7 @@ function guardProductionOutput(
       now: evaluationAt,
     });
     const blocked = guard.blockedReasonCodes.filter((reason) =>
-      !(segment.kind === "GENERAL" && onlyUnconfirmedTopicMentions(guardText, reason))
+      !(segment.kind === "GENERAL" && conversation?.task.obligationResolutions === undefined && onlyUnconfirmedTopicMentions(guardText, reason))
     );
     if (blocked.length > 0) {
       throw new Error(

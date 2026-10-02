@@ -232,14 +232,17 @@ describe("canonical buying and checkout journeys with real Producer validation",
 });
 
 
-const wrinkleReply = "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn v\u1ec1 kh\u1ea3 n\u0103ng ch\u1ed1ng nh\u0103n. Gi\u00e1 hi\u1ec7n t\u1ea1i c\u1ee7a m\u1eabu n\u00e0y l\u00e0 799.000\u0111 \u1ea1.";
+const wrinkleReply = "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn v\u1ec1 kh\u1ea3 n\u0103ng ch\u1ed1ng nh\u0103n của mẫu CB182. Gi\u00e1 hi\u1ec7n t\u1ea1i c\u1ee7a m\u1eabu n\u00e0y l\u00e0 799.000\u0111 \u1ea1.";
 const wrinkleText = "Gi\u00e1 bao nhi\u00eau v\u00e0 c\u00f3 ch\u1ed1ng nh\u0103n kh\u00f4ng?";
 const priceQuery = { intent: "PRICE" as const, offerType: "SET" as const, color: null, size: null, deliveryRegion: null };
 function wrinkleTurn(failure: "NONE" | "TRANSPORT" | "JSON" | "GUARD" = "NONE") {
-  return { text: wrinkleText, producer: inputDelta({ factQuery: priceQuery }),
+  return { text: wrinkleText, producer: inputDelta({ factQuery: priceQuery, obligations: [
+    { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "CB182", evidenceText: "Giá bao nhiêu" },
+    { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE", productId: "CB182", evidenceText: "chống nhăn" },
+  ] }),
     strategist: answerPlan("PRICE", "wrinkle resistance not verified", "price and wrinkle resistance"),
-    responder: { answerText: failure === "GUARD" ? "Em ch\u01b0a c\u00f3 th\u00f4ng tin v\u1ec1 \u0111\u1ed9 m\u1ecbn."
-      : "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn v\u1ec1 kh\u1ea3 n\u0103ng ch\u1ed1ng nh\u0103n.", factualTexts: [], progressionText: null },
+    responder: { answerText: failure === "GUARD" ? "Mẫu này chống nhăn."
+      : null, factualTexts: [], progressionText: null },
     ...(failure === "TRANSPORT" || failure === "JSON" ? { responderFailure: failure } : {}),
     attemptCount: 5,
   };
@@ -556,7 +559,7 @@ it("continues checkout details while answering an independent price question", a
   await openCart(runtime);
   const checkout = "Chị thanh toán.";
   const trace = await runtime.turn({ text: `${checkout} Giá bao nhiêu?`, producer: inputDelta({
-    salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: { decision: "COMMITTED", requestedAction: "PROCEED_TO_PAYMENT", quantity: null, evidenceText: checkout, confidence: 0.99 } },
+    salesSignals: { ...noCustomerSelection().salesSignals, purchaseConfirmation: { decision: "UNCLEAR", evidenceText: null, confidence: 0 }, buyingIntent: { decision: "COMMITTED", requestedAction: "PROCEED_TO_PAYMENT", quantity: null, evidenceText: checkout, confidence: 0.99 } },
     factQuery: priceQuery,
   }), strategist: (input) => ({ ...answerPlan()(input), continuation: null, canonicalAction: "ASK_CHECKOUT_DETAILS",
     goal: "NEED: checkout and price\nKNOWN: NONE\nANSWER: price supported\nLIMIT: NONE\nNEXT: checkout fields enable payment" }) });

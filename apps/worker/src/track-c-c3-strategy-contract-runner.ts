@@ -47,6 +47,7 @@ import {
 } from "./track-c-c3-strategy-contract.js";
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
+import { trackCLimitationTexts } from "./track-c-c3-obligation-resolution.js";
 import type { TrackCV5ExecutionLane } from
   "./track-c-c3-v5-benchmark-materialization.js";
 import {
@@ -609,6 +610,10 @@ function responderTaskPrompt(task: TrackCResponderTask) {
   return Object.freeze({
     answer: task.semanticHandoff === undefined ? { ...answer, goal } : answer,
     ...(task.semanticHandoff === undefined ? {} : { semanticHandoff: task.semanticHandoff }),
+    ...(task.obligationResolutions === undefined ? {} : {
+      obligationResolutions: task.obligationResolutions.map(({ evidenceRefs: _refs, ...resolution }) => resolution),
+      limitationTexts: trackCLimitationTexts(task),
+    }),
     evidence: responderReadableEvidence(task),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
@@ -686,6 +691,7 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
 }
 
 function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
+  if (task.obligationResolutions !== undefined) return false;
   return task.semanticHandoff?.limit != null && !singleRequestBody(task) &&
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
@@ -1034,6 +1040,8 @@ function compileResponderDraft(input: Readonly<{
     }
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
+  const limitationTexts = trackCLimitationTexts(task);
+  limitationTexts.forEach((text) => segments.push({ kind: "GENERAL", text }));
   if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });

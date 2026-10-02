@@ -5,6 +5,7 @@ import type {
   TrackCResponderTask,
   TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
+import { trackCLimitationTexts } from "./track-c-c3-obligation-resolution.js";
 
 /** Only the compiler/runtime can supply this context, never the output schema.
  * These references authorize no fact, fit advice, cart change or other effect. */
@@ -46,7 +47,10 @@ function classify(value: string, context: ContextV2,
   source: TrackCConversationGuardContext | null): NonFactStatement | null {
   if (source === null) return null;
   const phrase = body(value);
-  if (closedTopicUncertainty(value, context)) return "BOUNDED_UNCERTAINTY";
+  if (source.task.obligationResolutions !== undefined && trackCLimitationTexts(source.task).includes(value.trim())) {
+    return "BOUNDED_UNCERTAINTY";
+  }
+  if (source.task.obligationResolutions === undefined && closedTopicUncertainty(value, context)) return "BOUNDED_UNCERTAINTY";
   if (trackCPiiFreeLocalityRequest(value, source.task)) return "LOCALITY_REQUEST";
   const referent = /^mau ([a-z]{1,6}\d{1,8}[a-z0-9]*|nay) chi dang xem$/u.exec(phrase)?.[1];
   if (referent && context.productBinding.status === "RESOLVED" &&
@@ -149,6 +153,11 @@ export function trackCObligationMatchesEvidence(
       return false;
     }
   }
+  if (obligation.variantId !== undefined && evidence.subject?.variantId !== obligation.variantId) return false;
+  if (obligation.size !== undefined && evidence.subject?.variantLabel?.size?.toLocaleUpperCase("vi-VN") !==
+      obligation.size.toLocaleUpperCase("vi-VN")) return false;
+  if (obligation.color !== undefined && evidence.subject?.variantLabel?.color?.toLocaleUpperCase("vi-VN") !==
+      obligation.color.toLocaleUpperCase("vi-VN")) return false;
   if (obligation.scope === null) return true;
   if (obligation.capability === "PRODUCT_ATTRIBUTES") {
     const field = ATTRIBUTE_SCOPE_FIELD[
@@ -256,6 +265,7 @@ function closedTopicUncertainty(value: string, context: ContextV2): boolean {
  * not coverage. Unknown vocabulary stays bounded but is not certified here. */
 export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
   value: string | null, context: ContextV2): void {
+  if (task.obligationResolutions !== undefined) return;
   if (task.semanticHandoff?.limit == null) return;
   if (value === null) throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
   const expected = limitationTopics(task.semanticHandoff.limit);
@@ -278,7 +288,8 @@ export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
 
 /** Recovery derives only fixed uncertainty labels, not claims or arbitrary
  * goal prose. Preserve every selected fact separately in its bound fact slot. */
-export function trackCRecoveryLimitation(task: TrackCResponderTask): string {
+export function trackCRecoveryLimitation(task: TrackCResponderTask): string | null {
+  if (task.obligationResolutions !== undefined) return null; // Compiler renders typed limitations.
   const topics = limitationTopics(task.semanticHandoff?.limit ?? "");
   return topics.length === 0 ? "Em chưa xác nhận được đầy đủ thông tin chị hỏi."
     : topics.map(({ label }) => `Em chưa có thông tin xác nhận về ${label}.`).join(" ");
