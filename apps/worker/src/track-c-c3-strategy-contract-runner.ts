@@ -1537,6 +1537,9 @@ async function runTrackCStrategyContractCore(
       currentCart: input.currentCart ?? null,
       comparisonFacts: input.comparisonFacts ?? [],
       ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+      ...(input.customerBuyingIntentEvidenceText === undefined ? {} : {
+        customerBuyingIntentEvidenceText: input.customerBuyingIntentEvidenceText,
+      }),
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
     });
   } catch (error) {
@@ -1580,6 +1583,9 @@ async function runTrackCStrategyContractCore(
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],
           ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+          ...(input.customerBuyingIntentEvidenceText === undefined ? {} : {
+            customerBuyingIntentEvidenceText: input.customerBuyingIntentEvidenceText,
+          }),
         });
         recoveryDiagnostic = failure.diagnostic;
       } catch { throw failure; }
