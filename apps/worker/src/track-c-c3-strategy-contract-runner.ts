@@ -1022,13 +1022,14 @@ function compileResponderDraft(input: Readonly<{
   const conversation = { task, dialogue: input.dialogue,
     ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }) };
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
-  // A hard stop still needs an accepted acknowledgement. The model can choose
-  // null when it sees no new question; use only a fact-free, effect-free reply.
+  // A terminal acknowledgement still needs an accepted reply. The model can
+  // choose null for no new need; use only a fact-free, effect-free acknowledgement.
   const ownedLimitations = trackCLimitationTexts(task);
   const modelDraft = ownedLimitations.length > 0 && input.draft.answerText === ownedLimitations.join(" ")
     ? { ...input.draft, answerText: null } : input.draft;
   const draft = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
-      task.canonicalRequest?.type === "HOLD_POSITION" &&
+      (task.canonicalRequest?.type === "HOLD_POSITION" || (task.canonicalRequest === null &&
+        task.continuation?.type === "KEEP_OPEN" && task.requestedObligations?.length === 0)) &&
       task.evidence.length === 0 && modelDraft.answerText === null &&
       modelDraft.progressionText === null
     ? { ...modelDraft, answerText: "Dạ vâng chị ạ." }
@@ -1519,13 +1520,15 @@ async function runTrackCStrategyContractCore(
   });
   // Recovery only re-renders an already-validated answer task. It must not
   // choose a strategy, manufacture missing evidence, or finish an action.
+  const recoverAcknowledgement = task.answer.kind === "ACKNOWLEDGE" && task.evidence.length === 0 &&
+    task.canonicalRequest === null && task.continuation?.type === "KEEP_OPEN" && task.requestedObligations?.length === 0;
   const assertRecoveryAllowed = (failure: TrackCStrategyContractFailure): void => {
     if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" || input.signal?.aborted ||
         failure.diagnostic.errorCode === "TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH" ||
         failure.diagnostic.errorCode === "CONTEXT_V2_CANDIDATE_CALLER_ABORTED" ||
-        task.answer.kind !== "ANSWER" ||
+        (!recoverAcknowledgement && (task.answer.kind !== "ANSWER" ||
         (task.obligationResolutions?.length ? false : task.answer.evidenceStatus !== "SUPPORTED" ||
-          task.evidence.length === 0 || task.unrealizedEvidence.length > 0) ||
+          task.evidence.length === 0 || task.unrealizedEvidence.length > 0))) ||
         (task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") &&
           !(recoverCheckoutRequest && task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS")) throw failure;
   };

@@ -249,6 +249,22 @@ function wrinkleTurn(failure: "NONE" | "TRANSPORT" | "JSON" | "GUARD" = "NONE") 
 }
 
 describe("evidence and bounded recovery journeys", () => {
+  it.each(["EMPTY", "TRANSPORT", "GUARD"] as const)("keeps a terminal acknowledgement after %s Responder output", async (failure) => {
+    const runtime = deterministicRuntime();
+    await quote(runtime);
+    await openCart(runtime);
+    const trace = await runtime.turn({ text: "Vâng, chị vẫn lấy M nhé.", producer: inputDelta({ obligations: [] }),
+      strategist: () => ({ replyAct: "ACKNOWLEDGE", proposition: "NONE", evidenceRefs: [],
+        goal: "NEED: NONE\nKNOWN: NONE\nANSWER: acknowledgement\nLIMIT: NONE\nNEXT: NONE",
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }),
+      responder: { answerText: failure === "GUARD" ? "Size M hợp với chị." : null, factualTexts: [], progressionText: null },
+      ...(failure === "TRANSPORT" ? { responderFailure: "TRANSPORT" as const } : {}),
+    });
+    expect(trace.reply).toBe("Dạ vâng chị ạ.");
+    expect(trace.after.commerce).toEqual(trace.before.commerce);
+    expect(roles(trace)).toEqual(["PRODUCER", "STRATEGIST", "RESPONDER"]);
+    committedOnce(trace);
+  });
   it.each(["NONE", "TRANSPORT", "JSON", "GUARD"] as const)("retains price and unsupported wrinkle on %s without another call or mutation", async (failure) => {
     const runtime = deterministicRuntime();
     await quote(runtime);
