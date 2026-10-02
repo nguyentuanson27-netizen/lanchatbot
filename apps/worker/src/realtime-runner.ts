@@ -116,6 +116,7 @@ import { redactAnalyticsMessage } from "@lana/database";
 import type { InboundEnvelopeV1 } from "@lana/meta-webhook";
 import type { PancakeHandoffAdapter } from "@lana/pancake-handoff";
 import { trackCObligationTopic } from "./track-c-c3-obligation-resolution.js";
+import type { TrackCRequestedObligation } from "./track-c-c3-strategy-contract.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { VerifiedVariantResult } from "./realtime-sales-catalog.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
@@ -3593,6 +3594,7 @@ export class RealtimeRunner {
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
     > = [];
+    let businessFactLookupQuery: AgentProposalV1["businessFactQuery"] | null = null;
     let canonicalDecisionEvidence: CanonicalDecisionEvidenceV1 | null = null;
     const canonicalDecisionEvidenceForTurn = (): CanonicalDecisionEvidenceV1 => {
       if (customerInput) return canonicalDecisionEvidence ??= customerInputCanonicalEvidence({
@@ -4057,10 +4059,11 @@ export class RealtimeRunner {
           envelope.status === "OK" && envelope.facts !== null);
         businessFacts = successfulFacts[0]?.envelope ?? flattened[0]?.envelope ?? null;
         businessFactEnvelopes = flattened.map(({ envelope }) => envelope);
-        // A locally isolated transport failure is not authority and must not
-        // erase a successful sibling. Stale, missing, malformed and other
-        // unavailable sources keep their existing fail-closed behavior.
-        const unsafe = flattened.some(({ envelope }) =>
+        // Failed/stale siblings are never authority. Typed obligations can
+        // retain fresh siblings and name each missing part without a handoff.
+        const typedRecovery = this.options.c3 !== null && customerInput !== null &&
+          customerInputObligations(customerInput).some(({ kind }) => kind === "FACT_REQUEST");
+        const unsafe = !typedRecovery && flattened.some(({ envelope }) =>
           staleFactsRequireHandoff(message.text ?? "", envelope) ||
           (unavailableFactsRequireHandoff(envelope) && !(successfulFacts.length > 0 &&
             envelope.status === "ERROR" && envelope.facts === null &&
@@ -4470,6 +4473,7 @@ export class RealtimeRunner {
                 handoffReason: null,
               };
         }
+        businessFactLookupQuery = { ...proposal.businessFactQuery };
         const facts = resolution.alternativeFacts ?? await this.resolveFacts(
           proposal,
           resolvedProduct,
@@ -4480,7 +4484,9 @@ export class RealtimeRunner {
         const explicitIntent = explicitCustomerBusinessIntent(message.text ?? "");
         const independentCommerceRequest = this.options.c3 !== null && customerInput !== null &&
           canonicalDecisionEvidenceForTurn().buyingIntent.decision === "COMMITTED";
-        if (independentCommerceRequest && facts !== null && facts.status !== "OK") {
+        const typedFactRecovery = this.options.c3 !== null && customerInput !== null &&
+          customerInputObligations(customerInput).some(({ kind }) => kind === "FACT_REQUEST");
+        if ((independentCommerceRequest || typedFactRecovery) && facts !== null && facts.status !== "OK") {
           // Fact lookup owns the answer lane. Cart selection revalidates its
           // own POS prerequisites below and cannot inherit this fact failure.
           proposal = { ...proposal, action: "REPLY", reply: "Em chưa xác minh được thông tin chị hỏi.",
@@ -4922,7 +4928,7 @@ export class RealtimeRunner {
           candidate: AgentProposalV1,
         ) => bindRealtimeProtectedClaimProposal({
           requestedClaims: requestedProtectedClaimTypes(
-            independentCommerceRequest && facts?.status !== "OK"
+            (independentCommerceRequest || typedFactRecovery) && facts?.status !== "OK"
               ? "NONE" : candidate.businessFactQuery.intent,
           ).map((type) => ({
             type,
@@ -5386,7 +5392,7 @@ export class RealtimeRunner {
           }
         }
       }
-      const independentSupportedAnswer = this.options.c3 !== null && customerInput?.factQuery.intent !== "NONE" &&
+      const independentSupportedAnswer = this.options.c3 !== null && customerInput !== null && customerInput.factQuery.intent !== "NONE" &&
         businessFacts?.status === "OK" && !sales.plan?.state.cart;
       if (sales.transferToHuman && independentSupportedAnswer) {
         // Failed commerce has no authority to suppress a supported fact.
@@ -5456,6 +5462,9 @@ export class RealtimeRunner {
             : {}),
           catalogVersion: resolvedProduct?.catalogVersion ?? null,
           facts: businessFactEnvelopes,
+          ...(businessFactLookupQuery?.intent === "STOCK" && businessFacts?.status === "OK"
+            ? { stockQuery: { productId: businessFacts.productId, size: businessFactLookupQuery.size,
+                color: businessFactLookupQuery.color } } : {}),
           sizeClaim: verifiedSizeClaimForTurn,
           fitDecision: resolvedProduct && customerProfile &&
               (event.requestedSalesStage === "FIT_CONSULTING" ||
@@ -5491,8 +5500,19 @@ export class RealtimeRunner {
           ...(customerInput === null ? {} : {
             customerVariant: customerInput.variant,
             requestedObligations: customerInputObligations(customerInput).map(
-              ({ kind, capability, scope, productId }) =>
-                ({ kind, capability, scope, productId })
+              ({ kind, capability, scope, productId }): TrackCRequestedObligation => {
+                const subject = productId ?? resolvedProduct?.productId ?? nextState.currentProductId;
+                const intent = capability === "SIZE_FIT" ? "SIZE" : capability;
+                const lookup = multiFactAudit.find((entry) => entry.productId === subject && entry.requestedFact === intent) ??
+                  (businessFactLookupQuery?.intent === intent && businessFacts?.productId === subject ? businessFacts : null);
+                return { kind, capability, scope, productId,
+                  ...(lookup && lookup.status !== "OK" ? { lookupStatus: lookup.status === "STALE" ? "STALE" : "FAILED" } : {}),
+                  ...(capability === "STOCK" && customerInput.factQuery.intent === "STOCK" && customerInput.factQuery.size !== null
+                    ? { size: customerInput.factQuery.size } : {}),
+                  ...(capability === "STOCK" && customerInput.factQuery.intent === "STOCK" && customerInput.factQuery.color !== null
+                    ? { color: customerInput.factQuery.color } : {}),
+                };
+              }
             ),
           }),
           checkoutClarificationActive:

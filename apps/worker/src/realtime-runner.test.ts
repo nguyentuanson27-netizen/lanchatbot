@@ -3921,11 +3921,15 @@ describe("RealtimeRunner inbound batching", () => {
         const text = selection ? `${selectionSpan}. Cho chị biết giá.` : wrinkle
           ? "Giá bao nhiêu và có chống nhăn không?" : "Nếu 625k thì chị lấy.";
         const answerText = selection ? unsafe ? "Size M chắc chắn vừa chị." : `${selectionSpan}.`
-          : wrinkle ? unsafe ? "Em chưa có thông tin về độ mịn."
-            : "Em chưa có thông tin xác nhận về khả năng chống nhăn."
+          : wrinkle ? unsafe ? "Mẫu này chống nhăn."
+            : "Em chưa có thông tin xác nhận về khả năng chống nhăn của mẫu CB182."
           : unsafe ? "Shop đồng ý giá 625k." : "Em chưa thể xác nhận giá 625k chị đề xuất.";
         typedOverride = { ...noCustomerSelection(),
           factQuery: { ...noCustomerSelection().factQuery, intent: "PRICE" },
+          ...(wrinkle ? { obligations: [
+            { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "CB182", evidenceText: "Giá bao nhiêu" },
+            { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE", productId: "CB182", evidenceText: "chống nhăn" },
+          ] } : {}),
           ...(selection ? { variant: { operation: "SELECT", productId: "CB182", size: "M",
             color: null, evidenceText: selectionSpan } } : {}),
         };

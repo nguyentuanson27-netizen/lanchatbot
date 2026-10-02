@@ -48,6 +48,7 @@ import {
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
 import { trackCLimitationTexts } from "./track-c-c3-obligation-resolution.js";
+import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
 import type { TrackCV5ExecutionLane } from
   "./track-c-c3-v5-benchmark-materialization.js";
 import {
@@ -1008,12 +1009,15 @@ function compileResponderDraft(input: Readonly<{
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
   // A hard stop still needs an accepted acknowledgement. The model can choose
   // null when it sees no new question; use only a fact-free, effect-free reply.
+  const ownedLimitations = trackCLimitationTexts(task);
+  const modelDraft = ownedLimitations.length > 0 && input.draft.answerText === ownedLimitations.join(" ")
+    ? { ...input.draft, answerText: null } : input.draft;
   const draft = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
       task.canonicalRequest?.type === "HOLD_POSITION" &&
-      task.evidence.length === 0 && input.draft.answerText === null &&
-      input.draft.progressionText === null
-    ? { ...input.draft, answerText: "Dạ vâng chị ạ." }
-    : input.draft;
+      task.evidence.length === 0 && modelDraft.answerText === null &&
+      modelDraft.progressionText === null
+    ? { ...modelDraft, answerText: "Dạ vâng chị ạ." }
+    : modelDraft;
   if (!adaptive && draft.answerText !== null &&
       !answerWording(task).includes(draft.answerText)) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
@@ -1048,7 +1052,7 @@ function compileResponderDraft(input: Readonly<{
   } else if (draft.answerText !== null && (adaptive || draft.answerText !== UNRESOLVED_ANSWER_TEXT)) {
     segments.push({ kind: "GENERAL", text: draft.answerText });
   }
-  const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
+  const multipleSubjects = task.requestedObligations?.some(({ kind }) => kind === "PRODUCT_SEARCH") || new Set(task.evidence.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
   )).size > 1;
   orderedEvidence.forEach((evidence, index) => {
@@ -1393,6 +1397,7 @@ async function runTrackCStrategyContractCore(
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
   let task: TrackCResponderTask;
+  let recoveryDiagnostic: TrackCStrategyContractDiagnostic | undefined;
   if (lane === "FIRST_CONTACT_FIXED") {
     task = constraints.hardStop
       ? compileTrackCStrategistDecision({
@@ -1453,7 +1458,29 @@ async function runTrackCStrategyContractCore(
       const capabilityGap = error instanceof Error &&
         (error.message === "TRACK_C_EVIDENCE_REALIZATION_UNSUPPORTED" ||
          error.message === "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
-      throw stageFailure(capabilityGap ? "EVIDENCE" : "STRATEGIST", strategistPayload, error);
+      const failure = stageFailure(capabilityGap ? "EVIDENCE" : "STRATEGIST", strategistPayload, error);
+      const requested = input.requestedObligations ?? [];
+      if (!input.recoverSelectedFacts || capabilityGap || constraints.hardStop || input.signal?.aborted ||
+          requested.length === 0 || failure.diagnostic.errorCode === "TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH" ||
+          failure.diagnostic.errorCode === "CONTEXT_V2_CANDIDATE_CALLER_ABORTED" ||
+          requested.some(({ kind, productId }) => kind === "FACT_REQUEST" && productId !== null &&
+            !context.productBinding.productIds.includes(productId))) throw failure;
+      // A failed model cannot supply a strategy. Recover only the original
+      // source-bound obligations from current evidence, with no new action.
+      const selected = evidence.filter((entry) => trackCEvidenceHasSafeFactualEgress(entry) &&
+        requested.some((obligation) => obligation.kind === "PRODUCT_SEARCH"
+          ? ["PRICE", "PRODUCT_PRESENTATION"].includes(entry.capability)
+          : trackCObligationMatchesEvidence(obligation, entry)));
+      const compiled = compileTrackCStrategistDecision({ ...constraints, evidence,
+        requestedObligations: requested, boundProductIds: context.productBinding.productIds,
+        decision: { replyAct: "ANSWER", proposition: selected[0]?.capability ??
+          requested.find(({ kind }) => kind === "FACT_REQUEST")?.capability ?? "NONE",
+          evidenceRefs: selected.map(({ ref }) => ref), canonicalAction: "NONE", continuation: { type: "KEEP_OPEN" },
+          goal: "NEED: current obligations\nKNOWN: NONE\nANSWER: current evidence\nLIMIT: unverified requested parts\nNEXT: NONE" },
+      });
+      task = compiled.task;
+      conversationPlan = compiled.decision;
+      recoveryDiagnostic = failure.diagnostic;
     }
     strategistRequestEnvelopeHash = strategistRequest.identity.requestEnvelopeHash;
   }
@@ -1474,14 +1501,15 @@ async function runTrackCStrategyContractCore(
     if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" || input.signal?.aborted ||
         failure.diagnostic.errorCode === "TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH" ||
         failure.diagnostic.errorCode === "CONTEXT_V2_CANDIDATE_CALLER_ABORTED" ||
-        task.answer.kind !== "ANSWER" || task.answer.evidenceStatus !== "SUPPORTED" ||
-        task.evidence.length === 0 || task.unrealizedEvidence.length > 0 ||
+        task.answer.kind !== "ANSWER" ||
+        (task.obligationResolutions?.length ? false : task.answer.evidenceStatus !== "SUPPORTED" ||
+          task.evidence.length === 0 || task.unrealizedEvidence.length > 0) ||
         task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") throw failure;
   };
-  let recoveryDiagnostic: TrackCStrategyContractDiagnostic | undefined;
   let responderPayload: unknown = null;
   let draft: ResponderDraft;
   try {
+    if (recoveryDiagnostic !== undefined) throw new TrackCStrategyContractFailure(recoveryDiagnostic);
     const responderResponse = await input.transport.send({
       url: responderRequest.url,
       body: responderRequest.body,
@@ -1496,7 +1524,8 @@ async function runTrackCStrategyContractCore(
       lane === "ADAPTIVE_FOLLOWUP",
     );
   } catch (error) {
-    const failure = stageFailure("RESPONDER", responderPayload, error);
+    const failure = recoveryDiagnostic === undefined ? stageFailure("RESPONDER", responderPayload, error)
+      : new TrackCStrategyContractFailure(recoveryDiagnostic);
     assertRecoveryAllowed(failure);
     recoveryDiagnostic = failure.diagnostic;
     // No trustworthy draft remains. Keep source facts and explicitly decline
