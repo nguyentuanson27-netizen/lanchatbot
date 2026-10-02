@@ -1510,7 +1510,12 @@ async function runTrackCStrategyContractCore(
     recoveryDiagnostic = failure.diagnostic;
     // No trustworthy draft remains. Keep source facts and explicitly decline
     // whole-answer completeness; never parse goal text into a factual claim.
-    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null };
+    draft = {
+      answerText: (task.typedLimitations?.length ?? 0) > 0
+        ? null : trackCRecoveryLimitation(task),
+      factualTexts: [],
+      progressionText: null,
+    };
   }
   let output: ContextV2CandidateOutputV2;
   try {
@@ -1526,6 +1531,7 @@ async function runTrackCStrategyContractCore(
       comparisonFacts: input.comparisonFacts ?? [],
       ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
+      recoverySubjectLabels: recoveryDiagnostic !== undefined,
     });
   } catch (error) {
     const failure = recoveryDiagnostic === undefined
@@ -1538,7 +1544,12 @@ async function runTrackCStrategyContractCore(
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null },
+        draft: {
+          answerText: (task.typedLimitations?.length ?? 0) > 0
+            ? null : (draft.answerText ?? trackCRecoveryLimitation(task)),
+          factualTexts: [],
+          progressionText: null,
+        },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
@@ -1552,8 +1563,12 @@ async function runTrackCStrategyContractCore(
       try {
         output = compileResponderDraft({
           context, dialogue: input.evaluationContext, task,
-          draft: { answerText: trackCRecoveryLimitation(task),
-            factualTexts: [], progressionText: null },
+          draft: {
+            answerText: (task.typedLimitations?.length ?? 0) > 0
+              ? null : trackCRecoveryLimitation(task),
+            factualTexts: [],
+            progressionText: null,
+          },
           lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],

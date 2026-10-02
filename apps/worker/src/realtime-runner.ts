@@ -5368,7 +5368,7 @@ export class RealtimeRunner {
           const cartState = (sales.plan?.state ?? salesCycleRecord.state).cart?.value ?? null;
           const commerceClaims = salesProtectedOutbound?.claims ?? [];
           const claims = [...commerceClaims, ...factClaims].filter((entry, index, all) =>
-            all.findIndex((candidate) => candidate.contentHash === entry.contentHash) === index
+            all.findIndex((candidate) => candidate.claimId === entry.claimId) === index
           );
           const claimTypes = [...new Set(claims.map(({ type }) => type))].sort();
           const parent = cartState === null ? null :
