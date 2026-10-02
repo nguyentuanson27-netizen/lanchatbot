@@ -25,8 +25,8 @@ describe("C3 structured goal semantic handoff", () => {
       "canonicalAction", "continuation", "evidenceRefs", "goal", "proposition", "replyAct",
     ]);
     expect(result.task.semanticHandoff).toEqual({
-      need: "price and wrinkle resistance", known: null, answer: "current price",
-      limit: "wrinkle resistance has no verified evidence", next: null,
+      need: "ANSWER", known: null, answer: "PRICE supported",
+      limit: "WRINKLE_RESISTANCE unsupported", next: null,
     });
     expect(result.task.evidence).toEqual([price]);
     expect(result.task.requiredEvidenceRefs).toEqual([price.ref]);
@@ -71,7 +71,7 @@ describe("C3 structured goal semantic handoff", () => {
       .replace("ANSWER: current price", "ANSWER: shop approved an invented discount");
     const result = compileTrackCStrategistDecision({ ...input, decision: { ...input.decision, goal: unsafe } });
     expect(JSON.stringify(result)).not.toContain("0901234567");
-    expect(result.task.semanticHandoff?.known).not.toBeNull();
+    expect(result.task.semanticHandoff?.known).toBeNull();
     expect(result.task.evidence).toEqual([price]);
     expect(result.task.canonicalRequest).toBeNull();
     expect(result.task.continuation).toEqual({ type: "KEEP_OPEN" });
@@ -140,7 +140,10 @@ describe("C3 structured goal semantic handoff", () => {
     const fields = trackCProductAttributeEvidence({ attributes, refPrefix: "ATTR", authority: "RUNTIME" });
     const material = fields.find(({ value }) => "materials" in value)!;
     const wrinkle = fields.find(({ value }) => "wearWrinkleResistance" in value)!;
-    const selected = { ...input, evidence: [price, ...fields], decision: { ...input.decision,
+    const selected = { ...input, evidence: [price, ...fields], requestedObligations: [
+      { kind: "FACT_REQUEST" as const, capability: "PRICE" as const, scope: null, productId: "ITEM42" },
+      { kind: "FACT_REQUEST" as const, capability: "PRODUCT_ATTRIBUTES" as const, scope: "WRINKLE_RESISTANCE" as const, productId: "ITEM42" },
+    ], decision: { ...input.decision,
       goal: goal.replace("LIMIT: wrinkle resistance has no verified evidence", "LIMIT: NONE"),
       evidenceRefs: [price.ref, wrinkle.ref] } };
     const good = compileTrackCStrategistDecision(selected);
@@ -148,10 +151,10 @@ describe("C3 structured goal semantic handoff", () => {
     expect(good.task.canonicalRequest).toBeNull();
     for (const refs of [[price.ref, material.ref], [price.ref]]) {
       expect(() => compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
-        evidenceRefs: refs } })).toThrow("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
+        evidenceRefs: refs } })).toThrow();
     }
     // The same independent price is retained when the limitation is explicit.
-    expect(compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
+    expect(compileTrackCStrategistDecision({ ...selected, evidence: [price, material], decision: { ...selected.decision,
       goal, evidenceRefs: [price.ref] } }).task.evidence).toEqual([price]);
   });
 

@@ -194,8 +194,8 @@ describe("Track C C3 strategy-contract runner", () => {
     }
     expect(send).toHaveBeenCalledTimes(2);
     const prompt = JSON.parse(JSON.parse(send.mock.calls[1]![0].body).contents[0].parts[0].text);
-    expect(prompt.responderTask.semanticHandoff).toEqual({ need: "price and wrinkle resistance", known: null,
-      answer: "current price", limit: "wrinkle resistance has no verified evidence", next: null });
+    expect(prompt.responderTask.semanticHandoff).toEqual({ need: "ANSWER", known: null,
+      answer: "PRICE supported", limit: "WRINKLE_RESISTANCE unsupported", next: null });
     expect(prompt.responderTask.answer).not.toHaveProperty("goal");
     expect(prompt).not.toHaveProperty("customerDecisionSignals");
   });
@@ -651,8 +651,8 @@ describe("Track C C3 strategy-contract runner", () => {
       confidenceBand: context.dialogueEvidence.confidenceBand,
       reasonCodes: context.dialogueEvidence.reasonCodes,
     });
-    expect(strategistPrompt.selectableEvidence[0].realizationText)
-      .toBe("Giá hiện tại của mẫu này là 849.000đ ạ.");
+    expect(strategistPrompt.selectableEvidence[0]).not.toHaveProperty("realizationText");
+    expect(strategistPrompt.selectableEvidence[0]).not.toHaveProperty("value");
     const responderRequest = JSON.parse(send.mock.calls[1]![0].body);
     const responderPrompt = JSON.parse(responderRequest.contents[0].parts[0].text);
     expect(responderPrompt).not.toHaveProperty("customerDecisionSignals");
@@ -669,7 +669,7 @@ describe("Track C C3 strategy-contract runner", () => {
       replyAct: "ANSWER", goal, proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
       continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
     };
-    const normalized = { ...decision, goal: redactAnalyticsMessage(goal).text };
+    const normalized = { ...decision, goal: "NEED: ANSWER\nKNOWN: NONE\nANSWER: PRICE supported\nLIMIT: NONE\nNEXT: NONE" };
     expect(normalized.goal).not.toBe(goal);
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({ payload: payload(decision),

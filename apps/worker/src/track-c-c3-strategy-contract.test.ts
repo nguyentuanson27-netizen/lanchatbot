@@ -191,7 +191,7 @@ describe("Track C C3 clean strategy contract", () => {
       hardStop: false,
     });
 
-    expect(task.answer).toEqual({ kind: "ACKNOWLEDGE", goal: "Ghi nhận băn khoăn rồi giải thích tình trạng còn hàng." });
+    expect(task.answer).toEqual({ kind: "ACKNOWLEDGE", goal: "ACKNOWLEDGE: STOCK; NONE" });
     expect(task.evidence).toEqual([stockEvidence]);
   });
 

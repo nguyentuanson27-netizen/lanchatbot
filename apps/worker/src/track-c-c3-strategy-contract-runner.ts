@@ -507,10 +507,12 @@ function presentableEvidence(
     Object.freeze({
       ref,
       capability,
-      ...(subject === undefined ? {} : { subject }),
-      value,
+      ...(subject === undefined ? {} : { subject: Object.fromEntries(
+        Object.entries(subject).filter(([key]) => key !== "displayName" && key !== "variantLabel"),
+      ) }),
+      factFields: Object.keys(value).sort(),
+      ...(capability === "OFFER_CONFIGURATION" ? { scope: value.offerScope } : {}),
       realizationSupported: deterministicText !== undefined,
-      ...(deterministicText === undefined ? {} : { realizationText: deterministicText }),
     })
   ));
 }

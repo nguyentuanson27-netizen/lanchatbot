@@ -1,6 +1,8 @@
 import {
   assertTrackCRequestedObligationCoverage,
   assertTrackCRequestedPropertyCoverage,
+  trackCObligationMatchesEvidence,
+  trackCPlanningLimitTopics,
 } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
@@ -439,7 +441,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   /** Required at the model boundary; omitted only for code-owned direct calls. */
   requireStructuredGoal?: boolean;
 }>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
-  const decision = readDecision(input.decision);
+  let decision = readDecision(input.decision);
   const evidence = selectedEvidence(
     decision.evidenceRefs,
     input.evidence,
@@ -495,11 +497,34 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
-  const semanticHandoff = input.requireStructuredGoal === true
+  const parsedHandoff = input.requireStructuredGoal === true
     ? structuredGoal(decision, unrealizable.length > 0 ||
         (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
           decision.continuation?.type === "KEEP_OPEN"))
     : undefined;
+  // Planning is a control plane. Never carry provider-authored factual values
+  // into the decision/task, even if the provider repeated an authorized fact.
+  const facts = input.requestedObligations?.filter(({ kind }) => kind === "FACT_REQUEST") ?? [];
+  const describe = (entry: TrackCRequestedObligation) =>
+    [entry.capability ?? entry.kind, entry.scope].filter(Boolean).join("/");
+  const unsupported = facts.filter((entry) =>
+    !realizable.some((fact) => trackCObligationMatchesEvidence(entry, fact)));
+  const semanticHandoff = parsedHandoff === undefined ? undefined : Object.freeze({
+    need: facts.length > 0 ? facts.map(describe).join("; ") : decision.replyAct,
+    known: null,
+    answer: realizable.length > 0 ? [...new Set(realizable.map(({ capability }) => capability))]
+      .map((capability) => `${capability} supported`).join("; ") : null,
+    limit: unsupported.length > 0 ? unsupported.map((entry) => `${describe(entry)} unsupported`).join("; ")
+      : parsedHandoff.limit === null ? null
+        : trackCPlanningLimitTopics(parsedHandoff.limit).map((id) => `${id} unsupported`).join("; ") || "Requested part unsupported",
+    next: decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION"
+      ? decision.canonicalAction : decision.continuation?.type === "ASK" ? decision.continuation.input : null,
+  });
+  const planningGoal = semanticHandoff === undefined
+    ? `${decision.replyAct}: ${decision.proposition}; ${decision.canonicalAction}`
+    : ["NEED", "KNOWN", "ANSWER", "LIMIT", "NEXT"].map((key) =>
+      `${key}: ${semanticHandoff[key.toLowerCase() as keyof TrackCSemanticHandoff] ?? "NONE"}`).join("\n");
+  decision = Object.freeze({ ...decision, goal: planningGoal });
   const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
     ? Object.freeze({
         kind: "ANSWER", evidenceStatus, goal: decision.goal,
