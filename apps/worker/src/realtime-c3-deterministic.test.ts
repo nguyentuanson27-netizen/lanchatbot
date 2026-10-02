@@ -132,6 +132,10 @@ describe("canonical buying and checkout journeys with real Producer validation",
     const text = `${purchase} Size S c\u00f2n kh\u00f4ng?`;
     const trace = await runtime.turn({ text, producer: { ...buy(purchase, "M"),
       factQuery: { intent: "STOCK", offerType: "SET", color: "be", size: "S", deliveryRegion: null },
+      obligations: [{
+        kind: "FACT_REQUEST", capability: "STOCK", scope: null,
+        productId: "CB182", evidenceText: "Size S còn không?",
+      }],
     } });
     runtime.save("selection-m-stock-s");
     committedOnce(trace);

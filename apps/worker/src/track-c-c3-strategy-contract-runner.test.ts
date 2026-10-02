@@ -3133,4 +3133,33 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(result.reply).not.toMatch(/không\s+bảo\s+đảm.*(?:kịp|mốc)/iu);
   });
 
+
+  it("recovery names the bound subject instead of returning an anonymous fact", async () => {
+    const decisionAt = new Date(recipe.evaluation_at);
+    const context = contextFromFrozenTrackCCapture({ capture: capture(), evaluationAt: decisionAt });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        replyAct: "ANSWER",
+        goal: ["NEED: price", "KNOWN: NONE", "ANSWER: selected evidence", "LIMIT: NONE", "NEXT: NONE"].join("\n"),
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) })
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        answerText: "Mẫu này chắc chắn đáng tiền hơn.", factualTexts: [], progressionText: null,
+      }) });
+    const result = await runTrackCStrategyLive({
+      context, modelResource: MODEL_RESOURCE, decisionAt,
+      dialogue: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "SQ9012 giá bao nhiêu?", attachmentCount: 0, occurredAt: decisionAt.toISOString() }],
+      requestedObligations: [{
+        kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "SQ9012",
+      }],
+      checkoutRequestedFields: [], checkoutClarificationActive: false,
+      currentCart: null, paymentOptions: ["COD"], transport: { send },
+    });
+    expect(result.recoveryDiagnostic).toBeDefined();
+    expect(result.reply).toContain("SQ9012");
+    expect(result.reply).toContain("849.000");
+  });
+
 });

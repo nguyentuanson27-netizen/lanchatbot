@@ -155,4 +155,72 @@ describe("C3 structured goal semantic handoff", () => {
       goal, evidenceRefs: [price.ref] } }).task.evidence).toEqual([price]);
   });
 
+
+  it("normalizes typed planning away from commercial fact values", () => {
+    const result = compileTrackCStrategistDecision({
+      ...input,
+      boundProductIds: ["ITEM42"],
+      requestedObligations: [{
+        kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "ITEM42",
+      }],
+      decision: {
+        ...input.decision,
+        goal: [
+          "NEED: current price",
+          "KNOWN: customer saw 799.000đ",
+          "ANSWER: price is 799.000đ",
+          "LIMIT: NONE",
+          "NEXT: NONE",
+        ].join("\n"),
+      },
+    });
+    expect(result.decision.goal).not.toMatch(/799[.]000|đ/u);
+    expect(result.task.semanticHandoff).toMatchObject({
+      known: null,
+      limit: null,
+      next: null,
+    });
+    expect(result.task.obligationResolutions).toEqual([
+      expect.objectContaining({
+        capability: "PRICE",
+        status: "SUPPORTED",
+        evidenceRefs: [price.ref],
+      }),
+    ]);
+  });
+
+  it("does not let duplicate goal prose veto canonical progression", () => {
+    const hold = compileTrackCStrategistDecision({
+      ...input,
+      permittedCanonicalActions: ["HOLD_POSITION"],
+      decision: {
+        replyAct: "ACKNOWLEDGE",
+        goal: ["NEED: NONE", "KNOWN: NONE", "ANSWER: NONE", "LIMIT: NONE", "NEXT: NONE"].join("\n"),
+        proposition: "NONE",
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "HOLD_POSITION",
+      },
+    });
+    expect(hold.task.canonicalRequest?.type).toBe("HOLD_POSITION");
+
+    const measurements = compileTrackCStrategistDecision({
+      ...input,
+      permittedCanonicalActions: ["ASK_MEASUREMENTS"],
+      measurementRequestedFields: ["HEIGHT_CM"],
+      decision: {
+        replyAct: "CLARIFY",
+        goal: ["NEED: fit inputs", "KNOWN: NONE", "ANSWER: NONE", "LIMIT: NONE", "NEXT: NONE"].join("\n"),
+        proposition: "NONE",
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "ASK_MEASUREMENTS",
+      },
+    });
+    expect(measurements.task.canonicalRequest).toMatchObject({
+      type: "ASK_MEASUREMENTS",
+      measurementFields: ["HEIGHT_CM"],
+    });
+  });
+
 });

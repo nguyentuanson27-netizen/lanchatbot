@@ -67,7 +67,7 @@ describe("C3 two-sided semantic statement guard", () => {
     const inbound = `Nếu ${amount} thì chị lấy.`;
     for (const answer of [`${amount} là mức chị đề xuất.`,
       `Em chưa thể xác nhận giá ${amount} chị đề xuất.`]) {
-      const { promise, send } = run({ inbound, answer, known: `customer proposed ${amount}` });
+      const { promise, send } = run({ inbound, answer });
       const result = await promise;
       expect(result.reply).toContain(answer);
       expect(result.reply).toContain("849.000");
@@ -233,6 +233,47 @@ describe("C3 two-sided semantic statement guard", () => {
       "Em chưa có dữ liệu tức là mẫu này không chống nhăn.",
       "Em chưa xác nhận khả năng chống nhăn bởi vậy vải này dễ nhăn.",
     ]) await expect(run({ ...input, answer }).promise).rejects.toThrow();
+  });
+
+
+  it("lets typed unresolved obligations egress as code-owned limitations without prose NLP", async () => {
+    const productId = "SQ9012";
+    const capture = materializeTrackCV5CaseCapture({ lane: "BEHAVIOR_SIMULATION", recipe,
+      fixture: { id: "TYPED_LIMIT", latest_customer_message: "Giá bao nhiêu và có dễ nhăn không?",
+        context: { product_binding: { status: "RESOLVED", product_ids: [productId] },
+          phase: "BROWSING", canonical_flags: [], source_stage: null,
+          buying_intent: { decision: "NONE", requested_action: "NONE", quantity: null, evidence: null },
+          runtime_claim_refs: ["RC_PRICE_A"] } },
+      runtimeClaimCatalog: catalog.runtime_claim_catalog });
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        replyAct: "ANSWER",
+        goal: ["NEED: facts", "KNOWN: NONE", "ANSWER: selected evidence", "LIMIT: NONE", "NEXT: NONE"].join("\n"),
+        proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+        continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+      }) })
+      .mockResolvedValueOnce({ providerModelVersion: "gemini-3.5-flash-lite", payload: payload({
+        answerText: null, factualTexts: [], progressionText: null,
+      }) });
+    const result = await runTrackCStrategyContractCase({
+      lane: "BEHAVIOR_SIMULATION", modelResource, capture, evaluationAt: at,
+      requestedObligations: [
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId },
+        { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE", productId },
+      ],
+      evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
+        text: "Giá bao nhiêu và có dễ nhăn không?", attachmentCount: 0, occurredAt: at.toISOString() }],
+      transport: { send },
+    });
+    expect(result.reply).toContain("849.000");
+    expect(result.reply.toLowerCase()).toContain("nhăn");
+    expect(result.responderTask.typedLimitations).toEqual([
+      expect.objectContaining({
+        capability: "PRODUCT_ATTRIBUTES",
+        scope: "WRINKLE_RESISTANCE",
+      }),
+    ]);
   });
 
 });
