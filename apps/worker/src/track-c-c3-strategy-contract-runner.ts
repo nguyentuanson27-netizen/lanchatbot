@@ -549,6 +549,7 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           capability: entry.capability,
           scope: entry.scope,
           productId: entry.productId,
+          ...(entry.variant === undefined ? {} : { variant: entry.variant }),
         })
       )),
     }),
