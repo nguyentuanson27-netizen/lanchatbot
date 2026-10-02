@@ -611,6 +611,31 @@ function responderTaskPrompt(task: TrackCResponderTask) {
   return Object.freeze({
     answer: task.semanticHandoff === undefined ? { ...answer, goal } : answer,
     ...(task.semanticHandoff === undefined ? {} : { semanticHandoff: task.semanticHandoff }),
+    ...(task.obligationResolutions === undefined ? {} : {
+      obligationResolutions: task.obligationResolutions.map((entry) => ({
+        kind: entry.kind,
+        capability: entry.capability,
+        scope: entry.scope,
+        productId: entry.productId,
+        ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+        ...(entry.size === undefined ? {} : { size: entry.size }),
+        ...(entry.color === undefined ? {} : { color: entry.color }),
+        ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
+        status: entry.status,
+        evidenceRefs: entry.evidenceRefs,
+      })),
+    }),
+    ...((task.typedLimitations?.length ?? 0) === 0 ? {} : {
+      codeOwnedLimitations: task.typedLimitations!.map((entry) => ({
+        capability: entry.capability,
+        scope: entry.scope,
+        productId: entry.productId,
+        ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+        ...(entry.size === undefined ? {} : { size: entry.size }),
+        ...(entry.color === undefined ? {} : { color: entry.color }),
+        ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
+      })),
+    }),
     evidence: responderReadableEvidence(task),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
