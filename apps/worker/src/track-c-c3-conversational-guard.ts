@@ -55,8 +55,7 @@ function classify(value: string, context: ContextV2,
   const latest = [...source.dialogue].reverse().find(({ direction, senderType, messageType }) =>
     direction === "INBOUND" && senderType === "CUSTOMER" && messageType === "TEXT")?.text ?? "";
   const amounts = amountTokens(value);
-  const known = source.task.semanticHandoff?.known ?? "";
-  if (amounts.length === 1 && amountTokens(latest).includes(amounts[0]!) && amountTokens(known).includes(amounts[0]!)) {
+  if (amounts.length === 1 && amountTokens(latest).includes(amounts[0]!)) {
     // Substitute just the source-bound numeric token. The remaining entire
     // sentence must be a reference/refusal, never a shop price declaration.
     const shape = phrase.replace(/\d[\d.,]{0,14}\s*(?:k|nghin|trieu|vnd|dong|d|₫)(?![a-z0-9])/u, "AMOUNT");
@@ -129,7 +128,7 @@ const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
   CARE_INSTRUCTIONS: "careInstructions",
 } as const);
 
-function obligationMatchesEvidence(
+export function trackCRequestedObligationMatchesEvidence(
   obligation: TrackCRequestedObligation,
   evidence: TrackCSelectableEvidence,
 ): boolean {
@@ -144,6 +143,13 @@ function obligationMatchesEvidence(
       return false;
     }
   }
+  const label = evidence.subject?.variantLabel;
+  if (obligation.size != null &&
+      label?.size?.normalize("NFC").toLocaleUpperCase("vi-VN") !==
+        obligation.size.normalize("NFC").toLocaleUpperCase("vi-VN")) return false;
+  if (obligation.color != null &&
+      label?.color?.normalize("NFC").toLocaleUpperCase("vi-VN") !==
+        obligation.color.normalize("NFC").toLocaleUpperCase("vi-VN")) return false;
   if (obligation.scope === null) return true;
   if (obligation.capability === "PRODUCT_ATTRIBUTES") {
     const field = ATTRIBUTE_SCOPE_FIELD[
@@ -172,17 +178,17 @@ export function assertTrackCRequestedObligationCoverage(
     const allowed = facts.filter((entry) => entry.capability === capability);
     if (selected.some((entry) =>
       entry.capability === capability &&
-      !allowed.some((obligation) => obligationMatchesEvidence(obligation, entry))
+      !allowed.some((obligation) => trackCRequestedObligationMatchesEvidence(obligation, entry))
     )) {
       throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
     }
   }
   for (const obligation of facts) {
     const hasAvailable = available.some((entry) =>
-      obligationMatchesEvidence(obligation, entry)
+      trackCRequestedObligationMatchesEvidence(obligation, entry)
     );
     if (hasAvailable && !selected.some((entry) =>
-      obligationMatchesEvidence(obligation, entry)
+      trackCRequestedObligationMatchesEvidence(obligation, entry)
     )) {
       throw new Error("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
     }
@@ -251,6 +257,7 @@ function closedTopicUncertainty(value: string, context: ContextV2): boolean {
  * not coverage. Unknown vocabulary stays bounded but is not certified here. */
 export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
   value: string | null, context: ContextV2): void {
+  if ((task.typedLimitations?.length ?? 0) > 0) return;
   if (task.semanticHandoff?.limit == null) return;
   if (value === null) throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
   const expected = limitationTopics(task.semanticHandoff.limit);
@@ -274,6 +281,9 @@ export function assertTrackCLimitationCoverage(task: TrackCResponderTask,
 /** Recovery derives only fixed uncertainty labels, not claims or arbitrary
  * goal prose. Preserve every selected fact separately in its bound fact slot. */
 export function trackCRecoveryLimitation(task: TrackCResponderTask): string {
+  if ((task.typedLimitations?.length ?? 0) > 0) {
+    return task.typedLimitations!.map(({ text }) => text).join(" ");
+  }
   const topics = limitationTopics(task.semanticHandoff?.limit ?? "");
   return topics.length === 0 ? "Em chưa xác nhận được đầy đủ thông tin chị hỏi."
     : topics.map(({ label }) => `Em chưa có thông tin xác nhận về ${label}.`).join(" ");

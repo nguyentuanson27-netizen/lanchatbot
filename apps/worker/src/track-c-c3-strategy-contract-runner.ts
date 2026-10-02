@@ -546,6 +546,10 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           capability: entry.capability,
           scope: entry.scope,
           productId: entry.productId,
+          ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+          ...(entry.size === undefined ? {} : { size: entry.size }),
+          ...(entry.color === undefined ? {} : { color: entry.color }),
+          ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
         })
       )),
     }),
@@ -684,6 +688,7 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
 }
 
 function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
+  if ((task.typedLimitations?.length ?? 0) > 0) return false;
   return task.semanticHandoff?.limit != null && !singleRequestBody(task) &&
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
@@ -708,7 +713,8 @@ function responderDraftSchema(
     maxProperties: 3,
     properties: {
       answerText: adaptive
-        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
+        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task) ||
+            ((task.typedLimitations?.length ?? 0) > 0 && task.answer.kind === "ANSWER")
           ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
@@ -993,6 +999,7 @@ function compileResponderDraft(input: Readonly<{
   comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
   customerVariant?: RealtimeCustomerInput["variant"];
+  recoverySubjectLabels?: boolean;
 }>): ContextV2CandidateOutputV2 {
   const { task } = input;
   const conversation = { task, dialogue: input.dialogue,
@@ -1056,12 +1063,21 @@ function compileResponderDraft(input: Readonly<{
       );
     }
     assertNoEffectText(factualText);
-    if (multipleSubjects && evidence.subject?.productId !== undefined) {
+    if ((multipleSubjects || input.recoverySubjectLabels === true) &&
+        evidence.subject?.productId !== undefined) {
       const label = text(evidence.subject.displayName ?? evidence.subject.productId,
         "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       if (label === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       assertNoEffectText(label);
-      segments.push({ kind: "GENERAL", text: `Với mẫu ${label}:` });
+      const resolution = task.obligationResolutions?.find(({ evidenceRefs }) =>
+        evidenceRefs.includes(evidence.ref)
+      );
+      const variant = [
+        resolution?.color == null ? null : `màu ${resolution.color}`,
+        resolution?.size == null ? null : `size ${resolution.size}`,
+      ].filter((value): value is string => value !== null).join(" ");
+      segments.push({ kind: "GENERAL",
+        text: `Với mẫu ${label}${variant === "" ? "" : ` (${variant})`}:` });
     }
     segments.push({
       kind: "VERIFIED_CLAIM",
@@ -1079,6 +1095,9 @@ function compileResponderDraft(input: Readonly<{
       task.answer.evidenceStatus === "SUPPORTED" &&
       draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: PARTIAL_REALIZATION_TEXT });
+  }
+  for (const limitation of task.typedLimitations ?? []) {
+    segments.push({ kind: "GENERAL", text: limitation.text });
   }
   if (task.deliveryDeadlineText !== undefined) {
     segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });
@@ -1524,6 +1543,7 @@ async function runTrackCStrategyContractCore(
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
         ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+        recoverySubjectLabels: true,
       });
       recoveryDiagnostic = failure.diagnostic;
     } catch {
@@ -1538,6 +1558,7 @@ async function runTrackCStrategyContractCore(
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],
           ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+          recoverySubjectLabels: true,
         });
         recoveryDiagnostic = failure.diagnostic;
       } catch { throw failure; }

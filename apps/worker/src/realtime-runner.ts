@@ -523,6 +523,31 @@ function isAlternativeProductRequest(value: string): boolean {
     /\b(?:co|con|xem)\s+(?:mau|sp|san pham|set|ao|vay|quan)\s+khac\b/u.test(text);
 }
 
+function trackCRequestedObligationsForTurn(
+  input: RealtimeCustomerInput,
+) {
+  const intentCapability = input.factQuery.intent === "PRICE" ? "PRICE" :
+    input.factQuery.intent === "STOCK" ? "STOCK" :
+    input.factQuery.intent === "SIZE" ? "SIZE_FIT" :
+    input.factQuery.intent === "ETA" ? "ETA" : null;
+  return customerInputObligations(input).map((entry) => {
+    const factQueryOwnsSubject = entry.kind === "FACT_REQUEST" &&
+      entry.capability !== null && entry.capability === intentCapability;
+    return {
+      kind: entry.kind,
+      capability: entry.capability,
+      scope: entry.scope,
+      productId: entry.productId,
+      ...(factQueryOwnsSubject ? {
+        offerType: input.factQuery.offerType,
+        size: input.factQuery.size,
+        color: input.factQuery.color,
+        deliveryRegion: input.factQuery.deliveryRegion,
+      } : {}),
+    };
+  });
+}
+
 export function currentProductContinuationId(
   value: string,
   currentProductId: string | null,
@@ -5339,18 +5364,38 @@ export class RealtimeRunner {
             queryMatchesSize
               ? { ...unit, text: `Với size ${requestedSize}: ${unit.text}` } : unit);
           const messages = [...answer, { kind: "TEXT" as const, text: checkoutRequest }];
-          const claims = protectedClaimSet.claims.filter(({ type }) => answerTypes.includes(type));
+          const factClaims = protectedClaimSet.claims.filter(({ type }) => answerTypes.includes(type));
+          const cartState = (sales.plan?.state ?? salesCycleRecord.state).cart?.value ?? null;
+          const commerceClaims = salesProtectedOutbound?.claims ?? [];
+          const claims = [...commerceClaims, ...factClaims].filter((entry, index, all) =>
+            all.findIndex((candidate) => candidate.contentHash === entry.contentHash) === index
+          );
+          const claimTypes = [...new Set(claims.map(({ type }) => type))].sort();
+          const parent = cartState === null ? null :
+            [...(sales.plan?.effectReadiness ?? [])].reverse().find((candidate) =>
+              candidate.outcome === "READY" &&
+              candidate.binding.cart?.cartId === cartState.cartId &&
+              candidate.binding.cart?.cartRevision === cartState.revision
+            ) ?? null;
           const payloadHash = canonicalSha256(messages);
           const readiness = evaluateDeterministicEffectReadinessV1({
             effect: "PROTECTED_OUTBOUND", pageId: claim.pageId, conversationId: record.conversationId,
             sourceMessageIdHash: canonicalEvidence.buyingIntent.sourceMessageIdHash,
             conversationRevision: record.stateVersion, salesCycleRevision: salesCycleRecord.stateRevision,
-            productIds: [businessFacts.productId], cartId: null, cartVersion: null, cartStateHash: null,
+            productIds: cartState === null
+              ? [businessFacts.productId]
+              : [...new Set([...cartState.lines.map(({ parentProductId }) => parentProductId), businessFacts.productId])],
+            cartId: cartState?.cartId ?? null,
+            cartVersion: cartState?.revision ?? null,
+            cartStateHash: parent?.binding.cart?.cartStateHash ?? null,
+            ...(cartState === null ? {} : { cartLines: cartState.lines }),
             orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims,
-            protectedClaimTypes: answerTypes, deterministicEvidenceHash: payloadHash, payloadHash,
-            checkedAt: new Date(),
+            protectedClaimTypes: claimTypes,
+            deterministicEvidenceHash: payloadHash,
+            parentReadinessHash: parent?.readinessHash ?? null,
+            payloadHash, checkedAt: new Date(),
           });
-          salesProtectedOutbound = { claims, claimTypes: answerTypes, readiness };
+          salesProtectedOutbound = { claims, claimTypes, readiness };
           commerceFactReplyPreserved = true;
           metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled ? messages : [];
         } else {
@@ -5456,10 +5501,7 @@ export class RealtimeRunner {
           dialogue: c3Dialogue,
           ...(customerInput === null ? {} : {
             customerVariant: customerInput.variant,
-            requestedObligations: customerInputObligations(customerInput).map(
-              ({ kind, capability, scope, productId }) =>
-                ({ kind, capability, scope, productId })
-            ),
+            requestedObligations: trackCRequestedObligationsForTurn(customerInput),
           }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===

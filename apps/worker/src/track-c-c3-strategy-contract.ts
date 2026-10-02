@@ -1,6 +1,7 @@
 import {
   assertTrackCRequestedObligationCoverage,
   assertTrackCRequestedPropertyCoverage,
+  trackCRequestedObligationMatchesEvidence,
 } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
@@ -60,7 +61,37 @@ export type TrackCProtectedProposition =
 export type TrackCRequestedObligation = Readonly<Pick<
   RealtimeCustomerObligationV1,
   "kind" | "capability" | "scope" | "productId"
->>;
+> & {
+  /** Code-enriched subject hints from the validated fact query. */
+  offerType?: string | null;
+  size?: string | null;
+  color?: string | null;
+  deliveryRegion?: string | null;
+}>;
+
+export type TrackCObligationResolution = Readonly<{
+  kind: "FACT_REQUEST";
+  capability: TrackCProtectedProposition;
+  scope: string | null;
+  productId: string | null;
+  offerType?: string | null;
+  size?: string | null;
+  color?: string | null;
+  deliveryRegion?: string | null;
+  status: "SUPPORTED" | "UNRESOLVED";
+  evidenceRefs: readonly string[];
+}>;
+
+export type TrackCTypedLimitation = Readonly<{
+  capability: TrackCProtectedProposition;
+  scope: string | null;
+  productId: string | null;
+  offerType?: string | null;
+  size?: string | null;
+  color?: string | null;
+  deliveryRegion?: string | null;
+  text: string;
+}>;
 
 /**
  * Mirrors the runtime `missingCheckout` field set. PAYMENT_METHOD was missing
@@ -166,7 +197,7 @@ export type TrackCStrategistDecision = Readonly<{
 
 /** Structured semantic instructions, never commercial evidence or action authority. */
 export type TrackCSemanticHandoff = Readonly<{
-  need: string;
+  need: string | null;
   known: string | null;
   answer: string | null;
   limit: string | null;
@@ -176,6 +207,8 @@ export type TrackCSemanticHandoff = Readonly<{
 export type TrackCResponderTask = Readonly<{
   semanticHandoff?: TrackCSemanticHandoff;
   requestedObligations?: readonly TrackCRequestedObligation[];
+  obligationResolutions?: readonly TrackCObligationResolution[];
+  typedLimitations?: readonly TrackCTypedLimitation[];
   answer:
     | Readonly<{
         kind: "ANSWER";
@@ -393,6 +426,95 @@ function selectedEvidence(
  * The model path opts in after normal decision/PII/authority validation. Fixed
  * code-owned tasks and historical direct compiler callers retain their API.
  */
+function obligationDescriptor(
+  obligation: TrackCRequestedObligation,
+): string {
+  return [
+    obligation.kind,
+    obligation.capability ?? "NONE",
+    obligation.scope ?? "ALL",
+    obligation.productId ?? "CURRENT",
+    obligation.offerType ?? "ANY_OFFER",
+    obligation.size ?? "ANY_SIZE",
+    obligation.color ?? "ANY_COLOR",
+    obligation.deliveryRegion ?? "ANY_REGION",
+  ].join(":");
+}
+
+function typedLimitationText(
+  obligation: TrackCObligationResolution,
+): string {
+  const product = obligation.productId === null ? "" : ` của mẫu ${obligation.productId}`;
+  const variant = [
+    obligation.color === null || obligation.color === undefined ? null : `màu ${obligation.color}`,
+    obligation.size === null || obligation.size === undefined ? null : `size ${obligation.size}`,
+  ].filter((value): value is string => value !== null).join(" ");
+  const subject = variant === "" ? product : ` ${variant}${product}`;
+  if (obligation.capability === "PRICE") {
+    return `Em chưa có thông tin xác nhận giá${subject}.`;
+  }
+  if (obligation.capability === "STOCK") {
+    return `Em chưa có thông tin xác nhận tồn kho${subject}.`;
+  }
+  if (obligation.capability === "ETA") {
+    return `Em chưa có thông tin xác nhận thời gian giao hàng${product}.`;
+  }
+  if (obligation.capability === "SIZE_FIT") {
+    return `Em chưa có thông tin xác nhận về độ phù hợp size${product}.`;
+  }
+  if (obligation.capability === "PRODUCT_ATTRIBUTES") {
+    const labels: Readonly<Record<string, string>> = {
+      MATERIALS: "chất liệu", COLORS: "màu sắc", STYLES: "kiểu dáng",
+      SILHOUETTE: "phom dáng", OCCASION: "dịp sử dụng",
+      WRINKLE_RESISTANCE: "khả năng chống nhăn", STRETCH: "độ co giãn",
+      OPACITY: "độ xuyên thấu", LINING: "lớp lót",
+      BREATHABILITY: "độ thoáng", CARE_INSTRUCTIONS: "hướng dẫn bảo quản",
+    };
+    return `Em chưa có thông tin xác nhận về ${labels[obligation.scope ?? ""] ?? "thuộc tính sản phẩm"}${product}.`;
+  }
+  if (obligation.capability === "OFFER_CONFIGURATION") {
+    const labels: Readonly<Record<string, string>> = {
+      FULL_SET: "nguyên set", TOP: "mua lẻ áo", BOTTOM: "mua lẻ quần/chân váy",
+      TWO_PIECE: "bộ 2 món", THREE_PIECE: "bộ 3 món",
+    };
+    return `Em chưa có thông tin xác nhận cho ${labels[obligation.scope ?? ""] ?? "cấu hình sản phẩm"}${product}.`;
+  }
+  return `Em chưa có thông tin xác nhận cho phần ${obligation.capability}${product}.`;
+}
+
+function typedSemanticHandoff(
+  decision: TrackCStrategistDecision,
+  requested: readonly TrackCRequestedObligation[],
+  resolutions: readonly TrackCObligationResolution[],
+): TrackCSemanticHandoff {
+  const supported = resolutions.filter(({ status }) => status === "SUPPORTED");
+  const unresolved = resolutions.filter(({ status }) => status === "UNRESOLVED");
+  const next = decision.continuation?.type === "ASK"
+    ? `ASK:${decision.continuation.input}`
+    : decision.canonicalAction !== "NONE"
+      ? `CANONICAL:${decision.canonicalAction}`
+      : null;
+  return Object.freeze({
+    need: requested.length === 0 ? null : requested.map(obligationDescriptor).join(","),
+    known: null,
+    answer: supported.length === 0 ? null :
+      supported.map((entry) => obligationDescriptor(entry)).join(","),
+    limit: unresolved.length === 0 ? null :
+      unresolved.map((entry) => obligationDescriptor(entry)).join(","),
+    next,
+  });
+}
+
+function semanticGoal(handoff: TrackCSemanticHandoff): string {
+  return [
+    `NEED: ${handoff.need ?? "NONE"}`,
+    "KNOWN: NONE",
+    `ANSWER: ${handoff.answer ?? "NONE"}`,
+    `LIMIT: ${handoff.limit ?? "NONE"}`,
+    `NEXT: ${handoff.next ?? "NONE"}`,
+  ].join("\n");
+}
+
 function structuredGoal(
   decision: TrackCStrategistDecision,
   requiresLimit: boolean,
@@ -410,14 +532,11 @@ function structuredGoal(
     return value === "NONE" ? null : value;
   });
   const [need, known, answer, limit, next] = parts;
-  const hasRequest = decision.continuation?.type === "ASK" ||
-    (decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION");
-  // These canonical tasks expose no open answer slot. Reject an incompatible
-  // plan instead of silently dropping its limit or opening checkout prose.
+  // Goal prose is planning metadata only. Canonical action/continuation fields
+  // own progression; do not make a second prose representation veto them.
   const closedAnswerSlot = decision.canonicalAction === "ASK_CHECKOUT_DETAILS" ||
     decision.canonicalAction === "HOLD_POSITION";
-  if (need == null || (next != null) !== hasRequest || (requiresLimit && limit == null) ||
-      (closedAnswerSlot && limit != null)) {
+  if ((requiresLimit && limit == null) || (closedAnswerSlot && limit != null)) {
     throw invalid();
   }
   return Object.freeze({ need, known: known ?? null, answer: answer ?? null,
@@ -482,6 +601,39 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   }
   const { realizable, unrealizable } =
     trackCPartitionEvidenceRealization(evidence);
+  const obligationResolutions: readonly TrackCObligationResolution[] =
+    Object.freeze((input.requestedObligations ?? []).flatMap((obligation) => {
+      if (obligation.kind !== "FACT_REQUEST" || obligation.capability === null) return [];
+      const refs = realizable.filter((entry) =>
+        trackCRequestedObligationMatchesEvidence(obligation, entry)
+      ).map(({ ref }) => ref);
+      return [Object.freeze({
+        kind: "FACT_REQUEST" as const,
+        capability: obligation.capability,
+        scope: obligation.scope,
+        productId: obligation.productId,
+        ...(obligation.offerType === undefined ? {} : { offerType: obligation.offerType }),
+        ...(obligation.size === undefined ? {} : { size: obligation.size }),
+        ...(obligation.color === undefined ? {} : { color: obligation.color }),
+        ...(obligation.deliveryRegion === undefined ? {} : { deliveryRegion: obligation.deliveryRegion }),
+        status: refs.length > 0 ? "SUPPORTED" as const : "UNRESOLVED" as const,
+        evidenceRefs: Object.freeze(refs),
+      })];
+    }));
+  const typedLimitations: readonly TrackCTypedLimitation[] = Object.freeze(
+    obligationResolutions.filter(({ status }) => status === "UNRESOLVED").map((entry) =>
+      Object.freeze({
+        capability: entry.capability,
+        scope: entry.scope,
+        productId: entry.productId,
+        ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+        ...(entry.size === undefined ? {} : { size: entry.size }),
+        ...(entry.color === undefined ? {} : { color: entry.color }),
+        ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
+        text: typedLimitationText(entry),
+      })
+    )
+  );
   // A capability counts as supported only when it can also be stated: holding
   // authority the reply cannot express does not answer the customer.
   const supportsProposition = decision.proposition !== "NONE" &&
@@ -495,23 +647,31 @@ export function compileTrackCStrategistDecision(input: Readonly<{
       decision.continuation?.type === "ASK" && decision.continuation.input === "SIZE") {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
   }
-  const semanticHandoff = input.requireStructuredGoal === true
-    ? structuredGoal(decision, unrealizable.length > 0 ||
-        (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
-          decision.continuation?.type === "KEEP_OPEN"))
-    : undefined;
-  const answer: TrackCResponderTask["answer"] = decision.replyAct === "ANSWER"
+  const semanticHandoff = input.requestedObligations !== undefined
+    ? typedSemanticHandoff(decision, input.requestedObligations, obligationResolutions)
+    : input.requireStructuredGoal === true
+      ? structuredGoal(decision, unrealizable.length > 0 ||
+          (decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" &&
+            decision.continuation?.type === "KEEP_OPEN"))
+      : undefined;
+  const compiledDecision = semanticHandoff !== undefined &&
+      input.requestedObligations !== undefined
+    ? Object.freeze({ ...decision, goal: semanticGoal(semanticHandoff) })
+    : decision;
+  const answer: TrackCResponderTask["answer"] = compiledDecision.replyAct === "ANSWER"
     ? Object.freeze({
-        kind: "ANSWER", evidenceStatus, goal: decision.goal,
-        proposition: decision.proposition,
+        kind: "ANSWER", evidenceStatus, goal: compiledDecision.goal,
+        proposition: compiledDecision.proposition,
       })
-    : Object.freeze({ kind: decision.replyAct, goal: decision.goal });
+    : Object.freeze({ kind: compiledDecision.replyAct, goal: compiledDecision.goal });
   const task: TrackCResponderTask = Object.freeze({
     ...(semanticHandoff === undefined ? {} : { semanticHandoff }),
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
         Object.freeze({ ...entry })
       )),
+      obligationResolutions,
+      typedLimitations,
     }),
     answer,
     evidence: realizable,
@@ -532,7 +692,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   assertTrackCRequestedPropertyCoverage(task);
   // Return the validated, PII-safe decision used to compile this exact task.
   // Consumers must not reuse the provider's raw planning text for reporting.
-  return Object.freeze({ decision, task });
+  return Object.freeze({ decision: compiledDecision, task });
 }
 
 export function compileTrackCFixedFirstContactTask(input: Readonly<{
