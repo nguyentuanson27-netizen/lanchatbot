@@ -215,6 +215,7 @@ export interface TrackCStrategyContractCaseInput {
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   /** Validated Producer delta for customer-reference wording only. */
   readonly customerVariant?: RealtimeCustomerInput["variant"];
+  readonly customerBuyingIntentEvidenceText?: string | null;
   /** Source-bound current-turn obligations; evidenceText is deliberately excluded. */
   readonly requestedObligations?: readonly TrackCRequestedObligation[];
   /**
@@ -247,6 +248,7 @@ export interface TrackCStrategyLiveInput {
   readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   /** Validated Producer delta for customer-reference wording only. */
   readonly customerVariant?: RealtimeCustomerInput["variant"];
+  readonly customerBuyingIntentEvidenceText?: string | null;
   /** Source-bound current-turn obligations; evidenceText is deliberately excluded. */
   readonly requestedObligations?: readonly TrackCRequestedObligation[];
   readonly transport: CandidateVertexTransport;
@@ -1004,10 +1006,15 @@ function compileResponderDraft(input: Readonly<{
   comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
   customerVariant?: RealtimeCustomerInput["variant"];
+  customerBuyingIntentEvidenceText?: string | null;
 }>): ContextV2CandidateOutputV2 {
   const { task } = input;
   const conversation = { task, dialogue: input.dialogue,
-    ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }) };
+    ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+    ...(input.customerBuyingIntentEvidenceText === undefined ? {} : {
+      customerBuyingIntentEvidenceText: input.customerBuyingIntentEvidenceText,
+    }),
+  };
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
   // A hard stop still needs an accepted acknowledgement. The model can choose
   // null when it sees no new question; use only a fact-free, effect-free reply.
@@ -1553,6 +1560,9 @@ async function runTrackCStrategyContractCore(
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
         ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+        ...(input.customerBuyingIntentEvidenceText === undefined ? {} : {
+          customerBuyingIntentEvidenceText: input.customerBuyingIntentEvidenceText,
+        }),
       });
       recoveryDiagnostic = failure.diagnostic;
     } catch {
@@ -1648,6 +1658,9 @@ export async function runTrackCStrategyLive(
     currentCart: input.currentCart,
     comparisonFacts: input.comparisonFacts ?? [],
     ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+    ...(input.customerBuyingIntentEvidenceText === undefined ? {} : {
+      customerBuyingIntentEvidenceText: input.customerBuyingIntentEvidenceText,
+    }),
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: input.requestedObligations,
     }),

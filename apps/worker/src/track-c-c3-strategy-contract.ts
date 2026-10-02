@@ -61,7 +61,9 @@ export type TrackCProtectedProposition =
 export type TrackCRequestedObligation = Readonly<Pick<
   RealtimeCustomerObligationV1,
   "kind" | "capability" | "scope" | "productId"
->>;
+> & {
+  variant?: Readonly<{ size?: string; color?: string }>;
+}>;
 
 export type TrackCObligationResolution = Readonly<{
   obligation: TrackCRequestedObligation;

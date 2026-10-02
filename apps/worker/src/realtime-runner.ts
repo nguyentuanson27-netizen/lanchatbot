@@ -5457,9 +5457,28 @@ export class RealtimeRunner {
           ...(customerInput === null ? {} : {
             customerVariant: customerInput.variant,
             requestedObligations: customerInputObligations(customerInput).map(
-              ({ kind, capability, scope, productId }) =>
-                ({ kind, capability, scope, productId })
+              ({ kind, capability, scope, productId }) => {
+                const factIntent = customerInput.factQuery.intent === "PRICE" ? "PRICE"
+                  : customerInput.factQuery.intent === "STOCK" ? "STOCK"
+                  : customerInput.factQuery.intent === "SIZE" ? "SIZE_FIT"
+                  : customerInput.factQuery.intent === "ETA" ? "ETA" : null;
+                const matchesLookup = kind === "FACT_REQUEST" && capability === factIntent;
+                return {
+                  kind, capability, scope, productId,
+                  ...(matchesLookup && (customerInput.factQuery.size !== null ||
+                      customerInput.factQuery.color !== null) ? {
+                    variant: {
+                      ...(customerInput.factQuery.size === null
+                        ? {} : { size: customerInput.factQuery.size }),
+                      ...(customerInput.factQuery.color === null
+                        ? {} : { color: customerInput.factQuery.color }),
+                    },
+                  } : {}),
+                };
+              }
             ),
+            customerBuyingIntentEvidenceText:
+              customerInput.salesSignals.buyingIntent.evidenceText,
           }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===

@@ -12,6 +12,8 @@ export type TrackCConversationGuardContext = Readonly<{
   task: TrackCResponderTask;
   dialogue: readonly ShadowContextMessage[];
   customerVariant?: RealtimeCustomerInput["variant"];
+  /** Exact source-bound Producer span for customer buying/offer context. */
+  customerBuyingIntentEvidenceText?: string | null;
 }>;
 
 type NonFactStatement = "CUSTOMER_PRICE_REFERENCE" | "CUSTOMER_SIZE_SELECTION" |
@@ -55,8 +57,10 @@ function classify(value: string, context: ContextV2,
   const latest = [...source.dialogue].reverse().find(({ direction, senderType, messageType }) =>
     direction === "INBOUND" && senderType === "CUSTOMER" && messageType === "TEXT")?.text ?? "";
   const amounts = amountTokens(value);
-  const known = source.task.semanticHandoff?.known ?? "";
-  if (amounts.length === 1 && amountTokens(latest).includes(amounts[0]!) && amountTokens(known).includes(amounts[0]!)) {
+  const customerBuyingContext = source.customerBuyingIntentEvidenceText ??
+    source.task.semanticHandoff?.known ?? "";
+  if (amounts.length === 1 && amountTokens(latest).includes(amounts[0]!) &&
+      amountTokens(customerBuyingContext).includes(amounts[0]!)) {
     // Substitute just the source-bound numeric token. The remaining entire
     // sentence must be a reference/refusal, never a shop price declaration.
     const shape = phrase.replace(/\d[\d.,]{0,14}\s*(?:k|nghin|trieu|vnd|dong|d|₫)(?![a-z0-9])/u, "AMOUNT");
@@ -141,6 +145,22 @@ export function trackCRequestedObligationMatchesEvidence(
     if (evidenceProductId === undefined ||
         evidenceProductId.normalize("NFC").toLocaleUpperCase("vi-VN") !==
         obligation.productId.normalize("NFC").toLocaleUpperCase("vi-VN")) {
+      return false;
+    }
+  }
+  if (obligation.variant?.size !== undefined) {
+    const size = evidence.subject?.variantLabel?.size;
+    if (size === undefined ||
+        size.normalize("NFC").toLocaleUpperCase("vi-VN") !==
+        obligation.variant.size.normalize("NFC").toLocaleUpperCase("vi-VN")) {
+      return false;
+    }
+  }
+  if (obligation.variant?.color !== undefined) {
+    const color = evidence.subject?.variantLabel?.color;
+    if (color === undefined ||
+        color.normalize("NFC").toLocaleUpperCase("vi-VN") !==
+        obligation.variant.color.normalize("NFC").toLocaleUpperCase("vi-VN")) {
       return false;
     }
   }
@@ -297,8 +317,14 @@ function typedObligationLabel(obligation: TrackCRequestedObligation): string {
     PRICE: "giá", STOCK: "tình trạng hàng", SIZE_FIT: "độ phù hợp size",
     ETA: "thời gian giao dự kiến",
   };
-  return obligation.capability === null ? "thông tin chị hỏi"
+  const base = obligation.capability === null ? "thông tin chị hỏi"
     : labels[obligation.capability] ?? "thông tin chị hỏi";
+  if (obligation.capability !== "STOCK" || obligation.variant === undefined) return base;
+  const qualifier = [
+    ...(obligation.variant.color === undefined ? [] : [`màu ${obligation.variant.color}`]),
+    ...(obligation.variant.size === undefined ? [] : [`size ${obligation.variant.size}`]),
+  ].join(" ");
+  return qualifier === "" ? base : `${base} ${qualifier}`;
 }
 
 export function trackCTypedLimitationTexts(task: TrackCResponderTask): readonly string[] {
