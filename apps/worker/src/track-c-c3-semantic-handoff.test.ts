@@ -55,6 +55,35 @@ describe("C3 structured goal semantic handoff", () => {
     } })).toThrow("TRACK_C_STRATEGIST_GOAL_INVALID");
   });
 
+  it("derives control metadata from the typed decision instead of making free-text NEXT authoritative", () => {
+    const ask = { ...input.decision,
+      continuation: { type: "ASK" as const, input: "LOCALITY" as const },
+      goal: goal.replace("NEXT: NONE", "NEXT: NONE"),
+    };
+    const result = compileTrackCStrategistDecision({ ...input, decision: ask });
+    expect(result.task.semanticHandoff?.next).toBe("ASK:LOCALITY");
+    expect(result.decision.goal).toContain("NEXT: ASK:LOCALITY");
+  });
+
+  it("allows acknowledgement and hard-stop tasks without an invented NEED sentence", () => {
+    const closed = {
+      ...input,
+      decision: {
+        ...input.decision,
+        replyAct: "ACKNOWLEDGE" as const,
+        proposition: "NONE" as const,
+        evidenceRefs: [],
+        continuation: null,
+        canonicalAction: "HOLD_POSITION" as const,
+        goal: ["NEED: NONE", "KNOWN: NONE", "ANSWER: NONE", "LIMIT: NONE", "NEXT: NONE"].join("\n"),
+      },
+      permittedCanonicalActions: ["HOLD_POSITION"] as const,
+    };
+    const result = compileTrackCStrategistDecision(closed);
+    expect(result.task.canonicalRequest?.type).toBe("HOLD_POSITION");
+    expect(result.task.semanticHandoff?.need).toBe("ACKNOWLEDGE:NONE");
+  });
+
   it("requires NEXT to agree with the single compiled request, not authorize it", () => {
     const nextGoal = goal.replace("NEXT: NONE", "NEXT: locality changes the available ETA lookup");
     const ask = { ...input.decision, continuation: { type: "ASK", input: "LOCALITY" }, goal: nextGoal };

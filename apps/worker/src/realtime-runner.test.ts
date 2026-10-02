@@ -4790,3 +4790,21 @@ describe("policy question versus after-sales routing", () => {
       .toBe(true);
   });
 });
+
+
+describe("protected outbound independence", () => {
+  it("does not roll back an independently ready commerce plan when only reply admission is blocked", () => {
+    const plan = { effectReadiness: [{ effect: "CART_OPEN", outcome: "READY" }] };
+    const result = enforceProtectedOutboundReadinessV1({
+      messages: [{ kind: "TEXT", text: "blocked factual reply" }],
+      claims: [{ type: "STOCK" }],
+      readiness: { outcome: "BLOCKED" as const, reasonCodes: ["CLAIM_MISSING"] },
+      salesCyclePlan: plan,
+      salesDesiredTag: null,
+      preserveIndependentlyReadyPlan: true,
+    });
+    expect(result.messages).toEqual([]);
+    expect(result.salesCyclePlan).toBe(plan);
+    expect(result.blockedReasonCodes).toEqual(["CLAIM_MISSING"]);
+  });
+});

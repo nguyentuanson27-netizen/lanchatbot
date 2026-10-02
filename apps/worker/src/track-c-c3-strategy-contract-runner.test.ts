@@ -669,8 +669,8 @@ describe("Track C C3 strategy-contract runner", () => {
       replyAct: "ANSWER", goal, proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
       continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
     };
-    const normalized = { ...decision, goal: redactAnalyticsMessage(goal).text };
-    expect(normalized.goal).not.toBe(goal);
+    const piiRedacted = redactAnalyticsMessage(goal).text;
+    expect(piiRedacted).not.toBe(goal);
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({ payload: payload(decision),
         providerModelVersion: "gemini-3.5-flash-lite" })
@@ -686,11 +686,17 @@ describe("Track C C3 strategy-contract runner", () => {
         occurredAt: "2026-09-10T01:59:00.000Z",
       }], transport: { send },
     });
-    expect(result.conversationPlan).toEqual(normalized);
-    expect(result.responderTask.answer).toEqual({ kind: "ANSWER",
-      evidenceStatus: "SUPPORTED", proposition: "PRICE", goal: normalized.goal });
+    expect(result.conversationPlan).toMatchObject({
+      replyAct: "ANSWER", proposition: "PRICE", evidenceRefs: ["CLAIM_001"],
+      continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+    });
+    expect(JSON.stringify(result.conversationPlan)).not.toMatch(/700000|849\.000|0901234567|lan@example\.com/u);
+    expect((result.conversationPlan as { goal: string }).goal).toContain("ANSWER: SUPPORTED:PRICE");
+    expect(result.responderTask.answer).toMatchObject({ kind: "ANSWER",
+      evidenceStatus: "SUPPORTED", proposition: "PRICE" });
+    expect(result.responderTask.answer.goal).toBe((result.conversationPlan as { goal: string }).goal);
     expect(result.identity.decisionHash).toBe(createHash("sha256")
-      .update(canonicalJsonV1(normalized)).digest("hex"));
+      .update(canonicalJsonV1(result.conversationPlan)).digest("hex"));
     const responderBody = JSON.parse(send.mock.calls[1]![0].body);
     const prompt = JSON.parse(responderBody.contents[0].parts[0].text);
     expect(prompt.responderTask.answer).not.toHaveProperty("goal");
@@ -703,7 +709,7 @@ describe("Track C C3 strategy-contract runner", () => {
     for (const internal of ["CLAIM_001", "contentHash", "provenance", "amountVnd"]) {
       expect(JSON.stringify(prompt.responderTask.evidence)).not.toContain(internal);
     }
-    for (const raw of ["700000", "0901234567", "lan@example.com"]) {
+    for (const raw of ["700000", "849.000", "0901234567", "lan@example.com"]) {
       expect(JSON.stringify(result)).not.toContain(raw);
       expect(send.mock.calls[1]![0].body).not.toContain(raw);
     }

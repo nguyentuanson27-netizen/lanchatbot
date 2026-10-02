@@ -132,14 +132,14 @@ describe("canonical buying and checkout journeys with real Producer validation",
     const text = `${purchase} Size S c\u00f2n kh\u00f4ng?`;
     const trace = await runtime.turn({ text, producer: { ...buy(purchase, "M"),
       factQuery: { intent: "STOCK", offerType: "SET", color: "be", size: "S", deliveryRegion: null },
-    } });
+    }, strategist: answerPlan("STOCK") });
     runtime.save("selection-m-stock-s");
     committedOnce(trace);
     expect(cartSizes(trace)).toEqual(["M", "M"]);
     expect(trace.reply).toContain("size S");
     expect(trace.reply).toContain("h\u1ebft h\u00e0ng");
     expect(trace.after.conversation.verifiedVariant?.selectedSizeCode).toBe("M");
-    expect(roles(trace)).toEqual(["PRODUCER"]);
+    expect(roles(trace)).toEqual(["PRODUCER", "STRATEGIST", "RESPONDER"]);
     expect(trace.after.commerce.stage).toBe("CART_OPEN");
   });
 
@@ -236,10 +236,17 @@ const wrinkleReply = "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn v\u
 const wrinkleText = "Gi\u00e1 bao nhi\u00eau v\u00e0 c\u00f3 ch\u1ed1ng nh\u0103n kh\u00f4ng?";
 const priceQuery = { intent: "PRICE" as const, offerType: "SET" as const, color: null, size: null, deliveryRegion: null };
 function wrinkleTurn(failure: "NONE" | "TRANSPORT" | "JSON" | "GUARD" = "NONE") {
-  return { text: wrinkleText, producer: inputDelta({ factQuery: priceQuery }),
+  return { text: wrinkleText, producer: inputDelta({ factQuery: priceQuery,
+    obligations: [
+      { kind: "FACT_REQUEST", capability: "PRICE", scope: null,
+        productId: null, evidenceText: "Gi\u00e1 bao nhi\u00eau" },
+      { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE",
+        productId: null, evidenceText: "c\u00f3 ch\u1ed1ng nh\u0103n kh\u00f4ng" },
+    ],
+  }),
     strategist: answerPlan("PRICE", "wrinkle resistance not verified", "price and wrinkle resistance"),
     responder: { answerText: failure === "GUARD" ? "Em ch\u01b0a c\u00f3 th\u00f4ng tin v\u1ec1 \u0111\u1ed9 m\u1ecbn."
-      : "Em ch\u01b0a c\u00f3 th\u00f4ng tin x\u00e1c nh\u1eadn v\u1ec1 kh\u1ea3 n\u0103ng ch\u1ed1ng nh\u0103n.", factualTexts: [], progressionText: null },
+      : null, factualTexts: [], progressionText: null },
     ...(failure === "TRANSPORT" || failure === "JSON" ? { responderFailure: failure } : {}),
     attemptCount: 5,
   };
@@ -259,7 +266,8 @@ describe("evidence and bounded recovery journeys", () => {
     expect(trace.after.conversation.conversationOwner).toBe("BOT");
     expect(roles(trace)).toEqual(["PRODUCER", "STRATEGIST", "RESPONDER"]);
     expect(trace.committed[0]?.receipt.handoffEventCreated).toBe(false);
-    if (failure !== "NONE") expect(JSON.stringify(trace.planned[0]?.decisionEvents)).toContain("C3_SELECTED_FACTS_RECOVERY");
+    if (failure === "NONE") expect(JSON.stringify(trace.planned[0]?.decisionEvents)).not.toContain("C3_SELECTED_FACTS_RECOVERY");
+    else expect(JSON.stringify(trace.planned[0]?.decisionEvents)).toContain("C3_SELECTED_FACTS_RECOVERY");
     expect(trace.inboxEvents).not.toContainEqual(expect.objectContaining({ kind: "FAILED_PERMANENT" }));
     expect(trace.historyAfter.filter(({ direction }) => direction === "OUTBOUND").at(-1)?.text).toBe(wrinkleReply);
   });
@@ -299,6 +307,7 @@ describe("evidence and bounded recovery journeys", () => {
     expect(runtime.search.searchAlternatives).toHaveBeenLastCalledWith(expect.stringContaining("650000"), ["SV9031", "CB182"]);
     expect(trace.after.conversation.sessionDecisionContext).toMatchObject({ budgetVnd: 650_000, rejectedProductIds: ["SV9031", "CB182"] });
     expect(trace.after.conversation.currentProductId).toBe("SD12");
+    expect(trace.reply).toContain("SD12");
     expect(trace.reply).toContain("599.000");
     expect(trace.reply).not.toMatch(/799\.000|699\.000/);
     expect(trace.after.commerce.cart).toBeNull();
