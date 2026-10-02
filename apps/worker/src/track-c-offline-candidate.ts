@@ -12,6 +12,7 @@ import {
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
 } from "./context-v2-candidate.js";
+import { resolveTrackCC3SystemInstruction } from "./track-c-c3-prompts.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 
 function validEvaluationTime(value: Date): boolean {
@@ -40,14 +41,11 @@ function productEvidenceTimeInvalid(
       (!Number.isFinite(expiresAtMs) || expiresAtMs <= evaluationAtMs));
 }
 
-/**
- * Shared Track C offline-candidate dialogue bound: 1..15 messages for every
- * caller, not only the journey adapter. 15 is the accumulated dialogue of the
- * longest supported authored journey - 8 customer turns plus the 7 candidate
- * replies between them - so a bounded multi-turn journey never needs a
- * per-caller exception. Anything longer is rejected.
+/** Existing runtime history (30) + current inbound (1) + customer context (1).
+ * Authored offline journeys remain unchanged; every caller keeps the same
+ * finite boundary and PII validation. No second truncation loses open questions.
  */
-const MAX_FROZEN_DIALOGUE_MESSAGES = 15;
+const MAX_FROZEN_DIALOGUE_MESSAGES = 32;
 
 function frozenEvaluationContext(
   value: readonly ShadowContextMessage[],
@@ -210,6 +208,7 @@ export function buildTrackCSharedCandidateRequest(input: Readonly<{
   if (!input.systemInstruction.trim()) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_SYSTEM_INSTRUCTION_INVALID");
   }
+  const systemInstruction = resolveTrackCC3SystemInstruction(input.systemInstruction);
   const request = buildCandidateRequest({
     modelResource: input.modelResource,
     context: input.context,
@@ -242,7 +241,7 @@ export function buildTrackCSharedCandidateRequest(input: Readonly<{
   });
   const candidateBody = JSON.stringify({
     ...body,
-    systemInstruction: { parts: [{ text: input.systemInstruction }] },
+    systemInstruction: { parts: [{ text: systemInstruction }] },
     contents: [{
       ...body.contents[0],
       parts: [{

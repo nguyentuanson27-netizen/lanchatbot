@@ -1,3 +1,4 @@
+import type { RealtimeCustomerInput } from "./realtime-customer-input.js";
 import { createHash } from "node:crypto";
 import {
   buildProtectedCartPolicyClaimsV1,
@@ -109,6 +110,7 @@ export interface RealtimeSalesCycleInput {
   readonly color: string | null;
   readonly canonicalBuyingIntent: CanonicalBuyingIntentV1;
   readonly salesSignals?: AgentSalesSignalsV1 | null;
+  readonly customerInput?: RealtimeCustomerInput | null;
   /**
    * Guarded post-generation proposal. COMMERCE may use this for conversational
    * negotiation semantics and wording; it never carries a monetary request.
@@ -557,6 +559,26 @@ function recipientSourceAmbiguous(text: string): boolean {
   return /\b(?:vi du|so cu|dia chi cu|dung dung|khong dung|khong phai|so cua ban|so cua nguoi khac|dia chi cua ban|dia chi cua nguoi khac)\b/u.test(folded);
 }
 
+function customerInputCheckoutDetails(text: string, input: RealtimeCustomerInput): CheckoutDetails {
+  const extracted = input.salesSignals.checkoutExtraction;
+  const fieldValue = (kind: "FULL_NAME" | "PHONE" | "ADDRESS", field: typeof extracted.fullName) => {
+    // Role is interpreted once by the producer. Code still checks exact value,
+    // source and format, without reviving the unlabelled recipient parser.
+    if (!field.value || !field.evidenceText || !exactEvidence(text, field.evidenceText) ||
+        !field.evidenceText.normalize("NFC").includes(field.value.normalize("NFC"))) return undefined;
+    if (kind === "FULL_NAME" && ["ten", "ho ten", "so dien thoai", "sdt", "dia chi", "nguoi nhan"]
+      .includes(foldVietnameseForRecall(field.value).trim())) return undefined;
+    return modelCheckoutValue(text, { ...field, evidenceText: field.value }, kind);
+  };
+  const fullName = fieldValue("FULL_NAME", extracted.fullName);
+  const phone = fieldValue("PHONE", extracted.phone);
+  const address = fieldValue("ADDRESS", extracted.address);
+  const payment = extracted.paymentMethod;
+  const paymentMethod = payment.confidence >= 0.9 && exactEvidence(text, payment.evidenceText) ? payment.value : null;
+  return { ...(fullName ? { fullName } : {}), ...(phone ? { phone } : {}),
+    ...(address ? { address } : {}), ...(paymentMethod ? { paymentMethod } : {}) };
+}
+
 function checkoutDetails(
   text: string,
   salesSignals: AgentSalesSignalsV1 | null | undefined,
@@ -681,6 +703,15 @@ function cartSummary(cart: CartV1): string {
   ].join("\n");
 }
 
+/** Only the exact missing inputs; no cart prices or completed-effect wording. */
+export function realtimeCheckoutInformationRequest(
+  state: SalesCycleRuntimeState,
+  resolution: RuntimePolicyResolution | null,
+): string | null {
+  const missing = missingCheckout(state);
+  return missing.length === 0 ? null : clarificationMessage(missing, 1, paymentPolicy(resolution) !== null);
+}
+
 function checkoutTemplate(
   cart: CartV1,
   draft: SalesCycleRuntimeState["checkoutDraft"] = null,
@@ -766,7 +797,7 @@ function paymentPolicy(
 }
 
 async function currentSelections(
-  input: RealtimeSalesCycleInput,
+  input: Pick<RealtimeSalesCycleInput, "facts" | "shopAlias" | "now">,
   cart: CartV1,
   address: string,
   checkedAt: Date = input.now,
@@ -807,6 +838,41 @@ function selectionsMatchCartLines(
       selected.lineTotalVnd === line.lineTotalVnd &&
       canonicalJson(selected.components) === canonicalJson(line.components);
   });
+}
+
+/** Refresh cart facts independently of this turn's dialogue/transition branch. */
+export async function readRealtimeCurrentCart(input: Pick<RealtimeSalesCycleInput,
+  "facts" | "shopAlias" | "now" | "pageId" | "conversationId" | "conversationRevision" | "stateRevision" | "state" | "canonicalBuyingIntent"
+>): Promise<DeterministicEffectReadinessV1 | null> {
+  const cart = input.state.cart;
+  if (!cart || Date.parse(cart.expiresAt) <= input.now.getTime()) return null;
+  const selections = await currentSelections(input, cart.value, input.state.checkoutDraft?.address ?? "");
+  const ready = selections.filter((selection): selection is ReadyCartSelection => selection.status === "READY");
+  if (!selectionsMatchCartLines(cart.value.lines, ready)) return null;
+  const claims = selectionProtectedClaims(ready);
+  const checked = evaluateDeterministicEffectReadinessV1({
+    effect: "CART_READY", pageId: input.pageId, conversationId: input.conversationId,
+    sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+    conversationRevision: input.conversationRevision, salesCycleRevision: input.stateRevision,
+    productIds: cart.value.lines.map((line) => line.parentProductId),
+    cartId: cart.value.cartId, cartVersion: cart.value.revision,
+    cartStateHash: createHash("sha256").update(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart.value)), "utf8").digest("hex"),
+    cartLines: cart.value.lines, orderPreviewId: null, orderPreviewHash: null,
+    buyingIntent: null, claims, checkedAt: input.now,
+  });
+  return checked.outcome === "READY" ? checked : null;
+}
+
+function selectionProtectedClaims(selections: readonly ReadyCartSelection[]) {
+  return buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
+    productId: selection.line.parentProductId, variantId: selection.line.offerId,
+    priceVnd: selection.line.posUnitPriceVnd!, priceVersion: selection.versions.price,
+    inventoryVersion: selection.versions.inventory, etaVersion: selection.versions.eta,
+    eta: selection.eta, etaExpiresAt: selection.etaExpiresAt,
+    sourceAuthority: selection.sourceAuthority, stockStatus: selection.stockStatus,
+    stockAvailableQuantity: selection.stockAvailableQuantity,
+    observedAt: selection.sourceObservedAt, expiresAt: selection.sourceExpiresAt,
+  })));
 }
 
 function fact(
@@ -1120,21 +1186,7 @@ export async function evaluateRealtimeSalesCycle(
     payloadHash: string | null = null,
     mutationQuantity: number | null = null,
   ): DeterministicEffectReadinessV1 => {
-    const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
-      productId: selection.line.parentProductId,
-      variantId: selection.line.offerId,
-      priceVnd: selection.line.posUnitPriceVnd!,
-      priceVersion: selection.versions.price,
-      inventoryVersion: selection.versions.inventory,
-      etaVersion: selection.versions.eta,
-      eta: selection.eta,
-      etaExpiresAt: selection.etaExpiresAt,
-      sourceAuthority: selection.sourceAuthority,
-      stockStatus: selection.stockStatus,
-      stockAvailableQuantity: selection.stockAvailableQuantity,
-      observedAt: selection.sourceObservedAt,
-      expiresAt: selection.sourceExpiresAt,
-    })));
+    const claims = selectionProtectedClaims(selections);
     effectClaimSets.set(effect, claims);
     return evaluateDeterministicEffectReadinessV1({
       effect,
@@ -1516,7 +1568,7 @@ export async function evaluateRealtimeSalesCycle(
   const v2Action = v2Classification
     ? confirmationClarificationAction(v2Classification, state.stage)
     : null;
-  const confirmationDecision: ConfirmationDecision = v2Classification && (
+  const proposedConfirmationDecision: ConfirmationDecision = v2Classification && (
     behaviorMode === "V2_ACTIVE" || behaviorMode === "CLARIFY_ONLY"
   )
     ? {
@@ -1526,6 +1578,17 @@ export async function evaluateRealtimeSalesCycle(
         reasonCode: v2Classification.reasonCode,
       }
     : legacyConfirmationDecision;
+  // The typed lane owns the latest message's meaning. A legacy positive match
+  // must not overrule UNCLEAR/REJECT (for example an acknowledgement of size).
+  // A typed positive still needs the existing deterministic authority below.
+  const typedConfirmation = input.customerInput?.salesSignals.purchaseConfirmation;
+  const confirmationDecision: ConfirmationDecision = input.customerInput &&
+      proposedConfirmationDecision.decision === "CONFIRM" &&
+      (!typedConfirmation || typedConfirmation.decision !== "CONFIRM" ||
+        typedConfirmation.confidence < 0.85 || !exactEvidence(input.text, typedConfirmation.evidenceText))
+    ? { decision: "UNCLEAR", attempted: true, source: "MODEL_STRUCTURED_OUTPUT",
+        reasonCode: "CUSTOMER_INPUT_NOT_PURCHASE_CONFIRMATION" }
+    : proposedConfirmationDecision;
   const behaviorTelemetry = {
     confirmationBehaviorMode: behaviorMode,
     confirmationModeSource: behaviorModeResolution.source,
@@ -1786,17 +1849,17 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (state.cart && (state.stage === "CART_OPEN" || state.stage === "ORDER_PREVIEW")) {
-    if (isVariantEditRequest(input.text)) {
+    if (input.customerInput ? input.customerInput.variant.operation === "CHANGE" : isVariantEditRequest(input.text)) {
       const cart = state.cart.value;
-      const colorEdit = /\b(?:doi|sua|thay)\s+(?:sang\s+)?mau\b/u
-        .test(foldVietnameseForRecall(input.text));
-      const size = explicitSize(input.text);
-      const namesExactProduct = input.productId !== null &&
+      const colorEdit = input.customerInput ? input.customerInput.variant.color !== null
+        : /\b(?:doi|sua|thay)\s+(?:sang\s+)?mau\b/u.test(foldVietnameseForRecall(input.text));
+      const size = input.customerInput ? input.customerInput.variant.size : explicitSize(input.text);
+      const namesExactProduct = input.customerInput ? input.customerInput.variant.productId !== null : input.productId !== null &&
         input.text.toLocaleUpperCase("vi").includes(input.productId.toLocaleUpperCase("vi"));
       const targets = cart.lines.filter(({ parentProductId }) =>
         (cart.lines.length === 1 &&
-          (!namesExactProduct || parentProductId === input.productId)) ||
-          (namesExactProduct && parentProductId === input.productId)
+          (!namesExactProduct || parentProductId === (input.customerInput?.variant.productId ?? input.productId))) ||
+          (namesExactProduct && parentProductId === (input.customerInput?.variant.productId ?? input.productId))
       );
       if ((!colorEdit && size === null) || targets.length !== 1) {
         return {
@@ -1834,6 +1897,7 @@ export async function evaluateRealtimeSalesCycle(
           : options.availableColors;
         const folded = foldVietnameseForRecall(input.text);
         const matches = availableColors.filter((color) => {
+          if (input.customerInput) return foldVietnameseForRecall(color) === foldVietnameseForRecall(input.customerInput.variant.color ?? "");
           const token = foldVietnameseForRecall(color).replace(/[^a-z0-9]+/gu, " ").trim();
           return token !== "" && new RegExp(`\\bmau\\s+${token.replace(/\s+/gu, "\\s+")}\\b`, "u")
             .test(folded);
@@ -1871,8 +1935,15 @@ export async function evaluateRealtimeSalesCycle(
         selected.line.offerId !== current.offerId ||
         selected.line.lineId !== current.lineId ||
         selected.line.quantity !== current.quantity ||
-        !selected.line.components.every((component) =>
-          (colorEdit ? component.color === requestedColor : component.size === size))) {
+        selected.line.components.length !== current.components.length ||
+        !current.components.every((before) => {
+          const after = selected.line.components.filter((component) =>
+            component.componentProductId === before.componentProductId &&
+            component.componentRole === before.componentRole);
+          return after.length === 1 && after[0]!.quantity === before.quantity &&
+            after[0]!.size === (size ?? before.size) &&
+            after[0]!.color === (colorEdit ? requestedColor : before.color);
+        })) {
         return failedOutput("CART_VARIANT_SCOPE_MISMATCH");
       }
       const otherSelections = await currentSelections(input, state.cart.value,
@@ -2050,7 +2121,9 @@ export async function evaluateRealtimeSalesCycle(
         : { ...reply, wordingAuthority: "MODEL" };
     }
 
-    const details = checkoutDetails(input.text, input.salesSignals);
+    const details = input.customerInput
+      ? customerInputCheckoutDetails(input.text, input.customerInput)
+      : checkoutDetails(input.text, input.salesSignals);
     const capturedAnyDetails = Object.keys(details).length > 0;
     const previewRequested = state.stage === "CART_OPEN" &&
       missingCheckout(state).length === 0 &&
@@ -2318,7 +2391,7 @@ export async function evaluateRealtimeSalesCycle(
         shopAlias: input.shopAlias,
         productId: input.productId,
         offerType: input.offerType,
-        size: explicitSize(input.text) ?? input.size,
+        size: input.customerInput ? input.customerInput.variant.size ?? input.size : explicitSize(input.text) ?? input.size,
         color: input.color,
         quantity: requestedQuantity(input.canonicalBuyingIntent),
         lineId: deterministicUuid(`${state.cart.value.cartId}:${input.productId}:${input.eventKey}`),
@@ -2409,7 +2482,7 @@ export async function evaluateRealtimeSalesCycle(
       shopAlias: input.shopAlias,
       productId: input.productId,
       offerType: input.offerType,
-      size: explicitSize(input.text) ?? input.size,
+      size: input.customerInput ? input.customerInput.variant.size ?? input.size : explicitSize(input.text) ?? input.size,
       color: input.color,
       quantity: requestedQuantity(input.canonicalBuyingIntent),
       lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
@@ -2521,20 +2594,8 @@ export async function evaluateRealtimeSalesCycle(
   ) {
     apply({ kind: "FACTS_PRESENTED", commandId: commandId("facts") });
   }
-  let cartReadback: DeterministicEffectReadinessV1 | null = null;
-  if (input.c3CartReadback && state.cart !== null) {
-    const selections = await currentSelections(
-      input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
-    );
-    const ready = selections.filter(
-      (selection): selection is ReadyCartSelection => selection.status === "READY",
-    );
-    if (ready.length === state.cart.value.lines.length &&
-        selectionsMatchCartLines(state.cart.value.lines, ready)) {
-      const checked = freshReadiness("CART_READY", ready, state.cart.value);
-      if (checked.outcome === "READY") cartReadback = checked;
-    }
-  }
+  const cartReadback = input.c3CartReadback
+    ? await readRealtimeCurrentCart({ ...input, state, now: effectNow() }) : null;
   return {
     handled: false,
     messages: [],

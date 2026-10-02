@@ -157,6 +157,21 @@ describe("Track B B2.3a protected-claim boundary", () => {
     });
   });
 
+  it.each([null, "SKU-1-M-BLACK"])("uses a code-owned type-specific scope instead of promoting parent facts: %s", (variantId) => {
+    const result = authorizeRealtimeProtectedClaimProposal({
+      declaredClaimIds: [PRICE_ID], observedClaimTypes: ["PRICE"],
+      availableClaims: [productClaim("PRICE", { scope: { kind: "PRODUCT", productId: "SKU-1", variantId } })],
+      expectedProductIds: ["SKU-1"],
+      expectedProductScopes: [
+        { productId: "SKU-1", variantId: "SKU-1-M-BLACK" },
+        { productId: "SKU-1", variantId: null, claimType: "PRICE" },
+      ], now: NOW,
+    });
+    expect(result.outcome).toBe(variantId === null ? "AUTHORIZED" : "BLOCKED");
+    if (variantId === null) expect(result.claims[0]?.authorization).toBe("NONE");
+    else expect(result.reasonCodes).toEqual([`PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH:${PRICE_ID}`]);
+  });
+
   it("rejects the whole proposal rather than partially authorizing mixed evidence", () => {
     const result = authorizeRealtimeProtectedClaimProposal({
       declaredClaimIds: [PRICE_ID, STOCK_ID],

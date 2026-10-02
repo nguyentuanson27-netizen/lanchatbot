@@ -94,7 +94,13 @@ function strategistPayload(prompt: ReturnType<typeof promptOf>) {
   const canonicalAction = prompt.constraints?.permittedCanonicalActions[0] ?? "NONE";
   return modelPayload({
     replyAct: "ACKNOWLEDGE",
-    goal: "Resolve the current customer decision.",
+    goal: [
+      "NEED: Resolve the current customer decision.",
+      "KNOWN: NONE",
+      "ANSWER: NONE",
+      "LIMIT: NONE",
+      (canonicalAction === "NONE" || canonicalAction === "HOLD_POSITION" ? "NEXT: NONE" : "NEXT: missing input enables the assigned canonical decision"),
+    ].join("\n"),
     proposition: "NONE",
     evidenceRefs: [],
     continuation: canonicalAction === "NONE" ? { type: "KEEP_OPEN" } : null,

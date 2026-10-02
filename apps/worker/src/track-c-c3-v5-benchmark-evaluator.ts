@@ -246,8 +246,12 @@ export async function evaluateTrackCV5BenchmarkCase(
         conversationPlan,
       ))
     : null;
-  const responder = await responderPromise;
-  const strategist = strategistPromise === null ? undefined : await strategistPromise;
+  // Attach rejection handlers to both calls immediately. Awaiting Responder
+  // first left a faster Strategist failure unhandled and terminated the run.
+  const [responder, strategist] = await Promise.all([
+    responderPromise,
+    strategistPromise ?? Promise.resolve(undefined),
+  ]);
   const score = scoreTrackCV5BenchmarkCase({
     rubric: input.rubric,
     lane: input.candidate.executionLane,

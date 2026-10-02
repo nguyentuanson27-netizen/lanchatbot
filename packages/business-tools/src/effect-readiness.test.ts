@@ -518,3 +518,18 @@ describe("deterministic effect readiness", () => {
     expect(result.reasonCodes).toEqual(expect.arrayContaining(["CART_REQUIRED", "ORDER_PREVIEW_REQUIRED"]));
   });
 });
+
+
+describe("source-bound customer input readiness", () => {
+  it("admits interpreted input only with exact cart scope and fresh POS facts", () => {
+    const bound = CanonicalBuyingIntentV1Schema.parse({ ...intent,
+      contributors: ["MODEL_STRUCTURED_OUTPUT", "SOURCE_BOUND_CUSTOMER_INPUT"] });
+    expect(evaluateDeterministicEffectReadinessV1({ ...base, buyingIntent: bound }).outcome).toBe("READY");
+    expect(evaluateDeterministicEffectReadinessV1({ ...base, buyingIntent: bound, claims: [] }).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({ ...base, buyingIntent: { ...bound, productId: "other" } }).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({ ...base, buyingIntent: { ...bound, quantity: 2 } }).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({ ...base, buyingIntent: { ...bound, requestedAction: "SET_QUANTITY" } }).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({ ...base, buyingIntent: bound,
+      checkedAt: new Date("2026-08-13T04:00:00.000Z") }).outcome).toBe("BLOCKED");
+  });
+});

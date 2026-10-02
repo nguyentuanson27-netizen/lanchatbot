@@ -112,6 +112,20 @@ export class ProductSearchService {
     return this.decideSemantic(candidates, this.thresholds.textMinScore);
   }
 
+  /** Suggestions are a bounded shortlist, not a claim that one ambiguous item was identified. */
+  public async searchAlternatives(query: string, excludedProductIds: readonly string[] = []): Promise<readonly StableProductDocument[]> {
+    const excluded = new Set(excludedProductIds.slice(-9).map(normalizeProductCode));
+    const limit = this.thresholds.maxCandidates + excluded.size;
+    const candidates = validateAndSortCandidates(await this.port.searchStableText(query, limit), limit);
+    const seen = new Set(excluded);
+    return candidates.filter(({ document, score }) => {
+      const id = normalizeProductCode(document.productId);
+      if (score < this.thresholds.textMinScore || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    }).slice(0, this.thresholds.maxCandidates).map(({ document }) => document);
+  }
+
   public async searchImage(imageUrl: string): Promise<ProductSearchResult> {
     // An image has no reliable exact/alias code; only the stable image-vector index is queried.
     new URL(imageUrl);
