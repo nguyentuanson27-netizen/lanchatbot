@@ -54,6 +54,8 @@ describe("obligation-aware runtime recovery", () => {
     }), strategist: (input) => ({ ...answerPlan("STOCK", "lookup failed")(input), evidenceRefs: [] }),
       responderFailure: "TRANSPORT" });
     expect(trace.reply).not.toContain("0901234567");
+    expect(JSON.stringify(trace.roleCalls.filter(({ role }) => role !== "PRODUCER"))).not.toContain("0901234567");
+    expect(JSON.stringify(trace.planned[0]?.decisionEvents)).not.toContain("0901234567");
     expect(trace.after.commerce).toEqual(trace.before.commerce);
   });
   it.each(["ERROR", "STALE"] as const)("retains fresh price and names the %s stock sibling", async (status) => {

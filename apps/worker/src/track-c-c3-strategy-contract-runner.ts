@@ -555,8 +555,8 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           scope: entry.scope,
           productId: entry.productId,
           ...(entry.variantId === undefined ? {} : { variantId: entry.variantId }),
-          ...(entry.size === undefined ? {} : { size: entry.size }),
-          ...(entry.color === undefined ? {} : { color: entry.color }),
+          ...(entry.size === undefined ? {} : { size: text(entry.size, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
+          ...(entry.color === undefined ? {} : { color: text(entry.color, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
           ...(entry.lookupStatus === undefined ? {} : { lookupStatus: entry.lookupStatus }),
         })
       )),
