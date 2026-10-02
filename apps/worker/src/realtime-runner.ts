@@ -5327,8 +5327,9 @@ export class RealtimeRunner {
       salesReadinessAttempt = sales.readinessAttempt ?? null;
       salesCartReadback = sales.cartReadback ?? null;
       if (sales.handled) {
-        const checkoutRequest = sales.plan?.state.cart && sales.plan.state.preview === null
-          ? realtimeCheckoutInformationRequest(sales.plan.state, policyResolution) : null;
+        const checkoutState = sales.plan?.state ?? salesCycleRecord.state;
+        const checkoutRequest = checkoutState.cart && checkoutState.preview === null
+          ? realtimeCheckoutInformationRequest(checkoutState, policyResolution) : null;
         const answerTypes = [...new Set([
           ...protectedClaimValidation.claimTypes, ...deterministicProtectedClaimTypes,
         ])];
