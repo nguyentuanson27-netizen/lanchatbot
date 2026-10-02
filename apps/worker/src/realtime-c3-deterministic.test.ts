@@ -501,3 +501,65 @@ describe("adversarial freshness, isolation and atomicity controls", () => {
     expect(roles(later)).toEqual([]);
   });
 });
+
+
+describe("independent commerce and response obligations", () => {
+  it("commits selected M when the independent S stock lookup fails", async () => {
+    const runtime = deterministicRuntime();
+    await quote(runtime);
+    runtime.failures.add("CB182:STOCK");
+    const purchase = "Chị lấy một bộ size M màu be.";
+    const trace = await runtime.turn({ text: `${purchase} Size S còn không?`, producer: { ...buy(purchase, "M"),
+      factQuery: { intent: "STOCK", offerType: "SET", color: "be", size: "S", deliveryRegion: null },
+      obligations: [{ kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "CB182", evidenceText: "Size S còn không?" }],
+    } });
+    runtime.save("b-failed-s");
+    expect(trace.after.commerce.stage).toBe("CART_OPEN");
+    expect(cartSizes(trace)).toEqual(["M", "M"]);
+    expect(trace.reply).toContain("size S");
+    expect(trace.reply).toContain("chưa");
+    expect(trace.reply).not.toContain("hết hàng");
+    committedOnce(trace);
+  });
+
+  it("answers verified price when the independent cart selection lacks authority", async () => {
+    const runtime = deterministicRuntime();
+    await quote(runtime);
+    vi.mocked(runtime.facts.resolveCartSelection!).mockResolvedValue({ status: "NOT_FOUND", reasonCode: "CATALOG_SNAPSHOT_NOT_FOUND", availableSizes: [], availableColors: [] });
+    const purchase = "Chị lấy một bộ size M màu be.";
+    const trace = await runtime.turn({ text: `${purchase} Giá bao nhiêu?`, producer: { ...buy(purchase, "M"), factQuery: priceQuery } });
+    expect(trace.after.commerce.cart).toBeNull();
+    expect(trace.reply).toContain("799.000");
+    expect(trace.after.conversation.conversationOwner).toBe("BOT");
+    committedOnce(trace);
+  });
+
+  it("keeps an unsupported attribute alongside an authorized purchase", async () => {
+    const runtime = deterministicRuntime();
+    await quote(runtime);
+    const purchase = "Chị lấy một bộ size M màu be.";
+    const question = "Có chống nhăn không?";
+    const trace = await runtime.turn({ text: `${purchase} ${question}`, producer: { ...buy(purchase, "M"), obligations: [
+      { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE", productId: "CB182", evidenceText: question },
+    ] } });
+    expect(cartSizes(trace)).toEqual(["M", "M"]);
+    expect(trace.reply).toContain("chống nhăn");
+    expect(trace.reply).toContain("chưa");
+    committedOnce(trace);
+  });
+});
+
+
+it("continues checkout details while answering an independent stock question", async () => {
+  const runtime = deterministicRuntime();
+  await quote(runtime);
+  await openCart(runtime);
+  const trace = await runtime.turn({ text: "Size S còn không?", producer: inputDelta({
+    factQuery: { intent: "STOCK", offerType: "SET", color: "be", size: "S", deliveryRegion: null },
+  }) });
+  expect(cartSizes(trace)).toEqual(["M", "M"]);
+  expect(trace.reply).toContain("size S");
+  expect(trace.reply).toContain("hết hàng");
+  expect(trace.reply).toContain("thông tin");
+  committedOnce(trace);
+});

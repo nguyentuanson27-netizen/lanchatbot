@@ -4790,3 +4790,15 @@ describe("policy question versus after-sales routing", () => {
       .toBe(true);
   });
 });
+
+
+describe("commerce readiness is independent of answer readiness", () => {
+  it("preserves an already authorized commerce plan when only the answer is blocked", () => {
+    const salesCyclePlan = { state: { cart: { cartId: "cart-current" } } };
+    const result = enforceProtectedOutboundReadinessV1({ messages: ["unsafe answer"], claims: [],
+      readiness: { outcome: "BLOCKED", reasonCodes: ["CLAIM_STALE"] }, salesCyclePlan, salesDesiredTag: null,
+      commerceReadiness: [{ outcome: "READY", reasonCodes: [] }] });
+    expect(result.messages).toEqual([]);
+    expect(result.salesCyclePlan).toBe(salesCyclePlan);
+  });
+});

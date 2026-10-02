@@ -115,6 +115,7 @@ import type {
 import { redactAnalyticsMessage } from "@lana/database";
 import type { InboundEnvelopeV1 } from "@lana/meta-webhook";
 import type { PancakeHandoffAdapter } from "@lana/pancake-handoff";
+import { trackCObligationTopic } from "./track-c-c3-obligation-resolution.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { VerifiedVariantResult } from "./realtime-sales-catalog.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
@@ -1052,6 +1053,7 @@ export function enforceProtectedOutboundReadinessV1<
   readonly readiness: TReadiness | null;
   readonly salesCyclePlan: TSalesCyclePlan | null;
   readonly salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
+  readonly commerceReadiness?: readonly TReadiness[];
 }): {
   readonly messages: readonly TMessage[];
   readonly claims: readonly TClaim[];
@@ -1072,7 +1074,10 @@ export function enforceProtectedOutboundReadinessV1<
     // Preserve the denial as telemetry evidence. It is never attached to a
     // Meta plan because only READY readiness can cross that boundary.
     readiness: input.readiness,
-    salesCyclePlan: null,
+    // Reuse the commerce lane's existing receipts; commit still validates their
+    // exact authority/binding. A denied answer cannot revoke an independent effect.
+    salesCyclePlan: input.commerceReadiness !== undefined && input.commerceReadiness.length > 0 &&
+      input.commerceReadiness.every(({ outcome }) => outcome === "READY") ? input.salesCyclePlan : null,
     salesDesiredTag: null,
     blockedReasonCodes: [...new Set(input.readiness.reasonCodes)],
   };
@@ -4473,7 +4478,14 @@ export class RealtimeRunner {
         businessFacts = facts;
         businessFactEnvelopes = facts === null ? [] : [facts];
         const explicitIntent = explicitCustomerBusinessIntent(message.text ?? "");
-        if (facts?.status === "STALE") {
+        const independentCommerceRequest = this.options.c3 !== null && customerInput !== null &&
+          canonicalDecisionEvidenceForTurn().buyingIntent.decision === "COMMITTED";
+        if (independentCommerceRequest && facts !== null && facts.status !== "OK") {
+          // Fact lookup owns the answer lane. Cart selection revalidates its
+          // own POS prerequisites below and cannot inherit this fact failure.
+          proposal = { ...proposal, action: "REPLY", reply: "Em chưa xác minh được thông tin chị hỏi.",
+            attachments: [], handoffReason: null };
+        } else if (facts?.status === "STALE") {
           proposal = staleFactsRequireHandoff(message.text ?? "", facts)
             ? {
                 ...proposal,
@@ -4910,7 +4922,8 @@ export class RealtimeRunner {
           candidate: AgentProposalV1,
         ) => bindRealtimeProtectedClaimProposal({
           requestedClaims: requestedProtectedClaimTypes(
-            candidate.businessFactQuery.intent,
+            independentCommerceRequest && facts?.status !== "OK"
+              ? "NONE" : candidate.businessFactQuery.intent,
           ).map((type) => ({
             type,
             ...(candidate.productId === null
@@ -5358,8 +5371,28 @@ export class RealtimeRunner {
             ? [...(policyReplyForTurn === null ? [] : [{ kind: "TEXT" as const, text: policyReplyForTurn }]),
                 ...sales.messages] : [];
         }
+        if (this.options.c3 !== null && customerInput !== null && !sales.transferToHuman) {
+          const pending = customerInputObligations(customerInput).filter(({ kind, capability }) =>
+            kind === "FACT_REQUEST" && (capability === "PRODUCT_ATTRIBUTES" || capability === "OFFER_CONFIGURATION" ||
+              (customerInput.factQuery.intent !== "NONE" && businessFacts?.status !== "OK")));
+          const limits = pending.map((entry) => {
+            const variant = entry.capability === "STOCK" && customerInput.factQuery.size !== null
+              ? ` của size ${customerInput.factQuery.size}` : "";
+            return { kind: "TEXT" as const, text: `Em chưa có thông tin xác nhận về ${trackCObligationTopic(entry)}${variant}.` };
+          });
+          if (limits.length > 0 && this.options.mode === "LIVE" && this.options.sendEnabled) {
+            metaMessages = [...limits, ...metaMessages];
+          }
+        }
       }
-      if (sales.transferToHuman) {
+      const independentSupportedAnswer = this.options.c3 !== null && customerInput?.factQuery.intent !== "NONE" &&
+        businessFacts?.status === "OK" && !sales.plan?.state.cart;
+      if (sales.transferToHuman && independentSupportedAnswer) {
+        // Failed commerce has no authority to suppress a supported fact.
+        salesHandled = false;
+        salesCyclePlan = null;
+        salesProtectedOutbound = null;
+      } else if (sales.transferToHuman) {
         salesDesiredTag = sales.desiredTag;
         salesHandoffReasonCode = sales.reasonCode;
         handoffGuardReasonCodes = sales.reasonCode ? [sales.reasonCode] : [];
@@ -5748,6 +5781,7 @@ export class RealtimeRunner {
       readiness: protectedOutboundReadiness,
       salesCyclePlan,
       salesDesiredTag,
+      commerceReadiness: salesCyclePlan?.effectReadiness ?? [],
     });
     metaMessages = [...protectedOutboundGate.messages];
     protectedOutboundClaims = [...protectedOutboundGate.claims];
