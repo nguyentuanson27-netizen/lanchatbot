@@ -507,6 +507,40 @@ describe("adversarial freshness, isolation and atomicity controls", () => {
 
 
 describe("independent commerce and response obligations", () => {
+  it("keeps a compound stock and price answer separate from the selected commerce variant", async () => {
+    const runtime = deterministicRuntime({ multiFact: true });
+    await quote(runtime);
+    const purchase = "Chị lấy một bộ size M màu be.";
+    const trace = await runtime.turn({ text: `${purchase} Size S còn không, giá bao nhiêu?`, producer: { ...buy(purchase, "M"),
+      factQuery: { intent: "STOCK", offerType: null, color: null, size: "S", deliveryRegion: null },
+      obligations: [
+        { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "CB182", evidenceText: "Size S còn không" },
+        { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "CB182", evidenceText: "giá bao nhiêu" },
+      ],
+    } });
+    expect(cartSizes(trace)).toEqual(["M", "M"]);
+    expect(trace.reply).toContain("size S");
+    expect(trace.reply).toContain("hết");
+    expect(trace.reply).toContain("799");
+    expect(trace.reply).toContain("nhận hàng");
+    expect(trace.lookups.filter(({ query }) => query.intent === "STOCK").every(({ query }) => query.size === "S")).toBe(true);
+    committedOnce(trace);
+  });
+  it.each([false, true])("keeps an unqualified stock question independent of cart selection with multi-fact %s", async (multiFact) => {
+    const runtime = deterministicRuntime({ multiFact });
+    await quote(runtime);
+    const purchase = "Chị lấy một bộ size M màu be.";
+    const trace = await runtime.turn({ text: `${purchase} Size S còn không?`, producer: { ...buy(purchase, "M"),
+      factQuery: { intent: "STOCK", offerType: null, color: null, size: "S", deliveryRegion: null },
+      obligations: [{ kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "CB182", evidenceText: "Size S còn không?" }],
+    } });
+    expect(trace.lookups.some(({ query }) => query.intent === "STOCK" && query.size === "S")).toBe(true);
+    expect(cartSizes(trace)).toEqual(["M", "M"]);
+    expect(trace.reply).toContain("size S");
+    expect(trace.reply).toContain("hết");
+    expect(trace.reply).toContain("nhận hàng");
+    committedOnce(trace);
+  });
   it("answers a supported attribute during purchase instead of declaring it unavailable", async () => {
     const runtime = deterministicRuntime();
     await quote(runtime);

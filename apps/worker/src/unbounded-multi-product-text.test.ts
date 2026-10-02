@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { BusinessFactEnvelopeV1Schema, type BusinessFactEnvelopeV1 } from "@lana/contracts";
+import { BusinessFactEnvelopeV1Schema, RealtimeCustomerInputSchema, type BusinessFactEnvelopeV1 } from "@lana/contracts";
+import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
 import type { StableProductDocument } from "@lana/business-tools";
 import {
   buildBusinessFactQueries,
@@ -37,6 +38,21 @@ const resolvedReferences = (count: number): readonly ResolvedProductReference[] 
   });
 
 describe("unbounded text product business-fact queries", () => {
+  it("keeps each typed fact subject's qualifier outside the buying selection", () => {
+    const input = RealtimeCustomerInputSchema.parse({ ...noCustomerSelection(),
+      factQuery: { intent: "STOCK", offerType: null, size: "S", color: null, deliveryRegion: null },
+      obligations: [
+        { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "SD001", evidenceText: "SD001 size S còn không?" },
+        { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "SD002", evidenceText: "SD002 size L còn không?" },
+      ],
+    });
+    const queries = buildBusinessFactQueries("typed-qualifiers", "Chị lấy size M. SD001 size S còn không? SD002 size L còn không?", resolvedReferences(2), input);
+    expect(queries?.queries.map(({ productRef, requestedFacts, qualifiers }) =>
+      ({ productId: productRef.productId, requestedFacts, size: qualifiers.size }))).toEqual([
+      { productId: "SD001", requestedFacts: ["STOCK"], size: "S" },
+      { productId: "SD002", requestedFacts: ["STOCK"], size: "L" },
+    ]);
+  });
   it.each([1, 3, 4, 10, 11, 14])(
     "retains all %i distinct valid product codes in first-occurrence order",
     (count) => {

@@ -1450,15 +1450,14 @@ export function buildBusinessFactQueries(
   eventKey: string,
   text: string,
   references: readonly ResolvedProductReference[],
+  customerInput?: RealtimeCustomerInput | null,
 ): BusinessFactQueriesV2 | null {
-  const requestedFacts = explicitCustomerBusinessIntents(text);
+  const obligations = customerInput?.obligations?.filter(({ kind }) => kind === "FACT_REQUEST");
+  const requestedFact = (capability: TrackCRequestedObligation["capability"]): RequestedBusinessFactV2 | null =>
+    capability === "SIZE_FIT" ? "SIZE" : capability === "PRICE" || capability === "STOCK" || capability === "ETA" ? capability : null;
+  const requestedFacts = obligations === undefined ? explicitCustomerBusinessIntents(text)
+    : [...new Set(obligations.flatMap(({ capability }) => requestedFact(capability) ?? []))];
   if (requestedFacts.length === 0 || references.length === 0) return null;
-  const size = text.match(
-    /(?:\bsize|\bsz|kích\s*cỡ|cỡ)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
-  )?.[1]?.trim() ?? null;
-  const color = text.match(
-    /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
-  )?.[1]?.trim() ?? null;
   const seenReferences = new Set<string>();
   const distinctReferences = references.filter((reference) => {
     const identity = normalizeProductCode(
@@ -1470,25 +1469,42 @@ export function buildBusinessFactQueries(
   });
   return BusinessFactQueriesV2Schema.parse({
     schemaVersion: 2,
-    queries: distinctReferences.map((reference, index) => ({
-      schemaVersion: 2,
-      queryId: deterministicUuid(`${eventKey}:business-fact-query:v2:${index}`),
-      productRef: {
-        raw: reference.raw,
-        productId: reference.product?.productId ?? null,
-        resolution: reference.resolution,
-      },
-      // With one subject, clauses need not repeat its code. Restrict by
-      // code-bearing clause only when there really are distinct subjects.
-      requestedFacts: distinctReferences.length === 1 ? requestedFacts
-        : factsForProductClause(text, reference.raw, requestedFacts),
-      qualifiers: {
-        offerType: null,
-        color,
-        size,
-        deliveryRegion: null,
-      },
-    })),
+    queries: distinctReferences.map((reference, index) => {
+      const scoped = obligations?.filter(({ productId }) => productId === null || productId === reference.product?.productId);
+      // Only this subject's fact spans can supply fallback lookup qualifiers.
+      // A purchase's selected variant is never a fact lookup subject.
+      const factualText = scoped?.map(({ evidenceText }) => evidenceText ?? "").join(". ") ?? text;
+      const primaryStock = customerInput?.factQuery.intent === "STOCK" &&
+        (obligations === undefined || (obligations.filter(({ capability }) => capability === "STOCK").length === 1 &&
+          scoped?.some(({ capability }) => capability === "STOCK")));
+      const size = primaryStock ? customerInput.factQuery.size : factualText.match(
+        /(?:\bsize|\bsz|kích\s*cỡ|cỡ)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
+      )?.[1]?.trim() ?? null;
+      const color = primaryStock ? customerInput.factQuery.color : factualText.match(
+        /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
+      )?.[1]?.trim() ?? null;
+      return {
+        schemaVersion: 2,
+        queryId: deterministicUuid(`${eventKey}:business-fact-query:v2:${index}`),
+        productRef: {
+          raw: reference.raw,
+          productId: reference.product?.productId ?? null,
+          resolution: reference.resolution,
+        },
+        // With one subject, clauses need not repeat its code. Restrict by
+        // code-bearing clause only when there really are distinct subjects.
+        requestedFacts: scoped !== undefined ? [...new Set(scoped
+          .flatMap(({ capability }) => requestedFact(capability) ?? []))]
+          : distinctReferences.length === 1 ? requestedFacts
+            : factsForProductClause(text, reference.raw, requestedFacts),
+        qualifiers: {
+          offerType: customerInput?.factQuery.offerType ?? null,
+          color,
+          size,
+          deliveryRegion: customerInput?.factQuery.deliveryRegion ?? null,
+        },
+      };
+    }).filter((query) => query.requestedFacts.length > 0),
   });
 }
 
@@ -3372,6 +3388,7 @@ export class RealtimeRunner {
             message.eventKey,
             message.text ?? "",
             resolution.references,
+            customerInput,
           )
         : null;
     const mediaDisposition = decideMediaBatchDisposition({
@@ -4126,7 +4143,9 @@ export class RealtimeRunner {
             this.factsReader.resolveVerifiedVariant &&
             resolution.primary
           ) {
-            const mentions = extractVariantMentions(message.text ?? "", proposal);
+            const mentions = customerInput
+              ? { size: customerInput.variant.size, color: customerInput.variant.color }
+              : extractVariantMentions(message.text ?? "", proposal);
             if (mentions.size !== null || mentions.color !== null) {
               const verified = await this.factsReader.resolveVerifiedVariant({
                 shopAlias: this.options.shopAlias,
