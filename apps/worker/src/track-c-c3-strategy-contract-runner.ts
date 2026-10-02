@@ -504,9 +504,11 @@ function strategistResponseSchema(
 
 function presentableEvidence(
   evidence: readonly TrackCSelectableEvidence[],
+  requested: readonly TrackCRequestedObligation[] = [],
 ): readonly Readonly<Record<string, unknown>>[] {
-  return Object.freeze(evidence.map(({ ref, capability, subject, value, deterministicText }) =>
-    Object.freeze({
+  return Object.freeze(evidence.map((entry) => {
+    const { ref, capability, subject, value, deterministicText } = entry;
+    return Object.freeze({
       ref,
       capability,
       ...(subject === undefined ? {} : { subject: Object.fromEntries(
@@ -515,8 +517,10 @@ function presentableEvidence(
       factFields: Object.keys(value).sort(),
       ...(capability === "OFFER_CONFIGURATION" ? { scope: value.offerScope } : {}),
       realizationSupported: deterministicText !== undefined,
-    })
-  ));
+      requestedObligationIndexes: requested.flatMap((obligation, index) =>
+        trackCObligationMatchesEvidence(obligation, entry) ? [index] : []),
+    });
+  }));
 }
 
 export function buildTrackCStrategistContractRequest(input: Readonly<{
@@ -542,7 +546,7 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   return narrowRequest(base, strategistResponseSchema(input.constraints, input.evidence), {
     contractVersion: "TRACK_C_C3_STRATEGIST_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
-    selectableEvidence: presentableEvidence(input.evidence),
+    selectableEvidence: presentableEvidence(input.evidence, input.requestedObligations),
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
         Object.freeze({
@@ -550,6 +554,10 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           capability: entry.capability,
           scope: entry.scope,
           productId: entry.productId,
+          ...(entry.variantId === undefined ? {} : { variantId: entry.variantId }),
+          ...(entry.size === undefined ? {} : { size: entry.size }),
+          ...(entry.color === undefined ? {} : { color: entry.color }),
+          ...(entry.lookupStatus === undefined ? {} : { lookupStatus: entry.lookupStatus }),
         })
       )),
     }),
@@ -1052,7 +1060,11 @@ function compileResponderDraft(input: Readonly<{
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
   const limitationTexts = trackCLimitationTexts(task);
-  limitationTexts.forEach((text) => segments.push({ kind: "GENERAL", text }));
+  limitationTexts.forEach((limitation) => {
+    const safe = text(limitation, "TRACK_C_LIMITATION_NOT_PII_SAFE");
+    if (safe === null) throw new Error("TRACK_C_LIMITATION_NOT_PII_SAFE");
+    segments.push({ kind: "GENERAL", text: safe });
+  });
   if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });

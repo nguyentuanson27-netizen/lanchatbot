@@ -5435,6 +5435,18 @@ export class RealtimeRunner {
             facts: this.factsReader, shopAlias: this.options.shopAlias, now: new Date(),
           });
         }
+        const factProductId = resolvedProduct?.productId ?? nextState.currentProductId;
+        const multiStockQuery = shouldUseMultiFacts ? multiFactQueries?.queries.find((query) =>
+          query.productRef.productId === factProductId && query.requestedFacts.includes("STOCK")) : undefined;
+        const stockQuery = multiStockQuery?.productRef.productId != null
+          ? { productId: multiStockQuery.productRef.productId, size: multiStockQuery.qualifiers.size,
+              color: multiStockQuery.qualifiers.color }
+          : businessFactLookupQuery?.intent === "STOCK" && businessFacts !== null
+            ? { productId: businessFacts.productId, size: businessFactLookupQuery.size,
+                color: businessFactLookupQuery.color } : null;
+        const stockLookupSupported = multiStockQuery !== undefined
+          ? multiFactAudit.some((entry) => entry.productId === stockQuery?.productId && entry.requestedFact === "STOCK" && entry.status === "OK")
+          : businessFacts?.status === "OK";
         const c3Input = buildRealtimeC3Input({
           sourceMessagePk: triggerMessagePk,
           canonicalEvidence: canonicalDecisionEvidenceForTurn(),
@@ -5450,9 +5462,7 @@ export class RealtimeRunner {
             : {}),
           catalogVersion: resolvedProduct?.catalogVersion ?? null,
           facts: businessFactEnvelopes,
-          ...(businessFactLookupQuery?.intent === "STOCK" && businessFacts?.status === "OK"
-            ? { stockQuery: { productId: businessFacts.productId, size: businessFactLookupQuery.size,
-                color: businessFactLookupQuery.color } } : {}),
+          ...(stockQuery !== null && stockLookupSupported ? { stockQuery } : {}),
           sizeClaim: verifiedSizeClaimForTurn,
           fitDecision: resolvedProduct && customerProfile &&
               (event.requestedSalesStage === "FIT_CONSULTING" ||
@@ -5495,10 +5505,10 @@ export class RealtimeRunner {
                   (businessFactLookupQuery?.intent === intent && businessFacts?.productId === subject ? businessFacts : null);
                 return { kind, capability, scope, productId,
                   ...(lookup && lookup.status !== "OK" ? { lookupStatus: lookup.status === "STALE" ? "STALE" : "FAILED" } : {}),
-                  ...(capability === "STOCK" && customerInput.factQuery.intent === "STOCK" && customerInput.factQuery.size !== null
-                    ? { size: customerInput.factQuery.size } : {}),
-                  ...(capability === "STOCK" && customerInput.factQuery.intent === "STOCK" && customerInput.factQuery.color !== null
-                    ? { color: customerInput.factQuery.color } : {}),
+                  ...(capability === "STOCK" && stockQuery?.productId === subject && stockQuery.size !== null
+                    ? { size: stockQuery.size } : {}),
+                  ...(capability === "STOCK" && stockQuery?.productId === subject && stockQuery.color !== null
+                    ? { color: stockQuery.color } : {}),
                 };
               }
             ),

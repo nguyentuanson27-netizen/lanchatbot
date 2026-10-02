@@ -15,6 +15,29 @@ const compound = () => inputDelta({ factQuery: price, obligations: [
 ] });
 
 describe("obligation-aware runtime recovery", () => {
+  it("retains S stock alongside price when the primary lookup hint is PRICE", async () => {
+    const runtime = deterministicRuntime({ multiFact: true });
+    await bound(runtime);
+    const trace = await runtime.turn({ text: "CB182 giá bao nhiêu, size S còn hàng không?", producer: compound(),
+      strategist: answerPlan("PRICE"), responderFailure: "TRANSPORT" });
+    expect(trace.reply).toContain("799.000");
+    expect(trace.reply).toContain("size S");
+    expect(trace.reply).toContain("hết");
+    expect(trace.reply).not.toContain("Mẫu này hiện hết hàng");
+    expect(trace.after.commerce).toEqual(trace.before.commerce);
+  });
+  it("does not leak a private value inserted into a missing fact's subject", async () => {
+    const runtime = deterministicRuntime();
+    await bound(runtime);
+    runtime.failures.add("CB182:STOCK");
+    const trace = await runtime.turn({ text: "Size S còn hàng không?", producer: inputDelta({
+      factQuery: { ...price, intent: "STOCK", size: "S", color: "0901234567" },
+      obligations: [{ kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "CB182", evidenceText: "Size S còn hàng" }],
+    }), strategist: (input) => ({ ...answerPlan("STOCK", "lookup failed")(input), evidenceRefs: [] }),
+      responderFailure: "TRANSPORT" });
+    expect(trace.reply).not.toContain("0901234567");
+    expect(trace.after.commerce).toEqual(trace.before.commerce);
+  });
   it.each(["ERROR", "STALE"] as const)("retains fresh price and names the %s stock sibling", async (status) => {
     const runtime = deterministicRuntime({ multiFact: true });
     await bound(runtime);

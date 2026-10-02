@@ -12,6 +12,12 @@ const base = { evidence: [fact], boundProductIds: ["ITEM42"], measurementsUnavai
   productResolved: true, hardStop: false, requireStructuredGoal: true };
 
 describe("typed task is the sole planning authority", () => {
+  it("rejects an unrelated price when only an unsupported property was requested", () => {
+    expect(() => compileTrackCStrategistDecision({ ...base, permittedCanonicalActions: ["NONE"],
+      requestedObligations: requests.slice(1), decision: { replyAct: "ANSWER", proposition: "PRICE", evidenceRefs: [fact.ref],
+        goal: absentGoal, canonicalAction: "NONE", continuation: { type: "KEEP_OPEN" } } }))
+      .toThrow("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
+  });
   it.each(["HOLD_POSITION", "ASK_MEASUREMENTS", "ASK_CHECKOUT_DETAILS"] as const)(
     "derives %s despite absent NEED/NEXT prose", (action) => {
       const result = compileTrackCStrategistDecision({ ...base, permittedCanonicalActions: [action],

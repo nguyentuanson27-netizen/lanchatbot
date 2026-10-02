@@ -158,6 +158,10 @@ export function assertTrackCRequestedObligationCoverage(
     entry.kind === "FACT_REQUEST" && entry.capability !== null
   );
   if (facts.length === 0) return;
+  if (!requested.some(({ kind }) => kind === "PRODUCT_SEARCH") && selected.some((entry) =>
+      !facts.some((obligation) => trackCObligationMatchesEvidence(obligation, entry)))) {
+    throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
+  }
   for (const capability of new Set(facts.map(({ capability }) => capability))) {
     const allowed = facts.filter((entry) => entry.capability === capability);
     if (selected.some((entry) =>
