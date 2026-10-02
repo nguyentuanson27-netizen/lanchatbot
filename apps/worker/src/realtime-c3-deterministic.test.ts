@@ -550,16 +550,19 @@ describe("independent commerce and response obligations", () => {
 });
 
 
-it("continues checkout details while answering an independent stock question", async () => {
+it("continues checkout details while answering an independent price question", async () => {
   const runtime = deterministicRuntime();
   await quote(runtime);
   await openCart(runtime);
-  const trace = await runtime.turn({ text: "Size S còn không?", producer: inputDelta({
-    factQuery: { intent: "STOCK", offerType: "SET", color: "be", size: "S", deliveryRegion: null },
-  }) });
+  const checkout = "Chị thanh toán.";
+  const trace = await runtime.turn({ text: `${checkout} Giá bao nhiêu?`, producer: inputDelta({
+    salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: { decision: "COMMITTED", requestedAction: "PROCEED_TO_PAYMENT", quantity: null, evidenceText: checkout, confidence: 0.99 } },
+    factQuery: priceQuery,
+  }), strategist: (input) => ({ ...answerPlan()(input), continuation: null, canonicalAction: "ASK_CHECKOUT_DETAILS",
+    goal: "NEED: checkout and price\nKNOWN: NONE\nANSWER: price supported\nLIMIT: NONE\nNEXT: checkout fields enable payment" }) });
   expect(cartSizes(trace)).toEqual(["M", "M"]);
-  expect(trace.reply).toContain("size S");
-  expect(trace.reply).toContain("hết hàng");
-  expect(trace.reply).toContain("thông tin");
+  expect(trace.reply).toContain("799.000");
+  expect(trace.reply).toContain("tiếp tục");
+  expect(trace.reply.match(/Chị cho em xin/g)).toHaveLength(1);
   committedOnce(trace);
 });
