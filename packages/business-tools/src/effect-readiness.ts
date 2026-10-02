@@ -65,7 +65,8 @@ export function evaluateDeterministicEffectReadinessV1(
   if (requiresIntent) {
     if (input.buyingIntent?.decision !== "COMMITTED") {
       reasons.add("BUYING_INTENT_MISSING");
-    } else if (!input.buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME")) {
+    } else if (!input.buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME") &&
+        !input.buyingIntent.contributors.includes("SOURCE_BOUND_CUSTOMER_INPUT")) {
       reasons.add("BUYING_INTENT_MISSING");
     } else if (
       input.buyingIntent.productId === null ||

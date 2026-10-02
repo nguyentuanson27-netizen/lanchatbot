@@ -84,6 +84,7 @@ function uniqueValues(
 const EvidenceContributorV1Schema = z.enum([
   "DETERMINISTIC_RUNTIME",
   "MODEL_STRUCTURED_OUTPUT",
+  "SOURCE_BOUND_CUSTOMER_INPUT",
 ]);
 
 export const CanonicalDialogueEvidenceV1Schema = z.object({
@@ -189,7 +190,8 @@ export function canonicalBuyingIntentAuthorizesCartMutationV1(
   const requestedActions: readonly CanonicalBuyingIntentV1["requestedAction"][] =
     action === "ADD_LINE" ? ["ADD_TO_CART"] : ["SET_QUANTITY"];
   return intent.decision === "COMMITTED" &&
-    intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
+    (intent.contributors.includes("DETERMINISTIC_RUNTIME") ||
+      intent.contributors.includes("SOURCE_BOUND_CUSTOMER_INPUT")) &&
     intent.productId === productId &&
     requestedActions.includes(intent.requestedAction) &&
     (action === "ADD_LINE"
@@ -203,7 +205,8 @@ export function canonicalBuyingIntentAuthorizesCartOpenV1(
   quantity: number,
 ): boolean {
   return intent.decision === "COMMITTED" &&
-    intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
+    (intent.contributors.includes("DETERMINISTIC_RUNTIME") ||
+      intent.contributors.includes("SOURCE_BOUND_CUSTOMER_INPUT")) &&
     intent.productId === productId &&
     (intent.requestedAction === "OPEN_CART" || intent.requestedAction === "ADD_TO_CART") &&
     (intent.quantity ?? 1) === quantity;

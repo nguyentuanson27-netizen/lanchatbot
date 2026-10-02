@@ -31,7 +31,7 @@ function sha256(value: string): string {
 const canonicalJson = canonicalJsonV1;
 const observableDialogueCodes = new Set<string>(DECISION_DIALOGUE_EVIDENCE_CODES_V1);
 
-function explicitQuantity(text: string): number | null {
+export function explicitPurchaseQuantity(text: string): number | null {
   const folded = foldVietnameseForRecall(text)
     .replace(/[^a-z0-9]+/gu, " ")
     .trim();
@@ -135,7 +135,7 @@ export function buildCanonicalDecisionEvidenceV1(
       ? input.modelBuyingIntent?.requestedAction ?? "OPEN_CART"
       : "OPEN_CART"
     : "NONE";
-  const observedQuantity = explicitQuantity(input.text);
+  const observedQuantity = explicitPurchaseQuantity(input.text);
   const modelQuantityMismatch =
     decision === "COMMITTED" &&
     resolved.source === "MODEL_STRUCTURED_OUTPUT" &&

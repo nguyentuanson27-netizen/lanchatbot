@@ -23,6 +23,8 @@ export function trackCCurrentCartClaims(
 ): readonly ProtectedClaimV1[] {
   const cart = CartV1Schema.parse(binding.cart);
   if (!Number.isFinite(at.getTime()) ||
+      !Number.isFinite(Date.parse(binding.cartExpiresAt)) ||
+      !Number.isFinite(Date.parse(binding.claimExpiresAt)) ||
       Date.parse(binding.cartExpiresAt) <= at.getTime() ||
       Date.parse(binding.claimExpiresAt) <= at.getTime() ||
       Date.parse(binding.claimExpiresAt) > Date.parse(binding.cartExpiresAt) ||

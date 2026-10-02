@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { BusinessFactEnvelopeV1Schema, type BusinessFactEnvelopeV1 } from "@lana/contracts";
 import type { StableProductDocument } from "@lana/business-tools";
 import {
   buildBusinessFactQueries,
@@ -202,5 +203,34 @@ describe("unbounded text product business-fact queries", () => {
     expect(peak).toBeLessThanOrEqual(3);
     expect(references.map(({ raw }) => raw)).toEqual(codes);
     expect(references.every(({ resolution }) => resolution === "RESOLVED")).toBe(true);
+  });
+});
+
+
+describe("partial lookup failure isolation", () => {
+  it("preserves independent reads and exposes an error only for the failed requested fact", async () => {
+    const references = resolvedReferences(2);
+    const base = buildBusinessFactQueries("lookup-fault", "SD001 SD002 price", references)!;
+    const queries = { ...base, queries: base.queries.map((query) => ({ ...query,
+      requestedFacts: ["PRICE", "STOCK"] as ("PRICE" | "STOCK")[] })) };
+    const resolve = vi.fn(async ({ productId, intent }: { productId: string; intent: string }): Promise<BusinessFactEnvelopeV1> => {
+      if (productId === "SD001" && intent === "PRICE") throw new Error("redis phone=0901234567 token=secret");
+      return { schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+        observedAt: "2026-09-30T00:00:00.000Z", expiresAt: "2099-01-01T00:00:00.000Z", productId,
+        facts: { schemaVersion: 1, productId, parentProductId: productId, offerType: "STANDARD",
+          salePriceVnd: 100_000, listPriceVnd: null, sizes: [], stockStatus: "IN_STOCK", stockQuantity: 2,
+          deliveryEta: null, fulfillmentPolicy: null, imageUrls: [] }, reasonCode: null };
+    });
+    const result = await resolveBusinessFactQueriesBounded(queries, references.map(({ product }) => product!), resolve, "LANA");
+    expect(resolve).toHaveBeenCalledTimes(4);
+    expect(result.map(({ facts }) => facts.map(({ envelope }) => envelope.status))).toEqual([["ERROR", "OK"], ["OK", "OK"]]);
+    const failed = result[0]!.facts[0]!.envelope;
+    expect(BusinessFactEnvelopeV1Schema.safeParse(failed).success).toBe(true);
+    expect(failed).toMatchObject({ productId: "SD001", facts: null, reasonCode: "BUSINESS_FACT_LOOKUP_FAILED" });
+    expect(JSON.stringify(result)).not.toMatch(/0901234567|token=|redis phone/);
+    const reply = multiFactReply(result)!;
+    expect(reply).toContain("SD001");
+    expect(reply).toContain("SD002");
+    expect(reply).toContain("100k");
   });
 });

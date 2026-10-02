@@ -23,6 +23,8 @@ export interface RealtimeProtectedClaimAuthorizationInput {
   readonly expectedProductScopes?: readonly Readonly<{
     productId: string;
     variantId: string | null;
+    /** Code-owned producer scope override; never supplied by model output. */
+    claimType?: ProtectedClaimV1["type"];
   }>[];
   readonly expectedCart?: Readonly<{
     cartId: string;
@@ -64,10 +66,13 @@ function claimReason(
     if (!input.expectedProductIds.includes(productScope.productId)) {
       return `PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH:${claim.claimId}`;
     }
-    const expectedScope = input.expectedProductScopes?.find(({ productId }) =>
+    const scopes = input.expectedProductScopes?.filter(({ productId }) =>
       productId === productScope.productId
-    );
-    if (expectedScope && productScope.variantId !== expectedScope.variantId) {
+    ) ?? [];
+    const typedScopes = scopes.filter(({ claimType }) => claimType === claim.type);
+    const expectedScopes = typedScopes.length > 0
+      ? typedScopes : scopes.filter(({ claimType }) => claimType === undefined);
+    if (expectedScopes.some(({ variantId }) => productScope.variantId !== variantId)) {
       return `PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH:${claim.claimId}`;
     }
     return null;

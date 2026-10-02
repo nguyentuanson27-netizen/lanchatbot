@@ -4,6 +4,7 @@ import {
   materializeTrackCV5CaseCapture,
   materializeTrackCV5CaseCurrentCart,
   type TrackCV5MaterializationRecipe,
+  type TrackCV5CompactCase,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import {
@@ -62,7 +63,60 @@ function evidenceFor(claimRefs: readonly string[]) {
   });
 }
 
+function cartCaseEvidence(includeCurrentCart: boolean, includeProduct = false) {
+  const chunk = JSON.parse(readFileSync(
+    new URL("quality-03.json", EVAL_ROOT), "utf8",
+  )) as { cases: Array<{ id: string }> };
+  const base = chunk.cases.find((entry) => entry.id === "V5V4Q025")! as TrackCV5CompactCase;
+  const fixture = includeProduct ? { ...base, context: { ...base.context,
+    runtime_claim_refs: [...base.context.runtime_claim_refs, "RC_PRICE_A"] } } : base;
+  const input = { fixture: fixture as never,
+    runtimeClaimCatalog: facts.runtime_claim_catalog, recipe };
+  const capture = materializeTrackCV5CaseCapture({
+    ...input, lane: "BEHAVIOR_SIMULATION",
+  });
+  const currentCart = materializeTrackCV5CaseCurrentCart(input)!;
+  return {
+    context: capture.context!,
+    currentCart,
+    evidence: buildTrackCSelectableEvidence({
+      context: capture.context!, simulationFacts: [],
+      executionLane: "BEHAVIOR_SIMULATION",
+      ...(includeCurrentCart ? { currentCart } : {}),
+      evaluationAt: new Date(recipe.evaluation_at),
+    }),
+  };
+}
+
 describe("Track C C3 evidence subject scope", () => {
+  it.each(["not-a-date", "", "2026-09-10T00:00:00.000Z"])(
+    "rejects invalid or stale independent cart expiry %j", (cartExpiresAt) => {
+      const { currentCart } = cartCaseEvidence(true);
+      expect(() => trackCCurrentCartClaims({ ...currentCart, cartExpiresAt },
+        new Date(recipe.evaluation_at))).toThrow("TRACK_C_CURRENT_CART_BINDING_STALE");
+    },
+  );
+
+  it.each(["not-a-date", "", "2026-09-10T00:00:00.000Z"])(
+    "rejects invalid or stale claim expiry %j", (claimExpiresAt) => {
+      const { currentCart } = cartCaseEvidence(true);
+      expect(() => trackCCurrentCartClaims({ ...currentCart, claimExpiresAt },
+        new Date(recipe.evaluation_at))).toThrow("TRACK_C_CURRENT_CART_BINDING_STALE");
+    },
+  );
+  it.each(["not-a-date", "", "2026-09-10T00:00:00.000Z"])(
+    "excludes invalid cart readback %j before model admission without dropping product facts", (expiresAt) => {
+      const { context, currentCart } = cartCaseEvidence(true, true);
+      const valid = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+        executionLane: "PRODUCTION_CONTRACT", currentCart, evaluationAt: new Date(recipe.evaluation_at) });
+      const result = buildTrackCSelectableEvidence({ context, simulationFacts: [],
+        executionLane: "PRODUCTION_CONTRACT", currentCart: { ...currentCart, cartExpiresAt: expiresAt },
+        evaluationAt: new Date(recipe.evaluation_at) });
+      expect(result.some(({ subject }) => subject?.scope === "CART")).toBe(false);
+      expect(result).toEqual(valid.filter(({ subject }) => subject?.scope !== "CART"));
+      expect(result.length).toBeGreaterThan(0);
+    });
+
   it("states a known non-free cart without changing legacy cart claims", () => {
     const chunk = JSON.parse(readFileSync(
       new URL("quality-03.json", EVAL_ROOT), "utf8",
@@ -157,48 +211,54 @@ describe("Track C C3 evidence subject scope", () => {
     }, "BEHAVIOR_SIMULATION", new Date(recipe.evaluation_at), [], currentCart)
       .segments).toHaveLength(1);
   });
-  it("keeps cart identity and version on a cart-scoped claim", () => {
-    const [shipping] = evidenceFor(["RC_SHIP_30"]).filter(
+  it("keeps cart identity and version on a claim bound to the current cart", () => {
+    const { currentCart, evidence } = cartCaseEvidence(true);
+    const [shipping] = evidence.filter(
       ({ capability }) => capability === "SHIPPING_FEE",
     );
     expect(shipping?.subject).toMatchObject({ scope: "CART" });
-    expect(typeof shipping?.subject?.cartVersion).toBe("number");
+    expect(shipping?.subject?.cartVersion).toBe(currentCart.cart.revision);
     // A cart fact must not be reported under a product subject.
     expect(shipping?.subject?.productId).toBeUndefined();
   });
 
-  it("keeps a cart fact selectable but not statable without a cart binding", () => {
-    // Quoting a fee asserts it about the cart as it is now, and the input
-    // contract carries no current cart revision to check that against. The
-    // fact keeps its authority and is reported as a realization limit rather
-    // than being quoted from a cart the customer may have changed.
-    for (const ref of ["RC_SHIP_30", "RC_FREESHIP_Y", "RC_FREESHIP_N"]) {
-      const [entry] = evidenceFor([ref]).filter(
-        ({ subject }) => subject?.scope === "CART",
-      );
-      expect(entry).toBeDefined();
-      expect(trackCEvidenceHasSafeFactualEgress(entry!)).toBe(false);
-    }
+  it("does not expose cart facts when the current cart binding is missing", () => {
+    expect(cartCaseEvidence(false).evidence.some(
+      ({ subject }) => subject?.scope === "CART",
+    )).toBe(false);
   });
 
-  it("keeps the cart version distinct when the cart claim changes", () => {
-    const cheap = evidenceFor(["RC_SHIP_30"]).find(
-      ({ capability }) => capability === "SHIPPING_FEE",
-    );
-    const dear = evidenceFor(["RC_SHIP_45"]).find(
-      ({ capability }) => capability === "SHIPPING_FEE",
-    );
-    expect(cheap?.subject?.cartVersion).not.toBe(dear?.subject?.cartVersion);
+  it("withholds a cart claim when the readback revision is stale", () => {
+    const { currentCart } = cartCaseEvidence(true);
+    const evidence = cartCaseEvidence(false).evidence;
+    const staleCart = { ...currentCart, cart: { ...currentCart.cart,
+      revision: currentCart.cart.revision + 1 } };
+    const staleCapture = (() => {
+      const chunk = JSON.parse(readFileSync(
+        new URL("quality-03.json", EVAL_ROOT), "utf8",
+      )) as { cases: Array<{ id: string }> };
+      const fixture = chunk.cases.find((entry) => entry.id === "V5V4Q025")!;
+      return materializeTrackCV5CaseCapture({ fixture: fixture as never,
+        runtimeClaimCatalog: facts.runtime_claim_catalog, recipe,
+        lane: "BEHAVIOR_SIMULATION" });
+    })();
+    const shipping = buildTrackCSelectableEvidence({
+      context: staleCapture.context!, simulationFacts: [],
+      executionLane: "BEHAVIOR_SIMULATION", currentCart: staleCart,
+      evaluationAt: new Date(recipe.evaluation_at),
+    }).find(({ capability }) => capability === "SHIPPING_FEE");
+    expect(evidence.some(({ capability }) => capability === "SHIPPING_FEE")).toBe(false);
+    expect(shipping).toBeUndefined();
   });
 
-  it("never emits a cart fact through the final guard", () => {
-    // The guard rejects cart-scoped output because nothing has revalidated the
-    // cart. Since the projection no longer offers wording, that rejection is
-    // unreachable from a normal turn instead of being a live failure mode.
-    const [shipping] = evidenceFor(["RC_SHIP_30"]).filter(
+  it("emits a cart fact through the final guard only with current readback", () => {
+    const { currentCart, evidence } = cartCaseEvidence(true);
+    const [shipping] = evidence.filter(
       ({ capability }) => capability === "SHIPPING_FEE",
     );
-    expect(shipping?.deterministicText).toBeUndefined();
+    expect(shipping?.subject?.cartVersion).toBe(currentCart.cart.revision);
+    expect(trackCEvidenceHasSafeFactualEgress(shipping!)).toBe(true);
+    expect(shipping?.deterministicText).toContain("30.000đ");
   });
 
   it("marks a product-scoped claim with the product scope", () => {
@@ -207,4 +267,39 @@ describe("Track C C3 evidence subject scope", () => {
     );
     expect(price?.subject).toMatchObject({ scope: "PRODUCT", productId: "SQ9012" });
   });
+
+  it.each([
+    ["V5V4Q084", ["FULL_SET", "TOP", "BOTTOM"], "TOP", "549.000", "899.000"],
+    ["V5V4Q085", ["TWO_PIECE", "THREE_PIECE"], "THREE_PIECE", "1.049.000", "829.000"],
+  ] as const)(
+    "projects offer configuration %s into atomic requested scopes",
+    (id, expectedScopes, targetScope, expectedText, forbiddenText) => {
+      const chunk = JSON.parse(readFileSync(
+        new URL("quality-09.json", EVAL_ROOT), "utf8",
+      )) as { cases: TrackCV5CompactCase[] };
+      const fixture = chunk.cases.find((entry) => entry.id === id)!;
+      const capture = materializeTrackCV5CaseCapture({
+        lane: "BEHAVIOR_SIMULATION",
+        fixture,
+        runtimeClaimCatalog: facts.runtime_claim_catalog,
+        recipe,
+      });
+      const simulationRefs = ((fixture as unknown as {
+        context: { simulation_fact_refs: readonly string[] };
+      }).context.simulation_fact_refs);
+      const simulationFacts = simulationRefs.map(
+        (ref: string) => facts.simulation_fact_catalog[ref],
+      );
+      const evidence = buildTrackCSelectableEvidence({
+        context: capture.context!,
+        simulationFacts,
+        executionLane: "BEHAVIOR_SIMULATION",
+        evaluationAt: new Date(recipe.evaluation_at),
+      }).filter(({ capability }) => capability === "OFFER_CONFIGURATION");
+      expect(evidence.map(({ value }) => value.offerScope)).toEqual(expectedScopes);
+      const target = evidence.find(({ value }) => value.offerScope === targetScope);
+      expect(target?.deterministicText).toContain(expectedText);
+      expect(target?.deterministicText).not.toContain(forbiddenText);
+    },
+  );
 });

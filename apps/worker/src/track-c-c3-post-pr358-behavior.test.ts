@@ -121,12 +121,20 @@ function promptOf(request: { body: string }): ContractPrompt {
   return JSON.parse(body.contents[0].parts[0].text) as ContractPrompt;
 }
 
-function decisionFor(prompt: ContractPrompt) {
+function decisionFor(prompt: ContractPrompt, next?: string) {
   const permitted = prompt.constraints?.permittedCanonicalActions ?? [];
   const canonicalAction = permitted[0] ?? "NONE";
   return {
     replyAct: "ANSWER",
-    goal: "Resolve the current customer decision without inventing facts.",
+    goal: [
+      "NEED: Resolve the current customer decision without inventing facts.",
+      "KNOWN: NONE",
+      "ANSWER: NONE",
+      "LIMIT: NONE",
+      next === undefined
+        ? (canonicalAction === "NONE" || canonicalAction === "HOLD_POSITION" ? "NEXT: NONE" : "NEXT: missing input enables the assigned canonical decision")
+        : `NEXT: ${next}`,
+    ].join("\n"),
     proposition: "NONE",
     evidenceRefs: [],
     continuation: canonicalAction === "NONE" ? { type: "KEEP_OPEN" } : null,
@@ -226,7 +234,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
           buyingIntent: { decision: caseFixture.context.buying_intent.decision },
         } });
         return measurementsRequired
-          ? { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null }
+          ? { ...decisionFor(prompt, "missing measurements enable current fit advice"), canonicalAction: "ASK_MEASUREMENTS", continuation: null }
           : decisionFor(prompt);
       } });
       const result = await runFixture(caseFixture, candidate);
@@ -246,7 +254,13 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
         buyingIntent: "COMMITTED" }),
     ]) {
       const candidate = candidateTransport({ strategist: () => ({
-        replyAct: "ACKNOWLEDGE", goal: "Acknowledge hesitation without more discovery.",
+        replyAct: "ACKNOWLEDGE", goal: [
+          "NEED: Acknowledge hesitation without more discovery.",
+          "KNOWN: NONE",
+          "ANSWER: NONE",
+          "LIMIT: NONE",
+          "NEXT: NONE",
+        ].join("\n"),
         proposition: "NONE", evidenceRefs: [],
         continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
       }) });
@@ -384,7 +398,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
           permittedCanonicalActions: ["NONE", "ASK_MEASUREMENTS"],
           measurementsUnavailable: false,
         });
-        return { ...decisionFor(prompt), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
+        return { ...decisionFor(prompt, "missing measurements enable current fit advice"), canonicalAction: "ASK_MEASUREMENTS", continuation: null };
       },
     });
     const measured = await runFixture(caseFixture, measuredCandidate, [], staleUnavailable);
@@ -404,7 +418,7 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
           measurementsUnavailable: true,
         });
         return {
-          ...decisionFor(prompt),
+          ...decisionFor(prompt, "usual size qualifies advice when measurements are unavailable"),
           continuation: { type: "ASK", input: "USUAL_SIZE" },
         };
       },
@@ -432,7 +446,13 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
           replyAct: "ACKNOWLEDGE",
           canonicalAction: "ASK_CHECKOUT_DETAILS",
           continuation: null,
-          goal: "Acknowledge the commitment and request only required details.",
+          goal: [
+            "NEED: Acknowledge the commitment and request only required details.",
+            "KNOWN: NONE",
+            "ANSWER: NONE",
+            "LIMIT: NONE",
+            "NEXT: missing checkout fields enable the canonical transaction",
+          ].join("\n"),
         };
       },
     });
@@ -462,7 +482,13 @@ describe("Track C C3 post-PR358 behavior wiring", () => {
     const candidate = candidateTransport({
       strategist: () => ({
         replyAct: "ANSWER",
-        goal: "Reopen with a color question.",
+        goal: [
+          "NEED: Reopen with a color question.",
+          "KNOWN: NONE",
+          "ANSWER: NONE",
+          "LIMIT: NONE",
+          "NEXT: assigned customer input changes the next executable decision",
+        ].join("\n"),
         proposition: "NONE",
         evidenceRefs: [],
         continuation: { type: "ASK", input: "COLOR" },

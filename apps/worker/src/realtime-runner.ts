@@ -1,3 +1,18 @@
+import { observeRealtimeC3Calls } from "./realtime-c3-call-telemetry.js";
+import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import { buildRealtimeC3Dialogue } from "./realtime-c3-dialogue.js";
+import { findVerifiedAlternative } from "./realtime-alternatives.js";
+import {
+  extractRealtimeCustomerInput,
+  unresolvedRealtimeCustomerInput,
+  applyCustomerDecisionInput,
+  customerInputCanonicalEvidence,
+  customerInputObligations,
+  customerInputRequestsAlternativeSearch,
+  customerInputRejectsProduct,
+  customerInputChangesProductReference,
+  type RealtimeCustomerInput,
+} from "./realtime-customer-input.js";
 import { createHash } from "node:crypto";
 import {
   buildCanonicalDecisionEvidenceV1,
@@ -166,7 +181,7 @@ import {
   hasSessionDecisionContext,
   updateSessionDecisionContext,
 } from "./realtime-session-decision-context.js";
-import { runTrackCStrategyLive } from "./track-c-c3-strategy-contract-runner.js";
+import { runTrackCStrategyLive, TrackCStrategyContractFailure } from "./track-c-c3-strategy-contract-runner.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
@@ -178,6 +193,9 @@ import { sizeChartTarget } from "./size-chart-target.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  missingRealtimeCheckoutFields,
+  realtimeCheckoutInformationRequest,
+  readRealtimeCurrentCart,
   buildGuardedModelNegotiationProposalV1,
   type ModelNegotiationProposalV1,
   type RealtimeSalesCycleOutput,
@@ -503,6 +521,31 @@ function isAlternativeProductRequest(value: string): boolean {
   const text = asciiFold(value);
   return /\b(?:tim|goi y|tu van)\b.*\b(?:mau|sp|san pham|set|ao|vay|quan)\b.*\bkhac\b/u.test(text) ||
     /\b(?:co|con|xem)\s+(?:mau|sp|san pham|set|ao|vay|quan)\s+khac\b/u.test(text);
+}
+
+function trackCRequestedObligationsForTurn(
+  input: RealtimeCustomerInput,
+) {
+  const intentCapability = input.factQuery.intent === "PRICE" ? "PRICE" :
+    input.factQuery.intent === "STOCK" ? "STOCK" :
+    input.factQuery.intent === "SIZE" ? "SIZE_FIT" :
+    input.factQuery.intent === "ETA" ? "ETA" : null;
+  return customerInputObligations(input).map((entry) => {
+    const factQueryOwnsSubject = entry.kind === "FACT_REQUEST" &&
+      entry.capability !== null && entry.capability === intentCapability;
+    return {
+      kind: entry.kind,
+      capability: entry.capability,
+      scope: entry.scope,
+      productId: entry.productId,
+      ...(factQueryOwnsSubject ? {
+        offerType: input.factQuery.offerType,
+        size: input.factQuery.size,
+        color: input.factQuery.color,
+        deliveryRegion: input.factQuery.deliveryRegion,
+      } : {}),
+    };
+  });
 }
 
 export function currentProductContinuationId(
@@ -1302,6 +1345,21 @@ function requestedProtectedClaimTypes(
   return [];
 }
 
+/** A failed read contributes no authority. Keep the error local to this
+ * requested fact so independent facts/media can still reach compatibility fallback.
+ */
+async function resolveBusinessFactOrError(
+  resolveFact: BusinessFactsReader["resolve"],
+  query: CatalogFactQuery,
+): Promise<BusinessFactEnvelopeV1> {
+  try { return await resolveFact(query); }
+  catch {
+    return { schemaVersion: 1, status: "ERROR", source: "POS_SNAPSHOT",
+      observedAt: new Date().toISOString(), expiresAt: null, productId: query.productId,
+      facts: null, reasonCode: "BUSINESS_FACT_LOOKUP_FAILED" };
+  }
+}
+
 export async function resolveBusinessFactQueriesBounded(
   queries: BusinessFactQueriesV2,
   products: readonly StableProductDocument[],
@@ -1326,7 +1384,7 @@ export async function resolveBusinessFactQueriesBounded(
       }
       const facts: MultiFactResolution["facts"][number][] = [];
       for (const requestedFact of query.requestedFacts) {
-        const envelope = await resolveFact({
+        const envelope = await resolveBusinessFactOrError(resolveFact, {
           shopAlias,
           productId,
           intent: requestedFact,
@@ -1440,7 +1498,10 @@ export function buildBusinessFactQueries(
         productId: reference.product?.productId ?? null,
         resolution: reference.resolution,
       },
-      requestedFacts: factsForProductClause(text, reference.raw, requestedFacts),
+      // With one subject, clauses need not repeat its code. Restrict by
+      // code-bearing clause only when there really are distinct subjects.
+      requestedFacts: distinctReferences.length === 1 ? requestedFacts
+        : factsForProductClause(text, reference.raw, requestedFacts),
       qualifiers: {
         offerType: null,
         color,
@@ -2028,6 +2089,7 @@ export interface CanonicalChatHistoryPort {
 
 export interface RealtimeProductSearchPort {
   searchText: ProductSearchService["searchText"];
+  searchAlternatives?: ProductSearchService["searchAlternatives"];
   searchImage: ProductSearchService["searchImage"];
   searchImages?: ProductSearchService["searchImages"];
   searchImageBytes?: ProductSearchService["searchImageBytes"];
@@ -2050,6 +2112,8 @@ interface MediaClarificationDecision {
 }
 
 interface ProductResolution {
+  readonly alternativeSearch?: "MATCHED" | "NO_MATCH" | "UNAVAILABLE";
+  readonly alternativeFacts?: BusinessFactEnvelopeV1;
   readonly primary: StableProductDocument | null;
   readonly products: readonly StableProductDocument[];
   readonly references: readonly ResolvedProductReference[];
@@ -2203,6 +2267,7 @@ export interface RealtimeRunnerOptions {
   /** Explicit test/composition opt-in. Source default stays on the baseline. */
   readonly c3?: Readonly<{
     modelResource: string;
+    customerInputEnabled?: boolean;
     transport: Parameters<typeof runTrackCStrategyLive>[0]["transport"];
   }> | null;
 }
@@ -2339,6 +2404,22 @@ export function responseGroupHandoffOrdering(
     sendAfterOwnerHandoff: orderedHandoff,
     afterResponseGroupId: orderedHandoff ? responseGroupId : null,
   };
+}
+
+/** Legacy BusinessFactEnvelopeV1 and media producers are parent-scoped. A
+ * customer's selection cannot turn those facts into variant-specific authority.
+ * Fit keeps its independently selected-variant fence; cart claims use their own
+ * cart/version/readiness path. Both draft and final egress use this same mapping.
+ */
+function parentFactProtectedScopes(
+  productIds: readonly string[],
+  variant: ConversationState["verifiedVariant"],
+) {
+  return productIds.flatMap((productId) => [
+    { productId, variantId: variant?.parentProductId === productId ? variant.selectedVariantId : null },
+    ...(["PRICE", "STOCK", "ETA", "PRODUCT_MEDIA"] as const).map((claimType) =>
+      ({ productId, variantId: null, claimType })),
+  ]);
 }
 
 export class RealtimeRunner {
@@ -2609,10 +2690,11 @@ export class RealtimeRunner {
       await this.completeWork(batch, status === "INBOX_ONLY");
       return true;
     } catch (error) {
-      const code =
-        error instanceof Error && error.message
-          ? error.message.slice(0, 128)
-          : "REALTIME_PROCESSING_FAILED";
+      // Keep machine codes, not raw provider/database exceptions containing
+      // query parameters, customer details or credentials, in durable retry state.
+      const message = error instanceof Error ? error.message : "";
+      const code = /^[A-Z][A-Z0-9_]{2,127}$/u.test(message)
+        ? message : "REALTIME_PROCESSING_FAILED";
       const retrySeed = batch.items.at(-1)?.eventKey ?? batch.conversationHash;
       const delaySeconds = inboxRetryDelaySeconds(
         batch.attemptCount,
@@ -2916,7 +2998,7 @@ export class RealtimeRunner {
           currentProductId: commerceBoundProductId,
         }
       : state;
-    const preSalePolicyIntent = message.isEcho
+    let preSalePolicyIntent = message.isEcho || this.options.c3?.customerInputEnabled
       ? null
       : classifyPreSalePolicyIntent(message.text ?? "");
 
@@ -3184,6 +3266,61 @@ export class RealtimeRunner {
       );
       return batchCommitStatus(result);
     }
+    // The existing quota counts AI turns, not transport calls. Share one
+    // admission across C3 roles/retries and any legacy contribution in this turn.
+    // Leave the C3-off path's existing reservation behavior unchanged.
+    let c3TurnAdmission: Promise<boolean> | null = null;
+    const reserveModelTurn = (): Promise<boolean> => {
+      const reserve = () => this.quota?.reserve(claim.pageId, now) ?? Promise.resolve(true);
+      if (this.options.c3 === null) return reserve();
+      return c3TurnAdmission ??= reserve();
+    };
+    const c3ModelCalls: NonNullable<RealtimeDecisionEventPlan["details"]["c3ModelCalls"]>[number][] = [];
+    const observedC3Transport = this.options.c3 === null ? null
+      : observeRealtimeC3Calls(this.options.c3.transport, c3ModelCalls);
+    const c3Transport = observedC3Transport === null ? null : {
+      send: async (request: Parameters<typeof observedC3Transport.send>[0]) => {
+        const allowed = await reserveModelTurn().catch(() => {
+          throw new Error("REALTIME_GENERATION_QUOTA_UNAVAILABLE");
+        });
+        if (!allowed) throw new Error("REALTIME_GENERATION_QUOTA_EXCEEDED");
+        return observedC3Transport.send(request);
+      },
+    };
+    let customerInput: RealtimeCustomerInput | null = null;
+    let customerInputFailure: string | null = null;
+    if (this.options.c3?.customerInputEnabled && !message.isEcho && !record.killSwitch &&
+        state.routingOwner === "APP" && observation.verified && !mediaInputLimitExceeded) {
+      // Apply only trusted ownership/tag/event ordering for admission. The returned
+      // state is not committed; the actual semantic event is applied below.
+      const preflight = applyInboundEvent({ state: authorityState, expectedRevision: authorityState.revision,
+        fence: Math.max(authorityState.lastFence + 1, batch.lastReceiveSequence),
+        event: { eventKey: message.eventKey, messageId: message.messageId, occurredAt: message.occurredAt,
+          receiveSequence: batch.lastReceiveSequence, actor: "CUSTOMER", journey: "PRE_SALE",
+          requestedHandoffReason: null, requestedSalesStage: null, salesStageTrigger: "NORMAL",
+          productId: null, objectionType: "NONE" }, tagObservation: observation, now });
+      if (preflight.status === "APPLIED" && preflight.authorization.allowEvaluate) {
+        try {
+          customerInput = await extractRealtimeCustomerInput({ text: message.text ?? "", history: context,
+          state: { ...authorityModelState, cart: salesCycleRecord?.state.cart?.value ?? null,
+            checkoutMissingFields: salesCycleRecord ? missingRealtimeCheckoutFields(salesCycleRecord.state) : [] },
+          modelResource: this.options.c3.modelResource, transport: c3Transport ?? this.options.c3.transport });
+        } catch (error) {
+          customerInputFailure = error instanceof Error && /^(CUSTOMER_INPUT_[A-Z_]+|REALTIME_GENERATION_QUOTA_(EXCEEDED|UNAVAILABLE))$/u.test(error.message)
+            ? error.message : "CUSTOMER_INPUT_PROVIDER_FAILURE";
+          customerInput = unresolvedRealtimeCustomerInput();
+        }
+        preSalePolicyIntent = customerInput.policyQuestion;
+      }
+    }
+    // A policy question is not a veto on an independent, validated customer
+    // request in the same message. Conditional buying remains non-committed.
+    const policyCommerceRequested = customerInput?.route === "PRE_SALE" && (
+      customerInput.salesSignals.buyingIntent?.decision === "COMMITTED" ||
+      customerInput.variant.operation !== "NONE" ||
+      Object.values(customerInput.salesSignals.checkoutExtraction).some((field) => field.value !== null) ||
+      customerInput.salesSignals.purchaseConfirmation.decision === "CONFIRM"
+    );
     const mediaPartialResolutionPolicy =
       activeMediaPartialResolutionPolicy(policyResolution);
     let customerUrlDisposition: CustomerUrlDisposition = customerUrlDecision.disposition;
@@ -3236,15 +3373,18 @@ export class RealtimeRunner {
     const resolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
-        isPostSaleRequest(message.text ?? "", salesCycleRecord?.state.stage === "CART_OPEN" ||
-          salesCycleRecord?.state.stage === "ORDER_PREVIEW") ||
-        preSalePolicyIntent !== null
+        (customerInput ? customerInput.route !== "PRE_SALE" :
+          isPostSaleRequest(message.text ?? "", salesCycleRecord?.state.stage === "CART_OPEN" ||
+            salesCycleRecord?.state.stage === "ORDER_PREVIEW")) ||
+        (preSalePolicyIntent !== null && !policyCommerceRequested)
       ? this.emptyResolution()
       : combinedCustomerUrlResolution ?? await this.resolveProducts(
           message,
           authorityState,
           claim.pageId,
           mediaPartialResolutionPolicy,
+          customerInput,
+          customerInputFailure === null,
         );
     const multiFactQueries =
       this.options.multiFactQueryEnabled && !message.isEcho
@@ -3314,6 +3454,7 @@ export class RealtimeRunner {
       commerceRuntimeContext?.status === "READY" ? "NONE" : undefined,
       salesCycleRecord?.state.stage === "CART_OPEN" ||
         salesCycleRecord?.state.stage === "ORDER_PREVIEW",
+      customerInput,
     );
     const applied = applyInboundEvent({
       state: authorityState,
@@ -3326,15 +3467,31 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
+    if (customerInput && customerInput.route === "PRE_SALE" &&
+        customerInputChangesProductReference(customerInput)) {
+      // An unresolved new selection/rejection must not revive the previous
+      // product via state fallback. The existing cart has its own identity.
+      nextState = { ...nextState, productSelections: [], mediaClarification: null,
+        ...(!resolvedProduct || resolvedProduct.productId !== authorityState.currentProductId
+          ? { currentProductId: resolvedProduct?.productId ?? null,
+          consideredVariant: { offerType: null, color: null, size: null },
+          verifiedVariant: null, orderDraft: null } : {}) };
+    }
     if (!message.isEcho && event.actor === "CUSTOMER") {
-      const session = updateSessionDecisionContext(
-        nextState.sessionDecisionContext, message.text ?? "",
-      );
+      const session = customerInput
+        ? applyCustomerDecisionInput(nextState.sessionDecisionContext, customerInput, authorityState.currentProductId)
+        : updateSessionDecisionContext(nextState.sessionDecisionContext, message.text ?? "");
       if (nextState.sessionDecisionContext !== undefined ||
           hasSessionDecisionContext(session)) {
         nextState = { ...nextState, sessionDecisionContext: session };
       }
     }
+    // Extraction saw the pre-turn snapshot. All later model consumers see the
+    // same post-delta customer context as C3; it never supplies shop authority.
+    modelContext[0] = { ...modelContext[0]!, text: JSON.stringify({
+      ...authorityModelState,
+      customerSessionContext: nextState.sessionDecisionContext ?? null,
+    }) };
     const initialAuthorityStrategyStage = commerceRuntimeContext?.status === "READY" && salesCycleRecord
       ? commerceStrategyStage(salesCycleRecord.state.stage)
       : nextState.salesStage;
@@ -3400,6 +3557,7 @@ export class RealtimeRunner {
       }
     }
     let metaMessages: RealtimeMetaMessageUnit[] = [];
+    let policyReplyForTurn: string | null = null;
     let proposal: AgentProposalV1 | null = null;
     let guardVerifiedAttachmentUrls: ReadonlySet<string> | undefined;
     const mediaSelectorV2GuardActive =
@@ -3423,6 +3581,7 @@ export class RealtimeRunner {
     let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
     let salesCartReadback: DeterministicEffectReadinessV1 | null = null;
     let c3Chosen = false;
+    let c3Candidate: RealtimeDecisionEventPlan["details"]["c3Candidate"];
     let c3CartSelected = false;
     let modelNegotiationProposal: ModelNegotiationProposalV1 | null = null;
     let buyingSignalOverride = false;
@@ -3456,6 +3615,10 @@ export class RealtimeRunner {
     > = [];
     let canonicalDecisionEvidence: CanonicalDecisionEvidenceV1 | null = null;
     const canonicalDecisionEvidenceForTurn = (): CanonicalDecisionEvidenceV1 => {
+      if (customerInput) return canonicalDecisionEvidence ??= customerInputCanonicalEvidence({
+        text: message.text ?? "", sourceMessageId: message.messageId ?? message.eventKey,
+        productId: resolvedProduct?.productId ?? nextState.currentProductId, evaluatedAt: now,
+      }, customerInput);
       canonicalDecisionEvidence ??= buildCanonicalDecisionEvidenceV1({
         text: message.isEcho ? "" : message.text ?? "",
         sourceMessageId: message.messageId ?? message.eventKey,
@@ -3602,7 +3765,7 @@ export class RealtimeRunner {
           explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_MODEL_UNAVAILABLE"];
         } else {
           for (let attempt = 0; attempt < 2; attempt += 1) {
-            if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+            if (this.quota && !(await reserveModelTurn())) {
               explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_QUOTA_DENIED"];
               break;
             }
@@ -3665,6 +3828,7 @@ export class RealtimeRunner {
           outboundRuntimePolicy(policyResolution),
         );
         if (reply) {
+          policyReplyForTurn = reply;
           if (preSalePolicyIntent === "SHIPPING_FEE") {
             deterministicProtectedClaimTypes = ["SHIPPING_FEE"];
             deterministicProtectedClaimRequests = [{ type: "SHIPPING_FEE" }];
@@ -3756,7 +3920,7 @@ export class RealtimeRunner {
           rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_UNAVAILABLE"];
         } else {
           for (let attempt = 0; attempt < 2; attempt += 1) {
-            if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+            if (this.quota && !(await reserveModelTurn())) {
               rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_QUOTA_DENIED"];
               break;
             }
@@ -3825,7 +3989,30 @@ export class RealtimeRunner {
           nextState = transitioned.state;
           handoff = transitioned.handoff;
         }
+      } else if (resolution.alternativeSearch === "NO_MATCH" || resolution.alternativeSearch === "UNAVAILABLE") {
+        // This is the result of this bounded lookup, not a claim that no stock
+        // exists anywhere. No model may invent a replacement or an offer.
+        clarificationHandled = true;
+        if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = [{ kind: "TEXT", text: resolution.alternativeSearch === "UNAVAILABLE"
+            ? "Em chưa xác minh được giá và tình trạng hàng của các mẫu vừa tìm, nên chưa thể đề xuất mẫu khác lúc này."
+            : "Trong các mẫu vừa tìm, em chưa xác minh được mẫu còn hàng phù hợp với yêu cầu của chị." }];
+        }
+      } else if (customerInputFailure !== null) {
+        // The Producer is the only semantic authority for this latest text.
+        // Do not let downstream text/model reasoning revive a stale product or
+        // manufacture a new fact/action after that boundary failed. Earlier
+        // URL/media branches may still complete because their bindings are
+        // independently verified.
+        clarificationHandled = true;
+        if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = [{
+            kind: "TEXT",
+            text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé.",
+          }];
+        }
       } else if (
+        customerInputFailure === null &&
         unresolvedProductRequiresHandoff(message.text ?? "", {
           isEcho: message.isEcho,
           hasAdsContext: Boolean(message.adsContext),
@@ -3886,11 +4073,18 @@ export class RealtimeRunner {
             observedAt: envelope.observedAt,
           }))
         );
-        businessFacts = flattened[0]?.envelope ?? null;
+        const successfulFacts = flattened.filter(({ envelope }) =>
+          envelope.status === "OK" && envelope.facts !== null);
+        businessFacts = successfulFacts[0]?.envelope ?? flattened[0]?.envelope ?? null;
         businessFactEnvelopes = flattened.map(({ envelope }) => envelope);
+        // A locally isolated transport failure is not authority and must not
+        // erase a successful sibling. Stale, missing, malformed and other
+        // unavailable sources keep their existing fail-closed behavior.
         const unsafe = flattened.some(({ envelope }) =>
           staleFactsRequireHandoff(message.text ?? "", envelope) ||
-          unavailableFactsRequireHandoff(envelope)
+          (unavailableFactsRequireHandoff(envelope) && !(successfulFacts.length > 0 &&
+            envelope.status === "ERROR" && envelope.facts === null &&
+            envelope.reasonCode === "BUSINESS_FACT_LOOKUP_FAILED"))
         );
         const reply = unsafe ? null : multiFactReply(resolutions);
         if (!reply) {
@@ -3907,7 +4101,7 @@ export class RealtimeRunner {
           nextState = transitioned.state;
           handoff = transitioned.handoff;
         } else {
-          deterministicProtectedClaimTypes = [...new Set(flattened.map(({ requestedFact }) => ({
+          deterministicProtectedClaimTypes = [...new Set(successfulFacts.map(({ requestedFact }) => ({
             PRICE: "PRICE" as const,
             STOCK: "STOCK" as const,
             SIZE: "SIZE_FIT" as const,
@@ -3916,7 +4110,8 @@ export class RealtimeRunner {
           deterministicProtectedClaimRequests = resolutions.flatMap((resolution) =>
             resolution.product === null
               ? []
-              : resolution.facts.map(({ requestedFact }) => ({
+              : resolution.facts.filter(({ envelope }) => envelope.status === "OK" && envelope.facts !== null)
+                .map(({ requestedFact }) => ({
                   type: ({
                     PRICE: "PRICE" as const,
                     STOCK: "STOCK" as const,
@@ -4108,20 +4303,22 @@ export class RealtimeRunner {
           metaMessages = [{ kind: "TEXT", text: proposal.reply }];
         }
       } else {
-        const directProductInfo = resolvedProduct !== null && imageRequest === null && (
+        const directProductInfo = resolvedProduct !== null && imageRequest === null &&
+          !(customerInput && customerInput.factQuery.intent !== "NONE") && (
           isResolvedProductCodeOnly(message.text ?? "", resolvedProduct) ||
           resolution.origin === "ADS" || resolution.origin === "MEDIA" ||
           resolution.origin === "SELECTION" || resolution.origin === "TEXT_CODE" ||
+          resolution.alternativeSearch === "MATCHED" ||
           (explicitCustomerBusinessIntent(message.text ?? "") === "PRICE" &&
             advisoryIntent === null)
         );
         // Lượt gửi ảnh và thẻ báo giá đều dựng bằng dữ liệu đã xác minh, không
         // gọi model, nên không được trừ hạn ngạch sinh nội dung.
-        const skipsModel = directProductInfo || imageRequest !== null;
+        const skipsModel = customerInput !== null || directProductInfo || imageRequest !== null;
         if (
           !skipsModel &&
           this.quota &&
-          !(await this.quota.reserve(claim.pageId, now))
+          !(await reserveModelTurn())
         ) {
           const result = await this.runtime.commit(
             {
@@ -4148,6 +4345,16 @@ export class RealtimeRunner {
           guardVerifiedAttachmentUrls = new Set(imageRequest.images);
         } else if (directProductInfo && resolvedProduct) {
           proposal = productInfoLookupProposal(resolvedProduct);
+        } else if (customerInput) {
+          // Input extraction owns semantics; C3 alone owns the adaptive reply.
+          // This proposal transports a verified lookup request through the
+          // existing fact assembler. It makes no business effect or sales claim.
+          proposal = {
+            schemaVersion: 1, intent: "customer_input", conversationStage: initialAuthorityStrategyStage,
+            productId: resolvedProduct?.productId ?? null, action: "REPLY", reply: "",
+            attachments: [], handoffReason: null, businessFactQuery: customerInput.factQuery,
+            salesSignals: customerInput.salesSignals,
+          };
         } else {
           modelCalled = true;
           try {
@@ -4283,7 +4490,7 @@ export class RealtimeRunner {
                 handoffReason: null,
               };
         }
-        const facts = await this.resolveFacts(
+        const facts = resolution.alternativeFacts ?? await this.resolveFacts(
           proposal,
           resolvedProduct,
           imageRequest ? imageRequest.intent : "PRICE_CARD",
@@ -4365,7 +4572,7 @@ export class RealtimeRunner {
           } else if (
             facts.status === "OK" &&
             resolvedProduct &&
-            (initialVertexFallbackUsed || (
+            (customerInput !== null || initialVertexFallbackUsed || (
               this.options.groundedDraftEnabled &&
               this.options.verifiedFactAssemblerEnabled &&
               this.model.groundDraftWithFacts
@@ -4378,7 +4585,7 @@ export class RealtimeRunner {
             );
             let groundedDraft = DETERMINISTIC_GROUNDED_DRAFT;
             let groundedDraftSucceeded = false;
-            if (!initialVertexFallbackUsed) {
+            if (!initialVertexFallbackUsed && !customerInput) {
               try {
                 modelCalled = true;
                 const grounded = await this.model.groundDraftWithFacts!(
@@ -4588,7 +4795,9 @@ export class RealtimeRunner {
             proposal.productId,
             nextState.currentProductId,
           );
-          const mentions = extractVariantMentions(message.text ?? "", proposal);
+          const mentions = customerInput
+            ? { size: customerInput.variant.size, color: customerInput.variant.color }
+            : extractVariantMentions(message.text ?? "", proposal);
           if (variantProductId && (mentions.size !== null || mentions.color !== null)) {
             const verified = await this.factsReader.resolveVerifiedVariant(
               {
@@ -4697,13 +4906,9 @@ export class RealtimeRunner {
           ...businessFactEnvelopes.map(({ productId }) => productId),
           ...(proposal.productId === null ? [] : [proposal.productId]),
         ])].sort();
-        const expectedProtectedClaimProductScopes =
-          expectedProtectedClaimProductIds.map((productId) => ({
-            productId,
-            variantId: activeVerifiedVariant?.parentProductId === productId
-              ? activeVerifiedVariant.selectedVariantId
-              : null,
-          }));
+        const expectedProtectedClaimProductScopes = parentFactProtectedScopes(
+          expectedProtectedClaimProductIds, activeVerifiedVariant,
+        );
         const typedClaimsForProposal = buildProtectedClaimsFromVerifiedFactSetV1({
           facts: businessFactEnvelopes,
           sizeClaim: verifiedSizeClaimForTurn,
@@ -5063,6 +5268,7 @@ export class RealtimeRunner {
       }
     }
 
+    let commerceFactReplyPreserved = false;
     const protectedClaimSet = buildProtectedClaimsFromVerifiedFactSetV1({
       facts: businessFactEnvelopes,
       sizeClaim: verifiedSizeClaimForTurn,
@@ -5072,9 +5278,10 @@ export class RealtimeRunner {
 
     if (
       salesCycleRecord &&
+      customerInputFailure === null &&
       !message.isEcho &&
       nextState.conversationOwner === "BOT" &&
-      preSalePolicyIntent === null &&
+      (preSalePolicyIntent === null || policyCommerceRequested) &&
       !clarificationHandled &&
       handoff === null
     ) {
@@ -5108,13 +5315,14 @@ export class RealtimeRunner {
           proposal?.businessFactQuery.offerType ??
           nextState.consideredVariant.offerType,
         size:
-          proposal?.businessFactQuery.size ??
-          nextState.consideredVariant.size,
+          customerInput ? customerInput.variant.size ?? nextState.consideredVariant.size
+            : proposal?.businessFactQuery.size ?? nextState.consideredVariant.size,
         color:
-          proposal?.businessFactQuery.color ??
-          nextState.consideredVariant.color,
+          customerInput ? customerInput.variant.color ?? nextState.consideredVariant.color
+            : proposal?.businessFactQuery.color ?? nextState.consideredVariant.color,
         canonicalBuyingIntent: canonicalEvidence.buyingIntent,
-        salesSignals: proposal?.salesSignals ?? null,
+        salesSignals: customerInput?.salesSignals ?? proposal?.salesSignals ?? null,
+        customerInput,
         negotiationProposal: modelNegotiationProposal,
         shopAlias: this.options.shopAlias,
         policyResolution,
@@ -5131,9 +5339,70 @@ export class RealtimeRunner {
       salesReadinessAttempt = sales.readinessAttempt ?? null;
       salesCartReadback = sales.cartReadback ?? null;
       if (sales.handled) {
-        metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
-          ? [...sales.messages]
-          : [];
+        const checkoutRequest = sales.plan?.state.cart && sales.plan.state.preview === null
+          ? realtimeCheckoutInformationRequest(sales.plan.state, policyResolution) : null;
+        const answerTypes = [...new Set([
+          ...protectedClaimValidation.claimTypes, ...deterministicProtectedClaimTypes,
+        ])];
+        const keepFactAnswer = customerInput !== null && customerInput.factQuery.intent !== "NONE" &&
+          preSalePolicyIntent === null && businessFacts?.status === "OK" &&
+          !sales.transferToHuman && checkoutRequest !== null && answerTypes.length > 0 &&
+          metaMessages.length > 0 && metaMessages.every(({ kind }) => kind === "TEXT");
+        if (keepFactAnswer && customerInput !== null && businessFacts !== null) {
+          // The question's stock/size is not the selected cart offer. Authorize its
+          // already-guarded answer as PRODUCT output, separately from CART effects.
+          // Do not relabel it as cart stock or weaken the cart-readiness validator.
+          const requestedSize = customerInput.factQuery.size;
+          // sizes lists AVAILABLE sizes, not the successful lookup's subject.
+          // An out-of-stock requested size is absent there; dropping its label
+          // would make the answer sound like the selected cart size is sold out.
+          // Scope comes from the exact typed query that produced this OK answer.
+          const queryMatchesSize = requestedSize !== null &&
+            proposal?.businessFactQuery.size?.toLocaleUpperCase("vi-VN") ===
+              requestedSize.toLocaleUpperCase("vi-VN");
+          const answer = metaMessages.map((unit, index) => index === 0 && unit.kind === "TEXT" &&
+            queryMatchesSize
+              ? { ...unit, text: `Với size ${requestedSize}: ${unit.text}` } : unit);
+          const messages = [...answer, { kind: "TEXT" as const, text: checkoutRequest }];
+          const factClaims = protectedClaimSet.claims.filter(({ type }) => answerTypes.includes(type));
+          const cartState = (sales.plan?.state ?? salesCycleRecord.state).cart?.value ?? null;
+          const commerceClaims = salesProtectedOutbound?.claims ?? [];
+          const claims = [...commerceClaims, ...factClaims].filter((entry, index, all) =>
+            all.findIndex((candidate) => candidate.claimId === entry.claimId) === index
+          );
+          const claimTypes = [...new Set(claims.map(({ type }) => type))].sort();
+          const parent = cartState === null ? null :
+            [...(sales.plan?.effectReadiness ?? [])].reverse().find((candidate) =>
+              candidate.outcome === "READY" &&
+              candidate.binding.cart?.cartId === cartState.cartId &&
+              candidate.binding.cart?.cartRevision === cartState.revision
+            ) ?? null;
+          const payloadHash = canonicalSha256(messages);
+          const readiness = evaluateDeterministicEffectReadinessV1({
+            effect: "PROTECTED_OUTBOUND", pageId: claim.pageId, conversationId: record.conversationId,
+            sourceMessageIdHash: canonicalEvidence.buyingIntent.sourceMessageIdHash,
+            conversationRevision: record.stateVersion, salesCycleRevision: salesCycleRecord.stateRevision,
+            productIds: cartState === null
+              ? [businessFacts.productId]
+              : [...new Set([...cartState.lines.map(({ parentProductId }) => parentProductId), businessFacts.productId])],
+            cartId: cartState?.cartId ?? null,
+            cartVersion: cartState?.revision ?? null,
+            cartStateHash: parent?.binding.cart?.cartStateHash ?? null,
+            ...(cartState === null ? {} : { cartLines: cartState.lines }),
+            orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims,
+            protectedClaimTypes: claimTypes,
+            deterministicEvidenceHash: payloadHash,
+            parentReadinessHash: parent?.readinessHash ?? null,
+            payloadHash, checkedAt: new Date(),
+          });
+          salesProtectedOutbound = { claims, claimTypes, readiness };
+          commerceFactReplyPreserved = true;
+          metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled ? messages : [];
+        } else {
+          metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
+            ? [...(policyReplyForTurn === null ? [] : [{ kind: "TEXT" as const, text: policyReplyForTurn }]),
+                ...sales.messages] : [];
+        }
       }
       if (sales.transferToHuman) {
         salesDesiredTag = sales.desiredTag;
@@ -5153,15 +5422,36 @@ export class RealtimeRunner {
 
     // C3 composes one candidate after commerce has advanced canonical state.
     // The transaction below remains the only owner of send and effects.
-    if (this.options.c3 !== null && triggerMessagePk !== null &&
-        salesCycleRecord !== null &&
+    if (customerInputFailure !== null && handoff === null &&
+        nextState.conversationOwner === "BOT" && businessFactEnvelopes.length === 0 &&
+        verifiedSizeClaimForTurn === null) {
+      // An unavailable input model cannot restart discovery or imply that a
+      // cart request succeeded. Keep verified facts when another branch has
+      // already supplied them; otherwise ask for one retry without changing commerce.
+      metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
+        ? [{ kind: "TEXT", text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé." }]
+        : [];
+    }
+    if (customerInputFailure === null && this.options.c3 !== null && triggerMessagePk !== null &&
+        preSalePolicyIntent === null && resolution.alternativeSearch !== "NO_MATCH" &&
+        resolution.alternativeSearch !== "UNAVAILABLE" && salesCycleRecord !== null &&
         !message.isEcho && handoff === null &&
         nextState.conversationOwner === "BOT" &&
         (resolution.products.length <= 1 ||
           (shouldUseMultiFacts && businessFactEnvelopes.length > 0)) &&
         !metaMessages.some((unit) => unit.kind === "IMAGE") &&
-        (!salesHandled || salesTelemetry?.clarificationCase === true)) {
+        (!salesHandled || resolution.alternativeSearch === "MATCHED" ||
+          (salesTelemetry?.clarificationCase === true && !commerceFactReplyPreserved))) {
       try {
+        if (salesCartReadback === null) {
+          salesCartReadback = await readRealtimeCurrentCart({
+            pageId: claim.pageId, conversationId: record.conversationId,
+            conversationRevision: record.stateVersion, stateRevision: salesCycleRecord.stateRevision,
+            state: salesCyclePlan?.state ?? salesCycleRecord.state,
+            canonicalBuyingIntent: canonicalDecisionEvidenceForTurn().buyingIntent,
+            facts: this.factsReader, shopAlias: this.options.shopAlias, now: new Date(),
+          });
+        }
         const c3Input = buildRealtimeC3Input({
           sourceMessagePk: triggerMessagePk,
           canonicalEvidence: canonicalDecisionEvidenceForTurn(),
@@ -5193,45 +5483,30 @@ export class RealtimeRunner {
           now: new Date(),
         });
         c3FitMeasurementsRequired = c3Input.context.barriers.active.includes("MEASUREMENTS_REQUIRED");
+        const c3Dialogue = buildRealtimeC3Dialogue(context, nextState.sessionDecisionContext, {
+          ...customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null),
+          selection: { productId: nextState.currentProductId,
+            size: nextState.consideredVariant.size, color: nextState.consideredVariant.color },
+        });
         const chosen = await runTrackCStrategyLive({
           ...c3Input,
           modelResource: this.options.c3.modelResource,
           decisionAt: new Date(),
-          // The shared Track C request accepts at most 15 dialogue messages.
-          // Keep the newest window, including this inbound, when the runtime
-          // history store returns its larger 30-message context window.
-          dialogue: [
-            ...(nextState.sessionDecisionContext &&
-                hasSessionDecisionContext(nextState.sessionDecisionContext)
-              ? [{
-                  direction: "INBOUND" as const,
-                  senderType: "SYSTEM" as const,
-                  messageType: "EVENT" as const,
-                  text: JSON.stringify({
-                    type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
-                    budgetCustomerReported: nextState.sessionDecisionContext.budgetVnd === null
-                      ? null
-                      : `${nextState.sessionDecisionContext.budgetVnd / 1_000}k`,
-                    occasion: nextState.sessionDecisionContext.occasion,
-                    rejectedProductIds: nextState.sessionDecisionContext.rejectedProductIds,
-                  }),
-                  attachmentCount: 0,
-                  occurredAt: context[0]?.occurredAt ?? now.toISOString(),
-                }]
-              : []),
-            ...context.slice(nextState.sessionDecisionContext &&
-              hasSessionDecisionContext(nextState.sessionDecisionContext)
-              ? -14 : -15).map((entry) => ({
-            ...entry,
-            text: redactCustomerUrlsForModel(
-              redactAnalyticsMessage(entry.text).text,
-            ),
-            })),
-          ],
+          comparisonFacts: businessFactEnvelopes,
+          knownBudgetVnd: nextState.sessionDecisionContext?.budgetVnd ?? null,
+          firstContactInputs: {
+            color: customerInput?.variant.color ?? nextState.consideredVariant.color,
+            measurements: customerProfileSummary(this.options.customerProfileEnabled ? customerProfile : null).measurements,
+          },
+          dialogue: c3Dialogue,
+          ...(customerInput === null ? {} : {
+            customerVariant: customerInput.variant,
+            requestedObligations: trackCRequestedObligationsForTurn(customerInput),
+          }),
           checkoutClarificationActive:
             (salesCyclePlan?.state ?? salesCycleRecord.state).clarification?.reasonCode ===
               "CHECKOUT_DETAILS_MISSING",
-          transport: this.options.c3.transport,
+          transport: c3Transport ?? this.options.c3.transport,
         });
         validateResponderOutput(
           c3Input.context, {
@@ -5239,11 +5514,18 @@ export class RealtimeRunner {
             strategy: chosen.output.strategy,
             cta: chosen.output.cta,
           }, "PRODUCTION_CONTRACT", new Date(),
-          [], c3Input.currentCart,
+          [], c3Input.currentCart, businessFactEnvelopes,
+          { task: chosen.responderTask, dialogue: c3Dialogue,
+            ...(customerInput === null ? {} : { customerVariant: customerInput.variant }) },
         );
         const hashes = new Set(chosen.output.segments.flatMap((segment) =>
           segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
         ));
+        for (const entry of trackCPriceComparisons(c3Input.context, businessFactEnvelopes, new Date())) {
+          if (hashes.has(entry.provenance.contentHash) && Array.isArray(entry.value.sourceClaimHashes)) {
+            for (const sourceHash of entry.value.sourceClaimHashes) if (typeof sourceHash === "string") hashes.add(sourceHash);
+          }
+        }
         const chosenClaims = c3Input.context.verifiedClaims.filter((claim) =>
           hashes.has(claim.provenance.contentHash)
         );
@@ -5304,6 +5586,13 @@ export class RealtimeRunner {
         if (readiness.outcome !== "READY") {
           throw new Error("TRACK_C_C3_OUTBOUND_READINESS_BLOCKED");
         }
+        c3Candidate = { status: "VALIDATED", replyHash: canonicalSha256(chosen.reply),
+          redactedReply: redactAnalyticsMessage(chosen.reply).text,
+          reason: chosen.recoveryDiagnostic ? "C3_SELECTED_FACTS_RECOVERY" : null,
+          ...(chosen.recoveryDiagnostic ? { failureStage: chosen.recoveryDiagnostic.stage,
+            reasonCodes: [chosen.recoveryDiagnostic.errorCode,
+            ...chosen.recoveryDiagnostic.reasonCodes ?? []] } : {}),
+          selectedForOutbound: this.options.mode === "LIVE" && this.options.sendEnabled };
         if (this.options.mode === "LIVE" && this.options.sendEnabled) {
           metaMessages = candidateMessages;
           salesProtectedOutbound = {
@@ -5318,10 +5607,15 @@ export class RealtimeRunner {
         const rawCode = error instanceof Error ? error.message : "TRACK_C_C3_UNKNOWN_ERROR";
         const code = /^[A-Z][A-Z0-9_]{2,100}$/u.test(rawCode)
           ? rawCode : "TRACK_C_C3_RUNTIME_FAILURE";
+        const reasonCodes = error instanceof TrackCStrategyContractFailure ? error.diagnostic.reasonCodes ?? [] : [];
+        c3Candidate = { status: "REJECTED", replyHash: null, redactedReply: null,
+          reason: code, reasonCodes, selectedForOutbound: false,
+          ...(error instanceof TrackCStrategyContractFailure ? { failureStage: error.diagnostic.stage } : {}) };
         process.stderr.write(`${JSON.stringify({
           level: "warn", code: "TRACK_C_C3_FALLBACK",
           candidate: "TRACK_C_C3_LIVE_V1", lane: "PRODUCTION_CONTRACT",
           reason: code,
+          reasonCodes,
           conversationRevision: record.stateVersion,
           salesCycleRevision: salesCycleRecord.stateRevision,
         })}\n`);
@@ -5370,7 +5664,7 @@ export class RealtimeRunner {
             : []
         );
     if (protectedOutboundReadiness !== null) {
-      const salesCart = c3Chosen && protectedOutboundReadiness.cartId === null
+      const salesCart = (c3Chosen || commerceFactReplyPreserved) && protectedOutboundReadiness.cartId === null
         ? null : (salesCyclePlan?.state ?? salesCycleRecord?.state)?.cart?.value ?? null;
       const payloadHash = canonicalSha256(metaMessages);
       protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
@@ -5409,12 +5703,9 @@ export class RealtimeRunner {
       const mediaProductId = expectedOutboundProductIds.length === 1
         ? expectedOutboundProductIds[0]!
         : null;
-      const expectedOutboundProductScopes = expectedOutboundProductIds.map((productId) => ({
-        productId,
-        variantId: nextState.verifiedVariant?.parentProductId === productId
-          ? nextState.verifiedVariant.selectedVariantId
-          : null,
-      }));
+      const expectedOutboundProductScopes = parentFactProtectedScopes(
+        expectedOutboundProductIds, nextState.verifiedVariant,
+      );
       if (mediaProductId !== null && outboundClaimTypes.includes("PRODUCT_MEDIA")) {
         protectedOutboundClaims = [
           ...protectedOutboundClaims,
@@ -5929,6 +6220,9 @@ export class RealtimeRunner {
           salesCycleStageBefore: salesStageBefore,
           salesCycleStageAfter: salesStageAfter,
           outboundMessageCount: metaMessages.length,
+          ...(customerInputFailure ? { customerInputFailure } : {}),
+          ...(c3ModelCalls.length > 0 ? { c3ModelCalls } : {}),
+          ...(c3Candidate ? { c3Candidate } : {}),
           modelCalled,
           modelLatencyMs: modelCalled ? modelLatencyMs : null,
           modelTokenUsage: modelTelemetry.tokenUsage,
@@ -6567,6 +6861,8 @@ export class RealtimeRunner {
     state: ConversationState,
     pageId: string,
     mediaPartialResolutionPolicy: MediaPartialResolutionPolicy,
+    customerInput: RealtimeCustomerInput | null = null,
+    allowStateContinuation = true,
   ): Promise<ProductResolution> {
     const text = message.text?.trim() ?? "";
     const imageAttachments = message.attachments
@@ -6579,6 +6875,36 @@ export class RealtimeRunner {
         Boolean(item.attachment.url)
       );
     const activeClarification = state.mediaClarification;
+    if (allowStateContinuation && customerInput &&
+        imageAttachments.length === 0 && !message.adsContext) {
+      const operation = customerInput.product.operation;
+      const searchRequested = customerInputRequestsAlternativeSearch(customerInput);
+      const rejectionRequested = customerInputRejectsProduct(customerInput);
+      if (searchRequested) {
+        const result = await findVerifiedAlternative({ text, customerInput,
+          session: state.sessionDecisionContext, currentProductId: state.currentProductId,
+          search: this.productSearch, facts: this.factsReader,
+          shopAlias: this.options.shopAlias, now: new Date() });
+        return result.status === "MATCHED"
+          ? { ...this.singleResolution(result.product, "TEXT_SEMANTIC"),
+              alternativeSearch: result.status, alternativeFacts: result.facts }
+          : { ...this.emptyResolution(), alternativeSearch: result.status };
+      }
+      if (rejectionRequested) return this.emptyResolution();
+      const selectedId = operation === "SELECT"
+        ? customerInput.product.productId : state.currentProductId;
+      const multipleFactSubjects = this.options.multiFactQueryEnabled &&
+        customerInput.factQuery.intent !== "NONE" && new Set(extractAdProductCodes(text)).size > 1;
+      if (!multipleFactSubjects && (selectedId || operation === "SELECT")) {
+        const product = selectedId ? await this.exactProduct(selectedId) : null;
+        if (!product) return this.emptyResolution();
+        return { ...this.singleResolution(product, operation === "SELECT" ? "SELECTION" : "STATE"),
+          ...(activeClarification?.status === "ACTIVE" ? { clarification: {
+            action: "CLEAR" as const, candidates: [], attemptCount: activeClarification.attemptCount,
+            maxAttempts: activeClarification.maxAttempts, reasonCode: "MEDIA_CLARIFICATION_SELECTED",
+          } } : {}) };
+      }
+    }
     if (activeClarification?.status === "ACTIVE" && imageAttachments.length === 0) {
       const explicitCodes = [...new Set([
         ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
@@ -6677,7 +7003,9 @@ export class RealtimeRunner {
         .map(({ product }) => product)
         .filter((product): product is StableProductDocument => product !== null);
       return {
-        primary: products[0] ?? null,
+        primary: (customerInput?.product.productId
+          ? products.find((product) => normalizeProductCode(product.productId) ===
+              normalizeProductCode(customerInput.product.productId!)) : undefined) ?? products[0] ?? null,
         products,
         references,
         media: aggregateMedia([]),
@@ -6833,15 +7161,23 @@ export class RealtimeRunner {
       };
     }
 
-    const stateProductId = currentProductContinuationId(text, state.currentProductId);
+    const stateProductId = !allowStateContinuation ? null : customerInput
+      ? customerInputChangesProductReference(customerInput)
+        ? customerInput.product.operation === "SELECT"
+          ? customerInput.product.productId
+          : null
+        : state.currentProductId
+      : currentProductContinuationId(text, state.currentProductId);
     if (stateProductId) {
       const product = await this.exactProduct(stateProductId);
       if (product) return this.singleResolution(product, "STATE");
     }
 
-    if (text) {
-      const excludeProductId = isAlternativeProductRequest(text)
-        ? state.currentProductId : null;
+    if (text && allowStateContinuation) {
+      const excludeProductId = (customerInput
+        ? customerInputRequestsAlternativeSearch(customerInput) ||
+          customerInputRejectsProduct(customerInput)
+        : isAlternativeProductRequest(text)) ? state.currentProductId : null;
       const result = excludeProductId
         ? await this.productSearch.searchText(text, excludeProductId)
         : await this.productSearch.searchText(text);
@@ -6872,7 +7208,7 @@ export class RealtimeRunner {
       size: proposal.businessFactQuery.size,
       deliveryRegion: proposal.businessFactQuery.deliveryRegion,
     };
-    const facts = await this.factsReader.resolve(query);
+    const facts = await resolveBusinessFactOrError(this.factsReader.resolve.bind(this.factsReader), query);
     if (
       product &&
       facts.status === "OK" &&
@@ -6898,10 +7234,11 @@ export class RealtimeRunner {
     commerceDerivedStage?: SalesStage,
     commerceDerivedObjectionType?: ObjectionType,
     hasOpenCart = false,
+    customerInput: RealtimeCustomerInput | null = null,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
-    const postSale = isPostSaleRequest(message.text ?? "", hasOpenCart);
-    const humanRequest = requestsHuman(text);
+    const postSale = customerInput ? customerInput.route === "POST_SALE" : isPostSaleRequest(message.text ?? "", hasOpenCart);
+    const humanRequest = customerInput ? customerInput.route === "HUMAN" : requestsHuman(text);
     return {
       eventKey: message.eventKey,
       messageId: message.messageId,
@@ -6910,13 +7247,18 @@ export class RealtimeRunner {
       actor: message.isEcho ? "HUMAN" : "CUSTOMER",
       journey: postSale ? "POST_SALE" : "PRE_SALE",
       requestedHandoffReason: postSale
-        ? postSaleHandoffReason(message.text ?? "")
+        ? customerInput ? "POST_SALE" : postSaleHandoffReason(message.text ?? "")
         : customerUrlRequiresHandoff
           ? "SENSITIVE_CASE"
         : humanRequest
           ? "CUSTOMER_REQUESTED_HUMAN"
           : null,
-      requestedSalesStage: commerceDerivedStage ?? this.salesStage(text, productId),
+      requestedSalesStage: commerceDerivedStage ?? (customerInput
+        ? customerInput.salesSignals.buyingIntent?.decision === "COMMITTED" &&
+            customerInput.salesSignals.buyingIntent.confidence >= 0.9 ? "READY_TO_BUY"
+          : customerInput.factQuery.intent === "SIZE" ? "FIT_CONSULTING"
+          : productId ? "PRODUCT_MATCHED" : null
+        : this.salesStage(text, productId)),
       salesStageTrigger: "NORMAL",
       productId,
       objectionType: commerceDerivedObjectionType ?? this.objectionType(text),

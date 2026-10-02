@@ -32,6 +32,32 @@ const priceEvidence: TrackCSelectableEvidence = {
 };
 
 describe("Track C C3 clean strategy contract", () => {
+  it("rejects a repeated budget request without choosing another progression", () => {
+    const input = { decision: { replyAct: "ANSWER", goal: "Find an alternative within budget.",
+      proposition: "PRICE", evidenceRefs: ["E_PRICE"], continuation: { type: "ASK", input: "BUDGET" },
+      canonicalAction: "NONE" }, evidence: [priceEvidence],
+      permittedCanonicalActions: ["NONE"] as const, measurementsUnavailable: false,
+      productResolved: true, hardStop: false, budgetKnown: true };
+    expect(() => compileTrackCStrategistDecision(input)).toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+    expect(compileTrackCStrategistDecision({ ...input, budgetKnown: false }).task.continuation)
+      .toEqual({ type: "ASK", input: "BUDGET" });
+  });
+
+  it("compiles canonical missing measurement fields instead of reading the model goal", () => {
+    const input = { decision: { replyAct: "ANSWER", goal: "Ask height and weight again.",
+      proposition: "SIZE_FIT", evidenceRefs: [], continuation: null, canonicalAction: "ASK_MEASUREMENTS" },
+      evidence: [], permittedCanonicalActions: ["ASK_MEASUREMENTS"] as const,
+      measurementsUnavailable: false, productResolved: true, hardStop: false,
+      measurementRequestedFields: ["WAIST_CM"] as const };
+    expect(compileTrackCStrategistDecision(input).task.canonicalRequest)
+      .toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["WAIST_CM"] });
+    expect(() => compileTrackCStrategistDecision({ ...input, measurementRequestedFields: [] }))
+      .toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+    expect(() => compileTrackCStrategistDecision({ ...input,
+      measurementRequestedFields: ["WAIST_CM", "WAIST_CM"] }))
+      .toThrow("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  });
+
   it("rejects an unresolved fit question disguised as purchase-size selection", () => {
     const input = {
       decision: { replyAct: "ANSWER", goal: "Need a body measurement to assess fit.",
@@ -261,7 +287,7 @@ describe("Track C C3 clean strategy contract", () => {
       hardStop: false,
     });
     expect(valid.continuation).toBeNull();
-    expect(valid.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
+    expect(valid.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["HEIGHT_CM", "WEIGHT_KG"] });
 
     expect(() => compileTrackCStrategistDecision({
       decision: {
@@ -397,7 +423,27 @@ describe("Track C C3 clean strategy contract", () => {
 
     expect(unresolved.canonicalRequest).toEqual({ type: "ASK_PRODUCT" });
     expect(colors.continuation).toEqual({ type: "ASK", input: "COLOR" });
-    expect(measurements.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
+    expect(measurements.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["HEIGHT_CM", "WEIGHT_KG"] });
+  });
+
+  it.each([false, true])("asks only a missing measurement and never repeats a known color (price=%s)", (hasPrice) => {
+    const task = compileTrackCFixedFirstContactTask({ productResolved: true,
+      classificationOrVariantRequired: false, colorChoiceMeaningful: false,
+      evidence: hasPrice ? [priceEvidence] : [], boundProductIds: ["SQ9012"],
+      missingMeasurements: ["WEIGHT_KG"],
+    });
+    expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["WEIGHT_KG"] });
+    expect(task.continuation).toBeNull();
+  });
+
+  it("keeps the quote but omits redundant discovery when its inputs are already known", () => {
+    const task = compileTrackCFixedFirstContactTask({ productResolved: true,
+      classificationOrVariantRequired: false, colorChoiceMeaningful: false,
+      evidence: [priceEvidence], boundProductIds: ["SQ9012"], missingMeasurements: [],
+    });
+    expect(task.evidence).toContain(priceEvidence);
+    expect(task.canonicalRequest).toBeNull();
+    expect(task.continuation).toEqual({ type: "KEEP_OPEN" });
   });
 
   it("keeps fixed progression priority when price is unresolved", () => {
@@ -415,6 +461,6 @@ describe("Track C C3 clean strategy contract", () => {
       proposition: "PRICE",
     });
     expect(task.continuation).toBeNull();
-    expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS" });
+    expect(task.canonicalRequest).toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["HEIGHT_CM", "WEIGHT_KG"] });
   });
 });

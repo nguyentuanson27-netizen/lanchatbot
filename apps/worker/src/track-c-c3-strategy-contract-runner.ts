@@ -1,4 +1,10 @@
+import {
+  trackCPiiFreeLocalityRequest, trackCUnclassifiedConversation,
+  assertTrackCLimitationCoverage, trackCRecoveryLimitation,
+} from "./track-c-c3-conversational-guard.js";
+import type { BusinessFactEnvelopeV1, MeasurementKind, RealtimeCustomerInput } from "@lana/contracts";
 import { createHash } from "node:crypto";
+import { DECISION_GUARD_REASON_CODES_V1 } from "@lana/contracts";
 import {
   canonicalJsonV1,
   type ContextV2,
@@ -20,10 +26,11 @@ import {
 } from "./track-c-offline-candidate.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 import type { TrackCCurrentCartBinding } from "./track-c-c3-cart-binding.js";
-import { trackCComposeReply, trackCRealizationMatches, trackCRealizationVariants } from "./track-c-c3-realization-style.js";
+import { trackCComposeReply, trackCOrderEvidence, trackCRealizationVariants } from "./track-c-c3-realization-style.js";
 import {
   compileTrackCFixedFirstContactTask,
   compileTrackCStrategistDecision,
+  validatedTrackCMeasurementFields,
   isTrackCTrustedAcquisitionMetadata,
   selectTrackCConversationLane,
   TRACK_C_PROTECTED_PROPOSITIONS,
@@ -34,6 +41,7 @@ import {
   type TrackCOrdinaryDecisionInput,
   type TrackCResponderTask,
   type TrackCSelectableEvidence,
+  type TrackCRequestedObligation,
   type TrackCStrategistDecision,
   type TrackCTrustedAcquisitionMetadata,
 } from "./track-c-c3-strategy-contract.js";
@@ -45,6 +53,8 @@ import {
   validateResponderOutput,
   type TrackCV5SimulationMetadata,
 } from "./track-c-c3-v5-benchmark-runner.js";
+
+const INCOMPLETE_ANSWER_TEXT = "Em chưa xác nhận được đầy đủ thông tin chị hỏi.";
 
 const ORDINARY_INPUTS = Object.freeze([
   "SIZE", "USUAL_SIZE", "COLOR", "VARIANT", "LOCALITY",
@@ -160,13 +170,6 @@ const FIRST_CONTACT_REQUEST_WORDING = Object.freeze({
   ],
 });
 
-// Existing DLP false positives, not choices offered to the adaptive writer.
-// Exact equality cannot exempt an appended name, address or phone number.
-const PII_FREE_LOCALITY_QUESTIONS = [
-  "Chị muốn nhận hàng ở tỉnh hoặc thành phố nào ạ?",
-  "Chị ở tỉnh hoặc thành phố nào để em kiểm tra giao hàng ạ?",
-];
-
 // The checkout field set is owned by the contract so it stays aligned with the
 // runtime state machine instead of drifting as a second local copy.
 type CheckoutField = TrackCCheckoutField;
@@ -185,6 +188,13 @@ export type TrackCStrategistConstraints = Readonly<{
   productResolved: boolean;
   hardStop: boolean;
   checkoutRequestedFields?: readonly CheckoutField[];
+  budgetKnown?: boolean;
+  measurementRequestedFields?: readonly MeasurementKind[];
+}>;
+
+type FirstContactInputs = Readonly<{
+  color: string | null;
+  measurements: Readonly<Record<string, number>>;
 }>;
 
 export interface TrackCStrategyContractCaseInput {
@@ -196,6 +206,16 @@ export interface TrackCStrategyContractCaseInput {
   readonly simulationFacts?: readonly unknown[];
   /** Runtime-owned; never inferred from dialogue or carried as model evidence. */
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
+  readonly firstContactInputs?: FirstContactInputs;
+  /** Current source-bound session preference; never inferred from goal. */
+  readonly knownBudgetVnd?: number | null;
+  /** Current Size Engine missing fields; an empty array forbids the request. */
+  readonly measurementRequestedFields?: readonly MeasurementKind[];
+  readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
+  /** Validated Producer delta for customer-reference wording only. */
+  readonly customerVariant?: RealtimeCustomerInput["variant"];
+  /** Source-bound current-turn obligations; evidenceText is deliberately excluded. */
+  readonly requestedObligations?: readonly TrackCRequestedObligation[];
   /**
    * Code-owned structured decision constraint. Never derive this value from
    * customer dialogue text inside this contract runner.
@@ -218,6 +238,16 @@ export interface TrackCStrategyLiveInput {
   readonly currentCart: TrackCCurrentCartBinding | null;
   readonly paymentOptions: readonly ("COD" | "BANK_TRANSFER")[];
   readonly trustedAcquisition?: TrackCTrustedAcquisitionMetadata;
+  readonly firstContactInputs?: FirstContactInputs;
+  /** Current source-bound session preference; never inferred from goal. */
+  readonly knownBudgetVnd?: number | null;
+  /** Current Size Engine missing fields; an empty array forbids the request. */
+  readonly measurementRequestedFields?: readonly MeasurementKind[];
+  readonly comparisonFacts?: readonly BusinessFactEnvelopeV1[];
+  /** Validated Producer delta for customer-reference wording only. */
+  readonly customerVariant?: RealtimeCustomerInput["variant"];
+  /** Source-bound current-turn obligations; evidenceText is deliberately excluded. */
+  readonly requestedObligations?: readonly TrackCRequestedObligation[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -233,6 +263,8 @@ export interface TrackCStrategyContractCaseResult {
   readonly responderTask: TrackCResponderTask;
   readonly output: ContextV2CandidateOutputV2;
   readonly reply: string;
+  /** Live-only facts preservation after rejected prose; never a quality pass. */
+  readonly recoveryDiagnostic?: TrackCStrategyContractDiagnostic;
   readonly identity: Readonly<{
     readonly captureContextHash: string;
     readonly strategistRequestEnvelopeHash: string | null;
@@ -253,6 +285,7 @@ export type TrackCStrategyContractDiagnostic = Readonly<{
   stage: TrackCStrategyContractStage;
   sanitizedRawModelOutput: string | null;
   errorCode: string;
+  reasonCodes?: readonly string[];
 }>;
 
 /**
@@ -328,10 +361,16 @@ function stageFailure(
   payload: unknown,
   error: unknown,
 ): TrackCStrategyContractFailure {
+  const reasonCodes = error instanceof Error &&
+    error.message.startsWith("TRACK_C_V5_PRODUCTION_GUARD_FAILED:")
+    ? error.message.slice("TRACK_C_V5_PRODUCTION_GUARD_FAILED:".length).split(",")
+      .filter((code) => (DECISION_GUARD_REASON_CODES_V1 as readonly string[]).includes(code)).slice(0, 20)
+    : [];
   return new TrackCStrategyContractFailure(Object.freeze({
     stage,
     sanitizedRawModelOutput: sanitizedRawModelOutput(payload),
     errorCode: errorCode(error),
+    ...(reasonCodes.length ? { reasonCodes: Object.freeze(reasonCodes) } : {}),
   }));
 }
 
@@ -369,7 +408,7 @@ function narrowRequest(
 function frozenDialogueWindow(
   evaluationContext: readonly ShadowContextMessage[],
 ): readonly ShadowContextMessage[] {
-  // The offline request builder already validates the full 1..15-message
+  // The offline request builder already validates the full bounded-message
   // window, including PII. Truncating again discards known inputs and blockers.
   return Object.freeze(evaluationContext.map((message) => Object.freeze({
     direction: message.direction,
@@ -394,13 +433,15 @@ function strategistResponseSchema(
   // contract until the code-derived, latest-relevant dialogue state says that
   // measurements are unavailable; the compiler retains the same check as a
   // defense at the provider boundary.
-  const continuationInputs = constraints.measurementsUnavailable
-    ? ORDINARY_INPUTS
-    : ORDINARY_INPUTS.filter((input) => input !== "USUAL_SIZE");
+  const continuationInputs = ORDINARY_INPUTS.filter((input) =>
+    (input !== "USUAL_SIZE" || constraints.measurementsUnavailable) &&
+    (input !== "BUDGET" || !constraints.budgetKnown)
+  );
   const shared = {
     replyAct: { type: "STRING", enum: constraints.hardStop
       ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
-    goal: { type: "STRING", minLength: 1, maxLength: 500 },
+    goal: { type: "STRING", minLength: 1, maxLength: 500,
+      description: "Exactly five lines in order: NEED: ...; KNOWN: ...; ANSWER: ...; LIMIT: ...; NEXT: ... . Use NONE for absent sections, never NEED. NEXT states the decision impact of the single assigned request, otherwise NONE. LIMIT preserves every unsupported requested part." },
     proposition: { type: "STRING", enum: TRACK_C_PROTECTED_PROPOSITIONS },
     evidenceRefs: {
       type: "ARRAY",
@@ -482,6 +523,7 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
   evaluationContext: readonly ShadowContextMessage[];
   evidence: readonly TrackCSelectableEvidence[];
   constraints: TrackCStrategistConstraints;
+  requestedObligations?: readonly TrackCRequestedObligation[];
 }>): BuiltCandidateRequest {
   const context = input.context ?? contextFromFrozenTrackCCapture({
     capture: input.capture,
@@ -497,6 +539,20 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
     contractVersion: "TRACK_C_C3_STRATEGIST_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
     selectableEvidence: presentableEvidence(input.evidence),
+    ...(input.requestedObligations === undefined ? {} : {
+      requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
+        Object.freeze({
+          kind: entry.kind,
+          capability: entry.capability,
+          scope: entry.scope,
+          productId: entry.productId,
+          ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+          ...(entry.size === undefined ? {} : { size: entry.size }),
+          ...(entry.color === undefined ? {} : { color: entry.color }),
+          ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
+        })
+      )),
+    }),
     canonicalContext: {
       productBinding: context.productBinding,
       dialogueEvidence: {
@@ -518,6 +574,8 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
       productResolved: input.constraints.productResolved,
       hardStop: input.constraints.hardStop,
       checkoutRequestedFields: input.constraints.checkoutRequestedFields ?? [],
+      budgetKnown: input.constraints.budgetKnown ?? false,
+      measurementRequestedFields: input.constraints.measurementRequestedFields ?? [],
     },
   });
 }
@@ -549,8 +607,35 @@ function modelAuthoredEvidence(
 }
 
 function responderTaskPrompt(task: TrackCResponderTask) {
+  const { goal, ...answer } = task.answer;
   return Object.freeze({
-    answer: task.answer,
+    answer: task.semanticHandoff === undefined ? { ...answer, goal } : answer,
+    ...(task.semanticHandoff === undefined ? {} : { semanticHandoff: task.semanticHandoff }),
+    ...(task.obligationResolutions === undefined ? {} : {
+      obligationResolutions: task.obligationResolutions.map((entry) => ({
+        kind: entry.kind,
+        capability: entry.capability,
+        scope: entry.scope,
+        productId: entry.productId,
+        ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+        ...(entry.size === undefined ? {} : { size: entry.size }),
+        ...(entry.color === undefined ? {} : { color: entry.color }),
+        ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
+        status: entry.status,
+        evidenceRefs: entry.evidenceRefs,
+      })),
+    }),
+    ...((task.typedLimitations?.length ?? 0) === 0 ? {} : {
+      codeOwnedLimitations: task.typedLimitations!.map((entry) => ({
+        capability: entry.capability,
+        scope: entry.scope,
+        productId: entry.productId,
+        ...(entry.offerType === undefined ? {} : { offerType: entry.offerType }),
+        ...(entry.size === undefined ? {} : { size: entry.size }),
+        ...(entry.color === undefined ? {} : { color: entry.color }),
+        ...(entry.deliveryRegion === undefined ? {} : { deliveryRegion: entry.deliveryRegion }),
+      })),
+    }),
     evidence: responderReadableEvidence(task),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
@@ -588,6 +673,13 @@ function answerWording(task: TrackCResponderTask): readonly string[] {
 
 function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[]): readonly string[] {
   const canonical = task.canonicalRequest?.type;
+  if (canonical === "ASK_MEASUREMENTS" && task.canonicalRequest?.measurementFields?.length === 1) {
+    const labels: Record<MeasurementKind, string> = {
+      HEIGHT_CM: "chiều cao", WEIGHT_KG: "cân nặng",
+      BUST_CM: "số đo vòng ngực", WAIST_CM: "số đo vòng eo", HIPS_CM: "số đo vòng mông",
+    };
+    return [`Chị cho em xin thêm ${labels[task.canonicalRequest.measurementFields[0]!]} nhé?`];
+  }
   if (canonical === "ASK_PRODUCT" || canonical === "ASK_MEASUREMENTS") {
     return FIRST_CONTACT_REQUEST_WORDING[canonical];
   }
@@ -620,6 +712,12 @@ function requestWording(task: TrackCResponderTask, dialogue: readonly ShadowCont
     ...mentionedColors.map((color) => `Chị đang ưu tiên màu ${color} đúng không ạ?`)];
 }
 
+function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
+  if ((task.typedLimitations?.length ?? 0) > 0) return false;
+  return task.semanticHandoff?.limit != null && !singleRequestBody(task) &&
+    task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
+}
+
 function responderDraftSchema(
   task: TrackCResponderTask,
   conversationLane: TrackCConversationLane,
@@ -640,12 +738,14 @@ function responderDraftSchema(
     maxProperties: 3,
     properties: {
       answerText: adaptive
-        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
+        ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task) ||
+            ((task.typedLimitations?.length ?? 0) > 0 && task.answer.kind === "ANSWER")
           ? { type: "NULL" }
           : neutralHold
             ? { type: "STRING", enum: NEUTRAL_HOLD_ACKNOWLEDGEMENTS }
-          : { description: "Customer context or specific unanswered part from the goal. SUPPORTED does not imply complete coverage. No shop facts, quantities, sizes or requests here.",
-            anyOf: [{ type: "NULL" }, { type: "STRING", minLength: 1, maxLength: 600 }] }
+          : { description: "Word the assigned semanticHandoff context/limit only. SUPPORTED is not complete coverage. No shop facts, quantities, sizes or requests here.",
+            anyOf: [...(responderHasAssignedLimit(task) ? [] : [{ type: "NULL" }]),
+              { type: "STRING", minLength: 1, maxLength: 600 }] }
         : boundedAcknowledgement
         ? { type: "STRING", enum: answers }
         : answers.length > 0
@@ -693,11 +793,6 @@ function buildTrackCResponderContractRequest(input: Readonly<{
   ), {
     contractVersion: "TRACK_C_C3_RESPONDER_INPUT_V1",
     dialogue: frozenDialogueWindow(input.evaluationContext),
-    customerDecisionSignals: {
-      act: input.context.dialogueEvidence.act,
-      confidenceBand: input.context.dialogueEvidence.confidenceBand,
-      reasonCodes: input.context.dialogueEvidence.reasonCodes,
-    },
     responderTask: responderTaskPrompt(input.task),
   });
 }
@@ -728,16 +823,21 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   // and perform the same PII check after trimming only the adaptive slots.
   const prose = (value: unknown): unknown => adaptive && typeof value === "string"
     ? value.trim() : value;
-  // The selected store fact answers a direct location request. A model preface
-  // adds no information and may trip customer-address DLP on the word "địa chỉ".
-  // Drop that untrusted prose; the bound fact still receives normal DLP checks.
-  const directLocationFact = adaptive && task.answer.kind === "ANSWER" &&
-    task.answer.proposition === "BUSINESS_LOCATION" &&
-    task.answer.evidenceStatus === "SUPPORTED" &&
-    task.unrealizedEvidence.length === 0 && task.evidence.length > 0 &&
-    task.evidence.every(({ capability }) => capability === "BUSINESS_LOCATION");
+  let answerText: string | null;
+  try { answerText = text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"); }
+  catch (error) {
+    // Preserve the public shop fact without exposing DLP-rejected prose. Unlike
+    // the former blanket drop, safe compound-question limits survive unchanged.
+    const publicLocation = adaptive && task.answer.kind === "ANSWER" &&
+      task.answer.proposition === "BUSINESS_LOCATION" &&
+      task.answer.evidenceStatus === "SUPPORTED" && task.unrealizedEvidence.length === 0 &&
+      task.evidence.length > 0 && task.evidence.every(({ capability }) => capability === "BUSINESS_LOCATION");
+    if (!publicLocation || typeof record.answerText !== "string") throw error;
+    answerText = INCOMPLETE_ANSWER_TEXT;
+  }
+  const progression = prose(record.progressionText);
   return Object.freeze({
-    answerText: directLocationFact ? null : text(prose(record.answerText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
+    answerText,
     factualTexts: Object.freeze(record.factualTexts.map((item) => {
       const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -746,11 +846,10 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
     // Exact schema vocabulary contains no customer values. Resolve it to the
     // code-owned string before DLP, which can mistake a locality question for
     // an address. Any other text still goes through DLP and final validation.
-    progressionText: [...requestWording(task, dialogue),
-      ...(task.continuation?.type === "ASK" && task.continuation.input === "LOCALITY"
-        ? PII_FREE_LOCALITY_QUESTIONS : [])].find((wording) =>
-      wording === prose(record.progressionText)
-    ) ?? text(prose(record.progressionText), "TRACK_C_RESPONDER_DRAFT_INVALID"),
+    progressionText: trackCPiiFreeLocalityRequest(progression, task)
+      ? progression
+      : requestWording(task, dialogue).find((wording) => wording === progression)
+        ?? text(progression, "TRACK_C_RESPONDER_DRAFT_INVALID"),
   });
 }
 
@@ -792,8 +891,29 @@ function assertConversationalProse(value: string | null): void {
   // asserts no policy property. A clause after "là" still needs evidence.
   // Match an asserted clause, not the embedded topic in "em chưa xác nhận
   // mẫu này có..." or the customer's reported comparison with a cheaper item.
-  if (/(?:^|[.!?;\n])\s*(?:da[, ]+)?(?:(?:em|shop|ben em)\s+(?:thay\s+)?)?(?:(?:mau|vai|san pham|set|bo do|chat lieu|chinh sach(?!\s+la\s*:))\s+(?:(?:nay|do|ben em)\s+)?(?:co|la|rat|luon|se|dam bao|khong|thiet ke|cao cap|ben|mem|thoang)|(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b)/u.test(folded)) {
+  const clauses = value.normalize("NFC").toLowerCase().split(/[.!?;,\n]|\s+(?:nh\u01b0ng|tuy nhi\u00ean|\u0111\u1ed3ng th\u1eddi|v\u00ec v\u1eady|n\u00ean|v\u00e0)\s+/u);
+  // Product/shop-subject declarations belong to the selected fact slots,
+  // regardless of the adjective or verb. Check each clause: an uncertainty
+  // preface must not license a separate benefit assertion after a conjunction.
+  const productDeclaration = /^\s*(?:v\u1ec1\s+)?(?:d\u1ea1\s+)?(?:(?:em|shop|b\u00ean em)\s+(?:th\u1ea5y\s+)?)?(?:m\u1eabu|v\u1ea3i|s\u1ea3n ph\u1ea9m|set|b\u1ed9 \u0111\u1ed3|ch\u1ea5t li\u1ec7u|ch\u1ea5t v\u1ea3i|ch\u00ednh s\u00e1ch(?!\s+l\u00e0\s*:))\s+\S/u;
+  const bareClaim = /^\s*(?:(?:chac chan|chac la|nhu vay)\s+)?(?:cao cap|ben dep|ton dang|che bung|chong nhan|khong nhan|dang tien|gia tuong xung|tot hon|re hon)\b/u;
+  if (clauses.some((clause) => productDeclaration.test(clause)) ||
+      folded.split(/[.!?;,\n]|\b(?:nhung|va|vi vay|nen)\b/u).some((clause) => bareClaim.test(clause))) {
     throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
+  }
+  // Relation/effect predicates remain code-owned even with an omitted
+  // subject. An exact evidence sentence is checked separately; the writer
+  // cannot translate cheaper into lighter/value or compute a time interval.
+  const proseClauses = folded.split(/[.!?;,\n]|\b(?:nhung|va|vi vay|nen)\b/u)
+    .map((clause) => clause.trim().replace(/^(?:(?:da|vay|nhu vay|chac chan|chac la|se)\s+)*/u, ""));
+  if (proseClauses.some((clause) =>
+    /^(?:(?:[a-z]{1,6}\d{1,8}[a-z0-9]*|gia|moc|han|thoi gian|khoang)\b[^.!?;]*\b(?:hon|bang|nam|thuoc|kip)\b|(?:nhe|nang|tot|re|dat|thap|cao|thoai mai|dang tien|hop)\s+hon\b|kip\b)/u.test(clause))) {
+    throw new Error("TRACK_C_RESPONDER_UNBOUND_RELATION");
+  }
+  // Passive/nominalized dispatch is still an effect; changing the grammatical
+  // subject cannot evade the active shop/em effect check above.
+  if (/\b(?:hang|viec gui hang)\s+(?:da|se|vua)\s+(?:duoc\s+)?(?:gui|dien ra)\b/u.test(folded)) {
+    throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
   // Comparing two prices is a new claim about both products. Two selected
   // price sentences do not give free prose authority to state their ordering.
@@ -820,13 +940,16 @@ function deterministicCheckoutText(
   fields: readonly CheckoutField[],
   paymentOptions: readonly ("COD" | "BANK_TRANSFER")[],
 ): string {
+  const methods = [...new Set(paymentOptions)].map((method) =>
+    method === "COD" ? "thanh toán khi nhận hàng (COD)" : "chuyển khoản").join(" hoặc ");
+  if (fields.length === 1 && fields[0] === "PAYMENT_METHOD") {
+    return `Chị chọn ${methods} nhé?`;
+  }
   const labels: Record<CheckoutField, string> = {
     FULL_NAME: "họ tên",
     PHONE: "số điện thoại",
     ADDRESS: "địa chỉ nhận hàng",
-    PAYMENT_METHOD: paymentOptions.includes("BANK_TRANSFER")
-      ? "hình thức thanh toán (COD hoặc chuyển khoản)"
-      : "hình thức thanh toán COD",
+    PAYMENT_METHOD: `lựa chọn thanh toán (${methods})`,
   };
   const names = fields.map((field) => labels[field]);
   const joined = names.length === 1 ? names[0]! : names.length === 2
@@ -898,9 +1021,14 @@ function compileResponderDraft(input: Readonly<{
   conversationLane: TrackCConversationLane;
   evaluationAt: Date;
   currentCart?: TrackCCurrentCartBinding | null;
+  comparisonFacts?: readonly BusinessFactEnvelopeV1[];
   paymentOptions?: readonly ("COD" | "BANK_TRANSFER")[];
+  customerVariant?: RealtimeCustomerInput["variant"];
+  recoverySubjectLabels?: boolean;
 }>): ContextV2CandidateOutputV2 {
   const { task } = input;
+  const conversation = { task, dialogue: input.dialogue,
+    ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }) };
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
   // A hard stop still needs an accepted acknowledgement. The model can choose
   // null when it sees no new question; use only a fact-free, effect-free reply.
@@ -917,18 +1045,12 @@ function compileResponderDraft(input: Readonly<{
   if (!adaptive && usesBoundedAcknowledgement(task) && draft.answerText === null) {
     throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
   }
-  // An empty array deliberately chooses all original projections. Otherwise
-  // every selected claim needs its own positional, lossless realization.
-  const authoredEvidence = modelAuthoredEvidence(task);
-  if (draft.factualTexts.length !== 0 &&
-      (draft.factualTexts.length !== authoredEvidence.length ||
-       draft.factualTexts.some((value, index) =>
-         !trackCRealizationMatches(value, authoredEvidence[index]!.deterministicText!)))) {
-    throw new Error("TRACK_C_RESPONDER_UNBOUND_FACTUAL_TEXT");
-  }
+  // Reorder only whole source-bound fact units; never paraphrase their claims.
+  const orderedEvidence = trackCOrderEvidence(
+    modelAuthoredEvidence(task), draft.factualTexts, adaptive,
+  );
   assertProgression(task, draft, input.dialogue, adaptive);
   if (adaptive) {
-    for (const value of [draft.answerText, draft.progressionText]) assertConversationalProse(value);
     if (singleRequestBody(task) && draft.answerText !== null) {
       throw new Error("TRACK_C_RESPONDER_TASK_MISMATCH");
     }
@@ -951,7 +1073,7 @@ function compileResponderDraft(input: Readonly<{
   const multipleSubjects = new Set(task.evidence.flatMap(({ subject }) =>
     subject?.productId === undefined ? [] : [subject.productId]
   )).size > 1;
-  task.evidence.forEach((evidence, index) => {
+  orderedEvidence.forEach((evidence, index) => {
     const factualText = evidence.deterministicText === undefined
       ? null
       : text(
@@ -966,12 +1088,21 @@ function compileResponderDraft(input: Readonly<{
       );
     }
     assertNoEffectText(factualText);
-    if (multipleSubjects && evidence.subject?.productId !== undefined) {
+    if ((multipleSubjects || input.recoverySubjectLabels === true) &&
+        evidence.subject?.productId !== undefined) {
       const label = text(evidence.subject.displayName ?? evidence.subject.productId,
         "TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       if (label === null) throw new Error("TRACK_C_EVIDENCE_SUBJECT_LABEL_UNAVAILABLE");
       assertNoEffectText(label);
-      segments.push({ kind: "GENERAL", text: `Với mẫu ${label}:` });
+      const resolution = task.obligationResolutions?.find(({ evidenceRefs }) =>
+        evidenceRefs.includes(evidence.ref)
+      );
+      const variant = [
+        resolution?.color == null ? null : `màu ${resolution.color}`,
+        resolution?.size == null ? null : `size ${resolution.size}`,
+      ].filter((value): value is string => value !== null).join(" ");
+      segments.push({ kind: "GENERAL",
+        text: `Với mẫu ${label}${variant === "" ? "" : ` (${variant})`}:` });
     }
     segments.push({
       kind: "VERIFIED_CLAIM",
@@ -989,6 +1120,9 @@ function compileResponderDraft(input: Readonly<{
       task.answer.evidenceStatus === "SUPPORTED" &&
       draft.answerText !== UNRESOLVED_ANSWER_TEXT) {
     segments.push({ kind: "GENERAL", text: PARTIAL_REALIZATION_TEXT });
+  }
+  for (const limitation of task.typedLimitations ?? []) {
+    segments.push({ kind: "GENERAL", text: limitation.text });
   }
   if (task.deliveryDeadlineText !== undefined) {
     segments.push({ kind: "GENERAL", text: task.deliveryDeadlineText });
@@ -1032,7 +1166,19 @@ function compileResponderDraft(input: Readonly<{
     input.evaluationAt,
     simulationHashes,
     input.currentCart ?? null,
+    input.comparisonFacts ?? [],
+    conversation,
   );
+  // Preserve precise authority diagnostics before the extra prose boundary.
+  // Nothing is returned until both the structured and prose checks pass.
+  if (adaptive) {
+    for (const value of [draft.answerText, draft.progressionText]) {
+      assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation));
+    }
+  }
+  if (adaptive && responderHasAssignedLimit(task)) {
+    assertTrackCLimitationCoverage(task, draft.answerText, input.context);
+  }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
       validated.segments.some(({ text }) =>
         /(?:họ\s*(?:và\s*)?tên|số\s*điện\s*thoại|\bsđt\b|\bsdt\b|địa\s*chỉ\s*(?:nhận|giao)\s*hàng)/iu
@@ -1090,6 +1236,8 @@ function constraintsFor(
   dialogue: readonly ShadowContextMessage[],
   canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[],
   checkoutClarificationActive = false,
+  measurementRequestedFields: readonly MeasurementKind[] = ["HEIGHT_CM", "WEIGHT_KG"],
+  budgetKnown = false,
 ): TrackCStrategistConstraints {
   if (!metadata.every(validMetadata)) {
     throw new Error("TRACK_C_V5_SIMULATION_METADATA_INVALID");
@@ -1111,6 +1259,8 @@ function constraintsFor(
       measurementsUnavailable: false,
       productResolved,
       hardStop: true,
+      budgetKnown,
+      measurementRequestedFields: [],
     });
   }
   if (!productResolved) {
@@ -1119,6 +1269,8 @@ function constraintsFor(
       measurementsUnavailable: false,
       productResolved: false,
       hardStop: false,
+      budgetKnown,
+      measurementRequestedFields: [],
     });
   }
   const unavailable = measurementsUnavailable(dialogue);
@@ -1127,7 +1279,8 @@ function constraintsFor(
   // canonical fit readiness must identify a measurement blocker before this
   // action is offered; a resolved product alone does not authorize a new fit
   // funnel after an unrelated question.
-  if (!unavailable && context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
+  if (!unavailable && measurementRequestedFields.length > 0 &&
+      context.barriers.active.includes("MEASUREMENTS_REQUIRED")) {
     permittedCanonicalActions.push("ASK_MEASUREMENTS");
   }
   // Ask for the missing details at the state the runtime actually reaches.
@@ -1155,6 +1308,8 @@ function constraintsFor(
     measurementsUnavailable: unavailable,
     productResolved: true,
     hardStop: false,
+    budgetKnown,
+    measurementRequestedFields,
     ...(checkoutAuthorized ? {
       checkoutRequestedFields: Object.freeze([...checkoutRequestedFields]),
     } : {}),
@@ -1176,19 +1331,27 @@ function validatedDeliveryDeadlineConstraint(
 function fixedTask(
   context: ContextV2,
   evidence: readonly TrackCSelectableEvidence[],
+  known?: FirstContactInputs,
 ): TrackCResponderTask {
   const presentation = evidence.find(({ capability }) =>
     capability === "PRODUCT_PRESENTATION"
   );
   const colors = presentation?.value.colors;
   const colorChoiceMeaningful = Array.isArray(colors) &&
-    new Set(colors.filter((color) => typeof color === "string")).size > 1;
+    new Set(colors.filter((color) => typeof color === "string")).size > 1 &&
+    !colors.some((color) => typeof color === "string" && known?.color != null &&
+      color.normalize("NFC").toLocaleUpperCase("vi-VN") === known.color.normalize("NFC").toLocaleUpperCase("vi-VN"));
+  const measured = (kind: string) => Number.isFinite(known?.measurements[kind]) && (known?.measurements[kind] ?? 0) > 0;
+  const fitKnown = evidence.some(({ capability }) => capability === "SIZE_FIT") ||
+    ["BUST_CM", "WAIST_CM", "HIPS_CM"].every(measured);
+  const missingMeasurements = fitKnown ? [] : (["HEIGHT_CM", "WEIGHT_KG"] as const).filter((kind) => !measured(kind));
   return compileTrackCFixedFirstContactTask({
     productResolved: context.productBinding.status === "RESOLVED",
     classificationOrVariantRequired: context.productBinding.status !== "RESOLVED" ||
       context.productBinding.productIds.length !== 1 ||
       context.barriers.active.includes("PRODUCT_CONTEXT_UNREADY"),
     colorChoiceMeaningful,
+    ...(known === undefined && !fitKnown ? {} : { missingMeasurements }),
     evidence,
     boundProductIds: context.productBinding.productIds,
   });
@@ -1196,6 +1359,7 @@ function fixedTask(
 
 type TrackCStrategyCoreInput = Omit<TrackCStrategyContractCaseInput, "capture"> & Readonly<{
   context: ContextV2;
+  recoverSelectedFacts?: boolean;
   canonicalCheckoutRequestedFields?: readonly TrackCCheckoutField[];
   checkoutClarificationActive?: boolean;
   currentCart?: TrackCCurrentCartBinding | null;
@@ -1230,6 +1394,7 @@ async function runTrackCStrategyContractCore(
       simulationFacts,
       executionLane: input.lane,
       currentCart: input.currentCart ?? null,
+      comparisonFacts: input.comparisonFacts ?? [],
       evaluationAt: input.evaluationAt,
     });
   } catch (error) {
@@ -1243,10 +1408,21 @@ async function runTrackCStrategyContractCore(
   const lane = selectTrackCConversationLane(
     trustedAcquisition === undefined ? [] : [trustedAcquisition],
   );
+  if (input.knownBudgetVnd != null &&
+      (!Number.isSafeInteger(input.knownBudgetVnd) || input.knownBudgetVnd < 0)) {
+    throw new Error("TRACK_C_CUSTOMER_INPUTS_INVALID");
+  }
+  const measurementRequestedFields = validatedTrackCMeasurementFields(input.measurementRequestedFields)
+    .filter((kind) => {
+      const value = input.firstContactInputs?.measurements[kind];
+      return value === undefined || !Number.isFinite(value) || value <= 0;
+    });
   const constraints = constraintsFor(
     context, simulationMetadata, input.evaluationContext,
     input.canonicalCheckoutRequestedFields,
     input.checkoutClarificationActive,
+    measurementRequestedFields,
+    input.knownBudgetVnd != null,
   );
   let strategistRequestEnvelopeHash: string | null = null;
   let conversationPlan: TrackCResponderTask | TrackCStrategistDecision;
@@ -1263,7 +1439,7 @@ async function runTrackCStrategyContractCore(
             canonicalAction: "HOLD_POSITION",
           },
         }).task
-      : fixedTask(context, evidence);
+      : fixedTask(context, evidence, input.firstContactInputs);
     conversationPlan = task;
   } else {
     const strategistRequest = buildTrackCStrategistContractRequest({
@@ -1272,6 +1448,8 @@ async function runTrackCStrategyContractCore(
       evaluationContext: input.evaluationContext,
       evidence,
       constraints,
+      ...(input.requestedObligations === undefined
+        ? {} : { requestedObligations: input.requestedObligations }),
     });
     let strategistPayload: unknown = null;
     try {
@@ -1289,10 +1467,16 @@ async function runTrackCStrategyContractCore(
       const compiled = compileTrackCStrategistDecision({
         decision,
         evidence,
+        requireStructuredGoal: true,
         permittedCanonicalActions: constraints.permittedCanonicalActions,
         measurementsUnavailable: constraints.measurementsUnavailable,
         productResolved: constraints.productResolved,
         hardStop: constraints.hardStop,
+        budgetKnown: constraints.budgetKnown ?? false,
+        measurementRequestedFields: constraints.measurementRequestedFields ?? [],
+        ...(input.requestedObligations === undefined ? {} : {
+          requestedObligations: input.requestedObligations,
+        }),
         boundProductIds: context.productBinding.productIds,
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
@@ -1318,6 +1502,17 @@ async function runTrackCStrategyContractCore(
     task,
     conversationLane: lane,
   });
+  // Recovery only re-renders an already-validated answer task. It must not
+  // choose a strategy, manufacture missing evidence, or finish an action.
+  const assertRecoveryAllowed = (failure: TrackCStrategyContractFailure): void => {
+    if (!input.recoverSelectedFacts || lane !== "ADAPTIVE_FOLLOWUP" || input.signal?.aborted ||
+        failure.diagnostic.errorCode === "TRACK_C_V5_PROVIDER_IDENTITY_MISMATCH" ||
+        failure.diagnostic.errorCode === "CONTEXT_V2_CANDIDATE_CALLER_ABORTED" ||
+        task.answer.kind !== "ANSWER" || task.answer.evidenceStatus !== "SUPPORTED" ||
+        task.evidence.length === 0 || task.unrealizedEvidence.length > 0 ||
+        task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") throw failure;
+  };
+  let recoveryDiagnostic: TrackCStrategyContractDiagnostic | undefined;
   let responderPayload: unknown = null;
   let draft: ResponderDraft;
   try {
@@ -1335,7 +1530,17 @@ async function runTrackCStrategyContractCore(
       lane === "ADAPTIVE_FOLLOWUP",
     );
   } catch (error) {
-    throw stageFailure("RESPONDER", responderPayload, error);
+    const failure = stageFailure("RESPONDER", responderPayload, error);
+    assertRecoveryAllowed(failure);
+    recoveryDiagnostic = failure.diagnostic;
+    // No trustworthy draft remains. Keep source facts and explicitly decline
+    // whole-answer completeness; never parse goal text into a factual claim.
+    draft = {
+      answerText: (task.typedLimitations?.length ?? 0) > 0
+        ? null : trackCRecoveryLimitation(task),
+      factualTexts: [],
+      progressionText: null,
+    };
   }
   let output: ContextV2CandidateOutputV2;
   try {
@@ -1348,10 +1553,56 @@ async function runTrackCStrategyContractCore(
       conversationLane: lane,
       evaluationAt: input.evaluationAt,
       currentCart: input.currentCart ?? null,
+      comparisonFacts: input.comparisonFacts ?? [],
+      ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
       ...(input.paymentOptions === undefined ? {} : { paymentOptions: input.paymentOptions }),
+      recoverySubjectLabels: recoveryDiagnostic !== undefined,
     });
   } catch (error) {
-    throw stageFailure("FINAL_GUARD", responderPayload, error);
+    const failure = recoveryDiagnostic === undefined
+      ? stageFailure("FINAL_GUARD", responderPayload, error)
+      : new TrackCStrategyContractFailure(recoveryDiagnostic);
+    // Restore source facts, but do not erase a valid unanswered-part statement.
+    // SUPPORTED certifies only the declared capability, not whole-turn coverage.
+    // Frozen evaluation still exposes the original rejection.
+    assertRecoveryAllowed(failure);
+    try {
+      output = compileResponderDraft({
+        context, dialogue: input.evaluationContext, task,
+        draft: {
+          answerText: (task.typedLimitations?.length ?? 0) > 0
+            ? null : (draft.answerText ?? trackCRecoveryLimitation(task)),
+          factualTexts: [],
+          progressionText: null,
+        },
+        lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
+        currentCart: input.currentCart ?? null,
+        comparisonFacts: input.comparisonFacts ?? [],
+        ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+        recoverySubjectLabels: true,
+      });
+      recoveryDiagnostic = failure.diagnostic;
+    } catch {
+      // If prose itself was unsafe, preserve verified facts with an explicit
+      // incomplete-answer limit. Do not copy a goal or infer a missing fact.
+      try {
+        output = compileResponderDraft({
+          context, dialogue: input.evaluationContext, task,
+          draft: {
+            answerText: (task.typedLimitations?.length ?? 0) > 0
+              ? null : trackCRecoveryLimitation(task),
+            factualTexts: [],
+            progressionText: null,
+          },
+          lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
+          currentCart: input.currentCart ?? null,
+          comparisonFacts: input.comparisonFacts ?? [],
+          ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+          recoverySubjectLabels: true,
+        });
+        recoveryDiagnostic = failure.diagnostic;
+      } catch { throw failure; }
+    }
   }
   const decisionHash = sha256(conversationPlan);
   const identity = Object.freeze({
@@ -1377,6 +1628,7 @@ async function runTrackCStrategyContractCore(
     responderTask: task,
     output,
     reply: trackCComposeReply(output.segments.map(({ text }) => text)),
+    ...(recoveryDiagnostic ? { recoveryDiagnostic } : {}),
     identity,
   });
 }
@@ -1397,7 +1649,7 @@ export async function runTrackCStrategyContractCase(
 export async function runTrackCStrategyLive(
   input: TrackCStrategyLiveInput,
 ): Promise<Pick<TrackCStrategyContractCaseResult,
-  "conversationLane" | "conversationPlan" | "responderTask" | "output" | "reply" | "identity">> {
+  "conversationLane" | "conversationPlan" | "responderTask" | "output" | "reply" | "identity" | "recoveryDiagnostic">> {
   if ("simulationFacts" in input || "simulationMetadata" in input ||
       "capture" in input) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -1413,6 +1665,7 @@ export async function runTrackCStrategyLive(
   }
   const result = await runTrackCStrategyContractCore({
     lane: "PRODUCTION_CONTRACT",
+    recoverSelectedFacts: true,
     context,
     modelResource: input.modelResource,
     evaluationAt: input.decisionAt,
@@ -1422,7 +1675,16 @@ export async function runTrackCStrategyLive(
     canonicalCheckoutRequestedFields: input.checkoutRequestedFields,
     checkoutClarificationActive: input.checkoutClarificationActive,
     currentCart: input.currentCart,
+    comparisonFacts: input.comparisonFacts ?? [],
+    ...(input.customerVariant === undefined ? {} : { customerVariant: input.customerVariant }),
+    ...(input.requestedObligations === undefined ? {} : {
+      requestedObligations: input.requestedObligations,
+    }),
     paymentOptions: input.paymentOptions,
+    ...(input.firstContactInputs === undefined ? {} : { firstContactInputs: input.firstContactInputs }),
+    ...(input.knownBudgetVnd === undefined ? {} : { knownBudgetVnd: input.knownBudgetVnd }),
+    // Live execution never invents a measurement blocker from missing metadata.
+    measurementRequestedFields: input.measurementRequestedFields ?? [],
     ...(input.trustedAcquisition === undefined
       ? {} : { trustedAcquisition: input.trustedAcquisition }),
     transport: input.transport,
@@ -1435,5 +1697,6 @@ export async function runTrackCStrategyLive(
     output: result.output,
     reply: result.reply,
     identity: result.identity,
+    ...(result.recoveryDiagnostic ? { recoveryDiagnostic: result.recoveryDiagnostic } : {}),
   });
 }
