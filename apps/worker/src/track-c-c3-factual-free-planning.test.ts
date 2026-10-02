@@ -31,6 +31,13 @@ describe("factual-free Strategist planning", () => {
       context, evaluationContext: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
         text: "Thông tin mẫu này?", attachmentCount: 0, occurredAt: "2026-09-10T01:59:00.000Z" }], evidence: [evidence], constraints });
     const prompt = JSON.parse(JSON.parse(request.body).contents[0].parts[0].text);
+    const schema = JSON.parse(request.body).generationConfig.responseSchema;
+    for (const variant of schema.anyOf) {
+      const goals = variant.properties.goal.enum;
+      expect(goals).toHaveLength(1);
+      expect(goals[0]).not.toMatch(/\d/u);
+      expect(goals[0]).not.toContain(evidence.deterministicText);
+    }
     expect(prompt.selectableEvidence[0]).not.toHaveProperty("value");
     expect(prompt.selectableEvidence[0]).not.toHaveProperty("realizationText");
     expect(prompt.selectableEvidence[0]).toMatchObject({ ref: evidence.ref, capability: evidence.capability, realizationSupported: true });

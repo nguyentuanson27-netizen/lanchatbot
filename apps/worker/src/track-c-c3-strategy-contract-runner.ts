@@ -442,8 +442,9 @@ function strategistResponseSchema(
   const shared = {
     replyAct: { type: "STRING", enum: constraints.hardStop
       ? ["ACKNOWLEDGE"] : ["ANSWER", "ACKNOWLEDGE", "CLARIFY"] },
-    goal: { type: "STRING", minLength: 1, maxLength: 500,
-      description: "Exactly five lines in order: NEED: ...; KNOWN: ...; ANSWER: ...; LIMIT: ...; NEXT: ... . Use NONE for absent sections, never NEED. NEXT states the decision impact of the single assigned request, otherwise NONE. LIMIT preserves every unsupported requested part." },
+    goal: { type: "STRING", enum: [
+      "NEED: typed obligations\nKNOWN: NONE\nANSWER: typed evidence references\nLIMIT: typed support status\nNEXT: typed action and continuation",
+    ], description: "Return the fixed planning marker. Code derives semantic handoff from the other typed fields; this slot cannot carry factual literals or a second decision." },
     proposition: { type: "STRING", enum: TRACK_C_PROTECTED_PROPOSITIONS },
     evidenceRefs: {
       type: "ARRAY",
