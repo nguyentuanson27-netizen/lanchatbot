@@ -5751,7 +5751,7 @@ export class RealtimeRunner {
       });
     }
 
-    const preserveIndependentlyReadyPlan = salesCyclePlan?.effectReadiness.some((entry) =>
+    const preserveIndependentlyReadyPlan = salesCyclePlan?.effectReadiness?.some((entry) =>
       entry.outcome === "READY" &&
       (entry.effect === "CART_OPEN" || entry.effect === "CART_MUTATION")
     ) ?? false;
