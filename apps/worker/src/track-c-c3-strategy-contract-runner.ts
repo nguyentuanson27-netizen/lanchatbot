@@ -47,7 +47,7 @@ import {
 } from "./track-c-c3-strategy-contract.js";
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
-import { trackCLimitationTexts } from "./track-c-c3-obligation-resolution.js";
+import { trackCOutcomeTexts } from "./track-c-c3-obligation-resolution.js";
 import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
 import type { TrackCV5ExecutionLane } from
   "./track-c-c3-v5-benchmark-materialization.js";
@@ -559,6 +559,11 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           ...(entry.size === undefined ? {} : { size: text(entry.size, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
           ...(entry.color === undefined ? {} : { color: text(entry.color, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
           ...(entry.lookupStatus === undefined ? {} : { lookupStatus: entry.lookupStatus }),
+          ...(entry.component === undefined ? {} : { component: entry.component }),
+          ...(entry.relatedProductId === undefined ? {} : { relatedProductId: text(entry.relatedProductId, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
+          ...(entry.deadlineDays === undefined ? {} : { deadlineDays: entry.deadlineDays }),
+          ...(entry.criteria === undefined ? {} : { criteria: { shape: text(entry.criteria.shape, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE"),
+            avoid: entry.criteria.avoid.map((value) => text(value, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE")) } }),
         })
       )),
     }),
@@ -622,7 +627,7 @@ function responderTaskPrompt(task: TrackCResponderTask) {
     ...(task.semanticHandoff === undefined ? {} : { semanticHandoff: task.semanticHandoff }),
     ...(task.obligationResolutions === undefined ? {} : {
       obligationResolutions: task.obligationResolutions.map(({ evidenceRefs: _refs, ...resolution }) => resolution),
-      limitationTexts: trackCLimitationTexts(task),
+      outcomeTexts: trackCOutcomeTexts(task),
     }),
     evidence: responderReadableEvidence(task),
     // Capability names only: enough for the Responder to know part of the
@@ -1025,7 +1030,7 @@ function compileResponderDraft(input: Readonly<{
   const adaptive = input.conversationLane === "ADAPTIVE_FOLLOWUP";
   // A terminal acknowledgement still needs an accepted reply. The model can
   // choose null for no new need; use only a fact-free, effect-free acknowledgement.
-  const ownedLimitations = trackCLimitationTexts(task);
+  const ownedLimitations = trackCOutcomeTexts(task);
   const modelDraft = ownedLimitations.length > 0 && input.draft.answerText === ownedLimitations.join(" ")
     ? { ...input.draft, answerText: null } : input.draft;
   const draft = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
@@ -1061,7 +1066,7 @@ function compileResponderDraft(input: Readonly<{
     }
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  const limitationTexts = trackCLimitationTexts(task);
+  const limitationTexts = trackCOutcomeTexts(task);
   limitationTexts.forEach((limitation) => {
     const safe = text(limitation, "TRACK_C_LIMITATION_NOT_PII_SAFE");
     if (safe === null) throw new Error("TRACK_C_LIMITATION_NOT_PII_SAFE");
@@ -1165,7 +1170,7 @@ function compileResponderDraft(input: Readonly<{
   if (adaptive) {
     for (const value of [draft.answerText, draft.progressionText]) {
       assertConversationalProse(value === null ? null : trackCUnclassifiedConversation(value, input.context, conversation),
-        value === draft.answerText && trackCLimitationTexts(task).length > 0);
+        value === draft.answerText && trackCOutcomeTexts(task).length > 0);
     }
   }
   if (task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS" &&
@@ -1321,6 +1326,7 @@ function fixedTask(
   context: ContextV2,
   evidence: readonly TrackCSelectableEvidence[],
   known?: FirstContactInputs,
+  requestedObligations?: readonly TrackCRequestedObligation[],
 ): TrackCResponderTask {
   const presentation = evidence.find(({ capability }) =>
     capability === "PRODUCT_PRESENTATION"
@@ -1335,6 +1341,7 @@ function fixedTask(
     ["BUST_CM", "WAIST_CM", "HIPS_CM"].every(measured);
   const missingMeasurements = fitKnown ? [] : (["HEIGHT_CM", "WEIGHT_KG"] as const).filter((kind) => !measured(kind));
   return compileTrackCFixedFirstContactTask({
+    ...(requestedObligations === undefined ? {} : { requestedObligations }),
     productResolved: context.productBinding.status === "RESOLVED",
     classificationOrVariantRequired: context.productBinding.status !== "RESOLVED" ||
       context.productBinding.productIds.length !== 1 ||
@@ -1428,6 +1435,7 @@ async function runTrackCStrategyContractCore(
       ? compileTrackCStrategistDecision({
           ...constraints,
           evidence,
+          ...(input.requestedObligations === undefined ? {} : { requestedObligations: input.requestedObligations }),
           boundProductIds: context.productBinding.productIds,
           decision: {
             replyAct: "ACKNOWLEDGE", goal: "Respect the canonical hard stop.",
@@ -1435,7 +1443,7 @@ async function runTrackCStrategyContractCore(
             canonicalAction: "HOLD_POSITION",
           },
         }).task
-      : fixedTask(context, evidence, input.firstContactInputs);
+      : fixedTask(context, evidence, input.firstContactInputs, input.requestedObligations);
     conversationPlan = task;
   } else {
     const strategistRequest = buildTrackCStrategistContractRequest({

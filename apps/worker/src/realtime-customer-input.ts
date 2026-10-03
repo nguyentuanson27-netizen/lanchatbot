@@ -4,6 +4,7 @@ import { buildCanonicalDecisionEvidenceV1, explicitPurchaseQuantity } from "@lan
 export type { RealtimeCustomerInput } from "@lana/contracts";
 import type { ShadowContextMessage } from "@lana/database";
 import type { SessionDecisionContext } from "@lana/conversation-engine";
+import type { TrackCRequestedObligation } from "./track-c-c3-strategy-contract.js";
 import { CONTEXT_V2_CANDIDATE_PROVIDER_VERSION, type CandidateVertexTransport } from "./context-v2-candidate.js";
 import { structuredVertexGenerationIdentity } from "./vertex.js";
 
@@ -38,10 +39,15 @@ export const CUSTOMER_INPUT_RESPONSE_SCHEMA = object({
         "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
         "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
         "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
-        "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY",
+        "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION",
       ]),
       productId: nullableText,
       evidenceText: nullableText,
+      size: nullableText, color: nullableText,
+      component: nullableEnumField(["TOP", "BOTTOM", "FULL_SET"]),
+      relatedProductId: nullableText,
+      deadlineDays: { type: "INTEGER", nullable: true, minimum: 0, maximum: 365 },
+      criteria: { ...object({ shape: nullableText, avoid: { type: "ARRAY", maxItems: 4, items: { type: "STRING" } } }), nullable: true },
     }),
   },
   salesSignals: structuredVertexGenerationIdentity().structuredAgent.responseSchema.properties.salesSignals,
@@ -87,6 +93,22 @@ function identify(obligations: readonly RealtimeCustomerObligationV1[]) {
   return Object.freeze(obligations.map((entry, index) => Object.freeze({ ...entry,
     id: `obligation:${index}:${createHash("sha256").update(JSON.stringify(entry)).digest("hex").slice(0, 16)}`,
   })));
+}
+
+/** Shared live/replay semantic boundary. Source spans remain outside model planning. */
+export function customerInputRequestedObligations(value: RealtimeCustomerInput,
+  boundProductIds: readonly string[]): readonly TrackCRequestedObligation[] {
+  return Object.freeze(customerInputObligations(value).map(({ evidenceText: _source,
+    size, color, component, relatedProductId, deadlineDays, criteria, ...entry }) => {
+    const shopScope = entry.capability === "POLICY" || entry.capability === "PROMOTION_OFFER";
+    return Object.freeze({ ...entry,
+      productId: entry.productId ?? (!shopScope && entry.kind !== "PRODUCT_SEARCH" && boundProductIds.length === 1
+        ? boundProductIds[0]! : null),
+      ...(size == null ? {} : { size }), ...(color == null ? {} : { color }),
+      ...(component == null ? {} : { component }), ...(relatedProductId == null ? {} : { relatedProductId }),
+      ...(deadlineDays == null ? {} : { deadlineDays }), ...(criteria == null ? {} : { criteria }),
+    });
+  }));
 }
 
 export function customerInputRequestsAlternativeSearch(

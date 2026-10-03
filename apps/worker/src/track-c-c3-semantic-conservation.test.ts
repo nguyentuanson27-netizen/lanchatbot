@@ -97,3 +97,63 @@ describe("D1 Q052 obligation identity and evidence mapping", () => {
   });
 });
 
+describe("D2 Q052 explicit compiler and final task outcomes", () => {
+  it.each(["TYPED_DECISION", "NEED: price only\nKNOWN: NONE\nANSWER: PRICE\nLIMIT: NONE\nNEXT: NONE"])(
+    "compiles one explicit outcome for each independent obligation despite PRICE focus (%s)", (goal) => {
+      const obligations = [
+        { id: "current:price", kind: "FACT_REQUEST" as const, capability: "PRICE" as const,
+          scope: null, productId: "CB182" },
+        { id: "current:wrinkle", kind: "FACT_REQUEST" as const, capability: "PRODUCT_ATTRIBUTES" as const,
+          scope: "WRINKLE_RESISTANCE" as const, productId: "CB182" },
+      ];
+      const result = compileTrackCStrategistDecision({
+        requestedObligations: obligations, evidence: [priceEvidence], boundProductIds: ["CB182"],
+        permittedCanonicalActions: ["NONE"], measurementsUnavailable: false,
+        productResolved: true, hardStop: false, requireStructuredGoal: true,
+        decision: { replyAct: "ANSWER", goal, proposition: "PRICE", evidenceRefs: [priceEvidence.ref],
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" },
+      });
+      const coverage = result.task.obligationResolutions;
+      expect(result.task.requestedObligations).toEqual(obligations);
+      expect(coverage).toHaveLength(obligations.length);
+      expect(coverage).toEqual([
+        expect.objectContaining({ obligationId: obligations[0]!.id, capability: "PRICE",
+          status: "SUPPORTED", outcome: "ANSWERED", subject: expect.objectContaining({ productId: "CB182" }),
+          evidenceRefs: [{ ref: priceEvidence.ref, contentHash: priceEvidence.provenance.contentHash }], limitation: null }),
+        expect.objectContaining({ obligationId: obligations[1]!.id, capability: "PRODUCT_ATTRIBUTES",
+          scope: "WRINKLE_RESISTANCE", status: "UNSUPPORTED", outcome: "BOUNDED_UNAVAILABLE",
+          subject: expect.objectContaining({ productId: "CB182" }), evidenceRefs: [],
+          limitation: { kind: "NO_VERIFIED_EVIDENCE" } }),
+      ]);
+      expect(new Set(coverage!.map(({ obligationId }) => obligationId)).size).toBe(obligations.length);
+      expect(coverage!.map(({ obligationId }) => obligationId)).toEqual(ids(obligations));
+      expect(result.task.semanticHandoff).toMatchObject({
+        need: "PRICE; PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE",
+        answer: "PRICE supported", limit: "PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE unsupported",
+      });
+      expect(Object.keys(result.decision).sort()).toEqual([
+        "canonicalAction", "continuation", "evidenceRefs", "goal", "proposition", "replyAct",
+      ]);
+    },
+  );
+
+  it("keeps both final task outcomes and both reply parts through RealtimeRunner", async () => {
+    const { obligations, trace } = await compoundRuntimeTurn();
+    expect(trace.roleCalls.map(({ role }) => role)).toEqual(["PRODUCER", "STRATEGIST", "RESPONDER"]);
+    const responder = trace.roleCalls.find(({ role }) => role === "RESPONDER")!.input;
+    const task = responder.responderTask as { obligationResolutions: readonly { obligationId: string }[];
+      semanticHandoff: unknown };
+    expect(task.obligationResolutions).toHaveLength(obligations.length);
+    expect(task.obligationResolutions).toEqual([
+      expect.objectContaining({ obligationId: ids(obligations)[0], capability: "PRICE", outcome: "ANSWERED" }),
+      expect.objectContaining({ obligationId: ids(obligations)[1], capability: "PRODUCT_ATTRIBUTES",
+        scope: "WRINKLE_RESISTANCE", outcome: "BOUNDED_UNAVAILABLE" }),
+    ]);
+    expect(task.obligationResolutions.map(({ obligationId }) => obligationId)).toEqual(ids(obligations));
+    expect(task.semanticHandoff).toMatchObject({ need: "PRICE; PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE",
+      answer: "PRICE supported", limit: "PRODUCT_ATTRIBUTES/WRINKLE_RESISTANCE unsupported" });
+    expect(trace.reply).toContain("799.000");
+    expect(trace.reply).toContain("chưa có thông tin xác nhận về khả năng chống nhăn");
+    expect(trace.after.commerce).toEqual(trace.before.commerce);
+  });
+});

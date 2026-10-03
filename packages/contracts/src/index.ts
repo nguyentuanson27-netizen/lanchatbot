@@ -342,10 +342,17 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
     "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
     "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
-    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY",
+    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION",
   ]).nullable(),
   productId: z.string().trim().min(1).max(64).nullable(),
   evidenceText: CustomerInputEvidenceSchema.nullable(),
+  size: z.string().trim().min(1).max(32).nullable().optional(),
+  color: z.string().trim().min(1).max(80).nullable().optional(),
+  component: z.enum(["TOP", "BOTTOM", "FULL_SET"]).nullable().optional(),
+  relatedProductId: z.string().trim().min(1).max(64).nullable().optional(),
+  deadlineDays: z.number().int().min(0).max(365).nullable().optional(),
+  criteria: z.object({ shape: z.string().trim().min(1).max(80).nullable(),
+    avoid: z.array(z.string().trim().min(1).max(80)).max(4) }).strict().nullable().optional(),
 }).strict().superRefine((value, context) => {
   if (value.kind === "FACT_REQUEST") {
     if (value.capability === null) {
@@ -355,13 +362,13 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     const attributeScope = value.scope !== null &&
       ["MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
         "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
-        "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT"].includes(value.scope);
+        "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT", "WAIST_CONSTRUCTION"].includes(value.scope);
     const offerScope = value.scope !== null &&
       ["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"].includes(value.scope);
     const otherScopeValid = value.scope !== null && (
       (["DISPATCH_TIME", "DELIVERY_DEADLINE"].includes(value.scope) && value.capability === "ETA") ||
       (["CUSTOMER_OFFER", "FUTURE_PROMOTION"].includes(value.scope) && value.capability === "PROMOTION_OFFER") ||
-      (value.scope === "COMPARATIVE_PROPERTY" && value.capability === "PRODUCT_COMPARISON"));
+      (["COMPARATIVE_PROPERTY", "CHEAPER"].includes(value.scope) && value.capability === "PRODUCT_COMPARISON"));
     const scopedCapability = value.capability === "PRODUCT_ATTRIBUTES" ||
       value.capability === "OFFER_CONFIGURATION";
     if ((scopedCapability && value.scope === null) ||

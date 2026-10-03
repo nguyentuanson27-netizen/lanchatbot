@@ -8,6 +8,7 @@ import {
   applyCustomerDecisionInput,
   customerInputCanonicalEvidence,
   customerInputObligations,
+  customerInputRequestedObligations,
   customerInputRequestsAlternativeSearch,
   customerInputRejectsProduct,
   customerInputChangesProductReference,
@@ -5516,18 +5517,20 @@ export class RealtimeRunner {
           dialogue: c3Dialogue,
           ...(customerInput === null ? {} : {
             customerVariant: customerInput.variant,
-            requestedObligations: customerInputObligations(customerInput).map(
-              ({ id, kind, capability, scope, productId }): TrackCRequestedObligation => {
+            requestedObligations: customerInputRequestedObligations(customerInput,
+              c3Input.context.productBinding.status === "RESOLVED" ? c3Input.context.productBinding.productIds : []).map(
+              (entry): TrackCRequestedObligation => {
+                const { kind, capability, scope, productId } = entry;
                 const subject = productId ?? resolvedProduct?.productId ?? nextState.currentProductId;
                 const intent = capability === "SIZE_FIT" ? "SIZE" : capability;
                 const lookup = multiFactAudit.find((entry) => entry.productId === subject && entry.requestedFact === intent) ??
                   (businessFactLookupQuery?.intent === intent && businessFacts?.productId === subject ? businessFacts : null);
-                return { id, kind, capability, scope, productId: kind === "FACT_REQUEST" &&
+                return { ...entry, kind, capability, scope, productId: kind === "FACT_REQUEST" &&
                     capability !== "POLICY" && capability !== "PROMOTION_OFFER" ? subject : productId,
                   ...(lookup && lookup.status !== "OK" ? { lookupStatus: lookup.status === "STALE" ? "STALE" : "FAILED" } : {}),
-                  ...(capability === "STOCK" && stockQuery?.productId === subject && stockQuery.size !== null
+                  ...(entry.size === undefined && capability === "STOCK" && stockQuery?.productId === subject && stockQuery.size !== null
                     ? { size: stockQuery.size } : {}),
-                  ...(capability === "STOCK" && stockQuery?.productId === subject && stockQuery.color !== null
+                  ...(entry.color === undefined && capability === "STOCK" && stockQuery?.productId === subject && stockQuery.color !== null
                     ? { color: stockQuery.color } : {}),
                 };
               }

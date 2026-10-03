@@ -5,7 +5,7 @@ import type {
   TrackCResponderTask,
   TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
-import { trackCLimitationTexts } from "./track-c-c3-obligation-resolution.js";
+import { trackCOutcomeTexts } from "./track-c-c3-obligation-resolution.js";
 
 /** Only the compiler/runtime can supply this context, never the output schema.
  * These references authorize no fact, fit advice, cart change or other effect. */
@@ -16,7 +16,7 @@ export type TrackCConversationGuardContext = Readonly<{
 }>;
 
 type NonFactStatement = "CUSTOMER_PRICE_REFERENCE" | "CUSTOMER_SIZE_SELECTION" |
-  "PRODUCT_REFERENCE" | "LOCALITY_REQUEST" | "BOUNDED_UNCERTAINTY";
+  "PRODUCT_REFERENCE" | "LOCALITY_REQUEST" | "BOUNDED_UNCERTAINTY" | "CODE_OWNED_OUTCOME";
 
 function folded(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
@@ -47,8 +47,8 @@ function classify(value: string, context: ContextV2,
   source: TrackCConversationGuardContext | null): NonFactStatement | null {
   if (source === null) return null;
   const phrase = body(value);
-  if (source.task.obligationResolutions !== undefined && trackCLimitationTexts(source.task).includes(value.trim())) {
-    return "BOUNDED_UNCERTAINTY";
+  if (source.task.obligationResolutions !== undefined && trackCOutcomeTexts(source.task).includes(value.trim())) {
+    return "CODE_OWNED_OUTCOME";
   }
   if (source.task.obligationResolutions === undefined && closedTopicUncertainty(value, context)) return "BOUNDED_UNCERTAINTY";
   if (trackCPiiFreeLocalityRequest(value, source.task)) return "LOCALITY_REQUEST";
@@ -83,6 +83,7 @@ function classify(value: string, context: ContextV2,
  * Factual segments NEVER use this projection. */
 export function trackCUnclassifiedConversation(value: string, context: ContextV2,
   source: TrackCConversationGuardContext | null = null): string {
+  if (source !== null && trackCOutcomeTexts(source.task).includes(value.trim())) return "";
   const classes = sentences(value).map((sentence) => classify(sentence, context, source));
   if (classes.some((kind) => kind !== null)) {
     // Mixed uncertainty receives NO exemption. In particular a following
@@ -112,6 +113,7 @@ const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
   LINING: "wearLining",
   BREATHABILITY: "wearBreathability",
   CARE_INSTRUCTIONS: "careInstructions",
+  WAIST_CONSTRUCTION: "design.waist",
 } as const);
 
 export function trackCObligationMatchesEvidence(
@@ -119,12 +121,23 @@ export function trackCObligationMatchesEvidence(
   evidence: TrackCSelectableEvidence,
 ): boolean {
   if (obligation.kind === "PRODUCT_SEARCH") {
+    // Discovery/price does not prove shape or an avoidance criterion. Keep
+    // this request bounded until the same candidate has verified attributes.
+    if (obligation.criteria !== undefined) return false;
     return obligation.lookupStatus === undefined && evidence.subject?.productId !== undefined &&
       evidence.subject.productId !== obligation.productId && ["PRICE", "PRODUCT_PRESENTATION"].includes(evidence.capability);
   }
   if (obligation.lookupStatus !== undefined || obligation.kind !== "FACT_REQUEST" ||
       obligation.capability === null ||
       evidence.capability !== obligation.capability) return false;
+  if (obligation.capability === "PRODUCT_COMPARISON" && obligation.scope === "CHEAPER") {
+    const ids = evidence.value.productIds;
+    return obligation.productId !== null && obligation.relatedProductId !== undefined &&
+      Array.isArray(ids) && ids.length === 2 && new Set(ids).size === 2 &&
+      ids.includes(obligation.productId) && ids.includes(obligation.relatedProductId) &&
+      typeof evidence.value.differenceVnd === "number" && evidence.value.differenceVnd >= 0 &&
+      Array.isArray(evidence.value.sourceClaimHashes) && evidence.value.sourceClaimHashes.length === 2;
+  }
   if (obligation.productId === null && evidence.subject?.productId !== undefined) return false;
   if (obligation.productId !== null) {
     const evidenceProductId = evidence.subject?.productId;
@@ -137,17 +150,27 @@ export function trackCObligationMatchesEvidence(
   if (obligation.variantId !== undefined && evidence.subject?.variantId !== obligation.variantId) return false;
   if (obligation.size !== undefined && evidence.subject?.variantLabel?.size?.toLocaleUpperCase("vi-VN") !==
       obligation.size.toLocaleUpperCase("vi-VN")) return false;
-  if (obligation.color !== undefined && evidence.subject?.variantLabel?.color?.toLocaleUpperCase("vi-VN") !==
+  if (obligation.component !== undefined && evidence.value.component !== obligation.component) return false;
+  if (obligation.capability === "STOCK" && obligation.component === undefined &&
+      ["TOP", "BOTTOM"].includes(String(evidence.value.component))) return false;
+  if (obligation.color !== undefined && !(obligation.capability === "PRODUCT_ATTRIBUTES" && obligation.scope === "COLORS") &&
+      evidence.subject?.variantLabel?.color?.toLocaleUpperCase("vi-VN") !==
       obligation.color.toLocaleUpperCase("vi-VN")) return false;
   if (obligation.scope === null) return true;
   if (obligation.capability === "PRODUCT_ATTRIBUTES") {
     const field = ATTRIBUTE_SCOPE_FIELD[
       obligation.scope as keyof typeof ATTRIBUTE_SCOPE_FIELD
     ];
-    return field !== undefined && Object.hasOwn(evidence.value, field);
+    return (field !== undefined && Object.hasOwn(evidence.value, field)) ||
+      (obligation.scope === "SILHOUETTE" && Object.hasOwn(evidence.value, "design.silhouette"));
   }
   if (obligation.capability === "OFFER_CONFIGURATION") {
     return evidence.value.offerScope === obligation.scope;
+  }
+  if (obligation.capability === "ETA" && obligation.scope === "DELIVERY_DEADLINE") {
+    return Number.isInteger(obligation.deadlineDays) && obligation.deadlineDays! >= 0 &&
+      Number.isInteger(evidence.value.minDays) && Number.isInteger(evidence.value.maxDays) &&
+      (evidence.value.minDays as number) >= 0 && (evidence.value.maxDays as number) >= (evidence.value.minDays as number);
   }
   return false;
 }
