@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   CartV1Schema,
+  CanonicalCheckoutCompletenessV1Schema,
   ContextV2CaptureV1Schema,
   ContextV2Schema,
   OrderPreviewV1Schema,
@@ -60,6 +61,12 @@ export interface TrackCV5CompactCase {
     }>;
     readonly source_stage: "ORDER_PREVIEW" | "PURCHASE_CONFIRMED" | null;
     readonly runtime_claim_refs: readonly string[];
+    readonly checkout_completeness?: Readonly<{
+      readonly state: "REQUIRED" | "COMPLETE";
+      readonly missing_fields: readonly (
+        "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD"
+      )[];
+    }>;
   }>;
 }
 
@@ -159,6 +166,39 @@ function expectedBarriers(fixture: TrackCV5CompactCase): readonly string[] {
     }
   }
   return [...active];
+}
+
+function simulationCheckoutCompleteness(
+  fixture: TrackCV5CompactCase,
+  salesCycleRevision: number,
+): ContextV2["checkoutCompleteness"] {
+  const authored = fixture.context.checkout_completeness;
+  const checkoutDetailsPresent = fixture.context.canonical_flags.includes(
+    "CHECKOUT_DETAILS_PRESENT",
+  );
+  if (authored === undefined && !checkoutDetailsPresent) return undefined;
+  if (authored !== undefined) {
+    const keys = Object.keys(authored).sort();
+    if (JSON.stringify(keys) !== JSON.stringify(["missing_fields", "state"]) ||
+        (authored.state === "COMPLETE") !==
+          (authored.missing_fields.length === 0)) {
+      throw new Error("TRACK_C_C3_CHECKOUT_COMPLETENESS_INVALID");
+    }
+  }
+  try {
+    return CanonicalCheckoutCompletenessV1Schema.parse({
+      schemaVersion: 1,
+      contractVersion: "CANONICAL_CHECKOUT_COMPLETENESS_V1",
+      state: authored?.state ?? "COMPLETE",
+      missingFields: authored?.missing_fields ?? [],
+      source: "CANONICAL_COMMERCE_STATE_V1",
+      salesCycleRevision,
+      authority: "SHADOW_ONLY",
+      authorization: "NONE",
+    });
+  } catch {
+    throw new Error("TRACK_C_C3_CHECKOUT_COMPLETENESS_INVALID");
+  }
 }
 
 function protectedClaimScope(
@@ -538,6 +578,10 @@ function simulationContext(
   const verifiedClaims = [...claims].sort((left, right) =>
     left.claimId.localeCompare(right.claimId)
   );
+  const checkoutCompleteness = simulationCheckoutCompleteness(
+    fixture,
+    finalSalesCycleRevision,
+  );
   const draft: Omit<ContextV2, "contextHash"> = {
     schemaVersion: 2,
     contractVersion: "CONTEXT_V2",
@@ -590,6 +634,7 @@ function simulationContext(
       evidenceHash: evidence.buyingIntent.evidenceHash,
     },
     cartReadiness: null,
+    ...(checkoutCompleteness === undefined ? {} : { checkoutCompleteness }),
     ownership: { owner: "BOT", handoffActive: false, reasonCode: null },
     consumerContractVersions: {
       strategy: "CONTEXT_V2_STRATEGY_INPUT_V1",

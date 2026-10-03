@@ -13,10 +13,14 @@ import {
   type TrackCV5TwoPassBenchmarkResult,
 } from "./track-c-c3-v5-benchmark-runner.js";
 import type { TrackCV5CompactCase } from "./track-c-c3-v5-benchmark-materialization.js";
+import { renderTrackCCheckoutSafeReply } from "./track-c-checkout-safe-reply.js";
+import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 
 export type TrackCC3CheckoutCompleteness = Readonly<{
   readonly state: "REQUIRED" | "COMPLETE";
-  readonly missing_fields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+  readonly missing_fields: readonly (
+    "FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD"
+  )[];
 }>;
 
 export type TrackCC3TwoPassQualityFixture = TrackCV5CompactCase & Readonly<{
@@ -36,9 +40,6 @@ export type TrackCC3TwoPassQualityCandidateInput = Omit<
 
 export type TrackCC3TwoPassQualityCandidateResult =
   TrackCV5TwoPassBenchmarkResult;
-
-const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
-const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
 
 function trustedSimulationMetadata(
   fixture: TrackCC3TwoPassQualityFixture,
@@ -60,27 +61,6 @@ function trustedSimulationMetadata(
     }));
   }
 
-  const checkout = fixture.context.checkout_completeness;
-  if (checkout !== undefined) {
-    const fields = checkout.missing_fields;
-    const keys = Object.keys(checkout).sort();
-    if (fixture.context.source_stage !== "ORDER_PREVIEW" ||
-        JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
-        !Array.isArray(fields) ||
-        fields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
-        new Set(fields).size !== fields.length ||
-        (checkout.state === "COMPLETE" && fields.length !== 0) ||
-        (checkout.state === "REQUIRED" && fields.length === 0) ||
-        (checkout.state !== "COMPLETE" && checkout.state !== "REQUIRED")) {
-      throw new Error("TRACK_C_C3_CHECKOUT_COMPLETENESS_INVALID");
-    }
-    metadata.push(Object.freeze({
-      kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
-      state: checkout.state,
-      missingFields: Object.freeze([...fields]),
-      authorization: "NONE",
-    }));
-  }
   return Object.freeze(metadata);
 }
 
@@ -101,8 +81,16 @@ export async function runTrackCC3TwoPassQualityCandidate(
   }
   const metadata = trustedSimulationMetadata(input.fixture);
   const { fixture: _fixture, ...runnerInput } = input;
-  return runTrackCV5TwoPassBenchmarkCase({
+  const result = await runTrackCV5TwoPassBenchmarkCase({
     ...runnerInput,
     simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? metadata : [],
+  });
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
+  return Object.freeze({
+    ...result,
+    reply: renderTrackCCheckoutSafeReply(context, result.output),
   });
 }

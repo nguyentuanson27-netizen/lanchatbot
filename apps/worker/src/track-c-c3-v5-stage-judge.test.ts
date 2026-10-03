@@ -118,10 +118,26 @@ describe("Track C V5 Vertex stage judge composition", () => {
       artifact: {
         conversationPlan: {
           currentNeed: "Answer price",
-          mustResolve: "Exact price",
-          conversationRead: "Product resolved",
-          nextMove: "NONE",
+          answer: {
+            mode: "DIRECT",
+            objective: "Answer the exact verified price",
+            evidenceRefs: ["CLAIM_001"],
+            protectedProposition: "PRICE",
+            protectedResolution: "SUPPORTED",
+          },
+          nextMove: {
+            action: "NONE",
+            target: "NONE",
+            purpose: "NONE",
+            decisionInput: "NONE",
+          },
+          canonicalAction: {
+            type: "NONE",
+            requestedFields: [],
+          },
+          terminal: false,
           avoid: "No invented fact",
+          effectIntent: "NONE",
         },
         responderReply: "Mẫu này hiện 849k chị ạ.",
       },
@@ -191,10 +207,26 @@ describe("Track C V5 Vertex stage judge composition", () => {
       artifact: {
         conversationPlan: {
           currentNeed: "Clarify the active product",
-          mustResolve: "Referent",
-          conversationRead: "Ambiguous",
-          nextMove: "Ask one clarification",
+          answer: {
+            mode: "CLARIFY",
+            objective: "Clarify the active product referent",
+            evidenceRefs: [],
+            protectedProposition: "NONE",
+            protectedResolution: "NOT_APPLICABLE",
+          },
+          nextMove: {
+            action: "NONE",
+            target: "NONE",
+            purpose: "NONE",
+            decisionInput: "NONE",
+          },
+          canonicalAction: {
+            type: "ASK_PRODUCT",
+            requestedFields: [],
+          },
+          terminal: false,
           avoid: "Do not guess",
+          effectIntent: "NONE",
         },
       },
     })).rejects.toThrow("VERTEX_TRACK_C_V5_STAGE_SCHEMA_INVALID");
