@@ -1,3 +1,7 @@
+import { assertTrackCNoEffectText, trackCUnclassifiedConversation, type TrackCConversationGuardContext } from "./track-c-c3-conversational-guard.js";
+import { assertTrackCResolutionCoverage } from "./track-c-c3-obligation-resolution.js";
+import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { trackCRealizationMatches } from "./track-c-c3-realization-style.js";
 import {
@@ -291,7 +295,7 @@ function sizeGuardInputForClaim(
   };
 }
 
-/** The legacy guard treats promotion/free-shipping topic mentions as assertions. C3 may
+/** The legacy guard treats stock/fit/delivery/offer topic mentions as assertions. C3 may
  * explicitly say that information is unconfirmed. Admit only a bounded
  * uncertainty clause with no values/promise; never infer promotion authority.
  * This is not a relevance check or a general natural-language certificate. */
@@ -300,7 +304,13 @@ function onlyUnconfirmedTopicMentions(value: string, reason: string): boolean {
     ? /\b(?:khuyen mai|uu dai|giam gia|giam\s+\d|voucher|ma giam)\b/u
     : reason === "UNAUTHORIZED_FREESHIP"
       ? /\b(?:freeship|free ship|mien phi (?:giao|ship))\b/u
-      : null;
+      : reason === "UNAUTHORIZED_STOCK"
+        ? /\b(?:con hang|het hang|san hang|dat truoc|sap ve|(?:con|het) size)\b/u
+        : reason === "SIZE_RECOMMENDATION_UNDECLARED"
+          ? /\b(?:size|sz|vua|hop)\b/u
+          : reason === "UNAUTHORIZED_ETA"
+            ? /\b(?:giao|nhan|van chuyen)\b/u
+            : null;
   if (topic === null) return false;
   const folded = value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d").toLowerCase();
@@ -319,6 +329,8 @@ function guardProductionOutput(
   output: ContextV2CandidateOutputV2,
   evaluationAt: Date,
   currentCart: TrackCCurrentCartBinding | null = null,
+  comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
+  conversation: TrackCConversationGuardContext | null = null,
 ): void {
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
@@ -335,7 +347,17 @@ function guardProductionOutput(
     context.productAttributes === null || context.productAttributes === undefined
       ? new Map()
       : trackCProductAttributeProjectionRegistry(context.productAttributes);
+  const comparisons = new Map(trackCPriceComparisons(context, comparisonFacts, evaluationAt)
+    .map((entry) => [entry.provenance.contentHash, entry]));
   for (const segment of output.segments) {
+    if (segment.kind === "GENERAL") assertTrackCNoEffectText(segment.text);
+    const comparison = segment.kind === "VERIFIED_CLAIM" ? comparisons.get(segment.claimContentHash) : undefined;
+    if (comparison) {
+      if (!trackCRealizationMatches(segment.text, comparison.deterministicText!)) {
+        throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
+      }
+      continue;
+    }
     const usesProductPresentationEvidence =
       segment.kind === "VERIFIED_CLAIM" &&
       productPresentationHash !== null &&
@@ -377,6 +399,10 @@ function guardProductionOutput(
         claim,
         trackCBoundPresentationForClaim(context.productPresentation, claim.scope),
       );
+      if (claim.type === "STOCK" && claim.scope.kind === "PRODUCT" &&
+          claim.scope.variantId !== null && deterministicText === null) {
+        throw new Error("TRACK_C_V5_PRODUCTION_VARIANT_MAPPING_UNAVAILABLE");
+      }
       if (deterministicText !== null && !trackCRealizationMatches(segment.text, deterministicText)) {
         throw new Error("TRACK_C_V5_PRODUCTION_DETERMINISTIC_TEXT_MISMATCH");
       }
@@ -413,6 +439,8 @@ function guardProductionOutput(
             context.productPresentation?.productId ?? null
           : null;
     const sizeClaimContext = sizeGuardInputForClaim(context, claim);
+    const guardText = segment.kind === "GENERAL"
+      ? trackCUnclassifiedConversation(segment.text, context, conversation) : segment.text;
     const guard = guardAgentProposal({
       proposal: {
         schemaVersion: 1,
@@ -420,7 +448,7 @@ function guardProductionOutput(
         conversationStage: context.phase.phase,
         productId,
         action: "REPLY",
-        reply: segment.text,
+        reply: guardText || "Dạ.",
         attachments: [],
         handoffReason: null,
         protectedClaimIds: sizeClaimContext.claims.map(({ id }) => id),
@@ -435,7 +463,7 @@ function guardProductionOutput(
       now: evaluationAt,
     });
     const blocked = guard.blockedReasonCodes.filter((reason) =>
-      !(segment.kind === "GENERAL" && onlyUnconfirmedTopicMentions(segment.text, reason))
+      !(segment.kind === "GENERAL" && conversation?.task.obligationResolutions === undefined && onlyUnconfirmedTopicMentions(guardText, reason))
     );
     if (blocked.length > 0) {
       throw new Error(
@@ -452,6 +480,8 @@ export function validateResponderOutput(
   evaluationAt: Date,
   simulationClaimContentHashes: readonly string[] = [],
   currentCart: TrackCCurrentCartBinding | null = null,
+  comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
+  conversation: TrackCConversationGuardContext | null = null,
 ): ContextV2CandidateOutputV2 {
   if (lane !== "BEHAVIOR_SIMULATION" && simulationClaimContentHashes.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
@@ -481,6 +511,7 @@ export function validateResponderOutput(
       ? new Map()
       : trackCProductAttributeProjectionRegistry(context.productAttributes);
   const known = new Set([
+    ...trackCPriceComparisons(context, comparisonFacts, evaluationAt).map(({ provenance }) => provenance.contentHash),
     ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
     ...(context.productAttributes === null || context.productAttributes === undefined
       ? []
@@ -501,8 +532,16 @@ export function validateResponderOutput(
   ) {
     throw new Error("TRACK_C_V5_RESPONDER_PROVENANCE_INVALID");
   }
+  // Coverage owns the complete reply, including admitted hypothetical facts.
+  // The runtime authority projection below must not remove them from this readback.
+  if (conversation === null && output.segments.some((segment) => segment.kind === "GENERAL" && segment.obligationId !== undefined)) {
+    throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+  }
+  if (conversation !== null) {
+    assertTrackCResolutionCoverage(conversation.task, context.productBinding.productIds, output.segments);
+  }
   if (lane === "PRODUCTION_CONTRACT") {
-    guardProductionOutput(context, output, evaluationAt, currentCart);
+    guardProductionOutput(context, output, evaluationAt, currentCart, comparisonFacts, conversation);
   } else {
     const simulationHashes = new Set(simulationClaimContentHashes);
     const runtimeOnlyOutput: ContextV2CandidateOutputV2 = {
@@ -514,7 +553,7 @@ export function validateResponderOutput(
     };
     // Simulation facts are excluded above; runtime cart claims still need the
     // same pinned cart readback that production uses for their final guard.
-    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart);
+    guardProductionOutput(context, runtimeOnlyOutput, evaluationAt, currentCart, comparisonFacts, conversation);
   }
   return output;
 }

@@ -120,7 +120,7 @@ function policyText(
     const tryOnText = tryOn === true ? " Chị cũng được thử tại chỗ ạ."
       : tryOn === false ? " Phần thử đồ khi nhận hàng thì shop chưa hỗ trợ ạ."
       : tryOn === "ORDER_DEPENDENT"
-        ? " Riêng việc thử đồ còn tuỳ theo từng đơn, em cần kiểm tra lại giúp chị ạ."
+        ? " Riêng việc thử đồ còn tuỳ theo từng đơn ạ."
         : "";
     return trackCComposeReply([`Khi nhận hàng chị được kiểm tra ${joinVi(checks)} ạ.`,
       ...(tryOnText.length === 0 ? [] : [tryOnText.trim()])]);
@@ -189,12 +189,128 @@ function policyText(
   return null;
 }
 
+/** Raw artifact names are storage groups, not customer policy identities.
+ * Project only the field that proves each requested scope; a missing permission
+ * is never turned into a negative rule, and sale restrictions travel with it. */
+export function trackCPolicyProjections(
+  policy: string,
+  data: Readonly<Record<string, unknown>>,
+): readonly Readonly<{
+  scope: "INSPECTION" | "TRY_ON" | "ALTERATION" | "SPLIT_SIZE" | "EXCHANGE_SIZE" | "EXCHANGE_COLOR" | "EXCHANGE_MODEL";
+  value: Readonly<Record<string, unknown>>;
+  text: string;
+}>[] {
+  type Projection = ReturnType<typeof trackCPolicyProjections>[number];
+  const projections: Projection[] = [];
+  const add = (scope: Projection["scope"], value: Readonly<Record<string, unknown>>, text: string): void => {
+    projections.push(Object.freeze({ scope, value: Object.freeze({ policy: scope, ...value }), text }));
+  };
+  if (policy === "INSPECTION") {
+    const checks = Object.fromEntries(["verifyModel", "verifyColor", "verifySize"]
+      .filter((field) => booleanField(data, field) === true).map((field) => [field, true]));
+    // Missing/false fields do not prove another check. Keep try-on out of this
+    // atomic answer while retaining the full raw policy for legacy consumers.
+    if (Object.keys(checks).length > 0) add("INSPECTION", checks, policyText(policy, checks)!);
+    const tryOn = data["tryOn"];
+    if (tryOn === true || tryOn === false || tryOn === "ORDER_DEPENDENT") {
+      add("TRY_ON", { tryOn }, tryOn === true ? "Chị được thử đồ tại chỗ khi nhận hàng ạ."
+        : tryOn === false ? "Phần thử đồ khi nhận hàng thì shop chưa hỗ trợ ạ."
+        : "Việc thử đồ khi nhận hàng còn tuỳ theo từng đơn ạ.");
+    }
+  } else if (policy === "CUSTOMIZATION") {
+    const allowAlteration = booleanField(data, "supported");
+    if (allowAlteration !== null) add("ALTERATION", { allowAlteration }, policyText(policy, data)!);
+  } else if (policy === "SPLIT_SIZE") {
+    const allowMixedSizes = booleanField(data, "allowed");
+    if (allowMixedSizes !== null) add("SPLIT_SIZE", { allowMixedSizes }, policyText(policy, data)!);
+  } else if (policy === "EXCHANGE_SALE") {
+    const discountAtLeastPercent = numberField(data, "discountAtLeastPercent");
+    if (discountAtLeastPercent === null || discountAtLeastPercent < 0 || discountAtLeastPercent > 100) {
+      return Object.freeze(projections);
+    }
+    const allowed = stringList(data, "allowedChanges");
+    if (allowed !== null && mapAll(allowed, EXCHANGE_CHANGE_TEXT) !== null) {
+      for (const [token, scope] of [["size", "EXCHANGE_SIZE"], ["color", "EXCHANGE_COLOR"]] as const) {
+        if (allowed.includes(token)) add(scope, { allowed: true, discountAtLeastPercent },
+          `Với mẫu giảm từ ${discountAtLeastPercent}% trở lên, chị đổi được ${EXCHANGE_CHANGE_TEXT[token]} ạ.`);
+      }
+    }
+    const modelChange = booleanField(data, "modelChange");
+    if (modelChange !== null) add("EXCHANGE_MODEL", { allowed: modelChange, discountAtLeastPercent },
+      modelChange ? `Với mẫu giảm từ ${discountAtLeastPercent}% trở lên, chị đổi sang mẫu khác được ạ.`
+        : `Với mẫu giảm từ ${discountAtLeastPercent}% trở lên, phần đổi sang mẫu khác chưa áp dụng ạ.`);
+  }
+  return Object.freeze(projections);
+}
+
 /**
  * Realization for one typed fact group.
  *
  * `null` means the group has authority but no safe wording for this shape, and
  * the caller reports that as an unmet realization rather than dropping it.
  */
+export type TrackCOfferConfigurationScope =
+  | "FULL_SET" | "TOP" | "BOTTOM" | "TWO_PIECE" | "THREE_PIECE";
+
+export function trackCOfferConfigurationProjections(
+  data: Readonly<Record<string, unknown>>,
+): readonly Readonly<{
+  scope: TrackCOfferConfigurationScope;
+  value: Readonly<Record<string, unknown>>;
+  text: string;
+}>[] {
+  const projections: Array<Readonly<{
+    scope: TrackCOfferConfigurationScope;
+    value: Readonly<Record<string, unknown>>;
+    text: string;
+  }>> = [];
+  const fullSet = numberField(data, "fullSetVnd");
+  if (fullSet !== null) projections.push(Object.freeze({
+    scope: "FULL_SET",
+    value: Object.freeze({ fullSetVnd: fullSet }),
+    text: `Nguyên set có giá ${trackCFormatVnd(fullSet)} ạ.`,
+  }));
+  const twoPiece = numberField(data, "twoPieceVnd");
+  if (twoPiece !== null) projections.push(Object.freeze({
+    scope: "TWO_PIECE",
+    value: Object.freeze({ twoPieceVnd: twoPiece }),
+    text: `Bộ 2 món có giá ${trackCFormatVnd(twoPiece)} ạ.`,
+  }));
+  const threePiece = numberField(data, "threePieceVnd");
+  const threeItems = stringList(data, "threePieceItems");
+  if (threePiece !== null) projections.push(Object.freeze({
+    scope: "THREE_PIECE",
+    value: Object.freeze({
+      threePieceVnd: threePiece,
+      ...(threeItems === null ? {} : { threePieceItems: Object.freeze([...threeItems]) }),
+    }),
+    text: threeItems === null
+      ? `Bộ 3 món có giá ${trackCFormatVnd(threePiece)} ạ.`
+      : `Bộ 3 món gồm ${joinVi(threeItems)} có giá ${trackCFormatVnd(threePiece)} ạ.`,
+  }));
+  for (const [key, label, scope] of [
+    ["top", "áo", "TOP"],
+    ["bottom", "quần/chân váy", "BOTTOM"],
+  ] as const) {
+    const item = data[key];
+    if (item === null || typeof item !== "object" || Array.isArray(item)) continue;
+    const record = item as Readonly<Record<string, unknown>>;
+    const available = booleanField(record, "available");
+    if (available === null) continue;
+    const priceVnd = numberField(record, "priceVnd");
+    projections.push(Object.freeze({
+      scope,
+      value: Object.freeze({ available, priceVnd }),
+      text: available && priceVnd !== null
+        ? `Mua lẻ ${label} có giá ${trackCFormatVnd(priceVnd)} ạ.`
+        : available
+          ? `${label[0]!.toUpperCase()}${label.slice(1)} có bán lẻ ạ.`
+          : `${label[0]!.toUpperCase()}${label.slice(1)} hiện chưa bán lẻ riêng ạ.`,
+    }));
+  }
+  return Object.freeze(projections);
+}
+
 export function trackCSimulationFactText(
   kind: string,
   data: Readonly<Record<string, unknown>>,

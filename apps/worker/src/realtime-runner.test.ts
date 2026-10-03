@@ -1,4 +1,7 @@
+import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
 import { createHash } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   AFTER_SALES_HOLDING_REPLY_V2,
@@ -3316,14 +3319,18 @@ describe("RealtimeRunner inbound batching", () => {
     expect(inbox.complete).not.toHaveBeenCalled();
   });
 
-  it.each(["BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "LONG_HISTORY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
+  it.each(["TYPED_SEMANTIC_SELECTION", "TYPED_SEMANTIC_UNSAFE_FIT", "TYPED_SEMANTIC_PARENT_PRICE", "TYPED_SEMANTIC_PRICE", "TYPED_SEMANTIC_UNSAFE_PRICE", "TYPED_SEMANTIC_WRINKLE", "TYPED_SEMANTIC_WRONG_PROPERTY", "FAULT_STRATEGIST", "FAULT_RESPONDER_TIMEOUT", "FAULT_RESPONDER_MALFORMED", "FAULT_COMMIT", "BOT", "HUMAN", "C3_FAILURE", "FIT_REQUIRED", "FIT_READY", "FIT_NO_CHART", "FIT_UNRELATED", "VARIANT_RECALL", "MULTI_PRICE", "MULTI_COMPARISON", "LONG_HISTORY", "TYPED_INPUT", "TYPED_DRY_RUN", "TYPED_FAILURE", "TYPED_FAILURE_STALE_PRODUCT", "TYPED_CHANGE_BUY", "TYPED_ROUTING_HUMAN", "TYPED_ROUTING_POST_SALE", "TYPED_STOCK_BUY", "TYPED_POLICY_BUY", "TYPED_POLICY_CONDITIONAL", "TYPED_POLICY_ONLY", "TYPED_ALTERNATIVE", "TYPED_ALTERNATIVE_EMPTY"] as const)("builds C3 through realtime and respects %s ownership and input", async (checkoutOwner) => {
     const fitMode = checkoutOwner.startsWith("FIT_");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-22T02:00:34.000Z"));
     try {
-    const entry = item(34, checkoutOwner === "LONG_HISTORY"
-      ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
-      : "Mẫu CB182 bao nhiêu?");
+    const entry = item(34, checkoutOwner === "TYPED_FAILURE"
+      ? "Chị đang cân nhắc"
+      : checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT"
+        ? "Đổi sang mẫu kia, giá sao?"
+        : (checkoutOwner === "LONG_HISTORY" || checkoutOwner.startsWith("TYPED_"))
+          ? "Ngân sách đổi thành 700k. Mẫu CB182 bao nhiêu?"
+          : "Mẫu CB182 bao nhiêu?");
     const batch = {
       pageId,
       conversationHash,
@@ -3364,7 +3371,9 @@ describe("RealtimeRunner inbound batching", () => {
           budgetVnd: 600_000, occasion: "WORK" as const,
           rejectedProductIds: ["SV9031"],
         } }
-      : state;
+      : checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT"
+        ? { ...state, currentProductId: "SV9031" }
+        : state;
     let persistedCommerce = commerceState;
     const profile: CustomerProfileV1 = {
       schemaVersion: 1, profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
@@ -3376,15 +3385,20 @@ describe("RealtimeRunner inbound batching", () => {
       sizeHistory: [], createdAt: occurredAt, updatedAt: occurredAt,
     };
     const commit = vi.fn(async (input: unknown) => {
-      const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState } };
+      if (checkoutOwner === "FAULT_COMMIT") throw new Error("COMMIT_FAILED: phone=0901234567 token=do-not-store");
+      const written = input as { state: typeof state; salesCyclePlan?: { state: typeof commerceState };
+        metaPlan?: { messages: readonly unknown[] }; handoffEventPlan?: unknown };
       persistedState = written.state;
       if (written.salesCyclePlan) persistedCommerce = written.salesCyclePlan.state;
+      // Semantic controls record the actual synthetic plan, not the legacy
+      // fixture's constant successful-send receipt (which masks a no-send).
+      const semanticControl = checkoutOwner.startsWith("TYPED_SEMANTIC_");
       return ({
       stateCommitted: true,
-      metaOutboxCreated: 1,
+      metaOutboxCreated: semanticControl ? written.metaPlan?.messages.length ?? 0 : 1,
       pancakeTagOutboxCreated: false,
-      handoffEventCreated: false,
-      sendAuthorized: true,
+      handoffEventCreated: semanticControl && written.handoffEventPlan !== undefined,
+      sendAuthorized: !semanticControl || written.metaPlan !== undefined,
       reasonCodes: [],
       inboxBatchStatus: "COMMITTED" as const,
       });
@@ -3418,6 +3432,7 @@ describe("RealtimeRunner inbound batching", () => {
       linkProviderConversation: vi.fn(async () => undefined),
     };
     const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    let typedOverride: unknown = null;
     const c3Send = vi.fn(async (request: { body: string }) => {
       const body = JSON.parse(request.body) as { contents: [{ parts: [{ text: string }] }] };
       const prompt = JSON.parse(body.contents[0].parts[0].text) as {
@@ -3426,15 +3441,56 @@ describe("RealtimeRunner inbound batching", () => {
         selectableEvidence?: Array<{ ref: string; capability: string }>;
         constraints?: { checkoutRequestedFields?: string[] };
       };
+      if (checkoutOwner === "FAULT_STRATEGIST" && prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1") {
+        throw new Error("PROVIDER_UNAVAILABLE");
+      }
+      if (prompt.contractVersion === "TRACK_C_C3_RESPONDER_INPUT_V1") {
+        if (checkoutOwner === "FAULT_RESPONDER_TIMEOUT") throw new Error("PROVIDER_TIMEOUT");
+        if (checkoutOwner === "FAULT_RESPONDER_MALFORMED") return {
+          payload: { candidates: [{ content: { parts: [{ text: "{broken" }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite",
+        };
+      }
+      if (prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1") {
+        if (checkoutOwner === "TYPED_FAILURE" ||
+            checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
+          throw new Error("PROVIDER_UNAVAILABLE");
+        }
+        const response = typedOverride ?? { ...noCustomerSelection(),
+          budget: { operation: "SET", value: 700_000, evidenceText: "Ngân sách đổi thành 700k" } };
+        return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite" };
+      }
       const variantChoice = checkoutOwner === "VARIANT_RECALL" &&
         prompt.dialogue?.some(({ direction, text }) =>
           direction === "INBOUND" && text === "Chị chọn size M nhé.") === true;
       const shipping = prompt.selectableEvidence?.filter(({ capability }) =>
         capability === "SHIPPING_FEE"
       ) ?? [];
+      if (checkoutOwner === "MULTI_COMPARISON" && prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" &&
+          prompt.selectableEvidence?.some(({ capability }) => capability === "PRODUCT_COMPARISON")) {
+        return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+          replyAct: "ANSWER", goal: [
+            "NEED: Compare the verified unit prices without claiming superior quality.",
+            "KNOWN: NONE",
+            "ANSWER: selected evidence for the current request",
+            "LIMIT: NONE",
+            "NEXT: NONE",
+          ].join("\n"),
+          proposition: "PRODUCT_COMPARISON", evidenceRefs: prompt.selectableEvidence.filter(
+            ({ capability }) => capability === "PRODUCT_COMPARISON").map(({ ref }) => ref),
+          continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE",
+        }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite" };
+      }
       const response = variantChoice
         ? prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
-          ? { replyAct: "ACKNOWLEDGE", goal: "Keep the customer's size M choice for this product.",
+          ? { replyAct: "ACKNOWLEDGE", goal: [
+            "NEED: Keep the customer's size M choice for this product.",
+            "KNOWN: NONE",
+            "ANSWER: NONE",
+            "LIMIT: NONE",
+            "NEXT: NONE",
+          ].join("\n"),
               proposition: "NONE", evidenceRefs: [],
               continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
           : { answerText: "Dạ, em theo lựa chọn chị vừa nói ạ.",
@@ -3442,13 +3498,30 @@ describe("RealtimeRunner inbound batching", () => {
         : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1"
         ? prompt.constraints?.checkoutRequestedFields?.join(",") === "PAYMENT_METHOD"
           ? {
-              replyAct: "ACKNOWLEDGE", goal: "Collect the missing payment choice.",
+              replyAct: "ACKNOWLEDGE", goal: [
+                "NEED: Collect the missing payment choice.",
+                "KNOWN: NONE",
+                "ANSWER: NONE",
+                "LIMIT: NONE",
+                "NEXT: missing checkout fields enable the canonical transaction",
+              ].join("\n"),
               proposition: "PRICE", evidenceRefs: [], continuation: null,
               canonicalAction: "ASK_CHECKOUT_DETAILS",
             }
           : {
-            replyAct: "ANSWER", goal: shipping.length > 0
-              ? "Answer the verified cart delivery fee." : "Answer the verified price.",
+            replyAct: "ANSWER", goal: shipping.length > 0 ? [
+              "NEED: Answer the verified cart delivery fee.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n") : [
+              "NEED: Answer the verified price.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
             proposition: shipping.length > 0 ? "SHIPPING_FEE" : "PRICE",
             evidenceRefs: shipping.length > 0 ? shipping.map(({ ref }) => ref) :
               prompt.selectableEvidence?.filter(({ capability }) =>
@@ -3554,7 +3627,34 @@ describe("RealtimeRunner inbound batching", () => {
           artifactKey: "fit-chart", artifactKind: "SIZE_CHART", lifecycle: "PUBLISHED",
         }],
         artifacts: {
-          shopPolicy: {}, offerPolicy: {}, closingStrategy: {},
+          shopPolicy: { customerCare: {
+  exchange: {
+    windowDaysFromReceipt: 15,
+    maxExchangesPerOrder: 1,
+    supportedActions: ["SIZE", "COLOR", "MODEL"],
+    saleRestriction: { discountThresholdBps: 3_000, allowedActions: ["SIZE", "COLOR"] },
+    requiredConditions: { originalTags: true, unused: true, unwashed: true, clean: true, undamaged: true },
+    totalTwoWayShippingFeeVnd: 30_000,
+    modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+    customerPaysPositivePriceDifference: true,
+    fulfillmentMethod: "COURIER_SWAP",
+  },
+  returns: {
+    eligibleReasons: ["MANUFACTURING_FABRIC_DEFECT", "MANUFACTURING_SEAM_DEFECT", "WRONG_PRODUCT_SENT"],
+    reportingWindowDaysFromReceipt: 5,
+    shopShippingCoveragePercent: 100,
+    refundBusinessDaysMin: 1,
+    refundBusinessDaysMax: 3,
+    refundStartsAfter: "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+  },
+  inspection: { tryOnMode: "HOLD_UP_ONLY", refusedParcelShippingFeeVnd: 30_000 },
+  marketplacePricing: { shopeePriceMatch: false, reason: "PLATFORM_SUBSIDY_AND_VOUCHERS" },
+  customerFaq: {
+    discloseLightingAndDisplayColorVariance: true,
+    handWashPreferred: true,
+    machineWashAllowedWithLaundryBagAndGentleCycle: true,
+  },
+} }, offerPolicy: {}, closingStrategy: {},
           sizeCharts: !fitMode || checkoutOwner === "FIT_NO_CHART" ? {} : {
             "fit-chart": {
               chart: {
@@ -3576,13 +3676,17 @@ describe("RealtimeRunner inbound batching", () => {
     } as unknown as RuntimePolicyResolution;
     const baseModel = replyModel();
     const cartSelectionSizes: (string | null)[] = [];
+    const alternativeSearch = vi.fn(async () => [product,
+      { ...product, productId: "SV9031", parentProductId: "SV9031", canonicalCode: "SV9031" },
+      { ...product, productId: "SD12", parentProductId: "SD12", canonicalCode: "SD12" },
+    ]);
     const runner = new RealtimeRunner(
       inbox,
       runtime,
       baseModel,
       {
         ready: vi.fn(async () => true),
-        resolve: vi.fn(async (query: { productId: string }) => ({
+        resolve: vi.fn(async (query: { productId: string; size?: string | null }) => ({
           schemaVersion: 1 as const,
           status: "OK" as const,
           source: "POS_SNAPSHOT" as const,
@@ -3595,10 +3699,11 @@ describe("RealtimeRunner inbound batching", () => {
             parentProductId: query.productId,
             offerType: "SET",
             listPriceVnd: null,
-            salePriceVnd: query.productId === "CB182" ? 799_000 : 699_000,
-            sizes: ["M"],
-            stockStatus: "IN_STOCK" as const,
-            stockQuantity: 2,
+            salePriceVnd: query.productId === "CB182" ? 799_000 :
+              query.productId === "SD12" && checkoutOwner === "TYPED_ALTERNATIVE" ? 599_000 : 699_000,
+            sizes: checkoutOwner === "TYPED_STOCK_BUY" && query.size === "S" ? ["S"] : ["M"],
+            stockStatus: checkoutOwner === "TYPED_STOCK_BUY" && query.size === "S" ? "OUT_OF_STOCK" as const : "IN_STOCK" as const,
+            stockQuantity: checkoutOwner === "TYPED_STOCK_BUY" && query.size === "S" ? 0 : 2,
             deliveryEta: null,
             fulfillmentPolicy: "READY_STOCK",
             imageUrls: [],
@@ -3617,17 +3722,17 @@ describe("RealtimeRunner inbound batching", () => {
             quantity: query.quantity,
             components: [{
               componentProductId: "CB182_AO",
-              componentSku: "CB182_AO_BE_M",
+              componentSku: `CB182_AO_BE_${query.size ?? "M"}`,
               componentRole: "TOP" as const,
               color: "BE",
-              size: "M",
+              size: query.size ?? "M",
               quantity: 1,
             }, {
               componentProductId: "CB182_CV",
-              componentSku: "CB182_CV_BE_M",
+              componentSku: `CB182_CV_BE_${query.size ?? "M"}`,
               componentRole: "SKIRT" as const,
               color: "BE",
-              size: "M",
+              size: query.size ?? "M",
               quantity: 1,
             }],
             allowMixedSizes: true,
@@ -3684,6 +3789,7 @@ describe("RealtimeRunner inbound batching", () => {
         close: vi.fn(async () => undefined),
       },
       {
+        searchAlternatives: alternativeSearch,
         searchText: vi.fn(async (query: string) => ({
           status: "MATCHED" as const,
           matchKind: "EXACT_CODE" as const,
@@ -3699,16 +3805,18 @@ describe("RealtimeRunner inbound batching", () => {
       clearTagObservation(),
       {
         workerId: "worker-1",
-        mode: "LIVE",
-        sendEnabled: true,
+        mode: checkoutOwner === "TYPED_DRY_RUN" ? "DRY_RUN" : "LIVE",
+        sendEnabled: checkoutOwner !== "TYPED_DRY_RUN",
+        decisionTelemetryEnabled: true,
         salesCycleEnabled: true,
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
         contextV2CaptureEnabled: true,
         customerProfileEnabled: fitMode,
-        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL",
-        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE",
+        verifiedVariantEnabled: checkoutOwner === "VARIANT_RECALL" || checkoutOwner === "TYPED_SEMANTIC_PARENT_PRICE",
+        multiFactQueryEnabled: checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_COMPARISON",
         c3: {
+          customerInputEnabled: checkoutOwner.startsWith("TYPED_"),
           modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
           transport: { send: c3Send },
         },
@@ -3720,7 +3828,7 @@ describe("RealtimeRunner inbound batching", () => {
           direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
           senderType: index % 2 === 0 ? "CUSTOMER" as const : "BOT" as const,
           messageType: "TEXT" as const,
-          text: `Lượt trước ${index + 1}`,
+          text: index === 0 ? "Mẫu đó chất liệu gì?" : index === 1 ? "Chị đang hỏi mã nào?" : `Lượt trước ${index + 1}`,
           attachmentCount: 0,
           occurredAt: new Date(Date.parse(occurredAt) - (30 - index) * 60_000).toISOString(),
         }))),
@@ -3734,8 +3842,368 @@ describe("RealtimeRunner inbound batching", () => {
       { resolve: vi.fn(async () => policyResolution) },
     );
 
+    // A malformed/failed model at the final Inbox attempt must still produce
+    // verified fallback, not turn a recoverable wording fault into permanent loss.
+    if (checkoutOwner.startsWith("FAULT_") && checkoutOwner !== "FAULT_COMMIT") currentBatch.attemptCount = 5;
     expect(await runner.processOne()).toBe(true);
-    expect(c3Send).toHaveBeenCalledTimes(2);
+    if (checkoutOwner === "FAULT_COMMIT") {
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(persistedState).toBe(state);
+      expect(persistedCommerce).toBe(commerceState);
+      expect(inbox.retryBatch).toHaveBeenCalledWith(expect.any(Object), "REALTIME_PROCESSING_FAILED", expect.any(Number));
+      expect(inbox.completeBatch).not.toHaveBeenCalled();
+      expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+      expect(JSON.stringify(vi.mocked(inbox.retryBatch!).mock.calls)).not.toContain("0901234567");
+      return;
+    }
+    if (checkoutOwner.startsWith("FAULT_")) {
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(inbox.retryBatch).not.toHaveBeenCalled();
+      expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+      const written = commit.mock.calls[0]![0] as {
+        metaPlan?: { messages: { text?: string }[] };
+        decisionEvents?: { details: { c3Candidate?: { status: string; failureStage?: string } } }[];
+      };
+      const reply = written.metaPlan?.messages.map(({ text }) => text ?? "").join(" ") ?? "";
+      expect(reply).toContain("799.000");
+      expect(persistedCommerce.cart).toBeNull();
+      const candidate = written.decisionEvents?.find(({ details }) => details.c3Candidate)?.details.c3Candidate;
+      expect(candidate).toMatchObject(checkoutOwner === "FAULT_STRATEGIST"
+        ? { status: "REJECTED", failureStage: "STRATEGIST" }
+        : { status: "VALIDATED", failureStage: "RESPONDER", reason: "C3_SELECTED_FACTS_RECOVERY" });
+      expect(c3Send).toHaveBeenCalledTimes(checkoutOwner === "FAULT_STRATEGIST" ? 1 : 2);
+      return;
+    }
+    if (checkoutOwner === "TYPED_FAILURE" ||
+        checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
+      expect(c3Send).toHaveBeenCalledTimes(1);
+      const written = commit.mock.calls[0]![0] as {
+        metaPlan?: { messages: { text: string }[]; protectedClaimTypes?: string[] };
+        salesCyclePlan?: unknown;
+      };
+      expect(written.salesCyclePlan).toBeUndefined();
+      expect(written.metaPlan?.messages).toEqual([{
+        kind: "TEXT",
+        text: "Em chưa xử lý được tin nhắn vừa rồi. Chị gửi lại giúp em nhé.",
+      }]);
+      expect(written.metaPlan?.protectedClaimTypes ?? []).toEqual([]);
+      if (checkoutOwner === "TYPED_FAILURE_STALE_PRODUCT") {
+        // Preserve prior state for a later retry, but never use it as the
+        // current turn's binding after the Producer failed.
+        expect(persistedState.currentProductId).toBe("SV9031");
+        expect(JSON.stringify(written.metaPlan)).not.toContain("699.000");
+      }
+      expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+      expect(persistedCommerce.cart).toBeNull();
+      return;
+    }
+    expect(c3Send).toHaveBeenCalledTimes(checkoutOwner.startsWith("TYPED_") ? 3 : 2);
+    if (checkoutOwner.startsWith("TYPED_")) {
+      expect(persistedState.sessionDecisionContext?.budgetVnd).toBe(700_000);
+      const requests = c3Send.mock.calls.map(([request]) => JSON.parse(JSON.parse(request.body).contents[0].parts[0].text));
+      expect(requests.map((request) => request.contractVersion)).toEqual([
+        "REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1",
+      ]);
+      expect(JSON.stringify(requests[1])).toContain('700k');
+      const written = commit.mock.calls[0]![0] as { metaPlan?: unknown; decisionEvents?: { details: { c3Candidate?: unknown } }[] };
+      expect(written.decisionEvents?.find(({ details }) => details.c3Candidate)?.details.c3Candidate).toMatchObject({
+        status: "VALIDATED", selectedForOutbound: checkoutOwner !== "TYPED_DRY_RUN",
+        redactedReply: "Giá hiện tại của mẫu này là 799.000đ ạ.",
+      });
+      if (checkoutOwner === "TYPED_DRY_RUN") expect(written.metaPlan).toBeUndefined();
+      expect(persistedCommerce.cart).toBeNull();
+      if (checkoutOwner.startsWith("TYPED_SEMANTIC_")) {
+        const parentPriceWithVariant = checkoutOwner === "TYPED_SEMANTIC_PARENT_PRICE";
+        const selection = parentPriceWithVariant || checkoutOwner.endsWith("SELECTION") || checkoutOwner.endsWith("FIT");
+        const wrinkle = checkoutOwner.endsWith("WRINKLE") || checkoutOwner.endsWith("PROPERTY");
+        const unsafe = checkoutOwner.includes("UNSAFE") || checkoutOwner.includes("WRONG");
+        const selectionSpan = "Chị chọn M";
+        const text = selection ? `${selectionSpan}. Cho chị biết giá.` : wrinkle
+          ? "Giá bao nhiêu và có chống nhăn không?" : "Nếu 625k thì chị lấy.";
+        const answerText = selection ? unsafe ? "Size M chắc chắn vừa chị." : `${selectionSpan}.`
+          : wrinkle ? unsafe ? "Mẫu này chống nhăn."
+            : "Em chưa có thông tin xác nhận về khả năng chống nhăn của mẫu CB182."
+          : unsafe ? "Shop đồng ý giá 625k." : "Em chưa thể xác nhận giá 625k chị đề xuất.";
+        typedOverride = { ...noCustomerSelection(),
+          factQuery: { ...noCustomerSelection().factQuery, intent: "PRICE" },
+          ...(wrinkle ? { obligations: [
+            { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: "CB182", evidenceText: "Giá bao nhiêu" },
+            { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES", scope: "WRINKLE_RESISTANCE", productId: "CB182", evidenceText: "chống nhăn" },
+          ] } : {}),
+          ...(selection ? { variant: { operation: "SELECT", productId: "CB182", size: "M",
+            color: null, evidenceText: selectionSpan } } : {}),
+        };
+        const before = structuredClone(persistedCommerce);
+        const priorState = structuredClone(persistedState);
+        const priorVariant = priorState.consideredVariant;
+        c3Send.mockImplementation(async (request) => {
+          const prompt = JSON.parse(JSON.parse(request.body).contents[0].parts[0].text);
+          const response = prompt.contractVersion === "REALTIME_CUSTOMER_INPUT_V1" ? typedOverride
+            : prompt.contractVersion === "TRACK_C_C3_STRATEGIST_INPUT_V1" ? {
+              replyAct: "ANSWER", proposition: "PRICE", canonicalAction: "NONE", continuation: { type: "KEEP_OPEN" },
+              evidenceRefs: prompt.selectableEvidence.filter((fact: { capability: string }) => fact.capability === "PRICE")
+                .map((fact: { ref: string }) => fact.ref),
+              goal: [`NEED: ${wrinkle ? "price and wrinkle resistance" : "current price and customer context"}`,
+                `KNOWN: ${selection ? "selected M" : wrinkle ? "NONE" : "customer proposed 625k"}`,
+                "ANSWER: verified price", `LIMIT: ${wrinkle ? "wrinkle resistance not verified" : "NONE"}`, "NEXT: NONE"].join("\n"),
+            } : { answerText, factualTexts: [], progressionText: null };
+          return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
+            providerModelVersion: "gemini-3.5-flash-lite" };
+        });
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        expect(commit).toHaveBeenCalledTimes(2);
+        const final = commit.mock.calls.at(-1)![0] as { metaPlan?: { messages: { text: string }[];
+          protectedClaimTypes?: string[] }; decisionEvents?: { details: { c3Candidate?: { status: string; reason?: string } } }[] };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        const receipt = await commit.mock.results.at(-1)!.value;
+        expect(receipt.metaOutboxCreated).toBe(final.metaPlan?.messages.length ?? 0);
+        expect(receipt.handoffEventCreated).toBe("handoffEventPlan" in final);
+        expect(receipt.sendAuthorized).toBe(final.metaPlan !== undefined);
+        const recordControl = async () => {
+          const directory = process.env.C3_SEMANTIC_CONTROL_ARTIFACT_DIR;
+          if (!directory) return;
+          mkdirSync(directory, { recursive: true });
+          writeFileSync(join(directory, `${checkoutOwner}.json`), JSON.stringify({
+            kind: "DETERMINISTIC_CONTROL_ONLY", sourceRevision: process.env.C3_SEMANTIC_SOURCE_HEAD ?? "UNPINNED",
+            control: checkoutOwner, input: text, reply,
+            before: { conversation: priorState, commerce: before },
+            after: { conversation: persistedState, commerce: persistedCommerce },
+            plannedAndCommitted: final, receipt,
+            modelRoles: c3Send.mock.calls.slice(3).map(([request]) =>
+              JSON.parse(JSON.parse(request.body).contents[0].parts[0].text).contractVersion),
+          }, null, 2) + "\n", "utf8");
+        };
+        if (parentPriceWithVariant) {
+          // Parent facts stay parent-scoped even when the customer's selection
+          // has its own verified variant. Neither scope is promoted to the other.
+          expect(persistedState.consideredVariant.size).toBe("M");
+          expect(persistedState.verifiedVariant?.selectedVariantId).toBe("CB182_BE_M");
+          expect(JSON.stringify(final.decisionEvents)).not.toContain("PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH");
+        }
+        expect(reply).toContain("799.000");
+        expect(persistedState.currentProductId).toBe("CB182");
+        expect(persistedState.conversationOwner).toBe("BOT");
+        expect(persistedState.sessionDecisionContext?.budgetVnd).toBe(700_000);
+        expect(persistedCommerce.cart).toEqual(before.cart);
+        expect(persistedCommerce.checkoutDraft).toEqual(before.checkoutDraft);
+        expect(cartSelectionSizes).toEqual([]);
+        // No verified-variant path in these controls: acknowledgement is
+        // customer context only, not permission to persist a verified choice.
+        if (!parentPriceWithVariant) expect(persistedState.consideredVariant).toEqual(priorVariant);
+        if (wrinkle) expect(reply).toContain("chống nhăn");
+        if (unsafe) {
+          expect(reply).not.toContain(answerText);
+          expect(final.decisionEvents?.find(({ details }) => details.c3Candidate)?.details.c3Candidate)
+            .toMatchObject({ status: "VALIDATED", reason: "C3_SELECTED_FACTS_RECOVERY" });
+        } else expect(reply).toContain(answerText);
+        expect(final.metaPlan?.protectedClaimTypes).toEqual(["PRICE"]);
+        const roles = c3Send.mock.calls.slice(3).map(([request]) =>
+          JSON.parse(JSON.parse(request.body).contents[0].parts[0].text).contractVersion);
+        expect(roles).toEqual(["REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1"]);
+        expect(inbox.failBatchPermanent).not.toHaveBeenCalled();
+        expect(inbox.retryBatch).not.toHaveBeenCalled();
+        await recordControl();
+        return;
+      }
+      if (checkoutOwner.startsWith("TYPED_ALTERNATIVE")) {
+        persistedState = { ...persistedState, sessionDecisionContext: {
+          budgetVnd: 700_000, occasion: "WORK", rejectedProductIds: ["SD09"],
+        } };
+        const text = "Mẫu này thôi không lấy, tìm mẫu khác, ngân sách 650k";
+        typedOverride = { ...noCustomerSelection(),
+          product: {
+            operation: "REJECT", productId: null,
+            evidenceText: "Mẫu này thôi không lấy",
+          },
+          budget: {
+            operation: "SET", value: 650_000,
+            evidenceText: "ngân sách 650k",
+          },
+          obligations: [
+            {
+              kind: "PRODUCT_REJECT", capability: null, scope: null,
+              productId: null, evidenceText: "Mẫu này thôi không lấy",
+            },
+            {
+              kind: "PRODUCT_SEARCH", capability: null, scope: null,
+              productId: null, evidenceText: "tìm mẫu khác",
+            },
+          ],
+          salesSignals: {
+            ...noCustomerSelection().salesSignals,
+            buyingIntent: {
+              decision: "NEGATED", requestedAction: "NONE", quantity: null,
+              evidenceText: "Mẫu này thôi không lấy", confidence: 0.99,
+            },
+          },
+        };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const final = commit.mock.calls.at(-1)![0] as {
+          metaPlan?: { messages: { text: string }[]; protectedClaimTypes?: string[] } };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        expect(alternativeSearch).toHaveBeenCalledWith(expect.stringContaining("650000"), ["SD09", "CB182"]);
+        expect(persistedState.sessionDecisionContext).toEqual({
+          budgetVnd: 650_000, occasion: "WORK", rejectedProductIds: ["SD09", "CB182"],
+        });
+        expect(persistedCommerce.cart).toBeNull();
+        if (checkoutOwner === "TYPED_ALTERNATIVE") {
+          expect(persistedState.currentProductId).toBe("SD12");
+          expect(reply).toContain("599.000");
+          expect(final.metaPlan?.protectedClaimTypes).toContain("PRICE");
+          expect(reply).not.toContain("799.000");
+        } else {
+          expect(persistedState.currentProductId).toBeNull();
+          expect(reply).toContain("Trong các mẫu");
+          expect(c3Send).toHaveBeenCalledTimes(4);
+          expect(persistedState.conversationOwner).toBe("BOT");
+        }
+        return;
+      }
+      if (checkoutOwner === "TYPED_CHANGE_BUY") {
+        const text = "Đổi sang L, chị lấy một bộ nhé.";
+        typedOverride = { ...noCustomerSelection(),
+          variant: { operation: "CHANGE", productId: "CB182", size: "L", color: null, evidenceText: text },
+          salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: {
+            decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+            evidenceText: text, confidence: 0.99,
+          } },
+        };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+        expect(persistedCommerce.cart?.value.lines[0]?.components.map(({ size }) => size)).toEqual(["L", "L"]);
+        const final = commit.mock.calls.at(-1)![0] as { metaPlan?: { messages: { text: string }[] } };
+        expect(final.metaPlan?.messages.map(({ text }) => text).join(" ")).toContain("size L");
+        expect(cartSelectionSizes.at(-1)).toBe("L");
+        return;
+      }
+      if (checkoutOwner === "TYPED_STOCK_BUY") {
+        const purchase = "Chị lấy một bộ size M.";
+        const text = `${purchase} Size S còn không?`;
+        typedOverride = { ...noCustomerSelection(),
+          variant: { operation: "SELECT", productId: "CB182", size: "M", color: null, evidenceText: purchase },
+          factQuery: { ...noCustomerSelection().factQuery, intent: "STOCK", size: "S", offerType: "SET" },
+          salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: {
+            decision: "COMMITTED", requestedAction: "OPEN_CART", quantity: 1,
+            evidenceText: purchase, confidence: 0.99,
+          } },
+        };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const final = commit.mock.calls.at(-1)![0] as {
+          metaPlan?: { messages: { text: string }[]; protectedClaimTypes?: string[] };
+        };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+        expect(persistedCommerce.cart?.value.lines[0]?.components.every(({ size }) => size === "M")).toBe(true);
+        expect(reply).toContain("size S");
+        expect(reply).toContain("hết hàng");
+        expect(final.metaPlan?.protectedClaimTypes).toContain("STOCK");
+        expect(final.metaPlan?.protectedClaimTypes).not.toContain("PRICE");
+        expect(reply).toContain("tên người nhận");
+        expect(c3Send).toHaveBeenCalledTimes(4);
+        return;
+      }
+      if (checkoutOwner.startsWith("TYPED_POLICY_") || checkoutOwner.startsWith("TYPED_ROUTING_")) {
+        const committed = checkoutOwner === "TYPED_POLICY_BUY" || checkoutOwner.startsWith("TYPED_ROUTING_");
+        const conditional = checkoutOwner === "TYPED_POLICY_CONDITIONAL";
+        const purchaseClause = committed ? "Chị chốt một bộ CB182 size M."
+          : conditional ? "Nếu được mặc thử thì chị lấy CB182." : "";
+        const text = `${purchaseClause} Shop cho mặc thử không?`.trim();
+        typedOverride = { ...noCustomerSelection(), policyQuestion: "TRY_ON",
+          variant: committed ? { operation: "SELECT", productId: "CB182", size: "M",
+            color: null, evidenceText: purchaseClause } : noCustomerSelection().variant,
+          salesSignals: { ...noCustomerSelection().salesSignals, buyingIntent: {
+            decision: committed ? "COMMITTED" : conditional ? "CONSIDERING" : "NONE",
+            requestedAction: committed ? "OPEN_CART" : "NONE", quantity: committed ? 1 : null,
+            evidenceText: purchaseClause || null, confidence: 0.99,
+          } } };
+        const followup = item(40, text);
+        currentBatch = { ...batch, generation: 11, inboxIds: [followup.inboxId],
+          firstReceiveSequence: 40, lastReceiveSequence: 40, items: [followup] };
+        vi.setSystemTime(followup.occurredAt);
+        expect(await runner.processOne()).toBe(true);
+        const final = commit.mock.calls.at(-1)![0] as {
+          metaPlan?: { messages: { text: string }[] }; salesCyclePlan?: { state: typeof commerceState };
+        };
+        const reply = final.metaPlan?.messages.map(({ text }) => text).join(" ") ?? "";
+        expect(reply).toContain("chưa hỗ trợ mặc thử");
+        if (committed) {
+          expect(persistedCommerce.cart?.value.lines).toHaveLength(1);
+          expect(persistedCommerce.cart?.value.lines[0]?.components.every(({ size }) => size === "M")).toBe(true);
+          expect(reply).toContain("CB182");
+          expect(final.salesCyclePlan?.state.cart?.value.cartId).toBe(persistedCommerce.cart?.value.cartId);
+        } else {
+          expect(persistedCommerce.cart).toBeNull();
+          expect(final.salesCyclePlan).toBeUndefined();
+        }
+        // Policy and exact checkout fields are code-owned on this branch.
+        // Do not let a second generative answer overwrite either part.
+        expect(c3Send).toHaveBeenCalledTimes(4);
+        const nextTurn = async (text: string, seq: number) => {
+          const entry = item(seq, text);
+          currentBatch = { ...batch, generation: seq, inboxIds: [entry.inboxId],
+            firstReceiveSequence: seq, lastReceiveSequence: seq, items: [entry] };
+          vi.setSystemTime(entry.occurredAt);
+          expect(await runner.processOne()).toBe(true);
+        };
+        if (checkoutOwner.startsWith("TYPED_ROUTING_")) {
+          const postSale = checkoutOwner === "TYPED_ROUTING_POST_SALE";
+          const request = postSale ? "chị muốn hoàn tiền đơn đã nhận" : "cho chị gặp nhân viên khác";
+          const text = postSale ? `Không sửa giỏ này, ${request}.` : `Không gặp người cũ, ${request}.`;
+          typedOverride = { ...noCustomerSelection(), route: postSale ? "POST_SALE" : "HUMAN", routeEvidence: request };
+          await nextTurn(text, 43);
+          expect(persistedState.conversationOwner).toBe("HUMAN");
+          expect(c3Send).toHaveBeenCalledTimes(5); // input only; no sales model after handoff
+        } else if (committed) {
+          const name = "An Demo", phone = "0900000000", address = "123 Đường Mẫu, Hội An";
+          const details = `Tên: ${name}\nSĐT: ${phone}\nĐịa chỉ: ${address}\nChị chọn COD`;
+          const field = (value: string) => ({ value, evidenceText: details, confidence: 0.99 });
+          typedOverride = { ...noCustomerSelection(), salesSignals: { ...noCustomerSelection().salesSignals,
+            checkoutExtraction: { fullName: field(name), phone: field(phone), address: field(address), paymentMethod: field("COD") },
+          } };
+          await nextTurn(details, 43);
+          expect(persistedCommerce.stage).toBe("ORDER_PREVIEW");
+          expect(persistedCommerce.checkoutDraft).toMatchObject({ fullName: name, phone, address, paymentMethod: "COD" });
+          const confirm = "Đúng thông tin, chốt đơn giúp chị.";
+          typedOverride = { ...noCustomerSelection(), salesSignals: { ...noCustomerSelection().salesSignals,
+            purchaseConfirmation: { decision: "CONFIRM", evidenceText: confirm, confidence: 0.99 },
+          } };
+          await nextTurn(confirm, 46);
+          expect(persistedCommerce.stage).toBe("PURCHASE_CONFIRMED");
+          const final = commit.mock.calls.at(-1)![0] as { decisionEvents?: unknown; metaPlan?: unknown };
+          expect(final.metaPlan).toBeDefined();
+          expect(JSON.stringify(final.decisionEvents)).not.toContain(address);
+          expect(JSON.stringify(final.decisionEvents)).not.toContain(phone);
+        }
+        return;
+      }
+      persistedState = { ...persistedState, conversationOwner: "HUMAN",
+        ownerReason: "AGENT_HANDOFF", ownerLeaseUntil: "2026-07-22T03:00:00.000Z" };
+      const beforeCommerce = structuredClone(persistedCommerce);
+      const humanEntry = item(43, "Chị chốt size M, COD nhé");
+      currentBatch = { ...batch, generation: 13, inboxIds: [humanEntry.inboxId],
+        firstReceiveSequence: 43, lastReceiveSequence: 43, items: [humanEntry] };
+      vi.setSystemTime(humanEntry.occurredAt);
+      expect(await runner.processOne()).toBe(true);
+      expect(c3Send).toHaveBeenCalledTimes(3);
+      expect(persistedCommerce).toEqual(beforeCommerce);
+      return;
+    }
     expect(persistedCommerce.stage).toBe("FACTS_PRESENTED");
     expect(persistedCommerce.cart).toBeNull();
     const commitInput = commit.mock.calls[0]![0] as {
@@ -3792,7 +4260,10 @@ describe("RealtimeRunner inbound batching", () => {
     if (checkoutOwner === "LONG_HISTORY") {
       const body = JSON.parse(c3Send.mock.calls[0]![0].body);
       const strategistInput = JSON.parse(body.contents[0].parts[0].text);
-      expect(strategistInput.dialogue).toHaveLength(15);
+      expect(strategistInput.dialogue).toHaveLength(32);
+      expect(strategistInput.constraints.budgetKnown).toBe(true);
+      expect(strategistInput.dialogue[1].text).toBe("Mẫu đó chất liệu gì?");
+      expect(strategistInput.dialogue[2].text).toBe("Chị đang hỏi mã nào?");
       expect(JSON.parse(strategistInput.dialogue[0].text)).toEqual({
         type: "CUSTOMER_REPORTED_SESSION_CONTEXT",
         budgetCustomerReported: "700k", occasion: "WORK",
@@ -3807,7 +4278,7 @@ describe("RealtimeRunner inbound batching", () => {
       return;
     }
 
-    if (checkoutOwner === "MULTI_PRICE") {
+    if (checkoutOwner === "MULTI_PRICE" || checkoutOwner === "MULTI_COMPARISON") {
       const compare = item(40, "So sánh giá CB182 và SV9031 giúp chị.");
       currentBatch = { ...batch, generation: 11, inboxIds: [compare.inboxId],
         firstReceiveSequence: 40, lastReceiveSequence: 40, items: [compare] };
@@ -3819,8 +4290,13 @@ describe("RealtimeRunner inbound batching", () => {
       const reply = written.metaPlan?.messages.map(({ text }) => text).join(" ");
       expect(reply).toContain("CB182");
       expect(reply).toContain("SV9031");
-      expect(reply).toContain("799.000");
-      expect(reply).toContain("699.000");
+      if (checkoutOwner === "MULTI_COMPARISON") {
+        expect(reply).toContain("100.000");
+        expect(reply).not.toContain("799.000");
+      } else {
+        expect(reply).toContain("799.000");
+        expect(reply).toContain("699.000");
+      }
       expect(written.metaPlan?.protectedClaimTypes).toContain("PRICE");
       const strategistRequest = JSON.parse(c3Send.mock.calls[callsBefore]![0].body);
       const strategistInput = JSON.parse(strategistRequest.contents[0].parts[0].text);
@@ -3849,13 +4325,31 @@ describe("RealtimeRunner inbound batching", () => {
         const prompt = JSON.parse(body.contents[0].parts[0].text);
         const size = prompt.selectableEvidence.filter((entry: { capability: string }) => entry.capability === "SIZE_FIT");
         const response = checkoutOwner === "FIT_REQUIRED"
-          ? { replyAct: "ANSWER", goal: "Ask the missing waist measurement for the current fit request.",
+          ? { replyAct: "ANSWER", goal: [
+            "NEED: Ask the missing waist measurement for the current fit request.",
+            "KNOWN: NONE",
+            "ANSWER: NONE",
+            "LIMIT: requested fact has no verified evidence",
+            "NEXT: missing measurements enable the current fit decision",
+          ].join("\n"),
               proposition: "SIZE_FIT", evidenceRefs: [], continuation: null, canonicalAction: "ASK_MEASUREMENTS" }
           : checkoutOwner === "FIT_READY"
-            ? { replyAct: "ANSWER", goal: "State the Size Engine recommendation for the current waist measurement.",
+            ? { replyAct: "ANSWER", goal: [
+              "NEED: State the Size Engine recommendation for the current waist measurement.",
+              "KNOWN: NONE",
+              "ANSWER: selected evidence for the current request",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
                 proposition: "SIZE_FIT", evidenceRefs: size.map((entry: { ref: string }) => entry.ref),
                 continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }
-            : { replyAct: "ACKNOWLEDGE", goal: "Acknowledge without asking for unrelated or unusable customer input.",
+            : { replyAct: "ACKNOWLEDGE", goal: [
+              "NEED: Acknowledge without asking for unrelated or unusable customer input.",
+              "KNOWN: NONE",
+              "ANSWER: NONE",
+              "LIMIT: NONE",
+              "NEXT: NONE",
+            ].join("\n"),
                 proposition: "NONE", evidenceRefs: [], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" };
         return { payload: { candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] },
           providerModelVersion: "gemini-3.5-flash-lite" };
@@ -3870,6 +4364,13 @@ describe("RealtimeRunner inbound batching", () => {
       const fitPrompt = JSON.parse(fitBody.contents[0].parts[0].text);
       expect(fitPrompt.constraints.permittedCanonicalActions.includes("ASK_MEASUREMENTS"))
         .toBe(checkoutOwner === "FIT_REQUIRED");
+      expect(fitPrompt.constraints.measurementRequestedFields)
+        .toEqual(checkoutOwner === "FIT_REQUIRED" ? ["WAIST_CM"] : []);
+      if (checkoutOwner === "FIT_REQUIRED") {
+        const responderPrompt = JSON.parse(JSON.parse(c3Send.mock.calls[before + 1]![0].body).contents[0].parts[0].text);
+        expect(responderPrompt.responderTask.canonicalRequest)
+          .toEqual({ type: "ASK_MEASUREMENTS", measurementFields: ["WAIST_CM"] });
+      }
       expect(fitPrompt.selectableEvidence.some((entry: { capability: string }) => entry.capability === "SIZE_FIT"))
         .toBe(checkoutOwner === "FIT_READY");
       expect(c3Send.mock.calls.length - before).toBe(2);
@@ -3947,7 +4448,13 @@ describe("RealtimeRunner inbound batching", () => {
     const concernReply = "Chị đang cân nhắc khoản chi cho mẫu này. Điểm nào khiến chị còn phân vân nhất?";
     c3Send.mockResolvedValueOnce({
       payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
-        replyAct: "CLARIFY", goal: "Understand the concern without repeating the known price.",
+        replyAct: "CLARIFY", goal: [
+          "NEED: Understand the concern without repeating the known price.",
+          "KNOWN: NONE",
+          "ANSWER: NONE",
+          "LIMIT: NONE",
+          "NEXT: assigned customer input changes the next executable decision",
+        ].join("\n"),
         proposition: "NONE", evidenceRefs: [], canonicalAction: "NONE",
         continuation: { type: "ASK", input: "DECISION_CRITERION" },
       }) }] } }] }, providerModelVersion: "gemini-3.5-flash-lite",
@@ -4043,7 +4550,7 @@ describe("RealtimeRunner inbound batching", () => {
       metaPlan?: { messages: readonly { text: string }[] };
     };
     expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
-      .toContain("hình thức thanh toán COD");
+      .toContain("Chị chọn thanh toán khi nhận hàng (COD)");
     expect(detailsCommit.metaPlan?.messages.map(({ text }) => text).join(" "))
       .not.toMatch(/họ tên|số điện thoại|địa chỉ|chuyển khoản/iu);
 
@@ -4285,5 +4792,17 @@ describe("policy question versus after-sales routing", () => {
       .toBe(false);
     expect(isPostSaleRequest("Đơn cũ chị đã nhận rồi, muốn đổi size.", true))
       .toBe(true);
+  });
+});
+
+
+describe("commerce readiness is independent of answer readiness", () => {
+  it("preserves an already authorized commerce plan when only the answer is blocked", () => {
+    const salesCyclePlan = { state: { cart: { cartId: "cart-current" } } };
+    const result = enforceProtectedOutboundReadinessV1({ messages: ["unsafe answer"], claims: [],
+      readiness: { outcome: "BLOCKED", reasonCodes: ["CLAIM_STALE"] }, salesCyclePlan, salesDesiredTag: null,
+      commerceReadiness: [{ outcome: "READY", reasonCodes: [] }] });
+    expect(result.messages).toEqual([]);
+    expect(result.salesCyclePlan).toBe(salesCyclePlan);
   });
 });

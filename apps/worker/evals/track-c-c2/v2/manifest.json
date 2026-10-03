@@ -34,7 +34,7 @@
     "holdout_30_expanded_sha256": "c68a079f50f565045f81098a9b7a2ecc0a1dbcf8b09007bd46005fb72adbecc6",
     "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e",
     "bundle_fingerprint_sha256": "21fc2e3afa2ab894e72a095c84fbeec7f037179beb0a7f1dbe1626c6145b7266",
-    "quality_harness_fingerprint_sha256": "78744a5081d54853bae5857993a8e400913058fac64e4218ef72e11ef31cfaa6"
+    "quality_harness_fingerprint_sha256": "633d96fc2557bb1853ea01a30ab1ab133b2234d5d0a6e983c234730e7159e9b2"
   },
   "bundle_components_git_sha1": {
     "facts.json": "93cc14dc49e20f37fdf60bfeacdc5c6563317a45",
@@ -50,7 +50,7 @@
   },
   "quality_harness_components_git_sha1": {
     "../../../src/track-c-c3-v5-benchmark-scoring.ts": "b61743d0d7ec397e64ffa2ebeaaa8696fb3b207c",
-    "../../../src/track-c-c3-v5-benchmark-evaluator.ts": "67b1a774a6d01089aa666631987d0cad3a3440b6",
+    "../../../src/track-c-c3-v5-benchmark-evaluator.ts": "731a902987f768f0bc76be2da9dac0fa8c16dc79",
     "../../../src/track-c-c3-v5-benchmark-gate.ts": "62bc0eab919c025597c4c93f7d8895d5835831bf"
   },
   "storage": {

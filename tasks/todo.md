@@ -1,63 +1,122 @@
-# Checklist hiện hành — C3 sales root-cause fix, cập nhật 27/09/2026
+# Checklist hiện hành — C3 sales root-cause fix, cập nhật 30/09/2026
 
-Kế hoạch: [plan.md](plan.md). Baseline `ce558e6d4028dd06bd6efc960286464425a26a85`.
+Implementation mới từ merge PR375: branch `feat/pr375-sales-implementation-20260929`.
+PR376 đã đóng, không kế thừa commit của PR376. Tiến độ và thay đổi contract xem
+[runtime amendment](../docs/specs/pr375-customer-input-runtime-20260929.md).
+
+Kế hoạch/checklist được đồng bộ từ PR378 `bc02274bea11346ced164e62caa21a68986c4012`; owner đã yêu cầu thực hiện, không còn checkpoint chờ duyệt lại. Baseline của lượt sửa là PR377 `7576e6ec964aca0f22ca19c24eddc773030a0866`. PR378 vẫn chỉ tài liệu; đồng bộ nội dung không phải merge PR hoặc quyền deploy. Mục [x] là evidence cụ thể đã ghi nhận, không đóng cả task hoặc chứng minh exact head mới.
+
+Nguồn kế hoạch duy nhất: [plan.md](plan.md), mục 3 (mục tiêu model) và mục 4 (mapping trùng lặp). Baseline ce558e6d thuộc snapshot PR375, không phải điểm bắt đầu lại implementation.
 
 Các task P là việc còn phải thực hiện theo kế hoạch mới; checkbox chưa tick không có nghĩa toàn bộ code cũ chưa tồn tại.
 
-Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. Chỉ hoàn thành cập nhật tài liệu; các lỗi ứng dụng dưới đây chưa được sửa.
+Amendment lịch sử từ [comment review](evidence/c3-plan-review-comment-5847545097.md), đối chiếu PR375 head `d0c8a31`. PR377 đã sửa một phần; mục còn mở là acceptance chưa đủ, không có nghĩa mọi lỗi cũ còn nguyên.
 
 Đã hiệu chỉnh ba finding self-review tại `d36f213` trong plan/checklist: thứ tự extraction/routing, acceptance P05/P06 và context cùng lượt ở P06. Không đánh dấu implementation đã hoàn thành từ việc sửa tài liệu.
 
-## Chuẩn bị đã làm trong lượt lập kế hoạch
+## Chuẩn bị đã ghi nhận ở lượt lập kế hoạch PR375 (lịch sử)
 
 - [x] Kiểm tra local/remote HEAD, main và ancestry `88a1ce4`.
 - [x] Đối chiếu spec, audit, raw-run findings, rubric và phạm vi harness.
 - [x] Giữ bản kế hoạch/checklist trước khi cập nhật.
 - [x] Viết dependencies, acceptance, verification, điểm rẽ guard và giới hạn bàn giao.
-- [x] Self-review tài liệu; chưa sửa/chạy code ứng dụng trong lượt này.
+- [x] Self-review tài liệu; chưa sửa/chạy code ứng dụng trong lượt lập kế hoạch đó.
 
 ## 1. Bằng chứng và đầu vào
 
-- [ ] P00 — Phân loại đủ 70 output: input/guard/model/capability; pin source/contracts/rubric.
-- [ ] P00 — Tích hợp findings đã hiệu chỉnh: ví dụ handoff #7, canonical NONE ở #8, positive M→L đã pass; ghi rõ hàm/evaluator/source-only/full runtime.
+- [x] P00 — Phân loại đủ 70 output: input/guard/model/capability; pin source/contracts/rubric. Xem `evidence/pr377-dev70-baseline-diagnostic.md`; đây là diagnostic, không phải quality pass.
+- [x] P00/P12, phạm vi CI trigger — `2de13eca` thêm base `codex/c3-runtime-canonical-integration` vào workflow hiện có và regression Node; giữ push chỉ main, runner, permissions và các quality gate. Test filter đã RED/GREEN local; run `36725188599` thực sự chạy trên PR377 mà không đổi base.
+- [x] P00, chẩn đoán run `36725188599` tại `2de13eca` — raw log cho thấy hai lỗi trong `track-c-c3-strategy-contract-runner.test.ts` tại 1238 và 1541 do câu chữ ràng buộc prompt sau centralization; không phải hai lỗi recovery. Worker: 1.828 pass, 2 fail, 1 skip. Giữ kết quả FAIL này; không dùng báo cáo trung gian hoặc tên test không khớp để sửa guard.
+- [ ] P00 — Tích hợp các findings đã hiệu chỉnh và xác minh lần chạy sau bản sửa prompt `003fbef2`; giữ đối chiếu source/CI lịch sử riêng. Không tính run cũ là exact-head pass. Giữ hiệu chỉnh handoff #7, canonical NONE #8, positive M→L; tách source-only/reproduced/full runtime.
 - [ ] P01 — Current-cart snapshot/binding và variant mapping; frozen gaps có version rõ.
 - [ ] P02 — Catalog/Sheets producer → isolated readback → canonical, coverage thực.
 
 ## 2. Guard và diễn đạt
 
 - [ ] P03 — Thử bounded editorial/guard hai chiều; chốt amendment và residual từng nhóm fact.
-- [ ] P04 — Tích hợp Responder/guard theo phạm vi chứng minh; giữ first quote, đóng goal-fact bypass.
-- [ ] P03/P04 không đóng bằng whitelist wording, claimId annotations hoặc chỉ schema pass.
+- [ ] P04 — Tích hợp Responder/guard theo phạm vi chứng minh; giữ first quote, đóng goal-fact bypass; giữ phần chưa có evidence trong câu hỏi ghép để P10 tái dùng coverage.
+
+P03/P04 không đóng bằng whitelist wording, claimId annotations hoặc chỉ schema pass; không mặc định mở rộng sáu trường Strategist. `003fbef2` đồng bộ ràng buộc prompt với contract test hiện có, không chứng minh chất lượng trả lời bằng model thật hoặc hoàn thành P04/P07.
 
 ## 3. Hành trình bán hàng
 
-- [ ] P05 — Luna chạy producer/C3 thật trên nhánh được gọi; fake ports, full history/state/calls/skip reasons; tái hiện lỗi baseline được phép, không đòi P06 pass.
-- [ ] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness.
+### P06-P09 candidate source patch (2026-10-01)
+
+Base `8ce14b6e`; [amendment](../docs/specs/pr377-p06-p09-runtime-20261001.md)
+and [verification](evidence/pr377-p06-p09-verification-20261001.md).
+These are scoped implementation checks, not closure of the full tasks below.
+
+- [x] P06 consumer/runtime: independent purchase plus policy, CHANGE plus purchase,
+  selected M plus stock query S, recipient/COD/preview/confirm, human/post-sale
+  routing with an open cart; real runner with fake external ports.
+- [x] P06 variant binding: preserve unrequested size/color and validate both on a
+  combined edit; same-line/component/quantity checks retained.
+- [x] P07 request/egress: clarified open question and known first-contact inputs;
+  explicit spec amendment for no question when no applicable input is missing.
+- [x] P08a bounded search -> POS validation -> grounded reply/no-result; current
+  budget and rejected IDs applied without creating a cart or a discount.
+- [x] P08b code-owned same-offer price difference/order and independent final
+  guard; mismatched/stale/duplicate operands do not authorize a comparison.
+- [x] P09 existing accepted history retained up to 30 + inbound + context; current
+  customer inputs redacted and labelled; no new store/read/model summary.
+- [x] P06-P09 source head `11f045ed`: remote CI `36773490314` succeeded.
+  `bff00e05` records that result; it is not CI evidence for the P10-P12 patch.
+  The local snapshot's history-related limits remain in its own verification record.
+- [ ] Real-model understanding/voice/handoff/continuity acceptance and remaining
+  P05/P11 evaluation; DEV70 deferred, not passed. No conversion claim.
+
+
+- [ ] P05 — Hoàn thiện harness hiện có, fake ports/full history/state/calls/skip reasons; kiểm provider/schema/private boundary cho thử model theo mục 3 plan. CLI adaptation không tự chứng minh API đích; tái hiện lỗi baseline được phép, không đòi P06 pass.
+- [x] P05 — Luna stateful cart/size/checkout run `e76a9667`: 7 turns, 13 calls, current fee answer, size L retained, confirmed final state. Separate actual-server C3_RECOVERY control retains verified selected facts and guard reason. Synthetic/DRY_RUN only; not sales-quality or live smoke.
+- [x] P05 — Server DRY_RUN → C3 candidate quan sát được, không send; kiểm C3-off/no-call và phân biệt candidate/reply/send, không chỉ LIVE fake harness. `realtime-server-c3.test.ts` import entrypoint thật, giữ hai BF wrapper, thay external IO, chạy `processOne`.
+- [x] P06, phạm vi canonical bridge — `c26f577b` bỏ việc xóa buying intent chỉ vì variant CHANGE. Bảy regression mới ở `realtime-customer-input-purchase.test.ts` pass trong run `36725188599`: mua độc lập, chỉ sửa, giá có điều kiện, confidence thấp, HUMAN, evidence từ lượt khác và lệch product. Giữ source/product/route checks và authority NONE. Đây không phải evidence hoàn tất hành trình giỏ/reply.
 - [ ] P06 — Một owner trên nhánh chuyển; no-cart→commitment→edit→checkout→confirm đúng state.
 - [ ] P06 — Extraction trước routing hậu mãi/handoff, giữ/loại current product và session update; consumer dùng kết quả đã validate, trusted ownership/no-call vẫn đi trước.
 - [ ] P06 — Context cùng lượt đúng trong state/prompt trước P07: budget/preference/correction/rejection; differential C3-off cho timing, không đợi P09.
 - [ ] P06 — Typed edit producer → kernel `SET_LINE_VARIANT` hiện có, đúng line/value/source/revision; nhận xét không sửa giỏ, sửa rõ phải làm được.
-- [ ] P06 — Giữ chọn M + hỏi S theo từng mệnh đề; không dùng dấu hỏi/phủ định toàn tin để xóa commitment hợp lệ.
+- [ ] P06 — Giữ chọn M + hỏi S; hoàn tất CHANGE + mua ở runtime và mua + hỏi policy; đối chứng chỉ sửa/nhận xét/đề nghị giá có điều kiện. Không xóa commitment độc lập hoặc tự mutation khi điều kiện chưa giải quyết; kiểm final reply và state.
 - [ ] P06 — Checkout đúng recipient role và payment selection; field label không thành tên, địa chỉ Hội An không xóa COD; không khôi phục fallback cũ thiếu semantic checks.
 - [ ] P06 — Handoff đúng phạm vi phủ định/đối tượng; giỏ mở không che hậu mãi; giữ human-owner no-call preflight.
-- [ ] P07 — Chê giá/trải nghiệm/fit: hỏi hữu ích, evidence liên quan, lời đáp tự nhiên.
-- [ ] P08a — Tìm phương án theo budget/tiêu chí, lookup thật, no-result đúng.
-- [ ] P06/P08a — P06 sửa màu/mẫu, bộ/bỏ từ input tới context/product resolution; P08a tái dùng khi mở retrieval nhiều phương án, không phân loại lại bằng regex.
+- [ ] P07 — Chê giá/trải nghiệm/fit: hỏi hữu ích, evidence liên quan, lời đáp tự nhiên; bổ sung mã tiếp tục câu hỏi đang dở. First-contact đã biết input: chống hỏi lại; duyệt amendment trước khi thay quy tắc đúng một progression, không tự đổi form.
+- [ ] P08a — Tìm phương án theo budget/tiêu chí, lookup thật, loại current/rejected products, no-result đúng. Tái dùng phân biệt màu/mẫu, bộ/bỏ và context/product resolution của P06, không phân loại lại bằng regex.
 - [ ] P08b — Comparison đúng subject/offer, code derivation, đổi product giữ binding.
 
 ## 4. Hội thoại dài và sự cố
 
-- [ ] P09 — Preferences/correction/referent/câu hỏi đang dở qua window; giữ history recovery.
-- [ ] P09 — Tái dùng updater P06 qua window/recovery/multi-product; differential C3-off cho history recovery, ghi deviation có chủ đích.
-- [ ] P10 — Fallback đúng nhu cầu/partial facts/compatibility, detailed reason và call telemetry.
+- [ ] P09 — Giữ preferences/correction/referent/câu hỏi đang dở và tiêu chí cần thiết qua window; tái dùng updater P06/profile/session/history, không thêm store mặc định. Giữ accepted Outbox recovery; differential C3-off và deviation có chủ đích.
+- [ ] P10 — Fallback đúng nhu cầu/partial facts/compatibility, detailed reason/call telemetry; recovery giữ phần chưa biết của câu giá + chống nhăn, không coi `unrealizedEvidence=[]` là trả lời đủ.
+
+### P10-P12 source increment (2026-10-01)
+
+Baseline `bff00e05`. See [spec](../docs/specs/pr377-p10-p12-runtime-20261001.md),
+[verification](evidence/pr377-p10-p12-verification-20261001.md) and
+[whole-PR self-review](evidence/pr377-full-pr-self-review-20261001.md).
+
+- [x] P10 bounded Responder transport/JSON/guard recovery preserves selected facts
+  and an incomplete-answer limit without an extra model call or effect.
+- [x] P10 independent fact-read failures are isolated; original stage/machine
+  reasons remain visible. Raw exception prose is not stored in Inbox reasons.
+- [x] P10 actual runner tests inject model/lookup/commit faults; no permanent Inbox
+  loss for recoverable wording faults and no accepted state from a failed commit.
+- [x] P10/P12 quota finding: reuse existing turn quota across C3 roles; denied/error
+  quota and human ownership prevent model calls. No new budget service.
+- [x] P10 event call/latency/token observations are role-specific, nullable and
+  payload-free; RETURNED is not a successful answer or business effect.
+- [x] P12 complete-PR diff self-review and source/spec/export checks performed.
+- [ ] P11 real-model DEV70/judge/full-history quality and A/B: DEFERRED by owner,
+  not passed. Frozen validators and scripted tests do not close this task.
+- [ ] P12 exact new-head CI after owner commit/push, and remaining task acceptance.
+  Local full worker run: 1,912 passed, 0 failed, 4 opt-in skips. See the
+  verification record for exact commands and the deferred model evaluation.
 
 ## 5. Đánh giá và bàn giao
 
 - [ ] P11 — GPT-6 Luna DEV70 đúng revision + runtime full-intent ngoài wording DEV70; full history.
-- [ ] Chấm stage/quality theo rubric; đọc accepted/rejected; COMPLETED_NOT_JUDGED không là pass.
+- [x] Chấm bundle Luna e76a9667 bằng registered stage judge/rubric và candidate cache chính xác: 43 scored (14 PASS, 23 PASS_WITH_NOTE, 6 FAIL), 9 judge errors sau retry, 16 generation/guard failures và 2 expected pre-model rejects. Giữ kết quả 5596631 riêng; COMPLETED không tự thành quality pass. Chi tiết ở [diagnostic](evidence/pr377-dev70-e76a9667-diagnostic.md) và artifact ngoài repo; không chứng nhận head 7576e6ec.
 - [ ] Báo input/contract/provider/judge failures và giới hạn blind holdout.
-- [ ] P11 — Controls theo invariant, Luna theo hành trình; giữ full history và phân biệt planned state/commit/receipt; không thêm gate Luna cho từng finding.
-- [ ] P12 — Self-review code/spec, required checks/CI, evidence đúng source, draft PR/residual.
+- [ ] P11 — Controls theo invariant, Luna theo hành trình có nhánh theo câu trả lời; giữ full history và phân biệt planned state/commit/receipt; không thêm gate Luna cho từng finding.
+- [ ] P11 — Đối chiếu model theo vai trò cùng source/facts/contract/rubric sau P05; bắt đầu chỉ đổi Strategist, đo quality/guard/calls/token/p50/p95/chi phí gồm retry. Không dựng ma trận mọi tổ hợp hoặc coi đổi model là sửa được runtime.
+- [ ] P12 — Self-review code/spec, required checks/CI, evidence đúng source, draft PR/residual. Kết luận từng run mới ghi tại PR377 kèm SHA; không tự cập nhật kết quả PASS cho HEAD từ một ancestor.
 - [ ] Không merge/deploy/bật traffic/gửi khách/ghi dữ liệu live.
 
 ## Năng lực và invariants đã có cần bảo toàn
@@ -68,3 +127,75 @@ Amendment từ [comment review](evidence/c3-plan-review-comment-5847545097.md), 
 - Evidence cũ có phiên bản; không ghi đè bằng kết quả candidate mới.
 
 Không bảo toàn regex kích hoạt sai chỉ vì thuộc fix trước. Thay hiểu ý định tại producer/consumer tương ứng; không fit câu ví dụ/DEV70 hoặc thêm template. Typed JSON/span/confidence không tự cấp quyền nghiệp vụ. Giữ form báo giá đầu và sáu trường Strategist theo spec.
+
+
+### PR377 quality-closure Slice A source candidate (2026-10-01)
+
+- [x] Prompt ownership and KEEP_OPEN contradiction: centralized prompts assign
+  semantic choice to Strategist and wording only to Responder; concern signals
+  no longer enter the Responder request.
+- [x] Known budget and exact missing measurement checks: provider schema plus
+  compiler checks; runtime session/Size Engine bridges have regression assertions.
+- [x] Compound handoff uses the five-section goal fallback from PR380, retaining
+  the six-field Strategist contract and code-only authority. Structured presence,
+  PII normalization and closed canonical slots have positive/negative controls.
+- [ ] Full quality closure: the Slice A checkpoint did not claim Slice B or
+  Slice C. See the later Slice B checkpoint below; Slice C remains open.
+- [ ] Real-model runtime acceptance / DEV70 R2: NOT RUN in this environment.
+- [ ] P11: OPEN. P12: BLOCKED pending remaining implementation and Agent 2.
+
+Source/verification details: `tasks/evidence/pr377-slice-a-20261001.md`.
+No merge, deploy, traffic, rubric or threshold change. PR377 remains draft.
+
+
+### PR377 quality-closure Slice B source candidate (2026-10-01)
+
+- [x] Paired GENERAL-statement guard controls: source-bound customer amount and
+  size, bound product referent, ETA locality and bounded uncertainty are not
+  treated as shop facts, fit authority, recipient capture or effects.
+- [x] Explicit unsupported topic coverage: wrinkle is not smoothness; finite
+  epistemic LIMIT checks reject wrong-property and acknowledgement-only wording.
+  Existing typed wear evidence is required to omit a requested wrinkle limit.
+- [x] Price comparison remains code-derived; prose cannot substitute weight,
+  superiority/value or a model-derived ETA/deadline relation. Passive dispatch
+  claims and epistemic-prefix laundering have paired regressions.
+- [x] Eligible recovery retains selected price plus a named wrinkle limitation;
+  transport/JSON/wrong-property/dropped-limit controls preserve independent facts.
+- [x] Real Producer/RealtimeRunner scripted controls protect the final egress
+  bridge. No cart/checkout/effect authority is inferred from acknowledgements.
+- [x] Runtime scope residual resolved by Slice C: parent facts now retain their
+  producer scope independently of the selected variant. The fit/cart fences
+  remain strict; paired boundary tests and the full runtime reproduce the fix.
+- [x] Full Slice C deterministic journey matrix added (see execution section below).
+- [ ] Stateful real-model runtime acceptance remains open.
+- [ ] Real-model runtime acceptance / DEV70 R2: NOT RUN here.
+- [ ] P11: OPEN. P12: BLOCKED pending remaining runtime work and Agent 2.
+
+Source review, RED/GREEN and environment notes:
+`tasks/evidence/pr377-slice-b-20261001.md`. The delivered SOURCE_IDENTITY.json and
+VERIFICATION.json bind local exact HEAD and actual final commands. Remote CI on
+an ancestor is not evidence for this candidate. Keep PR377 draft; no merge,
+deploy, live traffic, rubric or threshold change.
+
+### PR377 quality closure - Slice C execution
+
+Base: `fbde9cd6cb8763ff8d27de0b6ce1f75f6a1d7abf` (Slice B).
+Scope: full RealtimeRunner/Producer deterministic controls with safe external
+ports, exact state/effect/receipt assertions, and owning-layer fixes only after RED.
+
+- [x] Twelve required journey families via 23 scripted full-runtime controls,
+  including branching checkout, failures, freshness and duplicate suppression.
+- [x] RED -> fix for parent-fact scope, stock-query subject label, single-product
+  compound query coverage, and partial lookup isolation. No authority waiver.
+- [x] Trace writer records actual replies, before/after state, reads, planned vs
+  committed effects, truthful fake receipts and real role-call topology.
+- [x] Self-review source diff across correctness/security/architecture/simplicity/performance.
+  Exact local candidate identity and command ledger are in the external handoff.
+- [x] Precommit focused/adjacent (458 tests) and full workspace (3,384 passed;
+  35 pre-existing opt-in/environment skips) checked. The external handoff
+  records subsequent exact-head re-verification, not ancestor CI.
+- [ ] Remote exact-head CI: pending publication; no prior CI result reused.
+- [ ] Real-model acceptance NOT RUN; DEV70 R2 NOT RUN; P11 OPEN;
+  P12 BLOCKED pending Agent 2. Do not merge/deploy or remove PR377 draft.
+
+Source evidence and residuals: `tasks/evidence/pr377-slice-c-20261001.md`.

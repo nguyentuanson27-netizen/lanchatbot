@@ -46,7 +46,7 @@ function hmac(salt: string, ...parts: readonly string[]): string {
 const bounded = (alternatives: string): string =>
   `(?<![\\p{L}\\p{M}])(?:${alternatives})(?![\\p{L}\\p{M}])`;
 
-/** Naming one of these is itself enough to treat the whole line as an address. */
+/** A component with a value is an address; a bounded field mention is not. */
 const ADDRESS_COMPONENT_TOKENS =
   "xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn";
 
@@ -103,6 +103,37 @@ const ADDRESS_REQUEST = /(?:cho\s+(?:\p{L}+\s+)?(?:xin|hỏi)|xin)\s*$/iu;
 const ADDRESS_DETAIL_TOKEN = new RegExp(bounded(ADDRESS_DETAIL_TOKENS), "iu");
 
 /**
+ * Closed field-role grammar, not a vocabulary of permissible address values.
+ * A deferred field operation, a choice of generic delivery venues, or another
+ * checkout field must consume the entire clause. Unknown words, numbers and
+ * value separators cannot be rescued by a request/deferral elsewhere in it.
+ * This is a bounded privacy surface check, not general intent extraction.
+ */
+const FIELD_ACTOR = "(?:chị|em|anh|mình|tôi|bạn|shop)";
+const FIELD_MODIFIER = "(?:(?:chi tiết|(?:nhận|giao)(?:\\s+hàng)?)\\s+)?";
+const FIELD_VENUE = "(?:nhà|công ty)";
+const FIELD_POLITENESS = `(?:\\s+${FIELD_ACTOR})?(?:\\s+(?:nhé|nha|ạ))?`;
+const ADDRESS_FIELD_CLAUSE = new RegExp(
+  `^${FIELD_MODIFIER}(?:` +
+  `${FIELD_ACTOR}\\s+(?:gửi|bổ sung|cung cấp)\\s+(?:sau|(?:lúc|khi)\\s+(?:đặt(?:\\s+hàng)?|chốt(?:\\s+đơn)?)(?:\\s+sau)?)|` +
+  `để\\s+${FIELD_ACTOR}\\s+(?:hỏi\\s+(?:chồng|vợ|gia đình)\\s+xem\\s+)?(?:nhận|giao)\\s+(?:ở|tại)\\s+${FIELD_VENUE}(?:\\s+hay\\s+${FIELD_VENUE})?|` +
+  `(?:nhận|giao)(?:\\s+hàng)?\\s+và\\s+(?:cách|phương thức)\\s+thanh toán` +
+  `)${FIELD_POLITENESS}\\s*$`,
+  "iu",
+);
+
+/** Only the generic component span is removed for inspection; independent
+ * address components and all unknown/value-bearing suffixes still redact. */
+const ADDRESS_GENERIC_COMPONENT = new RegExp(
+  `${bounded("ngoài")}\\s+${bounded("đường")}(?=\\s+(?:(?:nên|mà)\\s+)?(?:chưa|không)\\s+(?:đo|thử)\\s+được[.!?]?\\s*$)|` +
+  `${bounded("tỉnh")}\\s*/\\s*${bounded("thành")}(?:\\s+phố)?(?=\\s+(?:` +
+  `(?:trước\\s+)?(?:đúng\\s+)?(?:không|ko)[?]?|` +
+  `để\\s+(?:tra|xem|tính)\\s+(?:thời gian|phí)\\s+(?:giao|ship)(?:\\s+hàng)?` +
+  `)[.!?]?\\s*$)`,
+  "giu",
+);
+
+/**
  * The vocabulary of talking *about* the address field - pronouns, politeness
  * particles, question words and the generic nouns of delivery. A clause built
  * only from these names the field; any word outside it is a value.
@@ -122,7 +153,7 @@ const ADDRESS_NEUTRAL_WORDS = new Set([
   "đó", "đã", "đủ",
 ]);
 
-function declaresAddress(payload: string, before: string): boolean {
+function declaresAddress(payload: string, before: string, explicitValue: boolean): boolean {
   const end = payload.search(ADDRESS_CLAUSE_END);
   // "quận nào" asks which district; it is neither a value nor a word of its own.
   const clause = (end === -1 ? payload : payload.slice(0, end)).replace(
@@ -131,6 +162,9 @@ function declaresAddress(payload: string, before: string): boolean {
   );
   const hasHardValue =
     /\d/u.test(clause) || ADDRESS_DETAIL_TOKEN.test(clause);
+  if (!explicitValue && !hasHardValue && ADDRESS_FIELD_CLAUSE.test(
+    payload.replace(/[.!?…]+\s*$/u, "").trim(),
+  )) return false;
   if (!hasHardValue && ADDRESS_QUESTION.test(clause)) return false;
   if (!hasHardValue && ADDRESS_REQUEST.test(before)) return false;
   return clause
@@ -147,13 +181,15 @@ export function redactAnalyticsText(value: string): string {
     .replace(
       ADDRESS_KEYWORD,
       (match: string, payload: string, offset: number, whole: string) =>
-        declaresAddress(payload, whole.slice(0, offset)) ? "[ADDRESS]" : match,
+        declaresAddress(payload, whole.slice(0, offset),
+          /[:#-]/u.test(match.slice(0, match.length - payload.length))) ? "[ADDRESS]" : match,
     )
     .replace(/(?:họ tên|ho ten|tên người nhận|ten nguoi nhan)\s*[:#-]?[^\n]{2,}/giu, "[NAME]");
   return direct
     .split(/\r?\n/u)
     .map((line) => {
-      if (ADDRESS_LINE_TOKEN.test(line.replace(ADDRESS_TOKEN_QUESTION, " "))) {
+      if (ADDRESS_LINE_TOKEN.test(line.replace(ADDRESS_TOKEN_QUESTION, " ")
+        .replace(ADDRESS_GENERIC_COMPONENT, " "))) {
         return "[ADDRESS]";
       }
       if (/^\s*\p{Lu}[\p{L}'-]+(?:\s+\p{Lu}[\p{L}'-]+){1,4}\s*$/u.test(line)) {

@@ -483,6 +483,8 @@ export const ContextV2CandidateSemanticSegmentV2Schema = z.discriminatedUnion(
     z.object({
       kind: z.literal("GENERAL"),
       text: z.string().min(1).max(1_000),
+      /** Code-bound realization of an explicit consultation obligation only. */
+      obligationId: z.string().trim().min(1).max(128).optional(),
     }).strict(),
     z.object({
       kind: z.literal("VERIFIED_CLAIM"),

@@ -145,6 +145,25 @@ describe("inventory aggregation", () => {
 describe("stable product search", () => {
   const thresholds = { textMinScore: 0.75, imageMinScore: 0.8, minTopGap: 0.05, maxCandidates: 3 };
 
+  it("retrieves alternatives without treating close scores as an identity ambiguity", async () => {
+    const third = { ...sd397, productId: "SD398", parentProductId: "SD398", canonicalCode: "SD398" };
+    const port = new FakeStableCatalogSearchPort([], [
+      { document: sd396, score: 0.99 }, { document: sd397, score: 0.95 },
+      { document: sd397, score: 0.94 }, { document: third, score: 0.93 },
+    ]);
+    expect((await new ProductSearchService(port, thresholds).searchAlternatives("another dress", ["sd396"]))
+      .map(({ productId }) => productId)).toEqual(["SD397", "SD398"]);
+    expect(port.calls).toEqual(["text:another dress"]);
+  });
+
+  it("never returns low-scoring or rejected alternatives", async () => {
+    const port = new FakeStableCatalogSearchPort([], [
+      { document: sd396, score: 0.99 }, { document: sd397, score: 0.74 },
+    ]);
+    expect(await new ProductSearchService(port, thresholds).searchAlternatives("another dress", ["SD396"]))
+      .toEqual([]);
+  });
+
   it("checks exact code before alias and vector search", async () => {
     const port = new FakeStableCatalogSearchPort([sd396], [{ document: sd397, score: 0.99 }]);
     const result = await new ProductSearchService(port, thresholds).searchText(" sd396 ");

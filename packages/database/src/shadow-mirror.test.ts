@@ -130,6 +130,47 @@ describe("shadow mirror privacy helpers", () => {
     }
   });
 
+  it.each([
+    "Giờ chị đang ngoài đường chưa đo được.",
+    "Địa chỉ chi tiết chị gửi lúc đặt sau.",
+    "Chị cần nói tỉnh/thành trước đúng không?",
+    "Địa chỉ để chị hỏi chồng xem nhận ở nhà hay công ty.",
+    "hiện còn địa chỉ nhận và cách thanh toán chị nhé.",
+    "Em đang ngoài đường nên chưa thử được.",
+    "Địa chỉ nhận hàng mình bổ sung khi chốt đơn.",
+    "Anh chưa chọn địa chỉ giao hàng.",
+    "Shop cần tỉnh/thành để tra thời gian giao.",
+  ])("preserves an address field mention without a location value: %s", (text) => {
+    const result = redactAnalyticsMessage(text);
+    expect(result).toEqual({ text, dlpStatus: "PASSED" });
+  });
+
+  it.each([
+    "địa chỉ: tân bình",
+    "địa chỉ nhận hàng ở tân bình",
+    "địa chỉ chi tiết chị gửi là tân bình",
+    "Địa chỉ để chị hỏi chồng xem nhận ở đường tân bình.",
+    "hiện còn địa chỉ nhận ở phường tân bình và cách thanh toán chị nhé.",
+    "Chị cần nói tỉnh/thành trước: tỉnh đồng nai",
+    "Giờ chị đang ngoài đường lê lợi chưa đo được.",
+    "địa chỉ nhận hàng mình bổ sung khi chốt đơn: tân bình",
+    "Địa chỉ nhà hay công ty: nguyễn trãi",
+    "Địa chỉ để nhận hàng là tân bình",
+    "giao tới xã tân phú giúp chị",
+    "Chị ở đường lê lợi, hỏi quận nào được không?",
+    "địa chỉ: chi tiết chị gửi lúc đặt sau",
+    "Địa chỉ chi tiết chị gửi lúc đặt sau. Địa chỉ: tân bình",
+    "Địa chỉ để chị hỏi chồng xem nhận ở nhà hay công ty; tân bình",
+    "Địa chỉ chi tiết chị gửi lúc đặt sau: tân bình",
+    "Địa chỉ chi tiết chị gửi lúc đặt sau, tân bình",
+  ])("redacts an actual address even alongside a field discussion: %s", (text) => {
+    const result = redactAnalyticsText(text);
+    expect(result).toContain("[ADDRESS]");
+    for (const privateValue of ["tân bình", "đồng nai", "lê lợi", "nguyễn trãi", "tân phú"]) {
+      expect(result.toLocaleLowerCase("vi")).not.toContain(privateValue);
+    }
+  });
+
   it("compares internal keys without accepting different lengths", () => {
     expect(constantTimeKeyMatches("a".repeat(32), "a".repeat(32))).toBe(true);
     expect(constantTimeKeyMatches("a".repeat(32), "a".repeat(31))).toBe(false);

@@ -329,6 +329,138 @@ export const AgentSalesSignalsV1Schema = z.object({
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 
+const CustomerInputEvidenceSchema = z.string().trim().min(1).max(2_000);
+
+/** Shared vocabulary of customer fact requests and existing C3 evidence. */
+export const REALTIME_CUSTOMER_FACT_CAPABILITIES = [
+  "PRICE", "STOCK", "SIZE_FIT", "ETA", "SHIPPING_FEE", "FREESHIP",
+  "PROMOTION_OFFER", "PRODUCT_MEDIA", "PRODUCT_ATTRIBUTES", "PRODUCT_PRESENTATION",
+  "POLICY", "CARE_GUIDANCE", "OFFER_CONFIGURATION", "BUSINESS_LOCATION",
+  "FULFILLMENT_STATUS", "CART_TOTAL", "PRODUCT_LIFECYCLE", "PRODUCT_COMPARISON",
+] as const;
+
+export const REALTIME_CUSTOMER_POLICY_SCOPES = [
+  "EXCHANGE", "REFUND", "INSPECTION",
+  "EXCHANGE_AND_RETURN", "EXCHANGE_SIZE", "EXCHANGE_COLOR", "EXCHANGE_MODEL",
+  "RETURN_AND_REFUND", "TRY_ON", "REFUSED_PARCEL_FEE", "SHIPPING_FEE", "DELIVERY_TIME",
+  "SHOPEE_PRICE", "IMAGE_ACCURACY", "WASHING_CARE", "UNSUPPORTED_POLICY", "SPLIT_SIZE", "ALTERATION",
+] as const;
+export const REALTIME_CUSTOMER_DECISION_CONCERNS = [
+  "PRICE_HESITATION", "FIT_RISK", "TRUST_RISK", "USAGE_FREQUENCY", "DECISION_CRITERION_UNKNOWN",
+] as const;
+
+export const RealtimeCustomerObligationV1Schema = z.object({
+  kind: z.enum(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT", "CONSULTATION"]),
+  capability: z.enum(REALTIME_CUSTOMER_FACT_CAPABILITIES).nullable(),
+  scope: z.enum([
+    "MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
+    "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
+    "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
+    "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
+    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "APPLIED_CART_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION",
+    ...REALTIME_CUSTOMER_POLICY_SCOPES,
+  ]).nullable(),
+  productId: z.string().trim().min(1).max(64).nullable(),
+  /** Authority subject, distinct from a product mentioned as conversation context. */
+  subjectScope: z.enum(["PRODUCT", "CART", "SHOP"]).nullable().optional(),
+  evidenceText: CustomerInputEvidenceSchema.nullable(),
+  size: z.string().trim().min(1).max(32).nullable().optional(),
+  color: z.string().trim().min(1).max(80).nullable().optional(),
+  component: z.enum(["TOP", "BOTTOM", "FULL_SET"]).nullable().optional(),
+  /** Exact selling configuration for a price, distinct from its component. */
+  offerScope: z.enum(["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"]).nullable().optional(),
+  relatedProductId: z.string().trim().min(1).max(64).nullable().optional(),
+  deadlineDays: z.number().int().min(0).max(365).nullable().optional(),
+  criteria: z.object({ shape: z.string().trim().min(1).max(80).nullable(),
+    avoid: z.array(z.string().trim().min(1).max(80)).max(4) }).strict().nullable().optional(),
+  /** Decision role only; this classification grants no business-fact authority. */
+  decisionConcern: z.enum(REALTIME_CUSTOMER_DECISION_CONCERNS).nullable().optional(),
+}).strict().superRefine((value, context) => {
+  if (value.decisionConcern != null && value.kind !== "CONSULTATION") {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["decisionConcern"], message: "only consultation carries a decision concern" });
+  }
+  if (value.kind === "FACT_REQUEST") {
+    if (value.offerScope != null && (value.capability !== "PRICE" ||
+        (value.component != null && value.component !==
+          (value.offerScope === "TOP" || value.offerScope === "BOTTOM" ? value.offerScope : "FULL_SET")))) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["offerScope"], message: "price configuration does not match capability/component" });
+    }
+    if (value.capability === null) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["capability"],
+        message: "FACT_REQUEST requires capability" });
+    }
+    const attributeScope = value.scope !== null &&
+      ["MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
+        "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
+        "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT", "WAIST_CONSTRUCTION"].includes(value.scope);
+    const offerScope = value.scope !== null &&
+      ["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"].includes(value.scope);
+    const otherScopeValid = value.scope !== null && (
+      (["DISPATCH_TIME", "DELIVERY_DEADLINE"].includes(value.scope) && value.capability === "ETA") ||
+      (["CUSTOMER_OFFER", "FUTURE_PROMOTION", "APPLIED_CART_PROMOTION"].includes(value.scope) && value.capability === "PROMOTION_OFFER") ||
+      (["COMPARATIVE_PROPERTY", "CHEAPER"].includes(value.scope) && value.capability === "PRODUCT_COMPARISON") ||
+      ((REALTIME_CUSTOMER_POLICY_SCOPES as readonly string[]).includes(value.scope) && value.capability === "POLICY"));
+    const scopedCapability = value.capability === "PRODUCT_ATTRIBUTES" ||
+      value.capability === "OFFER_CONFIGURATION";
+    if ((scopedCapability && value.scope === null) ||
+        (attributeScope && value.capability !== "PRODUCT_ATTRIBUTES") ||
+        (offerScope && value.capability !== "OFFER_CONFIGURATION") ||
+        (value.scope !== null && !attributeScope && !offerScope && !otherScopeValid)) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["scope"],
+        message: "obligation scope does not match capability" });
+    }
+  } else if (value.capability !== null || value.scope !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom,
+      message: "nonfact obligations cannot carry fact capability or scope" });
+  }
+});
+export type RealtimeCustomerObligationV1 =
+  z.infer<typeof RealtimeCustomerObligationV1Schema>;
+
+/** Compatibility defaults follow the owner of the requested fact, never prose. */
+export function realtimeCustomerObligationSubjectScope(value: Pick<RealtimeCustomerObligationV1,
+  "capability" | "scope" | "subjectScope"> & { productId?: string | null }): "PRODUCT" | "CART" | "SHOP" {
+  // The model's subjectScope is a checked mirror, never an authority override.
+  if (["SHIPPING_FEE", "FREESHIP", "CART_TOTAL"].includes(value.capability ?? "")) return "CART";
+  if (value.capability === "POLICY") return value.productId != null &&
+    (value.scope === "SPLIT_SIZE" || value.scope === "ALTERATION") ? "PRODUCT" : "SHOP";
+  if (value.capability === "PROMOTION_OFFER" && value.scope === "APPLIED_CART_PROMOTION") return "CART";
+  if (value.capability === "BUSINESS_LOCATION" || value.capability === "PROMOTION_OFFER") return "SHOP";
+  return "PRODUCT";
+}
+
+export const RealtimeCustomerInputSchema = z.object({
+  factQuery: AgentBusinessFactQueryV1Schema,
+  policyQuestion: z.enum(["EXCHANGE_AND_RETURN", "EXCHANGE_SIZE", "EXCHANGE_COLOR", "EXCHANGE_MODEL",
+    "RETURN_AND_REFUND", "TRY_ON", "REFUSED_PARCEL_FEE", "SHIPPING_FEE", "DELIVERY_TIME",
+    "SHOPEE_PRICE", "IMAGE_ACCURACY", "WASHING_CARE", "UNSUPPORTED_POLICY"]).nullable(),
+  route: z.enum(["PRE_SALE", "HUMAN", "POST_SALE"]),
+  routeEvidence: CustomerInputEvidenceSchema.nullable(),
+  product: z.object({
+    operation: z.enum(["CURRENT", "SELECT", "SEARCH", "REJECT"]),
+    productId: z.string().trim().min(1).max(64).nullable(),
+    evidenceText: CustomerInputEvidenceSchema.nullable(),
+  }).strict(),
+  variant: z.object({
+    operation: z.enum(["NONE", "SELECT", "CHANGE"]),
+    productId: z.string().trim().min(1).max(64).nullable(),
+    size: z.string().trim().min(1).max(32).nullable(),
+    color: z.string().trim().min(1).max(80).nullable(),
+    evidenceText: CustomerInputEvidenceSchema.nullable(),
+  }).strict(),
+  budget: z.object({ operation: z.enum(["KEEP", "SET", "CLEAR"]),
+    value: z.number().int().min(0).max(100_000_000).nullable(), evidenceText: CustomerInputEvidenceSchema.nullable() }).strict(),
+  occasion: z.object({ operation: z.enum(["KEEP", "SET", "CLEAR"]),
+    value: z.enum(["WORK", "PARTY", "EVERYDAY"]).nullable(), evidenceText: CustomerInputEvidenceSchema.nullable() }).strict(),
+  // Optional keeps old persisted/replay payloads readable. New model generations
+  // require this field through CUSTOMER_INPUT_RESPONSE_SCHEMA.
+  obligations: z.array(RealtimeCustomerObligationV1Schema).max(8).optional(),
+  salesSignals: AgentSalesSignalsV1Schema,
+}).strict();
+export type RealtimeCustomerInput = z.infer<typeof RealtimeCustomerInputSchema>;
+
+
+
 export const AgentStrategyAnalysisV1Schema = z.object({
   need: z.enum([
     "NEED_OCCASION",

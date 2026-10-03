@@ -1,3 +1,5 @@
+import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
+import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
@@ -6,7 +8,6 @@ import {
 } from "./track-c-c3-cart-binding.js";
 import {
   TRACK_C_PROTECTED_PROPOSITIONS,
-  trackCCustomerFacingSizeFromVariantId,
   type TrackCProtectedProposition,
   type TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
@@ -16,6 +17,8 @@ import { trackCProductAttributeEvidence } from
   "./track-c-c3-attribute-projection.js";
 import {
   trackCFormatVnd,
+  trackCOfferConfigurationProjections,
+  trackCPolicyProjections,
   trackCSimulationFactText,
 } from "./track-c-c3-fact-realization.js";
 
@@ -104,10 +107,11 @@ export function trackCVariantLabel(
   presentation: ContextV2["productPresentation"] | null,
   variantId: string,
 ): Readonly<{ color?: string; size?: string }> | null {
-  const variant = presentation?.variants.find(
+  const variants = presentation?.variants.filter(
     (entry) => entry.variantId === variantId,
-  );
-  if (variant === undefined) return null;
+  ) ?? [];
+  if (variants.length !== 1) return null;
+  const variant = variants[0]!;
   if (variant.color === null && variant.size === null) return null;
   return Object.freeze({
     ...(variant.color === null ? {} : { color: variant.color }),
@@ -148,13 +152,12 @@ export function trackCRuntimeClaimDeterministicText(
     return `Giá hiện tại của mẫu này là ${trackCFormatVnd(claim.value.amountVnd)} ạ.`;
   }
   if (claim.type === "STOCK") {
-    // Prefer the authoritative variant mapping; fall back to the ID convention
-    // only when no presentation is available for this turn.
+    // Variant IDs are opaque. Missing or ambiguous mapping is an output
+    // capability gap, never evidence of a size or stock status.
     const label = claim.scope.variantId === null
       ? null
-      : trackCVariantLabel(presentation ?? null, claim.scope.variantId);
-    const size = label?.size
-      ?? trackCCustomerFacingSizeFromVariantId(claim.scope.variantId);
+      : trackCVariantLabel(trackCBoundPresentationForClaim(presentation, claim.scope), claim.scope.variantId);
+    const size = label?.size ?? null;
     const color = label?.color ?? null;
     if (claim.scope.variantId !== null && size === null && color === null) {
       return null;
@@ -241,9 +244,12 @@ function boundedSimulationEvidence(
       throw new Error("TRACK_C_SIMULATION_EVIDENCE_INVALID");
     }
     const offerType = typeof value.offerType === "string" ? value.offerType : null;
+    const profileSubject = offerType === null
+      ? `Mẫu ${displayName}`
+      : `Mẫu ${displayName} là ${offerType},`;
     const profileText = colors.length === 0
-      ? `Mẫu ${displayName} có chất liệu ${material} ạ.`
-      : `Mẫu ${displayName} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
+      ? `${profileSubject} có chất liệu ${material} ạ.`
+      : `${profileSubject} có chất liệu ${material}, hiện có màu ${colors.join(", ")} ạ.`;
     const deterministicText = design.length === 0 ? profileText :
       `${profileText.replace(/ ạ\.$/u, ".")} Thiết kế của mẫu gồm ${design.join(", ")} ạ.`;
     return make("PRODUCT_PRESENTATION", {
@@ -362,7 +368,7 @@ function boundedSimulationEvidence(
             ...(cartVersion === null ? {} : { cartVersion }),
           })
         : subjectProductId === undefined
-          ? undefined
+          ? kind === "POLICY_SNAPSHOT" ? Object.freeze({ scope: "SHOP" as const }) : undefined
           : Object.freeze({ scope: "PRODUCT" as const, productId: subjectProductId });
     return make(capability, {
       ...(policy === null ? {} : { policy }),
@@ -379,6 +385,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   executionLane: TrackCV5ExecutionLane;
   currentCart?: TrackCCurrentCartBinding | null;
   evaluationAt?: Date;
+  comparisonFacts?: readonly BusinessFactEnvelopeV1[];
 }>): readonly TrackCSelectableEvidence[] {
   if (input.executionLane !== "BEHAVIOR_SIMULATION" &&
       input.simulationFacts.length > 0) {
@@ -386,6 +393,20 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
   }
   const evidence: TrackCSelectableEvidence[] = [];
   input.context.verifiedClaims.forEach((claim, index) => {
+    // Missing current-cart authority is not merely missing wording. Exposing
+    // the value as selectable lets a Strategist copy it into goal and the
+    // Responder restate it in free prose. Reuse the existing binding check at
+    // admission, before either model sees the value.
+    if (claim.scope.kind === "CART") {
+      try {
+        if (!trackCCartClaimIsCurrent(
+          claim, input.currentCart ?? null, input.evaluationAt ?? new Date(),
+        )) return;
+      } catch {
+        // Bad cart input invalidates only cart evidence, not independent facts.
+        return;
+      }
+    }
     const capability = capabilityForClaim(claim.type);
     if (capability !== null) {
       const boundPresentation = trackCBoundPresentationForClaim(
@@ -408,6 +429,7 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       }));
     }
   });
+  evidence.push(...trackCPriceComparisons(input.context, input.comparisonFacts ?? [], input.evaluationAt ?? new Date()));
   if (input.context.productAttributes !== null &&
       input.context.productAttributes !== undefined) {
     // Every verified attribute group, one selectable entry per field. The
@@ -466,7 +488,79 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       input.context.productBinding.productIds,
     );
     if (projected === null) return;
+    if (projected.capability === "OFFER_CONFIGURATION") {
+      const data = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      for (const projection of trackCOfferConfigurationProjections(data)) {
+        const component = projection.scope === "TOP" || projection.scope === "BOTTOM" ? projection.scope : "FULL_SET";
+        evidence.push(Object.freeze({
+          ref: `${projected.ref}_${projection.scope}`,
+          capability: "OFFER_CONFIGURATION" as const,
+          ...(projected.subject === undefined ? {} : { subject: projected.subject }),
+          value: Object.freeze({
+            offerScope: projection.scope,
+            component,
+            ...projection.value,
+          }),
+          deterministicText: projection.text,
+          provenance: Object.freeze({
+            authority: "SIMULATION" as const,
+            contentHash: sha256({
+              sourceContentHash: projected.provenance.contentHash,
+              offerScope: projection.scope,
+              value: projection.value,
+            }),
+          }),
+        }));
+        // A composition/retail statement and its explicit price are different
+        // fact families. Preserve the offer scope on both; a component price
+        // never becomes a price (or stock assertion) for the whole set.
+        const amountVnd = projection.value.fullSetVnd ?? projection.value.twoPieceVnd ??
+          projection.value.threePieceVnd ?? projection.value.priceVnd;
+        if (typeof amountVnd === "number" && Number.isSafeInteger(amountVnd) && amountVnd >= 0 &&
+            projection.value.available !== false) {
+          const value = Object.freeze({ amountVnd, currency: "VND", offerScope: projection.scope,
+            component });
+          const label = { FULL_SET: "nguyên set", TOP: "áo bán lẻ", BOTTOM: "quần/chân váy bán lẻ",
+            TWO_PIECE: "bộ 2 món", THREE_PIECE: "bộ 3 món" }[projection.scope];
+          evidence.push(Object.freeze({
+            ref: `${projected.ref}_${projection.scope}_PRICE`, capability: "PRICE" as const,
+            ...(projected.subject === undefined ? {} : { subject: projected.subject }),
+            value, deterministicText: `Giá ${label} là ${trackCFormatVnd(amountVnd)} ạ.`,
+            provenance: Object.freeze({ authority: "SIMULATION" as const,
+              contentHash: sha256({ sourceContentHash: projected.provenance.contentHash, capability: "PRICE", value }),
+            }),
+          }));
+        }
+      }
+      return;
+    }
     evidence.push(projected);
+    if (projected.capability === "POLICY" && typeof projected.value.policy === "string") {
+      const data = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      for (const projection of trackCPolicyProjections(projected.value.policy, data)) {
+        const productScoped = projection.scope === "ALTERATION" || projection.scope === "SPLIT_SIZE";
+        // A global product rule applies only within a resolved binding. An
+        // explicit source product restriction must never expand to its peers.
+        const subjects: readonly TrackCSelectableEvidence["subject"][] = productScoped
+          ? input.context.productBinding.status !== "RESOLVED" ? []
+            : projected.subject?.productId !== undefined ? [projected.subject]
+              : input.context.productBinding.productIds.map((productId) => Object.freeze({ scope: "PRODUCT" as const, productId }))
+          : [projected.subject];
+        subjects.forEach((subject, subjectIndex) => {
+          const value = Object.freeze({ ...projection.value, sourceContentHash: projected.provenance.contentHash });
+          evidence.push(Object.freeze({
+            ref: `${projected.ref}_${projection.scope}${productScoped ? `_PRODUCT_${String(subjectIndex + 1).padStart(3, "0")}` : ""}`,
+            capability: "POLICY" as const,
+            ...(subject === undefined ? {} : { subject }), value,
+            deterministicText: projection.text,
+            provenance: Object.freeze({ authority: projected.provenance.authority,
+              contentHash: sha256({ sourceContentHash: projected.provenance.contentHash,
+                policy: projection.scope, subject: subject ?? null, value: projection.value }),
+            }),
+          }));
+        });
+      }
+    }
     if (projected.capability === "PRODUCT_PRESENTATION") {
       // Preserve the overview for fixed first contact, while adaptive turns
       // can select just one verified attribute without printing the bundle.
@@ -474,16 +568,16 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         material: string; colors: readonly string[]; design: readonly string[];
       };
       const fields = [
-        { field: "material", value: material,
+        { field: "materials", refSuffix: "MATERIAL", value: Object.freeze([material]),
           text: `Mẫu này có chất liệu ${material} ạ.` },
-        ...(colors.length === 0 ? [] : [{ field: "colors", value: colors,
+        ...(colors.length === 0 ? [] : [{ field: "colors", refSuffix: "COLORS", value: colors,
           text: `Mẫu này hiện có màu ${colors.join(", ")} ạ.` }]),
-        ...(design.length === 0 ? [] : [{ field: "design", value: design,
+        ...(design.length === 0 ? [] : [{ field: "design", refSuffix: "DESIGN", value: design,
           text: `Thiết kế của mẫu gồm ${design.join(", ")} ạ.` }]),
       ];
       for (const field of fields) {
         evidence.push(Object.freeze({
-          ref: `${projected.ref}_${field.field.toUpperCase()}`,
+          ref: `${projected.ref}_${field.refSuffix}`,
           capability: "PRODUCT_ATTRIBUTES" as const,
           subject: projected.subject!,
           value: Object.freeze({ [field.field]: field.value }),
@@ -498,6 +592,20 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
           }),
         }));
       }
+    }
+    if (projected.capability === "CARE_GUIDANCE") {
+      // Keep the legacy public capability selectable, while canonical typed
+      // obligations consume the same source under PRODUCT_ATTRIBUTES.
+      const careInstructions = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      const value = Object.freeze({ careInstructions: Object.freeze({ ...careInstructions }) });
+      evidence.push(Object.freeze({
+        ref: `${projected.ref}_CARE_INSTRUCTIONS`, capability: "PRODUCT_ATTRIBUTES" as const,
+        ...(projected.subject === undefined ? {} : { subject: projected.subject }), value,
+        ...(projected.deterministicText === undefined ? {} : { deterministicText: projected.deterministicText }),
+        provenance: Object.freeze({ authority: "SIMULATION" as const,
+          contentHash: sha256({ sourceContentHash: projected.provenance.contentHash, capability: "PRODUCT_ATTRIBUTES", value }),
+        }),
+      }));
     }
   });
   // Missing realization is a capability gap, not missing factual authority.

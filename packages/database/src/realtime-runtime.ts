@@ -298,6 +298,24 @@ export interface RealtimeDecisionEventPlan {
     salesCycleStageBefore: string | null;
     salesCycleStageAfter: string | null;
     outboundMessageCount: number;
+    customerInputFailure?: string;
+    /** C3 transport invocations only; missing provider usage is null, never zero. */
+    c3ModelCalls?: readonly Readonly<{
+      role: "CUSTOMER_INPUT" | "STRATEGIST" | "RESPONDER" | "UNKNOWN";
+      status: "RETURNED" | "ERROR";
+      latencyMs: number;
+      tokenUsage: Readonly<{ prompt: number | null; output: number | null;
+        thinking: number | null; total: number | null }>;
+    }>[];
+    c3Candidate?: Readonly<{
+      status: "VALIDATED" | "REJECTED";
+      replyHash: string | null;
+      redactedReply: string | null;
+      reason: string | null;
+      reasonCodes?: readonly string[];
+      failureStage?: "EVIDENCE" | "STRATEGIST" | "RESPONDER" | "FINAL_GUARD";
+      selectedForOutbound: boolean;
+    }>;
     modelCalled: boolean;
     modelLatencyMs: number | null;
     modelTokenUsage: Readonly<{

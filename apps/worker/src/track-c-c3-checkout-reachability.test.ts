@@ -87,7 +87,13 @@ function transport(fields: readonly string[]) {
   return vi.fn<CandidateVertexTransport["send"]>()
     .mockResolvedValueOnce({
       payload: payload({
-        replyAct: "ACKNOWLEDGE", goal: "Collect the missing checkout details.",
+        replyAct: "ACKNOWLEDGE", goal: [
+          "NEED: Collect the missing checkout details.",
+          "KNOWN: NONE",
+          "ANSWER: NONE",
+          "LIMIT: NONE",
+          "NEXT: missing checkout fields enable the canonical transaction",
+        ].join("\n"),
         proposition: "NONE", evidenceRefs: [], continuation: null,
         canonicalAction: "ASK_CHECKOUT_DETAILS",
       }),
@@ -172,7 +178,8 @@ describe("Track C C3 checkout reachability", () => {
     const action = result.output.segments.find(
       ({ kind }) => kind === "ACTION_REQUEST",
     );
-    expect(action?.text).toContain("hình thức thanh toán");
+    expect(action?.text).toContain("COD");
+    expect(action?.text).toContain("chuyển khoản");
     expect(action?.text).not.toContain("họ tên");
   });
 
