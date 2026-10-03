@@ -493,7 +493,8 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   // Planning is a control plane. Never carry provider-authored factual values
   // into the decision/task, even if the provider repeated an authorized fact.
   const obligationResolutions = input.requestedObligations === undefined ? undefined
-    : trackCResolveObligations(input.requestedObligations, realizable, input.boundProductIds ?? []);
+    : trackCResolveObligations(input.requestedObligations, realizable, input.boundProductIds ?? [],
+      canonicalRequest(decision.canonicalAction, input.checkoutRequestedFields ?? [], input.measurementRequestedFields));
   const facts = obligationResolutions?.filter(({ kind }) => kind === "FACT_REQUEST") ?? [];
   const describe = (entry: Pick<TrackCRequestedObligation, "kind" | "capability" | "scope">) =>
     [entry.capability ?? entry.kind, entry.scope].filter(Boolean).join("/");
@@ -506,7 +507,8 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     limit: unsupported.length > 0 ? unsupported.map((entry) => `${describe(entry)} unsupported`).join("; ")
       : unrealizable.length > 0 ? [...new Set(unrealizable.map(({ capability }) => capability))]
           .map((capability) => `${capability} unrealized`).join("; ")
-        : decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" ? `${decision.proposition} unsupported` : null,
+        : obligationResolutions !== undefined ? null
+          : decision.replyAct === "ANSWER" && evidenceStatus === "UNRESOLVED" ? `${decision.proposition} unsupported` : null,
     next: decision.canonicalAction !== "NONE" && decision.canonicalAction !== "HOLD_POSITION"
       ? decision.canonicalAction : decision.continuation?.type === "ASK" ? decision.continuation.input : null,
   });

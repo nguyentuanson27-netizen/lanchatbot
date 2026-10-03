@@ -150,6 +150,15 @@ export function bindRealtimeCustomerInput(raw: unknown, text: string): RealtimeC
   if (value.obligations !== undefined) {
     for (const obligation of value.obligations) {
       requireEvidence(true, obligation.evidenceText);
+      const span = obligation.evidenceText!.normalize("NFC").toLocaleLowerCase("vi");
+      const tokens = span.split(/[^\p{L}\p{N}]+/u);
+      if ((obligation.size != null && !tokens.includes(obligation.size.toLocaleLowerCase("vi"))) ||
+          (obligation.color != null && !span.includes(obligation.color.normalize("NFC").toLocaleLowerCase("vi"))) ||
+          (obligation.deadlineDays != null && !tokens.includes(String(obligation.deadlineDays))) ||
+          (obligation.criteria != null && [obligation.criteria.shape, ...obligation.criteria.avoid]
+            .some((criterion) => criterion !== null && !span.includes(criterion.normalize("NFC").toLocaleLowerCase("vi"))))) {
+        throw new Error("CUSTOMER_INPUT_UNBOUND_OBLIGATION_QUALIFIER");
+      }
     }
     if ((value.product.operation === "SEARCH" &&
          !value.obligations.some(({ kind }) => kind === "PRODUCT_SEARCH")) ||

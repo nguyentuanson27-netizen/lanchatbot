@@ -18,6 +18,17 @@ export type TrackCConversationGuardContext = Readonly<{
 type NonFactStatement = "CUSTOMER_PRICE_REFERENCE" | "CUSTOMER_SIZE_SELECTION" |
   "PRODUCT_REFERENCE" | "LOCALITY_REQUEST" | "BOUNDED_UNCERTAINTY" | "CODE_OWNED_OUTCOME";
 
+/** Existing bounded effect surface, shared by realization and final egress. */
+export function assertTrackCNoEffectText(value: string | null): void {
+  if (value !== null &&
+      (/\b(?:em|shop)\s+đã\s+(?:tạo|đặt|xác\s*nhận|gửi|cập\s*nhật)\b/iu.test(value) ||
+       /\b(?:em|shop)\s+(?:ghi\s*nhận|tiếp\s*nhận)\s+đơn\b/iu.test(value) ||
+       /(?:^|[\s,.;:])(?:đã|vừa)\s+(?:được\s+)?(?:xác\s*nhận|tạo|đặt|chốt)\s+đơn(?:\b|$)/iu.test(value) ||
+       /(?:^|[\s,.;:])đơn\s+(?:hàng\s+)?(?:đã|vừa)\s+(?:được\s+)?(?:shop\s+)?(?:xác\s*nhận|tạo|đặt|chốt)(?:\b|$)/iu.test(value))) {
+    throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
+  }
+}
+
 function folded(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d").toLowerCase().replace(/\s+/gu, " ").trim();

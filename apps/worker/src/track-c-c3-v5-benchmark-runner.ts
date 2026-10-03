@@ -1,4 +1,4 @@
-import { trackCUnclassifiedConversation, type TrackCConversationGuardContext } from "./track-c-c3-conversational-guard.js";
+import { assertTrackCNoEffectText, trackCUnclassifiedConversation, type TrackCConversationGuardContext } from "./track-c-c3-conversational-guard.js";
 import { assertTrackCResolutionCoverage } from "./track-c-c3-obligation-resolution.js";
 import { trackCPriceComparisons } from "./track-c-c3-price-comparison.js";
 import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
@@ -351,6 +351,7 @@ function guardProductionOutput(
   const comparisons = new Map(trackCPriceComparisons(context, comparisonFacts, evaluationAt)
     .map((entry) => [entry.provenance.contentHash, entry]));
   for (const segment of output.segments) {
+    if (segment.kind === "GENERAL") assertTrackCNoEffectText(segment.text);
     const comparison = segment.kind === "VERIFIED_CLAIM" ? comparisons.get(segment.claimContentHash) : undefined;
     if (comparison) {
       if (!trackCRealizationMatches(segment.text, comparison.deterministicText!)) {
