@@ -1,5 +1,8 @@
 # PR377 semantic conservation: owning-layer follow-up
 
+Historical record for `2b2cff76`. Consultation completeness and evidence-selection
+claims below are superseded by [review 5400907894 follow-up](pr377-review-5400907894-followup-20261003.md).
+
 This follow-up repairs the contracts and boundaries exposed by DEV70 on
 `626db43679b83424b646eb48ef2646174f509f0d`. It does not retune replies to DEV case
 strings or add an online correction/reviewer model.

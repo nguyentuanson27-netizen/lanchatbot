@@ -194,7 +194,9 @@ describe("realtime server C3 DRY_RUN composition", () => {
       expect(candidates).toContainEqual(expect.objectContaining({
         status: "VALIDATED", reason: "C3_SELECTED_FACTS_RECOVERY",
         reasonCodes: expect.arrayContaining(["SIZE_RECOMMENDATION_UNDECLARED"]),
-        redactedReply: "Giá hiện tại của mẫu này là 799.000đ ạ.", selectedForOutbound: false,
+        // A legacy payload supplies no explicit need coverage. Recovery keeps
+        // its price and bounds completeness instead of certifying the turn.
+        redactedReply: "Em chưa xác nhận được đầy đủ thông tin chị hỏi. Giá hiện tại của mẫu này là 799.000đ ạ.", selectedForOutbound: false,
       }));
     } else if (mode === "ON") {
       expect(stages).toEqual(["REALTIME_CUSTOMER_INPUT_V1", "TRACK_C_C3_STRATEGIST_INPUT_V1", "TRACK_C_C3_RESPONDER_INPUT_V1"]);

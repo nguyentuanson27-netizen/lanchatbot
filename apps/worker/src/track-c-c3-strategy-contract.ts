@@ -1,7 +1,4 @@
-import {
-  assertTrackCRequestedObligationCoverage,
-  trackCObligationMatchesEvidence,
-} from "./track-c-c3-conversational-guard.js";
+import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
   REALTIME_CUSTOMER_FACT_CAPABILITIES,
@@ -50,6 +47,7 @@ export type TrackCRequestedObligation = Readonly<Pick<
   id?: string;
   /** Source-bound customer concern; never shop factual authority. */
   customerText?: string;
+  decisionConcern?: RealtimeCustomerObligationV1["decisionConcern"];
   /** Source-bound lookup subject, independent of a selected commerce variant. */
   variantId?: string;
   size?: string;
@@ -59,6 +57,8 @@ export type TrackCRequestedObligation = Readonly<Pick<
   relatedProductId?: string;
   deadlineDays?: number;
   criteria?: Readonly<{ shape: string | null; avoid: readonly string[] }>;
+  /** Canonical customer state constraints, never Strategist-authored filters. */
+  searchConstraints?: Readonly<{ budgetVnd: number | null; rejectedProductIds: readonly string[] }>;
   lookupStatus?: "FAILED" | "STALE";
 }>;
 
@@ -156,6 +156,8 @@ export type TrackCStrategistDecision = Readonly<{
   replyAct: "ANSWER" | "ACKNOWLEDGE" | "CLARIFY";
   goal: string;
   proposition: TrackCProtectedProposition;
+  /** Focus/order over code-owned current factual coverage when obligations are explicit.
+   * Legacy callers without obligations retain selected-evidence behavior. */
   evidenceRefs: readonly string[];
   continuation:
     | Readonly<{ type: "ASK"; input: TrackCOrdinaryDecisionInput }>
@@ -404,16 +406,6 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   requireStructuredGoal?: boolean;
 }>): Readonly<{ decision: TrackCStrategistDecision; task: TrackCResponderTask }> {
   let decision = readDecision(input.decision);
-  let evidence = selectedEvidence(
-    decision.evidenceRefs,
-    input.evidence,
-    input.boundProductIds ?? [],
-  );
-  if (!input.productResolved && evidence.some(({ subject }) =>
-    subject?.productId !== undefined
-  )) {
-    throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
-  }
   if ((input.budgetKnown && decision.continuation?.type === "ASK" &&
        decision.continuation.input === "BUDGET") ||
       !input.permittedCanonicalActions.includes(decision.canonicalAction) ||
@@ -445,22 +437,25 @@ export function compileTrackCStrategistDecision(input: Readonly<{
     )) {
       throw new Error("TRACK_C_REQUESTED_OBLIGATION_BINDING_INVALID");
     }
-    // Strategist chooses focus; code preserves every answerable current part.
-    // Validate its selection first, then complete only matching safe evidence.
-    assertTrackCRequestedObligationCoverage(input.requestedObligations, [], evidence);
-    const refs = new Set(evidence.map(({ ref }) => ref));
-    for (const obligation of input.requestedObligations) {
-      if (evidence.some((fact) => trackCObligationMatchesEvidence(obligation, fact))) continue;
-      const fact = input.evidence.find((fact) => trackCEvidenceHasSafeFactualEgress(fact) &&
-        trackCObligationMatchesEvidence(obligation, fact));
-      if (fact !== undefined) refs.add(fact.ref);
-      evidence = selectedEvidence([...refs], input.evidence, input.boundProductIds ?? []);
-    }
-    assertTrackCRequestedObligationCoverage(
-      input.requestedObligations,
-      input.evidence.filter(trackCEvidenceHasSafeFactualEgress),
-      evidence,
-    );
+  }
+  // Explicit current needs determine the complete factual set before the
+  // Strategist is considered. Its refs only order/focus that code-owned set;
+  // they cannot authorize another fact or suppress a matching field/limit.
+  const requiredEvidence = input.requestedObligations === undefined ? undefined
+    : input.evidence.filter((fact) => input.requestedObligations!.some((obligation) =>
+      trackCObligationMatchesEvidence(obligation, fact, input.evidence)));
+  const preferredEvidence = selectedEvidence(decision.evidenceRefs, input.evidence, input.boundProductIds ?? []);
+  const requiredRefs = requiredEvidence === undefined ? undefined : new Set(requiredEvidence.map(({ ref }) => ref));
+  if (requiredRefs !== undefined && preferredEvidence.some(({ ref }) => !requiredRefs.has(ref))) {
+    throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
+  }
+  const preferredRefs = new Set(decision.evidenceRefs);
+  const evidence = requiredEvidence === undefined ? preferredEvidence : selectedEvidence([
+    ...decision.evidenceRefs,
+    ...requiredEvidence.filter(({ ref }) => !preferredRefs.has(ref)).map(({ ref }) => ref),
+  ], input.evidence, input.boundProductIds ?? []);
+  if (!input.productResolved && evidence.some(({ subject }) => subject?.productId !== undefined)) {
+    throw new Error("TRACK_C_EVIDENCE_BINDING_INVALID");
   }
   const { realizable, unrealizable } =
     trackCPartitionEvidenceRealization(evidence);
@@ -482,12 +477,13 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   const obligationResolutions = input.requestedObligations === undefined ? undefined
     : trackCResolveObligations(input.requestedObligations, realizable, input.boundProductIds ?? [],
       canonicalRequest(decision.canonicalAction, input.checkoutRequestedFields ?? [], input.measurementRequestedFields));
-  const facts = obligationResolutions?.filter(({ kind }) => kind === "FACT_REQUEST") ?? [];
-  const describe = (entry: Pick<TrackCRequestedObligation, "kind" | "capability" | "scope">) =>
-    [entry.capability ?? entry.kind, entry.scope].filter(Boolean).join("/");
-  const unsupported = facts.filter(({ outcome }) => outcome === "BOUNDED_UNAVAILABLE");
+  const obligations = obligationResolutions ?? [];
+  const describe = (entry: TrackCObligationResolution) => entry.kind === "CONSULTATION"
+    ? [entry.kind, entry.decisionConcern].filter(Boolean).join("/")
+    : [entry.capability ?? entry.kind, entry.scope].filter(Boolean).join("/");
+  const unsupported = obligations.filter(({ outcome }) => outcome === "BOUNDED_UNAVAILABLE");
   const semanticHandoff = input.requireStructuredGoal !== true ? undefined : Object.freeze({
-    need: facts.length > 0 ? facts.map(describe).join("; ") : decision.replyAct,
+    need: obligations.length > 0 ? obligations.map(describe).join("; ") : decision.replyAct,
     known: null,
     answer: realizable.length > 0 ? [...new Set(realizable.map(({ capability }) => capability))]
       .map((capability) => `${capability} supported`).join("; ") : null,

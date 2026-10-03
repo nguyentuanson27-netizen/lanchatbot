@@ -9,6 +9,7 @@ export type TrackCObligationResolution = Readonly<{
   kind: TrackCRequestedObligation["kind"];
   capability: TrackCRequestedObligation["capability"];
   scope: TrackCRequestedObligation["scope"];
+  decisionConcern?: TrackCRequestedObligation["decisionConcern"];
   subject: Readonly<{ productId: string | null; variantId: string | null; size: string | null; color: string | null;
     component: TrackCRequestedObligation["component"] | null; subjectScope?: "PRODUCT" | "CART" | "SHOP";
     offerScope?: "FULL_SET" | "TOP" | "BOTTOM" | "TWO_PIECE" | "THREE_PIECE" }>;
@@ -28,8 +29,8 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
     const productId = entry.productId ?? (subjectScope === "PRODUCT" &&
       (entry.kind === "FACT_REQUEST" || entry.kind === "CONSULTATION") && boundProductIds.length === 1 ? boundProductIds[0]! : null);
     const matches = entry.kind === "CONSULTATION" ? [] : evidence.filter((fact) => trackCObligationMatchesEvidence(
-      entry.kind === "PRODUCT_SEARCH" ? entry : { ...entry, productId }, fact));
-    const status = entry.kind === "CONSULTATION" ? entry.lookupStatus ?? "ACKNOWLEDGED" as const
+      entry.kind === "PRODUCT_SEARCH" ? entry : { ...entry, productId }, fact, evidence));
+    const status = entry.kind === "CONSULTATION" ? entry.lookupStatus ?? "UNSUPPORTED" as const
       : entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
       : entry.lookupStatus ?? (matches.length > 0 ? "SUPPORTED" as const : "UNSUPPORTED" as const);
     const asksRequiredInput = status === "UNSUPPORTED" && entry.kind === "FACT_REQUEST" &&
@@ -38,6 +39,7 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
     return Object.freeze({
       obligationId: entry.id ?? `obligation:${index}:${entry.kind}:${entry.capability ?? "NONE"}:${entry.scope ?? "NONE"}`,
       kind: entry.kind, capability: entry.capability, scope: entry.scope,
+      ...(entry.kind !== "CONSULTATION" ? {} : { decisionConcern: entry.decisionConcern ?? "DECISION_CRITERION_UNKNOWN" as const }),
       subject: Object.freeze({ productId, variantId: entry.variantId ?? null, size: entry.size ?? null, color: entry.color ?? null,
         component: entry.component ?? null, ...(entry.subjectScope == null ? {} : { subjectScope }),
         ...(entry.offerScope === undefined ? {} : { offerScope: entry.offerScope }) }),
@@ -47,7 +49,7 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
           ? "ETA_WITHIN_DEADLINE_IF_ESTIMATE_HOLDS" as const : "ETA_NOT_GUARANTEED_BY_DEADLINE" as const,
       }),
       status, outcome: status === "SUPPORTED" ? "ANSWERED" as const
-        : status === "ACKNOWLEDGED" ? entry.kind === "CONSULTATION" ? "ANSWERED" as const : "ACTIONED" as const
+        : status === "ACKNOWLEDGED" ? "ACTIONED" as const
         : asksRequiredInput ? "ASK_REQUIRED_INPUT" as const : "BOUNDED_UNAVAILABLE" as const,
       evidenceRefs: Object.freeze(matches.map(({ ref, provenance }) => Object.freeze({ ref, contentHash: provenance.contentHash }))),
       limitation: status === "SUPPORTED" || status === "ACKNOWLEDGED" || asksRequiredInput ? null : Object.freeze({
@@ -63,7 +65,16 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
 
 export function trackCLimitationText(resolution: TrackCObligationResolution): string | null {
   if (resolution.limitation === null) return null;
-  if (resolution.kind === "CONSULTATION") return "Em chưa thể trả lời đầy đủ phần băn khoăn này của chị.";
+  if (resolution.kind === "CONSULTATION") {
+    const concerns: Readonly<Record<NonNullable<TrackCRequestedObligation["decisionConcern"]>, string>> = {
+      PRICE_HESITATION: "Thông tin hiện có chưa đủ để kết luận khoản tiền cho mẫu này phù hợp với mức chị muốn chi.",
+      FIT_RISK: "Em chưa có đủ cơ sở đã xác nhận để kết luận mẫu này sẽ vừa và phù hợp với chị.",
+      TRUST_RISK: "Thông tin hiện có chưa đủ để em kết luận băn khoăn của chị khi mua online đã được giải quyết.",
+      USAGE_FREQUENCY: "Em chưa có đủ thông tin về nhu cầu sử dụng để kết luận chị sẽ mặc mẫu này thường xuyên.",
+      DECISION_CRITERION_UNKNOWN: "Em chưa thể trả lời đầy đủ phần băn khoăn này của chị.",
+    };
+    return concerns[resolution.decisionConcern ?? "DECISION_CRITERION_UNKNOWN"];
+  }
   const topic = trackCObligationTopic({ kind: resolution.kind, capability: resolution.capability,
     scope: resolution.scope, productId: resolution.subject.productId });
   const subject = resolution.subject;

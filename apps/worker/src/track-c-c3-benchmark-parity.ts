@@ -120,7 +120,7 @@ async function runSnapshot(snapshot: TrackCProducerBenchmarkSnapshot, input: Ben
     customerVariant: snapshot.customerInput.variant,
     knownBudgetVnd: snapshot.customerState.budgetVnd,
     requestedObligations: customerInputRequestedObligations(snapshot.customerInput, boundProductIds,
-      snapshot.priorProductId),
+      snapshot.priorProductId, snapshot.customerState),
     modelResource: input.modelResource, transport: input.transport,
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });

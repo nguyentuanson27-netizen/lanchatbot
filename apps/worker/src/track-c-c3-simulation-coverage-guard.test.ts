@@ -42,7 +42,7 @@ function fixture(policy = policies[0]!) {
   const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
   const customerInput = bindRealtimeCustomerInput({ ...noCustomerSelection(), obligations: [
     { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: null, evidenceText: "giá bao nhiêu" },
-    { kind: "FACT_REQUEST", capability: "POLICY", scope: null, productId: null, evidenceText: "chính sách thế nào" },
+    { kind: "FACT_REQUEST", capability: "POLICY", scope: policy.policy as "EXCHANGE" | "REFUND", productId: null, evidenceText: "chính sách thế nào" },
   ] }, text);
   const requestedObligations = customerInputRequestedObligations(customerInput, context.productBinding.productIds);
   const evidence = buildTrackCSelectableEvidence({ context, simulationFacts: [policy],

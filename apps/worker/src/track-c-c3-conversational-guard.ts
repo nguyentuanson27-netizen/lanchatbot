@@ -7,6 +7,7 @@ import type {
   TrackCSelectableEvidence,
 } from "./track-c-c3-strategy-contract.js";
 import { trackCOutcomeTexts } from "./track-c-c3-obligation-resolution.js";
+import { trackCConstrainedSearchMatchesEvidence } from "./track-c-c3-product-search.js";
 
 /** Only the compiler/runtime can supply this context, never the output schema.
  * These references authorize no fact, fit advice, cart change or other effect. */
@@ -131,11 +132,10 @@ const ATTRIBUTE_SCOPE_FIELD = Object.freeze({
 export function trackCObligationMatchesEvidence(
   obligation: TrackCRequestedObligation,
   evidence: TrackCSelectableEvidence,
+  evidencePool: readonly TrackCSelectableEvidence[] = [evidence],
 ): boolean {
   if (obligation.kind === "PRODUCT_SEARCH") {
-    // Discovery/price does not prove shape or an avoidance criterion. Keep
-    // this request bounded until the same candidate has verified attributes.
-    if (obligation.criteria !== undefined) return false;
+    if (obligation.criteria !== undefined) return trackCConstrainedSearchMatchesEvidence(obligation, evidence, evidencePool);
     return obligation.lookupStatus === undefined && evidence.subject?.productId !== undefined &&
       evidence.subject.productId !== obligation.productId && ["PRICE", "PRODUCT_PRESENTATION"].includes(evidence.capability);
   }
@@ -187,7 +187,7 @@ export function trackCObligationMatchesEvidence(
   if (obligation.color !== undefined && !(obligation.capability === "PRODUCT_ATTRIBUTES" && obligation.scope === "COLORS") &&
       evidence.subject?.variantLabel?.color?.toLocaleUpperCase("vi-VN") !==
       obligation.color.toLocaleUpperCase("vi-VN")) return false;
-  if (obligation.scope === null) return true;
+  if (obligation.scope === null) return obligation.capability !== "POLICY";
   if (obligation.capability === "PRODUCT_ATTRIBUTES") {
     const field = ATTRIBUTE_SCOPE_FIELD[
       obligation.scope as keyof typeof ATTRIBUTE_SCOPE_FIELD
@@ -206,33 +206,12 @@ export function trackCObligationMatchesEvidence(
   if (obligation.capability === "POLICY") {
     const field = obligation.scope === "SPLIT_SIZE" ? "allowMixedSizes"
       : obligation.scope === "ALTERATION" ? "allowAlteration" : null;
-    return field !== null && typeof evidence.value[field] === "boolean";
+    return field !== null ? typeof evidence.value[field] === "boolean" : evidence.value.policy === obligation.scope;
+  }
+  if (obligation.capability === "PROMOTION_OFFER" && obligation.scope === "APPLIED_CART_PROMOTION") {
+    return evidence.subject?.scope === "CART";
   }
   return false;
-}
-
-/** Typed semantic admission: the compiler already knows the requested
- * capability/scope. Never infer that scope back from Vietnamese prose. */
-export function assertTrackCRequestedObligationCoverage(
-  requested: readonly TrackCRequestedObligation[],
-  available: readonly TrackCSelectableEvidence[],
-  selected: readonly TrackCSelectableEvidence[],
-): void {
-  const answers = requested.filter(({ kind }) => kind === "FACT_REQUEST" || kind === "PRODUCT_SEARCH");
-  if (answers.length === 0) return;
-  if (selected.some((entry) => !answers.some((obligation) => trackCObligationMatchesEvidence(obligation, entry)))) {
-    throw new Error("TRACK_C_STRATEGIST_REQUEST_SCOPE_INVALID");
-  }
-  for (const obligation of answers) {
-    const hasAvailable = available.some((entry) =>
-      trackCObligationMatchesEvidence(obligation, entry)
-    );
-    if (hasAvailable && !selected.some((entry) =>
-      trackCObligationMatchesEvidence(obligation, entry)
-    )) {
-      throw new Error("TRACK_C_STRATEGIST_REQUEST_COVERAGE_INVALID");
-    }
-  }
 }
 
 function sentences(value: string): readonly string[] {

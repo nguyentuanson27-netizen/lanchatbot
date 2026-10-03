@@ -183,7 +183,6 @@ type ResponderDraft = Readonly<{
   answerText: string | null;
   factualTexts: readonly string[];
   progressionText: string | null;
-  obligationTexts?: readonly Readonly<{ obligationId: string; text: string }>[];
 }>;
 
 export type TrackCStrategistConstraints = Readonly<{
@@ -520,7 +519,7 @@ function presentableEvidence(
       ...(capability === "OFFER_CONFIGURATION" ? { scope: value.offerScope } : {}),
       realizationSupported: deterministicText !== undefined,
       requestedObligationIndexes: requested.flatMap((obligation, index) =>
-        trackCObligationMatchesEvidence(obligation, entry) ? [index] : []),
+        trackCObligationMatchesEvidence(obligation, entry, evidence) ? [index] : []),
     });
   }));
 }
@@ -556,12 +555,15 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           kind: entry.kind,
           capability: entry.capability,
           scope: entry.scope,
+          ...(entry.kind === "CONSULTATION" ? { decisionConcern: entry.decisionConcern ?? "DECISION_CRITERION_UNKNOWN" } : {}),
           productId: entry.productId,
+          ...(entry.subjectScope === undefined ? {} : { subjectScope: entry.subjectScope }),
           ...(entry.variantId === undefined ? {} : { variantId: entry.variantId }),
           ...(entry.size === undefined ? {} : { size: text(entry.size, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
           ...(entry.color === undefined ? {} : { color: text(entry.color, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
           ...(entry.lookupStatus === undefined ? {} : { lookupStatus: entry.lookupStatus }),
           ...(entry.component === undefined ? {} : { component: entry.component }),
+          ...(entry.offerScope === undefined ? {} : { offerScope: entry.offerScope }),
           ...(entry.relatedProductId === undefined ? {} : { relatedProductId: text(entry.relatedProductId, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE") }),
           ...(entry.deadlineDays === undefined ? {} : { deadlineDays: entry.deadlineDays }),
           ...(entry.criteria === undefined ? {} : { criteria: { shape: text(entry.criteria.shape, "TRACK_C_REQUESTED_OBLIGATION_NOT_PII_SAFE"),
@@ -632,14 +634,18 @@ function responderTaskPrompt(task: TrackCResponderTask) {
       outcomeTexts: trackCOutcomeTexts(task),
     }),
     evidence: responderReadableEvidence(task),
-    ...(consultationResolutions(task).length === 0 ? {} : {
-      consultationObligations: consultationResolutions(task).map(({ obligationId }) => {
-        const request = task.requestedObligations?.find(({ id }) => id === obligationId);
-        const customerText = text(request?.customerText, "TRACK_C_CONSULTATION_SOURCE_INVALID");
-        if (customerText === null) throw new Error("TRACK_C_CONSULTATION_SOURCE_INVALID");
-        return { obligationId, customerText };
-      }),
-    }),
+    ...((task.obligationResolutions ?? []).some(({ kind }) => kind === "CONSULTATION") ? {
+      consultationObligations: (task.obligationResolutions ?? []).filter(({ kind }) => kind === "CONSULTATION")
+        .map(({ obligationId, decisionConcern, outcome }) => {
+          const request = task.requestedObligations?.find(({ id }) => id === obligationId);
+          // The source mapper intentionally omits private/failed prose while
+          // retaining this need's ID and code-owned bounded outcome.
+          const customerText = request?.customerText === undefined ? null
+            : text(request.customerText, "TRACK_C_CONSULTATION_SOURCE_INVALID");
+          return { obligationId, decisionConcern: decisionConcern ?? "DECISION_CRITERION_UNKNOWN", outcome,
+            ...(customerText === null ? {} : { customerText }) };
+        }),
+    } : {}),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
     ...(task.unrealizedEvidence.length === 0 ? {} : {
@@ -721,29 +727,6 @@ function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
 
-function consultationResolutions(task: TrackCResponderTask) {
-  return (task.obligationResolutions ?? []).filter(({ kind, outcome }) => kind === "CONSULTATION" && outcome === "ANSWERED");
-}
-
-function parseConsultationTexts(value: unknown, task: TrackCResponderTask): readonly Readonly<{ obligationId: string; text: string }>[] {
-  const expectedIds = new Set(consultationResolutions(task).map(({ obligationId }) => obligationId));
-  if (!Array.isArray(value) || value.length !== expectedIds.size) throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
-  const seen = new Set<string>();
-  return Object.freeze(value.map((entry) => {
-    const record = plainObject(entry, "TRACK_C_RESPONDER_CONSULTATION_INVALID");
-    exactKeys(record, ["obligationId", "text"], "TRACK_C_RESPONDER_CONSULTATION_INVALID");
-    if (typeof record.obligationId !== "string" || !expectedIds.has(record.obligationId) || seen.has(record.obligationId)) {
-      throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
-    }
-    seen.add(record.obligationId);
-    const prose = typeof record.text === "string" ? record.text.trim() : record.text;
-    const safe = text(prose, "TRACK_C_RESPONDER_CONSULTATION_INVALID");
-    if (safe === null) throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
-    assertConversationalProse(safe);
-    return Object.freeze({ obligationId: record.obligationId, text: safe });
-  }));
-}
-
 function responderDraftSchema(
   task: TrackCResponderTask,
   conversationLane: TrackCConversationLane,
@@ -757,12 +740,11 @@ function responderDraftSchema(
   const answers = answerWording(task);
   const neutralHold = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
     task.canonicalRequest?.type === "HOLD_POSITION" && task.evidence.length === 0;
-  const consultationIds = consultationResolutions(task).map(({ obligationId }) => obligationId);
   return {
     type: "OBJECT",
-    required: ["answerText", "factualTexts", "progressionText", ...(consultationIds.length === 0 ? [] : ["obligationTexts"])],
-    minProperties: consultationIds.length === 0 ? 3 : 4,
-    maxProperties: consultationIds.length === 0 ? 3 : 4,
+    required: ["answerText", "factualTexts", "progressionText"],
+    minProperties: 3,
+    maxProperties: 3,
     properties: {
       answerText: adaptive
         ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
@@ -796,13 +778,6 @@ function responderDraftSchema(
             type: "STRING", minLength: 1, maxLength: 300 }
           : { type: "STRING", enum: requestWording(task, dialogue) }
         : { type: "NULL" },
-      ...(consultationIds.length === 0 ? {} : {
-        obligationTexts: { type: "ARRAY", minItems: consultationIds.length, maxItems: consultationIds.length,
-          description: "Address each assigned customer consultation concern once, using its obligationId. No shop facts, business effects or new requested parts.",
-          items: { type: "OBJECT", required: ["obligationId", "text"], minProperties: 2, maxProperties: 2,
-            properties: { obligationId: { type: "STRING", enum: consultationIds },
-              text: { type: "STRING", minLength: 1, maxLength: 1_000 } } } },
-      }),
     },
   };
 }
@@ -845,9 +820,7 @@ function text(value: unknown, errorCode: string): string | null {
 
 function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[], adaptive: boolean): ResponderDraft {
   const record = plainObject(value, "TRACK_C_RESPONDER_DRAFT_INVALID");
-  const hasConsultations = consultationResolutions(task).length > 0;
-  if (hasConsultations && !Object.hasOwn(record, "obligationTexts")) throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
-  exactKeys(record, ["answerText", "factualTexts", "progressionText", ...(hasConsultations ? ["obligationTexts"] : [])],
+  exactKeys(record, ["answerText", "factualTexts", "progressionText"],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
   if (!Array.isArray(record.factualTexts) ||
       (record.factualTexts.length !== 0 &&
@@ -873,7 +846,6 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   const progression = prose(record.progressionText);
   return Object.freeze({
     answerText,
-    ...(hasConsultations ? { obligationTexts: parseConsultationTexts(record.obligationTexts, task) } : {}),
     factualTexts: Object.freeze(record.factualTexts.map((item) => {
       const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -1100,8 +1072,6 @@ function compileResponderDraft(input: Readonly<{
     }
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  const consultationIds = new Set((task.obligationResolutions ?? []).filter(({ kind }) => kind === "CONSULTATION")
-    .map(({ obligationId }) => obligationId));
   (task.obligationResolutions ?? []).forEach((resolution) => {
     const limitation = trackCObligationOutcomeText(resolution);
     if (limitation === null) return;
@@ -1110,11 +1080,6 @@ function compileResponderDraft(input: Readonly<{
     segments.push({ kind: "GENERAL", text: safe,
       ...(resolution.kind === "CONSULTATION" ? { obligationId: resolution.obligationId } : {}) });
   });
-  if (consultationIds.size > 0) {
-    parseConsultationTexts(draft.obligationTexts ?? [], task).forEach((entry) => {
-      segments.push({ kind: "GENERAL", ...entry });
-    });
-  }
   if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
@@ -1553,7 +1518,7 @@ async function runTrackCStrategyContractCore(
       // A failed model cannot supply a strategy. Recover only the original
       // source-bound obligations from current evidence, with no new action.
       const selected = evidence.filter((entry) => trackCEvidenceHasSafeFactualEgress(entry) &&
-        requested.some((obligation) => trackCObligationMatchesEvidence(obligation, entry)));
+        requested.some((obligation) => trackCObligationMatchesEvidence(obligation, entry, evidence)));
       const compiled = compileTrackCStrategistDecision({ ...constraints, evidence,
         requestedObligations: requested, boundProductIds: context.productBinding.productIds,
         decision: { replyAct: "ANSWER", proposition: selected[0]?.capability ??
@@ -1631,7 +1596,7 @@ async function runTrackCStrategyContractCore(
     recoverConsultations();
     // No trustworthy draft remains. Keep source facts and explicitly decline
     // whole-answer completeness; never parse goal text into a factual claim.
-    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null, obligationTexts: [] };
+    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null };
   }
   let output: ContextV2CandidateOutputV2;
   try {
@@ -1657,11 +1622,10 @@ async function runTrackCStrategyContractCore(
     // Frozen evaluation still exposes the original rejection.
     assertRecoveryAllowed(failure);
     recoverConsultations();
-    draft = { ...draft, obligationTexts: [] };
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null, obligationTexts: [] },
+        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
@@ -1675,7 +1639,7 @@ async function runTrackCStrategyContractCore(
         output = compileResponderDraft({
           context, dialogue: input.evaluationContext, task,
           draft: { answerText: trackCRecoveryLimitation(task),
-            factualTexts: [], progressionText: null, obligationTexts: [] },
+            factualTexts: [], progressionText: null },
           lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],

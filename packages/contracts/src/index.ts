@@ -339,6 +339,16 @@ export const REALTIME_CUSTOMER_FACT_CAPABILITIES = [
   "FULFILLMENT_STATUS", "CART_TOTAL", "PRODUCT_LIFECYCLE", "PRODUCT_COMPARISON",
 ] as const;
 
+export const REALTIME_CUSTOMER_POLICY_SCOPES = [
+  "EXCHANGE", "REFUND",
+  "EXCHANGE_AND_RETURN", "EXCHANGE_SIZE", "EXCHANGE_COLOR", "EXCHANGE_MODEL",
+  "RETURN_AND_REFUND", "TRY_ON", "REFUSED_PARCEL_FEE", "SHIPPING_FEE", "DELIVERY_TIME",
+  "SHOPEE_PRICE", "IMAGE_ACCURACY", "WASHING_CARE", "UNSUPPORTED_POLICY", "SPLIT_SIZE", "ALTERATION",
+] as const;
+export const REALTIME_CUSTOMER_DECISION_CONCERNS = [
+  "PRICE_HESITATION", "FIT_RISK", "TRUST_RISK", "USAGE_FREQUENCY", "DECISION_CRITERION_UNKNOWN",
+] as const;
+
 export const RealtimeCustomerObligationV1Schema = z.object({
   kind: z.enum(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT", "CONSULTATION"]),
   capability: z.enum(REALTIME_CUSTOMER_FACT_CAPABILITIES).nullable(),
@@ -347,7 +357,8 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
     "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
     "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
-    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION", "SPLIT_SIZE", "ALTERATION",
+    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "APPLIED_CART_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION",
+    ...REALTIME_CUSTOMER_POLICY_SCOPES,
   ]).nullable(),
   productId: z.string().trim().min(1).max(64).nullable(),
   /** Authority subject, distinct from a product mentioned as conversation context. */
@@ -362,7 +373,12 @@ export const RealtimeCustomerObligationV1Schema = z.object({
   deadlineDays: z.number().int().min(0).max(365).nullable().optional(),
   criteria: z.object({ shape: z.string().trim().min(1).max(80).nullable(),
     avoid: z.array(z.string().trim().min(1).max(80)).max(4) }).strict().nullable().optional(),
+  /** Decision role only; this classification grants no business-fact authority. */
+  decisionConcern: z.enum(REALTIME_CUSTOMER_DECISION_CONCERNS).nullable().optional(),
 }).strict().superRefine((value, context) => {
+  if (value.decisionConcern != null && value.kind !== "CONSULTATION") {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["decisionConcern"], message: "only consultation carries a decision concern" });
+  }
   if (value.kind === "FACT_REQUEST") {
     if (value.offerScope != null && (value.capability !== "PRICE" ||
         (value.component != null && value.component !==
@@ -381,9 +397,9 @@ export const RealtimeCustomerObligationV1Schema = z.object({
       ["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"].includes(value.scope);
     const otherScopeValid = value.scope !== null && (
       (["DISPATCH_TIME", "DELIVERY_DEADLINE"].includes(value.scope) && value.capability === "ETA") ||
-      (["CUSTOMER_OFFER", "FUTURE_PROMOTION"].includes(value.scope) && value.capability === "PROMOTION_OFFER") ||
+      (["CUSTOMER_OFFER", "FUTURE_PROMOTION", "APPLIED_CART_PROMOTION"].includes(value.scope) && value.capability === "PROMOTION_OFFER") ||
       (["COMPARATIVE_PROPERTY", "CHEAPER"].includes(value.scope) && value.capability === "PRODUCT_COMPARISON") ||
-      (["SPLIT_SIZE", "ALTERATION"].includes(value.scope) && value.capability === "POLICY"));
+      ((REALTIME_CUSTOMER_POLICY_SCOPES as readonly string[]).includes(value.scope) && value.capability === "POLICY"));
     const scopedCapability = value.capability === "PRODUCT_ATTRIBUTES" ||
       value.capability === "OFFER_CONFIGURATION";
     if ((scopedCapability && value.scope === null) ||
@@ -404,10 +420,11 @@ export type RealtimeCustomerObligationV1 =
 /** Compatibility defaults follow the owner of the requested fact, never prose. */
 export function realtimeCustomerObligationSubjectScope(value: Pick<RealtimeCustomerObligationV1,
   "capability" | "scope" | "subjectScope"> & { productId?: string | null }): "PRODUCT" | "CART" | "SHOP" {
-  if (value.subjectScope != null) return value.subjectScope;
+  // The model's subjectScope is a checked mirror, never an authority override.
   if (["SHIPPING_FEE", "FREESHIP", "CART_TOTAL"].includes(value.capability ?? "")) return "CART";
   if (value.capability === "POLICY") return value.productId != null &&
     (value.scope === "SPLIT_SIZE" || value.scope === "ALTERATION") ? "PRODUCT" : "SHOP";
+  if (value.capability === "PROMOTION_OFFER" && value.scope === "APPLIED_CART_PROMOTION") return "CART";
   if (value.capability === "BUSINESS_LOCATION" || value.capability === "PROMOTION_OFFER") return "SHOP";
   return "PRODUCT";
 }

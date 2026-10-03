@@ -60,17 +60,17 @@ describe("customer need uses the same factual vocabulary as evidence", () => {
 describe("subject ownership is distinct from the current product referent", () => {
   it("maps general shop policy to shop evidence while preserving source identity", () => {
     const input = bindRealtimeCustomerInput({ ...noCustomerSelection(), obligations: [{
-      kind: "FACT_REQUEST", capability: "POLICY", scope: null, productId: "ITEM42",
-      evidenceText: "How does payment work?" }] }, "How does payment work?");
+      kind: "FACT_REQUEST", capability: "POLICY", scope: "TRY_ON", productId: "ITEM42",
+      evidenceText: "Can I try it on?" }] }, "Can I try it on?");
     const request = customerInputRequestedObligations(input, ["ITEM42"])[0]!;
     expect(request).toMatchObject({ id: customerInputObligations(input)[0]!.id, productId: null, subjectScope: "SHOP" });
-    expect(trackCObligationMatchesEvidence(request, fact("POLICY", { policy: "PAYMENT" }, { scope: "SHOP" }))).toBe(true);
+    expect(trackCObligationMatchesEvidence(request, fact("POLICY", { policy: "TRY_ON" }, { scope: "SHOP" }))).toBe(true);
   });
 
   it("does not use shop policy for an explicitly product-specific request", () => {
-    const source = "Does ITEM42 have its own exchange restrictions?";
+    const source = "Does ITEM42 allow mixed sizes?";
     const input = bindRealtimeCustomerInput({ ...noCustomerSelection(), obligations: [{
-      kind: "FACT_REQUEST", capability: "POLICY", scope: null, productId: "ITEM42",
+      kind: "FACT_REQUEST", capability: "POLICY", scope: "SPLIT_SIZE", productId: "ITEM42",
       subjectScope: "PRODUCT", evidenceText: source }] }, source);
     const request = customerInputRequestedObligations(input, ["ITEM42"])[0]!;
     expect(request).toMatchObject({ productId: "ITEM42", subjectScope: "PRODUCT" });

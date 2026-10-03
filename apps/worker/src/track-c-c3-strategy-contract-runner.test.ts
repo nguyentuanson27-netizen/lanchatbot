@@ -1294,7 +1294,7 @@ describe("Track C C3 strategy-contract runner", () => {
       },
       requestedObligations: [
         { kind: "FACT_REQUEST", capability: "PRICE", scope: null,
-          productId: null, evidenceText: "giá bao nhiêu" },
+          productId: null, subjectScope: "PRODUCT", offerScope: "THREE_PIECE", evidenceText: "giá bao nhiêu" },
         { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
           scope: "WRINKLE_RESISTANCE", productId: null,
           evidenceText: "có dễ nhăn không" },
@@ -1307,11 +1307,18 @@ describe("Track C C3 strategy-contract runner", () => {
     expect(body.systemInstruction.parts[0].text).toContain(
       "Preserve every independent requestedObligations item",
     );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "code owns complete matching factual coverage and bounded limitations",
+    );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "omitting a ref or returning an empty list never removes a required fact",
+    );
     const input = JSON.parse(body.contents[0].parts[0].text) as {
       requestedObligations?: unknown;
     };
     expect(input.requestedObligations).toEqual([
-      { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: null },
+      { kind: "FACT_REQUEST", capability: "PRICE", scope: null, productId: null,
+        subjectScope: "PRODUCT", offerScope: "THREE_PIECE" },
       { kind: "FACT_REQUEST", capability: "PRODUCT_ATTRIBUTES",
         scope: "WRINKLE_RESISTANCE", productId: null },
     ]);

@@ -52,6 +52,9 @@ describe("Track C C3 sales prompt contract", () => {
     expect(STRATEGIST_INSTRUCTION).not.toContain("use it only after the current need is resolved");
     expect(STRATEGIST_INSTRUCTION).toContain("canonical hard stop requires HOLD_POSITION");
     expect(STRATEGIST_INSTRUCTION).toContain("Missing shop evidence cannot be supplied by a customer answer");
+    expect(STRATEGIST_INSTRUCTION).toContain("code owns complete matching factual coverage and bounded limitations");
+    expect(STRATEGIST_INSTRUCTION).toContain("omitting a ref or returning an empty list never removes a required fact");
+    expect(STRATEGIST_INSTRUCTION).not.toContain("Select evidence for every supported requested part");
   });
 
   it.each([
@@ -70,6 +73,8 @@ describe("Track C C3 sales prompt contract", () => {
     expect(prompt).toContain("useful answer, relevance to the customer's stated decision, then the supplied progression");
     expect(prompt).toContain("The Strategist owns adaptive choice; code owns validation, binding, exact checkout fields and effect permission");
     expect(prompt).toContain("Never claim that an order, payment, delivery, message, or other effect has happened");
+    expect(prompt).toContain("Code supplies each consultationObligation's exact bounded outcome");
+    expect(prompt).toContain("acknowledgement cannot mark that concern answered or replace its outcome");
   });
 
   it("keeps the adaptive Responder explicitly subordinate to the Strategist", () => {
