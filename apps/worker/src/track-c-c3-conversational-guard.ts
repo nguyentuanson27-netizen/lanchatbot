@@ -206,6 +206,8 @@ export function trackCObligationMatchesEvidence(
       (evidence.value.minDays as number) >= 0 && (evidence.value.maxDays as number) >= (evidence.value.minDays as number);
   }
   if (obligation.capability === "POLICY") {
+    if (obligation.scope === "INSPECTION") return evidence.value.policy === "INSPECTION" &&
+      ["verifyModel", "verifyColor", "verifySize"].some((field) => evidence.value[field] === true);
     const field = obligation.scope === "SPLIT_SIZE" ? "allowMixedSizes"
       : obligation.scope === "ALTERATION" ? "allowAlteration" : null;
     // Artifact vocabulary is normalised at projection, never broad-matched

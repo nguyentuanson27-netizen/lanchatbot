@@ -196,7 +196,7 @@ export function trackCPolicyProjections(
   policy: string,
   data: Readonly<Record<string, unknown>>,
 ): readonly Readonly<{
-  scope: "TRY_ON" | "ALTERATION" | "SPLIT_SIZE" | "EXCHANGE_SIZE" | "EXCHANGE_COLOR" | "EXCHANGE_MODEL";
+  scope: "INSPECTION" | "TRY_ON" | "ALTERATION" | "SPLIT_SIZE" | "EXCHANGE_SIZE" | "EXCHANGE_COLOR" | "EXCHANGE_MODEL";
   value: Readonly<Record<string, unknown>>;
   text: string;
 }>[] {
@@ -206,6 +206,11 @@ export function trackCPolicyProjections(
     projections.push(Object.freeze({ scope, value: Object.freeze({ policy: scope, ...value }), text }));
   };
   if (policy === "INSPECTION") {
+    const checks = Object.fromEntries(["verifyModel", "verifyColor", "verifySize"]
+      .filter((field) => booleanField(data, field) === true).map((field) => [field, true]));
+    // Missing/false fields do not prove another check. Keep try-on out of this
+    // atomic answer while retaining the full raw policy for legacy consumers.
+    if (Object.keys(checks).length > 0) add("INSPECTION", checks, policyText(policy, checks)!);
     const tryOn = data["tryOn"];
     if (tryOn === true || tryOn === false || tryOn === "ORDER_DEPENDENT") {
       add("TRY_ON", { tryOn }, tryOn === true ? "Chị được thử đồ tại chỗ khi nhận hàng ạ."

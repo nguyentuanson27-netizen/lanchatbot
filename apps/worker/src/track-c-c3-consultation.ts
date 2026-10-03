@@ -17,9 +17,9 @@ export function trackCConsultationMatchesEvidence(request: TrackCRequestedObliga
           sizes.some((size) => size.toUpperCase() === request.size!.toUpperCase()));
     }
     case "TRUST_RISK":
-      // A realizable parent inspection already states its try-on condition.
-      // Keep the atomic projection for direct TRY_ON or an unrealizable parent.
-      if (value.policy === "TRY_ON" && pool.some((parent) => parent.capability === "POLICY" &&
+      // A realizable parent inspection already states its checks and try-on.
+      // Keep atoms for exact fact needs or an unrealizable parent.
+      if (["INSPECTION", "TRY_ON"].includes(String(value.policy)) && pool.some((parent) => parent.capability === "POLICY" &&
           parent.value.policy === "INSPECTION" && parent.deterministicText !== undefined &&
           parent.provenance.contentHash === value.sourceContentHash)) return false;
       return evidence.capability === "POLICY" && (sameProduct || evidence.subject?.scope === "SHOP") &&
