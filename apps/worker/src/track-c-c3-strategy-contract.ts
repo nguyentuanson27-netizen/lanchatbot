@@ -62,6 +62,8 @@ export type TrackCRequestedObligation = Readonly<Pick<
   RealtimeCustomerObligationV1,
   "kind" | "capability" | "scope" | "productId"
 > & {
+  /** Assigned by customer-input code, never by Strategist or Responder. */
+  id?: string;
   /** Source-bound lookup subject, independent of a selected commerce variant. */
   variantId?: string;
   size?: string;
@@ -433,6 +435,13 @@ export function compileTrackCStrategistDecision(input: Readonly<{
         decision.continuation.input === "USUAL_SIZE" &&
         !input.measurementsUnavailable)) {
     throw new Error("TRACK_C_STRATEGIST_PROGRESSION_INVALID");
+  }
+  if (input.requestedObligations !== undefined) {
+    input = { ...input, requestedObligations: input.requestedObligations.map((entry) => ({ ...entry,
+      productId: entry.productId ?? (entry.kind === "FACT_REQUEST" &&
+        entry.capability !== "POLICY" && entry.capability !== "PROMOTION_OFFER" &&
+        input.boundProductIds?.length === 1 ? input.boundProductIds[0]! : null),
+    })) };
   }
   if (input.requestedObligations !== undefined) {
     const bound = input.boundProductIds ?? [];

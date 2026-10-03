@@ -550,6 +550,7 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
     ...(input.requestedObligations === undefined ? {} : {
       requestedObligations: Object.freeze(input.requestedObligations.map((entry) =>
         Object.freeze({
+          ...(entry.id === undefined ? {} : { id: entry.id }),
           kind: entry.kind,
           capability: entry.capability,
           scope: entry.scope,

@@ -22,7 +22,7 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
     const status = entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
       : entry.lookupStatus ?? (matches.length > 0 ? "SUPPORTED" as const : "UNSUPPORTED" as const);
     return Object.freeze({
-      obligationId: `obligation:${index}:${entry.kind}:${entry.capability ?? "NONE"}:${entry.scope ?? "NONE"}`,
+      obligationId: entry.id ?? `obligation:${index}:${entry.kind}:${entry.capability ?? "NONE"}:${entry.scope ?? "NONE"}`,
       kind: entry.kind, capability: entry.capability, scope: entry.scope,
       subject: Object.freeze({ productId, variantId: entry.variantId ?? null, size: entry.size ?? null, color: entry.color ?? null }),
       status, evidenceRefs: Object.freeze(matches.map(({ ref, provenance }) => Object.freeze({ ref, contentHash: provenance.contentHash }))),

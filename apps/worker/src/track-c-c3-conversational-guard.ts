@@ -125,6 +125,7 @@ export function trackCObligationMatchesEvidence(
   if (obligation.lookupStatus !== undefined || obligation.kind !== "FACT_REQUEST" ||
       obligation.capability === null ||
       evidence.capability !== obligation.capability) return false;
+  if (obligation.productId === null && evidence.subject?.productId !== undefined) return false;
   if (obligation.productId !== null) {
     const evidenceProductId = evidence.subject?.productId;
     if (evidenceProductId === undefined ||

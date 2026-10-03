@@ -67,9 +67,9 @@ export const CUSTOMER_INPUT_INSTRUCTION = [
 
 export function customerInputObligations(
   value: RealtimeCustomerInput,
-): readonly RealtimeCustomerObligationV1[] {
-  if (value.obligations !== undefined) return Object.freeze([...value.obligations]);
-  const obligations: RealtimeCustomerObligationV1[] = [];
+): readonly Readonly<RealtimeCustomerObligationV1 & { id: string }>[] {
+  const obligations: RealtimeCustomerObligationV1[] = [...(value.obligations ?? [])];
+  if (value.obligations !== undefined) return identify(obligations);
   if (value.product.operation === "SEARCH") {
     obligations.push({ kind: "PRODUCT_SEARCH", capability: null, scope: null,
       productId: value.product.productId, evidenceText: value.product.evidenceText });
@@ -78,7 +78,15 @@ export function customerInputObligations(
     obligations.push({ kind: "PRODUCT_REJECT", capability: null, scope: null,
       productId: value.product.productId, evidenceText: value.product.evidenceText });
   }
-  return Object.freeze(obligations);
+  return identify(obligations);
+}
+
+function identify(obligations: readonly RealtimeCustomerObligationV1[]) {
+  // Identity is assigned before selection, from the validated current delta.
+  // Models cannot supply an ID or overwrite it when a referent is bound later.
+  return Object.freeze(obligations.map((entry, index) => Object.freeze({ ...entry,
+    id: `obligation:${index}:${createHash("sha256").update(JSON.stringify(entry)).digest("hex").slice(0, 16)}`,
+  })));
 }
 
 export function customerInputRequestsAlternativeSearch(
