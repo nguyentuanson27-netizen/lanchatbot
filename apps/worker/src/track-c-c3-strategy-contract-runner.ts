@@ -1459,7 +1459,7 @@ async function runTrackCStrategyContractCore(
         strategistPayload,
         "TRACK_C_STRATEGIST_OUTPUT_INVALID",
       );
-      const compiled = compileTrackCStrategistDecision({
+      let compiled = compileTrackCStrategistDecision({
         decision,
         evidence,
         requireStructuredGoal: true,
@@ -1476,6 +1476,15 @@ async function runTrackCStrategyContractCore(
         ...(constraints.checkoutRequestedFields === undefined
           ? {} : { checkoutRequestedFields: constraints.checkoutRequestedFields }),
       });
+      if (recoverCheckoutRequest && compiled.decision.canonicalAction === "NONE") {
+        // Keep validation of the model choice intact. Current cart state owns
+        // its missing-field request alongside the independent fact answer.
+        compiled = compileTrackCStrategistDecision({ ...constraints, evidence,
+          requestedObligations: input.requestedObligations ?? [], boundProductIds: context.productBinding.productIds,
+          requireStructuredGoal: true,
+          decision: { ...compiled.decision, canonicalAction: "ASK_CHECKOUT_DETAILS", continuation: null },
+        });
+      }
       task = compiled.task;
       conversationPlan = compiled.decision;
     } catch (error) {

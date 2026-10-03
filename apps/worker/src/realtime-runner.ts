@@ -5518,15 +5518,15 @@ export class RealtimeRunner {
           ...(customerInput === null ? {} : {
             customerVariant: customerInput.variant,
             requestedObligations: customerInputRequestedObligations(customerInput,
-              c3Input.context.productBinding.status === "RESOLVED" ? c3Input.context.productBinding.productIds : []).map(
+              c3Input.context.productBinding.status === "RESOLVED" ? c3Input.context.productBinding.productIds : [],
+              authorityState.currentProductId).map(
               (entry): TrackCRequestedObligation => {
                 const { kind, capability, scope, productId } = entry;
-                const subject = productId ?? resolvedProduct?.productId ?? nextState.currentProductId;
+                const subject = productId;
                 const intent = capability === "SIZE_FIT" ? "SIZE" : capability;
                 const lookup = multiFactAudit.find((entry) => entry.productId === subject && entry.requestedFact === intent) ??
                   (businessFactLookupQuery?.intent === intent && businessFacts?.productId === subject ? businessFacts : null);
-                return { ...entry, kind, capability, scope, productId: kind === "FACT_REQUEST" &&
-                    capability !== "POLICY" && capability !== "PROMOTION_OFFER" ? subject : productId,
+                return { ...entry, kind, capability, scope, productId,
                   ...(lookup && lookup.status !== "OK" ? { lookupStatus: lookup.status === "STALE" ? "STALE" : "FAILED" } : {}),
                   ...(entry.size === undefined && capability === "STOCK" && stockQuery?.productId === subject && stockQuery.size !== null
                     ? { size: stockQuery.size } : {}),

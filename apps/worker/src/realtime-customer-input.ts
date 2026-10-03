@@ -39,7 +39,7 @@ export const CUSTOMER_INPUT_RESPONSE_SCHEMA = object({
         "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
         "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
         "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
-        "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION",
+        "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION", "SPLIT_SIZE", "ALTERATION",
       ]),
       productId: nullableText,
       evidenceText: nullableText,
@@ -97,13 +97,14 @@ function identify(obligations: readonly RealtimeCustomerObligationV1[]) {
 
 /** Shared live/replay semantic boundary. Source spans remain outside model planning. */
 export function customerInputRequestedObligations(value: RealtimeCustomerInput,
-  boundProductIds: readonly string[]): readonly TrackCRequestedObligation[] {
+  boundProductIds: readonly string[], priorProductId: string | null = null): readonly TrackCRequestedObligation[] {
   return Object.freeze(customerInputObligations(value).map(({ evidenceText: _source,
     size, color, component, relatedProductId, deadlineDays, criteria, ...entry }) => {
     const shopScope = entry.capability === "POLICY" || entry.capability === "PROMOTION_OFFER";
     return Object.freeze({ ...entry,
-      productId: entry.productId ?? (!shopScope && entry.kind !== "PRODUCT_SEARCH" && boundProductIds.length === 1
-        ? boundProductIds[0]! : null),
+      productId: entry.kind === "PRODUCT_REJECT"
+        ? obligationExplicitlyNamesProduct({ ...entry, evidenceText: _source }) ? entry.productId : priorProductId
+        : entry.productId ?? (!shopScope && entry.kind === "FACT_REQUEST" && boundProductIds.length === 1 ? boundProductIds[0]! : null),
       ...(size == null ? {} : { size }), ...(color == null ? {} : { color }),
       ...(component == null ? {} : { component }), ...(relatedProductId == null ? {} : { relatedProductId }),
       ...(deadlineDays == null ? {} : { deadlineDays }), ...(criteria == null ? {} : { criteria }),

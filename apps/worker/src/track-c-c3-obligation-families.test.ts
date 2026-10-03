@@ -173,7 +173,7 @@ describe("D2 deterministic conservation across obligation families", () => {
 
   it("retains split policy, component stocks and retail facts without claiming full-set stock", () => {
     const requested: readonly TrackCRequestedObligation[] = [
-      { id: "mix-policy", kind: "FACT_REQUEST", capability: "POLICY", scope: null, productId: null },
+      { id: "mix-policy", kind: "FACT_REQUEST", capability: "POLICY", scope: "SPLIT_SIZE", productId: null },
       { id: "top-stock", kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "ITEM42", component: "TOP", size: "S" },
       { id: "bottom-stock", kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: "ITEM42", component: "BOTTOM", size: "M" },
       { id: "top-retail", kind: "FACT_REQUEST", capability: "OFFER_CONFIGURATION", scope: "TOP", productId: "ITEM42" },

@@ -7,6 +7,7 @@ import { compileTrackCStrategistDecision, type TrackCResponderTask } from "./tra
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
 import { materializeTrackCV5CaseCapture } from "./track-c-c3-v5-benchmark-materialization.js";
 import { validateResponderOutput } from "./track-c-c3-v5-benchmark-runner.js";
+import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
 
 const root = new URL("../evals/track-c-c2/v2/", import.meta.url);
 const recipe = JSON.parse(readFileSync(new URL("runtime-materialization.json", root), "utf8"));
@@ -70,6 +71,25 @@ describe("D3 two-way final coverage", () => {
     expect(task.obligationResolutions?.[0]?.outcome).toBe("ANSWERED");
     expect(task.semanticHandoff?.limit).toBeNull();
   });
+  it("does not map an exchange policy to split-size or alteration permission", () => {
+    const exchange = { ref: "exchange", capability: "POLICY" as const, subject: { scope: "SHOP" as const },
+      value: { policy: "EXCHANGE" }, deterministicText: "Đổi size được theo chính sách.",
+      provenance: { contentHash: "e".repeat(64), authority: "RUNTIME" as const } };
+    for (const scope of ["SPLIT_SIZE", "ALTERATION"] as const) {
+      const obligation = { id: scope, kind: "FACT_REQUEST" as const, capability: "POLICY" as const, scope, productId: null };
+      expect(trackCObligationMatchesEvidence(obligation, exchange)).toBe(false);
+      const { id: _codeId, ...source } = obligation;
+      expect(() => bindRealtimeCustomerInput({ ...bindRealtimeCustomerInput(inputDelta(), ""),
+        obligations: [{ ...source, evidenceText: "câu hỏi" }] }, "câu hỏi")).not.toThrow();
+    }
+  });
+  it("allows code-owned split policy evidence only for its own policy scope", () => {
+    const evidence = { ref: "split", capability: "POLICY" as const, subject: { scope: "SHOP" as const },
+      value: { allowMixedSizes: true }, deterministicText: "Cho phép phối size.",
+      provenance: { contentHash: "f".repeat(64), authority: "RUNTIME" as const } };
+    const obligation = { id: "split", kind: "FACT_REQUEST" as const, capability: "POLICY" as const, scope: "SPLIT_SIZE" as const, productId: null };
+    expect(trackCObligationMatchesEvidence(obligation, evidence)).toBe(true);
+  });
   it.each<{ text: string; extra: Record<string, unknown> }>([
     { text: "Size S còn không?", extra: { size: "L" } },
     { text: "Chị cần trong 5 ngày.", extra: { deadlineDays: 2 } },
@@ -78,6 +98,7 @@ describe("D3 two-way final coverage", () => {
     const request = "criteria" in extra ? { kind: "PRODUCT_SEARCH", capability: null, scope: null }
       : "deadlineDays" in extra ? { kind: "FACT_REQUEST", capability: "ETA", scope: "DELIVERY_DEADLINE" }
       : { kind: "FACT_REQUEST", capability: "STOCK", scope: null };
-    expect(() => bindRealtimeCustomerInput({ ...inputDelta(), obligations: [{ ...request, productId: null, evidenceText: text, ...extra }] }, text)).toThrow();
+    expect(() => bindRealtimeCustomerInput({ ...bindRealtimeCustomerInput(inputDelta(), ""),
+      obligations: [{ ...request, productId: null, evidenceText: text, ...extra }] }, text)).toThrow();
   });
 });

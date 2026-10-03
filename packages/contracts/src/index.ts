@@ -342,7 +342,7 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
     "BREATHABILITY", "CARE_INSTRUCTIONS", "SMOOTHNESS", "WEIGHT", "COMFORT",
     "FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE",
-    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION",
+    "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION", "SPLIT_SIZE", "ALTERATION",
   ]).nullable(),
   productId: z.string().trim().min(1).max(64).nullable(),
   evidenceText: CustomerInputEvidenceSchema.nullable(),
@@ -368,7 +368,8 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     const otherScopeValid = value.scope !== null && (
       (["DISPATCH_TIME", "DELIVERY_DEADLINE"].includes(value.scope) && value.capability === "ETA") ||
       (["CUSTOMER_OFFER", "FUTURE_PROMOTION"].includes(value.scope) && value.capability === "PROMOTION_OFFER") ||
-      (["COMPARATIVE_PROPERTY", "CHEAPER"].includes(value.scope) && value.capability === "PRODUCT_COMPARISON"));
+      (["COMPARATIVE_PROPERTY", "CHEAPER"].includes(value.scope) && value.capability === "PRODUCT_COMPARISON") ||
+      (["SPLIT_SIZE", "ALTERATION"].includes(value.scope) && value.capability === "POLICY"));
     const scopedCapability = value.capability === "PRODUCT_ATTRIBUTES" ||
       value.capability === "OFFER_CONFIGURATION";
     if ((scopedCapability && value.scope === null) ||

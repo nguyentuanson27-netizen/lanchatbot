@@ -53,7 +53,7 @@ function context(productIds = ["SQ9012"]) {
 }
 
 function snapshotInput() {
-  return { customerInput, latestCustomerText, dialogue: dialogue(),
+  return { customerInput, latestCustomerText, dialogue: dialogue(), priorProductId: "SQ9012",
     productBinding: context().productBinding,
     producerState: { selectedProductId: "SQ9012", measurements: { heightCm: 160 },
       preferences: { occasion: "WORK", shape: "loose" } },
@@ -80,6 +80,28 @@ function businessInputs(lookupContext = context()) {
 }
 
 describe("typed Producer benchmark parity", () => {
+  it("retains the prior rejected subject when the benchmark binds a new alternative", async () => {
+    const text = "Mẫu này thôi không lấy, tìm mẫu suông tránh bó eo";
+    const snapshot = freezeTrackCProducerBenchmarkSnapshot({ ...snapshotInput(), priorProductId: "CB182",
+      latestCustomerText: text, dialogue: dialogue(text), customerInput: { ...noCustomerSelection(),
+        obligations: [
+          { kind: "PRODUCT_REJECT", capability: null, scope: null, productId: null, evidenceText: "Mẫu này thôi không lấy" },
+          { kind: "PRODUCT_SEARCH", capability: null, scope: null, productId: null,
+            evidenceText: "tìm mẫu suông tránh bó eo", criteria: { shape: "suông", avoid: ["bó eo"] } },
+        ] } });
+    const transport = { send: vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce(modelResponse({ replyAct: "ANSWER", goal: "TYPED_DECISION", proposition: "PRICE",
+        evidenceRefs: [], continuation: { type: "KEEP_OPEN" }, canonicalAction: "NONE" }))
+      .mockResolvedValueOnce(modelResponse({ answerText: null, factualTexts: [], progressionText: null })) };
+    const result = await runTrackCFrozenProducerBenchmarkCase({ snapshot, modelResource, transport,
+      lookup: async () => businessInputs() });
+    expect(result.snapshot.customerState.rejectedProductIds).toContain("CB182");
+    expect(result.snapshot.customerState.rejectedProductIds).not.toContain("SQ9012");
+    expect(result.candidate.responderTask.obligationResolutions).toEqual([
+      expect.objectContaining({ kind: "PRODUCT_REJECT", outcome: "ACTIONED", subject: expect.objectContaining({ productId: "CB182" }) }),
+      expect.objectContaining({ kind: "PRODUCT_SEARCH", outcome: "BOUNDED_UNAVAILABLE" }),
+    ]);
+  });
   it("runs Producer once, deterministic lookup and the live compiler/Responder with both requested parts", async () => {
     const source = snapshotInput();
     const producerTransport = { send: vi.fn<CandidateVertexTransport["send"]>()

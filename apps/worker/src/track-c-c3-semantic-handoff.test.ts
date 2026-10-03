@@ -153,10 +153,13 @@ describe("C3 structured goal semantic handoff", () => {
     const good = compileTrackCStrategistDecision(selected);
     expect(good.task.evidence).toEqual([price, wrinkle]);
     expect(good.task.canonicalRequest).toBeNull();
-    for (const refs of [[price.ref, material.ref], [price.ref]]) {
-      expect(() => compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
-        evidenceRefs: refs } })).toThrow();
-    }
+    expect(() => compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
+      evidenceRefs: [price.ref, material.ref] } })).toThrow();
+    const completed = compileTrackCStrategistDecision({ ...selected, decision: { ...selected.decision,
+      evidenceRefs: [price.ref] } });
+    expect(completed.task.evidence).toEqual([price, wrinkle]);
+    expect(completed.task.obligationResolutions?.[1]).toMatchObject({ scope: "WRINKLE_RESISTANCE", outcome: "ANSWERED",
+      evidenceRefs: [{ ref: wrinkle.ref, contentHash: wrinkle.provenance.contentHash }] });
     // The same independent price is retained when the limitation is explicit.
     expect(compileTrackCStrategistDecision({ ...selected, evidence: [price, material], decision: { ...selected.decision,
       goal, evidenceRefs: [price.ref] } }).task.evidence).toEqual([price]);

@@ -3,6 +3,7 @@ import {
   bindRealtimeCustomerInput,
   customerInputObligations,
 } from "./realtime-customer-input.js";
+import { noCustomerSelection } from "./realtime-customer-input.fixture.js";
 import {
   AT,
   answerPlan,
@@ -98,6 +99,67 @@ describe("D1 Q052 obligation identity and evidence mapping", () => {
 });
 
 describe("D2 Q052 explicit compiler and final task outcomes", () => {
+  it("keeps a multi-product referential request unbound through the live runner", async () => {
+    const runtime = deterministicRuntime({ multiFact: true });
+    const text = "CB182 và SV9031, mẫu này bao nhiêu?";
+    const trace = await runtime.turn({ text, producer: inputDelta({ factQuery: priceQuery,
+      obligations: [{ kind: "FACT_REQUEST", capability: "PRICE", scope: null,
+        productId: null, evidenceText: "mẫu này bao nhiêu" }] }),
+      strategist: (input) => ({ ...answerPlan("PRICE")(input), evidenceRefs: [] }) });
+    const strategist = trace.roleCalls.find(({ role }) => role === "STRATEGIST")!.input;
+    expect(strategist.requestedObligations).toEqual([
+      expect.objectContaining({ productId: null, capability: "PRICE" }),
+    ]);
+    const task = trace.roleCalls.find(({ role }) => role === "RESPONDER")!.input.responderTask as {
+      obligationResolutions: readonly { outcome: string; subject: { productId: string | null } }[] };
+    expect(task.obligationResolutions).toEqual([
+      expect.objectContaining({ outcome: "BOUNDED_UNAVAILABLE", subject: expect.objectContaining({ productId: null }) }),
+    ]);
+    expect(trace.after.commerce.cart).toBeNull();
+  });
+  it("retains split sizes and whole-set stock during a conditional purchase without a cart effect", async () => {
+    const runtime = deterministicRuntime({ multiFact: true });
+    await runtime.turn({ text: "Mẫu CB182 giá bao nhiêu?", producer: inputDelta({ product: {
+      operation: "SELECT", productId: "CB182", evidenceText: "CB182" }, factQuery: priceQuery }) });
+    const base = noCustomerSelection();
+    const text = "Áo size S, quần size M phối được không? Nguyên bộ còn hàng không? Nếu còn nguyên bộ thì chị lấy.";
+    const trace = await runtime.turn({ text, producer: { ...base,
+      factQuery: { ...priceQuery, intent: "STOCK" },
+      obligations: [
+        { kind: "FACT_REQUEST", capability: "POLICY", scope: "SPLIT_SIZE", productId: null, evidenceText: "phối được không" },
+        { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: null, component: "TOP", size: "S", evidenceText: "Áo size S" },
+        { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: null, component: "BOTTOM", size: "M", evidenceText: "quần size M" },
+        { kind: "FACT_REQUEST", capability: "STOCK", scope: null, productId: null, component: "FULL_SET", evidenceText: "Nguyên bộ còn hàng không" },
+      ], salesSignals: { ...base.salesSignals, buyingIntent: { decision: "CONSIDERING", requestedAction: "NONE",
+        quantity: null, confidence: 1, evidenceText: "Nếu còn nguyên bộ thì chị lấy" } },
+    }, strategist: (input) => ({ ...answerPlan("STOCK")(input), evidenceRefs: [] }) });
+    const task = trace.roleCalls.find(({ role }) => role === "RESPONDER")!.input.responderTask as {
+      obligationResolutions: readonly { outcome: string; scope: string | null; subject: { size: string | null; component: string | null } }[] };
+    expect(task.obligationResolutions).toHaveLength(4);
+    expect(task.obligationResolutions.map(({ scope, subject }) => [scope, subject.component, subject.size]))
+      .toEqual([["SPLIT_SIZE", null, null], [null, "TOP", "S"], [null, "BOTTOM", "M"], [null, "FULL_SET", null]]);
+    expect(task.obligationResolutions.every(({ outcome }) => outcome === "BOUNDED_UNAVAILABLE")).toBe(true);
+    expect(trace.after.commerce).toEqual(trace.before.commerce);
+    expect(trace.after.commerce.cart).toBeNull();
+  });
+  it("keeps a referential rejection on the old subject after alternative binding changes", async () => {
+    const runtime = deterministicRuntime();
+    await runtime.turn({ text: "Mẫu CB182 giá bao nhiêu?", producer: inputDelta({ product: {
+      operation: "SELECT", productId: "CB182", evidenceText: "CB182" }, factQuery: priceQuery }) });
+    const text = "Mẫu này thôi không lấy, tìm mẫu khác dưới 700k";
+    const trace = await runtime.turn({ text, producer: inputDelta({
+      budget: { operation: "SET", value: 700000, evidenceText: "dưới 700k" }, obligations: [
+        { kind: "PRODUCT_REJECT", capability: null, scope: null, productId: null, evidenceText: "Mẫu này thôi không lấy" },
+        { kind: "PRODUCT_SEARCH", capability: null, scope: null, productId: null, evidenceText: "tìm mẫu khác dưới 700k" },
+      ] }), strategist: answerPlan("PRICE") });
+    const task = trace.roleCalls.find(({ role }) => role === "RESPONDER")!.input.responderTask as {
+      obligationResolutions: readonly { kind: string; subject: { productId: string | null } }[] };
+    expect(task.obligationResolutions.find(({ kind }) => kind === "PRODUCT_REJECT")?.subject.productId).toBe("CB182");
+    expect(trace.after.conversation.currentProductId).toBe("SV9031");
+    expect(trace.after.conversation.sessionDecisionContext?.rejectedProductIds).toContain("CB182");
+    expect(trace.reply).toContain("không chọn mẫu CB182");
+    expect(trace.after.commerce.cart).toBeNull();
+  });
   it.each(["TYPED_DECISION", "NEED: price only\nKNOWN: NONE\nANSWER: PRICE\nLIMIT: NONE\nNEXT: NONE"])(
     "compiles one explicit outcome for each independent obligation despite PRICE focus (%s)", (goal) => {
       const obligations = [

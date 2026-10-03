@@ -14,6 +14,8 @@ export interface TrackCProducerBenchmarkSnapshotInput {
   readonly dialogue: readonly ShadowContextMessage[];
   /** Exact state supplied to Producer, including customer preferences. */
   readonly producerState: unknown;
+  /** Canonical subject before the current Producer delta/alternative lookup. */
+  readonly priorProductId: string | null;
   readonly productBinding: ProductBindingV2;
   readonly priorCustomerState?: SessionDecisionContext;
   readonly customerInput: unknown;
@@ -24,6 +26,7 @@ export interface TrackCProducerBenchmarkSnapshot {
   readonly latestCustomerText: string;
   readonly dialogue: readonly ShadowContextMessage[];
   readonly producerState: unknown;
+  readonly priorProductId: string | null;
   readonly productBinding: ProductBindingV2;
   readonly priorCustomerState: SessionDecisionContext;
   readonly customerState: SessionDecisionContext;
@@ -77,6 +80,9 @@ export function freezeTrackCProducerBenchmarkSnapshot(
   input: TrackCProducerBenchmarkSnapshotInput,
 ): TrackCProducerBenchmarkSnapshot {
   assertCurrentSource(input);
+  if (input.priorProductId !== null && (typeof input.priorProductId !== "string" || input.priorProductId.length === 0)) {
+    throw new Error("TRACK_C_BENCHMARK_PRIOR_SUBJECT_REQUIRED");
+  }
   const customerInput = bindRealtimeCustomerInput(input.customerInput, input.latestCustomerText);
   if (customerInput.obligations === undefined) {
     throw new Error("TRACK_C_BENCHMARK_TYPED_OBLIGATIONS_REQUIRED");
@@ -85,13 +91,11 @@ export function freezeTrackCProducerBenchmarkSnapshot(
   const priorCustomerState = input.priorCustomerState ?? {
     budgetVnd: null, occasion: null, rejectedProductIds: [],
   };
-  const currentProductId = productBinding.status === "RESOLVED" && productBinding.productIds.length === 1
-    ? productBinding.productIds[0]! : null;
   return frozenCopy({
     contractVersion: "TRACK_C_TYPED_PRODUCER_BENCHMARK_SNAPSHOT_V1" as const,
     latestCustomerText: input.latestCustomerText, dialogue: input.dialogue,
-    producerState: input.producerState, productBinding, priorCustomerState,
-    customerState: applyCustomerDecisionInput(priorCustomerState, customerInput, currentProductId),
+    producerState: input.producerState, priorProductId: input.priorProductId, productBinding, priorCustomerState,
+    customerState: applyCustomerDecisionInput(priorCustomerState, customerInput, input.priorProductId),
     customerInput,
   });
 }
@@ -115,7 +119,8 @@ async function runSnapshot(snapshot: TrackCProducerBenchmarkSnapshot, input: Ben
     dialogue: snapshot.dialogue,
     customerVariant: snapshot.customerInput.variant,
     knownBudgetVnd: snapshot.customerState.budgetVnd,
-    requestedObligations: customerInputRequestedObligations(snapshot.customerInput, boundProductIds),
+    requestedObligations: customerInputRequestedObligations(snapshot.customerInput, boundProductIds,
+      snapshot.priorProductId),
     modelResource: input.modelResource, transport: input.transport,
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
@@ -149,7 +154,8 @@ export async function runTrackCProducerBenchmarkCase(
   assertCurrentSource(input);
   const source = frozenCopy({
     latestCustomerText: input.latestCustomerText, dialogue: input.dialogue,
-    producerState: input.producerState, productBinding: ProductBindingV2Schema.parse(input.productBinding),
+    producerState: input.producerState, priorProductId: input.priorProductId,
+    productBinding: ProductBindingV2Schema.parse(input.productBinding),
     ...(input.priorCustomerState === undefined ? {} : { priorCustomerState: input.priorCustomerState }),
   });
   const customerInput = await extractRealtimeCustomerInput({

@@ -23,7 +23,7 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
   canonicalRequest: TrackCResponderTask["canonicalRequest"] = null): readonly TrackCObligationResolution[] {
   const resolutions = Object.freeze(requested.map((entry, index) => {
     const shopScope = entry.capability === "POLICY" || entry.capability === "PROMOTION_OFFER";
-    const productId = entry.productId ?? (!shopScope && boundProductIds.length === 1 ? boundProductIds[0]! : null);
+    const productId = entry.productId ?? (!shopScope && entry.kind === "FACT_REQUEST" && boundProductIds.length === 1 ? boundProductIds[0]! : null);
     const matches = evidence.filter((fact) => trackCObligationMatchesEvidence(
       entry.kind === "PRODUCT_SEARCH" ? entry : { ...entry, productId }, fact));
     const status = entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
@@ -142,6 +142,7 @@ export function trackCObligationTopic(obligation: TrackCRequestedObligation): st
     CUSTOMER_OFFER: "mức chị đề xuất", FUTURE_PROMOTION: "ưu đãi tương lai",
     COMPARATIVE_PROPERTY: "thuộc tính so sánh",
     CHEAPER: "so sánh giá", WAIST_CONSTRUCTION: "cấu tạo cạp",
+    SPLIT_SIZE: "chính sách phối size", ALTERATION: "chính sách sửa đồ",
   };
   const capabilities: Readonly<Record<string, string>> = {
     PRICE: "giá", STOCK: "tình trạng còn hàng", SIZE_FIT: "độ vừa vặn",

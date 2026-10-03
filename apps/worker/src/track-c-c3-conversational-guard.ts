@@ -183,6 +183,11 @@ export function trackCObligationMatchesEvidence(
       Number.isInteger(evidence.value.minDays) && Number.isInteger(evidence.value.maxDays) &&
       (evidence.value.minDays as number) >= 0 && (evidence.value.maxDays as number) >= (evidence.value.minDays as number);
   }
+  if (obligation.capability === "POLICY") {
+    const field = obligation.scope === "SPLIT_SIZE" ? "allowMixedSizes"
+      : obligation.scope === "ALTERATION" ? "allowAlteration" : null;
+    return field !== null && typeof evidence.value[field] === "boolean";
+  }
   return false;
 }
 
