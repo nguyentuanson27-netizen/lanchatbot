@@ -1,4 +1,5 @@
 import type { ContextV2, RealtimeCustomerInput } from "@lana/contracts";
+import { realtimeCustomerObligationSubjectScope } from "@lana/contracts";
 import type { ShadowContextMessage } from "@lana/database";
 import type {
   TrackCRequestedObligation,
@@ -141,6 +142,14 @@ export function trackCObligationMatchesEvidence(
   if (obligation.lookupStatus !== undefined || obligation.kind !== "FACT_REQUEST" ||
       obligation.capability === null ||
       evidence.capability !== obligation.capability) return false;
+  if (obligation.subjectScope != null) {
+    const evidenceScope = evidence.subject?.scope ?? (evidence.subject?.productId !== undefined ? "PRODUCT"
+      : evidence.subject?.cartId !== undefined ? "CART" : realtimeCustomerObligationSubjectScope({
+        capability: evidence.capability, scope: null,
+      }));
+    if (obligation.subjectScope === "PRODUCT" ? !["PRODUCT", "VARIANT", "OFFER"].includes(evidenceScope)
+      : obligation.subjectScope !== evidenceScope) return false;
+  }
   if (obligation.capability === "PRODUCT_COMPARISON" && obligation.scope === "CHEAPER") {
     const ids = evidence.value.productIds;
     return obligation.productId !== null && obligation.relatedProductId !== undefined &&
@@ -159,9 +168,20 @@ export function trackCObligationMatchesEvidence(
     }
   }
   if (obligation.variantId !== undefined && evidence.subject?.variantId !== obligation.variantId) return false;
-  if (obligation.size !== undefined && evidence.subject?.variantLabel?.size?.toLocaleUpperCase("vi-VN") !==
-      obligation.size.toLocaleUpperCase("vi-VN")) return false;
+  if (obligation.size !== undefined) {
+    const wanted = obligation.size.toLocaleUpperCase("vi-VN");
+    if (obligation.capability === "SIZE_FIT") {
+      const sizes = [evidence.value.recommendedSizes, evidence.value.alternativeSizes]
+        .flatMap((value) => Array.isArray(value) ? value : []);
+      if (!sizes.some((value) => typeof value === "string" && value.toLocaleUpperCase("vi-VN") === wanted)) return false;
+    } else if (evidence.subject?.variantLabel?.size?.toLocaleUpperCase("vi-VN") !== wanted) return false;
+  }
   if (obligation.component !== undefined && evidence.value.component !== obligation.component) return false;
+  if (obligation.offerScope !== undefined && evidence.value.offerScope !== obligation.offerScope) return false;
+  if (obligation.capability === "PRICE" && obligation.offerScope === undefined &&
+      ["TWO_PIECE", "THREE_PIECE"].includes(String(evidence.value.offerScope))) return false;
+  if (obligation.capability === "PRICE" && obligation.component === undefined &&
+      ["TOP", "BOTTOM"].includes(String(evidence.value.component))) return false;
   if (obligation.capability === "STOCK" && obligation.component === undefined &&
       ["TOP", "BOTTOM"].includes(String(evidence.value.component))) return false;
   if (obligation.color !== undefined && !(obligation.capability === "PRODUCT_ATTRIBUTES" && obligation.scope === "COLORS") &&

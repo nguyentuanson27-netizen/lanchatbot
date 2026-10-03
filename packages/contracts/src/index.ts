@@ -331,12 +331,17 @@ export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 
 const CustomerInputEvidenceSchema = z.string().trim().min(1).max(2_000);
 
+/** Shared vocabulary of customer fact requests and existing C3 evidence. */
+export const REALTIME_CUSTOMER_FACT_CAPABILITIES = [
+  "PRICE", "STOCK", "SIZE_FIT", "ETA", "SHIPPING_FEE", "FREESHIP",
+  "PROMOTION_OFFER", "PRODUCT_MEDIA", "PRODUCT_ATTRIBUTES", "PRODUCT_PRESENTATION",
+  "POLICY", "CARE_GUIDANCE", "OFFER_CONFIGURATION", "BUSINESS_LOCATION",
+  "FULFILLMENT_STATUS", "CART_TOTAL", "PRODUCT_LIFECYCLE", "PRODUCT_COMPARISON",
+] as const;
+
 export const RealtimeCustomerObligationV1Schema = z.object({
-  kind: z.enum(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT"]),
-  capability: z.enum([
-    "PRICE", "STOCK", "SIZE_FIT", "ETA", "PRODUCT_ATTRIBUTES",
-    "OFFER_CONFIGURATION", "PROMOTION_OFFER", "POLICY", "PRODUCT_COMPARISON",
-  ]).nullable(),
+  kind: z.enum(["FACT_REQUEST", "PRODUCT_SEARCH", "PRODUCT_REJECT", "CONSULTATION"]),
+  capability: z.enum(REALTIME_CUSTOMER_FACT_CAPABILITIES).nullable(),
   scope: z.enum([
     "MATERIALS", "COLORS", "STYLES", "SILHOUETTE", "OCCASION",
     "WRINKLE_RESISTANCE", "STRETCH", "OPACITY", "LINING",
@@ -345,16 +350,25 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     "DISPATCH_TIME", "DELIVERY_DEADLINE", "CUSTOMER_OFFER", "FUTURE_PROMOTION", "COMPARATIVE_PROPERTY", "CHEAPER", "WAIST_CONSTRUCTION", "SPLIT_SIZE", "ALTERATION",
   ]).nullable(),
   productId: z.string().trim().min(1).max(64).nullable(),
+  /** Authority subject, distinct from a product mentioned as conversation context. */
+  subjectScope: z.enum(["PRODUCT", "CART", "SHOP"]).nullable().optional(),
   evidenceText: CustomerInputEvidenceSchema.nullable(),
   size: z.string().trim().min(1).max(32).nullable().optional(),
   color: z.string().trim().min(1).max(80).nullable().optional(),
   component: z.enum(["TOP", "BOTTOM", "FULL_SET"]).nullable().optional(),
+  /** Exact selling configuration for a price, distinct from its component. */
+  offerScope: z.enum(["FULL_SET", "TOP", "BOTTOM", "TWO_PIECE", "THREE_PIECE"]).nullable().optional(),
   relatedProductId: z.string().trim().min(1).max(64).nullable().optional(),
   deadlineDays: z.number().int().min(0).max(365).nullable().optional(),
   criteria: z.object({ shape: z.string().trim().min(1).max(80).nullable(),
     avoid: z.array(z.string().trim().min(1).max(80)).max(4) }).strict().nullable().optional(),
 }).strict().superRefine((value, context) => {
   if (value.kind === "FACT_REQUEST") {
+    if (value.offerScope != null && (value.capability !== "PRICE" ||
+        (value.component != null && value.component !==
+          (value.offerScope === "TOP" || value.offerScope === "BOTTOM" ? value.offerScope : "FULL_SET")))) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["offerScope"], message: "price configuration does not match capability/component" });
+    }
     if (value.capability === null) {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ["capability"],
         message: "FACT_REQUEST requires capability" });
@@ -381,11 +395,22 @@ export const RealtimeCustomerObligationV1Schema = z.object({
     }
   } else if (value.capability !== null || value.scope !== null) {
     context.addIssue({ code: z.ZodIssueCode.custom,
-      message: "search/reject obligations cannot carry fact capability or scope" });
+      message: "nonfact obligations cannot carry fact capability or scope" });
   }
 });
 export type RealtimeCustomerObligationV1 =
   z.infer<typeof RealtimeCustomerObligationV1Schema>;
+
+/** Compatibility defaults follow the owner of the requested fact, never prose. */
+export function realtimeCustomerObligationSubjectScope(value: Pick<RealtimeCustomerObligationV1,
+  "capability" | "scope" | "subjectScope"> & { productId?: string | null }): "PRODUCT" | "CART" | "SHOP" {
+  if (value.subjectScope != null) return value.subjectScope;
+  if (["SHIPPING_FEE", "FREESHIP", "CART_TOTAL"].includes(value.capability ?? "")) return "CART";
+  if (value.capability === "POLICY") return value.productId != null &&
+    (value.scope === "SPLIT_SIZE" || value.scope === "ALTERATION") ? "PRODUCT" : "SHOP";
+  if (value.capability === "BUSINESS_LOCATION" || value.capability === "PROMOTION_OFFER") return "SHOP";
+  return "PRODUCT";
+}
 
 export const RealtimeCustomerInputSchema = z.object({
   factQuery: AgentBusinessFactQueryV1Schema,

@@ -48,7 +48,7 @@ import {
 } from "./track-c-c3-strategy-contract.js";
 import { buildTrackCSelectableEvidence } from
   "./track-c-c3-selectable-evidence.js";
-import { trackCOutcomeTexts } from "./track-c-c3-obligation-resolution.js";
+import { trackCObligationOutcomeText, trackCOutcomeTexts } from "./track-c-c3-obligation-resolution.js";
 import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
 import type { TrackCV5ExecutionLane } from
   "./track-c-c3-v5-benchmark-materialization.js";
@@ -183,6 +183,7 @@ type ResponderDraft = Readonly<{
   answerText: string | null;
   factualTexts: readonly string[];
   progressionText: string | null;
+  obligationTexts?: readonly Readonly<{ obligationId: string; text: string }>[];
 }>;
 
 export type TrackCStrategistConstraints = Readonly<{
@@ -631,6 +632,14 @@ function responderTaskPrompt(task: TrackCResponderTask) {
       outcomeTexts: trackCOutcomeTexts(task),
     }),
     evidence: responderReadableEvidence(task),
+    ...(consultationResolutions(task).length === 0 ? {} : {
+      consultationObligations: consultationResolutions(task).map(({ obligationId }) => {
+        const request = task.requestedObligations?.find(({ id }) => id === obligationId);
+        const customerText = text(request?.customerText, "TRACK_C_CONSULTATION_SOURCE_INVALID");
+        if (customerText === null) throw new Error("TRACK_C_CONSULTATION_SOURCE_INVALID");
+        return { obligationId, customerText };
+      }),
+    }),
     // Capability names only: enough for the Responder to know part of the
     // question is not covered, with none of the underlying values.
     ...(task.unrealizedEvidence.length === 0 ? {} : {
@@ -712,6 +721,29 @@ function responderHasAssignedLimit(task: TrackCResponderTask): boolean {
     task.canonicalRequest?.type !== "ASK_CHECKOUT_DETAILS";
 }
 
+function consultationResolutions(task: TrackCResponderTask) {
+  return (task.obligationResolutions ?? []).filter(({ kind, outcome }) => kind === "CONSULTATION" && outcome === "ANSWERED");
+}
+
+function parseConsultationTexts(value: unknown, task: TrackCResponderTask): readonly Readonly<{ obligationId: string; text: string }>[] {
+  const expectedIds = new Set(consultationResolutions(task).map(({ obligationId }) => obligationId));
+  if (!Array.isArray(value) || value.length !== expectedIds.size) throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+  const seen = new Set<string>();
+  return Object.freeze(value.map((entry) => {
+    const record = plainObject(entry, "TRACK_C_RESPONDER_CONSULTATION_INVALID");
+    exactKeys(record, ["obligationId", "text"], "TRACK_C_RESPONDER_CONSULTATION_INVALID");
+    if (typeof record.obligationId !== "string" || !expectedIds.has(record.obligationId) || seen.has(record.obligationId)) {
+      throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+    }
+    seen.add(record.obligationId);
+    const prose = typeof record.text === "string" ? record.text.trim() : record.text;
+    const safe = text(prose, "TRACK_C_RESPONDER_CONSULTATION_INVALID");
+    if (safe === null) throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+    assertConversationalProse(safe);
+    return Object.freeze({ obligationId: record.obligationId, text: safe });
+  }));
+}
+
 function responderDraftSchema(
   task: TrackCResponderTask,
   conversationLane: TrackCConversationLane,
@@ -725,11 +757,12 @@ function responderDraftSchema(
   const answers = answerWording(task);
   const neutralHold = adaptive && task.answer.kind === "ACKNOWLEDGE" &&
     task.canonicalRequest?.type === "HOLD_POSITION" && task.evidence.length === 0;
+  const consultationIds = consultationResolutions(task).map(({ obligationId }) => obligationId);
   return {
     type: "OBJECT",
-    required: ["answerText", "factualTexts", "progressionText"],
-    minProperties: 3,
-    maxProperties: 3,
+    required: ["answerText", "factualTexts", "progressionText", ...(consultationIds.length === 0 ? [] : ["obligationTexts"])],
+    minProperties: consultationIds.length === 0 ? 3 : 4,
+    maxProperties: consultationIds.length === 0 ? 3 : 4,
     properties: {
       answerText: adaptive
         ? task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS" || singleRequestBody(task)
@@ -763,6 +796,13 @@ function responderDraftSchema(
             type: "STRING", minLength: 1, maxLength: 300 }
           : { type: "STRING", enum: requestWording(task, dialogue) }
         : { type: "NULL" },
+      ...(consultationIds.length === 0 ? {} : {
+        obligationTexts: { type: "ARRAY", minItems: consultationIds.length, maxItems: consultationIds.length,
+          description: "Address each assigned customer consultation concern once, using its obligationId. No shop facts, business effects or new requested parts.",
+          items: { type: "OBJECT", required: ["obligationId", "text"], minProperties: 2, maxProperties: 2,
+            properties: { obligationId: { type: "STRING", enum: consultationIds },
+              text: { type: "STRING", minLength: 1, maxLength: 1_000 } } } },
+      }),
     },
   };
 }
@@ -805,7 +845,9 @@ function text(value: unknown, errorCode: string): string | null {
 
 function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue: readonly ShadowContextMessage[], adaptive: boolean): ResponderDraft {
   const record = plainObject(value, "TRACK_C_RESPONDER_DRAFT_INVALID");
-  exactKeys(record, ["answerText", "factualTexts", "progressionText"],
+  const hasConsultations = consultationResolutions(task).length > 0;
+  if (hasConsultations && !Object.hasOwn(record, "obligationTexts")) throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+  exactKeys(record, ["answerText", "factualTexts", "progressionText", ...(hasConsultations ? ["obligationTexts"] : [])],
     "TRACK_C_RESPONDER_DRAFT_INVALID");
   if (!Array.isArray(record.factualTexts) ||
       (record.factualTexts.length !== 0 &&
@@ -831,6 +873,7 @@ function parseResponderDraft(value: unknown, task: TrackCResponderTask, dialogue
   const progression = prose(record.progressionText);
   return Object.freeze({
     answerText,
+    ...(hasConsultations ? { obligationTexts: parseConsultationTexts(record.obligationTexts, task) } : {}),
     factualTexts: Object.freeze(record.factualTexts.map((item) => {
       const result = text(item, "TRACK_C_RESPONDER_DRAFT_INVALID");
       if (result === null) throw new Error("TRACK_C_RESPONDER_DRAFT_INVALID");
@@ -1057,12 +1100,21 @@ function compileResponderDraft(input: Readonly<{
     }
   }
   const segments: ContextV2CandidateOutputV2["segments"] = [];
-  const limitationTexts = trackCOutcomeTexts(task);
-  limitationTexts.forEach((limitation) => {
+  const consultationIds = new Set((task.obligationResolutions ?? []).filter(({ kind }) => kind === "CONSULTATION")
+    .map(({ obligationId }) => obligationId));
+  (task.obligationResolutions ?? []).forEach((resolution) => {
+    const limitation = trackCObligationOutcomeText(resolution);
+    if (limitation === null) return;
     const safe = text(limitation, "TRACK_C_LIMITATION_NOT_PII_SAFE");
     if (safe === null) throw new Error("TRACK_C_LIMITATION_NOT_PII_SAFE");
-    segments.push({ kind: "GENERAL", text: safe });
+    segments.push({ kind: "GENERAL", text: safe,
+      ...(resolution.kind === "CONSULTATION" ? { obligationId: resolution.obligationId } : {}) });
   });
+  if (consultationIds.size > 0) {
+    parseConsultationTexts(draft.obligationTexts ?? [], task).forEach((entry) => {
+      segments.push({ kind: "GENERAL", ...entry });
+    });
+  }
   if (!adaptive && task.answer.kind === "ANSWER" && task.answer.evidenceStatus === "UNRESOLVED" &&
       task.canonicalRequest?.type !== "ASK_MEASUREMENTS") {
     segments.push({ kind: "GENERAL", text: UNRESOLVED_ANSWER_TEXT });
@@ -1541,6 +1593,19 @@ async function runTrackCStrategyContractCore(
         (task.canonicalRequest !== null || task.continuation?.type !== "KEEP_OPEN") &&
           !(recoverCheckoutRequest && task.canonicalRequest?.type === "ASK_CHECKOUT_DETAILS")) throw failure;
   };
+  const recoverConsultations = (): void => {
+    if (!task.requestedObligations?.some(({ kind }) => kind === "CONSULTATION")) return;
+    // Reuse the existing code-owned failure status. A missing or unsafe prose
+    // realization cannot certify that the source consultation was answered.
+    const compiled = compileTrackCStrategistDecision({ ...constraints, evidence,
+      requestedObligations: task.requestedObligations.map((entry) => entry.kind === "CONSULTATION"
+        ? { ...entry, lookupStatus: "FAILED" as const } : entry),
+      boundProductIds: context.productBinding.productIds, requireStructuredGoal: true,
+      decision: conversationPlan,
+    });
+    task = Object.freeze({ ...task, ...compiled.task });
+    conversationPlan = compiled.decision;
+  };
   let responderPayload: unknown = null;
   let draft: ResponderDraft;
   try {
@@ -1563,9 +1628,10 @@ async function runTrackCStrategyContractCore(
       : new TrackCStrategyContractFailure(recoveryDiagnostic);
     assertRecoveryAllowed(failure);
     recoveryDiagnostic = failure.diagnostic;
+    recoverConsultations();
     // No trustworthy draft remains. Keep source facts and explicitly decline
     // whole-answer completeness; never parse goal text into a factual claim.
-    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null };
+    draft = { answerText: trackCRecoveryLimitation(task), factualTexts: [], progressionText: null, obligationTexts: [] };
   }
   let output: ContextV2CandidateOutputV2;
   try {
@@ -1590,10 +1656,12 @@ async function runTrackCStrategyContractCore(
     // SUPPORTED certifies only the declared capability, not whole-turn coverage.
     // Frozen evaluation still exposes the original rejection.
     assertRecoveryAllowed(failure);
+    recoverConsultations();
+    draft = { ...draft, obligationTexts: [] };
     try {
       output = compileResponderDraft({
         context, dialogue: input.evaluationContext, task,
-        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null },
+        draft: { answerText: draft.answerText ?? trackCRecoveryLimitation(task), factualTexts: [], progressionText: null, obligationTexts: [] },
         lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
         currentCart: input.currentCart ?? null,
         comparisonFacts: input.comparisonFacts ?? [],
@@ -1607,7 +1675,7 @@ async function runTrackCStrategyContractCore(
         output = compileResponderDraft({
           context, dialogue: input.evaluationContext, task,
           draft: { answerText: trackCRecoveryLimitation(task),
-            factualTexts: [], progressionText: null },
+            factualTexts: [], progressionText: null, obligationTexts: [] },
           lane: input.lane, conversationLane: lane, evaluationAt: input.evaluationAt,
           currentCart: input.currentCart ?? null,
           comparisonFacts: input.comparisonFacts ?? [],

@@ -1,5 +1,6 @@
 import type { TrackCRequestedObligation, TrackCSelectableEvidence, TrackCResponderTask } from "./track-c-c3-strategy-contract.js";
 import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
+import { realtimeCustomerObligationSubjectScope } from "@lana/contracts";
 
 export type TrackCObligationOutcome = "ANSWERED" | "BOUNDED_UNAVAILABLE" | "ACTIONED" | "ASK_REQUIRED_INPUT" | "HANDOFF";
 
@@ -9,7 +10,8 @@ export type TrackCObligationResolution = Readonly<{
   capability: TrackCRequestedObligation["capability"];
   scope: TrackCRequestedObligation["scope"];
   subject: Readonly<{ productId: string | null; variantId: string | null; size: string | null; color: string | null;
-    component: TrackCRequestedObligation["component"] | null }>;
+    component: TrackCRequestedObligation["component"] | null; subjectScope?: "PRODUCT" | "CART" | "SHOP";
+    offerScope?: "FULL_SET" | "TOP" | "BOTTOM" | "TWO_PIECE" | "THREE_PIECE" }>;
   status: "SUPPORTED" | "UNSUPPORTED" | "FAILED" | "STALE" | "ACKNOWLEDGED";
   outcome: TrackCObligationOutcome;
   relation: Readonly<{ etaMinDays: number; etaMaxDays: number; deadlineDays: number;
@@ -22,11 +24,13 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
   evidence: readonly TrackCSelectableEvidence[], boundProductIds: readonly string[] = [],
   canonicalRequest: TrackCResponderTask["canonicalRequest"] = null): readonly TrackCObligationResolution[] {
   const resolutions = Object.freeze(requested.map((entry, index) => {
-    const shopScope = entry.capability === "POLICY" || entry.capability === "PROMOTION_OFFER";
-    const productId = entry.productId ?? (!shopScope && entry.kind === "FACT_REQUEST" && boundProductIds.length === 1 ? boundProductIds[0]! : null);
-    const matches = evidence.filter((fact) => trackCObligationMatchesEvidence(
+    const subjectScope = realtimeCustomerObligationSubjectScope(entry);
+    const productId = entry.productId ?? (subjectScope === "PRODUCT" &&
+      (entry.kind === "FACT_REQUEST" || entry.kind === "CONSULTATION") && boundProductIds.length === 1 ? boundProductIds[0]! : null);
+    const matches = entry.kind === "CONSULTATION" ? [] : evidence.filter((fact) => trackCObligationMatchesEvidence(
       entry.kind === "PRODUCT_SEARCH" ? entry : { ...entry, productId }, fact));
-    const status = entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
+    const status = entry.kind === "CONSULTATION" ? entry.lookupStatus ?? "ACKNOWLEDGED" as const
+      : entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
       : entry.lookupStatus ?? (matches.length > 0 ? "SUPPORTED" as const : "UNSUPPORTED" as const);
     const asksRequiredInput = status === "UNSUPPORTED" && entry.kind === "FACT_REQUEST" &&
       ((productId === null && canonicalRequest?.type === "ASK_PRODUCT") ||
@@ -35,14 +39,15 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
       obligationId: entry.id ?? `obligation:${index}:${entry.kind}:${entry.capability ?? "NONE"}:${entry.scope ?? "NONE"}`,
       kind: entry.kind, capability: entry.capability, scope: entry.scope,
       subject: Object.freeze({ productId, variantId: entry.variantId ?? null, size: entry.size ?? null, color: entry.color ?? null,
-        component: entry.component ?? null }),
+        component: entry.component ?? null, ...(entry.subjectScope == null ? {} : { subjectScope }),
+        ...(entry.offerScope === undefined ? {} : { offerScope: entry.offerScope }) }),
       relation: status !== "SUPPORTED" || entry.scope !== "DELIVERY_DEADLINE" ? null : Object.freeze({
         etaMinDays: matches[0]!.value.minDays as number, etaMaxDays: matches[0]!.value.maxDays as number,
         deadlineDays: entry.deadlineDays!, relation: (matches[0]!.value.maxDays as number) <= entry.deadlineDays!
           ? "ETA_WITHIN_DEADLINE_IF_ESTIMATE_HOLDS" as const : "ETA_NOT_GUARANTEED_BY_DEADLINE" as const,
       }),
       status, outcome: status === "SUPPORTED" ? "ANSWERED" as const
-        : status === "ACKNOWLEDGED" ? "ACTIONED" as const
+        : status === "ACKNOWLEDGED" ? entry.kind === "CONSULTATION" ? "ANSWERED" as const : "ACTIONED" as const
         : asksRequiredInput ? "ASK_REQUIRED_INPUT" as const : "BOUNDED_UNAVAILABLE" as const,
       evidenceRefs: Object.freeze(matches.map(({ ref, provenance }) => Object.freeze({ ref, contentHash: provenance.contentHash }))),
       limitation: status === "SUPPORTED" || status === "ACKNOWLEDGED" || asksRequiredInput ? null : Object.freeze({
@@ -58,11 +63,13 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
 
 export function trackCLimitationText(resolution: TrackCObligationResolution): string | null {
   if (resolution.limitation === null) return null;
+  if (resolution.kind === "CONSULTATION") return "Em chưa thể trả lời đầy đủ phần băn khoăn này của chị.";
   const topic = trackCObligationTopic({ kind: resolution.kind, capability: resolution.capability,
     scope: resolution.scope, productId: resolution.subject.productId });
   const subject = resolution.subject;
   const label = [subject.productId === null ? null : `mẫu ${subject.productId}`,
-    subject.component === "TOP" ? "phần áo" : subject.component === "BOTTOM" ? "phần dưới" : subject.component === "FULL_SET" ? "nguyên bộ" : null,
+    subject.offerScope === "THREE_PIECE" ? "cấu hình ba món" : subject.offerScope === "TWO_PIECE" ? "cấu hình hai món"
+      : subject.component === "TOP" ? "phần áo" : subject.component === "BOTTOM" ? "phần dưới" : subject.component === "FULL_SET" ? "nguyên bộ" : null,
     subject.size === null ? null : `size ${subject.size}`, subject.color === null ? null : `màu ${subject.color}`].filter(Boolean).join(" ");
   return `Em chưa có thông tin xác nhận về ${topic}${label ? ` của ${label}` : ""}.`;
 }
@@ -99,26 +106,34 @@ export function trackCOutcomeTexts(task: TrackCResponderTask): readonly string[]
 /** The existing final guard consumes code resolutions, never a model status
  * or a grammatical assertion that a limitation is safe. */
 export function assertTrackCResolutionCoverage(task: TrackCResponderTask, boundProductIds: readonly string[],
-  segments: readonly Readonly<{ kind: string; text: string; claimContentHash?: string; target?: string }>[]): void {
+  segments: readonly Readonly<{ kind: string; text: string; claimContentHash?: string; target?: string; obligationId?: string | undefined }>[]): void {
+  const labeled = segments.filter(({ obligationId }) => obligationId !== undefined);
   if (task.obligationResolutions === undefined) {
-    if (task.requestedObligations !== undefined) throw new Error("TRACK_C_OBLIGATION_RESOLUTION_INVALID");
+    if (task.requestedObligations !== undefined || labeled.length > 0) throw new Error("TRACK_C_OBLIGATION_RESOLUTION_INVALID");
     return;
   }
   const expected = trackCResolveObligations(task.requestedObligations ?? [], task.evidence, boundProductIds, task.canonicalRequest);
   if (JSON.stringify(expected) !== JSON.stringify(task.obligationResolutions)) {
     throw new Error("TRACK_C_OBLIGATION_RESOLUTION_INVALID");
   }
+  const consultations = expected.filter(({ kind }) => kind === "CONSULTATION");
+  const consultationIds = new Set(consultations.map(({ obligationId }) => obligationId));
+  if (labeled.length !== consultations.length || new Set(labeled.map(({ obligationId }) => obligationId)).size !== labeled.length ||
+      labeled.some((segment) => segment.kind !== "GENERAL" || !consultationIds.has(segment.obligationId!) || segment.text.trim().length === 0)) {
+    throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+  }
   for (const resolution of expected) {
     if (resolution.outcome === "ASK_REQUIRED_INPUT" && !segments.some((segment) => segment.kind === "CLARIFICATION" &&
       segment.target === (task.canonicalRequest?.type === "ASK_PRODUCT" ? "PRODUCT" : "MEASUREMENTS"))) {
       throw new Error("TRACK_C_RESPONDER_REQUIRED_INPUT_REQUIRED");
     }
-    if (resolution.kind === "FACT_REQUEST" && resolution.subject.productId !== null &&
+    if ((resolution.kind === "FACT_REQUEST" || resolution.kind === "CONSULTATION") && resolution.subject.productId !== null &&
         !boundProductIds.some((id) => id.toUpperCase() === resolution.subject.productId!.toUpperCase())) {
       throw new Error("TRACK_C_REQUESTED_OBLIGATION_BINDING_INVALID");
     }
     const limitation = trackCObligationOutcomeText(resolution);
-    if (limitation !== null && !segments.some((segment) => segment.kind === "GENERAL" && segment.text === limitation)) {
+    if (limitation !== null && !segments.some((segment) => segment.kind === "GENERAL" && segment.text === limitation &&
+        (resolution.kind !== "CONSULTATION" || segment.obligationId === resolution.obligationId))) {
       throw new Error("TRACK_C_RESPONDER_LIMIT_REQUIRED");
     }
     if (resolution.evidenceRefs.some(({ contentHash }) => !segments.some((segment) =>
@@ -149,6 +164,10 @@ export function trackCObligationTopic(obligation: TrackCRequestedObligation): st
     ETA: "thời gian giao hàng", PRODUCT_ATTRIBUTES: "thuộc tính sản phẩm",
     OFFER_CONFIGURATION: "cấu hình sản phẩm",
     PROMOTION_OFFER: "ưu đãi", POLICY: "chính sách", PRODUCT_COMPARISON: "thuộc tính so sánh",
+    SHIPPING_FEE: "phí giao hàng", FREESHIP: "miễn phí giao hàng", CART_TOTAL: "tổng tiền giỏ hàng",
+    PRODUCT_MEDIA: "hình ảnh sản phẩm", PRODUCT_PRESENTATION: "thông tin sản phẩm",
+    CARE_GUIDANCE: "cách chăm sóc", BUSINESS_LOCATION: "địa điểm và giờ hoạt động của shop",
+    FULFILLMENT_STATUS: "trạng thái xử lý đơn", PRODUCT_LIFECYCLE: "tình trạng sản xuất sản phẩm",
   };
   return scopes[obligation.scope ?? ""] ?? capabilities[obligation.capability ?? ""] ?? "lựa chọn khác";
 }

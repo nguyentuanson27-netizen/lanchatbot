@@ -490,12 +490,14 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
     if (projected.capability === "OFFER_CONFIGURATION") {
       const data = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
       for (const projection of trackCOfferConfigurationProjections(data)) {
+        const component = projection.scope === "TOP" || projection.scope === "BOTTOM" ? projection.scope : "FULL_SET";
         evidence.push(Object.freeze({
           ref: `${projected.ref}_${projection.scope}`,
           capability: "OFFER_CONFIGURATION" as const,
           ...(projected.subject === undefined ? {} : { subject: projected.subject }),
           value: Object.freeze({
             offerScope: projection.scope,
+            component,
             ...projection.value,
           }),
           deterministicText: projection.text,
@@ -508,6 +510,26 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
             }),
           }),
         }));
+        // A composition/retail statement and its explicit price are different
+        // fact families. Preserve the offer scope on both; a component price
+        // never becomes a price (or stock assertion) for the whole set.
+        const amountVnd = projection.value.fullSetVnd ?? projection.value.twoPieceVnd ??
+          projection.value.threePieceVnd ?? projection.value.priceVnd;
+        if (typeof amountVnd === "number" && Number.isSafeInteger(amountVnd) && amountVnd >= 0 &&
+            projection.value.available !== false) {
+          const value = Object.freeze({ amountVnd, currency: "VND", offerScope: projection.scope,
+            component });
+          const label = { FULL_SET: "nguyên set", TOP: "áo bán lẻ", BOTTOM: "quần/chân váy bán lẻ",
+            TWO_PIECE: "bộ 2 món", THREE_PIECE: "bộ 3 món" }[projection.scope];
+          evidence.push(Object.freeze({
+            ref: `${projected.ref}_${projection.scope}_PRICE`, capability: "PRICE" as const,
+            ...(projected.subject === undefined ? {} : { subject: projected.subject }),
+            value, deterministicText: `Giá ${label} là ${trackCFormatVnd(amountVnd)} ạ.`,
+            provenance: Object.freeze({ authority: "SIMULATION" as const,
+              contentHash: sha256({ sourceContentHash: projected.provenance.contentHash, capability: "PRICE", value }),
+            }),
+          }));
+        }
       }
       return;
     }
@@ -519,16 +541,16 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
         material: string; colors: readonly string[]; design: readonly string[];
       };
       const fields = [
-        { field: "material", value: material,
+        { field: "materials", refSuffix: "MATERIAL", value: Object.freeze([material]),
           text: `Mẫu này có chất liệu ${material} ạ.` },
-        ...(colors.length === 0 ? [] : [{ field: "colors", value: colors,
+        ...(colors.length === 0 ? [] : [{ field: "colors", refSuffix: "COLORS", value: colors,
           text: `Mẫu này hiện có màu ${colors.join(", ")} ạ.` }]),
-        ...(design.length === 0 ? [] : [{ field: "design", value: design,
+        ...(design.length === 0 ? [] : [{ field: "design", refSuffix: "DESIGN", value: design,
           text: `Thiết kế của mẫu gồm ${design.join(", ")} ạ.` }]),
       ];
       for (const field of fields) {
         evidence.push(Object.freeze({
-          ref: `${projected.ref}_${field.field.toUpperCase()}`,
+          ref: `${projected.ref}_${field.refSuffix}`,
           capability: "PRODUCT_ATTRIBUTES" as const,
           subject: projected.subject!,
           value: Object.freeze({ [field.field]: field.value }),
@@ -543,6 +565,20 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
           }),
         }));
       }
+    }
+    if (projected.capability === "CARE_GUIDANCE") {
+      // Keep the legacy public capability selectable, while canonical typed
+      // obligations consume the same source under PRODUCT_ATTRIBUTES.
+      const careInstructions = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      const value = Object.freeze({ careInstructions: Object.freeze({ ...careInstructions }) });
+      evidence.push(Object.freeze({
+        ref: `${projected.ref}_CARE_INSTRUCTIONS`, capability: "PRODUCT_ATTRIBUTES" as const,
+        ...(projected.subject === undefined ? {} : { subject: projected.subject }), value,
+        ...(projected.deterministicText === undefined ? {} : { deterministicText: projected.deterministicText }),
+        provenance: Object.freeze({ authority: "SIMULATION" as const,
+          contentHash: sha256({ sourceContentHash: projected.provenance.contentHash, capability: "PRODUCT_ATTRIBUTES", value }),
+        }),
+      }));
     }
   });
   // Missing realization is a capability gap, not missing factual authority.

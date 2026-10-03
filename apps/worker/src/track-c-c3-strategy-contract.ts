@@ -4,6 +4,8 @@ import {
 } from "./track-c-c3-conversational-guard.js";
 import {
   MeasurementKindSchema,
+  REALTIME_CUSTOMER_FACT_CAPABILITIES,
+  realtimeCustomerObligationSubjectScope,
   type MeasurementKind,
   type RealtimeCustomerObligationV1,
 } from "@lana/contracts";
@@ -35,40 +37,25 @@ export type TrackCCanonicalAction =
   | "HOLD_POSITION";
 
 export const TRACK_C_PROTECTED_PROPOSITIONS = Object.freeze([
-  "NONE",
-  "PRICE",
-  "STOCK",
-  "SIZE_FIT",
-  "ETA",
-  "SHIPPING_FEE",
-  "FREESHIP",
-  "PROMOTION_OFFER",
-  "PRODUCT_MEDIA",
-  "PRODUCT_ATTRIBUTES",
-  "PRODUCT_PRESENTATION",
-  "POLICY",
-  "CARE_GUIDANCE",
-  "OFFER_CONFIGURATION",
-  "BUSINESS_LOCATION",
-  "FULFILLMENT_STATUS",
-  "CART_TOTAL",
-  "PRODUCT_LIFECYCLE",
-  "PRODUCT_COMPARISON",
+  "NONE", ...REALTIME_CUSTOMER_FACT_CAPABILITIES,
 ] as const);
 export type TrackCProtectedProposition =
   typeof TRACK_C_PROTECTED_PROPOSITIONS[number];
 
 export type TrackCRequestedObligation = Readonly<Pick<
   RealtimeCustomerObligationV1,
-  "kind" | "capability" | "scope" | "productId"
+  "kind" | "capability" | "scope" | "productId" | "subjectScope"
 > & {
   /** Assigned by customer-input code, never by Strategist or Responder. */
   id?: string;
+  /** Source-bound customer concern; never shop factual authority. */
+  customerText?: string;
   /** Source-bound lookup subject, independent of a selected commerce variant. */
   variantId?: string;
   size?: string;
   color?: string;
   component?: "TOP" | "BOTTOM" | "FULL_SET";
+  offerScope?: "FULL_SET" | "TOP" | "BOTTOM" | "TWO_PIECE" | "THREE_PIECE";
   relatedProductId?: string;
   deadlineDays?: number;
   criteria?: Readonly<{ shape: string | null; avoid: readonly string[] }>;
@@ -443,7 +430,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   if (input.requestedObligations !== undefined) {
     input = { ...input, requestedObligations: input.requestedObligations.map((entry) => ({ ...entry,
       productId: entry.productId ?? (entry.kind === "FACT_REQUEST" &&
-        entry.capability !== "POLICY" && entry.capability !== "PROMOTION_OFFER" &&
+        realtimeCustomerObligationSubjectScope(entry) === "PRODUCT" &&
         input.boundProductIds?.length === 1 ? input.boundProductIds[0]! : null),
     })) };
   }

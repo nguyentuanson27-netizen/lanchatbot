@@ -332,7 +332,6 @@ function guardProductionOutput(
   comparisonFacts: readonly BusinessFactEnvelopeV1[] = [],
   conversation: TrackCConversationGuardContext | null = null,
 ): void {
-  if (conversation !== null) assertTrackCResolutionCoverage(conversation.task, context.productBinding.productIds, output.segments);
   const claims = new Map(
     context.verifiedClaims.map((claim) => [
       claim.provenance.contentHash,
@@ -532,6 +531,14 @@ export function validateResponderOutput(
     claimHashes.some((claimHash) => !known.has(claimHash))
   ) {
     throw new Error("TRACK_C_V5_RESPONDER_PROVENANCE_INVALID");
+  }
+  // Coverage owns the complete reply, including admitted hypothetical facts.
+  // The runtime authority projection below must not remove them from this readback.
+  if (conversation === null && output.segments.some((segment) => segment.kind === "GENERAL" && segment.obligationId !== undefined)) {
+    throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
+  }
+  if (conversation !== null) {
+    assertTrackCResolutionCoverage(conversation.task, context.productBinding.productIds, output.segments);
   }
   if (lane === "PRODUCTION_CONTRACT") {
     guardProductionOutput(context, output, evaluationAt, currentCart, comparisonFacts, conversation);
