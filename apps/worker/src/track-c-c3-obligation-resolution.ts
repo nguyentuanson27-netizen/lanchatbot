@@ -1,8 +1,9 @@
 import type { TrackCRequestedObligation, TrackCSelectableEvidence, TrackCResponderTask } from "./track-c-c3-strategy-contract.js";
 import { trackCObligationMatchesEvidence } from "./track-c-c3-conversational-guard.js";
 import { realtimeCustomerObligationSubjectScope } from "@lana/contracts";
+import { trackCConsultationClarification } from "./track-c-c3-consultation.js";
 
-export type TrackCObligationOutcome = "ANSWERED" | "BOUNDED_UNAVAILABLE" | "ACTIONED" | "ASK_REQUIRED_INPUT" | "HANDOFF";
+export type TrackCObligationOutcome = "ANSWERED" | "SUPPORTED_RESPONSE" | "BOUNDED_UNAVAILABLE" | "ACTIONED" | "ASK_REQUIRED_INPUT" | "HANDOFF";
 
 export type TrackCObligationResolution = Readonly<{
   obligationId: string;
@@ -10,6 +11,7 @@ export type TrackCObligationResolution = Readonly<{
   capability: TrackCRequestedObligation["capability"];
   scope: TrackCRequestedObligation["scope"];
   decisionConcern?: TrackCRequestedObligation["decisionConcern"];
+  clarificationTarget?: string;
   subject: Readonly<{ productId: string | null; variantId: string | null; size: string | null; color: string | null;
     component: TrackCRequestedObligation["component"] | null; subjectScope?: "PRODUCT" | "CART" | "SHOP";
     offerScope?: "FULL_SET" | "TOP" | "BOTTOM" | "TWO_PIECE" | "THREE_PIECE" }>;
@@ -23,23 +25,26 @@ export type TrackCObligationResolution = Readonly<{
 
 export function trackCResolveObligations(requested: readonly TrackCRequestedObligation[],
   evidence: readonly TrackCSelectableEvidence[], boundProductIds: readonly string[] = [],
-  canonicalRequest: TrackCResponderTask["canonicalRequest"] = null): readonly TrackCObligationResolution[] {
+  canonicalRequest: TrackCResponderTask["canonicalRequest"] = null,
+  continuation: TrackCResponderTask["continuation"] = null): readonly TrackCObligationResolution[] {
   const resolutions = Object.freeze(requested.map((entry, index) => {
     const subjectScope = realtimeCustomerObligationSubjectScope(entry);
     const productId = entry.productId ?? (subjectScope === "PRODUCT" &&
       (entry.kind === "FACT_REQUEST" || entry.kind === "CONSULTATION") && boundProductIds.length === 1 ? boundProductIds[0]! : null);
-    const matches = entry.kind === "CONSULTATION" ? [] : evidence.filter((fact) => trackCObligationMatchesEvidence(
+    const matches = evidence.filter((fact) => trackCObligationMatchesEvidence(
       entry.kind === "PRODUCT_SEARCH" ? entry : { ...entry, productId }, fact, evidence));
-    const status = entry.kind === "CONSULTATION" ? entry.lookupStatus ?? "UNSUPPORTED" as const
-      : entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
+    const status = entry.kind === "PRODUCT_REJECT" ? "ACKNOWLEDGED" as const
       : entry.lookupStatus ?? (matches.length > 0 ? "SUPPORTED" as const : "UNSUPPORTED" as const);
-    const asksRequiredInput = status === "UNSUPPORTED" && entry.kind === "FACT_REQUEST" &&
+    const clarificationTarget = entry.kind === "CONSULTATION" && status === "UNSUPPORTED"
+      ? trackCConsultationClarification({ ...entry, productId }, canonicalRequest, continuation) : null;
+    const asksRequiredInput = clarificationTarget !== null || status === "UNSUPPORTED" && entry.kind === "FACT_REQUEST" &&
       ((productId === null && canonicalRequest?.type === "ASK_PRODUCT") ||
        (entry.capability === "SIZE_FIT" && canonicalRequest?.type === "ASK_MEASUREMENTS"));
     return Object.freeze({
       obligationId: entry.id ?? `obligation:${index}:${entry.kind}:${entry.capability ?? "NONE"}:${entry.scope ?? "NONE"}`,
       kind: entry.kind, capability: entry.capability, scope: entry.scope,
       ...(entry.kind !== "CONSULTATION" ? {} : { decisionConcern: entry.decisionConcern ?? "DECISION_CRITERION_UNKNOWN" as const }),
+      ...(clarificationTarget === null ? {} : { clarificationTarget }),
       subject: Object.freeze({ productId, variantId: entry.variantId ?? null, size: entry.size ?? null, color: entry.color ?? null,
         component: entry.component ?? null, ...(entry.subjectScope == null ? {} : { subjectScope }),
         ...(entry.offerScope === undefined ? {} : { offerScope: entry.offerScope }) }),
@@ -48,7 +53,7 @@ export function trackCResolveObligations(requested: readonly TrackCRequestedObli
         deadlineDays: entry.deadlineDays!, relation: (matches[0]!.value.maxDays as number) <= entry.deadlineDays!
           ? "ETA_WITHIN_DEADLINE_IF_ESTIMATE_HOLDS" as const : "ETA_NOT_GUARANTEED_BY_DEADLINE" as const,
       }),
-      status, outcome: status === "SUPPORTED" ? "ANSWERED" as const
+      status, outcome: status === "SUPPORTED" ? entry.kind === "CONSULTATION" ? "SUPPORTED_RESPONSE" as const : "ANSWERED" as const
         : status === "ACKNOWLEDGED" ? "ACTIONED" as const
         : asksRequiredInput ? "ASK_REQUIRED_INPUT" as const : "BOUNDED_UNAVAILABLE" as const,
       evidenceRefs: Object.freeze(matches.map(({ ref, provenance }) => Object.freeze({ ref, contentHash: provenance.contentHash }))),
@@ -95,6 +100,19 @@ export function trackCLimitationTexts(task: TrackCResponderTask): readonly strin
 export function trackCObligationOutcomeText(resolution: TrackCObligationResolution): string | null {
   const limitation = trackCLimitationText(resolution);
   if (limitation !== null) return limitation;
+  if (resolution.kind === "CONSULTATION") {
+    if (resolution.outcome === "ASK_REQUIRED_INPUT") {
+      return resolution.decisionConcern === "USAGE_FREQUENCY" ? "Để tư vấn phần này, em cần biết nhu cầu mặc thực tế của chị."
+        : resolution.decisionConcern === "FIT_RISK" ? "Để tư vấn độ vừa, em cần thông tin còn thiếu của chị."
+        : "Để tư vấn phần này, em cần biết tiêu chí chị còn cân nhắc.";
+    }
+    if (resolution.outcome === "SUPPORTED_RESPONSE") {
+      return resolution.decisionConcern === "FIT_RISK" ? "Em gửi thông tin tư vấn size đã xác nhận để chị cân nhắc độ vừa."
+        : resolution.decisionConcern === "TRUST_RISK" ? "Em gửi chính sách đã xác nhận để chị cân nhắc khi mua online."
+        : resolution.decisionConcern === "USAGE_FREQUENCY" ? "Chị đối chiếu thông tin dịp sử dụng đã xác nhận dưới đây với nhu cầu mặc của mình nhé."
+        : "Em gửi thông tin lựa chọn đã xác nhận để chị cân nhắc khoản chi.";
+    }
+  }
   if (resolution.kind === "PRODUCT_REJECT") {
     return resolution.subject.productId === null ? "Dạ em ghi nhận chị không chọn mẫu đang xem."
       : `Dạ em ghi nhận chị không chọn mẫu ${resolution.subject.productId}.`;
@@ -123,7 +141,7 @@ export function assertTrackCResolutionCoverage(task: TrackCResponderTask, boundP
     if (task.requestedObligations !== undefined || labeled.length > 0) throw new Error("TRACK_C_OBLIGATION_RESOLUTION_INVALID");
     return;
   }
-  const expected = trackCResolveObligations(task.requestedObligations ?? [], task.evidence, boundProductIds, task.canonicalRequest);
+  const expected = trackCResolveObligations(task.requestedObligations ?? [], task.evidence, boundProductIds, task.canonicalRequest, task.continuation);
   if (JSON.stringify(expected) !== JSON.stringify(task.obligationResolutions)) {
     throw new Error("TRACK_C_OBLIGATION_RESOLUTION_INVALID");
   }
@@ -134,8 +152,15 @@ export function assertTrackCResolutionCoverage(task: TrackCResponderTask, boundP
     throw new Error("TRACK_C_RESPONDER_CONSULTATION_INVALID");
   }
   for (const resolution of expected) {
-    if (resolution.outcome === "ASK_REQUIRED_INPUT" && !segments.some((segment) => segment.kind === "CLARIFICATION" &&
-      segment.target === (task.canonicalRequest?.type === "ASK_PRODUCT" ? "PRODUCT" : "MEASUREMENTS"))) {
+    const ordinaryClarification = resolution.clarificationTarget !== undefined && task.continuation?.type === "ASK" &&
+      task.continuation.input === resolution.clarificationTarget;
+    // The existing Responder progression slot owns wording and cardinality.
+    // Reuse its final handoff rather than infer a question from prose here.
+    const clarification = ordinaryClarification ? segments.at(-1)?.kind === "GENERAL" &&
+      segments.at(-1)?.obligationId === undefined && Boolean(segments.at(-1)?.text.trim())
+      : segments.some((segment) => segment.kind === "CLARIFICATION" &&
+        segment.target === (task.canonicalRequest?.type === "ASK_PRODUCT" ? "PRODUCT" : "MEASUREMENTS"));
+    if (resolution.outcome === "ASK_REQUIRED_INPUT" && !clarification) {
       throw new Error("TRACK_C_RESPONDER_REQUIRED_INPUT_REQUIRED");
     }
     if ((resolution.kind === "FACT_REQUEST" || resolution.kind === "CONSULTATION") && resolution.subject.productId !== null &&

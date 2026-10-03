@@ -5,6 +5,7 @@ import {
 } from "./track-c-c3-conversational-guard.js";
 import type { BusinessFactEnvelopeV1, MeasurementKind, RealtimeCustomerInput } from "@lana/contracts";
 import { createHash } from "node:crypto";
+import { trackCConsultationClarificationPurpose, trackCConsultationClarificationTargets } from "./track-c-c3-consultation.js";
 import { DECISION_GUARD_REASON_CODES_V1 } from "@lana/contracts";
 import {
   canonicalJsonV1,
@@ -555,7 +556,9 @@ export function buildTrackCStrategistContractRequest(input: Readonly<{
           kind: entry.kind,
           capability: entry.capability,
           scope: entry.scope,
-          ...(entry.kind === "CONSULTATION" ? { decisionConcern: entry.decisionConcern ?? "DECISION_CRITERION_UNKNOWN" } : {}),
+          ...(entry.kind === "CONSULTATION" ? { decisionConcern: entry.decisionConcern ?? "DECISION_CRITERION_UNKNOWN",
+            clarificationTargets: trackCConsultationClarificationTargets(entry).filter((target) => target !== "BUDGET" || !input.constraints.budgetKnown),
+            clarificationPurpose: trackCConsultationClarificationPurpose(entry) } : {}),
           productId: entry.productId,
           ...(entry.subjectScope === undefined ? {} : { subjectScope: entry.subjectScope }),
           ...(entry.variantId === undefined ? {} : { variantId: entry.variantId }),
@@ -643,6 +646,8 @@ function responderTaskPrompt(task: TrackCResponderTask) {
           const customerText = request?.customerText === undefined ? null
             : text(request.customerText, "TRACK_C_CONSULTATION_SOURCE_INVALID");
           return { obligationId, decisionConcern: decisionConcern ?? "DECISION_CRITERION_UNKNOWN", outcome,
+            ...(outcome !== "ASK_REQUIRED_INPUT" || request === undefined ? {} : {
+              clarificationPurpose: trackCConsultationClarificationPurpose(request) }),
             ...(customerText === null ? {} : { customerText }) };
         }),
     } : {}),

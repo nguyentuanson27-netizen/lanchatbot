@@ -34,24 +34,26 @@ export async function findVerifiedAlternative(input: {
     }
   } catch { return { status: "UNAVAILABLE" }; }
   let failed = false;
+  const criteria = customerInputObligations(input.customerInput).filter((entry) => entry.kind === "PRODUCT_SEARCH" && entry.criteria != null)
+    .map((entry) => entry.criteria!);
   // Recheck exclusion/deduplication here even if an adapter ignores its contract.
   const shortlist = candidates.slice(0, 12).filter(({ productId }) => {
     const id = normalizeProductCode(productId);
     if (ids.has(id)) return false;
     ids.add(id);
     return true;
-  }).slice(0, 3);
-  const criteria = customerInputObligations(input.customerInput).filter((entry) => entry.kind === "PRODUCT_SEARCH" && entry.criteria != null)
-    .map((entry) => entry.criteria!);
-  for (const product of shortlist) {
+  }).filter((product) => {
     if (criteria.length > 0) {
       const attributes = verifyProductAttributesV1(product.attributes, product.productId);
       if (criteria.some((entry) => entry.avoid.length > 0) ||
           (criteria.some((entry) => entry.shape !== null) && (attributes === null || attributes.metadata.freshnessState !== "FRESH" ||
             Date.parse(attributes.metadata.observedAt) > input.now.getTime() ||
             !criteria.every((entry) => trackCSearchShapeMatches(entry,
-              [...attributes.silhouettes, ...(attributes.designAttributes?.silhouette ?? [])]))))) continue;
+              [...attributes.silhouettes, ...(attributes.designAttributes?.silhouette ?? [])]))))) return false;
     }
+    return true;
+  }).slice(0, 3);
+  for (const product of shortlist) {
     try {
       const requested = input.customerInput.factQuery;
       const value = BusinessFactEnvelopeV1Schema.parse(await input.facts.resolve({

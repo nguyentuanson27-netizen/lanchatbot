@@ -189,6 +189,55 @@ function policyText(
   return null;
 }
 
+/** Raw artifact names are storage groups, not customer policy identities.
+ * Project only the field that proves each requested scope; a missing permission
+ * is never turned into a negative rule, and sale restrictions travel with it. */
+export function trackCPolicyProjections(
+  policy: string,
+  data: Readonly<Record<string, unknown>>,
+): readonly Readonly<{
+  scope: "TRY_ON" | "ALTERATION" | "SPLIT_SIZE" | "EXCHANGE_SIZE" | "EXCHANGE_COLOR" | "EXCHANGE_MODEL";
+  value: Readonly<Record<string, unknown>>;
+  text: string;
+}>[] {
+  type Projection = ReturnType<typeof trackCPolicyProjections>[number];
+  const projections: Projection[] = [];
+  const add = (scope: Projection["scope"], value: Readonly<Record<string, unknown>>, text: string): void => {
+    projections.push(Object.freeze({ scope, value: Object.freeze({ policy: scope, ...value }), text }));
+  };
+  if (policy === "INSPECTION") {
+    const tryOn = data["tryOn"];
+    if (tryOn === true || tryOn === false || tryOn === "ORDER_DEPENDENT") {
+      add("TRY_ON", { tryOn }, tryOn === true ? "Chị được thử đồ tại chỗ khi nhận hàng ạ."
+        : tryOn === false ? "Phần thử đồ khi nhận hàng thì shop chưa hỗ trợ ạ."
+        : "Việc thử đồ khi nhận hàng còn tuỳ theo từng đơn ạ.");
+    }
+  } else if (policy === "CUSTOMIZATION") {
+    const allowAlteration = booleanField(data, "supported");
+    if (allowAlteration !== null) add("ALTERATION", { allowAlteration }, policyText(policy, data)!);
+  } else if (policy === "SPLIT_SIZE") {
+    const allowMixedSizes = booleanField(data, "allowed");
+    if (allowMixedSizes !== null) add("SPLIT_SIZE", { allowMixedSizes }, policyText(policy, data)!);
+  } else if (policy === "EXCHANGE_SALE") {
+    const discountAtLeastPercent = numberField(data, "discountAtLeastPercent");
+    if (discountAtLeastPercent === null || discountAtLeastPercent < 0 || discountAtLeastPercent > 100) {
+      return Object.freeze(projections);
+    }
+    const allowed = stringList(data, "allowedChanges");
+    if (allowed !== null && mapAll(allowed, EXCHANGE_CHANGE_TEXT) !== null) {
+      for (const [token, scope] of [["size", "EXCHANGE_SIZE"], ["color", "EXCHANGE_COLOR"]] as const) {
+        if (allowed.includes(token)) add(scope, { allowed: true, discountAtLeastPercent },
+          `Với mẫu giảm từ ${discountAtLeastPercent}% trở lên, chị đổi được ${EXCHANGE_CHANGE_TEXT[token]} ạ.`);
+      }
+    }
+    const modelChange = booleanField(data, "modelChange");
+    if (modelChange !== null) add("EXCHANGE_MODEL", { allowed: modelChange, discountAtLeastPercent },
+      modelChange ? `Với mẫu giảm từ ${discountAtLeastPercent}% trở lên, chị đổi sang mẫu khác được ạ.`
+        : `Với mẫu giảm từ ${discountAtLeastPercent}% trở lên, phần đổi sang mẫu khác chưa áp dụng ạ.`);
+  }
+  return Object.freeze(projections);
+}
+
 /**
  * Realization for one typed fact group.
  *

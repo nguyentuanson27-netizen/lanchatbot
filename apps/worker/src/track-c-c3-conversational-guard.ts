@@ -8,6 +8,7 @@ import type {
 } from "./track-c-c3-strategy-contract.js";
 import { trackCOutcomeTexts } from "./track-c-c3-obligation-resolution.js";
 import { trackCConstrainedSearchMatchesEvidence } from "./track-c-c3-product-search.js";
+import { trackCConsultationMatchesEvidence } from "./track-c-c3-consultation.js";
 
 /** Only the compiler/runtime can supply this context, never the output schema.
  * These references authorize no fact, fit advice, cart change or other effect. */
@@ -134,6 +135,7 @@ export function trackCObligationMatchesEvidence(
   evidence: TrackCSelectableEvidence,
   evidencePool: readonly TrackCSelectableEvidence[] = [evidence],
 ): boolean {
+  if (obligation.kind === "CONSULTATION") return trackCConsultationMatchesEvidence(obligation, evidence, evidencePool);
   if (obligation.kind === "PRODUCT_SEARCH") {
     if (obligation.criteria !== undefined) return trackCConstrainedSearchMatchesEvidence(obligation, evidence, evidencePool);
     return obligation.lookupStatus === undefined && evidence.subject?.productId !== undefined &&
@@ -206,7 +208,11 @@ export function trackCObligationMatchesEvidence(
   if (obligation.capability === "POLICY") {
     const field = obligation.scope === "SPLIT_SIZE" ? "allowMixedSizes"
       : obligation.scope === "ALTERATION" ? "allowAlteration" : null;
-    return field !== null ? typeof evidence.value[field] === "boolean" : evidence.value.policy === obligation.scope;
+    // Artifact vocabulary is normalised at projection, never broad-matched
+    // here. Legacy field-only policy evidence remains exact to that field.
+    return field !== null ? typeof evidence.value[field] === "boolean" &&
+      (evidence.value.policy === undefined || evidence.value.policy === obligation.scope)
+      : evidence.value.policy === obligation.scope;
   }
   if (obligation.capability === "PROMOTION_OFFER" && obligation.scope === "APPLIED_CART_PROMOTION") {
     return evidence.subject?.scope === "CART";

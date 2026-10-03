@@ -18,6 +18,7 @@ import { trackCProductAttributeEvidence } from
 import {
   trackCFormatVnd,
   trackCOfferConfigurationProjections,
+  trackCPolicyProjections,
   trackCSimulationFactText,
 } from "./track-c-c3-fact-realization.js";
 
@@ -367,7 +368,7 @@ function boundedSimulationEvidence(
             ...(cartVersion === null ? {} : { cartVersion }),
           })
         : subjectProductId === undefined
-          ? undefined
+          ? kind === "POLICY_SNAPSHOT" ? Object.freeze({ scope: "SHOP" as const }) : undefined
           : Object.freeze({ scope: "PRODUCT" as const, productId: subjectProductId });
     return make(capability, {
       ...(policy === null ? {} : { policy }),
@@ -534,6 +535,32 @@ export function buildTrackCSelectableEvidence(input: Readonly<{
       return;
     }
     evidence.push(projected);
+    if (projected.capability === "POLICY" && typeof projected.value.policy === "string") {
+      const data = plainObject(projected.value.data, "TRACK_C_SIMULATION_EVIDENCE_INVALID");
+      for (const projection of trackCPolicyProjections(projected.value.policy, data)) {
+        const productScoped = projection.scope === "ALTERATION" || projection.scope === "SPLIT_SIZE";
+        // A global product rule applies only within a resolved binding. An
+        // explicit source product restriction must never expand to its peers.
+        const subjects: readonly TrackCSelectableEvidence["subject"][] = productScoped
+          ? input.context.productBinding.status !== "RESOLVED" ? []
+            : projected.subject?.productId !== undefined ? [projected.subject]
+              : input.context.productBinding.productIds.map((productId) => Object.freeze({ scope: "PRODUCT" as const, productId }))
+          : [projected.subject];
+        subjects.forEach((subject, subjectIndex) => {
+          const value = Object.freeze({ ...projection.value, sourceContentHash: projected.provenance.contentHash });
+          evidence.push(Object.freeze({
+            ref: `${projected.ref}_${projection.scope}${productScoped ? `_PRODUCT_${String(subjectIndex + 1).padStart(3, "0")}` : ""}`,
+            capability: "POLICY" as const,
+            ...(subject === undefined ? {} : { subject }), value,
+            deterministicText: projection.text,
+            provenance: Object.freeze({ authority: projected.provenance.authority,
+              contentHash: sha256({ sourceContentHash: projected.provenance.contentHash,
+                policy: projection.scope, subject: subject ?? null, value: projection.value }),
+            }),
+          }));
+        });
+      }
+    }
     if (projected.capability === "PRODUCT_PRESENTATION") {
       // Preserve the overview for fixed first contact, while adaptive turns
       // can select just one verified attribute without printing the bundle.

@@ -421,7 +421,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   }
   if (input.requestedObligations !== undefined) {
     input = { ...input, requestedObligations: input.requestedObligations.map((entry) => ({ ...entry,
-      productId: entry.productId ?? (entry.kind === "FACT_REQUEST" &&
+      productId: entry.productId ?? ((entry.kind === "FACT_REQUEST" || entry.kind === "CONSULTATION") &&
         realtimeCustomerObligationSubjectScope(entry) === "PRODUCT" &&
         input.boundProductIds?.length === 1 ? input.boundProductIds[0]! : null),
     })) };
@@ -429,7 +429,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   if (input.requestedObligations !== undefined) {
     const bound = input.boundProductIds ?? [];
     if (bound.length > 0 && input.requestedObligations.some((entry) =>
-      entry.kind === "FACT_REQUEST" && entry.productId !== null &&
+      (entry.kind === "FACT_REQUEST" || entry.kind === "CONSULTATION") && entry.productId !== null &&
       !bound.some((productId) =>
         productId.normalize("NFC").toLocaleUpperCase("vi-VN") ===
         entry.productId!.normalize("NFC").toLocaleUpperCase("vi-VN")
@@ -476,7 +476,7 @@ export function compileTrackCStrategistDecision(input: Readonly<{
   // into the decision/task, even if the provider repeated an authorized fact.
   const obligationResolutions = input.requestedObligations === undefined ? undefined
     : trackCResolveObligations(input.requestedObligations, realizable, input.boundProductIds ?? [],
-      canonicalRequest(decision.canonicalAction, input.checkoutRequestedFields ?? [], input.measurementRequestedFields));
+      canonicalRequest(decision.canonicalAction, input.checkoutRequestedFields ?? [], input.measurementRequestedFields), decision.continuation);
   const obligations = obligationResolutions ?? [];
   const describe = (entry: TrackCObligationResolution) => entry.kind === "CONSULTATION"
     ? [entry.kind, entry.decisionConcern].filter(Boolean).join("/")

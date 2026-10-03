@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildCanonicalDecisionEvidenceV1, buildProductAttributesV1, type StableProductDocument } from "@lana/business-tools";
 import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { findVerifiedAlternative } from "./realtime-alternatives.js";
@@ -79,6 +79,40 @@ describe("verified alternative business lookup satisfies current criteria", () =
     expect(result).toMatchObject({ status: "MATCHED", product: { productId: "ITEM99" }, facts: fact("ITEM99") });
   });
 
+  it("finds the fourth discovery candidate after the first three fail verified shape criteria", async () => {
+    const resolve = vi.fn().mockImplementation(async ({ productId }) => fact(productId));
+    const result = await findVerifiedAlternative({ text, customerInput, currentProductId: "ITEM42",
+      search: { searchAlternatives: async () => [
+        product("ITEM91", "ôm"), product("ITEM92", "ôm"), product("ITEM93", "ôm"), product("ITEM99"),
+      ] }, facts: { resolve }, shopAlias: "LANA", now });
+
+    expect(result).toMatchObject({ status: "MATCHED", product: { productId: "ITEM99" }, facts: fact("ITEM99") });
+    expect(resolve.mock.calls.map(([request]) => request.productId)).toEqual(["ITEM99"]);
+  });
+
+  it("does not inspect a matching thirteenth discovery candidate", async () => {
+    const resolve = vi.fn().mockImplementation(async ({ productId }) => fact(productId));
+    const result = await findVerifiedAlternative({ text, customerInput, currentProductId: "ITEM42",
+      search: { searchAlternatives: async () => [
+        ...Array.from({ length: 12 }, (_, index) => product(`ITEM${100 + index}`, "ôm")), product("ITEM99"),
+      ] }, facts: { resolve }, shopAlias: "LANA", now });
+
+    expect(result.status).toBe("NO_MATCH");
+    expect(resolve).not.toHaveBeenCalled();
+  });
+
+  it("checks at most three POS candidates after filtering verified shape criteria", async () => {
+    const resolve = vi.fn().mockImplementation(async ({ productId }) => fact(productId, productId === "ITEM99" ? 690_000 : 810_000));
+    const result = await findVerifiedAlternative({ text, customerInput, currentProductId: "ITEM42",
+      search: { searchAlternatives: async () => [
+        product("ITEM91", "ôm"), product("ITEM92", "ôm"), product("ITEM93", "ôm"),
+        product("ITEM94"), product("ITEM95"), product("ITEM96"), product("ITEM99"),
+      ] }, facts: { resolve }, shopAlias: "LANA", now });
+
+    expect(result.status).toBe("NO_MATCH");
+    expect(resolve.mock.calls.map(([request]) => request.productId)).toEqual(["ITEM94", "ITEM95", "ITEM96"]);
+  });
+
   it.each(["wrong shape", "missing shape", "discovery only", "unverified attributes"])("does not recommend %s", async (mode) => {
     const candidate = product("ITEM99", mode === "wrong shape" ? "ôm" : mode === "missing shape" ? null : "suông");
     if (mode === "discovery only") candidate.attributes = null;
@@ -103,10 +137,12 @@ describe("verified alternative business lookup satisfies current criteria", () =
     const constrained = bindRealtimeCustomerInput({ ...customerInput, obligations: customerInput.obligations!.map((entry) =>
       entry.kind === "PRODUCT_SEARCH" ? { ...entry, evidenceText: "tìm dáng suông tránh bó eo dưới 800k",
         criteria: { shape: "suông", avoid: ["bó eo"] } } : entry) }, constrainedText);
+    const resolve = vi.fn().mockImplementation(async ({ productId }) => fact(productId));
     const result = await findVerifiedAlternative({ text: constrainedText, customerInput: constrained, currentProductId: "ITEM42",
       search: { searchAlternatives: async () => [product("ITEM99")] },
-      facts: { resolve: async ({ productId }) => fact(productId) }, shopAlias: "LANA", now });
+      facts: { resolve }, shopAlias: "LANA", now });
     expect(result.status).toBe("NO_MATCH");
+    expect(resolve).not.toHaveBeenCalled();
   });
 });
 
