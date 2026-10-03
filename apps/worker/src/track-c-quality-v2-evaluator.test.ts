@@ -15,7 +15,7 @@ import {
 } from "./track-c-c3-v5-benchmark-evaluator.js";
 
 const RUBRIC = JSON.parse(readFileSync(
-  new URL("../evals/track-c-c3-v5/v4/rubric.json", import.meta.url),
+  new URL("../evals/track-c-c2/v2/rubric.json", import.meta.url),
   "utf8",
 )) as TrackCV5RubricConfig;
 const HASH = "a".repeat(64);
@@ -42,6 +42,7 @@ function candidate(): TrackCV5TwoPassBenchmarkResult {
     evaluationOnly: true,
     sideEffects: "DISABLED",
     executionLane: "PRODUCTION_CONTRACT",
+    conversationLane: "ADAPTIVE_FOLLOWUP",
     conversationPlan: {
       currentNeed: "Answer the price question.",
       mustResolve: "Give the verified price.",
@@ -175,6 +176,24 @@ describe("Track C C3 V5 benchmark evaluator", () => {
     expect(result.runIdentity.candidateSourceRevision).toBe(SOURCE_REVISION);
     expect(result.runIdentity.rubricHash).toBe(RUBRIC_HASH);
     expect(result.runIdentity.runFingerprint).toMatch(/^[a-f0-9]{64}$/u);
+  });
+
+  it("scores fixed first contact through the Responder stage only", async () => {
+    const assess = vi.fn(async (input: TrackCV5StageJudgeInput) => assessment(input.stage));
+    const firstContact = {
+      ...candidate(),
+      conversationLane: "FIRST_CONTACT_FIXED" as const,
+      identity: { ...candidate().identity, strategistRequestEnvelopeHash: null },
+    };
+
+    const result = await evaluateTrackCV5BenchmarkCase(evaluationInput(assess, {
+      candidate: firstContact,
+    }));
+
+    expect(assess).toHaveBeenCalledTimes(1);
+    expect(assess.mock.calls[0]?.[0].stage).toBe("RESPONDER");
+    expect(result.score.strategist).toBeNull();
+    expect(result.score.outcome).toBe("PASS");
   });
 
   it("rejects a judge rubric label that does not match the rubric actually scored", async () => {

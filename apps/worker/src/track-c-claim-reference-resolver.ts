@@ -1,10 +1,17 @@
-import type { ContextV2 } from "@lana/contracts";
+import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
+import { createHash } from "node:crypto";
 import { candidateProductPresentationClaims } from "./context-v2-candidate.js";
 
-type ClaimReferenceRegistryEntry = Readonly<{
+export type ClaimReferenceRegistryEntry = Readonly<{
   contentHash: string;
   placeholders: Readonly<Record<string, string>> | null;
 }>;
+
+function sha256(value: unknown): string {
+  return createHash("sha256")
+    .update(canonicalJsonV1(value), "utf8")
+    .digest("hex");
+}
 
 function hasValidPresentationProduction(
   text: string,
@@ -115,6 +122,19 @@ export function buildTrackCClaimReferenceRegistry(
     }
   }
   return registry;
+}
+
+/**
+ * Simulation facts use the same reference/binding seam as Context V2 facts,
+ * but callers must only supply this registry on the evaluation-only lane.
+ */
+export function buildTrackCSimulationFactReferenceRegistry(
+  facts: readonly unknown[],
+): ReadonlyMap<string, ClaimReferenceRegistryEntry> {
+  return new Map(facts.map((fact, index) => [
+    `SIMULATION_${String(index + 1).padStart(3, "0")}`,
+    Object.freeze({ contentHash: sha256({ kind: "SIMULATION_FACT", fact }), placeholders: null }),
+  ]));
 }
 
 function resolvePlaceholders(
