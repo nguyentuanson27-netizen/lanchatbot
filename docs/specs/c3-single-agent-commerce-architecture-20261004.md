@@ -437,7 +437,64 @@ Code validates:
 
 The model may propose a state update and request a domain tool from the same conversational turn. No second semantic model is required.
 
-### 8.2 Reference selection and state commit are distinct
+### 8.2 Effective state precedes dependent tools
+
+A tool must never silently read stale pre-correction state when the same turn contains a state correction that the tool depends on.
+
+Invariant:
+
+~~~text
+same-agent state proposal
+        |
+        v
+existing state owner validates/resolves
+        |
+        +-- REJECTED / CONFLICT --> no dependent tool result may be treated
+        |                         as if the correction succeeded
+        |
+        v
+ACCEPTED effective state / revision
+        |
+        v
+dependent domain tool
+        |
+        v
+reply
+~~~
+
+For the first candidate:
+
+- if a tool input depends on a corrected writable field, the existing state owner resolves that correction first;
+- the dependent tool consumes the accepted effective state/revision returned by that owner;
+- if the correction is rejected or conflicts, the runtime must clarify, re-read/re-resolve, or recompute after resolution; it must not continue with a result derived from the old value while speaking as if the new value applied;
+- genuinely independent lookups may still run in the same parallel tool round.
+
+Example:
+
+> "Em nói nhầm, chị 58kg chứ không phải 48kg. Vậy mẫu này mặc size nào?"
+
+Required order:
+
+~~~text
+validate/accept 58kg correction
+        |
+        v
+effective state says weight = 58kg
+        |
+        v
+size/fit tool reads 58kg
+        |
+        v
+reply
+~~~
+
+A size/fit result derived from 48kg cannot be reused after the 58kg correction is accepted.
+
+This is a dependency invariant, not a generic workflow scheduler. No extra model role is introduced.
+
+### 8.3 Reference selection and state commit are distinct
+
+### 8.3 Reference selection and state commit are distinct
 
 For a message such as:
 
@@ -476,13 +533,34 @@ The candidate must preserve the repository's durable model-claim boundary:
 
 Protected claims include the existing durable categories such as price, stock, size/fit recommendation, ETA, shipping/freeship, promotion/offer, product media and effect claims.
 
-### 9.1 Minimal output contract
+### 9.1 Open feasibility hypothesis: safe protected egress without conversational collapse
 
-The candidate should not introduce a new claim graph. It should reuse the existing verified evidence/claim boundary and keep the model's output surface minimal.
+This boundary is **not yet proven feasible** for the new candidate output surface.
+
+The core hypothesis is:
+
+> a smaller single-owner conversational path can preserve the existing protected-claim guarantee **without** forcing normal replies back into rigid templates or growing a new semantic-regex/parser subsystem.
+
+The first implementation slice must test this hypothesis before building the full candidate orchestration.
+
+The feasibility experiment must use the actual egress shape intended for the candidate and answer:
+
+- what prose surface is allowed;
+- which protected facts/effects must remain code-realized;
+- what the existing durable claim boundary can actually enforce;
+- what it explicitly cannot certify about arbitrary surrounding natural language;
+- whether safe output remains sufficiently complete, useful and natural on ordinary multi-part/policy/correction turns;
+- whether adversarial unsafe wording is rejected without continuously expanding semantic regexes/templates.
+
+If the only way to preserve safety is to template most customer-facing language, or if each new phrasing failure requires another semantic parser/regex layer, the hypothesis fails its quality/complexity objective and the candidate remains evaluation-only.
+
+### 9.2 Candidate output surface for the feasibility experiment
+
+The experiment should not introduce a new claim graph. It should reuse the existing verified evidence/claim boundary and keep the proposed output surface minimal.
 
 Conceptually, the model owns:
 
-- conversational free text for acknowledgement, customer context, reasoning glue, questions and transitions;
+- conversational free text for acknowledgement, customer context, questions and transitions;
 - selection/order of verified protected facts that are relevant;
 - requested actions through bounded tool calls.
 
@@ -497,11 +575,11 @@ type CandidateReply = {
 };
 ~~~
 
-This is not approval for a new standalone schema if the existing responder/evidence contract can express the same boundary more simply.
+This is an experiment shape, not a claim that the boundary is solved and not approval for a new standalone schema if the existing responder/evidence contract can express it more simply.
 
-### 9.2 Protected prose invariant
+### 9.3 Protected prose invariant and limit of guarantee
 
-Free text must not become a second channel for undeclared business facts.
+Free text must not intentionally become a second channel for undeclared business facts.
 
 For protected claims:
 
@@ -513,22 +591,24 @@ For protected claims:
 
 The model may choose **which** verified claim to use and where it belongs conversationally, but it may not manufacture or paraphrase a protected value in an undeclared free-text channel.
 
-The first candidate retains the existing durable undeclared-claim rejection/repair boundary rather than replacing it with a new generic Vietnamese semantic parser.
+The existing C3 prose guard is a conservative egress check; it is **not** a certificate of arbitrary natural-language meaning. Reusing it does not by itself prove that surrounding free text cannot imply a stronger/wrong policy, change subject, reverse negation, or drop a material condition.
 
-If surrounding free text changes subject, reverses negation, drops a material condition, strengthens a commitment, or introduces an undeclared protected claim, the proposal must fail closed under the existing claim boundary. A single bounded repair may be attempted using safe reason codes and already verified evidence. After bounded failure, use the existing safe clarification/handoff behavior while preserving independently verified context.
+Therefore the feasibility experiment must explicitly test those cases on the intended candidate surface. It may reuse the current bounded rejection/repair behavior, but it must not claim full semantic guarantee from regex/bounded wording alone.
 
-If the current durable claim boundary cannot enforce this guarantee for the candidate's output form without adding a new broad language-understanding subsystem, the candidate remains **evaluation-only**. The spec does not weaken the existing claim guarantee to make the architecture simpler.
-
-Required adversarial coverage includes:
+Required coverage includes:
 
 - protected claim outside the declared protected surface;
-- correct value attached to the wrong subject;
+- correct verified literal attached to the wrong subject;
 - negation inversion;
 - dropped material condition;
+- stronger policy/benefit implied by surrounding free text;
 - stale evidence;
-- effect-success wording without receipt.
+- effect-success wording without receipt;
+- normal compound replies that must remain useful/natural while staying inside the safe surface.
 
-### 9.3 Runtime hard guard vs offline quality
+If the durable protected-claim guarantee cannot be preserved for the candidate output without a new broad language-understanding subsystem, the candidate remains **evaluation-only**. The spec does not weaken the existing guarantee to make the architecture simpler.
+
+### 9.4 Runtime hard guard vs offline quality
 
 The runtime hard guard owns machine-verifiable authority, permission, effect and privacy invariants. It must not decide whether the answer is useful, reconstruct full customer intent, infer concern, or become a generic semantic-completeness engine.
 
@@ -657,7 +737,7 @@ The first implementation is an isolated candidate/shadow path. It must not send 
 
 The PR base SHA is documentation provenance, not automatically the experiment baseline.
 
-### 13.1 Experiment manifest and substrate
+### 13.1 Experiment manifest, substrate and matched-comparison parity
 
 Every comparison run must record:
 
@@ -675,9 +755,33 @@ rubric/judge identity
 request/run identity
 ~~~
 
-For an architecture-isolation claim, candidate and C3 should share the same accepted business/safety substrate. The intended independent variable is semantic orchestration.
+For a claim that isolates **architecture / semantic orchestration**, recording provenance is necessary but not sufficient. Candidate and baseline must also be matched on the variables that are not intended to change.
 
-If the candidate also changes authority adapters, policy data, context richness or other substrate behavior, the result may still be useful, but it must be reported as a **package-level improvement**, not proof that semantic orchestration alone caused the delta.
+For paired single-turn architecture comparison, use the same:
+
+- model family/version;
+- thinking/effort setting;
+- relevant generation parameters;
+- judge model/configuration or the same human rubric/process;
+- customer message;
+- accepted history;
+- canonical pre-turn state;
+- business/source snapshot and freshness time;
+- business/safety substrate.
+
+For stateful journey architecture comparison, use the same:
+
+- initial state;
+- initial business/source world and freshness policy;
+- model/version/effort/generation settings;
+- judge/rubric process;
+- customer-simulation policy / scripted branch rules.
+
+After the journey begins, each path is expected to accumulate different history/state/effects because those are measured outcomes.
+
+Prompt/orchestration, number of model invocations, tool-call count, token use and latency may differ; those are part of the architecture under test or measured outcomes.
+
+If matching cannot be achieved, the run may still be reported, but only as a **package-level comparison**. It must not replace the matched comparison required to attribute quality delta to semantic orchestration.
 
 ### 13.2 Development evidence
 
@@ -708,7 +812,7 @@ Exact prose is not required except where an existing code-owned receipt/policy s
 
 Before a promotion-candidate run, freeze:
 
-- exact baseline/candidate source identities;
+- exact baseline/candidate source identities and matched-comparison configuration from §13.1;
 - dev corpus vs sealed holdout;
 - history window/truncation policy;
 - rubric and numeric/minimum-improvement threshold;
@@ -804,13 +908,14 @@ Rejected alternatives may be revisited only with new evidence.
 
 Implementation, if approved, proceeds in this order:
 
-1. isolated candidate runner with existing read-only business tools;
-2. paired single-turn and stateful fake-port evaluation;
-3. real-model paired/journey comparison;
-4. stateful mutation tests with fake ports;
-5. **production persistence/business adapters against ephemeral/test infrastructure, external send disabled**;
-6. only after the previous gates pass, bounded opt-in with current fallback;
-7. only after acceptance, plan deprecation of superseded semantic roles.
+1. **protected-egress feasibility slice** using the actual intended output surface, ordinary + adversarial cases, and the existing durable claim boundary;
+2. isolated candidate runner with existing read-only business tools only if the feasibility slice does not fail the safety/quality/complexity hypothesis;
+3. paired single-turn and stateful fake-port evaluation;
+4. real-model paired/journey comparison;
+5. stateful mutation tests with fake ports;
+6. **production persistence/business adapters against ephemeral/test infrastructure, external send disabled**;
+7. only after the previous gates pass, bounded opt-in with current fallback;
+8. only after acceptance, plan deprecation of superseded semantic roles.
 
 ### 16.1 Pre-effect vs post-effect recovery
 
@@ -916,12 +1021,16 @@ Cover:
 - tool argument/reference validation;
 - server-owned protected execution identity;
 - state SET/CLEAR/REPLACE validation against existing writable owners;
+- correction -> accepted effective state -> dependent tool ordering;
+- rejected/conflicting correction blocks stale dependent-tool interpretation;
 - source/revision conflicts;
 - freshness/binding/revision;
 - mutation idempotency;
 - ambiguous-result reconciliation;
-- protected-claim egress and existing undeclared-claim rejection;
-- wrong-subject / negation / condition / no-receipt adversarial cases;
+- protected-egress feasibility on the actual candidate output surface;
+- existing undeclared-claim rejection;
+- wrong-subject / negation / dropped-condition / stronger-implied-policy / no-receipt adversarial cases;
+- normal compound/policy replies remain sufficiently complete and natural without expanding semantic regexes;
 - deterministic derivations;
 - loop budget/fallback.
 
@@ -1029,16 +1138,18 @@ This spec is ready for implementation planning only if reviewers agree that:
 2. evidence for the experiment is stated without claiming current C3 is globally broken;
 3. ownership is clear: model owns conversation; code owns reality/authority/effects;
 4. current C3 business/safety infrastructure to reuse is named;
-5. protected egress preserves the durable "verify every protected claim / reject undeclared claims" contract;
+5. protected egress is explicitly an **open feasibility hypothesis**, and the first implementation slice must prove safety + conversational usefulness without a new broad semantic parser/template explosion;
 6. referent selection uses a bounded runtime-supplied reference set while code retains protected identity authority;
 7. same-agent state patching is limited to existing writable state owners and does not recreate Producer;
-8. mutation idempotency plus post-effect recovery prevents replay after committed effects;
-9. paired evaluation records exact baseline/candidate/substrate provenance and includes stateful journeys;
-10. promotion protocol has preregistered holdout/rubric/accounting rules;
-11. "do not build C3 again" is a falsifiable structural gate, not only a principle;
-12. real-adapter send-disabled verification is required before opt-in;
-13. runtime safety guards remain distinct from offline conversational-quality evaluation;
-14. this PR changes no runtime behavior.
+8. dependent tools consume the accepted effective state after same-turn corrections; stale pre-correction results cannot be treated as current;
+9. mutation idempotency plus post-effect recovery prevents replay after committed effects;
+10. matched architecture comparison requires the same model/version/effort/generation/judge process and paired inputs/substrate; unmatched runs are package-level only;
+11. evaluation includes both paired single turns and stateful journeys;
+12. promotion protocol has preregistered holdout/rubric/accounting rules;
+13. "do not build C3 again" is a falsifiable structural gate, not only a principle;
+14. real-adapter send-disabled verification is required before opt-in;
+15. runtime safety guards remain distinct from offline conversational-quality evaluation;
+16. this PR changes no runtime behavior.
 
 Human approval is required before implementation planning.
 
@@ -1084,4 +1195,4 @@ After any committed state/effect, recovery continues from the committed state/re
 
 Offline locked evaluation, not the runtime guard, decides whether the conversation is complete, useful and natural.
 
-The experiment succeeds only if this smaller semantic path is measurably better across paired turns **and stateful journeys**, preserves the durable claim/effect safety contract, and passes the structural "do not build C3 again" gate.
+The experiment proceeds beyond the first feasibility slice only if the intended protected-egress surface can preserve the durable claim/effect safety contract without collapsing normal conversation into templates or rebuilding a semantic parser. Promotion then additionally requires measurably better paired-turn **and stateful-journey** quality and the structural "do not build C3 again" gate.
