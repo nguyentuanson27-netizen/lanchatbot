@@ -175,21 +175,35 @@ For example, a canonical preference such as loose fit can coexist with the origi
 
 The structured state is memory and authority support, not a lossy substitute for language.
 
-### 3.5 Final guard is a safety boundary, not a second language reasoner
+### 3.5 Separate runtime permission checks from conversational quality
 
-The final guard should answer questions code can know with high confidence:
+Free-form customer prose creates a deliberate boundary: deterministic code can verify authoritative values and effects, but it cannot reliably prove the full semantic completeness, relevance or naturalness of arbitrary Vietnamese text without becoming another language reasoner.
 
-- Is a factual claim grounded?
-- Is it bound to the correct subject?
-- Is the source still fresh?
-- Is an effect claim backed by a successful receipt?
-- Is PII exposure allowed?
-- Is an explicit required customer need completely missing?
-- Does the reply contain directly contradictory authoritative claims?
+Therefore the candidate has two different verification layers.
 
-The final guard should not reconstruct the customer's full intent, choose conversational strategy, or re-plan the answer.
+**Runtime hard guard — permission/safety only.** It may block on machine-checkable invariants such as:
 
-If it must do so, upstream ownership is wrong.
+- PII/private-data exposure;
+- effect claims without a successful receipt/readback;
+- protected product/cart/order identity mismatches;
+- stale source, cart revision or freshness binding;
+- price, stock, policy or other protected values that can be matched to authoritative structured data;
+- forbidden actions or ownership/handoff violations;
+- direct contradictions between protected structured claims where both sides are machine-identifiable.
+
+**Offline/locked quality evaluation — conversational semantics.** It measures:
+
+- whether all explicit customer needs were handled;
+- whether context and corrections were used correctly;
+- usefulness and decision support;
+- next-step appropriateness;
+- coherence, contradiction in ordinary language and naturalness.
+
+The runtime guard must not reconstruct the customer's full intent, infer concerns, choose conversational strategy or re-plan the answer. A generic runtime claim-extraction/semantic-completeness engine is explicitly out of scope for the first candidate.
+
+If a high-impact business claim cannot be machine-checked from authoritative structured data, the safer options are to omit it, expose it through an existing bounded code-owned realization, or keep the candidate in evaluation until a narrow repeated invariant justifies a typed boundary.
+
+This separation is the main defense against recreating the current semantic pipeline inside the final guard.
 
 ---
 
@@ -285,20 +299,24 @@ The candidate must not begin by creating equivalents of:
 
 Any new typed structure must be justified by a concrete code boundary that cannot safely operate on existing canonical state or normal tool arguments.
 
-### 6.2 Agent context
+### 6.2 Agent context and history selection
 
 The initial model context should contain only information relevant to the turn:
 
 - latest inbound message;
-- recent dialogue;
-- selected older dialogue when relevant;
+- a fixed recent accepted-turn window;
 - current canonical customer/session state;
 - current bound product/cart context;
+- older dialogue explicitly referenced by existing canonical state when already available through current owners;
 - already-available verified facts when cheap/current;
 - available domain tools with precise descriptions;
 - explicit hard rules: model output is not business authority and tool success must be observed before claiming effects.
 
-Do not dump every historical record or every business fact into every turn.
+For the first experiment, do **not** add a new semantic history selector, summarizer model or vector-memory subsystem. History selection is intentionally boring and deterministic: recent accepted turns + existing canonical state + existing explicit references.
+
+Only introduce a more selective older-history mechanism after a locked RED scenario proves this bounded context is insufficient across repeated cases.
+
+Do not dump every historical record or every business fact into every turn. Structured state supports current truth; raw dialogue preserves nuance. Neither replaces the other.
 
 ### 6.3 Tool loop
 
@@ -308,15 +326,37 @@ For the first experiment:
 
 - target 1 model invocation for a turn that needs no new external fact/action;
 - target 2 invocations when one tool round is required;
-- allow a third invocation when a second dependent tool round is genuinely required;
+- allow a third invocation only when a second tool round genuinely depends on the first result;
+- issue independent tool calls in the **same** tool round whenever possible;
+- do not serialize price, stock, policy or other independent lookups into extra model invocations;
 - do not permit an unbounded loop;
 - if the bounded loop cannot resolve the turn safely, produce a bounded clarification/unavailable/handoff outcome rather than continuing indefinitely.
+
+Example:
+
+~~~text
+customer asks price + black/M stock
+  -> model
+  -> price lookup + stock lookup in one independent tool round
+  -> model final reply
+~~~
+
+A third model call is justified only by new dependent world information, not by semantic handoff.
 
 The exact hard implementation cap is part of the implementation plan, but it must be finite and recorded in telemetry before any production opt-in.
 
 ### 6.4 No semantic telephone
 
-The same conversational role should continue after a tool result whenever the model/provider API supports the required continuation pattern.
+The same conversational **role** should continue after a tool result whenever the model/provider API supports the required continuation pattern.
+
+Semantic continuity must be represented by observable inputs:
+
+- conversation messages supplied to the model;
+- tool request;
+- tool result;
+- canonical state/context supplied for that invocation.
+
+The architecture must not depend on hidden chain-of-thought, hidden provider session memory or inaccessible reasoning state for correctness.
 
 A second independent model role must not be introduced merely to re-read a JSON interpretation produced by the first role.
 
@@ -326,21 +366,40 @@ A second independent model role must not be introduced merely to re-read a JSON 
 
 The tool layer is the main safety boundary.
 
-A tool must expose domain behavior, not unrestricted data mutation.
+A tool must expose domain behavior, not unrestricted data mutation. Protected execution identity is injected by the server-side runtime and is not chosen by the model.
 
-Prefer:
+Prefer a model-visible request such as:
 
 ~~~ts
-type ChangeCartVariantRequest = {
-  cartId: string;
-  expectedRevision: number;
+type ChangeCurrentCartVariantRequest = {
   component: "TOP" | "BOTTOM" | "SET";
   requestedSize: string;
 };
+~~~
 
-type ChangeCartVariantResult =
+with a server-owned execution scope such as:
+
+~~~ts
+type CommerceExecutionScope = {
+  tenantId: string;
+  conversationId: string;
+  customerId: string;
+  cartId: string;
+  expectedRevision: number;
+  sourceMessageId: string;
+  operationId: string;
+};
+~~~
+
+The model does not supply or override `tenantId`, `customerId`, `conversationId`, protected cart/order identity, authorization scope, or the current revision.
+
+A mutation result must distinguish committed success from ambiguity:
+
+~~~ts
+type ChangeCurrentCartVariantResult =
   | {
       status: "SUCCESS";
+      operationId: string;
       cartRevision: number;
       readback: {
         component: "TOP" | "BOTTOM" | "SET";
@@ -349,21 +408,26 @@ type ChangeCartVariantResult =
     }
   | {
       status: "STALE" | "AMBIGUOUS" | "UNAVAILABLE" | "REJECTED";
+      operationId: string;
       reasonCode: string;
     };
 ~~~
 
-over a generic mutation such as "save arbitrary customer/cart JSON".
+Mutation requirements:
 
-Tool requirements:
+- generate/bind an idempotency or operation identity at the trusted runtime boundary;
+- validate every model-provided argument;
+- bind operations to the current authorized tenant/conversation/customer/cart;
+- enforce source, freshness, permission and revision/CAS rules in code;
+- return a typed success receipt/readback before the model may claim success;
+- after an ambiguous transport/result, reconcile/read back by operation identity before any retry;
+- never blindly retry a mutation whose commit status is unknown.
 
-- validate all model-provided arguments;
-- bind operations to the current authorized conversation/customer/cart;
-- enforce source, freshness and revision rules in code;
-- return typed results;
-- return receipts/readback for mutating operations;
-- expose only data needed by the conversational task;
+All tools must:
+
+- expose only the minimum data needed by the conversational task;
 - never treat prompt instructions as permission;
+- return typed results with explicit unknown/stale/unbound states where relevant;
 - record sanitized diagnostics;
 - never return secrets or unnecessary PII;
 - keep retrieval tenant/shop scoped;
@@ -420,7 +484,7 @@ A model statement such as "customer changed bottom size to M" is not itself a ca
 | 7. Every explicit need gets an outcome | End-to-end turn evaluation checks unresolved/answered/action/clarification/handoff outcomes; avoid an online obligation subsystem unless proven necessary |
 | 8. Do not re-ask; know when to stop | Canonical state plus model understanding; hard stop/handoff stays code-enforced |
 | 9. Use model capability | Same conversational role can reason over raw language and fresh tool results and compose the final answer |
-| 10. Verify final reply | Thin deterministic authority/effect/PII/completeness guard |
+| 10. Verify final reply | Runtime hard guard checks machine-verifiable authority/effect/PII invariants; locked offline evaluation owns semantic completeness and quality |
 
 ---
 
@@ -516,7 +580,9 @@ The implementation must follow these constraints:
 - tools must not accept arbitrary SQL, shell, URL or code execution from the model;
 - secrets and unnecessary private data must not enter model context;
 - recipient data remains behind current private checkout boundaries;
-- mutations require canonical current identifiers and revision/fencing where applicable;
+- protected tenant/customer/conversation/cart/order identifiers and current revisions come from trusted execution context, not model arguments;
+- mutations require idempotency/operation identity plus canonical revision/fencing where applicable;
+- ambiguous mutation results require reconciliation/readback before retry;
 - the agent loop has finite model/tool budgets;
 - retrieval remains shop/tenant scoped;
 - effect claims require returned success receipts;
@@ -528,7 +594,8 @@ The implementation must follow these constraints:
 - customer attempts prompt injection asking the bot to ignore tool restrictions;
 - model invents stock/price without calling or receiving verified data;
 - stale cart revision mutation;
-- model tries to mutate a different product/cart/customer;
+- model attempts to supply/override another tenant/customer/cart/order identity;
+- duplicate/ambiguous mutation result is retried and could double-apply;
 - tool returns malformed/stale data;
 - customer message includes PII in a context where it must not be propagated;
 - model claims an order/cart change after a failed tool result;
@@ -628,13 +695,29 @@ The candidate cannot be promoted if it regresses any existing hard invariant:
 - cross-owner continuation after hard handoff;
 - missing effect receipt;
 - invalid revision/CAS behavior;
-- explicit customer need silently dropped in the locked acceptance corpus.
+- explicit customer need silently dropped in the locked acceptance corpus (evaluation hard gate, not a generic runtime prose parser).
 
-### 15.4 Conversational quality gate
+### 15.4 Paired conversational quality gate
 
 Guard acceptance alone is insufficient.
 
-The candidate and current C3 must be evaluated on the same frozen source/history/business data for:
+The candidate and current C3 must be evaluated as a **paired architecture comparison**. Before a promotion-candidate run, freeze:
+
+- the same customer message and accepted history;
+- the same canonical pre-turn state;
+- the same business/source snapshot and freshness time;
+- the same model family/version;
+- the same thinking/effort setting;
+- the same generation parameters that affect sampling/output;
+- the same tool/business source data;
+- the same case set;
+- the same judge model/configuration or the same human rubric/process.
+
+The intended independent variable is semantic orchestration. Call count, latency and token usage are measured outcomes and do not need to be equal.
+
+If a provider limitation prevents an exactly matched setting, record the mismatch and do not attribute the observed quality delta solely to architecture.
+
+Score both paths for:
 
 - understanding;
 - completeness/question resolution;
@@ -652,7 +735,8 @@ At minimum, promotion requires:
 
 - no hard-safety regression;
 - no worse deterministic state/effect acceptance;
-- a clear measured improvement in conversational quality over current C3;
+- no silent drop of explicit needs in the locked acceptance corpus;
+- a clear measured improvement in conversational quality over current C3 under the paired protocol;
 - no increase in architecture complexity that recreates Producer -> planner -> writer semantic handoffs under new names.
 
 ---
@@ -676,7 +760,22 @@ The desired shape is one conversational owner plus deterministic domain boundari
 
 ---
 
-## 17. Migration strategy if the experiment succeeds
+## 17. Alternatives considered
+
+| Alternative | Why it is not the default candidate |
+|---|---|
+| Continue patching the current C3 semantic pipeline | Good for narrow local bugs, but repeated semantic gaps risk adding more representations/validators without proving end-to-end quality |
+| Producer -> one final response model | Removes one model role but still allows upstream semantic compression to become the final model's only view |
+| Two-model interpreter -> responder | Cleaner than three roles, but still creates a semantic telephone unless the second model retains raw context and the split proves measurable value |
+| Full rewrite from zero | Discards hard-earned authority, cart/CAS, PII, effect, handoff and delivery protections |
+| Adopt n8n or another general agent runtime | The model + memory + tools shape is useful, but a new framework is unnecessary until the existing TypeScript runtime is proven insufficient |
+| Single conversational owner + existing hardened tools | Selected as the smallest experiment that changes semantic ownership while reusing business/safety infrastructure |
+
+These are experiment choices, not permanent bans. A rejected alternative can be reconsidered only with evidence that it addresses a repeated failure more simply than the candidate.
+
+---
+
+## 18. Migration strategy if the experiment succeeds
 
 Migration is deliberately outside this spec PR.
 
@@ -695,7 +794,7 @@ Do not maintain two permanent architectures. The experiment must either converge
 
 ---
 
-## 18. Rollback and failure policy
+## 19. Rollback and failure policy
 
 Before any production opt-in:
 
@@ -710,7 +809,7 @@ If the candidate does not produce a clear quality improvement, remove the experi
 
 ---
 
-## 19. Tech stack
+## 20. Tech stack
 
 Current workspace baseline:
 
@@ -726,7 +825,7 @@ The implementation should first use existing project/provider abstractions and d
 
 ---
 
-## 20. Commands
+## 21. Commands
 
 Workspace commands from the current root package.json:
 
@@ -744,7 +843,7 @@ This documentation PR itself does not claim these commands were run.
 
 ---
 
-## 21. Project structure
+## 22. Project structure
 
 Expected ownership, subject to the later implementation plan:
 
@@ -778,7 +877,7 @@ This spec does not authorize moving modules merely to make the directory tree ma
 
 ---
 
-## 22. Code style
+## 23. Code style
 
 Prefer explicit domain tools and discriminated results over generic model-driven mutation.
 
@@ -811,7 +910,7 @@ Rules:
 
 ---
 
-## 23. Testing strategy
+## 24. Testing strategy
 
 ### Unit
 
@@ -830,6 +929,9 @@ Test:
 - model/tool adapter with fake model outputs;
 - one tool round and dependent two-tool rounds;
 - state update/readback;
+- server-owned protected execution identity;
+- mutation idempotency and ambiguous-result reconciliation;
+- independent tool calls sharing one tool round;
 - tool failure/malformed result;
 - hard stop/handoff;
 - PII boundaries.
@@ -858,7 +960,7 @@ Do not weaken existing regressions to make the candidate pass.
 
 ---
 
-## 24. Boundaries
+## 25. Boundaries
 
 ### Always
 
@@ -867,6 +969,8 @@ Do not weaken existing regressions to make the candidate pass.
 - preserve PII/effect/ownership/Outbox invariants;
 - treat model and retrieved text as untrusted;
 - validate every privileged tool boundary;
+- keep protected execution identity server-owned;
+- do not add a generic runtime semantic-completeness/claim parser to police free-form Vietnamese;
 - keep the agent loop finite;
 - compare exact candidate and baseline inputs when claiming improvement;
 - record real call counts and failures;
@@ -897,7 +1001,7 @@ Do not weaken existing regressions to make the candidate pass.
 
 ---
 
-## 25. Success criteria for this spec PR
+## 26. Success criteria for this spec PR
 
 This documentation PR is complete when reviewers can answer yes to all of the following:
 
@@ -909,25 +1013,26 @@ This documentation PR is complete when reviewers can answer yes to all of the fo
 6. Security/tool trust boundaries are explicit.
 7. The candidate cannot silently become a permanent second architecture without a migration decision.
 8. Evaluation compares the candidate against current C3 on the same frozen inputs.
-9. Guard acceptance is explicitly separated from customer-quality acceptance.
-10. No runtime/code behavior is changed by this PR.
+9. Runtime hard guards are explicitly separated from offline conversational-quality evaluation.
+10. Protected tool identity/idempotency and paired architecture evaluation are explicit.
+11. No runtime/code behavior is changed by this PR.
 
 Human approval of this spec is required before creating the implementation plan.
 
 ---
 
-## 26. Open questions requiring owner review
+## 27. Open questions requiring owner review
 
 1. **Promotion threshold:** What exact paired-judge/human quality threshold should be frozen before the first promotion-candidate run?
 2. **First-contact lane:** Should the experiment initially preserve the current fixed first-contact policy unchanged, or include first contact in the single-agent comparison corpus while still preserving its business-authority rules?
-3. **Model-call cap:** The experiment should target 1 call without tools, 2 with one tool round, and 3 only for dependent tool work. What exact hard runtime cap should be adopted after baseline measurement?
+3. **Model-call cap:** The experiment targets 1 call without tools, 2 with one independent tool round, and 3 only for genuinely dependent tool work. What exact hard runtime cap should be frozen after baseline measurement?
 4. **Candidate naming:** Keep "C3 single-agent candidate" for the experiment, or use a neutral name that does not imply automatic replacement of C3?
 
 None of these open questions requires runtime code in this PR.
 
 ---
 
-## 27. Decision summary
+## 28. Decision summary
 
 The candidate architecture is intentionally small:
 
