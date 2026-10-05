@@ -52,16 +52,25 @@ T5 Bounded refs + existing-state updates + effective-state ordering
 T6 Mutation idempotency + post-effect recovery
  |
  v
-T7 Stateful matched journeys + structural-complexity audit
+T7 Preregister promotion protocol + seal holdout
  |
  v
-T8 Real-adapter send-disabled pre-opt-in verification
+T8 Stateful matched promotion journeys + structural-complexity audit
+ |
+ v
+T9 Real-adapter send-disabled pre-opt-in verification
  |
  v
 CHECKPOINT B — promotion/migration decision (separate approval)
 ~~~
 
 Tasks after Checkpoint A are conditional. Do not build them merely because they appear in this plan.
+
+**Evidence phases are intentionally different:**
+
+- **T1–T3 are development/feasibility evidence.** Their corpus is visible to implementers and may be used to refine the candidate. They can decide whether the architecture is worth continuing, but they are not promotion evidence.
+- **T7 freezes promotion protocol + sealed holdout before any promotion-candidate result is observed.**
+- **T8 is the first run that may support an architecture-promotion claim.** Development and sealed-holdout results must be reported separately.
 
 ## 3. First experiment: what must actually be proven
 
@@ -75,9 +84,11 @@ model chooses fact ref -> code prints verified fact
 
 It must show that the same conversational owner can connect dialogue context and verified evidence into a useful customer decision while preserving the durable protected-claim boundary.
 
-### 3.2 Locked semantic families
+### 3.2 Development/feasibility semantic families
 
-Create a compact feasibility corpus with **at least 3 cases from each family below** plus 2–4 simple fact controls. Keep it small enough for line-by-line review.
+Create a compact **development** feasibility corpus with **at least 3 cases from each family below** plus 2–4 simple fact controls. Keep it small enough for line-by-line review.
+
+This corpus is intentionally visible to implementation work. Passing it can justify Checkpoint A GO, but it cannot later be relabeled as sealed promotion evidence.
 
 #### A. Concern / decision support
 
@@ -111,22 +122,25 @@ Required outcome:
 - give at most one useful next step/clarification tied to the customer's decision;
 - preserve one coherent reply rather than a bag of independent fact lines.
 
-#### C. Cross-turn correction / referent / defer
+#### C. Cross-turn correction / referent / defer — egress feasibility only
 
-Mandatory journey ingredients:
+Mandatory dialogue ingredients:
 
 - customer corrects weight, e.g. 48kg -> 58kg;
 - customer changes which product is being discussed;
 - customer changes component size;
 - customer says “chưa chốt”.
 
-Required outcome:
+For **T1–T3**, use raw accepted dialogue plus a frozen current canonical snapshot / verified evidence that is identical for baseline and candidate. This phase tests whether the conversational owner understands and expresses the corrected situation; it does **not** claim to prove state persistence, trusted-reference resolution or dependent-tool ordering.
 
-- accepted correction becomes the effective state before dependent size/fit lookup;
-- stale pre-correction tool results are not reused as current;
-- bounded subject reference resolves to the correct trusted identity;
-- the final reply and persisted state agree about product/size/commitment;
-- “chưa chốt” prevents purchase/effect progression.
+Required feasibility outcome:
+
+- final reply follows the latest correction/referent rather than an older contradicted value;
+- reply does not reuse stale evidence that the frozen scenario marks superseded;
+- reply does not invent a purchase/effect commitment after “chưa chốt”;
+- the whole reply remains coherent across the correction and product/size context.
+
+The runtime transition `correction -> accepted effective state -> dependent tool -> reply`, bounded-reference resolution, and persisted-state agreement are proved later in **T5** and exercised end-to-end in **T8** using traces each path actually creates. Fixture answers must not substitute for those runtime invariants.
 
 #### D. Conditional policy
 
@@ -188,7 +202,7 @@ Do not “fix” a failed feasibility experiment by adding a new semantic subsys
 
 - [ ] Record exact `implementationBaseSha`, `comparisonBaselineSha`, shared business/safety substrate, model/version/effort/generation config and judge/rubric identity.
 - [ ] Lock the feasibility corpus covering all four semantic families plus simple positive controls; every case defines raw dialogue/state, verified business truth, required outcomes and forbidden claims/actions.
-- [ ] Paired single-turn inputs are identical except orchestration; stateful journeys share initial conditions/customer policy and then retain each path's own resulting history/state.
+- [ ] Paired feasibility inputs are identical except orchestration. Correction/referent/defer cases use the same frozen accepted dialogue/current snapshot/evidence on both sides and are explicitly labeled **egress feasibility only**; no T1–T3 result claims persisted-state/tool-ordering proof.
 
 **Verification:**
 
@@ -233,13 +247,14 @@ Add exact focused test path once Task 1 inventory chooses the owning module.
 
 ### Task 3 — Run the first provider-backed whole-reply feasibility comparison
 
-**Description:** Use the actual intended candidate egress surface and the same model/version/effort/generation settings on both candidate and C3. Run the locked semantic corpus and review the entire final reply.
+**Description:** Use the actual intended candidate egress surface and the same model/version/effort/generation settings on both candidate and C3. Run the visible **development/feasibility** semantic corpus and review the entire final reply.
 
-This task is the first major architecture gate.
+This task is the first major architecture gate, but it is **not promotion evidence**. For correction/referent/defer cases it evaluates the reply against frozen accepted dialogue/current evidence only; it does not claim to prove candidate-owned persistence, reference resolution or dependent-tool ordering.
 
 **Acceptance criteria:**
 
-- [ ] Every concern, partial-evidence, correction/referent and conditional-policy case retains a complete per-attempt trace: raw input/history/state, verified facts, model request/result, assembled final reply, guard result and quality result.
+- [ ] Every concern, partial-evidence, correction/referent and conditional-policy case retains a complete per-attempt trace: raw input/history/frozen current state, verified facts, model request/result, assembled final reply, guard result and quality result.
+- [ ] Correction/referent/defer feasibility results are labeled as **egress understanding evidence only** and do not assert persisted-state, trusted-ref or dependent-tool correctness.
 - [ ] Whole-reply quality evaluation is blind/paired where supported; all accepts, rejects, fallbacks and timeouts remain in the denominator.
 - [ ] Owner review can inspect paired final replies directly; simple fact controls are reported separately and cannot dominate the conclusion.
 
@@ -268,6 +283,8 @@ Proceed only with explicit owner approval after reviewing Task 3 evidence.
 - the candidate still has one conversational semantic owner.
 
 If evidence is mixed or neutral, prefer STOP/remove experiment over preserving neutral complexity.
+
+A GO at Checkpoint A means only: **protected egress + conversational ownership are feasible enough to justify implementing the real tool/state/effect path.** It is not a promotion decision and does not prove stateful correctness.
 
 ---
 
@@ -337,29 +354,60 @@ If evidence is mixed or neutral, prefer STOP/remove experiment over preserving n
 
 **Estimated scope:** M.
 
-### Task 7 — Stateful matched journeys and structural audit
+### Task 7 — Preregister promotion protocol and seal the holdout
 
-**Description:** Expand from the feasibility corpus to matched stateful journeys where each architecture continues with the history/state/effects it produced. Measure quality and architecture, not just isolated turns.
+**Description:** Before any run whose result may be used for promotion, freeze the comparison protocol required by spec §13.4 and seal a holdout corpus that implementation work has not inspected or tuned against.
+
+This task produces **no promotion score**. Its output is the immutable protocol/holdout identity used by Task 8.
+
+**Acceptance criteria:**
+
+- [ ] Freeze exact baseline/candidate source identities and matched model/version/effort/generation/judge settings.
+- [ ] Separate development corpus from sealed holdout; record holdout identity/hash without exposing case contents to candidate-tuning work.
+- [ ] Freeze history/truncation policy, rubric, numeric/minimum-improvement threshold, blind/randomized A/B ordering, tie/judge-disagreement handling, repeated-generation/variance policy, retry policy and all-attempt accounting.
+- [ ] Freeze provider/model/request identity requirements plus corpus/rubric provenance.
+- [ ] Thresholds/rubric/accounting rules cannot change after Task 8 results are observed.
+
+**Verification:**
+
+- [ ] Manifest/registration validator fails closed when any preregistered field is missing or mismatched.
+- [ ] Owner can review the protocol/thresholds without seeing sealed holdout contents.
+- [ ] Development and holdout identities are distinct and cannot be silently substituted.
+
+**Dependencies:** Task 6.
+
+**Files likely touched:** 2–4 evaluation registration/manifest files.
+
+**Estimated scope:** S–M.
+
+### Task 8 — Stateful matched promotion journeys and structural audit
+
+**Description:** Run the preregistered matched comparison on the sealed holdout. Each architecture continues with the history/state/effects it actually produced. This is the first run in this plan whose result may support an architecture-promotion claim.
 
 **Acceptance criteria:**
 
 - [ ] Journeys include corrections, product switches, partial lookup failure, defer/stop, policy, cart edit and effect recovery.
+- [ ] Correction/ref/state cases prove the real trace `customer correction -> accepted effective state -> bounded trusted ref/tool input -> dependent tool result -> persisted state/final reply`; no fixture-injected “correct state” substitutes for the transition.
+- [ ] Each path consumes its own resulting history/state/effects after the common initial conditions.
 - [ ] Raw customer needs are mapped to customer-visible outcomes; extracted intermediate obligations are not used as the completeness denominator.
 - [ ] Structural audit identifies every semantic representation/validator crossed by representative C3 vs candidate turns and shows which old semantic responsibilities were actually collapsed/replaced.
+- [ ] Development and sealed-holdout results are reported separately.
 
 **Verification:**
 
+- [ ] Task 7 preregistration identity is validated before the first holdout result is scored.
 - [ ] Matched model/config/judge rules from the spec are enforced by manifest validation.
-- [ ] Whole final replies and resulting state are retained for owner review.
+- [ ] Whole final replies, resulting state and relevant tool/effect traces are retained for owner review.
+- [ ] All accepts, rejects, timeouts, fallbacks and handoffs remain in the registered denominator.
 - [ ] No claim of architecture superiority from an unmatched/package-level run.
 
-**Dependencies:** Task 6.
+**Dependencies:** Task 7.
 
 **Files likely touched:** 3–5 evaluation/journey files.
 
 **Estimated scope:** M.
 
-### Task 8 — Real-adapter send-disabled pre-opt-in gate
+### Task 9 — Real-adapter send-disabled pre-opt-in gate
 
 **Description:** Exercise production persistence/business adapters on isolated/ephemeral infrastructure with external customer send disabled.
 
@@ -375,7 +423,7 @@ If evidence is mixed or neutral, prefer STOP/remove experiment over preserving n
 - [ ] Relevant package typecheck/build/lint pass.
 - [ ] `pnpm check` passes before any opt-in proposal.
 
-**Dependencies:** Task 7.
+**Dependencies:** Task 8.
 
 **Files likely touched:** 3–5 integration/evaluation files.
 
@@ -405,14 +453,14 @@ pnpm --filter @lana/worker typecheck
 pnpm --filter @lana/worker build
 ~~~
 
-### Checkpoint B after Tasks 7–8
+### Checkpoint B after Tasks 8–9
 
 ~~~bash
 pnpm --filter @lana/worker test
 pnpm check
 ~~~
 
-Then review against Definition of Done and the PR385 promotion/structural gates. Production opt-in/migration remains a separate owner-approved plan.
+Then review preregistered sealed-holdout evidence against Definition of Done and the PR385 promotion/structural gates. Development-corpus results are supporting evidence only. Production opt-in/migration remains a separate owner-approved plan.
 
 ## 6. Risks and mitigations
 
@@ -436,8 +484,9 @@ After Checkpoint A:
 
 - Task 4 must precede Task 5.
 - Task 5 must precede Task 6.
-- Some evaluation fixture preparation for Task 7 may proceed in parallel only after interfaces from Tasks 4–5 are stable.
-- Task 8 is sequential after mutation/recovery behavior exists.
+- Promotion protocol/holdout design for Task 7 may be prepared after interfaces from Tasks 4–6 are understood, but it must be **sealed before any Task 8 promotion result is observed**.
+- Task 8 is sequential after Task 7 preregistration.
+- Task 9 is sequential after the stateful promotion path exists.
 
 Avoid parallel agents making independent semantic schemas for the same concept.
 
@@ -462,7 +511,9 @@ This plan is ready for implementation only when:
 
 - PR385 is merged; plan is approved; implementation base SHA is refreshed/recorded immediately before build;
 - every task has acceptance + verification + dependency;
-- first feasibility experiment has owner-reviewable whole-reply cases from all four semantic families;
-- Checkpoint A is explicitly a stop/go gate;
+- first feasibility experiment has owner-reviewable whole-reply cases from all four semantic families and explicitly does **not** overclaim persisted-state/tool-ordering evidence;
+- Checkpoint A is explicitly a development feasibility stop/go gate;
+- promotion protocol + sealed holdout are preregistered before Task 8;
+- development and promotion evidence cannot be conflated;
 - no task is larger than one focused session / ~5 files without further split;
 - production opt-in/migration remains outside this plan until candidate evidence exists.
