@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "DRAFT_ROUTE_PENDING",
+  "status": "FROZEN",
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "specSha": "2336826244b85eae92f12f310a9da8f1d5da23d6",
   "evidenceSha": "1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da",
@@ -10,16 +10,56 @@
       "model": "gpt-6.1-sol",
       "version": "gpt-6.1-sol",
       "effort": "high",
-      "credentialRoute": null,
-      "generationConfig": null
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
     },
     "conversation": {
       "provider": "OPENAI",
       "model": "gpt-6.1-sol",
       "version": "gpt-6.1-sol",
       "effort": "high",
-      "credentialRoute": null,
-      "generationConfig": null
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
     }
   },
   "repetitions": 3,
@@ -87,8 +127,8 @@
   },
   "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
   "corpusHashes": {
-    "a2": "035a19d9eb9d48256587d0122840f5199f92004c5654ed96d651051aa073df4a",
-    "a3": "50032c95052504b8508bd8f7172667ad24b3eb9562bd68451e29e1046c035fa5"
+    "a2": "05d14e1ccad999e74bbf21ed73aa80ecd159241e66b69ba7cac55f509d83b229",
+    "a3": "b53cdef8b74796086f8ee89872e2d8fa73790c47b788a0323d12390cf441a89a"
   },
   "seedHashes": {
     "undeclared-protected-claim": "80f4c271376972fcff22d0a910058839a83f20c87a8c51b0ce4c59ed3a6ae029",
@@ -147,7 +187,7 @@
   },
   "usability": {
     "maximumTerminalFailureRate": 0.1,
-    "ownerConfirmed": false
+    "ownerConfirmed": true
   },
   "scoring": {
     "method": "OWNER_HUMAN_ALL_TERMINAL_OUTCOMES",
@@ -183,12 +223,8 @@
     "addedLatency": "verifier start through final gate",
     "fallbackRate": "terminal fallback/handoff/no-send divided by all eligible population attempts"
   },
-  "versionPolicy": "Require exact provider-returned model identity; no substitution. Alias drift requires a new frozen configuration/run.",
-  "draftLimitations": [
-    "Provider route, generation config and owner usability threshold are unresolved; T1 is not frozen.",
-    "A2 authored seed segments are preserved; first and stale historical attempts had no finalAssembledReply. New-seam authority/empty-reply handling must be resolved before freeze.",
-    "Code scenarios define replay overrides but no runner executes them yet.",
-    "Captured request firewall test uses a mock provider; no real provider request exists.",
-    "Schema/output/PII validation and final gate are not implemented until T2."
-  ]
+  "versionPolicy": "Freeze selected gpt-6.1-sol alias; record provider-returned model when exposed, reject any different returned model. Immutable snapshot identity may be unavailable; no claim of one is made. Alias/config changes require a new frozen run.",
+  "draftLimitations": [],
+  "serialization": "JSON.stringify fixed runtime projection key order; SHA-256 UTF-8; exact text without normalization. No truncation. Histories are supplied accepted dialogue only.",
+  "providerBoundary": "Codex CLI supplies its existing login to a loopback relay. Relay sends only the frozen model-visible body, tools=[], tool_choice=none and at most one upstream generation request. CLI retries/continuations are rejected locally and retained in accounting; no provider retry. No token file is read or credentials retained."
 }

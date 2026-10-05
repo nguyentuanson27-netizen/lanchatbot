@@ -59,8 +59,22 @@ test('frozen bounds reject oversized input instead of silently truncating author
   assert.throws(() => projectRuntime(manifest, fixture, 'verifier', 'opaque-request-uuid'), /BOUND/);
 });
 
-test('full freeze fails closed while credential route and usability approval are unresolved', () => {
-  assert.throws(() => validateProtocol(manifest, a2, a3), /NOT_FROZEN/);
+test('owner decisions and bounded Codex inference configuration are frozen', () => {
+  assert.equal(manifest.usability.ownerConfirmed, true);
+  assert.equal(manifest.usability.maximumTerminalFailureRate, 0.1);
+  for (const model of Object.values(manifest.models)) {
+    assert.equal(model.credentialRoute, 'CODEX_CHATGPT_LOGIN');
+    assert.equal(model.generationConfig.tools.length, 0);
+    assert.equal(model.generationConfig.tool_choice, 'none');
+    assert.equal(model.generationConfig.relayUpstreamRequestsPerAttempt, 1);
+  }
+  assert.doesNotThrow(() => validateProtocol(manifest, a2, a3));
+  const broken = structuredClone(manifest);
+  broken.models.verifier.generationConfig = null;
+  assert.throws(() => validateProtocol(broken, a2, a3), /NOT_FROZEN/);
+  const retrying = structuredClone(manifest);
+  retrying.models.verifier.generationConfig.relayUpstreamRequestsPerAttempt = 2;
+  assert.throws(() => validateProtocol(retrying, a2, a3), /GENERATION_CONFIG/);
 });
 
 test('A2 and A3 preflight reject missing or mismatched runtime source SHA', () => {

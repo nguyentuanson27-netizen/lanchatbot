@@ -54,8 +54,9 @@ export function projectRuntime(manifest, fixture, role, requestId) {
 export function buildRequest(manifest, role, projection) {
   const model = manifest.models[role];
   return { model: model.model, reasoning: { effort: model.effort },
-    instructions: manifest.prompts[role], input: JSON.stringify(projection),
-    tools: [], store: false,
+    instructions: manifest.prompts[role],
+    input: [{ type:'message', role:'user', content:[{type:'input_text',text:JSON.stringify(projection)}] }],
+    tools: [], tool_choice:'none', parallel_tool_calls:false, store: false, stream:true,
     ...(role === 'verifier' ? { text: { format: { type: 'json_schema', name: 'semantic_egress_verdict', strict: true, schema: manifest.verdictSchema } } } : {}) };
 }
 
@@ -106,7 +107,17 @@ export function validateProtocol(m, a2, a3) {
   const summary = validateDraft(m, a2, a3);
   requireThat(m.status === 'FROZEN' && m.usability.ownerConfirmed === true &&
     Number.isFinite(m.usability.maximumTerminalFailureRate) && m.usability.maximumTerminalFailureRate >= 0 && m.usability.maximumTerminalFailureRate <= 1 &&
-    Object.values(m.models).every(model => model.credentialRoute && model.generationConfig), 'NOT_FROZEN_ROUTE_OR_THRESHOLD');
+    Object.values(m.models).every(model => model.credentialRoute && model.generationConfig), 'NOT_FROZEN_PROVIDER_CONFIGURATION');
+  for (const model of Object.values(m.models)) {
+    const c = model.generationConfig;
+    requireThat(model.credentialRoute === 'CODEX_CHATGPT_LOGIN' && c.transport === 'CODEX_CLI_BOUNDED_INFERENCE_RELAY' &&
+      c.cliVersion === '0.159.2' && c.endpoint === 'https://chatgpt.com/backend-api/codex/responses' &&
+      Array.isArray(c.tools) && c.tools.length === 0 && c.tool_choice === 'none' && c.parallel_tool_calls === false &&
+      c.store === false && c.stream === true && c.reasoningEffort === 'high' && c.timeoutMs === 90000 &&
+      c.relayUpstreamRequestsPerAttempt === 1 && c.retry === 0 && c.maxResponseBytes === 1048576,
+      'GENERATION_CONFIG');
+  }
+  requireThat(hash(JSON.stringify(a2)) === m.corpusHashes.a2 && hash(JSON.stringify(a3)) === m.corpusHashes.a3, 'CORPUS_HASH');
   return summary;
 }
 
