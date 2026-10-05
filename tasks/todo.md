@@ -86,7 +86,9 @@
   - [ ] Freeze history/truncation, rubric and numeric **absolute product-quality thresholds** for each mode.
   - [ ] Freeze blind/randomized A/B ordering and tie/judge-disagreement handling.
   - [ ] Freeze repeated-generation/variance and retry/all-attempt accounting.
-  - [ ] Freeze C3 comparative-delta reporting rules separately from candidate pass/fail.
+  - [ ] Freeze **comparative replacement criteria** for paired single-turn and stateful journeys: preregistered clear quality-improvement rule over C3 + any non-compensable quality dimensions.
+  - [ ] Freeze hard comparative non-regression rules for safety/state/effect behavior.
+  - [ ] Freeze structural evidence required to prove C3 semantic responsibilities were actually removed/collapsed.
   - [ ] Build sealed holdout from target product capabilities, not known C3 failures.
   - [ ] Freeze provider/model/request and corpus/rubric provenance.
   - [ ] One promotion mode cannot compensate for failure in the other.
@@ -96,11 +98,11 @@
   - [ ] Validate T7 preregistration before first holdout result in either mode is scored.
   - [ ] **Paired single-turn:** run complete candidate with exactly same message, accepted history, canonical pre-turn state and business snapshot as baseline.
   - [ ] **Paired single-turn:** report candidate absolute quality/safety/completeness/product-quality gate and retain exact paired final replies + common input.
-  - [ ] **Paired single-turn:** report matched C3 delta separately for regression/migration analysis; do not use it as correctness threshold.
+  - [ ] **Paired single-turn:** report matched C3 delta separately and evaluate the preregistered paired-turn replacement criterion; it is not the correctness threshold but is required for replacement readiness.
   - [ ] **Stateful journeys:** each path consumes its own resulting state/history/effects after common initial conditions.
   - [ ] **Stateful journeys:** real correction trace proves correction -> accepted effective state -> bounded trusted ref/tool input -> dependent result -> persisted state/final reply.
   - [ ] **Stateful journeys:** report candidate absolute quality/safety/state/effect/completeness/product-quality gate separately.
-  - [ ] **Stateful journeys:** report matched C3 delta separately for regression/migration analysis; do not use it as correctness threshold.
+  - [ ] **Stateful journeys:** report matched C3 delta separately and evaluate the preregistered journey replacement criterion; it is not the correctness threshold but is required for replacement readiness.
   - [ ] Raw customer need -> final customer outcome completeness accounting in both modes.
   - [ ] Matched comparison manifest enforced.
   - [ ] Retain whole replies for both modes; retain resulting state/tool/effect traces for journeys.
@@ -109,7 +111,10 @@
   - [ ] Report development, paired-single-turn holdout and journey-holdout results separately.
   - [ ] Both promotion modes must pass their **absolute** gates independently; no averaged/aggregate pass hides a failed mode.
   - [ ] Better-than-C3 results cannot rescue an absolute failure.
-  - [ ] Neutral/local worse C3 wording deltas remain visible for migration review but do not automatically fail a candidate that passes the absolute contract.
+  - [ ] Emit `Candidate meets target` verdict from absolute gates only.
+  - [ ] Emit `Candidate qualifies to replace C3` verdict only after target PASS + clear preregistered improvement in both comparison modes + no safety/state/effect regression + structural simplification.
+  - [ ] Neutral matched quality may yield target PASS but must yield replacement-ready FAIL.
+  - [ ] Any hard/non-compensable comparative regression defined in T7 fails replacement readiness.
 
 - [ ] **T9 — Real-adapter send-disabled gate**
   - [ ] Ephemeral/test persistence infrastructure.
@@ -130,6 +135,8 @@
 - [ ] Final review: correctness -> security -> architecture -> simplicity -> performance.
 - [ ] Project Definition of Done checked.
 - [ ] Promotion claim uses only preregistered sealed-holdout evidence; development corpus is not relabeled as holdout.
-- [ ] Absolute product/safety gates define candidate correctness; C3 comparison is secondary regression/migration evidence.
-- [ ] Paired single-turn and stateful-journey absolute promotion gates both pass independently; neither mode can compensate for the other.
+- [ ] Absolute product/safety gates define `Candidate meets target`; C3-relative scoring does not define correctness.
+- [ ] Paired single-turn and stateful-journey absolute gates both pass independently; neither mode can compensate for the other.
+- [ ] Replacement readiness additionally passes preregistered quality-improvement criteria vs C3 in both modes, hard safety/state/effect non-regression, and structural simplification.
+- [ ] Neutral matched quality is recorded as target-met but not replacement-ready; no migration proceeds from that result.
 - [ ] No live traffic/deploy/C3 removal performed by this plan.
