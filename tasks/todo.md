@@ -1,142 +1,255 @@
-# C3 Single-Agent Candidate — TODO
+# C3 Semantic-Verifier Checkpoint A — TODO
 
 **Source:** `tasks/plan.md`  
-**Spec:** `docs/specs/c3-single-agent-commerce-architecture-20261004.md`  
-**Status:** PLAN ONLY — PR385 is merged; implementation waits for plan approval.
+**Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
+**Status:** PLAN ONLY — implementation has not started.  
+**Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
-## Precondition
+## Preconditions
 
-- [x] PR385 merged as `432376b05ca8c8e1aff0dea397534f4a6805c618`.
-- [ ] After plan approval, refresh `main` and record that exact SHA as `implementationBaseSha`.
-- [ ] Freeze same-substrate C3 `comparisonBaselineSha` for regression/migration comparison.
-- [ ] Confirm matched model/version/effort/generation/judge settings for comparative claims.
-- [ ] Confirm **goal-first, baseline-second** evaluation: absolute product/safety gates define candidate pass/fail; C3 deltas are reported separately.
+- [x] Final degraded self-review of PR388: APPROVE for planning.
+- [ ] PR388/spec approved + merged, or implementation explicitly pins the approved spec commit.
+- [ ] Refresh then-current `main`; record exact `implementationBaseSha`.
+- [ ] Confirm PR387 head `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da` is evidence/fixture input only; do not import its failed runtime seam.
+- [ ] Freeze verifier provider/model/version/effort/generation config.
+- [ ] Freeze A3 conversational provider/model/version/effort/generation config.
+- [ ] Freeze prompt/schema/context/binding/variance/usability/quality/operational measurement identities before first provider result.
+- [ ] Define required `a2RunSourceSha` / `a3RunSourceSha` preflight fields; seal each from a clean executable commit immediately before the first corresponding provider call.
+- [ ] Freeze one-generation-request-max provider policy and fail-closed accounting for auth/token/401/429/5xx/timeout failures.
+- [ ] Freeze runtime-vs-evaluator projections; evaluator-only labels may never enter conversation/verifier requests.
+- [ ] Freeze terminal disposition mapping + exact code-owned fallback IDs/text/hashes.
+- [ ] Freeze A3 candidate output surface to final customer-visible text + telemetry only.
+- [ ] Verify current official provider API docs before implementing provider-specific calls.
+- [ ] Confirm no C3 comparison criterion applies at Checkpoint A.
 
-## First feasibility experiment — mandatory before full candidate
+## T1 — Freeze protocol and corpora
 
-- [ ] **T1 — Freeze bases, corpus and protocol**
-  - [ ] At least 3 concern/decision-support cases.
-  - [ ] At least 3 multi-part/partial-evidence cases.
-  - [ ] At least 3 correction/referent/defer **egress-feasibility** cases using raw accepted dialogue + frozen current state/evidence.
-  - [ ] At least 3 conditional-policy cases.
-  - [ ] Add only 2–4 simple price/stock/direct-fact positive controls.
-  - [ ] Each case defines raw dialogue/state, verified truth, required outcomes and forbidden claims/actions.
-  - [ ] Correction/referent/defer feasibility cases explicitly do **not** claim persisted-state, trusted-ref or dependent-tool proof.
-  - [ ] Paired manifest rejects model/config/judge/substrate mismatch.
+- [ ] Create fail-closed manifest/protocol validator.
+- [ ] Record implementation/spec/evidence provenance.
+- [ ] Freeze verifier + conversation + judge/human scoring descriptors.
+- [ ] Freeze prompt/schema hashes.
+- [ ] Freeze state-field allowlist, history/input bounds and trusted/untrusted serialization.
+- [ ] Freeze separate runtime-input projections vs evaluator-only expectations/rubrics.
+- [ ] Forbid caseId/split/attack-family/expected-safe-or-unsafe/required/forbidden/rubric labels from conversation/verifier request projections.
+- [ ] Freeze requestId + finalDraftHash + trustedSnapshot/state/fact binding.
+- [ ] Freeze required A2/A3 run-source SHA fields + preflight validation.
+- [ ] Freeze one provider generation request maximum per registered attempt; no automatic generation retry.
+- [ ] Freeze auth/token/401/429/5xx/timeout fail-closed accounting.
+- [ ] Freeze no model repair/reverify policy.
+- [ ] Freeze repetitions/variance/all-attempt accounting.
+- [ ] Freeze exact terminal disposition policy for FAIL/UNCERTAIN/timeout/malformed/provider-error/stale snapshot.
+- [ ] Freeze exact code-owned fallback IDs/text/hashes.
+- [ ] Freeze A3 generator contract: exact customer-visible final text + telemetry only.
+- [ ] Freeze numeric safe-reply fallback/handoff/no-send usability threshold.
+- [ ] Freeze A3 whole-reply development quality bar.
+- [ ] Freeze latency/error/token/cost/fallback measurement method.
+- [ ] A2 includes all 7 exact PR387 attacks.
+- [ ] A2 includes >=2 non-literal paraphrases for each of the 5 previously escaped semantic families.
+- [ ] A2 includes prompt/meta-instruction, fake-ref, mixed safe+unsafe, oversized-context and stale-binding/replay abuse cases.
+- [ ] A2 includes safe controls for multi-part facts, conditional policy, decision support, receipt-backed acknowledgement and bounded correction/referent language.
+- [ ] A3 includes concern=3, partial-evidence=3, correction/referent/defer=4, conditional-policy=3 and 2–4 simple controls.
+- [ ] Every A3 case records raw dialogue/state/trusted truth, required outcomes and forbidden claims/actions.
+- [ ] Provider/model unavailable is defined as BLOCKED, never substituted/simulated.
 
-- [ ] **T2 — Minimal protected-egress surface**
-  - [ ] RED: undeclared protected claim.
-  - [ ] RED: wrong subject.
-  - [ ] RED: negation inversion.
-  - [ ] RED: dropped material policy condition.
-  - [ ] RED: stronger implied policy/benefit in surrounding prose.
-  - [ ] RED: stale evidence.
-  - [ ] RED: effect-success wording without receipt.
-  - [ ] GREEN without generic semantic parser, case switches or template proliferation.
-  - [ ] Normal compound replies remain coherent/natural.
+Verification:
 
-- [ ] **T3 — Provider-backed whole-reply feasibility comparison**
-  - [ ] Same model/version/effort/generation config for C3 and candidate.
-  - [ ] Evaluate the exact final customer-visible reply, not only factual slots.
-  - [ ] Score understanding, completeness, context use, partial-answer quality, usefulness, next step, coherence, repetition/contradiction, naturalness and factual/action safety.
-  - [ ] Retain all attempts including reject/timeout/fallback/handoff.
-  - [ ] Owner reviews paired final replies directly.
-  - [ ] Produce explicit GO/STOP evidence note.
-  - [ ] Label T1–T3 results as **development/feasibility evidence**, not promotion evidence.
+- [ ] `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs`
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs`
+- [ ] Protocol test: runtime conversation/verifier projections exclude evaluator-only fields.
+- [ ] Protocol test: A2/A3 provider preflight rejects missing/mismatched run-source SHA.
+- [ ] Protocol test: terminal disposition/fallback IDs/text/hashes are frozen inputs.
+- [ ] Manual: no result file exists before protocol freeze.
+- [ ] Manual: no real customer PII/secrets in fixtures.
+- [ ] Manual: no PR387 source implementation imported.
+
+## T2 — Deterministic verifier envelope + final gate
+
+- [ ] RED: malformed/unknown verifier verdict is non-send-eligible.
+- [ ] RED: PASS with violations is rejected.
+- [ ] RED: unknown protectedRef is rejected.
+- [ ] RED: finalDraftHash mismatch is rejected.
+- [ ] RED: trustedSnapshot/state/fact mismatch is rejected.
+- [ ] RED: fact expires after verifier result but before final gate.
+- [ ] RED: subject/state revision changes after verifier result.
+- [ ] RED: permission/recipient changes after verifier result.
+- [ ] RED: verifier timeout/error/UNCERTAIN is non-send-eligible.
+- [ ] RED: unverified fallback cannot contain protected business assertion.
+- [ ] GREEN: valid PASS + unchanged current snapshot becomes send-eligible in the isolated seam.
+- [ ] Compatibility-only assertion: later receipt-backed post-effect deterministic recovery remains representable without effect replay; do **not** implement post-effect recovery in Checkpoint A.
+- [ ] Verifier has no tools/state/effect/rewrite/send capability.
+- [ ] Trusted context is bounded/allowlisted; untrusted text is data, not verifier instruction.
+- [ ] No semantic parser/regex/template added for PR387 phrasing failures.
+- [ ] No production entrypoint imports the Checkpoint-A seam.
+
+Verification:
+
+- [ ] `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts`
+- [ ] `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts`
+- [ ] `pnpm --filter @lana/worker typecheck`
+
+## Deterministic readiness checkpoint
+
+- [ ] T1 protocol/corpus validator GREEN.
+- [ ] T2 deterministic boundary GREEN.
+- [ ] Existing focused protected-claim/reply-assembly tests GREEN.
+- [ ] Worker typecheck GREEN.
+- [ ] No production runtime wiring.
+- [ ] No secrets/customer PII.
+- [ ] No third role/repair loop/parser/template growth.
+- [ ] Official provider API docs checked for the selected T3 path.
+
+**If this checkpoint fails: STOP before provider calls.**
+
+## T3 — A2 provider-backed adversarial safety
+
+- [ ] Add only the frozen verifier provider capability.
+- [ ] Reuse existing auth/token acquisition, timeout primitives and structured-output infrastructure without inheriting an automatic second generation request.
+- [ ] One registered A2 attempt issues at most one provider generation request.
+- [ ] Auth/token failure or generation 401/429/5xx/timeout is retained as the current attempt's fail-closed outcome; no hidden retry.
+- [ ] Capture every provider request/error needed to prove request-count accounting.
+- [ ] Capture exact modelVersion/config, latency, tokens/cost where exposed.
+- [ ] Deterministic hard precheck may block invalid authority/freshness/privacy input; **every surviving draft must invoke the verifier**.
+- [ ] No semantic/protected-looking classifier may bypass the verifier.
+- [ ] Retain every unsafe/safe attempt and every registered repetition.
+- [ ] Any unsafe send-eligible PASS => A2 FAIL.
+- [ ] Safe controls satisfy frozen terminal usability threshold.
+- [ ] No majority-vote safety.
+- [ ] No corpus tuning after first result.
+- [ ] No model substitution.
+- [ ] No semantic production regex/template added after failures.
+- [ ] Evidence contains draft hash + trusted snapshot/state/fact identity + precheck/verifier/final-gate ownership.
+- [ ] Provider errors are sanitized; no raw secrets logged.
+
+Verification:
+
+- [ ] `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts` when Vertex is the selected path.
+- [ ] `pnpm --filter @lana/worker typecheck`
+- [ ] `pnpm --filter @lana/worker build`
+- [ ] `pnpm --filter @lana/worker lint`
+- [ ] Commit all executable A2 source + frozen inputs; require clean executable/config state.
+- [ ] Record exact commit as `a2RunSourceSha`.
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2`
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs` or the exact frozen equivalent.
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2`
+- [ ] Any executable-source change after seal => discard run identity and seal a new `a2RunSourceSha`.
+
+Decision:
+
+- [ ] A2 PASS: zero **observed** unsafe send-eligible PASS across all registered attempts/repetitions.
+- [ ] Or A2 FAIL: STOP.
+- [ ] Or BLOCKED: provider/config unavailable; do not simulate.
+
+**T4 is forbidden unless A2 PASS.**
+
+## T4 — A3 whole-reply feasibility
+
+- [ ] Use one frozen conversational owner over the locked A3 development corpus.
+- [ ] Candidate output surface is exact customer-visible final text + telemetry only.
+- [ ] Do not use AgentProposalV1, Strategist/Responder plan, intent/obligation schema or another semantic handoff object as A3 ownership surface.
+- [ ] Conversation/verifier requests use runtime projections only; evaluator-only labels/expectations/rubrics are absent.
+- [ ] Send exact final draft through the same verifier + final gate.
+- [ ] Every hard-precheck-surviving draft invokes the verifier; no semantic bypass classifier.
+- [ ] One provider generation request maximum per registered conversation attempt and per registered verifier attempt.
+- [ ] Keep every registered generation in the denominator.
+- [ ] PASS outcome scored as exact sent reply.
+- [ ] FAIL/UNCERTAIN/timeout/malformed scored as actual fallback/handoff/no-send.
+- [ ] Snapshot/freshness invalidation scored as the actual allowed terminal recovery outcome.
+- [ ] Safe handoff can still fail quality when the case was answerable.
+- [ ] Score understanding.
+- [ ] Score explicit-need completeness.
+- [ ] Score context/correction use.
+- [ ] Score usefulness/decision support.
+- [ ] Score partial-answer behavior.
+- [ ] Score next-step appropriateness.
+- [ ] Score coherence/naturalness.
+- [ ] Score factual/action safety.
+- [ ] Terminal fallback/handoff/no-send rate satisfies frozen usability threshold.
+- [ ] Report verifier p50/p95 latency.
+- [ ] Report provider timeout/error rate.
+- [ ] Report input/output tokens and cost where exposed.
+- [ ] Report added end-to-end verification latency.
+- [ ] Retain all blocked/error attempts.
+- [ ] No C3 comparison / better-than-C3 claim.
+- [ ] No persisted-state/tool-ordering proof claimed.
+- [ ] No live tool/effect/send.
+
+Verification:
+
+- [ ] `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts` when Vertex is selected.
+- [ ] `pnpm --filter @lana/worker typecheck`
+- [ ] `pnpm --filter @lana/worker build`
+- [ ] `pnpm --filter @lana/worker lint`
+- [ ] Commit all executable A3 generator/runner source + frozen inputs; require clean executable/config state.
+- [ ] Record exact commit as `a3RunSourceSha`.
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3`
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs` or the exact frozen equivalent.
+- [ ] `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3`
+- [ ] Any executable-source change after seal => evidence belongs to a new A3 run identity.
+- [ ] Produce `apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A.md`.
 
 ## CHECKPOINT A
 
-- [ ] Owner GO decision recorded.
-- [ ] Hard safety parity proven.
-- [ ] No silent customer-need loss in locked feasibility corpus.
-- [ ] Semantic cases show clear whole-reply quality improvement, not only correct fact assembly.
-- [ ] No broad semantic parser/template/regex growth.
-- [ ] Still one conversational semantic owner.
+- [ ] Owner GO / STOP / BLOCKED decision recorded.
+- [ ] A2 zero observed unsafe send-eligible false PASS.
+- [ ] Fail-closed behavior proven for UNCERTAIN/malformed/timeout/provider error.
+- [ ] Safe controls + A3 terminal outcomes pass frozen usability threshold.
+- [ ] A3 passes frozen whole-reply quality bar.
+- [ ] Final-send freshness/binding/revision/permission/snapshot revalidation proven.
+- [ ] One conversational owner + one verifier only.
+- [ ] Verifier has no tool/state/effect/rewrite/send authority.
+- [ ] Code remains sole truth/identity/state/permission/effect authority.
+- [ ] No parser/case-specific regex/template/semantic router/repair loop.
+- [ ] Operational latency/error/token-cost/fallback evidence shown to owner.
+- [ ] Exact `a2RunSourceSha` / `a3RunSourceSha` + model/prompt/schema/corpus/request provenance retained.
+- [ ] Captured model requests prove evaluator-only fields did not leak.
+- [ ] Provider request-count accounting proves no automatic generation retry.
+- [ ] Terminal disposition/fallback identity matches the pre-result frozen policy.
+- [ ] Worker focused tests/typecheck/build/lint GREEN for the final Checkpoint-A source.
 
-**If any item above fails: STOP. Do not continue T4–T9 without spec amendment + owner decision.**
+**If STOP/BLOCKED: preserve evidence and do not continue.**
 
-## Conditional implementation after GO
+**If GO: do not implement post-A work yet. First replace/amend `tasks/plan.md` and `tasks/todo.md` with a new owner-reviewed plan.**
 
-- [ ] **T4 — Minimal read-only single-agent loop**
-  - [ ] One-call no-tool fast path.
-  - [ ] Independent read-only tools share a round.
-  - [ ] Dependent tool round only when new world data requires it.
-  - [ ] Finite loop/fallback.
-  - [ ] No new model roles/framework dependency.
+## Post-A skeleton only — intentionally not actionable
 
-- [ ] **T5 — Bounded refs + existing-state updates**
-  - [ ] Runtime-supplied/allowlisted subject refs only.
-  - [ ] SET/CLEAR/REPLACE only on existing writable customer-state owners.
-  - [ ] 48kg -> 58kg effective-state-before-size lookup.
-  - [ ] Product/size correction + “chưa chốt” remains consistent.
-  - [ ] Conflict/reject cannot reuse stale dependent result.
+- [ ] Future plan: read-only domain tool loop.
+- [ ] Future plan: bounded refs + effective-state-before-dependent-tool ordering.
+- [ ] Future plan: mutation/idempotency/receipt/reconciliation/post-effect recovery.
+- [ ] Future plan: exact-final-draft verifier across real state/tool/effect paths.
+- [ ] Future plan: sealed complete-candidate qualification.
+- [ ] Future plan: paired single-turn absolute target + matched C3 comparison.
+- [ ] Future plan: stateful journey absolute target + matched C3 comparison.
+- [ ] Future plan: real-adapter send-disabled gate.
+- [ ] Future plan: separate rollout/migration decision.
 
-- [ ] **T6 — Mutation + recovery**
-  - [ ] Server-owned protected execution scope.
-  - [ ] operationId/idempotency.
-  - [ ] success receipt/readback.
-  - [ ] ambiguous reconciliation before retry.
-  - [ ] post-effect model/guard failure cannot replay effect.
+## Explicitly not done by this plan
 
-- [ ] **T7 — Preregister promotion protocol + seal holdout**
-  - [ ] Freeze exact baseline/candidate source + matched model/version/effort/generation/judge settings.
-  - [ ] Separate development corpus from sealed holdout; record holdout identity/hash without exposing contents to candidate tuning.
-  - [ ] Preregister **paired single-turn** mode with same message/history/pre-state/business snapshot/freshness for baseline and candidate.
-  - [ ] Preregister **stateful journey** mode with same initial state/business world/customer policy, then each path uses its own resulting state/history/effects.
-  - [ ] Freeze history/truncation, rubric and numeric **absolute product-quality thresholds** for each mode.
-  - [ ] Freeze blind/randomized A/B ordering and tie/judge-disagreement handling.
-  - [ ] Freeze repeated-generation/variance and retry/all-attempt accounting.
-  - [ ] Freeze **comparative replacement criteria** for paired single-turn and stateful journeys: preregistered clear quality-improvement rule over C3 + any non-compensable quality dimensions.
-  - [ ] Freeze hard comparative non-regression rules for safety/state/effect behavior.
-  - [ ] Freeze structural evidence required to prove C3 semantic responsibilities were actually removed/collapsed.
-  - [ ] Build sealed holdout from target product capabilities, not known C3 failures.
-  - [ ] Freeze provider/model/request and corpus/rubric provenance.
-  - [ ] One promotion mode cannot compensate for failure in the other.
-  - [ ] Validator fails closed for missing/mismatched preregistration fields.
+- [ ] No production/live send.
+- [ ] No real order/payment/cart mutation.
+- [ ] No deployment.
+- [ ] No C3 removal/migration.
+- [ ] No generic provider/agent framework.
+- [ ] No durable semantic memory.
+- [ ] No semantic router.
+- [ ] No third online model role.
+- [ ] No verifier tool access.
+- [ ] No verifier rewrite.
+- [ ] No automatic repair/reverify loop.
+- [ ] No generic Vietnamese semantic parser.
+- [ ] No failure-specific production regex/template patches.
+- [ ] No final promotion claim.
 
-- [ ] **T8 — Paired single-turn + stateful matched promotion evidence**
-  - [ ] Validate T7 preregistration before first holdout result in either mode is scored.
-  - [ ] **Paired single-turn:** run complete candidate with exactly same message, accepted history, canonical pre-turn state and business snapshot as baseline.
-  - [ ] **Paired single-turn:** report candidate absolute quality/safety/completeness/product-quality gate and retain exact paired final replies + common input.
-  - [ ] **Paired single-turn:** report matched C3 delta separately and evaluate the preregistered paired-turn replacement criterion; it is not the correctness threshold but is required for replacement readiness.
-  - [ ] **Stateful journeys:** each path consumes its own resulting state/history/effects after common initial conditions.
-  - [ ] **Stateful journeys:** real correction trace proves correction -> accepted effective state -> bounded trusted ref/tool input -> dependent result -> persisted state/final reply.
-  - [ ] **Stateful journeys:** report candidate absolute quality/safety/state/effect/completeness/product-quality gate separately.
-  - [ ] **Stateful journeys:** report matched C3 delta separately and evaluate the preregistered journey replacement criterion; it is not the correctness threshold but is required for replacement readiness.
-  - [ ] Raw customer need -> final customer outcome completeness accounting in both modes.
-  - [ ] Matched comparison manifest enforced.
-  - [ ] Retain whole replies for both modes; retain resulting state/tool/effect traces for journeys.
-  - [ ] Trace semantic boundaries for representative baseline/candidate turns.
-  - [ ] Identify concrete C3 responsibilities collapsed/replaced.
-  - [ ] Report development, paired-single-turn holdout and journey-holdout results separately.
-  - [ ] Both promotion modes must pass their **absolute** gates independently; no averaged/aggregate pass hides a failed mode.
-  - [ ] Better-than-C3 results cannot rescue an absolute failure.
-  - [ ] Emit `Candidate meets target` verdict from absolute gates only.
-  - [ ] Emit `Candidate qualifies to replace C3` verdict only after target PASS + clear preregistered improvement in both comparison modes + no safety/state/effect regression + structural simplification.
-  - [ ] Neutral matched quality may yield target PASS but must yield replacement-ready FAIL.
-  - [ ] Any hard/non-compensable comparative regression defined in T7 fails replacement readiness.
+## Implementation completion gate
 
-- [ ] **T9 — Real-adapter send-disabled gate**
-  - [ ] Ephemeral/test persistence infrastructure.
-  - [ ] External customer send disabled.
-  - [ ] Stale DB revision.
-  - [ ] Duplicate source message.
-  - [ ] crash/timeout after committed mutation.
-  - [ ] ambiguous reconciliation.
-  - [ ] idempotent retry.
-  - [ ] accepted-history/Outbox recovery without duplicate effect.
+For each future implementation task:
 
-## Final verification before any opt-in proposal
-
-- [ ] Focused tests green after each task.
-- [ ] Relevant package typechecks/builds green.
-- [ ] `pnpm --filter @lana/worker test` green.
-- [ ] `pnpm check` green.
-- [ ] Final review: correctness -> security -> architecture -> simplicity -> performance.
-- [ ] Project Definition of Done checked.
-- [ ] Promotion claim uses only preregistered sealed-holdout evidence; development corpus is not relabeled as holdout.
-- [ ] Absolute product/safety gates define `Candidate meets target`; C3-relative scoring does not define correctness.
-- [ ] Paired single-turn and stateful-journey absolute gates both pass independently; neither mode can compensate for the other.
-- [ ] Replacement readiness additionally passes preregistered quality-improvement criteria vs C3 in both modes, hard safety/state/effect non-regression, and structural simplification.
-- [ ] Neutral matched quality is recorded as target-met but not replacement-ready; no migration proceeds from that result.
-- [ ] No live traffic/deploy/C3 removal performed by this plan.
+- [ ] Task acceptance criteria pass.
+- [ ] New behavior has RED->GREEN tests.
+- [ ] Relevant focused tests/typechecks/build/lint pass.
+- [ ] Runtime/provider behavior is actually observed where required.
+- [ ] Evidence run is bound to a sealed source SHA from a clean executable/config state.
+- [ ] Captured provider requests contain no evaluator-only labels/expectations/rubric fields.
+- [ ] No unrelated refactor/dependency drift.
+- [ ] Security review covers untrusted model/customer/tool data.
+- [ ] Evidence contains no secrets/PII.
+- [ ] Project Definition of Done is checked before calling the task complete.
