@@ -188,7 +188,7 @@ A later fast path that skips verification is out of scope until evidence shows a
 
 The verifier receives observable inputs only. Correctness must not depend on hidden chain-of-thought, provider session memory or inaccessible state from the conversational model.
 
-The verifier invocation is independent of the conversational invocation even if the same provider/model family is used.
+The verifier invocation is operationally separate from the conversational invocation, but that does **not** imply statistically independent failure. If both roles use the same provider/model family, correlated semantic mistakes remain possible and must be recorded as an experiment risk rather than treated as independent-defense evidence.
 
 ---
 
@@ -227,6 +227,13 @@ Conceptually, the verifier context contains only what is required to judge prote
 
 ~~~ts
 type SemanticVerifierInput = {
+  requestIdentity: {
+    requestId: string;
+    finalDraftHash: string;
+    trustedSnapshotId: string;
+    stateRevision?: string;
+    factSnapshotVersion?: string;
+  };
   finalDraft: string;                    // exact customer-visible text
   latestCustomerMessage: string;
   recentAcceptedDialogue: readonly Message[];
@@ -240,6 +247,18 @@ type SemanticVerifierInput = {
 
 This is a conceptual contract, not approval to create these exact new types if existing runtime/evaluation contracts can carry the same information more simply.
 
+The implementation plan must also freeze explicit bounds for verifier context:
+
+- allowlist the canonical-state fields visible to the verifier; do not serialize arbitrary state;
+- bound accepted-history count/bytes/tokens;
+- bound total verifier input bytes/tokens;
+- include only minimum necessary PII;
+- serialize trusted facts/state/receipts in a structure/namespace distinct from customer/history/retrieved text;
+- pass customer/history/retrieved/policy language as **data**, never by string-concatenating it into verifier instructions;
+- bind the verdict to the exact final-draft hash plus the relevant trusted snapshot/state/fact identity so an old PASS cannot authorize a changed draft or changed world snapshot.
+
+Prompt-injection tests supplement this contract; they do not replace it.
+
 ### 6.1 Trusted vs untrusted
 
 Trusted/code-owned:
@@ -247,19 +266,21 @@ Trusted/code-owned:
 - subject reference set and protected identity resolution;
 - verified fact envelopes and protected claims;
 - freshness/provenance;
-- canonical state;
+- allowlisted canonical-state fields and revision/snapshot identity;
 - policy literals sourced from existing policy authority;
 - effect receipts/readback;
-- ownership/permission state.
+- ownership/permission state;
+- verifier request identity and final-draft hash binding.
 
 Untrusted data:
 
 - customer text;
+- accepted dialogue text;
 - conversation model output;
 - retrieved/external text before code validation;
 - semantic verifier output.
 
-The verifier may reason over untrusted text, but untrusted text never grants authority.
+The verifier may reason over untrusted text, but untrusted text never grants authority or changes the verifier's instruction hierarchy.
 
 ### 6.2 Exact final reply requirement
 
@@ -341,9 +362,14 @@ Any of these means **no send**:
 - provider error;
 - response cannot be bound to the current draft/request identity.
 
-A verifier failure may trigger a bounded deterministic fallback or handoff.
+A verifier failure may trigger only one of these send-safe outcomes:
 
-For Checkpoint A there is **no automatic rewrite/retry loop**.
+- a **code-owned static/bounded fallback** whose contract contains no protected business assertion; or
+- human handoff / no-send.
+
+A newly model-generated replacement is a **new draft**. It cannot inherit the failed/uncertain verdict and cannot be sent unless it goes through the verifier again under the same binding rules. Checkpoint A approves **no automatic rewrite/reverify path at all**, so during A a verifier non-PASS ends the candidate send path with the bounded fallback/handoff/no-send behavior above.
+
+This prevents verifier failure from opening a second, unverified customer-facing semantic channel.
 
 ### 7.3 No verifier agency
 
@@ -443,15 +469,16 @@ Before the first provider result, freeze:
 - conversational model/provider/version/effort/generation settings;
 - verifier model/provider/version/effort/generation settings;
 - verifier prompt/schema identity;
-- history/context selection;
-- exact trusted-context serialization;
+- history/context selection and explicit context-size/field allowlists;
+- exact trusted-context serialization and request/draft/snapshot binding;
 - retry policy: none for Checkpoint A;
 - repeated-generation/variance policy;
 - corpus identity/hash;
 - safety and usability scoring rules;
-- numeric safe-reply false-reject/usability threshold.
+- numeric safe-reply false-reject/usability threshold;
+- operational measurement method for verifier latency, timeout/error rate, token/cost usage, end-to-end added latency and fail-closed/handoff rate.
 
-If any identity changes after results are observed, results are a new experiment run.
+If any frozen identity changes after results are observed, results belong to a new experiment run. A later qualified verifier configuration is never silently transferable across model/version/prompt/schema/effort changes.
 
 ### 10.2 Experiment phase A2 — verifier-only adversarial boundary test
 
@@ -480,6 +507,8 @@ Required safe controls:
 ### 10.3 A2 hard safety gate
 
 Checkpoint A cannot pass if **any preregistered unsafe attempt receives a send-eligible PASS**.
+
+Report this claim precisely as **zero observed send-eligible false PASS on the preregistered A2 population under the frozen verifier configuration**. It is evidence about the tested population/configuration, not a deterministic proof that the verifier can never fail on arbitrary language.
 
 `FAIL`, `UNCERTAIN`, timeout, provider error or malformed verdict are fail-closed safety outcomes, though excessive blocking may fail usability.
 
@@ -513,6 +542,16 @@ Score the whole customer-visible outcome on:
 - factual/action safety;
 - verifier false rejection / unnecessary handoff.
 
+Also report operational viability for the frozen verifier configuration:
+
+- verifier latency p50/p95;
+- verifier timeout/error rate;
+- verifier input/output token usage and cost where the provider exposes them;
+- added end-to-end latency attributable to verification;
+- fail-closed / fallback / handoff rate.
+
+Checkpoint A does not require premature latency/cost optimization, but the owner must see these measurements before GO. If the provider does not expose one metric, report it as unavailable rather than estimate it.
+
 Simple price/stock controls remain controls only.
 
 ### 10.5 Checkpoint A GO requirements
@@ -527,6 +566,7 @@ Owner may issue GO only if all are true:
 6. **One conversation owner:** verifier never writes customer text, calls tools or changes state.
 7. **Deterministic authority intact:** existing identity/freshness/permission/effect/PII boundaries remain code-owned.
 8. **Observable provenance:** exact source/model/request/corpus/verdict identities are retained.
+9. **Operational evidence visible:** verifier latency, availability/error, token/cost where available, added end-to-end latency and fail-closed/handoff rates are reported before owner GO.
 
 ### 10.6 Checkpoint A STOP conditions
 
@@ -595,11 +635,30 @@ Exact T4-T9 implementation details are intentionally deferred until A evidence e
 
 ## 12. Evaluation and replacement semantics
 
-Keep the parent spec's two decisions:
+Keep the parent spec's two decisions, with one necessary amendment for the new probabilistic semantic-safety boundary.
 
 ### Gate A — Candidate meets target
 
-Defined by absolute product-quality and safety gates.
+Gate A still requires the complete candidate to pass absolute product-quality and safety gates. For semantic-verifier safety specifically, promotion evidence must include a **sealed semantic-safety holdout** evaluated under a preregistered frozen verifier configuration.
+
+Before the first sealed result, freeze:
+
+- exact verifier provider/model/version/effort/generation settings;
+- verifier prompt + verdict schema identity/hash;
+- trusted-context serialization/bounds;
+- request/draft/snapshot binding;
+- repeated-generation/variance policy;
+- retry/all-attempt accounting;
+- fail-closed timeout/error/malformed behavior;
+- exact unsafe/safe holdout identity and scoring rules.
+
+Gate A requires **zero observed send-eligible false PASS across the complete preregistered unsafe sealed population and every registered repeated generation**. This is the operational promotion criterion for the probabilistic semantic verifier; it must not be described as deterministic proof over arbitrary language.
+
+Safe-population false-reject/handoff behavior must also pass its preregistered usability threshold.
+
+A verifier qualification is bound to the frozen configuration. Any change to safety-relevant verifier identity — including model/version, provider, effort, generation settings, prompt, verdict schema, trusted-context serialization/bounds or request-binding contract — **invalidates the previous semantic-verifier qualification and requires re-evaluation before production use**.
+
+Deterministic code safety gates for identity, freshness, permission, state revision, effects, receipts and privacy remain absolute and independent of verifier scores.
 
 ### Gate B — Candidate qualifies to replace C3
 
@@ -649,7 +708,10 @@ Checkpoint A must include adversarial cases for:
 - fake protected refs mentioned only in prose;
 - attempts to persuade the verifier that untrusted text is authoritative;
 - malformed/oversized verifier output;
-- stale request/draft identity replay.
+- stale request/draft/snapshot identity replay;
+- oversized history/state intended to crowd trusted context out of the model window.
+
+The runtime contract must keep verifier instructions separate from serialized data, enforce the frozen input bounds/allowlists, and reject verdicts whose request/draft/snapshot binding no longer matches.
 
 The verifier has no tools or effects, so compromise cannot directly mutate business state. However, a false PASS can authorize unsafe customer-visible text; therefore semantic false negatives are hard failures.
 
@@ -855,13 +917,17 @@ This amendment is ready for implementation planning only if reviewers agree that
 10. Non-literal paraphrases and verifier-prompt-injection cases are included so the experiment cannot pass by memorizing exact phrases.
 11. A2 requires zero send-eligible false PASS on the preregistered unsafe population.
 12. Safe natural replies have a preregistered numeric usability/false-reject threshold before results are observed.
-13. A3 evaluates whole final replies on the four semantic families, not factual blocks alone.
-14. Checkpoint A is development feasibility only; no C3-relative improvement criterion is required there.
-15. T4-T9 details remain deferred until explicit owner GO.
-16. Parent state/tool/mutation/recovery and final replacement gates remain intact.
-17. The architecture hard cap is one conversational owner + one verifier; no repair loop or third semantic role is approved.
-18. Existing repo commands/stack/project boundaries are recorded.
-19. No runtime behavior changes are made by the spec PR.
+13. Verifier context is bounded/allowlisted, trusted data is structurally separated from untrusted language, and verdicts bind to exact draft + trusted snapshot identity.
+14. A verifier non-PASS cannot open an unverified fallback channel; only code-owned non-protected fallback/handoff/no-send is allowed at Checkpoint A.
+15. A3 evaluates whole final replies on the four semantic families, not factual blocks alone, and reports verifier latency/availability/token-cost/added-latency/fail-closed operational evidence.
+16. Checkpoint A safety claims use "zero observed false PASS" wording for the frozen tested population/configuration, not deterministic-proof wording.
+17. Final Gate A requires sealed semantic-safety holdout evidence under a frozen verifier configuration, and any safety-relevant verifier configuration change invalidates prior qualification.
+18. Checkpoint A is development feasibility only; no C3-relative improvement criterion is required there.
+19. T4-T9 details remain deferred until explicit owner GO.
+20. Parent state/tool/mutation/recovery and final replacement gates remain intact.
+21. The architecture hard cap is one conversational owner + one verifier; no repair loop or third semantic role is approved.
+22. Existing repo commands/stack/project boundaries are recorded.
+23. No runtime behavior changes are made by the spec PR.
 
 Human approval is required before implementation planning.
 
@@ -873,9 +939,10 @@ These must be frozen before the first Checkpoint-A provider run, not necessarily
 
 1. **Verifier model/provider/effort:** exact identity used for A2/A3.
 2. **Conversation model/provider/effort:** exact identity used for A3.
-3. **Variance policy:** number of repeated verifier generations per case and how any false PASS is counted.
-4. **Safe-reply usability threshold:** numeric maximum false-reject/unnecessary-handoff rate for A2/A3.
-5. **Post-A repair policy:** whether a later phase may test at most one same-conversation-model rewrite + one reverify. This amendment does not approve it.
+3. **Variance policy:** number of repeated verifier generations per case and how any false PASS is counted. Any observed unsafe PASS counts as a safety failure; repetitions are not majority-voted into safety.
+4. **Safe-reply usability threshold:** numeric maximum false-reject/unnecessary-handoff rate for A2/A3 and later sealed qualification.
+5. **Operational viability review:** whether Checkpoint A needs any owner-set ceiling for verifier p95 added latency/error/handoff beyond mandatory reporting; no optimization work is approved by this decision alone.
+6. **Post-A repair policy:** whether a later phase may test at most one same-conversation-model rewrite + one reverify. This amendment does not approve it.
 
 ---
 
@@ -911,6 +978,8 @@ The amendment makes one deliberate trade:
 
 > **Protected language semantics become a model-judged runtime safety check, while protected world authority remains deterministic code.**
 
-That trade is acceptable only if Checkpoint A proves the verifier is sufficiently reliable on locked adversarial and normal natural-language cases **without adding semantic machinery that recreates C3**.
+Checkpoint A can provide only **zero observed false PASS** evidence for a frozen development population/configuration. Production qualification, if the experiment proceeds, requires separate sealed semantic-safety evidence under the exact frozen verifier configuration, and safety-relevant verifier changes require requalification.
+
+That trade is acceptable only if the verifier is sufficiently reliable on locked adversarial and normal natural-language cases **without adding semantic machinery that recreates C3**, while deterministic world-authority gates remain intact.
 
 Until then, this is a hypothesis, not an approved production architecture.
