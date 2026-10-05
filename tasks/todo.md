@@ -16,10 +16,11 @@
 - [ ] **T1 — Freeze bases, corpus and protocol**
   - [ ] At least 3 concern/decision-support cases.
   - [ ] At least 3 multi-part/partial-evidence cases.
-  - [ ] At least 3 correction/referent/defer cases/journey steps.
+  - [ ] At least 3 correction/referent/defer **egress-feasibility** cases using raw accepted dialogue + frozen current state/evidence.
   - [ ] At least 3 conditional-policy cases.
   - [ ] Add only 2–4 simple price/stock/direct-fact positive controls.
   - [ ] Each case defines raw dialogue/state, verified truth, required outcomes and forbidden claims/actions.
+  - [ ] Correction/referent/defer feasibility cases explicitly do **not** claim persisted-state, trusted-ref or dependent-tool proof.
   - [ ] Paired manifest rejects model/config/judge/substrate mismatch.
 
 - [ ] **T2 — Minimal protected-egress surface**
@@ -40,6 +41,7 @@
   - [ ] Retain all attempts including reject/timeout/fallback/handoff.
   - [ ] Owner reviews paired final replies directly.
   - [ ] Produce explicit GO/STOP evidence note.
+  - [ ] Label T1–T3 results as **development/feasibility evidence**, not promotion evidence.
 
 ## CHECKPOINT A
 
@@ -50,7 +52,7 @@
 - [ ] No broad semantic parser/template/regex growth.
 - [ ] Still one conversational semantic owner.
 
-**If any item above fails: STOP. Do not continue T4–T8 without spec amendment + owner decision.**
+**If any item above fails: STOP. Do not continue T4–T9 without spec amendment + owner decision.**
 
 ## Conditional implementation after GO
 
@@ -75,14 +77,27 @@
   - [ ] ambiguous reconciliation before retry.
   - [ ] post-effect model/guard failure cannot replay effect.
 
-- [ ] **T7 — Stateful matched journeys + structural audit**
-  - [ ] Each path consumes its own resulting state/history.
+- [ ] **T7 — Preregister promotion protocol + seal holdout**
+  - [ ] Freeze exact baseline/candidate source + matched model/version/effort/generation/judge settings.
+  - [ ] Separate development corpus from sealed holdout; record holdout identity/hash without exposing contents to candidate tuning.
+  - [ ] Freeze history/truncation, rubric, numeric/minimum-improvement threshold.
+  - [ ] Freeze blind/randomized A/B ordering and tie/judge-disagreement handling.
+  - [ ] Freeze repeated-generation/variance and retry/all-attempt accounting.
+  - [ ] Freeze provider/model/request and corpus/rubric provenance.
+  - [ ] Validator fails closed for missing/mismatched preregistration fields.
+
+- [ ] **T8 — Stateful matched promotion journeys + structural audit**
+  - [ ] Validate T7 preregistration before first holdout result is scored.
+  - [ ] Each path consumes its own resulting state/history/effects after common initial conditions.
+  - [ ] Real correction trace proves correction -> accepted effective state -> bounded trusted ref/tool input -> dependent result -> persisted state/final reply.
   - [ ] Raw customer need -> final customer outcome completeness accounting.
   - [ ] Matched comparison manifest enforced.
+  - [ ] Retain whole replies + resulting state/tool/effect traces for owner review.
   - [ ] Trace semantic boundaries for representative baseline/candidate turns.
   - [ ] Identify concrete C3 responsibilities collapsed/replaced.
+  - [ ] Report development and sealed-holdout results separately.
 
-- [ ] **T8 — Real-adapter send-disabled gate**
+- [ ] **T9 — Real-adapter send-disabled gate**
   - [ ] Ephemeral/test persistence infrastructure.
   - [ ] External customer send disabled.
   - [ ] Stale DB revision.
@@ -100,4 +115,5 @@
 - [ ] `pnpm check` green.
 - [ ] Final review: correctness -> security -> architecture -> simplicity -> performance.
 - [ ] Project Definition of Done checked.
+- [ ] Promotion claim uses only preregistered sealed-holdout evidence; development corpus is not relabeled as holdout.
 - [ ] No live traffic/deploy/C3 removal performed by this plan.
