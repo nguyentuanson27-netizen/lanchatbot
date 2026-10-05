@@ -1,7 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A
 
 2026-10-05 (Asia/Saigon). Scope = Checkpoint A only. Current recommendation: **PENDING**.
-T1 frozen; T2 deterministic readiness passed. A2 execution pending source seal; no real provider generation yet.
+T1 frozen; T2 deterministic readiness passed. Corrected A2 executable awaits new source seal; prior transport-failed run retained below.
 A3 has not run; prohibited unless A2 PASS.
 
 ## Provenance and frozen identity
@@ -71,7 +71,9 @@ Every hard-precheck survivor, including nonprotected controls, invokes the verif
 
 Executed denominator: 0; observed unsafe send-eligible false PASS count: not evaluated. No empty-population safety claim.
 
-Provider generation count = 0 before source seal; latency/error/token/cost/outcome rates not measured yet.
+Current corrected run has not executed; its operational rates are not measured yet.
+
+Prior transport-failed run is preserved in a2-transport-errors-52b1e92f.json, source 52b1e92f9862da78dee80b43a8257a3dac6646c5. Registered denominator 102; executed 33; unexecuted 69; provider requests/errors 27/27. All errors remain in its denominator. No unsafe send-eligible PASS occurred, but no verdict was decoded; this incomplete run cannot support semantic qualification. It stopped at the next attempt boundary before correcting the decoder. The official streaming contract returns final content in output_item.done; completed may contain metadata only. RED reproduced this decoder defect; corrected decoder tests pass. The executable correction requires a new run-source SHA. Corpus, prompts, model and generation configuration did not change. Actual historical requests are not hidden retries of new registered attempts.
 
 Mock transport tests capture the actual forwarded body, proving it equals the
 runtime projection and excludes evaluator labels, CLI tools and CLI context. The
@@ -104,14 +106,14 @@ terminal outcomes on all ten frozen dimensions, blind to verifier result; no thi
 - node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs: FROZEN_PROTOCOL_VALID, exit 0.
 - pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts: missing-module RED then 29/30 (recipient change); final 30/30 GREEN.
 - pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts: 21/21 PASS.
-- node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs: missing-module RED; 9 deterministic adapter tests GREEN; installed CLI test also GREEN with C3_TEST_CODEX_TRANSPORT=1 (10/10, no skip).
+- node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs: missing-module RED; metadata-only completed event RED observed; corrected adapter GREEN with C3_TEST_CODEX_TRANSPORT=1 (11/11, no skip).
 - node --test apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs: missing-module RED; 5/5 GREEN.
-- With C3_TEST_CODEX_TRANSPORT=1, combined protocol/adapter/A2-runner Node tests: 23/23 PASS.
+- With C3_TEST_CODEX_TRANSPORT=1, combined protocol/adapter/A2-runner Node tests: 23/23 before decoder correction; final combined verification recorded separately.
 - pnpm --filter @lana/worker exec vitest run src/vertex.test.ts: prior 34/34 PASS; not selected adapter evidence.
 - pnpm --filter @lana/worker typecheck: PASS; pnpm --filter @lana/worker build: PASS; pnpm --filter @lana/worker lint: PASS.
 - codex version/login/features/help, app-server schema generation and configuration-only probes: inspected without provider generation; built-in override probe exit 1 as documented.
 - Source import search: boundary imported only by its focused test (evaluation runner uses built dist).
-- A2 source seal/preflight/run/validation: pending; no claim of execution.
+- Previous A2 preflight PASS at 52b1e92f; run stopped fail-closed after 33 completed attempts. New source seal/preflight pending.
 
 ## Complexity, failures and disposition
 

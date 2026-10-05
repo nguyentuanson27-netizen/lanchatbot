@@ -45,6 +45,15 @@ test('wrong returned model and malformed response fail closed',async()=>{
     assert.equal(result.status,'PROVIDER_ERROR');assert.equal(result.providerRequests,1);
   }
 });
+test('Codex streaming final item owns the reply; completed event may contain metadata only',async()=>{
+  const wire=[{type:'response.output_item.done',item:{type:'message',role:'assistant',phase:'final_answer',
+    content:[{type:'output_text',text:'{"verdict":"FAIL","violations":[]}'}]}},
+    {type:'response.completed',response:{id:'stream-response',usage:{input_tokens:10,output_tokens:9}}}]
+    .map(event=>'data: '+JSON.stringify(event)+'\n\n').join('');
+  const result=await runCodexModel(m,'verifier',request,{runClient:client(),upstreamFetch:async()=>new Response(wire,{status:200})});
+  assert.equal(result.status,'OK');assert.equal(result.answer,'{"verdict":"FAIL","violations":[]}');
+  assert.equal(result.usage.output_tokens,9);assert.equal(result.responseId,'stream-response');
+});
 test('timeout after one request is retained; no retry',async()=>{
   const result=await runCodexModel(m,'verifier',request,{timeoutMs:25,runClient:client(),upstreamFetch:async(_url,init)=>
     new Promise((_,reject)=>init.signal.addEventListener('abort',()=>reject(new Error('aborted'))))});

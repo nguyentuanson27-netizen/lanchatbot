@@ -35,23 +35,28 @@ function launchCodex(base,manifest,role) {
   const child=spawn(codexBinary(),args,{stdio:['ignore','ignore','ignore'],windowsHide:true});
   return {done:new Promise(resolve=>{child.on('error',()=>resolve());child.on('exit',()=>resolve());}),stop:()=>child.kill()};
 }
-function parseStream(text,requestedModel) {
-  let completed;
+function parseStream(text,requestedModel,headerModel) {
+  let completed;const doneItems=[];
   for(const line of text.split('\n')) {
     if(!line.startsWith('data: '))continue;
     const value=line.slice(6).trim();
     if(value==='[DONE]')continue;
     let event;try{event=JSON.parse(value);}catch{continue;}
     if(event.type==='response.completed')completed=event.response;
+    if(event.type==='response.output_item.done'&&event.item)doneItems.push(event.item);
   }
-  if(!completed || completed.model && completed.model!==requestedModel || !Array.isArray(completed.output))throw new Error('PROVIDER_RESPONSE');
-  if(completed.output.some(item=>!['reasoning','message'].includes(item.type)))throw new Error('PROVIDER_TOOL_OUTPUT');
-  const messages=completed.output.filter(item=>item.type==='message');
+  if(!completed)throw new Error('PROVIDER_RESPONSE');
+  const model=completed.model??headerModel;
+  if(model&&model!==requestedModel)throw Object.assign(new Error('PROVIDER_MODEL_MISMATCH'),{modelVersion:model});
+  const items=Array.isArray(completed.output)&&completed.output.length?completed.output:doneItems;
+  if(items.some(item=>!['reasoning','message'].includes(item.type)))throw new Error('PROVIDER_TOOL_OUTPUT');
+  const messages=items.filter(item=>item.type==='message'&&item.phase!=='commentary');
+  if(messages.length!==1)throw new Error('PROVIDER_FINAL_MESSAGE_COUNT');
   const answer=messages.flatMap(item=>item.content??[]).filter(item=>item.type==='output_text').map(item=>item.text).join('');
   if(!answer || Buffer.byteLength(answer)>4096)throw new Error('PROVIDER_OUTPUT_BOUND');
   const usage=completed.usage ? Object.fromEntries(['input_tokens','output_tokens','total_tokens','input_tokens_details','output_tokens_details']
     .filter(k=>Object.hasOwn(completed.usage,k)).map(k=>[k,completed.usage[k]])) : null;
-  return {answer,modelVersion:completed.model??null,responseId:completed.id??null,usage,cost:null};
+  return {answer,modelVersion:model??null,responseId:completed.id??null,usage,cost:null};
 }
 
 export async function runCodexModel(manifest,role,request,testDependencies={}) {
@@ -74,21 +79,24 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
     const authorization=req.headers.authorization;
     if(!authorization){finish({status:'PROVIDER_ERROR',error:'AUTH_UNAVAILABLE',httpStatus:null});res.writeHead(400);res.end();return;}
     providerRequests++; // synchronous seal BEFORE await, including failed transmissions
+    let httpStatus=null;
     try {
       const headers={'content-type':'application/json',authorization,accept:'text/event-stream',originator:'codex_cli_rs',
         'user-agent':'codex_cli_rs/0.159.2'};
       if(typeof req.headers['chatgpt-account-id']==='string')headers['chatgpt-account-id']=req.headers['chatgpt-account-id'];
       const response=await(testDependencies.upstreamFetch??fetch)(config.endpoint,{method:'POST',headers,body:requestBody,signal:controller.signal});
+      httpStatus=response.status;
       if(!response.ok){await response.body?.cancel();finish({status:'PROVIDER_ERROR',error:'UPSTREAM_HTTP',httpStatus:response.status});res.writeHead(400);res.end();return;}
       const reader=response.body?.getReader();if(!reader)throw new Error('EMPTY_BODY');
       const chunks=[];let size=0;
       while(true){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;
         if(size>config.maxResponseBytes){await reader.cancel();throw new Error('RESPONSE_BOUND');}chunks.push(Buffer.from(value));}
       const text=Buffer.concat(chunks).toString('utf8');
-      const parsed=parseStream(text,request.model);
+      const parsed=parseStream(text,request.model,response.headers.get('openai-model')??response.headers.get('x-openai-model'));
       res.writeHead(200,{'content-type':'text/event-stream'});res.end(text);
       finish({status:'OK',httpStatus:response.status,...parsed});
-    }catch {finish({status:controller.signal.aborted?'TIMEOUT':'PROVIDER_ERROR',error:'UPSTREAM_TRANSPORT_OR_RESPONSE',httpStatus:null});
+    }catch(error) {const code=['PROVIDER_RESPONSE','PROVIDER_MODEL_MISMATCH','PROVIDER_TOOL_OUTPUT','PROVIDER_FINAL_MESSAGE_COUNT','PROVIDER_OUTPUT_BOUND','EMPTY_BODY','RESPONSE_BOUND'].includes(error.message)?error.message:'UPSTREAM_TRANSPORT';
+      finish({status:controller.signal.aborted?'TIMEOUT':'PROVIDER_ERROR',error:code,httpStatus,modelVersion:error.modelVersion??null});
       if(!res.headersSent)res.writeHead(400);res.end();}
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
