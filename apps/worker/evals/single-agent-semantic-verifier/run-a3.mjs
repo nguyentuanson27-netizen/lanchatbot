@@ -2,11 +2,11 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {projectRuntime,buildRequest,validateProtocol,preflight,hash} from './protocol.mjs';
+import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath} from './protocol.mjs';
 import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence} from './run-a2.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {terminalFallback,finalGate,makeBinding} from '../../dist/single-agent-semantic-verifier-boundary.js';
-const read=name=>readFileSync(new URL(name,import.meta.url),'utf8');
+const read=name=>readFileSync(inputUrl(name),'utf8');
 
 export async function evaluateA3Attempt(manifest,fixture,generate) {
   const started=performance.now();
@@ -30,7 +30,7 @@ export function humanView(fixture,attempt) {
 }
 export function scoreWholeReplies(manifest,corpus,attempts,scores) {
   const denominator=corpus.cases.length*manifest.repetitions;
-  if(attempts.length!==denominator||!scores||scores.length!==denominator)return {status:'BLOCKED',reason:'MISSING_ALL_TERMINAL_HUMAN_SCORES',denominator};
+  if(attempts.length!==denominator||!scores||scores.length!==denominator)return {status:'BLOCKED',reason:manifest.scoring.method==='OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW'?'MISSING_ALL_TERMINAL_OFFLINE_SCORES':'MISSING_ALL_TERMINAL_HUMAN_SCORES',denominator};
   const byId=new Map(scores.map(v=>[v.attemptId,v.scores]));
   if(byId.size!==denominator)return {status:'BLOCKED',reason:'DUPLICATE_HUMAN_SCORE',denominator};
   const rows=[];
@@ -100,7 +100,7 @@ async function main() {
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
   preflight(manifest,'a3',{a3RunSourceSha:process.env.A3_RUN_SOURCE_SHA,a2Status:a2Evidence.summary.status},sha,status);
-  const output=new URL('./a3-evidence.json',import.meta.url);
+  const output=inputUrl('a3-evidence.json');
   if(existsSync(output))throw new Error('A3_EVIDENCE_ALREADY_EXISTS');
   const client=inspectCodex();
   const evidence={schemaVersion:1,phase:'A3',a3RunSourceSha:sha,a2RunSourceSha:a2Evidence.a2RunSourceSha,
@@ -113,7 +113,7 @@ async function main() {
     writeFileSync(output,JSON.stringify(evidence,null,2)+'\n');};
   save();
   for(const attempt of evidence.attempts) {
-    assertSealedSource(sha,['apps/worker/evals/single-agent-semantic-verifier/a3-evidence.json']);
+    assertSealedSource(sha,[evidencePath('a3-evidence.json')]);
     if(hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==evidence.boundaryExecutableHash)throw new Error('A3_BOUNDARY_EXECUTABLE_CHANGED');
     const fixture=a3.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     Object.assign(attempt,await evaluateA3Attempt(manifest,fixture,(role,request)=>runCodexModel(manifest,role,request)));
@@ -122,13 +122,13 @@ async function main() {
   }
   evidence.finishedAt=new Date().toISOString();save();
   const views=evidence.attempts.map(attempt=>humanView(a3.cases.find(c=>c.evaluator.caseId===attempt.caseId),attempt));
-  writeFileSync(new URL('./a3-human-review.json',import.meta.url),JSON.stringify({rubric:manifest.scoring,attempts:views},null,2)+'\n');
-  writeFileSync(new URL('./a3-human-scores.json',import.meta.url),JSON.stringify({scorer:null,scoredAt:null,a3RunSourceSha:sha,
+  writeFileSync(inputUrl('a3-human-review.json'),JSON.stringify({rubric:manifest.scoring,attempts:views},null,2)+'\n');
+  writeFileSync(inputUrl('a3-human-scores.json'),JSON.stringify({scorer:null,scoredAt:null,a3RunSourceSha:sha,
     attempts:views.map(view=>({attemptId:view.attemptId,scores:Object.fromEntries(manifest.scoring.dimensions.map(d=>[d,null]))}))},null,2)+'\n');
   const review='# A3 — human review of actual terminal customer outcomes\n\nScore 0/1/2 on the ten frozen dimensions in a3-human-scores.json. No model/judge scores are synthesized.\n'+
     '\nTrusted truth and required/forbidden behavior per case are in a3-human-review.json. The packet excludes rejected drafts and verifier verdicts.\n\n'+
     views.map(view=>'## '+view.attemptId+'\n\nCustomer: '+view.customer+'\n\nAccepted dialogue:\n```json\n'+JSON.stringify(view.acceptedDialogue)+'\n```\n\nActual terminal customer outcome:\n```text\n'+(view.customerOutcome.text??'[NO CUSTOMER REPLY]')+'\n```\n').join('\n');
-  writeFileSync(new URL('./A3_HUMAN_REVIEW.md',import.meta.url),review);
+  writeFileSync(inputUrl('A3_HUMAN_REVIEW.md'),review);
   console.log(JSON.stringify(validateA3Evidence(manifest,a3,evidence)));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(error=>{console.error('A3_RUN_FAILED_CLOSED:'+error.message);process.exitCode=1;});

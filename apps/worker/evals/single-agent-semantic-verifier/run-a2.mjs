@@ -2,11 +2,11 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {projectRuntime,buildRequest,validateProtocol,preflight,hash} from './protocol.mjs';
+import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath} from './protocol.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {makeBinding,hardPrecheck,finalGate,terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {authorizeRealtimeProtectedClaimProposal} from '../../dist/realtime-protected-claim-boundary.js';
-const read=name=>readFileSync(new URL(name,import.meta.url),'utf8');
+const read=name=>readFileSync(inputUrl(name),'utf8');
 export const loadInputs=()=>({manifest:JSON.parse(read('manifest.json')),a2:JSON.parse(read('corpus-a2.json')),a3:JSON.parse(read('corpus-a3.json'))});
 
 export async function evaluateA2Attempt(manifest,fixture,generate) {
@@ -97,7 +97,7 @@ async function main() {
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
   preflight(manifest,'a2',{a2RunSourceSha:process.env.A2_RUN_SOURCE_SHA},sha,status);
-  const output=new URL('./a2-evidence.json',import.meta.url);
+  const output=inputUrl('a2-evidence.json');
   if(existsSync(output))throw new Error('EVIDENCE_ALREADY_EXISTS');
   const client=inspectCodex();
   const evidence={schemaVersion:1,phase:'A2',a2RunSourceSha:sha,implementationBaseSha:manifest.implementationBaseSha,specSha:manifest.specSha,
@@ -109,7 +109,7 @@ async function main() {
   const save=()=>{evidence.summary=summarizeA2(manifest,evidence.attempts);evidence.operational=operational(evidence.attempts);writeFileSync(output,JSON.stringify(evidence,null,2)+'\n');};
   save();
   for(const attempt of evidence.attempts) {
-    assertSealedSource(sha,['apps/worker/evals/single-agent-semantic-verifier/a2-evidence.json']);
+    assertSealedSource(sha,[evidencePath('a2-evidence.json')]);
     if(hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==evidence.boundaryExecutableHash)throw new Error('BOUNDARY_EXECUTABLE_CHANGED');
     const fixture=a2.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     Object.assign(attempt,await evaluateA2Attempt(manifest,fixture,request=>runCodexModel(manifest,'verifier',request)));

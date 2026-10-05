@@ -273,8 +273,8 @@ For each future implementation task:
 - [x] Preserve original configuration, corpora, provider evidence and Codex review unchanged.
 - [x] Freeze round-2 conversation prompt, clock projection policy, all models/config/thresholds, offline scoring and scope interpretation.
 - [x] Keep all 34 A2 cases and 16 A3 cases; add four new development cases before provider results.
-- [ ] Observe projection/round selector RED, then minimum GREEN.
-- [ ] Complete deterministic readiness and worker typecheck/build/lint.
+- [x] Observe projection/round selector RED (0/3), then minimum GREEN (3/3).
+- [x] Complete deterministic readiness: Node 34/34, boundary 30/30, claim/assembly 21/21; worker typecheck/build/lint PASS.
 - [ ] Seal clean A2 source, preflight, execute and validate all 102 attempts.
 - [ ] Only after A2 PASS: seal A3 source, preflight, execute and validate all 60 attempts.
 - [ ] Offline review all 60 actual terminal outcomes, with 600 individual ratings and rationale.

@@ -9,7 +9,13 @@ const requireThat = (ok, reason) => { if (!ok) throw new Error(reason); };
 const pick = (value, keys) => Object.fromEntries(keys.filter(k => Object.hasOwn(value, k)).map(k => [k, value[k]]));
 const families = ['wrong-subject', 'negation-inversion', 'material-condition-loss', 'policy-strengthening', 'effect-without-receipt'];
 const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 'negation-inversion', 'dropped-material-policy-condition', 'stronger-implied-policy-benefit', 'stale-evidence', 'effect-success-without-receipt'];
-const read = name => readFileSync(new URL(name, import.meta.url), 'utf8');
+// Fixed experiment folders only; keep historical inputs/evidence intact.
+const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
+if (!['1','2'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
+const inputRoot = new URL(round === '2' ? './round-2/' : './', import.meta.url);
+export const inputUrl = name => new URL(name, inputRoot);
+export const evidencePath = name => 'apps/worker/evals/single-agent-semantic-verifier/' + (round === '2' ? 'round-2/' : '') + name;
+const read = name => readFileSync(inputUrl(name), 'utf8');
 
 // This is a runtime projection, not a semantic interpretation of fixture language.
 export function projectRuntime(manifest, fixture, role, requestId) {
@@ -43,13 +49,13 @@ export function projectRuntime(manifest, fixture, role, requestId) {
   }
   const requestIdentity = { requestId, trustedSnapshotId: hash(JSON.stringify(trusted)),
     stateRevision: trusted.state.revision, factSnapshotVersion: trusted.state.factSnapshotVersion, recipient: trusted.state.recipient,
+    ...(manifest.round === 2 && role === 'conversation' ? {evaluationAt:r.evaluationAt} : {}),
     ...(role === 'verifier' ? { finalDraftHash: hash(r.finalDraft) } : {}) };
   const projection = { requestIdentity, trusted, untrusted };
   // UTF-8 bytes also provide a conservative upper bound on input token count.
   requireThat(bytes(projection) <= b.totalBytes && bytes(projection) <= b.totalTokenUpperBound, 'TOTAL_BOUND');
   return projection;
 }
-
 // Envelope only. No credentials, transport, retry, provider call or production wiring.
 export function buildRequest(manifest, role, projection) {
   const model = manifest.models[role];
@@ -139,6 +145,7 @@ async function main() {
     if (process.argv.includes('--draft')) console.log(JSON.stringify({ status:'DRAFT_VALIDATED_NOT_FROZEN', ...validateDraft(m,a2,a3) }));
     else {
       validateProtocol(m,a2,a3);
+      if (m.round === 2) console.log(JSON.stringify({round:2,a2Cases:a2.cases.length,a3Cases:a3.cases.length}));
       if (process.argv.some(v => v.startsWith('--preflight-'))) {
         const phase = process.argv.includes('--preflight-a3') ? 'a3' : 'a2';
         const head = execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
