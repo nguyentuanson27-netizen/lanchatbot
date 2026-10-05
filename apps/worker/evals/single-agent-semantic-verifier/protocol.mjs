@@ -42,7 +42,7 @@ export function projectRuntime(manifest, fixture, role, requestId) {
     untrusted.finalDraft = r.finalDraft;
   }
   const requestIdentity = { requestId, trustedSnapshotId: hash(JSON.stringify(trusted)),
-    stateRevision: trusted.state.revision, factSnapshotVersion: trusted.state.factSnapshotVersion,
+    stateRevision: trusted.state.revision, factSnapshotVersion: trusted.state.factSnapshotVersion, recipient: trusted.state.recipient,
     ...(role === 'verifier' ? { finalDraftHash: hash(r.finalDraft) } : {}) };
   const projection = { requestIdentity, trusted, untrusted };
   // UTF-8 bytes also provide a conservative upper bound on input token count.
