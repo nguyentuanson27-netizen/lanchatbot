@@ -2,27 +2,27 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-single-agent-commerce-architecture-20261004.md`  
-**Status:** PLAN ONLY — PR385 is merged; implementation waits for plan approval.
+**Status:** Owner approved T1–T3 only; implementation started on `feat/c3-single-agent-checkpoint-a-20261005`. Evidence: `apps/worker/evals/single-agent-feasibility/`. Checkpoint A owner GO remains pending.
 
 ## Precondition
 
 - [x] PR385 merged as `432376b05ca8c8e1aff0dea397534f4a6805c618`.
-- [ ] After plan approval, refresh `main` and record that exact SHA as `implementationBaseSha`.
-- [ ] Freeze same-substrate C3 `comparisonBaselineSha` for regression/migration comparison.
+- [x] After plan approval, refresh `main` and record that exact SHA as `implementationBaseSha`: `c4bd59857a560689ce0b10758a4927f6401b0c27`.
+- [x] Freeze same-substrate C3 `comparisonBaselineSha` for regression/migration comparison: same exact main SHA; no PR377 source imported into either lane.
 - [ ] Confirm matched model/version/effort/generation/judge settings for comparative claims.
-- [ ] Confirm **goal-first, baseline-second** evaluation: absolute product/safety gates define candidate pass/fail; C3 deltas are reported separately.
+- [x] Confirm **goal-first, baseline-second** evaluation: absolute product/safety gates define candidate pass/fail; C3 deltas are reported separately.
 
 ## First feasibility experiment — mandatory before full candidate
 
-- [ ] **T1 — Freeze bases, corpus and protocol**
-  - [ ] At least 3 concern/decision-support cases.
-  - [ ] At least 3 multi-part/partial-evidence cases.
-  - [ ] At least 3 correction/referent/defer **egress-feasibility** cases using raw accepted dialogue + frozen current state/evidence.
-  - [ ] At least 3 conditional-policy cases.
-  - [ ] Add only 2–4 simple price/stock/direct-fact positive controls.
-  - [ ] Each case defines raw dialogue/state, verified truth, required outcomes and forbidden claims/actions.
-  - [ ] Correction/referent/defer feasibility cases explicitly do **not** claim persisted-state, trusted-ref or dependent-tool proof.
-  - [ ] Paired manifest rejects model/config/judge/substrate mismatch.
+- [x] **T1 — Freeze bases, corpus and intended protocol** (static evidence only; provider-observed matching remains unconfirmed).
+  - [x] At least 3 concern/decision-support cases (3).
+  - [x] At least 3 multi-part/partial-evidence cases (3).
+  - [x] At least 3 correction/referent/defer **egress-feasibility** cases using raw accepted dialogue + frozen current state/evidence (4).
+  - [x] At least 3 conditional-policy cases (3).
+  - [x] Add only 2–4 simple price/stock/direct-fact positive controls (2).
+  - [x] Each case defines raw dialogue/state, verified truth, required outcomes and forbidden claims/actions.
+  - [x] Correction/referent/defer feasibility cases explicitly do **not** claim persisted-state, trusted-ref or dependent-tool proof.
+  - [x] Paired manifest rejects model/config/judge/substrate mismatch (25 static validator tests); unobserved comparative claim rejected.
 
 - [ ] **T2 — Minimal protected-egress surface**
   - [ ] RED: undeclared protected claim.
