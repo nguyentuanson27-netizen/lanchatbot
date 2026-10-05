@@ -494,8 +494,6 @@ This is a dependency invariant, not a generic workflow scheduler. No extra model
 
 ### 8.3 Reference selection and state commit are distinct
 
-### 8.3 Reference selection and state commit are distinct
-
 For a message such as:
 
 > "Không lấy mẫu đang trong giỏ nữa; lấy mẫu thứ hai lúc nãy, áo M, quần L. Chưa chốt nhé."
@@ -579,7 +577,7 @@ This is an experiment shape, not a claim that the boundary is solved and not app
 
 ### 9.3 Protected prose invariant and limit of guarantee
 
-Free text must not intentionally become a second channel for undeclared business facts.
+Free text must not become a second channel for undeclared business facts.
 
 For protected claims:
 
