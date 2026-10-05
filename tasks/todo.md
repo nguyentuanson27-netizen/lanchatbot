@@ -2,7 +2,7 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** T1 frozen; T2 deterministic readiness PASS; A2 pending source seal. Checkpoint A only.
+**Status:** T1 frozen; T2 deterministic readiness PASS; A2 PASS. Checkpoint A only.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
@@ -12,7 +12,7 @@ Owner: both GPT-6.1 Sol/high, 3 repetitions, existing Codex login, 10% maximum u
 T1 frozen. T2 30/30 GREEN after RED. Protocol 8/8, adapter 11/11 including installed
 CLI-to-local-stub, A2 runner 5/5, protected claims/assembly 21/21, worker typecheck/build/lint PASS.
 No production wiring. See CHECKPOINT_A.md for identities, actual commands and remaining work.
-A2: not yet executed; A3: not run. No post-A work.
+A2: PASS; A3: not run. No post-A work.
 
 ## Preconditions
 

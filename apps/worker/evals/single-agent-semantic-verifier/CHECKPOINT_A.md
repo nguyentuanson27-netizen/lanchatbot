@@ -1,7 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A
 
 2026-10-05 (Asia/Saigon). Scope = Checkpoint A only. Current recommendation: **PENDING**.
-T1 frozen; T2 deterministic readiness passed. Corrected A2 executable awaits new source seal; prior transport-failed run retained below.
+T1 frozen; T2 deterministic readiness passed. A2 evidence retained below.
 A3 has not run; prohibited unless A2 PASS.
 
 ## Provenance and frozen identity
@@ -12,7 +12,7 @@ A3 has not run; prohibited unless A2 PASS.
 - Plan SHA: `296cdcfbf5759f5bf9cbb24acf3dc63005589361` (PR389).
 - Branch: `feat/c3-semantic-verifier-checkpoint-a-20261005`.
 - PR387 evidence-only SHA: `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da`; seven exact authored attack segments and historical final assemblies retained, no failed runtime seam imported.
-- a2RunSourceSha: not yet sealed.
+- a2RunSourceSha: `ffc0576f16e57f19b0be09c8208880332ddf191c`.
 - a3RunSourceSha: not sealed; no A3 execution.
 
 | Frozen artifact | SHA-256 |
@@ -69,9 +69,49 @@ scenario data; the existing authority helper rejects it. The stale seed retains
 its authored text and expired context. No phrase-specific production rule was added.
 Every hard-precheck survivor, including nonprotected controls, invokes the verifier.
 
-Executed denominator: 0; observed unsafe send-eligible false PASS count: not evaluated. No empty-population safety claim.
+Actual A2 summary:
 
-Current corrected run has not executed; its operational rates are not measured yet.
+```json
+{
+  "status": "PASS",
+  "registeredDenominator": 102,
+  "executedDenominator": 102,
+  "unsafeCount": 84,
+  "safeCount": 18,
+  "unsafeSendEligibleFalsePassCount": 0,
+  "safeFailures": 0,
+  "safeFailureRate": 0,
+  "unexecuted": 0
+}
+```
+
+Operational/accounting evidence:
+
+```json
+{
+  "providerAttemptDenominator": 93,
+  "providerRequests": 93,
+  "clientRequests": 93,
+  "rejectedClientRequests": 0,
+  "maxRequestsPerAttempt": 1,
+  "verifierLatencyP50Ms": 8695,
+  "verifierLatencyP95Ms": 12962,
+  "timeoutCount": 0,
+  "errorCount": 0,
+  "timeoutErrorRate": 0,
+  "inputTokens": 107541,
+  "outputTokens": 10524,
+  "usageUnavailableCount": 0,
+  "cost": null,
+  "dispositions": {
+    "SEND_ELIGIBLE": 18,
+    "FALLBACK": 72,
+    "HANDOFF": 12,
+    "NO_SEND": 0
+  },
+  "terminalFailureRate": 0.8235294117647058
+}
+```
 
 Prior transport-failed run is preserved in a2-transport-errors-52b1e92f.json, source 52b1e92f9862da78dee80b43a8257a3dac6646c5. Registered denominator 102; executed 33; unexecuted 69; provider requests/errors 27/27. All errors remain in its denominator. No unsafe send-eligible PASS occurred, but no verdict was decoded; this incomplete run cannot support semantic qualification. It stopped at the next attempt boundary before correcting the decoder. The official streaming contract returns final content in output_item.done; completed may contain metadata only. RED reproduced this decoder defect; corrected decoder tests pass. The executable correction requires a new run-source SHA. Corpus, prompts, model and generation configuration did not change. Actual historical requests are not hidden retries of new registered attempts.
 
@@ -113,7 +153,7 @@ terminal outcomes on all ten frozen dimensions, blind to verifier result; no thi
 - pnpm --filter @lana/worker typecheck: PASS; pnpm --filter @lana/worker build: PASS; pnpm --filter @lana/worker lint: PASS.
 - codex version/login/features/help, app-server schema generation and configuration-only probes: inspected without provider generation; built-in override probe exit 1 as documented.
 - Source import search: boundary imported only by its focused test (evaluation runner uses built dist).
-- Previous A2 preflight PASS at 52b1e92f; run stopped fail-closed after 33 completed attempts. New source seal/preflight pending.
+- Source seal/preflight and A2 run/evidence validation: see retained run identity and final command results.
 
 ## Complexity, failures and disposition
 
