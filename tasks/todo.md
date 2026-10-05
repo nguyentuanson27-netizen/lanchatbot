@@ -2,7 +2,7 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** T1/T2 readiness GREEN; A2 PASS (102/102); A3 complete (48/48), owner-authorized Codex offline quality FAIL (41/48 pass). Checkpoint A recommendation STOP; owner disposition pending. Original human protocol remains unscored.
+**Status:** Round 1 preserved (A2 PASS; offline A3 FAIL/STOP). Owner authorized one Round-2 Checkpoint-A iteration; T1 frozen inputs prepared before any new provider result.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
@@ -266,3 +266,17 @@ For each future implementation task:
 - [ ] Security review covers untrusted model/customer/tool data.
 - [ ] Evidence contains no secrets/PII.
 - [ ] Project Definition of Done is checked before calling the task complete.
+
+## Authorized Round 2 — 2026-10-05
+
+- [x] Refresh main and record exact implementation base /round start SHA.
+- [x] Preserve original configuration, corpora, provider evidence and Codex review unchanged.
+- [x] Freeze round-2 conversation prompt, clock projection policy, all models/config/thresholds, offline scoring and scope interpretation.
+- [x] Keep all 34 A2 cases and 16 A3 cases; add four new development cases before provider results.
+- [ ] Observe projection/round selector RED, then minimum GREEN.
+- [ ] Complete deterministic readiness and worker typecheck/build/lint.
+- [ ] Seal clean A2 source, preflight, execute and validate all 102 attempts.
+- [ ] Only after A2 PASS: seal A3 source, preflight, execute and validate all 60 attempts.
+- [ ] Offline review all 60 actual terminal outcomes, with 600 individual ratings and rationale.
+- [ ] Report original/new population, operational evidence, structural delta and checkpoint recommendation.
+- [ ] Update PR390 and stop; no third iteration or post-A work.
