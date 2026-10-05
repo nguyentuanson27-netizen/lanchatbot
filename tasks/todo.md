@@ -2,9 +2,11 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** Round1 preserved (A2 PASS/offline A3 FAIL). Round2 A2 PASS; A3 not run; recommendation PENDING. Checkpoint A only.
+**Status:** Round1 preserved (A2 PASS/offline A3 FAIL). Round2 A2 PASS; A3 60/60 complete, offline quality PASS; recommendation GO. Checkpoint A only.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
+
+## Round 1 — retained historical implementation evidence
 
 **Implementation intake (2026-10-05):** owner authorized Checkpoint A.
 implementationBaseSha = `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; branch `feat/c3-semantic-verifier-checkpoint-a-20261005`.
@@ -202,11 +204,11 @@ Verification:
 
 ## CHECKPOINT A
 
-- [ ] Owner GO / STOP / BLOCKED decision recorded. Implementation recommendation: STOP after owner-authorized Codex review; owner final disposition pending.
+- [ ] Owner GO / STOP / BLOCKED decision recorded. Current Round-2 recommendation: GO on the frozen population/configuration; owner final disposition pending. Round-1 STOP remains retained historical evidence.
 - [x] A2 zero observed unsafe send-eligible false PASS.
 - [x] Fail-closed behavior proven for UNCERTAIN/malformed/timeout/provider error.
 - [x] Safe controls + A3 terminal outcomes pass frozen usability threshold.
-- [ ] A3 passes frozen whole-reply quality bar. FAIL in owner-authorized Codex offline review (41/48 overall; partial 5/9, simple 6/9 below 90%). No human qualification claimed.
+- [x] Round-2 A3 passes frozen numerical whole-reply quality bar in preregistered Codex offline review:60/60, every family100%, all600 ratings retained. Round-1 FAIL remains unchanged (41/48; partial5/9, simple6/9). No independent, blinded or human qualification claimed.
 - [x] Final-send freshness/binding/revision/permission/snapshot revalidation proven.
 - [x] One conversational owner + one verifier only.
 - [x] Verifier has no tool/state/effect/rewrite/send authority.
@@ -276,7 +278,7 @@ For each future implementation task:
 - [x] Observe projection/round selector RED (0/3), then minimum GREEN (3/3).
 - [x] Complete deterministic readiness: Node 34/34, boundary 30/30, claim/assembly 21/21; worker typecheck/build/lint PASS.
 - [x] Seal clean A2 source ab3e466bf5c1fbd8b12677ce13b36958cde75dd8, preflight, execute 102/102 and validate; status PASS.
-- [ ] Only after A2 PASS: seal A3 source, preflight, execute and validate all 60 attempts.
-- [ ] Offline review all 60 actual terminal outcomes, with 600 individual ratings and rationale.
-- [ ] Report original/new population, operational evidence, structural delta and checkpoint recommendation.
-- [ ] Update PR390 and stop; no third iteration or post-A work.
+- [x] After A2 PASS: seal A3 source 4647eaa2053ee796e6f8546b9ce289a64af27bcb, preflight, execute60/60 and validate.
+- [x] Offline review60/60 outcomes /600 individual ratings and rationale; quality PASS.
+- [x] Report original/new population, operational evidence, structural delta; GO recommendation.
+- [x] Update PR390 with Round-2 A2/A3 PASS, bounded GO recommendation and scoring/CI/coverage limitations; stop at owner checkpoint. No third iteration or post-A work.
