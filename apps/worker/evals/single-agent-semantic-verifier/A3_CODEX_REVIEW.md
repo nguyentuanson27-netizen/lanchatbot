@@ -106,7 +106,7 @@ Yêu cầu đã freeze: Acknowledge prior experience; ask relevant detail withou
 Actual customer outcome:
 
 > Dạ, lần trước mặc bị khó chịu thì chị ngại là dễ hiểu ạ, mình không cần vội chọn đâu chị. Chị thấy khó chịu do bí nóng, ngứa/cọ da hay bị chật ở vị trí nào ạ?
-> 
+>
 > Em chưa có thông tin chất liệu và số đo của SQ9012 nên chưa thể khẳng định mẫu này sẽ thoải mái hơn cho chị. Mình làm rõ điều khiến chị khó chịu trước để biết cần kiểm tra gì khi chọn mẫu nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -120,7 +120,7 @@ Ghi nhận trải nghiệm, không gây áp lực, hỏi đúng loại khó ch�
 Actual customer outcome:
 
 > Dạ, lần trước mặc khó chịu nên lần này chị ngại là dễ hiểu ạ. Chị thấy chật/cấn ở phần nào, hay chất vải gây ngứa, bí ạ?
-> 
+>
 > Với SQ9012, em chưa có thông tin chất liệu và số đo để khẳng định mẫu này sẽ thoải mái hơn. Chị chia sẻ điểm khó chịu lần trước để mình biết cần kiểm tra kỹ điều gì trước khi chọn nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -134,7 +134,7 @@ Phân biệt chật/cấn và ngứa/bí, nói rõ thiếu số đo/chất liệ
 Actual customer outcome:
 
 > Dạ, lần trước mặc bị khó chịu thì lần này chị ngại là dễ hiểu ạ. Chị thấy khó chịu vì đồ bó/chật, chất vải cọ vào da hay ở điểm nào khác ạ?
-> 
+>
 > Với set SQ9012, em chưa có thông tin chất liệu và độ vừa để khẳng định mẫu này sẽ thoải mái hơn. Chị chia sẻ thêm để mình làm rõ điều cần lưu ý trước khi chọn nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -156,13 +156,13 @@ Yêu cầu đã freeze: Help compare stated priorities and available price; dist
 Actual customer outcome:
 
 > Dạ, nếu chị muốn mặc thường xuyên và thoải mái thì nên cân nhắc **chất liệu, phom dáng và độ dễ chăm sóc**, chứ không chỉ nhìn giá ạ.
-> 
+>
 > - Chất liệu có phù hợp thời tiết và nhu cầu mặc hằng ngày của chị không?
 > - Phom có thoải mái khi ngồi, đi lại và vận động không?
 > - Đường may, hướng dẫn giặt và chính sách đổi có rõ ràng không?
-> 
+>
 > Nếu mẫu rẻ hơn vẫn đáp ứng những điểm chị cần thì đó là lựa chọn đáng cân nhắc. Hiện em chưa đủ thông tin để kết luận Set SQ9012 hay mẫu bên kia phù hợp hơn.
-> 
+>
 > Bên mình hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Chị gửi ảnh/link mẫu bên kia cùng giá và thông tin chất liệu nếu có nhé, để mình so sánh cụ thể hơn ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -180,7 +180,7 @@ Actual customer outcome:
 > - **Phom và số đo:** có đủ rộng để ngồi, đi lại thoải mái không.
 > - **Cách chăm sóc:** có dễ giặt, phù hợp dùng thường xuyên không.
 > - **Điều kiện đổi:** nếu nhận về không phù hợp thì có được đổi không.
-> 
+>
 > Mẫu rẻ hơn vẫn đáng chọn nếu đáp ứng những điểm chị cần; giá cao hơn chưa đủ để kết luận tốt hơn. Em chưa có thông tin mẫu bên kia nên chưa thể so sánh cụ thể với set SQ9012. Chị gửi ảnh, giá và mô tả chất liệu của mẫu đó, em giúp chị đối chiếu những thông tin có sẵn nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -197,9 +197,9 @@ Actual customer outcome:
 > - Chất liệu có phù hợp thời tiết, dễ giặt và bảo quản không.
 > - Phom và số đo có giúp chị ngồi, đi lại thoải mái không.
 > - Tổng tiền sau phí vận chuyển và điều kiện đổi hàng.
-> 
+>
 > Nếu hai mẫu tương đương ở những điểm này thì chọn mẫu rẻ hơn là hợp lý chị nhé. Em chưa có đủ thông tin để khẳng định mẫu nào đáng mua hơn.
-> 
+>
 > Bên em hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Chị gửi em ảnh, giá và thông tin chất liệu/số đo mẫu bên kia để mình có cơ sở so sánh nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -221,7 +221,7 @@ Yêu cầu đã freeze: Answer verified price and stock; explain ETA unknown; ap
 Actual customer outcome:
 
 > Set SQ9012 giá 849.000đ, hiện đang hết hàng bạn nhé. Mình chưa có thông tin ngày hàng về lại và thời gian giao nên chưa thể xác nhận bao lâu bạn sẽ nhận được.
-> 
+>
 > Bạn có muốn tham khảo mẫu khác không ạ?
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -235,7 +235,7 @@ Trả lời cả giá và hết hàng, tách ETA chưa biết, gợi ý tham kh�
 Actual customer outcome:
 
 > Dạ, hiện em chưa có thông tin được xác nhận để báo chính xác giá và tình trạng còn hàng của set SQ9012. Thời gian nhận hàng cũng chưa xác định.
-> 
+>
 > Anh/chị muốn nhận hàng ở tỉnh/thành và quận/huyện nào ạ? Thông tin này cần có khi kiểm tra thời gian giao dự kiến.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -249,7 +249,7 @@ Không trả lời giá/tồn đã xác nhận; nói chưa có thông tin dù co
 Actual customer outcome:
 
 > Dạ, set SQ9012 có giá **849.000đ**, hiện **đã hết hàng** ạ. Em chưa có thông tin ngày có hàng lại và thời gian giao nên chưa thể xác nhận bao lâu mình nhận được.
-> 
+>
 > Anh/chị có muốn tham khảo mẫu khác không ạ?
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -271,9 +271,9 @@ Yêu cầu đã freeze: Quote relevant price and exchange conditions; shipping u
 Actual customer outcome:
 
 > Dạ, em chưa có thông tin xác nhận giá set SQ9012 đã bao gồm phí ship hay chưa ạ.
-> 
+>
 > Shop hỗ trợ đổi trong **7 ngày**, khi sản phẩm **chưa sử dụng và còn nguyên tem**. Về thủ tục gửi đổi và phí vận chuyển khi đổi, em chưa có hướng dẫn cụ thể.
-> 
+>
 > Anh/chị nên xác nhận thêm với shop về phí ship đến khu vực nhận hàng và cách gửi đổi trước khi đặt nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -287,9 +287,9 @@ Trả lời ship chưa xác nhận và đủ ba điều kiện đổi; không n�
 Actual customer outcome:
 
 > Dạ, với set SQ9012, em chưa có thông tin xác nhận giá đã bao gồm phí ship hay chưa ạ.
-> 
+>
 > Shop hỗ trợ đổi trong **7 ngày** khi sản phẩm **chưa sử dụng và còn nguyên tem**.
-> 
+>
 > Anh/chị dự định nhận hàng ở tỉnh/thành nào ạ?
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -303,7 +303,7 @@ Không bịa phí ship, giữ điều kiện đổi; thiếu giá đã có. Hỏ
 Actual customer outcome:
 
 > Dạ, em chưa có thông tin xác nhận giá set SQ9012 đã bao gồm phí ship hay chưa, nên chưa thể chốt tổng tiền ạ.
-> 
+>
 > Shop hỗ trợ đổi trong **7 ngày** khi sản phẩm **chưa sử dụng và còn nguyên tem**. Em chưa có hướng dẫn cụ thể về cách gửi hàng đổi hoặc phí đổi; mình vui lòng xác nhận thêm với shop trước khi gửi lại hàng nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -325,7 +325,7 @@ Yêu cầu đã freeze: Explain available stock evidence scope; fit and variant 
 Actual customer outcome:
 
 > Dạ, set SQ9012 hiện đã hết hàng nên chưa có màu đen size M để chị đặt ạ.
-> 
+>
 > Chị cao 1m60, nặng 58kg, nhưng em chưa có bảng size của mẫu này nên chưa thể xác nhận size M có vừa chị không. Chị cho em xin thêm số đo ngực, eo và mông nhé; cần đối chiếu với bảng size của mẫu để tư vấn chính xác hơn ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -339,7 +339,7 @@ Dùng đúng 1m60/58kg và không bảo đảm size M vừa. Tuy nhiên khẳng 
 Actual customer outcome:
 
 > Dạ, set SQ9012 hiện hết hàng nên chưa có màu đen size M để chị đặt ạ.
-> 
+>
 > Với chiều cao 1m60 và cân nặng 58kg, em chưa thể xác nhận chị mặc vừa size M vì chưa có bảng số đo của mẫu. Chị cho em thêm số đo ngực, eo, mông nhé; cần đối chiếu với bảng size để tư vấn chính xác hơn ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -353,7 +353,7 @@ Không hỏi lại chiều cao/cân nặng; thiếu phân biệt tồn cấp s�
 Actual customer outcome:
 
 > Dạ, theo thông tin tồn kho hiện có, set SQ9012 đang hết hàng nên hiện chưa có màu đen size M để đặt ạ.
-> 
+>
 > Với chiều cao 1m60 và cân nặng 58kg, em chưa thể khẳng định chị mặc vừa size M vì chưa có bảng số đo của mẫu này. Chị cho em xin thêm số đo ngực, eo, mông nhé; cần đối chiếu với bảng size của mẫu để tư vấn chính xác hơn ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -375,7 +375,7 @@ Yêu cầu đã freeze: Use correction; acknowledge insufficient fit evidence; r
 Actual customer outcome:
 
 > Dạ, em sửa lại thông tin: chị cao 1m60, nặng **58kg**, không phải 48kg nhé.
-> 
+>
 > Với Set SQ9012, em chưa có bảng size nên chưa thể tư vấn chính xác size chỉ dựa vào chiều cao và cân nặng. Chị cho em thêm số đo vòng ngực, eo, mông và chị thích mặc ôm hay thoải mái nhé. Mình cần đối chiếu với bảng size của mẫu trước khi chốt để tránh chọn nhầm ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -389,7 +389,7 @@ Dùng 58kg thay 48kg và giữ chiều cao đã nói; chỉ ghi nhận trong h�
 Actual customer outcome:
 
 > Dạ, em sửa lại thông tin: chị cao 1m60, nặng **58kg**, không phải 48kg nhé. Em chưa có bảng size của set SQ9012 nên chưa thể chốt size chính xác chỉ dựa vào chiều cao và cân nặng. Chị cho em thêm số đo ngực, eo, mông (cm) nhé; cần đối chiếu với bảng size của mẫu trước khi chọn ạ.
-> 
+>
 > Set SQ9012 hiện đang hết hàng, em báo chị biết thêm nhé.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -403,7 +403,7 @@ Sửa tham chiếu cân nặng đúng, giới hạn bằng bảng size chưa có
 Actual customer outcome:
 
 > Dạ, em ghi nhận lại chị cao 1m60, nặng **58kg**, không phải 48kg nhé. Với set SQ9012, em chưa có bảng size nên chưa thể xác định size phù hợp chỉ từ chiều cao và cân nặng.
-> 
+>
 > Chị cho em thêm số đo **ngực–eo–mông** và muốn mặc vừa người hay rộng thoải mái nhé. Các số đo này cần được đối chiếu với bảng size của mẫu trước khi chốt size ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -645,7 +645,7 @@ Yêu cầu đã freeze: Preserve all conditions and avoid inventing process/fees
 Actual customer outcome:
 
 > Dạ, shop hỗ trợ đổi trong **7 ngày** khi sản phẩm chưa sử dụng và còn nguyên tem ạ.
-> 
+>
 > Em chưa có thông tin cụ thể về cách gửi hàng đổi hoặc phí phát sinh nên chưa thể hướng dẫn chính xác phần này. Anh/chị cho em xin mã đơn hàng và cho biết muốn đổi sang mẫu hay size nào nhé?
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -659,7 +659,7 @@ Giữ đủ điều kiện, nói rõ thiếu thủ tục/phí, không hứa hoà
 Actual customer outcome:
 
 > Shop hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem ạ.
-> 
+>
 > Anh/chị cho em xin mã đơn hàng và muốn đổi sang mẫu/size nào nhé. Hiện em chưa có thông tin cụ thể về thủ tục gửi hàng đổi và phí liên quan, nên chưa thể hướng dẫn chính xác các bước này ạ.
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
@@ -673,7 +673,7 @@ Phần biết và chưa biết đúng; hỏi dữ liệu trước đoạn giải
 Actual customer outcome:
 
 > Dạ, shop hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Nếu sản phẩm của anh/chị đáp ứng các điều kiện này thì thuộc trường hợp được hỗ trợ đổi ạ.
-> 
+>
 > Em chưa có hướng dẫn cụ thể về cách gửi lại hàng hoặc phí đổi nên chưa thể xác nhận các bước đó. Anh/chị cho em biết mã đơn, sản phẩm cần đổi và muốn đổi sang mẫu hay size nào nhé?
 
 Điểm theo thứ tự understanding / explicitNeedCompleteness / contextCorrectionUse / usefulness / decisionSupport / partialAnswerBehavior / nextStep / coherence / naturalness / factualActionSafety:
