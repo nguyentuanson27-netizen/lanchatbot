@@ -2,7 +2,7 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** Round 1 preserved (A2 PASS; offline A3 FAIL/STOP). Owner authorized one Round-2 Checkpoint-A iteration; T1 frozen inputs prepared before any new provider result.
+**Status:** Round1 preserved (A2 PASS/offline A3 FAIL). Round2 A2 PASS; A3 not run; recommendation PENDING. Checkpoint A only.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
@@ -275,7 +275,7 @@ For each future implementation task:
 - [x] Keep all 34 A2 cases and 16 A3 cases; add four new development cases before provider results.
 - [x] Observe projection/round selector RED (0/3), then minimum GREEN (3/3).
 - [x] Complete deterministic readiness: Node 34/34, boundary 30/30, claim/assembly 21/21; worker typecheck/build/lint PASS.
-- [ ] Seal clean A2 source, preflight, execute and validate all 102 attempts.
+- [x] Seal clean A2 source ab3e466bf5c1fbd8b12677ce13b36958cde75dd8, preflight, execute 102/102 and validate; status PASS.
 - [ ] Only after A2 PASS: seal A3 source, preflight, execute and validate all 60 attempts.
 - [ ] Offline review all 60 actual terminal outcomes, with 600 individual ratings and rationale.
 - [ ] Report original/new population, operational evidence, structural delta and checkpoint recommendation.
