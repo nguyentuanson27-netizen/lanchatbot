@@ -75,3 +75,15 @@ Local tools: Node `v24.19.0`, pnpm `10.12.4`, lockfile-resolved Vitest `3.2.7`, 
 | Provider-backed comparison / whole-reply judging | **BLOCKED / NOT RUN**, as above |
 
 Review (`code-review-and-quality`): correctness/security defects are explicit feasibility blockers; they were not repaired by weakening a guard or an assertion. Identity/permission surfaces remain code-supplied; there are no runtime effects, secrets, real customer PII or new dependencies. Scope/simplicity review permits preserving this isolated failed experiment for review, **not** treating it as a completed safe candidate. Full worker suite, `pnpm check` and Checkpoint B verification were not run and are not claimed.
+
+## Follow-up: requested GPT-6.1 Sol Light access check
+
+On 2026-10-05 the owner requested trying “6.1 sol light”. Local Codex CLI `0.159.2` advertises `gpt-6.1-sol` with default/supported effort `low` (lighter reasoning). `codex login status` reports ChatGPT authentication. One actual access-only turn requested that alias/effort and returned `ACCESS_OK`, exit 0; usage reported 14319 input tokens, 6 output tokens and 0 reasoning output tokens. The JSON event stream contains one completed agent message and no tool execution. It does not expose an immutable provider model version or full wire request, so this is not matched comparative evidence.
+
+Exact invocation (`$trialDir` was the isolated OS temporary directory `lanchatbot-sol-low-access-20261005`):
+
+```powershell
+codex exec --ignore-user-config --ignore-rules --ephemeral --skip-git-repo-check --json -s read-only -C $trialDir -m gpt-6.1-sol -c model_reasoning_effort=low -c web_search=disabled --disable shell_tool --disable unified_exec --disable memories --disable multi_agent 'Reply exactly ACCESS_OK. Do not invoke tools.'
+```
+
+This adds **one access diagnostic**, outside the frozen feasibility experiment; its candidate/C3/judge call counts remain zero. No corpus generation, provider adapter, new semantic role or model substitution was performed. The frozen manifest still records the original intended Vertex configuration. ChatGPT-authenticated Codex access is available for the requested alias; missing Vertex configuration remains a separate fact. T3 remains BLOCKED by the five deterministic safety failures, and Checkpoint A recommendation remains STOP. Model choice alone does not repair the tested code boundary.
