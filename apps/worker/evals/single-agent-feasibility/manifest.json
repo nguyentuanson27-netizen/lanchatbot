@@ -1,0 +1,101 @@
+{
+  "evidencePhase": "DEVELOPMENT_FEASIBILITY_ONLY",
+  "implementationBaseSha": "c4bd59857a560689ce0b10758a4927f6401b0c27",
+  "comparisonBaselineSha": "c4bd59857a560689ce0b10758a4927f6401b0c27",
+  "baselineSelection": "Existing main C3 two-pass path on same accepted substrate; no PR377 source imported into either lane",
+  "corpusHash": "cbb7c75eda966c25f6a20aac3659c097fbfd2189955fa8ed3461f80826a4ab56",
+  "candidate": {
+    "provider": "VERTEX_AI",
+    "model": "gemini-3.5-flash-lite",
+    "version": "gemini-3.5-flash-lite",
+    "effort": "MODEL_DEFAULT_NO_OVERRIDE_MATCH_EXISTING_REQUEST",
+    "generation": {
+      "maxOutputTokens": 1024,
+      "responseMimeType": "application/json",
+      "temperature": "PROVIDER_DEFAULT",
+      "topP": "PROVIDER_DEFAULT",
+      "thinkingConfig": "OMITTED_MATCH_EXISTING_REQUEST",
+      "safetySettings": "EXISTING_CONTEXT_V2_CANDIDATE"
+    },
+    "historyPolicy": {
+      "windowMessages": 10,
+      "truncation": "RECENT_ACCEPTED_ONLY_NO_SUMMARIZER",
+      "olderReferencedDialogue": "ONLY_IF_EXPLICITLY_REFERENCED_IN_FROZEN_STATE"
+    },
+    "judge": {
+      "type": "HUMAN_BLIND_PAIRED",
+      "rubricId": "CHECKPOINT_A_WHOLE_REPLY_DEV_V1",
+      "process": "Score every exact final reply and required outcome; controls separate; no C3-relative pass requirement"
+    },
+    "substrate": {
+      "packages/contracts/src/v2/canonical-evidence-readiness.ts": "598312d8ea8464d9c752d99b2d4cfbf0ca82304c",
+      "packages/business-tools/src/protected-claims.ts": "0bd193ecd29e9927f3471c49c1935624424cae89",
+      "packages/business-tools/src/reply-assembler.ts": "8702091f346cb666d8ef7a17df7919970f900ac9",
+      "packages/business-tools/src/guard.ts": "9341555171b8d3ca86137d90be14a0db6197adfb",
+      "apps/worker/src/realtime-protected-claim-boundary.ts": "d619fa8c409cbf718de4a2ff16792873f12076f7",
+      "apps/worker/src/track-c-offline-candidate-validation.ts": "47c6e4f81d2b09d34db337701ac1ea3e435d42ff",
+      "apps/worker/src/track-c-c3-two-pass-candidate.ts": "1b60c2870f29b92ea1ae339008f98aa11c43173f",
+      "apps/worker/src/context-v2-candidate.ts": "9f9531827d1305341cd9e160c5f3a447f70cc8bf"
+    },
+    "pairedInputHash": "cbb7c75eda966c25f6a20aac3659c097fbfd2189955fa8ed3461f80826a4ab56",
+    "evaluationAt": "2026-10-05T03:00:00.000Z",
+    "observedProviderVersion": null,
+    "requestIdentity": null,
+    "sourceSha": null,
+    "orchestration": "ONE_CONVERSATIONAL_OWNER_PROTECTED_REFS"
+  },
+  "baseline": {
+    "provider": "VERTEX_AI",
+    "model": "gemini-3.5-flash-lite",
+    "version": "gemini-3.5-flash-lite",
+    "effort": "MODEL_DEFAULT_NO_OVERRIDE_MATCH_EXISTING_REQUEST",
+    "generation": {
+      "maxOutputTokens": 1024,
+      "responseMimeType": "application/json",
+      "temperature": "PROVIDER_DEFAULT",
+      "topP": "PROVIDER_DEFAULT",
+      "thinkingConfig": "OMITTED_MATCH_EXISTING_REQUEST",
+      "safetySettings": "EXISTING_CONTEXT_V2_CANDIDATE"
+    },
+    "historyPolicy": {
+      "windowMessages": 10,
+      "truncation": "RECENT_ACCEPTED_ONLY_NO_SUMMARIZER",
+      "olderReferencedDialogue": "ONLY_IF_EXPLICITLY_REFERENCED_IN_FROZEN_STATE"
+    },
+    "judge": {
+      "type": "HUMAN_BLIND_PAIRED",
+      "rubricId": "CHECKPOINT_A_WHOLE_REPLY_DEV_V1",
+      "process": "Score every exact final reply and required outcome; controls separate; no C3-relative pass requirement"
+    },
+    "substrate": {
+      "packages/contracts/src/v2/canonical-evidence-readiness.ts": "598312d8ea8464d9c752d99b2d4cfbf0ca82304c",
+      "packages/business-tools/src/protected-claims.ts": "0bd193ecd29e9927f3471c49c1935624424cae89",
+      "packages/business-tools/src/reply-assembler.ts": "8702091f346cb666d8ef7a17df7919970f900ac9",
+      "packages/business-tools/src/guard.ts": "9341555171b8d3ca86137d90be14a0db6197adfb",
+      "apps/worker/src/realtime-protected-claim-boundary.ts": "d619fa8c409cbf718de4a2ff16792873f12076f7",
+      "apps/worker/src/track-c-offline-candidate-validation.ts": "47c6e4f81d2b09d34db337701ac1ea3e435d42ff",
+      "apps/worker/src/track-c-c3-two-pass-candidate.ts": "1b60c2870f29b92ea1ae339008f98aa11c43173f",
+      "apps/worker/src/context-v2-candidate.ts": "9f9531827d1305341cd9e160c5f3a447f70cc8bf"
+    },
+    "pairedInputHash": "cbb7c75eda966c25f6a20aac3659c097fbfd2189955fa8ed3461f80826a4ab56",
+    "evaluationAt": "2026-10-05T03:00:00.000Z",
+    "observedProviderVersion": null,
+    "requestIdentity": null,
+    "sourceSha": null,
+    "orchestration": "TRACK_C_C3_STRATEGIST_RESPONDER_V2"
+  },
+  "attemptPolicy": {
+    "generationsPerCasePerLane": 1,
+    "retries": 0,
+    "deadlineMs": 60000,
+    "denominator": [
+      "ACCEPT",
+      "REJECT",
+      "FALLBACK",
+      "TIMEOUT",
+      "HANDOFF"
+    ],
+    "controlsReportedSeparately": true
+  },
+  "status": "FROZEN_INTENDED_PROTOCOL_NOT_PROVIDER_OBSERVED"
+}

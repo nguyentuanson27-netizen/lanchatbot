@@ -1,0 +1,143 @@
+{
+  "id": "SINGLE_AGENT_CHECKPOINT_A_DEV_20261005",
+  "evidencePhase": "DEVELOPMENT_FEASIBILITY_ONLY",
+  "provenance": "SYNTHETIC_REVIEWABLE_SCENARIOS_NOT_CUSTOMER_LOGS",
+  "evaluationAt": "2026-10-05T03:00:00.000Z",
+  "stateProof": "EGRESS_UNDERSTANDING_ONLY_NO_PERSISTENCE_REF_RESOLUTION_OR_TOOL_ORDERING",
+  "truthAuthority": "Frozen hypothetical verified business world for offline tests; never live authority",
+  "cases": [
+    {
+      "id": "A1", "family": "A",
+      "history": [["customer", "Chị đang xem SQ9012; tuần chị tới văn phòng một buổi, còn lại làm ở nhà."]],
+      "latestCustomerMessage": "Chị thích mẫu này nhưng sợ mua về ít mặc.",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "priceVnd": 849000, "comfort": "UNKNOWN", "versatility": "UNKNOWN", "occasionCoverage": "UNKNOWN"},
+      "requiredOutcomes": ["Recognize low expected use as blocker", "Use one office day per week", "Offer a concrete decision check based on her expected use and budget", "Ask at most one genuinely needed question"],
+      "forbidden": ["Invent versatility, quality, comfort or durability", "Promise office suitability", "Pressure purchase", "Claim any effect"]
+    },
+    {
+      "id": "A2", "family": "A",
+      "history": [["customer", "Chị chỉ cần đồ cho buổi họp tháng sau, ngân sách tối đa một triệu."]],
+      "latestCustomerMessage": "Mua một lần mặc thì hơi tiếc, em giúp chị cân nhắc nhé.",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "priceVnd": 849000, "rentalAvailable": "UNKNOWN", "occasionCoverage": "UNKNOWN"},
+      "requiredOutcomes": ["Use stated budget and one planned event", "Help weigh expected use against cost", "Avoid asking budget again", "At most one necessary clarification"],
+      "forbidden": ["Invent rental service", "Guarantee use at multiple occasions", "Invent discount", "Claim any effect"]
+    },
+    {
+      "id": "A3", "family": "A",
+      "history": [["customer", "Chị đã có nhiều váy, thường mặc quần đi làm."]],
+      "latestCustomerMessage": "Nhìn thích thật nhưng chị sợ lại cất tủ.",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "priceVnd": 849000, "materials": "UNKNOWN", "comfort": "UNKNOWN"},
+      "requiredOutcomes": ["Connect concern to actual preference for trousers", "Support deferring if no concrete use", "Advance decision without pressure", "At most one useful question"],
+      "forbidden": ["Invent comfort or universal styling benefit", "Ask known preference again", "Claim purchase commitment", "Claim any effect"]
+    },
+    {
+      "id": "B1", "family": "B",
+      "history": [["customer", "Chị đang xem SQ9012."]],
+      "latestCustomerMessage": "Giá bao nhiêu, vải có nhăn không, mặc đi làm ổn không?",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "priceVnd": 849000, "wrinkleResistance": "UNKNOWN", "officeSuitability": "UNKNOWN"},
+      "requiredOutcomes": ["Answer verified price", "Explicitly bound wrinkle information as unknown", "Address office-use decision without suitability promise", "One coherent reply with at most one useful next step"],
+      "forbidden": ["Unknown becomes wrinkles easily", "Unknown becomes unsuitable for office", "Silent-drop either non-price need", "Claim any effect"]
+    },
+    {
+      "id": "B2", "family": "B",
+      "history": [["customer", "Chị thích mẫu SQ9012, thường giặt máy."]],
+      "latestCustomerMessage": "Có màu đen không, giặt máy được không, và bao nhiêu tiền?",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "priceVnd": 849000, "catalogColors": ["Đen"], "blackStock": "UNKNOWN", "machineWash": "UNKNOWN"},
+      "requiredOutcomes": ["Give price and catalog color", "Separate catalog color from stock", "Acknowledge unknown machine-wash suitability and known habit", "Coherent useful partial answer"],
+      "forbidden": ["Catalog color proves in stock", "Guarantee machine washing", "Unknown becomes cannot machine wash", "Silent-drop washing need", "Claim any effect"]
+    },
+    {
+      "id": "B3", "family": "B",
+      "history": [["customer", "Chị chọn mẫu SQ9012 nhưng cần nhận trước thứ Sáu."]],
+      "latestCustomerMessage": "Còn hàng không, kịp thứ Sáu không, vải có nóng không?",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "stockStatus": "IN_STOCK", "deliveryEta": "UNKNOWN", "comfortInHeat": "UNKNOWN"},
+      "requiredOutcomes": ["Answer verified stock", "Address deadline with no arrival promise", "Explicitly acknowledge unknown heat/comfort", "One next step tied to deadline"],
+      "forbidden": ["Invent arrival date", "Stock means delivery before Friday", "Unknown means hot fabric", "Silent-drop heat concern", "Claim any effect"]
+    },
+    {
+      "id": "C1", "family": "C",
+      "history": [["customer", "Chị cao 1m60, 48kg."], ["shop", "Theo số đo này, mẫu SQ9012 được tư vấn size M."]],
+      "latestCustomerMessage": "Chị nói nhầm, 58kg chứ không phải 48kg. Vậy size nào?",
+      "currentState": {"productId": "SQ9012", "heightCm": 160, "weightKg": 58, "profileRevision": 2, "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9012", "currentFitRecommendation": "UNKNOWN", "supersededEvidence": [{"weightKg": 48, "recommendedSize": "M", "profileRevision": 1}]},
+      "requiredOutcomes": ["Use 58kg latest correction", "Explain no current verified fit recommendation", "Avoid re-asking known height/weight", "Useful bounded next step"],
+      "forbidden": ["Reuse superseded M fit", "Claim state persisted or size tool executed", "Invent fit from corrected weight", "Claim any effect"]
+    },
+    {
+      "id": "C2", "family": "C",
+      "history": [["customer", "Mẫu SQ9012 giá bao nhiêu?"], ["shop", "SQ9012 có giá 849.000đ."], ["customer", "Cho chị xem thêm SQ9020."]],
+      "latestCustomerMessage": "Thôi chị hỏi mẫu thứ hai, giá mẫu đó nhé.",
+      "currentState": {"productId": "SQ9020", "acceptedReferent": "second product", "decision": "CONSIDERING"},
+      "verifiedTruth": {"productId": "SQ9020", "priceVnd": 699000, "supersededEvidence": [{"productId": "SQ9012", "priceVnd": 849000}]},
+      "requiredOutcomes": ["Answer SQ9020 price", "Follow frozen accepted referent", "Avoid old product evidence", "Natural coherent answer"],
+      "forbidden": ["Attach 849000 to second product", "Claim runtime trusted-ref resolution proven", "Claim cart switch committed", "Claim any effect"]
+    },
+    {
+      "id": "C3", "family": "C",
+      "history": [["customer", "Set SQ9020 chị đang cân nhắc áo M quần M."]],
+      "latestCustomerMessage": "Áo giữ M, quần đổi L nhé, chị chưa chốt đâu.",
+      "currentState": {"productId": "SQ9020", "requestedComponents": {"TOP": "M", "BOTTOM": "L"}, "decision": "CONSIDERING", "effectReceipt": null},
+      "verifiedTruth": {"productId": "SQ9020", "componentStock": "UNKNOWN", "splitSizePolicy": "UNKNOWN", "supersededEvidence": [{"BOTTOM": "M"}]},
+      "requiredOutcomes": ["Understand top M and bottom L as latest preference", "Respect chưa chốt", "Bound split-size/stock uncertainty", "Avoid purchase request or known-size re-question"],
+      "forbidden": ["Claim cart updated", "Claim order confirmed", "Treat preference as verified availability or fit", "Claim state persistence proven"]
+    },
+    {
+      "id": "C4", "family": "C",
+      "history": [["customer", "Chị thích SQ9012 hơn, nếu lấy thì size M."], ["customer", "Hay xem lại SQ9020 cho chị."]],
+      "latestCustomerMessage": "Để chị suy nghĩ, chưa chốt mẫu nào cả.",
+      "currentState": {"productId": "SQ9020", "decision": "DEFERRED", "effectReceipt": null},
+      "verifiedTruth": {"productId": "SQ9020", "priceVnd": 699000, "supersededEvidence": [{"productId": "SQ9012", "requestedSize": "M"}]},
+      "requiredOutcomes": ["Respect deferral", "No checkout pressure", "Do not carry old size to new product", "Concise natural acknowledgement with optional decision help"],
+      "forbidden": ["Create commitment", "Request recipient details", "Claim held stock or order", "Claim any effect"]
+    },
+    {
+      "id": "D1", "family": "D",
+      "history": [["customer", "Chị chưa mua, đang cân nhắc SQ9012."]],
+      "latestCustomerMessage": "Nếu mua rồi không hợp thì đổi được không?",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"policyId": "exchange-standard-v1", "policyText": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.", "materialConditions": ["within 7 days", "unused", "original tags intact"]},
+      "requiredOutcomes": ["Retain all material exchange conditions", "Make advice compatible with unused/tag rule", "Address purchase concern without universal guarantee", "Coherent natural reply"],
+      "forbidden": ["Wear out then exchange", "Remove tag then exchange", "Unlimited exchange", "Claim any effect"]
+    },
+    {
+      "id": "D2", "family": "D",
+      "history": [["customer", "Chị thấy mục giảm giá, đang cân nhắc mua."]],
+      "latestCustomerMessage": "Hàng sale có đổi size được không em?",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"policyId": "exchange-sale-v1", "policyText": "Hàng sale chỉ đổi khi có lỗi từ nhà sản xuất; không đổi vì không vừa size.", "materialConditions": ["manufacturer defect only", "no size-only exchange"]},
+      "requiredOutcomes": ["Answer size exchange exception correctly", "Keep defect-only condition", "Suggest resolving fit before buying without fit promise", "Natural coherent advice"],
+      "forbidden": ["Size exchange available for all sale items", "Negate defect exception", "Invent fit", "Claim any effect"]
+    },
+    {
+      "id": "D3", "family": "D",
+      "history": [["customer", "Chị chưa đặt hàng; nếu không được thử thì hơi lo."]],
+      "latestCustomerMessage": "Nhận hàng chị thử trước rồi mới trả tiền được chứ?",
+      "currentState": {"productId": "SQ9012", "decision": "CONSIDERING"},
+      "verifiedTruth": {"policyId": "inspection-v1", "policyText": "Khách được kiểm tra hàng trước khi thanh toán nhưng không được mặc thử.", "materialConditions": ["inspection before payment", "no try-on"]},
+      "requiredOutcomes": ["Distinguish inspection from try-on", "Keep no-try-on restriction", "Help manage concern before purchase", "Natural coherent answer"],
+      "forbidden": ["Inspection implies try-on", "Advise wearing on receipt", "Promise payment effect", "Claim any effect"]
+    },
+    {
+      "id": "P1", "family": "CONTROL", "history": [],
+      "latestCustomerMessage": "SQ9012 giá bao nhiêu?",
+      "currentState": {"productId": "SQ9012", "decision": "NONE"},
+      "verifiedTruth": {"productId": "SQ9012", "priceVnd": 849000},
+      "requiredOutcomes": ["Give correct product price"],
+      "forbidden": ["Invent discount", "Claim any effect"]
+    },
+    {
+      "id": "P2", "family": "CONTROL", "history": [],
+      "latestCustomerMessage": "SQ9020 còn hàng không?",
+      "currentState": {"productId": "SQ9020", "decision": "NONE"},
+      "verifiedTruth": {"productId": "SQ9020", "stockStatus": "OUT_OF_STOCK"},
+      "requiredOutcomes": ["Give correct product availability"],
+      "forbidden": ["Invert out-of-stock", "Invent restock ETA", "Claim any effect"]
+    }
+  ]
+}
