@@ -2,15 +2,25 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** PLAN ONLY — implementation has not started.  
+**Status:** BLOCKED at T1 intake — owner provider/config decisions pending; no runtime implementation or provider run.
+
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
+
+**Implementation intake (2026-10-05):** owner requested Checkpoint A implementation.
+Refreshed `main` = `296cdcfbf5759f5bf9cbb24acf3dc63005589361` (`implementationBaseSha`).
+Branch: `feat/c3-semantic-verifier-checkpoint-a-20261005`.
+See `apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A.md` for provenance,
+provider-path inspection and explicit unverified items. Exact verifier/conversation
+provider/model/version/effort, repetitions, numeric usability threshold and authorized
+evaluation access are pending; no model selected/substituted. T1 remains incomplete,
+so T2–T4 and deterministic readiness have not started. No provider calls/results.
 
 ## Preconditions
 
 - [x] Final degraded self-review of PR388: APPROVE for planning.
-- [ ] PR388/spec approved + merged, or implementation explicitly pins the approved spec commit.
-- [ ] Refresh then-current `main`; record exact `implementationBaseSha`.
-- [ ] Confirm PR387 head `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da` is evidence/fixture input only; do not import its failed runtime seam.
+- [x] PR388/spec approved + merged, or implementation explicitly pins the approved spec commit. Owner requested implementation against current merged spec (PR388 merge `2336826244b85eae92f12f310a9da8f1d5da23d6`).
+- [x] Refresh then-current `main`; record exact `implementationBaseSha` (`296cdcfbf5759f5bf9cbb24acf3dc63005589361`).
+- [x] Confirm PR387 head `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da` is evidence/fixture input only; do not import its failed runtime seam. Seven attack evidence records read; no source imported.
 - [ ] Freeze verifier provider/model/version/effort/generation config.
 - [ ] Freeze A3 conversational provider/model/version/effort/generation config.
 - [ ] Freeze prompt/schema/context/binding/variance/usability/quality/operational measurement identities before first provider result.
