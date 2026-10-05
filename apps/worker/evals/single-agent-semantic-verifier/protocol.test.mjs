@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import { validateDraft, validateProtocol, projectRuntime, preflight, hash, buildRequest } from './protocol.mjs';
 
 const load = name => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'));
@@ -96,4 +98,8 @@ test('fallback text/hash, terminal map and corpus tampering invalidate protocol 
   const n = structuredClone(manifest);
   n.terminal.FAIL = 'PASS';
   assert.throws(() => validateDraft(n, a2, a3), /TERMINAL/);
+});
+test('CLI validates retained A2 evidence without a circular top-level await',()=>{
+  const output=execFileSync(process.execPath,[fileURLToPath(new URL('./protocol.mjs',import.meta.url)),'--validate-a2'],{encoding:'utf8'});
+  assert.ok(output.includes('"status":"PASS"'));
 });

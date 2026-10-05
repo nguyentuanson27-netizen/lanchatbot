@@ -142,18 +142,19 @@ terminal outcomes on all ten frozen dimensions, blind to verifier result; no thi
 
 - git fetch origin main / git rev-parse origin/main: PASS, base above; isolated implementation worktree created.
 - pnpm install --frozen-lockfile: PASS; lockfile unchanged.
-- node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs: initial missing-module RED; owner/config and whole-request-bound RED observed; final 8/8 GREEN.
+- node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs: initial missing-module RED; owner/config and whole-request-bound RED; CLI circular top-level-await RED; final 9/9 GREEN.
 - node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs: FROZEN_PROTOCOL_VALID, exit 0.
 - pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts: missing-module RED then 29/30 (recipient change); final 30/30 GREEN.
 - pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts: 21/21 PASS.
 - node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs: missing-module RED; metadata-only completed event RED observed; corrected adapter GREEN with C3_TEST_CODEX_TRANSPORT=1 (11/11, no skip).
 - node --test apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs: missing-module RED; 5/5 GREEN.
-- With C3_TEST_CODEX_TRANSPORT=1, combined protocol/adapter/A2-runner Node tests: 23/23 before decoder correction; final combined verification recorded separately.
+- With C3_TEST_CODEX_TRANSPORT=1, combined protocol/adapter/A2/A3-runner Node tests: 31/31 PASS, no skip.
+- node --test apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs: missing-module RED then 6/6 GREEN; includes exact final text, mandatory verification, actual terminal scoring and missing-human-score BLOCKED.
 - pnpm --filter @lana/worker exec vitest run src/vertex.test.ts: prior 34/34 PASS; not selected adapter evidence.
 - pnpm --filter @lana/worker typecheck: PASS; pnpm --filter @lana/worker build: PASS; pnpm --filter @lana/worker lint: PASS.
 - codex version/login/features/help, app-server schema generation and configuration-only probes: inspected without provider generation; built-in override probe exit 1 as documented.
 - Source import search: boundary imported only by its focused test (evaluation runner uses built dist).
-- Source seal/preflight and A2 run/evidence validation: see retained run identity and final command results.
+- A2 preflight PASS at ffc0576f; run-a2.mjs completed 102/102, exit 0, inline evidence validation PASS. protocol.mjs --validate-a2 first failed with circular top-level-await (exit 13), then RED->GREEN CLI fix; rerun PASS exit 0. Existing A2 evidence retains its original sealed executable identity. No model/request/gate change from the CLI bootstrap fix.
 
 ## Complexity, failures and disposition
 

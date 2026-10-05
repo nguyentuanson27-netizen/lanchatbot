@@ -130,7 +130,7 @@ export function preflight(m, phase, metadata, head, status) {
   if (phase === 'a3') requireThat(metadata.a2Status === 'PASS', 'A2_NOT_PASS');
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+async function main() {
   try {
     const m = JSON.parse(read('manifest.json'));
     const a2 = JSON.parse(read('corpus-a2.json'));
@@ -149,8 +149,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         const {validateA2Evidence} = await import('./run-a2.mjs');
         console.log(JSON.stringify(validateA2Evidence(m,a2,JSON.parse(read('a2-evidence.json')))));
       }
-      requireThat(!process.argv.includes('--validate-a3'), 'A3_EVIDENCE_VALIDATOR_NOT_IMPLEMENTED');
+      if (process.argv.includes('--validate-a3')) {
+        const {validateA3Evidence} = await import('./run-a3.mjs');
+        console.log(JSON.stringify(validateA3Evidence(m,a3,JSON.parse(read('a3-evidence.json')))));
+      }
       console.log('FROZEN_PROTOCOL_VALID');
     }
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) void main();

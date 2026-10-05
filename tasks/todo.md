@@ -9,8 +9,9 @@
 **Implementation intake (2026-10-05):** owner authorized Checkpoint A.
 implementationBaseSha = `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; branch `feat/c3-semantic-verifier-checkpoint-a-20261005`.
 Owner: both GPT-6.1 Sol/high, 3 repetitions, existing Codex login, 10% maximum usability failure.
-T1 frozen. T2 30/30 GREEN after RED. Protocol 8/8, adapter 11/11 including installed
+T1 frozen. T2 30/30 GREEN after RED. Protocol 9/9, adapter 11/11 including installed
 CLI-to-local-stub, A2 runner 5/5, protected claims/assembly 21/21, worker typecheck/build/lint PASS.
+A3 runner 6/6 GREEN after RED; exact terminal outcome human scoring prepared. Combined Node tests 31/31.
 No production wiring. See CHECKPOINT_A.md for identities, actual commands and remaining work.
 A2: PASS; A3: not run. No post-A work.
 
