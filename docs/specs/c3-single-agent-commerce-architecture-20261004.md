@@ -735,6 +735,23 @@ The first implementation is an isolated candidate/shadow path. It must not send 
 
 The PR base SHA is documentation provenance, not automatically the experiment baseline.
 
+### Evaluation principle: goal first, baseline second
+
+Candidate correctness is defined by **pre-registered absolute product and safety gates**, not by whether it beats C3.
+
+C3 remains useful as a matched reference for:
+
+- measuring architecture/orchestration delta;
+- finding regressions in capabilities that already work;
+- understanding migration risk and trade-offs.
+
+But C3 is not the quality specification and is not the pass line. Therefore:
+
+- beating C3 does not rescue a candidate that fails an absolute product/safety gate;
+- a neutral or locally worse C3 comparison does not automatically fail a candidate that meets the absolute contract;
+- any comparative regression still must be reported and explained before migration;
+- the sealed holdout should be designed from target product capabilities, not from a list of known C3 failures.
+
 ### 13.1 Experiment manifest, substrate and matched-comparison parity
 
 Every comparison run must record:
@@ -813,7 +830,8 @@ Before a promotion-candidate run, freeze:
 - exact baseline/candidate source identities and matched-comparison configuration from §13.1;
 - dev corpus vs sealed holdout;
 - history window/truncation policy;
-- rubric and numeric/minimum-improvement threshold;
+- rubric and numeric **absolute product-quality pass thresholds** for paired turns and stateful journeys;
+- comparative C3 delta/reporting rules, recorded separately from the absolute pass thresholds;
 - blind/randomized A/B ordering;
 - tie and judge-disagreement handling;
 - repeated-generation/variance policy where nondeterminism matters;
@@ -825,9 +843,11 @@ Thresholds and rubric do not change after results are observed.
 
 The whole population is accounted for: accepted replies, rejects, timeouts, fallbacks and handoffs. A safe handoff may still be a quality failure when the bot had enough information to answer.
 
-### 13.5 Promotion hard gates
+### 13.5 Promotion hard gates: absolute target first, baseline second
 
-No promotion if the candidate regresses:
+Promotion requires the **candidate itself** to pass all preregistered absolute gates on the sealed holdout.
+
+Hard correctness/safety gates include:
 
 - product/variant subject safety;
 - protected claim authority;
@@ -837,9 +857,9 @@ No promotion if the candidate regresses:
 - ownership/handoff;
 - revision/CAS behavior;
 - deterministic state/effect acceptance;
-- explicit customer needs in the locked corpus.
+- explicit customer needs are not silently dropped.
 
-Quality dimensions for both paired turns and journeys:
+Product-quality gates must be defined and passed **separately** for paired single turns and stateful journeys. Quality dimensions for both modes include:
 
 - understanding;
 - completeness/question resolution;
@@ -848,6 +868,15 @@ Quality dimensions for both paired turns and journeys:
 - next step;
 - naturalness/coherence;
 - factual/action safety.
+
+Both modes must meet their absolute thresholds independently. A strong result in one mode cannot compensate for failure in the other.
+
+The matched C3 comparison is a **secondary regression/migration reference**:
+
+- report paired and journey deltas against C3;
+- use it to identify capabilities the candidate may have lost and to understand migration trade-offs;
+- do not use a C3-relative improvement score as the definition of correctness;
+- do not let a better-than-C3 result override an absolute failure.
 
 Guard acceptance alone is insufficient.
 
@@ -1141,9 +1170,9 @@ This spec is ready for implementation planning only if reviewers agree that:
 7. same-agent state patching is limited to existing writable state owners and does not recreate Producer;
 8. dependent tools consume the accepted effective state after same-turn corrections; stale pre-correction results cannot be treated as current;
 9. mutation idempotency plus post-effect recovery prevents replay after committed effects;
-10. matched architecture comparison requires the same model/version/effort/generation/judge process and paired inputs/substrate; unmatched runs are package-level only;
-11. evaluation includes both paired single turns and stateful journeys;
-12. promotion protocol has preregistered holdout/rubric/accounting rules;
+10. candidate promotion is **goal-first**: absolute product/safety gates define pass/fail; matched C3 comparison is secondary regression/migration evidence and uses the same model/version/effort/generation/judge process and paired inputs/substrate;
+11. evaluation includes both paired single turns and stateful journeys, and both must pass their absolute gates independently;
+12. promotion protocol has preregistered sealed-holdout/rubric/absolute-threshold/accounting rules;
 13. "do not build C3 again" is a falsifiable structural gate, not only a principle;
 14. real-adapter send-disabled verification is required before opt-in;
 15. runtime safety guards remain distinct from offline conversational-quality evaluation;
@@ -1155,7 +1184,7 @@ Human approval is required before implementation planning.
 
 ## 21. Open owner decisions
 
-1. **Promotion threshold:** exact paired judge/human quality threshold to freeze before promotion-candidate evaluation.
+1. **Absolute product-quality thresholds:** exact paired-turn and stateful-journey quality pass thresholds to freeze before promotion-candidate evaluation. C3 comparative deltas are reported separately and are not the pass criterion.
 2. **First-contact lane:** preserve current fixed first-contact unchanged initially, or include it in the paired candidate corpus.
 3. **Hard model/tool-loop cap:** target is 1 call with no tools, 2 with one independent tool round, 3 only for dependent work; freeze the exact production cap after baseline measurement.
 4. **Candidate name:** keep "C3 single-agent candidate" or use a neutral experiment name.
@@ -1193,4 +1222,4 @@ After any committed state/effect, recovery continues from the committed state/re
 
 Offline locked evaluation, not the runtime guard, decides whether the conversation is complete, useful and natural.
 
-The experiment proceeds beyond the first feasibility slice only if the intended protected-egress surface can preserve the durable claim/effect safety contract without collapsing normal conversation into templates or rebuilding a semantic parser. Promotion then additionally requires measurably better paired-turn **and stateful-journey** quality and the structural "do not build C3 again" gate.
+The experiment proceeds beyond the first feasibility slice only if the intended protected-egress surface can preserve the durable claim/effect safety contract without collapsing normal conversation into templates or rebuilding a semantic parser. Promotion then requires the complete candidate to pass preregistered **absolute** product-quality and safety gates for both paired turns and stateful journeys, plus the structural "do not build C3 again" gate. C3 comparison remains secondary regression/migration evidence; it does not define correctness.
