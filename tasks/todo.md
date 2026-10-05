@@ -46,6 +46,8 @@
   - [ ] Produce explicit GO/STOP evidence note.
   - [ ] Label T1–T3 results as **development/feasibility evidence**, not promotion evidence.
 
+  **T3 = BLOCKED / not run.** T2 hard safety prerequisite failed. Local Vertex project/service-account credential/token environment is unavailable; no provider-observed identity or paired whole-reply scores were fabricated. Evidence/recommendation: `apps/worker/evals/single-agent-feasibility/CHECKPOINT_A.md` (STOP). No T4–T9 work or owner GO.
+
 ## CHECKPOINT A
 
 - [ ] Owner GO decision recorded.
