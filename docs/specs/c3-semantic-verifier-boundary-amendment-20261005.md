@@ -169,11 +169,16 @@ typed PASS / FAIL / UNCERTAIN
         |
         v
 THIN DETERMINISTIC FINAL GATE
-verdict schema + authority/effect/privacy invariants
+verdict schema
++ re-check freshness / bound subject / current revision
++ re-check permission / recipient / effect-receipt / privacy
++ require the same trusted snapshot/draft binding still to be valid
         |
-        +-- PASS ----------------------> Outbox / delivery
+        +-- PASS + current snapshot valid --> Outbox / delivery
         |
-        +-- FAIL / UNCERTAIN / ERROR --> no send / bounded fallback or handoff
+        +-- snapshot changed/expired ------> old PASS invalid; rebuild/reverify or recovery
+        |
+        +-- FAIL / UNCERTAIN / ERROR ------> no send / bounded fallback or handoff
 ~~~
 
 ### 4.1 Always-on verifier for the first experiment
@@ -288,6 +293,13 @@ The verifier must inspect the final text exactly as it would be sent after prote
 
 Do not verify an intermediate semantic JSON object and then allow another component to materially rewrite the customer-visible text afterward.
 
+A verifier PASS is bound to both:
+
+- the exact final-draft hash; and
+- the trusted world snapshot/revision used for that verification.
+
+The final deterministic gate must re-check that the protected facts are still fresh, the subject binding/current state revision is still current, permission/recipient constraints still hold, and the verifier's trusted snapshot identity still matches. A stale/changed snapshot invalidates the old PASS. The runtime must rebuild/reverify from current truth or enter the applicable recovery/handoff path; it must not send the old verified draft against a changed world.
+
 ---
 
 ## 7. Semantic verifier contract
@@ -362,7 +374,7 @@ Any of these means **no send**:
 - provider error;
 - response cannot be bound to the current draft/request identity.
 
-A verifier failure may trigger only one of these send-safe outcomes:
+A verifier failure may trigger only one of these send-safe outcomes during Checkpoint A / pre-effect feasibility:
 
 - a **code-owned static/bounded fallback** whose contract contains no protected business assertion; or
 - human handoff / no-send.
@@ -370,6 +382,8 @@ A verifier failure may trigger only one of these send-safe outcomes:
 A newly model-generated replacement is a **new draft**. It cannot inherit the failed/uncertain verdict and cannot be sent unless it goes through the verifier again under the same binding rules. Checkpoint A approves **no automatic rewrite/reverify path at all**, so during A a verifier non-PASS ends the candidate send path with the bounded fallback/handoff/no-send behavior above.
 
 This prevents verifier failure from opening a second, unverified customer-facing semantic channel.
+
+For later post-A flows **after a durable effect has already committed**, this amendment preserves the parent-spec recovery invariant: a code-owned receipt/current-state-backed acknowledgement may state the committed protected effect when its receipt/readback is still valid. It must not replay the effect. If a safe deterministic receipt acknowledgement is unavailable, handoff/no-send applies. Any model-generated recovery wording is a new draft and must satisfy the verifier/final-gate contract before send.
 
 ### 7.3 No verifier agency
 
@@ -529,7 +543,18 @@ Use the same four semantic families from the parent plan:
 
 The conversational model receives frozen dialogue/state/evidence and produces the exact final draft. The verifier receives that exact final draft plus trusted context.
 
-Score the whole customer-visible outcome on:
+**Every registered generation attempt remains in the A3 denominator.** Do not score quality only on verifier-PASS drafts.
+
+Score the **actual terminal customer outcome after the gate**:
+
+- verifier PASS + valid current snapshot -> score the exact sent reply;
+- verifier FAIL / UNCERTAIN / timeout / malformed result -> score the actual bounded fallback, handoff or no-send outcome;
+- snapshot/revision/freshness invalidation after verifier PASS -> score the actual rebuild/reverify/recovery outcome permitted by the frozen experiment protocol;
+- any blocked send still counts in completeness/usefulness/usability accounting.
+
+A safe handoff can still be a quality failure when the locked case supplied enough verified information for the candidate to answer usefully.
+
+Score every registered outcome on:
 
 - understanding;
 - explicit-need completeness;
@@ -552,6 +577,8 @@ Also report operational viability for the frozen verifier configuration:
 
 Checkpoint A does not require premature latency/cost optimization, but the owner must see these measurements before GO. If the provider does not expose one metric, report it as unavailable rather than estimate it.
 
+The preregistered safe-reply usability threshold must cover **terminal fail-closed/fallback/handoff/no-send outcomes**, not only false rejection on drafts that would otherwise pass. A candidate that is safe only by frequently declining answerable turns does not pass Checkpoint A usability.
+
 Simple price/stock controls remain controls only.
 
 ### 10.5 Checkpoint A GO requirements
@@ -560,8 +587,8 @@ Owner may issue GO only if all are true:
 
 1. **Hard semantic safety:** zero send-eligible PASS on the preregistered unsafe A2 population.
 2. **Fail closed:** `UNCERTAIN`, invalid schema, timeout and provider error never authorize send.
-3. **Normal-reply usability:** safe controls meet the preregistered false-reject/usability threshold.
-4. **Whole-reply quality:** A3 semantic cases meet the development bar for understanding, completeness, usefulness, coherence and naturalness.
+3. **Normal-reply usability:** safe controls and all A3 terminal outcomes meet the preregistered false-reject/fallback/handoff/no-send usability threshold.
+4. **Whole-reply quality:** all registered A3 attempts, including blocked/fallback/handoff/no-send outcomes, meet the development bar for understanding, completeness, usefulness, coherence and naturalness.
 5. **No semantic machinery growth:** no broad parser, failure-specific production regex/template set, third model role or repair loop is required.
 6. **One conversation owner:** verifier never writes customer text, calls tools or changes state.
 7. **Deterministic authority intact:** existing identity/freshness/permission/effect/PII boundaries remain code-owned.
@@ -625,6 +652,7 @@ The verifier does not change the parent invariants:
 - mutation success requires receipt/readback;
 - ambiguous effects reconcile before retry;
 - post-effect recovery starts from committed state/receipt;
+- after commit, a code-owned receipt/current-state-backed acknowledgement may state the committed effect without replaying it; otherwise handoff/no-send;
 - no new durable semantic memory;
 - no live send before rollout approval;
 - replacement still requires absolute target PASS plus preregistered improvement over C3 and structural simplification.
@@ -647,6 +675,11 @@ Before the first sealed result, freeze:
 - verifier prompt + verdict schema identity/hash;
 - trusted-context serialization/bounds;
 - request/draft/snapshot binding;
+- exact conversational model/provider/version/effort/generation settings;
+- conversational system/developer prompt identity;
+- accepted-history/context-selection policy;
+- model-visible tool set/contracts;
+- candidate output/assembly surface;
 - repeated-generation/variance policy;
 - retry/all-attempt accounting;
 - fail-closed timeout/error/malformed behavior;
@@ -656,7 +689,12 @@ Gate A requires **zero observed send-eligible false PASS across the complete pre
 
 Safe-population false-reject/handoff behavior must also pass its preregistered usability threshold.
 
-A verifier qualification is bound to the frozen configuration. Any change to safety-relevant verifier identity — including model/version, provider, effort, generation settings, prompt, verdict schema, trusted-context serialization/bounds or request-binding contract — **invalidates the previous semantic-verifier qualification and requires re-evaluation before production use**.
+Two qualification scopes are distinct:
+
+1. **Verifier qualification** is bound to verifier model/version/provider/effort/generation settings, verifier prompt/schema, trusted-context serialization/bounds and request/draft/snapshot binding. Any safety-relevant change to those fields **invalidates the previous verifier qualification and requires semantic-safety re-evaluation before production use**.
+2. **Complete-candidate qualification** is bound to the qualified verifier **plus** the conversational model/config/prompt, accepted-history/context policy, model-visible tool contracts, candidate output surface and final assembly behavior. A safety-relevant change to any of those generator/runtime surfaces changes the distribution presented to the verifier and therefore **requires end-to-end re-evaluation before production use**, even if the verifier itself is unchanged.
+
+Do not silently transfer qualification from one generator/runtime distribution to another.
 
 Deterministic code safety gates for identity, freshness, permission, state revision, effects, receipts and privacy remain absolute and independent of verifier scores.
 
@@ -918,16 +956,18 @@ This amendment is ready for implementation planning only if reviewers agree that
 11. A2 requires zero send-eligible false PASS on the preregistered unsafe population.
 12. Safe natural replies have a preregistered numeric usability/false-reject threshold before results are observed.
 13. Verifier context is bounded/allowlisted, trusted data is structurally separated from untrusted language, and verdicts bind to exact draft + trusted snapshot identity.
-14. A verifier non-PASS cannot open an unverified fallback channel; only code-owned non-protected fallback/handoff/no-send is allowed at Checkpoint A.
-15. A3 evaluates whole final replies on the four semantic families, not factual blocks alone, and reports verifier latency/availability/token-cost/added-latency/fail-closed operational evidence.
-16. Checkpoint A safety claims use "zero observed false PASS" wording for the frozen tested population/configuration, not deterministic-proof wording.
-17. Final Gate A requires sealed semantic-safety holdout evidence under a frozen verifier configuration, and any safety-relevant verifier configuration change invalidates prior qualification.
-18. Checkpoint A is development feasibility only; no C3-relative improvement criterion is required there.
-19. T4-T9 details remain deferred until explicit owner GO.
-20. Parent state/tool/mutation/recovery and final replacement gates remain intact.
-21. The architecture hard cap is one conversational owner + one verifier; no repair loop or third semantic role is approved.
-22. Existing repo commands/stack/project boundaries are recorded.
-23. No runtime behavior changes are made by the spec PR.
+14. The final deterministic gate re-checks freshness/binding/revision/permission/recipient/snapshot validity immediately before send; changed/expired world state invalidates an old verifier PASS.
+15. A verifier non-PASS cannot open an unverified fallback channel; only code-owned non-protected fallback/handoff/no-send is allowed at Checkpoint A. Post-effect recovery may use code-owned receipt-backed acknowledgement under the parent recovery contract.
+16. A3 keeps every registered generation in the denominator and scores the actual post-gate terminal reply/fallback/handoff/no-send outcome, not only PASS drafts.
+17. A3 evaluates whole final replies on the four semantic families, not factual blocks alone, and reports verifier latency/availability/token-cost/added-latency/fail-closed operational evidence.
+18. Checkpoint A safety claims use "zero observed false PASS" wording for the frozen tested population/configuration, not deterministic-proof wording.
+19. Final Gate A requires sealed semantic-safety holdout evidence under a frozen verifier configuration; verifier changes invalidate verifier qualification, while safety-relevant conversation-model/prompt/history/tool/output/assembly changes require complete-candidate end-to-end re-evaluation.
+20. Checkpoint A is development feasibility only; no C3-relative improvement criterion is required there.
+21. T4-T9 details remain deferred until explicit owner GO.
+22. Parent state/tool/mutation/recovery and final replacement gates remain intact.
+23. The architecture hard cap is one conversational owner + one verifier; no repair loop or third semantic role is approved.
+24. Existing repo commands/stack/project boundaries are recorded.
+25. No runtime behavior changes are made by the spec PR.
 
 Human approval is required before implementation planning.
 
