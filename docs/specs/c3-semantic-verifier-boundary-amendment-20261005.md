@@ -11,6 +11,19 @@ This is a narrow amendment to the protected-egress boundary proposed by the pare
 
 If approved, this amendment supersedes only the parent-spec clauses that require arbitrary protected customer-facing meaning to be certified by deterministic code alone. All other tool, state, mutation, recovery, evaluation and replacement-readiness contracts remain in force unless explicitly changed here.
 
+### Normative override map
+
+If this amendment is approved, it changes the parent spec only as follows:
+
+- **§4 Target architecture:** insert one bounded semantic-verifier call after the exact final draft and before final send authorization.
+- **§5 Ownership:** split runtime safety into deterministic world-authority checks (code) and protected-language semantic judgment (verifier model).
+- **§6.3 Same role:** keep one conversational owner; allow one non-conversational verifier role because it sees the final customer-visible draft and trusted world context, not an intermediate planning JSON.
+- **§9 Protected egress:** replace the failed deterministic-only semantic guarantee with the hybrid verifier boundary defined here.
+- **§11 Anti-overengineering #5:** the default ban on an online reviewer is overridden only for this single bounded semantic verifier. No other reviewer/model role is approved.
+- **§12 Security model:** add verifier-output and verifier-prompt-injection threats while keeping existing code authority unchanged.
+
+All other parent sections remain normative.
+
 ---
 
 ## 0. Assumptions to validate in review
