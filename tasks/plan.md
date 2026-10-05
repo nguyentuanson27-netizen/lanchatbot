@@ -22,7 +22,11 @@ This plan does not approve production traffic, model-pin changes, new durable se
 
 Implement the smallest experiment that can answer this question:
 
-> Can one conversational model preserve customer meaning and produce a better whole reply while code continues to own protected facts, identity, state authority, permissions and effects?
+> Can one conversational model preserve customer meaning and produce a complete, useful, natural whole reply while code continues to own protected facts, identity, state authority, permissions and effects?
+
+**Evaluation principle: goal first, baseline second.**
+
+The candidate must pass the product and safety contract on its own. C3 is retained only as a matched reference to measure delta, expose regressions and inform migration risk; beating C3 is not the definition of success, and a better-than-C3 score cannot rescue an absolute failure.
 
 The first experiment is intentionally **not** a price/stock demo. Simple factual turns are positive controls only. The decisive evidence must require the model to connect customer context, partial evidence, correction and conditional policy into one coherent reply.
 
@@ -69,8 +73,8 @@ Tasks after Checkpoint A are conditional. Do not build them merely because they 
 **Evidence phases are intentionally different:**
 
 - **T1–T3 are development/feasibility evidence.** Their corpus is visible to implementers and may be used to refine the candidate. They can decide whether the architecture is worth continuing, but they are not promotion evidence.
-- **T7 freezes promotion protocol + sealed holdout before any promotion-candidate result is observed, for both promotion modes: paired single-turn and stateful journeys.**
-- **T8 is the first run that may support an architecture-promotion claim.** It runs and reports both promotion modes separately. Development and sealed-holdout results must also remain separate.
+- **T7 freezes promotion protocol + sealed holdout before any promotion-candidate result is observed, for both promotion modes: paired single-turn and stateful journeys.** It freezes **absolute product-quality/safety gates first** and C3-comparison reporting rules separately.
+- **T8 is the first run that may support an architecture-promotion claim.** It runs and reports both promotion modes separately, with candidate-vs-target pass/fail kept separate from candidate-vs-C3 deltas. Development and sealed-holdout results must also remain separate.
 
 ## 3. First experiment: what must actually be proven
 
@@ -186,7 +190,7 @@ STOP before building the full candidate if any of these are true:
 - each unsafe phrasing class creates another production regex/template patch;
 - safe output becomes materially template-like and loses the desired conversational quality;
 - the candidate mainly selects references while code composes the substantive answer;
-- whole-reply quality shows no clear advantage over matched C3 on the semantic families above;
+- whole-reply quality fails the defined development bar for understanding, completeness, usefulness, coherence or naturalness on the semantic families above;
 - safety regresses even if average quality improves;
 - the experiment requires a second model role whose only purpose is semantic handoff.
 
@@ -278,7 +282,7 @@ Proceed only with explicit owner approval after reviewing Task 3 evidence.
 
 - hard safety parity;
 - no silent loss of explicit customer needs in the locked feasibility corpus;
-- whole replies are clearly more useful/coherent on semantic cases, not merely correct factual blocks;
+- whole replies meet the defined development quality bar for understanding, completeness, usefulness and coherence on semantic cases, not merely correct factual blocks;
 - protected egress did not require broad semantic parsing/template proliferation;
 - the candidate still has one conversational semantic owner.
 
@@ -356,7 +360,9 @@ A GO at Checkpoint A means only: **protected egress + conversational ownership a
 
 ### Task 7 — Preregister promotion protocol and seal the holdout
 
-**Description:** Before any run whose result may be used for promotion, freeze the comparison protocol required by spec §13.4 and seal a holdout corpus that implementation work has not inspected or tuned against.
+**Description:** Before any run whose result may be used for promotion, freeze the evaluation protocol required by spec §13.4 and seal a holdout corpus that implementation work has not inspected or tuned against.
+
+The protocol is **goal-first, baseline-second**: it first defines whether the complete candidate independently meets the target product/safety contract, then separately defines how C3 comparison will be reported for regression/migration analysis.
 
 This task produces **no promotion score**. Its output is the immutable protocol/holdout identity used by Task 8.
 
@@ -366,8 +372,10 @@ This task produces **no promotion score**. Its output is the immutable protocol/
 - [ ] Separate development corpus from sealed holdout; record holdout identity/hash without exposing case contents to candidate-tuning work.
 - [ ] Preregister **paired single-turn promotion mode**: baseline and candidate receive the same customer message, accepted history, canonical pre-turn state, business/source snapshot and freshness inputs; only the intended orchestration differs.
 - [ ] Preregister **stateful-journey promotion mode**: both paths start from the same initial state/business world/customer-simulation policy, then each path must consume the history/state/effects it actually produced.
-- [ ] Freeze history/truncation policy, rubric, numeric/minimum-improvement threshold, blind/randomized A/B ordering, tie/judge-disagreement handling, repeated-generation/variance policy, retry policy and all-attempt accounting **for each mode**.
-- [ ] Define mode-specific pass accounting: quality/safety/completeness and minimum-improvement results are reported separately for paired single-turn and stateful journeys; one mode cannot compensate for failure in the other.
+- [ ] Freeze history/truncation policy, rubric and numeric **absolute product-quality pass thresholds** for each mode, plus blind/randomized A/B ordering, tie/judge-disagreement handling, repeated-generation/variance policy, retry policy and all-attempt accounting.
+- [ ] Define mode-specific absolute pass accounting: quality/safety/completeness are evaluated separately for paired single-turn and stateful journeys; one mode cannot compensate for failure in the other.
+- [ ] Freeze C3 comparative-delta reporting rules separately; the comparative result is diagnostic/migration evidence, not the candidate correctness threshold.
+- [ ] Build the sealed holdout from target product capabilities and required customer outcomes, not from a list of known C3 failures.
 - [ ] Freeze provider/model/request identity requirements plus corpus/rubric provenance.
 - [ ] Thresholds/rubric/accounting rules cannot change after Task 8 results are observed.
 
@@ -404,7 +412,8 @@ Only the intended orchestration may differ.
 **Acceptance criteria:**
 
 - [ ] Run paired single-turn cases on the **complete candidate**, not the earlier T1–T3 egress-only shape.
-- [ ] Report quality, hard safety, explicit-need completeness and registered minimum-improvement result for paired single-turn separately.
+- [ ] Report the candidate's **absolute** quality, hard safety, explicit-need completeness and registered product-quality gate result for paired single-turn.
+- [ ] Report the matched C3 delta separately for regression/migration analysis; it does not determine candidate correctness.
 - [ ] Retain exact paired final customer-visible replies plus the common frozen input/pre-state/business truth for owner review.
 - [ ] No candidate-only richer context/business data is injected into paired cases.
 
@@ -415,14 +424,17 @@ Only the intended orchestration may differ.
 - [ ] Journeys include corrections, product switches, partial lookup failure, defer/stop, policy, cart edit and effect recovery.
 - [ ] Correction/ref/state cases prove the real trace `customer correction -> accepted effective state -> bounded trusted ref/tool input -> dependent tool result -> persisted state/final reply`; no fixture-injected “correct state” substitutes for the transition.
 - [ ] Each path consumes its own resulting history/state/effects after the common initial conditions.
-- [ ] Report quality, hard safety, explicit-need completeness and registered minimum-improvement result for stateful journeys separately.
+- [ ] Report the candidate's **absolute** quality, hard safety, explicit-need completeness and registered product-quality gate result for stateful journeys.
+- [ ] Report the matched C3 journey delta separately for regression/migration analysis; it does not determine candidate correctness.
 
 #### Shared promotion requirements
 
 - [ ] Raw customer needs are mapped to customer-visible outcomes; extracted intermediate obligations are not used as the completeness denominator.
 - [ ] Structural audit identifies every semantic representation/validator crossed by representative C3 vs candidate turns and shows which old semantic responsibilities were actually collapsed/replaced.
 - [ ] Development, paired-single-turn holdout and stateful-journey holdout results are reported as distinct evidence sets.
-- [ ] A strong result in one promotion mode cannot offset a failed registered gate in the other mode.
+- [ ] A strong result in one promotion mode cannot offset a failed absolute gate in the other mode.
+- [ ] A better-than-C3 result cannot rescue an absolute product/safety failure.
+- [ ] A neutral or locally worse C3 wording delta is reported and reviewed, but does not automatically fail a candidate that passes the absolute contract.
 
 **Verification:**
 
@@ -430,8 +442,8 @@ Only the intended orchestration may differ.
 - [ ] Matched model/config/judge rules from the spec are enforced by manifest validation.
 - [ ] Whole final replies are retained for both modes; resulting state/tool/effect traces are additionally retained for journeys.
 - [ ] All accepts, rejects, timeouts, fallbacks and handoffs remain in the registered denominator for their mode.
-- [ ] Produce separate paired-single-turn and stateful-journey score/gate summaries plus one combined readiness summary that cannot hide a failed mode.
-- [ ] No claim of architecture superiority from an unmatched/package-level run.
+- [ ] Produce separate paired-single-turn and stateful-journey **absolute target** summaries, separate matched-C3 delta summaries, and one combined readiness summary that cannot hide a failed absolute mode.
+- [ ] No claim about comparative architecture delta from an unmatched/package-level run.
 
 **Dependencies:** Task 7.
 
@@ -492,14 +504,18 @@ pnpm --filter @lana/worker test
 pnpm check
 ~~~
 
-Checkpoint B requires **both registered promotion modes** to pass independently:
+Checkpoint B is **goal-first, baseline-second**.
 
-- paired single-turn meets its hard safety/completeness gates and registered minimum-improvement threshold;
-- stateful journeys meet their hard safety/state/effect/completeness gates and registered minimum-improvement threshold.
+First, the complete candidate must pass both registered promotion modes independently against the target contract:
+
+- paired single-turn passes its absolute hard safety, completeness and product-quality thresholds;
+- stateful journeys pass their absolute hard safety, state/effect, completeness and product-quality thresholds.
 
 Do not average or aggregate a failed mode into a pass.
 
-Then review the two sealed-holdout evidence sets plus the structural audit against Definition of Done and the PR385 promotion gates. Development-corpus results are supporting evidence only. Production opt-in/migration remains a separate owner-approved plan.
+Second, review matched C3 deltas to understand regressions, gains and migration trade-offs. C3 comparison is required evidence, but it is **not the definition of correctness** and cannot rescue an absolute failure.
+
+Then review the two sealed-holdout evidence sets plus the structural audit against Definition of Done and the amended spec promotion gates. Development-corpus results are supporting evidence only. Production opt-in/migration remains a separate owner-approved plan.
 
 ## 6. Risks and mitigations
 
@@ -508,7 +524,7 @@ Then review the two sealed-holdout evidence sets plus the structural audit again
 | First experiment passes only trivial fact assembly | Semantic corpus is mandatory; simple price/stock are controls only |
 | Protected free prose weakens policy/claim meaning | Adversarial whole-reply tests + feasibility STOP rule |
 | Judge rewards fluent but incomplete reply | Score whole final reply + explicit required/forbidden outcomes + owner paired review |
-| Candidate gets stronger model/config than baseline | Matched manifest is required; otherwise package-level result only |
+| Candidate gets stronger model/config than C3 reference | Matched manifest is required for comparative claims; absolute candidate gates still use the preregistered candidate configuration |
 | State correction races dependent tool | Effective-state-before-dependent-tool invariant |
 | Tool layer becomes semantic pipeline | Domain tools return truth/action results only; structural audit blocks intent classifiers |
 | New schemas accumulate | Reuse existing claims/state/bindings; every new semantic boundary must retire/replace responsibility |
@@ -553,7 +569,9 @@ This plan is ready for implementation only when:
 - first feasibility experiment has owner-reviewable whole-reply cases from all four semantic families and explicitly does **not** overclaim persisted-state/tool-ordering evidence;
 - Checkpoint A is explicitly a development feasibility stop/go gate;
 - promotion protocol + sealed holdout are preregistered before Task 8 for **both paired single-turn and stateful-journey modes**;
-- both promotion modes must pass independently at Checkpoint B;
+- absolute product/safety thresholds, not C3-relative improvement, define candidate pass/fail;
+- both promotion modes must pass their absolute gates independently at Checkpoint B;
+- C3 comparison is retained as separate regression/migration evidence;
 - development and promotion evidence cannot be conflated;
 - no task is larger than one focused session / ~5 files without further split;
 - production opt-in/migration remains outside this plan until candidate evidence exists.
