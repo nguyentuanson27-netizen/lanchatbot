@@ -1,151 +1,128 @@
-# C3 Semantic-Verifier Checkpoint A — BLOCKED at partial T1
+# C3 Semantic-Verifier Checkpoint A
 
-Date: 2026-10-05 (Asia/Saigon). Scope: Checkpoint A only.
-Recommendation: **BLOCKED**; owner checkpoint decision pending.
+2026-10-05 (Asia/Saigon). Scope = Checkpoint A only. Current recommendation: **PENDING**.
+T1 frozen; T2 deterministic readiness passed. A2 execution pending source seal; no real provider generation yet.
+A3 has not run; prohibited unless A2 PASS.
 
-Owner selected **GPT-6.1 Sol / high for both roles** and **3 repetitions**.
-This supersedes the initial model-selection blocker. Provider transport/credential
-route, generation configuration and numeric terminal usability threshold remain
-unresolved. T1 is a draft; T2–T4 have not started. No provider generation occurred.
+## Provenance and frozen identity
 
-## Provenance
-
-- `implementationBaseSha`: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`.
-  Refreshed main again after owner model selection; it remains this SHA.
-- Branch: `feat/c3-semantic-verifier-checkpoint-a-20261005`.
-- Spec SHA: amendment PR388 merge `2336826244b85eae92f12f310a9da8f1d5da23d6`.
+- implementationBaseSha: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; refreshed main remained this SHA.
+- Spec SHA: `2336826244b85eae92f12f310a9da8f1d5da23d6` (amendment PR388 merge).
 - Parent spec last-change SHA: `c4bd59857a560689ce0b10758a4927f6401b0c27`.
 - Plan SHA: `296cdcfbf5759f5bf9cbb24acf3dc63005589361` (PR389).
-- Historical PR387 evidence: `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da`.
-  Its seven exact authored segment objects, source IDs and original final assembly
-  results are retained as evaluator-only seed provenance. No runtime source imported.
-- `a2RunSourceSha`: not sealed; no executable A2 runner.
-- `a3RunSourceSha`: not sealed; A3 has not run.
+- Branch: `feat/c3-semantic-verifier-checkpoint-a-20261005`.
+- PR387 evidence-only SHA: `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da`; seven exact authored attack segments and historical final assemblies retained, no failed runtime seam imported.
+- a2RunSourceSha: not yet sealed.
+- a3RunSourceSha: not sealed; no A3 execution.
 
-Source Git blobs: parent spec `419cad5eb5b5596d57c34753b3d91cb13f0d8d24`,
-amendment `ca5bc8e3eec8ae5b1764d58a49010db1e474a7c3`,
-plan `ac3b992757fe42b73878d1b837e081d06fa2d6b7`.
-
-Current draft SHA-256 identities (not a completed protocol freeze):
-
-| Artifact | SHA-256 |
+| Frozen artifact | SHA-256 |
 |---|---|
-| Manifest | `3e7f33cd8d2ba3416006c2e719f06a5cff0f26718ba7164b154a013f98644aa1` |
-| A2 corpus | `035a19d9eb9d48256587d0122840f5199f92004c5654ed96d651051aa073df4a` |
-| A3 corpus | `50032c95052504b8508bd8f7172667ad24b3eb9562bd68451e29e1046c035fa5` |
+| Manifest | `bb5500e2db6a5edd71277c8b8044cb2262b10e6974f313cfa356fe279dfbff51` |
+| A2 corpus | `05d14e1ccad999e74bbf21ed73aa80ecd159241e66b69ba7cac55f509d83b229` |
+| A3 corpus | `b53cdef8b74796086f8ee89872e2d8fa73790c47b788a0323d12390cf441a89a` |
+| Verifier prompt | `d1b97169a78134c96c234c6978c09889c117c026dbd1003388bac0c3f4f0ae30` |
+| Conversation prompt | `e43f092d78ee77ee839fb7e604c8c86378bcfaff12a5750238cb91c44226f126` |
+| Verdict schema | `76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97` |
 
-Draft prompt/schema hashes are in `manifest.json`; no provider result has been
-observed against them. No hash is claimed as a completed qualification identity.
+Both roles: OPENAI / gpt-6.1-sol / high; version selection is the frozen alias
+`gpt-6.1-sol`. Existing CODEX_CHATGPT_LOGIN, CLI 0.159.2. No model substitution.
+Three repetitions; zero generation retries; maximum one upstream generation request
+per registered role attempt. Maximum safe terminal usability failure = owner-confirmed 10%.
+Full generation descriptors, prompts, trusted projection, state allowlist, bounds,
+serialization, variance, whole-reply thresholds and human scoring protocol are in manifest.json.
 
-## Exact model/config and remaining access boundary
+Configuration: Responses streaming, store=false, tools=[], tool_choice=none,
+parallel_tool_calls=false, reasoning effort high; temperature/topP/output-token limit
+omitted as frozen provider defaults. Timeout 90,000 ms; response bound 1,048,576 bytes;
+final reply/verdict bound 4,096 bytes. Input/token upper bounds include complete
+model request, prompt and schema. No truncation. Provider-reported model/version,
+usage and cost are retained where exposed; no immutable model snapshot is invented.
 
-Both descriptors: provider `OPENAI`, model/version selection `gpt-6.1-sol`, effort
-`high`. Credential route and generation config are explicitly null, so full
-protocol validation and preflight reject. No different model may be substituted.
-Both roles use the same model family; no independent-defense claim is made.
+## Codex route and current authority boundary
 
-Official [model documentation](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
-was fetched; it supports `high` and identifies the model using `gpt-6.1-sol`.
-A provider-returned version/request identity has not been observed. Also fetched
-[structured-output guidance](https://developers.openai.com/api/docs/guides/structured-outputs),
-[Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference),
-and [authentication guidance](https://learn.chatgpt.com/docs/auth).
+The initial CLI-only BLOCKED interpretation was corrected after owner clarified
+using Codex as one model. Prior PR387 documents an ACCESS_OK diagnostic, not A2/A3 evidence.
+The installed CLI login was read back without reading/copying auth.json or tokens.
+A narrow loopback relay uses that login, replaces the CLI agent body with the exact
+frozen inference request, and forwards at most one request to the official Codex
+service endpoint. CLI retries/continuations are rejected locally; the first upstream
+401/429/5xx/timeout remains that attempt's fail-closed outcome. No hidden provider retry.
+Credentials are transient transport headers; never retained in request/evidence files.
+This is candidate-only infrastructure; no production entrypoint imports the seam.
 
-Local `codex-cli 0.159.2` is logged in using ChatGPT. This corrects the initial
-assumption that only Vertex might be accessible. The model cache contains
-`gpt-6.1-sol`. However, no candidate CLI adapter currently proves actual generation
-request count, exact provider-returned version and absence of tool capability.
-Default HTTP/SSE retries exist; documented settings alone are not accounting
-evidence. No CLI generation was run to bypass the freeze/readiness requirement.
+Official [model docs](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
+[structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
+[configuration](https://learn.chatgpt.com/docs/config-file/config-reference) and
+[authentication](https://learn.chatgpt.com/docs/auth) were checked before API implementation.
+Official [Codex provider source](https://github.com/openai/codex/blob/823ea830c0fd418b09ff02d36cad9a1fff66465b/codex-rs/model-provider-info/src/lib.rs)
+identifies the ChatGPT-authenticated endpoint and custom-provider auth/retry fields.
+Installed CLI behavior was independently exercised against a local upstream stub.
+Built-in openai retry overrides reject; this does not block the bounded relay.
 
-`OPENAI_API_KEY` is absent from this process. No credential file/token was read,
-copied or exposed; no undocumented ChatGPT backend was used as an API substitute.
-Existing Vertex paths remain available in source but are not the selected model.
+## Safety, denominator and contamination firewall
 
-Owner clarification requested: numeric usability threshold (10% proposed, not
-owner-confirmed) and the authorized route. Three repetitions is not a usability
-percentage or credential route. Changes after results require a new frozen run;
-the current experiment cannot be adjusted retroactively.
+A2 frozen corpus: 34 cases = 28 unsafe + 6 safe. Registered population = 102 attempts
+(84 unsafe + 18 safe). Seven seeds; two paraphrases per each of five semantic
+families; injections, fake refs, context crowding/oversize, replay and mixed clauses.
+The undeclared seed carries the old mechanical declaration input as code-only
+scenario data; the existing authority helper rejects it. The stale seed retains
+its authored text and expired context. No phrase-specific production rule was added.
+Every hard-precheck survivor, including nonprotected controls, invokes the verifier.
 
-## T1 draft evidence and denominators
+Executed denominator: 0; observed unsafe send-eligible false PASS count: not evaluated. No empty-population safety claim.
 
-- A2: 34 draft cases = 28 unsafe + 6 safe, including seven PR387 seeds, two
-  paraphrases per semantic family, injection/fake-ref/context/replay/mixed cases.
-- Planned A2 population at 3 repetitions: 102 attempts (84 unsafe + 18 safe).
-  **Executed denominator: 0.** Population is not yet registered/frozen.
-- A3: 16 draft cases = concern 3, partial evidence 3, correction/referent/defer 4,
-  conditional policy 3, simple controls 3. Every case has required/forbidden
-  outcomes outside runtime projection. Planned 48 conversation generations;
-  **executed denominator: 0**. A3 is prohibited until A2 PASS.
-- Unsafe send-eligible false PASS: **not evaluated**. No zero-observed safety
-  claim is made from an empty executed population.
-- Provider generation requests: 0. Request-count adapter proof is still missing.
-- Firewall: two request envelopes captured by a mock provider prove evaluator
-  fields/sentinel values and unallowlisted private state are excluded. This is
-  deterministic projection evidence, not captured real-provider evidence.
-- Request/draft/snapshot projection binding and size bounds have draft tests.
-  They do not prove the T2 final deterministic gate.
+Provider generation count = 0 before source seal; latency/error/token/cost/outcome rates not measured yet.
 
-Draft terminal map: PASS -> final gate; FAIL/UNCERTAIN/malformed/timeout/provider
-error -> `C3_A_NONPROTECTED_V1`; stale -> handoff; permission/recipient/privacy ->
-no-send. Proposed static fallback:
+Mock transport tests capture the actual forwarded body, proving it equals the
+runtime projection and excludes evaluator labels, CLI tools and CLI context. The
+installed CLI-to-relay test forwards to a local stub only; it is not a model result.
+Real-run per-attempt requestBody retains the exact upstream body for validation
+against frozen runtime inputs. Evaluator-only caseId/split/family/expected/required/
+forbidden/rubric data stay outside requests. Request/hash/snapshot/state/fact binding
+is code-owned; verdict cannot grant business authority.
 
-> Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.
+Terminal map: PASS -> final deterministic gate; FAIL/UNCERTAIN/malformed/timeout/
+provider error -> C3_A_NONPROTECTED_V1; stale -> HANDOFF; privacy/permission/recipient
+-> NO_SEND. Handoff/no-send have no customer-visible text in this experiment.
+Static fallback: “Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.”
+SHA-256: `9addecd5d2d9b2b33c215810a4221bd592fc120c388461c5a33ff438deec03c8`.
+Only this exact code-owned fallback identity can be used unverified; protected
+model fallback text is rejected. Post-effect recovery is a compatibility type only.
 
-Exact fallback hash is in the draft manifest. Terminal behavior is not implemented
-or frozen. Post-effect recovery has not been implemented.
+A3 corpus: concern 3, partial evidence 3, correction/referent/defer 4, conditional
+policy 3, simple controls 3; planned 48 conversation generations. Candidate ownership
+surface is exact final customer-visible text + telemetry only. Whole-reply results,
+human scores and conversation operational evidence: not evaluated.
+Safe handoff is not automatically a quality pass. Human protocol scores all actual
+terminal outcomes on all ten frozen dimensions, blind to verifier result; no third online role.
 
-Whole-reply quality, fallback/handoff/no-send rate, verifier p50/p95, added latency,
-timeout/error rate, tokens and provider-exposed cost: **not measured**. Human
-scoring rubric is a draft; no terminal outcomes or human scores exist.
+## Commands actually run
 
-Before freeze, resolve how the new envelope handles the first/stale PR387 seeds,
-whose historical final assembled reply was empty although authored segments were
-present. Code scenarios define replay binding overrides; no runner executes them
-yet. These are explicit remaining T1 issues, not evidence of completed coverage.
+- git fetch origin main / git rev-parse origin/main: PASS, base above; isolated implementation worktree created.
+- pnpm install --frozen-lockfile: PASS; lockfile unchanged.
+- node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs: initial missing-module RED; owner/config and whole-request-bound RED observed; final 8/8 GREEN.
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs: FROZEN_PROTOCOL_VALID, exit 0.
+- pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts: missing-module RED then 29/30 (recipient change); final 30/30 GREEN.
+- pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts: 21/21 PASS.
+- node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs: missing-module RED; 9 deterministic adapter tests GREEN; installed CLI test also GREEN with C3_TEST_CODEX_TRANSPORT=1 (10/10, no skip).
+- node --test apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs: missing-module RED; 5/5 GREEN.
+- With C3_TEST_CODEX_TRANSPORT=1, combined protocol/adapter/A2-runner Node tests: 23/23 PASS.
+- pnpm --filter @lana/worker exec vitest run src/vertex.test.ts: prior 34/34 PASS; not selected adapter evidence.
+- pnpm --filter @lana/worker typecheck: PASS; pnpm --filter @lana/worker build: PASS; pnpm --filter @lana/worker lint: PASS.
+- codex version/login/features/help, app-server schema generation and configuration-only probes: inspected without provider generation; built-in override probe exit 1 as documented.
+- Source import search: boundary imported only by its focused test (evaluation runner uses built dist).
+- A2 source seal/preflight/run/validation: pending; no claim of execution.
 
-## Commands actually run and outcomes
+## Complexity, failures and disposition
 
-From this worktree, unless noted:
+No shared package source changes, dependency drift, production wiring, semantic
+router/parser, third online role, repair/reverify loop, template growth, tool/state/
+mutation/promotion work, deployment or customer send. Added isolated verdict/final
+gate mechanics and one narrow transport relay to own the concrete one-request/no-tool
+boundary; corpus/runner/evidence validation stay offline. Semantic roles at execution:
+one sole conversational owner (A3 only) and at most one verdict-only verifier.
 
-| Command | Observed result |
-|---|---|
-| `git fetch origin main` / `git rev-parse origin/main` | PASS; SHA above, including refresh after model choice |
-| `git worktree add -b feat/c3-semantic-verifier-checkpoint-a-20261005 '../lanchatbot-c3-semantic-verifier-checkpoint-a-20261005' origin/main` (initial repo) | PASS |
-| `codex --version` / `codex login status` / `codex exec --help` / `codex features list` | Read-only capability inspection; no generation |
-| `pnpm install --frozen-lockfile` | PASS; lockfile unchanged |
-| `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs` | RED observed first: missing module, exit 1; then 8/8 GREEN, exit 0 |
-| `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --draft` | PASS; 28 unsafe / 6 safe / 16 A3 draft cases |
-| `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs` | Expected BLOCKED, exit 1: `NOT_FROZEN_ROUTE_OR_THRESHOLD` |
-| `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2` | Expected BLOCKED, exit 1: `NOT_FROZEN_ROUTE_OR_THRESHOLD` |
-| `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts` | PASS; 21/21 |
-| `pnpm --filter @lana/worker exec vitest run src/vertex.test.ts` | PASS; 34/34 existing Vertex tests; not a GPT adapter qualification |
-| `pnpm --filter @lana/worker typecheck` | PASS, exit 0 |
-| `pnpm --filter @lana/worker build` | PASS, exit 0 |
-| `pnpm --filter @lana/worker lint` | PASS, exit 0 |
-| `git diff --cached --check` | PASS before draft savepoint |
-
-Source reads/hashes used `git show`, `git log -1`, `git hash-object`, targeted `rg`
-and `Get-FileHash -Algorithm SHA256`. Initial incorrect wildcard/source paths and
-the first corpus-builder literal-key assumption were corrected. Failed attempts
-produced no provider result. Official Responses reference retrieval was too large
-and one authentication URL was 404; alternate official pages above were fetched.
-
-Not run: T2 boundary tests (file does not exist), selected-provider adapter tests,
-A2/A3 runner/evidence validation, actual provider generation or human scoring.
-Deterministic readiness is not achieved merely because the existing worker checks
-pass. Shared package source has not changed.
-
-## Complexity and disposition
-
-Added five evaluation files: two data corpora, draft manifest, projection/protocol
-module and eight tests; updated this note and TODO. One evaluation request
-projection crosses the trusted/untrusted boundary. No semantic interpretation in
-code, framework, runtime dependency, durable state or production entrypoint change.
-Online semantic roles added: 0 so far; planned maximum remains one conversational
-owner and one verdict-only verifier. No parser, phrase-specific production rule,
-repair/reverify loop, tool/state/mutation/promotion work, deploy or live send.
-
-**BLOCKED at partial T1.** Resolve credential/transport accounting and numeric
-usability threshold, finish and freeze T1, then implement T2 RED->GREEN. Only
-deterministic readiness permits A2; only A2 PASS permits A3. Stop at Checkpoint A.
+Actual RED failures and the initial CLI-only assumption are retained above. Provider
+immutable snapshot identity/cost may be unavailable; record unknown rather than simulate.
+Continue only through Checkpoint A; A3 requires A2 PASS. Final owner GO/STOP/BLOCKED remains pending.
+Post-A implementation always requires a new plan and owner approval.

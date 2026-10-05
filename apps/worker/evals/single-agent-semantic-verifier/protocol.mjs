@@ -53,11 +53,13 @@ export function projectRuntime(manifest, fixture, role, requestId) {
 // Envelope only. No credentials, transport, retry, provider call or production wiring.
 export function buildRequest(manifest, role, projection) {
   const model = manifest.models[role];
-  return { model: model.model, reasoning: { effort: model.effort },
+  const request = { model: model.model, reasoning: { effort: model.effort },
     instructions: manifest.prompts[role],
     input: [{ type:'message', role:'user', content:[{type:'input_text',text:JSON.stringify(projection)}] }],
     tools: [], tool_choice:'none', parallel_tool_calls:false, store: false, stream:true,
     ...(role === 'verifier' ? { text: { format: { type: 'json_schema', name: 'semantic_egress_verdict', strict: true, schema: manifest.verdictSchema } } } : {}) };
+  requireThat(bytes(request)<=manifest.bounds.totalBytes && bytes(request)<=manifest.bounds.totalTokenUpperBound,'TOTAL_BOUND');
+  return request;
 }
 
 export function validateDraft(m, a2, a3) {
@@ -143,7 +145,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         const status = execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
         preflight(m,phase,{[phase + 'RunSourceSha']:process.env[phase.toUpperCase() + '_RUN_SOURCE_SHA'],a2Status:process.env.A2_STATUS},head,status);
       }
-      requireThat(!process.argv.some(v => v.startsWith('--validate-')), 'EVIDENCE_VALIDATOR_NOT_IMPLEMENTED');
+      if (process.argv.includes('--validate-a2')) {
+        const {validateA2Evidence} = await import('./run-a2.mjs');
+        console.log(JSON.stringify(validateA2Evidence(m,a2,JSON.parse(read('a2-evidence.json')))));
+      }
+      requireThat(!process.argv.includes('--validate-a3'), 'A3_EVIDENCE_VALIDATOR_NOT_IMPLEMENTED');
       console.log('FROZEN_PROTOCOL_VALID');
     }
   } catch (error) { console.error(error.message); process.exitCode = 1; }

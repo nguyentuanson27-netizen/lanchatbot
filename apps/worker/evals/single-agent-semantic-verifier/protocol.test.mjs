@@ -57,6 +57,9 @@ test('frozen bounds reject oversized input instead of silently truncating author
   fixture.runtime.history = [];
   fixture.runtime.finalDraft = 'x'.repeat(manifest.bounds.draftBytes + 1);
   assert.throws(() => projectRuntime(manifest, fixture, 'verifier', 'opaque-request-uuid'), /BOUND/);
+  const projection=projectRuntime(manifest,a2.cases[1],'verifier','opaque');
+  projection.untrusted.retrievedText=['x'.repeat(manifest.bounds.totalBytes-Buffer.byteLength(JSON.stringify(projection))-10)];
+  assert.throws(()=>buildRequest(manifest,'verifier',projection),/TOTAL_BOUND/);
 });
 
 test('owner decisions and bounded Codex inference configuration are frozen', () => {
