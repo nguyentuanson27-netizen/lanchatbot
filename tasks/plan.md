@@ -55,7 +55,7 @@ T6 Mutation idempotency + post-effect recovery
 T7 Preregister promotion protocol + seal holdout
  |
  v
-T8 Stateful matched promotion journeys + structural-complexity audit
+T8 Paired single-turn + stateful matched promotion evidence
  |
  v
 T9 Real-adapter send-disabled pre-opt-in verification
@@ -69,8 +69,8 @@ Tasks after Checkpoint A are conditional. Do not build them merely because they 
 **Evidence phases are intentionally different:**
 
 - **T1–T3 are development/feasibility evidence.** Their corpus is visible to implementers and may be used to refine the candidate. They can decide whether the architecture is worth continuing, but they are not promotion evidence.
-- **T7 freezes promotion protocol + sealed holdout before any promotion-candidate result is observed.**
-- **T8 is the first run that may support an architecture-promotion claim.** Development and sealed-holdout results must be reported separately.
+- **T7 freezes promotion protocol + sealed holdout before any promotion-candidate result is observed, for both promotion modes: paired single-turn and stateful journeys.**
+- **T8 is the first run that may support an architecture-promotion claim.** It runs and reports both promotion modes separately. Development and sealed-holdout results must also remain separate.
 
 ## 3. First experiment: what must actually be proven
 
@@ -364,7 +364,10 @@ This task produces **no promotion score**. Its output is the immutable protocol/
 
 - [ ] Freeze exact baseline/candidate source identities and matched model/version/effort/generation/judge settings.
 - [ ] Separate development corpus from sealed holdout; record holdout identity/hash without exposing case contents to candidate-tuning work.
-- [ ] Freeze history/truncation policy, rubric, numeric/minimum-improvement threshold, blind/randomized A/B ordering, tie/judge-disagreement handling, repeated-generation/variance policy, retry policy and all-attempt accounting.
+- [ ] Preregister **paired single-turn promotion mode**: baseline and candidate receive the same customer message, accepted history, canonical pre-turn state, business/source snapshot and freshness inputs; only the intended orchestration differs.
+- [ ] Preregister **stateful-journey promotion mode**: both paths start from the same initial state/business world/customer-simulation policy, then each path must consume the history/state/effects it actually produced.
+- [ ] Freeze history/truncation policy, rubric, numeric/minimum-improvement threshold, blind/randomized A/B ordering, tie/judge-disagreement handling, repeated-generation/variance policy, retry policy and all-attempt accounting **for each mode**.
+- [ ] Define mode-specific pass accounting: quality/safety/completeness and minimum-improvement results are reported separately for paired single-turn and stateful journeys; one mode cannot compensate for failure in the other.
 - [ ] Freeze provider/model/request identity requirements plus corpus/rubric provenance.
 - [ ] Thresholds/rubric/accounting rules cannot change after Task 8 results are observed.
 
@@ -380,25 +383,54 @@ This task produces **no promotion score**. Its output is the immutable protocol/
 
 **Estimated scope:** S–M.
 
-### Task 8 — Stateful matched promotion journeys and structural audit
+### Task 8 — Paired single-turn + stateful matched promotion evidence
 
-**Description:** Run the preregistered matched comparison on the sealed holdout. Each architecture continues with the history/state/effects it actually produced. This is the first run in this plan whose result may support an architecture-promotion claim.
+**Description:** Run both preregistered promotion modes on the sealed holdout using the **complete candidate** after the real tool/state/effect path exists.
+
+Mode 1 keeps the comparison input identical to isolate reply/decision quality on the same situation. Mode 2 allows paths to diverge after the same initial conditions to measure accumulated conversational/state quality. This is the first task in this plan whose results may support an architecture-promotion claim.
+
+#### Mode A — Paired single-turn
+
+For every paired holdout case, baseline and candidate receive the same:
+
+- customer message;
+- accepted history;
+- canonical pre-turn state;
+- business/source snapshot and freshness;
+- matched model/version/effort/generation/judge settings.
+
+Only the intended orchestration may differ.
+
+**Acceptance criteria:**
+
+- [ ] Run paired single-turn cases on the **complete candidate**, not the earlier T1–T3 egress-only shape.
+- [ ] Report quality, hard safety, explicit-need completeness and registered minimum-improvement result for paired single-turn separately.
+- [ ] Retain exact paired final customer-visible replies plus the common frozen input/pre-state/business truth for owner review.
+- [ ] No candidate-only richer context/business data is injected into paired cases.
+
+#### Mode B — Stateful journeys
 
 **Acceptance criteria:**
 
 - [ ] Journeys include corrections, product switches, partial lookup failure, defer/stop, policy, cart edit and effect recovery.
 - [ ] Correction/ref/state cases prove the real trace `customer correction -> accepted effective state -> bounded trusted ref/tool input -> dependent tool result -> persisted state/final reply`; no fixture-injected “correct state” substitutes for the transition.
 - [ ] Each path consumes its own resulting history/state/effects after the common initial conditions.
+- [ ] Report quality, hard safety, explicit-need completeness and registered minimum-improvement result for stateful journeys separately.
+
+#### Shared promotion requirements
+
 - [ ] Raw customer needs are mapped to customer-visible outcomes; extracted intermediate obligations are not used as the completeness denominator.
 - [ ] Structural audit identifies every semantic representation/validator crossed by representative C3 vs candidate turns and shows which old semantic responsibilities were actually collapsed/replaced.
-- [ ] Development and sealed-holdout results are reported separately.
+- [ ] Development, paired-single-turn holdout and stateful-journey holdout results are reported as distinct evidence sets.
+- [ ] A strong result in one promotion mode cannot offset a failed registered gate in the other mode.
 
 **Verification:**
 
-- [ ] Task 7 preregistration identity is validated before the first holdout result is scored.
+- [ ] Task 7 preregistration identity is validated before the first holdout result in either mode is scored.
 - [ ] Matched model/config/judge rules from the spec are enforced by manifest validation.
-- [ ] Whole final replies, resulting state and relevant tool/effect traces are retained for owner review.
-- [ ] All accepts, rejects, timeouts, fallbacks and handoffs remain in the registered denominator.
+- [ ] Whole final replies are retained for both modes; resulting state/tool/effect traces are additionally retained for journeys.
+- [ ] All accepts, rejects, timeouts, fallbacks and handoffs remain in the registered denominator for their mode.
+- [ ] Produce separate paired-single-turn and stateful-journey score/gate summaries plus one combined readiness summary that cannot hide a failed mode.
 - [ ] No claim of architecture superiority from an unmatched/package-level run.
 
 **Dependencies:** Task 7.
@@ -460,7 +492,14 @@ pnpm --filter @lana/worker test
 pnpm check
 ~~~
 
-Then review preregistered sealed-holdout evidence against Definition of Done and the PR385 promotion/structural gates. Development-corpus results are supporting evidence only. Production opt-in/migration remains a separate owner-approved plan.
+Checkpoint B requires **both registered promotion modes** to pass independently:
+
+- paired single-turn meets its hard safety/completeness gates and registered minimum-improvement threshold;
+- stateful journeys meet their hard safety/state/effect/completeness gates and registered minimum-improvement threshold.
+
+Do not average or aggregate a failed mode into a pass.
+
+Then review the two sealed-holdout evidence sets plus the structural audit against Definition of Done and the PR385 promotion gates. Development-corpus results are supporting evidence only. Production opt-in/migration remains a separate owner-approved plan.
 
 ## 6. Risks and mitigations
 
@@ -513,7 +552,8 @@ This plan is ready for implementation only when:
 - every task has acceptance + verification + dependency;
 - first feasibility experiment has owner-reviewable whole-reply cases from all four semantic families and explicitly does **not** overclaim persisted-state/tool-ordering evidence;
 - Checkpoint A is explicitly a development feasibility stop/go gate;
-- promotion protocol + sealed holdout are preregistered before Task 8;
+- promotion protocol + sealed holdout are preregistered before Task 8 for **both paired single-turn and stateful-journey modes**;
+- both promotion modes must pass independently at Checkpoint B;
 - development and promotion evidence cannot be conflated;
 - no task is larger than one focused session / ~5 files without further split;
 - production opt-in/migration remains outside this plan until candidate evidence exists.
