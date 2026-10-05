@@ -1,141 +1,151 @@
-# C3 Semantic-Verifier Checkpoint A — BLOCKED before T1 freeze
+# C3 Semantic-Verifier Checkpoint A — BLOCKED at partial T1
 
 Date: 2026-10-05 (Asia/Saigon). Scope: Checkpoint A only.
+Recommendation: **BLOCKED**; owner checkpoint decision pending.
 
-Recommendation: **BLOCKED**. This is an intake/blocker record, not completed
-implementation or provider-backed evidence. Owner GO/STOP/BLOCKED decision remains
-pending. The owner's implementation request authorizes this experiment; historical
-"draft / plan only" document headers are not a separate approval blocker.
+Owner selected **GPT-6.1 Sol / high for both roles** and **3 repetitions**.
+This supersedes the initial model-selection blocker. Provider transport/credential
+route, generation configuration and numeric terminal usability threshold remain
+unresolved. T1 is a draft; T2–T4 have not started. No provider generation occurred.
 
-## Source provenance
+## Provenance
 
-- `implementationBaseSha`: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`, obtained by
-  refreshing `origin/main`, then creating
-  `feat/c3-semantic-verifier-checkpoint-a-20261005` from that exact revision.
-- Approved source references: `docs/specs/c3-single-agent-commerce-architecture-20261004.md`,
-  `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`, and `tasks/plan.md`
-  as present at `implementationBaseSha`.
-- Amendment spec commit: `2336826244b85eae92f12f310a9da8f1d5da23d6` (PR388 merge).
-- Parent spec last-change commit: `c4bd59857a560689ce0b10758a4927f6401b0c27`.
-- Plan commit: `296cdcfbf5759f5bf9cbb24acf3dc63005589361` (PR389 merge).
-- PR387 evidence only: `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da`.
-  Read its `apps/worker/evals/single-agent-feasibility/egress-attempts.json`:
-  exactly seven authored attacks. No PR387 runtime seam imported or rebased.
-- `a2RunSourceSha`: not sealed; no executable A2 runner exists.
+- `implementationBaseSha`: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`.
+  Refreshed main again after owner model selection; it remains this SHA.
+- Branch: `feat/c3-semantic-verifier-checkpoint-a-20261005`.
+- Spec SHA: amendment PR388 merge `2336826244b85eae92f12f310a9da8f1d5da23d6`.
+- Parent spec last-change SHA: `c4bd59857a560689ce0b10758a4927f6401b0c27`.
+- Plan SHA: `296cdcfbf5759f5bf9cbb24acf3dc63005589361` (PR389).
+- Historical PR387 evidence: `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da`.
+  Its seven exact authored segment objects, source IDs and original final assembly
+  results are retained as evaluator-only seed provenance. No runtime source imported.
+- `a2RunSourceSha`: not sealed; no executable A2 runner.
 - `a3RunSourceSha`: not sealed; A3 has not run.
 
-SHA-256 of the source files actually read (local checkout bytes):
+Source Git blobs: parent spec `419cad5eb5b5596d57c34753b3d91cb13f0d8d24`,
+amendment `ca5bc8e3eec8ae5b1764d58a49010db1e474a7c3`,
+plan `ac3b992757fe42b73878d1b837e081d06fa2d6b7`.
 
-| Source | SHA-256 |
+Current draft SHA-256 identities (not a completed protocol freeze):
+
+| Artifact | SHA-256 |
 |---|---|
-| Parent spec | `19101994b0232f4a0894ebf986f70583e9ddaa5ac53cbcf6d7b7f67f24b05875` |
-| Amendment spec | `7d39d55119ae175448d3926b40d1da0e8e7a960e48268f0c890f112085f4e035` |
-| Plan | `c6913e1d0a63687bf8e273e8774143945285fb33200aaf31dcc4107585f305f7` |
+| Manifest | `3e7f33cd8d2ba3416006c2e719f06a5cff0f26718ba7164b154a013f98644aa1` |
+| A2 corpus | `035a19d9eb9d48256587d0122840f5199f92004c5654ed96d651051aa073df4a` |
+| A3 corpus | `50032c95052504b8508bd8f7172667ad24b3eb9562bd68451e29e1046c035fa5` |
 
-Git blob identities, which avoid checkout newline differences, respectively:
-`419cad5eb5b5596d57c34753b3d91cb13f0d8d24`,
-`ca5bc8e3eec8ae5b1764d58a49010db1e474a7c3`,
-`ac3b992757fe42b73878d1b837e081d06fa2d6b7`.
+Draft prompt/schema hashes are in `manifest.json`; no provider result has been
+observed against them. No hash is claimed as a completed qualification identity.
 
-## Blocking owner decisions and access
+## Exact model/config and remaining access boundary
 
-The amendment's section 22 leaves provider/model/effort, repetitions and numeric
-usability thresholds open. Neither the current plan nor TODO approves exact
-Checkpoint-A provider identities. Prior C3 model choices are historical evidence,
-not authorization to reuse them for these roles.
+Both descriptors: provider `OPENAI`, model/version selection `gpt-6.1-sol`, effort
+`high`. Credential route and generation config are explicitly null, so full
+protocol validation and preflight reject. No different model may be substituted.
+Both roles use the same model family; no independent-defense claim is made.
 
-Required before T1 can be completed:
+Official [model documentation](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
+was fetched; it supports `high` and identifies the model using `gpt-6.1-sol`.
+A provider-returned version/request identity has not been observed. Also fetched
+[structured-output guidance](https://developers.openai.com/api/docs/guides/structured-outputs),
+[Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference),
+and [authentication guidance](https://learn.chatgpt.com/docs/auth).
 
-1. Exact provider/model/version/effort for verifier A2/A3 and conversation A3.
-2. Registered repetitions and the numeric safe-A2/all-A3 terminal usability
-   threshold; any owner-required operational ceiling.
-3. Available, authorized evaluation credential/config route for the chosen path.
-4. Frozen prompts/schema/config, bounds/binding, complete corpora, terminal
-   disposition/fallback identities and whole-reply scoring protocol.
+Local `codex-cli 0.159.2` is logged in using ChatGPT. This corrects the initial
+assumption that only Vertex might be accessible. The model cache contains
+`gpt-6.1-sol`. However, no candidate CLI adapter currently proves actual generation
+request count, exact provider-returned version and absence of tool capability.
+Default HTTP/SSE retries exist; documented settings alone are not accounting
+evidence. No CLI generation was run to bypass the freeze/readiness requirement.
 
-Repository paths inspected:
+`OPENAI_API_KEY` is absent from this process. No credential file/token was read,
+copied or exposed; no undocumented ChatGPT backend was used as an API substitute.
+Existing Vertex paths remain available in source but are not the selected model.
 
-- `apps/worker/src/vertex.ts`: existing Vertex AI generation, service-account
-  OAuth/token acquisition, timeout, structured-output, modelVersion/token/latency
-  capture. Existing generation methods can retry on 401; judge methods also
-  retry. They cannot be reused unchanged for Checkpoint A's one-request limit.
-- `apps/worker/src/vertex-baseline.ts`: baseline capability separation.
-- `apps/worker/src/phase4-server.ts`: configured Vertex credential-file path.
-- `.env.example`: `gemini-3.5-flash-lite` example; existing offline judge source
-  references `gemini-3.6-flash`. Neither is an approved Checkpoint-A choice.
-- No tracked GPT-6.1 generation adapter was found by the targeted source search;
-  the parent spec's GPT-6.1 Sol/low record does not establish an available adapter.
+Owner clarification requested: numeric usability threshold (10% proposed, not
+owner-confirmed) and the authorized route. Three repetitions is not a usability
+percentage or credential route. Changes after results require a new frozen run;
+the current experiment cannot be adjusted retroactively.
 
-No `VERTEX_*`, `GOOGLE_APPLICATION_*` or `OPENAI_*` environment variable was
-present in this execution session. This is **not** proof that credentials are
-unavailable elsewhere. No credential file was read, no token acquired, and no
-provider request sent. Current official provider API documentation review is
-pending provider selection; no provider API implementation has been written.
+## T1 draft evidence and denominators
 
-## Evidence status and denominators
+- A2: 34 draft cases = 28 unsafe + 6 safe, including seven PR387 seeds, two
+  paraphrases per semantic family, injection/fake-ref/context/replay/mixed cases.
+- Planned A2 population at 3 repetitions: 102 attempts (84 unsafe + 18 safe).
+  **Executed denominator: 0.** Population is not yet registered/frozen.
+- A3: 16 draft cases = concern 3, partial evidence 3, correction/referent/defer 4,
+  conditional policy 3, simple controls 3. Every case has required/forbidden
+  outcomes outside runtime projection. Planned 48 conversation generations;
+  **executed denominator: 0**. A3 is prohibited until A2 PASS.
+- Unsafe send-eligible false PASS: **not evaluated**. No zero-observed safety
+  claim is made from an empty executed population.
+- Provider generation requests: 0. Request-count adapter proof is still missing.
+- Firewall: two request envelopes captured by a mock provider prove evaluator
+  fields/sentinel values and unallowlisted private state are excluded. This is
+  deterministic projection evidence, not captured real-provider evidence.
+- Request/draft/snapshot projection binding and size bounds have draft tests.
+  They do not prove the T2 final deterministic gate.
 
-| Required evidence | Actual status |
+Draft terminal map: PASS -> final gate; FAIL/UNCERTAIN/malformed/timeout/provider
+error -> `C3_A_NONPROTECTED_V1`; stale -> handoff; permission/recipient/privacy ->
+no-send. Proposed static fallback:
+
+> Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.
+
+Exact fallback hash is in the draft manifest. Terminal behavior is not implemented
+or frozen. Post-effect recovery has not been implemented.
+
+Whole-reply quality, fallback/handoff/no-send rate, verifier p50/p95, added latency,
+timeout/error rate, tokens and provider-exposed cost: **not measured**. Human
+scoring rubric is a draft; no terminal outcomes or human scores exist.
+
+Before freeze, resolve how the new envelope handles the first/stale PR387 seeds,
+whose historical final assembled reply was empty although authored segments were
+present. Code scenarios define replay binding overrides; no runner executes them
+yet. These are explicit remaining T1 issues, not evidence of completed coverage.
+
+## Commands actually run and outcomes
+
+From this worktree, unless noted:
+
+| Command | Observed result |
 |---|---|
-| Protocol/prompt/schema/corpus hashes | Not frozen; source-document hashes above are not protocol hashes |
-| A2 unsafe/safe population | Not registered; seven historical attacks inspected only |
-| A2 complete attempt denominator | 0 attempts executed; not a completed population |
-| Unsafe send-eligible false PASS | Not evaluated; no zero-observed safety claim |
-| Provider generation requests | 0; no adapter request-count proof yet |
-| Evaluator-label firewall | Not implemented/tested; no captured model requests |
-| Terminal dispositions / fallback IDs, texts, hashes | Not frozen |
-| A3 family counts | Not registered; plan requires concern >=3, partial >=3, correction/referent/defer >=4, policy >=3, simple 2–4 |
-| A3 whole-reply results / denominator | Not evaluated / 0 executed |
-| Fallback/handoff/no-send rate | Not measured; no terminal attempts |
-| Verifier p50/p95 / added latency | Not measured |
-| Provider timeout/error rate | Not measured |
-| Input/output tokens / exposed cost | Not measured |
-| Deterministic readiness | Not reached; T1 has not been frozen |
+| `git fetch origin main` / `git rev-parse origin/main` | PASS; SHA above, including refresh after model choice |
+| `git worktree add -b feat/c3-semantic-verifier-checkpoint-a-20261005 '../lanchatbot-c3-semantic-verifier-checkpoint-a-20261005' origin/main` (initial repo) | PASS |
+| `codex --version` / `codex login status` / `codex exec --help` / `codex features list` | Read-only capability inspection; no generation |
+| `pnpm install --frozen-lockfile` | PASS; lockfile unchanged |
+| `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs` | RED observed first: missing module, exit 1; then 8/8 GREEN, exit 0 |
+| `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --draft` | PASS; 28 unsafe / 6 safe / 16 A3 draft cases |
+| `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs` | Expected BLOCKED, exit 1: `NOT_FROZEN_ROUTE_OR_THRESHOLD` |
+| `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2` | Expected BLOCKED, exit 1: `NOT_FROZEN_ROUTE_OR_THRESHOLD` |
+| `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts` | PASS; 21/21 |
+| `pnpm --filter @lana/worker exec vitest run src/vertex.test.ts` | PASS; 34/34 existing Vertex tests; not a GPT adapter qualification |
+| `pnpm --filter @lana/worker typecheck` | PASS, exit 0 |
+| `pnpm --filter @lana/worker build` | PASS, exit 0 |
+| `pnpm --filter @lana/worker lint` | PASS, exit 0 |
+| `git diff --cached --check` | PASS before draft savepoint |
 
-T2 depends on completed T1; T3 depends on deterministic readiness; T4 requires
-A2 PASS. None of those dependencies is satisfied. No results were simulated and
-no model was substituted.
+Source reads/hashes used `git show`, `git log -1`, `git hash-object`, targeted `rg`
+and `Get-FileHash -Algorithm SHA256`. Initial incorrect wildcard/source paths and
+the first corpus-builder literal-key assumption were corrected. Failed attempts
+produced no provider result. Official Responses reference retrieval was too large
+and one authentication URL was 404; alternate official pages above were fetched.
 
-## Verification actually performed
+Not run: T2 boundary tests (file does not exist), selected-provider adapter tests,
+A2/A3 runner/evidence validation, actual provider generation or human scoring.
+Deterministic readiness is not achieved merely because the existing worker checks
+pass. Shared package source has not changed.
 
-Executed from the repository worktree:
+## Complexity and disposition
 
-- `git fetch origin main` (from the existing repository): exit 0.
-- `git rev-parse origin/main`: exact `implementationBaseSha` above.
-- `git worktree add -b feat/c3-semantic-verifier-checkpoint-a-20261005 '../lanchatbot-c3-semantic-verifier-checkpoint-a-20261005' origin/main`: exit 0.
-- `git status --short`: new implementation worktree initially clean.
-- Read required specs, plan, TODO, root instructions/README, operating mode,
-  historical baseline, model-evaluation boundary and project ops `SKILL.md`.
-- `git log -1 --format='%H %s' -- <source-file>` and `git hash-object <source-files>`:
-  provenance recorded above.
-- `Get-FileHash -Algorithm SHA256 <source-files>`: hashes recorded above.
-- `git show 1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da:apps/worker/evals/single-agent-feasibility/egress-attempts.json`:
-  historical evidence read; parsed attack count 7.
-- Targeted `rg` source searches and environment-variable **names-only** check:
-  provider findings above. Two initial wildcard/path searches returned missing-path
-  diagnostics; subsequent searches used existing directories. Those diagnostics
-  are not verification failures of implemented code.
-- `node --version`: `v24.19.0`; `pnpm --version`: `10.12.4`.
-- Documentation readback: parsed PR387 attack count = 7; recomputed the three
-  SHA-256 hashes and asserted each appears in this report (PASS).
-- `git diff --check`: initially caught trailing whitespace in the edited TODO
-  status line; corrected before committing.
-- `git diff --cached --check`: exit 0 after correction; only this report and
-  `tasks/todo.md` are staged (139 added report lines; 14 added / 4 removed TODO lines).
+Added five evaluation files: two data corpora, draft manifest, projection/protocol
+module and eight tests; updated this note and TODO. One evaluation request
+projection crosses the trusted/untrusted boundary. No semantic interpretation in
+code, framework, runtime dependency, durable state or production entrypoint change.
+Online semantic roles added: 0 so far; planned maximum remains one conversational
+owner and one verdict-only verifier. No parser, phrase-specific production rule,
+repair/reverify loop, tool/state/mutation/promotion work, deploy or live send.
 
-**Not run:** focused protocol/boundary tests, existing protected-claims/reply-assembler
-tests, provider adapter tests, worker typecheck/build/lint, provider preflight,
-A2/A3 execution or evidence validation. No implementation test is claimed PASS.
-Protocol/boundary/runner files do not yet exist. Full required checks remain
-mandatory when implementation resumes.
-
-## Structural delta and recommendation
-
-Two documentation files changed: this blocker record and `tasks/todo.md`.
-Runtime code, dependencies, public contracts and executable configuration delta:
-zero. Semantic roles/layers added: zero. No production wiring, state/tool/effect
-work, repair loop, parser, templates, promotion, deployment or live send.
-
-Recommendation: **BLOCKED pending the owner decisions and evaluation access
-above**. Resume at T1 on this branch after they are resolved. Do not treat this PR
-as completed Checkpoint A implementation, deterministic readiness, A2 PASS,
-A3 feasibility or permission to proceed beyond Checkpoint A.
+**BLOCKED at partial T1.** Resolve credential/transport accounting and numeric
+usability threshold, finish and freeze T1, then implement T2 RED->GREEN. Only
+deterministic readiness permits A2; only A2 PASS permits A3. Stop at Checkpoint A.

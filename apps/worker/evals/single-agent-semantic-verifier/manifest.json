@@ -87,7 +87,7 @@
   },
   "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
   "corpusHashes": {
-    "a2": "e98f2527eeab92e7bb7769f244a6bf2d217f31913c33bcd22ebe16761b46889c",
+    "a2": "035a19d9eb9d48256587d0122840f5199f92004c5654ed96d651051aa073df4a",
     "a3": "50032c95052504b8508bd8f7172667ad24b3eb9562bd68451e29e1046c035fa5"
   },
   "seedHashes": {
@@ -183,5 +183,12 @@
     "addedLatency": "verifier start through final gate",
     "fallbackRate": "terminal fallback/handoff/no-send divided by all eligible population attempts"
   },
-  "versionPolicy": "Require exact provider-returned model identity; no substitution. Alias drift requires a new frozen configuration/run."
+  "versionPolicy": "Require exact provider-returned model identity; no substitution. Alias drift requires a new frozen configuration/run.",
+  "draftLimitations": [
+    "Provider route, generation config and owner usability threshold are unresolved; T1 is not frozen.",
+    "A2 authored seed segments are preserved; first and stale historical attempts had no finalAssembledReply. New-seam authority/empty-reply handling must be resolved before freeze.",
+    "Code scenarios define replay overrides but no runner executes them yet.",
+    "Captured request firewall test uses a mock provider; no real provider request exists.",
+    "Schema/output/PII validation and final gate are not implemented until T2."
+  ]
 }

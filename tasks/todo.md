@@ -2,7 +2,7 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** BLOCKED at T1 intake — owner provider/config decisions pending; no runtime implementation or provider run.
+**Status:** BLOCKED at partial T1 — owner selected both models and repetitions; credential route/config and numeric usability freeze pending.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
@@ -10,10 +10,14 @@
 Refreshed `main` = `296cdcfbf5759f5bf9cbb24acf3dc63005589361` (`implementationBaseSha`).
 Branch: `feat/c3-semantic-verifier-checkpoint-a-20261005`.
 See `apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A.md` for provenance,
-provider-path inspection and explicit unverified items. Exact verifier/conversation
-provider/model/version/effort, repetitions, numeric usability threshold and authorized
-evaluation access are pending; no model selected/substituted. T1 remains incomplete,
-so T2–T4 and deterministic readiness have not started. No provider calls/results.
+provider-path inspection and explicit unverified items. Owner selected GPT-6.1 Sol
+`high` for verifier and conversation, with 3 repetitions. Draft corpora/projections
+and protocol tests exist (8/8 GREEN); full validator/preflight remain BLOCKED.
+Numeric usability threshold (10% proposed), generation config and qualified authorized
+credential route are pending. T1 remains incomplete, so T2–T4 and deterministic
+readiness have not started. No provider calls/results. Worker typecheck/build/lint,
+21 protected-claim/assembly tests and 34 existing Vertex tests pass; these do not
+qualify the GPT adapter or final gate.
 
 ## Preconditions
 
@@ -37,6 +41,8 @@ so T2–T4 and deterministic readiness have not started. No provider calls/resul
 - [ ] Create fail-closed manifest/protocol validator.
 - [ ] Record implementation/spec/evidence provenance.
 - [ ] Freeze verifier + conversation + judge/human scoring descriptors.
+  Owner choices recorded in draft manifest: `OPENAI / gpt-6.1-sol / high`, 3 repetitions;
+  credential route/config and complete freeze are still pending.
 - [ ] Freeze prompt/schema hashes.
 - [ ] Freeze state-field allowlist, history/input bounds and trusted/untrusted serialization.
 - [ ] Freeze separate runtime-input projections vs evaluator-only expectations/rubrics.
@@ -63,14 +69,14 @@ so T2–T4 and deterministic readiness have not started. No provider calls/resul
 
 Verification:
 
-- [ ] `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs`
+- [x] `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs` — RED missing-module observed; then 8/8 GREEN for draft protocol. This does not complete freeze/readiness.
 - [ ] `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs`
-- [ ] Protocol test: runtime conversation/verifier projections exclude evaluator-only fields.
-- [ ] Protocol test: A2/A3 provider preflight rejects missing/mismatched run-source SHA.
+- [x] Protocol test: runtime conversation/verifier projections exclude evaluator-only fields — mocked provider envelopes, not actual provider captures.
+- [x] Protocol test: A2/A3 provider preflight rejects missing/mismatched run-source SHA.
 - [ ] Protocol test: terminal disposition/fallback IDs/text/hashes are frozen inputs.
 - [ ] Manual: no result file exists before protocol freeze.
-- [ ] Manual: no real customer PII/secrets in fixtures.
-- [ ] Manual: no PR387 source implementation imported.
+- [x] Manual: no real customer PII/secrets in fixtures — authored/synthetic fixture population only.
+- [x] Manual: no PR387 source implementation imported.
 
 ## T2 — Deterministic verifier envelope + final gate
 
