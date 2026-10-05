@@ -17,7 +17,7 @@ Inventory before adding a seam:
 | C3 candidate | `src/track-c-c3-two-pass-candidate.ts`, `track-c-offline-candidate-validation.ts`: advisory plan -> response segments; code attaches binding; typed effects forbidden |
 | C3 production-contract guard | `src/track-c-c3-v5-benchmark-runner.ts`: per-segment `guardAgentProposal`, GENERAL gets no fact authority |
 | Quality utilities | `src/track-c-quality-judge.ts`, `track-c-c3-v5-stage-judge.ts`: reusable provider/metrics infrastructure; stage judge is not this new full-reply rubric |
-| Policy | existing `CustomerCarePolicyAdminContentV1` / runtime policy resolver; exchange/inspection not a `ProtectedClaimV1` category; minimal offline code-owned literal reference needed, no new taxonomy |
+| Policy | `src/pre-sale-policy.ts` (`renderPreSalePolicyReply`), existing `CustomerCarePolicyAdminContentV1` / runtime policy resolver; exchange/inspection not a `ProtectedClaimV1` category; minimal offline code-owned literal reference needed, no new taxonomy. No classifier or renderer expansion; literals in this experiment are frozen synthetic business truth |
 
 `corpus.json` contains 13 semantic cases (A3/B3/C4/D3) and 2 controls. All truth is a hypothetical frozen verified world, never live authority. Each case includes raw accepted history/latest input, frozen state, truth, required outcomes and forbidden claims/actions. Requirements are prose-independent except protected code-owned literals. C cases prove only egress understanding. There is no candidate-generated state persistence, trusted-reference resolution or dependent-tool ordering evidence here.
 
@@ -37,3 +37,14 @@ node apps/worker/evals/single-agent-feasibility/protocol.mjs
 ```
 
 T1 review: scenario contracts and counts inspected individually; paired fixture identity/config matches; hypothetical truth labeled; no runtime source or dependency changed. Static protocol RED initially failed because validator did not exist, then GREEN. Provider-observed comparative claims remain rejected.
+
+T2 surface: `{ segments: [{ text: string } | { ref: string }] }`. This local evaluation seam is necessary because existing C3 segments require model-authored protected prose; the experiment instead resolves code-owned claim IDs/literals and leaves conversational prose verbatim. Price/stock/ETA realization reuses `buildVerifiedFactBlocks`; ID/scope/freshness reuse protected authorization. Free prose passes existing C3 per-segment reject-only guard plus existing undeclared-stock detector and DLP. No runtime entrypoint, permission, provider adapter, business tool, memory, model role, generic semantic parser or production regex is added. The optional policy literal is a **trusted code/fixture input**, never a raw tool/API or model response.
+
+Strict hard safety probes remain RED and exit nonzero on any accepted unsafe draft:
+
+```text
+pnpm --filter @lana/worker exec tsc -p tsconfig.json
+node --test apps/worker/evals/single-agent-feasibility/egress-safety.red.mjs
+```
+
+The explicit `.red.mjs` command is separate from ordinary Vitest mechanics tests so an intentionally failed architecture experiment can be retained for review without breaking unrelated runtime tests. It has no skip/xfail and is **not** a required check converted to PASS. See `egress-attempts.json` and `CHECKPOINT_A.md`; T2 hard safety is FAIL regardless of green mechanics tests. The JSON keeps all seven attempts and references one shared frozen input without duplicating business truth. It records exact tested source/build hashes. Synthetic attack drafts are not real-model results. STOP means this tested surface did not establish feasibility, not that every possible architecture is impossible.

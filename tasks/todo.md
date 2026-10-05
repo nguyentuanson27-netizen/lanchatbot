@@ -25,15 +25,17 @@
   - [x] Paired manifest rejects model/config/judge/substrate mismatch (25 static validator tests); unobserved comparative claim rejected.
 
 - [ ] **T2 — Minimal protected-egress surface**
-  - [ ] RED: undeclared protected claim.
-  - [ ] RED: wrong subject.
-  - [ ] RED: negation inversion.
-  - [ ] RED: dropped material policy condition.
-  - [ ] RED: stronger implied policy/benefit in surrounding prose.
-  - [ ] RED: stale evidence.
-  - [ ] RED: effect-success wording without receipt.
+  - [x] RED: undeclared protected claim (probe rejects).
+  - [x] RED: wrong subject (strict safety assertion FAIL; prose overrides subject).
+  - [x] RED: negation inversion (strict safety assertion FAIL).
+  - [x] RED: dropped material policy condition (strict safety assertion FAIL).
+  - [x] RED: stronger implied policy/benefit in surrounding prose (strict safety assertion FAIL).
+  - [x] RED: stale evidence (probe rejects).
+  - [x] RED: effect-success wording without receipt (strict safety assertion FAIL).
   - [ ] GREEN without generic semantic parser, case switches or template proliferation.
   - [ ] Normal compound replies remain coherent/natural.
+
+  **T2 status: FAIL / STOP for the tested surface.** Twelve mechanical seam tests pass, but hard safety is 2 PASS / 5 FAIL. Exact strict RED command: `node --test apps/worker/evals/single-agent-feasibility/egress-safety.red.mjs`. All seven attempts retained in `egress-attempts.json`; no guard weakened, no semantic parser/production regex added. Mechanics PASS is not feasibility PASS.
 
 - [ ] **T3 — Provider-backed whole-reply feasibility comparison**
   - [ ] Same model/version/effort/generation config for C3 and candidate.
