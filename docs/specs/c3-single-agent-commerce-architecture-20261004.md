@@ -735,6 +735,25 @@ The first implementation is an isolated candidate/shadow path. It must not send 
 
 The PR base SHA is documentation provenance, not automatically the experiment baseline.
 
+### Evaluation principle: goal first, baseline second
+
+Candidate correctness is defined by **pre-registered absolute product and safety gates**, not by whether it beats C3.
+
+Replacement readiness is a separate decision. C3 remains a matched reference for:
+
+- measuring architecture/orchestration delta;
+- proving whether customer-facing quality clearly improves enough to justify replacement;
+- finding regressions in capabilities that already work;
+- understanding migration risk and trade-offs.
+
+C3 is not the quality specification, but comparison against it is a required **second gate for replacing C3**. Therefore:
+
+- beating C3 does not rescue a candidate that fails an absolute product/safety gate;
+- a candidate may meet the absolute product target while still being **not replacement-ready**;
+- neutral comparative quality is insufficient to replace C3 under this experiment's objective;
+- replacement additionally requires preregistered clear quality improvement, no safety/state/effect regression, and the structural "do not build C3 again" gate;
+- the sealed holdout should be designed from target product capabilities, not from a list of known C3 failures.
+
 ### 13.1 Experiment manifest, substrate and matched-comparison parity
 
 Every comparison run must record:
@@ -813,7 +832,10 @@ Before a promotion-candidate run, freeze:
 - exact baseline/candidate source identities and matched-comparison configuration from §13.1;
 - dev corpus vs sealed holdout;
 - history window/truncation policy;
-- rubric and numeric/minimum-improvement threshold;
+- rubric and numeric **absolute product-quality pass thresholds** for paired turns and stateful journeys;
+- preregistered **comparative replacement criteria** for paired turns and stateful journeys, including what counts as clear quality improvement over C3;
+- hard non-regression rules for safety/state/effect behavior in the matched comparison;
+- structural evidence required to show the candidate actually collapses/replaces C3 semantic machinery rather than recreating it;
 - blind/randomized A/B ordering;
 - tie and judge-disagreement handling;
 - repeated-generation/variance policy where nondeterminism matters;
@@ -825,9 +847,13 @@ Thresholds and rubric do not change after results are observed.
 
 The whole population is accounted for: accepted replies, rejects, timeouts, fallbacks and handoffs. A safe handoff may still be a quality failure when the bot had enough information to answer.
 
-### 13.5 Promotion hard gates
+### 13.5 Two sequential decisions: meets target, then qualifies to replace C3
 
-No promotion if the candidate regresses:
+#### Gate A — Candidate meets target
+
+The **candidate itself** must pass all preregistered absolute gates on the sealed holdout.
+
+Hard correctness/safety gates include:
 
 - product/variant subject safety;
 - protected claim authority;
@@ -837,9 +863,9 @@ No promotion if the candidate regresses:
 - ownership/handoff;
 - revision/CAS behavior;
 - deterministic state/effect acceptance;
-- explicit customer needs in the locked corpus.
+- explicit customer needs are not silently dropped.
 
-Quality dimensions for both paired turns and journeys:
+Product-quality gates must be defined and passed **separately** for paired single turns and stateful journeys. Quality dimensions for both modes include:
 
 - understanding;
 - completeness/question resolution;
@@ -848,6 +874,27 @@ Quality dimensions for both paired turns and journeys:
 - next step;
 - naturalness/coherence;
 - factual/action safety.
+
+Both modes must meet their absolute thresholds independently. A strong result in one mode cannot compensate for failure in the other.
+
+If Gate A fails, the candidate is rejected regardless of C3 comparison.
+
+#### Gate B — Candidate qualifies to replace C3
+
+Gate B is evaluated only after Gate A passes.
+
+Replacement readiness additionally requires all of:
+
+- matched paired-turn comparison satisfies the preregistered **clear quality-improvement** criterion over C3;
+- matched stateful-journey comparison satisfies its preregistered **clear quality-improvement** criterion over C3;
+- no safety/state/effect regression relative to the matched C3 reference;
+- structural audit passes §14.1 and shows meaningful C3 semantic responsibilities were removed/collapsed rather than renamed or recreated.
+
+A better-than-C3 result cannot override a Gate A failure.
+
+A **neutral** matched comparison may still yield `Candidate meets target = PASS`, but it yields `Candidate qualifies to replace C3 = FAIL`. Under this experiment, neutral quality is not enough reason to migrate.
+
+Comparative criteria are migration/replacement criteria, not the definition of product correctness.
 
 Guard acceptance alone is insufficient.
 
@@ -965,7 +1012,7 @@ Before production opt-in:
 
 A kill switch does not undo already committed effects.
 
-Do not keep two permanent architectures. If the candidate does not produce clear quality improvement, remove the experiment rather than preserve neutral complexity.
+Do not keep two permanent architectures. If the candidate passes the absolute product target but does not satisfy the preregistered replacement gate — including clear quality improvement over C3 — record it as **target-met but not replacement-ready** and remove/close the experiment rather than preserve neutral complexity. Reconsidering replacement for a different objective requires a new explicit spec/owner decision.
 
 ---
 
@@ -1141,10 +1188,10 @@ This spec is ready for implementation planning only if reviewers agree that:
 7. same-agent state patching is limited to existing writable state owners and does not recreate Producer;
 8. dependent tools consume the accepted effective state after same-turn corrections; stale pre-correction results cannot be treated as current;
 9. mutation idempotency plus post-effect recovery prevents replay after committed effects;
-10. matched architecture comparison requires the same model/version/effort/generation/judge process and paired inputs/substrate; unmatched runs are package-level only;
-11. evaluation includes both paired single turns and stateful journeys;
-12. promotion protocol has preregistered holdout/rubric/accounting rules;
-13. "do not build C3 again" is a falsifiable structural gate, not only a principle;
+10. evaluation is **goal-first, baseline-second**: absolute product/safety gates decide whether the candidate meets target; they are not replaced by C3-relative scoring;
+11. replacement readiness is a separate second gate requiring preregistered clear quality improvement over matched C3 in both paired single turns and stateful journeys, plus no safety/state/effect regression;
+12. promotion protocol has preregistered sealed-holdout/rubric/absolute-threshold/comparative-replacement/accounting rules;
+13. "do not build C3 again" is a falsifiable structural gate required for replacement readiness, not only a principle;
 14. real-adapter send-disabled verification is required before opt-in;
 15. runtime safety guards remain distinct from offline conversational-quality evaluation;
 16. this PR changes no runtime behavior.
@@ -1155,10 +1202,11 @@ Human approval is required before implementation planning.
 
 ## 21. Open owner decisions
 
-1. **Promotion threshold:** exact paired judge/human quality threshold to freeze before promotion-candidate evaluation.
-2. **First-contact lane:** preserve current fixed first-contact unchanged initially, or include it in the paired candidate corpus.
-3. **Hard model/tool-loop cap:** target is 1 call with no tools, 2 with one independent tool round, 3 only for dependent work; freeze the exact production cap after baseline measurement.
-4. **Candidate name:** keep "C3 single-agent candidate" or use a neutral experiment name.
+1. **Absolute product-quality thresholds:** exact paired-turn and stateful-journey quality pass thresholds to freeze before promotion-candidate evaluation.
+2. **Comparative replacement criteria:** exact preregistered rule for "clear quality improvement" over C3 in paired turns and stateful journeys, including any non-compensable quality dimensions; safety/state/effect remain hard non-regression.
+3. **First-contact lane:** preserve current fixed first-contact unchanged initially, or include it in the paired candidate corpus.
+4. **Hard model/tool-loop cap:** target is 1 call with no tools, 2 with one independent tool round, 3 only for dependent work; freeze the exact production cap after baseline measurement.
+5. **Candidate name:** keep "C3 single-agent candidate" or use a neutral experiment name.
 
 ---
 
@@ -1193,4 +1241,11 @@ After any committed state/effect, recovery continues from the committed state/re
 
 Offline locked evaluation, not the runtime guard, decides whether the conversation is complete, useful and natural.
 
-The experiment proceeds beyond the first feasibility slice only if the intended protected-egress surface can preserve the durable claim/effect safety contract without collapsing normal conversation into templates or rebuilding a semantic parser. Promotion then additionally requires measurably better paired-turn **and stateful-journey** quality and the structural "do not build C3 again" gate.
+The experiment proceeds beyond the first feasibility slice only if the intended protected-egress surface can preserve the durable claim/effect safety contract without collapsing normal conversation into templates or rebuilding a semantic parser.
+
+Final evaluation produces two explicit verdicts:
+
+1. **Candidate meets target** — the complete candidate passes preregistered absolute product-quality and safety gates for both paired turns and stateful journeys.
+2. **Candidate qualifies to replace C3** — verdict 1 passes, matched paired-turn and stateful-journey comparisons satisfy preregistered clear quality-improvement criteria, safety/state/effect do not regress, and the structural "do not build C3 again" gate passes.
+
+C3 does not define product correctness, but clear improvement over C3 is required to justify replacing C3 in this experiment.
