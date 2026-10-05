@@ -49,7 +49,7 @@
 - [ ] Owner GO decision recorded.
 - [ ] Hard safety parity proven.
 - [ ] No silent customer-need loss in locked feasibility corpus.
-- [ ] Semantic cases show clear whole-reply quality improvement, not only correct fact assembly.
+- [ ] Semantic cases meet the development whole-reply quality bar for understanding, completeness, usefulness, coherence, naturalness and safety, not only correct fact assembly. Checkpoint A does not require preregistered improvement versus C3; that replacement criterion belongs to Gate B / T7–T8.
 - [ ] No broad semantic parser/template/regex growth.
 - [ ] Still one conversational semantic owner.
 
