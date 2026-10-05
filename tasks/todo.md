@@ -80,22 +80,29 @@
 - [ ] **T7 — Preregister promotion protocol + seal holdout**
   - [ ] Freeze exact baseline/candidate source + matched model/version/effort/generation/judge settings.
   - [ ] Separate development corpus from sealed holdout; record holdout identity/hash without exposing contents to candidate tuning.
-  - [ ] Freeze history/truncation, rubric, numeric/minimum-improvement threshold.
+  - [ ] Preregister **paired single-turn** mode with same message/history/pre-state/business snapshot/freshness for baseline and candidate.
+  - [ ] Preregister **stateful journey** mode with same initial state/business world/customer policy, then each path uses its own resulting state/history/effects.
+  - [ ] Freeze history/truncation, rubric, numeric/minimum-improvement threshold **for each mode**.
   - [ ] Freeze blind/randomized A/B ordering and tie/judge-disagreement handling.
   - [ ] Freeze repeated-generation/variance and retry/all-attempt accounting.
   - [ ] Freeze provider/model/request and corpus/rubric provenance.
+  - [ ] One promotion mode cannot compensate for failure in the other.
   - [ ] Validator fails closed for missing/mismatched preregistration fields.
 
-- [ ] **T8 — Stateful matched promotion journeys + structural audit**
-  - [ ] Validate T7 preregistration before first holdout result is scored.
-  - [ ] Each path consumes its own resulting state/history/effects after common initial conditions.
-  - [ ] Real correction trace proves correction -> accepted effective state -> bounded trusted ref/tool input -> dependent result -> persisted state/final reply.
-  - [ ] Raw customer need -> final customer outcome completeness accounting.
+- [ ] **T8 — Paired single-turn + stateful matched promotion evidence**
+  - [ ] Validate T7 preregistration before first holdout result in either mode is scored.
+  - [ ] **Paired single-turn:** run complete candidate with exactly same message, accepted history, canonical pre-turn state and business snapshot as baseline.
+  - [ ] **Paired single-turn:** report quality/safety/completeness/minimum-improvement gate separately and retain exact paired final replies + common input.
+  - [ ] **Stateful journeys:** each path consumes its own resulting state/history/effects after common initial conditions.
+  - [ ] **Stateful journeys:** real correction trace proves correction -> accepted effective state -> bounded trusted ref/tool input -> dependent result -> persisted state/final reply.
+  - [ ] **Stateful journeys:** report quality/safety/state/effect/completeness/minimum-improvement gate separately.
+  - [ ] Raw customer need -> final customer outcome completeness accounting in both modes.
   - [ ] Matched comparison manifest enforced.
-  - [ ] Retain whole replies + resulting state/tool/effect traces for owner review.
+  - [ ] Retain whole replies for both modes; retain resulting state/tool/effect traces for journeys.
   - [ ] Trace semantic boundaries for representative baseline/candidate turns.
   - [ ] Identify concrete C3 responsibilities collapsed/replaced.
-  - [ ] Report development and sealed-holdout results separately.
+  - [ ] Report development, paired-single-turn holdout and journey-holdout results separately.
+  - [ ] Both promotion modes must pass independently; no averaged/aggregate pass hides a failed mode.
 
 - [ ] **T9 — Real-adapter send-disabled gate**
   - [ ] Ephemeral/test persistence infrastructure.
@@ -116,4 +123,5 @@
 - [ ] Final review: correctness -> security -> architecture -> simplicity -> performance.
 - [ ] Project Definition of Done checked.
 - [ ] Promotion claim uses only preregistered sealed-holdout evidence; development corpus is not relabeled as holdout.
+- [ ] Paired single-turn and stateful-journey promotion gates both pass independently; neither mode can compensate for the other.
 - [ ] No live traffic/deploy/C3 removal performed by this plan.
