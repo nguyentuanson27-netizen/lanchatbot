@@ -2,7 +2,7 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** T1/T2 readiness GREEN; A2 PASS (102/102); A3 generation complete (48/48), human whole-reply scoring BLOCKED. Checkpoint A recommendation BLOCKED; owner decision pending.
+**Status:** T1/T2 readiness GREEN; A2 PASS (102/102); A3 complete (48/48), owner-authorized Codex offline quality FAIL (41/48 pass). Checkpoint A recommendation STOP; owner disposition pending. Original human protocol remains unscored.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
@@ -11,9 +11,9 @@ implementationBaseSha = `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; branch `feat
 Owner: both GPT-6.1 Sol/high, 3 repetitions, existing Codex login, 10% maximum usability failure.
 T1 frozen. T2 30/30 GREEN after RED. Protocol 9/9, adapter 11/11 including installed
 CLI-to-local-stub, A2 runner 5/5, protected claims/assembly 21/21, worker typecheck/build/lint PASS.
-A3 runner 6/6 GREEN after RED; exact terminal outcome human scoring prepared. Combined Node tests 31/31.
+A3 runner 6/6 GREEN after RED; exact terminal outcome human scoring prepared. Owner-authorized offline review now records 480 ratings and every outcome rationale in A3_CODEX_REVIEW.md /a3-codex-review-scores.json. Combined Node tests 31/31.
 No production wiring. See CHECKPOINT_A.md for identities, actual commands and remaining work.
-A2: PASS (84 unsafe /18 safe, zero observed unsafe send-eligible false PASS); A3: 48/48 generated, runtime validation PASS, human scoring pending. No post-A work.
+A2: PASS (84 unsafe /18 safe, zero observed unsafe send-eligible false PASS); A3: 48/48 generated, runtime validation PASS; owner explicitly requested Codex review, offline quality FAIL (41/48), STOP recommendation; no fabricated human ratings. No post-A work.
 
 ## Preconditions
 
@@ -154,6 +154,8 @@ Decision:
 
 ## T4 — A3 whole-reply feasibility
 
+Scoring completed by CODEX_PRIMARY_AGENT at explicit owner request after the run, using the unchanged numerical rubric. Offline AI assessment; original human sheet remains blank. Non-PASS/recovery scoring paths are unit-tested but did not occur in the actual A3 run.
+
 - [x] Use one frozen conversational owner over the locked A3 development corpus.
 - [x] Candidate output surface is exact customer-visible final text + telemetry only.
 - [x] Do not use AgentProposalV1, Strategist/Responder plan, intent/obligation schema or another semantic handoff object as A3 ownership surface.
@@ -162,18 +164,18 @@ Decision:
 - [x] Every hard-precheck-surviving draft invokes the verifier; no semantic bypass classifier.
 - [x] One provider generation request maximum per registered conversation attempt and per registered verifier attempt.
 - [x] Keep every registered generation in the denominator.
-- [ ] PASS outcome scored as exact sent reply.
+- [x] PASS outcome scored as exact sent reply.
 - [ ] FAIL/UNCERTAIN/timeout/malformed scored as actual fallback/handoff/no-send.
 - [ ] Snapshot/freshness invalidation scored as the actual allowed terminal recovery outcome.
 - [x] Safe handoff can still fail quality when the case was answerable.
-- [ ] Score understanding.
-- [ ] Score explicit-need completeness.
-- [ ] Score context/correction use.
-- [ ] Score usefulness/decision support.
-- [ ] Score partial-answer behavior.
-- [ ] Score next-step appropriateness.
-- [ ] Score coherence/naturalness.
-- [ ] Score factual/action safety.
+- [x] Score understanding.
+- [x] Score explicit-need completeness.
+- [x] Score context/correction use.
+- [x] Score usefulness/decision support.
+- [x] Score partial-answer behavior.
+- [x] Score next-step appropriateness.
+- [x] Score coherence/naturalness.
+- [x] Score factual/action safety.
 - [x] Terminal fallback/handoff/no-send rate satisfies frozen usability threshold.
 - [x] Report verifier p50/p95 latency.
 - [x] Report provider timeout/error rate.
@@ -200,11 +202,11 @@ Verification:
 
 ## CHECKPOINT A
 
-- [ ] Owner GO / STOP / BLOCKED decision recorded. Implementation recommendation: BLOCKED; human scoring packet prepared, scores absent.
+- [ ] Owner GO / STOP / BLOCKED decision recorded. Implementation recommendation: STOP after owner-authorized Codex review; owner final disposition pending.
 - [x] A2 zero observed unsafe send-eligible false PASS.
 - [x] Fail-closed behavior proven for UNCERTAIN/malformed/timeout/provider error.
 - [x] Safe controls + A3 terminal outcomes pass frozen usability threshold.
-- [ ] A3 passes frozen whole-reply quality bar. BLOCKED until all 48 human ratings are supplied; no synthesized scores.
+- [ ] A3 passes frozen whole-reply quality bar. FAIL in owner-authorized Codex offline review (41/48 overall; partial 5/9, simple 6/9 below 90%). No human qualification claimed.
 - [x] Final-send freshness/binding/revision/permission/snapshot revalidation proven.
 - [x] One conversational owner + one verifier only.
 - [x] Verifier has no tool/state/effect/rewrite/send authority.

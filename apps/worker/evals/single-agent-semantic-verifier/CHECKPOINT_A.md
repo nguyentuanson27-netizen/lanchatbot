@@ -1,8 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A
 
-Scope: Checkpoint A only. Recommendation: **BLOCKED**. This is a recommendation; owner GO/STOP/BLOCKED has not been recorded.
+Scope: Checkpoint A only. Recommendation: **STOP**. This is a recommendation; owner GO/STOP/BLOCKED has not been recorded.
 
-T1 frozen before provider results; T2 deterministic readiness GREEN; A2 **PASS** on the complete sealed population; A3 generated all 48 actual terminal outcomes. A3 whole-reply qualification is **BLOCKED** (MISSING_ALL_TERMINAL_HUMAN_SCORES). No post-A implementation or production send.
+T1 frozen before provider results; T2 deterministic readiness GREEN; A2 **PASS** on the complete sealed population; A3 generated all 48 actual terminal outcomes. Original A3 human qualification remains **BLOCKED** (MISSING_ALL_TERMINAL_HUMAN_SCORES). Owner subsequently explicitly requested Codex to review every history and assess; that offline assessment is **FAIL**, supporting the current **STOP** recommendation. No post-A implementation or production send.
 
 ## Exact provenance
 
@@ -76,9 +76,27 @@ Frozen family case counts: concern/decision support=3; multi-part partial eviden
 
 Conversation successful generations: 48. Hard-precheck survivors: 48; all invoked verifier and final gate. Terminal counts: {"SEND_ELIGIBLE":48,"FALLBACK":0,"HANDOFF":0,"NO_SEND":0}. Actual fallback/handoff/no-send rate: **0%**, satisfying the frozen <=10% usability threshold.
 
-Whole-reply result: **BLOCKED**, reason `MISSING_ALL_TERMINAL_HUMAN_SCORES`. No human scores are synthesized. Review packet A3_HUMAN_REVIEW.md and a3-human-review.json contains actual terminal customer outcomes, trusted truth and required/forbidden behaviors; excludes rejected candidates, verdicts and verifier telemetry. a3-human-scores.json has 48 rows with ten null ratings, scorer/scoredAt null. Sent-eligible replies are reviewed as their exact final text; non-PASS outcomes would be reviewed as the actual frozen fallback/handoff/no-send. Safe handoff does not automatically pass quality.
+Original frozen-human result: **BLOCKED**, reason `MISSING_ALL_TERMINAL_HUMAN_SCORES`. No human scores are synthesized. Review packet A3_HUMAN_REVIEW.md and a3-human-review.json contains actual terminal customer outcomes, trusted truth and required/forbidden behaviors; excludes rejected candidates, verdicts and verifier telemetry. a3-human-scores.json has 48 rows with ten null ratings, scorer/scoredAt null. Sent-eligible replies are reviewed as their exact final text; non-PASS outcomes would be reviewed as the actual frozen fallback/handoff/no-send. Safe handoff does not automatically pass quality.
 
 Concrete quality concern for human review: price-stock-eta:2 says price/stock are unconfirmed although trusted context supplies 849,000 VND and OUT_OF_STOCK. Repetitions :1 and :3 answer those facts. This omission is visible in the retained exact terminal outcome; no prompt/corpus/template patch or repeat selection was made. It has not been assigned a fabricated human score. A3 verifier PASS evaluates protected semantics only and does not establish completeness/usefulness.
+
+### Owner-authorized offline assessment after the run
+
+Owner instruction: “câu trả lời chưa được hay / tự xem từng lịch sử hội thoại và đánh giá đi”. Scorer: CODEX_PRIMARY_AGENT. This later instruction authorizes offline AI editorial assessment instead of waiting for owner ratings. It does not change frozen prompts/corpora/provider/source or numerical thresholds. No human ratings are fabricated; a3-human-scores.json and original a3-evidence.json retain their pre-review contents. This assessment is not independent/blinded: the primary agent built the implementation and already knew verifier results. No new provider request or runtime semantic role was added.
+
+A3_CODEX_REVIEW.md examines all 16 supplied cases and all 48 terminal outcomes with their actual accepted histories, trusted truth and required/forbidden behavior. a3-codex-review-scores.json retains all 480 dimension ratings, per-attempt rationale, terminal hashes, original evidence/review-packet hashes, scorer identity, instruction and timing. Applying the unchanged numerical bar gives **FAIL: 41/48 pass (85.4%)**.
+
+| Family | Pass /denominator | Pass rate | Frozen >=90% |
+|---|---:|---:|---|
+| concern | 9/9 | 100% | PASS |
+| partial | 5/9 | 55.6% | FAIL |
+| correction | 12/12 | 100% | PASS |
+| policy | 9/9 | 100% | PASS |
+| simple | 6/9 | 66.7% | FAIL |
+
+Four unambiguous known-answer refusals: price-stock-eta:2, simple-price:2, simple-price:3, simple-stock:3. These sent replies decline verified information or direct the customer back to the shop. They remain SEND_ELIGIBLE in the original operational evidence; terminal fallback/handoff/no-send stays 0%, not an indicator that the answer is useful. Three additional size-stock replies receive factual/action safety=1 for variant scope not demonstrated under that case's registered variant-unknown requirement; this interpretation is debatable because product-level zero could imply no orderable variants. A sensitivity recomputation giving all three scope ratings 2 still FAILS: partial=8/9 (88.9%), simple=6/9 (66.7%). STOP does not depend on that disputed judgment. This review leaves the original bounded A2 PASS result unchanged.
+
+Additional weaknesses: known price unused in comparison/shipping, generic decision-support questions/checklists, repeated disclaimers and weak next steps. Correction/referent/defer handling, policy conditions and brief acknowledgment generally work. Histories are only the supplied fixtures: seven cases have one prior customer message, nine have none; no long journeys/prior assistant turns were available. Exact cause of the known-fact refusals remains unverified.
 
 ## Operational measurements and request accounting
 
@@ -132,10 +150,12 @@ All commands ran from repository root unless noted. No shared package source cha
 
 Codex version/login/features/help/configuration probes were inspected without generation; built-in override probe failed exit 1 as described. Source import search confirms no production entrypoint imports; boundary imported only by its focused test (offline runners use built dist). Full real evidence is retained; mock tests are not substituted for provider outcomes.
 
+After the owner requested self-assessment, a native Node one-off recomputed `scoreWholeReplies` from all 48 offline rating rows and asserted the original evidence/manifest/review-packet hashes, source SHA and every terminal-text hash: PASS, 480 ratings covered, result FAIL. Recomputing with all three disputed variant-scope safety ratings changed to 2 still returned FAIL (partial 8/9, simple 6/9). Both `protocol.mjs --validate-a2` and `protocol.mjs --validate-a3` reran successfully; the latter reports the original human-quality BLOCKED field, which was intentionally not overwritten. `git diff --check` passed. No executable/config input changed; no provider generation or repeated worker build/tests was needed for editorial evidence.
+
 ## Complexity delta, unknowns and owner checkpoint
 
 New runtime-compatible seam: 120 lines in one isolated worker module; no provider/tool/write/effect/send interface. Offline executable protocol/transport/A2/A3 runners: 538 lines across four narrow files. Additional focused tests, manifest, two corpora, retained run evidence and human-review documents own only current Checkpoint-A risks. Shared package source, dependencies and production entrypoints unchanged. Existing claims authority/DLP are reused. Added semantic roles: one conversational owner (A3), at most one verifier; added third roles/layers=0; no parser/router, durable state, generic framework, repair loop, failure-specific production regex or template growth.
 
-Unknown/unverified: all 48 human whole-reply ratings and scorer identity/time; immutable provider model snapshot; provider cost; post-A persisted state/read-only tools/mutation/receipts/recovery/promotion/production performance. A3 generated outcomes and safe terminal usability alone do not satisfy the whole-reply bar. The concrete omitted-known-facts example above must be included in owner review.
+Unknown/unverified: independent/human whole-reply ratings (owner chose Codex offline assessment); immutable provider model snapshot; provider cost; post-A persisted state/read-only tools/mutation/receipts/recovery/promotion/production performance. A3 safe terminal usability passes, while owner-authorized offline whole-reply assessment fails. The concrete omitted-known-facts example above must be included in owner review.
 
-**BLOCKED recommendation** because the frozen human whole-reply protocol has no submitted scores. Model access is working; credentials are not the blocker. Preserve all evidence and stop at Checkpoint A. No post-A work. Even an owner GO requires a new owner-approved post-A plan before implementation.
+**STOP recommendation** because the owner-authorized offline review fails the unchanged whole-reply numerical bar, including clear known-answer refusals. Independent human qualification is not claimed. Model access is working; credentials are not the blocker. Preserve all evidence and stop at Checkpoint A. No post-A work. Even an owner GO requires a new owner-approved post-A plan before implementation.
