@@ -286,9 +286,9 @@ Proceed only with explicit owner approval after reviewing Task 3 evidence.
 - protected egress did not require broad semantic parsing/template proliferation;
 - the candidate still has one conversational semantic owner.
 
-If evidence is mixed or neutral, prefer STOP/remove experiment over preserving neutral complexity.
+If the **development feasibility evidence itself** is mixed or weak, prefer STOP/remove experiment over preserving neutral complexity. Checkpoint A does **not** require or evaluate a preregistered quality-improvement claim over C3; that belongs only to the later replacement gate.
 
-A GO at Checkpoint A means only: **protected egress + conversational ownership are feasible enough to justify implementing the real tool/state/effect path.** It is not a promotion decision and does not prove stateful correctness.
+A GO at Checkpoint A means only: **protected egress + conversational ownership are feasible enough to justify implementing the real tool/state/effect path.** It is not a promotion/replacement decision and does not prove stateful correctness.
 
 ---
 
@@ -362,7 +362,7 @@ A GO at Checkpoint A means only: **protected egress + conversational ownership a
 
 **Description:** Before any run whose result may be used for promotion, freeze the evaluation protocol required by spec §13.4 and seal a holdout corpus that implementation work has not inspected or tuned against.
 
-The protocol is **goal-first, baseline-second**: it first defines whether the complete candidate independently meets the target product/safety contract, then separately defines how C3 comparison will be reported for regression/migration analysis.
+The protocol is **goal-first, baseline-second**: it first defines whether the complete candidate independently meets the target product/safety contract, then separately defines whether the candidate has earned the right to replace C3.
 
 This task produces **no promotion score**. Its output is the immutable protocol/holdout identity used by Task 8.
 
@@ -374,7 +374,9 @@ This task produces **no promotion score**. Its output is the immutable protocol/
 - [ ] Preregister **stateful-journey promotion mode**: both paths start from the same initial state/business world/customer-simulation policy, then each path must consume the history/state/effects it actually produced.
 - [ ] Freeze history/truncation policy, rubric and numeric **absolute product-quality pass thresholds** for each mode, plus blind/randomized A/B ordering, tie/judge-disagreement handling, repeated-generation/variance policy, retry policy and all-attempt accounting.
 - [ ] Define mode-specific absolute pass accounting: quality/safety/completeness are evaluated separately for paired single-turn and stateful journeys; one mode cannot compensate for failure in the other.
-- [ ] Freeze C3 comparative-delta reporting rules separately; the comparative result is diagnostic/migration evidence, not the candidate correctness threshold.
+- [ ] Freeze **comparative replacement criteria** for paired single-turn and stateful journeys: the preregistered rule for what counts as clear quality improvement over C3 in each mode, plus any non-compensable quality dimensions.
+- [ ] Freeze hard comparative non-regression rules for safety/state/effect behavior.
+- [ ] Freeze the structural evidence required to pass the "do not build C3 again" gate; replacement requires evidence that semantic responsibilities were actually collapsed/removed, not renamed.
 - [ ] Build the sealed holdout from target product capabilities and required customer outcomes, not from a list of known C3 failures.
 - [ ] Freeze provider/model/request identity requirements plus corpus/rubric provenance.
 - [ ] Thresholds/rubric/accounting rules cannot change after Task 8 results are observed.
@@ -413,7 +415,7 @@ Only the intended orchestration may differ.
 
 - [ ] Run paired single-turn cases on the **complete candidate**, not the earlier T1–T3 egress-only shape.
 - [ ] Report the candidate's **absolute** quality, hard safety, explicit-need completeness and registered product-quality gate result for paired single-turn.
-- [ ] Report the matched C3 delta separately for regression/migration analysis; it does not determine candidate correctness.
+- [ ] Report the matched C3 delta separately and evaluate the preregistered **paired-turn replacement criterion**; it does not determine candidate correctness, but it is required for replacement readiness.
 - [ ] Retain exact paired final customer-visible replies plus the common frozen input/pre-state/business truth for owner review.
 - [ ] No candidate-only richer context/business data is injected into paired cases.
 
@@ -425,7 +427,7 @@ Only the intended orchestration may differ.
 - [ ] Correction/ref/state cases prove the real trace `customer correction -> accepted effective state -> bounded trusted ref/tool input -> dependent tool result -> persisted state/final reply`; no fixture-injected “correct state” substitutes for the transition.
 - [ ] Each path consumes its own resulting history/state/effects after the common initial conditions.
 - [ ] Report the candidate's **absolute** quality, hard safety, explicit-need completeness and registered product-quality gate result for stateful journeys.
-- [ ] Report the matched C3 journey delta separately for regression/migration analysis; it does not determine candidate correctness.
+- [ ] Report the matched C3 journey delta separately and evaluate the preregistered **stateful-journey replacement criterion**; it does not determine candidate correctness, but it is required for replacement readiness.
 
 #### Shared promotion requirements
 
@@ -434,7 +436,11 @@ Only the intended orchestration may differ.
 - [ ] Development, paired-single-turn holdout and stateful-journey holdout results are reported as distinct evidence sets.
 - [ ] A strong result in one promotion mode cannot offset a failed absolute gate in the other mode.
 - [ ] A better-than-C3 result cannot rescue an absolute product/safety failure.
-- [ ] A neutral or locally worse C3 wording delta is reported and reviewed, but does not automatically fail a candidate that passes the absolute contract.
+- [ ] Produce **two explicit verdicts**:
+  - `Candidate meets target` — based only on absolute product/safety gates;
+  - `Candidate qualifies to replace C3` — evaluated only if the first verdict passes, then additionally requires clear preregistered quality improvement in both comparison modes, no safety/state/effect regression, and structural simplification.
+- [ ] A neutral matched comparison may still yield `Candidate meets target = PASS`, but must yield `Candidate qualifies to replace C3 = FAIL`.
+- [ ] Local comparative regressions must be reported; any hard/non-compensable regression defined in T7 fails replacement readiness.
 
 **Verification:**
 
@@ -442,8 +448,9 @@ Only the intended orchestration may differ.
 - [ ] Matched model/config/judge rules from the spec are enforced by manifest validation.
 - [ ] Whole final replies are retained for both modes; resulting state/tool/effect traces are additionally retained for journeys.
 - [ ] All accepts, rejects, timeouts, fallbacks and handoffs remain in the registered denominator for their mode.
-- [ ] Produce separate paired-single-turn and stateful-journey **absolute target** summaries, separate matched-C3 delta summaries, and one combined readiness summary that cannot hide a failed absolute mode.
-- [ ] No claim about comparative architecture delta from an unmatched/package-level run.
+- [ ] Produce separate paired-single-turn and stateful-journey **absolute target** summaries, separate matched-C3 replacement summaries, and the two explicit verdicts above.
+- [ ] The combined readiness summary must not collapse `target met` and `replacement-ready` into one boolean.
+- [ ] No claim about comparative architecture delta or replacement readiness from an unmatched/package-level run.
 
 **Dependencies:** Task 7.
 
@@ -504,18 +511,35 @@ pnpm --filter @lana/worker test
 pnpm check
 ~~~
 
-Checkpoint B is **goal-first, baseline-second**.
+Checkpoint B is **goal-first, baseline-second** and produces two separate decisions.
 
-First, the complete candidate must pass both registered promotion modes independently against the target contract:
+### Gate A — Candidate meets target
+
+The complete candidate must pass both registered modes independently against the target contract:
 
 - paired single-turn passes its absolute hard safety, completeness and product-quality thresholds;
 - stateful journeys pass their absolute hard safety, state/effect, completeness and product-quality thresholds.
 
 Do not average or aggregate a failed mode into a pass.
 
-Second, review matched C3 deltas to understand regressions, gains and migration trade-offs. C3 comparison is required evidence, but it is **not the definition of correctness** and cannot rescue an absolute failure.
+If Gate A fails: **candidate rejected**. C3 comparison cannot rescue it.
 
-Then review the two sealed-holdout evidence sets plus the structural audit against Definition of Done and the amended spec promotion gates. Development-corpus results are supporting evidence only. Production opt-in/migration remains a separate owner-approved plan.
+### Gate B — Candidate qualifies to replace C3
+
+Evaluate Gate B only after Gate A passes.
+
+Replacement readiness additionally requires:
+
+- paired single-turn matched comparison passes its preregistered clear quality-improvement criterion over C3;
+- stateful-journey matched comparison passes its preregistered clear quality-improvement criterion over C3;
+- no matched safety/state/effect regression;
+- structural audit passes the "do not build C3 again" gate and shows meaningful semantic responsibilities were removed/collapsed.
+
+If Gate A passes but Gate B fails: record **target-met but not replacement-ready**. Do not proceed to C3 migration; after evidence is preserved, close/remove the experimental path rather than maintain a neutral second architecture unless a new owner-approved spec changes the objective.
+
+Only when **Gate A + Gate B + T9 verification** pass is the candidate **replacement-ready**. Even then, production opt-in/migration remains a separate owner-approved plan.
+
+Then review the two sealed-holdout evidence sets plus the structural audit against Definition of Done and the amended spec gates. Development-corpus results are supporting evidence only.
 
 ## 6. Risks and mitigations
 
@@ -524,7 +548,8 @@ Then review the two sealed-holdout evidence sets plus the structural audit again
 | First experiment passes only trivial fact assembly | Semantic corpus is mandatory; simple price/stock are controls only |
 | Protected free prose weakens policy/claim meaning | Adversarial whole-reply tests + feasibility STOP rule |
 | Judge rewards fluent but incomplete reply | Score whole final reply + explicit required/forbidden outcomes + owner paired review |
-| Candidate gets stronger model/config than C3 reference | Matched manifest is required for comparative claims; absolute candidate gates still use the preregistered candidate configuration |
+| Candidate gets stronger model/config than C3 reference | Matched manifest is required for replacement claims; absolute candidate gates still use the preregistered candidate configuration |
+| Candidate meets target but neutral C3 comparison is mistaken for migration approval | Emit separate `meets target` and `qualifies to replace C3` verdicts; neutral comparison fails the latter |
 | State correction races dependent tool | Effective-state-before-dependent-tool invariant |
 | Tool layer becomes semantic pipeline | Domain tools return truth/action results only; structural audit blocks intent classifiers |
 | New schemas accumulate | Reuse existing claims/state/bindings; every new semantic boundary must retire/replace responsibility |
@@ -569,9 +594,10 @@ This plan is ready for implementation only when:
 - first feasibility experiment has owner-reviewable whole-reply cases from all four semantic families and explicitly does **not** overclaim persisted-state/tool-ordering evidence;
 - Checkpoint A is explicitly a development feasibility stop/go gate;
 - promotion protocol + sealed holdout are preregistered before Task 8 for **both paired single-turn and stateful-journey modes**;
-- absolute product/safety thresholds, not C3-relative improvement, define candidate pass/fail;
-- both promotion modes must pass their absolute gates independently at Checkpoint B;
-- C3 comparison is retained as separate regression/migration evidence;
+- absolute product/safety thresholds define whether the candidate **meets target**;
+- both promotion modes must pass their absolute gates independently at Checkpoint B Gate A;
+- preregistered C3-relative quality improvement in both modes, hard safety/state/effect non-regression, and structural simplification define whether the candidate **qualifies to replace C3** at Gate B;
+- neutral matched quality may pass Gate A but must fail Gate B;
 - development and promotion evidence cannot be conflated;
 - no task is larger than one focused session / ~5 files without further split;
 - production opt-in/migration remains outside this plan until candidate evidence exists.
