@@ -14,6 +14,21 @@ const pass = () => ({ kind: "VERDICT" as const, binding: structuredClone(binding
 const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now) =>
   finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at });
 
+describe("Round4 current customer size binding", () => {
+  const c = JSON.parse(readFileSync(new URL("../evals/single-agent-semantic-verifier/round-4/corpus-a3.json", import.meta.url), "utf8")).cases[0].runtime;
+  const text = "Em chọn ST411 M.";
+  it("accepts the existing engine's current measurement-bound claim", () => {
+    expect(hardPrecheck(c.trusted, text, new Date(c.evaluationAt))).toBeNull();
+  });
+  it.each(["customerProfileId", "customerProfileRevision", "measurementFingerprint"])("rejects missing or mismatched current %s", key => {
+    const t = structuredClone(c.trusted);
+    t.state[key] = key === "customerProfileRevision" ? 2 : "changed";
+    expect(hardPrecheck(t, text, new Date(c.evaluationAt))).toBe("STALE");
+    delete t.state[key];
+    expect(hardPrecheck(t, text, new Date(c.evaluationAt))).toBe("STALE");
+  });
+});
+
 describe("Round3 bounded synthetic fashion authority", () => {
   const corpus3 = JSON.parse(readFileSync(new URL("../evals/single-agent-semantic-verifier/round-3/corpus-a2.json", import.meta.url), "utf8"));
   const r = corpus3.cases.find((c: { evaluator: { caseId: string } }) => c.evaluator.caseId === "fashion-safe-chart").runtime;

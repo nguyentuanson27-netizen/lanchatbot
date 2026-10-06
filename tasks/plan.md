@@ -767,9 +767,9 @@ Round 3 observed outcome: A2 PASS, 138/138 attempts (108 unsafe / 30 safe), zero
 
 [Parent spec §1.1](../docs/specs/c3-single-agent-commerce-architecture-20261004.md#11-owner-approved-fashion-sales-product-direction-2026-10-06) now explicitly requires selling advice grounded in sufficiently documented shop products. Prepare the next proposal by identifying and supplying missing verified product measurements, size guidance and relevant material/stretch information before normal selling scenarios. Advice should help choose the shop's products, resolve objections and move towards purchase using natural conversation. Missing catalog data is work to fix; repeated unknowns/deferrals or asking customers for the shop's own product information are inadequate selling outcomes. Keep missing-data safety cases and all historical evidence unchanged. This documentation clarification does not authorize another provider run or post-A implementation; Checkpoint A remains STOP.
 
-## Proposed Round 4 — complete product data and natural selling advice (2026-10-06)
+## Authorized Round 4 — complete product data and natural selling advice (2026-10-06)
 
-**Status: proposal, not authorized execution.** Owner requested one proposed new round. Round 3 remains STOP; all its inputs, provider evidence and scores stay unchanged. This proposal changes the development population before any new result; it is not a re-score or a claim that prior failures have passed. Start source for this proposal is `ef0c81c2bcf33c0d4da7c41acec6b37607366191`.
+**Status: execution authorized by owner “thực hiện đi”.** Round 3 remains STOP; all its inputs, provider evidence and scores stay unchanged. This round changes the development population before any new result; it is not a re-score or a claim that prior failures have passed. Approved plan/spec source: `425463d23b92f765f82fb1c5d60cef90c4743930`. Main refreshed at execution; implementationBaseSha: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Reuse isolated branch and PR390. Authorization is for this round only.
 
 **Goal:** With sufficiently documented shop products, the sole owner helps the customer choose a suitable shop item, resolve the buying objection and move towards a color/size choice or purchase intent, using everyday Vietnamese. Seller knowledge must be supplied before normal selling cases; the customer supplies their needs and measurements, not the shop's missing catalog.
 
@@ -810,7 +810,7 @@ Score every actual terminal outcome on the ten existing dimensions, including fa
 
 Report all source/config/hash identities, denominator/request/firewall proof, whole-reply results, latency p50/p95, timeout/error and token/cost evidence where exposed, terminal/fallback rates, actual commands, complexity delta and unknowns in `round-4/CHECKPOINT_A.md`. Recommendation GO/STOP/BLOCKED; then stop. One owner + at most one verifier, code authority, no tools/state writes/effects/send/retrieval/rewrite by verifier. No post-A implementation, mutation, promotion, migration, merge/deploy/live send.
 
-### Commands planned, not executed
+### Required commands (execution evidence recorded in round-4/READINESS.md)
 
 ```powershell
 $env:C3_CHECKPOINT_A_ROUND='4'
@@ -835,4 +835,4 @@ node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs
 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
 ```
 
-These commands describe the proposed implementation after authorization. Round 4 files, protocol freeze, readiness and provider runs do not yet exist. No provider command was executed while preparing this proposal.
+At T1, Round 4 inputs are frozen before any provider generation. Exact outcomes and commands are recorded incrementally in round-4/READINESS.md and CHECKPOINT_A.md. Run-source SHA is captured after each clean executable/config commit, outside frozen inputs.
