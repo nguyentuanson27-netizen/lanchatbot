@@ -323,3 +323,8 @@ For each future implementation task:
 - [ ] Seal clean A2 source, preflight/run/validate198 registered attempts; retain all failures; STOP without A3 on FAIL/BLOCKED.
 - [ ] Only after A2PASS, seal clean A3 source and run60 actual terminal outcomes; read every history/reply and assign600 phrase-grounded scores.
 - [ ] Deliver CHECKPOINT_A, histories/review, actual commands/provenance/operational/complexity evidence and PR390 update; stop at owner GO/STOP/BLOCKED.
+
+### Round5 repetition amendment
+
+- [x] Owner changes future cases to1attempt. Stop original run after92results/83requests; preserve198original registrations,106unexecuted and2transport errors unchanged. Freeze35remaining A2 cases once plus20A3 once; carry all92results without vote/rerun into127actual A2 outcomes.
+- [ ] Observe amended selector/registration RED→GREEN, affected checks; commit clean source and run remaining35A2, retain old/new source provenance and cancellations. A2PASS required before20A3 outcomes.
