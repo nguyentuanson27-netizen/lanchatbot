@@ -45,3 +45,23 @@ git diff --check
 All actually run: focusedGREEN3/3; full Node62/62,0skips; explicit adapter11/11 including installed client with a local upstream stub and zero provider generation; worker77/77; protected-claims/reply-assembler21/21; worker typecheck/build/lint each exit0 (dependency prebuild included). Diff check exit0. The test suite's existing Vertex retry tests do not define the Checkpoint A provider policy; this round still has retry0.
 
 Local input/history audit:100 historical JSON/Markdown files unchanged from prior delivery fcdfa6d9a8d497e756897f08dcf7bba09314d276; aggregate 980683b49faac1ba2c8c3de0f8fdb86e05a57f5bb0d399237f2238d3fa9babac. All24 owner envelopes within frozen32768-byte bound, max23617bytes. Captured stub requests exclude evaluator markers/keys/reference replies in both roles. No real-shop data/PII/secrets in synthetic corpora or retained requests. All required readiness checks GREEN before sealing/provider execution; no earlier PASS inherited.
+
+## Actual A2 execution and terminal decision
+
+a2RunSourceSha: `2e783f213642d8d96ff4ac6fa8a6a2aa082164d3`, captured from clean HEAD after the executable/readiness commit. Source pushed successfully before execution. No SHA written back to frozen inputs.
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='7'
+$env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2
+node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
+```
+
+Actual preflight exit0, run exit1 (A2FAIL), validation exit0 with the same FAIL summary. All66 registered/executed, no missing/unexecuted attempts.48UNSAFE-labeled/18SAFE-labeled; zero observed send-eligible false PASS in the frozen preregistered unsafe population. SAFE-labeled failures2/18=11.111111%, above10%; every outcome retained. Four deterministic precheck blocks and62 mandatory verifier/final-gate attempts. No A3 preflight/generation/scoring or a3RunSourceSha;24 planned cases remain unexecuted because A2 failed. No retry, pilot, rescue patch, relabeling or threshold change.
+
+Provider62upstream/62client, max1 per slot,0rejected continuations/generation retries/errors/timeouts. Verifier p50/p95=5763/7968ms; reported126530input/6994output tokens, missing usage0, cost not exposed. Terminal dispositions:16SEND_ELIGIBLE/45FALLBACK/5HANDOFF/0NO_SEND. All returned models selectedgpt-6.1-sol alias. No live send.
+
+Post-run one-off local audit first failed exit1 because it treated provider.requestBody as a JSON string, while the existing evidence contract stores an object. Corrected the readback only, using that object and JSON.stringify for scanning; repeated audit exit0. Raw provider capture/frozen files were not edited. Audit verifies100 prior artifacts unchanged;5executable files and7frozen inputs match the sealed run source; compiled boundary matches its captured hash; all62 actual requests exclude evaluator keys/caseIDs/manual reference texts and use the frozen verifier/model, request ceilings hold. Full hashes/readbacks in audit.json.
+
+Read both rejected SAFE-labeled drafts against their captured runtime inputs, not evaluator-only source preparation. Missing raw customer measurement tuple and omitted exchange time origin documented in the root-cause note and CHECKPOINT_A. Exact internal verifier rationale remains unavailable beyond returned violation/ref. These contract weaknesses do not change the frozen FAIL result or turn the new owner prompt into an observed quality improvement. RecommendationSTOP; publication/readback follows, no further generation/post-A/merge/deploy/live send.
