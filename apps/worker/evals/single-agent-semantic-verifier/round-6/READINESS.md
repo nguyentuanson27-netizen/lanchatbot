@@ -38,3 +38,19 @@ Required remaining readiness and provider commands will be appended with observe
 Primary-agent source review: original provider adapter and deterministic boundary unchanged; every hard-precheck survivor still enters exactly one verifier generation and final gate, including nonprotected controls. Frozen synthetic data/captured bodies contain no credentials or live PII. No API implementation changed in this round; existing adapter and inspected login route reused. No additional semantic selection/repair/template machinery.
 
 `pnpm --filter @lana/worker build`: actual exit0, including dependency prebuild. Deterministic readiness GREEN; all required local checks observed. Commit source/config/frozen inputs, require clean worktree, capture runtime HEAD and execute preflight before A2. No provider result exists at this readiness checkpoint.
+
+## T3 observed A2 execution
+
+Runtime a2RunSourceSha `069c2f52bb988fbb037494246a91deff80c7f4f2`, captured from committed clean HEAD and never written into frozen manifest. T1 input savepoint0609739c. Executable/config remained sealed throughout all66attempts; original boundary executable hash retained in raw evidence.
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='6'
+$env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2
+node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
+```
+
+Each actual exit0. A2PASS66/66 (48unsafe/18safe), zero observed send-eligible false PASS on this frozen population/configuration; safe failures1/18=5.555556% (r4-safe-sale:1 retained), no missing attempts.62provider requests/62client requests, maximum1per attempt,0rejected continuation/0errors/0timeouts.4deterministic precheck rejections; every62survivor entered verifier/final gate. p50/p95verifier6,665/9,945ms; provider reported126,544input/7,673output tokens,0missing usage, cost not exposed. Candidate conversation prompt was not generated in A2.
+
+Publication attempts during A2: SSH443push failed twice with connection timeout; noninteractive HTTPSpush failed to connect github.com:443. These are source-publication network failures, not provider generation retries. Commit/evidence source identity remains local and exact; retry publication after the next evidence savepoint. No credential displayed or new login route introduced.
