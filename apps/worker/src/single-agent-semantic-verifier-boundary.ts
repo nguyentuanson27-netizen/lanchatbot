@@ -4,12 +4,30 @@ import { hasResidualPii } from "@lana/dataset-review";
 import { authorizeRealtimeProtectedClaimProposal } from "./realtime-protected-claim-boundary.js";
 
 // Isolated Checkpoint-A mechanics. No provider, tool, mutation or send interface.
+interface ProductProfile {
+  ref: string; subjectRef: string; authority: "EVALUATION_FIXTURE"; sourceVersion: string;
+  observedAt: string; expiresAt: string; contentHash: string;
+  details: { silhouette: string; material: string; colors: string[]; sizeChart: string[]; care: string; limitations: string };
+}
+const boundedText = (v: unknown, max: number): v is string => typeof v === "string" && v.length > 0 && v.length <= max;
+const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+function validProfile(v: unknown): v is ProductProfile {
+  if (!record(v) || Object.keys(v).sort().join(",") !== "authority,contentHash,details,expiresAt,observedAt,ref,sourceVersion,subjectRef" ||
+    v.authority !== "EVALUATION_FIXTURE" || ![v.ref, v.subjectRef, v.sourceVersion].every(s => boundedText(s, 128)) ||
+    !boundedText(v.observedAt, 64) || !boundedText(v.expiresAt, 64) || !boundedText(v.contentHash, 64) || !/^[a-f0-9]{64}$/u.test(v.contentHash)) return false;
+  const d = v.details;
+  return record(d) && Object.keys(d).sort().join(",") === "care,colors,limitations,material,silhouette,sizeChart" &&
+    [d.silhouette, d.material, d.care, d.limitations].every(s => boundedText(s, 1024)) &&
+    Array.isArray(d.colors) && d.colors.length <= 8 && d.colors.every(s => boundedText(s, 64)) &&
+    Array.isArray(d.sizeChart) && d.sizeChart.length <= 4 && d.sizeChart.every(s => boundedText(s, 1024));
+}
 export interface TrustedContext {
   boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string }[];
   protectedClaims: unknown[];
   policyLiterals: { ref: string; text: string; sourceVersion: string; observedAt: string; expiresAt: string }[];
   effectReceipts: { ref: string; operationId: string; subjectRef: string; status: string; effect: string;
     stateRevision: number; recipient: string; observedAt: string; expiresAt: string }[];
+  productProfiles?: ProductProfile[];
   state: { [key: string]: unknown; conversationOwner: string; revision: number; currentProductId: string;
     factSnapshotVersion: string; bindingVersion: string; recipient: string; permission: boolean; privacyAllowed: boolean };
 }
@@ -71,8 +89,15 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   if (trusted.effectReceipts.some(receipt => !fresh(receipt, now) || receipt.status !== "SUCCESS" ||
     receipt.recipient !== s.recipient || receipt.stateRevision !== s.revision ||
     !trusted.boundSubjects.some(subject => subject.ref === receipt.subjectRef))) return "STALE";
+  if (trusted.productProfiles !== undefined) {
+    if (!Array.isArray(trusted.productProfiles) || trusted.productProfiles.length > 4 || trusted.productProfiles.some(profile =>
+      !validProfile(profile) || Buffer.byteLength(JSON.stringify(profile)) > 2048)) return "MALFORMED";
+    if (trusted.productProfiles.some(profile => !fresh(profile, now) || profile.sourceVersion !== s.factSnapshotVersion ||
+      !trusted.boundSubjects.some(subject => subject.kind === "PRODUCT" && subject.ref === profile.subjectRef) ||
+      profile.contentHash !== hash(JSON.stringify(profile.details)))) return "STALE";
+  }
   const refs = [...trusted.boundSubjects.map(v => v.ref), ...claims.map(v => v.claimId),
-    ...trusted.policyLiterals.map(v => v.ref), ...trusted.effectReceipts.map(v => v.ref)];
+    ...trusted.policyLiterals.map(v => v.ref), ...trusted.effectReceipts.map(v => v.ref), ...(trusted.productProfiles ?? []).map(v => v.ref)];
   if (new Set(refs).size !== refs.length) return "MALFORMED";
   return null;
 }
@@ -85,7 +110,8 @@ function parseVerdict(result: unknown, trusted: TrustedContext): "PASS" | "FAIL"
     if (!v || Array.isArray(v) || Object.keys(v).sort().join(",") !== "verdict,violations" ||
       typeof v.verdict !== "string" || !["PASS", "FAIL", "UNCERTAIN"].includes(v.verdict) || !Array.isArray(v.violations) || v.violations.length > 16) return null;
     const claims = trusted.protectedClaims.flatMap(c => { const p = ProtectedClaimV1Schema.safeParse(c); return p.success ? [p.data.claimId] : []; });
-    const refs = new Set([...claims, ...trusted.boundSubjects.map(v => v.ref), ...trusted.policyLiterals.map(v => v.ref), ...trusted.effectReceipts.map(v => v.ref)]);
+    const refs = new Set([...claims, ...trusted.boundSubjects.map(v => v.ref), ...trusted.policyLiterals.map(v => v.ref),
+      ...trusted.effectReceipts.map(v => v.ref), ...(trusted.productProfiles ?? []).map(v => v.ref)]);
     for (const violation of v.violations) {
       if (!violation || typeof violation !== "object" || Array.isArray(violation) ||
         Object.keys(violation).sort().join(",") !== "kind,protectedRef" || !kinds.has(violation.kind) ||

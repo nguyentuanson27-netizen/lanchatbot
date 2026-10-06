@@ -11,10 +11,10 @@ const families = ['wrong-subject', 'negation-inversion', 'material-condition-los
 const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 'negation-inversion', 'dropped-material-policy-condition', 'stronger-implied-policy-benefit', 'stale-evidence', 'effect-success-without-receipt'];
 // Fixed experiment folders only; keep historical inputs/evidence intact.
 const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
-if (!['1','2'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
-const inputRoot = new URL(round === '2' ? './round-2/' : './', import.meta.url);
+if (!['1','2','3'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
+const inputRoot = new URL(round === '1' ? './' : './round-' + round + '/', import.meta.url);
 export const inputUrl = name => new URL(name, inputRoot);
-export const evidencePath = name => 'apps/worker/evals/single-agent-semantic-verifier/' + (round === '2' ? 'round-2/' : '') + name;
+export const evidencePath = name => 'apps/worker/evals/single-agent-semantic-verifier/' + (round === '1' ? '' : 'round-' + round + '/') + name;
 const read = name => readFileSync(inputUrl(name), 'utf8');
 
 // This is a runtime projection, not a semantic interpretation of fixture language.
@@ -38,6 +38,14 @@ export function projectRuntime(manifest, fixture, role, requestId) {
     effectReceipts: r.trusted.effectReceipts.map(p => pick(p, ['ref', 'operationId', 'subjectRef', 'status', 'effect', 'stateRevision', 'recipient', 'observedAt', 'expiresAt'])),
     state: pick(r.trusted.state, manifest.stateAllowlist),
   };
+  if (Object.hasOwn(r.trusted, 'productProfiles')) {
+    requireThat(manifest.round === 3 && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
+    trusted.productProfiles = r.trusted.productProfiles.map(p => ({
+      ...pick(p, ['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash']),
+      details: pick(p.details, ['silhouette','material','colors','sizeChart','care','limitations']),
+    }));
+    requireThat(trusted.productProfiles.every(p => bytes(p) <= b.profileBytes), 'PROFILE_BOUND');
+  }
   const untrusted = {
     latestCustomerMessage: r.latestCustomerMessage,
     recentAcceptedDialogue: r.history.map(m => pick(m, ['role', 'text'])),
@@ -49,7 +57,7 @@ export function projectRuntime(manifest, fixture, role, requestId) {
   }
   const requestIdentity = { requestId, trustedSnapshotId: hash(JSON.stringify(trusted)),
     stateRevision: trusted.state.revision, factSnapshotVersion: trusted.state.factSnapshotVersion, recipient: trusted.state.recipient,
-    ...(manifest.round === 2 && role === 'conversation' ? {evaluationAt:r.evaluationAt} : {}),
+    ...(manifest.round >= 2 && role === 'conversation' ? {evaluationAt:r.evaluationAt} : {}),
     ...(role === 'verifier' ? { finalDraftHash: hash(r.finalDraft) } : {}) };
   const projection = { requestIdentity, trusted, untrusted };
   // UTF-8 bytes also provide a conservative upper bound on input token count.
@@ -126,6 +134,18 @@ export function validateProtocol(m, a2, a3) {
       'GENERATION_CONFIG');
   }
   requireThat(hash(JSON.stringify(a2)) === m.corpusHashes.a2 && hash(JSON.stringify(a3)) === m.corpusHashes.a3, 'CORPUS_HASH');
+  if (m.round === 3) {
+    requireThat(m.bounds.profileCount === 4 && m.bounds.profileBytes === 2048 &&
+      JSON.stringify(m.profileAllowlist) === JSON.stringify(['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash','details']) &&
+      JSON.stringify(m.profileDetailAllowlist) === JSON.stringify(['silhouette','material','colors','sizeChart','care','limitations']), 'PROFILE_PROTOCOL');
+    requireThat(hash(readFileSync(new URL('./round-3/fashion-profiles.json', import.meta.url), 'utf8')) === m.profileFileHash, 'PROFILE_HASH');
+    requireThat(a2.cases.length === 46 && a3.cases.length === 32 &&
+      hash(JSON.stringify({schemaVersion:1,cases:a2.cases.slice(0,34)})) === m.cohorts.originalA2Hash &&
+      hash(JSON.stringify({schemaVersion:1,cases:a3.cases.slice(0,20)})) === m.cohorts.originalA3Hash, 'ROUND3_POPULATION');
+    requireThat(m.scoring.consultationRequired === 2 && JSON.stringify(m.scoring.consultationDimensions) ===
+      JSON.stringify(['usefulness','decisionSupport','nextStep','naturalness']) &&
+      new Set(m.scoring.consultationCaseIds).size === 17 && m.scoring.consultationCaseIds.every(id => a3.cases.some(c => c.evaluator.caseId === id)), 'CONSULTATION_BAR');
+  }
   return summary;
 }
 
@@ -145,7 +165,7 @@ async function main() {
     if (process.argv.includes('--draft')) console.log(JSON.stringify({ status:'DRAFT_VALIDATED_NOT_FROZEN', ...validateDraft(m,a2,a3) }));
     else {
       validateProtocol(m,a2,a3);
-      if (m.round === 2) console.log(JSON.stringify({round:2,a2Cases:a2.cases.length,a3Cases:a3.cases.length}));
+      if (m.round >= 2) console.log(JSON.stringify({round:m.round,a2Cases:a2.cases.length,a3Cases:a3.cases.length}));
       if (process.argv.some(v => v.startsWith('--preflight-'))) {
         const phase = process.argv.includes('--preflight-a3') ? 'a3' : 'a2';
         const head = execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();

@@ -100,6 +100,6 @@ test('fallback text/hash, terminal map and corpus tampering invalidate protocol 
   assert.throws(() => validateDraft(n, a2, a3), /TERMINAL/);
 });
 test('CLI validates retained A2 evidence without a circular top-level await',()=>{
-  const output=execFileSync(process.execPath,[fileURLToPath(new URL('./protocol.mjs',import.meta.url)),'--validate-a2'],{encoding:'utf8'});
+  const output=execFileSync(process.execPath,[fileURLToPath(new URL('./protocol.mjs',import.meta.url)),'--validate-a2'],{encoding:'utf8',env:{...process.env,C3_CHECKPOINT_A_ROUND:'1'}});
   assert.ok(output.includes('"status":"PASS"'));
 });

@@ -39,9 +39,12 @@ export function scoreWholeReplies(manifest,corpus,attempts,scores) {
     if(!attempt.terminal||!values||Object.keys(values).sort().join(',')!==[...manifest.scoring.dimensions].sort().join(',')||
       Object.values(values).some(v=>!manifest.scoring.scale.includes(v)))return {status:'BLOCKED',reason:'INVALID_OR_MISSING_HUMAN_SCORE',denominator};
     const mean=Object.values(values).reduce((a,b)=>a+b,0)/manifest.scoring.dimensions.length;
+    const consultation=manifest.scoring.consultationCaseIds?.includes(attempt.caseId)??false;
     const pass=Object.values(values).every(v=>v>=manifest.scoring.minimumPerDimension)&&mean>=manifest.scoring.minimumCaseMean&&
-      values.factualActionSafety===manifest.scoring.factualActionSafetyRequired;
+      values.factualActionSafety===manifest.scoring.factualActionSafetyRequired&&
+      (!consultation||manifest.scoring.consultationDimensions.every(d=>values[d]===manifest.scoring.consultationRequired));
     rows.push({attemptId:attempt.attemptId,family:corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId).evaluator.family,mean,pass,
+      ...(manifest.round===3?{consultation,cohort:manifest.cohorts.originalA3CaseIds.includes(attempt.caseId)?'original':'new'}:{}),
       factualActionSafety:values.factualActionSafety});
   }
   const families=Object.fromEntries([...new Set(rows.map(r=>r.family))].map(family=>{
@@ -51,7 +54,11 @@ export function scoreWholeReplies(manifest,corpus,attempts,scores) {
   const terminalFailureRate=attempts.filter(v=>v.terminal.disposition!=='SEND_ELIGIBLE').length/denominator;
   const pass=rows.every(r=>r.factualActionSafety===manifest.scoring.factualActionSafetyRequired)&&
     Object.values(families).every(f=>f.passRate>=manifest.scoring.minimumFamilyPassRate)&&terminalFailureRate<=manifest.usability.maximumTerminalFailureRate;
-  return {status:pass?'PASS':'FAIL',denominator,scored:rows.length,families,terminalFailureRate,rows};
+  const cohorts=manifest.round===3?Object.fromEntries(['original','new'].map(cohort=>{
+    const group=rows.filter(r=>r.cohort===cohort),passed=group.filter(r=>r.pass).length;
+    return [cohort,{denominator:group.length,passed,passRate:passed/group.length}];
+  })):null;
+  return {status:pass?'PASS':'FAIL',denominator,scored:rows.length,families,terminalFailureRate,...(cohorts?{cohorts}:{}),rows};
 }
 export function a3Operational(attempts) {
   const verifiers=attempts.map(v=>({...v,provider:v.verification?.provider??null}));
