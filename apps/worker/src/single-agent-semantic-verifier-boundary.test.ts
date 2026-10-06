@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TrustedContext,
   type PostEffectRecoveryCompatibility } from "./single-agent-semantic-verifier-boundary.js";
@@ -12,6 +13,46 @@ const binding = makeBinding("opaque-request", draft, trusted);
 const pass = () => ({ kind: "VERDICT" as const, binding: structuredClone(binding), result: { verdict: "PASS", violations: [] } });
 const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now) =>
   finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at });
+
+describe("Round3 bounded synthetic fashion authority", () => {
+  const corpus3 = JSON.parse(readFileSync(new URL("../evals/single-agent-semantic-verifier/round-3/corpus-a2.json", import.meta.url), "utf8"));
+  const r = corpus3.cases.find((c: { evaluator: { caseId: string } }) => c.evaluator.caseId === "fashion-safe-chart").runtime;
+  const check = (current = structuredClone(r.trusted), at = new Date(r.evaluationAt)) => hardPrecheck(current, r.finalDraft, at);
+  it("accepts current source-bound profile data", () => expect(check()).toBeNull());
+  it.each(["subjectRef", "sourceVersion", "contentHash"])("rejects changed profile %s", key => {
+    const t = structuredClone(r.trusted);t.productProfiles[0][key] = key === "contentHash" ? "0".repeat(64) : "wrong";
+    expect(check(t)).toBe("STALE");
+  });
+  it("rejects expired profile while other facts are still fresh", () => {
+    const t = structuredClone(r.trusted);t.productProfiles[0].expiresAt = r.evaluationAt;
+    expect(check(t)).toBe("STALE");
+  });
+  it("rejects wrong authority/shape and unbounded data", () => {
+    const t = structuredClone(r.trusted);t.productProfiles[0].authority = "CUSTOMER";
+    expect(check(t)).toBe("MALFORMED");
+    const oversized = structuredClone(r.trusted);oversized.productProfiles[0].details.material = "x".repeat(2049);
+    expect(check(oversized)).toBe("MALFORMED");
+  });
+  it("profile expires after verifier PASS before final eligibility", () => {
+    const t = structuredClone(r.trusted);t.productProfiles[0].expiresAt = "2026-10-06T03:00:01.000Z";
+    const b = makeBinding("opaque", r.finalDraft, t);
+    expect(finalGate({ expected: b, response: { kind: "VERDICT", binding: b, result: { verdict: "PASS", violations: [] } }, current: t,
+      finalDraft: r.finalDraft, now: new Date("2026-10-06T03:00:01.000Z") }).disposition).toBe("HANDOFF");
+  });
+  it("changed current catalog content cannot reuse earlier PASS even with a new valid content hash", () => {
+    const t = structuredClone(r.trusted), b = makeBinding("opaque", r.finalDraft, t);
+    t.productProfiles[0].details.material = "Different material";
+    t.productProfiles[0].contentHash = createHash("sha256").update(JSON.stringify(t.productProfiles[0].details)).digest("hex");
+    expect(check(t)).toBeNull();
+    expect(finalGate({ expected: b, response: { kind: "VERDICT", binding: b, result: { verdict: "PASS", violations: [] } }, current: t,
+      finalDraft: r.finalDraft, now: new Date(r.evaluationAt) }).disposition).toBe("HANDOFF");
+  });
+  it("known profile refs can appear in semantic violations", () => {
+    const t = structuredClone(r.trusted), b = makeBinding("opaque", r.finalDraft, t);
+    expect(finalGate({ expected: b, response: { kind: "VERDICT", binding: b, result: { verdict: "FAIL", violations: [{ kind: "SUBJECT_MISMATCH", protectedRef: t.productProfiles[0].ref }] } },
+      current: t, finalDraft: r.finalDraft, now: new Date(r.evaluationAt) }).reason).toBe("FAIL");
+  });
+});
 
 describe("isolated deterministic verifier boundary", () => {
   it("valid PASS with unchanged exact snapshot and draft is send eligible", () => {

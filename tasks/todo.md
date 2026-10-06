@@ -290,3 +290,14 @@ For each future implementation task:
 - [x] Record fashion-sales consultation as the official product goal in parent spec §1.1, covering product choices, objections, naturalness, appropriate next steps and grounded fashion data.
 - [x] Record full-product goals: buying-journey continuity, objection handling, convenient purchase, after-sales support, useful staff handoff, reliable operation and actual outcome measurement. Link amendment/plan/todo to the canonical goal section.
 - [x] Preserve Checkpoint A STOP and frozen evidence/scoring. These product goals do not authorize a new provider run, runtime implementation or post-A work.
+
+
+## Authorized Round 3 — 2026-10-06
+
+- [x] Refresh main; preserve Round1/Round2 evidence, owner STOP and source identities.
+- [x] Freeze four synthetic fashion profiles, unchanged34A2/20A3 plus12A2/12A3, both models/config, stricter consultation applicability/anchors and terminal thresholds.
+- [ ] Observe RED then minimum GREEN on profile authority/binding, label firewall, Round3 selection and consultation bar.
+- [ ] Deterministic readiness: focused tests and worker typecheck/build/lint.
+- [ ] Seal A2 source, preflight/run138 registrations; retain every attempt.
+- [ ] Only if A2 PASS: seal A3 source, preflight/run96 generations and score every terminal outcome, original/new cohorts separately.
+- [ ] Record Checkpoint A report, commands, operational evidence, complexity delta and PR390 recommendation. Stop at owner checkpoint.

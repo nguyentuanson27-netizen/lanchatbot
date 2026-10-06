@@ -726,3 +726,36 @@ Owner explicitly authorized one new round and requested preservation of core arc
 5. Produce round-2/CHECKPOINT_A.md, update tasks/todo.md and PR390 with identities, actual commands, request/error/token/latency evidence and GO/STOP/BLOCKED recommendation. STOP at owner checkpoint. No automatic third iteration or post-A work.
 
 Exact round-2 commands reuse existing runners with C3_CHECKPOINT_A_ROUND=2. Source SHA environment fields are sealed after commit, not embedded in frozen inputs. Original-round CLI validation remains available with the selector absent. No new provider API contract is implemented; the existing documented one-request Codex relay is reused.
+
+
+## Authorized Round 3 — fashion-sales Checkpoint A (2026-10-06)
+
+Owner explicitly approved the proposed single Round3 with “thực hiện đi”. This supersedes the earlier no-automatic-third-round restriction only for this round. Main was refreshed and remains 296cdcfbf5759f5bf9cbb24acf3dc63005589361; start/source for the approved product-goal documents is f5f8d3af25530e3b5f540c1ad7d2727ad0d42a4a. Reuse the existing isolated implementation branch and PR390. No production wiring, live send/deploy or post-A work.
+
+1. T1 freeze: preserve all34 old A2 and20 old A3 cases unchanged. Add four synthetic development product profiles with silhouette/material/colors/garment chart/care/limitations plus source/hash/freshness/bound subject; retain price/stock/policy authority and missing-evidence cases. Add12A2 (8unsafe,4safe) and12A3 (three per concern/partial/correction/policy, each2–4 accepted prior turns). Freeze models/prompts/schema/serialization/allowlists/bounds/cohorts/scoring/terminal fallbacks before results. Both roles gpt-6.1-sol/high, existing Codex login,3repetitions,10% terminal usability threshold, no automatic generation retry.
+2. T2 RED→GREEN: profile allowlist and evaluator-request firewall; profile subject/source/hash/freshness and changed-world invalidation through existing precheck/finalGate; explicit Round3 input/evidence selection; weak consultation no longer passes on mean alone. Minimal optional profile field, no new semantic/strategy role/parser/router/tool/size engine/repair layer.
+3. Deterministic readiness: focused Node protocol/provider/runner/round tests; worker boundary+vertex tests; existing business-tools protected-claims/reply-assembler tests; worker typecheck/build/lint.
+4. T3 seal clean committed source, capture runtime a2RunSourceSha, preflight and run46cases×3=138 registered attempts (108unsafe/30safe). Any unsafe eligible PASS→FAIL/STOP; retain all registrations/errors/request evidence; no A3 or rescue tuning.
+5. T4 only if A2PASS: seal clean A3 source, preflight and run32cases×3=96 outcomes. Every generation is in denominator, every hard-precheck survivor invokes verifier and finalGate. Score actual terminal outcome on10dimensions; usefulness/decisionSupport/nextStep/naturalness each2 on frozen consultation-case list; safety2 everywhere, other existing bars unchanged. Old20/new12 cohorts reported separately. Evaluator-only anchors/applicability never enter provider requests. Offline primary-agent review is not independent human acceptance.
+6. Report exact source/config/hash/denominators/firewall/request/latency/token/error/cost evidence in round-3/CHECKPOINT_A.md; update todo and PR390. STOP at owner GO/STOP/BLOCKED, no automatic fourth round or post-A work.
+
+Exact commands (repository root):
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='3'
+node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs
+pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts
+pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts
+pnpm --filter @lana/worker typecheck
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2
+node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
+# Only after A2 PASS, clean source and captured A3_RUN_SOURCE_SHA / A2_STATUS=PASS:
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3
+node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
+```
+
+Run-source SHAs are environment/runtime evidence captured after commits, not embedded back into frozen inputs. Existing bounded inference relay/API is reused unchanged.
