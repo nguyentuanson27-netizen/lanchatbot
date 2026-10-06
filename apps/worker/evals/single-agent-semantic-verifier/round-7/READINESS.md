@@ -23,3 +23,25 @@ node --test apps/worker/evals/single-agent-semantic-verifier/round-7.test.mjs
 ```
 
 Actual exit1,0/3PASS: ATTEMPT_POLICY for frozen one-pass Round7 and PROFILE_BOUND for both direct/captured projections. Runtime implementation unchanged during RED; these are unsupported new-round contracts, not semantic-quality proof. GREEN/readiness/provider run evidence follows only after the minimum fixed support change.
+
+## GREEN and deterministic readiness
+
+Only fixed Round7 enum/allowlist/one-pass/count support changed in existing protocol.mjs:7lines added/7removed. No worker production/shared package source change, no new semantic role/layer/framework/router/parser/templates/repair. Existing final gate reused. No production entrypoint import found for the isolated boundary.
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='7'
+node --test apps/worker/evals/single-agent-semantic-verifier/round-7.test.mjs
+$env:C3_TEST_CODEX_TRANSPORT='1'
+node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs
+node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs
+pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts
+pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts
+pnpm --filter @lana/worker typecheck
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+git diff --check
+```
+
+All actually run: focusedGREEN3/3; full Node62/62,0skips; explicit adapter11/11 including installed client with a local upstream stub and zero provider generation; worker77/77; protected-claims/reply-assembler21/21; worker typecheck/build/lint each exit0 (dependency prebuild included). Diff check exit0. The test suite's existing Vertex retry tests do not define the Checkpoint A provider policy; this round still has retry0.
+
+Local input/history audit:100 historical JSON/Markdown files unchanged from prior delivery fcdfa6d9a8d497e756897f08dcf7bba09314d276; aggregate 980683b49faac1ba2c8c3de0f8fdb86e05a57f5bb0d399237f2238d3fa9babac. All24 owner envelopes within frozen32768-byte bound, max23617bytes. Captured stub requests exclude evaluator markers/keys/reference replies in both roles. No real-shop data/PII/secrets in synthetic corpora or retained requests. All required readiness checks GREEN before sealing/provider execution; no earlier PASS inherited.

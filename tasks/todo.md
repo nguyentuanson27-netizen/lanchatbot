@@ -351,7 +351,7 @@ For each future implementation task:
 
 - [x] Refresh main, implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; read all20 Round6 histories/outcomes, prompt and runtime evidence. Record root-cause hypotheses/limits and revised task-centered owner prompt; preserve prior evidence.
 - [x] T1 freeze66A2/24A3, four contrasting continuations, unchanged verifier/config/authority/scoring and one-attempt policy before provider results. Prompt7871bytes, hash3de18ef4648549a18fbd181eb3bdf1b0663f31d3520966d816caba1bd395e345; client0.159.2/login available. No generation before freeze.
-- [ ] T2 observed RED→GREEN and required protocol/adapter/boundary/protected-claims tests plus worker typecheck/build/lint; minimal fixed round support, no production wiring.
+- [x] T2 observed RED0/3→GREEN3/3; Node62/62, explicit local-stub adapter11/11, worker77/77, protected-claims21/21; worker typecheck/build/lint each exit0.100historical artifacts unchanged; +7/-7protocol lines, no production wiring/semantic layer. All24envelopes bounded, max23617bytes. ReadinessGREEN before generation.
 - [ ] T3 clean commit/seal/preflight A2; execute and retain every registered attempt, report safety/usability and request accounting. No A3 unless A2PASS.
 - [ ] T4 only after A2PASS: clean commit/seal/preflight A3; read all actual outcomes and240individual ratings with quotes/buying-goal reasons, no rubric tuning.
 - [ ] Publish CHECKPOINT_A/conversations/review/audit/ops, update/readback PR390, stop at owner GO/STOP/BLOCKED. No further generation/post-A/merge/deploy/live send.
