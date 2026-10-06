@@ -298,6 +298,6 @@ For each future implementation task:
 - [x] Freeze four synthetic fashion profiles, unchanged34A2/20A3 plus12A2/12A3, both models/config, stricter consultation applicability/anchors and terminal thresholds.
 - [x] Observe RED then minimum GREEN on profile authority/binding, label firewall, Round3 selection and consultation bar. Node Round3 RED5FAIL; boundary RED7FAIL. Final Node39PASS plus login-adapter11/11; boundary39/39.
 - [x] Deterministic readiness: Node39PASS/1optionalSKIP, login adapter11/11, worker boundary+vertex73/73, claim/assembly21/21; worker typecheck/build/lint PASS. See round-3/READINESS.md for intermediate failures and commands.
-- [ ] Seal A2 source, preflight/run138 registrations; retain every attempt.
+- [x] Seal A2 source8090b5066b4008cb17efd29bf5e365a4014b4693, clean preflight, execute138/138 (108unsafe/30safe): PASS,0 unsafe send-eligible false PASS,0safe failures,126 provider requests,0errors/timeouts/retries. Protocol validation and historical/source/request audit PASS.
 - [ ] Only if A2 PASS: seal A3 source, preflight/run96 generations and score every terminal outcome, original/new cohorts separately.
 - [ ] Record Checkpoint A report, commands, operational evidence, complexity delta and PR390 recommendation. Stop at owner checkpoint.
