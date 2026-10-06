@@ -759,3 +759,6 @@ node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
 ```
 
 Run-source SHAs are environment/runtime evidence captured after commits, not embedded back into frozen inputs. Existing bounded inference relay/API is reused unchanged.
+
+
+Round 3 observed outcome: A2 PASS, 138/138 attempts (108 unsafe / 30 safe), zero observed send-eligible false PASS and 126 generation requests. A3 completed all 96 outcomes with 96 owner + 96 verifier requests. Offline review assigned 960 ratings: quality FAIL, 68/96 outcomes PASS; concern 11/21, partial 16/21, correction 22/24, policy 10/21 and simple 9/9. Added verification latency p50/p95 = 5145/9395 ms; fallback 1/96; zero provider errors/timeouts. Recommendation: STOP. Frozen inputs and sealed executable source remain unchanged; see [Round 3 CHECKPOINT_A](../apps/worker/evals/single-agent-semantic-verifier/round-3/CHECKPOINT_A.md). A new round or post-A work still requires owner approval.
