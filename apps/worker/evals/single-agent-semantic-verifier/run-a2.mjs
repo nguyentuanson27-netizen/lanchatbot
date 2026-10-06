@@ -9,6 +9,19 @@ import {authorizeRealtimeProtectedClaimProposal} from '../../dist/realtime-prote
 const read=name=>readFileSync(inputUrl(name),'utf8');
 export const loadInputs=()=>({manifest:JSON.parse(read('manifest.json')),a2:JSON.parse(read('corpus-a2.json')),a3:JSON.parse(read('corpus-a3.json'))});
 
+export function registerA2Attempts(manifest,a2,prior=null) {
+  const fresh=cases=>cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),caseId:c.evaluator.caseId,
+    repetition:i+1,expected:c.evaluator.expected,finalDraft:c.runtime.finalDraft,finalDraftHash:hash(c.runtime.finalDraft),precheck:null,provider:null,terminal:null})));
+  if(!manifest.ownerAmendment)return fresh(a2.cases);
+  const amendment=manifest.ownerAmendment;
+  if(!prior||hash(JSON.stringify(prior,null,2)+'\n')!==amendment.priorEvidenceHash||prior.a2RunSourceSha!==amendment.priorRunSourceSha)throw new Error('PRIOR_EVIDENCE_CHANGED');
+  const adopted=prior.attempts.filter(a=>a.terminal).map(a=>({...a,originRunSourceSha:prior.a2RunSourceSha})),seen=new Set(adopted.map(a=>a.caseId));
+  const remaining=a2.cases.filter(c=>!seen.has(c.evaluator.caseId));
+  const attempts=[...adopted,...fresh(remaining)];
+  if(JSON.stringify(remaining.map(c=>c.evaluator.caseId))!==JSON.stringify(amendment.remainingCaseIds)||JSON.stringify(attempts.map(a=>a.attemptId))!==JSON.stringify(amendment.registeredAttemptIds))throw new Error('AMENDED_REGISTRATION_CHANGED');
+  return attempts;
+}
+
 export async function evaluateA2Attempt(manifest,fixture,generate) {
   const started=performance.now();
   const draft=fixture.runtime.finalDraft;
@@ -72,7 +85,7 @@ export function assertSealedSource(sha,allowedEvidence) {
   if(changed.some(line=>!allowedEvidence.some(path=>line.slice(3).replaceAll('\\','/').replaceAll('"','')===path)))throw new Error('RUN_SOURCE_CHANGED');
 }
 export function validateA2Evidence(manifest,a2,evidence) {
-  const expected=a2.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>c.evaluator.caseId+':'+(i+1)));
+  const expected=manifest.ownerAmendment?.registeredAttemptIds??a2.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('ATTEMPT_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a2RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('EVIDENCE_IDENTITY');
   for(const attempt of evidence.attempts) {
@@ -104,15 +117,17 @@ async function main() {
     manifestHash:hash(read('manifest.json')),corpusHash:manifest.corpusHashes.a2,promptHash:manifest.promptHashes.verifier,schemaHash:manifest.schemaHash,
     models:manifest.models,client,startedAt:new Date().toISOString(),
     boundaryExecutableHash:hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url))),
-    attempts:a2.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),caseId:c.evaluator.caseId,
-      repetition:i+1,expected:c.evaluator.expected,finalDraft:c.runtime.finalDraft,finalDraftHash:hash(c.runtime.finalDraft),precheck:null,provider:null,terminal:null}))),summary:null};
+    ownerAmendment:manifest.ownerAmendment??null,
+    attempts:registerA2Attempts(manifest,a2,manifest.ownerAmendment?JSON.parse(readFileSync(inputUrl('../a2-evidence.json'),'utf8')):null),summary:null};
   const save=()=>{evidence.summary=summarizeA2(manifest,evidence.attempts);evidence.operational=operational(evidence.attempts);writeFileSync(output,JSON.stringify(evidence,null,2)+'\n');};
   save();
   for(const attempt of evidence.attempts) {
+    if(attempt.terminal)continue; // Preserve every adopted observation; never rerun completed cases.
     assertSealedSource(sha,[evidencePath('a2-evidence.json')]);
     if(hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==evidence.boundaryExecutableHash)throw new Error('BOUNDARY_EXECUTABLE_CHANGED');
     const fixture=a2.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     Object.assign(attempt,await evaluateA2Attempt(manifest,fixture,request=>runCodexModel(manifest,'verifier',request)));
+    attempt.originRunSourceSha=sha;
     save();
     console.log(JSON.stringify({attemptId:attempt.attemptId,precheck:attempt.precheck,provider:attempt.provider?.status??null,
       outcome:attempt.terminal.disposition,reason:attempt.terminal.reason,requests:attempt.provider?.providerRequests??0}));

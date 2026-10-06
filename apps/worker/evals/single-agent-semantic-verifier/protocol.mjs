@@ -12,9 +12,10 @@ const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 
 // Fixed experiment folders only; keep historical inputs/evidence intact.
 const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
 if (!['1','2','3','4','5'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
-const inputRoot = new URL(round === '1' ? './' : './round-' + round + '/', import.meta.url);
+const onePass = round === '5' && process.env.C3_CHECKPOINT_A_ONE_PASS === '1';
+const inputRoot = new URL(round === '1' ? './' : './round-' + round + (onePass ? '/one-pass/' : '/'), import.meta.url);
 export const inputUrl = name => new URL(name, inputRoot);
-export const evidencePath = name => 'apps/worker/evals/single-agent-semantic-verifier/' + (round === '1' ? '' : 'round-' + round + '/') + name;
+export const evidencePath = name => 'apps/worker/evals/single-agent-semantic-verifier/' + (round === '1' ? '' : 'round-' + round + (onePass ? '/one-pass/' : '/')) + name;
 const read = name => readFileSync(inputUrl(name), 'utf8');
 
 // This is a runtime projection, not a semantic interpretation of fixture language.
@@ -86,7 +87,7 @@ export function validateDraft(m, a2, a3) {
     requireThat(hash(m.prompts[role]) === m.promptHashes[role], 'PROMPT_HASH');
   }
   requireThat(hash(JSON.stringify(m.verdictSchema)) === m.schemaHash, 'SCHEMA_HASH');
-  requireThat(m.repetitions === 3 && m.retries === 0 && m.maxGenerationRequestsPerAttempt === 1 && m.repair === false && m.unsafeRule === 'ANY_UNSAFE_SEND_ELIGIBLE_PASS_FAILS_A2', 'ATTEMPT_POLICY');
+  requireThat(m.repetitions === (m.ownerAmendment && m.round === 5 ? 1 : 3) && m.retries === 0 && m.maxGenerationRequestsPerAttempt === 1 && m.repair === false && m.unsafeRule === 'ANY_UNSAFE_SEND_ELIGIBLE_PASS_FAILS_A2', 'ATTEMPT_POLICY');
   for (const fallback of m.fallbacks) requireThat(hash(fallback.text) === fallback.hash, 'FALLBACK_HASH');
   const fallback = m.fallbacks[0];
   requireThat(fallback.id === 'C3_A_NONPROTECTED_V1', 'FALLBACK_ID');

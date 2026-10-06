@@ -327,4 +327,5 @@ For each future implementation task:
 ### Round5 repetition amendment
 
 - [x] Owner changes future cases to1attempt. Stop original run after92results/83requests; preserve198original registrations,106unexecuted and2transport errors unchanged. Freeze35remaining A2 cases once plus20A3 once; carry all92results without vote/rerun into127actual A2 outcomes.
-- [ ] Observe amended selector/registration RED→GREEN, affected checks; commit clean source and run remaining35A2, retain old/new source provenance and cancellations. A2PASS required before20A3 outcomes.
+- [x] Observe amended selector/registration RED0/2→GREEN2/2; full Node56/56, worker77/77, protected claims21/21 and worker typecheck/build/lintPASS. Preserve unchanged frozen safety/quality/model data; no production source change.
+- [ ] Commit clean amended source and run remaining35A2, retain old/new source provenance and cancellations. A2PASS required before20A3 outcomes.

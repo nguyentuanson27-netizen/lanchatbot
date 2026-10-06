@@ -7,7 +7,7 @@
   },
   "status": "FROZEN",
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
-  "specSha": "a270cd12218f97cfab7844d165a2b83114e3affa",
+  "specSha": "94fc894c7b2b4999a2fa829b24cdb15a0e673b67",
   "evidenceSha": "1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da",
   "models": {
     "verifier": {
