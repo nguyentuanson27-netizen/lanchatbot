@@ -54,3 +54,22 @@ node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
 Each actual exit0. A2PASS66/66 (48unsafe/18safe), zero observed send-eligible false PASS on this frozen population/configuration; safe failures1/18=5.555556% (r4-safe-sale:1 retained), no missing attempts.62provider requests/62client requests, maximum1per attempt,0rejected continuation/0errors/0timeouts.4deterministic precheck rejections; every62survivor entered verifier/final gate. p50/p95verifier6,665/9,945ms; provider reported126,544input/7,673output tokens,0missing usage, cost not exposed. Candidate conversation prompt was not generated in A2.
 
 Publication attempts during A2: SSH443push failed twice with connection timeout; noninteractive HTTPSpush failed to connect github.com:443. These are source-publication network failures, not provider generation retries. Commit/evidence source identity remains local and exact; retry publication after the next evidence savepoint. No credential displayed or new login route introduced.
+
+## T4 observed A3 execution and offline assessment
+
+a3RunSourceSha `a018f0b1097ed32f63f961d9f1f78511698c8126`, clean after A2evidence commit. Frozen generator/runner and inputs unchanged.
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='6'
+$env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+$env:A2_STATUS='PASS'
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3
+node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
+```
+
+Each actual exit0.20/20owner and20/20mandatory verifier generations, allSEND_ELIGIBLE,0error/timeout/fallback/handoff/no-send. Raw qualityBLOCKED means unfilled human scores, not missing generation; raw capture/placeholders retained unchanged. Authorized primary-agent review: read all histories/actual terminal texts,200individual phrase-grounded ratings; `scoreWholeReplies` with those ratings returnsFAIL16/20PASS. Concern1/4,partial4/4,correction5/5,policy3/4,simple3/3; four naturalness failures. Frozen bars unchanged; recommendationSTOP.
+
+One-off local node audit/formatting: all102actual captured requests exclude evaluator keys/caseIDs/reference texts, max1upstream each; all5executable and7frozen files match both run-source commits; all82historical artifacts unchanged; every200review quote exists in its exact terminal text and score/reason is complete. Results in audit.json, complete conversations/review and CHECKPOINT_A.md. No extra model/judge generation or result-dependent tuning.
+
+Two further SSHpublication attempts timed out, including IPv4-only transport; subsequent exact SSH443push succeeded: remote source advanced6d5ce189→a018f0b1. These publication errors have no bearing on provider-generation denominator. Artifact publication and exact-head CI readback follow; no merge/deploy authorized.

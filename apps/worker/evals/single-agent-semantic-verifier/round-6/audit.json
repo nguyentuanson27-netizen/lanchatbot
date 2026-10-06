@@ -1,0 +1,23 @@
+{
+  "historicalArtifactsUnchanged": 82,
+  "historicalAggregateHash": "1caa39840397b22444c38ae23f49f1c696f14e65cde9a7fbbfcb0689772b4d55",
+  "sealedExecutableFiles": 5,
+  "sealedFrozenFiles": 7,
+  "manifestHash": "7a2c08e7e7e16b166c434218b8ebff2c0905e40eecaab96ca5defdb72ffc08ec",
+  "capturedProviderRecords": 102,
+  "providerRequests": 102,
+  "maxProviderRequestsPerSlot": 1,
+  "clientRequests": 102,
+  "rejectedClientRequests": 0,
+  "firewall": "PASS_ALL_CAPTURED_MODEL_REQUESTS",
+  "returnedModels": [
+    "gpt-6.1-sol"
+  ],
+  "returnedModelUnavailable": 0,
+  "usageUnavailable": 0,
+  "verbatimManualRatings": 200,
+  "completeA2Denominator": 66,
+  "completeA3Denominator": 20,
+  "a2RunSourceSha": "069c2f52bb988fbb037494246a91deff80c7f4f2",
+  "a3RunSourceSha": "a018f0b1097ed32f63f961d9f1f78511698c8126"
+}
