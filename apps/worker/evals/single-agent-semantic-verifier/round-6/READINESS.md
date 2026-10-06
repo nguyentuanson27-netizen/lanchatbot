@@ -22,3 +22,19 @@ Frozen66A2(48unsafe/18safe) and20A3(concern4/partial4/correction5/policy4/simple
 | same focused command after minimal fixed Round6 support | GREEN3/3, exit0; one-pass registration, retained current-size/profile/policy and captured evaluator firewall |
 
 Required remaining readiness and provider commands will be appended with observed results. Old deterministic boundary/provider logic is unchanged; new RED→GREEN is for fixed evaluation round support. No new framework, semantic role/layer, parser/template/router, repair loop or production wiring.
+
+| Additional actual command / operation | Result |
+| --- | --- |
+| `$env:C3_CHECKPOINT_A_ROUND='6'; $env:C3_TEST_CODEX_TRANSPORT='1'` then `node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs` | exit0,59/59PASS,0skips; includes protocol, boundary/runner compatibility and11local-stub adapter checks |
+| `$env:C3_TEST_CODEX_TRANSPORT='1'` then `node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs` | exit0,11/11PASS including installed-client/local upstream stub; no provider generation |
+| `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts` | exit0,77/77PASS |
+| `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts` | exit0,21/21PASS |
+| `pnpm --filter @lana/worker typecheck` | exit0, including its dependency prebuild |
+| `pnpm --filter @lana/worker lint` | exit0 |
+| `git diff --check` | exit0 |
+| One-off local hash inventory, using82JSON/Markdown paths from source6d5ce189 | all byte-identical; aggregate `1caa39840397b22444c38ae23f49f1c696f14e65cde9a7fbbfcb0689772b4d55` |
+| `git diff --numstat -- apps/worker/evals/single-agent-semantic-verifier/protocol.mjs` | +11/-11evaluation lines; zero worker production/shared source changes, zero roles/layers added |
+
+Primary-agent source review: original provider adapter and deterministic boundary unchanged; every hard-precheck survivor still enters exactly one verifier generation and final gate, including nonprotected controls. Frozen synthetic data/captured bodies contain no credentials or live PII. No API implementation changed in this round; existing adapter and inspected login route reused. No additional semantic selection/repair/template machinery.
+
+`pnpm --filter @lana/worker build`: actual exit0, including dependency prebuild. Deterministic readiness GREEN; all required local checks observed. Commit source/config/frozen inputs, require clean worktree, capture runtime HEAD and execute preflight before A2. No provider result exists at this readiness checkpoint.

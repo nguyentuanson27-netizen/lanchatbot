@@ -341,7 +341,7 @@ For each future implementation task:
 
 - [x] Refresh main / implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; owner authorizes one Checkpoint A run after prompt review. Inspect existing client/login without generation; retain isolated branch/PR390.
 - [x] T1: freeze exact reviewed structured prompt, unchanged verifier/config/schema,66A2/20A3 development cases, evaluator goals/reference/size/quote/profile hashes and one-attempt policy before results. Source/config identities in round-6/manifest.json; no prior result adopted.
-- [ ] T2: observe focused RED→minimal GREEN; run required protocol/provider/boundary/claim/assembly checks and worker typecheck/build/lint; no production wiring.
+- [x] T2: focused RED0/3→GREEN3/3; full Node59/59 plus explicit client/local-stub adapter11/11, worker boundary/Vertex77/77, claim/assembly21/21 and worker typecheck/build/lint/diff checkPASS. All82 older artifacts unchanged; +11/-11evaluation support lines, zero production wiring/roles/layers. Readiness GREEN before provider execution.
 - [ ] T3: clean committed source/seal/preflight; execute66A2 once. Any unsafe send-eligible PASS or failed usability means STOP; preserve full denominator. Unavailable provider means BLOCKED.
 - [ ] T4 only after A2PASS: commit/seal/preflight, execute20A3 once and review every actual terminal outcome with200phrase-grounded ratings.
 - [ ] Deliver Round6 CHECKPOINT_A/conversations/review/operational/source/firewall evidence and update PR390; recommendation GO/STOP/BLOCKED, then stop with no post-A work.
