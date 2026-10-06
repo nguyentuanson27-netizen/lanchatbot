@@ -1,8 +1,19 @@
 # C3 Semantic-Verifier Checkpoint A — Round 2
 
-Recommendation: **GO**. Scope = one owner-authorized new Checkpoint-A iteration only. Owner final GO/STOP/BLOCKED is not assumed. No post-A work, production wiring, deployment or live send.
+Owner checkpoint disposition: **STOP — Checkpoint A not achieved** (2026-10-06, Asia/Saigon). Current recommendation: **STOP**; the earlier Codex GO recommendation is withdrawn. Scope remains Checkpoint A only. No post-A work, production wiring, deployment or live send.
 
-T1/T2 deterministic readiness GREEN. A2 **PASS**. A3 all 60 actual terminal outcomes generated; offline quality PASS. Original round-1 evidence and offline FAIL/STOP remain unchanged. This round preserves the core architecture and makes no failure-specific production patch.
+T1/T2 deterministic readiness GREEN. A2 **PASS** on its frozen tested population/configuration. A3 generated all60 outcomes, but **owner whole-reply quality acceptance FAIL**. The prior Codex numerical PASS/600 ratings remain unchanged as historical self-assessment, not the current checkpoint disposition. Original round-1 evidence remains unchanged.
+
+## Owner quality review — 2026-10-06
+
+Owner statement:
+
+> đánh giá của tôi về A3: hiểu như cầu, trả lời đủ nhưng ko phương án trả lời chưa hữu ích, hợp lí, đang máy móc và ko đc tự nhiên, bước xử lí kém
+> chưa đạt check point A
+
+The owner accepts that the replies understand the need and answer its parts, but rejects the usefulness/reasonableness of the proposed response, naturalness and handling/next steps. These are required whole-reply dimensions; A2 safety and numerical self-assessment do not override this rejection. The primary-agent scoring treated several weak outcomes as sufficient and the earlier GO recommendation was too optimistic. It is withdrawn.
+
+This is an aggregate qualitative owner review, not fabricated per-attempt human ratings. Frozen thresholds, prompts, corpora, provider results, source identities and original600 Codex ratings remain unchanged; no retrospective threshold tuning or generation is performed. Do not continue post-A or start an automatic third round. A future quality revision needs a separate explicitly authorized scope and a newly frozen experiment; this review alone does not establish a technical root cause.
 
 ## Source and configuration identity
 
@@ -122,4 +133,4 @@ Final evidence audit: `C3_CHECKPOINT_A_ROUND=2; node C:/Users/nguye/AppData/Loca
 
 Round-2 executable complexity delta versus1a37ca2e: protocol.mjs+9/-2 lines, run-a2.mjs+4/-4, run-a3.mjs+8/-8 (net+7 across existing modules); round-2.test.mjs36 lines/3 cases. Zero worker/shared-package/provider-adapter/dependency changes. Semantic roles/layers added:0. Frozen fixtures and complete per-attempt evidence account for the large data diff.
 
-Recommendation **GO** only for this frozen tested configuration/population, with primary-agent scoring limitation above. Preserve both rounds. Stop here after this single new round; no automatic third iteration/post-A implementation, even if recommendation GO. Post-A requires a new owner-approved plan.
+Current recommendation and owner checkpoint disposition: **STOP**. A3 whole-reply quality is not accepted; Checkpoint A is not achieved. Preserve both rounds and the previous numerical self-assessment for comparison. No automatic third iteration or post-A implementation. Any further experiment requires explicit authorization; post-A requires owner GO and a new owner-approved plan.

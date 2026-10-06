@@ -2,7 +2,7 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
-**Status:** Round1 preserved (A2 PASS/offline A3 FAIL). Round2 A2 PASS; A3 60/60 complete, offline quality PASS; recommendation GO. Checkpoint A only.
+**Status:** Owner review2026-10-06:STOP, Checkpoint A not achieved. Round2 A2 PASS remains; A3 whole-reply quality not accepted (usefulness/reasonableness, naturalness and handling/next steps). Prior Codex numerical PASS/GO retained historically; GO recommendation withdrawn. Checkpoint A only.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
 
@@ -204,11 +204,11 @@ Verification:
 
 ## CHECKPOINT A
 
-- [ ] Owner GO / STOP / BLOCKED decision recorded. Current Round-2 recommendation: GO on the frozen population/configuration; owner final disposition pending. Round-1 STOP remains retained historical evidence.
+- [x] Owner review recorded2026-10-06:STOP, Checkpoint A not achieved because A3 usefulness/reasonableness, naturalness and handling/next steps are inadequate. Earlier Codex GO recommendation withdrawn; both rounds' evidence retained.
 - [x] A2 zero observed unsafe send-eligible false PASS.
 - [x] Fail-closed behavior proven for UNCERTAIN/malformed/timeout/provider error.
 - [x] Safe controls + A3 terminal outcomes pass frozen usability threshold.
-- [x] Round-2 A3 passes frozen numerical whole-reply quality bar in preregistered Codex offline review:60/60, every family100%, all600 ratings retained. Round-1 FAIL remains unchanged (41/48; partial5/9, simple6/9). No independent, blinded or human qualification claimed.
+- [ ] A3 whole-reply quality accepted. Owner review FAIL2026-10-06. Prior Codex numerical60/60 and600 ratings remain historical self-assessment, not owner acceptance. Round-1 FAIL remains unchanged (41/48; partial5/9, simple6/9). No fabricated per-attempt human ratings.
 - [x] Final-send freshness/binding/revision/permission/snapshot revalidation proven.
 - [x] One conversational owner + one verifier only.
 - [x] Verifier has no tool/state/effect/rewrite/send authority.
@@ -280,5 +280,5 @@ For each future implementation task:
 - [x] Seal clean A2 source ab3e466bf5c1fbd8b12677ce13b36958cde75dd8, preflight, execute 102/102 and validate; status PASS.
 - [x] After A2 PASS: seal A3 source 4647eaa2053ee796e6f8546b9ce289a64af27bcb, preflight, execute60/60 and validate.
 - [x] Offline review60/60 outcomes /600 individual ratings and rationale; quality PASS.
-- [x] Report original/new population, operational evidence, structural delta; GO recommendation.
-- [x] Update PR390 with Round-2 A2/A3 PASS, bounded GO recommendation and scoring/CI/coverage limitations; stop at owner checkpoint. No third iteration or post-A work.
+- [x] Report original/new population, operational evidence and structural delta; earlier GO recommendation withdrawn after owner quality review, current STOP.
+- [x] Record owner quality rejection in report/review/PR390; Checkpoint A not achieved. Preserve raw evidence and original scoring; no automatic third iteration or post-A work.

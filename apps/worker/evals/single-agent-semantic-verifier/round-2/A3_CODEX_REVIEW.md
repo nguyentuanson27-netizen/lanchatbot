@@ -1,6 +1,8 @@
 # Round 2 — all-terminal Codex offline review
 
-Recommendation: **GO** for Checkpoint A only. 60/60 actual terminal outcomes pass the unchanged numerical bar. All 600 ratings and individual rationale are retained; no generation selected, dropped, rewritten or retried.
+Current checkpoint disposition: **STOP — A3 quality not accepted by owner** (2026-10-06, Asia/Saigon). The earlier Codex GO recommendation is withdrawn. Owner finds understanding/completeness adequate but usefulness/reasonableness, naturalness and handling/next steps insufficient. See CHECKPOINT_A.md for the owner's exact statement.
+
+The following is the preserved historical Codex self-assessment:60/60 outcomes passed its numerical bar. All600 original ratings and rationale remain unchanged; this numerical result does not represent owner acceptance. No generation was selected, dropped, rewritten or retried; no per-attempt human ratings are inferred from the aggregate owner review.
 
 Method was frozen before generation: OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW. Scorer implemented the experiment and may know verifier outcomes; this is an owner-authorized offline AI editorial assessment, not independent, blinded or human validation. No provider judge request and no third online semantic role. Provider evidence SHA-256: `498e763b65e3201090ee6594d792544590419e623306e8813b57427d92988340`; a3RunSourceSha: `4647eaa2053ee796e6f8546b9ce289a64af27bcb`. Original Round-1 evidence and ratings remain unchanged.
 
