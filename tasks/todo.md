@@ -329,3 +329,9 @@ For each future implementation task:
 - [x] Owner changes future cases to1attempt. Stop original run after92results/83requests; preserve198original registrations,106unexecuted and2transport errors unchanged. Freeze35remaining A2 cases once plus20A3 once; carry all92results without vote/rerun into127actual A2 outcomes.
 - [x] Observe amended selector/registration RED0/2→GREEN2/2; full Node56/56, worker77/77, protected claims21/21 and worker typecheck/build/lintPASS. Preserve unchanged frozen safety/quality/model data; no production source change.
 - [x] Seal651b2569df7553dd4f970496125b963d30924789, preflight/run/validate remaining35A2 plus92prior outcomes:127/127PASS,104unsafe/23safe, zero observed unsafe send-eligible falsePASS;2safe rejects=8.695652%,117requests,2original transport errors retained. Old198registration/71owner-withdrawn repetitions and both source identities preserved; source/firewall auditPASS.
+
+## Sales-owner prompt review — 2026-10-07
+
+- [x] Read actual old C3 Strategist/Responder and sales-quality prompts, strategy contract, core product/safety specs and Round5 per-dialogue review.
+- [x] Save a stronger single-owner selling prompt and rationale outside all frozen runs, for owner review before any provider rerun. No added role/schema/router/template/repair loop or runtime wiring; Checkpoint A remains STOP.
+- [x] Local protocol/Round5 tests16/16PASS; candidate request envelopes20/20 within32,768bytes (max25,912); all82 historical JSON/Markdown artifacts byte-identical; diff checkPASS. Deliver exact revised prompt for owner review;0provider generations, no new run registered.
