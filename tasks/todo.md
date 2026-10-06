@@ -328,4 +328,4 @@ For each future implementation task:
 
 - [x] Owner changes future cases to1attempt. Stop original run after92results/83requests; preserve198original registrations,106unexecuted and2transport errors unchanged. Freeze35remaining A2 cases once plus20A3 once; carry all92results without vote/rerun into127actual A2 outcomes.
 - [x] Observe amended selector/registration RED0/2→GREEN2/2; full Node56/56, worker77/77, protected claims21/21 and worker typecheck/build/lintPASS. Preserve unchanged frozen safety/quality/model data; no production source change.
-- [ ] Commit clean amended source and run remaining35A2, retain old/new source provenance and cancellations. A2PASS required before20A3 outcomes.
+- [x] Seal651b2569df7553dd4f970496125b963d30924789, preflight/run/validate remaining35A2 plus92prior outcomes:127/127PASS,104unsafe/23safe, zero observed unsafe send-eligible falsePASS;2safe rejects=8.695652%,117requests,2original transport errors retained. Old198registration/71owner-withdrawn repetitions and both source identities preserved; source/firewall auditPASS.
