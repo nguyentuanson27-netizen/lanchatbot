@@ -164,6 +164,8 @@ Actual local authoring/readback commands: c3-prepare-round5.mjs; c3-freeze-round
 
 Delivery main refresh first timed out over SSH22, then succeeded using the existing SSH identity over GitHub SSH443 with strict known-host checking. Exact delivery main remains296cdcfbf5759f5bf9cbb24acf3dc63005589361. This changes neither provider credential/config nor run source; no extra model request occurred.
 
+Artifact delivery commitac9470b815a306cde8e541268d54101642cb8608 was pushed successfully. GitHub connector confirms draftPR390head matches and title/body records Round5one-pass A2PASS/A3FAIL/STOP. CI run37481641515 was queued at artifact publication; no GitHub CI PASS claimed. Documentation delivery follow-up modifies no executable/frozen input/raw capture. No merge/deploy/live send.
+
 Executable delta versus Round4delivery6f40a8074e7993686d5c429857e4bca30cd0cd9f: **+35/-15lines in3existing evaluation modules** (protocol+15/-12, A2runner+18/-3, A3offline packet+2); tests+106lines. The one-pass amendment reuses the existing runner/binding/scoring and adds a fixed input folder plus exact hash-bound prior-record adoption, protecting preservation/no completed-case rerun. No new runtime boundary/gate/role/layer/provider framework/parser/router/case-specific production template/repair loop/durable state. No apps/worker/src or shared package source change, no production imports/wiring. Large JSON line growth is frozen inputs/captured request evidence, not production mechanism growth.
 
 ## Unknowns and checkpoint disposition

@@ -36,3 +36,7 @@ Read every20full histories and20actual terminal replies. `node C:/Users/nguye/Ap
 Final `node C:/Users/nguye/AppData/Local/Temp/c3-r5-audit.mjs . write`:exit0,157actual captured upstream requests/max1, zero evaluator label/ID/reference/amendment leakage, old53artifacts and all92adopted outcomes preserved. `node C:/Users/nguye/AppData/Local/Temp/c3-r5-report.mjs .`:final exit0, complete report plus parent pointer. Temporary Markdown formatter initially had two JavaScript quoting errors, corrected in the local helper only; no provider/runtime/frozen-source edit or rerun. `git diff --check`:exit0 after assembled artifacts.
 
 STOP recommendation. No automatic additional round, post-A implementation, merge/deploy/live send. Full actual evidence/provenance/limits in CHECKPOINT_A.md; all histories A3_CONVERSATIONS.md and phrase-grounded scores A3_CODEX_REVIEW.md/a3-codex-assessment.json.
+
+## Publication readback
+
+Evidence savepointac9470b815a306cde8e541268d54101642cb8608 pushed to the existing implementation branch; GitHub connector readback confirms draftPR390head/title/body A2PASS/A3FAIL/STOP. GitHub API read over local gh timed out, connector succeeded. SSH22 delivery fetch timed out; strict-known-host existing-identity SSH443 fetch/push exit0, main unchanged296cdcfbf5759f5bf9cbb24acf3dc63005589361. Provider route/config unaffected. CI run37481641515 queued at artifact publication, not claimedPASS. Final documentation follow-up changes only plan/todo/readiness/report and preserves sealed source/inputs/raw captures.

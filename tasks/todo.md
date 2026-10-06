@@ -322,7 +322,7 @@ For each future implementation task:
 - [x] Observe RED3pass/4fail → minimal GREEN7/7; full Node54/54 including installed-client local-stub adapter, worker boundary/vertex77/77, protected claims/reply assembly21/21 and worker typecheck/build/lintPASS. Captured request firewall and no production wiring confirmed; see Round5 READINESS.md.
 - [x] Original198registration sealed6e371a13d8f257d556e3a5b28e50d16b41f15552, preflight0, owner-interrupted after92results/83requests. Preserve all registrations/2errors. Owner changes remaining cases to one attempt; amended127/127A2PASS with origins/cancellations explicit, see repetition amendment below.
 - [x] After combined A2PASS, seal1b701970cb168ea5722848cf274bde33e4150182 and preflight/run/validate20A3 actual outcomes, per owner one-pass instruction. Read all20histories and20exact replies;200phrase-grounded scores. QualityFAIL10/20,9naturalness failures, one unsupported nextStep0; all20SEND_ELIGIBLE,0providererrors/fallback. RecommendationSTOP, no subsequent round/post-A.
-- [ ] Deliver CHECKPOINT_A, histories/review, actual commands/provenance/operational/complexity evidence and PR390 update; stop at owner GO/STOP/BLOCKED.
+- [x] Deliver Round5 CHECKPOINT_A parent pointer and complete one-pass report, all20histories/actual replies,200phrase-grounded ratings, request/source/cancellation/operational/complexity audit. Evidence commitac9470b815a306cde8e541268d54101642cb8608 pushed; draftPR390 readback matches that head and updated A2PASS/A3FAIL/STOP title/body. Main296cdcfbf5759f5bf9cbb24acf3dc63005589361 at delivery. Local required checksPASS; CI queued at artifact publication, not claimedPASS. Stop at owner checkpoint, no automatic further round/post-A.
 
 ### Round5 repetition amendment
 
