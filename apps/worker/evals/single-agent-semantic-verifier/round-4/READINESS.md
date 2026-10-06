@@ -33,3 +33,14 @@ T3 A2 completed:
 - Provider162requests/162slots, maximum1/slot,162clientrequests,0 rejected continuations,0errors/timeouts. p50/p95 latency6875/12984ms. Usage289395input/20166output tokens, cost unavailable. Twelve deterministic rejects invoked no verifier; all162 survivors did.
 
 Offline readback helper `node C:/Users/nguye/AppData/Local/Temp/c3-r4-audit.mjs .` initially hit ENOBUFS reading large historical evidence; increasing the local read buffer resolved it, with no executable/config change or provider retry. Readback PASS:36 earlier JSON/Markdown artifacts unchanged; all captured requests exclude evaluator labels/references and use requested6.1sol/high. Final full audit follows A3. A2 safe false rejects are a material usability weakness, not excluded attempts.
+
+T4 A3 / checkpoint completed:
+
+- Clean a3RunSourceSha: `216e41d5f02d5b6bfa453ec4857e2fdb8d8a5b8f`; `$env:C3_CHECKPOINT_A_ROUND='4'; $env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); $env:A2_STATUS='PASS'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3`: exit0.
+- `node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs`: exit0, all60 owner+60 verifier slots complete;60SEND_ELIGIBLE,0fallback/handoff/no-send and0provider errors/timeouts. Exit0 records complete capture, not quality acceptance.
+- `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3`: exit0; captured requests/exact final surface/current gates and all registrations validated. Raw quality remains an unscored BLOCKED placeholder, separate offline review resolves quality FAIL.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-r4-assessment.mjs .` with C3_CHECKPOINT_A_ROUND=4: exit0; all20 histories and60 actual terminal replies read,600manual scores and individual reasons assembled in a3-codex-assessment.json.38/60 pass,22 naturalness failures. Families concern5/12,partial4/12,correction14/15,policy6/12,simple9/9. Primary agent review, not independent/human acceptance; no judge provider call.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-r4-audit.mjs . write`: exit0;282captured provider records/requests,282clientrequests,max1per slot,0rejected continuations, all returned6.1sol;36historical artifacts and all sealed executable/frozen sources unchanged. Zero evaluator labels/references in requests. audit.json records final counts.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-r4-report.mjs .`: exit0; CHECKPOINT_A.md generated from frozen inputs/evidence/manual assessment.
+
+A3 verifier p50/p95=6065/10685ms; added verification=6068/10691ms, full end-to-end=14612/24793ms. Total usage across A2+A3=727951input/34249output tokens; cost unavailable. See full report and A3_CONVERSATIONS.md. Recommendation STOP; no new model requests, tuning, automatic next round or post-A work.

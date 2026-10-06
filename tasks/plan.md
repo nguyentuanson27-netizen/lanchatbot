@@ -836,3 +836,7 @@ node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
 ```
 
 At T1, Round 4 inputs are frozen before any provider generation. Exact outcomes and commands are recorded incrementally in round-4/READINESS.md and CHECKPOINT_A.md. Run-source SHA is captured after each clean executable/config commit, outside frozen inputs.
+
+### Round 4 observed disposition
+
+Completed the authorized round with frozen inputs unchanged. A2 PASS174/174, zero observed unsafe send-eligible false PASS on this population/configuration; safe rejects4/42=9.5238% retained. A3 whole-reply quality FAIL38/60, including22naturalness failures; all60 terminal replies send-eligible and individually reviewed. No provider errors/timeouts. Recommendation STOP; source identities, all commands, operational data and limitations are in [Round4 CHECKPOINT_A](../apps/worker/evals/single-agent-semantic-verifier/round-4/CHECKPOINT_A.md). No automatic next round or post-A implementation authorized by these results.
