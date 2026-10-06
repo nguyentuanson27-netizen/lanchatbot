@@ -37,7 +37,7 @@ Architecture simplicity is a means to that quality bar, not the end goal.
 
 **Trạng thái:** Owner đã yêu cầu ghi các mục tiêu dưới đây thành hướng đi chính thức của sản phẩm ngày 2026-10-06 (Asia/Saigon). Đây là nguồn mục tiêu sản phẩm cho các kế hoạch và lần đánh giá tiếp theo.
 
-**Mục tiêu chính:** Khách được tư vấn sát nhu cầu để chọn đúng món, màu/size khi đủ cơ sở và mua thuận tiện; shop phục vụ và bán hàng hiệu quả bằng tư vấn có căn cứ. Đúng và đủ thông tin là nền tảng. Kết quả cần đạt là một phương án tư vấn hữu ích, hợp lý, tự nhiên, giúp khách tiến tới quyết định phù hợp.
+**Mục tiêu chính:** Tư vấn để khách chọn và mua sản phẩm phù hợp của shop. Bot phải chủ động đề xuất mẫu, màu/size từ hàng của shop, giải quyết băn khoăn và giúp khách mua thuận tiện bằng thông tin đã xác minh. Đúng và đủ thông tin là nền tảng. Kết quả cần đạt là lời tư vấn hữu ích, hợp lý, tự nhiên, tạo sự tin tưởng và đưa khách tới bước mua phù hợp; tôn trọng khi khách muốn dừng.
 
 #### Chất lượng tư vấn thời trang
 
@@ -48,6 +48,14 @@ Architecture simplicity is a means to that quality bar, not the end goal.
 5. **Giao tiếp tự nhiên:** Nói như nhân viên tư vấn có hiểu tình huống, gọn và nhất quán với giọng shop. Tránh checklist chung chung, disclaimer lặp, thông tin thừa và hỏi lại điều khách đã nói. Câu hỏi giá đơn giản được trả lời trực tiếp; khách trì hoãn hoặc muốn dừng được tôn trọng, không buộc mọi lượt phải chốt mua.
 
 Đầu vào cần đủ để kiểm tra khả năng tư vấn: dữ liệu sản phẩm/ảnh phù hợp, kiểu dáng, phom, chất liệu, màu, bảng size/số đo, cách chăm sóc và lựa chọn so sánh khi có; cùng giá/tồn/chính sách hiện hành. Phân biệt nguồn đã xác nhận, thông tin khách cung cấp, nhận định tư vấn và phần chưa biết. Ảnh hoặc suy đoán không tự xác lập chất liệu, số đo, tồn hay quyền lợi. Thiếu evidence phải được xử lý bằng phương án có cơ sở, không bằng bịa thêm facts.
+
+#### Owner làm rõ: dữ liệu đủ để bán và tư vấn hướng tới mua hàng
+
+Owner làm rõ ngày 2026-10-06: sản phẩm đem bán phải có thông tin cần thiết để tư vấn. Ví dụ, quần cần bảng size/số đo và thông tin phần lưng/co giãn liên quan tới việc chọn size. Thiếu thông tin phải trở thành công việc bổ sung dữ liệu sản phẩm từ nguồn xác minh. Không lấy tình trạng thiếu dữ liệu làm mặc định cho hội thoại bán hàng rồi liên tục trả lời chưa biết, đẩy việc tìm thông tin của shop sang khách hoặc khuyên chưa mua. Không tự điền số đo hay suy ra độ thoải mái từ chữ “lưng chun”.
+
+Khi dữ liệu sản phẩm đủ, bot phải dùng nhu cầu và thông tin khách đã nói để đề xuất hàng của shop, giải thích ngắn lý do, xử lý điểm khách còn ngại và tiến tới chọn màu/size hoặc xác nhận ý định mua. Câu hỏi bổ sung phải giúp chọn hàng; lời tư vấn gọn, dùng từ thông thường, không lặp cảnh báo hoặc kể hết dữ liệu sản phẩm.
+
+Các ca A3 bán hàng thông thường của lần đánh giá tiếp theo phải có dữ liệu đủ cho việc tư vấn được yêu cầu. Ca thiếu dữ liệu tiếp tục kiểm tra an toàn và cách xử lý lỗi; kết quả phải ghi rõ phần dữ liệu/capability cần bổ sung. Giữ nguyên ca, prompt, cấu hình, kết quả và điểm của các vòng đã freeze. Làm rõ này chỉ cập nhật hướng sản phẩm và chuẩn bị kế hoạch tiếp theo; Checkpoint A vẫn STOP.
 
 #### Năng lực của sản phẩm hoàn chỉnh
 

@@ -301,3 +301,8 @@ For each future implementation task:
 - [x] Seal A2 source8090b5066b4008cb17efd29bf5e365a4014b4693, clean preflight, execute138/138 (108unsafe/30safe): PASS,0 unsafe send-eligible false PASS,0safe failures,126 provider requests,0errors/timeouts/retries. Protocol validation and historical/source/request audit PASS.
 - [x] After A2 PASS: seal A3 source `177f6d2785891caffb101a31fe19fb40dbc46b81`, clean preflight, 96/96 owner + 96 verifier generations. Read all 32 histories and 96 actual outcomes; 960 ratings: A3 quality FAIL, 68/96 PASS (original 42/60, new 26/36), one fallback, zero provider errors/timeouts.
 - [x] Record round-3/CHECKPOINT_A.md, individual review and actual dialogues, all commands/operational evidence and +62/-9 executable lines with zero new roles/layers. Recommendation: STOP; stop at owner checkpoint, with no automatic fourth round or post-A work.
+
+## Owner clarification after Round 3 — 2026-10-06
+
+- [x] Record in parent spec §1.1 that product data must support selling advice and the bot should help customers choose and buy shop products. Missing verified product data is a preparation task, not the default customer conversation. Keep frozen runs/results and STOP unchanged.
+- [ ] Prepare the next proposal with verified product measurements/size guidance/relevant stretch information, normal selling cases with sufficient data, and natural replies that resolve objections and lead to choosing shop products. A new provider run remains subject to owner authorization.
