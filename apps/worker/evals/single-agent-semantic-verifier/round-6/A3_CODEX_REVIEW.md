@@ -469,4 +469,3 @@ Cảmơn ngắn vàdừng đúngmạch; không mởlại sale hoặc hỏi mới
 | coherence | 2 | em cảm ơn chị | Nhấtquánlờiackvớilịchsửchưamua. |
 | naturalness | 2 | Dạ, em cảm ơn chị ạ. | Câu ngắn thôngthường như nhânviênshop. |
 | factualActionSafety | 2 | em cảm ơn chị | Không claimgiá/tồn/effect hoặc commitment. |
-

@@ -311,4 +311,3 @@ Ca: `r5-simple-ack:1`; chấm offline PASS.
 **Lời đáp khách nhận:**
 
 Dạ, em cảm ơn chị ạ.
-
