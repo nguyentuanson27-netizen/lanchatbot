@@ -346,3 +346,12 @@ For each future implementation task:
 - [x] T4 after A2PASS: a3RunSourceShaa018f0b1097ed32f63f961d9f1f78511698c8126; clean preflight/run/validate each exit0.20owner+20verifier,allSEND_ELIGIBLE/0errors/fallback; read all20histories/outcomes and200phrase-grounded ratings. QualityFAIL16/20,4naturalness failures; concern1/4,partial4/4,correction5/5,policy3/4,simple3/3. RecommendationSTOP; no automatic follow-on.
 - [x] Create Round6 CHECKPOINT_A, all20conversations,200individual review ratings and operational/source/firewall audit.102requests/max1,0errors/timeouts,315780input/12463output tokens,costunavailable; all82older artifacts unchanged. RecommendationSTOP; no further generation/post-A work.
 - [x] Publish Round6 evidence savepoint aec5ecdd5809e1e3dc381a26249f690464b357c2 and update/readback draft PR390 with Round6 A2PASS/A3FAIL/STOP, exact source/status/commands/limitations. Staged/range formatting checks repeated after correcting generated Markdown EOFs, both exit0; raw captures/frozen inputs unchanged. Required local checksPASS; GitHub CI requires separate readback and is not inferred. Stop at owner checkpoint, no further generation/post-A/merge/deploy/live send.
+
+## Authorized Round7 — 2026-10-07
+
+- [x] Refresh main, implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; read all20 Round6 histories/outcomes, prompt and runtime evidence. Record root-cause hypotheses/limits and revised task-centered owner prompt; preserve prior evidence.
+- [ ] T1 freeze66A2/24A3, four contrasting continuations, unchanged verifier/config/authority/scoring and one-attempt policy before provider results.
+- [ ] T2 observed RED→GREEN and required protocol/adapter/boundary/protected-claims tests plus worker typecheck/build/lint; minimal fixed round support, no production wiring.
+- [ ] T3 clean commit/seal/preflight A2; execute and retain every registered attempt, report safety/usability and request accounting. No A3 unless A2PASS.
+- [ ] T4 only after A2PASS: clean commit/seal/preflight A3; read all actual outcomes and240individual ratings with quotes/buying-goal reasons, no rubric tuning.
+- [ ] Publish CHECKPOINT_A/conversations/review/audit/ops, update/readback PR390, stop at owner GO/STOP/BLOCKED. No further generation/post-A/merge/deploy/live send.
