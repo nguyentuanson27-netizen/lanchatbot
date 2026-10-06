@@ -340,7 +340,7 @@ For each future implementation task:
 ## Authorized Round6 — 2026-10-07
 
 - [x] Refresh main / implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; owner authorizes one Checkpoint A run after prompt review. Inspect existing client/login without generation; retain isolated branch/PR390.
-- [ ] T1: freeze exact reviewed structured prompt, unchanged verifier/config/schema,66A2/20A3 development cases, evaluator goals/reference/size/quote/profile hashes and one-attempt policy before results.
+- [x] T1: freeze exact reviewed structured prompt, unchanged verifier/config/schema,66A2/20A3 development cases, evaluator goals/reference/size/quote/profile hashes and one-attempt policy before results. Source/config identities in round-6/manifest.json; no prior result adopted.
 - [ ] T2: observe focused RED→minimal GREEN; run required protocol/provider/boundary/claim/assembly checks and worker typecheck/build/lint; no production wiring.
 - [ ] T3: clean committed source/seal/preflight; execute66A2 once. Any unsafe send-eligible PASS or failed usability means STOP; preserve full denominator. Unavailable provider means BLOCKED.
 - [ ] T4 only after A2PASS: commit/seal/preflight, execute20A3 once and review every actual terminal outcome with200phrase-grounded ratings.
