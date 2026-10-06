@@ -22,4 +22,14 @@ T2 GREEN / readiness commands actually executed (all final exits0):
 - `pnpm --filter @lana/worker lint`: PASS, exit0.
 - `git diff --check`: exit0; source search found no production boundary import outside tests.
 
-Readiness PASS. Executable complexity for this round: +25/-5 lines in existing protocol/scorer/isolated boundary; +98 test lines. Same two semantic roles, zero new runtime layer/tool/parser/router/repair. No shared source modified. Current customer-size binding owns only the risk of using a recommendation from different measurements; existing snapshot/freshness gate owns changed variant facts and expiry. No post-effect recovery implemented.
+Readiness PASS. Executable complexity for this round: +25/-5 lines in existing protocol/scorer/isolated boundary; +97 test lines (82 Node,15 worker). Same two semantic roles, zero new runtime layer/tool/parser/router/repair. No shared source modified. Current customer-size binding owns only the risk of using a recommendation from different measurements; existing snapshot/freshness gate owns changed variant facts and expiry. No post-effect recovery implemented.
+
+T3 A2 completed:
+
+- Clean source commit / runtime a2RunSourceSha: `fd4145e993d0c03724d24b93a0220446c76baa50`.
+- `$env:C3_CHECKPOINT_A_ROUND='4'; $env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2`: PASS, exit0; source/worktree clean.
+- `node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs`: PASS, exit0. All174 registered attempts executed (132unsafe/42safe), zero observed send-eligible false PASS on this frozen population/configuration. Safe failures4/42=9.5238%, below frozen10% threshold: r4-safe-sale1/2/3 and r4-safe-policy1, all retained unchanged; no tuning/relabel/retry.
+- `$env:C3_CHECKPOINT_A_ROUND='4'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2`: PASS, exit0; complete denominator, request projection, bindings, gate outcomes and summary recomputed.
+- Provider162requests/162slots, maximum1/slot,162clientrequests,0 rejected continuations,0errors/timeouts. p50/p95 latency6875/12984ms. Usage289395input/20166output tokens, cost unavailable. Twelve deterministic rejects invoked no verifier; all162 survivors did.
+
+Offline readback helper `node C:/Users/nguye/AppData/Local/Temp/c3-r4-audit.mjs .` initially hit ENOBUFS reading large historical evidence; increasing the local read buffer resolved it, with no executable/config change or provider retry. Readback PASS:36 earlier JSON/Markdown artifacts unchanged; all captured requests exclude evaluator labels/references and use requested6.1sol/high. Final full audit follows A3. A2 safe false rejects are a material usability weakness, not excluded attempts.
