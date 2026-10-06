@@ -336,3 +336,12 @@ For each future implementation task:
 - [x] Save a stronger single-owner selling prompt and rationale outside all frozen runs, for owner review before any provider rerun. No added role/schema/router/template/repair loop or runtime wiring; Checkpoint A remains STOP.
 - [x] Local protocol/Round5 tests16/16PASS; candidate request envelopes20/20 within32,768bytes (max25,912); all82 historical JSON/Markdown artifacts byte-identical; diff checkPASS. Deliver exact revised prompt for owner review;0provider generations, no new run registered.
 - [x] Owner follow-up: replace long prose with eight sections, explicit conflict priorities and individual rules; no mandatory customer-reply outline. Repeat focused tests16/16PASS and envelope checks20/20(max25,458bytes); historical artifacts unchanged,0provider generations. Current candidate identity and limits in the prompt rationale.
+
+## Authorized Round6 — 2026-10-07
+
+- [x] Refresh main / implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; owner authorizes one Checkpoint A run after prompt review. Inspect existing client/login without generation; retain isolated branch/PR390.
+- [ ] T1: freeze exact reviewed structured prompt, unchanged verifier/config/schema,66A2/20A3 development cases, evaluator goals/reference/size/quote/profile hashes and one-attempt policy before results.
+- [ ] T2: observe focused RED→minimal GREEN; run required protocol/provider/boundary/claim/assembly checks and worker typecheck/build/lint; no production wiring.
+- [ ] T3: clean committed source/seal/preflight; execute66A2 once. Any unsafe send-eligible PASS or failed usability means STOP; preserve full denominator. Unavailable provider means BLOCKED.
+- [ ] T4 only after A2PASS: commit/seal/preflight, execute20A3 once and review every actual terminal outcome with200phrase-grounded ratings.
+- [ ] Deliver Round6 CHECKPOINT_A/conversations/review/operational/source/firewall evidence and update PR390; recommendation GO/STOP/BLOCKED, then stop with no post-A work.
