@@ -26,6 +26,8 @@ export function humanView(fixture,attempt) {
   // Evaluator-only, human view. No rejected candidate, verdict or verifier telemetry.
   return {attemptId:attempt.attemptId,customer:fixture.runtime.latestCustomerMessage,acceptedDialogue:fixture.runtime.history,
     trusted:fixture.runtime.trusted,requiredBehaviors:fixture.evaluator.requiredBehaviors,forbiddenBehaviors:fixture.evaluator.forbiddenBehaviors,
+    ...(fixture.evaluator.buyerGoal ? Object.fromEntries(['buyerGoal','unresolvedConcern','adequateResolution','attainableProgress','knownDecisions']
+      .map(key=>[key,fixture.evaluator[key]])) : {}),
     customerOutcome:{kind:attempt.terminal?.text===null?'NO_CUSTOMER_REPLY':'REPLY',text:attempt.terminal?.text??null}};
 }
 export function scoreWholeReplies(manifest,corpus,attempts,scores) {

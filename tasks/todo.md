@@ -318,8 +318,8 @@ For each future implementation task:
 ## Authorized Round 5 — 2026-10-06
 
 - [x] Refresh main, record implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361 and owner authorization; retain earlier evidence and isolated PR390.
-- [ ] Freeze66A2/20newA3, confident-owner prompt, complete source data, consistent histories/state, code-derived quotes, exact config and per-case selling goals/scoring.
-- [ ] Observe RED → minimal GREEN; complete focused readiness and worker typecheck/build/lint; evaluator firewall/no production wiring.
+- [x] Freeze66A2/20newA3, confident-owner prompt, complete source data, consistent histories/state, code-derived quotes, exact config and per-case selling goals/scoring. T1 savepoint1e554eed; plan/spec sourcea270cd12218f97cfab7844d165a2b83114e3affa.
+- [x] Observe RED3pass/4fail → minimal GREEN7/7; full Node54/54 including installed-client local-stub adapter, worker boundary/vertex77/77, protected claims/reply assembly21/21 and worker typecheck/build/lintPASS. Captured request firewall and no production wiring confirmed; see Round5 READINESS.md.
 - [ ] Seal clean A2 source, preflight/run/validate198 registered attempts; retain all failures; STOP without A3 on FAIL/BLOCKED.
 - [ ] Only after A2PASS, seal clean A3 source and run60 actual terminal outcomes; read every history/reply and assign600 phrase-grounded scores.
 - [ ] Deliver CHECKPOINT_A, histories/review, actual commands/provenance/operational/complexity evidence and PR390 update; stop at owner GO/STOP/BLOCKED.
