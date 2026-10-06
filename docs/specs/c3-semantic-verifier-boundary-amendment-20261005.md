@@ -49,6 +49,8 @@ The end goal remains:
 
 > **correct + sufficiently complete + useful + context-aware + natural + safe**
 
+The official owner-approved product direction is [parent spec §1.1 — fashion-sales consultation and effective buying](c3-single-agent-commerce-architecture-20261004.md#11-owner-approved-fashion-sales-product-direction-2026-10-06). Whole-reply usefulness, decision support, naturalness and next steps must serve that sales-consultation goal. Verifier scope remains protected-language safety only. Owner has not accepted A3 quality; Checkpoint A remains STOP. The product-direction update does not retroactively change frozen experiment inputs/results or authorize post-A implementation.
+
 The amendment exists because the previous boundary failed its hardest feasibility test before full orchestration was built.
 
 ### 1.1 What success means

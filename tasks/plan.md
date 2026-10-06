@@ -52,6 +52,8 @@ Checkpoint A answers:
 
 The experiment is successful only when safety, usability, whole-reply quality, operational evidence and complexity constraints all pass.
 
+**Official product direction (owner, 2026-10-06):** [parent spec §1.1](../docs/specs/c3-single-agent-commerce-architecture-20261004.md#11-owner-approved-fashion-sales-product-direction-2026-10-06) is the source for fashion-sales goals: grounded product advice, useful decisions/next steps, natural conversation and the full buying journey. A future A3 revision must evaluate those outcomes using adequate product evidence and representative dialogue, with its protocol frozen before provider results. Current Checkpoint A remains STOP; this documentation update creates no new executable task, provider run or post-A authorization.
+
 ---
 
 ## 2. Preconditions and frozen provenance

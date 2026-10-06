@@ -12,7 +12,7 @@ This spec proposes a bounded architecture experiment. It does not approve a rewr
 
 ## 1. Objective
 
-The goal is a chatbot that is good enough for real customer conversations, not merely a pipeline that is internally valid.
+The product goal is effective fashion-sales consultation: help customers choose suitable products, resolve purchase concerns and make an informed buying decision, with a reliable path to completing a purchase. The owner-approved product direction is defined in §1.1 below.
 
 A successful customer turn must satisfy ten requirements:
 
@@ -32,6 +32,43 @@ The customer-facing quality bar is:
 > **correct + sufficiently complete + useful + context-aware + natural + safe**
 
 Architecture simplicity is a means to that quality bar, not the end goal.
+
+### 1.1 Owner-approved fashion-sales product direction (2026-10-06)
+
+**Trạng thái:** Owner đã yêu cầu ghi các mục tiêu dưới đây thành hướng đi chính thức của sản phẩm ngày 2026-10-06 (Asia/Saigon). Đây là nguồn mục tiêu sản phẩm cho các kế hoạch và lần đánh giá tiếp theo.
+
+**Mục tiêu chính:** Khách được tư vấn sát nhu cầu để chọn đúng món, màu/size khi đủ cơ sở và mua thuận tiện; shop phục vụ và bán hàng hiệu quả bằng tư vấn có căn cứ. Đúng và đủ thông tin là nền tảng. Kết quả cần đạt là một phương án tư vấn hữu ích, hợp lý, tự nhiên, giúp khách tiến tới quyết định phù hợp.
+
+#### Chất lượng tư vấn thời trang
+
+1. **Hiểu nhu cầu mua:** Nắm dịp sử dụng, phong cách, sở thích, ngân sách, ưu tiên về dáng/độ thoải mái và thông tin vóc dáng/số đo khách đã cung cấp khi liên quan. Chỉ hỏi phần còn thiếu có thể làm thay đổi phương án tư vấn; không hỏi để điền đủ một checklist.
+2. **Đề xuất cụ thể:** Chọn phương án từ sản phẩm/biến thể có dữ liệu trong phạm vi được phép, giải thích vì sao phù hợp và đánh đổi gì. Có thể hỗ trợ so sánh hoặc phối đồ khi có cơ sở; không bịa sản phẩm thay thế, tồn hàng, chất liệu, fit hoặc lợi ích để thuyết phục khách.
+3. **Giải quyết băn khoăn:** Hiểu lý do phía sau phản đối về giá, size, độ thoải mái, mẫu khác hoặc trải nghiệm trước đó. Tư vấn theo nguyên nhân và dữ kiện thay vì lặp giá/chính sách, ép mua, tạo khan hiếm hoặc ưu đãi giả.
+4. **Dẫn tới bước phù hợp:** Giúp khách cân nhắc mẫu, làm rõ điểm cản quyết định, chọn màu/size khi đủ cơ sở hoặc xác nhận ý định mua. Bước tiếp phải thực sự làm được với thông tin và khả năng hiện có. Không xin số đo để hứa đối chiếu khi chưa có bảng size, hoặc gợi quy trình/ngoại lệ chưa được xác nhận.
+5. **Giao tiếp tự nhiên:** Nói như nhân viên tư vấn có hiểu tình huống, gọn và nhất quán với giọng shop. Tránh checklist chung chung, disclaimer lặp, thông tin thừa và hỏi lại điều khách đã nói. Câu hỏi giá đơn giản được trả lời trực tiếp; khách trì hoãn hoặc muốn dừng được tôn trọng, không buộc mọi lượt phải chốt mua.
+
+Đầu vào cần đủ để kiểm tra khả năng tư vấn: dữ liệu sản phẩm/ảnh phù hợp, kiểu dáng, phom, chất liệu, màu, bảng size/số đo, cách chăm sóc và lựa chọn so sánh khi có; cùng giá/tồn/chính sách hiện hành. Phân biệt nguồn đã xác nhận, thông tin khách cung cấp, nhận định tư vấn và phần chưa biết. Ảnh hoặc suy đoán không tự xác lập chất liệu, số đo, tồn hay quyền lợi. Thiếu evidence phải được xử lý bằng phương án có cơ sở, không bằng bịa thêm facts.
+
+#### Năng lực của sản phẩm hoàn chỉnh
+
+| Năng lực | Kết quả khách/shop cần nhận được |
+|---|---|
+| Theo hành trình mua | Giữ mẫu/biến thể đang cân nhắc, ngân sách, sở thích, sửa đổi và điểm chưa giải quyết qua nhiều lượt; không hỏi lại hoặc nhầm mẫu khi khách đổi ý. Tái sử dụng history/state hiện có. |
+| Xử lý phản đối | Giải quyết đúng lo ngại về giá/fit/trải nghiệm và giúp chọn hướng phù hợp, không gây áp lực hoặc đưa lời hứa thiếu căn cứ. |
+| Mua thuận tiện | Chọn đúng màu/size, xác nhận tồn, tổng tiền gồm phí/quyền lợi đã xác minh và giao hàng; thực hiện nghiệp vụ khi có đồng ý/quyền phù hợp, không tạo đơn trùng hoặc báo thành công giả. |
+| Hỗ trợ sau mua | Theo dõi đơn, giải đáp và hướng dẫn đổi hàng/đổi size theo dữ liệu và quy trình thật. |
+| Chuyển nhân viên | Nhận ra khi cần người xử lý; chuyển đúng lúc với nhu cầu, lịch sử và phần đã xác minh để khách không phải kể lại. Không handoff vô ích khi đã đủ dữ kiện trả lời. |
+| Vận hành ổn định | Phản hồi đủ nhanh, facts cập nhật, không gửi lặp và giữ mạch sau lỗi/timeout; recovery dựa trên state/receipt đã commit, không phát sinh hiệu ứng trùng. |
+| Đo hiệu quả thực tế | Theo dõi tiến triển chọn mẫu/size, hoàn tất đơn, điểm bỏ dở, handoff, chất lượng tư vấn và ca sai/đổi trả liên quan tới tư vấn; đối chiếu với độ trễ, lỗi và token/cost khi có dữ liệu. |
+
+#### Áp dụng vào đánh giá và lộ trình
+
+- A3 phải đánh giá tư vấn bán hàng trên tình huống mua cụ thể: lựa chọn/so sánh, phản đối, sửa đổi và lịch sử nhiều lượt với evidence phù hợp. Giữ cả ca đủ và thiếu evidence; price/stock đơn giản tiếp tục là controls. Dùng các chiều whole-reply hiện có để đánh giá phương án tư vấn, tính hữu ích/hợp lý, tự nhiên và bước xử lý, thay vì chỉ đếm facts đã trả lời.
+- Chất lượng của phương án và tiến triển phù hợp của khách là căn cứ chấp nhận. Điểm tự chấm, verifier PASS hoặc tỷ lệ chốt đơn đơn lẻ không thay thế đánh giá này. Một quyết định trì hoãn/từ chối phù hợp vẫn được tôn trọng. Các mẫu số, mốc đo và ngưỡng định lượng cho thử nghiệm tương lai phải được freeze trước khi chạy.
+- **Checkpoint A hiện vẫn STOP:** owner chưa chấp nhận chất lượng A3. Ưu tiên tiếp theo là chất lượng tư vấn và đầu vào đánh giá. Luồng nghiệp vụ mua hàng thật, persistence/mutation, sau mua và rollout thuộc plan post-A sau owner GO; việc ghi mục tiêu không tự mở implementation hoặc một provider run mới.
+- Giữ một conversational owner và tối đa một semantic verifier. Code là sole authority về identity/truth/freshness/state/permission/effects/receipts/privacy. Không thêm third role, semantic router, generic Vietnamese parser, template theo ca, repair/reverify loop hoặc durable semantic memory để đạt mục tiêu bán hàng.
+
+Mục tiêu này có hiệu lực cho các kế hoạch tương lai. Corpora, prompts, cấu hình, source SHA, provider evidence và điểm số của những vòng đã freeze được giữ nguyên theo identity lịch sử; không chấm lại hoặc gọi chúng là đã đạt mục tiêu mới.
 
 ---
 

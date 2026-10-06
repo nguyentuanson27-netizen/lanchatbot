@@ -2,6 +2,8 @@
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
+**Official product goals:** [Fashion-sales product direction, owner-approved2026-10-06](../docs/specs/c3-single-agent-commerce-architecture-20261004.md#11-owner-approved-fashion-sales-product-direction-2026-10-06). Future planning/evaluation must use these goals; frozen historical inputs/results remain unchanged.
+
 **Status:** Owner review2026-10-06:STOP, Checkpoint A not achieved. Round2 A2 PASS remains; A3 whole-reply quality not accepted (usefulness/reasonableness, naturalness and handling/next steps). Prior Codex numerical PASS/GO retained historically; GO recommendation withdrawn. Checkpoint A only.
 
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.
@@ -282,3 +284,9 @@ For each future implementation task:
 - [x] Offline review60/60 outcomes /600 individual ratings and rationale; quality PASS.
 - [x] Report original/new population, operational evidence and structural delta; earlier GO recommendation withdrawn after owner quality review, current STOP.
 - [x] Record owner quality rejection in report/review/PR390; Checkpoint A not achieved. Preserve raw evidence and original scoring; no automatic third iteration or post-A work.
+
+## Owner-approved product direction — 2026-10-06
+
+- [x] Record fashion-sales consultation as the official product goal in parent spec §1.1, covering product choices, objections, naturalness, appropriate next steps and grounded fashion data.
+- [x] Record full-product goals: buying-journey continuity, objection handling, convenient purchase, after-sales support, useful staff handoff, reliable operation and actual outcome measurement. Link amendment/plan/todo to the canonical goal section.
+- [x] Preserve Checkpoint A STOP and frozen evidence/scoring. These product goals do not authorize a new provider run, runtime implementation or post-A work.
