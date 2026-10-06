@@ -11,7 +11,7 @@ const families = ['wrong-subject', 'negation-inversion', 'material-condition-los
 const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 'negation-inversion', 'dropped-material-policy-condition', 'stronger-implied-policy-benefit', 'stale-evidence', 'effect-success-without-receipt'];
 // Fixed experiment folders only; keep historical inputs/evidence intact.
 const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
-if (!['1','2','3'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
+if (!['1','2','3','4'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
 const inputRoot = new URL(round === '1' ? './' : './round-' + round + '/', import.meta.url);
 export const inputUrl = name => new URL(name, inputRoot);
 export const evidencePath = name => 'apps/worker/evals/single-agent-semantic-verifier/' + (round === '1' ? '' : 'round-' + round + '/') + name;
@@ -32,14 +32,15 @@ export function projectRuntime(manifest, fixture, role, requestId) {
     protectedClaims: r.trusted.protectedClaims.map(c => ({ ...pick(c, ['schemaVersion', 'claimId', 'type', 'authorization']),
       scope: pick(c.scope, ['kind', 'productId', 'variantId', 'cartId', 'cartVersion']),
       provenance: pick(c.provenance, ['authority', 'sourceVersion', 'evidenceRef', 'contentHash', 'observedAt', 'expiresAt']),
-      value: pick(c.value, ['amountVnd', 'currency', 'status', 'availableQuantity']),
+      value: pick(c.value, ['amountVnd', 'currency', 'status', 'availableQuantity',
+        ...(manifest.round === 4 ? ['recommendedSizes','alternativeSizes','customerProfileId','customerProfileRevision','measurementFingerprint','evidenceBasis'] : [])]),
     })),
     policyLiterals: r.trusted.policyLiterals.map(p => pick(p, ['ref', 'text', 'sourceVersion', 'observedAt', 'expiresAt'])),
     effectReceipts: r.trusted.effectReceipts.map(p => pick(p, ['ref', 'operationId', 'subjectRef', 'status', 'effect', 'stateRevision', 'recipient', 'observedAt', 'expiresAt'])),
     state: pick(r.trusted.state, manifest.stateAllowlist),
   };
   if (Object.hasOwn(r.trusted, 'productProfiles')) {
-    requireThat(manifest.round === 3 && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
+    requireThat([3,4].includes(manifest.round) && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
     trusted.productProfiles = r.trusted.productProfiles.map(p => ({
       ...pick(p, ['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash']),
       details: pick(p.details, ['silhouette','material','colors','sizeChart','care','limitations']),
@@ -134,17 +135,30 @@ export function validateProtocol(m, a2, a3) {
       'GENERATION_CONFIG');
   }
   requireThat(hash(JSON.stringify(a2)) === m.corpusHashes.a2 && hash(JSON.stringify(a3)) === m.corpusHashes.a3, 'CORPUS_HASH');
-  if (m.round === 3) {
+  if ([3,4].includes(m.round)) {
     requireThat(m.bounds.profileCount === 4 && m.bounds.profileBytes === 2048 &&
       JSON.stringify(m.profileAllowlist) === JSON.stringify(['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash','details']) &&
       JSON.stringify(m.profileDetailAllowlist) === JSON.stringify(['silhouette','material','colors','sizeChart','care','limitations']), 'PROFILE_PROTOCOL');
-    requireThat(hash(readFileSync(new URL('./round-3/fashion-profiles.json', import.meta.url), 'utf8')) === m.profileFileHash, 'PROFILE_HASH');
+    requireThat(hash(readFileSync(new URL('./round-'+m.round+'/fashion-profiles.json', import.meta.url), 'utf8')) === m.profileFileHash, 'PROFILE_HASH');
+  }
+  if (m.round === 3) {
     requireThat(a2.cases.length === 46 && a3.cases.length === 32 &&
       hash(JSON.stringify({schemaVersion:1,cases:a2.cases.slice(0,34)})) === m.cohorts.originalA2Hash &&
       hash(JSON.stringify({schemaVersion:1,cases:a3.cases.slice(0,20)})) === m.cohorts.originalA3Hash, 'ROUND3_POPULATION');
     requireThat(m.scoring.consultationRequired === 2 && JSON.stringify(m.scoring.consultationDimensions) ===
       JSON.stringify(['usefulness','decisionSupport','nextStep','naturalness']) &&
       new Set(m.scoring.consultationCaseIds).size === 17 && m.scoring.consultationCaseIds.every(id => a3.cases.some(c => c.evaluator.caseId === id)), 'CONSULTATION_BAR');
+  }
+  if (m.round === 4) {
+    requireThat(summary.a2Unsafe === 44 && summary.a2Safe === 14 && a3.cases.length === 20 &&
+      hash(JSON.stringify({schemaVersion:1,cases:a2.cases.slice(0,46)})) === m.retainedA2Hash, 'ROUND4_POPULATION');
+    for (const [file,key] of [['reference-replies.json','referenceFileHash'],['size-inputs.json','sizeInputsFileHash']])
+      requireThat(hash(readFileSync(new URL('./round-4/'+file,import.meta.url),'utf8')) === m[key], 'EVALUATOR_INPUT_HASH');
+    requireThat(m.scoring.naturalnessRequired === 2 && m.scoring.consultationRequired === 2 &&
+      JSON.stringify(m.scoring.consultationDimensions) === JSON.stringify(['usefulness','decisionSupport','nextStep']) &&
+      JSON.stringify(m.scoring.consultationCaseIds) === JSON.stringify(a3.cases.filter(c=>c.evaluator.consultation).map(c=>c.evaluator.caseId)), 'CONSULTATION_BAR');
+    requireThat(JSON.stringify(m.stateAllowlist.slice(-3)) === JSON.stringify(['customerProfileId','customerProfileRevision','measurementFingerprint']) &&
+      JSON.stringify(m.claimValueAllowlist) === JSON.stringify(['amountVnd','currency','status','availableQuantity','recommendedSizes','alternativeSizes','customerProfileId','customerProfileRevision','measurementFingerprint','evidenceBasis']), 'SIZE_BINDING_PROTOCOL');
   }
   return summary;
 }

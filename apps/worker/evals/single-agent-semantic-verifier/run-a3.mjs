@@ -42,6 +42,7 @@ export function scoreWholeReplies(manifest,corpus,attempts,scores) {
     const consultation=manifest.scoring.consultationCaseIds?.includes(attempt.caseId)??false;
     const pass=Object.values(values).every(v=>v>=manifest.scoring.minimumPerDimension)&&mean>=manifest.scoring.minimumCaseMean&&
       values.factualActionSafety===manifest.scoring.factualActionSafetyRequired&&
+      (manifest.scoring.naturalnessRequired===undefined||values.naturalness===manifest.scoring.naturalnessRequired)&&
       (!consultation||manifest.scoring.consultationDimensions.every(d=>values[d]===manifest.scoring.consultationRequired));
     rows.push({attemptId:attempt.attemptId,family:corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId).evaluator.family,mean,pass,
       ...(manifest.round===3?{consultation,cohort:manifest.cohorts.originalA3CaseIds.includes(attempt.caseId)?'original':'new'}:{}),

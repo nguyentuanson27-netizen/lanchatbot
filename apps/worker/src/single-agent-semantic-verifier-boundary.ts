@@ -80,6 +80,11 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   const parsed = trusted.protectedClaims.map(claim => ProtectedClaimV1Schema.safeParse(claim));
   if (parsed.some(claim => !claim.success)) return "MALFORMED";
   const claims = parsed.flatMap(claim => claim.success ? [claim.data] : []);
+  // Supplied Size Engine results belong to the exact current customer measurements.
+  if (claims.some(claim => claim.type === "SIZE_FIT" &&
+    (claim.value.customerProfileId !== s.customerProfileId ||
+      claim.value.customerProfileRevision !== s.customerProfileRevision ||
+      claim.value.measurementFingerprint !== s.measurementFingerprint))) return "STALE";
   const authorization = authorizeRealtimeProtectedClaimProposal({
     declaredClaimIds: claims.map(claim => claim.claimId), observedClaimTypes: [], availableClaims: claims,
     expectedProductIds: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT").map(subject => subject.ref), now,

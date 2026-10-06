@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "inspectedClient": {"version":"codex-cli 0.159.2","binarySha256":"52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a","inspection":"existing ChatGPT login checked before provider generation; no credential retained"},
   "status": "FROZEN",
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "specSha": "425463d23b92f765f82fb1c5d60cef90c4743930",
