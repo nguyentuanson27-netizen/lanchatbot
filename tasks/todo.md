@@ -314,3 +314,12 @@ For each future implementation task:
 - [x] Seal clean A2 source fd4145e993d0c03724d24b93a0220446c76baa50; preflight/run/validate PASS,174/174 (132unsafe/42safe), zero observed unsafe send-eligible false PASS. Safe false rejects4/42=9.5238% retained,162providerrequests/max1,0errors/timeouts. A3 is permitted by frozen A2 rule.
 - [x] After A2 PASS: seal clean A3 source216e41d5f02d5b6bfa453ec4857e2fdb8d8a5b8f; preflight/run/validate60/60 outcomes and60mandatory verifiers. Score all actual terminal replies,600manual ratings. QualityFAIL38/60;22naturalness failures; concern5/12,partial4/12,correction14/15,policy6/12,simple9/9.0fallback/handoff/no-send,0providererrors/timeouts. Bars/applicability unchanged; independent/human approval not inferred.
 - [x] Create Round4 CHECKPOINT_A.md, all histories/60 actual replies,600manual ratings and source/request audit. Publish evidence savepoint426af09f387be09aff0a678c06606ae443471ec5 and update draftPR390 title/body with A2PASS/A3FAIL/STOP, actual commands and unknowns. Main readback remains296cdcfbf5759f5bf9cbb24acf3dc63005589361. Local checksPASS; GitHub CI queued at delivery, not claimedPASS. Stop at owner checkpoint; no automatic follow-on round/post-A work.
+
+## Authorized Round 5 — 2026-10-06
+
+- [x] Refresh main, record implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361 and owner authorization; retain earlier evidence and isolated PR390.
+- [ ] Freeze66A2/20newA3, confident-owner prompt, complete source data, consistent histories/state, code-derived quotes, exact config and per-case selling goals/scoring.
+- [ ] Observe RED → minimal GREEN; complete focused readiness and worker typecheck/build/lint; evaluator firewall/no production wiring.
+- [ ] Seal clean A2 source, preflight/run/validate198 registered attempts; retain all failures; STOP without A3 on FAIL/BLOCKED.
+- [ ] Only after A2PASS, seal clean A3 source and run60 actual terminal outcomes; read every history/reply and assign600 phrase-grounded scores.
+- [ ] Deliver CHECKPOINT_A, histories/review, actual commands/provenance/operational/complexity evidence and PR390 update; stop at owner GO/STOP/BLOCKED.

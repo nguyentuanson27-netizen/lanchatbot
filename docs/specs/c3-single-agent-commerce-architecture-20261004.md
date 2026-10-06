@@ -55,6 +55,8 @@ Owner làm rõ ngày 2026-10-06: sản phẩm đem bán phải có thông tin c�
 
 Khi dữ liệu sản phẩm đủ, bot phải dùng nhu cầu và thông tin khách đã nói để đề xuất hàng của shop, giải thích ngắn lý do, xử lý điểm khách còn ngại và tiến tới chọn màu/size hoặc xác nhận ý định mua. Câu hỏi bổ sung phải giúp chọn hàng; lời tư vấn gọn, dùng từ thông thường, không lặp cảnh báo hoặc kể hết dữ liệu sản phẩm.
 
+Owner làm rõ trước Round5 ngày 2026-10-06: tư vấn tự tin để khách tin tưởng, loại giọng dè dặt chung chung khi đã đủ dữ kiện. Giữ điều kiện có ảnh hưởng thực tế; sự tự tin không tạo quyền bịa fit, tồn, chính sách hay thành công hành động. Viết lại toàn bộ hội thoại đánh giá với lời khách/shop tự nhiên và context/state nhất quán. Chấm kỹ từng kết quả trong lịch sử theo nhu cầu mua, phương án, điểm cản, sự tin tưởng và tiến triển phù hợp; đúng facts hoặc có câu hỏi chốt chưa đủ đạt. Giữ10chiều đánh giá hiện có, một conversational owner, tối đa một verifier và code authority; không thêm tầng ngữ nghĩa để cải thiện lời nói.
+
 Các ca A3 bán hàng thông thường của lần đánh giá tiếp theo phải có dữ liệu đủ cho việc tư vấn được yêu cầu. Ca thiếu dữ liệu tiếp tục kiểm tra an toàn và cách xử lý lỗi; kết quả phải ghi rõ phần dữ liệu/capability cần bổ sung. Giữ nguyên ca, prompt, cấu hình, kết quả và điểm của các vòng đã freeze. Làm rõ này chỉ cập nhật hướng sản phẩm và chuẩn bị kế hoạch tiếp theo; Checkpoint A vẫn STOP.
 
 #### Năng lực của sản phẩm hoàn chỉnh
