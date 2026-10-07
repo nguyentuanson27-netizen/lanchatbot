@@ -33,3 +33,21 @@ Sealed clean HEAD/runtime `a2RunSourceSha`: `12e0f3f10ba95d5f723c1c61192c0c14cb4
 - Same selected round, `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round12.mjs`: exit0;7sources/11inputs match seal,62captured requests/bindings/gates reconstruct,232/233historical evaluation files unchanged; only protocol.mjs intentionally changed.
 
 `r4-safe-policy` PASS here versus FAIL in Round11 under identical verifier/context/draft. This is observed variation, not improvement caused by owner prompt (A2 never calls owner). All original observations retained. A3 is permitted only now.
+
+## T4 actually executed
+
+Sealed clean HEAD/runtime `a3RunSourceSha`: `9bccd0c812c887c687dd005f1e35fdb2781db32b` after A2PASS savepoint; no executable/config/input changes between the two seals or during generation.
+
+- `C3_CHECKPOINT_A_ROUND=12 A3_RUN_SOURCE_SHA=9bccd0c812c887c687dd005f1e35fdb2781db32b A2_STATUS=PASS node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3`: exit0.
+- Same env and process-local approved Vertex credential route, `node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs`: exit0;28/28executed,28owner+25mandatoryverifier requests,20SEND_ELIGIBLE/8FALLBACK.3ownerHTTP429 errors,0timeouts/retries;4verifierFAIL and1invalid protectedRef→MALFORMED. All error attempts retained.
+- Selected round, `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3`: exit0;28complete exact-request/binding/final-gate reconstructions; raw qualityBLOCKED until offline review, no claimed raw qualityPASS.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-review-round12-view.mjs` with ranges0–28: exit0;read all28full histories/latest/trusted fit/quotes/terminal/candidate/verdict; no provider generation.
+- Selected round, `node C:/Users/nguye/AppData/Local/Temp/c3-score-round12.mjs`: exit0;280diagnostic ratings after connected whole-turn reviews;15/28PASS, A3FAIL. Anchors13/24, new2/4; owner final judgment prevails.
+- Same selected round, `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round12.mjs`: exit0 after finalized scores;7sources/11inputs match bothseals,115captured requests reconstruct with no evaluator labels,232historical evaluation files unchanged. Normalized tokens454106input/44716output,3usage-unavailable; provider costunexposed, no estimate.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-report-round12.mjs`: exit0;CHECKPOINT_A STOP, complete28conversation export/connected reviews/failed-candidate diagnosis and separate cohorts. Raw evidence/human-null packet preserved.
+
+No generation repeated, failed attempt omitted, source tuned after results or new runtime layer added. A3 verifier latency p50/p95=7863/18324ms; added verification7868/18328ms; end-to-end13316/24736ms.8/28fallback=28.57%>10%, handoff/no-send0. Gemini3/28errors10.71%; verifier transport errors0/25; invalidref1/25separate4%. STOP independent of any disputed offline style/source-attribution judgment.
+
+- `node C:/Users/nguye/AppData/Local/Temp/c3-polish-round12-reviews.mjs`: exit0;28connected review paragraphs made readable; all280numeric ratings/attempt identities unchanged. No raw/frozen evidence edits.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round12.mjs`: exit0;28displayed terminal replies match exact raw strings modulo display-only trailing whitespace;280ratings/115requests/8fallback/454106input/44716output accounting matches; local Markdown links exist. Extra generated Markdown EOF blanks normalized, raw JSON unchanged.
+- Final `git diff --check` / staged formatting and delivery readback are recorded below only after execution. Failed patch-context attempt during report editing made no file change; corrected before artifact verification, no provider/source/config changes.
