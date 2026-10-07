@@ -468,7 +468,7 @@ For each future implementation task:
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; clean initialHEAD5f5778c3415d8e640940d14beac913b54ef51e03, existing implementation branch/PR390. C3 histories and follow-up ownership corrections reviewed; distinguish guards/contracts from selling outcomes and synthetic purchase confirmation from actual sale. Preregister lessons/prompt/scope treatment specSHAa333fa9607db4a6e4743493fef6179922d391f26; exact prompt shared before provider.
 - [x] T1freeze72A2 retained/34A3questions+4new/38total,304historical evalfiles inventoried; new existing-field A3 profile/shipping-scope text,claims/history/bindings/evaluator retained,no evaluator labels forwarded. Initial preparation helper failed on four absent R12destination audit records; explicit statuses populated from existing histories,partial unsealed files recreated. No provider result/no old evidence edit.
-- [ ] T2observedRED/minimumGREEN and deterministic readiness.
+- [x] T2observedRED0/3→intermediate2/3(CORPUS_HASH serialization)→GREEN3/3;100Node/77worker/21business testsPASS/0skip,worker build/typecheck/lint/protocol/diff0. Compact A3 byte serialization corrected before provider, parsed data/preregistered hash unchanged; initial conversion SyntaxError caused no mutation. Protocol+14/-8lines only,50line3test file,no production wiring/new role/gate/shared/API change. Clean source seal follows.
 - [ ] T3cleanseal/preflight/A2 once; any unsafe eligiblePASS→STOP/noA3.
 - [ ] T4onlyA2PASS:38A3once,full terminal reviews/accounting/report.
 - [ ] Evidence/CHECKPOINT_A/todo/draftPR390 delivery;stop owner checkpoint,no automatic next round/post-A.

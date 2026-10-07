@@ -12,3 +12,21 @@ Owner authorizes learning from C3, fix and one Checkpoint A round. Date2026-10-0
 - `node C:/Users/nguye/AppData/Local/Temp/c3-freeze-round15.mjs`: initial exit1,missing R12destination preparation admissions. Read four histories,explicitly establish known innerHCMC foroffice/knownwaist,unknown forcolour/exchange. Correct helper before results; remove only named four partial new files and empty unsealed directory. Final exit0,304previous evaluation files inventoried,72A2/51UNSAFE/21SAFE retained,38A3/34consultation registered. Existing34questions/evaluator/history/claims/receipt/bindings retain,4authored new continuations. Existing-field A3 product/shipping-scope data revised; no parser/new business facts/authority/recovery.
 
 One attempt/case/max1generation/role,errors retain denominator,no retry/substitute/repair. OwnerGemini3.5FlashLite/global/HIGH,verifier6.1Sol/high/Codexlogin;unchanged verifier/schema/config/bounds/stateallowlist/static outcomes/numericbars. Synthetic fixtures/timestamps not current shop data. No provider results at T1;tests/seals/results added only after execution. Stop owner Checkpoint A,no production wiring/post-A/merge/deploy/live send.
+
+## Deterministic readiness actually executed
+
+T1savepoint382c5bb14eb2a0f382bf12c066f7f634894a50bf. Protocol+14/-8lines only for explicit Round15 selection/counts/retained contracts; new50line3test file. No provider/API/shared/boundary/production source change.
+
+- `C3_CHECKPOINT_A_ROUND=14 node --test apps/worker/evals/single-agent-semantic-verifier/round-15.test.mjs`: observed RED,exit1,0/3PASS/0skip; selected15 child UNKNOWN_CHECKPOINT_ROUND and two PROFILE_BOUND failures. Only then minimum selector support added.
+- Same focused command after selector change: intermediate exit1,2/3PASS, CORPUS_HASH; preparation helper had serialized A3 pretty rather than the protocol's compact JSON bytes. Initial serialization one-liner exit1(SyntaxError), no mutation; corrected conversion exit0, parsed data and preregistered compact hash unchanged. No model results or numeric bars changed.
+- `C3_CHECKPOINT_A_ROUND=15 node --test apps/worker/evals/single-agent-semantic-verifier/round-15.test.mjs`: exit0,3/3PASS/0skip. Both roles receive updated existing-field scope, retain price/stock/fit/history and exclude injected evaluator/preparation markers. Every surviving draft invokes verifier.
+- `pnpm --filter @lana/worker build`: exit0, dependency hooks and worker build complete.
+- `C3_CHECKPOINT_A_ROUND=15 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs`: exit0,100/100PASS/0skip; protocol/adapters/firewall/installed Codex client local stub, no actual provider generation.
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts`: exit0,77/77PASS(43boundary/34Vertex).
+- `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts`: exit0,21/21PASS.
+- `pnpm --filter @lana/worker typecheck`: exit0, dependency hooks complete.
+- `pnpm --filter @lana/worker lint`: exit0, existing tsc/noEmit script.
+- `C3_CHECKPOINT_A_ROUND=15 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs`: exit0,FROZEN_PROTOCOL_VALID,72A2/38A3.
+- `rg -n 'single-agent-semantic-verifier-boundary' apps/worker/src --glob '*.ts'`: boundary test import only,no production wiring. `git diff --check`: exit0.
+
+Readiness is mechanical compatibility, not provider semantic or sales-quality evidence. No added online role/layer/gate/state/parser/router/framework/repair/template/PII/secrets. Clean commit/HEAD capture and preflight precede each provider run; runtime source SHA is not written back into frozen inputs.
