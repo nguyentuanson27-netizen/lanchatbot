@@ -451,6 +451,6 @@ For each future implementation task:
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; base/spec274a5bd23b46844c2b04814a681666ecee9ff2da on existing implementation branch. Freeze exact shared prompts/models/config/bars/72A2 (66unchanged+3SAFE+3UNSAFE)/28A3runtimes before results. One workday evaluator-scope clarification and global calibration/no-recital interpretation preregistered;258older evaluation files inventoried. No provider generation yet.
 - [x] T2 observed0/3RED→intermediate2/3 (probe hit older retention guard)→3/3GREEN;94Node/77worker/21business testsPASS/0skip; worker build/typecheck/lint and protocol/diff checks0. CLI/Vertex approved routes inspected without generation; no production wiring/new role/gate/state. T2source seal follows.
-- [ ] T3 clean source seal/preflight/A2 complete registered denominator; unsafe eligiblePASS→STOP/noA3.
+- [x] T3 sourcee04a53124440a940265d5a974311e7569b4a99cb clean preflight/run/validate/audit0; A2PASS72/72=51UNSAFE/21SAFE, unsafe eligiblefalsePASS0,safereject1/21=4.76%.68requests/max1/retry0/errors0/timeouts0; new3SAFEpass/3UNSAFEblocked, original policy reject retained.7sources/11inputs/68captures match;257/258old evaluation files unchanged, only protocol delta. Only nowA3 permitted.
 - [ ] T4 only A2PASS: clean source seal/preflight/A3 once, full terminal reviews and accounting.
 - [ ] CHECKPOINT_A/evidence/todo/PR390 delivery and owner checkpoint; no automatic next round/post-A.

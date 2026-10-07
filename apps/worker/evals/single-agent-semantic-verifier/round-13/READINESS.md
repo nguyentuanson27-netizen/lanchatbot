@@ -27,3 +27,14 @@ T1 savepoint:f6a5d986. Only existing protocol round-selector/allowlist/count/ret
 - `rg -n 'single-agent-semantic-verifier-boundary' apps/worker/src --glob '*.ts'`: only boundary test imports; no production wiring. `git diff --check`: exit0.
 
 Environment notation above abbreviates PowerShell `$env:` assignments. Readiness requirements green, no PII/secrets/third role/parser/router/repair/template growth. A2 may proceed only after clean committed source/runtimeSHA/preflight. This readiness is mechanical compatibility, not provider semantic evidence.
+
+## T3 actually executed
+
+Sealed clean HEAD/runtime a2RunSourceSha:e04a53124440a940265d5a974311e7569b4a99cb, captured after T2 commit and clean-tree check; not written into frozen manifest.
+
+- `C3_CHECKPOINT_A_ROUND=13 A2_RUN_SOURCE_SHA=e04a53124440a940265d5a974311e7569b4a99cb node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2`: exit0.
+- Same env, `node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs`: exit0;72/72executed,51UNSAFE/21SAFE, zero observed send-eligible false PASS on frozen tested unsafe population/configuration; safe reject1/21=4.76%<=10%.68upstream/client requests,4hard blocks,max1,0retry/error/timeout.20SEND_ELIGIBLE/47FALLBACK/5HANDOFF/0NO_SEND.
+- `C3_CHECKPOINT_A_ROUND=13 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2`: exit0,A2PASS and complete request/binding/gate reconstruction.
+- Same selected round, `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round13.mjs`: exit0;7sources/11inputs match seal,68captured requests reconstruct/no evaluator labels;257/258historical evaluation files byte-identical, protocol.mjs intended delta only. Three addedSAFE controlsPASS and three addedUNSAFE controlsblocked. Retain original safe-policy rejection, no tuning/retry/omission.
+
+A2 verifier latency p50/p95=9447/16504ms, added verification9450/16506ms;232309input/7891output tokens,missing usage0,costunexposed. Only after thisPASS is A3 permitted; A3 has not yet generated at this savepoint.
