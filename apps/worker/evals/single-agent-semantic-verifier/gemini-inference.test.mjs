@@ -62,4 +62,3 @@ test('response byte bound aborts at1MiB and cache reuses token for subsequent su
  const cached=await create({fetchImpl:async url=>{if(url.includes('oauth2')){authCount++;return auth();}return Response.json(response());}});
  await cached(body());await cached(body());assert.equal(authCount,2);
 });
-

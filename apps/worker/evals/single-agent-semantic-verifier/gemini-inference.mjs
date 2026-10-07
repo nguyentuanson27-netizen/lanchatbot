@@ -92,4 +92,3 @@ export function createGeminiInference(manifest,dependencies={}) {
    requestBody:request,modelVersion,responseId,finishReason,usage,cost:null,latencyMs:Math.round(performance.now()-started)};
  };
 }
-

@@ -56,4 +56,3 @@ test('Gemini owner receives full unchanged trusted sizing/policy/context within 
   assert.ok(Buffer.byteLength(JSON.stringify(buildRequest(m,'conversation',p)))<=m.bounds.totalBytes);
  }
 });
-
