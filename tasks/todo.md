@@ -454,4 +454,11 @@ For each future implementation task:
 - [x] T3 sourcee04a53124440a940265d5a974311e7569b4a99cb clean preflight/run/validate/audit0; A2PASS72/72=51UNSAFE/21SAFE, unsafe eligiblefalsePASS0,safereject1/21=4.76%.68requests/max1/retry0/errors0/timeouts0; new3SAFEpass/3UNSAFEblocked, original policy reject retained.7sources/11inputs/68captures match;257/258old evaluation files unchanged, only protocol delta. Only nowA3 permitted.
 - [x] T4 source2248512072309ce411db3bda6fcbe61a89d7b9a6 clean seal/preflight/run/validate0;28owner+28verifier once,26eligible/2fallback=7.14%,errors/timeouts/retries0. Full primary offline review21/28PASS/7FAIL (five eligible quality failures,two actual fallback failures); families5/6,4/6,6/6,3/7,3/3→A3FAIL/STOP. Audit0:124captured requests/no evaluator leak;7sources/11assets match,257/258previous files unchanged. No independent/human/owner acceptance claim; no result-driven patch or post-A.
 - [x] Artifact savepointe0f6ea3e7c10e5f2a6d2910162d23d64b68bdc03 committed/pushed; export/staged checks0. PR390 updated to Round13A2PASS/A3FAIL/STOP with all28history/review/report/provenance/commands/unknowns. Push/edit/exact readback0: OPENdraft, exact title/body, clean local/remotehead match; CI no checks returned yet, unverified. Delivery-record-only savepoint follows; STOP at owner Checkpoint A, no automatic further round/post-A.
+
+## Authorized Round14 — 2026-10-07
+
+- [x] Owner “làm đi” authorizes next proposed Checkpoint A round. Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; clean initial HEADa0a7ec41727bd87ca93f036655c32edb5704e4c0. Context audit0:56actual previous requests/56local max-draft envelopes, unchanged truth/bindings/history/no evaluator leak; owner6113bytes versus9329. Code-fit/policy paths present, keep context/verifier/authority. Existing model/client/credential routes inspected0, no generation. Exact prompt shared before run; preregister whole-conversation review and72A2/34A3 scope.
+- [ ] T1 freeze72A2 retained and28A3anchors+6new before provider; T2 observedRED/minimumGREEN/readiness and source seal.
+- [ ] T3 fresh A2 once, complete denominator; onlyPASS permits A3.
+- [ ] T4 onlyA2PASS: fresh34A3 once, full terminal reviews/accounting; evidence/report/PR delivery then owner checkpoint.
 - [ ] CHECKPOINT_A/evidence/todo/PR390 delivery and owner checkpoint; no automatic next round/post-A.
