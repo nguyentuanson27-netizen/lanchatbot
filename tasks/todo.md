@@ -436,7 +436,7 @@ For each future implementation task:
 ## Authorized Round12 — 2026-10-07
 
 - [x] Review all24Round11 histories and current owner prompt/spec/plan/project instructions; refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; current branch/PR390 reused. Freeze owner-only prompt intervention and unchanged verifier/context/models/bars/66A2/24anchors plus4newdevelopment cases before results.
-- [ ] T2 observed RED→minimumGREEN and deterministic readiness; no production wiring.
-- [ ] T3 commit/clean/seal/preflight A2, complete registered denominator, STOP on failure.
+- [x] T2 observed RED0/3→GREEN3/3; Node91/91zero skips, worker boundary/Vertex77/77, business claims/assembly21/21, worker build/typecheck/lint0; credential routes inspected without generation. No production wiring/new semantic layer.
+- [x] T3 source12e0f3f10ba95d5f723c1c61192c0c14cb4d611c: clean preflight/run/validate/audit0, A2PASS66/66 (48UNSAFE/18SAFE), unsafe eligiblefalsePASS0/safe reject0;62requests/max1/retry0/errors0/timeouts0.7sources/11inputs/62request reconstructions match,232older evaluation files unchanged; prior safe-policy rejection retained as variance. Only now A3 permitted.
 - [ ] T4 only A2PASS; source seal/run28once, all whole-terminal reviews and operational audit.
 - [ ] CHECKPOINT_A/todo/PR390 delivery, owner GO/STOP/BLOCKED; no automatic next round/post-A.

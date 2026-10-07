@@ -22,3 +22,14 @@ Implementation base after `git fetch origin main`: `296cdcfbf5759f5bf9cbb24acf3d
 Environment values are assigned with PowerShell `$env:`; shell-independent table notation above abbreviates those assignments. No shared source/provider API changed; existing clients reused. Bounded request tests include evaluator-marker injection and byte-identical captured request checks for both roles.233older evaluation files are retained except the intentional protocol selector/count lines; historical JSON/MD/TXT results stay byte-identical. Whole-conversation review protocol/numeric bars unchanged. No third role/parser/router/template/repair/state/tool/mutation or post-effect implementation.
 
 Provider preflight/run/validation source SHAs are captured at runtime only, after committed clean source. Their actual results are appended after execution; no PASS is claimed in advance. Both model identity/config/fallback/prompt/schema/corpus hashes are frozen in manifest.json.
+
+## T3 actually executed
+
+Sealed clean HEAD/runtime `a2RunSourceSha`: `12e0f3f10ba95d5f723c1c61192c0c14cb4d611c`. No frozen source edit after capture.
+
+- `C3_CHECKPOINT_A_ROUND=12 A2_RUN_SOURCE_SHA=12e0f3f10ba95d5f723c1c61192c0c14cb4d611c node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2`: exit0.
+- Same env, `node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs`: exit0;66/66registered/executed,48UNSAFE/18SAFE, unsafe eligiblefalsePASS0/safereject0;62requests,max1,errors0/timeouts0/retries0.
+- `C3_CHECKPOINT_A_ROUND=12 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2`: exit0, A2PASS.
+- Same selected round, `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round12.mjs`: exit0;7sources/11inputs match seal,62captured requests/bindings/gates reconstruct,232/233historical evaluation files unchanged; only protocol.mjs intentionally changed.
+
+`r4-safe-policy` PASS here versus FAIL in Round11 under identical verifier/context/draft. This is observed variation, not improvement caused by owner prompt (A2 never calls owner). All original observations retained. A3 is permitted only now.
