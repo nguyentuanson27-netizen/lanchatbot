@@ -403,3 +403,12 @@ For each future implementation task:
 - [ ] T4 NOT_RUN because A2FAIL:24frozen A3 cases unexecuted, a3RunSourceSha null, owner requests0; no conversations/scores fabricated or earlier results adopted.
 - [x] Create CHECKPOINT_A/complete66attempt table/contextual failure review/raw evidence/audit. Seven sources/eleven frozen assets match seal;153older JSON/MD/text files unchanged,3actual requests/bindings/gates reconstruct without evaluator labels.5926input/397output,p50/p957825/8651ms,costunknown. RecommendationSTOP; PR delivery/readback follows, no further generation/post-A.
 - [x] Publish evidence39291c5b8e15c51524580cfacc39561cb85d1ab7; push0, update draftPR390 with self-contained Round9A2FAIL/A3NOT_RUN/STOP and exact observed commands/limits; title/body/head/draft readback matches. Formatting working/staged checks0; CI pnpm check queued, not claimedPASS. Final documentation savepoint only; no provider request/frozen-input/executable change or automatic follow-on round/post-A/merge/deploy/live send.
+
+## Authorized Round10 — 2026-10-07
+
+- [x] Owner authorizes narrow policy-scope correction and one new round. Preserve Round9FAIL/STOP; refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361.
+- [ ] T1 freeze v2 prompts/context and retained66A2/24A3 contracts, models/config/bars.
+- [ ] T2 readiness with observed selectorRED→GREEN and required focused checks.
+- [ ] T3 sealed clean A2 execution and evidence; unsafe send-eligible PASS ends round.
+- [ ] T4 only A2PASS: sealed A3, whole-conversation offline assessment and operational report.
+- [ ] CHECKPOINT_A and draftPR390 actual results; stop for owner.
