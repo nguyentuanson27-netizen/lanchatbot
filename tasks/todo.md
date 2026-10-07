@@ -349,6 +349,16 @@ For each future implementation task:
 
 ## Authorized Round7 — 2026-10-07
 
+## Authorized Round8 Gemini owner comparison — 2026-10-07
+
+- [x] Owner selects gemini-3.5-flash-lite for conversation only; verifier remains6.1sol/high. Main refreshed at296cdcfbf5759f5bf9cbb24acf3dc63005589361. Official model/API docs confirm exact stable ID/global/HIGH; existing local Vertex service-account credential route found without logging secret values.
+- [ ] T1 freeze separate round-8-gemini identity; preserve byte-identical Round8 population/prompt/schema/review/thresholds and one attempt per case.
+- [ ] T2 observed RED→GREEN minimal evaluation-only Gemini text adapter, request firewall and no-retry accounting; all focused tests and worker checks.
+- [ ] T3 fresh sealed A2 preflight/run/validate; only A2PASS permits A3.
+- [ ] T4 sealed24-case A3 once; review entire actual terminal conversations, publish histories/reviews/metrics/CHECKPOINT_A and draftPR; stop at owner GO/STOP/BLOCKED.
+
+## Authorized Round7 evidence (retained)
+
 - [x] Refresh main, implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; read all20 Round6 histories/outcomes, prompt and runtime evidence. Record root-cause hypotheses/limits and revised task-centered owner prompt; preserve prior evidence.
 - [x] T1 freeze66A2/24A3, four contrasting continuations, unchanged verifier/config/authority/scoring and one-attempt policy before provider results. Prompt7871bytes, hash3de18ef4648549a18fbd181eb3bdf1b0663f31d3520966d816caba1bd395e345; client0.159.2/login available. No generation before freeze.
 - [x] T2 observed RED0/3→GREEN3/3; Node62/62, explicit local-stub adapter11/11, worker77/77, protected-claims21/21; worker typecheck/build/lint each exit0.100historical artifacts unchanged; +7/-7protocol lines, no production wiring/semantic layer. All24envelopes bounded, max23617bytes. ReadinessGREEN before generation.
