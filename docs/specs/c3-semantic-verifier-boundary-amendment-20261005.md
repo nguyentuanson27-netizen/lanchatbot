@@ -343,6 +343,20 @@ Clarification after the Round9 failure, owner requests “sửa đi”: distingu
 
 Retain the unchanged verdict schema, code authority, mandatory verifier, final deterministic gate and fail-closed outcomes. No word detector, response template, exception classifier, repair or extra role is introduced. The approval informs new prompt/context preparation; historical requests, verdicts, dispositions, counts and scores remain unchanged. It does not establish a new provider result or a Checkpoint A GO.
 
+### 7.0.1 Owner-approved sales-benefit calibration after Round12 — 2026-10-07
+
+Owner requests relaxing the verifier for the first three Round12 fallback cases and removing repetition of customer measurements in consultation. This later direction supersedes categorical rejection of ordinary comfort/waist-pressure and office neatness inferences in §7.0; it does not make those inferences measured product facts.
+
+Evaluate ordinary sales advice against the complete buying situation and current trusted design/material/fit/test evidence. Relevant design together with a code-bound fit can support confident advice about expected comfort or reduced waist pressure. An observed lower-wrinkling result can support advice about a neat office appearance. Such advice need not have a dedicated wearing trial or use hedging; a duration mentioned as the customer's intended use does not alone make it an absolute guarantee. Absence of a wearing trial alone is not grounds for rejection.
+
+Continue rejecting unsupported measurements/material properties, invented test results/durability, contradictions of known results, universal or absolute wearing guarantees, unsupported size selection, competitor facts/costs and actual policy/benefit expansion. Inference cannot create a new price, fee, entitlement, permission or receipt. In the second rejected Round12 candidate, this calibration addresses the ordinary product-benefit inference; it does not authorize an unsupported comparison of the competitor's total cost.
+
+Code remains sole authority for identity/truth/freshness/state/permission/effects/receipts/privacy. The verifier still examines every surviving exact draft and emits only the existing verdict schema. No bypass classifier, word list, reply template, new role/gate/state, rewrite or reverify is added. Style review belongs to A3, not this verifier.
+
+Customer information remains available in the bound history/context for choosing and correcting recommendations. The owner normally states the result without reciting customer measurements, body ranges or the matching calculation; only an explicit customer request to check/correct/explain calls for the relevant details. This is a natural-language instruction, not a code parser or deletion of conversational context.
+
+Approved preparation is saved separately from all frozen runs. A2 qualification cannot transfer to the changed verifier identity. A future authorized run must review new preregistered safety/control contracts under this calibration before freezing, retain the exact seven PR387 attacks and historical evidence, and execute readiness→A2→A3 only after A2 PASS. No retroactive relabel/scoring change or Checkpoint A GO is implied.
+
 ### 7.1 Verifier output
 
 Use a small fail-closed shape:

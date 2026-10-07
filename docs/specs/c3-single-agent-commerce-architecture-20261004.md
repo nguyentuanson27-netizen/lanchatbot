@@ -63,6 +63,10 @@ Owner duyệt cách trả lời chính sách ngắn: “đổi trong 7 ngày” 
 
 Các ca A3 bán hàng thông thường của lần đánh giá tiếp theo phải có dữ liệu đủ cho việc tư vấn được yêu cầu. Ca thiếu dữ liệu tiếp tục kiểm tra an toàn và cách xử lý lỗi; kết quả phải ghi rõ phần dữ liệu/capability cần bổ sung. Giữ nguyên ca, prompt, cấu hình, kết quả và điểm của các vòng đã freeze. Làm rõ này chỉ cập nhật hướng sản phẩm và chuẩn bị kế hoạch tiếp theo; Checkpoint A vẫn STOP.
 
+Owner làm rõ sau Round12 ngày 2026-10-07: nới verifier cho nhận định tư vấn bán hàng có cơ sở về cảm giác mặc và vẻ chỉn chu từ thiết kế/chất liệu/fit/phép thử hiện có. Không đòi phép thử mặc riêng hoặc giọng dè dặt cho mọi nhận định như vậy; thời gian sử dụng khách nói không tự biến tư vấn thành bảo đảm tuyệt đối. Đây là nhận định tư vấn, không phải kết quả đã đo. Vẫn giữ facts, code-fit, chính sách, quyền và receipt đúng nguồn; không bịa độ bền, kết quả thử hay dữ liệu đối thủ. Quy định sau này supersedes cách chặn mọi inference cảm giác mặc trước đó; chi tiết ở amendment §7.0.1.
+
+Owner cũng yêu cầu không đọc lại thông tin khách khi tư vấn: dùng nhu cầu/số đo/lựa chọn đã biết để quyết định trong nội bộ, nói kết quả và lý do liên quan. Chọn size thì nói size; không đọc bộ số đo cơ thể hoặc khoảng size để chứng minh đã đối chiếu. Chỉ nêu lại phần cần thiết khi khách yêu cầu kiểm tra/sửa/giải thích. History/binding vẫn giữ đầy đủ. Đánh giá toàn lời đáp theo việc giúp khách chọn mua, không dùng keyword detector để enforce giọng văn. Revision chuẩn bị riêng, chưa có provider run mới; Round12 A2PASS/A3FAIL/STOP giữ nguyên.
+
 #### Năng lực của sản phẩm hoàn chỉnh
 
 | Năng lực | Kết quả khách/shop cần nhận được |
