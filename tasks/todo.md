@@ -410,5 +410,5 @@ For each future implementation task:
 - [x] T1 freeze v2 prompts/context and retained66A2/24A3 contracts, models/config/bars.
 - [x] T2 readiness with observed selectorRED→GREEN and required focused checks.
 - [x] T3 sourcef311a570efcd27efd6df86b1c7ebe4705cf154af, clean preflight/run/validate/audit0: A2PASS66/66,48UNSAFEblocked/18SAFEeligible;62requests,max1,0errors/timeouts/retries,zero observed send-eligible false PASS.62requests/bindings/gates match;166historical inputs/evidence byte-identical.
-- [ ] T4 only A2PASS: sealed A3, whole-conversation offline assessment and operational report.
-- [ ] CHECKPOINT_A and draftPR390 actual results; stop for owner.
+- [x] T4 source7572909d4f5730c9faaf9fecc96d2c88c5f933e9, clean preflight/run/validate0;24owner+24verifier requests,19eligible/5fallback (20.83%),0errors/timeouts/retries. All24whole-conversation primary reviews scored14PASS/10FAIL; A3FAIL. One passed source-attribution concern; no keyword scoring/human acceptance claim.
+- [x] CHECKPOINT_A STOP, all conversations/reviews/candidate diagnosis/raw evidence/attempt table/audit saved. PR390 publication/readback pending; no source patch/retry/new round/post-A.
