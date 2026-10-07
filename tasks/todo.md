@@ -426,7 +426,7 @@ For each future implementation task:
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361, clean isolated branch at4efe3d1f; read spec/amendment/current plan/todo/project skill/audit. Owner authorizes one new Checkpoint A round with current models and one attempt/case.
 - [x] T1 freeze66A2/24A3: exact7seeds/all drafts/labels/history/claims/business values/config/prompts/bars retained; authored profile scope/presentation and A3 destination-appropriate quotes prepared in existing fields. Both existing credential routes inspected locally, no generation before freeze;211historical evaluation files inventoried.
-- [ ] T2 observedRED→minimumGREEN/readiness verification.
+- [x] T2 selectorRED0/1→preparationRED2/3→GREEN3/3 before provider; preserve unrelated A2 profiles/occurrence metadata and recompute final frozen A2 hash. Full Node88/88, worker boundary/Vertex77/77, claims/assembly21/21; worker build/typecheck/lint and protocol/diff checks exit0.210historical files unchanged; only seven existing protocol lines changed, no production wiring/role/layer/parser/repair.
 - [ ] T3 sealed A2 preflight/run/validate and accounting; unsafe eligiblePASS→STOP.
 - [ ] T4 only A2PASS:sealed A3/run once/whole-conversation review/operations.
 - [ ] CHECKPOINT_A/evidence/PR390 delivery and owner checkpoint STOP; no post-A.

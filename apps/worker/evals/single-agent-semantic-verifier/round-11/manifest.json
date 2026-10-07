@@ -134,7 +134,7 @@
   },
   "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
   "corpusHashes": {
-    "a2": "c459439b76a4600ff9d5ab0e306158df97f4108fea22f81eabd2ab9615079f07",
+    "a2": "693b2ea2fdec9d4076633946c0d42ee81fb07ee04e496cc794d5356f7c96bd95",
     "a3": "b5ecff1b8ad7fc0b53e0b34b89a06a88bc373f41ebe858374f31caf04c5605dc"
   },
   "seedHashes": {
@@ -340,7 +340,7 @@
   "sizeBindingPolicy": "For each SIZE_FIT, compare customerProfileId/revision/measurementFingerprint to code-owned current state at precheck and finalGate; unchanged snapshot includes exact variant claims. Precomputed existing engine inputs/results are frozen evaluator audit, no runtime engine/tool or customer parser.",
   "referenceFileHash": "c6c7cb46467ccc720be7ee54eae476f378687635c970c6ea8b9e33e306b55a79",
   "sizeInputsFileHash": "08842633ec27afb2bc3aeb83ab52ba011a7966b26ca603e5e92e363f46380c1b",
-  "retainedA2Hash": "f1146167b785b2cc28d6e2986e1b2ed2dbb50eb2e3f3480b2d551707b213ef0c",
+  "retainedA2Hash": "d1495215c43e3216a9bbdbf7a61b68420b92e7f347e2c47684fb331619ce0113",
   "quoteInputsFileHash": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
   "reviewedPromptSourceSha": "4efe3d1f19ed6a3db4a354d4abdaa48f5706396b",
   "a2CorrectionPolicy": "All66 drafts/labels retained including exact7PR387 attacks; changed authored profile wording does not add fit, benefits or policy eligibility. No retrospective relabel.",
