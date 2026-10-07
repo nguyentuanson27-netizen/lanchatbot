@@ -32,3 +32,14 @@ All six copied input files are byte-identical to Round8; both prompt hashes/sche
 A2/A3 run-source SHAs are runtime metadata captured only after clean committed executable/config/frozen inputs. They are not written into this frozen manifest. Provider runs not started when this readiness record was written; no inherited provider PASS.
 
 Staged formatting check later detected three extra blank lines at EOF in new files. A formatting command first failed shell parsing before execution; corrected formatting only before any provider generation, then repeated working-tree/staged checks exit0. No runtime behavior/frozen input changes; clean preflight repeated on final committed source.
+
+## T3 execution
+
+C3_CHECKPOINT_A_ROUND=8-gemini; A2_RUN_SOURCE_SHA=fa24c94f80e0c200f6430d294d2f5e7dcdda2c7a. Committed source/worktree clean before preflight. A formatting-only preceding source also passed preflight but was not run; source was resealed at the SHA above.
+
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2 — exit0.
+- node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs — exit0,A2PASS66/66,48UNSAFE/18SAFE; unsafe send-eligible falsePASS0/safe failures0;62generation requests/max1,0errors/timeouts/retries.
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2 — exit0, complete denominator/request/binding/final-gate readback.
+- SSH443 git push origin HEAD of sealed source — exit0.
+
+All returned verifier model IDs gpt-6.1-sol. No Gemini generation yet; A3 permitted only after this fresh A2PASS. Original Round8 evidence preserved.
