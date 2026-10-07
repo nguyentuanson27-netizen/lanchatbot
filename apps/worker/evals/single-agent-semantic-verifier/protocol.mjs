@@ -11,7 +11,7 @@ const families = ['wrong-subject', 'negation-inversion', 'material-condition-los
 const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 'negation-inversion', 'dropped-material-policy-condition', 'stronger-implied-policy-benefit', 'stale-evidence', 'effect-success-without-receipt'];
 // Fixed experiment folders only; keep historical inputs/evidence intact.
 const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
-if (!['1','2','3','4','5','6','7','8'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
+if (!['1','2','3','4','5','6','7','8','8-gemini'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
 const onePass = round === '5' && process.env.C3_CHECKPOINT_A_ONE_PASS === '1';
 const inputRoot = new URL(round === '1' ? './' : './round-' + round + (onePass ? '/one-pass/' : '/'), import.meta.url);
 export const inputUrl = name => new URL(name, inputRoot);
@@ -69,7 +69,12 @@ export function projectRuntime(manifest, fixture, role, requestId) {
 // Envelope only. No credentials, transport, retry, provider call or production wiring.
 export function buildRequest(manifest, role, projection) {
   const model = manifest.models[role];
-  const request = { model: model.model, reasoning: { effort: model.effort },
+  const request = manifest.variant === 'GEMINI_CONVERSATION' && role === 'conversation' ? {
+    systemInstruction:{parts:[{text:manifest.prompts.conversation}]},
+    contents:[{role:'user',parts:[{text:JSON.stringify(projection)}]}],tools:[],
+    generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,
+      thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}},
+  } : { model: model.model, reasoning: { effort: model.effort },
     instructions: manifest.prompts[role],
     input: [{ type:'message', role:'user', content:[{type:'input_text',text:JSON.stringify(projection)}] }],
     tools: [], tool_choice:'none', parallel_tool_calls:false, store: false, stream:true,
@@ -79,11 +84,14 @@ export function buildRequest(manifest, role, projection) {
 }
 
 export function validateDraft(m, a2, a3) {
+  requireThat(m.variant === undefined || m.variant === 'GEMINI_CONVERSATION' && m.round === 8, 'VARIANT_IDENTITY');
   requireThat(m.schemaVersion === 1 && /^[a-f0-9]{40}$/.test(m.implementationBaseSha) && /^[a-f0-9]{40}$/.test(m.specSha), 'SOURCE_IDENTITY');
   requireThat(m.evidenceSha === '1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da', 'SEED_SOURCE');
   for (const role of ['verifier', 'conversation']) {
     const model = m.models[role];
-    requireThat(model.provider === 'OPENAI' && model.model === 'gpt-6.1-sol' && model.version === 'gpt-6.1-sol' && model.effort === 'high', 'MODEL_IDENTITY');
+    const gemini = m.variant === 'GEMINI_CONVERSATION' && role === 'conversation';
+    requireThat(model.provider === (gemini ? 'VERTEX_AI' : 'OPENAI') &&
+      model.model === (gemini ? 'gemini-3.5-flash-lite' : 'gpt-6.1-sol') && model.version === model.model && model.effort === 'high', 'MODEL_IDENTITY');
     requireThat(hash(m.prompts[role]) === m.promptHashes[role], 'PROMPT_HASH');
   }
   requireThat(hash(JSON.stringify(m.verdictSchema)) === m.schemaHash, 'SCHEMA_HASH');
@@ -128,6 +136,18 @@ export function validateProtocol(m, a2, a3) {
     Object.values(m.models).every(model => model.credentialRoute && model.generationConfig), 'NOT_FROZEN_PROVIDER_CONFIGURATION');
   for (const model of Object.values(m.models)) {
     const c = model.generationConfig;
+    if (m.variant === 'GEMINI_CONVERSATION' && model === m.models.conversation) {
+      requireThat(model.credentialRoute === 'EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT' && c.transport === 'VERTEX_SINGLE_REQUEST_TEXT' &&
+        c.wireApi === 'generateContent' && c.projectId === 'project-388db62b-f5a4-4e76-a2b' && c.location === 'global' &&
+        c.endpoint === 'https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent' &&
+        c.thinkingLevel === 'HIGH' && c.includeThoughts === false && c.candidateCount === 1 && c.responseMimeType === 'text/plain' &&
+        c.maxOutputTokens === 8192 && c.timeoutMs === 90000 && c.maxResponseBytes === 1048576 &&
+        c.relayUpstreamRequestsPerAttempt === 1 && c.retry === 0 && Array.isArray(c.tools) && c.tools.length === 0 &&
+        c.temperature === 'OMITTED_PROVIDER_DEFAULT' && c.topP === 'OMITTED_PROVIDER_DEFAULT' && c.topK === 'OMITTED_PROVIDER_DEFAULT' &&
+        c.penalties === 'OMITTED_PROVIDER_DEFAULT' && c.errorPolicy === 'FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY' &&
+        c.tokenRefresh === 'BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY', 'GENERATION_CONFIG');
+      continue;
+    }
     requireThat(model.credentialRoute === 'CODEX_CHATGPT_LOGIN' && c.transport === 'CODEX_CLI_BOUNDED_INFERENCE_RELAY' &&
       c.cliVersion === '0.159.2' && c.endpoint === 'https://chatgpt.com/backend-api/codex/responses' &&
       Array.isArray(c.tools) && c.tools.length === 0 && c.tool_choice === 'none' && c.parallel_tool_calls === false &&
@@ -140,7 +160,7 @@ export function validateProtocol(m, a2, a3) {
     requireThat(m.bounds.profileCount === 4 && m.bounds.profileBytes === 2048 &&
       JSON.stringify(m.profileAllowlist) === JSON.stringify(['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash','details']) &&
       JSON.stringify(m.profileDetailAllowlist) === JSON.stringify(['silhouette','material','colors','sizeChart','care','limitations']), 'PROFILE_PROTOCOL');
-    requireThat(hash(readFileSync(new URL('./round-'+m.round+'/fashion-profiles.json', import.meta.url), 'utf8')) === m.profileFileHash, 'PROFILE_HASH');
+    requireThat(hash(readFileSync(new URL('./round-'+m.round+(m.variant === 'GEMINI_CONVERSATION' ? '-gemini' : '')+'/fashion-profiles.json', import.meta.url), 'utf8')) === m.profileFileHash, 'PROFILE_HASH');
   }
   if (m.round === 3) {
     requireThat(a2.cases.length === 46 && a3.cases.length === 32 &&
@@ -155,8 +175,8 @@ export function validateProtocol(m, a2, a3) {
     requireThat(summary.a2Unsafe === (withBuyerGoals ? 48 : 44) && summary.a2Safe === (withBuyerGoals ? 18 : 14) && a3.cases.length === (m.round >= 7 ? 24 : 20) &&
       hash(JSON.stringify({schemaVersion:1,cases:a2.cases.slice(0,withBuyerGoals ? 58 : 46)})) === m.retainedA2Hash, 'ROUND'+m.round+'_POPULATION');
     for (const [file,key] of [['reference-replies.json','referenceFileHash'],['size-inputs.json','sizeInputsFileHash']])
-      requireThat(hash(readFileSync(new URL('./round-'+m.round+'/'+file,import.meta.url),'utf8')) === m[key], 'EVALUATOR_INPUT_HASH');
-    if (withBuyerGoals) requireThat(hash(readFileSync(new URL('./round-'+m.round+'/quote-inputs.json',import.meta.url),'utf8')) === m.quoteInputsFileHash, 'QUOTE_INPUT_HASH');
+      requireThat(hash(readFileSync(new URL('./round-'+m.round+(m.variant === 'GEMINI_CONVERSATION' ? '-gemini' : '')+'/'+file,import.meta.url),'utf8')) === m[key], 'EVALUATOR_INPUT_HASH');
+    if (withBuyerGoals) requireThat(hash(readFileSync(new URL('./round-'+m.round+(m.variant === 'GEMINI_CONVERSATION' ? '-gemini' : '')+'/quote-inputs.json',import.meta.url),'utf8')) === m.quoteInputsFileHash, 'QUOTE_INPUT_HASH');
     requireThat(m.scoring.naturalnessRequired === 2 && m.scoring.consultationRequired === 2 &&
       JSON.stringify(m.scoring.consultationDimensions) === JSON.stringify([...(withBuyerGoals ? ['understanding'] : []),'usefulness','decisionSupport','nextStep']) &&
       JSON.stringify(m.scoring.consultationCaseIds) === JSON.stringify(a3.cases.filter(c=>c.evaluator.consultation).map(c=>c.evaluator.caseId)), 'CONSULTATION_BAR');

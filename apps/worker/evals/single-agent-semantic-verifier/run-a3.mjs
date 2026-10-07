@@ -5,6 +5,7 @@ import {pathToFileURL} from 'node:url';
 import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath} from './protocol.mjs';
 import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence} from './run-a2.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
+import {createGeminiInference,inspectGemini} from './gemini-inference.mjs';
 import {terminalFallback,finalGate,makeBinding} from '../../dist/single-agent-semantic-verifier-boundary.js';
 const read=name=>readFileSync(inputUrl(name),'utf8');
 
@@ -80,7 +81,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
     if(!attempt.terminal||!attempt.conversation)throw new Error('A3_MISSING_GENERATION');
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');
-    const cp=JSON.parse(attempt.conversation.requestBody.input[0].content[0].text);
+    const cp=JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text);
     const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',cp.requestIdentity.requestId));
     if(JSON.stringify(attempt.conversation.requestBody)!==JSON.stringify(expectedConversation))throw new Error('A3_CONVERSATION_FIREWALL');
     if(attempt.conversation.status==='OK'&&attempt.finalDraft!==attempt.conversation.answer)throw new Error('A3_EXACT_OWNER_SURFACE');
@@ -113,9 +114,11 @@ async function main() {
   const output=inputUrl('a3-evidence.json');
   if(existsSync(output))throw new Error('A3_EVIDENCE_ALREADY_EXISTS');
   const client=inspectCodex();
+  const gemini=manifest.variant === 'GEMINI_CONVERSATION' ? createGeminiInference(manifest) : null;
   const evidence={schemaVersion:1,phase:'A3',a3RunSourceSha:sha,a2RunSourceSha:a2Evidence.a2RunSourceSha,
     implementationBaseSha:manifest.implementationBaseSha,specSha:manifest.specSha,manifestHash:hash(read('manifest.json')),
     corpusHash:manifest.corpusHashes.a3,promptHashes:manifest.promptHashes,schemaHash:manifest.schemaHash,models:manifest.models,client,
+    ...(gemini ? {conversationClient:inspectGemini(manifest)} : {}),
     boundaryExecutableHash:hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url))),
     startedAt:new Date().toISOString(),attempts:a3.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),
       caseId:c.evaluator.caseId,repetition:i+1,conversation:null,finalDraft:null,verification:null,terminal:null}))),quality:null,operational:null};
@@ -124,9 +127,10 @@ async function main() {
   save();
   for(const attempt of evidence.attempts) {
     assertSealedSource(sha,[evidencePath('a3-evidence.json')]);
+    if(gemini && hash(readFileSync(new URL('../../dist/vertex.js',import.meta.url)))!==evidence.conversationClient.helperExecutableHash)throw new Error('A3_VERTEX_EXECUTABLE_CHANGED');
     if(hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==evidence.boundaryExecutableHash)throw new Error('A3_BOUNDARY_EXECUTABLE_CHANGED');
     const fixture=a3.cases.find(c=>c.evaluator.caseId===attempt.caseId);
-    Object.assign(attempt,await evaluateA3Attempt(manifest,fixture,(role,request)=>runCodexModel(manifest,role,request)));
+    Object.assign(attempt,await evaluateA3Attempt(manifest,fixture,(role,request)=>role === 'conversation' && gemini ? gemini(request) : runCodexModel(manifest,role,request)));
     save();console.log(JSON.stringify({attemptId:attempt.attemptId,generation:attempt.conversation.status,verifier:attempt.verification?.provider?.status??null,
       terminal:attempt.terminal.disposition,reason:attempt.terminal.reason}));
   }

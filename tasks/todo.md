@@ -349,16 +349,6 @@ For each future implementation task:
 
 ## Authorized Round7 — 2026-10-07
 
-## Authorized Round8 Gemini owner comparison — 2026-10-07
-
-- [x] Owner selects gemini-3.5-flash-lite for conversation only; verifier remains6.1sol/high. Main refreshed at296cdcfbf5759f5bf9cbb24acf3dc63005589361. Official model/API docs confirm exact stable ID/global/HIGH; existing local Vertex service-account credential route found without logging secret values.
-- [ ] T1 freeze separate round-8-gemini identity; preserve byte-identical Round8 population/prompt/schema/review/thresholds and one attempt per case.
-- [ ] T2 observed RED→GREEN minimal evaluation-only Gemini text adapter, request firewall and no-retry accounting; all focused tests and worker checks.
-- [ ] T3 fresh sealed A2 preflight/run/validate; only A2PASS permits A3.
-- [ ] T4 sealed24-case A3 once; review entire actual terminal conversations, publish histories/reviews/metrics/CHECKPOINT_A and draftPR; stop at owner GO/STOP/BLOCKED.
-
-## Authorized Round7 evidence (retained)
-
 - [x] Refresh main, implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361; read all20 Round6 histories/outcomes, prompt and runtime evidence. Record root-cause hypotheses/limits and revised task-centered owner prompt; preserve prior evidence.
 - [x] T1 freeze66A2/24A3, four contrasting continuations, unchanged verifier/config/authority/scoring and one-attempt policy before provider results. Prompt7871bytes, hash3de18ef4648549a18fbd181eb3bdf1b0663f31d3520966d816caba1bd395e345; client0.159.2/login available. No generation before freeze.
 - [x] T2 observed RED0/3→GREEN3/3; Node62/62, explicit local-stub adapter11/11, worker77/77, protected-claims21/21; worker typecheck/build/lint each exit0.100historical artifacts unchanged; +7/-7protocol lines, no production wiring/semantic layer. All24envelopes bounded, max23617bytes. ReadinessGREEN before generation.
@@ -385,3 +375,11 @@ For each future implementation task:
 - [x] T3 source5f5958bd001b7f662f7bb7d8602761272bcb0741; committed/clean source push and preflight/run/validate each exit0. A2PASS66/66 (48UNSAFE/18SAFE labels), zero observed unsafe send-eligible falsePASS, safe failures0/18;62requests/max1,0errors/timeouts/retries. Complete raw request/verdict/error accounting retained; no label/exclusion/threshold change.
 - [x] T4 only after A2PASS: source18c18986bd4b8bd88b6cb5f5127a56f001e99eb0, clean preflight/run/validate exit0;24owner+24mandatoryverifier, allSEND_ELIGIBLE/0errors/fallback. Read/review all24histories/actual outcomes whole-turn first,240contextual diagnostic ratings; qualityFAIL19/24,5naturalness failures and2weak price cases. Concern2/5,partial4/5,correction5/5,policy5/6,simple3/3. RecommendationSTOP; no tuning or generation retry.
 - [x] Create CHECKPOINT_A/all24conversations/connected reviews/raw evidence/audit/ops.110requests/max1/0errors/timeouts,356429input/12794output tokens,cost unavailable. Source/request/firewall/terminal integrity checksPASS;111older artifacts unchanged. Offline artifact export OS206 corrected using temporary files,0provider requests. Publish/update/readback PR390 at delivery; stop at owner checkpoint.
+
+## Authorized Round8 Gemini owner comparison — 2026-10-07
+
+- [x] Owner selects gemini-3.5-flash-lite for conversation only; verifier remains6.1sol/high. Main refreshed at296cdcfbf5759f5bf9cbb24acf3dc63005589361. Official model/API docs confirm exact stable ID/global/HIGH; existing local Vertex service-account credential route found without logging secret values.
+- [x] T1 inputs b9559c30: separate round-8-gemini identity; six byte-identical Round8 corpus/profile/evaluator files, unchanged prompts/schema/review/thresholds, one attempt per case. No provider generation before freeze.
+- [x] T2 observed RED1/12→GREEN12/12. Full Node77/77, explicit Codex/local-stub11/11, worker boundary/Vertex77/77, claims/assembly21/21; worker build/typecheck/lint and diff check exit0. Narrow evaluation-only Gemini text adapter reuses JWT/endpoint helpers; firewall/no-retry evidence green, no production wiring/extra semantic role.
+- [ ] T3 fresh sealed A2 preflight/run/validate; only A2PASS permits A3.
+- [ ] T4 sealed24-case A3 once; review entire actual terminal conversations, publish histories/reviews/metrics/CHECKPOINT_A and draftPR; stop at owner GO/STOP/BLOCKED.
