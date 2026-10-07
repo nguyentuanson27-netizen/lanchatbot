@@ -355,3 +355,8 @@ For each future implementation task:
 - [x] T3 source2e783f213642d8d96ff4ac6fa8a6a2aa082164d3; clean preflight0/run1/validate0, A2FAIL66/66 (48UNSAFE/18SAFE labels), zero observed unsafe send-eligible falsePASS.2SAFE-labeled failures=11.111111% above10%;62requests/max1,0errors/timeouts/retries. Actual-input diagnosis finds missing raw measurement grounding and exchange time origin; original labels/drafts/denominator unchanged. RecommendationSTOP.
 - [ ] T4 not run because A2FAIL:24frozen cases unexecuted, owner requests0, no a3RunSourceSha or fabricated conversations/scores. New prompt quality unverified; no rubric tuning or bypass of the frozen A2 gate.
 - [x] Publish Round7 CHECKPOINT_A/root-cause review/raw A2 evidence/audit/ops at a85e5955ab3fd59118c99d3d4830458f733b9749; update/readback draftPR390 with A2FAIL/A3NOT_RUN/STOP, exact sources/commands/limitations and fixture-contract diagnosis. No new conversations/ratings fabricated. Required local checksPASS, remote CI requires separate readback. Stop at owner checkpoint; no further generation/post-A/merge/deploy/live send.
+
+## Owner correction of review method — 2026-10-07
+
+- [x] Acknowledge weak keyword/phrase justifications and record whole-conversation/whole-reply review as the next direction. Judge buying-context reasoning and customer impact before diagnostic dimensions; excerpts support contextual findings, not automatic scores. Explain the shown case without fabricating a new frozen score.
+- [x] Preserve all historical frozen inputs/replies/ratings and Round7STOP/A3NOT_RUN. Historical self-assessment counts are not owner-accepted quality evidence. No provider generation/runtime/scorer change; future scoring protocol must be frozen before any new results.
