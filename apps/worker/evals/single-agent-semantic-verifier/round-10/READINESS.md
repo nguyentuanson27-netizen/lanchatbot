@@ -22,3 +22,9 @@ Complexity delta: protocol +7/-7lines for explicit round10 support; one focused5
 Known raw legacy aggregate limitations: unexecuted safe slots may count as safeFailures after early stop; not observed rejects or measured safe usability. terminalFailureRate with unexecuted denominator is not an observed-terminal rate. Gemini usage uses different keys: report raw records separately; no zero-token or missing-cost claim. Whole-terminal offline review by primary agent is not independent/human/owner acceptance.
 
 Commit complete source/config/frozen inputs and clean tree before runtime source capture/preflight. Do not insert runtime SHA into frozen source. Unsafe send-eligible PASS => A2FAIL/STOP; only A2PASS enables sealed A3. No post-A/deploy/live send.
+
+## T3 actual A2PASS
+
+Committed clean a2RunSourceSha f311a570efcd27efd6df86b1c7ebe4705cf154af; protocol --preflight-a2 exit0; run-a2.mjs exit0/PASS; protocol --validate-a2 exit0; one-off c3-round10-audit.mjs exit0,62captured requests/bindings/final gates reconstruct,7sources/11inputs match seal,166historical JSON/MD/TXT files byte-identical to9afd65ca. All66executed (48UNSAFE/18SAFE), zero observed send-eligible false PASS,0safe rejects/unexecuted.62requests/max1/0errors/timeouts/retries. Verifier p50/p955917/8585ms,183619input/6283outputtokens,costnull. Terminals18SEND_ELIGIBLE/43FALLBACK/5HANDOFF/0NO_SEND;72.73% overall includes intentionally unsafe cases, not safe usability (0/18failure). Offline audit initially read wrong returned-model key, corrected to modelVersion without changing raw evidence; all62reportgpt-6.1-sol. No source/config/input changes after A2seal.
+
+A3runner/generator is already complete and unchanged. Save this A2 evidence/readiness, commit/clean then capture currentHEAD as runtime a3RunSourceSha, preflight with A2PASS. No SHA written into frozen manifest.

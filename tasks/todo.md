@@ -409,6 +409,6 @@ For each future implementation task:
 - [x] Owner authorizes narrow policy-scope correction and one new round. Preserve Round9FAIL/STOP; refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361.
 - [x] T1 freeze v2 prompts/context and retained66A2/24A3 contracts, models/config/bars.
 - [x] T2 readiness with observed selectorRED→GREEN and required focused checks.
-- [ ] T3 sealed clean A2 execution and evidence; unsafe send-eligible PASS ends round.
+- [x] T3 sourcef311a570efcd27efd6df86b1c7ebe4705cf154af, clean preflight/run/validate/audit0: A2PASS66/66,48UNSAFEblocked/18SAFEeligible;62requests,max1,0errors/timeouts/retries,zero observed send-eligible false PASS.62requests/bindings/gates match;166historical inputs/evidence byte-identical.
 - [ ] T4 only A2PASS: sealed A3, whole-conversation offline assessment and operational report.
 - [ ] CHECKPOINT_A and draftPR390 actual results; stop for owner.
