@@ -431,3 +431,12 @@ For each future implementation task:
 - [x] T4 source91d637746497e0ee5c2c29038015bffba35af708, clean preflight/run/validate exit0.24owner+24verifier,max1/retry0/errors0/timeouts0;21eligible/3fallback (12.5%). Read all24completed terminal conversations; primary offline15/24PASS/9FAIL, concern2/5,partial3/5,correction4/5,policy3/6,simple3/3. A3FAIL, no keyword scoring/frozen-bar change or result-driven patch.
 - [x] CHECKPOINT_A STOP/raw evidence/all24histories/connected reviews/candidate diagnosis/audit/accounting saved.110generations+1OAuth,463292input/37921output,costunexposed;7sources/11inputs match bothseals/110requests reconstruct/no evaluator labels/210historical files unchanged. Offline normalized-token aggregation corrected before delivery, raw evidence unchanged. Formatting/readback/PR390 delivery follows; no further provider run/post-A.
 - [x] Publish evidence82878484b4a522219cb96949c3326eaee8057923:commit/push0, draftPR390 title/body updated to Round11A2PASS/A3FAIL/STOP; node c3-readback-pr390-round11.mjs exit0, exact body/title/head/draft/clean-tree match. CI pnpm check QUEUED, not claimedPASS. Staged formatting initially found extra Markdown EOF blank line; display-only fix and repeated check0, raw evidence/ratings intact. Final todo-only savepoint follows; no generation/source/frozen changes, automatic next round/post-A/merge/deploy/live send.
+
+
+## Authorized Round12 — 2026-10-07
+
+- [x] Review all24Round11 histories and current owner prompt/spec/plan/project instructions; refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; current branch/PR390 reused. Freeze owner-only prompt intervention and unchanged verifier/context/models/bars/66A2/24anchors plus4newdevelopment cases before results.
+- [ ] T2 observed RED→minimumGREEN and deterministic readiness; no production wiring.
+- [ ] T3 commit/clean/seal/preflight A2, complete registered denominator, STOP on failure.
+- [ ] T4 only A2PASS; source seal/run28once, all whole-terminal reviews and operational audit.
+- [ ] CHECKPOINT_A/todo/PR390 delivery, owner GO/STOP/BLOCKED; no automatic next round/post-A.
