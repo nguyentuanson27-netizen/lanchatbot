@@ -446,3 +446,11 @@ For each future implementation task:
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; clean base0e311e84cacdd3dbc700a2417a5b88047a198f56. Prepare separate owner/verifier benefit-calibration prompts and record latest owner direction in product spec/boundary amendment/review/plan. Keep all frozen inputs/evidence, context/bindings, code authority, policies/provider config/bars unchanged. No active runtime/new round/provider generation/post-A.
 - [x] Local candidate preparation check exit0:65A2/56A3 envelopes (max-draft4096), max owner25427/verifier27888bytes<32768; runtime/history/measurement/binding projections unchanged, evaluator markers excluded,256historical evaluation files byte-identical. Focused protocol/round12 tests12/12PASS/0skip; diffcheck0. No provider transport/generation/semantic-quality proof. Worker/shared checks not rerun for inactive text/docs edits.
 - [x] Prompt/spec savepointc89a29d2e1b5019de6d6914501a53e292000c5b9 committed/pushed, PR390 includes both exact revised prompt links before any rerun. Staged check/push/edit/readback exit0; exact title/body/local-remote head/open-draft/clean tree match. CI pnpm checkQUEUED, not claimedPASS. Final todo-only savepoint follows; Round12STOP retained, no new attempt/provider generation/A2qualification/GO/post-A.
+
+## Authorized Round13 — 2026-10-07
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; base/spec274a5bd23b46844c2b04814a681666ecee9ff2da on existing implementation branch. Freeze exact shared prompts/models/config/bars/72A2 (66unchanged+3SAFE+3UNSAFE)/28A3runtimes before results. One workday evaluator-scope clarification and global calibration/no-recital interpretation preregistered;258older evaluation files inventoried. No provider generation yet.
+- [ ] T2 observed RED→minimumGREEN and required deterministic readiness commands.
+- [ ] T3 clean source seal/preflight/A2 complete registered denominator; unsafe eligiblePASS→STOP/noA3.
+- [ ] T4 only A2PASS: clean source seal/preflight/A3 once, full terminal reviews and accounting.
+- [ ] CHECKPOINT_A/evidence/todo/PR390 delivery and owner checkpoint; no automatic next round/post-A.
