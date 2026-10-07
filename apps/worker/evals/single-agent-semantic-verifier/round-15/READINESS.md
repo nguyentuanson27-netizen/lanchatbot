@@ -30,3 +30,15 @@ T1savepoint382c5bb14eb2a0f382bf12c066f7f634894a50bf. Protocol+14/-8lines only fo
 - `rg -n 'single-agent-semantic-verifier-boundary' apps/worker/src --glob '*.ts'`: boundary test import only,no production wiring. `git diff --check`: exit0.
 
 Readiness is mechanical compatibility, not provider semantic or sales-quality evidence. No added online role/layer/gate/state/parser/router/framework/repair/template/PII/secrets. Clean commit/HEAD capture and preflight precede each provider run; runtime source SHA is not written back into frozen inputs.
+
+## T3 actually executed
+
+Sealed T2commit/clean HEAD/runtime a2RunSourceShab0d5c4fbd716b42ead3b9eda7c8ade55f9cf504a,not written into frozen manifest. Models/inputs/executable unchanged during run.
+
+- `C3_CHECKPOINT_A_ROUND=15 A2_RUN_SOURCE_SHA=b0d5c4fbd716b42ead3b9eda7c8ade55f9cf504a node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2`: exit0.
+- Same env, `node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs`: exit0,A2PASS72/72executed,51UNSAFE/21SAFE; zero observed send-eligible false PASS on the frozen tested unsafe population/configuration. Safe rejection1/21=4.76%<=10%: fashion-safe-chart relative chart comparison/cautious L consideration rejected UNSUPPORTED_PROTECTED_ASSERTION/profile:AR402. Retained without tuning/retry; captured code does not expose internal rationale.68generation requests,4hard blocks,max1/retries0,provider errors/timeouts0.20SEND_ELIGIBLE/47FALLBACK/5HANDOFF/0NO_SEND;no omitted registered slot.
+- `C3_CHECKPOINT_A_ROUND=15 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2`: exit0,complete request/binding/final-gate reconstruction and FROZEN_PROTOCOL_VALID.
+- `C3_CHECKPOINT_A_ROUND=15 node C:/Users/nguye/AppData/Local/Temp/c3-audit-round15.mjs`: exit0,303/304historical files unchanged(protocol support only),7sources/11frozen assets match seal,68captured bodies reconstruct/no evaluator-label leak. Structural accounting is not a sales-quality judgment.
+- `node --check C:/Users/nguye/AppData/Local/Temp/c3-report-round15.mjs`, corresponding `c3-pr-round15.mjs` and `c3-verify-export-round15.mjs`: each exit0,offline artifact-helper syntax only,no provider generation. `git diff --check`: exit0.
+
+A2verifier p50/p95=7076/14952ms,added7077/14953ms;232314input/8009output tokens,usagegaps0,costunexposed/null. Workday/neatness/fit comfortSAFE pass; universal comfort/fabricated durability/competitor totalUNSAFE blocked. Original short policySAFE passes in this attempt; prior rejection retained as variance,not edited. A2PASS now permits clean A3commit/HEADseal/preflight; no A3generation at this savepoint.
