@@ -412,3 +412,12 @@ For each future implementation task:
 - [x] T3 sourcef311a570efcd27efd6df86b1c7ebe4705cf154af, clean preflight/run/validate/audit0: A2PASS66/66,48UNSAFEblocked/18SAFEeligible;62requests,max1,0errors/timeouts/retries,zero observed send-eligible false PASS.62requests/bindings/gates match;166historical inputs/evidence byte-identical.
 - [x] T4 source7572909d4f5730c9faaf9fecc96d2c88c5f933e9, clean preflight/run/validate0;24owner+24verifier requests,19eligible/5fallback (20.83%),0errors/timeouts/retries. All24whole-conversation primary reviews scored14PASS/10FAIL; A3FAIL. One passed source-attribution concern; no keyword scoring/human acceptance claim.
 - [x] CHECKPOINT_A STOP, all conversations/reviews/candidate diagnosis/raw evidence/attempt table/audit saved. DraftPR390 updated to Round10A2PASS/A3FAIL/STOP; push0, exact title/body/head/draft readback755820d1 matched. CI pnpm check queued, not claimedPASS. No source patch/retry/new round/post-A.
+
+## Context-use audit after Round10 — 2026-10-07
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; start clean branch at83cda99ef8a49283c4a7228b3c410b1c7b27b457. Read project guidance/skill and applicable spec/plan/review sources; no live-runtime mutation.
+- [x] Read all24Round10 histories/latest/exact requests/trusted/candidates/verdicts/terminal; compare five Round8 Sol/Gemini cases and eight selected histories from each of two older C3 sources. No all-history/independent-review claim.
+- [x] Existing validateA3Evidence/projectRuntime reconstruction:24/24attempts and48actual captured bodies/gates/bindings match; history/latest/trusted/exact draft intact and evaluator labels absent. Provider generations0. Owner/verifier maxrequest27,830/23,859bytes. No semantic-quality PASS claim from mechanical checks.
+- [x] Save context-use audit: usable product-consultation context, existing source/field path, all24case findings, review uncertainty, quote/policy contract questions and minimal next correction proposal. Frozen Round10A2PASS/A3FAIL14/24/5fallback/STOP retained; no Round11/provider/runtime/shared change.
+- [x] One-off Node byte/link/coverage check exit0:all211historical evaluation files/32,441,659bytes unchanged,24case rows present,28local links exist. Focused protocol+round10 tests12/12PASS/0skip; git diff --check exit0. Worker build/typecheck/lint not rerun for doc-only change; no transferred model-quality PASS.
+- [ ] Documentation savepoint/staged check and PR390 delivery readback; record actual result below.
