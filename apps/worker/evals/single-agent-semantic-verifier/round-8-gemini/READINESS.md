@@ -43,3 +43,24 @@ C3_CHECKPOINT_A_ROUND=8-gemini; A2_RUN_SOURCE_SHA=fa24c94f80e0c200f6430d294d2f5e
 - SSH443 git push origin HEAD of sealed source — exit0.
 
 All returned verifier model IDs gpt-6.1-sol. No Gemini generation yet; A3 permitted only after this fresh A2PASS. Original Round8 evidence preserved.
+
+## T4 execution and offline review
+
+C3_CHECKPOINT_A_ROUND=8-gemini; A2_STATUS=PASS; A3_RUN_SOURCE_SHA=b7e08321d6bb6a16e486e0ae9277912801f8ed33. Existing C3_VERTEX_CREDENTIAL_FILE path supplied locally; no credential value retained. Committed/clean preflight before generation.
+
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3 — exit0.
+- node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs — exit0,24registered/executed owner slots plus23mandatory verifiers; initial qualityBLOCKED waiting offline scores.16SEND_ELIGIBLE/8FALLBACK; one owner PROVIDER_ERROR, HTTP200/nullfinishReason, no retry. Exit0 is not A3qualityPASS.
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3 — exit0 before review, complete evidence/qualityBLOCKED.
+- node C:/Users/nguye/AppData/Local/Temp/c3-r8-gemini-export.mjs — exit0, primary-agent whole-conversation review14/24/qualityFAIL and240diagnostic scores, raw attempts/operational unchanged; zero provider requests.
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3 — exit0 after review, valid qualityFAIL/24complete scored outcomes.
+- node C:/Users/nguye/AppData/Local/Temp/c3-r8-gemini-audit.mjs — exit0, source/frozen-input/compiled executable/historical artifact/request/firewall/terminal/review readback.109generation requests/max1 plus1OAuth;129older artifacts unchanged.
+- SSH443 git push origin HEAD for the sealed A3 source — exit0.
+
+Known defect discovered by post-run readback: legacy operational() only sums OpenAI usage keys, so Gemini operational aggregate zero token counts are invalid. Retain all raw records and the original aggregate. Offline audit/report reads23Gemini usage records147135input/27348output; one failed slot usageunknown. Combined known subtotal367503input/37208output, costunavailable. No executable change, source reseal or repeat generation to repair observations. Exact provider cause for HTTP200/nullfinishReason is unknown; no raw payload reconstructed.
+
+RecommendationSTOP: A2PASS/A3FAIL, fallback8/24 above10% plus family/consultation failures. No provider judge, regex/template rescue, production wiring/post-A work, automatic next round/merge/deploy/live send. Artifact-only delivery changes do not justify repeating unchanged worker checks.
+
+- node C:/Users/nguye/AppData/Local/Temp/c3-r8-gemini-report-check.mjs — exit0,12reported hashes match frozen inputs;24assessment terminal texts match raw outcomes;109request denominator/known token subtotal/qualityFAIL integrity checked.
+- git diff --check — exit0 after artifact/document updates; staged formatting checked before evidence commit.
+
+The first staged artifact check exited2 on12trailing-space lines in two conversation/review Markdown files. They are exact Gemini terminal text inside fenced blocks (six occurrences per file), not source formatting. Preserve those bytes. Ordinary staged check excludes exactly A3_CONVERSATIONS.md/A3_HUMAN_REVIEW.md; a separate scoped check disables blank-at-eol only for those two files. Exact fenced texts are checked against all24raw outcomes. No reply normalization, .gitattributes growth or provider rerun. The attempted evidence commit did not run after the failed check; following push reported already up-to-date.

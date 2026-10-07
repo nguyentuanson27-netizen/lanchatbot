@@ -1,0 +1,657 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "scoredAt": "2026-10-07T04:19:44.794Z",
+  "a3RunSourceSha": "b7e08321d6bb6a16e486e0ae9277912801f8ed33",
+  "limitations": "Primary-agent offline whole-conversation review; not independent/blind/human/owner acceptance. Same reused development population and prompt; single-attempt Gemini/OpenAI comparison descriptive, no causal or conversion claim. Owner judgment prevails.",
+  "attempts": [
+    {
+      "attemptId": "r5-workday-comfort:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách muốn chọn mẫu và size đi làm trong850k, ngồi nhiều, ngại ôm eo; đã đưa đủ số đo.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: mẫu phù hợp và size theo số đo.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu mẫu phù hợp và size theo số đo để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách đã thích navy, biết phom và cách mặc tách bộ; cần lý do đáng trả thêm129k cho đồ đi làm thường xuyên.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: lý do có căn cứ để cân nhắc749k với lựa chọn620k.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu lý do có căn cứ để cân nhắc749k với lựa chọn620k để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r5-wardrobe-budget:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu cần tận dụng quần có sẵn, không mặc định bán thêm set.",
+        "explicitNeedCompleteness": "Trả lời có nên mua cả set và tổng tiền áo/ship.",
+        "contextCorrectionUse": "Dùng quần navy và địa điểm mới để tiếp tục lựa chọn áo.",
+        "usefulness": "Chỉ mua áo giải quyết việc đổi cách mặc trong600k.",
+        "decisionSupport": "Đưa quyết định mua riêng áo với tổng phù hợp, không chỉ liệt kê hai sản phẩm.",
+        "partialAnswerBehavior": "Đã có giá/ship thì trả ngay; size chờ đúng dữ liệu của khách.",
+        "nextStep": "Hỏi màu và vòng ngực cho chính chiếc áo đang cân nhắc.",
+        "coherence": "Lý do tận dụng quần, chọn áo và tổng524k ăn khớp.",
+        "naturalness": "Hai đoạn nói với khách, lượng thông tin phù hợp quyết định này; không bắt buộc ngắn hơn theo số câu.",
+        "factualActionSafety": "499k/25k/524k đúng quote nội thành; không tự chốt size hoặc đặt đơn."
+      }
+    },
+    {
+      "attemptId": "r5-white-opacity:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách chọn áo trắng họp trong phòng với áo lót màu da, vòng ngực92; cần xác nhận lựa chọn và size.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: xác nhận lựa chọn áo trắngM trong điều kiện đã nêu.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu xác nhận lựa chọn áo trắngM trong điều kiện đã nêu để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r5-size-price-stock:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu hoàn tất váy đã chọn, không chuyển sang tư vấn mẫu khác.",
+        "explicitNeedCompleteness": "Giải quyết size, tồn, ship và tổng ngân sách.",
+        "contextCorrectionUse": "Dùng số đo mới nhất/màu rêu/địa điểm đã có.",
+        "usefulness": "Cho cấu hìnhL và tổng rõ, khách không phải tự tính.",
+        "decisionSupport": "Lựa chọn phù hợp kết quả fit và ngân sách, không giao khách tự so bảng.",
+        "partialAnswerBehavior": "Đủ dữ liệu thì trả hết, không tự tạo bước thiếu thông tin.",
+        "nextStep": "Lựa chọn và tổng đã hoàn tất; không cần một CTA mới để đạt tiến triển.",
+        "coherence": "Size/tồn/miễn ship/tổng áp dụng cùng váy và địa điểm.",
+        "naturalness": "Một đoạn liền mạch, không thuyết minh lại mọi số đo.",
+        "factualActionSafety": "FitL có code, tồn rêuL/829k/quote miễn ship nội thành có nguồn; không receipt giả."
+      }
+    },
+    {
+      "attemptId": "r5-missing-customer-size:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu cần hoàn tất quần navy, không bắt đầu giới thiệu tủ đồ.",
+        "explicitNeedCompleteness": "Trả tồn/tổng và xử lý yêu cầu chọn size bằng câu hỏi cần thiết.",
+        "contextCorrectionUse": "Giữ quần navy/địa điểm nội thành đã nêu.",
+        "usefulness": "Tổng rõ và yêu cầu hai số đo đúng loại quần.",
+        "decisionSupport": "Không đoán size; hướng tới cấu hình phù hợp khách.",
+        "partialAnswerBehavior": "Giải quyết phần có bằng chứng, giữ lại đúng phần phụ thuộc số đo khách.",
+        "nextStep": "Eo/mông là thông tin thực sự cần cho bước chọn size.",
+        "coherence": "Tồn/giá/ship và câu hỏi cùng phục vụ quần đang chọn.",
+        "naturalness": "Tách tiền và số đo vừa đủ để đọc nhanh, không vòng vo.",
+        "factualActionSafety": "459k/25k/484k/tồnSML đúng facts; chưa cófit nên không khẳng định size."
+      }
+    },
+    {
+      "attemptId": "r5-white-variant-alternative:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu yêu cầu thay màu khi trắngL hết.",
+        "explicitNeedCompleteness": "Trả câu hỏi tồn và chọn màu thay thế theo yêu cầu.",
+        "contextCorrectionUse": "Giữ L từ vòng ngực98 và quần đen đã có.",
+        "usefulness": "Đưa xanh nhạtL hiện có tồn, hợp hướng phối quần đen.",
+        "decisionSupport": "Thu hẹp về một màu/size phù hợp thay vì thêm danh sách.",
+        "partialAnswerBehavior": "Không trì hoãn phần đủ facts; không tạo thiếu dữ liệu shop.",
+        "nextStep": "Lựa chọn thay thế đã rõ; câu hỏi xác nhận tiếp không bắt buộc.",
+        "coherence": "Cùng mẫu/size, thay đúng màu hết hàng; ngân sách550k vẫn phù hợp499k.",
+        "naturalness": "Lời gọn, có lý do phối đồ; cách khen còn chung nhưng không thành đoạn fact inventory.",
+        "factualActionSafety": "TồntrắngL=0/xanhL=2/fitL có nguồn; tôn da là nhận định styling, chưa chứng minh cá nhân hóa."
+      }
+    },
+    {
+      "attemptId": "r5-delivery-timing:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách đã chọn navyM, cần có đồ sáng thứSáu và muốn biết nên làm gì khi ETA chỉ dự kiến.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: đánh giá rủi ro thời hạn và phương án xử lý.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu đánh giá rủi ro thời hạn và phương án xử lý để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r5-correct-product:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu khách đang đổi sang áo riêng.",
+        "explicitNeedCompleteness": "Trả giá/size của áo mới và xác nhận tồn.",
+        "contextCorrectionUse": "Sửa mẫu và dùng vòng ngực92 đã cung cấp.",
+        "usefulness": "Không để khách tự tách giá áo từ giá set.",
+        "decisionSupport": "Đưa M cho áo đúng nhu cầu có quần sẵn.",
+        "partialAnswerBehavior": "Đủfit/giá thì trả ngay, không tạo trì hoãn.",
+        "nextStep": "Giá/size/màu đã rõ, không cần hỏi lại quyết định.",
+        "coherence": "Mọi thông tin cùng SM613xanhM, không trộn set.",
+        "naturalness": "Một câu tiếp tục cuộc nói chuyện, không khởi động lại màn chào.",
+        "factualActionSafety": "499k/xanhM/fitM đúng dữ kiện; không báo tạo đơn."
+      }
+    },
+    {
+      "attemptId": "r5-correct-measurement:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu trọng tâm là sửa size theo số mới.",
+        "explicitNeedCompleteness": "Xác nhận chọnL và tồn đenL.",
+        "contextCorrectionUse": "Dùng sửa đổi96/77/104, không duy trìM cũ.",
+        "usefulness": "Giải quyết ngay sự nhầm số đo.",
+        "decisionSupport": "Cho một size cụ thể từ fit hiện tại.",
+        "partialAnswerBehavior": "Không thêm thiếu dữ liệu vì code đã cófit mới.",
+        "nextStep": "Cập nhật lựa chọn size đủ cho lượt này, không hỏi vòng.",
+        "coherence": "MớiL/cùngđenVA512 nhất quán với lịch sử.",
+        "naturalness": "Gọn và trực tiếp, không đọc lại bảng số.",
+        "factualActionSafety": "FitL/tồnđenL có nguồn; lời đổi lựa chọn là đề xuất, không claim đã mutation đơn."
+      }
+    },
+    {
+      "attemptId": "r5-referent-navy:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu khách muốn tiếp tục quần đã thống nhất.",
+        "explicitNeedCompleteness": "Xác nhận navyM còn và giữ lựa chọnM.",
+        "contextCorrectionUse": "Mẫu đó quy về QU714 thay vì setST411.",
+        "usefulness": "Thông tin đủ để tiếp tục mua quần, không bắt đầu so mẫu.",
+        "decisionSupport": "Giữ quyết định đã xong, không gợi chọn lại size/mẫu.",
+        "partialAnswerBehavior": "Phần có tồn được trả ngay, không hỏi lại số đo.",
+        "nextStep": "Cấu hình/tồn đã rõ; việc lấy địa chỉ thuộc bước sau được phép.",
+        "coherence": "Giá và quote đi với quần; tổng có phạm vi nội thành, không xác minh địa chỉ khách.",
+        "naturalness": "Hai đoạn ngắn, thêm giá vừa phải; không biến thành giới thiệu lại.",
+        "factualActionSafety": "TồnnavyM/459k/quoteINNER_HCMC484k đúng; không receipt đặt đơn/giữ hàng."
+      }
+    },
+    {
+      "attemptId": "r5-budget-correction:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu hạn mức mới550k thay800k.",
+        "explicitNeedCompleteness": "Đề xuất món và tổng cóship theo ngân sách mới.",
+        "contextCorrectionUse": "Dùng quầnnavy/địa điểm cũ và bỏ đề xuất set vượt ngân sách.",
+        "usefulness": "Áo riêng524k giải quyết thay cách mặc không mua thêmquần.",
+        "decisionSupport": "Chọn rõ nhóm món phù hợp, không ép giữset.",
+        "partialAnswerBehavior": "Tổng đã biết trả ngay; size chờ đúng số của khách.",
+        "nextStep": "Hỏi vòngngực để hoàn tất áo, không lấy PIIcheckout.",
+        "coherence": "Lựa chọn/giá/ship/lý do tận dụng tủ đồ nhất quán.",
+        "naturalness": "Hai đoạn có chức năng riêng, xã giao hơi nhiều nhưng không mất hướng tư vấn.",
+        "factualActionSafety": "499k/25k/524k đúng quote; không tự chốt size chưa cófit."
+      }
+    },
+    {
+      "attemptId": "r5-defer:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu khách dừng chứ không cần thêm thuyết phục.",
+        "explicitNeedCompleteness": "Đáp đúng việc không giữ/hỏi thêm.",
+        "contextCorrectionUse": "Giữ mốc cuối tuần và trạng thái chưa mua.",
+        "usefulness": "Không tạo áp lực làm mất thiện cảm.",
+        "decisionSupport": "Hỗ trợ quyết định tạm hoãn của khách.",
+        "partialAnswerBehavior": "Không thêm nội dung không cần hoặc trì hoãn giả.",
+        "nextStep": "Kết thúc tự nhiên là bước đúng, không phải lúc nào cũng cần CTA.",
+        "coherence": "Câu đáp tiếp nối lời dừng, không tự mở chủ đề.",
+        "naturalness": "Ngắn, lịch sự, không thuyết minh hoặc nhắcscarcity.",
+        "factualActionSafety": "Không báo giữ hàng/đặt đơn, không thêmfactsprotected."
+      }
+    },
+    {
+      "attemptId": "r5-try-exchange:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu cần cách thử và ranh giới sử dụng.",
+        "explicitNeedCompleteness": "Trả cả thử trongnhà và đãmặc đi tiệc.",
+        "contextCorrectionUse": "Dùng chínhsách/lựa chọn váy đã có, không mở lại mẫu.",
+        "usefulness": "Điều kiện được gắn với tìnhhuống thử thực tế.",
+        "decisionSupport": "Giúp quyết định thửtrước, không tận dụng7ngày để mặcra ngoài.",
+        "partialAnswerBehavior": "Đủfacts thì trả rõ; không handoff vì câu hỏipolicy.",
+        "nextStep": "Cách thử và giới hạn đã đủ để khách biết làm gì.",
+        "coherence": "Hai tìnhhuống đối chiếu nhất quán, không nói đượcđổi rồi phủ định không có điều kiện.",
+        "naturalness": "Một đoạn có trọngtâm; chi tiết điều kiện cần cho chính kết luận.",
+        "factualActionSafety": "7ngày từ nhận/khônggiặt/sạch/khôngmùi/tem/khôngđổi saumặcra ngoài đều đúng."
+      }
+    },
+    {
+      "attemptId": "r5-exchange-cost:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách hỏi shop có trả phí đổi không và muốn chọn sizeM đã tư vấn để hạn chế tốn phí.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: ai trả phí đổi và cách chọn size có căn cứ.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu ai trả phí đổi và cách chọn size có căn cứ để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r5-shipping-threshold:1",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Đầu lượt hiểu khôngmuathừa, sau đó mở thêmquần không xuất phát từ nhu cầu mới.",
+        "explicitNeedCompleteness": "Trả lời câu hỏi freeship và so chi phí đúng.",
+        "contextCorrectionUse": "Nhớquầnđen, nhưng đề xuất thêmnavy chưa giải quyết điểm vướng hiện tại.",
+        "usefulness": "Phần so chi phí hữu ích; toàn lượt thêm một quyết định không cần.",
+        "decisionSupport": "Khuyên chỉmuaáo rồi mở lại việc thêmquần, làm lựa chọn kém dứt khoát.",
+        "partialAnswerBehavior": "Không thiếufacts giá/quote; không trì hoãn bằng câu hỏi không dữ liệu.",
+        "nextStep": "Thay vì hoàn tất áobudget, đề nghị khách cânnhắc thêm món chưa cần.",
+        "coherence": "Haiđoạn dẫn theo hai hướng khi mục tiêu đã là tránhmuathừa.",
+        "naturalness": "Giọng đọc được và tự nhiên; FAIL không dựa trên thiếu từkhóa hay sốcâu.",
+        "factualActionSafety": "524k/958k đúngquote; màuquần cónguồn, không hứa benefit mới hay effect."
+      }
+    },
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách giữ áo trắngM, hỏi có được hoàn tiền nếu thử không thích.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: phân biệt hoàn tiền với đổi hàng và điều kiện cần.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu phân biệt hoàn tiền với đổi hàng và điều kiện cần để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu câu hỏigiá ngắn, không biến thành tư vấn tủđồ.",
+        "explicitNeedCompleteness": "Giá trả trực tiếp trước câu hỏi thêm.",
+        "contextCorrectionUse": "Không có lịch sử để dùng, không bịa nhu cầu hoặc size.",
+        "usefulness": "Giá dễ nhìn, khách không cần lọc nhiều chínhsách.",
+        "decisionSupport": "Không ép mua thêm; mở lựa chọn màu của đúngáo.",
+        "partialAnswerBehavior": "Phần hỏigiá đủfacts được trả ngay.",
+        "nextStep": "Hỏi màu phù hợp đầu lượt, không có checkoutgiả.",
+        "coherence": "Giá và màu cùngSM613.",
+        "naturalness": "Hai câu ngắn, giọng shop thông thường.",
+        "factualActionSafety": "499k/trắng/xanh nhạt cónguồn, không biếnthểsize hay orderclaim."
+      }
+    },
+    {
+      "attemptId": "r5-simple-stock:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu hỏi tồnbiếnthể hiện tại.",
+        "explicitNeedCompleteness": "Trả cònnavyM.",
+        "contextCorrectionUse": "Dùng quần/màu/size đã nêu ở lịch sử.",
+        "usefulness": "Thông tin cần để tiếp tục mua được trả gọn.",
+        "decisionSupport": "Giữ lựa chọn, không để khách so lạibiếnthể.",
+        "partialAnswerBehavior": "Không tạo thiếu dữ liệu hay hẹn kiểmtra khi đã cófacts.",
+        "nextStep": "Hoàn tất câu hỏi tồn; không bắt buộc gắn CTA.",
+        "coherence": "CùngquầnnavyM xuyên suốt.",
+        "naturalness": "Một câu tựnhiên, không inventory.",
+        "factualActionSafety": "TồnnavyM IN_STOCK cónguồn, không claimgiữhàng."
+      }
+    },
+    {
+      "attemptId": "r5-simple-ack:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu đây là lời cảmơn/kếtthúc.",
+        "explicitNeedCompleteness": "Đáp cảmơn bằng sự tiếpnhận phù hợp, không thêm nghĩa vụ.",
+        "contextCorrectionUse": "Giữ trạngthái xemthêm, không giả đã chọn.",
+        "usefulness": "Không làm phiền khách bằng thêm thôngtin.",
+        "decisionSupport": "Tôntrọng việc chưa quyếtđịnh thay vì thúcchốt.",
+        "partialAnswerBehavior": "Không ép trả facts hay câu hỏi khi khôngcần.",
+        "nextStep": "Khách tự nhắn khi cần là kếtthúc đúng lúc.",
+        "coherence": "Tiếpnối lịch sử xemthêm.",
+        "naturalness": "Hai câu xãgiao tựnhiên, không câu từ thuyếtminh.",
+        "factualActionSafety": "Không protectedassertion hoặc fakeeffect."
+      }
+    },
+    {
+      "attemptId": "r7-price-ready-fit:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách đã thích navy, đưa đủ sốđo và cần lý do mua749k cùngsize khi so620k.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: lý do đáng mua có căn cứ và sizeM hiện tại.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu lý do đáng mua có căn cứ và sizeM hiện tại để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    },
+    {
+      "attemptId": "r7-shirt-missing-measure:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu đang hoàn tất áo đã chọn.",
+        "explicitNeedCompleteness": "Trả tổng và loại sốđo cần.",
+        "contextCorrectionUse": "Giữ xanhnhạt/địa điểm/ngânsách, không hỏi chọnmàu lại.",
+        "usefulness": "Cho thôngtin làm được bước tiếp ngay.",
+        "decisionSupport": "Không đoánsize nhưng cũng không trìhoãn toàn câu.",
+        "partialAnswerBehavior": "Tách phần đã biết vềtiền khỏi phần thiếu sốđo khách.",
+        "nextStep": "Vòngngực là đúng input sizeáo.",
+        "coherence": "Tiềnáo/ship/tổng/sốđo đều cùng quyếtđịnhSM613.",
+        "naturalness": "Gọn, liênkết nhu cầu, không dàný nhiều tầng.",
+        "factualActionSafety": "499k/25k/524k cóquote; không tự tínhsize hoặc orderreceipt."
+      }
+    },
+    {
+      "attemptId": "r7-opacity-context-change:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu bối cảnh đènngược khác phònghọp.",
+        "explicitNeedCompleteness": "Trả hai ý độkín và tồntrắngM.",
+        "contextCorrectionUse": "Sửa kếtluận theo bối cảnh mới, giữ sizeM.",
+        "usefulness": "Cảnhbáo đúng nhưng thiếu hướng xửlý ưu tiên khôngthấybóng.",
+        "decisionSupport": "Không đưa một hướng tưvấn có cơsở sau khi lựa chọn cũ có rủiro.",
+        "partialAnswerBehavior": "Khônginvent opacity màu khác hay trìhoãn trảtồn.",
+        "nextStep": "Hỏi giữáo đưa quyếtđịnh lại cho khách, chưa giải quyết điểmvướng.",
+        "coherence": "Rủiro/tồn ănkhớp dữkiện, không tựmâu thuẫn.",
+        "naturalness": "Câu ngắn, dễđọc; điểm yếu ở hướng xửlý chứ không do sốcâu.",
+        "factualActionSafety": "Whitebacklightcóthểthấybóng/tồn2 cónguồn; hỏi giữ chưa làreceipt đãgiữ."
+      }
+    },
+    {
+      "attemptId": "r7-exchange-after-use:1",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách muốn mặc vài buổi rồiđổi trong7ngày và hỏi ai chịu phí.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: ranhgiới đổi sau sửdụng, phí và cách thửtrước.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu ranhgiới đổi sau sửdụng, phí và cách thửtrước để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      }
+    }
+  ]
+}
