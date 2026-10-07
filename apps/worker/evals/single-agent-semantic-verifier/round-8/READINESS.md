@@ -73,3 +73,35 @@ node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
 48UNSAFE/18SAFE labels; zero observed send-eligible false PASS on the frozen tested unsafe population/configuration.18/18SAFE send-eligible, safe terminal failures0%, unexecuted0. Four deterministic precheck blocks and62mandatory verifier requests;62upstream/62client, max1,0rejected continuations/retries/errors/timeouts. Verifier p50/p95=6016/8687ms; provider-reported126638input/6989output tokens, missingusage0,cost unavailable. Dispositions18SEND_ELIGIBLE/43FALLBACK/5HANDOFF/0NO_SEND; no live sends.
 
 All five corrected SAFE controls send-eligible in this fresh development run. This does not retrospectively validate old labels or prove the exact cause of prior rejections; different sampling and corrected context limit comparisons. No rerun, excluded attempt or post-result tuning. A3 may now proceed from another clean source seal; language quality is still unobserved.
+
+## A3 execution, offline review and STOP
+
+A2 evidence committed at `18c18986bd4b8bd88b6cb5f5127a56f001e99eb0`; clean HEAD captured at runtime as a3RunSourceSha, frozen inputs/executable unchanged. Commands actually run:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='8'
+$env:A3_RUN_SOURCE_SHA='18c18986bd4b8bd88b6cb5f5127a56f001e99eb0'
+$env:A2_STATUS='PASS'
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3
+# exit0, after A2PASS and clean source/config
+node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs
+# exit0,24/24owner +24mandatoryverifier requests; allSEND_ELIGIBLE
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
+# initial exit0, valid complete evidence with qualityBLOCKED awaiting offline scores
+node 'C:/Users/nguye/AppData/Local/Temp/c3-round8-export-review-20261007.mjs'
+# exit0, export24whole-conversation reviews/240individual diagnostic scores, qualityFAIL19/24
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
+# final exit0, valid qualityFAIL evidence, not A3PASS
+```
+
+Primary agent read all24histories/current messages/trusted facts/actual terminal replies individually before scoring. One connected whole-turn judgment plus customer-impact assessment first, then10contextual diagnostic scores; no keyword quote tables or online judge. QualityFAIL19/24; concern2/5,partial4/5,correction5/5,policy5/6,simple3/3. Five naturalness1; the two price cases also usefulness1/decisionSupport1. Owner finalquality decision still prevails; offline self-assessment is not independent/human approval or measured improvement.
+
+24/24SEND_ELIGIBLE; fallback/handoff/no-send0%, owner/verifier errors/timeouts0. A3verifier p50/p95=5560/7528ms; added verification5563/7534ms; end-to-end12376/22491ms. Owner132576input/3946output tokens, verifier97215/1859; all110A2/A3records356429/12794tokens, costunavailable.86combinedverifiers p50/p95=5778/8430ms.
+
+One-off source/request/firewall audit exit0: five executable/nine frozen inputs match both sealed heads; compiled boundary hash unchanged;111older artifacts byte-identical; all110actual captured request bodies/bindings/final gates valid, model IDs selected alias, evaluator keys/case IDs/references/scoring procedure excluded from context,110upstream/110client requests, max1/0rejected continuations. The verifier draft is evaluated output, not an evaluator context source. No credentials/real customer PII copied.
+
+Artifact export first attempted as a long PowerShell command was rejected before process creation with WindowsOS206. Retried only this offline artifact export via two temporary files outside repo; success,0newprovider requests. This was not a generation retry or provider error. Terminal-integrity readback exit0: original generated review packet and all24exact terminal texts/assessment outcomes agree;240diagnostic scores present, whole-turn judgments agree with unchanged numeric bars. No frozen source/prompt/corpus/bounds/rubric change after results.
+
+Deliver [CHECKPOINT_A](CHECKPOINT_A.md), all conversations/connected reviews/raw provider evidence/audit/measurements. RecommendationSTOP; language/price-consultation weaknesses remain. No further generation/post-A/merge/deploy/live send. Final formatting/staged checks and publication follow at delivery.
+
+Delivery checks actually run: report-identity/metric readback exit0; `git diff --check` and `git diff --cached --check` each exit0. Staged scope only twelve Round8 evidence/documentation files; no frozen input/executable changes after seal. Final evidence commit/push and exact-head PR readback are recorded in PR delivery; GitHub CI is not inferred from local checks.
