@@ -366,3 +366,12 @@ For each future implementation task:
 - [x] Replace generic style guidance with explicit voice/composition instructions in a separate inactive prompt candidate: natural shop conversation, direct grounded advice, useful connected explanations, fewer redundant connectors/repeated facts and an ending suited to the current turn. Preserve sections1–6, material conditions and code/verifier authority. No fixed reply outline, keyword scoring, new role/parser/gate or runtime wiring.
 - [x] With C3_CHECKPOINT_A_ROUND=7, run `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-7.test.mjs`:12/12PASS. One-off local Node readback checks unchanged section1–6/frozen Round7 prompt and24 candidate conversation envelopes within32,768bytes, excluding evaluator keys; final size/hash readback recorded in PR delivery. No provider generations or worker/shared executable changes; no new full worker checks or model-quality claim.
 - [x] Keep candidate outside all frozen manifests/runners/evidence for owner review before any later run. Round7A2FAIL/A3NOT_RUN/STOP remains; historical results/ratings are unchanged.
+
+## Authorized Round8 — 2026-10-07
+
+- [x] Owner authorizes rerun after voice review; refresh main / implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361, inspect installed client0.159.2/existing ChatGPT login without generation, reuse isolated branch/PR390. Review all18SAFE controls; declare five context/time-origin corrections before freeze. Preserve Round7 and all previous observations.
+- [ ] T1 freeze exact reviewed voice prompt, unchanged verifier/config/authority/bars,66A2/24A3 once and whole-conversation offline review procedure before provider results.
+- [ ] T2 observed RED→minimum GREEN, all exact focused readiness commands and source/history/firewall checks.
+- [ ] T3 clean source seal/preflight/fresh A2 run/validation; preserve complete denominator and STOP ifFAIL/BLOCKED.
+- [ ] T4 only after A2PASS: clean source seal/preflight/24A3 once, whole-conversation reviews and diagnostic scores for actual terminal outcomes.
+- [ ] Deliver CHECKPOINT_A/conversations/review/raw evidence/audit/ops, update/readback PR390 and STOP at owner checkpoint.
