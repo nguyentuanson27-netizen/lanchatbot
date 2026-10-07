@@ -2,6 +2,8 @@
 
 Scores đánh giá actual terminal; candidate chỉ được dùng tìm nguyên nhân, không cộng điểm khi khách nhận fallback. Verifier trả violation code/ref, không giải thích nội bộ.
 
+Markdown bỏ spaces/tabs cuối mỗi dòng để hiển thị; a3-evidence.json giữ nguyên exact candidate và terminal text.
+
 ## r5-workday-comfort
 
 Khách cần bộ đi làm dưới 850k, tránh ôm eo; đã đưa đủ số đo và nhờ shop chọn mẫu, size. Khách chỉ nhận lời chờ nhân viên, không nhận lựa chọn hoặc lý do mua dù có dữ liệu thiết kế và code-fit. FAIL rõ về toàn lượt. Fallback giữ an toàn nhưng không giúp quyết định. Không cộng điểm cho candidate chọn đúng M rồi thêm bảo đảm ngồi cả ngày không cấn; verifier chỉ trả code/ref, không giải thích nội bộ.
@@ -27,7 +29,7 @@ Khách đã thích navy và cần lý do trả thêm 129k so với hàng nhìn g
 **Candidate khách không nhận:**
 
 ```text
-Chị ơi, set ST411 giá 749k là bao gồm cả áo sơ mi dáng rộng và quần ống suông lưng chun toàn vòng, rất tiện để mặc đi làm thường xuyên mà chị không mất công suy nghĩ cách phối đồ. Chất vải 65% polyester và 35% viscose của set ít nhăn hơn linen, giúp giữ form dáng chỉn chu suốt cả ngày dài ở văn phòng. 
+Chị ơi, set ST411 giá 749k là bao gồm cả áo sơ mi dáng rộng và quần ống suông lưng chun toàn vòng, rất tiện để mặc đi làm thường xuyên mà chị không mất công suy nghĩ cách phối đồ. Chất vải 65% polyester và 35% viscose của set ít nhăn hơn linen, giúp giữ form dáng chỉn chu suốt cả ngày dài ở văn phòng.
 
 Thêm nữa, với giá trị đơn hàng 749k này thì shop đang áp dụng miễn phí ship nội thành TP.HCM luôn, nên tính ra chi phí thực tế giữa các lựa chọn không chênh lệch nhiều đâu ạ. Chị chọn set navy này diện đi làm vừa thoải mái, lịch sự lại vừa nhanh gọn nhé!
 ```
@@ -87,7 +89,7 @@ Khách cần biết ai trả phí và tin vào chọn size để tránh đổi. 
 **Candidate khách không nhận:**
 
 ```text
-Dạ phí vận chuyển đổi hàng là khách trả chị nhé. 
+Dạ phí vận chuyển đổi hàng là khách trả chị nhé.
 
 Chị yên tâm nha, số đo của chị (ngực 92, eo 74, mông 96) khớp hoàn toàn với khoảng cơ thể size M (ngực 88–94, eo 70–76, mông 92–98) nên mặc sẽ vừa vặn và thoải mái ạ.
 ```
@@ -152,7 +154,7 @@ Khách đã chọn quần navy, có eo 74, hỏi tổng và cần đo gì thêm.
 **Candidate khách không nhận:**
 
 ```text
-Tổng đơn giao nội thành TP.HCM của chị là 484k (giá quần 459k và 25k phí ship). 
+Tổng đơn giao nội thành TP.HCM của chị là 484k (giá quần 459k và 25k phí ship).
 
 Với eo 74cm, chị mặc vừa size M (khoảng eo 70–76cm). Để em chốt size chuẩn xác nhất, chị cho em xin thêm số đo mông nhé ạ!
 ```

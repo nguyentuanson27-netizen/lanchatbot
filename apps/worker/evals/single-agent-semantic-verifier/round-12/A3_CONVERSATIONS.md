@@ -1,6 +1,6 @@
 # Round12 — toàn bộ lịch sử A3 và review
 
-Exact raw strings/requests/terminal bindings: a3-evidence.json. Markdown chỉ trim trailing whitespace để hiển thị; JSON giữ nguyên exact text. Review primary offline toàn lượt trước10diagnostic scores, không independent/human/owner acceptance. Không keyword/CTA/reference matching.
+Exact raw strings/requests/terminal bindings: a3-evidence.json. Markdown bỏ spaces/tabs cuối mỗi dòng và cuối block để hiển thị; JSON giữ nguyên exact text. Review primary offline toàn lượt trước10diagnostic scores, không independent/human/owner acceptance. Không keyword/CTA/reference matching.
 
 ## r5-workday-comfort — FAIL
 
@@ -102,7 +102,7 @@ Cả hai màu trắng và xanh nhạt của áo đều rất dễ phối với q
 **Actual terminal — SEND_ELIGIBLE:**
 
 ```text
-Dạ, chị chọn trắng size M là chuẩn nhất ạ. 
+Dạ, chị chọn trắng size M là chuẩn nhất ạ.
 
 Họp trong phòng với ánh sáng văn phòng kết hợp áo lót màu da, chị hoàn toàn yên tâm là không bị lộ màu áo lót. Số đo ngực 92cm của chị mặc size M vừa đẹp và shop đang có sẵn mẫu này nha chị.
 ```
@@ -193,7 +193,7 @@ Chị cho em xin số đo eo và mông để em chọn size chuẩn nhất cho m
 **Actual terminal — SEND_ELIGIBLE:**
 
 ```text
-Dạ, áo trắng size L nhà em hết mất rồi chị ạ. 
+Dạ, áo trắng size L nhà em hết mất rồi chị ạ.
 
 Chị chuyển sang màu xanh nhạt size L nhé; màu này mặc với quần đen vừa lịch sự lại rất tôn da. Áo giá 499.000đ, đúng với khoản ngân sách của chị luôn ạ.
 ```
@@ -344,7 +344,7 @@ Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ 
 **Actual terminal — SEND_ELIGIBLE:**
 
 ```text
-Dạ, với ngân sách 550k bao gồm ship nội thành, mẫu áo sơ mi SM613 (499k + 25k ship = 524k) là lựa chọn vừa vặn với khoản phí của chị ạ. 
+Dạ, với ngân sách 550k bao gồm ship nội thành, mẫu áo sơ mi SM613 (499k + 25k ship = 524k) là lựa chọn vừa vặn với khoản phí của chị ạ.
 
 Áo có hai màu trắng và xanh nhạt, kết hợp cùng quần navy sẵn có của chị rất lịch sự và dễ mặc đi làm. Chị cho em xin số đo vòng ngực để em đối chiếu bảng size và chọn chuẩn cho mình nhé ạ!
 ```
@@ -404,7 +404,7 @@ Dạ vâng ạ, cuối tuần chị cứ thong thả xem nhé, khi nào cần ch
 **Actual terminal — SEND_ELIGIBLE:**
 
 ```text
-Dạ đúng rồi chị, chị thử trong nhà (chưa giặt, sạch, không mùi và giữ nguyên tem) thì mình đổi được trong 7 ngày từ lúc nhận hàng nhé ạ (khách trả phí vận chuyển đổi). 
+Dạ đúng rồi chị, chị thử trong nhà (chưa giặt, sạch, không mùi và giữ nguyên tem) thì mình đổi được trong 7 ngày từ lúc nhận hàng nhé ạ (khách trả phí vận chuyển đổi).
 
 Còn nếu đã mặc đi tiệc rồi thì shop không nhận đổi, vì quy định đổi hàng là sản phẩm chưa sử dụng và shop không nhận đổi khi đã mặc ra ngoài ạ.
 ```
@@ -640,7 +640,7 @@ Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ 
 **Actual terminal — SEND_ELIGIBLE:**
 
 ```text
-Dạ tổng đơn áo xanh nhạt giao nội thành TP.HCM là 524.000đ (gồm 499.000đ tiền áo và 25.000đ phí ship), hoàn toàn dưới 600.000đ chị nhé. 
+Dạ tổng đơn áo xanh nhạt giao nội thành TP.HCM là 524.000đ (gồm 499.000đ tiền áo và 25.000đ phí ship), hoàn toàn dưới 600.000đ chị nhé.
 
 Để chọn size chuẩn cho sơ mi SM613, em chỉ cần chị cho em xin số đo **vòng ngực cơ thể** thôi ạ!
 ```
