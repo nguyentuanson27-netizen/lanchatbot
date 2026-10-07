@@ -53,3 +53,11 @@ T3savepoint/clean HEAD/runtime a3RunSourceSha0c586ac22a51a5d78bb3a23a0ac1cb1a7a8
 - After report findings/human-packet clarification, repeated export check: exit0; `git diff --check`: exit0. No executable/config/frozen-input change or repeated generation. Focused tests already passed before seals; no broader repeat needed for evidence/document-only additions.
 
 A3 fallback20.59%>10% independently fails bar. Owner latency5409/9276ms; verifier6549/20881ms, added6554/20887ms, end-to-end12512/26123ms (p50/p95). Owner transport error2/34=5.88%, verifier0/32, no timeouts. Three unbound freeship candidates/one stronger benefit/one untested colour opacity candidate blocked; exact verdict codes and classification uncertainty preserved. Existing context truth/fit/policy path was present, so no context repair or causal improvement claim. STOP at owner Checkpoint A; no automatic further run/post-A or production work. Delivery evidence appended after actual push/readback.
+
+## Delivery actually completed
+
+- `git add -- apps/worker/evals/single-agent-semantic-verifier/round-14 tasks/todo.md`; `git diff --cached --check`: exit0. Artifact commit `ef8ae516375691c9ef72fb9856b8308b0c4b7257`, clean worktree, containing complete evidence/reviews/report, no sealed executable/config change.
+- `git push origin feat/c3-semantic-verifier-checkpoint-a-20261005`: exit0. `gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Checkpoint A: Round14 A2 PASS, A3 FAIL / STOP' --body-file C:/Users/nguye/AppData/Local/Temp/c3-round14-pr-body.md`: exit0.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-readback-pr390-round14.mjs`: exit0, exact title/body, OPENdraft PR390, local/remote/PRhead equal artifact SHA, clean worktree. GitHub `pnpm check` QUEUED at readback; remote CI PASS remains unverified.
+
+Delivery-record-only savepoint follows; no generation/evidence/source/config edits. STOP at owner Checkpoint A, no automatic further round/post-A implementation, merge/deploy/live send.
