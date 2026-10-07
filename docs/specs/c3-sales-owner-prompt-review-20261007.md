@@ -50,3 +50,28 @@ Local checks actually performed:
 Candidate UTF-8 bytes including final newline:9,797 (first prose draft10,308). Current candidate SHA-256: `8ee7e0cdd712ad8dcfefb0649726ba3a229b654d3e56df30e3ba11af95a74f43`. This identifies the review draft, not a frozen provider run. Focused tests16/16PASS and diff checkPASS were repeated after restructuring. Provider generations for this revision:0; roles/layers/executable lines added:0. Worker typecheck/build/lint were not rerun for these inactive text/document edits; previous run results are not transferred to a new round.
 
 No conversational-quality improvement or Checkpoint A PASS is claimed before execution and assessment. This is a prompt hypothesis; it cannot establish provider reliability, conversion, complete product data or real checkout capability. Recommendation remains STOP pending owner review; no rerun started.
+
+## Owner-approved confidence and short policy replies after Round8 Gemini
+
+The owner approves confident recommendations from code-confirmed size results, relevant sales reasoning within supplied evidence, and whole-conversation interpretation of policy conditions. The owner explicitly accepts “đổi trong 7 ngày” as seven days from receipt without listing all conditions unless asked or relevant to the customer's situation. This approval supersedes requiring the explicit time-origin phrase in every short exchange-policy reply; it does not change the recorded Round8 provider verdicts or terminal outcomes.
+
+Prepared on existing implementation branch at HEAD `48ada90e3d540191a8da8da05440515a669cf5c3`; refreshed `origin/main` remains `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. The earlier frozen runs and their implementationBaseSha are unchanged.
+
+| Inactive preparation asset | Purpose | SHA-256 |
+| --- | --- | --- |
+| [Owner prompt](../../apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-confidence-review-20261007.vi.txt) | Keep the reviewed natural voice; make code-grounded size recommendations confident, constrain added benefits to available evidence, and allow relevant concise policy replies. | `7a7802579ecc731d33e30e5935d0ade209811e87256fc708e51c22d48786dabc` |
+| [Verifier prompt](../../apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-sales-confidence-review-20261007.vi.txt) | Judge meaning in the full conversation; confidence and approved shorthand alone are not violations. Keep actual unsupported benefits, contradictory eligibility and receipt failures blocked. | `f4ee27c7b97deaa0954b1c60fce3f3455eddb1bf027fad1fe7b19c1c563ddf2d` |
+| [Context preparation](../../apps/worker/evals/single-agent-semantic-verifier/prompts/sales-confidence-context-review-20261007.json) | Shop-confirmed exchange shorthand plus explicit scope/unknowns of existing authored product data. No new benefit, measurement or eligibility is invented. | `fcc01e5024249864836960b5f3e811a0f92eab241880abbb7fa7c509a548ba42` |
+
+The context JSON is an authored synthetic evaluation preparation asset, not real shop data or a new runtime schema. A later freeze copies the text into existing `policyLiterals.text` / `productProfiles.details.limitations`, records the new source version, computes profile content hashes and binds the resulting trusted snapshot. Existing `projectRuntime` carries these allowlisted fields to both roles. Protected claims, their provenance and exact SIZE_FIT/customer binding are retained. No new selector, state field, parser, prompt-example corpus, role or provider framework is needed. The prompt and the product facts/limits work together; a prompt does not fill missing measurements or manufacture proof of all-day comfort/durability.
+
+Local verification actually performed:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='8-gemini'
+node --test apps/worker/evals/single-agent-semantic-verifier/sales-confidence-review.test.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-8-gemini.test.mjs
+```
+
+14/14 PASS, zero skips. New checks prepare all24 histories locally, retain every protected claim/provenance and verify existing hardPrecheck accepts the clarified context, then capture both request envelopes with evaluator/private annotations excluded. All48 requests fit the32,768-byte bound even with a4,096-byte verifier draft; one-off Node envelope readback measures maxima27,382 bytes owner /26,226 verifier. A one-off Node/Git byte comparison confirms all169 previously tracked evaluation files (28,274,944 bytes) identical to preparation HEAD. Candidate sizes: owner10,841bytes, verifier4,878bytes, context1,888bytes. These are structural checks, not semantic model judgments; no semantic RED→GREEN or model-quality result is claimed. No worker/shared executable or API implementation changed, so worker typecheck/build/lint were not rerun for this preparation. Formatting verification is recorded in tasks/todo.md.
+
+Provider generations0, new attempts0, new run/source seal0; no manifest/runner selects these assets. This instruction authorizes prompt/context preparation, and no provider rerun was requested in it. Models, one-attempt preference,10% terminal-failure bar, mandatory verifier/final gate and static fallback remain unchanged. Before a later authorized run, review A2 labels/conditions against the approved contract before freezing, preserve the exact7 PR387 attacks and all previous observations, seal new inputs/source and rerun A2 before A3. A result-driven relabel, a repair loop or a repeat attempt is not a remedy. Gemini's recorded incomplete-response issue remains outside this prompt preparation. Checkpoint A remains STOP with historical evidence intact.

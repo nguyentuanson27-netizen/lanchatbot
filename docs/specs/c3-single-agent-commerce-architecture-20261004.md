@@ -57,6 +57,10 @@ Khi dữ liệu sản phẩm đủ, bot phải dùng nhu cầu và thông tin kh
 
 Owner làm rõ trước Round5 ngày 2026-10-06: tư vấn tự tin để khách tin tưởng, loại giọng dè dặt chung chung khi đã đủ dữ kiện. Giữ điều kiện có ảnh hưởng thực tế; sự tự tin không tạo quyền bịa fit, tồn, chính sách hay thành công hành động. Viết lại toàn bộ hội thoại đánh giá với lời khách/shop tự nhiên và context/state nhất quán. Chấm kỹ từng kết quả trong lịch sử theo nhu cầu mua, phương án, điểm cản, sự tin tưởng và tiến triển phù hợp; đúng facts hoặc có câu hỏi chốt chưa đủ đạt. Giữ10chiều đánh giá hiện có, một conversational owner, tối đa một verifier và code authority; không thêm tầng ngữ nghĩa để cải thiện lời nói.
 
+Owner làm rõ sau Round8 Gemini ngày 2026-10-07: kết quả chọn size đã được code xác nhận cho đúng khách cho phép tư vấn tự tin, không cần giọng tạm thời hoặc dè dặt. Dùng dữ kiện về thiết kế, số đo và phạm vi thử nghiệm để giải thích lợi ích lựa chọn; kết quả chọn size không tự chứng minh thoải mái cả ngày, phép thử ít nhăn không chứng minh độ bền. Cung cấp đầy đủ facts và giới hạn evidence trong context cho model, chọn phần liên quan để nói với khách.
+
+Owner duyệt cách trả lời chính sách ngắn: “đổi trong 7 ngày” mặc định tính từ ngày nhận hàng, không cần nhắc mốc hoặc liệt kê mọi điều kiện trừ khi khách hỏi hoặc tình huống ảnh hưởng quyền lợi. Xét ý nghĩa của lời khẳng định cùng toàn bộ lịch sử; tóm tắt không đồng nghĩa miễn điều kiện, còn quyền lợi thực sự trái nguồn vẫn bị chặn. Chi tiết hợp đồng ở amendment §7.0; các prompt/context mới được lưu riêng để chuẩn bị lần đánh giá tiếp theo, không thay đổi evidence hoặc điểm của các vòng đã freeze.
+
 Các ca A3 bán hàng thông thường của lần đánh giá tiếp theo phải có dữ liệu đủ cho việc tư vấn được yêu cầu. Ca thiếu dữ liệu tiếp tục kiểm tra an toàn và cách xử lý lỗi; kết quả phải ghi rõ phần dữ liệu/capability cần bổ sung. Giữ nguyên ca, prompt, cấu hình, kết quả và điểm của các vòng đã freeze. Làm rõ này chỉ cập nhật hướng sản phẩm và chuẩn bị kế hoạch tiếp theo; Checkpoint A vẫn STOP.
 
 #### Năng lực của sản phẩm hoàn chỉnh

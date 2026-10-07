@@ -333,6 +333,14 @@ It does **not** judge:
 
 Those remain owned elsewhere.
 
+### 7.0 Owner-approved confident consultation and contextual policy summaries — 2026-10-07
+
+The owner approves confident recommendations from an exact code-bound SIZE_FIT result. Recommending the returned size for the current product/customer does not require hedging; confidence and subjective styling language alone are not protected semantic violations. A size recommendation does not establish all-day comfort, lack of waist pressure or other unverified wearing outcomes. Product facts and test scope support relevant sales reasoning without creating additional verified benefits.
+
+The owner also approves the shop's ordinary short exchange-policy wording: “đổi trong 7 ngày” means seven days from receipt. For this confirmed policy, omission of the explicit time-origin phrase alone is not MATERIAL_CONDITION_LOSS. A concise policy summary does not itself waive unmentioned conditions. Interpret assertions in the full conversation and the customer's stated situation; require the conditions material to that assertion in that situation, and explain further when asked. Explicitly different deadlines, eligibility contrary to the stated situation, invented refunds/free shipping or real benefit expansion remain violations. This convention is shop-confirmed context, not an assumption to impose on unrelated policies.
+
+Retain the unchanged verdict schema, code authority, mandatory verifier, final deterministic gate and fail-closed outcomes. No word detector, response template, exception classifier, repair or extra role is introduced. The approval informs new prompt/context preparation; historical requests, verdicts, dispositions, counts and scores remain unchanged. It does not establish a new provider result or a Checkpoint A GO.
+
 ### 7.1 Verifier output
 
 Use a small fail-closed shape:
