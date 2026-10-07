@@ -18,7 +18,7 @@ test('Round13 selects the preregistered calibration population without changing 
  for(const role of ['conversation','verifier'])assert.notEqual(m.promptHashes[role],old.promptHashes[role]);
  const output=execFileSync(process.execPath,[fileURLToPath(new URL('./protocol.mjs',import.meta.url))],{encoding:'utf8',env:{...process.env,C3_CHECKPOINT_A_ROUND:'13'}});
  assert.match(output,/FROZEN_PROTOCOL_VALID/);assert.deepEqual(validateProtocol(m,a2,a3),{a2Unsafe:51,a2Safe:21,a3:28});
- const damaged=structuredClone(a2);damaged.cases[10].runtime.finalDraft+='changed';
+ const damaged=structuredClone(a2);damaged.cases[60].runtime.finalDraft+='changed';
  const changed=structuredClone(m);changed.corpusHashes.a2=hash(JSON.stringify(damaged));
  assert.throws(()=>validateProtocol(changed,damaged,a3),/ROUND13_RETAINED/);
 });
