@@ -370,8 +370,8 @@ For each future implementation task:
 ## Authorized Round8 — 2026-10-07
 
 - [x] Owner authorizes rerun after voice review; refresh main / implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361, inspect installed client0.159.2/existing ChatGPT login without generation, reuse isolated branch/PR390. Review all18SAFE controls; declare five context/time-origin corrections before freeze. Preserve Round7 and all previous observations.
-- [ ] T1 freeze exact reviewed voice prompt, unchanged verifier/config/authority/bars,66A2/24A3 once and whole-conversation offline review procedure before provider results.
-- [ ] T2 observed RED→minimum GREEN, all exact focused readiness commands and source/history/firewall checks.
+- [x] T1 freeze at4dc8f0ee: exact reviewed voice prompt9742bytes/hashff57aa4f2771ddb0f1a0f5a57d68af8384caae0d897c45214fc94ef90530c6c6, unchanged verifier/config/authority/bars,66A2/24A3 once and whole-conversation offline review procedure. Five declared SAFE context/time-origin corrections; all48UNSAFE/7seeds/24A3 unchanged. No prior observation adopted or provider generation.
+- [x] T2 observed unsupported selector then RED0/3→GREEN3/3. Node65/65, explicit local-stub adapter11/11, worker77/77, claim/assembly21/21; worker typecheck/build/lint exit0. All24envelopes withinbound(max25503bytes),111older artifacts byte-identical; firewall tests green, no production imports. +7/-7evaluation-protocol lines only, no role/layer/parser/template/repair loop.
 - [ ] T3 clean source seal/preflight/fresh A2 run/validation; preserve complete denominator and STOP ifFAIL/BLOCKED.
 - [ ] T4 only after A2PASS: clean source seal/preflight/24A3 once, whole-conversation reviews and diagnostic scores for actual terminal outcomes.
 - [ ] Deliver CHECKPOINT_A/conversations/review/raw evidence/audit/ops, update/readback PR390 and STOP at owner checkpoint.

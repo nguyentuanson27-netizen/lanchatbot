@@ -19,3 +19,38 @@ No labels/counts/seeds weakened, historical frozen artifacts unchanged. These ar
 Whole-conversation-first offline review procedure/hash frozen in evaluator-only manifest scoring. Judge complete actual terminal outcome in history/buying context, then record diagnostic scores/contextual reasons. No keyword matching, per-dimension phrase requirement, fact-count reward or requiredCTA. Numeric bars unchanged; no extra online judge.
 
 No provider generation before committed freeze/readiness/source seal. Observed RED/GREEN and actual required command results follow after execution.
+
+## Observed RED to minimum GREEN
+
+With C3_CHECKPOINT_A_ROUND=8, `node --test apps/worker/evals/single-agent-semantic-verifier/round-8.test.mjs` actually exits1: UNKNOWN_CHECKPOINT_ROUND before tests. Repeat with round7 to exercise new-round contracts: actual exit1/0of3PASS, ATTEMPT_POLICY and PROFILE_BOUND. Runtime implementation unchanged during RED.
+
+Extend only seven existing evaluation-protocol lines for fixed round8 selection, unchanged allowlists/one-pass policy and24-case population. No production/shared source or final-gate change. Repeat round8 focused test: exit0/3of3PASS. This proves supported round/projection/accounting contracts, not model language quality.
+
+## Deterministic readiness
+
+Actually run before provider generation:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='8'
+$env:C3_TEST_CODEX_TRANSPORT='1'
+node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs
+# 65/65PASS,0skips; includes protocol, runners, all historical rounds, adapter/local installed-client stub
+node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs
+# 11/11PASS, local upstream stub, no provider generations
+pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts
+# 77/77PASS
+pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts
+# 21/21PASS
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker typecheck
+pnpm --filter @lana/worker lint
+# each exit0; build/typecheck run their existing dependency build hooks
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs
+# exit0/FROZEN_PROTOCOL_VALID,48UNSAFE/18SAFE/24A3
+```
+
+One-off Node readback: all24 candidate conversation request envelopes within32,768bytes, max25,503bytes. All111 older tracked evaluation JSON/Markdown files byte-identical to967489aef2acfeef6fdfe845822e1a0d8f81767e; sorted path/hash aggregate8db1053358691853a6e348036f8451f028403d02b9a528b3f491bb367b983c91. Tests capture both role bodies and prove evaluator labels/review procedure/reference text excluded. Search production imports for isolated semantic-verifier boundary: no matches (rg exit1); no new entrypoint wiring.
+
+Self-review: only seven evaluation selector/allowlist/population lines changed, one focused round test and frozen data/documents; no added semantic role/layer/parser/framework/template/repair loop. Newly supplied customer context is synthetic; no credentials or real customer PII copied. Read all24 planned histories/needs and supplied size/quote/policy context before execution. Existing authority/freshness/revision/permission/recipient/receipt/privacy/exact-draft/snapshot final checks remain green.
+
+Readiness GREEN. Source commit/clean capture/preflight and actual provider outcomes will be recorded after execution, never inserted into frozen manifest/source.
