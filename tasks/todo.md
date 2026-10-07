@@ -360,3 +360,9 @@ For each future implementation task:
 
 - [x] Acknowledge weak keyword/phrase justifications and record whole-conversation/whole-reply review as the next direction. Judge buying-context reasoning and customer impact before diagnostic dimensions; excerpts support contextual findings, not automatic scores. Explain the shown case without fabricating a new frozen score.
 - [x] Preserve all historical frozen inputs/replies/ratings and Round7STOP/A3NOT_RUN. Historical self-assessment counts are not owner-accepted quality evidence. No provider generation/runtime/scorer change; future scoring protocol must be frozen before any new results.
+
+## Owner clarification of voice and answer composition — 2026-10-07
+
+- [x] Replace generic style guidance with explicit voice/composition instructions in a separate inactive prompt candidate: natural shop conversation, direct grounded advice, useful connected explanations, fewer redundant connectors/repeated facts and an ending suited to the current turn. Preserve sections1–6, material conditions and code/verifier authority. No fixed reply outline, keyword scoring, new role/parser/gate or runtime wiring.
+- [x] With C3_CHECKPOINT_A_ROUND=7, run `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-7.test.mjs`:12/12PASS. One-off local Node readback checks unchanged section1–6/frozen Round7 prompt and24 candidate conversation envelopes within32,768bytes, excluding evaluator keys; final size/hash readback recorded in PR delivery. No provider generations or worker/shared executable changes; no new full worker checks or model-quality claim.
+- [x] Keep candidate outside all frozen manifests/runners/evidence for owner review before any later run. Round7A2FAIL/A3NOT_RUN/STOP remains; historical results/ratings are unchanged.
