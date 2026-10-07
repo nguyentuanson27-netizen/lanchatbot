@@ -60,3 +60,12 @@ A3fallback18.42%>10% independently fails frozenbar. Verifierp50/p955640/20827ms,
 - `node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round15.mjs`: exit0,38exact terminal exports/380ratings,26PASS/12FAIL,144generation requests,raw JSON/sealed inputs unchanged,Markdown links valid,human packet unfilled. Helper checks rendering/accounting only,not quality acceptance.
 - `node C:/Users/nguye/AppData/Local/Temp/c3-round15-plan-order.mjs`: exit0,move mistakenly interleaved Round15 section after complete Round14section;assert all paragraph contents unchanged. Doc organization only,not source/config/frozen review-protocol change. Human Markdown packet clarified separate primary review;raw human JSON allnull retained.
 - `git diff --check`: exit0 after findings/doc additions. Focused readiness already passed before seals; no executable/config/source changes to justify a broader rerun. Final export/staged-check/delivery readback follow.
+
+## Delivery actually completed
+
+- Repeated `node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round15.mjs`: exit0 after human packet clarification;38exact terminals/380ratings/raw JSON/sealed inputs/links intact. `git add -- apps/worker/evals/single-agent-semantic-verifier/round-15 tasks/plan.md tasks/todo.md`; `git diff --cached --check`: exit0.
+- Artifact commit83690a86428007ec52406fb73c579ec061b69613;clean worktree. `node C:/Users/nguye/AppData/Local/Temp/c3-pr-round15.mjs`: exit0,creates exact reviewed PR body/title in temporary files from actual audit/results. No credentials/provider generation/source change.
+- `git push origin feat/c3-semantic-verifier-checkpoint-a-20261005`: exit0. `gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Checkpoint A: Round15 A2 PASS, A3 FAIL / STOP' --body-file C:/Users/nguye/AppData/Local/Temp/c3-round15-pr-body.md`: exit0.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-readback-pr390-round15.mjs`: exit0,exact title/body,OPENdraft,clean tree/local-remote-PRhead matches artifact SHA. Remote CI returns no checks yet;not claimedPASS.
+
+Final delivery-record-only savepoint follows;no raw evidence/ratings/frozen input/executable/config change. RecommendationSTOP at owner Checkpoint A;no automatic next round/post-A/tool/state/mutation/promotion/merge/deploy/live send.
