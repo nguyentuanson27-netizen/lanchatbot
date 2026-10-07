@@ -10,3 +10,19 @@ Owner “làm đi” authorizes the proposed new Checkpoint A round. Existing is
 - `C3_CHECKPOINT_A_ROUND=13 node --test apps/worker/evals/single-agent-semantic-verifier/round-14.test.mjs`: exit1,0/3PASS/0skip, observed RED: explicit selected-round14 child rejected UNKNOWN_CHECKPOINT_ROUND, other two tests PROFILE_BOUND. Only after this observation may selector support change.
 
 Environment notation abbreviates PowerShell `$env:` assignments. No provider result yet. Models/config/verifier/schema/bounds/bindings/code authority/numeric bars/static outcomes unchanged. Exact shared owner prompt and offline quality interpretation frozen before result, one attempt/case/max1generation per role slot/no retries/repair/substitution. Every survivor requires verifier/final gate. Existing officially documented clients reused, no API implementation. Readiness/seals/provider/scoring/delivery appended only after actual execution. Stop at owner Checkpoint A, no post-A/production work.
+
+## Deterministic readiness actually executed
+
+T1savepointc183ef6b85b2ae9bbd88b247b518b88747afb283. After RED, protocol.mjs+11/-8lines only for explicit Round14 support/counts/retained population. No projection shape, provider/API/shared source, boundary or production change; new51line3test file.
+
+- `C3_CHECKPOINT_A_ROUND=14 node --test apps/worker/evals/single-agent-semantic-verifier/round-14.test.mjs`: exit0,3/3PASS/0skip, minimum GREEN.
+- `pnpm --filter @lana/worker build`: exit0, dependency hooks and worker build complete.
+- `C3_CHECKPOINT_A_ROUND=14 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs`: exit0,97/97PASS/0skip; protocol/adapters/firewall/installed-client local stub, no actual provider generation.
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts`: exit0,77/77PASS (43boundary/34Vertex).
+- `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts`: exit0,21/21PASS.
+- `pnpm --filter @lana/worker typecheck`: exit0, dependency hooks complete.
+- `pnpm --filter @lana/worker lint`: exit0, existing tsc/noEmit script.
+- `C3_CHECKPOINT_A_ROUND=14 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs`: exit0,FROZEN_PROTOCOL_VALID,72A2/34A3.
+- `rg -n 'single-agent-semantic-verifier-boundary' apps/worker/src --glob '*.ts'`: only boundary test import; no production wiring. `git diff --check`: exit0. Source/config commit and clean currentHEAD seal precede provider preflight/run.
+
+Readiness green is mechanical compatibility, not semantic provider or sales-quality evidence. New online semantic roles/layers/authority/gates/state0; one owner/at most one verifier, no parser/router/framework/repair/template growth/PII or credential contents.
