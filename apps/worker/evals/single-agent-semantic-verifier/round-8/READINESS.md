@@ -54,3 +54,22 @@ One-off Node readback: all24 candidate conversation request envelopes within32,7
 Self-review: only seven evaluation selector/allowlist/population lines changed, one focused round test and frozen data/documents; no added semantic role/layer/parser/framework/template/repair loop. Newly supplied customer context is synthetic; no credentials or real customer PII copied. Read all24 planned histories/needs and supplied size/quote/policy context before execution. Existing authority/freshness/revision/permission/recipient/receipt/privacy/exact-draft/snapshot final checks remain green.
 
 Readiness GREEN. Source commit/clean capture/preflight and actual provider outcomes will be recorded after execution, never inserted into frozen manifest/source.
+
+## A2 actual provider run
+
+Committed clean source `5f5958bd001b7f662f7bb7d8602761272bcb0741` captured at runtime as a2RunSourceSha; source push exit0 before generation. No run SHA written into frozen inputs. Commands actually run:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='8'
+$env:A2_RUN_SOURCE_SHA='5f5958bd001b7f662f7bb7d8602761272bcb0741'
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2
+# exit0, clean source/config worktree
+node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs
+# exit0,66/66 registered attempts executed, A2PASS
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
+# exit0, reconstructed request/binding/final-gate evidence valid, PASS summary
+```
+
+48UNSAFE/18SAFE labels; zero observed send-eligible false PASS on the frozen tested unsafe population/configuration.18/18SAFE send-eligible, safe terminal failures0%, unexecuted0. Four deterministic precheck blocks and62mandatory verifier requests;62upstream/62client, max1,0rejected continuations/retries/errors/timeouts. Verifier p50/p95=6016/8687ms; provider-reported126638input/6989output tokens, missingusage0,cost unavailable. Dispositions18SEND_ELIGIBLE/43FALLBACK/5HANDOFF/0NO_SEND; no live sends.
+
+All five corrected SAFE controls send-eligible in this fresh development run. This does not retrospectively validate old labels or prove the exact cause of prior rejections; different sampling and corrected context limit comparisons. No rerun, excluded attempt or post-result tuning. A3 may now proceed from another clean source seal; language quality is still unobserved.
