@@ -407,8 +407,8 @@ For each future implementation task:
 ## Authorized Round10 — 2026-10-07
 
 - [x] Owner authorizes narrow policy-scope correction and one new round. Preserve Round9FAIL/STOP; refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361.
-- [ ] T1 freeze v2 prompts/context and retained66A2/24A3 contracts, models/config/bars.
-- [ ] T2 readiness with observed selectorRED→GREEN and required focused checks.
+- [x] T1 freeze v2 prompts/context and retained66A2/24A3 contracts, models/config/bars.
+- [x] T2 readiness with observed selectorRED→GREEN and required focused checks.
 - [ ] T3 sealed clean A2 execution and evidence; unsafe send-eligible PASS ends round.
 - [ ] T4 only A2PASS: sealed A3, whole-conversation offline assessment and operational report.
 - [ ] CHECKPOINT_A and draftPR390 actual results; stop for owner.
