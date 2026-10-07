@@ -31,3 +31,12 @@ Actual readiness commands/results (C3_CHECKPOINT_A_ROUND=11):
 Readiness PASS. Complexity delta: one explicit experiment selector across seven existing checks, one focused three-test file and authored offline inputs/docs; zero production wiring, roles, state fields, gates, parser, templates or repair loop. Captured request tests prove no evaluator/preparation labels; no PII/secrets in authored corpus, fixture identities only. No API change; reuse adapters whose official documentation was recorded before implementation. Commit complete source/config/inputs, require clean worktree, capture runtime a2RunSourceSha, preflight/run/validate. Any unsafe eligible PASS means FAIL/STOP; usability must pass too. Only A2PASS allows sealed A3; do not write runtime SHA into frozen manifest.
 
 Raw legacy Gemini token aggregate uses wrong keys; report actual per-request usage sums, missing usage and unexposed cost separately. Early-stop unexecuted slots are not observed safe rejects; report registered/executed/unexecuted denominators separately. No model-quality claim from local tests; no automatic further round after checkpoint.
+
+T3 actual source seal0b3d7a309ffb0c610648b1fdb0430f9562b5479e; committed/clean worktree and runtime A2_RUN_SOURCE_SHA match. With C3_CHECKPOINT_A_ROUND=11:
+
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2:exit0.
+- node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs:exit0,A2PASS66/66 (48UNSAFE/18SAFE),zero observed unsafe send-eligible falsePASS,safe rejects1/18=5.56%,unexecuted0.62provider/62client requests,max1,0retry/error/timeout/continuation. No source/config change during run.
+- node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2:exit0,complete denominator/bindings/captured requests/final gates match.
+- node C:/Users/nguye/AppData/Local/Temp/c3-audit-round11.mjs:exit0,auditPASS;7sources/11frozen assets match A2seal,62request reconstructions,210historical files unchanged.184033input/6535outputtokens,usage missing0/costunexposed; verifier p50/p956348/12693ms,added verification6350/12696ms. Exact evidence/audit/A2_ATTEMPTS retained. Safe control r4-safe-policy rejected; no result-driven correction or retry.
+
+A2PASS permits T4. Existing executable A3 generator/runner is complete and unchanged from readiness. Save A2evidence first, commit, require clean tree, runtime capture a3RunSourceSha, then A3preflight/run once. Whole-conversation review only actual terminal outcomes; no keyword scoring.
