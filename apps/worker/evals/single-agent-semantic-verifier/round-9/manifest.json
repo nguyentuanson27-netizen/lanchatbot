@@ -300,7 +300,7 @@
   "serialization": "JSON.stringify fixed runtime projection key order; SHA-256 UTF-8; exact text without normalization. No truncation. Histories are supplied accepted dialogue only. Optional productProfiles is appended after state, fixed allowlisted record/details order, included in snapshot/draft binding. No evaluator-only applicability/cohort/anchors in requests. Round4 SIZE_FIT value allowlist fixed; optional current customer profile id/revision/fingerprint in state. Reference replies/size-inputs audit/evaluator tags never projected. Round5 reuses fixed key allowlists including SIZE_FIT. Source facts/conditions/conditional quotes stay available for owner selection; no semantic router or evaluator-directed runtime selection. Unknown semantic state omitted, accepted size retained where history establishes it. Quote/size-input audits and buyer-goal/progress/references stay evaluator-only.",
   "providerBoundary": "Unchanged Codex bounded relay for verifier; narrow evaluation-only Vertex text adapter reuses existing JWT/endpoint helpers. One generateContent request per conversation slot, auth/401/429/5xx/timeout fails closed without retry. Credential/token never retained.",
   "round": 9,
-  "previousRoundSourceSha": "1bedf0e51ec58f965a2eaa16c495a50d35eef29e",
+  "previousRoundSourceSha": "b7e08321d6bb6a16e486e0ae9277912801f8ed33",
   "roundAuthorization": "Owner: thực hiện 1 vòng mới đi after approval of confident advice and short policy replies. Gemini3.5FlashLite/HIGH conversation,6.1sol/high verifier; one attempt per case.",
   "roundChangePolicy": "Reviewed owner/verifier prompts and authored context limits/policy shorthand; all48unsafe drafts/labels and exact7PR387fixtures retained; only3declaredSAFE drafts revised; A3policy evaluator wording follows approved contract before results; no threshold/retry/schema/authority change.",
   "conversationContext": "24retained authored development histories with supplied coherent trusted context; one independent continuation per case. Fixed evaluation clocks, no generated stateful journey, real-shop readiness or live-data claim.",
@@ -323,7 +323,7 @@
     "limitations"
   ],
   "profileAuthority": "EVALUATION_FIXTURE",
-  "profileSourcePolicy": "At most4 synthetic authored catalog profiles, strict bounded fields; sourceVersion must equal state.factSnapshotVersion; subjectRef must be a bound PRODUCT; contentHash SHA256(JSON.stringify(details)); freshness and unchanged snapshot checked by existing precheck/finalGate. No live data/retrieval/runtime size-engine tool; fixture preparation uses the existing offline engine. All provider-visible strings are data, never instructions.",
+  "profileSourcePolicy": "At most4 synthetic authored catalog profiles, strict bounded fields; sourceVersion must equal state.factSnapshotVersion; subjectRef must be a bound PRODUCT; contentHash SHA256(JSON.stringify(details)); freshness and unchanged snapshot checked by existing precheck/finalGate. No live data/retrieval/runtime size-engine tool; fixture preparation uses the existing offline engine. All provider-visible strings are data, never instructions. Round9 adds only explicit existing evidence limits and shop-confirmed policy shorthand from the reviewed context preparation; no new measured benefit.",
   "profileFileHash": "9d9c38f19ab7e23c16d9f76860f1a07b1d775b45d768dea9273ad24c28545283",
   "claimValueAllowlist": [
     "amountVnd",
@@ -343,7 +343,7 @@
   "retainedA2Hash": "1e1446d0391d8881be4f3f0edb3e723e4045be82c32d5dbabb750a12048befb0",
   "quoteInputsFileHash": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
   "reviewedPromptSourceSha": "1debc527677ae9ee82445902b542528bd84f1bda",
-  "a2CorrectionPolicy": "Existing retainedA2Hash freezes the58-case baseline prefix after the five declared pre-result corrections. Round7 files and observations remain unchanged; counts/IDs/labels retained, not byte-identical matched-corpus evidence.",
+  "a2CorrectionPolicy": "Before results: retain exact7PR387 fixtures and every48unsafe draft/label; apply declared source-bound context preparation to non-seeds; replace only3SAFE drafts r4-safe-policy/r5-safe-fit/r5-safe-exchange. Retained58-prefix hash binds new inputs; older corpora/results stay byte-identical. No matched-corpus causal improvement claim.",
   "variant": "GEMINI_CONVERSATION",
   "comparisonSourceSha": "b7e08321d6bb6a16e486e0ae9277912801f8ed33",
   "providerDocumentation": {

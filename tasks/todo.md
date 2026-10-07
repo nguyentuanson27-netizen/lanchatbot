@@ -397,8 +397,8 @@ For each future implementation task:
 ## Authorized Round9 — 2026-10-07
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361 and inspect clean isolated branch; owner authorizes new run with reviewed confidence/policy prompts and context, existing Gemini owner/6.1sol high verifier, one attempt.
-- [ ] T1 freeze separate66A2/24A3, reviewed prompts/context, declared SAFE/context/evaluator changes and unchanged thresholds/config; exact7seeds/historical evidence retained.
-- [ ] T2 observed RED→GREEN and deterministic readiness/focused tests/build/typecheck/lint before provider.
+- [x] T1 initial savepointb7b98cf2: freeze separate66A2/24A3, reviewed prompts/context, three declared SAFE drafts/context/policy-evaluator clarifications and unchanged thresholds/config; exact7seeds/all48unsafe drafts/labels retained. New raw corpus serialization corrected before any provider result; final source seal follows.
+- [x] T2 observed selectorRED0/1→serializationRED2/3→GREEN3/3; Node82/82 and explicit adapter11/11, worker boundary/Vertex77/77, claims/assembly21/21, worker build/typecheck/lint exit0. Both credential routes inspected without generation, request firewall/context authority GREEN; no production wiring/new semantic role or layer.
 - [ ] T3 clean source seal/preflight/fresh A2; preserve all unsafe results/error accounting and STOP if FAIL/BLOCKED.
 - [ ] T4 only after A2PASS: clean source seal/preflight/24A3 once, whole-conversation terminal review and operations/source/firewall evidence.
 - [ ] CHECKPOINT_A and PR delivery with actual results/limits; stop at owner checkpoint, no post-A or automatic further round.
