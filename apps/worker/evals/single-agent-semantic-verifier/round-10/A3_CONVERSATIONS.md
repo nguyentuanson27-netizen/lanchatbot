@@ -1,5 +1,7 @@
 # Round10 — lịch sử và review toàn hội thoại
 
+Display omits trailing line whitespace only. Canonical exact replies, including whitespace, remain unchanged in a3-evidence.json and a3-human-review.json.
+
 Đọc lịch sử → lời khách → dữ kiện hiện tại → toàn terminal, rồi kết luận lượt và mới gán10điểm chẩn đoán. Không keyword scorer/reference matching, không thưởng độ dài hoặc bắt có CTA. Đây là primary-agent offline review, không độc lập/human/owner acceptance. Rejected candidates không được dùng cứu điểm terminal. Raw provider evidence giữ nguyên qualityBLOCKED lúc chưa có điểm; kết quả offline trong a3-quality.json.
 
 ## r5-workday-comfort:1
@@ -60,7 +62,7 @@ Khách (mới): Chị họp trong phòng và có áo lót màu da rồi. Ngực9
 
 **Exact terminal khách nhận:**
 
-Dạ được chứ ạ, chị hoàn toàn chọn màu trắng được nha. Với số đo ngực 92cm, chị mặc size M là vừa vặn, lại đúng điều kiện phòng họp và áo lót màu da nên hoàn toàn yên tâm không bị lộ màu áo lót. 
+Dạ được chứ ạ, chị hoàn toàn chọn màu trắng được nha. Với số đo ngực 92cm, chị mặc size M là vừa vặn, lại đúng điều kiện phòng họp và áo lót màu da nên hoàn toàn yên tâm không bị lộ màu áo lót.
 
 Áo trắng size M hiện shop đang có sẵn với giá 499.000đ (phí ship nội thành 25.000đ, tổng thanh toán là 524.000đ ạ).
 
@@ -94,7 +96,7 @@ Khách (mới): Chị ở nội thànhTP.HCM. Tính cả ship và xem còn hàng
 
 **Exact terminal khách nhận:**
 
-Màu navy hiện còn đủ size S, M, L chị nhé. Quần 459k cộng phí ship nội thành TP.HCM 25k, tổng đơn của mình là 484k. 
+Màu navy hiện còn đủ size S, M, L chị nhé. Quần 459k cộng phí ship nội thành TP.HCM 25k, tổng đơn của mình là 484k.
 
 Chị cho em xin số đo vòng eo và mông để em chọn size chuẩn nhất cho mình nhé ạ.
 
@@ -198,7 +200,7 @@ Khách (mới): Chị tính lại chỉ còn550k cảship. Chọn giúp chị m�
 
 **Exact terminal khách nhận:**
 
-Với tầm 550k gồm ship thì áo sơ mi SM613 giá 499k (phí ship nội thành 25k, tổng 524k) là vừa khít ngân sách của chị ạ. Áo có màu trắng và xanh nhạt, mặc cùng quần navy sẵn có của chị đi làm rất lịch sự và đổi mới. 
+Với tầm 550k gồm ship thì áo sơ mi SM613 giá 499k (phí ship nội thành 25k, tổng 524k) là vừa khít ngân sách của chị ạ. Áo có màu trắng và xanh nhạt, mặc cùng quần navy sẵn có của chị đi làm rất lịch sự và đổi mới.
 
 Chị thích màu trắng hay xanh nhạt hơn, và cho em xin số đo vòng ngực hoặc chiều cao cân nặng để em chọn size vừa vặn nhé!
 
@@ -264,7 +266,7 @@ Khách (mới): Có nên thêm quần để freeship không? Chị có quầnđe
 
 **Exact terminal khách nhận:**
 
-Dạ nếu không có nhu cầu mặc thêm thì chị không nên mua quần chỉ để lấy freeship ạ, vì bỏ thêm 459k tiền quần mà chỉ bớt được 25k phí ship thì không kinh tế bằng mua riêng áo tổng 524k. 
+Dạ nếu không có nhu cầu mặc thêm thì chị không nên mua quần chỉ để lấy freeship ạ, vì bỏ thêm 459k tiền quần mà chỉ bớt được 25k phí ship thì không kinh tế bằng mua riêng áo tổng 524k.
 
 Quần QU714 bên em ngoài màu đen còn có màu navy, nhưng nếu tủ đồ đã đủ thì chị cứ chốt riêng áo SM613 là hợp lý nhất ạ.
 
