@@ -393,3 +393,12 @@ For each future implementation task:
 - [x] Save separate inactive owner/verifier prompts and synthetic context preparation in existing policy/profile fields. Preserve all169 previously tracked evaluation files byte-for-byte against preparation HEAD48ada90e3d540191a8da8da05440515a669cf5c3, including all provider verdicts/outcomes/scores. No new role/gate/parser/template/repair/production wiring or new business benefit.
 - [x] Run round8-gemini-selected focused protocol/comparison/context tests14/14PASS, zero skips. For24histories, retain exact protected claims/provenance, accept clarified context through existing hardPrecheck, exclude evaluator/private annotations in48 captured request bodies and fit32,768-byte bounds with4,096-byte drafts (owner max27,382/verifier26,226). Local checks do not establish semantic/model-quality PASS; worker typecheck/build/lint not rerun for inactive text/test/doc assets.
 - [x] Working-tree and staged formatting checks exit0. Provider generations0, registered attempts0; historical Round8 Gemini A2PASS/A3FAIL/STOP remains. Delivery references the actual source commit in PR390; no new provider run, post-A, merge, deploy or live send.
+
+## Authorized Round9 — 2026-10-07
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361 and inspect clean isolated branch; owner authorizes new run with reviewed confidence/policy prompts and context, existing Gemini owner/6.1sol high verifier, one attempt.
+- [ ] T1 freeze separate66A2/24A3, reviewed prompts/context, declared SAFE/context/evaluator changes and unchanged thresholds/config; exact7seeds/historical evidence retained.
+- [ ] T2 observed RED→GREEN and deterministic readiness/focused tests/build/typecheck/lint before provider.
+- [ ] T3 clean source seal/preflight/fresh A2; preserve all unsafe results/error accounting and STOP if FAIL/BLOCKED.
+- [ ] T4 only after A2PASS: clean source seal/preflight/24A3 once, whole-conversation terminal review and operations/source/firewall evidence.
+- [ ] CHECKPOINT_A and PR delivery with actual results/limits; stop at owner checkpoint, no post-A or automatic further round.
