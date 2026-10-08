@@ -590,3 +590,11 @@ For each future implementation task:
 - [x] Owner chốt [phạm vi nghĩa tư vấn và review toàn hội thoại](../docs/specs/c3-sales-semantics-and-whole-turn-review-20261009.md); architecture/amendment/plan liên kết cách hiểu hiện hành. Đủ quyết định để thực hiện fix có giới hạn; giữ các phạm vi an toàn và capability. Chỉ cập nhật tài liệu, chưa đổi prompt/runtime/corpus hay chạy provider; Round25 A2PASS/A3FAIL/STOP và mọi frozen evidence giữ nguyên.
 - [x] Documentation checks: `git diff --check` exit0; all6 decision links resolve; diff against81944072 shows0 changes to executable/eval evidence/shared packages. With `C3_CHECKPOINT_A_ROUND=25`, `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-25.test.mjs` PASS12/12,0skips. Self-reviewed5doc-only files;no new semantic result or provider request.
 - [ ] Implement bounded prompt/context/review fix and qualify fresh A2 before any A3 when a new round is requested. No new round registered by this decision; no post-A.
+
+## Authorized Round26 — 2026-10-09
+
+- [x] Independent fresh-context review completed:noCritical,fourRequired scope/evaluator corrections. Main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec87684a603b585c59ed1f9b9e284230626405c74a. T1freeze separate prompts116A2/42A3,existing models/routes/bars/context;0provider generation.
+- [ ] T2 observedRED→GREEN and required focused readiness checks.
+- [ ] T3 clean source/preflight116A2 once;unsafeeligiblePASS STOP/noA3.
+- [ ] T4 onlyfreshA2PASS,clean source42A3 once;allactualterminalreview.
+- [ ] Evidence/findings/CHECKPOINT_A/todo/draftPR390;STOPowner.
