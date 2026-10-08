@@ -39,3 +39,37 @@ Prepared61code summaries change representation/hash,not facts or fit authorizati
 |same environment;node C:/Users/nguye/AppData/Local/Temp/c3-audit-round25.mjs|exit0,8sources/11frozenassets/104capturedbodies match;533/536historical evalfiles exact,only3declared executable changes|
 
 104generation/104client/max1/retry0/providererror0/timeout0,allusage reported,costnull. Verifierp50/p956669/12584ms;added6672/12586ms;input450870/output11980. r4-safe-policy received semanticFAIL,not providererror. Fourdeterministicrejects take0generation. FreshA2PASS permits clean-sealed42A3once;no prompt/input/source rescue.
+
+## Actual A3 execution and review
+
+|Actual command|Observed result|
+|---|---|
+|git add -- explicit A2evidence/todo/readiness;git commit -m 'eval(c3): preserve Round25 A2 qualification evidence';git status --short;git rev-parse HEAD|exit0,clean A3source 0c3d3cb9744ca8e8c48e9539ef3b669d987193c5|
+|C3_CHECKPOINT_A_ROUND=25;A3_RUN_SOURCE_SHA=currentcleanHEAD;A2_STATUS=PASS;existinglocalVertexcredential selected;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3|exit0,FROZEN_PROTOCOL_VALID,clean runtimeSHA 0c3d3cb9744ca8e8c48e9539ef3b669d987193c5|
+|sameenvironment;node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs|exit0,42/42complete;34eligible/8fallback19.05%,0handoff/no-send;42owner+42mandatoryverifiergeneration,max1/retry0|
+|C3_CHECKPOINT_A_ROUND=25;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3|exit0,FROZEN_PROTOCOL_VALID;rawqualityBLOCKEDpendingreview/human-null retained|
+|node C:/Users/nguye/AppData/Local/Temp/c3-read-a3-round25.mjs with bounded batches covering0–42;read frozen product profiles/policy and compare all non-size profile fields;targeted history/evaluator reread|exit0,all42fullhistories/latest/currentfacts/actualterminals read before final scoring;future unexecuted slots reread after completion|
+|C3_CHECKPOINT_A_ROUND=25;node C:/Users/nguye/AppData/Local/Temp/c3-score-round25.mjs|exit0,42connectedwhole-turnreviews/420diagnostics,0additionalprovider requests;primary30PASS/12FAIL,families5/11,8/9,8/10,6/9,3/3,A3FAIL|
+|sameenvironment;node C:/Users/nguye/AppData/Local/Temp/c3-audit-round25.mjs after completed run/scoring|exit0,8sources/11inputs/188capturedclientbodies matchseals/firewall,533/536historicalevalfiles exact,3declaredexecutable edits|
+
+All42drafts survived deterministic precheck and invoked verifier. 34PASS+8semanticFAIL,0providererrors/timeouts;no malformed/UNCERTAIN. 188upstreamgeneration/188capturedclientenvelopes,max1/retry0/rejected-client0. Reportedauth1fromVertex;Codex internaltoken-renewal HTTP accounting unavailable,not allnetworkrequests. Input936745/output73691,usagegap0/costnull. Gemini candidate2461+thinking54349=output56810 normalized by audit;legacy raw summaries unchanged. A3verifierp50/p956547/13470ms,added6550/13473ms,end-to-end12557/26599ms. Primary4eligiblequalityfailures separatefrom8fallbacks. Whole-meaning ambiguities retained,not automaticunsafe labels/keywordban. No probe/retry/substitution/resample/executable or frozeninput tuning.
+
+Exact existingcredential-route environment used,without printing keys/tokens:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='25'
+$env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+$env:A2_STATUS='PASS'
+$env:C3_VERTEX_CREDENTIAL_FILE=(Get-ChildItem -LiteralPath 'C:/Users/nguye/Downloads' -Filter 'project-388db62b*.json' -File | Select-Object -First 1).FullName
+```
+
+## Actual artifact validation
+
+|Actual command|Observed result|
+|---|---|
+|node C:/Users/nguye/AppData/Local/Temp/c3-record-a3-round25.mjs;node C:/Users/nguye/AppData/Local/Temp/c3-report-round25.mjs|exit0,42reviews/12failedturns/CHECKPOINT_A/readiness/todo/plan recorded;STOP recommendation|
+|node C:/Users/nguye/AppData/Local/Temp/c3-normalize-markdown-round25.mjs|exit0,display trailing whitespace trimmed only in A3_CONVERSATIONS/A3_FAILURE_REVIEW/A3_HUMAN_REVIEW;all15JSONfiles unchanged|
+|node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round25.mjs|exit0,42actualterminal exports/420ratings,rawJSON/human-null/sealedinputs/source identities intact,markdown links valid;188requests/936745input/73691output|
+|node C:/Users/nguye/AppData/Local/Temp/c3-secret-scan-round25.mjs;git diff --check|exit0,30currentfiles scanned/0secret-patternmatches;synthetic fixtures|
+
+Whitespace normalization is Markdown display only. Exact customer-visible text, requests, verdicts, hashes and blank human scoring remain in unchanged JSON;displays include every blocked candidate as diagnosis,never as the scored terminal. No provider generations during scoring/audit/report/export. Git/PRdelivery recorded after actual execution.
