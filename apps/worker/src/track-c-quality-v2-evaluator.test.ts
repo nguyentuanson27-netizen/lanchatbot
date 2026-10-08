@@ -15,7 +15,7 @@ import {
 } from "./track-c-c3-v5-benchmark-evaluator.js";
 
 const RUBRIC = JSON.parse(readFileSync(
-  new URL("../evals/track-c-c3-v5/v4/rubric.json", import.meta.url),
+  new URL("../evals/track-c-c2/v2/rubric.json", import.meta.url),
   "utf8",
 )) as TrackCV5RubricConfig;
 const HASH = "a".repeat(64);
@@ -44,10 +44,26 @@ function candidate(): TrackCV5TwoPassBenchmarkResult {
     executionLane: "PRODUCTION_CONTRACT",
     conversationPlan: {
       currentNeed: "Answer the price question.",
-      mustResolve: "Give the verified price.",
-      conversationRead: "Product is resolved.",
-      nextMove: "NONE",
+      answer: {
+        mode: "DIRECT",
+        objective: "Give the verified price.",
+        evidenceRefs: ["CLAIM_001"],
+        protectedProposition: "PRICE",
+        protectedResolution: "SUPPORTED",
+      },
+      nextMove: {
+        action: "NONE",
+        target: "NONE",
+        purpose: "NONE",
+        decisionInput: "NONE",
+      },
+      canonicalAction: {
+        type: "NONE",
+        requestedFields: [],
+      },
+      terminal: false,
       avoid: "Do not invent facts.",
+      effectIntent: "NONE",
     },
     output: {
       schemaVersion: 2,

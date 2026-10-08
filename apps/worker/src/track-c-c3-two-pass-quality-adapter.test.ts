@@ -12,10 +12,11 @@ import {
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
 import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runner.js";
+import type { TrackCResponsePlanV2 } from "./track-c-c3-two-pass-candidate.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
-const EVAL_ROOT = new URL("../evals/track-c-c3-v5/v4/", import.meta.url);
+const EVAL_ROOT = new URL("../evals/track-c-c2/v2/", import.meta.url);
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(new URL(name, EVAL_ROOT), "utf8")) as T;
@@ -83,19 +84,93 @@ function dialogue(): readonly ShadowContextMessage[] {
   }];
 }
 
-function providerPayload(value: unknown) {
+function withFixtureResponderRoles(value: unknown): unknown {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return value;
+  }
+  const output = value as Readonly<Record<string, unknown>>;
+  if (!Array.isArray(output.segments)) return value;
   return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }],
+    ...output,
+    segments: output.segments.map((segment) => {
+      if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
+        return segment;
+      }
+      const record = segment as Readonly<Record<string, unknown>>;
+      const role = Object.hasOwn(record, "role")
+        ? record.role
+        : record.kind === "ACTION_REQUEST" ? "CANONICAL_ACTION" : "ANSWER";
+      if (Object.hasOwn(record, "protectedProposition") &&
+          Object.hasOwn(record, "protectedResolution")) {
+        return { ...record, role };
+      }
+      const proposition = record.kind === "VERIFIED_CLAIM"
+        ? typeof record.claimRef === "string" &&
+            record.claimRef.startsWith("PRODUCT_ATTRIBUTES_")
+          ? "PRODUCT_ATTRIBUTES"
+          : typeof record.claimRef === "string" &&
+              record.claimRef.startsWith("PRODUCT_PRESENTATION_")
+            ? "PRODUCT_PRESENTATION"
+            : "PRICE"
+        : "NONE";
+      return {
+        ...record,
+        role,
+        protectedProposition: proposition,
+        protectedResolution: proposition === "NONE" ? "NOT_APPLICABLE" : "SUPPORTED",
+      };
+    }),
   };
 }
 
-function planPayload() {
+function providerPayload(value: unknown) {
+  return {
+    candidates: [{ content: { parts: [{
+      text: JSON.stringify(withFixtureResponderRoles(value)),
+    }] } }],
+  };
+}
+
+type ResponsePlanOverrides = Omit<Partial<TrackCResponsePlanV2>,
+  "answer" | "nextMove" | "canonicalAction"> & Readonly<{
+    answer?: Partial<TrackCResponsePlanV2["answer"]>;
+    nextMove?: Partial<TrackCResponsePlanV2["nextMove"]>;
+    canonicalAction?: Partial<TrackCResponsePlanV2["canonicalAction"]>;
+  }>;
+
+function planPayload(overrides: ResponsePlanOverrides = {}) {
+  const {
+    answer: answerOverrides = {},
+    nextMove: nextMoveOverrides = {},
+    canonicalAction: canonicalActionOverrides = {},
+    ...planOverrides
+  } = overrides;
   return providerPayload({
-    currentNeed: "Answer the current price question.",
-    mustResolve: "Give the verified price directly.",
-    conversationRead: "The product is already resolved.",
-    nextMove: "NONE",
+    currentNeed: "Resolve the current customer need.",
+    answer: {
+      mode: "DIRECT",
+      objective: "Give the verified information directly.",
+      evidenceRefs: ["CLAIM_001"],
+      protectedProposition: "NONE",
+      protectedResolution: "NOT_APPLICABLE",
+      ...answerOverrides,
+    },
+    nextMove: {
+      action: "NONE",
+      target: "NONE",
+      purpose: "NONE",
+      decisionInput: "NONE",
+      ...nextMoveOverrides,
+    },
+    canonicalAction: {
+      type: "NONE",
+      requestedFields: [],
+      ...canonicalActionOverrides,
+    },
+    terminal: false,
     avoid: "Do not invent another fact.",
+    effectIntent: "NONE",
+    ...planOverrides,
   });
 }
 
@@ -154,7 +229,7 @@ function successfulTransport() {
       payload: providerPayload({
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Mẫu này hiện 849k chị ạ.",
+          text: "Mẫu {{CLAIM_SUBJECT}} hiện {{CLAIM_VALUE}} chị ạ.",
           claimRef: "CLAIM_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -165,6 +240,51 @@ function successfulTransport() {
 }
 
 describe("Track C C3 V5 benchmark runner", () => {
+  it.each([
+    [
+      "extraction",
+      { candidates: [{ content: { parts: [{ text: "{not-json" }] } }] },
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:EXTRACTION",
+    ],
+    [
+      "schema",
+      providerPayload({ currentNeed: "Missing required response-plan fields." }),
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SCHEMA",
+    ],
+    [
+      "semantic",
+      planPayload({
+        nextMove: {
+          action: "NONE",
+          target: "SIZE_PREFERENCE",
+          purpose: "NARROW_CHOICE",
+          decisionInput: "NONE",
+        },
+      }),
+      "TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC",
+    ],
+  ] as const)("keeps V5 strategist diagnostics stage-safe for %s", async (
+    _stage,
+    payload,
+    errorCode,
+  ) => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload,
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture(),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      transport: { send },
+    })).rejects.toThrow(errorCode);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it("derives production dialogue evidence through the canonical producer", () => {
     const capture = freshCapture();
     if (capture.status !== "BUILT" || capture.context === null) {
@@ -194,7 +314,7 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.output.segments).toEqual([{
       kind: "VERIFIED_CLAIM",
-      text: "Mẫu này hiện 849k chị ạ.",
+      text: "Mẫu SQ9012 hiện 849.000đ chị ạ.",
       claimContentHash: capture.context.verifiedClaims[0]?.provenance.contentHash,
     }]);
     expect(result.identity.captureContextHash).toBe(capture.context.contextHash);
@@ -212,7 +332,13 @@ describe("Track C C3 V5 benchmark runner", () => {
     }
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: planPayload({
+          answer: {
+            mode: "DIRECT",
+            objective: "Mẫu này dùng chất liệu lụa ạ.",
+            evidenceRefs: ["PRODUCT_ATTRIBUTES_001"],
+          },
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -262,13 +388,19 @@ describe("Track C C3 V5 benchmark runner", () => {
       }
       return {
         kind: "VERIFIED_CLAIM" as const,
-        text: `${claim.scope.productId} hiện ${claim.value.amountVnd / 1_000}k chị ạ.`,
+        text: "{{CLAIM_SUBJECT}} hiện {{CLAIM_VALUE}} chị ạ.",
         claimRef: `CLAIM_${String(index + 1).padStart(3, "0")}`,
       };
     });
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: planPayload({
+          answer: {
+            mode: "DIRECT",
+            objective: "Báo giá sản phẩm.",
+            evidenceRefs: segments.map(({ claimRef }) => claimRef),
+          },
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -293,13 +425,26 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.output.segments).toHaveLength(2);
     expect(result.output.segments.every(({ kind }) => kind === "VERIFIED_CLAIM"))
       .toBe(true);
+    expect(result.output.segments.map(({ text }) => text)).toEqual(
+      capture.context.verifiedClaims.map((claim) =>
+        `${claim.scope.kind === "PRODUCT" ? claim.scope.productId : ""} hiện ${
+          claim.type === "PRICE" ? claim.value.amountVnd.toLocaleString("vi-VN") : ""
+        }đ chị ạ.`,
+      ),
+    );
   });
 
   it("blocks protected price text hidden inside a GENERAL production segment", async () => {
     const capture = freshCapture();
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: planPayload(),
+        payload: planPayload({
+          answer: {
+            mode: "DIRECT",
+            objective: "Báo giá sản phẩm.",
+            evidenceRefs: [],
+          },
+        }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
       .mockResolvedValueOnce({
@@ -387,6 +532,206 @@ describe("Track C C3 V5 benchmark runner", () => {
     }
   });
 
+  it("carries simulation-only product authority from Strategist validation into selected Responder evidence", async () => {
+    const capture = freshCapture("BEHAVIOR_SIMULATION");
+    const simulationFact = facts.simulation_fact_catalog.SF_PRODUCT_A;
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: planPayload({
+          answer: {
+            evidenceRefs: ["SIM_FACT_001"],
+            protectedProposition: "PRODUCT_ATTRIBUTES",
+            protectedResolution: "SUPPORTED",
+          },
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: providerPayload({
+          segments: [{
+            kind: "VERIFIED_CLAIM",
+            protectedProposition: "PRODUCT_ATTRIBUTES",
+            protectedResolution: "SUPPORTED",
+            text: "Mẫu Tường Vi có chất tơ xước mềm, nhẹ.",
+            claimRef: "SIM_FACT_001",
+          }],
+          strategy: "ANSWER_VERIFIED_FACTS",
+          cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      simulationFacts: [simulationFact],
+      transport: { send },
+    })).resolves.toMatchObject({ executionLane: "BEHAVIOR_SIMULATION" });
+    expect(send).toHaveBeenCalledTimes(2);
+
+    const strategistBody = JSON.parse(send.mock.calls[0]![0].body) as {
+      contents: [{ parts: [{ text: string }] }];
+      generationConfig: { responseSchema: unknown };
+    };
+    const responderBody = JSON.parse(send.mock.calls[1]![0].body) as {
+      contents: [{ parts: [{ text: string }] }];
+      generationConfig: { responseSchema: unknown };
+    };
+    const strategistPrompt = JSON.parse(
+      strategistBody.contents[0].parts[0].text,
+    ) as Readonly<Record<string, unknown>>;
+    const responderPrompt = JSON.parse(
+      responderBody.contents[0].parts[0].text,
+    ) as Readonly<{
+      selectedEvidence: Readonly<Record<string, unknown>>;
+    }>;
+    expect(strategistPrompt.benchmarkSimulationFacts).toEqual(
+      responderPrompt.selectedEvidence.benchmarkSimulationFacts,
+    );
+    expect(JSON.stringify(strategistBody.generationConfig.responseSchema))
+      .toContain("SIM_FACT_001");
+    expect(JSON.stringify(responderBody.generationConfig.responseSchema))
+      .toContain("SIM_FACT_001");
+  });
+
+  it("does not let simulation-only factual authority broaden canonical action permission", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: planPayload({
+          answer: {
+            evidenceRefs: ["SIM_FACT_001"],
+            protectedProposition: "PRODUCT_ATTRIBUTES",
+            protectedResolution: "SUPPORTED",
+          },
+          canonicalAction: {
+            type: "ASK_CHECKOUT_DETAILS",
+            requestedFields: ["PHONE"],
+          },
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC");
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("materializes policy simulation facts as factual-only plan authority", async () => {
+    const simulationFact = facts.simulation_fact_catalog.SF_PAYMENT;
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: planPayload({
+          answer: {
+            evidenceRefs: ["SIM_FACT_001"],
+            protectedProposition: "POLICY",
+            protectedResolution: "SUPPORTED",
+          },
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: providerPayload({
+          segments: [{
+            kind: "VERIFIED_CLAIM",
+            protectedProposition: "POLICY",
+            protectedResolution: "SUPPORTED",
+            text: "Shop hỗ trợ COD và chuyển khoản ạ.",
+            claimRef: "SIM_FACT_001",
+          }],
+          strategy: "ANSWER_VERIFIED_FACTS",
+          cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      simulationFacts: [simulationFact],
+      transport: { send },
+    })).resolves.toMatchObject({ executionLane: "BEHAVIOR_SIMULATION" });
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a non-NONE effect intent after recognizing simulation factual authority", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: planPayload({
+          answer: {
+            evidenceRefs: ["SIM_FACT_001"],
+            protectedProposition: "PRODUCT_ATTRIBUTES",
+            protectedResolution: "SUPPORTED",
+          },
+          effectIntent: "CONFIRM_ORDER" as never,
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      simulationFacts: [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC");
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not let a simulated price snapshot support a promotion proposition", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: planPayload({
+          answer: {
+            evidenceRefs: ["SIM_FACT_001"],
+            protectedProposition: "PROMOTION_OFFER",
+            protectedResolution: "SUPPORTED",
+          },
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      simulationFacts: [facts.simulation_fact_catalog.SF_CHANNEL_PRICE],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_V5_STRATEGIST_OUTPUT_INVALID:SEMANTIC");
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects an untyped simulation fact before the Strategist transport call", async () => {
+    const send = vi.fn<CandidateVertexTransport["send"]>();
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "BEHAVIOR_SIMULATION",
+      modelResource: MODEL_RESOURCE,
+      capture: freshCapture("BEHAVIOR_SIMULATION"),
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      simulationFacts: [{ kind: "UNMAPPED_SIMULATION_FACT" }],
+      transport: { send },
+    })).rejects.toThrow("TRACK_C_V5_SIMULATION_FACT_INVALID");
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it("rejects any simulation-fact leak on the production path before provider execution", async () => {
     const capture = freshCapture();
     const send = vi.fn<CandidateVertexTransport["send"]>();
@@ -427,11 +772,7 @@ describe("Track C C3 V5 benchmark runner", () => {
     const capture = freshCapture();
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
-        payload: providerPayload({
-          currentNeed: "Answer the current question.",
-          mustResolve: "Stay within verified evidence.",
-          conversationRead: "The product is resolved.",
-          nextMove: "NONE",
+        payload: planPayload({
           avoid: "Do not claim effects.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",

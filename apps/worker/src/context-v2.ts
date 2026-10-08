@@ -10,6 +10,7 @@ import {
   ContextV2CaptureV1Schema,
   ContextV2Schema,
   canonicalJsonV1,
+  deriveCanonicalCheckoutCompletenessV1,
   deriveConversationBarriersV2,
   deriveConversationPhaseV2,
   validateEffectReadinessTemporalWindowV1,
@@ -208,6 +209,27 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     conversationRevision: input.finalTurnEvidence.finalConversationRevision,
     salesCycleRevision: input.finalTurnEvidence.finalSalesCycleRevision,
   });
+  const checkoutCompleteness = deriveCanonicalCheckoutCompletenessV1({
+    commerceStage: input.finalCommerceState.stage,
+    hasCart: input.finalCommerceState.cart !== null,
+    hasPreview: input.finalCommerceState.preview !== null,
+    hasCheckoutDraft: input.finalCommerceState.checkoutDraft !== null,
+    checkoutClarificationActive:
+      input.finalCommerceState.clarification?.reasonCode ===
+        "CHECKOUT_DETAILS_MISSING",
+    checkoutFields: {
+      fullNamePresent: input.finalCommerceState.checkoutDraft?.fullName !== null &&
+        input.finalCommerceState.checkoutDraft?.fullName !== undefined,
+      phonePresent: input.finalCommerceState.checkoutDraft?.phone !== null &&
+        input.finalCommerceState.checkoutDraft?.phone !== undefined,
+      addressPresent: input.finalCommerceState.checkoutDraft?.address !== null &&
+        input.finalCommerceState.checkoutDraft?.address !== undefined,
+      paymentMethodPresent:
+        input.finalCommerceState.checkoutDraft?.paymentMethod !== null &&
+        input.finalCommerceState.checkoutDraft?.paymentMethod !== undefined,
+    },
+    salesCycleRevision: input.finalTurnEvidence.finalSalesCycleRevision,
+  });
   const verifiedClaims = [...input.verifiedClaims]
     .sort((left, right) => left.claimId.localeCompare(right.claimId));
   const verifiedClaimTypes = [...new Set(verifiedClaims.map(({ type }) => type))]
@@ -254,6 +276,7 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
           readinessHash: lastReadiness.readinessHash,
           expiresAt: lastReadiness.expiresAt,
         },
+    ...(checkoutCompleteness === null ? {} : { checkoutCompleteness }),
     ownership: {
       owner: input.owner,
       handoffActive: input.owner === "HUMAN",

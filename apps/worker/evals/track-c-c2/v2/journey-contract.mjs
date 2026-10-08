@@ -35,7 +35,7 @@ const canonicalFlags = new Set([
   "CHECKOUT_DETAILS_REQUIRED",
   "EFFECT_READINESS_BLOCKED",
 ]);
-const checkoutFields = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+const checkoutFields = new Set(["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"]);
 const checkoutKeys = ["missing_fields", "state"];
 const implementationKeys = new Set([
   "strategist",
