@@ -594,7 +594,7 @@ For each future implementation task:
 ## Authorized Round26 — 2026-10-09
 
 - [x] Independent fresh-context review completed:noCritical,fourRequired scope/evaluator corrections. Main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec87684a603b585c59ed1f9b9e284230626405c74a. T1freeze separate prompts116A2/42A3,existing models/routes/bars/context;0provider generation.
-- [ ] T2 observedRED→GREEN and required focused readiness checks.
+- [x] Round26 T2 observed selectorRED0/1,retentionRED2/3→GREEN3/3. FullNode146/146,focusedprotocol/Codex/Gemini29/29,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Only existingevalprotocol+19/-8,new3tests;561/562oldfiles unchanged,protocolonly. 11frozenassets secret-scan,no production/shared changes/entrypoint import or added layer/state/role. [Actual commands](../apps/worker/evals/single-agent-semantic-verifier/round-26/READINESS.md). 0provider requests before clean source seal.
 - [ ] T3 clean source/preflight116A2 once;unsafeeligiblePASS STOP/noA3.
 - [ ] T4 onlyfreshA2PASS,clean source42A3 once;allactualterminalreview.
 - [ ] Evidence/findings/CHECKPOINT_A/todo/draftPR390;STOPowner.
