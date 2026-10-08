@@ -564,3 +564,5 @@ For each future implementation task:
 - [ ] T3cleanseal/preflight/108A2once,unsafeeligiblePASS meansSTOP/noA3.
 - [ ] T4onlyfreshA2PASS,cleanseal/42A3once/fullactualterminalreview.
 - [ ] Evidence/findings/CHECKPOINT_A/todo/draftPR390delivery,STOPowner.
+
+- [x] Round24 T2selectorRED0/1,retentionRED2/3->GREEN3/3;fullNode134/134,protocol+Codex20/20,worker77/77,business41/41,0skips;worker build/typecheck/lint/protocol/diffexit0. All108A2/42A3/preparation exact23;capturedbothrolelabel-firewall and changedsizecontextoldPASSinvalid tested. Protocol+14/-8,threefocusedtests,no newdata/roles/gates/state/production. Approvedclient/routeavailable,0provider generation/no quota probe. Readinesscomplete beforecleanA2seal.
