@@ -34,3 +34,33 @@ node C:/Users/nguye/AppData/Local/Temp/c3-audit-round17.mjs
 ```
 
 All exit0. A2PASS84/84,57UNSAFE/27SAFE,unsafe sendeligiblefalsePASS0,safereject1/27=3.70%,80provider requests,max1,retry0,timeout1/error0,oneusagegap. Timeout remains denominator,not observed semantic rejection. Known safe r4-safe-policy rejected MATERIAL_CONDITION_LOSS. Audit5sources/12frozenassets/80capturedbodies exact,no evaluatorlabel leak;348/350previous evalfiles unchanged(adapter/protocolonly). A3 now authorized by frozen rule.
+
+## T4 real provider run, complete review and export — observed
+
+AfterA2PASS,clean committed executable/config HEADruntime a3RunSourceSha`56b46452e43a8a21db6d5b504f407a256429658a`. C3_CHECKPOINT_A_ROUND=17:
+
+```powershell
+$env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+$env:A2_STATUS='PASS'
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3
+node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 0 10
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 6 17
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 14 25
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 20 32
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 27 38
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 34 42
+node C:/Users/nguye/AppData/Local/Temp/c3-review-round17-view.mjs 40 42
+node C:/Users/nguye/AppData/Local/Temp/c3-round17-review-write.mjs
+node C:/Users/nguye/AppData/Local/Temp/c3-score-round17.mjs
+node C:/Users/nguye/AppData/Local/Temp/c3-audit-round17.mjs
+node C:/Users/nguye/AppData/Local/Temp/c3-report-round17.mjs
+node C:/Users/nguye/AppData/Local/Temp/c3-round17-copyedit.mjs
+```
+
+All exit0. Views read completed cases in seven overlapping slices covering all42before420diagnostic ratings. Raw pre-reviewqualityBLOCKED retained; separate primary offline whole-conversation assessmentFAIL32/42PASS/10FAIL, no human/owner/independent acceptance inferred. Copy-edit only spaces/prose in new reviews, no scores/decisions/raw evidence changes; audit/report rerun exit0.42owner+42mandatoryverifier generations,all42eligible,0fallback/handoff/no-send/error/timeout,eachslotmax1,retry0. Families7/11,7/9,8/10,7/9,3/3;bars unchanged, recommendationSTOP.5voice/redundancy failures,3history/motivation errors,2data gaps. All4previouslynewcases now3PASS,missingVA512boundfit case remainsFAIL.
+
+Normalized total164generation/0auth,719932input/15719outputtokens,costunknown;A2timeout1/80andoneusagegap retained. A3verifierp50/p95=4968/6990ms,addedverification4972/6996ms,end-to-end11073/15919ms.5sources/12assets/164capturedbodies match/no evaluatorlabels,348/350prior evalfiles unchanged(adapter/protocolonly). No production/post-A/automatic further run. Export/diff/stagedreadback follows as actual final verification,not new model generation.
+
+Final export validation: node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round17.mjs exit0:42exactterminal exports,420ratings,32PASS/10FAIL,164requests,719932input/15719output,raw/sealedinputs unchanged,Markdownlinksvalid,humanpacketnull. git diff --check exit0. No worker/source changes after readiness, no additional model calls.
