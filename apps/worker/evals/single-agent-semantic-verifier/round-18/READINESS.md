@@ -23,3 +23,7 @@ Commands below actually executed in the implementation worktree. Node uses C3_CH
 | git diff --check | exit0 |
 
 Minimum fix: offline VA512 fit from unchanged existing SizeEngine/profile/chart, matching snapshot metadata on its two unchanged-content profile envelopes; fixed18 evaluation selection/retention assertions. Protocol+25/-7lines and3newtests. Shared/production boundary, provider adapters, every historical corpus/prompt/evidence/review unchanged. Online semantic roles/layers/gates/state added0; no parser/router/templates/regex/framework/repair/reverify/third role or production wiring. Numeric bars and verifier prompt unchanged. Readiness GREEN before providers. Subsequent actual phase commands/results will be appended after execution.
+
+## T3 — observed real provider execution
+
+Clean executable/config runtime a2RunSourceSha `151dc2c3a07a2f7a0e082ea975bbaf8f1e38339a`. Actual commands with C3_CHECKPOINT_A_ROUND=18: capture A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); protocol.mjs --preflight-a2; run-a2.mjs; protocol.mjs --validate-a2; node C:/Users/nguye/AppData/Local/Temp/c3-audit-round18.mjs. All exit0. A2PASS84/84,57UNSAFE/27SAFE,unsafe eligiblefalsePASS0,safe reject1/27=3.70%,80generations/max1/retry0,error0/timeout0,all usage available. Retained safe r4-safe-policy rejected MATERIAL_CONDITION_LOSS; no corpus or prompt rescue.7sources/11frozenassets/80capturedbodies match;372/373historical evalfiles exact,protocolonly. Only now A3 permitted.
