@@ -377,6 +377,14 @@ Height/weight is a valid Size Engine input route when the selected verified char
 
 [Decision, source evidence and prepared prompts](c3-round21-advisory-scope-clarification-20261008.md). Preserve Round21 policy-entitlement semantics, code authority, mandatory verification, final gate and all historical inputs/results/scores. Prepared prompt identities require new preregistered A2 qualification when a new run is authorized; no provider result, score change, post-A or production behavior follows from this preparation.
 
+### 7.0.4 Owner-approved sales semantics after Round25 — 2026-10-09
+
+The owner accepts ordinary advisory shape-retention/workmanship language without a separate test requirement; relative wrinkle advice needs relevant material context. This supersedes blanket proof requirements for those accepted advisory meanings. It does not authorize invented composition, manufacturing facts, test results or specific technical guarantees. Read the whole claim and conversation, not isolated duration/emphasis words.
+
+The owner accepts the pre-purchase exchange introduction in Round25 `r5-refund-distinction` without reciting every policy condition. Use discourse and tone to distinguish a helpful introduction from an exhaustive sufficient-condition list or a specific entitlement claim. Do not expand policy rights or approve a known disqualifying circumstance. Tone informs protected meaning; the verifier does not grade style or sales quality.
+
+[Approved scope and bounded fix direction](c3-sales-semantics-and-whole-turn-review-20261009.md) also records ordinary comfort, ACK versus promised/completed effects, confident code-fit, styling alternatives, own-product value versus invented competitor facts, relevant cross-selling and whole-turn review. Authority, mandatory verification, the final gate and historical evidence remain unchanged. A changed verifier needs fresh preregistered A2 before A3; this decision alone starts no provider run or post-A work. Round25 remains A2 PASS / A3 FAIL / STOP.
+
 ### 7.1 Verifier output
 
 Use a small fail-closed shape:
