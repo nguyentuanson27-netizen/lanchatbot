@@ -598,3 +598,12 @@ For each future implementation task:
 - [x] T3clean source5ad9fa75d0abbb4e505c77608da47c43f354c3c8/preflight exit0;one A2run exit1 FAIL at slot47/116,1registered unsafeeligiblePASS r4-absolute-comfort.47executed=37UNSAFE/10SAFE,69unexecuted preserved;43generation/max1/retry0/error0/timeout0. Oneobservedsafereject,fullusability unknown. validate/auditexit0,43captures/8sources/11actualfrozenassets match;561/562oldfiles exact,protocolonly. No rescue/relabel/retry;STOP.
 - [ ] T4 NOT RUN: A2FAIL hardSTOP;42A3inputs frozen only,no new conversations/scores/source identity.
 - [x] A2 evidence/all116slot table/audit/findings/CHECKPOINT_A/todo recorded;A3not run,STOPowner. Export/raw-preservation/25local-link/21file-secret-scan/diff checks exit0. Publish this review artifact to existing draftPR390 and check exact remote head/title/body after final artifact commit; no A3/new round/post-A.
+
+## Authorized maximum3new rounds — 2026-10-09
+
+- [x] Owner authorization/scope reviewed;main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specc44aa40f249cc5499def183fc693c24852e04223. [Bounded follow-up](../docs/specs/c3-checkpoint-a-bounded-followup-20261009.md). Round27T1freeze120A2/42A3,two meaning clarifications,116oldA2/42A3 exact26,existing models/routes/bars;0provider generation.
+- [ ] Round27T2observedRED→GREEN and deterministic readiness.
+- [ ] Round27T3clean source/preflight/120A2 once;unsafeeligiblePASS ends round,noA3.
+- [ ] Round27T4onlyfreshA2PASS,clean source/42A3once/allactualterminal review.
+- [ ] Ifnotqualified,review findings/fix/freeze new Round28 then Round29 within batch limit;no fourthround.
+- [ ] Batch findings/feasibility/CHECKPOINT_A/todo/draftPR390 and STOPowner.
