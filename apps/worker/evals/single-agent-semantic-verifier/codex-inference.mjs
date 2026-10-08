@@ -68,8 +68,9 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
   const started=performance.now();
   const controller=new AbortController();
   let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client;
+  let upstreamRequestId=null,retryAfterSeconds=null;
   let complete;const completion=new Promise(resolve=>{complete=resolve;});
-  const finish=value=>{if(!settled){settled=true;record=value;complete();}};
+  const finish=value=>{if(!settled){settled=true;record={...value,upstreamRequestId,retryAfterSeconds};complete();}};
   const route='/'+randomUUID();
   const server=createServer(async(req,res)=>{
     if(req.method!=='POST'||req.url!==route+'/responses') {res.writeHead(404);res.end();return;}
@@ -78,7 +79,7 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
     // Drain the CLI body without retaining it: frozen projection is sole input.
     req.resume();
     const authorization=req.headers.authorization;
-    if(!authorization){finish({status:'PROVIDER_ERROR',error:'AUTH_UNAVAILABLE',httpStatus:null});res.writeHead(400);res.end();return;}
+    if(!authorization){finish({status:'PROVIDER_ERROR',error:'AUTH_UNAVAILABLE',errorStage:'AUTH_HEADER',httpStatus:null});res.writeHead(400);res.end();return;}
     providerRequests++; // synchronous seal BEFORE await, including failed transmissions
     let httpStatus=null;
     try {
@@ -87,7 +88,11 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       if(typeof req.headers['chatgpt-account-id']==='string')headers['chatgpt-account-id']=req.headers['chatgpt-account-id'];
       const response=await(testDependencies.upstreamFetch??fetch)(config.endpoint,{method:'POST',headers,body:requestBody,signal:controller.signal});
       httpStatus=response.status;
-      if(!response.ok){await response.body?.cancel();finish({status:'PROVIDER_ERROR',error:'UPSTREAM_HTTP',httpStatus:response.status});res.writeHead(400);res.end();return;}
+      // Keep only bounded operational identifiers, never arbitrary headers/body.
+      const requestId=response.headers.get('x-request-id'),retryAfter=response.headers.get('retry-after');
+      upstreamRequestId=requestId&&/^req[_-][A-Za-z0-9_-]{8,128}$/.test(requestId)?requestId:null;
+      retryAfterSeconds=retryAfter&&/^\d{1,5}$/.test(retryAfter)&&Number(retryAfter)<=86400?Number(retryAfter):null;
+      if(!response.ok){await response.body?.cancel();finish({status:'PROVIDER_ERROR',error:'UPSTREAM_HTTP',errorStage:'GENERATION_HTTP',httpStatus:response.status});res.writeHead(400);res.end();return;}
       const reader=response.body?.getReader();if(!reader)throw new Error('EMPTY_BODY');
       const chunks=[];let size=0;
       while(true){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;
@@ -97,23 +102,23 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       res.writeHead(200,{'content-type':'text/event-stream'});res.end(text);
       finish({status:'OK',httpStatus:response.status,...parsed});
     }catch(error) {const code=['PROVIDER_RESPONSE','PROVIDER_MODEL_MISMATCH','PROVIDER_TOOL_OUTPUT','PROVIDER_FINAL_MESSAGE_COUNT','PROVIDER_OUTPUT_BOUND','EMPTY_BODY','RESPONSE_BOUND'].includes(error.message)?error.message:'UPSTREAM_TRANSPORT';
-      finish({status:controller.signal.aborted?'TIMEOUT':'PROVIDER_ERROR',error:code,httpStatus,modelVersion:error.modelVersion??null});
+      finish({status:controller.signal.aborted?'TIMEOUT':'PROVIDER_ERROR',error:code,errorStage:controller.signal.aborted?'TIMEOUT':code==='UPSTREAM_TRANSPORT'?'GENERATION_TRANSPORT':'RESPONSE_VALIDATION',httpStatus,modelVersion:error.modelVersion??null});
       if(!res.headersSent)res.writeHead(400);res.end();}
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const base='http://127.0.0.1:'+server.address().port+route;
-  const timer=setTimeout(()=>{controller.abort();finish({status:'TIMEOUT',error:'ATTEMPT_TIMEOUT',httpStatus:null});client?.stop();},timeoutMs);
+  const timer=setTimeout(()=>{controller.abort();finish({status:'TIMEOUT',error:'ATTEMPT_TIMEOUT',errorStage:'TIMEOUT',httpStatus:null});client?.stop();},timeoutMs);
   try {
     if(testDependencies.runClient) {
       // Test client completes all attempted continuations before accounting closes.
       await testDependencies.runClient(base);
-      if(!settled)finish({status:'PROVIDER_ERROR',error:'CLIENT_NO_COMPLETED_GENERATION',httpStatus:null});
+      if(!settled)finish({status:'PROVIDER_ERROR',error:'CLIENT_NO_COMPLETED_GENERATION',errorStage:'CLIENT',httpStatus:null});
     } else {
       client=launchCodex(base,manifest,role,testDependencies.spawnClient);
-      await Promise.race([completion,client.done.then(()=>{if(!settled)finish({status:'PROVIDER_ERROR',error:'CLIENT_NO_GENERATION',httpStatus:null});})]);
+      await Promise.race([completion,client.done.then(()=>{if(!settled)finish({status:'PROVIDER_ERROR',error:'CLIENT_NO_GENERATION',errorStage:'CLIENT',httpStatus:null});})]);
     }
     await completion;
-  }catch {finish({status:'PROVIDER_ERROR',error:'CLIENT_FAILURE',httpStatus:null});}
+  }catch {finish({status:'PROVIDER_ERROR',error:'CLIENT_FAILURE',errorStage:'CLIENT',httpStatus:null});}
   finally {clearTimeout(timer);controller.abort();client?.stop();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
   return {...record,providerRequests,clientRequests,rejectedClientRequests,requestBody:JSON.parse(requestBody),
     latencyMs:Math.round(performance.now()-started),cost:record.cost??null,usage:record.usage??null};

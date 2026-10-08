@@ -576,7 +576,7 @@ For each future implementation task:
 ## Authorized Round25 — 2026-10-09
 
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec30285850594bf5495c32c6a2bd70d6bd755cb50b. Self-review corrected overbroad plan;freeze108A2/42A3 with61code-derived status-first summaries,generic owner voice instructions,unchangedverifier/config/numericbars. Data/capability gaps retained;0provider generations/no quota probe.
-- [ ] T2observedRED→GREEN and all required focused readiness checks.
+- [x] T2observedsizeRED0/3,diagnosticsRED0/3,selectorRED0/1/1-of-3,retentionRED2/3→GREEN9/9. FullNode143/143,focusedprotocol/Codex/diagnostics23/23,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Threeeval-only sources+43/-18,ninefocusedtests;legacy/helper default compatible,no newauthority/roles/gates/state/production.
 - [ ] T3clean source seal/preflight/108A2once;unsafeeligiblePASS meansSTOP/noA3.
 - [ ] T4onlyfreshA2PASS,cleanseal/42A3once/readallactualterminalhistories.
 - [ ] Preserve evidence/findings/CHECKPOINT_A/requestaudit/todo/draftPR390;STOPowner.
