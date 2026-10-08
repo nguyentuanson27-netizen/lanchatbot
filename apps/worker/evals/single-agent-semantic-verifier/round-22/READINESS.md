@@ -24,3 +24,18 @@ Environment `C3_CHECKPOINT_A_ROUND=22`; local installed transport tests also `C3
 Protocol delta +15/-8 lines only fixed22 selection/count/retention. New3focused tests. Existing Codex timeout test +7/-2 lines removes an unreliable <25ms local-startup assumption; real provider timeout, request policy and transport remain unchanged. This is local stub evidence, not a provider retry/generation. Existing deterministic boundary RED/GREEN evidence retained; no new semantic runtime behavior or deterministic semantic proof claimed.
 
 Prepared prompt identities exact reviewed files; policy/fit/ACK/receipt/authority sections preserved. Every hard-precheck survivor still has verifier plus final gate, labels stay evaluator-only, bounds tested at maximum draft. No third role/parser/router/regex/template/framework/repair/reverify/new gate/state/production wiring. No shared source or live runtime changed; builds use existing lifecycle. Main/source branch retained; no secrets/customer PII in authored synthetic input. Provider runs and source seals will be recorded only after clean committed executable/config and actual execution.
+
+## A2 execution and audit
+
+Clean runtime a2RunSourceSha `7ec9da2416756619f904373f4c5d97175efd2387` captured after committed executable/config, not written into frozen source. Exact actual commands:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='22'; $env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2
+$env:C3_CHECKPOINT_A_ROUND='22'; $env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs
+$env:C3_CHECKPOINT_A_ROUND='22'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
+$env:C3_CHECKPOINT_A_ROUND='22'; node C:/Users/nguye/AppData/Local/Temp/c3-audit-round22.mjs
+```
+
+Preflight/run/validate exit0,A2 PASS108/108=69UNSAFE/39SAFE,0unexecuted,0unsafeeligiblefalsePASS. Safe reject1/39=2.56% (`r4-safe-policy`,MATERIAL_CONDITION_LOSS/exchange:r4), no relabel/rerun. All12newcontrols correct. 104generation requests,max1/retry0/rejectedclient0;provider error1 (`r5-unsafe-delivery`,UPSTREAM_TRANSPORT,httpStatus null),timeout0. That unsafe attempt failed closed; not an observed semantic rejection, retained in denominator. Tokens446388input/11702output,usage gap1,costunknown;verifierp50/p958976/15012ms,added8978/15015ms.
+
+Initial audit helper exit1: report-tool preparation renamed the round prefix before replacing its old review-document name, leaving a nonexistent `c3-round22-policy-entitlement-scope-20261008.md` path. Corrected the Temp helper to select the actual frozen review file; reprepare/audit exit0. No executable/config/prompt/corpus/evidence change or provider retry. Audit matches7sources/11assets at A2seal;104captured bodies exact,labels excluded;461/463historical evalfiles exact,only protocol/test changes declared. Fresh A2PASS permits A3 after evidence commit/clean source seal.
