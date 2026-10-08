@@ -518,6 +518,6 @@ For each future implementation task:
 ## Authorized Round20 — 2026-10-08
 
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361; starting/spec15b8efd996bee13ce6147eee830e92b598169f78, existing isolated branch/PR390. Read current specs/plan/todo/project skills and Round19 raw outcomes. Prepare separate owner/verifier prompts for scope/decisions under approved calibration, no invented context facts. Freeze96A2=84exact retained+6SAFE/6UNSAFE pairs,63UNSAFE/33SAFE;all42A3runtime/history/evaluator and preparation/profile files exact19.420historical evalfiles inventoried, numeric bars unchanged. OfficialGoogle docs checked,provider generations0.
-- [ ] T2 observedRED→minimum fixed20 registration/populationGREEN, focused protocol/boundary/adapter/protectedclaim/replyassembler tests andworker typecheck/build/lint;inspectapprovedclient/credentials;clean seal.
+- [x] T2 selectorRED0/1;initial retentionprobe hit existing abuseguard,correctedprobeRED2/3→minimumGREEN3/3. FullNode118/118,worker77/77,business21/21,0skip;explicitCodex initially10/11(25ms localtimeout beforeforwarding),unchangedrerun11/11,0skip. Worker typecheck/build/lint/protocol/diffexit0. Protocol+15/-8lines,3focusedtests;no boundary/shared/provider/production/newrole/layer/gate/state. Approved client/credential inspection and clean seal recorded before A2.
 - [ ] T3 freshA2 once,all96attempts/retained-newcontrols/accounting preserved;A2PASS prerequisite forA3.
 - [ ] T4 conditional42A3 once/allhistory primaryreview/420ratings/report/audit/PR390;STOPowner.
