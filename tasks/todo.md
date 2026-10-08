@@ -527,6 +527,6 @@ For each future implementation task:
 
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec0103e8d4cbc59e486befa0c23ba68b30b97fa0a4. Read governing specs/plan/todo/project skills and Round20 failed raw attempt. Freeze narrow verifier policy section; owner prompt/all96A2/all42A3/preparation/profile/evaluator and numericbars exact20, no new facts/cases. Historical evalfile inventory and exact hashes saved before changes; provider generations0.
 - [x] T2selectorRED0/1,retentionRED2/3->GREEN3/3;fullNode121/121,explicitCodex11/11,worker77/77,business21/21,0skip;worker typecheck/build/lint/protocol/diffexit0. Approvedclient/credential inspectexit0,0generations. Protocol+14/-8,3focusedtests;boundary/shared/provider/production unchanged,roles/layers/gates/state added0. Clean executable/config savepoint before runtimeA2seal.
-- [ ] T3freshA2once,complete denominator/audit;any unsafeeligiblePASS STOP.
+- [x] T3clean sourcec8718ead78ba608b0aea4f11543d7d2087022ec8/preflight/run/validate/auditexit0,A2PASS96/96=63UNSAFE/33SAFE,unsafeeligiblefalsePASS0,safe reject1/33=3.03%.92generation/max1/retry0/error0/timeout0,354765input/10657outputtokens;7sources/11assets/92bodies match,436/437old evalfiles exact,protocolonly. FreshA2PASS permits42A3 once after clean evidence/sourcecommit;no prompt/corpus rescue.
 - [ ] T4onlyifA2PASS,42once/full-history actualterminalreview;otherwiseNOT_RUN.
 - [ ] CHECKPOINT_A/findings/todo/draftPR390delivery;STOPowner, no further round/post-A.
