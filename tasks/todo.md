@@ -542,7 +542,7 @@ For each future implementation task:
 ## Authorized Round22 — 2026-10-08
 
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specd96fa2fe0c59566d643c602f49673332c275a95f. Self-review prepared prompts/context/retained96drafts;freeze both exact prepared prompts and6SAFE/6UNSAFE contrasts. All42A3runtime/evaluator/context exact21;numericbars/config/authority unchanged,no new facts. Historical inventory saved;provider generations0.
-- [ ] T2observedRED/GREEN,fixed22compatibility/firewall,requiredchecks,approved routeinspect,clean source seal.
+- [x] T2observedselectorRED1/3,retentionRED2/3→GREEN3/3;fullNode124/124,focusedprotocol9/9,worker77/77,business41/41,0skip;typecheck/build/lint/protocol/diffexit0. ExplicitCodex10/11 exposed25ms local-startup assumption;test-onlyallowance1000ms+actualcountassert→11/11;fullNodeafterfix124/124. Protocol+15/-8,test+7/-2;boundary/shared/transport/productionunchanged,roles/layers/gates/state0. Approved existingCodexlogin/GeminiHIGHglobalinspection exit0,0generation. Readiness recorded before clean source seal.
 - [ ] T3A2once,108complete denominator/retained-newcohortaudit;anyunsafe eligiblePASS STOP.
 - [ ] T4onlyfreshA2PASS,42once/fullactualterminal review;otherwiseNOT_RUN.
 - [ ] Report/findings/todo/draftPR390delivery;STOPowner,no next round/post-A.

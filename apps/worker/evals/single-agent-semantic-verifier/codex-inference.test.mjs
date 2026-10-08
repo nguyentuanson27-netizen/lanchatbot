@@ -55,9 +55,14 @@ test('Codex streaming final item owns the reply; completed event may contain met
   assert.equal(result.usage.output_tokens,9);assert.equal(result.responseId,'stream-response');
 });
 test('timeout after one request is retained; no retry',async()=>{
-  const result=await runCodexModel(m,'verifier',request,{timeoutMs:25,runClient:client(),upstreamFetch:async(_url,init)=>
-    new Promise((_,reject)=>init.signal.addEventListener('abort',()=>reject(new Error('aborted'))))});
+  // The deadline includes local relay startup; allow it to reach the upstream
+  // before testing a stalled response, rather than assuming startup takes <25ms.
+  let calls=0;
+  const result=await runCodexModel(m,'verifier',request,{timeoutMs:1000,runClient:client(),upstreamFetch:async(_url,init)=>{
+    calls++;return new Promise((_,reject)=>init.signal.addEventListener('abort',()=>reject(new Error('aborted'))));
+  }});
   assert.equal(result.status,'TIMEOUT');assert.equal(result.providerRequests,1);
+  assert.equal(calls,1);
 });
 test('installed Codex login reaches relay; upstream is a local stub, no provider generation',
   {skip:process.env.C3_TEST_CODEX_TRANSPORT!=='1'},async()=>{
