@@ -562,9 +562,12 @@ For each future implementation task:
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec58b7d1a0d5ea5e9f799e240911e9c58f09614bfa. Read Round23failed histories/findings/context and governance;freeze prompt-only treatment,108A2/42A3 byte-exact23,verifier/config/bars unchanged. No quota probe/provider generation/newdata/roles/gates/state/production.
 - [x] T2observedRED/GREEN and requiredreadiness;actual evidence below.
 - [x] T3cleanseal/preflight/108A2once,A2PASS;actual evidence below.
-- [ ] T4onlyfreshA2PASS,cleanseal/42A3once/fullactualterminalreview.
-- [ ] Evidence/findings/CHECKPOINT_A/todo/draftPR390delivery,STOPowner.
+- [x] T4freshA2PASS,cleanseal/42A3once/fullactualterminalreview completed;A3FAILbelow.
+- [x] Evidence/findings/CHECKPOINT_A/todo completed;draftPR390delivery below,STOPowner.
 
 - [x] Round24 T2selectorRED0/1,retentionRED2/3->GREEN3/3;fullNode134/134,protocol+Codex20/20,worker77/77,business41/41,0skips;worker build/typecheck/lint/protocol/diffexit0. All108A2/42A3/preparation exact23;capturedbothrolelabel-firewall and changedsizecontextoldPASSinvalid tested. Protocol+14/-8,threefocusedtests,no newdata/roles/gates/state/production. Approvedclient/routeavailable,0provider generation/no quota probe. Readinesscomplete beforecleanA2seal.
 
 - [x] Round24 T3clean sourcebd3edf5e8eb6d71c16576026deac4f28043f675f/preflight/run/validate/auditexit0,A2PASS108/108=69UNSAFE/39SAFE;zero observed send-eligible false PASS,safe rejection1/39(2.56%,r4-safe-policy semanticFAIL).104generation/104client/max1/retry0/error0/timeout0,allusage reported,costunknown;8sources/11inputs/104bodies match/no evaluatorleak,511/512oldfiles exact(protocolonly). FreshA2PASS permits42A3once after evidence savepoint/clean source seal. No quota probe/rescue/newdata/source change.
+
+- [x] Round24 T4clean source9fba5c937f690b368542c4aba81c65ff46d9f81e/preflight/run/validateexit0,42owner+38verifiergeneration/max1/retry0;31eligible/11fallback26.19%,0handoff/no-send. Verifier42invocations:5HTTP429+4AUTH_UNAVAILABLE+2semanticFAIL+31PASS;Geminierror0/timeouts0. All42wholehistories/actualterminalreviewed before420ratings:primary26PASS/16FAIL,families6/11,6/9,7/10,4/9,3/3->A3FAIL/STOP. Fiveeligiblequalityfailures separatefrom11fallbacks,one safety-scope concern receivedverifierPASS;not anA2unsafeattempt or owneracceptance.
+- [x] Round24 audit8sources/11inputs/188capturedclientenvelopes match,no evaluatorleak;184generation+1OAuth,888137input/70305output,9usagegaps/costunknown;511/512oldfiles exact(protocolonly). No model/route/source/input rescue,retry,quota probe or post-A. Rawhuman-null/prereview retained. Findings/readiness saved;report/export/PRdelivery follows.
