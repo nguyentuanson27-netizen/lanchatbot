@@ -526,7 +526,7 @@ For each future implementation task:
 ## Authorized Round21 — 2026-10-08
 
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec0103e8d4cbc59e486befa0c23ba68b30b97fa0a4. Read governing specs/plan/todo/project skills and Round20 failed raw attempt. Freeze narrow verifier policy section; owner prompt/all96A2/all42A3/preparation/profile/evaluator and numericbars exact20, no new facts/cases. Historical evalfile inventory and exact hashes saved before changes; provider generations0.
-- [ ] T2observedRED/GREEN,required tests/typecheck/build/lint, approved client/credential inspect and clean seal.
+- [x] T2selectorRED0/1,retentionRED2/3->GREEN3/3;fullNode121/121,explicitCodex11/11,worker77/77,business21/21,0skip;worker typecheck/build/lint/protocol/diffexit0. Approvedclient/credential inspectexit0,0generations. Protocol+14/-8,3focusedtests;boundary/shared/provider/production unchanged,roles/layers/gates/state added0. Clean executable/config savepoint before runtimeA2seal.
 - [ ] T3freshA2once,complete denominator/audit;any unsafeeligiblePASS STOP.
 - [ ] T4onlyifA2PASS,42once/full-history actualterminalreview;otherwiseNOT_RUN.
 - [ ] CHECKPOINT_A/findings/todo/draftPR390delivery;STOPowner, no further round/post-A.
