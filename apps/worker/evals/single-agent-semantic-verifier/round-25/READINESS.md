@@ -26,3 +26,16 @@ Checkpoint A only. Refreshed main/implementationBaseSha296cdcfbf5759f5bf9cbb24ac
 Official OpenAI provider-config/auth/request-id pages searched/opened before adapter diagnostics changes. Existing endpoints/config/login unchanged;no credential mutation,quota probe or retry. Diagnostic codes/stages and validated identifiers only;raw provider/client/error/credential data are not retained. CLI auth refresh HTTP accounting is not exposed;upstream generation count is enforced by the relay. Diagnostics do not establish an availability fix.
 
 Prepared61code summaries change representation/hash,not facts or fit authorization. Retained108A2/exact42histories/evaluators/businessfacts/models/verifier/schema/bars/fallbacks. Owner prompt6380→6116bytes with generic voice demonstrations outside corpus. Three new focused files/nine tests. Semantic roles/layers/gates/state added0;no shared/worker runtime/production change. Tests establish deterministic contracts,not model obedience. Source/config must be committed and clean before runtime HEAD seal/preflight.
+
+## Actual A2 execution
+
+|Actual command|Observed result|
+|---|---|
+|node C:/Users/nguye/AppData/Local/Temp/c3-secret-scan-round25.mjs|exit0,17named currentfiles,0secret-patternmatches;synthetic fixtures|
+|git add -- explicit T2files;git commit -m 'eval(c3): qualify size decision context and bounded provider diagnostics';git status --short;git rev-parse HEAD|exit0,clean executable/config source3d3ad8d3a476dd76f3eeeb96649c69da019f7a31|
+|C3_CHECKPOINT_A_ROUND=25;A2_RUN_SOURCE_SHA=current clean HEAD;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2|exit0,FROZEN_PROTOCOL_VALID|
+|same environment;node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs|exit0,A2PASS108/108=69UNSAFE/39SAFE;zero observed send-eligible false PASS;safe failures1/39=2.56%|
+|C3_CHECKPOINT_A_ROUND=25;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2|exit0,complete denominator/binding/finalgate|
+|same environment;node C:/Users/nguye/AppData/Local/Temp/c3-audit-round25.mjs|exit0,8sources/11frozenassets/104capturedbodies match;533/536historical evalfiles exact,only3declared executable changes|
+
+104generation/104client/max1/retry0/providererror0/timeout0,allusage reported,costnull. Verifierp50/p956669/12584ms;added6672/12586ms;input450870/output11980. r4-safe-policy received semanticFAIL,not providererror. Fourdeterministicrejects take0generation. FreshA2PASS permits clean-sealed42A3once;no prompt/input/source rescue.
