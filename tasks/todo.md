@@ -538,3 +538,11 @@ For each future implementation task:
 - [x] [Prepared advisory-scope direction](../docs/specs/c3-round21-advisory-scope-clarification-20261008.md) and separate owner/verifier prompts reflect owner approval for ca4/6/7: ordinary appearance/elastic-waist advice judged in whole context, without token-level guarantee detection. Policy-entitlement/fit/receipt/code-authority sections retained; no new runtime gates/roles/parser/state/production wiring.
 - [x] Local helper initialexit1 for wrong expected oversized error name, corrected baseline/new assertion→exit0;95A2+84A3envelopes+1negative bound, runtime/bindings/noninstruction fields retained,evaluator markers excluded,461historical evalfiles exact,51links valid,max24842/29535bytes<32768. Protocol/round21 tests12/12 and Size Engine20/20 exit0;git diff --check exit0. Prompt hashes/actualcommands/unknowns recorded in linked document. No new semantic/provider PASS claim; worker/shared builds not rerun for inactive text/docs.
 - [ ] Verified height/weight product-chart context and fresh provider qualification for prepared prompts remain outstanding for a future requested run. Provider generations0/new run registrations0; all historical Round21 results/scores unchanged,A2PASS/A3FAIL/STOP. No post-A.
+
+## Authorized Round22 — 2026-10-08
+
+- [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specd96fa2fe0c59566d643c602f49673332c275a95f. Self-review prepared prompts/context/retained96drafts;freeze both exact prepared prompts and6SAFE/6UNSAFE contrasts. All42A3runtime/evaluator/context exact21;numericbars/config/authority unchanged,no new facts. Historical inventory saved;provider generations0.
+- [ ] T2observedRED/GREEN,fixed22compatibility/firewall,requiredchecks,approved routeinspect,clean source seal.
+- [ ] T3A2once,108complete denominator/retained-newcohortaudit;anyunsafe eligiblePASS STOP.
+- [ ] T4onlyfreshA2PASS,42once/fullactualterminal review;otherwiseNOT_RUN.
+- [ ] Report/findings/todo/draftPR390delivery;STOPowner,no next round/post-A.
