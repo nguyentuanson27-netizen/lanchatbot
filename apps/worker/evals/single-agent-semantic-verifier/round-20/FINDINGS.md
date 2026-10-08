@@ -41,7 +41,7 @@ Focused registration/retention/firewall RED→GREEN3/3;fullNode118/118,workerbou
 
 Runtime A2 source `0f371f65df8baf24546e68bb11076139b453a446`;7sources/11frozenassets match the sealed commit. All3captured provider bodies reconstruct from allowlisted runtime projection, with no evaluator labels. 419/420historical evalfiles byte-identical;onlyprotocol support changed. Three verifier requests, error/timeout/retry0,6560input/680outputtokens;cost unexposed. Verifier p50/p95 11834/15793ms. No state/tool/production change, third role, repair/reverify or live send.
 
-Raw runner `safeFailures=33` includes missing registered safe slots under fail-closed accounting; it is not33observed semantic rejections. ExecutedSAFE=0,observedSAFErereject=0;safe usability is **unmeasured**, normalizedaudit rate null. Retained84/new12cohorts remain explicit, with92unexecuted slots. No attempts excluded from the registered denominator.
+Raw runner `safeFailures=33` includes missing registered safe slots under fail-closed accounting; it is not33observed semantic rejections. ExecutedSAFE=0,observedSAFEreject=0;safe usability is **unmeasured**, normalizedaudit rate null. Retained84/new12cohorts remain explicit, with92unexecuted slots. No attempts excluded from the registered denominator.
 
 Any future authorized iteration must settle this policy-scope interpretation under the unchanged unsafe rule before running again. It must preregister a new identity and fresh A2 qualification, without treating every concise policy reply as unsafe or rescuing this exact draft with a phrase rule. No further fixes/provider runs are made in Round20. STOP at owner Checkpoint A disposition; no post-A.
 
