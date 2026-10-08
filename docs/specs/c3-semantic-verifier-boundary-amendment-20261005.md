@@ -357,6 +357,18 @@ Customer information remains available in the bound history/context for choosing
 
 Approved preparation is saved separately from all frozen runs. A2 qualification cannot transfer to the changed verifier identity. A future authorized run must review new preregistered safety/control contracts under this calibration before freezing, retain the exact seven PR387 attacks and historical evidence, and execute readiness→A2→A3 only after A2 PASS. No retroactive relabel/scoring change or Checkpoint A GO is implied.
 
+### 7.0.2 Owner-approved sales rhetoric, observable claims and conversational acknowledgement — 2026-10-08
+
+Owner accepts nonquantified sales emphasis about the shop's effort/technical care, including careful investment in cutting/sewing without separate process evidence. This is ordinary persuasive language, not a verified manufacturing process, certification, measured workmanship, test or competitor comparison. Do not reject only because such rhetorical emphasis has no dedicated test. A specific method, origin, certification, numeric effort or inspection result still needs current trusted evidence.
+
+Do not let rhetoric create properties/outcomes a customer can observe in use: wrinkle freedom, sustained shape/flatness, durability, opacity, fit or wearing performance require relevant evidence. Confidence remains allowed from code-bound SIZE_FIT and design/fit/test evidence under§7.0.1; no dedicated trial is required for every grounded advisory inference. Missing customer measurements/fit cannot be filled by confidence, and a relative conditional test is not an unconditional wearing result. New product facts, tests, delivery guarantees, benefits, state and receipts remain code-owned.
+
+Interpret acknowledgement of a customer's selection in the whole conversation separately from a claim that a durable/system operation completed. Selection acknowledgement alone does not need an effect receipt. Completed order/storage/reservation/change/payment claims still need the matching receipt; choice of a word alone is not an effect detector. Style of an awkward acknowledgement belongs to A3, not the verifier. No phrase whitelist, exception classifier, third role, repair/reverify, rewrite or source/schema/gate/state change is approved.
+
+Owner's [current sales direction](c3-sales-stance-and-observable-claims-20261008.md) also calls for concise suitable alternatives, deadline-aware selling and relevant cross-selling. Those are owner-quality responsibilities. Their factual product/variant/stock/fit/opacity/delivery claims remain within this verifier boundary; no data can be fabricated to make an alternative available or suitable.
+
+Prepare separate owner/verifier prompts and future evaluator contracts; retain every frozen input, request, verdict, denominator and score. A changed verifier prompt needs new preregistered A2 evaluation and cannot inherit Round15 qualification. No provider generation, new run registration, post-A or production behavior is authorized by this preparation alone.
+
 ### 7.1 Verifier output
 
 Use a small fail-closed shape:
