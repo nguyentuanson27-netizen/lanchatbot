@@ -509,6 +509,6 @@ For each future implementation task:
 ## Authorized Round19 — 2026-10-08
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; clean starting/specf793a6afc97dac5788b9a46b1247df4015034c00, existing isolated branch/PR390. Record owner correction separately from immutable Round18 primary scores. Preregister grounded cross-selling/whole-conversation review before results;84A2 exact/all42A3runtime exact/bothprompts-config-bars exact. Two evaluator-only contracts revised,other40 retained;397historical evalfiles inventoried. Official Google model/thinking docs checked; no provider generation.
-- [ ] T2 fixed-round source support and observedRED→GREEN; required focused tests/worker typecheck/build/lint/readiness/credential inspection.
+- [x] T2 selectorRED0/1,retentionRED1/3→GREEN3/3. FullNode115/115,explicitCodex11/11,worker77/77,business21/21,0skip;worker typecheck/build/lint/protocol/diffexit0. Approved local Codex0.159.2/VertexGeminiHIGH/global available,0generation. Protocol+17/-7lines,3tests;no boundary/shared/provider/production change,newrole/layer/gate/state.
 - [ ] T3 fresh84A2 once, all slots/error accounting; onlyPASS permitsA3.
 - [ ] T4 conditional fresh42A3 once/allhistory primary review/evidence/report/draftPR390;STOPowner.
