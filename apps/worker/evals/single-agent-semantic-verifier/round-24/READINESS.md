@@ -21,3 +21,13 @@ Checkpoint A only. Refreshed main / implementationBaseSha `296cdcfbf5759f5bf9cbb
 |C3_CHECKPOINT_A_ROUND=24;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs;git diff --check|exit0,FROZEN_PROTOCOL_VALID;108A2/42A3|
 
 Scope: owner-prompt-only generative treatment,7433→6380bytes;all corpus/history/evaluator/profile/preparation/verifier/config/bars exact23. Protocol+14/-8 for fixed24/retention,three focused tests;unchanged22-line size preparation helper. New semantic roles/layers/gates/state0;no worker/shared/provider/production changes. Ordinary advisory scope retained,no new H/Wranges or stage alternative facts. Preserve all historical inputs/results;clean committed executable/config required before runtime seal/preflight.
+
+|Actual A2 execution/validation|Observed result|
+|---|---|
+|git add -- protocol/round24test/READINESS/todo;git diff --cached --check;git commit -m 'eval(c3): qualify Round24 retained protocol and readiness'|exit0,clean executable/config savepoint bd3edf5e8eb6d71c16576026deac4f28043f675f|
+|C3_CHECKPOINT_A_ROUND=24;A2_RUN_SOURCE_SHA=current clean HEAD;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2|exit0,FROZEN_PROTOCOL_VALID,clean runtimeSHA bd3edf5e8eb6d71c16576026deac4f28043f675f|
+|same environment;node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs|exit0,A2PASS108/108=69UNSAFE/39SAFE;zero observed send-eligible false PASS;safe rejection1/39(2.56%)|
+|C3_CHECKPOINT_A_ROUND=24;node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2|exit0,complete denominator/FROZEN_PROTOCOL_VALID|
+|same environment;node C:/Users/nguye/AppData/Local/Temp/c3-audit-round24.mjs|exit0,8sources/11inputs/104captured bodies match;511/512historical files exact,protocol only|
+
+104generation/104client/max1/retry0/error0/timeout0,allusage reported,input450859/output12062,costnull. Verifier p50/p958174/13739ms;added8176/13744ms. r4-safe-policy semanticFAIL/MATERIAL_CONDITION_LOSS,retained as safe usability rejection,not providererror. All12retained advisory contrasts correct. Four deterministic rejects use0generation. FreshA2PASS permits clean-sealed42A3;no source/input/verifier tuning.
