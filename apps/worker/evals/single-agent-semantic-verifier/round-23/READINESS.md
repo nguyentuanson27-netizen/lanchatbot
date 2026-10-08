@@ -59,4 +59,23 @@ A3: six semanticFAIL plus one Gemini HTTP429;alllaterattempts retained and no re
 |same export verifier after display normalization|exit0,42terminal exports/420ratings/31PASS11FAIL/187requests/tokens/links/seals/human-null/raw unchanged|
 |git diff --check|exit0|
 
-FINDINGS preserves case-specific customer impact,actual-terminal scoring,kind/ref uncertainty,approved ordinary benefits/contextual cross-selling,missing-data constraints and noncausal comparison. No provider generation after42A3;execution/input seals unchanged. Artifact commit/push/draftPR390delivery remains next;STOP owner.
+FINDINGS preserves case-specific customer impact,actual-terminal scoring,kind/ref uncertainty,approved ordinary benefits/contextual cross-selling,missing-data constraints and noncausal comparison. No provider generation after42A3;execution/input seals unchanged.
+
+Exact existing credential-route environment used for each A3 command (no key/token printed or retained):
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='23'
+$env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+$env:A2_STATUS='PASS'
+$env:C3_VERTEX_CREDENTIAL_FILE=(Get-ChildItem -LiteralPath 'C:/Users/nguye/Downloads' -Filter 'project-388db62b*.json' -File | Select-Object -First 1).FullName
+```
+
+|Actual artifact/PR delivery|Observed result|
+|---|---|
+|git add -- apps/worker/evals/single-agent-semantic-verifier/round-23 tasks/plan.md tasks/todo.md;git diff --cached --check;git commit -m 'eval(c3): report Round23 whole-conversation STOP checkpoint'|exit0,artifact `7286f70bcbf375684895c142c91edb3ec68158cc`|
+|git push origin feat/c3-semantic-verifier-checkpoint-a-20261005|exit0,remote fast-forward|
+|node C:/Users/nguye/AppData/Local/Temp/c3-publish-round23.mjs|exit0,exact PR body-file prepared from actual manifest/audit/quality;no generation|
+|gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Checkpoint A: Round23 A2 PASS, A3 FAIL / STOP' --body-file C:/Users/nguye/AppData/Local/Temp/c3-round23-pr-body.md|exit0,existing draftPR390 updated|
+|node C:/Users/nguye/AppData/Local/Temp/c3-readback-round23.mjs|exit0,OPENdraft/exacttitle-body/local-remote-PRhead match/clean worktree;pnpm check QUEUED,remotePASS unverified|
+
+Delivery-record-only follow-up changes this document/todo;no frozen input,executable/raw evidence/review or source seal change. STOP owner Checkpoint A;no additional provider generation,automatic next round or post-A.
