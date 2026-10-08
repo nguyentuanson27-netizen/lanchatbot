@@ -8,7 +8,6 @@ import {
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
 } from "./context-v2-candidate.js";
 import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
-import type { TrackCConversationPlanV1 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5TwoPassBenchmarkResult } from "./track-c-c3-v5-benchmark-runner.js";
 import {
   scoreTrackCV5BenchmarkCase,
@@ -38,7 +37,7 @@ export interface TrackCV5StageJudgeInput {
   }>;
   readonly authoritativeEvidence: unknown;
   readonly artifact: Readonly<{
-    readonly conversationPlan: TrackCConversationPlanV1;
+    readonly conversationPlan: TrackCV5TwoPassBenchmarkResult["conversationPlan"];
     readonly responderReply?: string;
     readonly responderOutput?: TrackCV5TwoPassBenchmarkResult["output"];
   }>;
@@ -78,7 +77,7 @@ export interface TrackCV5BenchmarkEvaluationResult {
     readonly candidateSourceRevision: string;
     readonly candidateProviderModelVersion: string;
     readonly candidateCompositionHash: string;
-    readonly strategistRequestEnvelopeHash: string;
+    readonly strategistRequestEnvelopeHash: string | null;
     readonly responderRequestEnvelopeHash: string;
     readonly judgeProvider: string;
     readonly judgeModel: string;
@@ -167,7 +166,7 @@ function judgeInput(
   dialogue: readonly ShadowContextMessage[],
   expected: ReturnType<typeof safeExpected>,
   authoritativeEvidence: unknown,
-  conversationPlan: TrackCConversationPlanV1,
+  conversationPlan: TrackCV5TwoPassBenchmarkResult["conversationPlan"],
 ): TrackCV5StageJudgeInput {
   const artifact = stage === "STRATEGIST"
     ? Object.freeze({ conversationPlan })
@@ -201,8 +200,9 @@ function assertRunIdentityInput(input: TrackCV5BenchmarkEvaluationInput): void {
 }
 
 /**
- * Composes the two required V5 stage assessments and the deterministic rubric
- * scorer. The public input deliberately has no caseId or split field, matching
+ * Composes lane-explicit stage assessments and the deterministic rubric scorer.
+ * Adaptive turns assess Strategist and Responder; fixed first-contact turns
+ * assess only the Responder because code owns their policy. The public input deliberately has no caseId or split field, matching
  * the registered judge visibility policy. Every text/evidence field is proven
  * model-safe before the first judge call. The judge-declared rubric hash is
  * bound to the exact rubric object used for scoring, and the result records the
@@ -228,28 +228,29 @@ export async function evaluateTrackCV5BenchmarkCase(
   const authoritativeEvidence = safeEvidence(input.authoritativeEvidence);
   const conversationPlan = safeEvidence(
     input.candidate.conversationPlan,
-  ) as TrackCConversationPlanV1;
-  const [strategist, responder] = await Promise.all([
-    input.judge.assess(judgeInput(
-      input,
-      "STRATEGIST",
-      dialogue,
-      expected,
-      authoritativeEvidence,
-      conversationPlan,
-    )),
-    input.judge.assess(judgeInput(
-      input,
-      "RESPONDER",
-      dialogue,
-      expected,
-      authoritativeEvidence,
-      conversationPlan,
-    )),
-  ]);
+  ) as TrackCV5TwoPassBenchmarkResult["conversationPlan"];
+  const responder = await input.judge.assess(judgeInput(
+    input,
+    "RESPONDER",
+    dialogue,
+    expected,
+    authoritativeEvidence,
+    conversationPlan,
+  ));
+  const strategist = input.candidate.conversationLane === "FIRST_CONTACT_FIXED"
+    ? null
+    : await input.judge.assess(judgeInput(
+        input,
+        "STRATEGIST",
+        dialogue,
+        expected,
+        authoritativeEvidence,
+        conversationPlan,
+      ));
   const score = scoreTrackCV5BenchmarkCase({
     rubric: input.rubric,
     lane: input.candidate.executionLane,
+    conversationLane: input.candidate.conversationLane,
     domain: input.domain,
     strategist,
     responder,

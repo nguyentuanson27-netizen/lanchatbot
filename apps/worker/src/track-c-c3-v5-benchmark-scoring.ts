@@ -49,8 +49,10 @@ export interface TrackCV5StageAssessmentInput {
 export interface TrackCV5CaseScoringInput {
   readonly rubric: TrackCV5RubricConfig;
   readonly lane: TrackCV5ScoringLane;
+  /** First contact is code policy + Responder, not an implicit two-pass run. */
+  readonly conversationLane?: "FIRST_CONTACT_FIXED" | "ADAPTIVE_FOLLOWUP";
   readonly domain: string;
-  readonly strategist: TrackCV5StageAssessmentInput;
+  readonly strategist: TrackCV5StageAssessmentInput | null;
   readonly responder: TrackCV5StageAssessmentInput;
 }
 
@@ -68,7 +70,7 @@ export interface TrackCV5CaseScoreResult {
   readonly contractVersion: "TRACK_C_V5_RUBRIC_SCORE_V1";
   readonly lane: TrackCV5ScoringLane;
   readonly domain: string;
-  readonly strategist: TrackCV5StageScoreResult;
+  readonly strategist: TrackCV5StageScoreResult | null;
   readonly responder: TrackCV5StageScoreResult;
   readonly outcome: "PASS" | "PASS_WITH_NOTE" | "FAIL";
   readonly hardFailures: readonly string[];
@@ -193,17 +195,27 @@ export function scoreTrackCV5BenchmarkCase(
   if (!input.rubric.domain_thresholds[input.domain]) {
     throw new Error(`TRACK_C_V5_RUBRIC_DOMAIN_UNKNOWN:${input.domain}`);
   }
-  const strategist = scoreStage(input, "STRATEGIST", input.strategist);
+  const fixedFirstContact = input.conversationLane === "FIRST_CONTACT_FIXED";
+  if (!fixedFirstContact && input.strategist === null) {
+    throw new Error("TRACK_C_V5_ADAPTIVE_STRATEGIST_ASSESSMENT_REQUIRED");
+  }
+  if (fixedFirstContact && input.strategist !== null) {
+    throw new Error("TRACK_C_V5_FIXED_STRATEGIST_ASSESSMENT_FORBIDDEN");
+  }
+  const strategist = fixedFirstContact
+    ? null
+    : scoreStage(input, "STRATEGIST", input.strategist!);
   const responder = scoreStage(input, "RESPONDER", input.responder);
   const hardFailures = [...new Set([
-    ...strategist.hardFailures,
+    ...(strategist?.hardFailures ?? []),
     ...responder.hardFailures,
   ])].sort();
   const tuningNotes = [...new Set([
-    ...(input.strategist.tuningNotes ?? []),
+    ...(input.strategist?.tuningNotes ?? []),
     ...(input.responder.tuningNotes ?? []),
   ].map((note) => note.trim()).filter(Boolean))];
-  const passed = strategist.passed && responder.passed && hardFailures.length === 0;
+  const passed = (strategist?.passed ?? true) && responder.passed &&
+    hardFailures.length === 0;
   return Object.freeze({
     contractVersion: "TRACK_C_V5_RUBRIC_SCORE_V1",
     lane: input.lane,

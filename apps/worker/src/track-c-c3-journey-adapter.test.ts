@@ -68,37 +68,126 @@ function journey(turnCount: number): TrackCC2JourneyFixture {
   };
 }
 
-function planPayload() {
+function payload(value: unknown) {
   return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify({
-      currentNeed: "Resolve the current customer need.",
-      mustResolve: "Use only supplied authority.",
-      conversationRead: "Use accumulated dialogue without creating authority.",
-      nextMove: "NONE",
-      avoid: "Do not invent facts or effects.",
-    }) }] } }],
+    candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }],
   };
 }
 
-function replyPayload(reply: string) {
-  return {
-    candidates: [{ content: { parts: [{ text: JSON.stringify({
-      segments: [{ kind: "GENERAL", text: reply }],
-      strategy: "HOLD_POSITION",
-      cta: "NONE",
-    }) }] } }],
-  };
+function promptFromRequest(request: { body: string }): Record<string, unknown> {
+  const body = JSON.parse(request.body) as { contents: [{ parts: [{ text: string }] }] };
+  return JSON.parse(body.contents[0].parts[0].text) as Record<string, unknown>;
 }
 
-function transport() {
-  let call = 0;
-  const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
-    const current = call++;
-    const turnNumber = Math.floor(current / 2) + 1;
+function strategistPayload(prompt: Record<string, unknown>) {
+  const constraints = prompt.strategistConstraints as {
+    permittedCanonicalActions?: readonly string[];
+    evidenceCapabilities?: Record<string, string>;
+  } | undefined;
+  if (constraints?.permittedCanonicalActions?.includes("ASK_CHECKOUT_DETAILS")) {
+    return payload({
+      replyAct: "CLARIFY",
+      goal: "Request the smallest missing checkout detail.",
+      proposition: "NONE",
+      evidenceRefs: [],
+      continuation: null,
+      canonicalAction: "ASK_CHECKOUT_DETAILS",
+    });
+  }
+  const evidenceRefs = constraints?.evidenceCapabilities?.CLAIM_001 === "PRICE"
+    ? ["CLAIM_001"]
+    : [];
+  return payload({
+    replyAct: evidenceRefs.length > 0 ? "ANSWER" : "ACKNOWLEDGE",
+    goal: "Resolve the current customer need without creating authority.",
+    proposition: evidenceRefs.length > 0 ? "PRICE" : "NONE",
+    evidenceRefs,
+    continuation: { type: "KEEP_OPEN" },
+    canonicalAction: "NONE",
+  });
+}
+
+function responderPayload(
+  task: Record<string, unknown>,
+  reply: string,
+) {
+  const canonical = task.canonicalRequest as { type?: string } | null;
+  const answer = task.answer as { status?: string };
+  const evidenceRefs = task.evidenceRefs as readonly string[];
+  const segments: Array<Record<string, unknown>> = [];
+  if (answer.status === "SUPPORTED") {
+    segments.push(...evidenceRefs.map((claimRef) => ({
+      kind: "VERIFIED_CLAIM",
+      text: reply,
+      claimRef,
+      role: "ANSWER",
+      decisionInput: "NONE",
+    })));
+  } else {
+    segments.push({
+      kind: "GENERAL",
+      text: reply,
+      role: "ANSWER",
+      decisionInput: "NONE",
+    });
+  }
+  if (canonical?.type === "ASK_MEASUREMENTS") {
+    segments.push({
+      kind: "CLARIFICATION",
+      text: "Chị cho em xin chiều cao và cân nặng để tư vấn size sát hơn ạ?",
+      target: "MEASUREMENTS",
+      role: "CANONICAL",
+      decisionInput: "NONE",
+    }, {
+      kind: "ACTION_REQUEST",
+      text: "Em dựa vào số đo để tư vấn size cho mình ạ.",
+      action: "PROVIDE_MEASUREMENTS",
+      role: "CANONICAL",
+      decisionInput: "NONE",
+    });
+    return payload({ segments, strategy: "ASK_CLARIFICATION", cta: "ASK_MEASUREMENTS" });
+  }
+  if (canonical?.type === "ASK_CHECKOUT_DETAILS") {
+    segments.push({
+      kind: "CLARIFICATION",
+      text: "Chị cho em xin thông tin nhận hàng còn thiếu ạ.",
+      target: "CHECKOUT_DETAILS",
+      role: "CANONICAL",
+      decisionInput: "NONE",
+    }, {
+      kind: "ACTION_REQUEST",
+      text: "Em cần thông tin còn thiếu để tiếp tục ạ.",
+      action: "PROVIDE_CHECKOUT_DETAILS",
+      role: "CANONICAL",
+      decisionInput: "NONE",
+    });
+    return payload({ segments, strategy: "ASK_CLARIFICATION", cta: "ASK_CHECKOUT_DETAILS" });
+  }
+  segments.push({
+    kind: "GENERAL",
+    text: "Chị cần em hỗ trợ thêm điều gì thì nhắn em nhé.",
+    role: "PROGRESSION",
+    decisionInput: "NONE",
+  });
+  return payload({
+    segments,
+    strategy: answer.status === "SUPPORTED" ? "ANSWER_VERIFIED_FACTS" : "HOLD_POSITION",
+    cta: "NONE",
+  });
+}
+
+function transport(reply = "actual Lana reply", numbered = true) {
+  let responderCalls = 0;
+  const send = vi.fn<CandidateVertexTransport["send"]>(async (request) => {
+    const prompt = promptFromRequest(request);
+    const task = prompt.responderTask;
     return {
-      payload: current % 2 === 0
-        ? planPayload()
-        : replyPayload(`actual Lana reply ${turnNumber}`),
+      payload: task === undefined
+        ? strategistPayload(prompt)
+        : responderPayload(
+            task as Record<string, unknown>,
+            numbered ? `${reply} ${++responderCalls}` : reply,
+          ),
       providerModelVersion: "gemini-3.5-flash-lite",
     };
   });
@@ -106,15 +195,7 @@ function transport() {
 }
 
 function transportWithReply(reply: string) {
-  let call = 0;
-  const send = vi.fn<CandidateVertexTransport["send"]>(async () => {
-    const current = call++;
-    return {
-      payload: current % 2 === 0 ? planPayload() : replyPayload(reply),
-      providerModelVersion: "gemini-3.5-flash-lite",
-    };
-  });
-  return { send };
+  return transport(reply, false);
 }
 
 function input(
@@ -173,7 +254,7 @@ describe("Track C C3 journey adapter", () => {
     expect(result.sideEffects).toBe("DISABLED");
     expect(result.turns[1]?.evaluationContext.map(({ text }) => text)).toEqual([
       "customer turn 1",
-      "actual Lana reply 1",
+      expect.stringContaining("actual Lana reply 1"),
       "customer turn 2",
     ]);
     const turnTwoStrategistRequest = candidateTransport.send.mock.calls[2]?.[0];
@@ -184,9 +265,9 @@ describe("Track C C3 journey adapter", () => {
     const prompt = JSON.parse(body.contents[0].parts[0].text) as {
       evaluationContext: Array<{ text: string }>;
     };
-    expect(prompt.evaluationContext.map(({ text }) => text)).toContain(
-      "actual Lana reply 1",
-    );
+    expect(prompt.evaluationContext.some(({ text }) =>
+      text.includes("actual Lana reply 1")
+    )).toBe(true);
     expect(Object.hasOwn(result, "persistence")).toBe(false);
     expect(Object.hasOwn(result, "effectPort")).toBe(false);
     expect(Object.hasOwn(result, "delivery")).toBe(false);
@@ -203,22 +284,19 @@ describe("Track C C3 journey adapter", () => {
     expect(result.turns).toHaveLength(8);
     expect(result.turns[7]?.evaluationContext).toHaveLength(15);
     expect(result.turns[7]?.evaluationContext.some(({ text }) =>
-      text === "actual Lana reply 7"
+      text.startsWith("actual Lana reply 7")
     )).toBe(true);
   });
 
-  it("carries the candidate's prescribed checkout wording through the journey intact", async () => {
-    // Naming the checkout fields carries no identifier, so the reply reaches
-    // the next turn verbatim instead of aborting the journey or arriving
-    // truncated.
-    const checkoutReply = "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.";
-    const candidateTransport = transportWithReply(checkoutReply);
+  it("carries a guarded ordinary reply through the journey without truncation", async () => {
+    const ordinaryReply = "Chị cần em hỗ trợ thêm nhé.";
+    const candidateTransport = transportWithReply(ordinaryReply);
     const result = await runTrackCC3Journey(input(journey(3), candidateTransport));
 
     expect(candidateTransport.send).toHaveBeenCalledTimes(6);
-    expect(result.turns[0]?.result.reply).toBe(checkoutReply);
-    expect(result.transcript[1]?.text).toBe(checkoutReply);
-    expect(result.turns[1]?.evaluationContext[1]?.text).toBe(checkoutReply);
+    expect(result.turns[0]?.result.reply).toContain(ordinaryReply);
+    expect(result.transcript[1]?.text).toContain(ordinaryReply);
+    expect(result.turns[1]?.evaluationContext[1]?.text).toContain(ordinaryReply);
   });
 
   it("keeps a six-digit price reply inside the PII-guarded frozen dialogue", async () => {
@@ -226,15 +304,13 @@ describe("Track C C3 journey adapter", () => {
     const result = await runTrackCC3Journey(input(journey(3), candidateTransport));
 
     expect(candidateTransport.send).toHaveBeenCalledTimes(6);
-    expect(result.transcript[1]?.text).toBe("Dạ bộ này [NUMBER] đồng chị nhé.");
+    expect(result.transcript[1]?.text).toContain("Dạ bộ này [NUMBER] đồng chị nhé.");
   });
 
   it("runs the authored checkout and ad-lead journeys end to end", async () => {
     for (const journeyId of ["C2J001", "C2J006"]) {
       const authored = authoredJourney(journeyId);
-      const candidateTransport = transportWithReply(
-        "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
-      );
+      const candidateTransport = transport();
       const result = await runTrackCC3Journey({
         lane: "BEHAVIOR_SIMULATION",
         modelResource: MODEL_RESOURCE,
@@ -248,7 +324,11 @@ describe("Track C C3 journey adapter", () => {
       expect(result.journeyId).toBe(journeyId);
       expect(result.turns.map(({ turnId }) => turnId))
         .toEqual(authored.turns.map(({ id }) => id));
-      expect(candidateTransport.send).toHaveBeenCalledTimes(authored.turns.length * 2);
+      const expectedCalls = authored.turns.reduce((total, turn) => total + (
+        turn.context.origin === "ADVERTISEMENT" &&
+        turn.context.first_meaningful_inbound ? 1 : 2
+      ), 0);
+      expect(candidateTransport.send).toHaveBeenCalledTimes(expectedCalls);
       expect(result.transcript).toHaveLength(authored.turns.length * 2);
       expect(result.sideEffects).toBe("DISABLED");
     }
