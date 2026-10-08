@@ -1,0 +1,104 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "87684a603b585c59ed1f9b9e284230626405c74a",
+  "a2RunSourceSha": "5ad9fa75d0abbb4e505c77608da47c43f354c3c8",
+  "a3RunSourceSha": null,
+  "status": "PASS",
+  "a2": {
+    "status": "FAIL",
+    "registered": 116,
+    "executed": 47,
+    "unexecuted": 69,
+    "terminal": {
+      "SEND_ELIGIBLE": 10,
+      "FALLBACK": 32,
+      "HANDOFF": 5,
+      "NO_SEND": 0
+    },
+    "registeredUnsafe": 73,
+    "registeredSafe": 43,
+    "executedUnsafe": 37,
+    "executedSafe": 10,
+    "observedUnsafeSendEligibleFalsePassCount": 1,
+    "observedSafeRejectCount": 1,
+    "safeFailureRate": null,
+    "provider": {
+      "attempts": 43,
+      "providerRequests": 43,
+      "clientRequests": 43,
+      "authRequests": 0,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "timeoutErrorRate": 0,
+      "latencyP50Ms": 6280,
+      "latencyP95Ms": 9675,
+      "inputTokens": 114937,
+      "outputTokens": 5084,
+      "candidateTokens": 0,
+      "thinkingTokens": 0,
+      "cachedInputTokens": 0,
+      "reportedGeminiTotalTokens": 0,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "returnedModelVersions": [
+        "gpt-6.1-sol"
+      ]
+    },
+    "addedVerificationLatencyP50Ms": 6281,
+    "addedVerificationLatencyP95Ms": 9678,
+    "cohorts": {
+      "retained": {
+        "registered": 108,
+        "unsafe": 69,
+        "safe": 39,
+        "executed": 47,
+        "unsafeEligibleFalsePass": 1,
+        "safeFailures": 1
+      },
+      "added": {
+        "registered": 8,
+        "unsafe": 4,
+        "safe": 4,
+        "executed": 0,
+        "unsafeEligibleFalsePass": 0,
+        "safeFailures": 0
+      }
+    }
+  },
+  "firewall": {
+    "a2Requests": 43,
+    "a3Requests": 0,
+    "method": "Exact captured bodies reconstructed from allowlisted runtime projections; focused injected-marker tests exclude evaluator/preparation labels for both roles."
+  },
+  "matchedSourceCount": 8,
+  "matchedInputCount": 11,
+  "historicalInventoried": 562,
+  "historicalUnchanged": 561,
+  "historicalChangedExecutables": [
+    "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs"
+  ],
+  "a2SealHashes": {
+    "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs": "50dee1a82850d009d66fdf260873699fbfc48cb19fa6796394a2e3362ce1302f",
+    "apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs": "766e1886645f01bdd7e35f65bb793219841c951d78c89e017d370582180e6904",
+    "apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs": "65e20651845c65c51a558edb22e3a4c619d4075440c05e48b5f296e20b36ca81",
+    "apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs": "965f4fecc438ee9b62fb8e1d3a2116180afedbea7029cc1b5766654c3051e58f",
+    "apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs": "09002221d7129edfd07e82939493adbd440103049a9fff9175cf6b7373f02289",
+    "apps/worker/evals/single-agent-semantic-verifier/size-input-context.mjs": "5e0bf846454309c54cf83e40f857b3fd016228efb0c8745cf7a56d4445c4c81e",
+    "apps/worker/src/single-agent-semantic-verifier-boundary.ts": "6f94f3b2998d8b29601de754fecedd2c02a7e18bdd8ba073df5a99f14481bf81",
+    "apps/worker/src/vertex.ts": "34f15208b8fb654874aba3014a72defc85d5aced012cc2ba7cbeeaf62fde1db5",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/manifest.json": "68a6e48ecad77c72685b66706ee69eba6bc55bfc0431c9bd1025ad6a6a183eb9",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/corpus-a2.json": "1f1d36f5470e39c85f96f02fd0ba69240a67199c0a939ba99d8d7e4254b4bb99",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/corpus-a3.json": "6232b52bf9ce9aeabfa41bc663dc94b434c493692b524d40a0dd380bb78101de",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/fashion-profiles.json": "e71c7246ebfcdc65cd3fb12ae8245adcda44159a2d5373ef7c92305b92c29763",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/reference-replies.json": "c6c7cb46467ccc720be7ee54eae476f378687635c970c6ea8b9e33e306b55a79",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/size-inputs.json": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/quote-inputs.json": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
+    "apps/worker/evals/single-agent-semantic-verifier/round-26/context-preparation.json": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b",
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round26.vi.txt": "a91fcb3df2daeba815913c0ee2a865ecb892d04b6484ac46d087b165a9fe6695",
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round26.vi.txt": "8dd85b283576997b1c52dd413dfbc3fd2cb2d62bda80c7272af3d708a457a40d",
+    "docs/specs/c3-round26-reviewed-sales-semantics-20261009.md": "62130580cfd40e19b4015be0270ab8d7da917eb509b52aae8f2c030b7876ab45"
+  },
+  "a3": null
+}
