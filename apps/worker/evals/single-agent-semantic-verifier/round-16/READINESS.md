@@ -31,3 +31,19 @@ Clean source `c31fa2a55dcab9a2ba67789f3526d380d11b1cb5`, captured after source c
 - `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round16.mjs`: exit0,7sources/11inputs/80captures match source seal,no evaluator leak,327/328oldfiles unchanged(protocol support only).
 
 Sole safe rejection: `r4-safe-policy`,verdictFAIL/MATERIAL_CONDITION_LOSS/exchange:r4. Exact frozen draft/label/verdict retained;not relabelled or changed. New effort/ACK/confident-fit/ETA/relevant-alternative SAFEcontrols PASS and six new unsupported-outcome/process/effect/opacity/deadline/partial-fit UNSAFEcontrols blocked. These are observations on known synthetic controls,not wider proof. Only nowA3authorized by A2PASS. No executable/config edits afterA2seal.
+
+## A3 execution and review
+
+Source `314be30063beefb1eae5cbc71dbf713e987f3cf0`, clean after A2 evidence commit;executable/frozen inputs unchanged. Actually run with `C3_CHECKPOINT_A_ROUND=16`:
+
+- `$env:A3_RUN_SOURCE_SHA='314be30063beefb1eae5cbc71dbf713e987f3cf0'; $env:A2_STATUS='PASS'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3`: exit0.
+- Same runtime SHA,existing approved process-local Vertex credential route,`node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs`: exit0;42owner/42verifier,max1/retry0,35eligible/7fallback,sixverdictFAIL+oneprovidererror. RawqualityBLOCKED untilreview,notPASSclaim.
+- `node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3`: exit0,42registered/42executed,exactdraft/requests/snapshots/finalgate. Rawpre-reviewqualityBLOCKED remains unchanged.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-review-round16-view.mjs <start> <end>` actually read ranges0–4,4–10,9–15,15–24,24–31,29–36,34–42,40–42. Every42fullhistory/latest/actualterminal/fit/quote/candidate/verdict read;candidate onlydiagnosis,actualterminal scored. Temporary review JSON records whole-turn decisions beforediagnostic ratings,not provider judge.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-score-round16.mjs`: exit0,42wholeturns/420ratings;qualityFAIL27/42PASS,15FAIL,families4/11,6/9,7/10,7/9,3/3;terminalfailure7/42=16.67%. Primary-review safety1 ononeeligible r15-value-use;not independently verified/humanacceptance,not relabelledA2.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round16.mjs`: exit0,7sources/11inputs/164captures match seals/firewall,327/328oldfiles unchanged,164generation+1OAuth,750954input/63479output,oneusagegap,costnull. A3verifier5780/12754ms p50/p95,added5784/12760ms,end-to-end10883/18403ms;1/42providererror,timeout0.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-report-round16.mjs`: exit0,CHECKPOINT_A STOP/all42histories/15failure reviews.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round16.mjs`: exit0,42exactterminalexports/420ratings,rawJSON unchanged/inputssealed/Markdownlinksexist,humanpacketnull.
+- `git diff --check`: exit0.
+
+Observed input-preparation defect: new indoor-dresshistory incorrectly implies VA512Mfit,while trustedSIZE_FIT only ST411. CandidateVA512M blocked. Keep failedcase in registereddenominator;do not fabricate a fit,patch/reseal/adopt/retryorrescore oldrun. Thisdefect belongs to preparation,not solely language capability. Existingstage alternate-opacitycoverage gap alsoexplicit. No source/configeditafterA3seal,no newprovidergenerationafter42.
