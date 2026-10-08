@@ -572,3 +572,11 @@ For each future implementation task:
 - [x] Round24 T4clean source9fba5c937f690b368542c4aba81c65ff46d9f81e/preflight/run/validateexit0,42owner+38verifiergeneration/max1/retry0;31eligible/11fallback26.19%,0handoff/no-send. Verifier42invocations:5HTTP429+4AUTH_UNAVAILABLE+2semanticFAIL+31PASS;Geminierror0/timeouts0. All42wholehistories/actualterminalreviewed before420ratings:primary26PASS/16FAIL,families6/11,6/9,7/10,4/9,3/3->A3FAIL/STOP. Fiveeligiblequalityfailures separatefrom11fallbacks,one safety-scope concern receivedverifierPASS;not anA2unsafeattempt or owneracceptance.
 - [x] Round24 audit8sources/11inputs/188capturedclientenvelopes match,no evaluatorleak;184generation+1OAuth,888137input/70305output,9usagegaps/costunknown;511/512oldfiles exact(protocolonly). No model/route/source/input rescue,retry,quota probe or post-A. Rawhuman-null/prereview retained. Findings/readiness saved;report/export/PRdelivery follows.
 - [x] Round24 report/export/secretscan/diff/stagedchecksexit0;42terminal histories/16failedreviews/420ratings/human-null/raw/seals intact. Artifact00c9fb4626be58d86228107ab6d24751803ef7ac committed/pushed;draftPR390 title/body updated Round24A2PASS/A3FAIL/STOP. Push/edit/exactreadbackexit0,OPENdraft/clean local-remote-PRhead/title-body match;pnpmcheckQUEUED,remotePASSunverified. Delivery-record-only followup leaves all frozen inputs/source seals/results unchanged and adds0provider generations. STOPowner,no automaticnext round/post-A.
+
+## Authorized Round25 — 2026-10-09
+
+- [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec30285850594bf5495c32c6a2bd70d6bd755cb50b. Self-review corrected overbroad plan;freeze108A2/42A3 with61code-derived status-first summaries,generic owner voice instructions,unchangedverifier/config/numericbars. Data/capability gaps retained;0provider generations/no quota probe.
+- [ ] T2observedRED→GREEN and all required focused readiness checks.
+- [ ] T3clean source seal/preflight/108A2once;unsafeeligiblePASS meansSTOP/noA3.
+- [ ] T4onlyfreshA2PASS,cleanseal/42A3once/readallactualterminalhistories.
+- [ ] Preserve evidence/findings/CHECKPOINT_A/requestaudit/todo/draftPR390;STOPowner.
