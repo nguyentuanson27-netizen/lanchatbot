@@ -602,7 +602,7 @@ For each future implementation task:
 ## Authorized maximum3new rounds — 2026-10-09
 
 - [x] Owner authorization/scope reviewed;main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specc44aa40f249cc5499def183fc693c24852e04223. [Bounded follow-up](../docs/specs/c3-checkpoint-a-bounded-followup-20261009.md). Round27T1freeze120A2/42A3,two meaning clarifications,116oldA2/42A3 exact26,existing models/routes/bars;0provider generation.
-- [ ] Round27T2observedRED→GREEN and deterministic readiness.
+- [x] Round27T2selectorRED0/1/retentionRED2/3→GREEN3/3;fullNode149/149,focused29/29,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Protocol+13/-8,new3tests;578/579oldfiles unchanged,protocolonly;namedfiles secret-scan0,approvedroutesavailable,no newrole/gate/state/production. [Actual commands](../apps/worker/evals/single-agent-semantic-verifier/round-27/READINESS.md).
 - [ ] Round27T3clean source/preflight/120A2 once;unsafeeligiblePASS ends round,noA3.
 - [ ] Round27T4onlyfreshA2PASS,clean source/42A3once/allactualterminal review.
 - [ ] Ifnotqualified,review findings/fix/freeze new Round28 then Round29 within batch limit;no fourthround.
