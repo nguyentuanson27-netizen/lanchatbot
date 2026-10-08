@@ -552,7 +552,7 @@ For each future implementation task:
 ## Authorized Round23 — 2026-10-08
 
 - [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec7fb625023e0122f4cabf9b96816e0a25fd6f812b. Owner quota confirmation accepted without probe. Size context TDD0/4RED->4/4GREEN;frozen108A2/42A3,newownerprompt/code-derived hints,verifier/bars/config unchanged. History/evaluator/facts exact apart profile sizeChart/hash;no fabricated ranges/alternative evidence,providergeneration0.
-- [ ] T2fixed23retention/projection/binding RED/GREEN and requiredlocalchecks.
+- [x] T2selectorRED0/3,retentionRED2/3->GREEN3/3;sizecontextRED0/4->GREEN4/4. FullNode131/131,protocol9/9,explicitCodex11/11,worker77/77,business41/41,0skip;worker typecheck/build/lint/protocol/diffexit0. All61engine admissions/profiles/hints+oldPASS snapshot invalidation proven;485/486oldfiles exact,protocolonly. Protocol+21/-8,22line evalhelper,no new field/gate/role/state/shared/provider/production wiring. Ownerquota confirmation used,no quota investigation. Ready cleanA2source seal.
 - [ ] T3clean source/runtimeSHA/preflight/A2once;any unsafeeligiblePASS STOP.
 - [ ] T4onlyfreshA2PASS,42A3once/fullactualterminalreview.
 - [ ] Report/findings/todo/draftPR390delivery,STOPowner.
