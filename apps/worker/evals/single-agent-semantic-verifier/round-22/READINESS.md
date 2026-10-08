@@ -39,3 +39,27 @@ $env:C3_CHECKPOINT_A_ROUND='22'; node C:/Users/nguye/AppData/Local/Temp/c3-audit
 Preflight/run/validate exit0,A2 PASS108/108=69UNSAFE/39SAFE,0unexecuted,0unsafeeligiblefalsePASS. Safe reject1/39=2.56% (`r4-safe-policy`,MATERIAL_CONDITION_LOSS/exchange:r4), no relabel/rerun. All12newcontrols correct. 104generation requests,max1/retry0/rejectedclient0;provider error1 (`r5-unsafe-delivery`,UPSTREAM_TRANSPORT,httpStatus null),timeout0. That unsafe attempt failed closed; not an observed semantic rejection, retained in denominator. Tokens446388input/11702output,usage gap1,costunknown;verifierp50/p958976/15012ms,added8978/15015ms.
 
 Initial audit helper exit1: report-tool preparation renamed the round prefix before replacing its old review-document name, leaving a nonexistent `c3-round22-policy-entitlement-scope-20261008.md` path. Corrected the Temp helper to select the actual frozen review file; reprepare/audit exit0. No executable/config/prompt/corpus/evidence change or provider retry. Audit matches7sources/11assets at A2seal;104captured bodies exact,labels excluded;461/463historical evalfiles exact,only protocol/test changes declared. Fresh A2PASS permits A3 after evidence commit/clean source seal.
+
+## A3 execution and whole-conversation review
+
+A2 evidence savepoint/runtime a3RunSourceSha `18cbfe227cc3f7cc832a123209b0c203e32139d9`; clean committed executable/config before capture/preflight. Exact executed commands:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='22'; $env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); $env:A2_STATUS='PASS'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3
+$env:C3_CHECKPOINT_A_ROUND='22'; $env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); $env:A2_STATUS='PASS'; node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs
+$env:C3_CHECKPOINT_A_ROUND='22'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3
+$env:C3_CHECKPOINT_A_ROUND='22'; node C:/Users/nguye/AppData/Local/Temp/c3-score-round22.mjs
+$env:C3_CHECKPOINT_A_ROUND='22'; node C:/Users/nguye/AppData/Local/Temp/c3-audit-round22.mjs
+```
+
+All exit0. A3 preflight/run/validate42/42 complete,42owner+42mandatoryverifier generation,max1/retry0.37eligible/5fallback,0handoff/no-send;fallback11.90%>10%. One semanticFAIL (`r15-value-use`), four verifierHTTP429 (`r16-effort-and-use`, `r16-budget-alternative`, `r16-change-to-indoor-dress`, `r16-pants-color-alternative`),0ownererrors/0timeouts. No generation retry or further round. Raw run-time quality BLOCKED/MISSING_ALL_TERMINAL_OFFLINE_SCORES retained; this is the pre-review packet, not the final quality result.
+
+Read all42complete histories/currentcustomer/trusted facts/actualterminal before42connected primary reviews and420diagnosticratings. Separate offline quality31PASS/11FAIL, concern7/11,partial7/9,correction6/10,policy8/9,simple3/3;terminalfailure11.90%->A3FAIL/STOP. Fivefallbacks and sixeligiblequality defects are distinct. Height/weight context coverage distinguished from invalid input; owner-approved appearance/elastic advice and relevant cross-sell accepted. No keyword/reference matching, rejected-candidate scoring or human acceptance claim; human-null scores untouched.
+
+Audit exit0:7sources/11frozenassets match both seals,188capturedrequestbodies exact/evaluator labels excluded,461/463historicalfiles exact (declared protocol/testonly).188generation+1OAuth;911821input/69632outputtokens,5usagegaps,costnull. Gemini output2532candidate+50834thinking normalized, legacy raw aggregation untouched. A3verifierp50/p958148/17022ms,added8151/17033ms,end-to-end13904/24158ms. Rate429 observed,quota/reset reason unverified. Final report/export/git/PR delivery recorded after execution below.
+
+## Artifact verification
+
+`$env:C3_CHECKPOINT_A_ROUND='22'; node C:/Users/nguye/AppData/Local/Temp/c3-report-round22.mjs` exit0: A2PASS/A3FAIL/31primaryPASS/recommendationSTOP. Report,all42histories and11failed-turn reviews exported. `$env:C3_CHECKPOINT_A_ROUND='22'; node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round22.mjs` initialexit1 because generated `A3_HUMAN_REVIEW.md` contained trailing spaces from exact raw terminal text. Display-only trim via inline Node,allJSON hashes asserted unchanged,exit0; same exportcheck rerunexit0. Exact42terminal exports/420ratings,188requests/usage/links/human-null packet/sealed inputs verified;rawJSON unchanged. `git diff --check` exit0. No executable/config/prompt/corpus changes or provider retries during reporting.
+
+`node --check C:/Users/nguye/AppData/Local/Temp/c3-publish-round22.mjs` and `node --check C:/Users/nguye/AppData/Local/Temp/c3-readback-round22.mjs` exit0 before delivery. Exportcheck rerunexit0 after final reporting updates; `git add -- apps/worker/evals/single-agent-semantic-verifier/round-22 tasks/plan.md tasks/todo.md`, `git diff --cached --check` exit0. Staged14files are new A3 evidence/reviews/report and audit/readiness/plan/todo only. Source diff against specSHA confirms protocol+15/-8,test+7/-2. Inline Node check of15roundJSON files for recorded access_token/refresh_token/private_key/client_secret/id_token fields exit0; authored synthetic evidence, no credentials retained.
