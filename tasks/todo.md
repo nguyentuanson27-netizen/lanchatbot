@@ -480,3 +480,9 @@ For each future implementation task:
 - [x] Prepare separate inactive owner/verifier prompts; inspect actual Round15bound subjects/profiles/policies:stage has no confirmed suitable alternative,ETA has no separately supported timely item,other dress not bound to freeship case. Record concrete data preparation gaps without inventing facts/new parser/router/tool/recovery or modifying historical corpus/labels/scores.
 - [x] Local prepared-envelope check0:71A2/76A3maxdraft envelopes,maxowner23361/verifier27218<32768bytes,runtime/bindings/history unchanged,evaluator markers excluded,326historical evalfiles byte-identical,29doclinks valid. Focused protocol/round15 tests12/12PASS/0skip,diffcheck0. New owner6883/verifier5914bytes;not semantic provider/quality evidence. Provider generations0;no worker/shared/API/runtime change.
 - [x] Preparation savepoint03f0f867790633628b5377bab056dab28603698f committed/pushed;draftPR390 title/body updated with exact approved direction/newprompt links/hashes/actual local checks/data gaps. Staged check/push/edit/readback0:exacttitle/body,OPENdraft,clean local/remote/PRhead match;remoteCI no checks returned,unverified. Round15STOP remains,providergenerations0,no new run/post-A. Delivery-record-only savepoint follows.
+## Authorized Round16 — 2026-10-08
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; clean starting/spec85221ecd88337acd0278ae20c9ac51b4f1c53214. Freeze approved previously shared prompts/config/one attempt/bars/84A2(72retained+6SAFE/6UNSAFE)/42A3(38runtime retained+4new) and4offline buyer-contract changes before results;328historical evaluation files inventoried. Existing synthetic facts only,stage/deadline alternative gaps explicit,provider generations0.
+- [ ] T2observed RED→GREEN/readiness.
+- [ ] T3sealed A2,onlyPASSpermitsA3.
+- [ ] T4sealed A3/whole-terminal review/report/PR/ownerSTOP.
