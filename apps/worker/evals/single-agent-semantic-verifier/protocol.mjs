@@ -11,7 +11,7 @@ const families = ['wrong-subject', 'negation-inversion', 'material-condition-los
 const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 'negation-inversion', 'dropped-material-policy-condition', 'stronger-implied-policy-benefit', 'stale-evidence', 'effect-success-without-receipt'];
 // Fixed experiment folders only; keep historical inputs/evidence intact.
 const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
-if (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
+if (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
 const onePass = round === '5' && process.env.C3_CHECKPOINT_A_ONE_PASS === '1';
 const inputRoot = new URL(round === '1' ? './' : './round-' + round + (onePass ? '/one-pass/' : '/'), import.meta.url);
 export const inputUrl = name => new URL(name, inputRoot);
@@ -34,14 +34,14 @@ export function projectRuntime(manifest, fixture, role, requestId) {
       scope: pick(c.scope, ['kind', 'productId', 'variantId', 'cartId', 'cartVersion']),
       provenance: pick(c.provenance, ['authority', 'sourceVersion', 'evidenceRef', 'contentHash', 'observedAt', 'expiresAt']),
       value: pick(c.value, ['amountVnd', 'currency', 'status', 'availableQuantity',
-        ...([4,5,6,7,8,9,10,11,12,13,14,15,16].includes(manifest.round) ? ['recommendedSizes','alternativeSizes','customerProfileId','customerProfileRevision','measurementFingerprint','evidenceBasis'] : [])]),
+        ...([4,5,6,7,8,9,10,11,12,13,14,15,16,17].includes(manifest.round) ? ['recommendedSizes','alternativeSizes','customerProfileId','customerProfileRevision','measurementFingerprint','evidenceBasis'] : [])]),
     })),
     policyLiterals: r.trusted.policyLiterals.map(p => pick(p, ['ref', 'text', 'sourceVersion', 'observedAt', 'expiresAt'])),
     effectReceipts: r.trusted.effectReceipts.map(p => pick(p, ['ref', 'operationId', 'subjectRef', 'status', 'effect', 'stateRevision', 'recipient', 'observedAt', 'expiresAt'])),
     state: pick(r.trusted.state, manifest.stateAllowlist),
   };
   if (Object.hasOwn(r.trusted, 'productProfiles')) {
-    requireThat([3,4,5,6,7,8,9,10,11,12,13,14,15,16].includes(manifest.round) && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
+    requireThat([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].includes(manifest.round) && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
     trusted.productProfiles = r.trusted.productProfiles.map(p => ({
       ...pick(p, ['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash']),
       details: pick(p.details, ['silhouette','material','colors','sizeChart','care','limitations']),
@@ -91,11 +91,11 @@ export function validateDraft(m, a2, a3) {
     const model = m.models[role];
     const gemini = m.variant === 'GEMINI_CONVERSATION' && role === 'conversation';
     requireThat(model.provider === (gemini ? 'VERTEX_AI' : 'OPENAI') &&
-      model.model === (gemini ? 'gemini-3.5-flash-lite' : 'gpt-6.1-sol') && model.version === model.model && model.effort === 'high', 'MODEL_IDENTITY');
+      model.model === (gemini ? 'gemini-3.5-flash-lite' : 'gpt-6.1-sol') && model.version === model.model && model.effort === (m.round === 17 && role === 'conversation' ? 'medium' : 'high'), 'MODEL_IDENTITY');
     requireThat(hash(m.prompts[role]) === m.promptHashes[role], 'PROMPT_HASH');
   }
   requireThat(hash(JSON.stringify(m.verdictSchema)) === m.schemaHash, 'SCHEMA_HASH');
-  requireThat(m.repetitions === ([6,7,8,9,10,11,12,13,14,15,16].includes(m.round) || m.ownerAmendment && m.round === 5 ? 1 : 3) && m.retries === 0 && m.maxGenerationRequestsPerAttempt === 1 && m.repair === false && m.unsafeRule === 'ANY_UNSAFE_SEND_ELIGIBLE_PASS_FAILS_A2', 'ATTEMPT_POLICY');
+  requireThat(m.repetitions === ([6,7,8,9,10,11,12,13,14,15,16,17].includes(m.round) || m.ownerAmendment && m.round === 5 ? 1 : 3) && m.retries === 0 && m.maxGenerationRequestsPerAttempt === 1 && m.repair === false && m.unsafeRule === 'ANY_UNSAFE_SEND_ELIGIBLE_PASS_FAILS_A2', 'ATTEMPT_POLICY');
   for (const fallback of m.fallbacks) requireThat(hash(fallback.text) === fallback.hash, 'FALLBACK_HASH');
   const fallback = m.fallbacks[0];
   requireThat(fallback.id === 'C3_A_NONPROTECTED_V1', 'FALLBACK_ID');
@@ -151,12 +151,12 @@ export function validateProtocol(m, a2, a3) {
     requireThat(model.credentialRoute === 'CODEX_CHATGPT_LOGIN' && c.transport === 'CODEX_CLI_BOUNDED_INFERENCE_RELAY' &&
       c.cliVersion === '0.159.2' && c.endpoint === 'https://chatgpt.com/backend-api/codex/responses' &&
       Array.isArray(c.tools) && c.tools.length === 0 && c.tool_choice === 'none' && c.parallel_tool_calls === false &&
-      c.store === false && c.stream === true && c.reasoningEffort === 'high' && c.timeoutMs === 90000 &&
+      c.store === false && c.stream === true && c.reasoningEffort === model.effort && c.timeoutMs === 90000 &&
       c.relayUpstreamRequestsPerAttempt === 1 && c.retry === 0 && c.maxResponseBytes === 1048576,
       'GENERATION_CONFIG');
   }
   requireThat(hash(JSON.stringify(a2)) === m.corpusHashes.a2 && hash(JSON.stringify(a3)) === m.corpusHashes.a3, 'CORPUS_HASH');
-  if ([3,4,5,6,7,8,9,10,11,12,13,14,15,16].includes(m.round)) {
+  if ([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].includes(m.round)) {
     requireThat(m.bounds.profileCount === 4 && m.bounds.profileBytes === 2048 &&
       JSON.stringify(m.profileAllowlist) === JSON.stringify(['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash','details']) &&
       JSON.stringify(m.profileDetailAllowlist) === JSON.stringify(['silhouette','material','colors','sizeChart','care','limitations']), 'PROFILE_PROTOCOL');
@@ -170,9 +170,9 @@ export function validateProtocol(m, a2, a3) {
       JSON.stringify(['usefulness','decisionSupport','nextStep','naturalness']) &&
       new Set(m.scoring.consultationCaseIds).size === 17 && m.scoring.consultationCaseIds.every(id => a3.cases.some(c => c.evaluator.caseId === id)), 'CONSULTATION_BAR');
   }
-  if ([4,5,6,7,8,9,10,11,12,13,14,15,16].includes(m.round)) {
+  if ([4,5,6,7,8,9,10,11,12,13,14,15,16,17].includes(m.round)) {
     const withBuyerGoals = m.round >= 5;
-    requireThat(summary.a2Unsafe === (m.round === 16 ? 57 : m.round >= 13 ? 51 : withBuyerGoals ? 48 : 44) && summary.a2Safe === (m.round === 16 ? 27 : m.round >= 13 ? 21 : withBuyerGoals ? 18 : 14) && a3.cases.length === (m.round === 16 ? 42 : m.round === 15 ? 38 : m.round === 14 ? 34 : m.round >= 12 ? 28 : m.round >= 7 ? 24 : 20) &&
+    requireThat(summary.a2Unsafe === (m.round >= 16 ? 57 : m.round >= 13 ? 51 : withBuyerGoals ? 48 : 44) && summary.a2Safe === (m.round >= 16 ? 27 : m.round >= 13 ? 21 : withBuyerGoals ? 18 : 14) && a3.cases.length === (m.round >= 16 ? 42 : m.round === 15 ? 38 : m.round === 14 ? 34 : m.round >= 12 ? 28 : m.round >= 7 ? 24 : 20) &&
       hash(JSON.stringify({schemaVersion:1,cases:a2.cases.slice(0,withBuyerGoals ? 58 : 46)})) === m.retainedA2Hash, 'ROUND'+m.round+'_POPULATION');
     for (const [file,key] of [['reference-replies.json','referenceFileHash'],['size-inputs.json','sizeInputsFileHash']])
       requireThat(hash(readFileSync(new URL('./round-'+m.round+(m.variant === 'GEMINI_CONVERSATION' && m.round === 8 ? '-gemini' : '')+'/'+file,import.meta.url),'utf8')) === m[key], 'EVALUATOR_INPUT_HASH');
@@ -202,6 +202,10 @@ export function validateProtocol(m, a2, a3) {
     m.cohorts.addedSafeA2Count === 6 && m.cohorts.addedUnsafeA2Count === 6 &&
     m.cohorts.anchorA3Count === 38 && m.cohorts.newA3Count === 4 &&
     hash(JSON.stringify(a3.cases.slice(0,38).map(c=>c.runtime))) === m.cohorts.anchorA3RuntimeHash, 'ROUND16_RETAINED');
+  if (m.round === 17) requireThat(m.cohorts.retainedA2Count === 84 && m.cohorts.anchorA3Count === 42 && m.cohorts.newA3Count === 0 &&
+    hash(JSON.stringify(a2)) === m.cohorts.retainedA2Hash && hash(JSON.stringify(a3)) === m.cohorts.anchorA3Hash &&
+    hash(JSON.stringify(a2)) === hash(readFileSync(new URL('./round-16/corpus-a2.json',import.meta.url),'utf8')) &&
+    hash(JSON.stringify(a3)) === hash(readFileSync(new URL('./round-16/corpus-a3.json',import.meta.url),'utf8')), 'ROUND17_RETAINED');
   return summary;
 }
 

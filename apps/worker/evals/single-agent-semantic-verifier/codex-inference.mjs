@@ -18,11 +18,11 @@ export function inspectCodex() {
   if(login.status!==0 || !(login.stdout+login.stderr).includes('Logged in using ChatGPT'))throw new Error('CODEX_CHATGPT_LOGIN_REQUIRED');
   return {version,binarySha256:createHash('sha256').update(readFileSync(binary)).digest('hex')};
 }
-function launchCodex(base,manifest,role) {
+function launchCodex(base,manifest,role,spawnClient=spawn) {
   const dir=mkdtempSync(join(tmpdir(),'c3-inference-'));
   const model=manifest.models[role];
   const args=['exec','--ignore-user-config','--ignore-rules','--ephemeral','--skip-git-repo-check','--json','-s','read-only','-C',dir,
-    '-m',model.model,'-c','model_reasoning_effort="high"','-c','web_search="disabled"',
+    '-m',model.model,'-c',`model_reasoning_effort="${model.effort}"`,'-c','web_search="disabled"',
     '-c','model_provider="c3_checkpoint_a"',
     '-c',`model_providers.c3_checkpoint_a={name="OpenAI",base_url="${base}",wire_api="responses",requires_openai_auth=true,request_max_retries=0,stream_max_retries=0,supports_websockets=false}`,
     '--disable','shell_tool','--disable','multi_agent','--disable','memories','--disable','sleep_tool'];
@@ -32,7 +32,7 @@ function launchCodex(base,manifest,role) {
     args.push('--output-schema',schema);
   }
   args.push('Return only the final answer. Do not invoke tools.');
-  const child=spawn(codexBinary(),args,{stdio:['ignore','ignore','ignore'],windowsHide:true});
+  const child=spawnClient(codexBinary(),args,{stdio:['ignore','ignore','ignore'],windowsHide:true});
   return {done:new Promise(resolve=>{child.on('error',()=>resolve());child.on('exit',()=>resolve());}),stop:()=>child.kill()};
 }
 function parseStream(text,requestedModel,headerModel) {
@@ -63,7 +63,8 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
   const config=manifest.models[role].generationConfig;
   const timeoutMs=testDependencies.timeoutMs??config.timeoutMs;
   const requestBody=JSON.stringify(request); // snapshot before any asynchronous client work
-  if(request.model!==manifest.models[role].model || request.tools.length!==0 || request.tool_choice!=='none')throw new Error('FROZEN_REQUEST');
+  if(request.model!==manifest.models[role].model || request.reasoning?.effort!==manifest.models[role].effort ||
+    config.reasoningEffort!==manifest.models[role].effort || request.tools.length!==0 || request.tool_choice!=='none')throw new Error('FROZEN_REQUEST');
   const started=performance.now();
   const controller=new AbortController();
   let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client;
@@ -108,7 +109,7 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       await testDependencies.runClient(base);
       if(!settled)finish({status:'PROVIDER_ERROR',error:'CLIENT_NO_COMPLETED_GENERATION',httpStatus:null});
     } else {
-      client=launchCodex(base,manifest,role);
+      client=launchCodex(base,manifest,role,testDependencies.spawnClient);
       await Promise.race([completion,client.done.then(()=>{if(!settled)finish({status:'PROVIDER_ERROR',error:'CLIENT_NO_GENERATION',httpStatus:null});})]);
     }
     await completion;
