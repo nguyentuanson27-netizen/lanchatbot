@@ -66,3 +66,13 @@ $env:C3_VERTEX_CREDENTIAL_FILE=(Get-ChildItem -LiteralPath 'C:/Users/nguye/Downl
 |git diff --check|exit0|
 
 Export accounting explicitly separates188captured client envelopes from184upstreamgeneration requests;four verifier AUTH_UNAVAILABLE slots never forward. A report-helper patch was initially rejected for two operations on the same temporary file;no mutation occurred,corrected update applied. An initial historical-document read used an absent FINDINGS_AND_ACTIONS filename;actual FINDINGS.md was located/read. These are local tooling issues,not provider retries or changes to frozen execution. No command/provider result synthesized;all current raw inputs/requests/verdicts/human-null results unchanged.
+
+|Actual artifact/PR delivery|Observed result|
+|---|---|
+|git add -- apps/worker/evals/single-agent-semantic-verifier/round-24 tasks/plan.md tasks/todo.md;git diff --cached --check;git commit -m 'eval(c3): report Round24 whole-conversation STOP checkpoint'|exit0,artifact00c9fb4626be58d86228107ab6d24751803ef7ac|
+|git push origin feat/c3-semantic-verifier-checkpoint-a-20261005|exit0,remote fast-forward|
+|node C:/Users/nguye/AppData/Local/Temp/c3-publish-round24.mjs|exit0,exact PRbody-file prepared from actual manifest/audit/quality|
+|gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Checkpoint A: Round24 A2 PASS, A3 FAIL / STOP' --body-file C:/Users/nguye/AppData/Local/Temp/c3-round24-pr-body.md|exit0,existing draftPR390 updated|
+|node C:/Users/nguye/AppData/Local/Temp/c3-readback-round24.mjs|exit0,OPENdraft/exact title-body/clean local-remote-PRhead00c9fb4626be58d86228107ab6d24751803ef7ac match;pnpmcheckQUEUED,remote CI PASS unverified|
+
+This delivery-record-only follow-up changes readiness/todo,not executable/config/frozen inputs/raw results/reviews or either run seal. It is published on the same branch/draftPR;no additional provider generation. STOP at owner CheckpointA,no automatic next round/post-A.
