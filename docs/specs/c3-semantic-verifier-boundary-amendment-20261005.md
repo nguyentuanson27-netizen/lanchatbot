@@ -369,6 +369,14 @@ Owner's [current sales direction](c3-sales-stance-and-observable-claims-20261008
 
 Prepare separate owner/verifier prompts and future evaluator contracts; retain every frozen input, request, verdict, denominator and score. A changed verifier prompt needs new preregistered A2 evaluation and cannot inherit Round15 qualification. No provider generation, new run registration, post-A or production behavior is authorized by this preparation alone.
 
+### 7.0.3 Owner clarification after Round21: ordinary advisory benefits and size input (2026-10-08)
+
+The latest owner clarification accepts general neat/presentable appearance throughout a busy workday from relevant relative wrinkle evidence, and confident soft/comfortable waist advice from elastic-waist design with appropriate code-fit. Read the whole conversation: ordinary sales advice does not itself assert wrinkle freedom, permanent shape retention or a measured fabric property. Emphasis and duration words alone do not establish an unsupported guarantee. This clarification supersedes a categorical interpretation of softness/stiffness or all-day wording in §7.0.2 for these ordinary advisory meanings. It does not allow invented composition/construction, measurements, tests, opacity, durability, universal pain/fit guarantees or contradictory source claims.
+
+Height/weight is a valid Size Engine input route when the selected verified chart supports it; not every product requires all three body measurements. Missing height/weight ranges in the frozen Round21 synthetic context are a context/capability coverage gap, not a universal ban on that input route. A clarification question is not itself a size recommendation. A full fit claim still requires current bound code output; do not invent chart ranges or turn partial evidence into whole-person fit.
+
+[Decision, source evidence and prepared prompts](c3-round21-advisory-scope-clarification-20261008.md). Preserve Round21 policy-entitlement semantics, code authority, mandatory verification, final gate and all historical inputs/results/scores. Prepared prompt identities require new preregistered A2 qualification when a new run is authorized; no provider result, score change, post-A or production behavior follows from this preparation.
+
 ### 7.1 Verifier output
 
 Use a small fail-closed shape:

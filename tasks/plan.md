@@ -1107,3 +1107,9 @@ A2FAIL at fourthregistered attempt:exact PR387 draft `Chị không hợp thì đ
 ## Authorized Round21 — 2026-10-08
 
 Owner asks fix and rerun. [Frozen treatment](../docs/specs/c3-round21-policy-entitlement-scope-20261008.md) narrows verifier policy entitlement scope only; owner prompt and all96A2/42A3/preparation/profile/evaluator/numeric bars exact20. T1freeze, T2observedRED/GREEN and required checks, clean A2seal/preflight/once; A3onlyfreshA2PASS then clean A3seal/once/full-history review. Any unsafeeligiblePASS STOP; no rescue/post-A. Record measured outcomes/unknowns in Round21CHECKPOINT_A and draftPR390.
+
+## Owner clarification after Round21 — preparation only, 2026-10-08
+
+[Current advisory/size-input direction](../docs/specs/c3-round21-advisory-scope-clarification-20261008.md), amendment§7.0.3: accept ordinary neat/presentable appearance and soft/comfortable elastic-waist advice in the whole conversation; do not infer a technical guarantee from isolated emphasis/duration words. Retain source-bound product facts/tests/fit/policy/effects, one owner/one verifier, mandatory verification and final gate. Height/weight is a valid existing Size Engine route for charts that support it; not every product requires all three body measurements. Round21 synthetic context lacks height/weight ranges, so prepare verified chart/input-route context before using that route in a future run; do not fabricate ranges or implement post-A tooling.
+
+Save separate prepared owner/verifier prompts; retain every frozen prompt/manifest/corpus/context/request/verdict/score. Local compatibility/firewall, existing protocol/round21 and Size Engine checks only; no new provider generation, registration or automatic rerun. A changed verifier requires fresh preregistered A2 before any A3 when a new run is requested. Update draftPR390 with preparation scope/actual checks/unknowns; Round21 A2PASS/A3FAIL/STOP remains the observed checkpoint result.
