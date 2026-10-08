@@ -47,3 +47,10 @@ Source `314be30063beefb1eae5cbc71dbf713e987f3cf0`, clean after A2 evidence commi
 - `git diff --check`: exit0.
 
 Observed input-preparation defect: new indoor-dresshistory incorrectly implies VA512Mfit,while trustedSIZE_FIT only ST411. CandidateVA512M blocked. Keep failedcase in registereddenominator;do not fabricate a fit,patch/reseal/adopt/retryorrescore oldrun. Thisdefect belongs to preparation,not solely language capability. Existingstage alternate-opacitycoverage gap alsoexplicit. No source/configeditafterA3seal,no newprovidergenerationafter42.
+
+## Delivery readback
+
+- `git diff --cached --check`; `git commit -m 'test(c3): report Round16 whole-reply FAIL and owner checkpoint STOP'`: exit0,artifact451e28d6f8bee13f0c3d456ba150138cf1a828e2.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-pr-round16.mjs`: exit0,structured exactbody from actual report/audit/scores. `git push origin feat/c3-semantic-verifier-checkpoint-a-20261005`: exit0.
+- `gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Checkpoint A: Round16 A2 PASS, A3 FAIL / STOP' --body-file C:/Users/nguye/AppData/Local/Temp/c3-round16-pr-body.md`: exit0.
+- `node C:/Users/nguye/AppData/Local/Temp/c3-readback-pr390-round16.mjs`: exit0,title/body/OPENdraft/clean tree/local-remote-PRhead exactmatch. Remote `pnpm check`QUEUED,not claimedPASS. Finaldelivery-record-only savepoint does not modify executable/config/corpus/rawrequests/verdicts/scores or cause another model request. STOP ownerCheckpointA.
