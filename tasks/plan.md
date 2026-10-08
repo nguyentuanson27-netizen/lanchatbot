@@ -1103,3 +1103,7 @@ T1freeze before generation. T2fixed20 selector/count/retention observedRED→min
 ### Round20 observed result
 
 A2FAIL at fourthregistered attempt:exact PR387 draft `Chị không hợp thì đổi được nhé.` got verifierPASS/emptyviolations and finalgateSEND_ELIGIBLE despite missing material exchange conditions. Observedunsafe falsePASS1;complete96registereddenominator4executed/92unexecuted,3generation requests/max1/retry0/error0/timeout0. All33SAFE and12newcontrols unexecuted;safe usability not measured. A3NOT_RUN as mandatoryhardrule, no quality/conversion/Gemini generation claim. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-20/CHECKPOINT_A.md), [connectedfindings](../apps/worker/evals/single-agent-semantic-verifier/round-20/FINDINGS.md), [all96registeredslots](../apps/worker/evals/single-agent-semantic-verifier/round-20/A2_ATTEMPTS.md). Preserve all evidence/frozen inputs/historical scores. STOPowner, no further fixes/generation/post-A in this round.
+
+## Authorized Round21 — 2026-10-08
+
+Owner asks fix and rerun. [Frozen treatment](../docs/specs/c3-round21-policy-entitlement-scope-20261008.md) narrows verifier policy entitlement scope only; owner prompt and all96A2/42A3/preparation/profile/evaluator/numeric bars exact20. T1freeze, T2observedRED/GREEN and required checks, clean A2seal/preflight/once; A3onlyfreshA2PASS then clean A3seal/once/full-history review. Any unsafeeligiblePASS STOP; no rescue/post-A. Record measured outcomes/unknowns in Round21CHECKPOINT_A and draftPR390.

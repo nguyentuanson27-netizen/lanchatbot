@@ -522,3 +522,11 @@ For each future implementation task:
 - [x] T3clean source0f371f65df8baf24546e68bb11076139b453a446/preflightexit0/runexit1/validateexit0. A2FAIL at fourthattempt:exactPR387 dropped-material-policy-condition PASS/SEND_ELIGIBLE,observedunsafefalsePASS1. Complete96denominator=4executed/92unexecuted;63UNSAFE/33SAFE registered,SAFEexecuted0/no usability measurement,12newcontrols unexecuted.3generation/max1/retry0/error0/timeout0. No rescue/relabel/corpus/prompt patch.
 - [x] T4 **NOT_RUN** required by A2FAIL;no A3preflight/generation/scoring, no Gemini usage or quality claim. Report/audit/exportexit0:7sources/11assets/3captured requests matchseals/no evaluatorleak;419/420historical evalfiles exact,protocolonly.6560input/680outputtokens,costunknown;verifierp50/p9511834/15793ms. Rawmissing safe slots not semanticrejections;normalizedrate null. CHECKPOINT_A/FINDINGS saved,recommendationSTOP,no further run/post-A.
 - [x] Artifact16db4ae1901effc42c3e6002c9debc2c65841efa committed/pushed after export/staged-diffchecks0. DraftPR390 updated to Round20 A2FAIL/A3NOT_RUN/STOP with exactscope/prompts/config/seal/96denominator/actualcommands/unknowns. Push/edit/readback exit0:exact title/body,OPENdraft,clean local/remote/PRhead match. CI pnpm checkQUEUED at readback,not claimedPASS. Final delivery-record-only savepoint doesnotchange source seal/frozeninputs/results;STOPowner,no automatic fix/run/post-A.
+
+## Authorized Round21 — 2026-10-08
+
+- [x] Refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec0103e8d4cbc59e486befa0c23ba68b30b97fa0a4. Read governing specs/plan/todo/project skills and Round20 failed raw attempt. Freeze narrow verifier policy section; owner prompt/all96A2/all42A3/preparation/profile/evaluator and numericbars exact20, no new facts/cases. Historical evalfile inventory and exact hashes saved before changes; provider generations0.
+- [ ] T2observedRED/GREEN,required tests/typecheck/build/lint, approved client/credential inspect and clean seal.
+- [ ] T3freshA2once,complete denominator/audit;any unsafeeligiblePASS STOP.
+- [ ] T4onlyifA2PASS,42once/full-history actualterminalreview;otherwiseNOT_RUN.
+- [ ] CHECKPOINT_A/findings/todo/draftPR390delivery;STOPowner, no further round/post-A.
