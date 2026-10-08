@@ -73,3 +73,16 @@ $env:C3_VERTEX_CREDENTIAL_FILE=(Get-ChildItem -LiteralPath 'C:/Users/nguye/Downl
 |node C:/Users/nguye/AppData/Local/Temp/c3-secret-scan-round25.mjs;git diff --check|exit0,30currentfiles scanned/0secret-patternmatches;synthetic fixtures|
 
 Whitespace normalization is Markdown display only. Exact customer-visible text, requests, verdicts, hashes and blank human scoring remain in unchanged JSON;displays include every blocked candidate as diagnosis,never as the scored terminal. No provider generations during scoring/audit/report/export. Git/PRdelivery recorded after actual execution.
+
+## Actual Git and draft PR delivery
+
+|Actual command|Observed result|
+|---|---|
+|node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round25.mjs;git diff --check;git add -- apps/worker/evals/single-agent-semantic-verifier/round-25 tasks/plan.md tasks/todo.md;git diff --cached --check|exit0,artifact exports/rawJSON/seals/human-null/links intact,stageddiffcheck0|
+|Get-FileHash -LiteralPath round25/a2-evidence.json,round25/a3-evidence.json,round25/a3-human-scores.json -Algorithm SHA256;compare with captured before offline scoring|exit0,allthree hashes byte-exact prior values;actual command uses full repo-relative paths|
+|git commit -m 'eval(c3): record Round25 whole-conversation checkpoint STOP';git status --short;git rev-parse HEAD|exit0,artifacta4645982318a085a893caeb9a3d3c3b56d845ddf,clean worktree|
+|git push origin feat/c3-semantic-verifier-checkpoint-a-20261005|exit0,remote artifacthead published|
+|node C:/Users/nguye/AppData/Local/Temp/c3-publish-round25.mjs;gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Checkpoint A: Round25 A2 PASS, A3 FAIL / STOP' --body-file 'C:/Users/nguye/AppData/Local/Temp/c3-round25-pr-body.md'|exit0,existing draftPR390 title/body updated with exactsource/config/scope/commands/A2/A3/STOP/unknowns|
+|node C:/Users/nguye/AppData/Local/Temp/c3-readback-round25.mjs|exit0,local/remote/PRartifacthead exactmatch,clean tree,title/body match,OPENdraft;pnpmcheckQUEUED,remoteCI PASSunverified|
+
+Delivery-record-only followup documents these completed actions;no executable/config/frozeninput/rawJSON/score change or additionalprovider generation. Stop at owner CheckpointA;no automaticnewround/post-A/merge/deploy/live send.
