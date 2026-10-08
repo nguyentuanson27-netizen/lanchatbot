@@ -21,3 +21,7 @@ Environment: C3_CHECKPOINT_A_ROUND=19; installed transport tests C3_TEST_CODEX_T
 Protocol source delta17added/7removed lines;3new focused tests. Fixed19 selection/retained-population validation only. Provider adapters, boundary/shared/production source unchanged. Runtime semantic roles/layers/gates/state added0. No parser/router/template/regex/framework/repair/reverify/thirdrole/production wiring. Same prompts/runtime/config/numeric bars; evaluator-only review correction frozen before results. Subsequent commands/results appended only after actual execution.
 
 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs and git diff --check both exit0 after readiness;FROZEN_PROTOCOL_VALID,84A2/42A3. Clean source commit follows before runtime A2 seal.
+
+## T3 — actual provider run and seal
+
+Clean runtime a2RunSourceSha a0936818550e94184dd9b029c158b784dbc1bd68. C3_CHECKPOINT_A_ROUND=19; A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(). Actual protocol.mjs --preflight-a2,run-a2.mjs,protocol.mjs --validate-a2,c3-audit-round19.mjs,c3-report-round19.mjs all exit0. A2PASS84/84=57UNSAFE/27SAFE;unsafeeligiblefalsePASS0,safe terminalfailure1/27=3.70%(r4-safe-policy).80generations,max1/retry0,error0/timeout0,usage complete.7sources/11assets/80captured bodies matchseals;396/397historical evalfiles exact,onlyprotocol support changed. Interim reportA3NOT_RUN/missing review; no terminal owner disposition implied. Only nowA3permitted;commit clean evidence before its runtime seal.
