@@ -649,5 +649,5 @@ For each future implementation task:
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361;owner “chạy đi” authorizes exactly1new round against completed28,not extension of prior max3batch. Freeze READABLE_FACTS_V1 owner presentation only;prompts/models/config/all120A2/42A3/evaluators/facts/bars/terminals unchanged.
 - [x] T1frozen120A2/42A3+all7aux exact28 atd5d2fb68;T2observedRED0/4→minimumGREEN4/4;Node168/168,focused38/38,worker77/77,business41/41,workerbuild/typecheck/lint/protocol/diff exit0.650/651historical files unchanged(protocolonly),11files secretscan0,exact Codexbinary/login and Vertex route inspected/no generation. Clean source capture/preflight next.
-- [ ] T3fresh120A2once;retain all errors;unsafeeligiblePASS or A2FAIL/BLOCKED stops this round;A3onlyif freshPASS.
+- [x] T3fresh120/120A2once PASS,75UNSAFE/45SAFE,unsafeeligiblefalsePASS0/SAFEreject0;a2sourcec70eb53598b7ed37c0d3584d288a1a2329d48d58/preflight/run/validate/audit exit0.116requests/max1/retry0/errors0/timeouts0;650/651historical exact,8sources/12inputs/116captures checked. A3nowpermitted;commit evidence then clean source/preflight.
 - [ ] T4if permitted,42whole-turn actual terminal reviews/results/context comparison/CheckpointA;commit/push/draftPR delivery. No automatic further round/post-A/live send.

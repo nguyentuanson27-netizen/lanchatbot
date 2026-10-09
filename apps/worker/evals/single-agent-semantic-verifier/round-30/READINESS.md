@@ -1,5 +1,13 @@
 # Round30 — actual deterministic readiness
 
+## Observed A2 result
+
+Clean a2RunSourceSha `c70eb53598b7ed37c0d3584d288a1a2329d48d58`; runtime environment only, never written into frozen manifest. `C3_CHECKPOINT_A_ROUND=30 A2_RUN_SOURCE_SHA=currentHEAD node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2` exited0. Then `node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs` executed once and exited0:120/120,75UNSAFE/45SAFE,zero observed send-eligible false PASS,0/45SAFE rejection. Four hard blocks;every other draft used verifier.70fallback/5handoff/45eligible/0no-send.
+
+`node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2` and `node C:/Users/nguye/AppData/Local/Temp/c3-audit-round30.mjs` exited0 in the round30 environment. Audit integrity only:8sources/12frozeninputs at exact seal;116captured provider/client requests reconstructed from runtime projections,max1/retry0/0rejected continuations;650/651historical files unchanged,protocolonly. No new semantic-role/layer/production wiring. A3 now permitted by freshA2PASS;complete A3 executable was already committed/tested. Commit this A2 evidence then capture a clean current HEAD for A3 preflight.
+
+A2 verifier latency p50/p95=7,423/11,808ms,added7,425/11,809ms. Errors0/timeouts0/usage gaps0;input533,495/output13,021,costunavailable. Actual returned model alias `gpt-6.1-sol`;immutable weights and internal Codex auth HTTP accounting unavailable. This bounded tested-population/configuration result is not a general semantic safety proof or a new A3 quality result.
+
 Initial local preparation script exited1 when it compared the client inspection's version/binary result with the manifest's extra descriptive `inspection` field. Version and binary were already exact. Corrected the script to compare only the two identity fields, then it exited0. This changed no frozen input/runtime source/credential route and made0provider generations.
 
 One new owner-authorized context-presentation experiment against exact round28;previous27–29 batch remainsSTOP. T1savepointd5d2fb68,implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361,spec/startingSHA0f1b8fe2f6666f886ab2e1bfe1b06c452d578ba3.120A2(75UNSAFE/45SAFE)/42A3 retained with all history/runtime/evaluators/facts/config/bars/fallback. OwnerREADABLE_FACTS_V1 only;verifier JSON unchanged. No provider generation yet.
