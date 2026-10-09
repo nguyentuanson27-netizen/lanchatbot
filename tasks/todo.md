@@ -657,6 +657,6 @@ For each future implementation task:
 ## Authorized Round31 — 2026-10-09
 
 - [x] Main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec550770bbf9969aafcbcd17730284521552977cc0,existing isolated implementationbranch. T1freeze owner29byteexact/readable30/verifier28/all120A2/42A3+7aux exact30/models/config/bars/terminals unchanged. Priorowner29A3unrun due providerblock;one-variable experiment,no verifierrescue/factinvention/newmechanism.0provider generation.
-- [ ] T2observedRED→minimumGREEN,focusedreadiness/clientinspection/cleanseal.
+- [x] Round31 T2observedRED0/3→minimumGREEN3/3;fullNode171/171,focusedprotocol/adapters38/38,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Existingprotocol+22/-10 only source change,3tests;674/675historical unchanged,secret-pattern0/11namedfiles,approvedroutes/client available/0generation. [Actualcommands](../apps/worker/evals/single-agent-semantic-verifier/round-31/READINESS.md). Selfreview,no newrole/gate/parser/repair/provider/runtime/production/sharedchanges.Cleansource seal next.
 - [ ] T3fresh120A2once;anyunsafeeligiblePASS hardSTOP/noA3.
 - [ ] T4onlyA2PASS,42A3once/wholeactualterminalreview/Checkpoint/todo/draftPR390/STOPowner.No automatic32/post-A.
