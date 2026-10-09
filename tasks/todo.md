@@ -589,7 +589,7 @@ For each future implementation task:
 
 - [x] Owner chốt [phạm vi nghĩa tư vấn và review toàn hội thoại](../docs/specs/c3-sales-semantics-and-whole-turn-review-20261009.md); architecture/amendment/plan liên kết cách hiểu hiện hành. Đủ quyết định để thực hiện fix có giới hạn; giữ các phạm vi an toàn và capability. Chỉ cập nhật tài liệu, chưa đổi prompt/runtime/corpus hay chạy provider; Round25 A2PASS/A3FAIL/STOP và mọi frozen evidence giữ nguyên.
 - [x] Documentation checks: `git diff --check` exit0; all6 decision links resolve; diff against81944072 shows0 changes to executable/eval evidence/shared packages. With `C3_CHECKPOINT_A_ROUND=25`, `node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-25.test.mjs` PASS12/12,0skips. Self-reviewed5doc-only files;no new semantic result or provider request.
-- [ ] Implement bounded prompt/context/review fix and qualify fresh A2 before any A3 when a new round is requested. No new round registered by this decision; no post-A.
+- [x] Bounded fixes executed under later owner authorization in26-29;each freshA2required,see retained outcomes. No post-A.
 
 ## Authorized Round26 — 2026-10-09
 
@@ -605,8 +605,8 @@ For each future implementation task:
 - [x] Round27T2selectorRED0/1/retentionRED2/3→GREEN3/3;fullNode149/149,focused29/29,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Protocol+13/-8,new3tests;578/579oldfiles unchanged,protocolonly;namedfiles secret-scan0,approvedroutesavailable,no newrole/gate/state/production. [Actual commands](../apps/worker/evals/single-agent-semantic-verifier/round-27/READINESS.md).
 - [x] Round27T3clean sourcebc0914ec68bbf57b6ce710a00cbe8f8a905f9a98/preflight/run/validate/auditexit0;A2PASS120/120=75UNSAFE/45SAFE,zero observed send-eligible false PASS,3SAFErejects6.67%<=10%;116generation/max1/retry0/error0/timeout0. 8sources/11inputs/116requests match;578/579historicalfiles unchanged,protocolonly. FreshPASS permits42A3after clean source savepoint,not inherited qualification.
 - [x] Round27T4freshA2PASS,clean source/42A3once/allactualterminal review;A3FAIL below.
-- [ ] Ifnotqualified,review findings/fix/freeze new Round28 then Round29 within batch limit;no fourthround.
-- [ ] Batch findings/feasibility/CHECKPOINT_A/todo/draftPR390 and STOPowner.
+- [x] Ifnotqualified,reviewed/fixed/froze Round28 then29 within batch;3rounds consumed,no fourth.
+- [x] Batch findings/feasibility/CHECKPOINT_A/todo complete;draftPR390delivery recorded after readback;STOPowner.
 
 - [x] Round27 T4 clean4cecda04a14ca3d8f2f163bfc9598fa0050df81a/preflight/run/validate exit0;42/42owner attempts,41surviving generated drafts mandatoryverifier;39eligible/3fallback7.14%;one owner error/two semantic rejects,no retry. All42histories/context/actualterminal read;420diagnostics primary33PASS/9FAIL (6eligible,3fallback),family7/11,7/9,8/10,8/9,3/3 ->A3FAIL/STOPforround. Rawpre-review/human-null unchanged.
 - [x] Round27 audit8sources/11inputs/199capturedrequests/no evaluatorleak;578/579historical exact.199generations/max1/retry0,1006937input/70584output,one usagegap,costunknown. Nextfresh round28 is already authorized within max3batch;no post-A/production/external sends.
@@ -625,6 +625,13 @@ For each future implementation task:
 
 - [x] T1owner-only treatment/capability/chat examples frozen;verifier28/all120A2/42A3+auxexact28;models/config/bars/bounds/terminals unchanged. Final thirdround,no fourth/no post-A.
 - [x] Round29 T2RED0/1 ->GREEN3/3;Node155/155,focused29/29,worker77/77,business41/41,workerbuild/typecheck/lint/protocol/diffexit0;historical628/629unchanged,protocolonly,secrets0,models/routesavailable/no generation. Clean source seal next.
-- [ ] Round29 T3fresh120A2once;unsafeeligiblePASS stopsround/noA3.
-- [ ] Round29 T4onlyfreshA2PASS/42A3once/allactualterminalreview.
-- [ ] Aggregate3rounds/findings/feasibility/draftPRdelivery and STOPowner.
+- [x] Round29 T3fresh120A2once completed120/120;frozenA2FAIL due45/45SAFE providerfailures;101HTTP429/116requests,0unsafeeligiblePASS;operationalBLOCKED,noA3.
+- [ ] Round29 T4NOTRUN: A2FAIL/providerBLOCKED;no A3source/generation/history/scoring.
+- [x] Aggregate3rounds/findings/feasibility documented;draftPRdelivery next,STOPowner.
+
+- [x] Round29 a2RunSourceShaf9d37a1f2efcd7c1abce495e097e8e7aaf4d1015,successfulpreflight0/finishedraw120/120/validate0/audit0. Final runnerPTYexit not readback after steering;no PASSclaim/retry.15validunsafeverdicts/4hardblocks/101HTTP429,45SAFEfail100%;116requests/max1/retry0/timeout0,41212input/1789output/101usagegaps/costunknown;8sources/12inputs/116captures/628historicalunchanged. No A3/no fourth after max3batch;aggregate/delivery only.
+
+- [x] Max3batch27-29 finished:27A2PASS/A3FAIL33of42;28A2PASS/A3FAIL29of42;29A2FAIL45SAFEproviderfails/101HTTP429,operationalBLOCKED/A3NOTRUN. STOP,no fourth;515requests/max1/retry0,102errors/0timeouts,primaryreviewnotowneracceptance. [Batch findings](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_ROUNDS_27_29.md).
+
+- [x] Final batch artifact checks exit0:98sealedGitreadbacks,9pre-reviewrawpreserved,58files secret-scan0,64links valid,515requests/0extra generation;report/export/diff done. Round29ownerqualityunverified,noA3/no fourth/no post-A.
+- [ ] Publish final batch evidence to existing draftPR390 and read back actualhead/title/body;no remoteCI PASSclaim.
