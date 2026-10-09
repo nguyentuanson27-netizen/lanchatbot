@@ -1174,3 +1174,8 @@ Owner tiếp tục after all13Round30 failed/fallback replies authorizes one new
 ### Round31 post-run review requested by owner — 2026-10-09
 
 Owner requests reviewing all42 conversations and a fix proposal:two fallback candidates were judged too strictly;the unbound total-price rejection was correct. [Whole-conversation review and proposed scope](../apps/worker/evals/single-agent-semantic-verifier/round-31/WHOLE_CONVERSATION_REVIEW_20261009.md) separates23 usable/12 polish/4 owner-quality fixes/2 verifier calibrations/1 correct fallback. These are qualitative work categories,not revised frozen PASS counts. Round31 raw/corpora/prompts/scores/terminal33of42FAIL/STOP stay unchanged. Proposed next treatment prioritizes whole-turn buyer progress and natural voice,limited advisory calibration with old unsafe contrasts retained,and presentation of product PRICE versus bound quote. No new role/router/parser/repair/state/gate. This request authorizes review/proposal only;no next round registered/generated or post-A work.
+
+
+## Authorized Round32 — 2026-10-09
+
+Owner requests fix -> self-review -> one new CheckpointA round. [Frozen scope](../docs/specs/c3-round32-whole-turn-sales-and-advisory-calibration-20261009.md):owner32priorities/voice,verifier32advisorycalibration,existingreadableV2PRICE/quote labels;retain120A2+2newSAFE/all42A3/facts/aux/models/config/bars/gates/terminals. T1freeze/T2observedRED-GREEN/selfreview/readiness/cleanseal/T3fresh122A2/onlyPASS permitsT4fresh42A3/fullactualterminalreview/evidence/todo/PR390/STOPowner. Historicalscores/raw/labels unchanged;no automatic33/post-A.

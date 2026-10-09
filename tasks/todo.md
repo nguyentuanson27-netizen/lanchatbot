@@ -663,3 +663,11 @@ For each future implementation task:
 - [x] Round31T4evidence7391fa424863d25c2c60effdc4de5a698606a209 committed/pushed;draftPR390edited/readbackexit0,OPENdraft/strictbody/title/local-remote-PRhead/cleantree match. RemoteCIQUEUED,notPASS. Initialstagedwhitespacecheckexit1 for8spaces inexactproviderMarkdown;source/otherdocs andprojection-only retained-spacechecks subsequentlyexit0. [Deliveryreceipt](../apps/worker/evals/single-agent-semantic-verifier/round-31/DELIVERY.md). Receipt-onlyfollowupchanges no source/config/frozen/raw/scores/providerrequest. STOPowner,no automatic32/post-A.
 
 - [x] Owner-requested post-run review of all42 Round31 histories/latest/trusted facts/actual terminals completed. [Whole-turn review and proposal](../apps/worker/evals/single-agent-semantic-verifier/round-31/WHOLE_CONVERSATION_REVIEW_20261009.md):23 usable/12 polish/4 owner-quality fixes;2 advisory fallback calibrations per owner/1 total-price rejection correct. Qualitative categories only;frozen33of42FAIL/STOP and all26 existing Round31files unchanged. Proposal covers owner priorities/natural voice,PRICE-versus-quote presentation and narrow verifier calibration with retained unsafe contrasts. No executable/prompt/input/score edits,new provider requests or next-round authorization.
+
+
+## Authorized Round32 — 2026-10-09
+
+- [x] Main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec4ba9d5afcf4b49d5c1523a5488d45d19edc1febe,existing isolated implementationbranch. T1freeze owner32/verifier32/readableV2price-scope labels;120A2retained+2SAFE/42A3+5aux exact31;models/config/bars/gates/terminals unchanged. Oldfiles inventoried,0providergeneration.
+- [ ] Round32T2observedRED->minimumGREEN,selfreview/focusedreadiness/selectedclients/cleanseal.
+- [ ] Round32T3fresh122A2once;unsafeeligiblePASS hardSTOP/noA3.
+- [ ] Round32T4onlyfreshA2PASS,42A3once/fullactualterminalreview/Checkpoint/todo/draftPR390/STOPowner. Noautomatic33/post-A.
