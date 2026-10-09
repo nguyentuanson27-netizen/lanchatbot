@@ -624,7 +624,7 @@ For each future implementation task:
 ## Owner-authorized final bounded follow-up — Round29
 
 - [x] T1owner-only treatment/capability/chat examples frozen;verifier28/all120A2/42A3+auxexact28;models/config/bars/bounds/terminals unchanged. Final thirdround,no fourth/no post-A.
-- [ ] Round29 T2observedRED/minimumGREEN/requiredreadiness/clean source seal.
+- [x] Round29 T2RED0/1 ->GREEN3/3;Node155/155,focused29/29,worker77/77,business41/41,workerbuild/typecheck/lint/protocol/diffexit0;historical628/629unchanged,protocolonly,secrets0,models/routesavailable/no generation. Clean source seal next.
 - [ ] Round29 T3fresh120A2once;unsafeeligiblePASS stopsround/noA3.
 - [ ] Round29 T4onlyfreshA2PASS/42A3once/allactualterminalreview.
 - [ ] Aggregate3rounds/findings/feasibility/draftPRdelivery and STOPowner.
