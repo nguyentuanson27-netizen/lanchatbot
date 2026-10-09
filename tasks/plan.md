@@ -1165,3 +1165,8 @@ Owner authorizes max3new rounds27-29,fix/review/freeze separately between unsucc
 ### Observed bounded-batch27-29 result — 2026-10-09
 
 Completed the authorized maximum3new rounds:27A2PASS/A3FAIL33of42,28A2PASS/A3FAIL29of42;29A2frozenFAIL due45SAFEprovidererrors/101verifierHTTP429,operationalBLOCKED/A3NOTRUN. No safety/usability/quality threshold lowered,error excluded,model substituted or per-attempt retry. Finalowner treatment unverified because noA3. [Batch findings/feasibility and source/config/commands](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_ROUNDS_27_29.md). STOP at CheckpointA;no fourth/post-A/production/mutation/promotion/merge/deploy/live send. Primaryreviewisnonblind/subjective,not human/independent/owneracceptance.
+
+
+## Authorized Round31 — 2026-10-09
+
+Owner tiếp tục after all13Round30 failed/fallback replies authorizes one new round. [Frozen scope/commands](../docs/specs/c3-round31-existing-owner-with-readable-context-20261009.md):keep READABLE_FACTS_V1/exact verifier28/data/config/bars;reuse untested-in-A3 owner29 byteexact as the only variable versus30.120A2/42A3 and all7aux exact30,no invented gaps/no new machinery. T1freeze/T2observedRED→GREEN/readiness/cleanA2seal/preflight/once;onlyfreshPASS cleanA3seal/preflight/once/fullactualterminal review/evidence/todo/PR390/STOPowner. Previous27–29batch and30STOP retained;no automatic32/post-A.
