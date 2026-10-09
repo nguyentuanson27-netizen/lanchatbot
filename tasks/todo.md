@@ -607,3 +607,6 @@ For each future implementation task:
 - [ ] Round27T4onlyfreshA2PASS,clean source/42A3once/allactualterminal review.
 - [ ] Ifnotqualified,review findings/fix/freeze new Round28 then Round29 within batch limit;no fourthround.
 - [ ] Batch findings/feasibility/CHECKPOINT_A/todo/draftPR390 and STOPowner.
+
+- [x] Round27 T4 clean4cecda04a14ca3d8f2f163bfc9598fa0050df81a/preflight/run/validate exit0;42/42owner attempts,41surviving generated drafts mandatoryverifier;39eligible/3fallback7.14%;one owner error/two semantic rejects,no retry. All42histories/context/actualterminal read;420diagnostics primary33PASS/9FAIL (6eligible,3fallback),family7/11,7/9,8/10,8/9,3/3 ->A3FAIL/STOPforround. Rawpre-review/human-null unchanged.
+- [x] Round27 audit8sources/11inputs/199capturedrequests/no evaluatorleak;578/579historical exact.199generations/max1/retry0,1006937input/70584output,one usagegap,costunknown. Nextfresh round28 is already authorized within max3batch;no post-A/production/external sends.

@@ -43,3 +43,30 @@ node C:/Users/nguye/AppData/Local/Temp/c3-record-a2-round27.mjs
 ```
 
 Providerp50/p955475/9046ms;added5481/9050ms;input521511/output13220,usagegap0/costunknown. ThreeSAFErejections:r13-safe-workday-advice,r22-waist-soft-advice-safe,r22-waist-comfort-confidence-safe. No label/prompt/source/input rescue;A3can begin only after clean source savepoint.
+
+## Actual A3 and primary whole-turn review
+
+| Actual command | Observed result |
+| --- | --- |
+| git add explicit A2 evidence/readiness/todo; git commit; git status --short; git rev-parse HEAD | exit0,clean A3source 4cecda04a14ca3d8f2f163bfc9598fa0050df81a |
+| C3_CHECKPOINT_A_ROUND=27; A3_RUN_SOURCE_SHA=currentHEAD; A2_STATUS=PASS; existing local credential; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3 | exit0,clean seal/FROZEN_PROTOCOL_VALID |
+| sameenvironment; node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs | exit0,42/42;39eligible/3fallback;42owner+41mandatoryverifierrequests,max1/retry0;one owner error,no generated draft for that slot |
+| sameenvironment; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3 | exit0,FROZEN_PROTOCOL_VALID,raw qualityBLOCKED pending review/human-null preserved |
+| Get-FileHash -Algorithm SHA256 for4raw files immediately after runner/Set-Content outside repo | pre-review raw hashes frozen;all4 unchanged after scoring |
+| node C:/Users/nguye/AppData/Local/Temp/c3-read-a3-round27.mjs bounded batches0-42; full prompts/approved review-policy read | exit0,all42histories/latest/context/actualterminal reviewed before scoring |
+| C3_CHECKPOINT_A_ROUND=27; node C:/Users/nguye/AppData/Local/Temp/c3-finalize-review27.mjs | exit0,42connected primary reviews/420diagnostics/0extra generations;33PASS/9FAIL;families7/11,7/9,8/10,8/9,3/3;A3FAIL |
+| sameenvironment; node C:/Users/nguye/AppData/Local/Temp/c3-audit-round27.mjs after A3/scoring | exit0,8sources/11inputs/199captures match;578/579historical unchanged,protocol only |
+| node C:/Users/nguye/AppData/Local/Temp/c3-record-round27-result.mjs | exit0,all rawpre-review hashes preserved;records observed results only |
+
+199generation requests/199capturedclient requests,max1/retry0;reportedVertexOAuth1,internalCodexauth accounting unknown. Input1006937/output70584,one usage gap/costunavailable. Gemini candidate2128+thinking51039 normalized,raw summaries preserved. Verifierp50/p955196/10757ms,added5200/10762ms,end-to-end10968/15809ms. Providerfailure1 distinct from2semantic rejections and6eligiblequality failures. Three fallback slots remain in all42 denominator. No resample/retry/current-run tuning;frozen familybars remain.
+
+## Actual artifact verification
+
+| Actual command | Observed result |
+| --- | --- |
+| C3_CHECKPOINT_A_ROUND=27; node C:/Users/nguye/AppData/Local/Temp/c3-bounded-report.mjs | exit0,Checkpoint/42conversation exports/9failed-turn exports |
+| node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round27.mjs | first exit1,extra final newline in generated history Markdown; second exit1,runner human Markdown retained trailing spaces. Corrected presentation whitespace only; final exit0,42exact terminal exports/420ratings/rawpre-review and both seals unchanged/links valid/human JSON null |
+| node C:/Users/nguye/AppData/Local/Temp/c3-finish-round27-export.mjs | exit0,22artifact files scanned,secrets0;display Markdown only normalized |
+| git diff --check | exit0 |
+
+No raw terminal, verdict, request, score, frozen prompt, model, input or executable changed during artifact formatting. No remote CI PASS claimed.
