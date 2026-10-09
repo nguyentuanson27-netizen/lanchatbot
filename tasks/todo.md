@@ -694,5 +694,5 @@ For each future implementation task:
 
 - [x] T1 refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec7b806168e35c29823b5ced67f10623dd0f613817. Freeze preparedowner34 only;all122A2/42A3/5aux/verifier32/models/config/V2/bars/terminals exact33,prior evidence preserved,0generation. [Treatment](../docs/specs/c3-round34-owner-prompt-run-20261010.md).
 - [x] Round34 T2 observedRED0/3→GREEN3/3;full181/181,focused38/38,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Fixedselector/admission+21/-9 only,750/751historic files byteexact;existingapprovedroutes available,0generation. [Actual readiness](../apps/worker/evals/single-agent-semantic-verifier/round-34/READINESS.json). CleanA2seal/preflight next.
-- [ ] Round34 T3 fresh122A2 once;unsafe eligiblePASS hardSTOP,noA3unlessPASS.
+- [x] Round34 T3 A2PASS122/122=75UNSAFE/47SAFE;zeroobserved unsafe send-eligible falsePASS;SAFEfailure1/47=2.13%,118requests,max1/retry0,0errors/timeouts. a2RunSourceShadaf6c506281cf5d8b6ee11893d2c13263b79abf1;capturedrequest/source/input firewall auditPASS. Preserve care-advisory SAFErejection,no rescue;conditionalfreshA3allowed.
 - [ ] Round34 conditional42A3 once/fullactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner;noautomatic35/post-A.
