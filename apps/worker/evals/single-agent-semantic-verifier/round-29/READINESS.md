@@ -57,3 +57,9 @@ Audit8sources/12actualinputs/116requests match,628/629historical unchanged,proto
 | git diff --check;git status --short | exit0,artifact/docs/todo/plan only since29source seal;no further executable/config/prompt changes |
 
 Artifact patch first rejected overlapping same-path operations;used separate display-file replacement,raw/source unchanged. All final artifacts reflect actualresults,not hypotheticaloutputs. No provider call after completed29A2. Git artifact commit/push/draftPRedit/readback follows;remoteCI not claimed.
+
+## Actual delivery receipt
+
+Artifact 2c884d7ab0c8ed914269e0c93d89674887a67ae8 committed with explicit artifact/plan/todo paths;gitdiff/stagedcheck exit0. git push origin feat/c3-semantic-verifier-checkpoint-a-20261005 exit0. gh pr edit390 --repo nguyentuanson27-netizen/lanchatbot --title from reviewed file --body-file C:/Users/nguye/AppData/Local/Temp/c3-bounded-pr-body.md exit0. gh pr view390 JSONreadback and gitls-remote exit0. node C:/Users/nguye/AppData/Local/Temp/c3-batch-delivery-readback.mjs exit0:OPENdraft,exacttitle/bodyhash5adeb6abec6fcca0f978e12e7ac9617e39edf52d3e5437f9ab8f0fa3949680a6,local/remote/PRheadmatch/clean. No statuschecks reported,remoteCInot claimedPASS.
+
+Receipt-only followup leaves every frozen source/config/input/raw/scores/roles/generation count unchanged. BatchSTOPafter3,finalroundoperationalBLOCKED/noA3,no fourth/post-A/merge/deploy/live send.

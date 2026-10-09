@@ -634,4 +634,6 @@ For each future implementation task:
 - [x] Max3batch27-29 finished:27A2PASS/A3FAIL33of42;28A2PASS/A3FAIL29of42;29A2FAIL45SAFEproviderfails/101HTTP429,operationalBLOCKED/A3NOTRUN. STOP,no fourth;515requests/max1/retry0,102errors/0timeouts,primaryreviewnotowneracceptance. [Batch findings](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_ROUNDS_27_29.md).
 
 - [x] Final batch artifact checks exit0:98sealedGitreadbacks,9pre-reviewrawpreserved,58files secret-scan0,64links valid,515requests/0extra generation;report/export/diff done. Round29ownerqualityunverified,noA3/no fourth/no post-A.
-- [ ] Publish final batch evidence to existing draftPR390 and read back actualhead/title/body;no remoteCI PASSclaim.
+- [x] Published final batch evidence to draftPR390;gitpush/ghpr edit/exactreadback exit0,OPENdraft/title-body/local-remote-PRhead match at 2c884d7ab0c8ed914269e0c93d89674887a67ae8;remoteCI PASSunverified. STOP/no furthergeneration/post-A.
+
+- [x] Delivery 2c884d7ab0c8ed914269e0c93d89674887a67ae8:draftPR390updated to rounds27-29/STOP(finalroundBLOCKED),exactbodyhash 5adeb6abec6fcca0f978e12e7ac9617e39edf52d3e5437f9ab8f0fa3949680a6,cleanheadreadback matched;0statuschecks reported,not PASS. This receipt-only savepoint changes no source/config/prompts/inputs/raw/scores or providerrequests.
