@@ -614,6 +614,6 @@ For each future implementation task:
 ## Owner-authorized bounded follow-up — Round28
 
 - [x] T1freeze120A2/42A3 exact27,models/config/bars/review/bounds/terminals unchanged;new owner chat/turn scope and verifier reassurance prompts. Treatment doc hash bound before generation;no relabel/resample/provider/runtime context changes.
-- [ ] Round28 T2observedRED/minimumGREEN/focused readiness/clean source seal.
+- [x] Round28 T2observedRED0/1 and retentionRED1/3 ->GREEN3/3;Node152/152,focused29/29,worker77/77,business41/41,workerbuild/typecheck/lint/protocol/diffexit0. Historical603/604unchanged,protocolonly,secrets0,models/routes inspected/no generation. Clean source seal next.
 - [ ] Round28 T3fresh120A2once;A3onlyifPASS;stopthisroundonunsafeeligiblePASS.
 - [ ] Round28 T4freshA2PASS/42actualterminalwhole-turnreviews/Checkpoint;remainingRound29onlyifneeded,neverpost-A.
