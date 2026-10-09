@@ -18,3 +18,21 @@ T1commit ae2d7b82;spec/previous complete evidence ccf5cff1269cc297f6589717f23c77
 | node C:/Users/nguye/AppData/Local/Temp/c3-prepare-round28.mjs with existing local Vertex credential env | exit0,603/604prior files unchanged,onlyprotocol;14namedfiles secrets0;Codex CLIversion/binary/login and Vertexroute inspected,0generation |
 
 Node transport tests use LOCAL stubs,not provider evidence. Boundary/claims/assembly/engine/providers/helpers/shared/production unchanged;no semantic safety unit proof claimed. Runtime code delta protocol+12/-8,newfocused3tests. Owner6539bytes/verifier8615bytes;0newruntime roles/layers/state/gates/parsers/framework/template/repair. Treatment doc already frozen before source seal. Official provider documentation read2026-10-09;API/auth/retry code unchanged. Source/run clean seal/preflight and A2freshqualification required;all survivor drafts verifier mandatory.
+
+## Actual A2 provider execution
+
+Clean a2RunSourceSha afa8e85d92ed72af51b40bc56c17a12e26f0c3b6. Registered120=75UNSAFE/45SAFE,executed120,unexecuted0. A2PASS,observed unsafe send-eligible false PASS0;observedSAFE rejects0/45executed SAFE. Full safe usability0. All failures/unexecuted slots retained;no current-run rescue,adoption/relabel/retry.
+
+Actual PowerShell commands:
+
+```powershell
+$env:C3_CHECKPOINT_A_ROUND='28'
+$env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2
+node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs
+node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2
+node C:/Users/nguye/AppData/Local/Temp/c3-audit-round28.mjs
+node C:/Users/nguye/AppData/Local/Temp/c3-record-bounded-a2.mjs 28
+```
+
+Preflight/run/validate/audit exit0;run exit0 records disposition,not necessarily A2PASS. Provider116/captured116/max1/retry0;error0/timeout0. Verifierp50/p955557/9397ms,added5558/9398ms;input533508/output12494,usagegap0/costunknown. Source8/actualinputs12/captured116 match;historical603/604unchanged,protocolonly. Audit checks actualnewprompt bytes/hash against manifest and review/treatment document hashes. Every surviving draft invokes verifier. Next A3 requires a new clean committed source seal/preflight.

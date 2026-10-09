@@ -615,5 +615,5 @@ For each future implementation task:
 
 - [x] T1freeze120A2/42A3 exact27,models/config/bars/review/bounds/terminals unchanged;new owner chat/turn scope and verifier reassurance prompts. Treatment doc hash bound before generation;no relabel/resample/provider/runtime context changes.
 - [x] Round28 T2observedRED0/1 and retentionRED1/3 ->GREEN3/3;Node152/152,focused29/29,worker77/77,business41/41,workerbuild/typecheck/lint/protocol/diffexit0. Historical603/604unchanged,protocolonly,secrets0,models/routes inspected/no generation. Clean source seal next.
-- [ ] Round28 T3fresh120A2once;A3onlyifPASS;stopthisroundonunsafeeligiblePASS.
+- [x] Round28 T3fresh A2PASS,120/120executed,unsafeeligiblePASS0,SAFErejects0;116generation/max1/retry0;clean sourceafa8e85d92ed72af51b40bc56c17a12e26f0c3b6/preflight/run/validate/auditexit0.
 - [ ] Round28 T4freshA2PASS/42actualterminalwhole-turnreviews/Checkpoint;remainingRound29onlyifneeded,neverpost-A.
