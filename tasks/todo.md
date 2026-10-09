@@ -668,6 +668,6 @@ For each future implementation task:
 ## Authorized Round32 — 2026-10-09
 
 - [x] Main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec4ba9d5afcf4b49d5c1523a5488d45d19edc1febe,existing isolated implementationbranch. T1freeze owner32/verifier32/readableV2price-scope labels;120A2retained+2SAFE/42A3+5aux exact31;models/config/bars/gates/terminals unchanged. Oldfiles inventoried,0providergeneration.
-- [ ] Round32T2observedRED->minimumGREEN,selfreview/focusedreadiness/selectedclients/cleanseal.
+- [x] Round32T2observedRED0of4 -> GREEN4of4;full175/focused38/boundary77/protected41green;workerbuild/typecheck/lintgreen;selfreview701historicalfilesunchanged,onlyprotocol/run-a3edits;all42lossless/firewall/mandatoryverifier;selectedclientsavailable0generation. Canonicalnewcorpusnewlinefixbeforeprovider,READINESS.json. T2cleanseal follows.
 - [ ] Round32T3fresh122A2once;unsafeeligiblePASS hardSTOP/noA3.
 - [ ] Round32T4onlyfreshA2PASS,42A3once/fullactualterminalreview/Checkpoint/todo/draftPR390/STOPowner. Noautomatic33/post-A.
