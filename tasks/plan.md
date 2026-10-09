@@ -1179,3 +1179,8 @@ Owner requests reviewing all42 conversations and a fix proposal:two fallback can
 ## Authorized Round32 — 2026-10-09
 
 Owner requests fix -> self-review -> one new CheckpointA round. [Frozen scope](../docs/specs/c3-round32-whole-turn-sales-and-advisory-calibration-20261009.md):owner32priorities/voice,verifier32advisorycalibration,existingreadableV2PRICE/quote labels;retain120A2+2newSAFE/all42A3/facts/aux/models/config/bars/gates/terminals. T1freeze/T2observedRED-GREEN/selfreview/readiness/cleanseal/T3fresh122A2/onlyPASS permitsT4fresh42A3/fullactualterminalreview/evidence/todo/PR390/STOPowner. Historicalscores/raw/labels unchanged;no automatic33/post-A.
+
+
+## Authorized Round33 rerun — 2026-10-09
+
+Owner “chạy lại” after32BLOCKED authorizes one fresh run. Preserve every32result/error. Freeze exact32prompts/models/config/V2/all122A2/all42A3/5aux/bars/terminals before results;new33manifest provenance,minimum fixed selector/control admission. TDD observedRED->GREEN,focused readiness/selfreview,cleancommit/runtimeA2SHA/preflight/fresh122once;onlyA2PASS cleanA3SHA/preflight/fresh42once/fullactualterminalreview/Checkpoint/PR390/STOPowner. Credentialloginstatus is not provideravailability proof. Every error in denominator,max1generation per role slot,retry0;no provider substitution/adoption/relabel/automatic34/post-A. Exact focused commands and review procedure reused from Round32treatment document;no prompt/data/API/providerclient change.

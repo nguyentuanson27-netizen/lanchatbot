@@ -671,3 +671,11 @@ For each future implementation task:
 - [x] Round32T2observedRED0of4 -> GREEN4of4;full175/focused38/boundary77/protected41green;workerbuild/typecheck/lintgreen;selfreview701historicalfilesunchanged,onlyprotocol/run-a3edits;all42lossless/firewall/mandatoryverifier;selectedclientsavailable0generation. Canonicalnewcorpusnewlinefixbeforeprovider,READINESS.json. T2cleanseal follows.
 - [x] Round32T3fresh122/122once,A2FAIL safeFailures7of47=14.89%>10%;12providererrors(6HTTP429/1HTTP401/5AUTH_UNAVAILABLE),0timeout/unsafeeligiblePASS/retry. 113upstreamrequests/118clientslots,max1;allerrorsindenominator. BothnewSAFEcontrols AUTH_UNAVAILABLE,calibrationunverified;a2RunSourceSha6b7192b140ef201fec91318dd44b6a02c5eb318b. Audit8source/12inputs/701historicalbyteexact.
 - [x] Round32A3 NOT_RUN becausefreshA2FAIL;42inputs frozenonly,owner32/V2quality unverified. Checkpoint/FINDINGS/A2failures/denominator/raw/readiness/runcommands preserved. RecommendationBLOCKED dueapprovedCodexrouteavailability;rawA2FAIL unchanged. Stopowner/noautomatic33/post-A. DraftPR390 updated/pushed/readback reporthead687f445869d56e281b3cc2bba76b7f4407123233 and exactbodyverified;CIqueued,notPASSclaimed. Codexloginstatusafterrunloggedin;429/401/authheaderrootcauseunknown. Worktree/source/config seals unchanged.
+
+
+## Authorized Round33 rerun — 2026-10-09
+
+- [x] Refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specf24be3f676cb7d8f004994a789b35cf2789b7159,isolatedexistingbranch. T1exact32prompts/models/config/V2/122A2/42A3/5aux/bars/gates/terminals frozen;newprovenanceonly,prior32preserved,0generation. ExistingCodexloginconfirmed,availabilityunknown.
+- [ ] Round33T2observedRED->GREEN/focusedreadiness/selfreview/cleanseal.
+- [ ] Round33T3fresh122A2once/noadoption/retry;unsafeeligiblePASS hardSTOP,noA3unlessPASS.
+- [ ] Round33conditional42A3once/fullactualterminalreview/Checkpoint/evidence/PR390/STOPowner,noautomatic34/post-A.
