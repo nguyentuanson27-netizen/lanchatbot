@@ -1,6 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
-Latest owner-authorized preparation (2026-10-09): implement only readable conversation-context presentation against exact round28 control, with local RED→GREEN/data-retention/firewall/bounds checks. [Scope and treatment](../docs/specs/c3-context-presentation-preparation-20261009.md). Models/prompts/verifier/facts/gate unchanged; no new provider round, no extension of the completed max3 batch or post-A.
+Latest owner authorization (2026-10-09, “chạy đi”): exactly one new Round30 using the prepared readable conversation-context presentation against exact round28 control. [Frozen run scope](../docs/specs/c3-round30-context-presentation-run-20261009.md). Fresh A2 before A3; models/prompts/verifier/facts/bars/gate unchanged. Prior max3 batch27–29 remains STOP; no automatic follow-up round or post-A.
+
+Completed preparation: readable conversation-context presentation against round28, local RED→GREEN/data-retention/firewall/bounds verification and before/after preview. [Preparation evidence](../docs/specs/c3-context-presentation-preparation-20261009.md). It made0provider generations; the new authorization above is separate.
 
 **Status:** PLAN ONLY — implementation is not approved by this document.  
 **Planning base:** spec PR388 head `00a733d4090d71ba1b705cfbc23971d26e143e0b`.  

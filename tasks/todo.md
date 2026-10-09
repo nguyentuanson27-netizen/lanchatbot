@@ -644,3 +644,10 @@ For each future implementation task:
 - [x] Readable owner-only context serializer, observed RED→GREEN twice;9contexttests/full42case readback/evaluator firewall,84historical owner/verifier bodies unchanged;existing A3 requestId telemetry reused. Node164/164,focused38/38,worker77/77,business41/41;workerbuild/typecheck/lint/read-only28A3validation exit0. No provider generation or new quality result.
 - [x] Deterministic before/after previews:126local bodies/42cases,644historical files retained;source998fe9c5f79983bdc06149210b16eb8e1728b4ef;owner max25,793/verifier max31,022 below32,768. Focusedchecks/workerbuild/typecheck/lint green;0provider generations/attempts,new model quality unverified. [Preview](../apps/worker/evals/single-agent-semantic-verifier/context-presentation/PREVIEW.md).
 - [x] Commit/push/update existing draftPR390 with exact preparation evidence:source998fe9c5f79983bdc06149210b16eb8e1728b4ef/artifacts60f5583dfa6273e4328b9f6ceeec17c3b5383a22;push/edit/exactbody/local-remote-PRhead/cleanworktree readback exit0,OPENdraft. BodySHA256770b774d71803d4288f19c71def9ba84ecdf9e3ac396a379fb89120a153ce52d;CIqueued,not claimedPASS. No new provider round/post-A/merge/deploy/send;batchSTOP remains.
+
+## Owner-authorized one context experiment — Round30
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361;owner “chạy đi” authorizes exactly1new round against completed28,not extension of prior max3batch. Freeze READABLE_FACTS_V1 owner presentation only;prompts/models/config/all120A2/42A3/evaluators/facts/bars/terminals unchanged.
+- [ ] T1frozen inputs/manifest → T2observedRED/minimumGREEN/required focused readiness → committed clean A2source/preflight.
+- [ ] T3fresh120A2once;retain all errors;unsafeeligiblePASS or A2FAIL/BLOCKED stops this round;A3onlyif freshPASS.
+- [ ] T4if permitted,42whole-turn actual terminal reviews/results/context comparison/CheckpointA;commit/push/draftPR delivery. No automatic further round/post-A/live send.
