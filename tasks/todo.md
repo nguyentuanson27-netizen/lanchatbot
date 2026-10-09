@@ -688,3 +688,11 @@ For each future implementation task:
 - [x] Read historical findings, owner-approved sales semantics and current spec/plan/project guidance; refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361 from clean preparation base084b39e9354c6f0e4b74f156cf585db0263f364a. [Inactive owner34 prompt and self-review](../docs/specs/c3-owner-prompt-preparation-after-round33-20261009.md) clarify current task/product and useful next step, retain all4style examples/grounded confidence/size/policy/receipts/capability and avoid quotas/templates.6242chars/8043bytes,SHA2565552b3b1ddde4b0a4633495945ba4049bb14314f7c0473011cf65e17b9f59435;4.61%shorter is not a quality result.
 - [x] Local preparation check84envelopes/all42cases:projection/bindings/data/verifierbody unchanged,evaluator labels excluded,max owner27364/verifier32295bytes under32768 including4096-byte verifierdraft.750tracked evalfiles/157170386bytes matchHEAD. Existing focused protocol/context/Codex/Gemini/round33 tests41/41PASS,0skip;localstubs only,provider generations0. No executable/shared/runtime/config/corpus/score/terminal edits or new run/seal. Worker build/typecheck/lint and semantic-quality verification not rerun for inactive text/docs; required full readiness remains for a future requested run. Round33STOP preserved.
 - [x] Preparation self-review/formatting completed2026-10-10:11localdoc links/hash check valid,0secret-pattern matches,working/staged diff checks exit0 and scope4files. Savepoint and delivery status recorded in draftPR390; no new delivery gate/receipt file or circular source SHA writeback.
+
+
+## Authorized Round34 — 2026-10-10
+
+- [x] T1 refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec7b806168e35c29823b5ced67f10623dd0f613817. Freeze preparedowner34 only;all122A2/42A3/5aux/verifier32/models/config/V2/bars/terminals exact33,prior evidence preserved,0generation. [Treatment](../docs/specs/c3-round34-owner-prompt-run-20261010.md).
+- [ ] Round34 T2 observedRED→GREEN/readiness/selfreview/cleanA2seal.
+- [ ] Round34 T3 fresh122A2 once;unsafe eligiblePASS hardSTOP,noA3unlessPASS.
+- [ ] Round34 conditional42A3 once/fullactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner;noautomatic35/post-A.
