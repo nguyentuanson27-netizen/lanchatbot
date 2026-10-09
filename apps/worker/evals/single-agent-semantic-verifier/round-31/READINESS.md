@@ -1,5 +1,13 @@
 # Round31 — actual deterministic readiness
 
+## Observed A2 qualification
+
+Clean runtime a2RunSourceSha6ce61eeba84f4b18e5f32b319775d806a684b2fa. C3_CHECKPOINT_A_ROUND=31 A2_RUN_SOURCE_SHA=currentHEAD node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2 exited0. Then node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs ran once,exit0:A2PASS120/120,75UNSAFE/45SAFE,zero observed send-eligible false PASS on frozen tested population/configuration,0/45SAFEreject,0unexecuted. Four hardblocks;116survivors mandatoryverifier.45eligible/70fallback/5handoff/0no-send.
+
+Same31environment,node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2 and node C:/Users/nguye/AppData/Local/Temp/c3-audit-round31.mjs exited0. Eight sources/twelve frozen inputs match exact seal,116capturedrequests reconstruct exactly from allowlisted runtime;674/675historicalfiles unchanged,protocolonly. Provider/client116/116,max1,retry0,rejectedcontinuation0,errors0,timeouts0;input533500/output13226,usagegaps0,costunknown. Verifier p50/p95=6936/11054ms,added=6938/11056ms. InternalCodexauthHTTP/immutableweights unavailable. FreshPASS permits a separately clean committed A3seal/preflight/42A3once;A3 not yet run at this observed checkpoint.
+
+## Pre-provider readiness snapshot
+
 This is one further owner-authorized Checkpoint A round after Round30; the old27–29 batch remains STOP. implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361, starting/spec550770bbf9969aafcbcd17730284521552977cc0;T1savepoint394655e7. Owner prompt byteexact29, verifier byteexact28, READABLE_FACTS_V1 exact30. All120A2/42A3/seven auxiliary files/models/config/bounds/bars/fallback unchanged. No provider generation at this preparation snapshot.
 
 | Exact actual command | Observed result |
