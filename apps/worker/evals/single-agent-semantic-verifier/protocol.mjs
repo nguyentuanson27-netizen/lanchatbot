@@ -66,17 +66,60 @@ export function projectRuntime(manifest, fixture, role, requestId) {
   requireThat(bytes(projection) <= b.totalBytes && bytes(projection) <= b.totalTokenUpperBound, 'TOTAL_BOUND');
   return projection;
 }
+// Presentation only: every value is serialized data from the existing projection.
+// No relevance selection, customer-language parsing or new business facts.
+function readableConversationContext({trusted,untrusted,requestIdentity}) {
+  const lines=['# Context tư vấn — READABLE_FACTS_V1'];
+  const section=title=>lines.push('\n## '+title);
+  const data=(label,value)=>lines.push(label+': '+JSON.stringify(value));
+  const profileLabels={silhouette:'Thiết kế',material:'Chất liệu và căn cứ',colors:'Màu',
+    sizeChart:'Bảng size và đầu vào',care:'Chăm sóc',limitations:'Giới hạn'};
+  if (Object.hasOwn(trusted,'productProfiles')) {
+    section('TRUSTED — Hồ sơ sản phẩm');
+    for (const {details,...source} of trusted.productProfiles) {
+      lines.push('### Hồ sơ hàng '+JSON.stringify(source.subjectRef));
+      for (const [key,value] of Object.entries(details)) data(profileLabels[key]??key,{[key]:value});
+      data('Nguồn hồ sơ',source);
+    }
+  }
+  section('TRUSTED — Giá, tồn và kết quả size');
+  for (const {type,scope,value,...source} of trusted.protectedClaims) {
+    lines.push('### Dữ kiện');
+    data('Nội dung',{type,scope,value});
+    data('Nguồn và ràng buộc',source);
+  }
+  section('TRUSTED — Sản phẩm và đối tượng đã bind');
+  for (const subject of trusted.boundSubjects) data('Đối tượng',subject);
+  section('TRUSTED — Chính sách và tổng tiền');
+  for (const policy of trusted.policyLiterals) data('Chính sách',policy);
+  section('TRUSTED — Trạng thái được phép đọc');
+  data('Trạng thái',trusted.state);
+  section('TRUSTED — Biên nhận hành động');
+  for (const receipt of trusted.effectReceipts) data('Biên nhận',receipt);
+  section('REQUEST_IDENTITY — Ràng buộc hiện tại');
+  data('Identity',requestIdentity);
+  section('UNTRUSTED — Nội dung truy xuất');
+  for (const text of untrusted.retrievedText) data('Nội dung',text);
+  section('UNTRUSTED — Lịch sử hội thoại');
+  for (const message of untrusted.recentAcceptedDialogue) data('Tin nhắn',message);
+  section('UNTRUSTED — Tin mới của khách');
+  data('Tin khách',untrusted.latestCustomerMessage);
+  return lines.join('\n')+'\n';
+}
 // Envelope only. No credentials, transport, retry, provider call or production wiring.
 export function buildRequest(manifest, role, projection) {
+  requireThat(manifest.conversationContextFormat===undefined || manifest.conversationContextFormat==='READABLE_FACTS_V1','CONTEXT_PRESENTATION');
+  const inputText=role==='conversation' && manifest.conversationContextFormat==='READABLE_FACTS_V1'
+    ? readableConversationContext(projection) : JSON.stringify(projection);
   const model = manifest.models[role];
   const request = manifest.variant === 'GEMINI_CONVERSATION' && role === 'conversation' ? {
     systemInstruction:{parts:[{text:manifest.prompts.conversation}]},
-    contents:[{role:'user',parts:[{text:JSON.stringify(projection)}]}],tools:[],
+    contents:[{role:'user',parts:[{text:inputText}]}],tools:[],
     generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,
       thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}},
   } : { model: model.model, reasoning: { effort: model.effort },
     instructions: manifest.prompts[role],
-    input: [{ type:'message', role:'user', content:[{type:'input_text',text:JSON.stringify(projection)}] }],
+    input: [{ type:'message', role:'user', content:[{type:'input_text',text:inputText}] }],
     tools: [], tool_choice:'none', parallel_tool_calls:false, store: false, stream:true,
     ...(role === 'verifier' ? { text: { format: { type: 'json_schema', name: 'semantic_egress_verdict', strict: true, schema: manifest.verdictSchema } } } : {}) };
   requireThat(bytes(request)<=manifest.bounds.totalBytes && bytes(request)<=manifest.bounds.totalTokenUpperBound,'TOTAL_BOUND');
@@ -84,6 +127,8 @@ export function buildRequest(manifest, role, projection) {
 }
 
 export function validateDraft(m, a2, a3) {
+  // The registered historical rounds freeze JSON; preparation is not run admission.
+  requireThat(m.conversationContextFormat===undefined,'UNREGISTERED_CONTEXT_PRESENTATION');
   requireThat(m.variant === undefined || m.variant === 'GEMINI_CONVERSATION' && [8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24,25,26,27,28,29].includes(m.round), 'VARIANT_IDENTITY');
   requireThat(m.schemaVersion === 1 && /^[a-f0-9]{40}$/.test(m.implementationBaseSha) && /^[a-f0-9]{40}$/.test(m.specSha), 'SOURCE_IDENTITY');
   requireThat(m.evidenceSha === '1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da', 'SEED_SOURCE');

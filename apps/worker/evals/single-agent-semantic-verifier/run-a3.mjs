@@ -12,8 +12,10 @@ const read=name=>readFileSync(inputUrl(name),'utf8');
 export async function evaluateA3Attempt(manifest,fixture,generate) {
   const started=performance.now();
   const projection=projectRuntime(manifest,fixture,'conversation',randomUUID());
+  const requestTelemetry=manifest.conversationContextFormat==='READABLE_FACTS_V1'
+    ? {conversationRequestId:projection.requestIdentity.requestId} : {};
   const conversation=await generate('conversation',buildRequest(manifest,'conversation',projection));
-  if(conversation.status!=='OK')return {conversation,finalDraft:null,verification:null,
+  if(conversation.status!=='OK')return {...requestTelemetry,conversation,finalDraft:null,verification:null,
     terminal:{...terminalFallback(),reason:conversation.status},endToEndLatencyMs:Math.round(performance.now()-started)};
   // Sole owner surface: exact final text + telemetry. No proposal/plan/intent object.
   const finalDraft=conversation.answer;
@@ -21,7 +23,7 @@ export async function evaluateA3Attempt(manifest,fixture,generate) {
   runtime.finalDraft=finalDraft;
   runtime.evaluationAt=new Date(Date.parse(runtime.evaluationAt)+Math.round(performance.now()-started)).toISOString();
   const verification=await evaluateA2Attempt(manifest,{runtime},request=>generate('verifier',request));
-  return {conversation,finalDraft,verification,terminal:verification.terminal,endToEndLatencyMs:Math.round(performance.now()-started)};
+  return {...requestTelemetry,conversation,finalDraft,verification,terminal:verification.terminal,endToEndLatencyMs:Math.round(performance.now()-started)};
 }
 export function humanView(fixture,attempt) {
   // Evaluator-only, human view. No rejected candidate, verdict or verifier telemetry.
@@ -81,8 +83,9 @@ export function validateA3Evidence(manifest,corpus,evidence) {
     if(!attempt.terminal||!attempt.conversation)throw new Error('A3_MISSING_GENERATION');
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');
-    const cp=JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text);
-    const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',cp.requestIdentity.requestId));
+    const conversationRequestId=manifest.conversationContextFormat==='READABLE_FACTS_V1' ? attempt.conversationRequestId :
+      JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text).requestIdentity.requestId;
+    const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',conversationRequestId));
     if(JSON.stringify(attempt.conversation.requestBody)!==JSON.stringify(expectedConversation))throw new Error('A3_CONVERSATION_FIREWALL');
     if(attempt.conversation.status==='OK'&&attempt.finalDraft!==attempt.conversation.answer)throw new Error('A3_EXACT_OWNER_SURFACE');
     if(attempt.verification?.precheck==='SURVIVED') {

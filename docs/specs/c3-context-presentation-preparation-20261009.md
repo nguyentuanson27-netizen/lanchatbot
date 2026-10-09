@@ -22,6 +22,8 @@ The opt-in request setting is `conversationContextFormat: READABLE_FACTS_V1`; th
 
 The verifier request remains the exact original JSON request, even when the conversation presentation is opted in. The deterministic final gate still binds the exact draft and original trusted world. No rewrite, repair/reverify, new model role, state/effect, production wiring or post-A work.
 
+The A3 readback currently parses the conversation input as JSON to find requestId. For the readable treatment only, reuse that existing code-generated requestId in `conversationRequestId` telemetry and reconstruct/compare the entire expected request using the existing builder. Do not parse the rendered language or introduce another identity. Default historical attempts keep their existing shape and readback. This compatibility change is required for the serialization treatment, not another model/prompt variable.
+
 This format intentionally retains source metadata rather than dropping it for a smaller request. The hypothesis is improved visibility/order of business values and the current conversation, not lower token usage. Measure actual request bytes; oversized requests must reject rather than truncate data.
 
 ## Local evidence required
@@ -39,3 +41,28 @@ Prepare a before/after request preview and byte measurements from the existing s
 ## Delivery
 
 Incremental commits on the existing implementation branch and update draft PR390. Preserve every historical frozen input/raw request/outcome/score. Local evidence and limitations will be appended after the commands actually run.
+
+## Observed local verification
+
+Commands below ran on this preparation; all use round28 as control. No live provider generation occurred. `C3_TEST_CODEX_TRANSPORT=1` enables the existing local transport stub, not upstream inference.
+
+| Command actually run | Observed result |
+| --- | --- |
+| `git fetch origin main` / `git rev-parse origin/main` | Exit0; main `296cdcfbf5759f5bf9cbb24acf3dc63005589361` |
+| `C3_CHECKPOINT_A_ROUND=28 node --test apps/worker/evals/single-agent-semantic-verifier/conversation-context.test.mjs` before serializer implementation | RED: exit1, 1/7 PASS, 6 failures; readable presentation ignored, bounds/registration/unknown-format expectations failed |
+| Same context command after minimum serializer | GREEN: exit0, 7/7 PASS |
+| Same command after adding A3 compatibility/adapter tests, before readback fix | RED: exit1, 8/9 PASS; missing existing requestId telemetry |
+| Same command after compatibility fix | GREEN: exit0, 9/9 PASS |
+| `C3_CHECKPOINT_A_ROUND=28 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/conversation-context.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs` | Exit0, 38/38 PASS, no skips |
+| `C3_CHECKPOINT_A_ROUND=28 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/*.test.mjs` | Exit0, 164/164 PASS, no skips; includes the focused38, not another independent164 |
+| `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts` | Exit0, 77/77 PASS |
+| `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts` | Exit0, 41/41 PASS |
+| `pnpm --filter @lana/worker typecheck` | Exit0 |
+| `pnpm --filter @lana/worker build` | Exit0 |
+| `pnpm --filter @lana/worker lint` | Exit0 |
+| `C3_CHECKPOINT_A_ROUND=28 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3` | Exit0, `FROZEN_PROTOCOL_VALID`; read-only validation of existing round28 evidence. Its machine quality field remains `BLOCKED`; primary human review remains29/42 PASS. This is evidence integrity, not a new quality result. |
+| `git diff --check` | Exit0 before preview delivery |
+
+Environment prefixes above describe the settings actually applied via PowerShell `$env:...`; they are not Windows shell syntax. Worker package scripts also built their declared dependencies; no shared-package source changed.
+
+Complexity delta: one private presentation function and an opt-in in the existing request builder; an existing frozen-protocol check rejects unregistered formats; the existing A3 runner/readback reuses requestId telemetry only for the new format. Two existing executable files changed, with one focused test file. No new runtime parser, gate, model role, authority, persistent state, provider/client abstraction or production entrypoint. Test-only readback and local previews do not participate in customer runtime.

@@ -641,6 +641,6 @@ For each future implementation task:
 ## Owner-authorized context presentation preparation — 2026-10-09
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; record starting HEADa83c85a68c0c2310c6bb62f9e67b65bff5c6634d. Freeze preparation scope against exact round28 prompts/models/facts; completed27–29 batchSTOP remains.
-- [ ] Readable owner-only context serializer, observed RED→GREEN, full data/binding retention and evaluator firewall; default/verifier historical requests unchanged.
+- [x] Readable owner-only context serializer, observed RED→GREEN twice;9contexttests/full42case readback/evaluator firewall,84historical owner/verifier bodies unchanged;existing A3 requestId telemetry reused. Node164/164,focused38/38,worker77/77,business41/41;workerbuild/typecheck/lint/read-only28A3validation exit0. No provider generation or new quality result.
 - [ ] Deterministic before/after previews and bounds measurements; focused checks/workerbuild/typecheck/lint;0provider generations,quality improvement unverified.
 - [ ] Commit/push/update existing draftPR390 with exact preparation evidence; no new provider round/post-A/merge/deploy/send.
