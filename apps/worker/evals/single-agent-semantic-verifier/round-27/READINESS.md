@@ -70,3 +70,5 @@ Providerp50/p955475/9046ms;added5481/9050ms;input521511/output13220,usagegap0/co
 | git diff --check | exit0 |
 
 No raw terminal, verdict, request, score, frozen prompt, model, input or executable changed during artifact formatting. No remote CI PASS claimed.
+
+Final auditor readback found its inherited seal file list still pointed at Round26prompt paths/review doc. Corrected the outside-repo auditor to actual Round27owner/verifier and frozen reviewProcedureFile; directly compared file bytes to manifest prompts and hashes. Reran audit/report/export: all exit0,8sources/11actual inputs match both source seals,199captured bodies unchanged,42exports/420ratings/rawpre-review unchanged. This corrects reporting provenance;no provider rerun or result relabel.

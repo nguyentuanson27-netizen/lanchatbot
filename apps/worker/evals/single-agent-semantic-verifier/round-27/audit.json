@@ -96,9 +96,9 @@
     "apps/worker/evals/single-agent-semantic-verifier/round-27/size-inputs.json": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
     "apps/worker/evals/single-agent-semantic-verifier/round-27/quote-inputs.json": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
     "apps/worker/evals/single-agent-semantic-verifier/round-27/context-preparation.json": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b",
-    "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round26.vi.txt": "a91fcb3df2daeba815913c0ee2a865ecb892d04b6484ac46d087b165a9fe6695",
-    "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round26.vi.txt": "8dd85b283576997b1c52dd413dfbc3fd2cb2d62bda80c7272af3d708a457a40d",
-    "docs/specs/c3-round26-reviewed-sales-semantics-20261009.md": "62130580cfd40e19b4015be0270ab8d7da917eb509b52aae8f2c030b7876ab45"
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round27.vi.txt": "f3c603f504e4313ee9aa283fcaa074ac90eb76c034d58322c491486560b40078",
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round27.vi.txt": "44f15848388e17fbcb843bc6837c3ed69c37697e91a04beb5f086d37e6a31995",
+    "docs/specs/c3-checkpoint-a-bounded-followup-20261009.md": "0c26a54c778629a81927b3ff51d41b63133c6c42c05d574e645717131eea24e7"
   },
   "a3": {
     "registered": 42,
@@ -512,8 +512,8 @@
     "apps/worker/evals/single-agent-semantic-verifier/round-27/size-inputs.json": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
     "apps/worker/evals/single-agent-semantic-verifier/round-27/quote-inputs.json": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
     "apps/worker/evals/single-agent-semantic-verifier/round-27/context-preparation.json": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b",
-    "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round26.vi.txt": "a91fcb3df2daeba815913c0ee2a865ecb892d04b6484ac46d087b165a9fe6695",
-    "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round26.vi.txt": "8dd85b283576997b1c52dd413dfbc3fd2cb2d62bda80c7272af3d708a457a40d",
-    "docs/specs/c3-round26-reviewed-sales-semantics-20261009.md": "62130580cfd40e19b4015be0270ab8d7da917eb509b52aae8f2c030b7876ab45"
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round27.vi.txt": "f3c603f504e4313ee9aa283fcaa074ac90eb76c034d58322c491486560b40078",
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round27.vi.txt": "44f15848388e17fbcb843bc6837c3ed69c37697e91a04beb5f086d37e6a31995",
+    "docs/specs/c3-checkpoint-a-bounded-followup-20261009.md": "0c26a54c778629a81927b3ff51d41b63133c6c42c05d574e645717131eea24e7"
   }
 }
