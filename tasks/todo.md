@@ -637,3 +637,10 @@ For each future implementation task:
 - [x] Published final batch evidence to draftPR390;gitpush/ghpr edit/exactreadback exit0,OPENdraft/title-body/local-remote-PRhead match at 2c884d7ab0c8ed914269e0c93d89674887a67ae8;remoteCI PASSunverified. STOP/no furthergeneration/post-A.
 
 - [x] Delivery 2c884d7ab0c8ed914269e0c93d89674887a67ae8:draftPR390updated to rounds27-29/STOP(finalroundBLOCKED),exactbodyhash 5adeb6abec6fcca0f978e12e7ac9617e39edf52d3e5437f9ab8f0fa3949680a6,cleanheadreadback matched;0statuschecks reported,not PASS. This receipt-only savepoint changes no source/config/prompts/inputs/raw/scores or providerrequests.
+
+## Owner-authorized context presentation preparation — 2026-10-09
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; record starting HEADa83c85a68c0c2310c6bb62f9e67b65bff5c6634d. Freeze preparation scope against exact round28 prompts/models/facts; completed27–29 batchSTOP remains.
+- [ ] Readable owner-only context serializer, observed RED→GREEN, full data/binding retention and evaluator firewall; default/verifier historical requests unchanged.
+- [ ] Deterministic before/after previews and bounds measurements; focused checks/workerbuild/typecheck/lint;0provider generations,quality improvement unverified.
+- [ ] Commit/push/update existing draftPR390 with exact preparation evidence; no new provider round/post-A/merge/deploy/send.
