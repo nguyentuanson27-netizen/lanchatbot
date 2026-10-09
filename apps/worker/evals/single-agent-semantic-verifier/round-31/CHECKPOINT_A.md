@@ -111,3 +111,7 @@ Providerpreflight/run/validation/audit commands and exactexit statuses appear in
 A2PASS120/120,zero observed send-eligible false PASS/SAFEreject0;A3FAIL33/42 sau một correction consistency có lưu bản chấm đầu32/42.39eligible/3semanticfallback7.14%,0providererror/timeout. Sáu reply eligible chưa đạt chất lượng và ba fallback làm bốn family dưới90%;facts hiện có đủ cho các quyết định đó. Đây là kết quả chủ quan/nonblind trên một generation/ca,không causal proof hay owner acceptance.
 Unknown/unverified:independent/human/ownerquality acceptance,immutableweights,cost/internalCodexauthHTTP,realshopcoverage/HWchart/stage-safealternative/assuredFridaydelivery,productioneffects/liveconversion/holdouts/remoteCI. Kind/refschema doesnot expose exactoffending span/internalreason. No productionbehavior/unrunPASS claimed.
 **STOP recommendation.** Stop at CheckpointA ownerGO/STOP/BLOCKED;no automaticRound32/post-A/tool/state/mutation/promotion/migration/merge/deploy/live-send.
+
+## Actual delivery
+
+T4evidence7391fa424863d25c2c60effdc4de5a698606a209 pushed to existingdraftPR390;exacttitle/body/local-remote-PRhead/cleanworktree readbackexit0. Initialstagedwhitespacecheckexit1 for8verbatimmodel line-ending spaces;normalcode/otherdoc formatting and projection-only space-preservingchecks afterwardexit0. No providertext normalized or rawhash changed. RemoteCIQUEUED,not verifiedPASS. [Deliveryreceipt and actualcommandresults](DELIVERY.md). Metadatareceiptfollowupadds0providerrequests and leaves source/config/frozeninputs/raw/scores exact.
