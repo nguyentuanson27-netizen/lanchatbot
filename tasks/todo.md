@@ -620,3 +620,11 @@ For each future implementation task:
 
 - [x] Round28 T4clean 06a277103935ab82588312b2f5ba8e7a43b69a1f/preflight/run/validateexit0;42owner+42verifier/max1/retry0/error0/timeout0,39eligible/3semanticfallback7.14%. All42histories/context/actualterminal reviewed:primary29PASS/13FAIL (10eligible/3fallback),family4/11,8/9,7/10,7/9,3/3 ->A3FAIL/STOPforround. Rawpre-review/human-null preserved.
 - [x] Round28 audit8sources/12actualinputs/200captures,no evaluatorleak;603/604historical exact,protocolonly. 1032878input/74332output,0usagegap/costunknown. Finalround29remains within max3batch,no fourth/no post-A.
+
+## Owner-authorized final bounded follow-up — Round29
+
+- [x] T1owner-only treatment/capability/chat examples frozen;verifier28/all120A2/42A3+auxexact28;models/config/bars/bounds/terminals unchanged. Final thirdround,no fourth/no post-A.
+- [ ] Round29 T2observedRED/minimumGREEN/requiredreadiness/clean source seal.
+- [ ] Round29 T3fresh120A2once;unsafeeligiblePASS stopsround/noA3.
+- [ ] Round29 T4onlyfreshA2PASS/42A3once/allactualterminalreview.
+- [ ] Aggregate3rounds/findings/feasibility/draftPRdelivery and STOPowner.
