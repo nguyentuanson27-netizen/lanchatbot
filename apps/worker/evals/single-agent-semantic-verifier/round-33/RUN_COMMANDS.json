@@ -171,6 +171,39 @@
       "exitCode": 0,
       "output": "{\"fullStagedWhitespaceCheckExit\":2,\"retainedProviderWhitespace\":47,\"files\":[\"apps/worker/evals/single-agent-semantic-verifier/round-33/A3_CONVERSATIONS.md\",\"apps/worker/evals/single-agent-semantic-verifier/round-33/A3_FAILURE_REVIEW.md\",\"apps/worker/evals/single-agent-semantic-verifier/round-33/A3_HUMAN_REVIEW.md\"],\"proof\":\"Existing artifactreadback5rawhashes/42whole actualtexts\"}\n .../round-33/A2_FAILURES.md                        |    27 +\n .../round-33/A3_CONVERSATIONS.md                   |  1051 ++\n .../round-33/A3_FAILURE_REVIEW.md                  |   153 +\n .../round-33/A3_HUMAN_REVIEW.md                    |   635 +\n .../round-33/CHECKPOINT_A.md                       |   107 +\n .../round-33/FINDINGS.md                           |    53 +\n .../round-33/RAW_PRE_REVIEW_HASHES.json            |     7 +\n .../round-33/RUN_COMMANDS.json                     |   167 +\n .../round-33/a3-evidence.json                      |  8442 ++++++++++\n .../round-33/a3-human-review.json                  | 15856 +++++++++++++++++++\n .../round-33/a3-human-scores.json                  |   637 +\n .../round-33/a3-offline-scores.json                |   684 +\n .../round-33/a3-quality.json                       |   329 +\n .../round-33/audit.json                            |   422 +-\n tasks/todo.md                                      |     3 +-\n 15 files changed, 28569 insertions(+), 4 deletions(-)\n",
       "note": "Raw fidelity uses existing5hashes and whole actualtext readback;nonexport/source/docs whitespace passed. Full whitespace check remains exit2,not PASS claimed."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round33-readback-pr.mjs",
+      "exitCode": 0,
+      "result": {
+        "status": "DRAFT_PR_PUBLICATION_READBACK_PASS",
+        "publishedReportHead": "5fee2ad6df3de1acd5e058a415fb246f187ff022",
+        "bodySha256WithoutTerminalWhitespace": "6b07113c55b6ca39df5e5826e8e646cfc04164a5f800285d746cb75b929a8438",
+        "url": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/390",
+        "title": "C3 Checkpoint A: round33 fresh rerun; A2 PASS / A3 FAIL / STOP",
+        "state": "OPEN",
+        "isDraft": true,
+        "statusChecks": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "0001-01-01T00:00:00Z",
+            "conclusion": "",
+            "detailsUrl": "https://github.com/nguyentuanson27-netizen/lanchatbot/actions/runs/37949604594/job/113884649708",
+            "name": "pnpm check",
+            "startedAt": "2026-10-09T15:09:31Z",
+            "status": "QUEUED",
+            "workflowName": "CI"
+          }
+        ],
+        "cleanWorktree": true,
+        "extraProviderGenerations": 0,
+        "bodyComparison": "Exact text excluding terminal document whitespace"
+      }
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-record-round33-publication.mjs",
+      "exitCode": 1,
+      "result": "First receipt writer stopped before writing because the delivery checkbox had already changed tasks/todo.md. Corrected expected status to that sole documentation edit; no provider/source/evidence changes."
     }
   ],
   "unrun": [
@@ -181,5 +214,28 @@
   "additionalPostRunProviderGenerations": 0,
   "readinessFile": "READINESS.json",
   "artifactReadback": "PASS:5rawpreserved/42histories/420ratings/41links/26files/0secrets/sourceunchangedafterseal. Full staged whitespaceexit2 from47retained provider-text spaces in3Markdown exports;other source/docs/frozen files stagedcheckexit0.",
-  "delivery": "Pending commit/push/PRreadback;not PASS claimed"
+  "delivery": {
+    "status": "DRAFT_PR_PUBLICATION_READBACK_PASS",
+    "publishedReportHead": "5fee2ad6df3de1acd5e058a415fb246f187ff022",
+    "url": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/390",
+    "title": "C3 Checkpoint A: round33 fresh rerun; A2 PASS / A3 FAIL / STOP",
+    "bodySha256WithoutTerminalWhitespace": "6b07113c55b6ca39df5e5826e8e646cfc04164a5f800285d746cb75b929a8438",
+    "localRemotePrHeadMatch": true,
+    "cleanWorktreeAtPublication": true,
+    "remoteCiAtPublicationReadback": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/nguyentuanson27-netizen/lanchatbot/actions/runs/37949604594/job/113884649708",
+        "name": "pnpm check",
+        "startedAt": "2026-10-09T15:09:31Z",
+        "status": "QUEUED",
+        "workflowName": "CI"
+      }
+    ],
+    "remoteCiPassClaim": false,
+    "additionalProviderGenerations": 0,
+    "receiptOnlyFollowup": "Records completed report publication; no executable, config, frozen input, raw evidence or score changes."
+  }
 }
