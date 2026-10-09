@@ -36,3 +36,21 @@ node C:/Users/nguye/AppData/Local/Temp/c3-record-bounded-a2.mjs 28
 ```
 
 Preflight/run/validate/audit exit0;run exit0 records disposition,not necessarily A2PASS. Provider116/captured116/max1/retry0;error0/timeout0. Verifierp50/p955557/9397ms,added5558/9398ms;input533508/output12494,usagegap0/costunknown. Source8/actualinputs12/captured116 match;historical603/604unchanged,protocolonly. Audit checks actualnewprompt bytes/hash against manifest and review/treatment document hashes. Every surviving draft invokes verifier. Next A3 requires a new clean committed source seal/preflight.
+
+## Actual A3 and whole-turn primary review
+
+| Actual command | Observed result |
+| --- | --- |
+| git add explicit A2 evidence/readiness/todo; git commit; git status --short; git rev-parse HEAD | exit0,clean a3RunSourceSha 06a277103935ab82588312b2f5ba8e7a43b69a1f |
+| C3_CHECKPOINT_A_ROUND=28; A3_RUN_SOURCE_SHA=currentHEAD; A2_STATUS=PASS; existing local credential; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3 | exit0,FROZEN_PROTOCOL_VALID/clean seal |
+| same environment; node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs | exit0,42/42,39eligible/3semanticfallback;42owner+42verifier requests,max1/retry0,error0/timeout0 |
+| same environment; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3 | exit0,FROZEN_PROTOCOL_VALID;raw pending-review/human-null preserved |
+| Get-FileHash -Algorithm SHA256 for4raw files immediately after runner/Set-Content outside repo | all4 pre-review hashes captured,unchanged after primary review |
+| node C:/Users/nguye/AppData/Local/Temp/c3-read-bounded-outcomes.mjs 28 bounded batches0-42 | exit0,all42full histories/latest/evaluator/fit/actualterminal read;trusted facts/context byteexact already reviewed27 |
+| C3_CHECKPOINT_A_ROUND=28; node C:/Users/nguye/AppData/Local/Temp/c3-score-round28.mjs | exit0,42connected reviews/420diagnostics/0extra generation,29PASS/13FAIL;families4/11,8/9,7/10,7/9,3/3 ->A3FAIL |
+| same environment; node C:/Users/nguye/AppData/Local/Temp/c3-audit-round28.mjs | exit0,8sources/12actualfrozeninputs/200capturedrequests;603/604historical files unchanged,protocolonly |
+| node C:/Users/nguye/AppData/Local/Temp/c3-record-round28-result.mjs | exit0,raw pre-review preserved;records observed outcomes |
+
+Total 200generations/max1/retry0,input1032878/output74332,usagegap0/costunavailable;OAuth1,Codex internal auth HTTP accounting unavailable. Verifierp50/p955262/16190ms,added5267/16196ms,end-to-end10619/23199ms. Ten eligible quality failures distinct from3semanticfallbacks;all42 in denominator. Primary subjective nonblind review,not independent/human/owner acceptance.
+
+Final actual artifact checks: C3_CHECKPOINT_A_ROUND=28; node C:/Users/nguye/AppData/Local/Temp/c3-bounded-report.mjs; node C:/Users/nguye/AppData/Local/Temp/c3-finish-round28-export.mjs; node C:/Users/nguye/AppData/Local/Temp/c3-verify-export-round28.mjs; git diff --check all exit0.42exact terminal exports/420ratings/29PASS13FAIL/human-null/pre-reviewraw+sealedbytes intact;22files scanned,secrets0,all Markdown links valid. No extra generations.

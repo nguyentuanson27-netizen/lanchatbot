@@ -604,7 +604,7 @@ For each future implementation task:
 - [x] Owner authorization/scope reviewed;main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specc44aa40f249cc5499def183fc693c24852e04223. [Bounded follow-up](../docs/specs/c3-checkpoint-a-bounded-followup-20261009.md). Round27T1freeze120A2/42A3,two meaning clarifications,116oldA2/42A3 exact26,existing models/routes/bars;0provider generation.
 - [x] Round27T2selectorRED0/1/retentionRED2/3→GREEN3/3;fullNode149/149,focused29/29,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Protocol+13/-8,new3tests;578/579oldfiles unchanged,protocolonly;namedfiles secret-scan0,approvedroutesavailable,no newrole/gate/state/production. [Actual commands](../apps/worker/evals/single-agent-semantic-verifier/round-27/READINESS.md).
 - [x] Round27T3clean sourcebc0914ec68bbf57b6ce710a00cbe8f8a905f9a98/preflight/run/validate/auditexit0;A2PASS120/120=75UNSAFE/45SAFE,zero observed send-eligible false PASS,3SAFErejects6.67%<=10%;116generation/max1/retry0/error0/timeout0. 8sources/11inputs/116requests match;578/579historicalfiles unchanged,protocolonly. FreshPASS permits42A3after clean source savepoint,not inherited qualification.
-- [ ] Round27T4onlyfreshA2PASS,clean source/42A3once/allactualterminal review.
+- [x] Round27T4freshA2PASS,clean source/42A3once/allactualterminal review;A3FAIL below.
 - [ ] Ifnotqualified,review findings/fix/freeze new Round28 then Round29 within batch limit;no fourthround.
 - [ ] Batch findings/feasibility/CHECKPOINT_A/todo/draftPR390 and STOPowner.
 
@@ -616,4 +616,7 @@ For each future implementation task:
 - [x] T1freeze120A2/42A3 exact27,models/config/bars/review/bounds/terminals unchanged;new owner chat/turn scope and verifier reassurance prompts. Treatment doc hash bound before generation;no relabel/resample/provider/runtime context changes.
 - [x] Round28 T2observedRED0/1 and retentionRED1/3 ->GREEN3/3;Node152/152,focused29/29,worker77/77,business41/41,workerbuild/typecheck/lint/protocol/diffexit0. Historical603/604unchanged,protocolonly,secrets0,models/routes inspected/no generation. Clean source seal next.
 - [x] Round28 T3fresh A2PASS,120/120executed,unsafeeligiblePASS0,SAFErejects0;116generation/max1/retry0;clean sourceafa8e85d92ed72af51b40bc56c17a12e26f0c3b6/preflight/run/validate/auditexit0.
-- [ ] Round28 T4freshA2PASS/42actualterminalwhole-turnreviews/Checkpoint;remainingRound29onlyifneeded,neverpost-A.
+- [x] Round28 T4freshA2PASS/42actualterminalwhole-turnreviews/Checkpoint;A3FAIL,finalRound29authorized,neverpost-A.
+
+- [x] Round28 T4clean 06a277103935ab82588312b2f5ba8e7a43b69a1f/preflight/run/validateexit0;42owner+42verifier/max1/retry0/error0/timeout0,39eligible/3semanticfallback7.14%. All42histories/context/actualterminal reviewed:primary29PASS/13FAIL (10eligible/3fallback),family4/11,8/9,7/10,7/9,3/3 ->A3FAIL/STOPforround. Rawpre-review/human-null preserved.
+- [x] Round28 audit8sources/12actualinputs/200captures,no evaluatorleak;603/604historical exact,protocolonly. 1032878input/74332output,0usagegap/costunknown. Finalround29remains within max3batch,no fourth/no post-A.
