@@ -693,6 +693,6 @@ For each future implementation task:
 ## Authorized Round34 — 2026-10-10
 
 - [x] T1 refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec7b806168e35c29823b5ced67f10623dd0f613817. Freeze preparedowner34 only;all122A2/42A3/5aux/verifier32/models/config/V2/bars/terminals exact33,prior evidence preserved,0generation. [Treatment](../docs/specs/c3-round34-owner-prompt-run-20261010.md).
-- [ ] Round34 T2 observedRED→GREEN/readiness/selfreview/cleanA2seal.
+- [x] Round34 T2 observedRED0/3→GREEN3/3;full181/181,focused38/38,worker77/77,business41/41,0skips;workerbuild/typecheck/lint/protocol/diffexit0. Fixedselector/admission+21/-9 only,750/751historic files byteexact;existingapprovedroutes available,0generation. [Actual readiness](../apps/worker/evals/single-agent-semantic-verifier/round-34/READINESS.json). CleanA2seal/preflight next.
 - [ ] Round34 T3 fresh122A2 once;unsafe eligiblePASS hardSTOP,noA3unlessPASS.
 - [ ] Round34 conditional42A3 once/fullactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner;noautomatic35/post-A.

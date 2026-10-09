@@ -16,7 +16,7 @@ test('fixed34 activates only prepared owner prompt with all33 populations/config
  assert.equal(m.ownerAmendment,undefined);assert.equal(m.repetitions,1);assert.equal(m.retries,0);
 });
 test('rehashing an unregistered prompt/population/config or adopting old attempts cannot authorize34',()=>{
- for(const index of [0,120,121]){const c=structuredClone(a2),v=structuredClone(m);c.cases[index].evaluator.reason='Unregistered treatment';v.corpusHashes.a2=hash(JSON.stringify(c));assert.throws(()=>validateProtocol(v,c,a3),/ROUND34_CONTROL/);}
+ for(const index of [0,120,121]){const c=structuredClone(a2),v=structuredClone(m);c.cases[index].evaluator.reason='Unregistered treatment';v.corpusHashes.a2=hash(JSON.stringify(c));assert.throws(()=>validateProtocol(v,c,a3),/ROUND34_POPULATION|ROUND34_CONTROL/);}
  for(const change of [v=>{v.bounds.totalBytes++;},v=>{v.usability.maximumTerminalFailureRate=.15;},v=>{v.ownerAmendment={};},v=>{v.prompts.verifier+=' Another instruction';v.promptHashes.verifier=hash(v.prompts.verifier);},v=>{v.prompts.conversation+=' Another instruction';v.promptHashes.conversation=hash(v.prompts.conversation);}]){const v=structuredClone(m);change(v);assert.throws(()=>validateProtocol(v,a2,a3),/ROUND34_CONTROL|ROUND34_OWNER_PROMPT/);}
  const old=structuredClone(control);old.prompts.conversation=m.prompts.conversation;old.promptHashes.conversation=m.promptHashes.conversation;assert.throws(()=>validateProtocol(old,a2,a3),/ROUND33_CONTROL/);
 });
