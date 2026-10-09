@@ -1,4 +1,4 @@
-# Round28 A2 complete registered denominator
+# Round30 A2 complete registered denominator
 
 All120 slots registered (120 exact retained cases;0new contrasts); unexecuted is not an observed rejection. No retry/adoption or failed-attempt exclusion. See exact drafts/labels in corpus-a2.json and captured requests/verdicts/bindings/gates in a2-evidence.json.
 
