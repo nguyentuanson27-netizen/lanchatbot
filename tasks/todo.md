@@ -701,6 +701,6 @@ For each future implementation task:
 ## Authorized Round35 — 2026-10-10
 
 - [x] Review all42 Round34 whole conversations and record findings separately;refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spece8843f06710b6738486aa67d8827edb7a167bf45. T1freeze native dialogue +owner35;all122A2/42A3/5aux/verifier32/models/config/bounds/bars/terminals exact34,0generation. [Treatment](../docs/specs/c3-round35-native-dialogue-owner-run-20261010.md).
-- [ ] Round35 T2 observedRED→minimumGREEN/readiness/selfreview/cleanA2seal.
+- [x] Round35 T2 observed7/7RED(exit1)→7/7GREEN(exit0);full188/focused38/boundaryVertex77/protected41;workerbuild/typecheck/lint0. Lossless42/native text adapter/firewall/mandatory verifier/old34requests/frozen-controls tests green;actual approved clients inspected,0generation;774/777historical unchanged,only3evaluation executables. CleanA2source savepoint follows.
 - [ ] Round35 T3 fresh122A2 once;unsafe eligiblePASS hardSTOP,noA3unlessPASS.
 - [ ] Round35 conditional fresh42A3 once;validate/commit raw hashes BEFORE review;all42actualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner;noautomatic36/post-A.

@@ -12,7 +12,7 @@ const read=name=>readFileSync(inputUrl(name),'utf8');
 export async function evaluateA3Attempt(manifest,fixture,generate) {
   const started=performance.now();
   const projection=projectRuntime(manifest,fixture,'conversation',randomUUID());
-  const requestTelemetry=['READABLE_FACTS_V1','READABLE_FACTS_V2'].includes(manifest.conversationContextFormat)
+  const requestTelemetry=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3'].includes(manifest.conversationContextFormat)
     ? {conversationRequestId:projection.requestIdentity.requestId} : {};
   const conversation=await generate('conversation',buildRequest(manifest,'conversation',projection));
   if(conversation.status!=='OK')return {...requestTelemetry,conversation,finalDraft:null,verification:null,
@@ -83,7 +83,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
     if(!attempt.terminal||!attempt.conversation)throw new Error('A3_MISSING_GENERATION');
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');
-    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
+    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
       JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text).requestIdentity.requestId;
     const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',conversationRequestId));
     if(JSON.stringify(attempt.conversation.requestBody)!==JSON.stringify(expectedConversation))throw new Error('A3_CONVERSATION_FIREWALL');

@@ -39,10 +39,15 @@ export function createGeminiInference(manifest,dependencies={}) {
   let providerRequests=0,authRequests=0,httpStatus=null,authHttpStatus=null,usage=null,modelVersion=null,responseId=null,finishReason=null;
   let record;
   try {
-   // Check the fixed text capability before sending. No tools, candidate selection or memory.
+   // Fixed35 carries existing dialogue as text turns in the same single request.
+   const native=manifest.round===35&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3';
+   const textContents=native ? Array.isArray(request.contents)&&request.contents.length>=2&&request.contents.length<=manifest.bounds.historyCount+2&&
+    request.contents[0].role==='user'&&request.contents.at(-1).role==='user'&&request.contents.every(message=>
+     ['user','model'].includes(message.role)&&message.parts?.length===1&&Object.keys(message.parts[0]).length===1&&typeof message.parts[0].text==='string') :
+    request.contents?.length===1&&request.contents[0].role==='user'&&request.contents[0].parts?.length===1&&typeof request.contents[0].parts[0].text==='string';
+   // No tools, candidate selection or server-side memory.
    requireThat(request.systemInstruction?.parts?.[0]?.text===manifest.prompts.conversation&&
-    request.contents?.length===1&&request.contents[0].role==='user'&&request.contents[0].parts?.length===1&&
-    typeof request.contents[0].parts[0].text==='string'&&JSON.stringify(request.tools)==='[]'&&
+    textContents&&JSON.stringify(request.tools)==='[]'&&
     JSON.stringify(request.generationConfig)===JSON.stringify({candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}),
     'VERTEX_TEXT_REQUEST');
    if(!cachedToken||cachedToken.expiresAt-Date.now()<60000){
