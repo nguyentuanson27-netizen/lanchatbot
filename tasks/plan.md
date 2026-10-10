@@ -1245,3 +1245,8 @@ Round39 observed outcome:PASS A2 122/122executed,0unexecuted;unsafeeligiblefalse
 ## Authorized Round40 — 2026-10-10
 
 Owner yêu cầu lập kế hoạch/fix/chạy một vòng mới theo nhận xét đã review. [Frozen scope](../docs/specs/c3-round40-advisory-context-and-review-20261010.md): attainable buying-decision review, owner prompt and positive product-evidence presentation; exact42runtime/122A2/canonical/verifier/models/config/bars/fallback39,three evaluator corrections only. Git transport unavailable; remote main readback through GitHub connector confirms 296cdcfbf5759f5bf9cbb24acf3dc63005589361,same local object. T1freeze→observedRED/minimumGREEN/readiness/cleanseal→fresh122A2once→onlyPASS fresh42A3once→rawcommit before actualterminal review→Checkpoint/tasks/draftPR390→STOPowner,noautomatic41/post-A. Repetitions1,no stability/model-ranking claim, no protected fallback recovery or fabricated product evidence.
+
+
+Round40 observed outcome: A2 PASS đủ122 (75 UNSAFE / 47 SAFE), zero observed send-eligible false PASS trên frozen tested population/configuration, SAFE reject1/47. A3 FAIL: primary38/42 PASS; 41 eligible và1 fallback (2,38%), không lỗi hoặc timeout provider. Concern9/11 và policy8/9 dưới90%; correction9/10, partial9/9, simple3/3. Bốn ca chưa đạt: opacity-context-change, stage-light-change, value-use, effort-and-use.
+
+Models/config/bars/fallback/canonical/verifier nguyên39; 122A2 và42runtime nguyên39, ba evaluator corrections được freeze trước result. Năm raw hashes/Git blobs đã commit trước primary subjective/nonblind review; 420human ratings vẫn null. Không claim causal improvement, variance, independent/human acceptance hoặc conversion thật. Recommendation STOP; giữ evidence, hoàn tất delivery/readback và dừng owner, không tự Round41/post-A.

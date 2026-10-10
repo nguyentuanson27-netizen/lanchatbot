@@ -2,7 +2,7 @@
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "specSha": "9b6622a883ed95b72d70ba034f7cb20530816198",
   "a2RunSourceSha": "a6c247e895f101bb2d83876947000bb6e71125e7",
-  "a3RunSourceSha": null,
+  "a3RunSourceSha": "1dc27400785896522aec54e16dce64b7d6fbf0f0",
   "status": "INTEGRITY_PASS",
   "a2": {
     "status": "PASS",
@@ -70,7 +70,7 @@
   },
   "firewall": {
     "a2Requests": 118,
-    "a3Requests": 0,
+    "a3Requests": 84,
     "method": "Exact captured bodies reconstructed from allowlisted runtime projections; focused injected-marker tests exclude evaluator/preparation labels for both roles."
   },
   "matchedSourceCount": 8,
@@ -102,5 +102,432 @@
     "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round32.vi.txt": "deb7508ebe97ec9ff0f9827ba13f5608390406a8ca32b9406d925a8d175aa9a5",
     "docs/specs/c3-round40-advisory-context-and-review-20261010.md": "b4d712d5bfa788ae3d1255b44f11ae288ae2e36119852dd6f52d886e5305f787"
   },
-  "a3": null
+  "a3": {
+    "registered": 42,
+    "executed": 42,
+    "unexecuted": 0,
+    "terminal": {
+      "SEND_ELIGIBLE": 41,
+      "FALLBACK": 1,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "quality": {
+      "status": "FAIL",
+      "denominator": 42,
+      "scored": 42,
+      "families": {
+        "concern": {
+          "denominator": 11,
+          "passed": 9,
+          "passRate": 0.8181818181818182
+        },
+        "partial": {
+          "denominator": 9,
+          "passed": 9,
+          "passRate": 1
+        },
+        "correction": {
+          "denominator": 10,
+          "passed": 9,
+          "passRate": 0.9
+        },
+        "policy": {
+          "denominator": 9,
+          "passed": 8,
+          "passRate": 0.8888888888888888
+        },
+        "simple": {
+          "denominator": 3,
+          "passed": 3,
+          "passRate": 1
+        }
+      },
+      "terminalFailureRate": 0.023809523809523808,
+      "rows": [
+        {
+          "attemptId": "r5-workday-comfort:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-competitor-price:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-wardrobe-budget:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-white-opacity:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-size-price-stock:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-missing-customer-size:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-white-variant-alternative:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-delivery-timing:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-correct-product:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-correct-measurement:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-referent-navy:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-budget-correction:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-defer:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-try-exchange:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-exchange-cost:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-shipping-threshold:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-refund-distinction:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-simple-price:1",
+          "family": "simple",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-simple-stock:1",
+          "family": "simple",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r5-simple-ack:1",
+          "family": "simple",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r7-price-ready-fit:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r7-shirt-missing-measure:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r7-opacity-context-change:1",
+          "family": "policy",
+          "mean": 1.7,
+          "pass": false,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r7-exchange-after-use:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r12-office-color:1",
+          "family": "concern",
+          "mean": 1.9,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r12-pants-known-waist:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r12-change-color-only:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r12-indoor-exchange-eligible:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r14-workday-choice:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r14-price-repeat-wear:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r14-pants-size-input:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r14-stage-light-change:1",
+          "family": "correction",
+          "mean": 1.6,
+          "pass": false,
+          "factualActionSafety": 1
+        },
+        {
+          "attemptId": "r14-refund-before-buy:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r14-freeship-extra-pants:1",
+          "family": "policy",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r15-value-use:1",
+          "family": "concern",
+          "mean": 0.5,
+          "pass": false,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r15-fit-reassurance:1",
+          "family": "concern",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r15-known-waist-next:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r15-color-final-confirm:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r16-effort-and-use:1",
+          "family": "concern",
+          "mean": 1.9,
+          "pass": false,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r16-budget-alternative:1",
+          "family": "partial",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r16-change-to-indoor-dress:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        },
+        {
+          "attemptId": "r16-pants-color-alternative:1",
+          "family": "correction",
+          "mean": 2,
+          "pass": true,
+          "factualActionSafety": 2
+        }
+      ]
+    },
+    "conversation": {
+      "attempts": 42,
+      "providerRequests": 42,
+      "clientRequests": 42,
+      "authRequests": 1,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "timeoutErrorRate": 0,
+      "latencyP50Ms": 4790,
+      "latencyP95Ms": 8855,
+      "inputTokens": 129505,
+      "outputTokens": 46597,
+      "candidateTokens": 1642,
+      "thinkingTokens": 44955,
+      "cachedInputTokens": 0,
+      "reportedGeminiTotalTokens": 176102,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "returnedModelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "errorDiagnostics": []
+    },
+    "verifier": {
+      "attempts": 42,
+      "providerRequests": 42,
+      "clientRequests": 42,
+      "authRequests": 0,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "timeoutErrorRate": 0,
+      "latencyP50Ms": 7778,
+      "latencyP95Ms": 13210,
+      "inputTokens": 254091,
+      "outputTokens": 3796,
+      "candidateTokens": 0,
+      "thinkingTokens": 0,
+      "cachedInputTokens": 0,
+      "reportedGeminiTotalTokens": 0,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "returnedModelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "errorDiagnostics": []
+    },
+    "fallbackRate": 0.023809523809523808,
+    "handoffRate": 0,
+    "noSendRate": 0,
+    "addedVerificationLatencyP50Ms": 7787,
+    "addedVerificationLatencyP95Ms": 13217,
+    "endToEndLatencyP50Ms": 13618,
+    "endToEndLatencyP95Ms": 20393
+  },
+  "a3SealHashes": {
+    "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs": "4101d83cc6ab043a2ed0596598df16074beb5c89beb58ec35c724c68cdc4222a",
+    "apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs": "29339884f46ab4dc8c7f0610118fb40a22179c54ecdb0863ead42a77e594375f",
+    "apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs": "1fdaee16e8cc8429a769a6fc8cc93d22f0bbd695bfb41ef0119e0e2cf2a212b8",
+    "apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs": "973b95f099cc4ca16ab82bd99d87d62b5acd9b475598dde668da922f7a6787bb",
+    "apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs": "82d65fa260dac8bc9f1e7358af287f8b7f26f57e9b2a0eb0bdba7e72757faa02",
+    "apps/worker/evals/single-agent-semantic-verifier/size-input-context.mjs": "5e0bf846454309c54cf83e40f857b3fd016228efb0c8745cf7a56d4445c4c81e",
+    "apps/worker/src/single-agent-semantic-verifier-boundary.ts": "6f94f3b2998d8b29601de754fecedd2c02a7e18bdd8ba073df5a99f14481bf81",
+    "apps/worker/src/vertex.ts": "34f15208b8fb654874aba3014a72defc85d5aced012cc2ba7cbeeaf62fde1db5",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/manifest.json": "7f0e594d85be6562a65576187856f959ebc7bc50d57e6db7265a98b37fcf9343",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/corpus-a2.json": "4dd5ff15d336bd162f6f8b980c1deed8ec51bc7c132fc323cc9144fbc3c08455",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/corpus-a3.json": "a0438f119ba6db24d339b51ad03ba3a8630c068e6c78282e457c14dbf07a0176",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/fashion-profiles.json": "e71c7246ebfcdc65cd3fb12ae8245adcda44159a2d5373ef7c92305b92c29763",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/reference-replies.json": "08ece3be422b42248803ad03ae6bccb743966741a8d6e0013dac8a6ab198e62b",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/size-inputs.json": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/quote-inputs.json": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
+    "apps/worker/evals/single-agent-semantic-verifier/round-40/context-preparation.json": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b",
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round40.vi.txt": "c526dc61a7655e6205d5063c8c8e9bc4543d487c7dba53feeab6fdbdc23708cb",
+    "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round32.vi.txt": "deb7508ebe97ec9ff0f9827ba13f5608390406a8ca32b9406d925a8d175aa9a5",
+    "docs/specs/c3-round40-advisory-context-and-review-20261010.md": "b4d712d5bfa788ae3d1255b44f11ae288ae2e36119852dd6f52d886e5305f787"
+  },
+  "rawIntegrity": {
+    "preReviewByteIdentityAvailable": true,
+    "rawEvidenceCommitSha": "d8ce30e58836bc3af65c281a9a356baa8478e062",
+    "rawFingerprintFile": "RAW_PRE_REVIEW_HASHES.json",
+    "rawFilesMatched": 5,
+    "a2EqualsCommittedEvidence": true,
+    "a3RequestsReconstructed": true,
+    "humanPacketMatchesExistingHumanView": true,
+    "humanRatingsUnfilled": 420
+  }
 }
