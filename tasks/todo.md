@@ -716,3 +716,11 @@ For each future implementation task:
 - [x] Owner-requested Vietnamese input audit/proposal completed at source `e44807f8e3976bbd907b2ff17412242129993759`: both active prompts, all42 A3 histories/latest, all122 A2 fixed drafts/dialogues,6 evaluator-only references; inventory34 prompt TXT/74 historical corpus copies. Manual whole-input categories16 rewrite/13 light edit/13 keep; three style examples need both customer/shop rewrite. Same42 A3 byte hash retained26–36; findings/proposal are separate from historical scores. [Audit and per-case proposal](../docs/specs/c3-vietnamese-dialogue-input-audit-20261010.md). Docs only, zero provider requests, no registered37/frozen-input/score/executable changes; consistency/hash/link/diff checks exit0; Round36 STOP preserved.
 
 - [x] Owner-authorized preparation after Vietnamese audit: refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361; baseb0eddbc15b5168ee52d119a294672c4d4589dfc7. [New prompt/42dialogues/reference/review guide](../docs/specs/c3-vietnamese-dialogue-preparation-20261010.md) prepared separately:29edits/13unchanged,world/evaluator expectations exact; knownDecisions only syncs new history.84offline requests preserve42snapshots/bindings/no labels; maxowner27804/verifier32257bytes under32768,history6/8. Focused tests39PASS/1optionalSKIP,then enabled installedCLI localstub and40/40PASS0skip;provider generation0. No executable/shared/active manifest/frozen-input/old-score change or new run; model quality unmeasured. Owner-visible draft ready;Round36STOP/no post-A preserved.
+
+
+## Authorized Round37 — 2026-10-10
+
+- [x] Round37 T1:main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specab26da65819817566c6de77b979feea022c5b64e;freeze approved prepared owner/dialogues/references/review guide separately,exact36verifier/122A2/facts/expectations/config/bars/gates. [Scope](../docs/specs/c3-round37-vietnamese-dialogue-run-20261010.md). Zero provider generation before freeze.
+- [ ] Round37 T2 observedRED→minimumGREEN/selfreview/fullreadiness/cleanseal.
+- [ ] Round37 T3 fresh122A2 once;allattempts/errors retained;noA3unlessPASS.
+- [ ] Round37 conditional42A3 once;rawcommit before wholeactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner,noautomatic38/post-A.
