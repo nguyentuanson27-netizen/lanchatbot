@@ -2,7 +2,7 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath} from './protocol.mjs';
+import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath,repetitionCount} from './protocol.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {makeBinding,hardPrecheck,finalGate,terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {authorizeRealtimeProtectedClaimProposal} from '../../dist/realtime-protected-claim-boundary.js';
@@ -14,7 +14,7 @@ export function providerCapacityExhausted(manifest,provider) {
 }
 
 export function registerA2Attempts(manifest,a2,prior=null) {
-  const fresh=cases=>cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),caseId:c.evaluator.caseId,
+  const fresh=cases=>cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),caseId:c.evaluator.caseId,
     repetition:i+1,expected:c.evaluator.expected,finalDraft:c.runtime.finalDraft,finalDraftHash:hash(c.runtime.finalDraft),precheck:null,provider:null,terminal:null})));
   if(!manifest.ownerAmendment)return fresh(a2.cases);
   const amendment=manifest.ownerAmendment;
@@ -44,7 +44,7 @@ export async function evaluateA2Attempt(manifest,fixture,generate) {
   if(problem) {
     const disposition=['PRIVACY','PERMISSION','RECIPIENT'].includes(problem)?'NO_SEND':problem==='STALE'?'HANDOFF':'FALLBACK';
     return {precheck:'BLOCKED',precheckReason:problem,binding:binding??null,provider:null,
-      terminal:disposition==='FALLBACK'?{...terminalFallback(),reason:problem}:{disposition,reason:problem,text:null,fallbackId:null},
+      terminal:disposition==='FALLBACK'?{...terminalFallback(manifest.fallbacks[0].id,manifest.fallbacks[0].text),reason:problem}:{disposition,reason:problem,text:null,fallbackId:null},
       addedVerificationLatencyMs:0};
   }
   // All surviving exact drafts, including nonprotected controls, take this path.
@@ -53,7 +53,7 @@ export async function evaluateA2Attempt(manifest,fixture,generate) {
   const response=provider.status==='OK'?{kind:'VERDICT',binding:returnedBinding,result:provider.answer}:
     {kind:provider.status==='TIMEOUT'?'TIMEOUT':'PROVIDER_ERROR'};
   const finalGateAt=new Date(now.getTime()+Math.round(performance.now()-started));
-  const terminal=finalGate({expected:binding,response,current:projection.trusted,finalDraft:draft,now:finalGateAt});
+  const terminal=finalGate({expected:binding,response,current:projection.trusted,finalDraft:draft,now:finalGateAt,fallback:manifest.fallbacks[0]});
   return {precheck:'SURVIVED',precheckReason:null,binding,returnedBinding,provider,terminal,finalGateAt:finalGateAt.toISOString(),
     addedVerificationLatencyMs:Math.round(performance.now()-started)};
 }
@@ -89,7 +89,7 @@ export function assertSealedSource(sha,allowedEvidence) {
   if(changed.some(line=>!allowedEvidence.some(path=>line.slice(3).replaceAll('\\','/').replaceAll('"','')===path)))throw new Error('RUN_SOURCE_CHANGED');
 }
 export function validateA2Evidence(manifest,a2,evidence) {
-  const expected=manifest.ownerAmendment?.registeredAttemptIds??a2.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>c.evaluator.caseId+':'+(i+1)));
+  const expected=manifest.ownerAmendment?.registeredAttemptIds??a2.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('ATTEMPT_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a2RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('EVIDENCE_IDENTITY');
   if(evidence.capacityBlock) {
@@ -107,7 +107,7 @@ export function validateA2Evidence(manifest,a2,evidence) {
       if(JSON.stringify(makeBinding(attempt.binding.requestId,fixture.runtime.finalDraft,projection.trusted))!==JSON.stringify(attempt.binding))throw new Error('BINDING_IDENTITY');
       const response=attempt.provider.status==='OK'?{kind:'VERDICT',binding:attempt.returnedBinding,result:attempt.provider.answer}:
         {kind:attempt.provider.status==='TIMEOUT'?'TIMEOUT':'PROVIDER_ERROR'};
-      if(JSON.stringify(finalGate({expected:attempt.binding,response,current:projection.trusted,finalDraft:fixture.runtime.finalDraft,now:new Date(attempt.finalGateAt)}))!==JSON.stringify(attempt.terminal))throw new Error('FINAL_GATE_EVIDENCE');
+      if(JSON.stringify(finalGate({expected:attempt.binding,response,current:projection.trusted,finalDraft:fixture.runtime.finalDraft,now:new Date(attempt.finalGateAt),fallback:manifest.fallbacks[0]}))!==JSON.stringify(attempt.terminal))throw new Error('FINAL_GATE_EVIDENCE');
     } else if(attempt.precheck==='SURVIVED')throw new Error('MANDATORY_VERIFIER');
   }
   if(JSON.stringify(summarizeA2(manifest,evidence.attempts))!==JSON.stringify(evidence.summary))throw new Error('SUMMARY');

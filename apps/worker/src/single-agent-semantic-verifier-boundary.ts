@@ -44,6 +44,8 @@ export interface TerminalOutcome {
 export interface PostEffectRecoveryCompatibility { receiptRef: string; effectReplayAllowed: false }
 const FALLBACK_ID = "C3_A_NONPROTECTED_V1";
 const FALLBACK_TEXT = "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.";
+const FALLBACK_V2_ID = "C3_A_NONPROTECTED_V2";
+const FALLBACK_V2_TEXT = "Phần này em chưa trả lời được, chị nhé.";
 const hash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "CONTRADICTION_OR_NEGATION",
   "MATERIAL_CONDITION_LOSS", "POLICY_OR_BENEFIT_STRENGTHENING", "EFFECT_WITHOUT_RECEIPT",
@@ -51,9 +53,9 @@ const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "C
 const terminal = (disposition: TerminalOutcome["disposition"], reason: string): TerminalOutcome =>
   ({ disposition, reason, text: null, fallbackId: null });
 
-export function terminalFallback(id = FALLBACK_ID, text = FALLBACK_TEXT): TerminalOutcome {
-  return id === FALLBACK_ID && text === FALLBACK_TEXT
-    ? { disposition: "FALLBACK", reason: "FAIL", text: FALLBACK_TEXT, fallbackId: FALLBACK_ID }
+export function terminalFallback(id = FALLBACK_ID, text = id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
+  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT)
+    ? { disposition: "FALLBACK", reason: "FAIL", text, fallbackId: id }
     : terminal("NO_SEND", "UNVERIFIED_FALLBACK");
 }
 export function makeBinding(requestId: string, finalDraft: string, trusted: TrustedContext): VerifierBinding {
@@ -129,14 +131,14 @@ function parseVerdict(result: unknown, trusted: TrustedContext): "PASS" | "FAIL"
 
 /** Call immediately before send eligibility with a current code-owned readback. */
 export function finalGate(input: { expected: VerifierBinding; response: VerifierResponse;
-  current: TrustedContext; finalDraft: string; now: Date }): TerminalOutcome {
+  current: TrustedContext; finalDraft: string; now: Date; fallback?: { id: string; text: string } }): TerminalOutcome {
   const { expected, response, current, finalDraft, now } = input;
   if (current.state.recipient !== expected.recipient) return terminal("NO_SEND", "RECIPIENT");
   const problem = hardPrecheck(current, finalDraft, now);
   if (problem && ["PRIVACY", "PERMISSION", "RECIPIENT"].includes(problem)) return terminal("NO_SEND", problem);
   if (problem === "STALE") return terminal("HANDOFF", "STALE");
-  if (problem) return { ...terminalFallback(), reason: problem };
-  if (response.kind !== "VERDICT") return { ...terminalFallback(), reason: response.kind };
+  if (problem) return { ...terminalFallback(input.fallback?.id, input.fallback?.text), reason: problem };
+  if (response.kind !== "VERDICT") return { ...terminalFallback(input.fallback?.id, input.fallback?.text), reason: response.kind };
   const currentBinding = makeBinding(expected.requestId, finalDraft, current);
   if (expected.trustedSnapshotId !== currentBinding.trustedSnapshotId) {
     // Snapshot covers permissions, recipient, revision, binding, facts and receipts.
@@ -146,6 +148,6 @@ export function finalGate(input: { expected: VerifierBinding; response: Verifier
     if (response.binding[key] !== expected[key] || currentBinding[key] !== expected[key]) return terminal("HANDOFF", "STALE");
   }
   const verdict = parseVerdict(response.result, current);
-  if (verdict !== "PASS") return { ...terminalFallback(), reason: verdict ?? "MALFORMED" };
+  if (verdict !== "PASS") return { ...terminalFallback(input.fallback?.id, input.fallback?.text), reason: verdict ?? "MALFORMED" };
   return { disposition: "SEND_ELIGIBLE", reason: "PASS", text: finalDraft, fallbackId: null };
 }

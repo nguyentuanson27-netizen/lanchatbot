@@ -14,6 +14,21 @@ const pass = () => ({ kind: "VERDICT" as const, binding: structuredClone(binding
 const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now) =>
   finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at });
 
+describe("Round41 truthful static fallback compatibility", () => {
+  const fallback = { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." };
+  it("accepts only the exact code-owned V2 and retains historical V1", () => {
+    expect(terminalFallback(fallback.id, fallback.text)).toEqual({ disposition: "FALLBACK", reason: "FAIL", text: fallback.text, fallbackId: fallback.id });
+    expect(terminalFallback().fallbackId).toBe("C3_A_NONPROTECTED_V1");
+    expect(terminalFallback(fallback.id, "Size M vừa chị nhé, đã tạo đơn.").disposition).toBe("NO_SEND");
+  });
+  it("uses selected V2 on failure without changing valid PASS or current-world authority", () => {
+    const input = { expected: binding, current: trusted, finalDraft: draft, now, fallback };
+    expect(finalGate({ ...input, response: { kind: "TIMEOUT" } })).toEqual({ disposition: "FALLBACK", reason: "TIMEOUT", text: fallback.text, fallbackId: fallback.id });
+    expect(finalGate({ ...input, response: pass() }).disposition).toBe("SEND_ELIGIBLE");
+    expect(finalGate({ ...input, current: { ...trusted, state: { ...trusted.state, recipient: "changed" } }, response: pass() }).disposition).toBe("NO_SEND");
+  });
+});
+
 describe("Round4 current customer size binding", () => {
   const c = JSON.parse(readFileSync(new URL("../evals/single-agent-semantic-verifier/round-4/corpus-a3.json", import.meta.url), "utf8")).cases[0].runtime;
   const text = "Em chọn ST411 M.";

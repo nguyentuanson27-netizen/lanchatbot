@@ -753,6 +753,6 @@ For each future implementation task:
 ## Authorized Round41 — 2026-10-10
 
 - [x] Round41 T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 2493c8fa0e511eae62f0ff2cd4ddb651614eca0f;prompts/claim-scope/V2terminal/repetitionmaps/corpora/review frozen before generation. [Scope](../docs/specs/c3-round41-claim-scope-and-terminal-20261010.md).
-- [ ] Round41 T2 observedRED/minimumGREEN/readiness/self-review/cleanseal.
+- [x] Round41 T2 observed8evaluationRED/2boundaryRED→8GREEN;full223/focused38/boundaryVertex79/protected41,0skips;workerbuild/typecheck/lint exit0. Four evaluation executables plus isolated static fallback boundary;no production/shared wiring/parser/thirdrole/repair. All42A3runtime/evaluators/canonical worlds and121A2 exact40;care control clarified prospectively. Per-case denominator/firewall/V2/no-send/oldV1 compatibility verified. Clean A2 seal follows.
 - [ ] Round41 T3 fresh172registeredA2 slots;all outcomes/errors retained;unsafeeligiblePASS→FAIL/STOP,noA3.
 - [ ] Round41 conditional62A3 slots/all42wholeconversations plus repetitions;rawcommit before primaryreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic42/post-A.

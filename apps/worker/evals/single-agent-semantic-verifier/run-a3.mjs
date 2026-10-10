@@ -2,7 +2,7 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath} from './protocol.mjs';
+import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath,repetitionCount} from './protocol.mjs';
 import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence,providerCapacityExhausted} from './run-a2.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {createGeminiInference,inspectGemini} from './gemini-inference.mjs';
@@ -16,7 +16,7 @@ export async function evaluateA3Attempt(manifest,fixture,generate) {
     ? {conversationRequestId:projection.requestIdentity.requestId} : {};
   const conversation=await generate('conversation',buildRequest(manifest,'conversation',projection));
   if(conversation.status!=='OK')return {...requestTelemetry,conversation,finalDraft:null,verification:null,
-    terminal:{...terminalFallback(),reason:conversation.status},endToEndLatencyMs:Math.round(performance.now()-started)};
+    terminal:{...terminalFallback(manifest.fallbacks[0].id,manifest.fallbacks[0].text),reason:conversation.status},endToEndLatencyMs:Math.round(performance.now()-started)};
   // Sole owner surface: exact final text + telemetry. No proposal/plan/intent object.
   const finalDraft=conversation.answer;
   const runtime=structuredClone(fixture.runtime);
@@ -34,7 +34,7 @@ export function humanView(fixture,attempt) {
     customerOutcome:{kind:attempt.terminal===null&&!attempt.conversation?'UNEXECUTED':attempt.terminal?.text===null?'NO_CUSTOMER_REPLY':'REPLY',text:attempt.terminal?.text??null}};
 }
 export function scoreWholeReplies(manifest,corpus,attempts,scores) {
-  const denominator=corpus.cases.length*manifest.repetitions;
+  const denominator=corpus.cases.reduce((n,c)=>n+repetitionCount(manifest,'a3',c.evaluator.caseId),0);
   if(manifest.providerCapacityPolicy&&attempts.some(v=>!v.terminal))return {status:'BLOCKED',reason:'UNEXECUTED_REGISTERED_ATTEMPTS',denominator,executed:attempts.filter(v=>v.terminal).length};
   if(attempts.length!==denominator||!scores||scores.length!==denominator)return {status:'BLOCKED',reason:manifest.scoring.method==='OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW'?'MISSING_ALL_TERMINAL_OFFLINE_SCORES':'MISSING_ALL_TERMINAL_HUMAN_SCORES',denominator};
   const byId=new Map(scores.map(v=>[v.attemptId,v.scores]));
@@ -77,7 +77,7 @@ export function a3Operational(attempts) {
     endToEndLatencyP50Ms:percentile(attempts.map(v=>v.endToEndLatencyMs),.5),endToEndLatencyP95Ms:percentile(attempts.map(v=>v.endToEndLatencyMs),.95)};
 }
 export function validateA3Evidence(manifest,corpus,evidence) {
-  const expected=corpus.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>c.evaluator.caseId+':'+(i+1)));
+  const expected=corpus.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a3',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('A3_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a3RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('A3_IDENTITY');
   const executed=evidence.attempts.filter(v=>v.terminal).length;
@@ -108,7 +108,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
       if(JSON.stringify(v.binding)!==JSON.stringify(makeBinding(v.binding.requestId,attempt.finalDraft,trusted)))throw new Error('A3_BINDING');
       const response=provider.status==='OK'?{kind:'VERDICT',binding:v.returnedBinding,result:provider.answer}:
         {kind:provider.status==='TIMEOUT'?'TIMEOUT':'PROVIDER_ERROR'};
-      const terminal=finalGate({expected:v.binding,response,current:trusted,finalDraft:attempt.finalDraft,now:new Date(v.finalGateAt)});
+      const terminal=finalGate({expected:v.binding,response,current:trusted,finalDraft:attempt.finalDraft,now:new Date(v.finalGateAt),fallback:manifest.fallbacks[0]});
       if(JSON.stringify(terminal)!==JSON.stringify(attempt.terminal))throw new Error('A3_FINAL_GATE');
     }
     if(attempt.terminal.disposition==='SEND_ELIGIBLE'&&attempt.terminal.text!==attempt.finalDraft)throw new Error('A3_TERMINAL_EXACT_TEXT');
@@ -133,7 +133,7 @@ async function main() {
     corpusHash:manifest.corpusHashes.a3,promptHashes:manifest.promptHashes,schemaHash:manifest.schemaHash,models:manifest.models,client,
     ...(gemini ? {conversationClient:inspectGemini(manifest)} : {}),
     boundaryExecutableHash:hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url))),
-    startedAt:new Date().toISOString(),attempts:a3.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),
+    startedAt:new Date().toISOString(),attempts:a3.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a3',c.evaluator.caseId)},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),
       caseId:c.evaluator.caseId,repetition:i+1,conversation:null,finalDraft:null,verification:null,terminal:null}))),quality:null,operational:null};
   const save=()=>{evidence.quality=scoreWholeReplies(manifest,a3,evidence.attempts,null);evidence.operational=a3Operational(evidence.attempts);
     writeFileSync(output,JSON.stringify(evidence,null,2)+'\n');};
