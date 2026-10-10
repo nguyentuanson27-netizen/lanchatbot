@@ -745,6 +745,6 @@ For each future implementation task:
 ## Authorized Round40 — 2026-10-10
 
 - [x] Round40 T1: remote main readback 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 9b6622a883ed95b72d70ba034f7cb20530816198;new owner presentation/prompt and prospective review frozen before generation;42runtime/122A2/canonical/verifier/models/config/bars/fallback39 unchanged;3 evaluator corrections. [Scope](../docs/specs/c3-round40-advisory-context-and-review-20261010.md).
-- [ ] Round40 T2 observedRED/minimumGREEN/readiness/selfreview/cleanseal.
+- [x] Round40 T2 observed4RED then1presentationRED→5GREEN;full215/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint exit0. Two evaluation executables only;canonical/verifier/all42runtime/122A2 unchanged39;84captured test requests labels absent;0newrole/layer/parser/repair/production/shared changes. Corrected historical39 suite environment after2identity failures;preserved evidence. CleanA2seal follows.
 - [ ] Round40 T3 fresh122A2once;all attempts/errors retained;provider unavailable/confirmed exhausted capacity→BLOCKED.
 - [ ] Round40 conditional42A3once;rawcommit before wholeterminalreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic41/post-A.
