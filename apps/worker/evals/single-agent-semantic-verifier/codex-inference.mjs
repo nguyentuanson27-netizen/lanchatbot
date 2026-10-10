@@ -59,6 +59,18 @@ function parseStream(text,requestedModel,headerModel) {
   return {answer,modelVersion:model??null,responseId:completed.id??null,usage,cost:null};
 }
 
+async function readHttpErrorCode(response) {
+  const reader=response.body?.getReader();if(!reader)return null;
+  try {
+    const chunks=[];let size=0;
+    while(true){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;
+      if(size>4096){await reader.cancel();return null;}chunks.push(Buffer.from(value));}
+    const error=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error;
+    const code=error?.code??error?.type;
+    return ['rate_limit_exceeded','usage_limit_reached','insufficient_quota','too_many_requests'].includes(code)?code:null;
+  }catch{return null;}finally{reader.releaseLock();}
+}
+
 export async function runCodexModel(manifest,role,request,testDependencies={}) {
   const config=manifest.models[role].generationConfig;
   const timeoutMs=testDependencies.timeoutMs??config.timeoutMs;
@@ -68,9 +80,9 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
   const started=performance.now();
   const controller=new AbortController();
   let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client;
-  let upstreamRequestId=null,retryAfterSeconds=null;
+  let upstreamRequestId=null,retryAfterSeconds=null,providerErrorCode=null;
   let complete;const completion=new Promise(resolve=>{complete=resolve;});
-  const finish=value=>{if(!settled){settled=true;record={...value,upstreamRequestId,retryAfterSeconds};complete();}};
+  const finish=value=>{if(!settled){settled=true;record={...value,upstreamRequestId,retryAfterSeconds,providerErrorCode};complete();}};
   const route='/'+randomUUID();
   const server=createServer(async(req,res)=>{
     if(req.method!=='POST'||req.url!==route+'/responses') {res.writeHead(404);res.end();return;}
@@ -92,7 +104,7 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       const requestId=response.headers.get('x-request-id'),retryAfter=response.headers.get('retry-after');
       upstreamRequestId=requestId&&/^req[_-][A-Za-z0-9_-]{8,128}$/.test(requestId)?requestId:null;
       retryAfterSeconds=retryAfter&&/^\d{1,5}$/.test(retryAfter)&&Number(retryAfter)<=86400?Number(retryAfter):null;
-      if(!response.ok){await response.body?.cancel();finish({status:'PROVIDER_ERROR',error:'UPSTREAM_HTTP',errorStage:'GENERATION_HTTP',httpStatus:response.status});res.writeHead(400);res.end();return;}
+      if(!response.ok){providerErrorCode=await readHttpErrorCode(response);finish({status:'PROVIDER_ERROR',error:'UPSTREAM_HTTP',errorStage:'GENERATION_HTTP',httpStatus:response.status});res.writeHead(400);res.end();return;}
       const reader=response.body?.getReader();if(!reader)throw new Error('EMPTY_BODY');
       const chunks=[];let size=0;
       while(true){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;

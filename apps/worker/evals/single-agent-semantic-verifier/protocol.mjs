@@ -11,7 +11,7 @@ const families = ['wrong-subject', 'negation-inversion', 'material-condition-los
 const seedIds = ['undeclared-protected-claim', 'correct-literal-wrong-subject', 'negation-inversion', 'dropped-material-policy-condition', 'stronger-implied-policy-benefit', 'stale-evidence', 'effect-success-without-receipt'];
 // Fixed experiment folders only; keep historical inputs/evidence intact.
 const round = process.env.C3_CHECKPOINT_A_ROUND ?? '1';
-if (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
+if (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');
 const onePass = round === '5' && process.env.C3_CHECKPOINT_A_ONE_PASS === '1';
 const inputRoot = new URL(round === '1' ? './' : './round-' + round + (onePass ? '/one-pass/' : '/'), import.meta.url);
 export const inputUrl = name => new URL(name, inputRoot);
@@ -34,14 +34,14 @@ export function projectRuntime(manifest, fixture, role, requestId) {
       scope: pick(c.scope, ['kind', 'productId', 'variantId', 'cartId', 'cartVersion']),
       provenance: pick(c.provenance, ['authority', 'sourceVersion', 'evidenceRef', 'contentHash', 'observedAt', 'expiresAt']),
       value: pick(c.value, ['amountVnd', 'currency', 'status', 'availableQuantity',
-        ...([4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(manifest.round) ? ['recommendedSizes','alternativeSizes','customerProfileId','customerProfileRevision','measurementFingerprint','evidenceBasis'] : [])]),
+        ...([4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36].includes(manifest.round) ? ['recommendedSizes','alternativeSizes','customerProfileId','customerProfileRevision','measurementFingerprint','evidenceBasis'] : [])]),
     })),
     policyLiterals: r.trusted.policyLiterals.map(p => pick(p, ['ref', 'text', 'sourceVersion', 'observedAt', 'expiresAt'])),
     effectReceipts: r.trusted.effectReceipts.map(p => pick(p, ['ref', 'operationId', 'subjectRef', 'status', 'effect', 'stateRevision', 'recipient', 'observedAt', 'expiresAt'])),
     state: pick(r.trusted.state, manifest.stateAllowlist),
   };
   if (Object.hasOwn(r.trusted, 'productProfiles')) {
-    requireThat([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(manifest.round) && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
+    requireThat([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36].includes(manifest.round) && Array.isArray(r.trusted.productProfiles) && r.trusted.productProfiles.length <= b.profileCount, 'PROFILE_BOUND');
     trusted.productProfiles = r.trusted.productProfiles.map(p => ({
       ...pick(p, ['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash']),
       details: pick(p.details, ['silhouette','material','colors','sizeChart','care','limitations']),
@@ -134,9 +134,9 @@ export function buildRequest(manifest, role, projection) {
 }
 
 export function validateDraft(m, a2, a3) {
-  // Historical formats stay frozen;35 only moves exact dialogue into native turns.
-  requireThat(m.round===35 ? m.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3' : [32,33,34].includes(m.round) ? m.conversationContextFormat==='READABLE_FACTS_V2' : [30,31].includes(m.round) ? m.conversationContextFormat==='READABLE_FACTS_V1' : m.conversationContextFormat===undefined,'UNREGISTERED_CONTEXT_PRESENTATION');
-  requireThat(m.variant === undefined || m.variant === 'GEMINI_CONVERSATION' && [8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(m.round), 'VARIANT_IDENTITY');
+  // Historical formats stay frozen;35/36 only move exact dialogue into native turns.
+  requireThat([35,36].includes(m.round) ? m.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3' : [32,33,34].includes(m.round) ? m.conversationContextFormat==='READABLE_FACTS_V2' : [30,31].includes(m.round) ? m.conversationContextFormat==='READABLE_FACTS_V1' : m.conversationContextFormat===undefined,'UNREGISTERED_CONTEXT_PRESENTATION');
+  requireThat(m.variant === undefined || m.variant === 'GEMINI_CONVERSATION' && [8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36].includes(m.round), 'VARIANT_IDENTITY');
   requireThat(m.schemaVersion === 1 && /^[a-f0-9]{40}$/.test(m.implementationBaseSha) && /^[a-f0-9]{40}$/.test(m.specSha), 'SOURCE_IDENTITY');
   requireThat(m.evidenceSha === '1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da', 'SEED_SOURCE');
   for (const role of ['verifier', 'conversation']) {
@@ -147,7 +147,7 @@ export function validateDraft(m, a2, a3) {
     requireThat(hash(m.prompts[role]) === m.promptHashes[role], 'PROMPT_HASH');
   }
   requireThat(hash(JSON.stringify(m.verdictSchema)) === m.schemaHash, 'SCHEMA_HASH');
-  requireThat(m.repetitions === ([6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(m.round) || m.ownerAmendment && m.round === 5 ? 1 : 3) && m.retries === 0 && m.maxGenerationRequestsPerAttempt === 1 && m.repair === false && m.unsafeRule === 'ANY_UNSAFE_SEND_ELIGIBLE_PASS_FAILS_A2', 'ATTEMPT_POLICY');
+  requireThat(m.repetitions === ([6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36].includes(m.round) || m.ownerAmendment && m.round === 5 ? 1 : 3) && m.retries === 0 && m.maxGenerationRequestsPerAttempt === 1 && m.repair === false && m.unsafeRule === 'ANY_UNSAFE_SEND_ELIGIBLE_PASS_FAILS_A2', 'ATTEMPT_POLICY');
   for (const fallback of m.fallbacks) requireThat(hash(fallback.text) === fallback.hash, 'FALLBACK_HASH');
   const fallback = m.fallbacks[0];
   requireThat(fallback.id === 'C3_A_NONPROTECTED_V1', 'FALLBACK_ID');
@@ -208,7 +208,7 @@ export function validateProtocol(m, a2, a3) {
       'GENERATION_CONFIG');
   }
   requireThat(hash(JSON.stringify(a2)) === m.corpusHashes.a2 && hash(JSON.stringify(a3)) === m.corpusHashes.a3, 'CORPUS_HASH');
-  if ([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(m.round)) {
+  if ([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36].includes(m.round)) {
     requireThat(m.bounds.profileCount === 4 && m.bounds.profileBytes === 2048 &&
       JSON.stringify(m.profileAllowlist) === JSON.stringify(['ref','subjectRef','authority','sourceVersion','observedAt','expiresAt','contentHash','details']) &&
       JSON.stringify(m.profileDetailAllowlist) === JSON.stringify(['silhouette','material','colors','sizeChart','care','limitations']), 'PROFILE_PROTOCOL');
@@ -222,9 +222,9 @@ export function validateProtocol(m, a2, a3) {
       JSON.stringify(['usefulness','decisionSupport','nextStep','naturalness']) &&
       new Set(m.scoring.consultationCaseIds).size === 17 && m.scoring.consultationCaseIds.every(id => a3.cases.some(c => c.evaluator.caseId === id)), 'CONSULTATION_BAR');
   }
-  if ([4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(m.round)) {
+  if ([4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36].includes(m.round)) {
     const withBuyerGoals = m.round >= 5;
-    requireThat(summary.a2Unsafe === ([27,28,29,30,31,32,33,34,35].includes(m.round) ? 75 : m.round === 26 ? 73 : [22,23,24,25,26].includes(m.round) ? 69 : [20,21].includes(m.round) ? 63 : m.round >= 16 ? 57 : m.round >= 13 ? 51 : withBuyerGoals ? 48 : 44) && summary.a2Safe === ([32,33,34,35].includes(m.round) ? 47 : [27,28,29,30,31].includes(m.round) ? 45 : m.round === 26 ? 43 : [22,23,24,25,26].includes(m.round) ? 39 : [20,21].includes(m.round) ? 33 : m.round >= 16 ? 27 : m.round >= 13 ? 21 : withBuyerGoals ? 18 : 14) && a3.cases.length === (m.round >= 16 ? 42 : m.round === 15 ? 38 : m.round === 14 ? 34 : m.round >= 12 ? 28 : m.round >= 7 ? 24 : 20) &&
+    requireThat(summary.a2Unsafe === ([27,28,29,30,31,32,33,34,35,36].includes(m.round) ? 75 : m.round === 26 ? 73 : [22,23,24,25,26].includes(m.round) ? 69 : [20,21].includes(m.round) ? 63 : m.round >= 16 ? 57 : m.round >= 13 ? 51 : withBuyerGoals ? 48 : 44) && summary.a2Safe === ([32,33,34,35,36].includes(m.round) ? 47 : [27,28,29,30,31].includes(m.round) ? 45 : m.round === 26 ? 43 : [22,23,24,25,26].includes(m.round) ? 39 : [20,21].includes(m.round) ? 33 : m.round >= 16 ? 27 : m.round >= 13 ? 21 : withBuyerGoals ? 18 : 14) && a3.cases.length === (m.round >= 16 ? 42 : m.round === 15 ? 38 : m.round === 14 ? 34 : m.round >= 12 ? 28 : m.round >= 7 ? 24 : 20) &&
       hash(JSON.stringify({schemaVersion:1,cases:a2.cases.slice(0,withBuyerGoals ? 58 : 46)})) === m.retainedA2Hash, 'ROUND'+m.round+'_POPULATION');
     for (const [file,key] of [['reference-replies.json','referenceFileHash'],['size-inputs.json','sizeInputsFileHash']])
       requireThat(hash(readFileSync(new URL('./round-'+m.round+(m.variant === 'GEMINI_CONVERSATION' && m.round === 8 ? '-gemini' : '')+'/'+file,import.meta.url),'utf8')) === m[key], 'EVALUATOR_INPUT_HASH');
@@ -432,6 +432,17 @@ export function validateProtocol(m, a2, a3) {
       m.prompts.conversation===readFileSync(new URL('./prompts/fashion-sales-owner-round35.vi.txt',import.meta.url),'utf8'),'ROUND35_OWNER_PROMPT');
     requireThat(m.treatmentDocument.file==='docs/specs/c3-round35-native-dialogue-owner-run-20261010.md'&&
       m.treatmentDocument.sha256===hash(readFileSync(new URL('../../../../'+m.treatmentDocument.file,import.meta.url))),'ROUND35_CONTROL');
+  }
+  if (m.round === 36) {
+    const control=JSON.parse(readFileSync(new URL('./round-35/manifest.json',import.meta.url),'utf8'));
+    const metadata=['round','specSha','previousRoundSourceSha','reviewedPromptSourceSha','comparisonSourceSha','roundAuthorization','roundChangePolicy','treatmentDocument'];
+    requireThat(m.ownerAmendment===undefined&&m.adoptedA2RunSourceSha===undefined&&m.adoptedA3RunSourceSha===undefined,'ROUND36_CONTROL');
+    for (const [key,value] of Object.entries(control)) if (!metadata.includes(key))
+      requireThat(JSON.stringify(m[key])===JSON.stringify(value),'ROUND36_CONTROL');
+    for (const [file,population] of [['corpus-a2.json',a2],['corpus-a3.json',a3]])
+      requireThat(JSON.stringify(population)===JSON.stringify(JSON.parse(readFileSync(new URL('./round-35/'+file,import.meta.url),'utf8'))),'ROUND36_POPULATION');
+    requireThat(m.treatmentDocument.file==='docs/specs/c3-round36-provider-diagnostics-rerun-20261010.md'&&
+      m.treatmentDocument.sha256===hash(readFileSync(new URL('../../../../'+m.treatmentDocument.file,import.meta.url))),'ROUND36_CONTROL');
   }
   return summary;
 }

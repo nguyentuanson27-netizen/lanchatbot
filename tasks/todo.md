@@ -709,6 +709,6 @@ For each future implementation task:
 ## Authorized Round36 — 2026-10-10
 
 - [x] Round36 T1:refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specd1c5be045499f2f63894c85c36d648ca2e7165fb;read-only limits11%/44%,no reached subtype,0generation;freeze exact35semantic inputs/config and bounded diagnostics. [Scope](../docs/specs/c3-round36-provider-diagnostics-rerun-20261010.md).
-- [ ] Round36 T2 observedRED→minimumGREEN/selfreview/readiness/cleanseal.
+- [x] Round36 T2:new8RED→8GREEN(3existing green);full196/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint/protocol/diff exit0. Self-review:792/796historical unchanged,3evaluation executables+1diagnostic test only;both prompts/native context/frozen inputs exact35;no new role/gate/parser/retry/production wiring. Approved clients inspected,0generation. CleanA2seal follows.
 - [ ] Round36 T3 fresh122A2 once;retain errors/denominator;noA3unlessPASS.
 - [ ] Round36 conditional42A3 once;rawcommit before review;wholeactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner;noautomatic37/post-A.
