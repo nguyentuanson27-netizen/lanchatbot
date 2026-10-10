@@ -769,6 +769,6 @@ For each future implementation task:
 ## Authorized Round43 — 2026-10-11
 
 - [x] T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1c7bec763a1136bccfa6125ab26dfdae2bdfad3f;policy-only verifier treatment and4contrasts/202slots frozen,owner/context/A3/models/bars/V2 exact42. [Scope](../docs/specs/c3-round43-policy-entitlement-boundary-20261011.md).
-- [ ] T2 observed admissionRED/minimumGREEN/readiness/cleanseal.
+- [x] Round43 T2 observed3RED→3GREEN;full233/focused29/boundaryVertex79/protected41,0skip;workerbuild/typecheck/lint exit0. Fixed43 admission/hash pins only;owner/context/world/bars/models exact42,142oldA2 retained. Captured-request firewall/bounds/202A2+66A3 denominators/current-world boundary green;0newroles/layers/functions/parser/repair/production/shared changes. Clean source commit/seal follows.
 - [ ] T3 fresh202registeredA2,anyunsafe eligiblePASS→FAIL/STOP,noA3.
 - [ ] Conditional T4 exact66A3/42histories,rawcommit before wholeturnreview/report/tasks/draftPR390/STOPowner,noautomatic44/post-A.
