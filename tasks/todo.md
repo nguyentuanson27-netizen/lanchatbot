@@ -778,5 +778,5 @@ For each future implementation task:
 
 - [x] T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 6ff9f7bcef6b9e39e6169252940d186994d9550d;owner/review treatment frozen with exact43 verifier/all146A2/202slots/42A3/66slots/world/config/bars/staticV2. [Scope](../docs/specs/c3-round44-grounded-evidence-and-sales-continuity-20261011.md).
 - [x] Round44 T2 observed3RED→3GREEN;full236/focused29/boundaryVertex79/protected41,0skip;workerbuild/typecheck/lint exit0. First full suite local401stub235PASS/1FAIL retained; focused and full serial rerun PASS, transient cause unknown. Fixed44 admission/hash pins only,146oldA2/42A3/world/verifier/models/bars/V2 retained;0newroles/layers/parser/repair/production/shared changes. Clean source commit/seal follows.
-- [ ] Round44 T3 fresh202registeredA2;anyunsafe eligiblePASS→FAIL/STOP,noA3.
+- [x] Round44 T3 A2 PASS: 202/202 executed, 0 unexecuted;registered116UNSAFE/86SAFE,unsafeeligiblefalsePASS0. 198upstreamrequests/max1/retry0/errors0/timeouts0. a2RunSourceSha ec7d31025ca5c3bc70b30ce59eec3f1277f0d2e7. Source/input/captured-request/historical auditPASS. Conditional A3 follows separate clean source seal/preflight.
 - [ ] Round44 conditional T4 exact66A3/42histories,rawcommit before whole-turn review/report/tasks/draftPR390/STOPowner,noautomatic45/post-A.
