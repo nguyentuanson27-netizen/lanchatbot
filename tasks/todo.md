@@ -704,3 +704,11 @@ For each future implementation task:
 - [x] Round35 T2 observed7/7RED(exit1)→7/7GREEN(exit0);full188/focused38/boundaryVertex77/protected41;workerbuild/typecheck/lint0. Lossless42/native text adapter/firewall/mandatory verifier/old34requests/frozen-controls tests green;actual approved clients inspected,0generation;774/777historical unchanged,only3evaluation executables. CleanA2source savepoint follows.
 - [x] Round35 T3 fresh122/122A2 once; a2RunSourceSha c2da4625399fd33010666671ee9b5f254de4afbd. MachineA2FAIL:9/47SAFEfailures19.15%>10%,all9dueHTTP429.118requests=101OK+17HTTP429(9SAFE/8UNSAFE),max1/retry0;4hardblocks;zero observed unsafe send-eligible falsePASS. Full request/source/input/firewall audit validated. CheckpointBLOCKED byprovider;noA3allowed.
 - [x] Round35 terminal outcome:conditionalA3 NOT_RUN becausefreshA2FAIL;owner/A3generation0,a3RunSourceShaabsent,noA3scores/rawhash invented. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-35/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-35/FINDINGS.md),complete122attempt/erroraccounting/actualcommands preserved. Owner35/nativecontextcodeverified,qualityimprovementnotverified. Delivery status tracked in draftPR390;STOP at ownerBLOCKED,noautomatic36/post-A.
+
+
+## Authorized Round36 — 2026-10-10
+
+- [x] Round36 T1:refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specd1c5be045499f2f63894c85c36d648ca2e7165fb;read-only limits11%/44%,no reached subtype,0generation;freeze exact35semantic inputs/config and bounded diagnostics. [Scope](../docs/specs/c3-round36-provider-diagnostics-rerun-20261010.md).
+- [ ] Round36 T2 observedRED→minimumGREEN/selfreview/readiness/cleanseal.
+- [ ] Round36 T3 fresh122A2 once;retain errors/denominator;noA3unlessPASS.
+- [ ] Round36 conditional42A3 once;rawcommit before review;wholeactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner;noautomatic37/post-A.
