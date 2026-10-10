@@ -1282,3 +1282,6 @@ Owner “thực hiện fix và chạy vòng mới” authorizes exactly one fres
 
 
 Round44 observed A2 PASS:202/202 executed, 0 unexecuted;unsafeeligiblefalsePASS0 on frozen population/configuration;all116UNSAFE/86SAFE registrations retained. 198upstreamrequests,max1/retry0/errors0/timeouts0. a2RunSourceSha ec7d31025ca5c3bc70b30ce59eec3f1277f0d2e7. Only after separate clean seal/preflight may the authorized66 A3 outcomes run. STOP owner after checkpoint,noautomatic45/post-A.
+
+
+Round44 checkpoint outcome: A2 PASS 202/202; A3 FAIL 52/66. Recommendation STOP. a3RunSourceSha 39374a5aa47a24ec1db83f75c0dafc13e3d0e3ab;rawcommit 2d13aab7d40699c00543e659e2c9233f6d5f5506 before primary whole-turn review,all outcomes retained. Exact43 populations/config/verifier/world/bars/terminals,owner/review treatment only;no causal attribution/historical score rewrite/extra roles/layers/production/shared change. Preserve evidence/update draftPR390/readback thenSTOPowner,noautomatic45/post-A/merge/deploy/live send.
