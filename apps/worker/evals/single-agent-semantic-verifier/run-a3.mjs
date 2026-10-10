@@ -3,7 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath} from './protocol.mjs';
-import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence} from './run-a2.mjs';
+import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence,providerCapacityExhausted} from './run-a2.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {createGeminiInference,inspectGemini} from './gemini-inference.mjs';
 import {terminalFallback,finalGate,makeBinding} from '../../dist/single-agent-semantic-verifier-boundary.js';
@@ -31,10 +31,11 @@ export function humanView(fixture,attempt) {
     trusted:fixture.runtime.trusted,requiredBehaviors:fixture.evaluator.requiredBehaviors,forbiddenBehaviors:fixture.evaluator.forbiddenBehaviors,
     ...(fixture.evaluator.buyerGoal ? Object.fromEntries(['buyerGoal','unresolvedConcern','adequateResolution','attainableProgress','knownDecisions']
       .map(key=>[key,fixture.evaluator[key]])) : {}),
-    customerOutcome:{kind:attempt.terminal?.text===null?'NO_CUSTOMER_REPLY':'REPLY',text:attempt.terminal?.text??null}};
+    customerOutcome:{kind:attempt.terminal===null&&!attempt.conversation?'UNEXECUTED':attempt.terminal?.text===null?'NO_CUSTOMER_REPLY':'REPLY',text:attempt.terminal?.text??null}};
 }
 export function scoreWholeReplies(manifest,corpus,attempts,scores) {
   const denominator=corpus.cases.length*manifest.repetitions;
+  if(manifest.providerCapacityPolicy&&attempts.some(v=>!v.terminal))return {status:'BLOCKED',reason:'UNEXECUTED_REGISTERED_ATTEMPTS',denominator,executed:attempts.filter(v=>v.terminal).length};
   if(attempts.length!==denominator||!scores||scores.length!==denominator)return {status:'BLOCKED',reason:manifest.scoring.method==='OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW'?'MISSING_ALL_TERMINAL_OFFLINE_SCORES':'MISSING_ALL_TERMINAL_HUMAN_SCORES',denominator};
   const byId=new Map(scores.map(v=>[v.attemptId,v.scores]));
   if(byId.size!==denominator)return {status:'BLOCKED',reason:'DUPLICATE_HUMAN_SCORE',denominator};
@@ -79,8 +80,17 @@ export function validateA3Evidence(manifest,corpus,evidence) {
   const expected=corpus.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('A3_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a3RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('A3_IDENTITY');
+  const executed=evidence.attempts.filter(v=>v.terminal).length;
+  if(evidence.capacityBlock) {
+    const stop=evidence.attempts[executed-1],provider=stop?.verification?.provider,block=evidence.capacityBlock;
+    if(!providerCapacityExhausted(manifest,provider)||block.attemptId!==stop.attemptId||block.role!=='verifier'||block.providerErrorCode!==provider.providerErrorCode||
+      evidence.attempts.slice(0,executed).some(v=>!v.terminal||!v.conversation)||evidence.attempts.slice(executed).some(v=>v.terminal!==null||v.conversation!==null||v.finalDraft!==null||v.verification!==null))throw new Error('A3_CAPACITY_PREFIX');
+  }
   for(const attempt of evidence.attempts) {
-    if(!attempt.terminal||!attempt.conversation)throw new Error('A3_MISSING_GENERATION');
+    if(!attempt.terminal||!attempt.conversation) {
+      if(evidence.capacityBlock)continue;
+      throw new Error('A3_MISSING_GENERATION');
+    }
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');
     const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
@@ -104,7 +114,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
     if(attempt.terminal.disposition==='SEND_ELIGIBLE'&&attempt.terminal.text!==attempt.finalDraft)throw new Error('A3_TERMINAL_EXACT_TEXT');
     if(attempt.terminal.disposition==='FALLBACK'&&attempt.terminal.text!==manifest.fallbacks[0].text)throw new Error('A3_TERMINAL_FALLBACK');
   }
-  return {registeredDenominator:expected.length,executedDenominator:evidence.attempts.filter(v=>v.terminal).length,
+  return {registeredDenominator:expected.length,executedDenominator:executed,...(manifest.providerCapacityPolicy?{unexecuted:expected.length-executed}:{}),
     quality:evidence.quality.status,operational:evidence.operational};
 }
 async function main() {
@@ -136,6 +146,9 @@ async function main() {
     Object.assign(attempt,await evaluateA3Attempt(manifest,fixture,(role,request)=>role === 'conversation' && gemini ? gemini(request) : runCodexModel(manifest,role,request)));
     save();console.log(JSON.stringify({attemptId:attempt.attemptId,generation:attempt.conversation.status,verifier:attempt.verification?.provider?.status??null,
       terminal:attempt.terminal.disposition,reason:attempt.terminal.reason}));
+    if(providerCapacityExhausted(manifest,attempt.verification?.provider)) {
+      evidence.capacityBlock={attemptId:attempt.attemptId,role:'verifier',providerErrorCode:attempt.verification.provider.providerErrorCode};break;
+    }
   }
   evidence.finishedAt=new Date().toISOString();save();
   const views=evidence.attempts.map(attempt=>humanView(a3.cases.find(c=>c.evaluator.caseId===attempt.caseId),attempt));
@@ -144,7 +157,7 @@ async function main() {
     attempts:views.map(view=>({attemptId:view.attemptId,scores:Object.fromEntries(manifest.scoring.dimensions.map(d=>[d,null]))}))},null,2)+'\n');
   const review='# A3 — human review of actual terminal customer outcomes\n\nScore 0/1/2 on the ten frozen dimensions in a3-human-scores.json. No model/judge scores are synthesized.\n'+
     '\nTrusted truth and required/forbidden behavior per case are in a3-human-review.json. The packet excludes rejected drafts and verifier verdicts.\n\n'+
-    views.map(view=>'## '+view.attemptId+'\n\nCustomer: '+view.customer+'\n\nAccepted dialogue:\n```json\n'+JSON.stringify(view.acceptedDialogue)+'\n```\n\nActual terminal customer outcome:\n```text\n'+(view.customerOutcome.text??'[NO CUSTOMER REPLY]')+'\n```\n').join('\n');
+    views.map(view=>'## '+view.attemptId+'\n\nCustomer: '+view.customer+'\n\nAccepted dialogue:\n```json\n'+JSON.stringify(view.acceptedDialogue)+'\n```\n\nActual terminal customer outcome:\n```text\n'+(view.customerOutcome.text??(view.customerOutcome.kind==='UNEXECUTED'?'[UNEXECUTED REGISTERED ATTEMPT]':'[NO CUSTOMER REPLY]'))+'\n```\n').join('\n');
   writeFileSync(inputUrl('A3_HUMAN_REVIEW.md'),review);
   console.log(JSON.stringify(validateA3Evidence(manifest,a3,evidence)));
 }

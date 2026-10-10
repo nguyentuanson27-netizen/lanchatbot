@@ -9,6 +9,10 @@ import {authorizeRealtimeProtectedClaimProposal} from '../../dist/realtime-prote
 const read=name=>readFileSync(inputUrl(name),'utf8');
 export const loadInputs=()=>({manifest:JSON.parse(read('manifest.json')),a2:JSON.parse(read('corpus-a2.json')),a3:JSON.parse(read('corpus-a3.json'))});
 
+export function providerCapacityExhausted(manifest,provider) {
+  return Boolean(provider?.status==='PROVIDER_ERROR'&&manifest.providerCapacityPolicy?.stopCodes.includes(provider.providerErrorCode));
+}
+
 export function registerA2Attempts(manifest,a2,prior=null) {
   const fresh=cases=>cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),caseId:c.evaluator.caseId,
     repetition:i+1,expected:c.evaluator.expected,finalDraft:c.runtime.finalDraft,finalDraftHash:hash(c.runtime.finalDraft),precheck:null,provider:null,terminal:null})));
@@ -57,9 +61,9 @@ export async function evaluateA2Attempt(manifest,fixture,generate) {
 export function summarizeA2(manifest,attempts) {
   const unsafe=attempts.filter(v=>v.expected==='UNSAFE'),safe=attempts.filter(v=>v.expected==='SAFE');
   const falsePass=unsafe.filter(v=>v.terminal?.disposition==='SEND_ELIGIBLE').length;
-  const safeFailures=safe.filter(v=>v.terminal?.disposition!=='SEND_ELIGIBLE').length;
+  const safeFailures=safe.filter(v=>(!manifest.providerCapacityPolicy||v.terminal)&&v.terminal?.disposition!=='SEND_ELIGIBLE').length;
   const missing=attempts.filter(v=>!v.terminal).length;
-  const safeFailureRate=safe.length?safeFailures/safe.length:null;
+  const safeFailureRate=manifest.providerCapacityPolicy&&missing?null:safe.length?safeFailures/safe.length:null;
   const available=attempts.some(v=>v.provider?.status==='OK');
   return {status:falsePass?'FAIL':missing||!available?'BLOCKED':safeFailureRate===null||safeFailureRate>manifest.usability.maximumTerminalFailureRate?'FAIL':'PASS',
     registeredDenominator:attempts.length,executedDenominator:attempts.length-missing,unsafeCount:unsafe.length,safeCount:safe.length,
@@ -88,6 +92,11 @@ export function validateA2Evidence(manifest,a2,evidence) {
   const expected=manifest.ownerAmendment?.registeredAttemptIds??a2.cases.flatMap(c=>Array.from({length:manifest.repetitions},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('ATTEMPT_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a2RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('EVIDENCE_IDENTITY');
+  if(evidence.capacityBlock) {
+    const executed=evidence.attempts.filter(v=>v.terminal).length,stop=evidence.attempts[executed-1],block=evidence.capacityBlock;
+    if(!providerCapacityExhausted(manifest,stop?.provider)||block.attemptId!==stop.attemptId||block.role!=='verifier'||block.providerErrorCode!==stop.provider.providerErrorCode||
+      evidence.attempts.slice(0,executed).some(v=>!v.terminal)||evidence.attempts.slice(executed).some(v=>v.terminal||v.provider||v.precheck!==null))throw new Error('A2_CAPACITY_PREFIX');
+  }
   for(const attempt of evidence.attempts) {
     const fixture=a2.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.expected!==fixture.evaluator.expected)throw new Error('EVIDENCE_EXPECTATION');
@@ -132,6 +141,9 @@ async function main() {
     console.log(JSON.stringify({attemptId:attempt.attemptId,precheck:attempt.precheck,provider:attempt.provider?.status??null,
       outcome:attempt.terminal.disposition,reason:attempt.terminal.reason,requests:attempt.provider?.providerRequests??0}));
     if(attempt.expected==='UNSAFE'&&attempt.terminal.disposition==='SEND_ELIGIBLE')break;
+    if(providerCapacityExhausted(manifest,attempt.provider)) {
+      evidence.capacityBlock={attemptId:attempt.attemptId,role:'verifier',providerErrorCode:attempt.provider.providerErrorCode};break;
+    }
   }
   evidence.finishedAt=new Date().toISOString();save();validateA2Evidence(manifest,a2,evidence);
   console.log(JSON.stringify({summary:evidence.summary,operational:evidence.operational}));

@@ -40,7 +40,7 @@ export function createGeminiInference(manifest,dependencies={}) {
   let record;
   try {
    // Fixed35–38 carry exact native dialogue in the same single request.
-   const native=[35,36,37].includes(manifest.round)&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3' || manifest.round===38&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V4';
+   const native=[35,36,37].includes(manifest.round)&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3' || [38,39].includes(manifest.round)&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V4';
    const textContents=native ? Array.isArray(request.contents)&&request.contents.length>=2&&request.contents.length<=manifest.bounds.historyCount+2&&
     request.contents[0].role==='user'&&request.contents.at(-1).role==='user'&&request.contents.every(message=>
      ['user','model'].includes(message.role)&&message.parts?.length===1&&Object.keys(message.parts[0]).length===1&&typeof message.parts[0].text==='string') :

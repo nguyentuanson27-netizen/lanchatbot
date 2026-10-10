@@ -737,6 +737,6 @@ For each future implementation task:
 ## Authorized Round39 — 2026-10-10
 
 - [x] Round39 T1: refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec97f0a378525ba6cbf00b147b5c7ce1ee58153c0d;owner decision/review/quota-stop policy frozen before generation;all42runtime/all122A2/verifier/V4/models/config/bars unchanged38,one evaluator-only correction. [Scope](../docs/specs/c3-round39-decision-review-quota-20261010.md).
-- [ ] Round39 T2 observedRED/minimumGREEN/readiness/selfreview/cleanseal.
+- [x] Round39 T2 observed6RED→6GREEN (capacity3RED after admission);full210/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint/protocol/source-config checks exit0. Four evaluation executables only,875/879historic files unchanged;0production/shared changes,0newsemanticrole/layer/parser/repair. Captured42/bothroles labels absent;partial-prefix/quota accounting verified;0provider generation before cleanA2seal.
 - [ ] Round39 T3 fresh122A2once;allregistered attempts/errors retained;confirmed capacity exhaustion→BLOCKED.
 - [ ] Round39 conditional42A3once;rawcommit before wholeterminalreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic40/post-A.
