@@ -1250,3 +1250,8 @@ Owner yêu cầu lập kế hoạch/fix/chạy một vòng mới theo nhận xé
 Round40 observed outcome: A2 PASS đủ122 (75 UNSAFE / 47 SAFE), zero observed send-eligible false PASS trên frozen tested population/configuration, SAFE reject1/47. A3 FAIL: primary38/42 PASS; 41 eligible và1 fallback (2,38%), không lỗi hoặc timeout provider. Concern9/11 và policy8/9 dưới90%; correction9/10, partial9/9, simple3/3. Bốn ca chưa đạt: opacity-context-change, stage-light-change, value-use, effort-and-use.
 
 Models/config/bars/fallback/canonical/verifier nguyên39; 122A2 và42runtime nguyên39, ba evaluator corrections được freeze trước result. Năm raw hashes/Git blobs đã commit trước primary subjective/nonblind review; 420human ratings vẫn null. Không claim causal improvement, variance, independent/human acceptance hoặc conversion thật. Recommendation STOP; giữ evidence, hoàn tất delivery/readback và dừng owner, không tự Round41/post-A.
+
+
+## Authorized Round41 — 2026-10-10
+
+Owner requests fix and exactly one new Checkpoint A after review40. [Frozen scope](../docs/specs/c3-round41-claim-scope-and-terminal-20261010.md): claim-scope/implicit alternatives and truthful static V2 fallback;42 runtime/evaluators/world/config/bars exact40,121A2 exact plus clarified care SAFE and16 preregistered contrasts. Models unchanged; default1 and bounded preregistered chronic/new-scope3 maps,172A2 slots/62A3 slots,all counted/no vote/retry. T1freeze→observedRED/minimumGREEN/readiness→cleanA2seal/preflight→onlyPASS cleanA3seal/preflight→rawcommit before wholeactualterminalreview→Checkpoint/tasks/draftPR390→STOPowner,noautomatic42/post-A. Main fetch succeeds:296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec:2493c8fa0e511eae62f0ff2cd4ddb651614eca0f.

@@ -748,3 +748,11 @@ For each future implementation task:
 - [x] Round40 T2 observed4RED then1presentationRED→5GREEN;full215/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint exit0. Two evaluation executables only;canonical/verifier/all42runtime/122A2 unchanged39;84captured test requests labels absent;0newrole/layer/parser/repair/production/shared changes. Corrected historical39 suite environment after2identity failures;preserved evidence. CleanA2seal follows.
 - [x] Round40 T3: A2 PASS, đủ 122/122 attempts (75 UNSAFE / 47 SAFE), 0 chưa chạy. Zero observed send-eligible false PASS trên frozen tested population/configuration; SAFE reject 1/47. Verifier 118 generation requests, errors/timeouts 0/0, max1/retry0. a2RunSourceSha: a6c247e895f101bb2d83876947000bb6e71125e7. Captured requests, labels firewall và source/input hashes đã kiểm tra.
 - [x] Round40 Checkpoint completion: A3 FAIL, đủ 42/42 attempts; primary whole-turn review 38/42 PASS, 4 FAIL. Terminal 41 eligible / 1 fallback / 0 handoff / 0 no-send; 0 chưa chạy. Owner42 + verifier42 requests, errors/timeouts0; raw commit trước review, 420 primary diagnostic ratings riêng và 420 human ratings vẫn null. a3RunSourceSha: 1dc27400785896522aec54e16dce64b7d6fbf0f0. Recommendation STOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-40/CHECKPOINT_A.md), [42 hội thoại](../apps/worker/evals/single-agent-semantic-verifier/round-40/A3_CONVERSATIONS.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-40/FINDINGS.md). Delivery qua draft PR390 theo readback thực tế; dừng owner, không tự Round41/post-A/merge/deploy/live send.
+
+
+## Authorized Round41 — 2026-10-10
+
+- [x] Round41 T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 2493c8fa0e511eae62f0ff2cd4ddb651614eca0f;prompts/claim-scope/V2terminal/repetitionmaps/corpora/review frozen before generation. [Scope](../docs/specs/c3-round41-claim-scope-and-terminal-20261010.md).
+- [ ] Round41 T2 observedRED/minimumGREEN/readiness/self-review/cleanseal.
+- [ ] Round41 T3 fresh172registeredA2 slots;all outcomes/errors retained;unsafeeligiblePASS→FAIL/STOP,noA3.
+- [ ] Round41 conditional62A3 slots/all42wholeconversations plus repetitions;rawcommit before primaryreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic42/post-A.
