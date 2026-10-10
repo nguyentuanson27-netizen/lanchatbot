@@ -1255,3 +1255,8 @@ Models/config/bars/fallback/canonical/verifier nguyên39; 122A2 và42runtime ngu
 ## Authorized Round41 — 2026-10-10
 
 Owner requests fix and exactly one new Checkpoint A after review40. [Frozen scope](../docs/specs/c3-round41-claim-scope-and-terminal-20261010.md): claim-scope/implicit alternatives and truthful static V2 fallback;42 runtime/evaluators/world/config/bars exact40,121A2 exact plus clarified care SAFE and16 preregistered contrasts. Models unchanged; default1 and bounded preregistered chronic/new-scope3 maps,172A2 slots/62A3 slots,all counted/no vote/retry. T1freeze→observedRED/minimumGREEN/readiness→cleanA2seal/preflight→onlyPASS cleanA3seal/preflight→rawcommit before wholeactualterminalreview→Checkpoint/tasks/draftPR390→STOPowner,noautomatic42/post-A. Main fetch succeeds:296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec:2493c8fa0e511eae62f0ff2cd4ddb651614eca0f.
+
+
+## Authorized Round42 — 2026-10-11
+
+Owner authorizes fix and exactly one new Checkpoint A after review41. [Frozen scope](../docs/specs/c3-round42-evidence-scope-and-decision-20261011.md): product observation presentation, owner decisions and approved advisory/ETA verifier scope;138A2 exact41+4 contrasts/188 attempts;42A3 runtime/evaluator/world/aux exact41/66 attempts. Models/config/bars/staticV2/canonical/gates unchanged;selectedN3 all counted/no retry/vote. T1freeze→observedRED/minimumGREEN/readiness→cleanA2seal/preflight→onlyPASS cleanA3seal/preflight→rawcommit before wholeactualterminalreview→CHECKPOINT/tasks/draftPR390→STOPowner,noautomatic43/post-A. Refreshed main 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec ad68dd95851a31dbbe8c609623105ab3946cb62a. Metadata rewritten accurately before seal, historical manifests unchanged.

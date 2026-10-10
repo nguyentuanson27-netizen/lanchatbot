@@ -756,3 +756,11 @@ For each future implementation task:
 - [x] Round41 T2 observed8evaluationRED/2boundaryRED→8GREEN;full223/focused38/boundaryVertex79/protected41,0skips;workerbuild/typecheck/lint exit0. Four evaluation executables plus isolated static fallback boundary;no production/shared wiring/parser/thirdrole/repair. All42A3runtime/evaluators/canonical worlds and121A2 exact40;care control clarified prospectively. Per-case denominator/firewall/V2/no-send/oldV1 compatibility verified. Clean A2 seal follows.
 - [x] Round41 T3 A2 PASS, 172/172 attempts = 102 UNSAFE / 70 SAFE; zero observed unsafe send-eligible false PASS. SAFE failures 3/70 (4.29%): 2 semantic rejects, 1 HTTP503; zero timeouts. 168 upstream requests / max1 / retry0; all outcomes retained. a2RunSourceSha c6c384e5e1b62d4464a5ae861e45e86352f955c3. Captured requests/source/frozen inputs/firewall validated; 929 historical files unchanged. Fresh PASS permits conditional A3 after committed clean source seal.
 - [x] Round41 checkpoint completion:A3 FAIL;primary51/62PASS,registered62,executed62,rawcommit before review,a3RunSourceSha:78423dbd2e960ba2699898dcf91302909ab7e1d1. RecommendationSTOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-41/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-41/FINDINGS.md). Delivery draftPR390;STOPowner,noautomatic42/post-A/merge/deploy/live send.
+
+
+## Authorized Round42 — 2026-10-11
+
+- [x] Round42 T1 refreshed main 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec ad68dd95851a31dbbe8c609623105ab3946cb62a;scope/prompts/presentation/corpora/repetitions/metadata/review frozen before provider result. [Scope](../docs/specs/c3-round42-evidence-scope-and-decision-20261011.md).
+- [ ] Round42 T2 observedRED/minimumGREEN/readiness/self-review/cleanseal.
+- [ ] Round42 T3 fresh188registeredA2 attempts;all outcomes/errors retained;unsafe eligible PASS→FAIL/STOP,noA3.
+- [ ] Round42 conditional66A3 attempts/42 histories;rawcommit before primaryreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic43/post-A.
