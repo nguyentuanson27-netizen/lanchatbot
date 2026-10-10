@@ -39,8 +39,8 @@ export function createGeminiInference(manifest,dependencies={}) {
   let providerRequests=0,authRequests=0,httpStatus=null,authHttpStatus=null,usage=null,modelVersion=null,responseId=null,finishReason=null;
   let record;
   try {
-   // Fixed35/36 carry existing dialogue as text turns in the same single request.
-   const native=[35,36].includes(manifest.round)&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3';
+   // Fixed35/36/37 carry existing dialogue as text turns in the same single request.
+   const native=[35,36,37].includes(manifest.round)&&manifest.conversationContextFormat==='NATIVE_DIALOGUE_FACTS_V3';
    const textContents=native ? Array.isArray(request.contents)&&request.contents.length>=2&&request.contents.length<=manifest.bounds.historyCount+2&&
     request.contents[0].role==='user'&&request.contents.at(-1).role==='user'&&request.contents.every(message=>
      ['user','model'].includes(message.role)&&message.parts?.length===1&&Object.keys(message.parts[0]).length===1&&typeof message.parts[0].text==='string') :

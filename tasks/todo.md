@@ -721,6 +721,6 @@ For each future implementation task:
 ## Authorized Round37 — 2026-10-10
 
 - [x] Round37 T1:main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/specab26da65819817566c6de77b979feea022c5b64e;freeze approved prepared owner/dialogues/references/review guide separately,exact36verifier/122A2/facts/expectations/config/bars/gates. [Scope](../docs/specs/c3-round37-vietnamese-dialogue-run-20261010.md). Zero provider generation before freeze.
-- [ ] Round37 T2 observedRED→minimumGREEN/selfreview/fullreadiness/cleanseal.
+- [x] Round37 T2 observed4RED→4GREEN;full200/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint/protocol/diff exit0. Prepared newline/hash compatibility corrected;exact37manifest pin and native adapter admission only.824/826existing eval files unchanged,0production/shared source changes,0newrole/gate/parser/repair. Approved clients inspected,0generation;cleanA2seal follows.
 - [ ] Round37 T3 fresh122A2 once;allattempts/errors retained;noA3unlessPASS.
 - [ ] Round37 conditional42A3 once;rawcommit before wholeactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner,noautomatic38/post-A.
