@@ -724,3 +724,11 @@ For each future implementation task:
 - [x] Round37 T2 observed4RED→4GREEN;full200/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint/protocol/diff exit0. Prepared newline/hash compatibility corrected;exact37manifest pin and native adapter admission only.824/826existing eval files unchanged,0production/shared source changes,0newrole/gate/parser/repair. Approved clients inspected,0generation;cleanA2seal follows.
 - [x] Round37 T3:PASS;122/122attempts=75UNSAFE/47SAFE;0observed unsafe send-eligible falsePASS;SAFEfailure1/47;requests118,errors0,timeouts0,max1/retry0. a2RunSourceSha5e2938b852ef93ac370a8ec5d940abd3bf425c39. Captured requests/source/input/firewall validated;allerrors retained.
 - [x] Round37 terminal outcome:A3FAIL:42owner+39verifier;36eligible/6fallback;primary22/42PASS,420explicit diagnostics;5raw hashes/Git blobs committed BEFORE primary review;no historicalscore rewrite. a3RunSourceSha030aca2ae3d89eaccab059373759dd846c69f902. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-37/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-37/FINDINGS.md),complete denominators/request/errors/hashes/commands retained. DraftPR390 delivery status follows publication readback. STOP at owner;noautomatic38/post-A/merge/deploy/live-send.
+
+
+## Authorized Round38 — 2026-10-10
+
+- [x] Round38 T1:main refreshed 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 38177a90f3d33edff3da0b198aaf8b4418717ebb;ownerV4/shorterprompt frozen before generation,exact37A2/A3/world/verifier/config/bars/review. [Scope](../docs/specs/c3-round38-sales-context-20261010.md).
+- [ ] Round38 T2 observedRED→minimumGREEN/selfreview/fullreadiness/cleanseal.
+- [ ] Round38 T3 fresh122A2 once;allattempts/errors retained;noA3unlessPASS.
+- [ ] Round38 conditional42A3 once;rawcommit before wholeactualterminalreview/CHECKPOINT_A/tasks/draftPR390/STOPowner,noautomatic39/post-A.

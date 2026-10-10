@@ -1224,3 +1224,8 @@ Owner “tiếp tục chạy vòng check point A mới” authorizes exactly one
 
 
 Round37 observed outcome:PASS A2 122/122,unsafeeligiblefalsePASS0,SAFEfailure1/47;118requests/0errors/0timeouts,max1/retry0. A3FAIL:42owner+39verifier;36eligible/6fallback;primary22/42PASS,420explicit diagnostics;5raw hashes/Git blobs committed BEFORE primary review;no historicalscore rewrite. a3RunSourceSha030aca2ae3d89eaccab059373759dd846c69f902. Prepared owner/examples/29dialogue edits/13unchanged/references/wholeconversation guide;exact36verifier/122A2/world/expectations/config/bars/nativeV3/gate. New population,no identical-input causal claim. Preserve evidence/tasks/draftPR390;STOP at owner,noautomatic38/post-A.
+
+
+## Authorized Round38 — 2026-10-10
+
+Owner “fix và chạy vòng mới” authorizes exactly one fresh Checkpoint A round. [Scope](../docs/specs/c3-round38-sales-context-20261010.md):owner business-facts V4 and shorter chat/voice prompt; all122A2/all42A3/verifier/world/expectations/models/bars/review/terminals exact37. Canonical projection/verifier/final gate unchanged. T1freeze/commit→observedRED/minimumGREEN/readiness→cleanA2seal/preflight/122once→onlyPASS cleanA3seal/preflight/42once→rawcommit before actualterminal wholeconversation review→Checkpoint/tasks/draftPR390→STOPowner. No automatic39/post-A/retry/adoption/substitution or isolated causal improvement claim.
