@@ -761,6 +761,6 @@ For each future implementation task:
 ## Authorized Round42 — 2026-10-11
 
 - [x] Round42 T1 refreshed main 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec ad68dd95851a31dbbe8c609623105ab3946cb62a;scope/prompts/presentation/corpora/repetitions/metadata/review frozen before provider result. [Scope](../docs/specs/c3-round42-evidence-scope-and-decision-20261011.md).
-- [ ] Round42 T2 observedRED/minimumGREEN/readiness/self-review/cleanseal.
+- [x] Round42 T2 observed7RED→7GREEN;full230/focused29/boundaryVertex79/protected41,0skips;workerbuild/typecheck/lint exit0. Two existing evaluation admission checks only;0worker/shared changes/newfunction/role/layer/parser/repair. Exact-source product presentation/canonical snapshot/firewall/all188A2/66A3 slots verified;138oldA2/42A3world/evaluator exact41. No generation before committed clean source seal.
 - [ ] Round42 T3 fresh188registeredA2 attempts;all outcomes/errors retained;unsafe eligible PASS→FAIL/STOP,noA3.
 - [ ] Round42 conditional66A3 attempts/42 histories;rawcommit before primaryreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic43/post-A.
