@@ -1232,3 +1232,8 @@ Owner “fix và chạy vòng mới” authorizes exactly one fresh Checkpoint A
 
 
 Round38 observed outcome:PASS A2 122/122,unsafeeligiblefalsePASS0,SAFEfailure1/47;118requests/0errors/0timeouts,max1/retry0. A3FAIL:42owner+42verifier;18eligible/24fallback/0handoff/0no-send;primary15/42PASS,420explicit diagnostics;5raw hashes/Git blobs committed BEFORE primary review;no historical score rewrite. a3RunSourceShab1429a9c4744b88a3dee52cccfbae5e309abf63d. RecommendationBLOCKED:23verifierHTTP429usage_limit_reached;not semantic verdicts. OwnerNATIVE_DIALOGUE_FACTS_V4 business presentation/no rawchart/provenance and shorter conversation/style guidance;exact37all122A2/all42A3/world/evaluator/aux/config/bars/canonical/verifier/gate;authority suffix unchanged. Identical-input population but bundled treatment/one observation/subjective review,no causal/variance/conversion claim. Preserve evidence/tasks/draftPR390;STOP owner,noautomatic39/post-A.
+
+
+## Authorized Round39 — 2026-10-10
+
+Owner “fix và thực hiện vòng mới” authorizes exactly one new Checkpoint A round. [Frozen scope](../docs/specs/c3-round39-decision-review-quota-20261010.md):decision-focused owner prompt,whole-turn review and one evaluator-only wardrobe correction;all42runtime/all122A2/verifier/V4/models/config/bars unchanged38. Explicit capacity exhaustion stops remaining generations;complete registration retained,unexecuted null/no invented outcomes. Read-only limits beforeA2/A3;no quota/account mutation. T1freeze→TDD/readiness→cleanA2seal/122once→onlyPASS cleanA3seal/42once→rawcommit before review→Checkpoint/tasks/draftPR390→STOPowner,noautomatic40/post-A.

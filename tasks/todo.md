@@ -732,3 +732,11 @@ For each future implementation task:
 - [x] Round38 T2 observed4RED→4GREEN;full204/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint/protocol/diff exit0. OwnerV4 formatter/native adapter/requestId telemetry only;849/852 prior files unchanged,0production/shared changes,0newrole/gate/parser/repair. Exact42/122 inputs retained;0provider generation;cleanA2seal follows.
 - [x] Round38 T3:PASS;122/122attempts,registered75UNSAFE/47SAFE;0observed unsafe send-eligible falsePASS;SAFEfailure1/47;requests118,errors0,timeouts0,max1/retry0. a2RunSourceSha6e4804d7fdb15df8c4e947c077900d210a8058d2. Captured requests/source/input/firewall validated;allerrors retained.
 - [x] Round38 terminal outcome:A3FAIL:42owner+42verifier;18eligible/24fallback/0handoff/0no-send;primary15/42PASS,420explicit diagnostics;5raw hashes/Git blobs committed BEFORE primary review;no historical score rewrite. a3RunSourceShab1429a9c4744b88a3dee52cccfbae5e309abf63d. RecommendationBLOCKED:23verifierHTTP429usage_limit_reached;not semantic verdicts. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-38/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-38/FINDINGS.md);complete denominators/request/errors/hashes/commands preserved. DraftPR390 delivery follows publication readback. STOP at owner;noautomatic39/post-A/merge/deploy/live-send.
+
+
+## Authorized Round39 — 2026-10-10
+
+- [x] Round39 T1: refreshed main296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec97f0a378525ba6cbf00b147b5c7ce1ee58153c0d;owner decision/review/quota-stop policy frozen before generation;all42runtime/all122A2/verifier/V4/models/config/bars unchanged38,one evaluator-only correction. [Scope](../docs/specs/c3-round39-decision-review-quota-20261010.md).
+- [ ] Round39 T2 observedRED/minimumGREEN/readiness/selfreview/cleanseal.
+- [ ] Round39 T3 fresh122A2once;allregistered attempts/errors retained;confirmed capacity exhaustion→BLOCKED.
+- [ ] Round39 conditional42A3once;rawcommit before wholeterminalreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic40/post-A.
