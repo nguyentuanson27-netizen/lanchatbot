@@ -1193,3 +1193,8 @@ Owner requests prompt fix/review for the next round, preserving conversation qua
 ## Authorized Round34 — 2026-10-10
 
 Owner “thực hiện chạy 1 vòng mới” authorizes exactly one fresh run with prepared owner34 only. [Frozen treatment](../docs/specs/c3-round34-owner-prompt-run-20261010.md):all122A2/42A3/5aux/verifier32/approvedmodels/config/V2/bars/terminals exact33. T1freeze→T2observedRED/GREEN/readiness→cleanA2seal/preflight/fresh122once→onlyA2PASS cleanA3seal/preflight/fresh42once→wholeactualterminalreview/report/tasks/PR390→STOPowner. Every error retained,max1generation/role slot,retry0;noadoption/substitute/repair/relabel/furtherpromptfix/automatic35/post-A. Reuse exact focused commands and review procedure;no provider API/client change.
+
+
+## Authorized Round35 — 2026-10-10
+
+Owner requests all42 re-review,root cause fix and one fresh run. [Frozen treatment](../docs/specs/c3-round35-native-dialogue-owner-run-20261010.md):native exact dialogue +owner35 reply flow;all122A2/42A3/5aux/verifier32/approved models/config/bars/terminals exact34. T1freeze→observed RED→minimum GREEN/readiness→cleanA2seal/preflight/fresh122once→onlyA2PASS cleanA3seal/preflight/fresh42once→validate/commit raw fingerprints BEFORE primary review→all42wholeterminalreview/report/tasks/PR390→STOPowner. No automatic36/post-A/retry/substitute/adoption/repair/relabel or additional rescue fix/run. Reuse focused commands;official native contents API checked2026-10-10. Prior reports/raw/scores untouched.
