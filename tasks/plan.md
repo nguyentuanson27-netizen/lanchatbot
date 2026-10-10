@@ -1240,3 +1240,8 @@ Owner “fix và thực hiện vòng mới” authorizes exactly one new Checkpo
 
 
 Round39 observed outcome:PASS A2 122/122executed,0unexecuted;unsafeeligiblefalsePASS0,observedSAFEfailure1/47;118requests/0errors/0timeouts,max1/retry0. A3 FAIL: 42/42 executed, 0 unexecuted; 42 owner + 42 verifier requests; 37 eligible / 5 fallback / 0 handoff / 0 no-send; primary 33/42 PASS, 420 explicit diagnostics;5raw hashes/Git blobs committed BEFORE primary review;420human ratings null. a3RunSourceSha 62898c43585f0c14afbf1ec709ca6863ac1740f6. RecommendationSTOP. Decision-focused owner39/whole-turn review;all42runtime/all122A2/verifier/V4/world/aux/config/bars/canonical/gate exact38,one evaluator-only wardrobe correction;new scoring identity,no causal comparison/historical score rewrite. Explicit capacity exhaustion stops registered remainder without invented outcomes. Preserve evidence/tasks/draftPR390;STOPowner,noautomatic40/post-A.
+
+
+## Authorized Round40 — 2026-10-10
+
+Owner yêu cầu lập kế hoạch/fix/chạy một vòng mới theo nhận xét đã review. [Frozen scope](../docs/specs/c3-round40-advisory-context-and-review-20261010.md): attainable buying-decision review, owner prompt and positive product-evidence presentation; exact42runtime/122A2/canonical/verifier/models/config/bars/fallback39,three evaluator corrections only. Git transport unavailable; remote main readback through GitHub connector confirms 296cdcfbf5759f5bf9cbb24acf3dc63005589361,same local object. T1freeze→observedRED/minimumGREEN/readiness/cleanseal→fresh122A2once→onlyPASS fresh42A3once→rawcommit before actualterminal review→Checkpoint/tasks/draftPR390→STOPowner,noautomatic41/post-A. Repetitions1,no stability/model-ranking claim, no protected fallback recovery or fabricated product evidence.

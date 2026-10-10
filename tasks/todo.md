@@ -740,3 +740,11 @@ For each future implementation task:
 - [x] Round39 T2 observed6RED→6GREEN (capacity3RED after admission);full210/focused38/boundaryVertex77/protected41,0skips;workerbuild/typecheck/lint/protocol/source-config checks exit0. Four evaluation executables only,875/879historic files unchanged;0production/shared changes,0newsemanticrole/layer/parser/repair. Captured42/bothroles labels absent;partial-prefix/quota accounting verified;0provider generation before cleanA2seal.
 - [x] Round39 T3:PASS;122/122executed,0unexecuted,registered75UNSAFE/47SAFE;0observed unsafe send-eligible falsePASS;observedSAFEfailure1/47;requests118,errors0,timeouts0,max1/retry0. a2RunSourceSha0dc69cb95bba7f044ea62b319f08ec17966bf2be. Captured requests/source/input/firewall validated;all errors retained.
 - [x] Round39 Checkpoint completion:A3 FAIL: 42/42 executed, 0 unexecuted; 42 owner + 42 verifier requests; 37 eligible / 5 fallback / 0 handoff / 0 no-send; primary 33/42 PASS, 420 explicit diagnostics;5raw hashes/Git blobs committed BEFORE primary review;420human ratings null. a3RunSourceSha 62898c43585f0c14afbf1ec709ca6863ac1740f6. RecommendationSTOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-39/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-39/FINDINGS.md);full registered denominator/request/errors/hashes/commands preserved. DraftPR390 delivery followed by publication readback. STOPowner,noautomatic40/post-A/merge/deploy/live-send.
+
+
+## Authorized Round40 — 2026-10-10
+
+- [x] Round40 T1: remote main readback 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 9b6622a883ed95b72d70ba034f7cb20530816198;new owner presentation/prompt and prospective review frozen before generation;42runtime/122A2/canonical/verifier/models/config/bars/fallback39 unchanged;3 evaluator corrections. [Scope](../docs/specs/c3-round40-advisory-context-and-review-20261010.md).
+- [ ] Round40 T2 observedRED/minimumGREEN/readiness/selfreview/cleanseal.
+- [ ] Round40 T3 fresh122A2once;all attempts/errors retained;provider unavailable/confirmed exhausted capacity→BLOCKED.
+- [ ] Round40 conditional42A3once;rawcommit before wholeterminalreview/CHECKPOINT/tasks/draftPR390/STOPowner,noautomatic41/post-A.
