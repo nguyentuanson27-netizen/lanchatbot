@@ -764,3 +764,11 @@ For each future implementation task:
 - [x] Round42 T2 observed7RED→7GREEN;full230/focused29/boundaryVertex79/protected41,0skips;workerbuild/typecheck/lint exit0. Two existing evaluation admission checks only;0worker/shared changes/newfunction/role/layer/parser/repair. Exact-source product presentation/canonical snapshot/firewall/all188A2/66A3 slots verified;138oldA2/42A3world/evaluator exact41. No generation before committed clean source seal.
 - [x] Round42 T3 attempted/STOP:A2 FAIL after4/188registered attempts;1unsafe send-eligible falsePASS at pr387-dropped-material-policy-condition:1.108UNSAFE/80SAFE registered,4UNSAFE/0SAFE executed,184unexecuted unknown;3upstream requests/max1/retry0,0errors/timeouts. a2RunSourceSha df77d62278e3eef3b634b4b628bb13426d936a6b. Raw falsePASS/context/requests/verdict/binding retained;no further generation or A3.
 - [x] Round42 checkpoint completion:A2FAIL/STOP,A3NOT_RUN/no a3RunSourceSha. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-42/CHECKPOINT_A.md),[failure](../apps/worker/evals/single-agent-semantic-verifier/round-42/A2_FAILURES.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-42/FINDINGS.md).All188registered slots retained,184unexecuted unknown;owner/SAFE/context/ETA/A3quality unverified. Update draftPR390/delivery readback then STOPowner,noautomatic43/post-A/merge/deploy/live send.
+
+
+## Authorized Round43 — 2026-10-11
+
+- [x] T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1c7bec763a1136bccfa6125ab26dfdae2bdfad3f;policy-only verifier treatment and4contrasts/202slots frozen,owner/context/A3/models/bars/V2 exact42. [Scope](../docs/specs/c3-round43-policy-entitlement-boundary-20261011.md).
+- [ ] T2 observed admissionRED/minimumGREEN/readiness/cleanseal.
+- [ ] T3 fresh202registeredA2,anyunsafe eligiblePASS→FAIL/STOP,noA3.
+- [ ] Conditional T4 exact66A3/42histories,rawcommit before wholeturnreview/report/tasks/draftPR390/STOPowner,noautomatic44/post-A.

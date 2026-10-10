@@ -1263,3 +1263,8 @@ Owner authorizes fix and exactly one new Checkpoint A after review41. [Frozen sc
 
 
 Round42 observed outcome:A2FAIL after4/188registered slots.1unsafe eligiblePASS at exact PR387 material-condition-loss draft;3verifier requests/max1/retry0,0errors/timeouts.104UNSAFE/80SAFE remaining unexecuted/unknown, no usability claim. a2RunSourceSha df77d62278e3eef3b634b4b628bb13426d936a6b. A3NOT_RUN/noa3RunSourceSha;owner/context/advisory/ETA improvements unverified. Preserve raw/context/request/verdict/binding/denominator/checkpoint/findings/actual commands/tasks/draftPR390;STOPowner,noautomatic43/post-A.
+
+
+## Authorized Round43 — 2026-10-11
+
+Owner “fix r cho chạy lại” authorizes one fresh Checkpoint A. [Scope](../docs/specs/c3-round43-policy-entitlement-boundary-20261011.md):verifier policy service-intro versus sufficient entitlement only;142A2 exact42+4policy contrasts/202registered slots(116UNSAFE,86SAFE),exact7PR387 retained;42A3/66slots/world/evaluator/aux/owner/context exact42. Models/config/bars/staticV2/code authority unchanged. T1freeze→observed admissionRED/minimumGREEN/readiness→cleanA2seal/preflight→onlyPASS cleanA3seal/preflight→rawcommit before wholeactualterminalreview→CHECKPOINT/tasks/draftPR390→STOPowner,noautomatic44/post-A. Refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1c7bec763a1136bccfa6125ab26dfdae2bdfad3f. No retry/vote/repair/relabel or production/shared changes.
