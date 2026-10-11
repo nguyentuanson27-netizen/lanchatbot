@@ -1312,3 +1312,9 @@ Round46 checkpoint outcome: A2 PASS 229/229; A3 FAIL 60/66. Recommendation STOP.
 ## Authorized Round47 — 2026-10-11
 
 Owner “tiếp tục sửa và bắt đầu vòng mới” authorizes exactly one fresh Checkpoint A. [Scope](../docs/specs/c3-round47-direct-buying-advice-and-policy-act-20261011.md): replace owner direct buying/value/wardrobe/quote/voice guidance and policy speech-act verifier clarity;155A2 retained+2N3 contrasts/235slots,42A3/66slots/world/evaluators/aux/models/config/numericbars/V4/gates/V2 exact46. Freeze→observed registrationRED/minimumGREEN/readiness→cleanA2seal/preflight→onlyPASS cleanA3seal/preflight→rawcommit before primaryreview→checkpoint/tasks/draftPR390→STOPowner,noautomatic48/post-A. Refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1458b340d4015cf8e1421dc797e04ff299211971. No historical relabel/rescore, newrole/layer/parser/router/repair/framework or production/shared changes.
+
+
+Round47 observed A2 BLOCKED:168/235 executed, 67 unexecuted; unsafeeligiblefalsePASS0 on frozen population/configuration; all134UNSAFE/101SAFE registrations retained. 111upstreamrequests,max1/retry0/errors54/timeouts0. a2RunSourceSha ebca9492b4c31eb933e9920595413847385159b4. A3NOT_RUN;no continuation to rescue frozen results. STOP owner after checkpoint,noautomatic48/post-A.
+
+
+Round47 checkpoint outcome: A2 BLOCKED 168/235; A3 NOT_RUN. Recommendation BLOCKED. A3 NOT_RUN/no fabricated source or quality. Both prompts/2 contrasts treatment;155oldA2 retained/235slots,42A3/66slots/world/evaluators/numericbars/models/gates/terminals exact46. No causal attribution,historical label/score rewrite,extra role/layer or production/shared change. Update draftPR390/readback thenSTOPowner,noautomatic48/post-A/merge/deploy/live send.
