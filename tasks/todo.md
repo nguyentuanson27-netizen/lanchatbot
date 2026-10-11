@@ -811,3 +811,12 @@ For each future implementation task:
 
 - [x] Freeze exact67 missing IDs and original evidence hash; retain all168 completed slots and unchanged models/prompts/inputs/bars. Recorded failures remain in the denominator. Original first-missing dispatch accounting is unknown; completion has a separate source seal and persists dispatch starts.
 - [x] Completion RED→GREEN/readiness249/33tests, clean source ca9e6230/preflight,50/67 provider outcomes before unsafe falsePASS hardSTOP. Combined218/235,1unsafeeligiblefalsePASS,32SAFEfailures,17unexecuted;rawcommit3d5f753/all168oldoutcomes unchanged. Two owner-requested offline reviews/accounting audit completed. [Final findings](../apps/worker/evals/single-agent-semantic-verifier/round-47/A2_COMPLETION.md). A2FAIL/STOP,A3NOT_RUN;original dispatch-count unknown retained. No further generation/Round48/post-A.
+
+
+## Round48 preparation — 2026-10-11
+
+- [x] Refreshed main296cdcfb; prospective policy contract/label correction and unchanged owner/A3/world/config documented. [Scope](../docs/specs/c3-round48-policy-contract-preparation-20261011.md).
+- [x] Correct two legacy SAFE labels in new corpus only; retain all157 old drafts/context/code scenarios and exact7PR387; add6N3 probes.163cases/253slots:147UNSAFE/106SAFE. Preserve historical results and policy-specific interpretation.
+- [x] Replace verifier policy section (6118→5974chars); keep remaining prompt/owner47 unchanged. Reuse availability stop for AUTH_HEADER/401/429, no retry/new role/layer/gate.
+- [x] Observed4RED→4GREEN; full253/focused38/boundary79/protected41; worker typecheck/build/lint PASS. Self-review/limitations and actual commands in [preparation evidence](../apps/worker/evals/single-agent-semantic-verifier/round-48/PREPARATION.md). T1be45150d/code35227c3d.
+- [ ] Provider run not performed in this preparation; no a2RunSourceSha/a3RunSourceSha or semantic qualification. Auth root cause remains unproven. Round47 A2FAIL/STOP,A3NOT_RUN remains; no automatic48generation/post-A.
