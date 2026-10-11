@@ -57,7 +57,7 @@ async function main(){
  const priorRaw=readFileSync(inputUrl('a2-evidence.json'),'utf8'),plan=JSON.parse(readFileSync(inputUrl('a2-completion-plan.json'),'utf8'));
  validateA2Evidence(manifest,a2,JSON.parse(priorRaw));
  if(hash(readFileSync(inputUrl('manifest.json')))!==plan.manifestHash)throw new Error('MANIFEST_CHANGED');
- const client=inspectCodex();if(JSON.stringify(client)!==JSON.stringify(manifest.inspectedClient))throw new Error('CLIENT_IDENTITY_CHANGED');
+ const client=inspectCodex();if(client.version!==manifest.inspectedClient.version||client.binarySha256!==manifest.inspectedClient.binarySha256)throw new Error('CLIENT_IDENTITY_CHANGED');
  const evidence=prepareCompletion(plan,priorRaw,manifest,a2,sha);
  const boundary=new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url);
  const save=value=>{
