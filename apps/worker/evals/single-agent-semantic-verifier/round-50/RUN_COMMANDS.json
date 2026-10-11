@@ -55,6 +55,36 @@
       "command": "C3_CHECKPOINT_A_ROUND=50 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node - (read-only inspectGemini(manifest))",
       "exitCode": 0,
       "result": "Credential available; project matches; global; helper SHA256 fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe; Node24.19.0; zero generation. No credential contents retained."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS before readiness commit; only line-ending advisory."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_RUN_SOURCE_SHA=9ede18d8fdad8e1ee508a95dc5adfca4ae4baedc node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID; clean committed source."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_RUN_SOURCE_SHA=9ede18d8fdad8e1ee508a95dc5adfca4ae4baedc node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs",
+      "exitCode": 0,
+      "result": "A2 PASS253/253;147UNSAFE106SAFE;0unsafeeligiblefalsePASS/0SAFEfailures;249requests,max1,retry0,0timeout/error,0unexecuted."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exitCode": 0,
+      "result": "A2 evidence validates253/253PASS;frozen protocol valid."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
+      "exitCode": 0,
+      "result": "PASS source/input/binding/accounting/firewall;249 captured requests reconstructed."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-readbacks.mjs",
+      "exitCode": 0,
+      "result": "1065 prior round/prompt files unchanged;source delta19insertions12deletions;A3 not yet run."
     }
   ]
 }
