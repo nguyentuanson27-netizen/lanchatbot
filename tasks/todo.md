@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task:** Owner-authorized Round52 preparation: root-cause fixes, self-review and failure-cohort-first N3 execution, then remainder only after PASS. [Frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). R51 A2PASS/A3FAIL/STOP and all historical evidence retained; no provider run yet, no automatic53/post-A.
+**Current task:** Round52 completed to the owner-requested conditional checkpoint: A2PASS277/277 (failure cohort90/90 then187remaining), A3failure cohort25/30PASS with5fallbacks;42remaining registrations NOT_RUN because prefixFAIL. Recommendation STOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-52/CHECKPOINT_A.md),[finding](../apps/worker/evals/single-agent-semantic-verifier/round-52/FINDINGS.md),[frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). All historical evidence retained;no automatic53/post-A.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
@@ -875,7 +875,8 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 
 - [x] Refresh main; record source identity; read current project/spec/plan/finding guidance;freeze owner/context/cohorts/inputs before providers.
 - [x] Observed RED0/8 before executable changes;intermediate7/8 canonical hash fix;GREEN8/8,focused48/full277,boundary79/protected41,0skip;worker build/typecheck/lint PASS;read-only approved routes available0generation;self-review/limits in round-52/READINESS.json.
-- [ ] Clean committed A2 seal/preflight;failure cohort then conditional remainder;retain complete registration/accounting.
-- [ ] Only fresh A2PASS:clean A3 seal/preflight,prefix30 outcomes,rawcommit before whole-turn primary scores.
-- [ ] Only all30prefixPASS:continue remaining42without rerunning prefix or changing source/config;review full outcomes.
-- [ ] Audit/report/checkpoint/tasks/draftPR390 and STOP owner.
+- [x] Clean A2source8e6e4f6b37a5f5b5a67b67c9946b509481ee0a3a/preflight;prefix90/90PASS then187remaining;277/277PASS159UNSAFE/118SAFE,0eligiblefalsePASS/0SAFEfailures,273requests,max1/retry0/errors0/timeouts0.
+- [x] Fresh A2PASS then clean A3sourcee40717eccf081a45e1d1f83a183914a00c8631ff/preflight;prefix30outcomes25eligible/5fallback,0providererrors/timeouts;raw4de28e89before primarycf1b90f8before diagnostics.
+- [x] Conditional remainder withheld:primary25/30PASS,policy7/12<90%,5/30fallback16.67%;authorizeA3Continuation rejects REGRESSION_NOT_PASS;42unexecuted/undispatched,720humanratingsnull. FullA3BLOCKED,not whole-corpus qualification.
+- [x] Audit333bodies/bindings/gates/source/raw/score,1089historical tracked files unchanged,9R51sidecars byte-exact;report/checkpoint/finding/fivefailures complete. Remaining owner-condition3clear conditional losses+2scope ambiguities;not context/provider missing. STOPowner,no automatic53/post-A.
+- [ ] Deliver draftPR390 with exactbase/commands/prefix-remainder status/unknowns and clean remote readback;no further generation.
