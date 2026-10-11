@@ -85,6 +85,26 @@
       "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-readbacks.mjs",
       "exitCode": 0,
       "result": "1065 prior round/prompt files unchanged;source delta19insertions12deletions;A3 not yet run."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_STATUS=PASS A3_RUN_SOURCE_SHA=eab2c4314954e6f08d9c8a3060015e14d32cf4f3 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;separate clean committed source."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_STATUS=PASS A3_RUN_SOURCE_SHA=eab2c4314954e6f08d9c8a3060015e14d32cf4f3 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs",
+      "exitCode": 0,
+      "result": "66/66 complete;66owner+66verifier requests;max1/retry0;65SEND_ELIGIBLE1FALLBACK,0HANDOFF/NO_SEND;0timeout/error. Quality unscored at generator completion; human ratings null."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3",
+      "exitCode": 0,
+      "result": "66/66 registered outcomes/bindings/requests valid;quality unscored at this stage."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
+      "exitCode": 0,
+      "result": "PASS after A3 completion;132 A3 captured requests reconstructed; raw Gemini candidate+thinking usage reconciled; human ratings null."
     }
   ]
 }
