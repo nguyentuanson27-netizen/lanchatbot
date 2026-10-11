@@ -801,6 +801,6 @@ For each future implementation task:
 ## Authorized Round47 — 2026-10-11
 
 - [x] T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1458b340d4015cf8e1421dc797e04ff299211971;both prompts/2N3 contrasts/review procedure frozen;155oldA2 retained/235slots,42A3/66slots/world/evaluator/aux/config/numericbars/V2 exact46. [Scope](../docs/specs/c3-round47-direct-buying-advice-and-policy-act-20261011.md).
-- [ ] Round47 T2 observed registrationRED/minimumGREEN/readiness/cleanseal.
+- [x] Round47 T2 observed3RED→3GREEN; serial full245/focused29/boundaryVertex79/protected41,0skip; workerbuild/typecheck/lint exit0. Fixed47 registration/hash pins only;155oldA2 retained+2N3 contrasts/235slots,42A3/66slots/world/evaluator/models/numericbars/V2 retained. Owner+379chars,verifier+179chars;0newrole/layer/parser/repair/production/shared changes. Approved clients available; read-only limits checked, credits present, actual generation availability unproven. Clean commit/seal follows.
 - [ ] Round47 T3 fresh235registeredA2;anyunsafe eligiblePASS→FAIL/STOP,noA3.
 - [ ] Round47 conditional T4 exact66A3/42histories,rawcommit before whole-turn review/report/tasks/draftPR390/STOPowner,noautomatic48/post-A.

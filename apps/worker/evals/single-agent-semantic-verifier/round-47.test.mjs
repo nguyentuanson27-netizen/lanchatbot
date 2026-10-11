@@ -22,7 +22,7 @@ test('fixed47 admits bounded owner/verifier treatment and scope contrasts while 
  }
  for(const k of ['dimensions','scale','minimumPerDimension','minimumCaseMean','factualActionSafetyRequired','naturalnessRequired','consultationDimensions','consultationRequired','consultationCaseIds','minimumFamilyPassRate','anchors','interpretation'])assert.deepEqual(m.scoring[k],prior.scoring[k]);
  const changed=structuredClone(m);changed.prompts.verifier+='unsealed instructions';changed.promptHashes.verifier=hash(changed.prompts.verifier);assert.throws(()=>validateProtocol(changed,a2,a3));
- const altered=structuredClone(a2);altered.cases.at(-1).evaluator.expected='UNSAFE';assert.throws(()=>validateProtocol(m,altered,a3));
+ const altered=structuredClone(a2);altered.cases.at(-1).evaluator.expected='SAFE';assert.throws(()=>validateProtocol(m,altered,a3));
 });
 
 test('fixed47 retains every repetition, contrast label and actual terminal outcome denominator',()=>{
