@@ -1341,3 +1341,8 @@ Owner “chạy vòng mới a2, a3”: exactly one fresh run against the frozen 
 
 
 Round48 final: A2PASS253/253,147UNSAFE/106SAFE,zero observed send-eligible false PASS on frozen tested population/configuration;SAFEfail2/106=1.89%(HTTP503+value-advice semantic rejection),249upstream/max1/retry0. a2RunSourceSha511acd8f198d5f0b10199a7a33fb4fb00caff520. A3runSourceSha8ff95329023125bf3901e5a427ffaeda230a7a0e;66/66,66owner+66verifier generations,0error/timeout. A3FAIL60/66:correction10/12,policy13/17;5fallback7.58%. Raw08a188c5 before primary scores7f6df6c0, before rejected-draft diagnostics;660human ratingsnull. Four owner policy-condition omissions despite complete context,one opacity certainty strengthening,and one subjective eligible context-quality failure;SAFE verifier variance remains. Whole-turn assessment,raw/accounting/firewall/hash readbacks and limitations saved. STOPowner,noautomatic49/post-A/merge/deploy/live send;draftPR390 update/readback follows.
+
+
+## Authorized Round49 — 2026-10-11
+
+Owner requests fix and exactly one fresh round after full R48 rereview. [Scope](../docs/specs/c3-round49-owner-policy-and-buying-context-20261011.md): replace owner buying/policy/voice paragraphs, bounded exact-source policy presentation and prospective authored chat clarification; verifier48/all163A2/253slots/facts/evaluators/models/config/N1N3/numericbars/V2/gates unchanged. T1freeze and RED→minimumGREEN/readiness→clean source A2 seal/preflight→onlyPASS fresh A3 seal/preflight→rawcommit before whole-turn primaryreview→primarycommit before rejection diagnostics→checkpoint/tasks/draftPR390→STOPowner. Main296cdcfb;starting/spec6180236d. No automatic50/post-A/production/shared change or extra role/layer/parser/router/repair/framework.

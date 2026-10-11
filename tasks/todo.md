@@ -833,3 +833,11 @@ For each future implementation task:
 
 
 Round48 final: A2PASS253/253, zero observed send-eligible false PASS on frozen tested population/configuration; A3FAIL60/66,5fallbacks. a2RunSourceSha511acd8f198d5f0b10199a7a33fb4fb00caff520; a3RunSourceSha8ff95329023125bf3901e5a427ffaeda230a7a0e. Main finding:4policy replies compressed trial conditions despite complete context;1opacity reply strengthened possibility into certainty;1eligible color ACK has a subjective context-quality concern. Verifier SAFE value-advice variance remains1/3. Primary Codex review is nonblind/subjective, not owner/human acceptance. No automatic49/post-A/merge/deploy/live send.
+
+
+## Authorized Round49 — 2026-10-11
+
+- [x] Refreshed main296cdcfb; owner49/policy display/frozen corpus and review scope prepared before provider. [Scope](../docs/specs/c3-round49-owner-policy-and-buying-context-20261011.md). A2 exact48;32 prospective dialogue edits/16 histories, trusted worlds/evaluators unchanged. Observed registration/formatter/adapter RED; no provider calls yet.
+- [ ] Minimum GREEN, focused/full protocol/context/adapter/boundary/protected checks and worker typecheck/build/lint; self-review.
+- [ ] Clean source seal/preflight and fresh A2, only PASS permits fresh clean A3.
+- [ ] Commit raw before primary review, review all actual outcomes, diagnostics/audit/checkpoint/tasks/PR readback, STOPowner;noautomatic50/post-A.
