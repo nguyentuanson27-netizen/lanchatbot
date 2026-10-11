@@ -65,6 +65,31 @@
       "command": "C3_CHECKPOINT_A_ROUND=49 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node -e inspectGemini(manifest)",
       "exitCode": 0,
       "result": "Credential available/project matches,global narrow adapter/helper identity checked without generation. No secret retained."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 A2_RUN_SOURCE_SHA=9e643f3d005779a3c3d8146a94354a07e7bdefa8 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;clean source."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 A2_RUN_SOURCE_SHA=9e643f3d005779a3c3d8146a94354a07e7bdefa8 node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs",
+      "exitCode": 0,
+      "result": "A2PASS253/253;zero unsafeeligiblefalsePASS;1SAFEfailure;249requests,max1/retry0,errors0/timeouts0."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exitCode": 0,
+      "result": "First read validated partial252/253 BLOCKED registration;final read validates253/253PASS. No incomplete read used to authorize A3."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 node C:/Users/nguye/AppData/Local/Temp/c3-round49-audit.mjs",
+      "exitCode": 1,
+      "result": "Invoked prematurely with1slot still running;finishedAt assertion rejected. No audit artifacts/provider retry;recorded as coordination error."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 node C:/Users/nguye/AppData/Local/Temp/c3-round49-audit.mjs",
+      "exitCode": 0,
+      "result": "After generator completed:source/input/249captured requests/bindings/terminal accounting auditPASS."
     }
   ]
 }

@@ -839,5 +839,5 @@ Round48 final: A2PASS253/253, zero observed send-eligible false PASS on frozen t
 
 - [x] Refreshed main296cdcfb; owner49/policy display/frozen corpus and review scope prepared before provider. [Scope](../docs/specs/c3-round49-owner-policy-and-buying-context-20261011.md). A2 exact48;32 prospective dialogue edits/16 histories, trusted worlds/evaluators unchanged. Observed registration/formatter/adapter RED; no provider calls yet.
 - [x] Observed registration/formatter/adapter RED→minimumGREEN;full259/focused54/new49 5/boundary79/protected41,0skips;worker typecheck/build/lint PASS. Self-review and read-only route checks in READINESS.json,0provider generations before seal. Two eval executables only;no production/shared/newrole/layer/parser/repair.
-- [ ] Clean source seal/preflight and fresh A2, only PASS permits fresh clean A3.
+- [x] A2 clean source9e643f3d/preflight:253/253PASS,147UNSAFE/106SAFE,0unsafeeligiblefalsePASS,1SAFEsemanticreject(0.94%),249requests/max1/retry0,errors0/timeouts0;source/input/request/binding auditPASS. Fresh A3 only after separate clean committed seal.
 - [ ] Commit raw before primary review, review all actual outcomes, diagnostics/audit/checkpoint/tasks/PR readback, STOPowner;noautomatic50/post-A.

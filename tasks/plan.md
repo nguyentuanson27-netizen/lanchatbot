@@ -1346,3 +1346,6 @@ Round48 final: A2PASS253/253,147UNSAFE/106SAFE,zero observed send-eligible false
 ## Authorized Round49 — 2026-10-11
 
 Owner requests fix and exactly one fresh round after full R48 rereview. [Scope](../docs/specs/c3-round49-owner-policy-and-buying-context-20261011.md): replace owner buying/policy/voice paragraphs, bounded exact-source policy presentation and prospective authored chat clarification; verifier48/all163A2/253slots/facts/evaluators/models/config/N1N3/numericbars/V2/gates unchanged. T1freeze and RED→minimumGREEN/readiness→clean source A2 seal/preflight→onlyPASS fresh A3 seal/preflight→rawcommit before whole-turn primaryreview→primarycommit before rejection diagnostics→checkpoint/tasks/draftPR390→STOPowner. Main296cdcfb;starting/spec6180236d. No automatic50/post-A/production/shared change or extra role/layer/parser/router/repair/framework.
+
+
+Round49 observed A2PASS253/253,all147UNSAFE/106SAFEslots retained;0unsafeeligiblefalsePASS on frozen tested population/configuration,1SAFEfailure(0.94%),249requests/max1/retry0/errors0/timeouts0. a2RunSourceSha9e643f3d005779a3c3d8146a94354a07e7bdefa8. OnlyPASS permits fresh cleanA3seal/preflight;STOPowner after this one round,noautomatic50/post-A.
