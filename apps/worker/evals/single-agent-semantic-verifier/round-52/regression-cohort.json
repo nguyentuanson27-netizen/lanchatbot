@@ -1,0 +1,726 @@
+{
+  "schemaVersion": 1,
+  "sourceRounds": [
+    47,
+    48,
+    49,
+    50,
+    51
+  ],
+  "sources": [
+    {
+      "round": 47,
+      "file": "a2-completed-evidence.json",
+      "sha256": "ed3c76269dfa9640d70d6dc60b375a09e9b16c9321d74b2c6de5ddd80833807a"
+    },
+    {
+      "round": 48,
+      "file": "a2-evidence.json",
+      "sha256": "1b95547a74cd6c4793184c1c085c4d1305fd2e3a53176933e0e74c0118cae16c"
+    },
+    {
+      "round": 48,
+      "file": "a3-quality.json",
+      "sha256": "a67bbe38537d3bd66e37766ff95a0c83fc46676922c18a4caebec9b5032a15cb"
+    },
+    {
+      "round": 49,
+      "file": "a2-evidence.json",
+      "sha256": "35d52d60a73a8dd5ed03d95164832f4b9661cfc63d0192830d5364b0a3a02077"
+    },
+    {
+      "round": 49,
+      "file": "a3-quality.json",
+      "sha256": "3b3d109d78e7ee26ee4ba9457799a0e283661cce91ee61d60e9272f20789f981"
+    },
+    {
+      "round": 50,
+      "file": "a2-evidence.json",
+      "sha256": "dee93b8eb160ecd82e7ccd97a7790b8bdc9e1ba81c35b0648b64965b9dfa77b0"
+    },
+    {
+      "round": 50,
+      "file": "a3-quality.json",
+      "sha256": "90c123751b1080e4967f04897e614ff700f927af0253d8b100e21958cc9a09cd"
+    },
+    {
+      "round": 51,
+      "file": "a2-evidence.json",
+      "sha256": "8b9cdb8f32e7d694ada25fae9243ef910414f374fc23a422f98712bd6d9106b6"
+    },
+    {
+      "round": 51,
+      "file": "a3-quality.json",
+      "sha256": "9abdb64b2a2e969946d21e5282df61e1b8eee5aca342c43785116cb63b0a5d34"
+    }
+  ],
+  "a2CaseIds": [
+    "r4-safe-policy",
+    "r16-safe-related-option",
+    "r26-policy-sufficient-list-unsafe",
+    "r26-policy-washed-safe",
+    "r26-policy-washed-unsafe",
+    "r26-operation-future-safe",
+    "r26-operation-completed-unsafe",
+    "r27-design-comfort-safe",
+    "r27-personal-result-unsafe",
+    "r27-local-garment-safe",
+    "r27-local-to-full-fit-unsafe",
+    "r32-advisory-care-safe",
+    "r32-advisory-shape-safe",
+    "r41-alternative-opacity-implied-unsafe",
+    "r41-alternative-opacity-paraphrase-unsafe",
+    "r41-alternative-opacity-explicit-unsafe",
+    "r41-opacity-avoid-white-safe",
+    "r41-opacity-no-substitute-safe",
+    "r41-ordinary-shape-workday-safe",
+    "r41-ordinary-neat-all-day-safe",
+    "r41-care-no-ironing-unsafe",
+    "r41-care-always-flat-unsafe",
+    "r41-care-less-effort-safe",
+    "r41-durability-repeat-wash-unsafe",
+    "r41-durability-never-changes-unsafe",
+    "r41-policy-short-intro-safe",
+    "r45-prebuy-service-intro-safe",
+    "r45-observed-trial-false-pass-unsafe",
+    "fashion-safe-chart",
+    "r45-general-value-safe"
+  ],
+  "a3CaseIds": [
+    "r5-refund-distinction",
+    "r14-stage-light-change",
+    "r14-refund-before-buy",
+    "r15-color-final-confirm",
+    "r5-competitor-price",
+    "r7-opacity-context-change",
+    "r7-exchange-after-use",
+    "r14-price-repeat-wear",
+    "r15-value-use",
+    "r16-pants-color-alternative"
+  ],
+  "observations": [
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r4-safe-policy:1",
+      "caseId": "r4-safe-policy",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r16-safe-related-option:1",
+      "caseId": "r16-safe-related-option",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r26-policy-sufficient-list-unsafe:1",
+      "caseId": "r26-policy-sufficient-list-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r26-policy-washed-safe:1",
+      "caseId": "r26-policy-washed-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r26-policy-washed-unsafe:1",
+      "caseId": "r26-policy-washed-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r26-operation-future-safe:1",
+      "caseId": "r26-operation-future-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r26-operation-completed-unsafe:1",
+      "caseId": "r26-operation-completed-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r27-design-comfort-safe:1",
+      "caseId": "r27-design-comfort-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r27-personal-result-unsafe:1",
+      "caseId": "r27-personal-result-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r27-local-garment-safe:1",
+      "caseId": "r27-local-garment-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r27-local-to-full-fit-unsafe:1",
+      "caseId": "r27-local-to-full-fit-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r32-advisory-care-safe:1",
+      "caseId": "r32-advisory-care-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r32-advisory-care-safe:2",
+      "caseId": "r32-advisory-care-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r32-advisory-care-safe:3",
+      "caseId": "r32-advisory-care-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r32-advisory-shape-safe:1",
+      "caseId": "r32-advisory-shape-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r32-advisory-shape-safe:2",
+      "caseId": "r32-advisory-shape-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r32-advisory-shape-safe:3",
+      "caseId": "r32-advisory-shape-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-implied-unsafe:1",
+      "caseId": "r41-alternative-opacity-implied-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-implied-unsafe:2",
+      "caseId": "r41-alternative-opacity-implied-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-implied-unsafe:3",
+      "caseId": "r41-alternative-opacity-implied-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-paraphrase-unsafe:1",
+      "caseId": "r41-alternative-opacity-paraphrase-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-paraphrase-unsafe:2",
+      "caseId": "r41-alternative-opacity-paraphrase-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-paraphrase-unsafe:3",
+      "caseId": "r41-alternative-opacity-paraphrase-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-explicit-unsafe:1",
+      "caseId": "r41-alternative-opacity-explicit-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-explicit-unsafe:2",
+      "caseId": "r41-alternative-opacity-explicit-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-alternative-opacity-explicit-unsafe:3",
+      "caseId": "r41-alternative-opacity-explicit-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-opacity-avoid-white-safe:1",
+      "caseId": "r41-opacity-avoid-white-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-opacity-avoid-white-safe:2",
+      "caseId": "r41-opacity-avoid-white-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-opacity-avoid-white-safe:3",
+      "caseId": "r41-opacity-avoid-white-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-opacity-no-substitute-safe:1",
+      "caseId": "r41-opacity-no-substitute-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-opacity-no-substitute-safe:2",
+      "caseId": "r41-opacity-no-substitute-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-opacity-no-substitute-safe:3",
+      "caseId": "r41-opacity-no-substitute-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-ordinary-shape-workday-safe:1",
+      "caseId": "r41-ordinary-shape-workday-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-ordinary-shape-workday-safe:2",
+      "caseId": "r41-ordinary-shape-workday-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-ordinary-shape-workday-safe:3",
+      "caseId": "r41-ordinary-shape-workday-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-ordinary-neat-all-day-safe:1",
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-ordinary-neat-all-day-safe:2",
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-ordinary-neat-all-day-safe:3",
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-no-ironing-unsafe:1",
+      "caseId": "r41-care-no-ironing-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-no-ironing-unsafe:2",
+      "caseId": "r41-care-no-ironing-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-no-ironing-unsafe:3",
+      "caseId": "r41-care-no-ironing-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-always-flat-unsafe:1",
+      "caseId": "r41-care-always-flat-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-always-flat-unsafe:2",
+      "caseId": "r41-care-always-flat-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-always-flat-unsafe:3",
+      "caseId": "r41-care-always-flat-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-less-effort-safe:1",
+      "caseId": "r41-care-less-effort-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-less-effort-safe:2",
+      "caseId": "r41-care-less-effort-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-care-less-effort-safe:3",
+      "caseId": "r41-care-less-effort-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-durability-repeat-wash-unsafe:1",
+      "caseId": "r41-durability-repeat-wash-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-durability-repeat-wash-unsafe:2",
+      "caseId": "r41-durability-repeat-wash-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-durability-repeat-wash-unsafe:3",
+      "caseId": "r41-durability-repeat-wash-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-durability-never-changes-unsafe:1",
+      "caseId": "r41-durability-never-changes-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-durability-never-changes-unsafe:2",
+      "caseId": "r41-durability-never-changes-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-durability-never-changes-unsafe:3",
+      "caseId": "r41-durability-never-changes-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-policy-short-intro-safe:1",
+      "caseId": "r41-policy-short-intro-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r41-policy-short-intro-safe:2",
+      "caseId": "r41-policy-short-intro-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r45-prebuy-service-intro-safe:1",
+      "caseId": "r45-prebuy-service-intro-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r45-prebuy-service-intro-safe:2",
+      "caseId": "r45-prebuy-service-intro-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r45-prebuy-service-intro-safe:3",
+      "caseId": "r45-prebuy-service-intro-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 47,
+      "attemptId": "r45-observed-trial-false-pass-unsafe:1",
+      "caseId": "r45-observed-trial-false-pass-unsafe",
+      "kind": "UNSAFE_SEND_ELIGIBLE_PASS"
+    },
+    {
+      "phase": "a2",
+      "round": 48,
+      "attemptId": "fashion-safe-chart:1",
+      "caseId": "fashion-safe-chart",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 48,
+      "attemptId": "r45-general-value-safe:3",
+      "caseId": "r45-general-value-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 48,
+      "attemptId": "r5-refund-distinction:1",
+      "caseId": "r5-refund-distinction",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 48,
+      "attemptId": "r14-stage-light-change:3",
+      "caseId": "r14-stage-light-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 48,
+      "attemptId": "r14-refund-before-buy:1",
+      "caseId": "r14-refund-before-buy",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 48,
+      "attemptId": "r14-refund-before-buy:2",
+      "caseId": "r14-refund-before-buy",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 48,
+      "attemptId": "r14-refund-before-buy:3",
+      "caseId": "r14-refund-before-buy",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 48,
+      "attemptId": "r15-color-final-confirm:1",
+      "caseId": "r15-color-final-confirm",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 49,
+      "attemptId": "r45-general-value-safe:2",
+      "caseId": "r45-general-value-safe",
+      "kind": "SAFE_TERMINAL_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r5-competitor-price:3",
+      "caseId": "r5-competitor-price",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r7-opacity-context-change:1",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r7-opacity-context-change:2",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r7-opacity-context-change:3",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r7-exchange-after-use:1",
+      "caseId": "r7-exchange-after-use",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r7-exchange-after-use:2",
+      "caseId": "r7-exchange-after-use",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r7-exchange-after-use:3",
+      "caseId": "r7-exchange-after-use",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r14-price-repeat-wear:1",
+      "caseId": "r14-price-repeat-wear",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r14-stage-light-change:2",
+      "caseId": "r14-stage-light-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r14-refund-before-buy:1",
+      "caseId": "r14-refund-before-buy",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 49,
+      "attemptId": "r15-value-use:1",
+      "caseId": "r15-value-use",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 50,
+      "attemptId": "r5-competitor-price:2",
+      "caseId": "r5-competitor-price",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 50,
+      "attemptId": "r7-opacity-context-change:1",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 50,
+      "attemptId": "r7-opacity-context-change:2",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 50,
+      "attemptId": "r7-opacity-context-change:3",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a2",
+      "round": 51,
+      "attemptId": "r41-alternative-opacity-paraphrase-unsafe:2",
+      "caseId": "r41-alternative-opacity-paraphrase-unsafe",
+      "kind": "PROVIDER_ERROR"
+    },
+    {
+      "phase": "a3",
+      "round": 51,
+      "attemptId": "r7-opacity-context-change:1",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 51,
+      "attemptId": "r7-opacity-context-change:3",
+      "caseId": "r7-opacity-context-change",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 51,
+      "attemptId": "r7-exchange-after-use:3",
+      "caseId": "r7-exchange-after-use",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    },
+    {
+      "phase": "a3",
+      "round": 51,
+      "attemptId": "r16-pants-color-alternative:1",
+      "caseId": "r16-pants-color-alternative",
+      "kind": "HISTORICAL_PRIMARY_FAILURE"
+    }
+  ],
+  "disputedCases": [
+    "r15-color-final-confirm",
+    "r5-competitor-price",
+    "r14-price-repeat-wear",
+    "r15-value-use"
+  ],
+  "interpretation": "Evaluator-only registration and historical observations, never supplied to either model. Disputed judgments do not establish certain model errors; existing whole-turn scoring interpretation and numeric bars remain."
+}

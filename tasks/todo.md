@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task:** Round51 complete: A2PASS253/253, A3FAIL62/66;recommendation STOP owner. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-51/CHECKPOINT_A.md)/[findings](../apps/worker/evals/single-agent-semantic-verifier/round-51/FINDINGS.md). Policy14/17<90%;2 unresolved buying-advice updates,1 supported policy fallback,1 unnecessary fit input. Historical evidence retained;no automatic52/post-A.
+**Current task:** Owner-authorized Round52 preparation: root-cause fixes, self-review and failure-cohort-first N3 execution, then remainder only after PASS. [Frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). R51 A2PASS/A3FAIL/STOP and all historical evidence retained; no provider run yet, no automatic53/post-A.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
@@ -867,3 +867,15 @@ Owner “fix và tiếp tục vòng mới”. [Scope](../docs/specs/c3-round51-c
 - [x] A3FAIL62/66:concern23/23,partial11/11,correction11/12,policy14/17<90%,simple3/3. Two implicit recommendation updates still missing;one trial-entitlement extension correctly rejected;one quần reply requests unnecessary BUST_CM.
 - [x] Audit381capturedbodies/bindings/gates/rawhashes and1096historicalfiles unchanged;report/checkpoint complete. Worker checks PASS,subjective primary limitations retained;STOPowner,no automatic52/post-A.
 - [x] Report5616447ee810fa43813ec9507560e6606b8f3199 pushed;draftPR390 updated toRound51 with exacthead/body/branch/base/draft/clean-tree readback. Remote pnpmcheckQUEUED,notPASS;[delivery](../apps/worker/evals/single-agent-semantic-verifier/round-51/DELIVERY.md). Documentation savepoint follows;no further generation. STOPowner.
+
+
+## Authorized Round52 — 2026-10-12
+
+Owner requests root-cause fixes, self-review, then exactly one Checkpoint A round with prior failed cases3times first and conditional remainder. [Frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). Main296cdcfb;starting/specab2336da. Preserve all163A2/42A3 fixtures and verifier/models/canonical worlds/labels/bars/fallback. New V5 lossless per-product owner context and replacement owner guidance. Registration277A2 (90prefix/187remainder),72A3 (30prefix/42remainder);no rerun completed slots, all errors retained. A2PASS before any A3;prefixFAIL/BLOCKED stops remainder. No53/post-A/merge/deploy/live send.
+
+- [x] Refresh main; record source identity; read current project/spec/plan/finding guidance;freeze owner/context/cohorts/inputs before providers.
+- [ ] Observe mechanics RED, implement minimum GREEN, readiness and self-review.
+- [ ] Clean committed A2 seal/preflight;failure cohort then conditional remainder;retain complete registration/accounting.
+- [ ] Only fresh A2PASS:clean A3 seal/preflight,prefix30 outcomes,rawcommit before whole-turn primary scores.
+- [ ] Only all30prefixPASS:continue remaining42without rerunning prefix or changing source/config;review full outcomes.
+- [ ] Audit/report/checkpoint/tasks/draftPR390 and STOP owner.
