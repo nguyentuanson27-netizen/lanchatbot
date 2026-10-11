@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current execution:** owner authorizes one fresh Round48, A2 then A3 only if PASS. [Scope](../docs/specs/c3-round48-execution-20261011.md). No automatic next round/post-A.
+**Current outcome:** Round48 A2 PASS253/253, A3 FAIL60/66;5fallback/66=7.58%. Recommendation STOP at owner. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-48/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-48/FINDINGS.md), [scope](../docs/specs/c3-round48-execution-20261011.md). No automatic next round/post-A.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
@@ -821,15 +821,15 @@ For each future implementation task:
 - [x] Correct two legacy SAFE labels in new corpus only; retain all157 old drafts/context/code scenarios and exact7PR387; add6N3 probes.163cases/253slots:147UNSAFE/106SAFE. Preserve historical results and policy-specific interpretation.
 - [x] Replace verifier policy section (6118→5974chars); keep remaining prompt/owner47 unchanged. Reuse availability stop for AUTH_HEADER/401/429, no retry/new role/layer/gate.
 - [x] Observed4RED→4GREEN; full253/focused38/boundary79/protected41; worker typecheck/build/lint PASS. Self-review/limitations and actual commands in [preparation evidence](../apps/worker/evals/single-agent-semantic-verifier/round-48/PREPARATION.md). T1be45150d/code35227c3d.
-- [ ] Provider run not performed in this preparation; no a2RunSourceSha/a3RunSourceSha or semantic qualification. Auth root cause remains unproven. Round47 A2FAIL/STOP,A3NOT_RUN remains; no automatic48generation/post-A.
+- [x] Preparation-time status retained: provider not run at that savepoint, no run SHAs or semantic qualification then. Superseded only for R48 by explicitly authorized execution below; R47 A2FAIL/STOP,A3NOT_RUN remains historical. Auth remediation is not established by availability stopping.
 
 
 ## Authorized Round48 execution — 2026-10-11
 
 - [x] Refreshedmain296cdcfb; originalprepared inputs unchanged; pinned CLI/login and Vertex credential route checked without generation. Gemini48 V4 omission reproducedRED then minimal admission fix; focused checks green.
-- [ ] Clean committed source seal/preflight and A2provider result; preserve253registered attempts.
-- [ ] A3 only if A2PASS; otherwise NOT_RUN.
-- [ ] Retain raw before review, whole-terminal findings/metrics/checkpoint/tasks/PR and STOPowner.
+- [x] A2 clean committed source511acd8f/preflight/generator/validator:253/253;147UNSAFE/106SAFE;0unsafeeligiblefalsePASS,2SAFEfailures(1HTTP503+1semanticreject),249upstream/max1/retry0. Frozen source/input/request/binding auditPASS; no label or prompt change during run.
+- [x] A2raw committed8ff95329, clean A3 source8ff95329/preflight/generator/validator:66/66,66owner+66verifier generations,max1/retry0,0errors/timeouts. A3FAIL60/66;correction10/12,policy13/17 below90%;61SEND_ELIGIBLE/5FALLBACK,rate7.58%.
+- [x] Raw commit08a188c5 before whole-terminal review; primary scores commit7f6df6c0 before rejected-draft diagnostics. All42histories/66outcomes reviewed,660human scoresnull. Raw hashes/primary scores unchanged;5rejections diagnosed,metrics/findings/checkpoint saved. STOPowner; draftPR390 delivery/readback recorded separately.
 
 
-Round48 observed A2 PASS:253/253registered,147UNSAFE/106SAFE;zero observed send-eligible false PASS on frozen tested population/configuration. SAFEfail2/106=1.89%:1HTTP503+1semanticreject(r45-general-value-safe:3);249upstreamrequests,max1/retry0. a2RunSourceSha 511acd8f198d5f0b10199a7a33fb4fb00caff520. Audit/firewall/source bindings valid. A3authorized only after fresh clean committed source seal;42histories/66attempts; no automatic49/post-A.
+Round48 final: A2PASS253/253, zero observed send-eligible false PASS on frozen tested population/configuration; A3FAIL60/66,5fallbacks. a2RunSourceSha511acd8f198d5f0b10199a7a33fb4fb00caff520; a3RunSourceSha8ff95329023125bf3901e5a427ffaeda230a7a0e. Main finding:4policy replies compressed trial conditions despite complete context;1opacity reply strengthened possibility into certainty;1eligible color ACK has a subjective context-quality concern. Verifier SAFE value-advice variance remains1/3. Primary Codex review is nonblind/subjective, not owner/human acceptance. No automatic49/post-A/merge/deploy/live send.
