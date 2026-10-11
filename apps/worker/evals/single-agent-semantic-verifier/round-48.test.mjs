@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {generateKeyPairSync} from 'node:crypto';
+import {createGeminiInference} from './gemini-inference.mjs';
 import {hash,validateProtocol,projectRuntime,buildRequest} from './protocol.mjs';
 import {registerA2Attempts,providerCapacityExhausted,summarizeA2,evaluateA2Attempt} from './run-a2.mjs';
 const raw=(round,file)=>readFileSync(new URL('./round-'+round+'/'+file,import.meta.url),'utf8');
@@ -85,4 +87,22 @@ test('new label review stays evaluator-only in actual stub-captured verifier req
   });
   assert.equal(calls,1);assert.equal(outcome.terminal.disposition,'FALLBACK');
  }
+});
+
+test('round48 native dialogue reaches the conversation adapter in one generation without retry',async()=>{
+ const m=read(48,'manifest.json'),fixture=read(48,'corpus-a3.json').cases[0];
+ const request=buildRequest(m,'conversation',projectRuntime(m,fixture,'conversation','opaque-r48'));
+ const credential={type:'service_account',project_id:m.models.conversation.generationConfig.projectId,client_email:'fixture@example.invalid',
+  private_key:generateKeyPairSync('rsa',{modulusLength:2048,privateKeyEncoding:{type:'pkcs8',format:'pem'},publicKeyEncoding:{type:'spki',format:'pem'}}).privateKey};
+ let generations=0;
+ const generate=createGeminiInference(m,{credential,fetchImpl:async(url,options)=>{
+  if(url==='https://oauth2.googleapis.com/token')return Response.json({access_token:'local-test-token',expires_in:3600});
+  generations++;assert.equal(url,m.models.conversation.generationConfig.endpoint);
+  assert.deepEqual(JSON.parse(options.body),request);
+  assert.equal(request.contents.at(-1).parts[0].text,fixture.runtime.latestCustomerMessage);
+  return Response.json({modelVersion:m.models.conversation.version,candidates:[{content:{parts:[{text:'Dạ, chị nhé.'}]},finishReason:'STOP'}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:3}});
+ }});
+ const result=await generate(request);
+ assert.equal(result.status,'OK');assert.equal(generations,1);assert.equal(result.providerRequests,1);
+ assert.equal(result.answer,'Dạ, chị nhé.');
 });

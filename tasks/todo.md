@@ -1,6 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current work (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
+**Current execution:** owner authorizes one fresh Round48, A2 then A3 only if PASS. [Scope](../docs/specs/c3-round48-execution-20261011.md). No automatic next round/post-A.
+
+**Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
@@ -820,3 +822,11 @@ For each future implementation task:
 - [x] Replace verifier policy section (6118→5974chars); keep remaining prompt/owner47 unchanged. Reuse availability stop for AUTH_HEADER/401/429, no retry/new role/layer/gate.
 - [x] Observed4RED→4GREEN; full253/focused38/boundary79/protected41; worker typecheck/build/lint PASS. Self-review/limitations and actual commands in [preparation evidence](../apps/worker/evals/single-agent-semantic-verifier/round-48/PREPARATION.md). T1be45150d/code35227c3d.
 - [ ] Provider run not performed in this preparation; no a2RunSourceSha/a3RunSourceSha or semantic qualification. Auth root cause remains unproven. Round47 A2FAIL/STOP,A3NOT_RUN remains; no automatic48generation/post-A.
+
+
+## Authorized Round48 execution — 2026-10-11
+
+- [x] Refreshedmain296cdcfb; originalprepared inputs unchanged; pinned CLI/login and Vertex credential route checked without generation. Gemini48 V4 omission reproducedRED then minimal admission fix; focused checks green.
+- [ ] Clean committed source seal/preflight and A2provider result; preserve253registered attempts.
+- [ ] A3 only if A2PASS; otherwise NOT_RUN.
+- [ ] Retain raw before review, whole-terminal findings/metrics/checkpoint/tasks/PR and STOPowner.

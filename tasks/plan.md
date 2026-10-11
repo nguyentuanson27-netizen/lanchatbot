@@ -1,6 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
-**Current work (2026-10-11):** owner “thực hiện fix đi” / “tiếp tục fix” authorizes [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md): consistent prospective policy labels, replacement verifier policy section and bounded provider-availability stopping. Local verification only in this task; no provider run started. Round47 remains A2 FAIL / STOP, A3 NOT_RUN. Entries below retain historical authorizations/results.
+**Current execution:** owner “chạy vòng mới a2, a3” authorizes one fresh [Round48 run](../docs/specs/c3-round48-execution-20261011.md), frozen prepared inputs/config, A2 first and A3 only if PASS. No further round/post-A.
+
+**Prior preparation (2026-10-11):** owner “thực hiện fix đi” / “tiếp tục fix” authorizes [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md): consistent prospective policy labels, replacement verifier policy section and bounded provider-availability stopping. Local verification only in this task; no provider run started. Round47 remains A2 FAIL / STOP, A3 NOT_RUN. Entries below retain historical authorizations/results.
 
 Latest owner authorization (2026-10-09, “chạy đi”): exactly one new Round30 using the prepared readable conversation-context presentation against exact round28 control. [Frozen run scope](../docs/specs/c3-round30-context-presentation-run-20261009.md). Fresh A2 before A3; models/prompts/verifier/facts/bars/gate unchanged. Prior max3 batch27–29 remains STOP; no automatic follow-up round or post-A.
 
@@ -1331,3 +1333,8 @@ Completion observed A2FAIL/STOP:50/67new outcomes,218/235combined;unsafeeligible
 ## Owner-authorized Round48 preparation — 2026-10-11
 
 Owner “thực hiện fix đi” / “tiếp tục fix”: implement the A2-history root-cause correction, local verification only. [Scope](../docs/specs/c3-round48-policy-contract-preparation-20261011.md). Two prospective SAFE-to-UNSAFE corrections with every prior draft/world retained; six N3 development probes,163cases/253slots. Replace only verifier policy section; keep owner47/A3/facts/config/bars/fallback/gates. Existing availability stop gains R48-only AUTH_HEADER/401/429 conditions; errors stay counted, remainder null, no retry. T1 be45150d; implementation35227c3d. [Actual preparation evidence](../apps/worker/evals/single-agent-semantic-verifier/round-48/PREPARATION.md): observed4RED→4GREEN, full253/focused38/boundary79/protected41,0skip; worker typecheck/build/lint exit0. No provider generation or new A2/A3 result; Round47 FAIL/STOP remains. Fresh clean source seal/preflight required for a future authorized run, A3 only after A2 PASS. No historical rescore, automatic run, post-A, merge/deploy/live send.
+
+
+## Authorized Round48 execution — 2026-10-11
+
+Owner “chạy vòng mới a2, a3”: exactly one fresh run against the frozen prepared163A2cases/253attempts and42A3histories/66attempts. [Execution scope](../docs/specs/c3-round48-execution-20261011.md). Refresh main, inspect pinned clients/credentials/read-only limits; fix omitted Gemini V4 round48 admission with observed RED→GREEN before sealing. Do not alter frozen prompts/corpus/config/bars. Commit clean source→runtimeA2_RUN_SOURCE_SHA/preflight/run/validate. A2FAIL/BLOCKED→noA3; onlyPASS commit raw→fresh runtimeA3_RUN_SOURCE_SHA/preflight/run/validate→raw commit before whole-terminal review. Preserve complete denominator/request/errors/usage/firewall and historical evidence; checkpoint/tasks/PR then STOPowner.
