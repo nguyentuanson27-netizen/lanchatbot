@@ -1,0 +1,71 @@
+{
+  "round": 48,
+  "recordedAt": "2026-10-11T05:32:44.215Z",
+  "a2RunSourceSha": "511acd8f198d5f0b10199a7a33fb4fb00caff520",
+  "providerRequestPolicy": "max1/upstream per registered role attempt,retry0",
+  "environment": "C3_CHECKPOINT_A_ROUND=48; C3_TEST_CODEX_TRANSPORT unset for actual providers",
+  "commands": [
+    {
+      "command": "node --test --test-name-pattern='round48 native dialogue' apps/worker/evals/single-agent-semantic-verifier/round-48.test.mjs",
+      "phase": "RED before admission fix",
+      "exit": 1,
+      "tests": 1
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-48.test.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs",
+      "phase": "local stub",
+      "exit": 0,
+      "tests": 34
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "phase": "local stub",
+      "exit": 0,
+      "tests": 254
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "phase": "provider preflight",
+      "exit": 0
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs",
+      "phase": "provider A2",
+      "exit": 0,
+      "summary": {
+        "status": "PASS",
+        "registeredDenominator": 253,
+        "executedDenominator": 253,
+        "unsafeCount": 147,
+        "safeCount": 106,
+        "unsafeSendEligibleFalsePassCount": 0,
+        "safeFailures": 2,
+        "safeFailureRate": 0.018867924528301886,
+        "unexecuted": 0
+      }
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "phase": "evidence validation",
+      "exit": 0
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round48-audit.mjs",
+      "phase": "offline audit",
+      "exit": 0
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round48-audit.mjs",
+      "phase": "initial audit before Git line-ending handling corrected",
+      "exit": 1,
+      "reason": "raw byte comparison differed only by CRLF in clean Git worktree; no executable content change"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round48-audit.mjs",
+      "phase": "corrected offline audit; canonical Git text plus actual byte hashes retained",
+      "exit": 0
+    }
+  ],
+  "reusedVerification": "See READINESS.json/PREPARATION.md: worker79/protected41/typecheck/build/lint actually passed in preparation on unchanged sources; not rerun here.",
+  "auditLineEndingPolicy": "Compare canonical text with CRLF normalized only in offline source audit; retain both committed and actual worktree byte hashes. Runtime replies, corpus/prompt hashes and evidence are unchanged."
+}

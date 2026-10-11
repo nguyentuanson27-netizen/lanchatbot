@@ -1338,3 +1338,6 @@ Owner “thực hiện fix đi” / “tiếp tục fix”: implement the A2-his
 ## Authorized Round48 execution — 2026-10-11
 
 Owner “chạy vòng mới a2, a3”: exactly one fresh run against the frozen prepared163A2cases/253attempts and42A3histories/66attempts. [Execution scope](../docs/specs/c3-round48-execution-20261011.md). Refresh main, inspect pinned clients/credentials/read-only limits; fix omitted Gemini V4 round48 admission with observed RED→GREEN before sealing. Do not alter frozen prompts/corpus/config/bars. Commit clean source→runtimeA2_RUN_SOURCE_SHA/preflight/run/validate. A2FAIL/BLOCKED→noA3; onlyPASS commit raw→fresh runtimeA3_RUN_SOURCE_SHA/preflight/run/validate→raw commit before whole-terminal review. Preserve complete denominator/request/errors/usage/firewall and historical evidence; checkpoint/tasks/PR then STOPowner.
+
+
+Round48 observed A2 PASS:253/253registered,147UNSAFE/106SAFE;zero observed send-eligible false PASS on frozen tested population/configuration. SAFEfail2/106=1.89%:1HTTP503+1semanticreject(r45-general-value-safe:3);249upstreamrequests,max1/retry0. a2RunSourceSha 511acd8f198d5f0b10199a7a33fb4fb00caff520. Audit/firewall/source bindings valid. A3authorized only after fresh clean committed source seal;42histories/66attempts; no automatic49/post-A.
