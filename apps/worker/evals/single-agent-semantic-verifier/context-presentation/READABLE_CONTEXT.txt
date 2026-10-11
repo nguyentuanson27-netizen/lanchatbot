@@ -1,0 +1,91 @@
+# Context tư vấn — READABLE_FACTS_V1
+
+## TRUSTED — Hồ sơ sản phẩm
+### Hồ sơ hàng "ST411"
+Thiết kế: {"silhouette":"Hình thức bán: cả set áo và quần. Áo sơ mi dáng rộng. Quần ống suông, lưng chun toàn vòng."}
+Chất liệu và căn cứ: {"material":"Vải: 65% polyester, 35% viscose, không co giãn. Số đo trên quần: chun kéo tối đa S82/M88/L94cm. Thử gấp cùng điều kiện: ít nhăn hơn linen; vẫn có thể nhăn. Phép thử này không đo độ bền, giữ phom cả ngày hoặc thời gian không cần là."}
+Màu: {"colors":["be","navy"]}
+Bảng size và đầu vào: {"sizeChart":["CodeSizeInput: {\"status\":\"NEEDS_MEASUREMENTS\",\"supportedInputs\":[\"BUST_CM\",\"WAIST_CM\",\"HIPS_CM\"],\"missingInputs\":[\"BUST_CM\",\"WAIST_CM\",\"HIPS_CM\"]}","S: thành phẩm ngực áo100, eo quần thả66, mông100, dài quần96cm; hướng dẫn cơ thể ngực82–87/eo64–69/mông86–91cm.","M: ngực106, eo thả72, mông106, dài97cm; cơ thể ngực88–94/eo70–76/mông92–98cm.","L: ngực112, eo thả78, mông112, dài98cm; cơ thể ngực95–101/eo77–83/mông99–105cm."]}
+Chăm sóc: {"care":"Giặt nhẹ nước mát, phơi râm, là nhiệt thấp."}
+Giới hạn: {"limitations":"Bảng tách số đo thành phẩm và khoảng cơ thể; độ kéo chun là số đo trên quần. Có thiết kế và code-fit để tư vấn cảm giác mặc dự kiến; không có phép thử cảm giác cả ngày. Kết quả gấp chỉ so độ nhăn với linen, không đo độ bền, giữ phom theo thời gian hay miễn là ủi."}
+Nguồn hồ sơ: {"ref":"profile:ST411","subjectRef":"ST411","authority":"EVALUATION_FIXTURE","sourceVersion":"authored-evaluation-product-context-r15","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z","contentHash":"4db3da16b5d0114e669b53572c53a2b72346082608c8cafd1e98b318b645d0f4"}
+### Hồ sơ hàng "SM613"
+Thiết kế: {"silhouette":"Hình thức bán: riêng áo. Sơ mi tay dài, dáng thẳng, cổ bẻ."}
+Chất liệu và căn cứ: {"material":"Vải: 100% cotton dệt dày 180g/m², không co giãn. Phép thử của shop cho màu trắng: ánh sáng phòng, áo lót màu da — không thấy màu áo lót. Đèn ngược sáng — có thể thấy bóng áo lót."}
+Màu: {"colors":["trắng","xanh nhạt"]}
+Bảng size và đầu vào: {"sizeChart":["CodeSizeInput: {\"status\":\"NEEDS_MEASUREMENTS\",\"supportedInputs\":[\"BUST_CM\"],\"missingInputs\":[\"BUST_CM\"]}","S: thành phẩm ngực100, vai38, dài62cm; cơ thể ngực82–87cm.","M: ngực106, vai39, dài63cm; cơ thể ngực88–94cm.","L: ngực112, vai40, dài64cm; cơ thể ngực95–100cm."]}
+Chăm sóc: {"care":"Giặt nhẹ nước mát, tách màu, phơi râm; là nhiệt vừa."}
+Giới hạn: {"limitations":"Bảng áo dùng vòng ngực cơ thể. Phép thử độ xuyên thuộc màu trắng và hai điều kiện ánh sáng ghi ở material; chưa có kết quả độ xuyên màu xanh nhạt. Đây là thử của shop, không phải hãng. Dữ liệu màu để tư vấn phối đồ không phải kết quả độ kín."}
+Nguồn hồ sơ: {"ref":"profile:SM613","subjectRef":"SM613","authority":"EVALUATION_FIXTURE","sourceVersion":"authored-evaluation-product-context-r15","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z","contentHash":"6ac23d49e5140529e5883bb9070bfa18ef03f74eabdce664db452587b6f7ec62"}
+
+## TRUSTED — Giá, tồn và kết quả size
+### Dữ kiện
+Nội dung: {"type":"PRICE","scope":{"kind":"PRODUCT","productId":"ST411","variantId":null},"value":{"amountVnd":749000,"currency":"VND"}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"d91ea996-2e19-5c6b-a033-22c03d76c197","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:null","contentHash":"b726ccc204b8c9f8e5e0843c1a3dfd3327d991a64929c824abe5a3c9f997d80c","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"ST411","variantId":"ST411:be:S"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"43ae26d5-b048-5a1e-af8b-bf934224e21f","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:ST411:be:S","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"ST411","variantId":"ST411:be:M"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"7623348d-71ca-5108-aacb-a235378fc6c4","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:ST411:be:M","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"ST411","variantId":"ST411:be:L"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"921c03f0-dfaa-5c3d-a9ae-acc54bc883c7","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:ST411:be:L","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"ST411","variantId":"ST411:navy:S"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"186c4043-3f80-50b4-a4f8-296247fe34ef","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:ST411:navy:S","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"ST411","variantId":"ST411:navy:M"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"9bf22696-43bc-5cf2-a28a-8c9720b9de3c","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:ST411:navy:M","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"ST411","variantId":"ST411:navy:L"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"a3f56a27-74f8-567f-ac20-36cc5dc8f059","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:ST411:ST411:navy:L","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"PRICE","scope":{"kind":"PRODUCT","productId":"SM613","variantId":null},"value":{"amountVnd":499000,"currency":"VND"}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"32116fdd-65f8-5f73-a0ef-8517964188fd","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:null","contentHash":"c1684b914b05a4d6d0aee14bd3f17109a190db4729ae9e4d7e1426611fb90c46","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"SM613","variantId":"SM613:trắng:S"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"96fcc7c5-cb50-5084-ae64-5e2787c3478a","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:SM613:trắng:S","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"SM613","variantId":"SM613:trắng:M"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"5b4c5c91-4676-5d5e-ad18-f6de9698a872","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:SM613:trắng:M","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"SM613","variantId":"SM613:trắng:L"},"value":{"status":"OUT_OF_STOCK","availableQuantity":0}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"646972fe-2a3e-5bf3-a0e1-0d79c3cb3fea","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:SM613:trắng:L","contentHash":"fbb310e6905bce59f8ace96eea6659d13ba81fa7597c676b74c82ab2f5ce6e23","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"SM613","variantId":"SM613:xanh nhạt:S"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"16907740-03c4-58ca-a440-9a9908393790","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:SM613:xanh nhạt:S","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"SM613","variantId":"SM613:xanh nhạt:M"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"deb335b9-e572-5939-a2a8-5389c66c032a","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:SM613:xanh nhạt:M","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+### Dữ kiện
+Nội dung: {"type":"STOCK","scope":{"kind":"PRODUCT","productId":"SM613","variantId":"SM613:xanh nhạt:L"},"value":{"status":"IN_STOCK","availableQuantity":2}}
+Nguồn và ràng buộc: {"schemaVersion":1,"claimId":"deed2756-2e59-5102-ae96-fdb713a7bf45","authorization":"NONE","provenance":{"authority":"POS_SNAPSHOT","sourceVersion":"AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1","evidenceRef":"fixture:SM613:SM613:xanh nhạt:L","contentHash":"3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}}
+
+## TRUSTED — Sản phẩm và đối tượng đã bind
+Đối tượng: {"ref":"ST411","kind":"PRODUCT","label":"Set sơ mi quần suông ST411","bindingVersion":"binding-r5-v1"}
+Đối tượng: {"ref":"SM613","kind":"PRODUCT","label":"Sơ mi dáng thẳng SM613","bindingVersion":"binding-r5-v1"}
+
+## TRUSTED — Chính sách và tổng tiền
+Chính sách: {"ref":"exchange:r5","text":"Đổi size hoặc mẫu: trong 7 ngày từ nhận hàng, chưa sử dụng, nguyên tem. Thử trong nhà: chưa giặt, sạch và không mùi, giữ tem. Mặc ra ngoài: không nhận đổi. Phí vận chuyển đổi: khách trả. Hoàn tiền: không áp dụng. Cách diễn đạt tóm tắt được shop xác nhận: đổi trong 7 ngày có cùng mốc tính từ ngày nhận hàng. Đây là giới thiệu chính sách có các giới hạn trên; không xác nhận mọi khách hoặc mọi hàng đều đủ điều kiện đổi. Quyền đổi cho tình huống cụ thể vẫn phụ thuộc thời hạn và tình trạng hàng; không hợp mẫu/size tự nó không đủ xác lập quyền đổi.","sourceVersion":"authored-evaluation-policy-scope-v2","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}
+Chính sách: {"ref":"shipping-fee:r5","text":"Nội thànhTP.HCM: tổng hàng dưới700.000đ phí25.000đ; từ700.000đ miễn phí. Ngoài phạm vi này chưa có mức phí được cung cấp. Phạm vi giao của khách đã xác lập: nội thành TP.HCM.","sourceVersion":"authored-evaluation-shipping-scope-r15","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}
+Chính sách: {"ref":"shipping-time:r5","text":"Nội thànhTP.HCM: dự kiến2–3ngày sau xác nhận đơn; đây là khoảng dự kiến, không phải cam kết ngày/giờ đến. Phạm vi giao của khách đã xác lập: nội thành TP.HCM.","sourceVersion":"authored-evaluation-shipping-scope-r15","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}
+Chính sách: {"ref":"quote:ST411","text":"{\"items\":[{\"productId\":\"ST411\",\"quantity\":1,\"unitPrice\":749000}],\"destination\":\"INNER_HCMC\",\"subtotal\":749000,\"shipping\":0,\"total\":749000}","sourceVersion":"authored-evaluation-policy-scope-v2","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}
+Chính sách: {"ref":"quote:SM613","text":"{\"items\":[{\"productId\":\"SM613\",\"quantity\":1,\"unitPrice\":499000}],\"destination\":\"INNER_HCMC\",\"subtotal\":499000,\"shipping\":25000,\"total\":524000}","sourceVersion":"authored-evaluation-policy-scope-v2","observedAt":"2026-10-06T02:59:00.000Z","expiresAt":"2026-10-06T03:05:00.000Z"}
+
+## TRUSTED — Trạng thái được phép đọc
+Trạng thái: {"conversationOwner":"BOT","revision":1,"currentProductId":"ST411","factSnapshotVersion":"authored-evaluation-product-context-r15","bindingVersion":"binding-r5-v1","recipient":"synthetic-recipient","permission":true,"privacyAllowed":true}
+
+## TRUSTED — Biên nhận hành động
+
+## REQUEST_IDENTITY — Ràng buộc hiện tại
+Identity: {"requestId":"80000000-0000-4000-8000-000000000001","trustedSnapshotId":"6b0d9b85661a3beb4fbf4251b1cd86aeb81a32a0e3771e0e9e5a11f51d912599","stateRevision":1,"factSnapshotVersion":"authored-evaluation-product-context-r15","recipient":"synthetic-recipient","evaluationAt":"2026-10-06T03:00:00.000Z"}
+
+## UNTRUSTED — Nội dung truy xuất
+
+## UNTRUSTED — Lịch sử hội thoại
+Tin nhắn: {"role":"customer","text":"Chị thích set749k, định dành800k. Chị có quầnnavy rồi, ở nội thànhTP.HCM."}
+Tin nhắn: {"role":"shop","text":"Set ST411 có be/navy chị nhé; sơmi SM613 bánriêng499k có trắng/xanhnhạt."}
+
+## UNTRUSTED — Tin mới của khách
+Tin khách: "Chị tính lại chỉ còn550k cảship. Chọn giúp chị món trongshop để đổi cách mặc đi làm nhé."

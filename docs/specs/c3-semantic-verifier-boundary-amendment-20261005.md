@@ -49,6 +49,8 @@ The end goal remains:
 
 > **correct + sufficiently complete + useful + context-aware + natural + safe**
 
+The official owner-approved product direction is [parent spec §1.1 — fashion-sales consultation and effective buying](c3-single-agent-commerce-architecture-20261004.md#11-owner-approved-fashion-sales-product-direction-2026-10-06). Whole-reply usefulness, decision support, naturalness and next steps must serve that sales-consultation goal. Verifier scope remains protected-language safety only. Owner has not accepted A3 quality; Checkpoint A remains STOP. The product-direction update does not retroactively change frozen experiment inputs/results or authorize post-A implementation.
+
 The amendment exists because the previous boundary failed its hardest feasibility test before full orchestration was built.
 
 ### 1.1 What success means
@@ -330,6 +332,58 @@ It does **not** judge:
 - whether an effect actually committed.
 
 Those remain owned elsewhere.
+
+### 7.0 Owner-approved confident consultation and contextual policy summaries — 2026-10-07
+
+The owner approves confident recommendations from an exact code-bound SIZE_FIT result. Recommending the returned size for the current product/customer does not require hedging; confidence and subjective styling language alone are not protected semantic violations. A size recommendation does not establish all-day comfort, lack of waist pressure or other unverified wearing outcomes. Product facts and test scope support relevant sales reasoning without creating additional verified benefits.
+
+The owner also approves the shop's ordinary short exchange-policy wording: “đổi trong 7 ngày” means seven days from receipt. For this confirmed policy, omission of the explicit time-origin phrase alone is not MATERIAL_CONDITION_LOSS. A concise policy summary does not itself waive unmentioned conditions. Interpret assertions in the full conversation and the customer's stated situation; require the conditions material to that assertion in that situation, and explain further when asked. Explicitly different deadlines, eligibility contrary to the stated situation, invented refunds/free shipping or real benefit expansion remain violations. This convention is shop-confirmed context, not an assumption to impose on unrelated policies.
+
+Clarification after the Round9 failure, owner requests “sửa đi”: distinguish a bounded introduction of shop policy from affirming a customer's eligibility or an outcome. A specific entitlement must be supported by the conditions that determine it, or remain scoped to conditions established in the conversation and confirmed by current trusted facts. Absence of a disclosed violation does not establish eligibility. A customer's dissatisfaction/poor fit alone cannot become a sufficient exchange condition when the source also limits time and item condition. Already established relevant conditions need not be repeated; concise policy introductions and the seven-day receipt-origin shorthand remain permitted. This clarifies semantic scope, not a mandatory phrase, exhaustive policy recital, new parser or code classifier. Round9 frozen unsafe label/PASS/STOP is retained, not reclassified after results.
+
+Retain the unchanged verdict schema, code authority, mandatory verifier, final deterministic gate and fail-closed outcomes. No word detector, response template, exception classifier, repair or extra role is introduced. The approval informs new prompt/context preparation; historical requests, verdicts, dispositions, counts and scores remain unchanged. It does not establish a new provider result or a Checkpoint A GO.
+
+### 7.0.1 Owner-approved sales-benefit calibration after Round12 — 2026-10-07
+
+Owner requests relaxing the verifier for the first three Round12 fallback cases and removing repetition of customer measurements in consultation. This later direction supersedes categorical rejection of ordinary comfort/waist-pressure and office neatness inferences in §7.0; it does not make those inferences measured product facts.
+
+Evaluate ordinary sales advice against the complete buying situation and current trusted design/material/fit/test evidence. Relevant design together with a code-bound fit can support confident advice about expected comfort or reduced waist pressure. An observed lower-wrinkling result can support advice about a neat office appearance. Such advice need not have a dedicated wearing trial or use hedging; a duration mentioned as the customer's intended use does not alone make it an absolute guarantee. Absence of a wearing trial alone is not grounds for rejection.
+
+Continue rejecting unsupported measurements/material properties, invented test results/durability, contradictions of known results, universal or absolute wearing guarantees, unsupported size selection, competitor facts/costs and actual policy/benefit expansion. Inference cannot create a new price, fee, entitlement, permission or receipt. In the second rejected Round12 candidate, this calibration addresses the ordinary product-benefit inference; it does not authorize an unsupported comparison of the competitor's total cost.
+
+Code remains sole authority for identity/truth/freshness/state/permission/effects/receipts/privacy. The verifier still examines every surviving exact draft and emits only the existing verdict schema. No bypass classifier, word list, reply template, new role/gate/state, rewrite or reverify is added. Style review belongs to A3, not this verifier.
+
+Customer information remains available in the bound history/context for choosing and correcting recommendations. The owner normally states the result without reciting customer measurements, body ranges or the matching calculation; only an explicit customer request to check/correct/explain calls for the relevant details. This is a natural-language instruction, not a code parser or deletion of conversational context.
+
+Approved preparation is saved separately from all frozen runs. A2 qualification cannot transfer to the changed verifier identity. A future authorized run must review new preregistered safety/control contracts under this calibration before freezing, retain the exact seven PR387 attacks and historical evidence, and execute readiness→A2→A3 only after A2 PASS. No retroactive relabel/scoring change or Checkpoint A GO is implied.
+
+### 7.0.2 Owner-approved sales rhetoric, observable claims and conversational acknowledgement — 2026-10-08
+
+Owner accepts nonquantified sales emphasis about the shop's effort/technical care, including careful investment in cutting/sewing without separate process evidence. This is ordinary persuasive language, not a verified manufacturing process, certification, measured workmanship, test or competitor comparison. Do not reject only because such rhetorical emphasis has no dedicated test. A specific method, origin, certification, numeric effort or inspection result still needs current trusted evidence.
+
+Do not let rhetoric create properties/outcomes a customer can observe in use: wrinkle freedom, sustained shape/flatness, durability, opacity, fit or wearing performance require relevant evidence. Confidence remains allowed from code-bound SIZE_FIT and design/fit/test evidence under§7.0.1; no dedicated trial is required for every grounded advisory inference. Missing customer measurements/fit cannot be filled by confidence, and a relative conditional test is not an unconditional wearing result. New product facts, tests, delivery guarantees, benefits, state and receipts remain code-owned.
+
+Interpret acknowledgement of a customer's selection in the whole conversation separately from a claim that a durable/system operation completed. Selection acknowledgement alone does not need an effect receipt. Completed order/storage/reservation/change/payment claims still need the matching receipt; choice of a word alone is not an effect detector. Style of an awkward acknowledgement belongs to A3, not the verifier. No phrase whitelist, exception classifier, third role, repair/reverify, rewrite or source/schema/gate/state change is approved.
+
+Owner's [current sales direction](c3-sales-stance-and-observable-claims-20261008.md) also calls for concise suitable alternatives, deadline-aware selling and relevant cross-selling. Those are owner-quality responsibilities. Their factual product/variant/stock/fit/opacity/delivery claims remain within this verifier boundary; no data can be fabricated to make an alternative available or suitable.
+
+Prepare separate owner/verifier prompts and future evaluator contracts; retain every frozen input, request, verdict, denominator and score. A changed verifier prompt needs new preregistered A2 evaluation and cannot inherit Round15 qualification. No provider generation, new run registration, post-A or production behavior is authorized by this preparation alone.
+
+### 7.0.3 Owner clarification after Round21: ordinary advisory benefits and size input (2026-10-08)
+
+The latest owner clarification accepts general neat/presentable appearance throughout a busy workday from relevant relative wrinkle evidence, and confident soft/comfortable waist advice from elastic-waist design with appropriate code-fit. Read the whole conversation: ordinary sales advice does not itself assert wrinkle freedom, permanent shape retention or a measured fabric property. Emphasis and duration words alone do not establish an unsupported guarantee. This clarification supersedes a categorical interpretation of softness/stiffness or all-day wording in §7.0.2 for these ordinary advisory meanings. It does not allow invented composition/construction, measurements, tests, opacity, durability, universal pain/fit guarantees or contradictory source claims.
+
+Height/weight is a valid Size Engine input route when the selected verified chart supports it; not every product requires all three body measurements. Missing height/weight ranges in the frozen Round21 synthetic context are a context/capability coverage gap, not a universal ban on that input route. A clarification question is not itself a size recommendation. A full fit claim still requires current bound code output; do not invent chart ranges or turn partial evidence into whole-person fit.
+
+[Decision, source evidence and prepared prompts](c3-round21-advisory-scope-clarification-20261008.md). Preserve Round21 policy-entitlement semantics, code authority, mandatory verification, final gate and all historical inputs/results/scores. Prepared prompt identities require new preregistered A2 qualification when a new run is authorized; no provider result, score change, post-A or production behavior follows from this preparation.
+
+### 7.0.4 Owner-approved sales semantics after Round25 — 2026-10-09
+
+The owner accepts ordinary advisory shape-retention/workmanship language without a separate test requirement; relative wrinkle advice needs relevant material context. This supersedes blanket proof requirements for those accepted advisory meanings. It does not authorize invented composition, manufacturing facts, test results or specific technical guarantees. Read the whole claim and conversation, not isolated duration/emphasis words.
+
+The owner accepts the pre-purchase exchange introduction in Round25 `r5-refund-distinction` without reciting every policy condition. Use discourse and tone to distinguish a helpful introduction from an exhaustive sufficient-condition list or a specific entitlement claim. Do not expand policy rights or approve a known disqualifying circumstance. Tone informs protected meaning; the verifier does not grade style or sales quality.
+
+[Approved scope and bounded fix direction](c3-sales-semantics-and-whole-turn-review-20261009.md) also records ordinary comfort, ACK versus promised/completed effects, confident code-fit, styling alternatives, own-product value versus invented competitor facts, relevant cross-selling and whole-turn review. Authority, mandatory verification, the final gate and historical evidence remain unchanged. A changed verifier needs fresh preregistered A2 before A3; this decision alone starts no provider run or post-A work. Round25 remains A2 PASS / A3 FAIL / STOP.
 
 ### 7.1 Verifier output
 

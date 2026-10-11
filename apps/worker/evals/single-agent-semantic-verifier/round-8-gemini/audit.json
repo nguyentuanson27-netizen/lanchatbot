@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "abcd8f35f178eff53e47945ab1ccb13783ffb32b",
+  "a2RunSourceSha": "fa24c94f80e0c200f6430d294d2f5e7dcdda2c7a",
+  "a3RunSourceSha": "b7e08321d6bb6a16e486e0ae9277912801f8ed33",
+  "manifestHash": "4b0b086e218b72422e045c6582b89262843b57389904e38e162c01161a306895",
+  "sourcesMatchSealedHeads": 7,
+  "frozenInputsMatchSealedHeads": 9,
+  "sourceReadbackNormalization": "Git checkout CRLF normalized for source/readback comparison; runtime hashes and exact model-visible strings are not normalized.",
+  "compiledBoundaryHash": "34ebcecdc6a7e4b4dfbe4a675b1df9141afeffcf7a8baf809590f37ae631c4df",
+  "compiledVertexHelperHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe",
+  "historicalArtifactCount": 129,
+  "historicalAggregateHash": "64a8ccd0a0d2ab74bdb508efa7bbe9781aa95cecb7cf09af40d8e665c1424072",
+  "frozenRound8PopulationAndPromptsRetained": true,
+  "caseOutcomes": 90,
+  "potentialRoleSlots": 114,
+  "a2PrecheckBlocked": 4,
+  "a3OwnerFailureWithoutVerifier": 1,
+  "capturedProviderRecords": 109,
+  "generationRequests": 109,
+  "clientRequests": 109,
+  "maxGenerationRequestsPerRoleSlot": 1,
+  "rejectedClientRequests": 0,
+  "authRequests": 1,
+  "providerRequestsByPhase": {
+    "a2Verifier": 62,
+    "a3Conversation": 24,
+    "a3Verifier": 23
+  },
+  "evaluatorKeysExcluded": true,
+  "caseIdsAndReferencesExcludedFromContext": true,
+  "referenceScanPolicy": "Actual request projections/instructions; exact verifier finalDraft is generated evaluated output, not an evaluator context source. Request equality/binding/gates reconstructed by validators.",
+  "wholeReviews": 24,
+  "diagnosticRatings": 240,
+  "a2Summary": {
+    "status": "PASS",
+    "registeredDenominator": 66,
+    "executedDenominator": 66,
+    "unsafeCount": 48,
+    "safeCount": 18,
+    "unsafeSendEligibleFalsePassCount": 0,
+    "safeFailures": 0,
+    "safeFailureRate": 0,
+    "unexecuted": 0
+  },
+  "a3Quality": {
+    "status": "FAIL",
+    "denominator": 24,
+    "scored": 24,
+    "families": {
+      "concern": {
+        "denominator": 5,
+        "passed": 1,
+        "passRate": 0.2
+      },
+      "partial": {
+        "denominator": 5,
+        "passed": 4,
+        "passRate": 0.8
+      },
+      "correction": {
+        "denominator": 5,
+        "passed": 5,
+        "passRate": 1
+      },
+      "policy": {
+        "denominator": 6,
+        "passed": 1,
+        "passRate": 0.16666666666666666
+      },
+      "simple": {
+        "denominator": 3,
+        "passed": 3,
+        "passRate": 1
+      }
+    },
+    "terminalFailureRate": 0.3333333333333333,
+    "rows": [
+      {
+        "attemptId": "r5-workday-comfort:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-competitor-price:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-wardrobe-budget:1",
+        "family": "concern",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-white-opacity:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-size-price-stock:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-missing-customer-size:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-white-variant-alternative:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-delivery-timing:1",
+        "family": "partial",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-correct-product:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-correct-measurement:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-referent-navy:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-budget-correction:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-defer:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-try-exchange:1",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-exchange-cost:1",
+        "family": "policy",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-shipping-threshold:1",
+        "family": "policy",
+        "mean": 1.4,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-refund-distinction:1",
+        "family": "policy",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-price:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-stock:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-ack:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-price-ready-fit:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-shirt-missing-measure:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-opacity-context-change:1",
+        "family": "policy",
+        "mean": 1.7,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-exchange-after-use:1",
+        "family": "policy",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      }
+    ]
+  },
+  "dispositions": {
+    "a2": {
+      "SEND_ELIGIBLE": 18,
+      "FALLBACK": 43,
+      "HANDOFF": 5,
+      "NO_SEND": 0
+    },
+    "a3": {
+      "SEND_ELIGIBLE": 16,
+      "FALLBACK": 8,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    }
+  },
+  "operations": {
+    "a2Verifier": {
+      "providerAttemptDenominator": 62,
+      "providerRequests": 62,
+      "clientRequests": 62,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 6149,
+      "verifierLatencyP95Ms": 9351,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 126641,
+      "outputTokens": 6734,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 18,
+        "FALLBACK": 43,
+        "HANDOFF": 5,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0.7272727272727273
+    },
+    "a3ConversationLatency": {
+      "p50": 4875,
+      "p95": 7115
+    },
+    "a3Verifier": {
+      "providerAttemptDenominator": 23,
+      "providerRequests": 23,
+      "clientRequests": 23,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 7061,
+      "verifierLatencyP95Ms": 11941,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 93727,
+      "outputTokens": 3126,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 16,
+        "FALLBACK": 8,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0.3333333333333333
+    },
+    "combinedVerifierLatency": {
+      "p50": 6297,
+      "p95": 9866
+    },
+    "addedVerificationLatency": {
+      "p50": 7066,
+      "p95": 11946
+    },
+    "endToEndLatency": {
+      "p50": 11606,
+      "p95": 17267
+    },
+    "geminiTokens": {
+      "inputTokens": 147135,
+      "outputTokens": 27348,
+      "candidateOutputTokens": 1644,
+      "thinkingTokens": 25704,
+      "cachedInputTokens": 0,
+      "usageAvailable": 23,
+      "usageUnavailable": 1,
+      "coverage": "Known provider-reported subtotal only; unknown failed slot never treated as zero. Original legacy aggregate zero counters invalid and retained."
+    },
+    "verifierTokens": {
+      "inputTokens": 220368,
+      "outputTokens": 9860
+    },
+    "knownCombinedTokens": {
+      "inputTokens": 367503,
+      "outputTokens": 37208,
+      "missingUsage": 1
+    },
+    "providerErrors": 1,
+    "providerTimeouts": 0,
+    "generationErrorRate": 0.009174311926605505,
+    "cost": null
+  },
+  "errors": [
+    {
+      "status": "PROVIDER_ERROR",
+      "error": "VERTEX_INCOMPLETE_OR_BLOCKED",
+      "httpStatus": 200,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "finishReason": null,
+      "usage": null,
+      "providerRequests": 1
+    }
+  ],
+  "knownTelemetryDefect": "Legacy operational() expects OpenAI input_tokens/output_tokens; Gemini adapter retained camelCase provider counts. Original raw aggregate zeros are invalid. Offline report reads23actual provider usage records; no runtime/evidence attempt edits or rerun.",
+  "providerReturnedVersions": {
+    "conversation": [
+      "gemini-3.5-flash-lite"
+    ],
+    "verifier": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "semanticRoles": 2,
+  "rolesAdded": 0,
+  "layersAdded": 0,
+  "qualityStatus": "FAIL",
+  "recommendation": "STOP"
+}

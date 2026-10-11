@@ -1,0 +1,305 @@
+{
+  "status": "PREPARED_LOCAL_ONLY",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "preparationStartingHead": "a83c85a68c0c2310c6bb62f9e67b65bff5c6634d",
+  "preparationSourceSha": "998fe9c5f79983bdc06149210b16eb8e1728b4ef",
+  "controlRound": 28,
+  "controlA3RunSourceSha": "06a277103935ab82588312b2f5ba8e7a43b69a1f",
+  "format": "READABLE_FACTS_V1",
+  "promptHashes": {
+    "conversation": "37ead1bc3ea7b9ccf8fd4f9e391cdba1e7d71fb0f68c6832348a5a7d74aaa223",
+    "verifier": "667946d7b35a0ba307969894612cab11d78b0ff40c27d682c7ecdaab57d1cb6e"
+  },
+  "modelConfigurationHash": "9d23a74bdae1f0a6279740df338739fe76959a07f39d84becc40b270c50f08cf",
+  "corpusHashes": {
+    "a2": "20e1f17d3a929f0abeeaf8ccd75a98b34d1c109b4e6812394652a08c03b33555",
+    "a3": "6232b52bf9ce9aeabfa41bc663dc94b434c493692b524d40a0dd380bb78101de"
+  },
+  "verifierSchemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "models": {
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high"
+    }
+  },
+  "historicalFilesRetained": 644,
+  "historicalExecutableChanges": [
+    "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+    "apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs"
+  ],
+  "cases": 42,
+  "maximumControlRequestBytes": 24104,
+  "maximumReadableRequestBytes": 25793,
+  "averageControlRequestBytes": 19388,
+  "averageReadableRequestBytes": 20677,
+  "maximumVerifierAtDraftBoundBytes": 31022,
+  "requestByteBound": 32768,
+  "localPreviewRequestsBuilt": 126,
+  "providerGenerations": 0,
+  "registeredProviderAttempts": 0,
+  "a2RunSourceSha": null,
+  "a3RunSourceSha": null,
+  "semanticOrWholeReplyQuality": "UNVERIFIED",
+  "rows": [
+    {
+      "caseId": "r5-workday-comfort",
+      "controlRequestBytes": 23129,
+      "readableRequestBytes": 24759,
+      "verifierMaxDraftRequestBytes": 30047
+    },
+    {
+      "caseId": "r5-competitor-price",
+      "controlRequestBytes": 22120,
+      "readableRequestBytes": 23691,
+      "verifierMaxDraftRequestBytes": 29038
+    },
+    {
+      "caseId": "r5-wardrobe-budget",
+      "controlRequestBytes": 22700,
+      "readableRequestBytes": 24301,
+      "verifierMaxDraftRequestBytes": 29618
+    },
+    {
+      "caseId": "r5-white-opacity",
+      "controlRequestBytes": 17109,
+      "readableRequestBytes": 18151,
+      "verifierMaxDraftRequestBytes": 24027
+    },
+    {
+      "caseId": "r5-size-price-stock",
+      "controlRequestBytes": 17071,
+      "readableRequestBytes": 18128,
+      "verifierMaxDraftRequestBytes": 23989
+    },
+    {
+      "caseId": "r5-missing-customer-size",
+      "controlRequestBytes": 15902,
+      "readableRequestBytes": 16900,
+      "verifierMaxDraftRequestBytes": 22820
+    },
+    {
+      "caseId": "r5-white-variant-alternative",
+      "controlRequestBytes": 17041,
+      "readableRequestBytes": 18083,
+      "verifierMaxDraftRequestBytes": 23959
+    },
+    {
+      "caseId": "r5-delivery-timing",
+      "controlRequestBytes": 16395,
+      "readableRequestBytes": 17393,
+      "verifierMaxDraftRequestBytes": 23313
+    },
+    {
+      "caseId": "r5-correct-product",
+      "controlRequestBytes": 23193,
+      "readableRequestBytes": 24823,
+      "verifierMaxDraftRequestBytes": 30111
+    },
+    {
+      "caseId": "r5-correct-measurement",
+      "controlRequestBytes": 16871,
+      "readableRequestBytes": 17913,
+      "verifierMaxDraftRequestBytes": 23789
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "controlRequestBytes": 23129,
+      "readableRequestBytes": 24785,
+      "verifierMaxDraftRequestBytes": 30047
+    },
+    {
+      "caseId": "r5-budget-correction",
+      "controlRequestBytes": 22690,
+      "readableRequestBytes": 24291,
+      "verifierMaxDraftRequestBytes": 29608
+    },
+    {
+      "caseId": "r5-defer",
+      "controlRequestBytes": 15723,
+      "readableRequestBytes": 16706,
+      "verifierMaxDraftRequestBytes": 22641
+    },
+    {
+      "caseId": "r5-try-exchange",
+      "controlRequestBytes": 15837,
+      "readableRequestBytes": 16820,
+      "verifierMaxDraftRequestBytes": 22755
+    },
+    {
+      "caseId": "r5-exchange-cost",
+      "controlRequestBytes": 17212,
+      "readableRequestBytes": 18254,
+      "verifierMaxDraftRequestBytes": 24130
+    },
+    {
+      "caseId": "r5-shipping-threshold",
+      "controlRequestBytes": 22686,
+      "readableRequestBytes": 24302,
+      "verifierMaxDraftRequestBytes": 29604
+    },
+    {
+      "caseId": "r5-refund-distinction",
+      "controlRequestBytes": 17078,
+      "readableRequestBytes": 18120,
+      "verifierMaxDraftRequestBytes": 23996
+    },
+    {
+      "caseId": "r5-simple-price",
+      "controlRequestBytes": 15555,
+      "readableRequestBytes": 16511,
+      "verifierMaxDraftRequestBytes": 22473
+    },
+    {
+      "caseId": "r5-simple-stock",
+      "controlRequestBytes": 15558,
+      "readableRequestBytes": 16541,
+      "verifierMaxDraftRequestBytes": 22476
+    },
+    {
+      "caseId": "r5-simple-ack",
+      "controlRequestBytes": 15954,
+      "readableRequestBytes": 16937,
+      "verifierMaxDraftRequestBytes": 22872
+    },
+    {
+      "caseId": "r7-price-ready-fit",
+      "controlRequestBytes": 23284,
+      "readableRequestBytes": 24914,
+      "verifierMaxDraftRequestBytes": 30202
+    },
+    {
+      "caseId": "r7-shirt-missing-measure",
+      "controlRequestBytes": 22896,
+      "readableRequestBytes": 24523,
+      "verifierMaxDraftRequestBytes": 29814
+    },
+    {
+      "caseId": "r7-opacity-context-change",
+      "controlRequestBytes": 17356,
+      "readableRequestBytes": 18424,
+      "verifierMaxDraftRequestBytes": 24274
+    },
+    {
+      "caseId": "r7-exchange-after-use",
+      "controlRequestBytes": 17239,
+      "readableRequestBytes": 18281,
+      "verifierMaxDraftRequestBytes": 24157
+    },
+    {
+      "caseId": "r12-office-color",
+      "controlRequestBytes": 22763,
+      "readableRequestBytes": 24364,
+      "verifierMaxDraftRequestBytes": 29681
+    },
+    {
+      "caseId": "r12-pants-known-waist",
+      "controlRequestBytes": 15834,
+      "readableRequestBytes": 16832,
+      "verifierMaxDraftRequestBytes": 22752
+    },
+    {
+      "caseId": "r12-change-color-only",
+      "controlRequestBytes": 16972,
+      "readableRequestBytes": 18014,
+      "verifierMaxDraftRequestBytes": 23890
+    },
+    {
+      "caseId": "r12-indoor-exchange-eligible",
+      "controlRequestBytes": 15938,
+      "readableRequestBytes": 16921,
+      "verifierMaxDraftRequestBytes": 22856
+    },
+    {
+      "caseId": "r14-workday-choice",
+      "controlRequestBytes": 23120,
+      "readableRequestBytes": 24750,
+      "verifierMaxDraftRequestBytes": 30038
+    },
+    {
+      "caseId": "r14-price-repeat-wear",
+      "controlRequestBytes": 23301,
+      "readableRequestBytes": 24931,
+      "verifierMaxDraftRequestBytes": 30219
+    },
+    {
+      "caseId": "r14-pants-size-input",
+      "controlRequestBytes": 15892,
+      "readableRequestBytes": 16890,
+      "verifierMaxDraftRequestBytes": 22810
+    },
+    {
+      "caseId": "r14-stage-light-change",
+      "controlRequestBytes": 17149,
+      "readableRequestBytes": 18191,
+      "verifierMaxDraftRequestBytes": 24067
+    },
+    {
+      "caseId": "r14-refund-before-buy",
+      "controlRequestBytes": 17094,
+      "readableRequestBytes": 18136,
+      "verifierMaxDraftRequestBytes": 24012
+    },
+    {
+      "caseId": "r14-freeship-extra-pants",
+      "controlRequestBytes": 22774,
+      "readableRequestBytes": 24390,
+      "verifierMaxDraftRequestBytes": 29692
+    },
+    {
+      "caseId": "r15-value-use",
+      "controlRequestBytes": 22154,
+      "readableRequestBytes": 23725,
+      "verifierMaxDraftRequestBytes": 29072
+    },
+    {
+      "caseId": "r15-fit-reassurance",
+      "controlRequestBytes": 23049,
+      "readableRequestBytes": 24679,
+      "verifierMaxDraftRequestBytes": 29967
+    },
+    {
+      "caseId": "r15-known-waist-next",
+      "controlRequestBytes": 15824,
+      "readableRequestBytes": 16822,
+      "verifierMaxDraftRequestBytes": 22742
+    },
+    {
+      "caseId": "r15-color-final-confirm",
+      "controlRequestBytes": 17002,
+      "readableRequestBytes": 18057,
+      "verifierMaxDraftRequestBytes": 23920
+    },
+    {
+      "caseId": "r16-effort-and-use",
+      "controlRequestBytes": 22085,
+      "readableRequestBytes": 23656,
+      "verifierMaxDraftRequestBytes": 29003
+    },
+    {
+      "caseId": "r16-budget-alternative",
+      "controlRequestBytes": 22754,
+      "readableRequestBytes": 24370,
+      "verifierMaxDraftRequestBytes": 29672
+    },
+    {
+      "caseId": "r16-change-to-indoor-dress",
+      "controlRequestBytes": 24104,
+      "readableRequestBytes": 25793,
+      "verifierMaxDraftRequestBytes": 31022
+    },
+    {
+      "caseId": "r16-pants-color-alternative",
+      "controlRequestBytes": 22758,
+      "readableRequestBytes": 24374,
+      "verifierMaxDraftRequestBytes": 29676
+    }
+  ]
+}

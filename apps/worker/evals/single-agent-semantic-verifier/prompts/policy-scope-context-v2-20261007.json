@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "population": "AUTHORED_SYNTHETIC_EVALUATION_NOT_REAL_SHOP",
+  "sourceVersion": "authored-evaluation-policy-scope-v2",
+  "policyTexts": {
+    "exchange:r5": "Đổi size hoặc mẫu: trong 7 ngày từ nhận hàng, chưa sử dụng, nguyên tem. Thử trong nhà: chưa giặt, sạch và không mùi, giữ tem. Mặc ra ngoài: không nhận đổi. Phí vận chuyển đổi: khách trả. Hoàn tiền: không áp dụng. Cách diễn đạt tóm tắt được shop xác nhận: đổi trong 7 ngày có cùng mốc tính từ ngày nhận hàng. Đây là giới thiệu chính sách có các giới hạn trên; không xác nhận mọi khách hoặc mọi hàng đều đủ điều kiện đổi. Quyền đổi cho tình huống cụ thể vẫn phụ thuộc thời hạn và tình trạng hàng; không hợp mẫu/size tự nó không đủ xác lập quyền đổi."
+  },
+  "profileLimitations": {
+    "profile:ST411": "Số đo chun kéo tối đa đo trên quần; khoảng cơ thể chọn size nằm trong bảng riêng. Dữ liệu có dáng, chất liệu, số đo và thử gấp so với linen; không có kết quả thử mặc cả ngày, cảm giác cấn eo, độ bền hoặc giữ phom cả ngày.",
+    "profile:VA512": "Khoảng cơ thể chọn size và số đo thành phẩm là hai cột riêng. Lót che thân váy trong ánh sáng phòng thông thường. Dữ liệu không có kết quả thử cảm giác mặc cả ngày.",
+    "profile:SM613": "Kết quả thử độ xuyên chỉ áp dụng điều kiện đã ghi. Hướng dẫn áo dùng vòng ngực, không dùng eo/mông để chốt size. Phép thử ánh sáng phòng với áo lót màu da xác nhận không thấy màu áo lót; không xác nhận kín trong mọi ánh sáng.",
+    "profile:QU714": "Độ kéo chun đo trên quần; khoảng eo/mông cơ thể chọn size nằm trong bảng. Dữ liệu không có kết quả thử mặc cả ngày hoặc cảm giác cấn eo."
+  }
+}

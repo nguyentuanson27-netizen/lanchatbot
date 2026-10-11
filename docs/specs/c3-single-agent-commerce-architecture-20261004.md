@@ -12,7 +12,7 @@ This spec proposes a bounded architecture experiment. It does not approve a rewr
 
 ## 1. Objective
 
-The goal is a chatbot that is good enough for real customer conversations, not merely a pipeline that is internally valid.
+The product goal is effective fashion-sales consultation: help customers choose suitable products, resolve purchase concerns and make an informed buying decision, with a reliable path to completing a purchase. The owner-approved product direction is defined in §1.1 below.
 
 A successful customer turn must satisfy ten requirements:
 
@@ -32,6 +32,67 @@ The customer-facing quality bar is:
 > **correct + sufficiently complete + useful + context-aware + natural + safe**
 
 Architecture simplicity is a means to that quality bar, not the end goal.
+
+### 1.1 Owner-approved fashion-sales product direction (2026-10-06)
+
+**Trạng thái:** Owner đã yêu cầu ghi các mục tiêu dưới đây thành hướng đi chính thức của sản phẩm ngày 2026-10-06 (Asia/Saigon). Đây là nguồn mục tiêu sản phẩm cho các kế hoạch và lần đánh giá tiếp theo.
+
+**Mục tiêu chính:** Tư vấn để khách chọn và mua sản phẩm phù hợp của shop. Bot phải chủ động đề xuất mẫu, màu/size từ hàng của shop, giải quyết băn khoăn và giúp khách mua thuận tiện bằng thông tin đã xác minh. Đúng và đủ thông tin là nền tảng. Kết quả cần đạt là lời tư vấn hữu ích, hợp lý, tự nhiên, tạo sự tin tưởng và đưa khách tới bước mua phù hợp; tôn trọng khi khách muốn dừng.
+
+#### Chất lượng tư vấn thời trang
+
+1. **Hiểu nhu cầu mua:** Nắm dịp sử dụng, phong cách, sở thích, ngân sách, ưu tiên về dáng/độ thoải mái và thông tin vóc dáng/số đo khách đã cung cấp khi liên quan. Chỉ hỏi phần còn thiếu có thể làm thay đổi phương án tư vấn; không hỏi để điền đủ một checklist.
+2. **Đề xuất cụ thể:** Chọn phương án từ sản phẩm/biến thể có dữ liệu trong phạm vi được phép, giải thích vì sao phù hợp và đánh đổi gì. Có thể hỗ trợ so sánh hoặc phối đồ khi có cơ sở; không bịa sản phẩm thay thế, tồn hàng, chất liệu, fit hoặc lợi ích để thuyết phục khách.
+3. **Giải quyết băn khoăn:** Hiểu lý do phía sau phản đối về giá, size, độ thoải mái, mẫu khác hoặc trải nghiệm trước đó. Tư vấn theo nguyên nhân và dữ kiện thay vì lặp giá/chính sách, ép mua, tạo khan hiếm hoặc ưu đãi giả.
+4. **Dẫn tới bước phù hợp:** Giúp khách cân nhắc mẫu, làm rõ điểm cản quyết định, chọn màu/size khi đủ cơ sở hoặc xác nhận ý định mua. Bước tiếp phải thực sự làm được với thông tin và khả năng hiện có. Không xin số đo để hứa đối chiếu khi chưa có bảng size, hoặc gợi quy trình/ngoại lệ chưa được xác nhận.
+5. **Giao tiếp tự nhiên:** Nói như nhân viên tư vấn có hiểu tình huống, gọn và nhất quán với giọng shop. Tránh checklist chung chung, disclaimer lặp, thông tin thừa và hỏi lại điều khách đã nói. Câu hỏi giá đơn giản được trả lời trực tiếp; khách trì hoãn hoặc muốn dừng được tôn trọng, không buộc mọi lượt phải chốt mua.
+
+Đầu vào cần đủ để kiểm tra khả năng tư vấn: dữ liệu sản phẩm/ảnh phù hợp, kiểu dáng, phom, chất liệu, màu, bảng size/số đo, cách chăm sóc và lựa chọn so sánh khi có; cùng giá/tồn/chính sách hiện hành. Phân biệt nguồn đã xác nhận, thông tin khách cung cấp, nhận định tư vấn và phần chưa biết. Ảnh hoặc suy đoán không tự xác lập chất liệu, số đo, tồn hay quyền lợi. Thiếu evidence phải được xử lý bằng phương án có cơ sở, không bằng bịa thêm facts.
+
+#### Owner làm rõ: dữ liệu đủ để bán và tư vấn hướng tới mua hàng
+
+Owner làm rõ ngày 2026-10-06: sản phẩm đem bán phải có thông tin cần thiết để tư vấn. Ví dụ, quần cần bảng size/số đo và thông tin phần lưng/co giãn liên quan tới việc chọn size. Thiếu thông tin phải trở thành công việc bổ sung dữ liệu sản phẩm từ nguồn xác minh. Không lấy tình trạng thiếu dữ liệu làm mặc định cho hội thoại bán hàng rồi liên tục trả lời chưa biết, đẩy việc tìm thông tin của shop sang khách hoặc khuyên chưa mua. Không tự điền số đo hay suy ra độ thoải mái từ chữ “lưng chun”.
+
+Khi dữ liệu sản phẩm đủ, bot phải dùng nhu cầu và thông tin khách đã nói để đề xuất hàng của shop, giải thích ngắn lý do, xử lý điểm khách còn ngại và tiến tới chọn màu/size hoặc xác nhận ý định mua. Câu hỏi bổ sung phải giúp chọn hàng; lời tư vấn gọn, dùng từ thông thường, không lặp cảnh báo hoặc kể hết dữ liệu sản phẩm.
+
+Owner làm rõ trước Round5 ngày 2026-10-06: tư vấn tự tin để khách tin tưởng, loại giọng dè dặt chung chung khi đã đủ dữ kiện. Giữ điều kiện có ảnh hưởng thực tế; sự tự tin không tạo quyền bịa fit, tồn, chính sách hay thành công hành động. Viết lại toàn bộ hội thoại đánh giá với lời khách/shop tự nhiên và context/state nhất quán. Chấm kỹ từng kết quả trong lịch sử theo nhu cầu mua, phương án, điểm cản, sự tin tưởng và tiến triển phù hợp; đúng facts hoặc có câu hỏi chốt chưa đủ đạt. Giữ10chiều đánh giá hiện có, một conversational owner, tối đa một verifier và code authority; không thêm tầng ngữ nghĩa để cải thiện lời nói.
+
+Owner làm rõ sau Round8 Gemini ngày 2026-10-07: kết quả chọn size đã được code xác nhận cho đúng khách cho phép tư vấn tự tin, không cần giọng tạm thời hoặc dè dặt. Dùng dữ kiện về thiết kế, số đo và phạm vi thử nghiệm để giải thích lợi ích lựa chọn; kết quả chọn size không tự chứng minh thoải mái cả ngày, phép thử ít nhăn không chứng minh độ bền. Cung cấp đầy đủ facts và giới hạn evidence trong context cho model, chọn phần liên quan để nói với khách.
+
+Owner duyệt cách trả lời chính sách ngắn: “đổi trong 7 ngày” mặc định tính từ ngày nhận hàng, không cần nhắc mốc hoặc liệt kê mọi điều kiện trừ khi khách hỏi hoặc tình huống ảnh hưởng quyền lợi. Xét ý nghĩa của lời khẳng định cùng toàn bộ lịch sử; tóm tắt không đồng nghĩa miễn điều kiện, còn quyền lợi thực sự trái nguồn vẫn bị chặn. Chi tiết hợp đồng ở amendment §7.0; các prompt/context mới được lưu riêng để chuẩn bị lần đánh giá tiếp theo, không thay đổi evidence hoặc điểm của các vòng đã freeze.
+
+Các ca A3 bán hàng thông thường của lần đánh giá tiếp theo phải có dữ liệu đủ cho việc tư vấn được yêu cầu. Ca thiếu dữ liệu tiếp tục kiểm tra an toàn và cách xử lý lỗi; kết quả phải ghi rõ phần dữ liệu/capability cần bổ sung. Giữ nguyên ca, prompt, cấu hình, kết quả và điểm của các vòng đã freeze. Làm rõ này chỉ cập nhật hướng sản phẩm và chuẩn bị kế hoạch tiếp theo; Checkpoint A vẫn STOP.
+
+Owner làm rõ sau Round12 ngày 2026-10-07: nới verifier cho nhận định tư vấn bán hàng có cơ sở về cảm giác mặc và vẻ chỉn chu từ thiết kế/chất liệu/fit/phép thử hiện có. Không đòi phép thử mặc riêng hoặc giọng dè dặt cho mọi nhận định như vậy; thời gian sử dụng khách nói không tự biến tư vấn thành bảo đảm tuyệt đối. Đây là nhận định tư vấn, không phải kết quả đã đo. Vẫn giữ facts, code-fit, chính sách, quyền và receipt đúng nguồn; không bịa độ bền, kết quả thử hay dữ liệu đối thủ. Quy định sau này supersedes cách chặn mọi inference cảm giác mặc trước đó; chi tiết ở amendment §7.0.1.
+
+Owner cũng yêu cầu không đọc lại thông tin khách khi tư vấn: dùng nhu cầu/số đo/lựa chọn đã biết để quyết định trong nội bộ, nói kết quả và lý do liên quan. Chọn size thì nói size; không đọc bộ số đo cơ thể hoặc khoảng size để chứng minh đã đối chiếu. Chỉ nêu lại phần cần thiết khi khách yêu cầu kiểm tra/sửa/giải thích. History/binding vẫn giữ đầy đủ. Đánh giá toàn lời đáp theo việc giúp khách chọn mua, không dùng keyword detector để enforce giọng văn. Revision chuẩn bị riêng, chưa có provider run mới; Round12 A2PASS/A3FAIL/STOP giữ nguyên.
+
+#### Năng lực của sản phẩm hoàn chỉnh
+
+| Năng lực | Kết quả khách/shop cần nhận được |
+|---|---|
+| Theo hành trình mua | Giữ mẫu/biến thể đang cân nhắc, ngân sách, sở thích, sửa đổi và điểm chưa giải quyết qua nhiều lượt; không hỏi lại hoặc nhầm mẫu khi khách đổi ý. Tái sử dụng history/state hiện có. |
+| Xử lý phản đối | Giải quyết đúng lo ngại về giá/fit/trải nghiệm và giúp chọn hướng phù hợp, không gây áp lực hoặc đưa lời hứa thiếu căn cứ. |
+| Mua thuận tiện | Chọn đúng màu/size, xác nhận tồn, tổng tiền gồm phí/quyền lợi đã xác minh và giao hàng; thực hiện nghiệp vụ khi có đồng ý/quyền phù hợp, không tạo đơn trùng hoặc báo thành công giả. |
+| Hỗ trợ sau mua | Theo dõi đơn, giải đáp và hướng dẫn đổi hàng/đổi size theo dữ liệu và quy trình thật. |
+| Chuyển nhân viên | Nhận ra khi cần người xử lý; chuyển đúng lúc với nhu cầu, lịch sử và phần đã xác minh để khách không phải kể lại. Không handoff vô ích khi đã đủ dữ kiện trả lời. |
+| Vận hành ổn định | Phản hồi đủ nhanh, facts cập nhật, không gửi lặp và giữ mạch sau lỗi/timeout; recovery dựa trên state/receipt đã commit, không phát sinh hiệu ứng trùng. |
+| Đo hiệu quả thực tế | Theo dõi tiến triển chọn mẫu/size, hoàn tất đơn, điểm bỏ dở, handoff, chất lượng tư vấn và ca sai/đổi trả liên quan tới tư vấn; đối chiếu với độ trễ, lỗi và token/cost khi có dữ liệu. |
+
+#### Áp dụng vào đánh giá và lộ trình
+
+Owner làm rõ sau Round15 ngày2026-10-08: dùng xác nhận lựa chọn tự nhiên; cho phép lời nhấn mạnh không định lượng về công sức/kỹ thuật, nhưng kết quả khách nhận thấy khi dùng vẫn phải có căn cứ. Khách nhờ chọn màu thì chọn theo nhu cầu (tạm chấp nhận); món không phù hợp dịp mới thì đề xuất món khác có dữ liệu; deadline thì giới thiệu món tương tự giao kịp khi có nguồn, hoặc báo ngắn tình trạng giao, không khuyên khách tự chuẩn bị đồ khác. Khi không nên mua thêm chỉ để freeship, vẫn chủ động giới thiệu màu/mẫu tương tự phù hợp thay vì mặc định dừng; tôn trọng lời yêu cầu dừng thật và capability hiện có. [Quyết định, phạm vi và dữ liệu cần chuẩn bị](c3-sales-stance-and-observable-claims-20261008.md), amendment§7.0.2 là hướng hiện hành cho chuẩn bị tiếp theo. Giữ nguyên các run đã freeze, không tự đăng ký provider run hoặc mở post-A.
+
+Owner làm rõ tiếp sau Round21: chấp nhận lợi ích tư vấn chung về vẻ gọn gàng trong ngày và cảm giác thoải mái/mềm mại ở phần eo có căn cứ thiết kế/fit, không suy cam kết kỹ thuật chỉ từ một cụm từ. Chiều cao/cân nặng là đường chọn size hợp lệ khi bảng size hỗ trợ; không mặc định phải xin đủ ba số đo cho mọi món. [Phạm vi và căn cứ](c3-round21-advisory-scope-clarification-20261008.md), amendment§7.0.3 thay cách hiểu quá chặt về lời tư vấn thông thường, giữ ranh giới facts/fit/kiểm nghiệm/quyền lợi/effects. Các kết quả đã freeze tiếp tục giữ nguyên.
+
+Owner chốt sau Round25 ngày2026-10-09: lời tư vấn thông thường về giữ form/đường may không bị reject vì thiếu kiểm nghiệm riêng; ít nhăn cần thông tin chất liệu liên quan. Chấp nhận lời giới thiệu đổi 7 ngày trong ngữ cảnh trước mua đã xét, không buộc liệt kê lại mọi điều kiện; xét cả lời khẳng định, hội thoại và giọng điệu. [Các phạm vi đã chốt, trách nhiệm và hướng fix](c3-sales-semantics-and-whole-turn-review-20261009.md), amendment§7.0.4 là cách hiểu hiện hành khi khác với yêu cầu căn cứ quá rộng trước đây. Review toàn lượt tư vấn trước các điểm chẩn đoán; giữ riêng thiếu dữ liệu, lỗi provider, từ chối ngữ nghĩa và chất lượng reply. Đủ để thực hiện fix có giới hạn, chưa là owner GO hay đăng ký run mới; không sửa kết quả lịch sử.
+
+- A3 phải đánh giá tư vấn bán hàng trên tình huống mua cụ thể: lựa chọn/so sánh, phản đối, sửa đổi và lịch sử nhiều lượt với evidence phù hợp. Giữ cả ca đủ và thiếu evidence; price/stock đơn giản tiếp tục là controls. Dùng các chiều whole-reply hiện có để đánh giá phương án tư vấn, tính hữu ích/hợp lý, tự nhiên và bước xử lý, thay vì chỉ đếm facts đã trả lời.
+- Chất lượng của phương án và tiến triển phù hợp của khách là căn cứ chấp nhận. Điểm tự chấm, verifier PASS hoặc tỷ lệ chốt đơn đơn lẻ không thay thế đánh giá này. Một quyết định trì hoãn/từ chối phù hợp vẫn được tôn trọng. Các mẫu số, mốc đo và ngưỡng định lượng cho thử nghiệm tương lai phải được freeze trước khi chạy.
+- **Checkpoint A hiện vẫn STOP:** owner chưa chấp nhận chất lượng A3. Ưu tiên tiếp theo là chất lượng tư vấn và đầu vào đánh giá. Luồng nghiệp vụ mua hàng thật, persistence/mutation, sau mua và rollout thuộc plan post-A sau owner GO; việc ghi mục tiêu không tự mở implementation hoặc một provider run mới.
+- Giữ một conversational owner và tối đa một semantic verifier. Code là sole authority về identity/truth/freshness/state/permission/effects/receipts/privacy. Không thêm third role, semantic router, generic Vietnamese parser, template theo ca, repair/reverify loop hoặc durable semantic memory để đạt mục tiêu bán hàng.
+
+Mục tiêu này có hiệu lực cho các kế hoạch tương lai. Corpora, prompts, cấu hình, source SHA, provider evidence và điểm số của những vòng đã freeze được giữ nguyên theo identity lịch sử; không chấm lại hoặc gọi chúng là đã đạt mục tiêu mới.
 
 ---
 

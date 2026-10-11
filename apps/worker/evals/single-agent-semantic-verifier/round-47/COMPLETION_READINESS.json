@@ -1,0 +1,114 @@
+{
+  "status": "READY_FOR_OWNER_AUTHORIZED_MISSING_SLOTS",
+  "recordedAt": "2026-10-11T03:57:20.264Z",
+  "providerGenerationRequests": 0,
+  "priorA2RunSourceSha": "ebca9492b4c31eb933e9920595413847385159b4",
+  "priorEvidenceHash": "f2f7b10b5db641ca80fbef142cc31a9551ee54519243f5ae39f6157d15934e4b",
+  "originalReadinessFile": "READINESS.json",
+  "observedRed": {
+    "command": "node --test apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.test.mjs",
+    "exit": 1,
+    "reason": "missing completion runner; observed ERR_MODULE_NOT_FOUND"
+  },
+  "initialGreen": {
+    "tests": 3,
+    "pass": 3,
+    "fail": 0,
+    "exit": 0
+  },
+  "fullSerial": {
+    "tests": 249,
+    "pass": 249,
+    "fail": 0,
+    "skipped": 0,
+    "exit": 0,
+    "stdoutSha256": "688608c1c33e043fe7afc956988f8529d2cbcc96d6778da45556d65d8c0b10f9"
+  },
+  "focusedProtocolAdapters": {
+    "tests": 29,
+    "pass": 29,
+    "fail": 0,
+    "skipped": 0,
+    "exit": 0,
+    "installedCodexAuthRelayStubPassed": true,
+    "providerGenerationRequests": 0
+  },
+  "unchangedWorkerChecks": {
+    "from": "READINESS.json",
+    "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+    "boundaryVertex": {
+      "tests": 79,
+      "pass": 79
+    },
+    "protectedClaimsAssemblerSize": {
+      "tests": 41,
+      "pass": 41
+    },
+    "workerBuild": 0,
+    "workerTypecheck": 0,
+    "workerLint": 0,
+    "reusedBecause": "Only an evaluation completion runner and its tests were added; worker/shared source and compiled boundary are unchanged."
+  },
+  "limitsRead": {
+    "checkedAt": "2026-10-11T03:50:35.558Z",
+    "identity": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "methods": [
+      "initialize",
+      "initialized",
+      "account/rateLimits/read"
+    ],
+    "generationRequests": 0,
+    "status": "OK",
+    "rateLimits": {
+      "limitId": "codex",
+      "primary": {
+        "usedPercent": 11,
+        "windowDurationMins": 300,
+        "resetsAt": 1791707972,
+        "resetsAtUtc": "2026-10-11T08:39:32.000Z"
+      },
+      "secondary": {
+        "usedPercent": 24,
+        "windowDurationMins": 10080,
+        "resetsAt": 1791997855,
+        "resetsAtUtc": "2026-10-14T17:10:55.000Z"
+      },
+      "rateLimitReachedType": null,
+      "credits": {
+        "hasCredits": false,
+        "unlimited": false
+      }
+    },
+    "rateLimitsByLimitId": [
+      {
+        "limitId": "codex",
+        "primary": {
+          "usedPercent": 11,
+          "windowDurationMins": 300,
+          "resetsAt": 1791707972,
+          "resetsAtUtc": "2026-10-11T08:39:32.000Z"
+        },
+        "secondary": {
+          "usedPercent": 24,
+          "windowDurationMins": 10080,
+          "resetsAt": 1791997855,
+          "resetsAtUtc": "2026-10-14T17:10:55.000Z"
+        },
+        "rateLimitReachedType": null,
+        "credits": {
+          "hasCredits": false,
+          "unlimited": false
+        }
+      }
+    ]
+  },
+  "registeredLogicalDenominator": 235,
+  "preservedCompleted": 168,
+  "registeredCompletionSlots": 67,
+  "frozenInputsChanged": false,
+  "rolesOrSemanticLayersAdded": 0,
+  "productionWiring": false
+}

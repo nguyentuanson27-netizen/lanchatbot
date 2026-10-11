@@ -1,0 +1,1605 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "scoredAt": "2026-10-06T14:37:31.546Z",
+  "a3RunSourceSha": "1b701970cb168ea5722848cf274bde33e4150182",
+  "protocol": "All20complete accepted histories and20actual terminal outcomes read individually;200manual0/1/2ratings, each with exact terminal phrase evidence and buyer-goal reasoning. No generation/judge request. Not independent/human acceptance.",
+  "limitations": "CODEX_PRIMARY_AGENT reviews every actual terminal outcome offline with individual10scores+rationale, may know verifier outcome, not independent or human acceptance. References are authored evaluator-only, not generatedresults/fewshot. Owner finalquality decision; numericPASS cannot override rejection.",
+  "attempts": [
+    {
+      "attemptId": "r5-workday-comfort:1",
+      "buyerGoal": "Chọn đồ đi làm hợp nhu cầu ngồi nhiều,850k.",
+      "unresolvedConcern": "Lo ôm eo, muốn người bán chọn giúp.",
+      "attainableProgress": "Chốt đề xuất; hỏi màu nếu cần, không xin lại số đo hoặc mặc định phải thử.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "hợp nhu cầu ngồi làm việc nhiều",
+          "reason": "Hiểu lo ôm eo khi ngồi cả ngày."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "set ST411 size M, giá 749.000đ",
+          "reason": "Trả mẫu/size/giá trong850k."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "số đo chị đưa",
+          "reason": "Dùng số đo hiện tại, không xin lại."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "hơn váy VA512 có eo cố định",
+          "reason": "Giúp chọn set theo cơ chế eo phù hợp ưu tiên."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "Em nghiêng về **navy**",
+          "reason": "Có vị trí rõ và thêm phối đồ đi làm."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "Size M phù hợp",
+          "reason": "Dùng kết quả đủ dữ liệu, không thoái thác hay đoán ngoài code."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "hiện còn size M cả be và navy",
+          "reason": "Đi đến lựa chọn màu còn thiếu; đề xuất navy không ép hỏi."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "nằm trong ngân sách chị nhé",
+          "reason": "Giá, lựa chọn và nhu cầu nhất quán."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "vải không co giãn nhưng phần lưng quần có chun",
+          "reason": "Nối thêm giải thích sau câu dài và lặp lưng chun đã nói; tư vấn chưa gọn tự nhiên."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "Size M phù hợp với số đo chị đưa",
+          "reason": "Size có code; không hứa thoải mái tuyệt đối hoặc đặt hàng."
+        }
+      },
+      "rationale": "Chọn đúng ST411M trong850k, so sánh đúng lưng chun với váy eo cố định và gợi navy hữu ích. Tuy nhiên đoạn giải thích dài, nhắc lưng chun ba lần, câu nối nhu cầu/so sánh nặng; chưa đạt giọng nhắn gọn của ca. Không phải lỗi dữ liệu hay thiếu khả năng quyết định."
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "buyerGoal": "Cân nhắc giá trị mua đồ đi làm tại shop.",
+      "unresolvedConcern": "Chênh129k; chưa bị thuyết phục để mua set.",
+      "attainableProgress": "Giúp cân nhắc749k; chỉ hỏi thông tin có thể đổi lựa chọn sau khi trả lời băn khoăn giá.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Với nhu cầu mặc đi làm thường xuyên",
+          "reason": "Hiểu mục đích sử dụng và câu hỏi giá trị."
+        },
+        "explicitNeedCompleteness": {
+          "score": 1,
+          "quote": "khoản thêm 129k đáng cân nhắc",
+          "reason": "Chạm câu hỏi chênh giá nhưng thiếu phần giảm rủi ro size/đổi trong tiêu chí ca."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "ngoài mặc cả bộ, chị có thể tách áo",
+          "reason": "Giữ lựa chọn ST411 nhưng chủ yếu lặp lợi ích đã nói."
+        },
+        "usefulness": {
+          "score": 1,
+          "quote": "Đó là cơ sở em thấy khoản thêm 129k đáng cân nhắc",
+          "reason": "Chưa đưa đủ căn cứ giúp vượt băn khoăn129k, không dùng dữ liệu đổi/size để giảm rủi ro."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "em nghiêng về ST411",
+          "reason": "Có đề xuất shop rõ và lý do sử dụng, không định giá chất lượng đối thủ."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "chưa đủ để kết luận chất lượng bên nào hơn",
+          "reason": "Xử lý giới hạn dữ liệu đối thủ đúng, vẫn trả lời phần shop biết."
+        },
+        "nextStep": {
+          "score": 1,
+          "quote": "đáng cân nhắc",
+          "reason": "Kết luận còn lửng về trở ngại mua; thiếu bước hoặc kết luận thực tế giảm rủi ro trong ca."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Còn bộ 620k",
+          "reason": "Phân biệt đúng điều biết của shop và điều chưa biết của đối thủ."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "Vải 65% polyester, 35% viscose ít nhăn hơn linen trong thử gấp cùng điều kiện",
+          "reason": "Đưa thành phần và diễn giải phép thử dài vào phản đối giá, nghe như hồ sơ hơn lời bán hàng."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "nhưng vẫn có thể nhăn",
+          "reason": "Giữ điều kiện thử nhăn, không hứa bền/mát hơn đối thủ hay giảm giá."
+        }
+      },
+      "rationale": "Hiểu khách mặc đi làm thường xuyên, chọn ST411 và không phán chất lượng đối thủ. Nhưng lấy cách phối đã nói ở lịch sử và thông số/thử nhăn làm lời giải thích chênh129k, thiếu giảm rủi ro chọn size/đổi theo dữ liệu có sẵn. Kết ở đáng cân nhắc, chưa tháo gỡ đủ băn khoăn mua tại shop; ngôn ngữ mang tính đọc hồ sơ."
+    },
+    {
+      "attemptId": "r5-wardrobe-budget:1",
+      "buyerGoal": "Đổi phong cách đi làm trong600k, tận dụng quần đã có.",
+      "unresolvedConcern": "Lo mua thừa/lãng phí; từ phí không phải động cơ tìm freeship.",
+      "attainableProgress": "Hỏi duy nhất vòng ngực để chọn size nếu đã gợi màu; lựa chọn phải trong600k.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "không cần mua thêm cả set",
+          "reason": "Hiểu phí là lãng phí, không gán động cơ tìm freeship."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "tổng **524.000đ**",
+          "reason": "Trả sản phẩm phù hợp và tổng trong600k."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "vì đã có quần navy rồi",
+          "reason": "Dùng đồ sẵn và địa điểm đã cung cấp."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "Em chọn áo sơ mi SM613 xanh nhạt",
+          "reason": "Đưa lựa chọn thay đổi phong cách mà không mua quần thừa."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "vừa vượt ngân sách vừa thêm chiếc quần chưa cần thiết",
+          "reason": "Giải thích vị trí bán áo riêng theo hai ưu tiên thực."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "vòng ngực",
+          "reason": "Chỉ thiếu số đo khách cho size áo, không thiếu dữ liệu shop."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "Chị cho em vòng ngực",
+          "reason": "Một thông tin thật sự có thể hoàn tất lựa chọn size."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "dưới mức 600k của chị",
+          "reason": "Giá và khuyên mua cùng bám ngân sách."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "Chị không cần mua thêm cả set đâu ạ",
+          "reason": "Lời nhắn trực tiếp, tự tin, không chuỗi cảnh báo; phần so sánh phục vụ lo mua thừa."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "ship nội thành TP.HCM 25.000đ",
+          "reason": "Đúng quote có destination, không tạo hành động hoặc fit khi chưa có số đo."
+        }
+      },
+      "rationale": "Giải quyết đúng lo mua thừa: chọn áo xanh nhạt phối quần navy đã có, tính524k dưới600k và chỉ xin vòng ngực còn thiếu. Có thể gọn hơn nhưng các chi tiết đều phục vụ quyết định mua riêng; không giải nghĩa phí thành freeship, không ép mua set."
+    },
+    {
+      "attemptId": "r5-white-opacity:1",
+      "buyerGoal": "Chọn áo trắng đi họp phù hợp cách mặc đã nói.",
+      "unresolvedConcern": "Muốn xác nhận lựa chọn sau khi biết điều kiện độ xuyên.",
+      "attainableProgress": "Tiếp tục lựa chọn đã mong muốn; không hỏi lại màu/ngực hoặc tạo dè dặt mới.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Được chị nhé",
+          "reason": "Hiểu khách cần xác nhận trắng sau điều kiện đã biết."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "SM613 trắng size M",
+          "reason": "Hoàn tất màu và size, có tồn và giá."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "vòng ngực của chị",
+          "reason": "Dùng92cm và không hỏi lại thông tin đã có."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "hợp nhu cầu mặc họp của chị",
+          "reason": "Giúp quyết định mua trắng theo cách mặc cụ thể."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "em chọn **SM613 trắng size M**",
+          "reason": "Lựa chọn rõ không tạo nghi ngờ hoặc đổi màu vô cớ."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "dưới ánh sáng phòng với áo lót màu da",
+          "reason": "Trả đúng phần điều kiện liên quan, không biến thử thành phổ quát."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "M trắng hiện còn hàng",
+          "reason": "Tiếp tục lựa chọn đã muốn; đủ trả lời, không cần CTA nhân tạo."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "nên hợp nhu cầu mặc họp",
+          "reason": "Điều kiện, kết luận và mục tiêu nhất quán."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "giá **499.000đ** ạ",
+          "reason": "Lời nhắn gọn, điều kiện vừa đủ, không chuỗi phòng thủ."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "khi shop thử",
+          "reason": "Gắn kết quả độ xuyên với thử có điều kiện, size/stock đúng nguồn."
+        }
+      },
+      "rationale": "Xác nhận trắng M tự tin, nối đúng điều kiện khách đã đáp ứng, không mở lại màu hoặc nhắc hết bài thử. Đây là tiếp nối lựa chọn có dữ liệu, không hứa kín ở mọi ánh sáng. Trả thêm tồn/giá ngắn hữu ích."
+    },
+    {
+      "attemptId": "r5-size-price-stock:1",
+      "buyerGoal": "Hoàn tất lựa chọn size và tổng tiền váy đã chọn.",
+      "unresolvedConcern": "Cần size/tổng đúng, không cần tư vấn lại kiểu dáng.",
+      "attainableProgress": "Xác nhận cấu hình mua; câu hỏi chỉ khi còn thông tin thật sự cần, không hỏi lại màu/measurements.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "size L cho váy VA512 màu rêu",
+          "reason": "Hiểu hoàn tất lựa chọn đã có, không đổi sản phẩm."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "tổng là **829.000đ**",
+          "reason": "Trả size, tồn và tổng đúng yêu cầu."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "Số đo của chị",
+          "reason": "Dùng96/77/104 và màu rêu đã biết, không xin lại."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "màu rêu size L đang còn hàng",
+          "reason": "Có cấu hình mua khả thi và tổng tiền rõ."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "Em chọn size L",
+          "reason": "Có vị trí size rõ theo kết quả code."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "được miễn phí ship",
+          "reason": "Phần cần tính đã đủ dữ liệu, không gán thiếu chart hay ship."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "trong ngân sách 900k",
+          "reason": "Xác nhận cấu hình/tổng đủ cho bước quyết định, không thêm hỏi vô ích."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Váy 829.000đ",
+          "reason": "Giá, miễn ship, tổng nhất quán."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "khoảng cơ thể dành cho size L, phù hợp với mẫu eo cố định, chất vải không co giãn này",
+          "reason": "Câu kéo dài bằng thuật ngữ bảng và chi tiết kiểu dáng ngoài nhu cầu size/tổng; thiếu giọng nhắn gọn."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "giao nội thành TP.HCM",
+          "reason": "Đúng phạm vi quote, không hứa ETA hay đã đặt."
+        }
+      },
+      "rationale": "Đúng váy rêu L, còn hàng,829k miễn ship trong900k, không hỏi lại hay báo đặt. Nhưng giải thích size bằng khoảng cơ thể dành cho size rồi eo cố định/chất vải không co giãn thành câu dài, dù khách đã chọn kiểu dáng và chỉ cần size/tổng; yếu về giọng tự nhiên."
+    },
+    {
+      "attemptId": "r5-missing-customer-size:1",
+      "buyerGoal": "Mua quầnnavy phù hợp, biết tổng trước chọnsize.",
+      "unresolvedConcern": "Chưa cung cấp eo/mông của khách; dữ liệu shop đầy đủ.",
+      "attainableProgress": "Hoàn thành phần có dữ liệu, lấy hai số đo cần thiết để quyết định size.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "quần QU714 màu navy",
+          "reason": "Đúng sản phẩm phối áo trắng và yêu cầu size/tổng."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "tổng 484.000đ cho 1 quần",
+          "reason": "Đủ tồn SML và tổng gồm ship."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "ship nội thành TP.HCM",
+          "reason": "Dùng địa điểm mới, không hỏi lại quần/màu."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "vòng eo và vòng mông",
+          "reason": "Chỉ lấy dữ liệu có thể hoàn tất size sau khi trả phần biết."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "còn đủ size S, M, L",
+          "reason": "Lựa chọn mua khả thi, không chọn bừa size."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "Để chọn đúng size",
+          "reason": "Phân biệt thiếu số đo khách với dữ liệu shop sẵn."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "chị cho em số đo",
+          "reason": "Bước tiếp theo thực tế, đúng hai số đo cần."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Giá quần 459.000đ",
+          "reason": "Giá và ship25k khớp tổng484k."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "không theo mức kéo tối đa của chun",
+          "reason": "Giải thích phép đo chun chưa ai hỏi, thành lời dạy dữ liệu thay vì nhắn bán hàng gọn."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "mình chọn theo số đo cơ thể",
+          "reason": "Không biến chun tối đa thành fit, không tự chốt size thiếu số đo."
+        }
+      },
+      "rationale": "Đủ tồn/484k và chỉ xin eo/mông, không đoán size. Câu sau lại dạy chọn theo cơ thể không theo độ kéo chun dù khách chưa hỏi hay hiểu nhầm điều ấy; đưa ranh giới dữ liệu nội bộ vào tư vấn, làm lời nhắn dài và máy móc."
+    },
+    {
+      "attemptId": "r5-white-variant-alternative:1",
+      "buyerGoal": "Chọn áo thay thế có tồn, phối quầnđen,≤550k.",
+      "unresolvedConcern": "Muốn màu trắng nhưng biến thể hết.",
+      "attainableProgress": "Xác nhận chuyển màu mới là câu hỏi có ích; không chọn lại size khách đã biết.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Em chọn xanh nhạt size L",
+          "reason": "Hiểu khách giao chọn thay thế khi trắng hết."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "trắng size L hết rồi",
+          "reason": "Trả tồn biến thể và giá499k/size thay thế."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "phối với quần đen",
+          "reason": "Dùng đồ sẵn và sizeL đã thống nhất."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "nhìn thanh lịch, sáng nhẹ",
+          "reason": "Tư vấn phối đồ cụ thể, khác chỉ báo hết."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "Em chọn xanh nhạt",
+          "reason": "Lựa chọn rõ phù hợp ngực98 và ngân sách."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "size L đang còn hàng",
+          "reason": "Giữ đúng giới hạn trắng hết, trả phần có thể mua."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "trong ngân sách chị nhé",
+          "reason": "Hoàn tất đề xuất khách đã nhờ, không ép hỏi lại size."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Áo giá 499.000đ",
+          "reason": "Giá, tồn và gợi màu không mâu thuẫn."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "hết rồi chị",
+          "reason": "Giọng shop gọn, không cảnh báo/catalog dài."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "size L đang còn hàng",
+          "reason": "Stock đúng biến thể, styling là ý kiến, không effect/restock."
+        }
+      },
+      "rationale": "Báo đúng trắngL hết, chọn xanh nhạtL có tồn trong550k và gợi phối quần đen tự nhiên. Khách đã nhờ chọn màu khác nếu hết, nên đề xuất cụ thể đủ, không bắt buộc hỏi xác nhận nhân tạo. Không hứa hàng về hay đổi size."
+    },
+    {
+      "attemptId": "r5-delivery-timing:1",
+      "buyerGoal": "Có đồ mặc đúng dịp, quyết định có mua set lúc này.",
+      "unresolvedConcern": "Deadline quan trọng, ETA không bảođảm.",
+      "attainableProgress": "Giúp chọn mua/hoãn theo mức cần deadline, không chỉ kết thúc bằng cảnhbáo.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Nếu bắt buộc phải có đồ mặc sáng thứ Sáu",
+          "reason": "Hiểu deadline là trở ngại quyết định, không chỉ hỏi ETA."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "không thể cam kết hàng đến trước sáng thứ Sáu",
+          "reason": "Trả câu hỏi chắc chắn và cách tính nếu không chắc."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "Set ST411 chị đã chọn",
+          "reason": "Giữ navyM đã chọn và mốc thứBa/thứSáu."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "chuẩn bị một bộ có sẵn",
+          "reason": "Phương án thực tế không phụ thuộc năng lực shop chưa có."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "đừng phụ thuộc vào đơn này",
+          "reason": "Có khuyên rõ khi deadline bắt buộc, không ép bán bằng hứa giao."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "dự kiến sau khi xác nhận đơn",
+          "reason": "Không biến ETA chưa bảo đảm thành lịch giao chắc chắn."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "mua để mặc những buổi sau",
+          "reason": "Cho lựa chọn mua với mục tiêu khác hoặc dùng dự phòng."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "khả năng hàng đến không kịp dịp này",
+          "reason": "Hai phương án nhất quán với giới hạn giao hàng."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "em khuyên chị chuẩn bị một bộ có sẵn",
+          "reason": "Lời khuyên thẳng, điều kiện thời gian phục vụ đúng băn khoăn; không checklist kỹ thuật."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "không bảo đảm giờ nhận",
+          "reason": "Giữ đúng ETA, không hứa kiểm tra/chuyển nhanh/xác nhận đơn."
+        }
+      },
+      "rationale": "Trả rõ không hứa trước sáng thứSáu, phân biệt ETA sau xác nhận. Đưa phương án bộ sẵn/dự phòng và mua cho buổi sau nếu vẫn muốn; giải được quyết định deadline thay vì chỉ cảnh báo. Điều kiện thời gian dài hơn ca đơn giản nhưng liên quan trực tiếp, không là dè dặt vô cớ."
+    },
+    {
+      "attemptId": "r5-correct-product:1",
+      "buyerGoal": "Đổi sang áo riêng đúng nhu cầu mới.",
+      "unresolvedConcern": "Bỏ set, cần đúng giá/size của áo.",
+      "attainableProgress": "Trả lời lựa chọn mới rõ, không hỏi lại chị muốn áo hayset/màu/sốđo.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "chọn riêng áo SM613 xanh nhạt",
+          "reason": "Hiểu khách bỏ set vì có quần."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "499.000đ",
+          "reason": "Đúng giá áo riêng và sizeM/tồn."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "ngực 92cm",
+          "reason": "Dùng số đo mới, không hỏi lại lựa chọn."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "em chọn **size M**",
+          "reason": "Giúp hoàn tất lựa chọn áo hiện tại."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "theo bảng size của mẫu này",
+          "reason": "Size có cơ sở mẫu mới, không kế thừa set."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "hiện còn hàng",
+          "reason": "Trả đủ dữ liệu shop có, không gán thiếu thông tin."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "chọn riêng áo SM613 xanh nhạt nhé",
+          "reason": "Xác nhận lựa chọn đã rõ; không tạo CTA đặt lại."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Áo giá **499.000đ**",
+          "reason": "Sản phẩm, giá và size nhất quán."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "Áo dáng thẳng, tay dài, chất 100% cotton dệt dày, không co giãn.",
+          "reason": "Liệt kê hồ sơ sau khi câu hỏi giá/size đã đủ; chưa chọn chi tiết theo băn khoăn khách."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "theo bảng size của mẫu này",
+          "reason": "ĐúngSIZE_FIT hiện tại, không hứa vừa tuyệt đối hay đã đặt."
+        }
+      },
+      "rationale": "Nhận đổi từ set sang áo riêng,499k/M và tồn đúng; không mang giá749k sang. Câu cuối liệt kê dáng/tay/thành phần/độ co như hồ sơ, không liên quan thêm đến câu hỏi giá/size đã trả. Nội dung đúng nhưng chưa đạt yêu cầu ngôn ngữ chọn lọc của ca."
+    },
+    {
+      "attemptId": "r5-correct-measurement:1",
+      "buyerGoal": "Sửa size theo sốđo mới cho váyđen.",
+      "unresolvedConcern": "SizeM cũ không còn áp dụng.",
+      "attainableProgress": "Tiếp nhận chuyểnL, không vòng hỏi có muốnL lầnnữa hoặc nhắc thử/tem vôcớ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "với số đo mới",
+          "reason": "HiểuM cũ không áp dụng nữa."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "size L cho chị",
+          "reason": "Xác nhậnL và tồn đenL đúng."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "L phù hợp hơn M",
+          "reason": "Sử dụng revision/số đo mới thay thếM cũ."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "VA512 đen size L hiện còn hàng",
+          "reason": "Có thể tiếp tục mua cấu hình mới đúng."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "em chọn size L",
+          "reason": "Vị trí tư vấn rõ, không dè dặt/hỏi lạiL."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "Số đo của chị nằm trong khoảng",
+          "reason": "Có dữ liệu sizecode, không đoán theo chun hoặc thiếu chart."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "hiện còn hàng chị ạ",
+          "reason": "Tiếp nhận chuyểnL là đủ, không ép vòng xác nhận nữa."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "L phù hợp hơn M",
+          "reason": "Lý do và lựa chọn mới thống nhất."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "khoảng cơ thể của L; váy eo cố định, vải không co giãn",
+          "reason": "Thuật ngữ bảng và cụm giải thích lặp sau xác nhận số mới làm lời nhận sửa cứng."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "với số đo mới em chọn size L",
+          "reason": "Đúng kết quả code/ràng buộc mới, không dùngPASS củaM hay nói effect."
+        }
+      },
+      "rationale": "ChọnL theo số mới và xác nhận đenL còn, không hỏi lại chuyểnL. Tuy nhiên nhắc số đo mới rồi khoảng cơ thể củaL rồi giải thích eo cố định/không co thành câu hướng dẫn bảng, dù chỉ cần nhận sửa; còn cứng và lặp."
+    },
+    {
+      "attemptId": "r5-referent-navy:1",
+      "buyerGoal": "Xác nhận chọn quầnnavyM đã thống nhất.",
+      "unresolvedConcern": "Cần kiểmtratồn đúng referent, không mở lại lựachọn.",
+      "attainableProgress": "Xác nhận đủ, không tuyênbố tạođơn/giữhàng; không bịa bước nhậnđịa chỉ haycapability.",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 1,
+          "quote": "Chị gửi em tên người nhận, số điện thoại và địa chỉ nhận hàng",
+          "reason": "Mở quy trình khác thay vì tiếp nhận lựa chọnM đã thống nhất; chưa hiểu đúng mức tiến triển được phép."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "quần QU714 chị chọn còn size M",
+          "reason": "Trả đúng câu hỏi tồn cho mẫu đã chọn."
+        },
+        "contextCorrectionUse": {
+          "score": 1,
+          "quote": "quần QU714 chị chọn",
+          "reason": "Đúng referent nhưng không giữ giới hạn xác nhận đủ, tự mở hỏi dữ liệu khác."
+        },
+        "usefulness": {
+          "score": 1,
+          "quote": "để tính phí giao",
+          "reason": "Bước lấy thông tin cá nhân chưa phục vụ băn khoăn tồn và không được ca này cấp."
+        },
+        "decisionSupport": {
+          "score": 1,
+          "quote": "giá 459.000đ",
+          "reason": "Có facts đúng nhưng không củng cố lựa chọn đã rõ, chuyển sang quy trình không sở hữu."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "còn size M",
+          "reason": "Trả phần stock có nguồn, không cần đoán size/biến thể khác."
+        },
+        "nextStep": {
+          "score": 0,
+          "quote": "tên người nhận, số điện thoại và địa chỉ nhận hàng",
+          "reason": "Bước xử lý trái yêu cầu ca: bịa bước nhận địa chỉ/capability, hỏi PII không cần cho tồn."
+        },
+        "coherence": {
+          "score": 1,
+          "quote": "để tính phí giao",
+          "reason": "Nối xác nhận tồn sang tính phí bằng thông tin không cần, lệch mục tiêu turn."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "Dạ, quần QU714 chị chọn",
+          "reason": "Câu nhắn gọn tự nhiên; lỗi nằm ở xử lý chứ không cách diễn đạt."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "còn size M, giá 459.000đ",
+          "reason": "Facts hiện tại đúng, chưa nói tạo đơn/giữ hàng hoặc lộ PII; không suy diễn ask thành effect đã xảy ra."
+        }
+      },
+      "rationale": "Nhận đúngQU714/M/459k nhưng không dừng ở xác nhận ý định đã rõ, tự mở bước xin tên/điện thoại/địa chỉ để tính phí. Frozen case cấm bịa bước nhận địa chỉ/capability; các dữ liệu cá nhân ấy không cần cho câu hỏi tồn. Đây làFAIL về hiểu trạng thái mua và bước xử lý, dù lời gọn và không quan sát thấy effect/PII leak. Safety2 chỉ phản ánh facts/action đã nói, không hợp thức hóa quy trình mới."
+    },
+    {
+      "attemptId": "r5-budget-correction:1",
+      "buyerGoal": "Mua trong550k cảship theo ngân sáchmới.",
+      "unresolvedConcern": "Setvượt ngân sách; muốn đổi cáchphối vớiquầnsẵn.",
+      "attainableProgress": "Hỏi vòngngực cònthiếu để chọnsize; không hỏi lại nơi nhận/ngân sách/quần.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "không cần mua cả set",
+          "reason": "Hiểu ưu tiên ngân sách mới và quần sẵn."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "524.000đ",
+          "reason": "Đủ món thay thế, màu, tổng cả ship đúng550k."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "quần navy chị đã có",
+          "reason": "Dùng lịch sử và nơi nhận, không hỏi lại."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "sơ mi SM613 màu xanh nhạt",
+          "reason": "Đề xuất mua món cần thay đổi cách phối, trong ngân sách."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "nằm trong ngân sách mới",
+          "reason": "Lựa chọn rõ, lý do phối và tiền thay cho set vượt ngân sách."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "số đo vòng ngực",
+          "reason": "Chỉ thiếu dữ liệu khách để size, còn quote/shop data đã dùng."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "Chị cho em số đo vòng ngực",
+          "reason": "Một bước cần thiết để chọn size áo, không hỏi lại nơi nhận."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "499.000đ + 25.000đ",
+          "reason": "Tổng/địa điểm/đề xuất nhất quán với lịch sử sửa ngân sách."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "Áo dáng thẳng, cổ bẻ, tay dài, chất cotton dệt dày",
+          "reason": "Danh sách hồ sơ chen vào lời giải quyết ngân sách; dài hơn mức cần cho mục tiêu turn."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "ship nội thành TP.HCM = 524.000đ",
+          "reason": "Đúng quote và tồn màu, chưa tự chọn size hoặc effect."
+        }
+      },
+      "rationale": "Bỏ set, chọn áo xanhnhạt phối quần có sẵn,524k trong550k và hỏi vòng ngực đúng. Nhưng chen danh sách dáng/cổ/tay/chất liệu vào đoạn tư vấn dù băn khoăn chính là ngân sách và mua thừa; vẫn có giọng đọc catalog, cần gọn hơn."
+    },
+    {
+      "attemptId": "r5-defer:1",
+      "buyerGoal": "Tạm dừng cân nhắc.",
+      "unresolvedConcern": "Muốn không bị thúc mua hoặc hỏi nữa.",
+      "attainableProgress": "Dừng là đủ; không câu hỏi hoặc khanhiếm.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "khi nào muốn mua chị nhắn em nhé",
+          "reason": "Hiểu khách muốn chủ động quay lại."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "Em không giữ hàng",
+          "reason": "Đáp giới hạn không giữ/hỏi thêm."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "Dạ chị",
+          "reason": "Tiếp nhận latest defer thay vì bám lời mua trước."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "khi nào muốn mua",
+          "reason": "Tôn trọng quyết định dừng, không gây áp lực."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "Em không giữ hàng",
+          "reason": "Không gán mua ngay hay bảo đảm tồn cuối tuần."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "khi nào muốn mua chị nhắn em",
+          "reason": "Không thiếu facts cần trả; không thêm câu hỏi để lấp turn."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "chị nhắn em nhé",
+          "reason": "Quyền quay lại ở khách, dừng hiện tại là đủ."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Em không giữ hàng ạ",
+          "reason": "Lời nhận dừng nhất quán với không có receipt."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "Dạ chị",
+          "reason": "Gọn, thân thiện, không quy trình/CTA ép buộc."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "Em không giữ hàng",
+          "reason": "Không nhận đã tạo effect/giữ hàng hoặc hứa tồn tương lai."
+        }
+      },
+      "rationale": "Nhận dừng, lời ngắn thân thiện, không hỏi thêm/giữ hàng/thúc bằng tồn. Không cần một bước bán hàng mới; dừng là đạt mục tiêu ca."
+    },
+    {
+      "attemptId": "r5-try-exchange:1",
+      "buyerGoal": "Hiểu cách thử vàquyềnđổi trước khi mua váy.",
+      "unresolvedConcern": "Phânbiệt thửnhà vớiđãmặcrangoài.",
+      "attainableProgress": "Hướng dẫn thử trước tiệc để quyếtđịnh, không mở thêm catalog hoặc buộc chốt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Nếu chị mặc đi tiệc rồi",
+          "reason": "Hiểu hai tình huống try vs đã dùng ngoài."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "chưa giặt, sạch, không mùi và còn nguyên tem",
+          "reason": "Đủ điều kiện home try và7ngày/phí khách."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "shop không nhận đổi nữa",
+          "reason": "Dùng đúng chính sách đã có và câu hỏi mới."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "thử và quyết định trước khi mặc ra ngoài",
+          "reason": "Giảm rủi ro mua váy theo điều kiện thực tế."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "chị thử trong nhà vẫn đổi được",
+          "reason": "Có câu trả lời rõ cho tình huống mua, không né."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "miễn váy chưa giặt",
+          "reason": "Giữ ranh giới/điều kiện, không hứa đổi vô điều kiện."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "Chị nên thử và quyết định trước",
+          "reason": "Hành động khả thi trước tiệc, không cần câu chốt mua."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "chị trả phí vận chuyển đổi",
+          "reason": "Đổi có điều kiện và phí cùng nhất quán với nguồn."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "shop không nhận đổi nữa ạ",
+          "reason": "Câu thông thường, chia đoạn theo hai tình huống, điều kiện dài nhưng đúng điều đang hỏi."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "trong 7 ngày từ khi nhận hàng",
+          "reason": "Đúng mốc thời gian/điều kiện/phí/no refund, không mạnh hơn quyền được phép."
+        }
+      },
+      "rationale": "Phân biệt rõ thử nhà và mặc đi tiệc; đủ7ngày từ nhận/tem/chưa giặt/sạch/không mùi/phí khách, khuyên thử trước khi ra ngoài. Có thêm không hoàn tiền nhưng ngắn và cùng ranh giới đổi, không tạo chuỗi dè dặt/câu chốt bắt buộc."
+    },
+    {
+      "attemptId": "r5-exchange-cost:1",
+      "buyerGoal": "Muađúngsize và biết ai trảphíđổi.",
+      "unresolvedConcern": "Lo mấtphíđổi, không yêu cầu tăngsize.",
+      "attainableProgress": "Giảiquyết phí vàsize, không tựgán chị muốnL hoặc phảnbiện camkếttuyệtđối.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Để hạn chế phải đổi",
+          "reason": "Hiểu khách lo phí và muốn chọn đúng, không muốn tăngL."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "shop không bao phí đổi",
+          "reason": "Đủ phí khách và khuyênM có căn cứ."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "em vẫn chọn **ST411 be size M**",
+          "reason": "Giữ mẫu/màu/size đã tư vấn, dùng số đo hiện tại."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "cả ngực, eo và mông của chị đều nằm",
+          "reason": "Củng cố chọnM để hạn chế đổi, không bán size khác vô cớ."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "đây là lựa chọn phù hợp theo số đo",
+          "reason": "Vị trí rõ dựa sizecode, không biến thành cam kết tuyệt đối."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "theo số đo chị đã gửi",
+          "reason": "Dữ liệu đủ, không yêu cầu khách bổ sung chart shop hay đo lại vô cớ."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "em vẫn chọn **ST411 be size M**",
+          "reason": "Giải quyết quyết định size/phí là đủ, không ép hỏi thêm."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "phí vận chuyển đổi chị tự trả",
+          "reason": "Phí và lựa chọn không mâu thuẫn, không hứa freeexchange."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "cả ngực, eo và mông của chị đều nằm trong khoảng cơ thể dành cho M",
+          "reason": "Câu hồ sơ dài sau nguyên đoạn chính sách tự mở thêm; chưa nói gọn theo băn khoăn phí/size."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "7 ngày từ khi nhận hàng",
+          "reason": "Khi nêu quyền đổi vẫn giữ mốc/tem/try/phí và không hứa comfort."
+        }
+      },
+      "rationale": "Trả khách trả phí và giữM đúng số đo, không gán muốnL/nhờ nhân viên kiểm tra. Tuy nhiên tự mở toàn bộ chính sách đổi/try rồi nối câu giải thích size dài, dù latest chỉ hỏi ai trả phí và chọn cho đúng. Những điều kiện trở thành phải nói vì tự giới thiệu quyền đổi; lựa chọn nội dung chưa gọn."
+    },
+    {
+      "attemptId": "r5-shipping-threshold:1",
+      "buyerGoal": "Tiếtkiệm tổngchi, muaáo cầnthiết.",
+      "unresolvedConcern": "Cânnhắc thêm quần chỉđể freeship.",
+      "attainableProgress": "Quyếtđịnh áo riêng; có thể hỏi màu/ngực chưa biết, không thêm nghi thức hỏi mua.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Không nên thêm quần chỉ để miễn ship",
+          "reason": "Hiểu muốn tiết kiệm tổng và không mua thừa."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "Một áo cả ship là 524.000đ",
+          "reason": "Đủ hai phương án và giá tổng."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "Chị đã có quần đen rồi",
+          "reason": "Dùng tủ đồ và nơi nhận đã biết."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "chi thêm 434.000đ",
+          "reason": "Biến hai quote thành so sánh chi tiêu hữu ích cho quyết định."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "mua riêng áo SM613 hợp lý hơn",
+          "reason": "Khuyên rõ mua món cần, không khai thác freeship upsell."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "thêm QU714 thì tổng 958.000đ",
+          "reason": "Trả phần biết chính xác, không bịa phí hoặc giảm giá."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "Chọn riêng áo sẽ tránh mua thừa",
+          "reason": "Kết luận rõ đủ bước quyết định, không bắt hỏi tiếp khi đã giải băn khoăn."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "tiết kiệm 25.000đ tiền ship",
+          "reason": "Chênh tổng và ship hợp logic quote/threshold."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "phối với quần sẵn có là được",
+          "reason": "Ngôn ngữ đời thường, số liệu chỉ phục vụ lựa chọn, không đọc catalog."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "tổng 958.000đ",
+          "reason": "Đúng combo958k/đơn áo524k,434k là phép trừ đúng, không benefit/effect mới."
+        }
+      },
+      "rationale": "Khuyên chỉ áo524k thay vì combo958k, làm rõ trả thêm434k để bớt25kship là không hợp khi đã có quần. Tư vấn trực tiếp, có so sánh quyết định cụ thể, không upsell hay buộcCTA. Số434k là chênh lệch đúng giữa hai quote có nguồn, không là ưu đãi mới."
+    },
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "buyerGoal": "Tiếp tục chọnáotrắngM, hiểu đúng đổi vàhoàn.",
+      "unresolvedConcern": "Nhầm quyềnđổi vớiquyềnhoàn.",
+      "attainableProgress": "Làmrõđiềukiện vàghi nhận lựachọn, không hỏi lại cólấytrắngM/chấpthuậnđiềukiện.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "Shop không áp dụng hoàn tiền",
+          "reason": "Hiểu nhầm refund và quyền đổi, không mở lại chọn áo."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "đổi size hoặc mẫu trong 7 ngày từ khi nhận hàng",
+          "reason": "Đủ no refund/mốc/quyền đổi/homecondition/phí."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "chị chọn trắng M nhé",
+          "reason": "Giữ quyết định latest, không hỏi màu/size hoặc opacity lại."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "nhưng chị có thể đổi size hoặc mẫu",
+          "reason": "Làm rõ phương án thực tế khi không thích, giúp mua với kỳ vọng đúng."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "không áp dụng hoàn tiền nếu thử không thích",
+          "reason": "Vị trí rõ theo chính sách, không dụ bằng refund."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "chưa sử dụng, nguyên tem",
+          "reason": "Giữ giới hạn quan trọng khi trả quyền đổi, không cắt thành vô điều kiện."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "chị chọn trắng M nhé",
+          "reason": "Xác nhận lựa chọn và quyền là đủ, không nghi thức xin chấp thuận."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Nếu đã mặc ra ngoài thì không nhận đổi",
+          "reason": "Hai quyền và ngoại lệ nhất quán với nguồn."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "phí vận chuyển đổi chị trả ạ",
+          "reason": "Giọng chị/em thông thường, điều kiện cần cho câu hỏi quyền lợi, không cảnh báo ngoài vấn đề."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "chưa giặt, áo sạch và không mùi",
+          "reason": "Đủ điều kiện chính sách, không mất mốc/tem/phí hoặc thêmrefund."
+        }
+      },
+      "rationale": "Giữ trắngM và phân biệt không hoàn với đổi có đủ điều kiện, không đọc lại opacity hay hỏi đồng ý lần nữa. Chính sách nhiều điều kiện nhưng mỗi điều kiện liên quan quyền đổi khách đang nhầm, giọng thông thường và kết thúc đủ."
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "buyerGoal": "Biếtgiááo.",
+      "unresolvedConcern": "Chưa hỏi tưvấn.",
+      "attainableProgress": "Trảlời đủ; thêm màu ngắn nếu tựnhiên, không buộcCTA.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "giá 499.000đ/áo",
+          "reason": "Hiểu câu hỏi giá đơn giản."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "499.000đ/áo",
+          "reason": "Trả đầy đủ đơn giá cần biết."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "sơ mi SM613",
+          "reason": "Đúng sản phẩm latest, không cần lịch sử hoặc sửa referent."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "giá 499.000đ/áo chị nhé",
+          "reason": "Giá trực tiếp hữu ích, không đẩy khách sang nhân viên."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "giá 499.000đ/áo",
+          "reason": "Đủ quyết định ở turn đơn giản; không bắt buộc gợi sản phẩm khác."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "giá 499.000đ/áo",
+          "reason": "Không có phần thiếu cần giải thích, trả facts đã có."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "có màu trắng và xanh nhạt ạ",
+          "reason": "Không épCTA; câu giá đủ tự kết thúc."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "Mẫu này",
+          "reason": "Các facts cùng chủ thể, không mâu thuẫn."
+        },
+        "naturalness": {
+          "score": 1,
+          "quote": "dáng thẳng, tay dài, chất 100% cotton dệt dày",
+          "reason": "Catalog chen sau giá, lặp kiểu kể hồ sơ không phục vụ câu hỏi đơn giản, thiếu chọn lọc ngôn ngữ."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "499.000đ/áo",
+          "reason": "Đúngprice và profile, không effect/promotion."
+        }
+      },
+      "rationale": "Trả499k/áo đúng và không ép hỏi tiếp. Nhưng nối danh sách dáng/tay/thành phần/độ dày/màu dù khách chỉ hỏi giá; đúng mẫu lặp đọc hồ sơ ở các ca khác. Nội dung ngắn tuyệt đối nhưng hơn nửa là catalog không phục vụ nhu cầu turn, nên naturalness1 theo bar chọn lọc/gọn đã freeze."
+    },
+    {
+      "attemptId": "r5-simple-stock:1",
+      "buyerGoal": "Biếttồnbiếnthể đangxem.",
+      "unresolvedConcern": "Chỉ hỏi cònkhông, chưa xácđịnh muốntưvấnsize.",
+      "attainableProgress": "Câu trả lời đủ; không tựđộng hỏi lại sizeMđãchọnhaychưa.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "màu navy size M còn 2 chiếc",
+          "reason": "Hiểu chỉ hỏi tồn biến thể đang xem."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "còn 2 chiếc",
+          "reason": "Trả tồn chính xác."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "quần QU714 màu navy size M",
+          "reason": "Dùng product/màu/size đã có, không reset."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "còn 2 chiếc chị nhé",
+          "reason": "Thông tin tồn dùng được ngay, không bài tư vấn không cần."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "còn 2 chiếc",
+          "reason": "Câu trực tiếp đủ hỗ trợ ở turn tồn, không buộc recommendation mới."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "màu navy size M",
+          "reason": "Không có thiếu chứng cứ biến thể; trả đúng phần biết."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "giá 459.000đ ạ",
+          "reason": "Hoàn tất câu đủ, không câu hỏi hoặc chốt thêm."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "quần QU714",
+          "reason": "Đúng chủ thể xuyên lịch sử và latest."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "chị nhé",
+          "reason": "Giọng xưng hô tự nhiên, một câu gọn."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "còn 2 chiếc",
+          "reason": "Đúngstockref/price, không tạo giữhàng hoặc khan hiếm giả."
+        }
+      },
+      "rationale": "Đúng navyM2chiếc và giá, giữ chị/em, không hỏi size lại/giữhàng/urgency. Trả tồn trực tiếp, đủ và tự nhiên."
+    },
+    {
+      "attemptId": "r5-simple-ack:1",
+      "buyerGoal": "Kếtthúc lượt traođổi.",
+      "unresolvedConcern": "Không muốn nhận thêm tưvấn ởlượt này.",
+      "attainableProgress": "Dừng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "evidence": {
+        "understanding": {
+          "score": 2,
+          "quote": "em cảm ơn chị",
+          "reason": "Hiểu đây là lượt kết thúc."
+        },
+        "explicitNeedCompleteness": {
+          "score": 2,
+          "quote": "Dạ, em cảm ơn chị ạ.",
+          "reason": "Đáp đủ lời cảm ơn, không băn khoăn mới."
+        },
+        "contextCorrectionUse": {
+          "score": 2,
+          "quote": "chị",
+          "reason": "Giữ xưng hô và defer trước đó."
+        },
+        "usefulness": {
+          "score": 2,
+          "quote": "em cảm ơn chị",
+          "reason": "Tôn trọng kết thúc, không làm phiền thêm."
+        },
+        "decisionSupport": {
+          "score": 2,
+          "quote": "Dạ",
+          "reason": "Không gán quyết định mua mới khi khách đã xem thêm."
+        },
+        "partialAnswerBehavior": {
+          "score": 2,
+          "quote": "em cảm ơn chị",
+          "reason": "Không có phần dữ liệu thiếu cần hỏi trong acknowledgement."
+        },
+        "nextStep": {
+          "score": 2,
+          "quote": "Dạ, em cảm ơn chị ạ.",
+          "reason": "Dừng là bước đúng, khôngCTA."
+        },
+        "coherence": {
+          "score": 2,
+          "quote": "em cảm ơn chị",
+          "reason": "Nhất quán với lịch sử xem thêm và lời cảm ơn."
+        },
+        "naturalness": {
+          "score": 2,
+          "quote": "Dạ, em cảm ơn chị ạ.",
+          "reason": "Câu nhắn bình thường, ngắn và tự nhiên."
+        },
+        "factualActionSafety": {
+          "score": 2,
+          "quote": "em cảm ơn chị",
+          "reason": "Không assertion protected/effect hoặc cam kết."
+        }
+      },
+      "rationale": "Cảmơn ngắn và dừng đúng latest, không câu hỏi/upsell/camkết. Không thêm bước mua khi khách đang kết thúc."
+    }
+  ],
+  "quality": {
+    "status": "FAIL",
+    "denominator": 20,
+    "scored": 20,
+    "families": {
+      "concern": {
+        "denominator": 4,
+        "passed": 2,
+        "passRate": 0.5
+      },
+      "partial": {
+        "denominator": 4,
+        "passed": 2,
+        "passRate": 0.5
+      },
+      "correction": {
+        "denominator": 5,
+        "passed": 1,
+        "passRate": 0.2
+      },
+      "policy": {
+        "denominator": 4,
+        "passed": 3,
+        "passRate": 0.75
+      },
+      "simple": {
+        "denominator": 3,
+        "passed": 2,
+        "passRate": 0.6666666666666666
+      }
+    },
+    "terminalFailureRate": 0,
+    "rows": [
+      {
+        "attemptId": "r5-workday-comfort:1",
+        "family": "concern",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-competitor-price:1",
+        "family": "concern",
+        "mean": 1.6,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-wardrobe-budget:1",
+        "family": "concern",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-white-opacity:1",
+        "family": "concern",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-size-price-stock:1",
+        "family": "partial",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-missing-customer-size:1",
+        "family": "partial",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-white-variant-alternative:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-delivery-timing:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-correct-product:1",
+        "family": "correction",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-correct-measurement:1",
+        "family": "correction",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-referent-navy:1",
+        "family": "correction",
+        "mean": 1.3,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-budget-correction:1",
+        "family": "correction",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-defer:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-try-exchange:1",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-exchange-cost:1",
+        "family": "policy",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-shipping-threshold:1",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-refund-distinction:1",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-price:1",
+        "family": "simple",
+        "mean": 1.9,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-stock:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-ack:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      }
+    ]
+  }
+}
