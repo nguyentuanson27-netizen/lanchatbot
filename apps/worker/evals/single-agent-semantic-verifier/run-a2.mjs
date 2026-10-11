@@ -10,7 +10,11 @@ const read=name=>readFileSync(inputUrl(name),'utf8');
 export const loadInputs=()=>({manifest:JSON.parse(read('manifest.json')),a2:JSON.parse(read('corpus-a2.json')),a3:JSON.parse(read('corpus-a3.json'))});
 
 export function providerCapacityExhausted(manifest,provider) {
-  return Boolean(provider?.status==='PROVIDER_ERROR'&&manifest.providerCapacityPolicy?.stopCodes.includes(provider.providerErrorCode));
+  const policy=manifest.providerCapacityPolicy;
+  return Boolean(provider?.status==='PROVIDER_ERROR' && (
+    policy?.stopCodes?.includes(provider.providerErrorCode) ||
+    policy?.stopErrorStages?.includes(provider.errorStage) ||
+    policy?.stopHttpStatuses?.includes(provider.httpStatus)));
 }
 
 export function registerA2Attempts(manifest,a2,prior=null) {
