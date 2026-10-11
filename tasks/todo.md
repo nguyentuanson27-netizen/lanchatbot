@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task:** Owner authorizes Round51 fix and exactly one fresh Checkpoint A. [Scope](../docs/specs/c3-round51-continuing-consultation-20261011.md). Freeze continuation/material-care treatment against exact50 controls;A2 before A3;STOP owner after reporting. Round50 remains A2PASS/A3FAIL62/66 historical;no automatic52/post-A.
+**Current task:** Round51 complete: A2PASS253/253, A3FAIL62/66;recommendation STOP owner. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-51/CHECKPOINT_A.md)/[findings](../apps/worker/evals/single-agent-semantic-verifier/round-51/FINDINGS.md). Policy14/17<90%;2 unresolved buying-advice updates,1 supported policy fallback,1 unnecessary fit input. Historical evidence retained;no automatic52/post-A.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
@@ -863,4 +863,7 @@ Owner “fix và tiếp tục vòng mới”. [Scope](../docs/specs/c3-round51-c
 - [x] Refresh main, record base/starting/spec identity, read current specs/plan/todo/AGENTS and skills;freeze51 inputs/treatment before provider.
 - [x] Observed RED5tests1PASS4FAIL→minimumGREEN5/5;focused54/full269/boundary79/protected41,0skip;worker typecheck/build/lint PASS;read-only routes available0generation;self-review limitations recorded.
 - [x] A2PASS253/253;0unsafeeligiblefalsePASS/0SAFEfailures,249requests,max1/retry0,1transporterror retained,0unexecuted;source/input/binding/firewall/historical audit PASS. A3 authorized after fresh clean seal.
-- [ ] Seal/run/account A3 once,commit raw before whole-turn primary,primary before diagnostics;complete checkpoint/update draftPR390 and STOPowner.
+- [x] Fresh a3RunSourceShabf871d30bc563deef77a5748447d56cd25cfe108;preflight/run/validate66/66,65eligible/1fallback,66owner+66verifier,max1/retry0/errors0/timeouts0. Raw9c8ce7e3 before primaryc90e1cdf before diagnostics;all42histories/66actual outcomes reviewed,660humanratingsnull.
+- [x] A3FAIL62/66:concern23/23,partial11/11,correction11/12,policy14/17<90%,simple3/3. Two implicit recommendation updates still missing;one trial-entitlement extension correctly rejected;one quần reply requests unnecessary BUST_CM.
+- [x] Audit381capturedbodies/bindings/gates/rawhashes and1096historicalfiles unchanged;report/checkpoint complete. Worker checks PASS,subjective primary limitations retained;STOPowner,no automatic52/post-A.
+- [ ] Push/report draftPR390,readback exacthead/body/branch/base/draft/CI/clean tree;record delivery thenSTOPowner.
