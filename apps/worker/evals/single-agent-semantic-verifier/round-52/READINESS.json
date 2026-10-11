@@ -1,0 +1,123 @@
+{
+  "round": 52,
+  "status": "DETERMINISTIC_READY_NOT_SEMANTIC_QUALIFICATION",
+  "checkedAt": "2026-10-11T17:46:35.517Z",
+  "providerGenerationsBeforeSeal": 0,
+  "commands": [
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": null,
+      "result": "Observed first RED before executable edits: 0 PASS / 8 FAIL. Exit code was not separately retained.",
+      "stage": "RED"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 1,
+      "result": "First minimum GREEN attempt: 7 PASS / 1 FAIL; canonical/pretty manifest hash mismatch. Corrected before provider.",
+      "stage": "INTERMEDIATE"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 0,
+      "result": "8/8 PASS;0 skip.",
+      "stage": "GREEN"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "result": "277/277 PASS;0 skip. Default R39 is the existing compatibility-test environment; R52 tests load and validate frozen R52 explicitly."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 0,
+      "result": "48/48 PASS;0 skip. Local transport stubs:0 real provider generations."
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "result": "79/79 PASS (45 boundary,34 Vertex)."
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "result": "41/41 PASS (7 protected-claims,14 reply-assembler,20 size-engine)."
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;163 A2 cases/42 A3 cases."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 0,
+      "result": "8/8 PASS;0 skip. Prior read-only inspectGemini reports expected route available;0 provider generations."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS; read-only inspectCodex CLI0.159.2/binary52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a;0 provider generations."
+    }
+  ],
+  "selfReview": {
+    "reviewer": "CODEX_PRIMARY_AGENT",
+    "procedure": "Review source diff, exact frozen controls, captured V5 preservation/firewall, ordering/accounting, conditional continuation, source identity and actual terminal scoring.",
+    "findings": [
+      "No production entrypoint, shared source, deterministic boundary/fallback, provider API/retry or verifier prompt change.",
+      "All nine frozen R51 sidecars are byte-exact. All42 V5 owner projections retain every V4 supplied subject/profile/claim/policy/receipt/state and native dialogue; canonical verifier projections/bindings unchanged.",
+      "Full pre-registration retained; A2 prefix90 then conditional187, A3 prefix30 then conditional42. Each prior failure N3; every repetition must pass. No completed-slot re-dispatch; unknown interrupted dispatch blocks.",
+      "Continuation requires exact raw/source/manifest-bound complete primary score packet and immutable executable/config source. Evidence-only commits permitted solely for requested staged review.",
+      "Captured requests in tests exclude evaluator and regression labels. Local tests are not provider safety/quality results.",
+      "Known pre-existing operational helper sums snake_case usage; Vertex returns camelCase. Final reporting must compute owner usage from raw camelCase records and distinguish missing usage from zero.",
+      "Subjective primary scoring, combined prompt/context treatment and unrun cases remain limits. No whole-corpus nonregression claim until conditional remaining cases run."
+    ],
+    "semanticRolesAdded": 0,
+    "onlineLayersAdded": 0,
+    "rootCauseStatus": "Observed repeated response defects and supplied-data completeness; product association/current-conversation attention is a plausible contributor, not proof of hidden model attention."
+  },
+  "officialProviderDocumentation": {
+    "checkedAt": "2026-10-12",
+    "urls": [
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/inference",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/thinking",
+      "https://learn.chatgpt.com/docs/config-file/config-reference"
+    ],
+    "apiChange": false
+  },
+  "modelRoutes": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "effort": "HIGH",
+      "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+      "credentialAvailable": true
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "client": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    }
+  },
+  "unknowns": [
+    "No real generation yet; availability at request time unproven.",
+    "No causal quality gain or nonregression claim from local mechanics tests.",
+    "No independent blind review or owner human acceptance; no production or promotion qualification."
+  ]
+}
