@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current outcome:** Round50 A2 PASS253/253; A3 FAIL62/66;1fallback/66=1.52%. Policy family14/17 below90% due3 unchanged buying recommendations after lighting change;1valid rejection of unsupported no-ironing benefit. Recommendation STOPowner. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-50/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-50/FINDINGS.md),[scope](../docs/specs/c3-round50-answer-scope-and-buying-decisions-20261011.md). No automatic51/post-A.
+**Current task:** Owner authorizes Round51 fix and exactly one fresh Checkpoint A. [Scope](../docs/specs/c3-round51-continuing-consultation-20261011.md). Freeze continuation/material-care treatment against exact50 controls;A2 before A3;STOP owner after reporting. Round50 remains A2PASS/A3FAIL62/66 historical;no automatic52/post-A.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
@@ -854,3 +854,13 @@ Round48 final: A2PASS253/253, zero observed send-eligible false PASS on frozen t
 - [x] CleanA3sourceeab2c431/preflight/66outcomes,66owner+66verifier requests,max1/retry0,0errors/timeouts;65eligible/1fallback. Raw26b2cbea before primaryc084e305 before rejection diagnostics;all42histories/66actualterminals reviewed;660human ratingsnull. A3FAIL62/66:policy14/17<90%;concern22/23,partial11/11,correction12/12,simple3/3.
 - [x] Source/input/request/binding/scoring auditPASS;381capturedrequests reconstructed,noevaluatorlabels;4rawhashes/1065historicalfiles unchanged. Context adequate:17policy/39opacityownerrequests preserveconditions/possibility. One valid no-ironing rejection;three owner buying-decision failures. Findings/checkpoint saved;STOPowner,noautomatic51/post-A.
 - [x] Reportd1320da6 pushed;draftPR390 updated toRound50 and exacthead/body/branch/base/draft/clean-tree readbackPASS. Remote pnpmcheckQUEUED at delivery snapshot,notPASS. Metadata savepoint follows report delivery;no further generation. STOPowner.
+
+
+## Authorized Round51 — 2026-10-11
+
+Owner “fix và tiếp tục vòng mới”. [Scope](../docs/specs/c3-round51-continuing-consultation-20261011.md). Main296cdcfb;starting/specfa57a290. T1freeze → observed registration/native-adapterRED→minimumGREEN/readiness → commit clean A2source/preflight/run/validate → onlyPASS commit clean A3source/preflight/run/validate → rawcommit before full actualterminalprimary → primarycommit before diagnostics → report/audit/tasks/draftPR390 → STOPowner. Canonical world/nativehistory/corpora/verifier/models/config/N1N3/bars/fallback unchanged50. No automatic52/post-A/merge/deploy/live send.
+
+- [x] Refresh main, record base/starting/spec identity, read current specs/plan/todo/AGENTS and skills;freeze51 inputs/treatment before provider.
+- [ ] Observe RED, minimumGREEN/readiness;focused/full tests,typecheck/build/lint and self-review.
+- [ ] Seal/run/account A2 once;A3 only ifPASS.
+- [ ] Seal/run/account A3 once,commit raw before whole-turn primary,primary before diagnostics;complete checkpoint/update draftPR390 and STOPowner.
