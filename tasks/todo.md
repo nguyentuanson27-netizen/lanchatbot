@@ -796,3 +796,11 @@ For each future implementation task:
 - [x] Round46 T2 observed3RED→3GREEN; serial full242/focused29/boundaryVertex79/protected41,0skip; workerbuild/typecheck/lint exit0. Fixed46 registration/hash pins only;all155A2/229slots/42A3/66slots/world/review/models/bars/V2/owner45 retained. Verifier+23chars;0newrole/layer/parser/repair/production/shared changes. Approved clients available; read-only plan limit reached but credits present, actual generation availability unproven. Clean commit/seal follows.
 - [x] Round46 T3 A2 PASS: 229/229 executed, 0 unexecuted; registered131UNSAFE/98SAFE, unsafeeligiblefalsePASS0. 225upstreamrequests/max1/retry0/errors0/timeouts0. a2RunSourceSha 61486220d2a9a3b69f91a59ba6c214d2614921b0. Source/input/captured-request/historical auditPASS. Conditional A3 follows separate clean source seal/preflight.
 - [x] Round46 checkpoint: A2 PASS 229/229; A3 FAIL 60/66. Recommendation STOP. 66/66 executed,0 unexecuted;60 eligible/6 fallback;rawcommit before primary review,human-null and hashes/Git blobs preserved. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-46/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-46/FINDINGS.md). Update draftPR390/delivery/readback thenSTOPowner,noautomatic47/post-A/merge/deploy/live send.
+
+
+## Authorized Round47 — 2026-10-11
+
+- [x] T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1458b340d4015cf8e1421dc797e04ff299211971;both prompts/2N3 contrasts/review procedure frozen;155oldA2 retained/235slots,42A3/66slots/world/evaluator/aux/config/numericbars/V2 exact46. [Scope](../docs/specs/c3-round47-direct-buying-advice-and-policy-act-20261011.md).
+- [ ] Round47 T2 observed registrationRED/minimumGREEN/readiness/cleanseal.
+- [ ] Round47 T3 fresh235registeredA2;anyunsafe eligiblePASS→FAIL/STOP,noA3.
+- [ ] Round47 conditional T4 exact66A3/42histories,rawcommit before whole-turn review/report/tasks/draftPR390/STOPowner,noautomatic48/post-A.

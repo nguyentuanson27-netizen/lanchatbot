@@ -1307,3 +1307,8 @@ Round46 observed A2 PASS:229/229 executed, 0 unexecuted; unsafeeligiblefalsePASS
 
 
 Round46 checkpoint outcome: A2 PASS 229/229; A3 FAIL 60/66. Recommendation STOP. a3RunSourceSha 15cb3311173372e9f60fc00124eb329675303246;rawcommit 49329a6b32ab085f0fbed7f04954d0cac86aea83 before primary review,all outcomes retained. Verifier-only treatment;owner45/all155A2/229slots/42A3/66slots/world/review/numericbars/models/gates/terminals exact45. No causal attribution,historical label/score rewrite,extra role/layer or production/shared change. Update draftPR390/readback thenSTOPowner,noautomatic47/post-A/merge/deploy/live send.
+
+
+## Authorized Round47 — 2026-10-11
+
+Owner “tiếp tục sửa và bắt đầu vòng mới” authorizes exactly one fresh Checkpoint A. [Scope](../docs/specs/c3-round47-direct-buying-advice-and-policy-act-20261011.md): replace owner direct buying/value/wardrobe/quote/voice guidance and policy speech-act verifier clarity;155A2 retained+2N3 contrasts/235slots,42A3/66slots/world/evaluators/aux/models/config/numericbars/V4/gates/V2 exact46. Freeze→observed registrationRED/minimumGREEN/readiness→cleanA2seal/preflight→onlyPASS cleanA3seal/preflight→rawcommit before primaryreview→checkpoint/tasks/draftPR390→STOPowner,noautomatic48/post-A. Refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361;starting/spec 1458b340d4015cf8e1421dc797e04ff299211971. No historical relabel/rescore, newrole/layer/parser/router/repair/framework or production/shared changes.
