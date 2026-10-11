@@ -90,6 +90,83 @@
       "command": "C3_CHECKPOINT_A_ROUND=49 node C:/Users/nguye/AppData/Local/Temp/c3-round49-audit.mjs",
       "exitCode": 0,
       "result": "After generator completed:source/input/249captured requests/bindings/terminal accounting auditPASS."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 A2_STATUS=PASS A3_RUN_SOURCE_SHA=1e0d37793eff681d18a2e7d2b6a38668306e1414 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;clean committed A2PASS source, fresh A3 seal."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 A3_RUN_SOURCE_SHA=1e0d37793eff681d18a2e7d2b6a38668306e1414 node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs",
+      "exitCode": 0,
+      "result": "66/66 raw outcomes;60SEND_ELIGIBLE/6FALLBACK;66owner+66verifier requests,max1/retry0;0errors/timeouts. Raw quality BLOCKED only for null primary scores, preserved."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3",
+      "exitCode": 0,
+      "result": "66 registered/executed,0unexecuted;request reconstruction/exact final text/mandatory verifier/binding/final gate valid;raw nullscore quality remains expected BLOCKED until offline scores."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 1,
+      "result": "Raw A3 Markdown preserved five provider trailing spaces;strict check reports those exact reply bytes, not source errors."
+    },
+    {
+      "command": "git -c core.whitespace=-blank-at-eol diff --cached --check",
+      "exitCode": 0,
+      "result": "Raw artifact staging check PASS with localized blank-at-eol exception;raw immutable commit8773fe2a."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round49-reread.mjs 30 35",
+      "exitCode": 0,
+      "result": "Read histories30..34 with all repetitions/current truth/actual terminals before rejection diagnostics;first30histories already reviewed in earlier calls."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round49-reread.mjs 35 42",
+      "exitCode": 0,
+      "result": "Read remaining7histories with all repetitions/current truth/actual terminals before rejection diagnostics;all42/66 reviewed. Oversized30..42 output was reread in these smaller ranges."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 node C:/Users/nguye/AppData/Local/Temp/c3-round49-primary-review.mjs",
+      "exitCode": 0,
+      "result": "66 connected manual assessments,660diagnostic ratings;A3FAIL55/66;concern20/23,policy10/17 below90%;660human ratingsnull."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 1,
+      "result": "Primary exact-reply copies preserve same five provider trailing spaces."
+    },
+    {
+      "command": "git -c core.whitespace=-blank-at-eol diff --cached --check",
+      "exitCode": 0,
+      "result": "Primary artifact staging PASS with localized raw-text exception;commit662e9b42 before rejection diagnostics."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 node C:/Users/nguye/AppData/Local/Temp/c3-round49-audit.mjs",
+      "exitCode": 0,
+      "result": "Final completed A2/A3/source/input/request/binding auditPASS;249A2+132A3 reconstructed captured requests;correct Gemini camelCase usage totals from unchanged raw."
+    },
+    {
+      "command": "node --input-type=module",
+      "exitCode": 1,
+      "result": "Windows ENAMETOOLONG from passing1035paths as git arguments;no audit write or generation. Corrected to bounded directory diff plus offline path-set filter.",
+      "stdinDescription": "PowerShell here-string inline raw/hash/history/input readback; corrected equivalent is c3-round49-readbacks.mjs with bounded directory diff."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round49-readbacks.mjs",
+      "exitCode": 0,
+      "result": "Four raw/hash files byte-identical to before-review commit;1035historicfiles unchanged;all4policyfailure captured owner inputs contain independent conditions/fee,opacity input contains possible result."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round49-report.mjs",
+      "exitCode": 0,
+      "result": "Checkpoint/diagnostics emitted after primary score commit. Re-emitted with final command log after documentation review."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "Final tracked report/task changes PASS;CRLF advisory only. Raw/provider quotes were not trimmed."
     }
-  ]
+  ],
+  "commandNotation": "Executable/flags plus selected environment shown as prefixes; PowerShell set these with $env. Local helper paths are outside sealed runtime. No credential contents printed."
 }
