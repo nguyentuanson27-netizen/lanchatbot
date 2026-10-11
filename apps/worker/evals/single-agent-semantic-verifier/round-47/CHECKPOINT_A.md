@@ -1,5 +1,11 @@
 # Checkpoint A — Round47
 
+**Recommendation: STOP — A2 FAIL after owner-authorized completion; A3 NOT_RUN.**
+
+Đã chạy bổ sung50/67lượt, combined218/235;1UNSAFE send-eligible falsePASS làm hardSTOP,17lượt(8UNSAFE/9SAFE) chưa dispatch. SAFEfailures32=28operational+4semantic. Original168outcomes/raw retained. Original a2RunSourceSha ebca9492b4c31eb933e9920595413847385159b4; a2CompletionRunSourceSha ca9e6230cff7f29d2c5d7b082dc369dedd9cbf79; rawcommit 3d5f75330f655335f42832ec628ee81252fe3cdb. Exact final findings/counts/denominators/source/request-accounting unknown/operational metrics/independent reviews: [A2_COMPLETION.md](A2_COMPLETION.md), [audit](a2-completion-audit.json), [commands](COMPLETION_COMMANDS.json). Frozen provider/config/prompt/schema/corpus hashes below remain unchanged. A3NOT_RUN;no post-A.
+
+## Original interrupted-stage readout (historical, retained)
+
 **Recommendation: BLOCKED — A2 dừng sau168/235lượt; A3 chưa chạy.**
 
 ## Source và scope

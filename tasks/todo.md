@@ -808,4 +808,4 @@ For each future implementation task:
 ### Round47 missing-slot completion — explicitly authorized by owner
 
 - [x] Freeze exact67 missing IDs and original evidence hash; retain all168 completed slots and unchanged models/prompts/inputs/bars. Recorded failures remain in the denominator. Original first-missing dispatch accounting is unknown; completion has a separate source seal and persists dispatch starts.
-- [ ] Focused continuation RED→GREEN/readiness, clean source seal/preflight, run missing slots only, preserve raw evidence, update combined checkpoint and draftPR390; STOP owner. No A3 unless full A2 PASS, no Round48/post-A work.
+- [x] Completion RED→GREEN/readiness249/33tests, clean source ca9e6230/preflight,50/67 provider outcomes before unsafe falsePASS hardSTOP. Combined218/235,1unsafeeligiblefalsePASS,32SAFEfailures,17unexecuted;rawcommit3d5f753/all168oldoutcomes unchanged. Two owner-requested offline reviews/accounting audit completed. [Final findings](../apps/worker/evals/single-agent-semantic-verifier/round-47/A2_COMPLETION.md). A2FAIL/STOP,A3NOT_RUN;original dispatch-count unknown retained. No further generation/Round48/post-A.

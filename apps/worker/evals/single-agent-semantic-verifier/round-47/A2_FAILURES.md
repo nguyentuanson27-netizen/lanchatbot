@@ -1,5 +1,7 @@
 # Round47 — A2 exceptions và các lượt chưa chạy
 
+**Final owner-authorized completion:** A2FAIL/STOP,218/235retained outcomes,1UNSAFEeligiblefalsePASS,32SAFEfailures,17hard-stop unexecuted. [Final findings and exact outcomes](A2_COMPLETION.md); a2-completed-evidence.json is final aggregate. The earlier partial-stage readout below is retained historically.
+
 Incomplete provider qualification. 29 SAFE terminal failures among70 completed SAFE slots:1 semantic rejection (r4-safe-policy, retained historical label/scope ambiguity),1HTTP503 and27AUTH_UNAVAILABLE with0upstream generation. These operational failures do not show a semantic rejection.31 SAFE slots and36 UNSAFE slots remain unexecuted/unknown; full101 SAFE usability rate unavailable. No historical relabel/retry or result exclusion.
 
 53 AUTH_UNAVAILABLE có zero upstream generation và không verdict. Full per-slot request/binding/error accounting nằm trong a2-evidence.json; các lượt chưa chạy vẫn null/unknown.

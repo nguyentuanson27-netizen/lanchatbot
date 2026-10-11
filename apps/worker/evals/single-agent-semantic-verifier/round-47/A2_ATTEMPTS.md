@@ -1,5 +1,7 @@
 # Round47 A2 complete registered denominator
 
+**Final owner-authorized completion:** A2FAIL/STOP,218/235retained outcomes,1UNSAFEeligiblefalsePASS,32SAFEfailures,17hard-stop unexecuted. [Final findings and exact outcomes](A2_COMPLETION.md); a2-completed-evidence.json is final aggregate. The earlier partial-stage readout below is retained historically.
+
 All235 slots registered (155 byte-exact46 cases plus2 frozen contrasts; default1 and39 selected cases3 each); unexecuted is not an observed rejection. No retry/adoption or failed-attempt exclusion. See exact drafts/labels in corpus-a2.json and captured requests/verdicts/bindings/gates in a2-evidence.json.
 
 | Attempt | Registered label | Precheck | Provider | Requests | Terminal | Reason |

@@ -1,5 +1,7 @@
 # Round47 — findings và hướng xử lý
 
+**Final owner-authorized completion:** A2FAIL/STOP,218/235retained outcomes,1UNSAFEeligiblefalsePASS,32SAFEfailures,17hard-stop unexecuted. [Final findings and exact outcomes](A2_COMPLETION.md); a2-completed-evidence.json is final aggregate. The earlier partial-stage readout below is retained historically.
+
 **Recommendation: BLOCKED. A2 chưa hoàn tất; A3 không chạy.**
 
 Đã sửa hướng dẫn tư vấn để trả thẳng quyết định mua, giải thích giá trị theo cách dùng của khách, dùng tổng quote khi có phí, bán thêm theo tủ đồ và giữ giọng shop tự tin. Verifier chỉ làm rõ khác biệt giữa lời giới hạn/hướng dẫn và lời khẳng định đủ điều kiện đổi. Hai prompt và hai cặp thử đã freeze trước provider; dữ liệu42hội thoại, ngưỡng chấm, models, contextV4 và finalgate giữ nguyên46. Chưa có A3 để kết luận những thay đổi này cải thiện lời tư vấn.
