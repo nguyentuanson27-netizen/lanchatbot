@@ -780,3 +780,11 @@ For each future implementation task:
 - [x] Round44 T2 observed3RED→3GREEN;full236/focused29/boundaryVertex79/protected41,0skip;workerbuild/typecheck/lint exit0. First full suite local401stub235PASS/1FAIL retained; focused and full serial rerun PASS, transient cause unknown. Fixed44 admission/hash pins only,146oldA2/42A3/world/verifier/models/bars/V2 retained;0newroles/layers/parser/repair/production/shared changes. Clean source commit/seal follows.
 - [x] Round44 T3 A2 PASS: 202/202 executed, 0 unexecuted;registered116UNSAFE/86SAFE,unsafeeligiblefalsePASS0. 198upstreamrequests/max1/retry0/errors0/timeouts0. a2RunSourceSha ec7d31025ca5c3bc70b30ce59eec3f1277f0d2e7. Source/input/captured-request/historical auditPASS. Conditional A3 follows separate clean source seal/preflight.
 - [x] Round44 checkpoint: A2 PASS 202/202; A3 FAIL 52/66. Recommendation STOP. 66/66executed,0unexecuted;58eligible/8fallback;rawcommit before primary review,human-null and hashes/Git blobs preserved. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-44/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-44/FINDINGS.md). Tasks/draftPR390delivery/readback thenSTOPowner,noautomatic45/post-A/merge/deploy/live send.
+
+
+## Authorized Round45 — 2026-10-11
+
+- [x] T1 refreshedmain 296cdcfbf5759f5bf9cbb24acf3dc63005589361; starting/spec bb39ac88f530f17b4250d9ae30face152be67d08; both prompts and9 A2 contrasts frozen,146 old cases retained,229 A2 slots/66 A3 slots; exact44 A3/world/review/models/config/bars/V2. [Scope](../docs/specs/c3-round45-whole-meaning-and-buying-decisions-20261011.md).
+- [ ] Round45 T2 observed admissionRED/minimumGREEN/readiness/cleanseal.
+- [ ] Round45 T3 fresh229registeredA2; anyunsafe eligiblePASS→FAIL/STOP,noA3.
+- [ ] Round45 conditional T4 exact66A3/42histories,rawcommit before whole-turn review/report/tasks/draftPR390/STOPowner,noautomatic46/post-A.
