@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+**Current work (2026-10-11):** owner “thực hiện fix đi” / “tiếp tục fix” authorizes [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md): consistent prospective policy labels, replacement verifier policy section and bounded provider-availability stopping. Local verification only in this task; no provider run started. Round47 remains A2 FAIL / STOP, A3 NOT_RUN. Entries below retain historical authorizations/results.
+
 Latest owner authorization (2026-10-09, “chạy đi”): exactly one new Round30 using the prepared readable conversation-context presentation against exact round28 control. [Frozen run scope](../docs/specs/c3-round30-context-presentation-run-20261009.md). Fresh A2 before A3; models/prompts/verifier/facts/bars/gate unchanged. Prior max3 batch27–29 remains STOP; no automatic follow-up round or post-A.
 
 Completed preparation: readable conversation-context presentation against round28, local RED→GREEN/data-retention/firewall/bounds verification and before/after preview. [Preparation evidence](../docs/specs/c3-context-presentation-preparation-20261009.md). It made0provider generations; the new authorization above is separate.

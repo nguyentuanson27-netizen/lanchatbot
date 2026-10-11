@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Current work (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
+
 **Source:** `tasks/plan.md`  
 **Spec:** `docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md`  
 **Official product goals:** [Fashion-sales product direction, owner-approved2026-10-06](../docs/specs/c3-single-agent-commerce-architecture-20261004.md#11-owner-approved-fashion-sales-product-direction-2026-10-06). Future planning/evaluation must use these goals; frozen historical inputs/results remain unchanged.
