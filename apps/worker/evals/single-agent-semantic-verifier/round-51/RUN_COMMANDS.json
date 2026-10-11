@@ -131,5 +131,101 @@
     "exitCode": 0,
     "result": "cyP95Ms:percentile(attempts.map(v=>v.endToEndLatencyMs),.95)};\n}\nexport function validateA3Evidence(manifest,corpus,evidence) {\n  const expected=corpus.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a3',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));\n  if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('A3_DENOMINATOR');\n  if(!/^[a-f0-9]{40}$/.test(evidence.a3RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('A3_IDENTITY');\n  const executed=evidence.attempts.filter(v=>v.terminal).length;\n  if(evidence.capacityBlock) {\n    const stop=evidence.attempts[executed-1],provider=stop?.verification?.provider,block=evidence.capacityBlock;\n    if(!providerCapacityExhausted(manifest,provider)||block.attemptId!==stop.attemptId||block.role!=='verifier'||block.providerErrorCode!==provider.providerErrorCode||\n      evidence.attempts.slice(0,executed).some(v=>!v.terminal||!v.conversation)||evidence.attempts.slice(executed).some(v=>v.terminal!==null||v.conversation!==null||v.finalDraft!==null||v.verification!==null))throw new Error('A3_CAPACITY_PREFIX');\n  }\n  for(const attempt of evidence.attempts) {\n    if(!attempt.terminal||!attempt.conversation) {\n      if(evidence.capacityBlock)continue;\n      throw new Error('A3_MISSING_GENERATION');\n    }\n    const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);\n    if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');\n    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :\n      JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text).requestIdentity.requestId;\n    const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',conversationRequestId));\n    if(JSON.stringify(attempt.conversation.requestBody)!==JSON.stringify(expectedConversation))throw new Error('A3_CONVERSATION_FIREWALL');\n    if(attempt.conversation.status==='OK'&&attempt.finalDraft!==attempt.conversation.answer)throw new Error('A3_EXACT_OWNER_SURFACE');\n    if(attempt.verification?.precheck==='SURVIVED') {\n      const v=attempt.verification,provider=v.provider;\n      if(!provider||provider.providerRequests>1)throw new Error('A3_MANDATORY_VERIFIER_OR_REQUEST_POLICY');\n      const runtime={...fixture.runtime,finalDraft:attempt.finalDraft};\n      const expectedVerifier=buildRequest(manifest,'verifier',projectRuntime(manifest,{runtime},'verifier',v.binding.requestId));\n      if(JSON.stringify(provider.requestBody)!==JSON.stringify(expectedVerifier))throw new Error('A3_VERIFIER_FIREWALL');\n      const trusted=JSON.parse(expectedVerifier.input[0].content[0].text).trusted;\n      if(JSON.stringify(v.binding)!==JSON.stringify(makeBinding(v.binding.requestId,attempt.finalDraft,trusted)))throw new Error('A3_BINDING');\n      const response=provider.status==='OK'?{kind:'VERDICT',binding:v.returnedBinding,result:provider.answer}:\n        {kind:provider.status==='TIMEOUT'?'TIMEOUT':'PROVIDER_ERROR'};\n      const terminal=finalGate({expected:v.binding,response,current:trusted,finalDraft:attempt.finalDraft,now:new Date(v.finalGateAt),fallback:manifest.fallbacks[0]});\n      if(JSON.stringify(terminal)!==JSON.stringify(attempt.terminal))throw new Error('A3_FINAL_GATE');\n    }\n    if(attempt.terminal.disposition==='SEND_ELIGIBLE'&&attempt.terminal.text!==attempt.finalDraft)throw new Error('A3_TERMINAL_EXACT_TEXT');\n    if(attempt.terminal.disposition==='FALLBACK'&&attempt.terminal.text!==manifest.fallbacks[0].text)throw new Error('A3_TERMINAL_FALLBACK');\n  }\n  return {registeredDenominator:expected.length,executedDenominator:executed,...(manifest.providerCapacityPolicy?{unexecu\n",
     "phase": "a3-raw-validation"
+  },
+  {
+    "command": "git diff --cached --check",
+    "exitCode": 1,
+    "result": "Five trailing-space lines in A3_HUMAN_REVIEW.md are verbatim provider terminal text; raw bytes retained.",
+    "phase": "a3-raw-savepoint"
+  },
+  {
+    "command": "git diff --cached --check -- . ':(exclude)apps/worker/evals/single-agent-semantic-verifier/round-51/A3_HUMAN_REVIEW.md'",
+    "exitCode": 0,
+    "result": "",
+    "phase": "a3-raw-savepoint"
+  },
+  {
+    "command": "git -c core.whitespace=-blank-at-eol diff --cached --check -- apps/worker/evals/single-agent-semantic-verifier/round-51/A3_HUMAN_REVIEW.md",
+    "exitCode": 0,
+    "result": "",
+    "phase": "a3-raw-savepoint"
+  },
+  {
+    "command": "git commit -m 'test: seal complete round51 A3 raw outcomes before primary review'",
+    "exitCode": 0,
+    "result": "[feat/c3-semantic-verifier-checkpoint-a-20261005 9c8ce7e3] test: seal complete round51 A3 raw outcomes before primary review\n 7 files changed, 42551 insertions(+), 113 deletions(-)\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-51/A3_HUMAN_REVIEW.md\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-51/RAW_PRE_REVIEW_HASHES.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-51/a3-evidence.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-51/a3-human-review.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-51/a3-human-scores.json\n",
+    "phase": "a3-raw-savepoint"
+  },
+  {
+    "command": "git rev-parse HEAD",
+    "exitCode": 0,
+    "result": "9c8ce7e36cbe6c1651aec4873161c8a5b58cc7b1\n",
+    "phase": "a3-raw-savepoint"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reread.mjs 0 8",
+    "exitCode": 0,
+    "result": "Initial expanded read output exceeded combined tool budget; subsequently reread all42 complete compact packets before primary scoring.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reread.mjs 8 16",
+    "exitCode": 0,
+    "result": "Initial expanded read output exceeded combined tool budget; subsequently reread all42 complete compact packets before primary scoring.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "@'\nconst fs=require('fs'),d='apps/worker/evals/single-agent-semantic-verifier/round-51/';const m=JSON.parse(fs.readFileSync(d+'manifest.json'));console.log(JSON.stringify({scoring:m.scoring,usability:m.usability}));const c=JSON.parse(fs.readFileSync(d+'corpus-a3.json'));console.log(JSON.stringify(c.cases.map(v=>v.evaluator)));console.log(fs.readFileSync(m.scoring.reviewProcedureFile,'utf8'));\n'@ | node -",
+    "exitCode": 0,
+    "result": "Complete whole-history terminal-only packet read; see sealed raw files.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 0 6",
+    "exitCode": 0,
+    "result": "Reread six-case compact packets without rejected drafts; current claims, stock, policy, profiles, code-input status retained.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 6 12",
+    "exitCode": 0,
+    "result": "Reread six-case compact packets without rejected drafts; current claims, stock, policy, profiles, code-input status retained.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 12 18",
+    "exitCode": 0,
+    "result": "Read whole history/current truth/actual outcomes before diagnostics.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 18 24",
+    "exitCode": 0,
+    "result": "Read full history, current truth and all actual terminal text; no rejected candidate/verdict.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 24 30",
+    "exitCode": 0,
+    "result": "Read all histories and actual terminal outcomes in chunk before rejection diagnostics.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 30 36",
+    "exitCode": 0,
+    "result": "Read complete history/current context/all terminal outcomes; no rejection diagnostics.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round51-reviewcompact.mjs 36 42",
+    "exitCode": 0,
+    "result": "Read all final six histories and all terminal samples before rejected candidate/verdict.",
+    "phase": "primary-review-read"
+  },
+  {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='51'\nnode C:/Users/nguye/AppData/Local/Temp/c3-round51-primary-review.mjs",
+    "exitCode": 0,
+    "result": "A3 FAIL;62/66;concern23/23,partial11/11,correction11/12,policy14/17,simple3/3;four actual outcomes failed;human660null.",
+    "phase": "primary-review"
   }
 ]
