@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current outcome:** Round49 A2 PASS 253/253, A3 FAIL 55/66; 6 fallback/66=9.09%. Recommendation STOP at owner. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-49/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-49/FINDINGS.md), [scope](../docs/specs/c3-round49-owner-policy-and-buying-context-20261011.md). No automatic next round/post-A.
+**Current outcome:** Round50 A2 PASS253/253; A3 FAIL62/66;1fallback/66=1.52%. Policy family14/17 below90% due3 unchanged buying recommendations after lighting change;1valid rejection of unsupported no-ironing benefit. Recommendation STOPowner. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-50/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-50/FINDINGS.md),[scope](../docs/specs/c3-round50-answer-scope-and-buying-decisions-20261011.md). No automatic51/post-A.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
@@ -851,4 +851,6 @@ Round48 final: A2PASS253/253, zero observed send-eligible false PASS on frozen t
 - [x] Clean intake d1d3305d/refreshedmain296cdcfb; owner-only treatment/frozen controls and [scope](../docs/specs/c3-round50-answer-scope-and-buying-decisions-20261011.md) before provider. Exact49 A2A3/nativecontext/evaluators/config/bars. Observed registration/projection/native-adapter RED5tests1PASS4FAIL before executable changes.
 - [x] Observed RED5tests1PASS4FAIL→minimumGREEN5/5;full264/focused54/boundary79/protected41,0skip;worker typecheck/build/lint exit0. Read-only routes available,0generation;owner-only treatment/controls unchanged,self-review limitations in READINESS.json. Clean source seal follows.
 - [x] Fresh A2 source9ede18d8/preflight/runner/validator PASS253/253;147UNSAFE106SAFE;0unsafeeligiblefalsePASS/0SAFEfailures;249requests,max1/retry0,errors0/timeouts0. Source/input/binding/captured-request auditPASS;1065historicalfiles unchanged. Separate clean A3 seal follows.
-- [ ] Raw/primary/diagnostics/audit/checkpoint/tasks/draftPR390 readback thenSTOPowner;noautomatic51/post-A.
+- [x] CleanA3sourceeab2c431/preflight/66outcomes,66owner+66verifier requests,max1/retry0,0errors/timeouts;65eligible/1fallback. Raw26b2cbea before primaryc084e305 before rejection diagnostics;all42histories/66actualterminals reviewed;660human ratingsnull. A3FAIL62/66:policy14/17<90%;concern22/23,partial11/11,correction12/12,simple3/3.
+- [x] Source/input/request/binding/scoring auditPASS;381capturedrequests reconstructed,noevaluatorlabels;4rawhashes/1065historicalfiles unchanged. Context adequate:17policy/39opacityownerrequests preserveconditions/possibility. One valid no-ironing rejection;three owner buying-decision failures. Findings/checkpoint saved;STOPowner,noautomatic51/post-A.
+- [ ] Push/update existing draftPR390 and read back exacthead/body/draft/CI status;local verification is not remote CI PASS.

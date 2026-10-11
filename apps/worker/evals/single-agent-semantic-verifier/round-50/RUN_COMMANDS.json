@@ -105,6 +105,101 @@
       "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
       "exitCode": 0,
       "result": "PASS after A3 completion;132 A3 captured requests reconstructed; raw Gemini candidate+thinking usage reconciled; human ratings null."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 1,
+      "result": "Seven trailing spaces in exact provider replies rendered in A3_HUMAN_REVIEW.md. Preserve raw bytes; use narrowly scoped blank-at-eol exception for evidence Markdown, no source whitespace change."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 0 8",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 8 16",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 16 24",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 24 30",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 30 35",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 35 42",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-primary-review.mjs",
+      "exitCode": 0,
+      "result": "All42histories/66actualterminals reviewed;62/66qualityPASS;A3FAIL policy14/17=82.35%<90%;primarysubjective/nonblindCodex;660humanratingsnull."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
+      "exitCode": 0,
+      "result": "Final evidence/source/request/scoring auditPASS;249A2+132A3 captured requests reconstructed,full denominator,thinking tokens reconciled."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-readbacks.mjs",
+      "exitCode": 0,
+      "result": "Four raw hashes match pre-primary26b2cbea;primaryc084e305;1065historicalfiles unchanged;17policy/39opacitycapturedinputs contain full material conditions/possibility."
+    },
+    {
+      "command": "git -c core.whitespace=-blank-at-eol diff --cached --check",
+      "exitCode": 0,
+      "result": "PASS for raw-evidence savepoint; exact provider trailing spaces preserved."
+    },
+    {
+      "command": "git diff --cached --check -- apps/worker/evals/single-agent-semantic-verifier/round-50/a3-offline-scores.json apps/worker/evals/single-agent-semantic-verifier/round-50/a3-quality.json apps/worker/evals/single-agent-semantic-verifier/round-50/A3_FAILURES.md",
+      "exitCode": 0,
+      "result": "PASS before primary score commit."
+    },
+    {
+      "command": "git -c core.whitespace=-blank-at-eol diff --cached --check -- apps/worker/evals/single-agent-semantic-verifier/round-50/A3_CONVERSATIONS.md",
+      "exitCode": 0,
+      "result": "PASS preserving exact quoted provider trailing spaces; no source whitespace exception."
+    },
+    {
+      "command": "node - (stdin: post-primary inspect r5-competitor-price:2 captured owner request)",
+      "exitCode": 0,
+      "result": "care guidance,relative wrinkle evidence and no-ironing boundary all present in actual owner body; no context omission for the rejected clause."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS for report/task/audit changes; raw quoted provider whitespace preserved in earlier evidence commits."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "result": "Initial report renderer placed empty/leading-newline stdout after an inline exit label, causing two trailing spaces. After first correction one remained; fixed renderer formatting offline; no raw/primary/runtime change."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "result": "One remaining leading-newline stdout formatting space before final report renderer correction. Raw evidence remains unchanged."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0,
+      "result": "Final report/task/audit artifact staging PASS with ordinary strict whitespace check."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-report.mjs",
+      "exitCode": 0,
+      "result": "Generated CHECKPOINT_A,A2 failures,and post-primary rejection diagnostics from retained complete evidence/scores. RecommendationSTOP, A2PASS/A3FAIL62/66."
     }
   ]
 }
