@@ -1316,5 +1316,9 @@ Owner “tiếp tục sửa và bắt đầu vòng mới” authorizes exactly o
 
 Round47 observed A2 BLOCKED:168/235 executed, 67 unexecuted; unsafeeligiblefalsePASS0 on frozen population/configuration; all134UNSAFE/101SAFE registrations retained. 111upstreamrequests,max1/retry0/errors54/timeouts0. a2RunSourceSha ebca9492b4c31eb933e9920595413847385159b4. A3NOT_RUN;no continuation to rescue frozen results. STOP owner after checkpoint,noautomatic48/post-A.
 
+### Owner-authorized Round47 missing-slot completion
+
+Owner "chạy lại các lượt thiếu" authorizes the 67 slots without retained outcomes, using unchanged Round47 inputs/models/configuration/labels/bars. Preserve original `a2-evidence.json` and all168 completed observations byte-exact; do not retry53 recorded authentication failures or any other completed slot. Freeze exact67 IDs and original evidence hash in `a2-completion-plan.json`; focused RED→GREEN→clean source commit/runtime completion SHA/preflight→one invocation per newly registered completion slot→separate `a2-completed-evidence.json`→combined235-slot audit/checkpoint/draftPR390→STOP owner. A2 falsePASS still stops immediately; A3 only if full A2 PASS. The original interrupted runner lacked dispatch-start records, so its first missing slot may have an unrecorded invocation; preserve that accounting unknown and identify the completion source separately. The completion records dispatch before invocation. No prompt/context/model/threshold changes, new semantic layer or production work.
+
 
 Round47 checkpoint outcome: A2 BLOCKED 168/235; A3 NOT_RUN. Recommendation BLOCKED. A3 NOT_RUN/no fabricated source or quality. Both prompts/2 contrasts treatment;155oldA2 retained/235slots,42A3/66slots/world/evaluators/numericbars/models/gates/terminals exact46. No causal attribution,historical label/score rewrite,extra role/layer or production/shared change. Update draftPR390/readback thenSTOPowner,noautomatic48/post-A/merge/deploy/live send.
