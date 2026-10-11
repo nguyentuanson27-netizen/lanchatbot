@@ -11,3 +11,7 @@ Observed focused RED before executable edits:5tests,1PASS/4FAIL. Unknown fixed51
 ## GREEN/readiness
 
 MinimumGREEN5/5;focused54/full269/boundaryVertex79/protectedAssemblerSize41,0skip. Worker typecheck/build/lint exit0. Exact commands/outputs in READINESS.json and RUN_COMMANDS.json. Read-only Codex CLI0.159.2 login/limits and approved Vertex credential/project/helper available;0health generations. Two eval executable delta19insertions12deletions;0new semantic roles/layers/parser/repair/state/production wiring. Owner6232→6675chars;context presentation reuses exact facts,not code inference of customer intent.
+
+## A2 complete
+
+A2source a8614e9d62e90a0e69561aea666765a3b2ef125b;253/253 complete,147UNSAFE/106SAFE,0unsafeeligiblefalsePASS and0SAFEfailures.249generation requests,max1/retry0;1UPSTREAM_TRANSPORT/GENERATION_TRANSPORT error retained as fail-closed,0timeouts/0unexecuted. Existing validators reconstruct all249 captured requests and gate bindings. Fresh clean A3seal follows;no source/config change afterA2seal.

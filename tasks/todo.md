@@ -862,5 +862,5 @@ Owner “fix và tiếp tục vòng mới”. [Scope](../docs/specs/c3-round51-c
 
 - [x] Refresh main, record base/starting/spec identity, read current specs/plan/todo/AGENTS and skills;freeze51 inputs/treatment before provider.
 - [x] Observed RED5tests1PASS4FAIL→minimumGREEN5/5;focused54/full269/boundary79/protected41,0skip;worker typecheck/build/lint PASS;read-only routes available0generation;self-review limitations recorded.
-- [ ] Seal/run/account A2 once;A3 only ifPASS.
+- [x] A2PASS253/253;0unsafeeligiblefalsePASS/0SAFEfailures,249requests,max1/retry0,1transporterror retained,0unexecuted;source/input/binding/firewall/historical audit PASS. A3 authorized after fresh clean seal.
 - [ ] Seal/run/account A3 once,commit raw before whole-turn primary,primary before diagnostics;complete checkpoint/update draftPR390 and STOPowner.
