@@ -2,7 +2,7 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath,repetitionCount} from './protocol.mjs';
+import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath,repetitionCount,orderedFixtures} from './protocol.mjs';
 import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence,providerCapacityExhausted} from './run-a2.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {createGeminiInference,inspectGemini} from './gemini-inference.mjs';
@@ -12,7 +12,7 @@ const read=name=>readFileSync(inputUrl(name),'utf8');
 export async function evaluateA3Attempt(manifest,fixture,generate) {
   const started=performance.now();
   const projection=projectRuntime(manifest,fixture,'conversation',randomUUID());
-  const requestTelemetry=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4'].includes(manifest.conversationContextFormat)
+  const requestTelemetry=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4','NATIVE_DIALOGUE_FACTS_V5'].includes(manifest.conversationContextFormat)
     ? {conversationRequestId:projection.requestIdentity.requestId} : {};
   const conversation=await generate('conversation',buildRequest(manifest,'conversation',projection));
   if(conversation.status!=='OK')return {...requestTelemetry,conversation,finalDraft:null,verification:null,
@@ -77,10 +77,12 @@ export function a3Operational(attempts) {
     endToEndLatencyP50Ms:percentile(attempts.map(v=>v.endToEndLatencyMs),.5),endToEndLatencyP95Ms:percentile(attempts.map(v=>v.endToEndLatencyMs),.95)};
 }
 export function validateA3Evidence(manifest,corpus,evidence) {
-  const expected=corpus.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a3',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
+  const expected=orderedFixtures(manifest,corpus,'a3').flatMap(c=>Array.from({length:repetitionCount(manifest,'a3',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('A3_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a3RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('A3_IDENTITY');
   const executed=evidence.attempts.filter(v=>v.terminal).length;
+  const staged=manifest.round===52 && evidence.regression;
+  if(staged && (evidence.attempts.slice(0,executed).some(v=>!v.terminal||!v.conversation) || evidence.attempts.slice(executed).some(v=>v.terminal!==null||v.conversation!==null||v.finalDraft!==null||v.verification!==null) || executed>manifest.regression.a3CaseIds.length*3 && evidence.regression.status!=='PASS'))throw new Error('A3_REGRESSION_PREFIX');
   if(evidence.capacityBlock) {
     const stop=evidence.attempts[executed-1],provider=stop?.verification?.provider,block=evidence.capacityBlock;
     if(!providerCapacityExhausted(manifest,provider)||block.attemptId!==stop.attemptId||block.role!=='verifier'||block.providerErrorCode!==provider.providerErrorCode||
@@ -88,12 +90,12 @@ export function validateA3Evidence(manifest,corpus,evidence) {
   }
   for(const attempt of evidence.attempts) {
     if(!attempt.terminal||!attempt.conversation) {
-      if(evidence.capacityBlock)continue;
+      if(evidence.capacityBlock||staged)continue;
       throw new Error('A3_MISSING_GENERATION');
     }
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');
-    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
+    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4','NATIVE_DIALOGUE_FACTS_V5'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
       JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text).requestIdentity.requestId;
     const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',conversationRequestId));
     if(JSON.stringify(attempt.conversation.requestBody)!==JSON.stringify(expectedConversation))throw new Error('A3_CONVERSATION_FIREWALL');
@@ -119,6 +121,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
 }
 async function main() {
   const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);
+  if(manifest.round===52)throw new Error('STAGED_RUN_REQUIRED');
   const a2Evidence=JSON.parse(read('a2-evidence.json'));
   if(validateA2Evidence(manifest,a2,a2Evidence).status!=='PASS')throw new Error('A2_NOT_PASS');
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();

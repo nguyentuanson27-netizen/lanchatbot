@@ -2,7 +2,7 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath,repetitionCount} from './protocol.mjs';
+import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evidencePath,repetitionCount,orderedFixtures} from './protocol.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {makeBinding,hardPrecheck,finalGate,terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {authorizeRealtimeProtectedClaimProposal} from '../../dist/realtime-protected-claim-boundary.js';
@@ -20,7 +20,7 @@ export function providerCapacityExhausted(manifest,provider) {
 export function registerA2Attempts(manifest,a2,prior=null) {
   const fresh=cases=>cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),caseId:c.evaluator.caseId,
     repetition:i+1,expected:c.evaluator.expected,finalDraft:c.runtime.finalDraft,finalDraftHash:hash(c.runtime.finalDraft),precheck:null,provider:null,terminal:null})));
-  if(!manifest.ownerAmendment)return fresh(a2.cases);
+  if(!manifest.ownerAmendment)return fresh(orderedFixtures(manifest,a2,'a2'));
   const amendment=manifest.ownerAmendment;
   if(!prior||hash(JSON.stringify(prior,null,2)+'\n')!==amendment.priorEvidenceHash||prior.a2RunSourceSha!==amendment.priorRunSourceSha)throw new Error('PRIOR_EVIDENCE_CHANGED');
   const adopted=prior.attempts.filter(a=>a.terminal).map(a=>({...a,originRunSourceSha:prior.a2RunSourceSha})),seen=new Set(adopted.map(a=>a.caseId));
@@ -87,13 +87,21 @@ export function operational(attempts) {
     usageUnavailableCount:providers.filter(v=>!v.usage).length,cost:null,dispositions,
     terminalFailureRate:attempts.length?(dispositions.FALLBACK+dispositions.HANDOFF+dispositions.NO_SEND)/attempts.length:null};
 }
-export function assertSealedSource(sha,allowedEvidence) {
-  if(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sha)throw new Error('RUN_SOURCE_CHANGED');
-  const changed=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).split('\n').filter(Boolean);
+export function assertSealedSource(sha,allowedEvidence,{cwd,allowEvidenceCommits=false}={}) {
+  const options={encoding:'utf8',...(cwd?{cwd}:{})};
+  if(allowEvidenceCommits) {
+    if(!/^[a-f0-9]{40}$/.test(sha))throw new Error('RUN_SOURCE_CHANGED');
+    execFileSync('git',['merge-base','--is-ancestor',sha,'HEAD'],options);
+    const committed=execFileSync('git',['log','--format=','--name-only',sha+'..HEAD'],options).trim().split('\n').filter(Boolean);
+    if(committed.some(path=>!allowedEvidence.includes(path)))throw new Error('RUN_SOURCE_CHANGED');
+    const paths=execFileSync('git',['diff','--name-only',sha,'--'],options).trim().split('\n').filter(Boolean);
+    if(paths.some(path=>!allowedEvidence.includes(path)))throw new Error('RUN_SOURCE_CHANGED');
+  } else if(execFileSync('git',['rev-parse','HEAD'],options).trim()!==sha)throw new Error('RUN_SOURCE_CHANGED');
+  const changed=execFileSync('git',['status','--porcelain','--untracked-files=all'],options).split('\n').filter(Boolean);
   if(changed.some(line=>!allowedEvidence.some(path=>line.slice(3).replaceAll('\\','/').replaceAll('"','')===path)))throw new Error('RUN_SOURCE_CHANGED');
 }
 export function validateA2Evidence(manifest,a2,evidence) {
-  const expected=manifest.ownerAmendment?.registeredAttemptIds??a2.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
+  const expected=manifest.ownerAmendment?.registeredAttemptIds??orderedFixtures(manifest,a2,'a2').flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('ATTEMPT_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a2RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('EVIDENCE_IDENTITY');
   if(evidence.capacityBlock) {
@@ -120,6 +128,7 @@ export function validateA2Evidence(manifest,a2,evidence) {
 
 async function main() {
   const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);
+  if(manifest.round===52)throw new Error('STAGED_RUN_REQUIRED');
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
   preflight(manifest,'a2',{a2RunSourceSha:process.env.A2_RUN_SOURCE_SHA},sha,status);
