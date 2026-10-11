@@ -1304,3 +1304,6 @@ Owner “fix và chạy lại” authorizes exactly one fresh Checkpoint A. [Sco
 
 
 Round46 observed A2 PASS:229/229 executed, 0 unexecuted; unsafeeligiblefalsePASS0 on frozen population/configuration; all131UNSAFE/98SAFE registrations retained. 225upstreamrequests,max1/retry0/errors0/timeouts0. a2RunSourceSha 61486220d2a9a3b69f91a59ba6c214d2614921b0. Only after separate clean seal/preflight may the authorized66 A3 outcomes run. STOP owner after checkpoint,noautomatic47/post-A.
+
+
+Round46 checkpoint outcome: A2 PASS 229/229; A3 FAIL 60/66. Recommendation STOP. a3RunSourceSha 15cb3311173372e9f60fc00124eb329675303246;rawcommit 49329a6b32ab085f0fbed7f04954d0cac86aea83 before primary review,all outcomes retained. Verifier-only treatment;owner45/all155A2/229slots/42A3/66slots/world/review/numericbars/models/gates/terminals exact45. No causal attribution,historical label/score rewrite,extra role/layer or production/shared change. Update draftPR390/readback thenSTOPowner,noautomatic47/post-A/merge/deploy/live send.
