@@ -386,3 +386,7 @@ Conditional command not run: node apps/worker/evals/single-agent-semantic-verifi
 ## Recommendation
 
 **STOP.** A2PASS does not authorize a full A3 run when the owner-requested N3regression prerequisite fails. Preserve all evidence and stop at owner. Any subsequent policy presentation/contract calibration needs a new frozen plan/run;no automatic53. No merge/deploy/live send or post-A tool/state/mutation/promotion/C3migration work.
+
+## Delivery readback
+
+Report commit8c597c32719cf4560ce3f739414bd18e0599b818 pushed to the existing isolated branch;[draft PR390](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/390) updated with exactbase/spec/source/commands/prefix-remainder/unknowns and STOP recommendation. Readback verified exact desired body,matching head,base main,branch,draft OPEN and clean worktree. First remote checks readback was empty;later pnpm check was QUEUED,notPASS. Commands and later doc savepoint are recorded in RUN_COMMANDS.json;frozen source/raw/primary identities unchanged. No further generation,automatic53 or post-A.
