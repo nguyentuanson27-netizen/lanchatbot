@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+**Current Round63(2026-10-13):** Owner self-review/fix and one new run. Contextual policy contract/four prospective labels/six contrasts frozen before generation, unchanged model/source/schema/bars. [Scope](../docs/specs/c3-round63-contextual-policy-20261013.md). Prior errorsN3first; full A2PASS before A3; no64/post-A.
+
 **Kết quả mới nhất (2026-10-13):** Đã hoàn tất đủ3vòng60–62 theo owner, recommendation **STOP**. R60A2FAIL7/333(1UNSAFEeligiblePASS); R61prefixFAIL36/333(3SAFEreject); R62prefixFAIL36/333(5SAFEreject).79/999executed,920NOT_RUN,79requests/max1/retry0/errors0; A3NOT_RUNall3. [Finding và feasibility](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_BATCH_60_62.md). Local352/focused94green; worker/boundary/protectedchecks60reused onlywith unchangedsource proof. Preserve initialR62localtestfailure/unknown. No63/post-A/merge/deploy/live send.
 
 **Current batch60–62(2026-10-13):** R60FAILunsafePASS; R61mixed36FAIL3SAFErejections/0providererrors,297NOT_RUN, A3NOT_RUN. R62FINALpreparation: sameverifier/owner/labels/bars, lossless legacy source presentation applied uniformly99occurrences; original7seeds/v2/A3 untouched. [Scope](../docs/specs/c3-round62-source-presentation-20261013.md). FailedintroN3first; source seal/readiness before generation. STOPafter62/no63/post-A.
