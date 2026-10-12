@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+**Current batch60–62(2026-10-13):** R60A2FAIL7/333,1unsafeeligiblePASS,326NOT_RUN,A3NOT_RUN. Raw/report/rootreview committed. R61round2/3prepared,0new61generations; failedtrialN3first, then allmixedcontrols/full onlyifprefixPASS. Same models/config/labels/worlds/bars, no regex/semantic code. [Scope](../docs/specs/c3-round61-policy-first-20261013.md). STOPaftermax3/no63/post-A.
+
 **Current authorization (2026-10-13):** owner requests fix/run at most3new rounds60–62, prior failed casesN3first. Round60preparation,0new provider generations; previous57–59COMPLETE/STOP retained. [Frozen scope](../docs/specs/c3-round60-assertion-scope-20261013.md). No regex/parser/semantic code growth, model/config/labels/bars unchanged; A3onlyfullA2PASS, STOP at owner after result or budget.
 
 **Current task (2026-10-13):** Authorized max3batch57–59 COMPLETE/STOP. R57A2FAIL1unsafeeligible/28;R58A2FAIL1unsafeeligible/40;R59regressionFAIL3SAFEsemantic+1transporterror/36,fullA2NOT_COMPLETED(rawBLOCKED,297NOT_RUN). A3NOT_RUNall3; no60/post-A. [Batch findings/feasibility](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_BATCH_57_59.md).
