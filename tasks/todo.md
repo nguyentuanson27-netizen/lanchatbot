@@ -1,8 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** exactly one [Round53 run authorized](../docs/specs/c3-round53-source-policy-run-20261012.md). T1frozen325A2/72A3registrations; T2 observedRED2/6, intermediate5/6, GREEN6/6; readiness290eval/46focused/79boundary+provider/41claims+size+assembly and worker build/typecheck/lint PASS. 1.113historical files unchanged; no production wiring. T3/A2 pending clean seal/preflight; A3 conditional on A2PASS. No automatic54/post-A.
+**Current task (2026-10-12):** Round53 dừng tại Checkpoint A. A2 regression FAIL: chạy 138/325 lượt, 6 SAFE bị chặn, zero observed send-eligible false PASS trong 66 UNSAFE đã chạy; 187 lượt còn lại chưa chạy. Full A2 BLOCKED/NOT_COMPLETED; A3 NOT_RUN (72 registrations). Recommendation STOP; không tự chạy54 hoặc post-A.
 
-**Latest checkpoint:** Round52 completed to the owner-requested conditional checkpoint: A2PASS277/277 (failure cohort90/90 then187remaining), A3failure cohort25/30PASS with5fallbacks;42remaining registrations NOT_RUN because prefixFAIL. Recommendation STOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-52/CHECKPOINT_A.md),[finding](../apps/worker/evals/single-agent-semantic-verifier/round-52/FINDINGS.md),[frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). All historical evidence retained;no automatic53/post-A.
+**Latest checkpoint:** [Round53](../apps/worker/evals/single-agent-semantic-verifier/round-53/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-53/FINDINGS.md), [frozen scope](../docs/specs/c3-round53-source-policy-run-20261012.md). Runtime a2RunSourceSha=`357c363640e2d7f6ea526e670a1af004eb370139`; no a3RunSourceSha. Policyv2 is supplied trusted source, not live integration; legacy evidence retained. Readiness: 290 eval / 46 focused / 79 boundary+provider / 41 claims+size and worker build/typecheck/lint PASS; no production wiring.
 
 ## Source-data preparation after Round52 — 2026-10-12
 
@@ -13,8 +13,8 @@
 - [x] Prepare generic product grouping retaining source business values/charts/conditions; no per-SKU/ref overlays or metadata duplication in owner input. Canonical verifier/code identities unchanged.
 - [x] Observed control RED before GREEN; self-review; final local suite/build/typecheck/lint PASS, evaluator/private/source-audit request firewall checked.
 - [x] Owner “cứ dùng policy cũ” selected full customer-care v2 repository snapshot for A; keep earlier fault-only clarification separate for later policy changes.
-- [ ] Prepare consistent prospective history/corpus/labels/quality contracts against selected v2 before any future freeze.
-- [ ] Separate run authorization/freeze/source seal; fresh A2 before A3. NOT_RUN in this preparation, no inherited R52 qualification.
+- [x] Round53 froze consistent prospective history/corpus/labels/quality contracts against selected v2 before provider results.
+- [x] Round53 received separate run authorization, freeze and clean source seal; fresh A2executed, prerequisite did not pass, A3NOT_RUN. No inherited R52qualification.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
 
