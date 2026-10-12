@@ -303,7 +303,7 @@
     "naturalnessRequired": 2,
     "evidencePolicy": "Prior12A2controls allPASS before313remaining; A3prior30prefix allPASS before42remaining. Whole actual-terminal primary review after raw commit, before rejected diagnostics; human scores null.",
     "reviewProcedureFile": "docs/specs/c3-round56-meaning-contract-20261012.md",
-    "reviewProcedureHash": "386b14b48a4b3d6eec8d8f38a8d06c2dd3a12e8ea70e23f1c791aa7496a627ad"
+    "reviewProcedureHash": "e520152e93b83a6bf0ef5789d6a28955a0e14bbca11cd3f0b18667c8227a6924"
   },
   "measurements": {
     "percentiles": "nearest-rank",
@@ -370,7 +370,7 @@
     "inference": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference",
     "codex": "https://developers.openai.com/codex/config-reference",
     "cli": "https://developers.openai.com/codex/cli/reference",
-    "change": "No provider API/auth/endpoint/client change; same official documentation checked2026-10-12. Candidate prompts and owner data presentation only."
+    "change": "No provider API/auth/endpoint/model/effort/retry change. Actual local adapter tests expose missing fixed nativeV6/V7 admission; compatibility validator repaired after official Google inference docs checked2026-10-12."
   },
   "contextPreparationHash": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b",
   "cohorts": {
@@ -390,7 +390,7 @@
   "providerDiagnosticsPolicy": "Bounded stages/validated request-id,retry-after and recognized error class only;no raw error/credentials;diagnostics do not prove availability remediation.",
   "treatmentDocument": {
     "file": "docs/specs/c3-round56-meaning-contract-20261012.md",
-    "sha256": "386b14b48a4b3d6eec8d8f38a8d06c2dd3a12e8ea70e23f1c791aa7496a627ad"
+    "sha256": "e520152e93b83a6bf0ef5789d6a28955a0e14bbca11cd3f0b18667c8227a6924"
   },
   "conversationContextFormat": "NATIVE_DIALOGUE_FACTS_V7",
   "providerCapacityPolicy": {

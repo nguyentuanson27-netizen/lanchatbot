@@ -12,7 +12,7 @@ const read=name=>readFileSync(inputUrl(name),'utf8');
 export async function evaluateA3Attempt(manifest,fixture,generate) {
   const started=performance.now();
   const projection=projectRuntime(manifest,fixture,'conversation',randomUUID());
-  const requestTelemetry=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4','NATIVE_DIALOGUE_FACTS_V5','NATIVE_DIALOGUE_FACTS_V6'].includes(manifest.conversationContextFormat)
+  const requestTelemetry=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4','NATIVE_DIALOGUE_FACTS_V5','NATIVE_DIALOGUE_FACTS_V6','NATIVE_DIALOGUE_FACTS_V7'].includes(manifest.conversationContextFormat)
     ? {conversationRequestId:projection.requestIdentity.requestId} : {};
   const conversation=await generate('conversation',buildRequest(manifest,'conversation',projection));
   if(conversation.status!=='OK')return {...requestTelemetry,conversation,finalDraft:null,verification:null,
@@ -81,7 +81,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('A3_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a3RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('A3_IDENTITY');
   const executed=evidence.attempts.filter(v=>v.terminal).length;
-  const staged=[52,53,54,55].includes(manifest.round) && evidence.regression;
+  const staged=[52,53,54,55,56].includes(manifest.round) && evidence.regression;
   if(staged && (evidence.attempts.slice(0,executed).some(v=>!v.terminal||!v.conversation) || evidence.attempts.slice(executed).some(v=>v.terminal!==null||v.conversation!==null||v.finalDraft!==null||v.verification!==null) || executed>manifest.regression.a3CaseIds.length*3 && evidence.regression.status!=='PASS'))throw new Error('A3_REGRESSION_PREFIX');
   if(evidence.capacityBlock) {
     const stop=evidence.attempts[executed-1],provider=stop?.verification?.provider,block=evidence.capacityBlock;
@@ -95,7 +95,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
     }
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
     if(attempt.conversation.providerRequests>1)throw new Error('A3_CONVERSATION_REQUEST_POLICY');
-    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4','NATIVE_DIALOGUE_FACTS_V5','NATIVE_DIALOGUE_FACTS_V6'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
+    const conversationRequestId=['READABLE_FACTS_V1','READABLE_FACTS_V2','NATIVE_DIALOGUE_FACTS_V3','NATIVE_DIALOGUE_FACTS_V4','NATIVE_DIALOGUE_FACTS_V5','NATIVE_DIALOGUE_FACTS_V6','NATIVE_DIALOGUE_FACTS_V7'].includes(manifest.conversationContextFormat) ? attempt.conversationRequestId :
       JSON.parse(manifest.variant === 'GEMINI_CONVERSATION' ? attempt.conversation.requestBody.contents[0].parts[0].text : attempt.conversation.requestBody.input[0].content[0].text).requestIdentity.requestId;
     const expectedConversation=buildRequest(manifest,'conversation',projectRuntime(manifest,fixture,'conversation',conversationRequestId));
     if(JSON.stringify(attempt.conversation.requestBody)!==JSON.stringify(expectedConversation))throw new Error('A3_CONVERSATION_FIREWALL');
@@ -121,7 +121,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
 }
 async function main() {
   const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);
-  if([52,53,54,55].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
+  if([52,53,54,55,56].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
   const a2Evidence=JSON.parse(read('a2-evidence.json'));
   if(validateA2Evidence(manifest,a2,a2Evidence).status!=='PASS')throw new Error('A2_NOT_PASS');
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();

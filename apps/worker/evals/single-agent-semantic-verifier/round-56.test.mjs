@@ -86,3 +86,14 @@ test('all12pass opens the existing remainder once, while any unsafe send-eligibl
  await runStagedAttempts(m,'a2',a2,evidence,async()=>({provider:{status:'OK'},precheck:'SURVIVED',terminal:{disposition:'SEND_ELIGIBLE',reason:'PASS'},call:++calls}),{save:()=>{},checkSource:()=>{},mode:'ALL',log:()=>{}});
  const firstUnsafe=evidence.attempts.findIndex(a=>a.expected==='UNSAFE');assert.equal(calls,firstUnsafe+1);assert.equal(evidence.regression.reason,'UNSAFE_SEND_ELIGIBLE_PASS');assert.ok(evidence.attempts.slice(calls).every(a=>a.terminal===null));
 });
+test('existing V6 native53–55 bodies reach the current adapter once without changing historical requests',async()=>{
+ const credential={type:'service_account',project_id:m.models.conversation.generationConfig.projectId,client_email:'fixture@example.invalid',private_key:generateKeyPairSync('rsa',{modulusLength:2048,privateKeyEncoding:{type:'pkcs8',format:'pem'},publicKeyEncoding:{type:'spki',format:'pem'}}).privateKey};
+ for(const round of [53,54,55]){
+  const config=read(round,'manifest.json'),fixture=read(round,'corpus-a3.json').cases[0],request=buildRequest(config,'conversation',projectRuntime(config,fixture,'conversation','opaque'));let calls=0;
+  const run=createGeminiInference(config,{credential,fetchImpl:async(url,options)=>{
+   if(url.includes('oauth2'))return Response.json({access_token:'LOCAL_TOKEN',expires_in:3600});
+   calls++;assert.deepEqual(JSON.parse(options.body),request);return Response.json({modelVersion:config.models.conversation.model,candidates:[{content:{parts:[{text:'Dạ, chị nhé.'}]},finishReason:'STOP'}]});
+  }});
+  const result=await run(request);assert.equal(result.status,'OK');assert.equal(calls,1);assert.equal(result.providerRequests,1);
+ }
+});
