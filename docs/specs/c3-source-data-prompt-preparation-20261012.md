@@ -18,12 +18,14 @@
 
 Như vậy repo **có** nguồn policy; thiếu bản nguồn đầy đủ khớp quy tắc đổi chỉ do lỗi shop vừa chốt. Không mang 15 ngày/30k của exchange, hoặc 5 ngày/hoàn tiền của returns sang quy tắc exchange mới. Thời hạn, phí, hoàn tiền của quy tắc mới chưa xác lập trong nguồn đã tìm thấy. Không lấy policy 7 ngày/thử trong nhà của corpus C3 làm policy shop mới.
 
+[Dữ liệu chuẩn bị từ xác nhận owner](../../apps/worker/evals/single-agent-semantic-verifier/prompts/owner-policy-source-preparation-20261012.json) giữ riêng hai quy tắc đã chốt và các phần chưa xác lập. Đây là owner clarification, không phải Admin published snapshot. Chỉ `policyLiterals` được dùng làm dữ liệu fixture trong tests; audit/status/unknowns không vào request model. Chưa có observedAt/expiresAt cho run, chưa freeze một policy đầy đủ để chạy provider.
+
 Trong A, policy là snapshot fixture được freeze và đưa vào `trusted.policyLiterals`; cả hai model đọc cùng nguồn. Trong B, reuse `RuntimePolicySourcePort.loadActivePointers` / `RuntimePolicyResolver` cùng version/content hash/pointer revision để nối nguồn thật. Không implement connector/policy migration hoặc ghi Admin trong bản chuẩn bị này.
 
 ## Thay đổi có giới hạn
 
 1. Viết riêng hai prompt ứng viên. Bỏ thời hạn, quyền thử/đổi, phí, mốc ETA cụ thể và license lợi ích gắn với một loại sản phẩm khỏi chỉ dẫn. Giữ nguyên nguyên tắc tư vấn tự tin có căn cứ, phân biệt tóm tắt dịch vụ với cấp quyền cụ thể, và toàn bộ giới hạn claims/effects.
-2. Chuẩn bị serializer dùng canonical projection hiện có: gom subject/profiles/claims theo productId, giữ đầy đủ giá trị nguồn và metadata, đọc trường JSON `CodeSizeInput` đã có. Không dùng `ownerPolicyPresentation`/`ownerProfilePresentation`, không diễn giải tiếng Việt hoặc suy dữ kiện mới. Native history/tin cuối được giữ nguyên.
+2. Chuẩn bị serializer dùng canonical projection hiện có: gom subject/profiles/claims theo productId, giữ đầy đủ giá trị nghiệp vụ từ nguồn, cả bảng size và giới hạn evidence, đọc trường JSON `CodeSizeInput` đã có. Canonical metadata/permission/privacy/binding vẫn nguyên vẹn trong code và input verifier; owner reuse view/state allowlist của V5 để tránh lặp metadata quản trị. Không dùng `ownerPolicyPresentation`/`ownerProfilePresentation`, không diễn giải tiếng Việt hoặc suy dữ kiện mới. Native history/tin cuối được giữ nguyên.
 3. Builder chỉ phục vụ preview/tests, reuse envelope/config hiện có; không được runner hoặc production import. Verifier vẫn đọc exact draft + canonical trusted input; binding/freshness/final gate không đổi.
 4. Test RED trước GREEN cho việc giữ nguồn và policy thay đổi, kiểm tra 42 fixture R52 như population **local compatibility**, không dùng chúng để đánh giá policy mới hoặc claim model đã PASS.
 

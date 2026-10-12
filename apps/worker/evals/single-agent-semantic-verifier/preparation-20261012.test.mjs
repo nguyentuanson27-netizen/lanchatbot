@@ -6,19 +6,26 @@ import {buildPreparedRequest} from './preparation-20261012.mjs';
 
 const read=name=>JSON.parse(readFileSync(new URL('./round-52/'+name,import.meta.url),'utf8'));
 const manifest=read('manifest.json'),a3=read('corpus-a3.json');
+const ownerPolicy=JSON.parse(readFileSync(new URL('./prompts/owner-policy-source-preparation-20261012.json',import.meta.url),'utf8'));
 const context=request=>JSON.parse(request.contents[0].parts[0].text.split('\n')[1]);
 const sorted=items=>[...items].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
 const originalProfile=({codeSizeInput,...profile})=>profile;
+const businessClaim=({type,scope,value})=>({type,scope,value});
+const businessProfile=({ref,subjectRef,details})=>({ref,subjectRef,details});
+const businessPolicy=({ref,text})=>({ref,text});
+const profilesOf=product=>product.profiles??(product.profile?[product.profile]:[]);
 
-test('preparation retains every canonical fact, profile qualifier, policy and binding across all 42 native histories',()=>{
+test('preparation retains every business fact, profile qualifier and policy across all 42 native histories',()=>{
   for(const fixture of a3.cases){
     const projection=projectRuntime(manifest,fixture,'conversation','opaque');
     const request=buildPreparedRequest(manifest,'conversation',projection),display=context(request);
     assert.deepEqual(display.requestIdentity,projection.requestIdentity);
     assert.deepEqual(display.trusted.products.map(p=>p.subject),projection.trusted.boundSubjects);
-    assert.deepEqual(sorted([...display.trusted.products.flatMap(p=>p.claims),...display.trusted.otherClaims]),sorted(projection.trusted.protectedClaims));
-    assert.deepEqual(sorted([...display.trusted.products.flatMap(p=>p.profiles),...display.trusted.otherProfiles].map(originalProfile)),sorted(projection.trusted.productProfiles));
-    for(const key of ['policyLiterals','effectReceipts','state'])assert.deepEqual(display.trusted[key],projection.trusted[key]);
+    assert.deepEqual(sorted([...display.trusted.products.flatMap(p=>p.claims),...display.trusted.otherClaims]),sorted(projection.trusted.protectedClaims.map(businessClaim)));
+    assert.deepEqual(sorted([...display.trusted.products.flatMap(profilesOf),...display.trusted.otherProfiles].map(originalProfile)),sorted(projection.trusted.productProfiles.map(businessProfile)));
+    assert.deepEqual(display.trusted.policyLiterals,projection.trusted.policyLiterals.map(businessPolicy));
+    assert.deepEqual(display.trusted.effectReceipts,projection.trusted.effectReceipts);
+    assert.deepEqual(display.trusted.state,context(buildRequest(manifest,'conversation',projection)).trusted.state);
     assert.deepEqual(request.contents.slice(1),buildRequest(manifest,'conversation',projection).contents.slice(1));
     assert.equal(projection.requestIdentity.trustedSnapshotId,hash(JSON.stringify(projection.trusted)));
   }
@@ -26,12 +33,13 @@ test('preparation retains every canonical fact, profile qualifier, policy and bi
 
 test('same prompts take conflicting policies and ETA anchors exclusively from current source data',()=>{
   const snapshots=[
-    {policy:'Chỉ được ướm, không được mặc thử. Chỉ đổi do lỗi shop: lỗi sản xuất, giao sai size hoặc mẫu.',eta:'Dự kiến 4–6 ngày kể từ khi đơn vị vận chuyển nhận kiện, không cam kết giờ đến.'},
+    {policy:ownerPolicy.policyLiterals[0].text,eta:'Dự kiến 4–6 ngày kể từ khi đơn vị vận chuyển nhận kiện, không cam kết giờ đến.'},
     {policy:'Fixture đối chứng: đổi màu trong 11 ngày sau bàn giao; phí 41.000đ, không hỗ trợ hoàn tiền.',eta:'Fixture đối chứng: 1–2 ngày sau ngày thanh toán đã xác nhận.'},
   ];
   const requests=[];
   for(const snapshot of snapshots){
     const fixture=structuredClone(a3.cases[0]);
+    fixture.policySourceAudit=ownerPolicy;
     fixture.runtime.finalDraft='Dạ, chị nhé.';
     fixture.runtime.trusted.policyLiterals=[
       {...fixture.runtime.trusted.policyLiterals[0],text:snapshot.policy,sourceVersion:'LOCAL_PREPARATION_ONLY:policy'},
@@ -42,10 +50,12 @@ test('same prompts take conflicting policies and ETA anchors exclusively from cu
       const projection=projectRuntime(manifest,fixture,role,'opaque');
       pair[role]=buildPreparedRequest(manifest,role,projection);
       const delivered=role==='conversation'?context(pair[role]):JSON.parse(pair[role].input[0].content[0].text);
-      assert.deepEqual(delivered.trusted.policyLiterals,projection.trusted.policyLiterals);
+      assert.deepEqual(delivered.trusted.policyLiterals,role==='conversation'?projection.trusted.policyLiterals.map(businessPolicy):projection.trusted.policyLiterals);
       const prompt=role==='conversation'?pair[role].systemInstruction.parts[0].text:pair[role].instructions;
       for(const rule of ['7 ngày','15 ngày','chỉ thử trong nhà','7ngày'])assert.ok(!prompt.includes(rule));
       assert.ok(!prompt.includes(snapshot.policy));assert.ok(!prompt.includes(snapshot.eta));
+      const body=JSON.stringify(pair[role]);
+      for(const label of ['notEstablishedForThisRule','historicalRepositorySource','PREPARATION_ONLY_NOT_FROZEN_FOR_PROVIDER'])assert.ok(!body.includes(label));
     }
     requests.push(pair);
   }
@@ -64,19 +74,19 @@ test('unseen products, multiple profiles and unbound source facts survive withou
   trusted.protectedClaims.push({...structuredClone(trusted.protectedClaims[0]),claimId:'unbound-claim',scope:{kind:'PRODUCT',productId:'NOT_BOUND',variantId:null}});
   const projection=projectRuntime(manifest,fixture,'conversation','opaque');
   const display=context(buildPreparedRequest(manifest,'conversation',projection)).trusted;
-  assert.equal(display.products.find(p=>p.subject.ref==='UNSEEN_PRODUCT').profiles.length,2);
-  assert.deepEqual(display.otherProfiles.map(originalProfile),projection.trusted.productProfiles.filter(p=>p.subjectRef==='NOT_BOUND'));
-  assert.deepEqual(display.otherClaims,projection.trusted.protectedClaims.filter(c=>c.scope.productId==='NOT_BOUND'));
+  assert.equal(profilesOf(display.products.find(p=>p.subject.ref==='UNSEEN_PRODUCT')).length,2);
+  assert.deepEqual(display.otherProfiles.map(originalProfile),projection.trusted.productProfiles.filter(p=>p.subjectRef==='NOT_BOUND').map(businessProfile));
+  assert.deepEqual(display.otherClaims,projection.trusted.protectedClaims.filter(c=>c.scope.productId==='NOT_BOUND').map(businessClaim));
 });
 
 test('code size inputs stay with their product and complete size charts remain available without deriving fit',()=>{
   const fixture=a3.cases.find(c=>c.evaluator.caseId==='r16-pants-color-alternative');
   const projection=projectRuntime(manifest,fixture,'conversation','opaque');
   const products=context(buildPreparedRequest(manifest,'conversation',projection)).trusted.products;
-  const pants=products.find(p=>p.subject.ref==='QU714').profiles[0];
-  const shirt=products.find(p=>p.subject.ref==='SM613').profiles[0];
-  assert.deepEqual(pants.codeSizeInput.missingInputs,['WAIST_CM','HIPS_CM']);
-  assert.deepEqual(shirt.codeSizeInput.missingInputs,['BUST_CM']);
+  const pants=profilesOf(products.find(p=>p.subject.ref==='QU714'))[0];
+  const shirt=profilesOf(products.find(p=>p.subject.ref==='SM613'))[0];
+  assert.deepEqual((pants.codeSizeInput??pants.details.codeSizeInput).missingInputs,['WAIST_CM','HIPS_CM']);
+  assert.deepEqual((shirt.codeSizeInput??shirt.details.codeSizeInput).missingInputs,['BUST_CM']);
   assert.deepEqual(pants.details.sizeChart,projection.trusted.productProfiles.find(p=>p.subjectRef==='QU714').details.sizeChart);
   assert.ok(!products.find(p=>p.subject.ref==='QU714').claims.some(c=>c.type==='SIZE_FIT'));
 });
