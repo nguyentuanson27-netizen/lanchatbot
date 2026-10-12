@@ -1,8 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-13):** Final authorized round59preparing (3/3). R57FAIL1unsafeeligible/28;R58FAIL1unsafeeligible/40; bothA3NOT_RUN. R59independent-condition verifier contract frozen, all181worlds/labels/owner controls retained; newfailure-first36prefix, RED3/7 observed before admission. No automatic60/post-A.
+**Current task (2026-10-13):** Authorized max3batch57–59 COMPLETE/STOP. R57A2FAIL1unsafeeligible/28;R58A2FAIL1unsafeeligible/40;R59regressionFAIL3SAFEsemantic+1transporterror/36,fullA2NOT_COMPLETED(rawBLOCKED,297NOT_RUN). A3NOT_RUNall3; no60/post-A. [Batch findings/feasibility](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_BATCH_57_59.md).
 
-**Latest checkpoint:** [Round56](../apps/worker/evals/single-agent-semantic-verifier/round-56/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-56/FINDINGS.md), [scope](../docs/specs/c3-round56-meaning-contract-20261012.md). a2RunSourceSha=f68047a623559abb100bc31ac31933fce3c3cda2;a3RunSourceSha/null. NineR55sidecars/1169historicalfiles unchanged. Readiness310eval/59focus/79boundary+provider/41claims+assembly+size,workerbuild/typecheck/lintPASS. CanonicalpolicyV7presentation andmissingnativeV6/V7adaptercompatibility fixed locally;owner/A3notrun.
+**Latest checkpoint:** [Round59](../apps/worker/evals/single-agent-semantic-verifier/round-59/CHECKPOINT_A.md), [whole-turn review](../apps/worker/evals/single-agent-semantic-verifier/round-59/ROOT_CAUSE_REVIEW.md). a2RunSourceSha=a54614a18ba49c60d14a12685d7f3a33eb798aa6;a3RunSourceSha/null. Final331eval/73focused/79boundary+provider/41claims+assembly+size,workerbuild/typecheck/lintPASS. All104executed/997registered attempts retained,101requests/max1/retry0;2unsafeeligible observations across differingconfigs,1providererror. Historical/prod/sharedsource unchanged; recommendationSTOP.
 
 ## Source-data preparation after Round52 — 2026-10-12
 

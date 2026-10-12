@@ -362,6 +362,8 @@ Whole-reply, sales voice/decisions and conversion unverified. A3needs completeA2
 
 ## Complexity and actual commands
 
+Cumulative runtime delta from implementation start:4evaluation-only helpers+19/-13lines; current round adds only fixed admission/pin. Detailed batch review: [CHECKPOINT_A_BATCH_57_59](../CHECKPOINT_A_BATCH_57_59.md). [Whole-turn root cause](ROOT_CAUSE_REVIEW.md).
+
 Evaluation-only fixed-round admission, prospective corpus and source-independent prompt treatment. New semantic roles/layers/gates0;1owner/max1verifier and code soleauthority. No production/sharedsource wiring, parser/router/repair/reverify/template/framework/tool/state/effect/send. Scope/readiness list exact structural delta. DETERMINISTIC_READINESS.md and RUN_COMMANDS.json retain actual commands/results/RED/failures. Remote CI not claimed PASS without readback.
 
 ## Recommendation
