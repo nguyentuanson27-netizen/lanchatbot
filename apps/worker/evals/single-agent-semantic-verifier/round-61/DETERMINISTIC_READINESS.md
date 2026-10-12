@@ -1,0 +1,11 @@
+# Round61 — readiness before source seal
+
+ObservedRED4/7 (new fixedround not admitted), minimumadmission GREEN7/7. Full345/345, focused87/87 green,0skip. Local captured-wire firewall/data retention/registration tests only,0real generation and no simulated semantic qualification. Semantic RED is the prior closed provider failure; semantic GREEN remains unknown until this run.
+
+Required workerbuild/typecheck/lint and boundary+Vertex79/79/protectedclaims+assembly+size41/41 actually passed in60. Reused here only after git diff --exit-code proves apps/worker/src and packages exact3707c73c; no new source ownership boundary. Original exact commands/results retained in round60/RUN_COMMANDS.json and referenced in this ledger; no rerun claim. A final changed eval/source concern must be tested separately.
+
+All9corpus/source/sidecar/label files byte-exact previous round;181cases109UNSAFE/72SAFE, exact7PR387worlds,42A3histories, approved models/effort/config/owner/source/schema/bars/usability/fallbacks unchanged. Actual verifier request bodies for bounded retained cases differ only in instructions. Source contains all known independent limits. Remaining risk is model interpretation, not mechanical receipt/state authority. No source-independent shop terms, evaluator labels or case-specific phrases in instructions.
+
+Cumulative executable delta against batchstart ec8df961114c985aa693b999be904792a33bb4d8:4existing evalfiles +25/-13, fixedround lists/pins only. Addedsemanticroles/layers/gates0. No production/sharedsource wiring, regex/parser/router, template/decisionengine/providerframework, repair/reverify, tools/state/effects/send. Oneowner/max1verifier, code soleauthority preserved.
+
+Commit complete inputs/executable/readiness, clean source/config, capture currentHEAD runtimea2RunSourceSha with no circularwriteback, preflight. PriorfailuresN3first; same36mixedprefix inside333registrations mustallmatch before297remainder. UnsafeeligiblePASS immediatelyFAIL; errors andNOT_RUN retained, max1generation/registeredroleattempt,retry0. A3onlycompleteA2PASS/freshseal, prior30N3before42remainder; whole actual-terminal review after raw, human scores null. Round61ofmax3new60–62; stop atowner/after62, no63/post-A/merge/deploy/live send.
