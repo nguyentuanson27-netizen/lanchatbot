@@ -81,7 +81,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('A3_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a3RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('A3_IDENTITY');
   const executed=evidence.attempts.filter(v=>v.terminal).length;
-  const staged=[52,53,54,55,56,57,58,59].includes(manifest.round) && evidence.regression;
+  const staged=[52,53,54,55,56,57,58,59,60].includes(manifest.round) && evidence.regression;
   if(staged && (evidence.attempts.slice(0,executed).some(v=>!v.terminal||!v.conversation) || evidence.attempts.slice(executed).some(v=>v.terminal!==null||v.conversation!==null||v.finalDraft!==null||v.verification!==null) || executed>manifest.regression.a3CaseIds.length*3 && evidence.regression.status!=='PASS'))throw new Error('A3_REGRESSION_PREFIX');
   if(evidence.capacityBlock) {
     const stop=evidence.attempts[executed-1],provider=stop?.verification?.provider,block=evidence.capacityBlock;
@@ -121,7 +121,7 @@ export function validateA3Evidence(manifest,corpus,evidence) {
 }
 async function main() {
   const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);
-  if([52,53,54,55,56,57,58,59].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
+  if([52,53,54,55,56,57,58,59,60].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
   const a2Evidence=JSON.parse(read('a2-evidence.json'));
   if(validateA2Evidence(manifest,a2,a2Evidence).status!=='PASS')throw new Error('A2_NOT_PASS');
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
