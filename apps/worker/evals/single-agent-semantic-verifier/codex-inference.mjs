@@ -42,10 +42,16 @@ function parseStream(text,requestedModel,headerModel) {
     const value=line.slice(6).trim();
     if(value==='[DONE]')continue;
     let event;try{event=JSON.parse(value);}catch{continue;}
+    if(['response.failed','response.incomplete','error'].includes(event?.type)) {
+      const reason=event.response?.incomplete_details?.reason;
+      throw Object.assign(new Error(event.type==='response.failed'?'PROVIDER_STREAM_FAILED':event.type==='response.incomplete'?'PROVIDER_STREAM_INCOMPLETE':'PROVIDER_STREAM_ERROR'),{
+        providerTerminalEvent:event.type,providerErrorCode:boundedErrorCode(event.type==='error'?event.code:event.response?.error?.code),
+        providerIncompleteReason:['max_output_tokens','content_filter'].includes(reason)?reason:null});
+    }
     if(event.type==='response.completed')completed=event.response;
     if(event.type==='response.output_item.done'&&event.item)doneItems.push(event.item);
   }
-  if(!completed)throw new Error('PROVIDER_RESPONSE');
+  if(!completed || (completed.status!==undefined&&completed.status!=='completed'))throw new Error('PROVIDER_RESPONSE');
   const model=completed.model??headerModel;
   if(model&&model!==requestedModel)throw Object.assign(new Error('PROVIDER_MODEL_MISMATCH'),{modelVersion:model});
   const items=Array.isArray(completed.output)&&completed.output.length?completed.output:doneItems;
@@ -59,6 +65,7 @@ function parseStream(text,requestedModel,headerModel) {
   return {answer,modelVersion:model??null,responseId:completed.id??null,usage,cost:null};
 }
 
+const boundedErrorCode=code=>['rate_limit_exceeded','usage_limit_reached','insufficient_quota','too_many_requests','server_error'].includes(code)?code:null;
 async function readHttpErrorCode(response) {
   const reader=response.body?.getReader();if(!reader)return null;
   try {
@@ -67,7 +74,7 @@ async function readHttpErrorCode(response) {
       if(size>4096){await reader.cancel();return null;}chunks.push(Buffer.from(value));}
     const error=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error;
     const code=error?.code??error?.type;
-    return ['rate_limit_exceeded','usage_limit_reached','insufficient_quota','too_many_requests'].includes(code)?code:null;
+    return boundedErrorCode(code);
   }catch{return null;}finally{reader.releaseLock();}
 }
 
@@ -82,7 +89,7 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
   let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client;
   let upstreamRequestId=null,retryAfterSeconds=null,providerErrorCode=null;
   let complete;const completion=new Promise(resolve=>{complete=resolve;});
-  const finish=value=>{if(!settled){settled=true;record={...value,upstreamRequestId,retryAfterSeconds,providerErrorCode};complete();}};
+  const finish=value=>{if(!settled){settled=true;record={providerTerminalEvent:null,providerIncompleteReason:null,...value,upstreamRequestId,retryAfterSeconds,providerErrorCode};complete();}};
   const route='/'+randomUUID();
   const server=createServer(async(req,res)=>{
     if(req.method!=='POST'||req.url!==route+'/responses') {res.writeHead(404);res.end();return;}
@@ -113,8 +120,11 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       const parsed=parseStream(text,request.model,response.headers.get('openai-model')??response.headers.get('x-openai-model'));
       res.writeHead(200,{'content-type':'text/event-stream'});res.end(text);
       finish({status:'OK',httpStatus:response.status,...parsed});
-    }catch(error) {const code=['PROVIDER_RESPONSE','PROVIDER_MODEL_MISMATCH','PROVIDER_TOOL_OUTPUT','PROVIDER_FINAL_MESSAGE_COUNT','PROVIDER_OUTPUT_BOUND','EMPTY_BODY','RESPONSE_BOUND'].includes(error.message)?error.message:'UPSTREAM_TRANSPORT';
-      finish({status:controller.signal.aborted?'TIMEOUT':'PROVIDER_ERROR',error:code,errorStage:controller.signal.aborted?'TIMEOUT':code==='UPSTREAM_TRANSPORT'?'GENERATION_TRANSPORT':'RESPONSE_VALIDATION',httpStatus,modelVersion:error.modelVersion??null});
+    }catch(error) {const streamError=['PROVIDER_STREAM_FAILED','PROVIDER_STREAM_INCOMPLETE','PROVIDER_STREAM_ERROR'].includes(error.message);
+      const code=streamError||['PROVIDER_RESPONSE','PROVIDER_MODEL_MISMATCH','PROVIDER_TOOL_OUTPUT','PROVIDER_FINAL_MESSAGE_COUNT','PROVIDER_OUTPUT_BOUND','EMPTY_BODY','RESPONSE_BOUND'].includes(error.message)?error.message:'UPSTREAM_TRANSPORT';
+      if(streamError)providerErrorCode=error.providerErrorCode;
+      finish({status:controller.signal.aborted?'TIMEOUT':'PROVIDER_ERROR',error:code,errorStage:controller.signal.aborted?'TIMEOUT':streamError?'GENERATION_STREAM':code==='UPSTREAM_TRANSPORT'?'GENERATION_TRANSPORT':'RESPONSE_VALIDATION',httpStatus,modelVersion:error.modelVersion??null,
+        providerTerminalEvent:error.providerTerminalEvent??null,providerIncompleteReason:error.providerIncompleteReason??null});
       if(!res.headersSent)res.writeHead(400);res.end();}
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
