@@ -626,7 +626,7 @@ export function validateProtocol(m, a2, a3) {
     for(const phase of ['a2','a3'])orderedFixtures(m,phase==='a2'?a2:a3,phase);
   }
   if(m.round===57) {
-    requireThat(hash(JSON.stringify(m)+'\n')==='fc26218ce32d1e0530ebf976caa30261456f3cb4a1e066d270a37770b39e8204','ROUND57_CONTROL');
+    requireThat(hash(JSON.stringify(m)+'\n')==='19d3964ae754d35a20c77727edf3127204d1637a2aee1d8622078acd6b78c32a','ROUND57_CONTROL');
     requireThat(summary.a2Unsafe===109&&summary.a2Safe===72&&a3.cases.length===42,'ROUND57_POPULATION');
     for(const {file,sha256} of [m.treatmentDocument,m.labelReview,m.dialogueEdits,m.sourcePolicy,{file:m.regression.file,sha256:m.regression.sha256}])requireThat(hash(readFileSync(new URL('../../../../'+file,import.meta.url)))===sha256,'ROUND57_INPUT');
     for(const phase of ['a2','a3'])orderedFixtures(m,phase==='a2'?a2:a3,phase);

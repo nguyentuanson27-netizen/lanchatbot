@@ -17,7 +17,7 @@ test('round57 freeze admits only pinned inputs and retains approved model/schema
  for(const f of ['corpus-a3.json','fashion-profiles.json','size-inputs.json','quote-inputs.json','reference-replies.json','context-preparation.json','dialogue-edits.json'])assert.equal(raw(57,f),raw(56,f));
  for(const key of ['models','bounds','stateAllowlist','verdictSchema','schemaHash','usability','fallbacks','terminal','sourcePolicy'])assert.deepEqual(m[key],prior[key]);
  for(const key of ['dimensions','minimumPerDimension','minimumCaseMean','minimumFamilyPassRate','factualActionSafetyRequired','naturalnessRequired','consultationRequired','interpretation'])assert.deepEqual(m.scoring[key],prior.scoring[key]);
- assert.equal(m.prompts.conversation,prior.prompts.conversation);
+ assert.equal(m.prompts.conversation,prior.prompts.conversation.replace("Không tạo tuổi thọ, độ bền qua giặt hoặc bảo đảm kết quả trong mọi điều kiện.","Chỉ dùng độ bền hoặc khả năng giữ chất lượng qua sử dụng làm lý do mua khi nguồn có căn cứ tương ứng; không suy từ ít nhăn hoặc fit. Không tạo tuổi thọ hay bảo đảm kết quả trong mọi điều kiện."));
  for(const role of ['conversation','verifier']){const changed=structuredClone(m);changed.prompts[role]+=' changed';changed.promptHashes[role]=hash(changed.prompts[role]);assert.throws(()=>validateProtocol(changed,a2,a3));}
  assert.match(execFileSync(process.execPath,[fileURLToPath(new URL('./protocol.mjs',import.meta.url))],{encoding:'utf8',env:{...process.env,C3_CHECKPOINT_A_ROUND:'57'}}),/FROZEN_PROTOCOL_VALID/);
 });
@@ -69,7 +69,7 @@ test('unchanged V7owner conversation reaches adapter once for new identity, with
  const credential={type:'service_account',project_id:m.models.conversation.generationConfig.projectId,client_email:'fixture@example.invalid',private_key:generateKeyPairSync('rsa',{modulusLength:2048,privateKeyEncoding:{type:'pkcs8',format:'pem'},publicKeyEncoding:{type:'spki',format:'pem'}}).privateKey};
  const fixture=a3.cases[0],request=buildRequest(m,'conversation',projectRuntime(m,fixture,'conversation','opaque'));
  const before=buildRequest(prior,'conversation',projectRuntime(prior,fixture,'conversation','opaque'));
- assert.deepEqual(request,before);let generations=0;
+ assert.deepEqual(request,{...before,systemInstruction:{parts:[{text:m.prompts.conversation}]}});let generations=0;
  const run=createGeminiInference(m,{credential,fetchImpl:async(url,options)=>{
   if(url.includes('oauth2'))return Response.json({access_token:'LOCAL_TOKEN',expires_in:3600});
   generations++;assert.deepEqual(JSON.parse(options.body),request);return Response.json({modelVersion:m.models.conversation.model,candidates:[{content:{parts:[{text:'Dạ, chị nhé.'}]},finishReason:'STOP'}]});
