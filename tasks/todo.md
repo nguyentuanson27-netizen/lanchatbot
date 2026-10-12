@@ -1,8 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** Owner authorized one Round56 root-cause fix/run. [Frozen scope](../docs/specs/c3-round56-meaning-contract-20261012.md), [readiness PASS](../apps/worker/evals/single-agent-semantic-verifier/round-56/DETERMINISTIC_READINESS.md): verifier advice contract/owner policy scope replacement, losslessV7source policy presentation and nativeV6/V7adapter compatibility. All source/labels/models/bars/fallback/retry controls unchanged. Prior12N3allPASS before313A2remaining; fullA2PASS beforeA3. No automatic57/post-A.
+**Current task (2026-10-12):** Round56 STOP tại Checkpoint A. A2prefix12regressionFAIL:7PASS/5semanticFAIL,0providererrors. FullA2NOT_COMPLETED(rawsummaryBLOCKED):12/325executed,313NOT_RUN,UNSAFEtested0. A3NOT_RUN0/72; no automatic57/post-A.
 
-**Latest checkpoint:** [Round55](../apps/worker/evals/single-agent-semantic-verifier/round-55/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-55/FINDINGS.md), [scope](../docs/specs/c3-round55-regression-first-20261012.md). a2RunSourceSha=3eceacae168a3b682722e2e639520379842fc840; a3RunSourceSha/null. NineR54sidecars/1150historicalfiles unchanged; same owner/data/model/bars/fallback. Readiness303eval/56focus/79boundary+provider/41claims+assembly+size; worker build/typecheck/lint PASS. Two policy controls PASS3/3; two advice controls FAIL3/3. No fullunsafe/A3qualification.
+**Latest checkpoint:** [Round56](../apps/worker/evals/single-agent-semantic-verifier/round-56/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-56/FINDINGS.md), [scope](../docs/specs/c3-round56-meaning-contract-20261012.md). a2RunSourceSha=f68047a623559abb100bc31ac31933fce3c3cda2;a3RunSourceSha/null. NineR55sidecars/1169historicalfiles unchanged. Readiness310eval/59focus/79boundary+provider/41claims+assembly+size,workerbuild/typecheck/lintPASS. CanonicalpolicyV7presentation andmissingnativeV6/V7adaptercompatibility fixed locally;owner/A3notrun.
 
 ## Source-data preparation after Round52 — 2026-10-12
 

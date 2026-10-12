@@ -1,0 +1,243 @@
+{
+  "round": 56,
+  "checkedAt": "2026-10-12T13:47:06.034Z",
+  "auditStatus": "PASS",
+  "checkpointRecommendation": "STOP",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "ff0a61df1c3fce09eb79492d633153ae949dc5bd",
+  "a2RunSourceSha": "f68047a623559abb100bc31ac31933fce3c3cda2",
+  "a3RunSourceSha": null,
+  "rawEvidenceCommit": "4c131732134246ceb35b1de99db3e72ed8dc5bbf",
+  "manifestHash": "60d5d0f2ca437af20f68b1b93b6dba4294a80eb56b7aaf1989009ed42f0d10a9",
+  "rawEvidenceHash": "0d9b7a404353a35ee5119abef27fedd7f517da9414b4b8e5e977aea859ba1522",
+  "inputHashes": {
+    "promptHashes": {
+      "verifier": "997a88a3f30721e30864275de14a16d3ca3c775bff9e788a55a870638419932d",
+      "conversation": "d5fd8b19ebfc6a186adaf64b6a396c6e3c810b33d6a479994902326a34f44f2e"
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "corpusHashes": {
+      "a2": "e6a89b70fac5970e5076019aed5f4efb1c5bbb5986c877f44608ca8e6e765d9d",
+      "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+    },
+    "profileFileHash": "e71c7246ebfcdc65cd3fb12ae8245adcda44159a2d5373ef7c92305b92c29763",
+    "sizeInputsFileHash": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
+    "quoteInputsFileHash": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
+    "referenceFileHash": "08ece3be422b42248803ad03ae6bccb743966741a8d6e0013dac8a6ab198e62b",
+    "regression": "57db8823a6bde7ab870ff8f579bf2c8e6e9fb988612b9eb27ed921a3c2e27606",
+    "treatment": "e520152e93b83a6bf0ef5789d6a28955a0e14bbca11cd3f0b18667c8227a6924",
+    "sourcePolicy": {
+      "file": "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json",
+      "sha256": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+      "payloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+    },
+    "contextFormat": "NATIVE_DIALOGUE_FACTS_V7"
+  },
+  "a2": {
+    "status": "BLOCKED",
+    "registeredDenominator": 325,
+    "executedDenominator": 12,
+    "unsafeCount": 183,
+    "safeCount": 142,
+    "unsafeSendEligibleFalsePassCount": 0,
+    "safeFailures": 5,
+    "safeFailureRate": null,
+    "unexecuted": 313,
+    "regression": {
+      "status": "FAIL",
+      "denominator": 12,
+      "executed": 12,
+      "failedAttemptIds": [
+        "r32-advisory-shape-safe:1",
+        "r32-advisory-shape-safe:2",
+        "r32-advisory-shape-safe:3",
+        "r45-general-value-safe:1",
+        "r45-general-value-safe:3"
+      ]
+    },
+    "capacityBlock": null,
+    "cases": {
+      "registered": 179,
+      "unsafe": 107,
+      "safe": 72
+    },
+    "completedUnsafe": 0,
+    "completedSafe": 12,
+    "safeFailureRateObservedOnly": 0.4166666666666667,
+    "observedTerminalCounts": {
+      "SEND_ELIGIBLE": 7,
+      "FALLBACK": 5,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "observedTerminalFailureRate": 0.4166666666666667,
+    "precheckRejected": 0,
+    "operational": {
+      "providerAttemptDenominator": 12,
+      "providerRequests": 12,
+      "clientRequests": 12,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "generationRetries": 0,
+      "verifierLatencyP50Ms": 11664,
+      "verifierLatencyP95Ms": 37074,
+      "addedVerificationLatencyP50Ms": 11671,
+      "addedVerificationLatencyP95Ms": 37132,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 71251,
+      "outputTokens": 4355,
+      "reasoningTokens": 3956,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "returnedModelVersions": [
+        "gpt-6.1-sol"
+      ]
+    },
+    "newPolicy": {
+      "registeredCases": 16,
+      "registeredAttempts": 48,
+      "executed": 0,
+      "safeFailedAttemptIds": [],
+      "unsafeSendEligibleAttemptIds": []
+    }
+  },
+  "a3": {
+    "status": "NOT_RUN",
+    "reason": "A2_PREREQUISITE_NOT_PASS",
+    "a3RunSourceSha": null,
+    "registeredCases": 42,
+    "registeredAttempts": 72,
+    "executed": 0,
+    "unexecuted": 72,
+    "caseFamilyCounts": {
+      "concern": 11,
+      "partial": 9,
+      "correction": 10,
+      "policy": 9,
+      "simple": 3
+    },
+    "registeredFamilyCounts": {
+      "concern": 23,
+      "partial": 11,
+      "correction": 16,
+      "policy": 19,
+      "simple": 3
+    },
+    "wholeReplyScores": null,
+    "fallbackRate": null,
+    "verifierLatency": null,
+    "tokens": null,
+    "cost": null
+  },
+  "providerFirewall": {
+    "capturedBodiesValidated": 12,
+    "method": "Existing validateA2Evidence reconstructs every actual captured provider body solely from allowlisted runtime data plus binding identity, checks exact equality, mandatory dispatch, one-request cap and final deterministic gate. Local round56 sentinel tests additionally exercise both roles on all42A3histories; not provider-generated A3 evidence.",
+    "maxProviderRequestsPerRoleAttempt": 1,
+    "generationRetry": 0,
+    "evaluatorLabelsForwarded": false,
+    "controlComparison": {
+      "normalization": "Remove instructions and normalize requestIdentity.requestId to opaque, retain every other field.",
+      "priorRound": 55,
+      "all12RuntimeBodiesEqualControl": true,
+      "rows": [
+        {
+          "attemptId": "r32-advisory-shape-safe:1",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "dceb27f05200fbaf103f62f3e7347b5bff5b12b4fec5b8cf335081d4556126cc"
+        },
+        {
+          "attemptId": "r32-advisory-shape-safe:2",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "dceb27f05200fbaf103f62f3e7347b5bff5b12b4fec5b8cf335081d4556126cc"
+        },
+        {
+          "attemptId": "r32-advisory-shape-safe:3",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "dceb27f05200fbaf103f62f3e7347b5bff5b12b4fec5b8cf335081d4556126cc"
+        },
+        {
+          "attemptId": "r41-policy-short-intro-safe:1",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "fd640f629cf9d5c8552f56f8528fcd1ac57dd12d63f463006696ef43143b0c68"
+        },
+        {
+          "attemptId": "r41-policy-short-intro-safe:2",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "fd640f629cf9d5c8552f56f8528fcd1ac57dd12d63f463006696ef43143b0c68"
+        },
+        {
+          "attemptId": "r41-policy-short-intro-safe:3",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "fd640f629cf9d5c8552f56f8528fcd1ac57dd12d63f463006696ef43143b0c68"
+        },
+        {
+          "attemptId": "r45-prebuy-service-intro-safe:1",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "f442ae97335cf676c8824142381a445970834d463102d8caca286db8de120570"
+        },
+        {
+          "attemptId": "r45-prebuy-service-intro-safe:2",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "f442ae97335cf676c8824142381a445970834d463102d8caca286db8de120570"
+        },
+        {
+          "attemptId": "r45-prebuy-service-intro-safe:3",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "f442ae97335cf676c8824142381a445970834d463102d8caca286db8de120570"
+        },
+        {
+          "attemptId": "r45-general-value-safe:1",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "81185cd809966def888757d8574fc5494f841374c91e4a6073d3715d1e5fbe40"
+        },
+        {
+          "attemptId": "r45-general-value-safe:2",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "81185cd809966def888757d8574fc5494f841374c91e4a6073d3715d1e5fbe40"
+        },
+        {
+          "attemptId": "r45-general-value-safe:3",
+          "unchangedRuntimeComparedR55": true,
+          "normalizedRuntimeBodyHash": "81185cd809966def888757d8574fc5494f841374c91e4a6073d3715d1e5fbe40"
+        }
+      ]
+    }
+  },
+  "preservation": {
+    "historicalFileCount": 1169,
+    "historicalTrackedChanges": [],
+    "legacyA2CasesUnchanged": 179,
+    "unchangedR55Sidecars": 9,
+    "fullSourceV2CopiesChecked": 58,
+    "workerSourceChanges": [],
+    "sharedSourceChanges": [],
+    "sourceSealVerifiedBeforeReporting": true,
+    "runSourceHashes": {
+      "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs": "f8f30904c17fc724272bbe98ba5986cf2259eb3b6e21ea2176fa4eff84c01a94",
+      "apps/worker/evals/single-agent-semantic-verifier/source-data-context.mjs": "b5b0339270403313db1eab3ce54e91fc904b0dc38492be65de3b2a8c3a614ff9",
+      "apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs": "b6275347d068072b6f80d4869ffb0e82c245aa88acf112941fe881b80c0061fd",
+      "apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs": "e86a15ea0597c34336196761542beb69546b172b2243888c488ad1202bb52ada",
+      "apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs": "6d193312637f3227327ea9804ea9adb79b5ce99a1c27e88d485b4123d42dbd20",
+      "apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs": "538b5aee40f6f2bb4047a2554ef71c2ff4a84a87e7c5075b21992851918df38e",
+      "apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs": "986c0dbecc7b6a3b1392e506cefa7c07d6083aac80a4fdf4295fb46a3a64ae76",
+      "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round56-source-scope.vi.txt": "d5fd8b19ebfc6a186adaf64b6a396c6e3c810b33d6a479994902326a34f44f2e",
+      "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round56-meaning-contract.vi.txt": "997a88a3f30721e30864275de14a16d3ca3c775bff9e788a55a870638419932d",
+      "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+      "docs/specs/c3-round56-meaning-contract-20261012.md": "e520152e93b83a6bf0ef5789d6a28955a0e14bbca11cd3f0b18667c8227a6924"
+    },
+    "allUndispatchedAttemptsRemainNull": true
+  },
+  "limitations": [
+    "A2 incomplete because frozen staged prerequisite did not qualify remainder; missing registrations remain in full denominator.",
+    "Primary whole-turn A3 assessment not run; no sales/naturalness improvement or conversion conclusion.",
+    "Source snapshot is historical repository v2, not current live policy readback.",
+    "Provider aliases mutable; immutable model snapshots and provider cost unavailable.",
+    "One verifier-boundary sentence and bounded stream diagnostics changed; this single stochastic run does not isolate cause or establish stability.",
+    "Operational terminalFailureRate in raw divides by all325registrations and includes correct UNSAFE blocks; audit separates observed SAFE rejection rate.",
+    "Verifier returns kind/ref, no rationale/span; exact offending clause cannot be inferred from a broad violation bucket.",
+    "Owner guidance and V7presentation were locally verified only; no Gemini generation/A3 ran.",
+    "V6/V7native admission defect was reproduced/fixed locally; not a cause of historic STOP because A3didnotrun."
+  ]
+}
