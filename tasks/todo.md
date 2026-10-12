@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** Authorized batch57–59, round2/3 preparing58. R57mixed24prefix qualified, fullA2FAIL at PR387conditional entitlement:1unsafeeligible/28executed,303NOT_RUN;A3NOT_RUN. R58verifier policy scope/prefix frozen, RED3/7 observed; no provider58yet. Historical evidence preserved.
+**Current task (2026-10-13):** Final authorized round59preparing (3/3). R57FAIL1unsafeeligible/28;R58FAIL1unsafeeligible/40; bothA3NOT_RUN. R59independent-condition verifier contract frozen, all181worlds/labels/owner controls retained; newfailure-first36prefix, RED3/7 observed before admission. No automatic60/post-A.
 
 **Latest checkpoint:** [Round56](../apps/worker/evals/single-agent-semantic-verifier/round-56/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-56/FINDINGS.md), [scope](../docs/specs/c3-round56-meaning-contract-20261012.md). a2RunSourceSha=f68047a623559abb100bc31ac31933fce3c3cda2;a3RunSourceSha/null. NineR55sidecars/1169historicalfiles unchanged. Readiness310eval/59focus/79boundary+provider/41claims+assembly+size,workerbuild/typecheck/lintPASS. CanonicalpolicyV7presentation andmissingnativeV6/V7adaptercompatibility fixed locally;owner/A3notrun.
 

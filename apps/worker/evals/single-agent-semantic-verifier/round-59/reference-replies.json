@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "visibility": "EVALUATOR_ONLY_NEVER_MODEL_INPUT",
+  "origin": "MANUALLY_AUTHORED_PREPARATION_NOT_PROVIDER_RESULTS",
+  "references": [
+    {
+      "caseId": "r5-workday-comfort",
+      "text": "Em chọn set ST411 size M chị nhé. Quần lưng chun, ngồi làm việc dễ chịu hơn váy eo cố định. Set 749k, chị thích be hay navy?"
+    },
+    {
+      "caseId": "r5-wardrobe-budget",
+      "text": "Lấy áo SM613 xanh nhạt phối với quần navy nhé chị, cả ship 524k. Chị gửi em số đo vòng ngực nhé."
+    },
+    {
+      "caseId": "r5-correct-measurement",
+      "text": "Vậy chị chuyển L nhé, đen L đang còn hàng."
+    },
+    {
+      "caseId": "r5-delivery-timing",
+      "text": "Em không chắc giao kịp sáng thứ Sáu chị nhé, bên em dự kiến 2–3 ngày sau xác nhận đơn."
+    },
+    {
+      "caseId": "r5-shipping-threshold",
+      "text": "Áo cả ship 524k, thêm quần thì 958k chị nhé. Nếu muốn có thêm một màu để phối, em chọn quần navy 459k; còn chỉ để freeship thì không cần."
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "text": "Dạ, quần QU714 navy M còn 2 chiếc chị nhé, 459k."
+    }
+  ]
+}
