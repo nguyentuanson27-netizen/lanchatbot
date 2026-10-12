@@ -43,6 +43,26 @@
       "cmd": "pnpm --filter @lana/worker lint",
       "exit": 0,
       "output": ""
+    },
+    {
+      "phase": "FINAL_INPUT_READINESS",
+      "cmd": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-57.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-58.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-59.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-60.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-61.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-62.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-63.test.mjs",
+      "exit": 0,
+      "output": "✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (4.2261ms)\r\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (7.0456ms)\r\nℹ tests 101\r\nℹ suites 0\r\nℹ pass 101\r\nℹ fail 0\r\nℹ cancelled 0\r\nℹ skipped 0\r\nℹ todo 0\r\nℹ duration_ms 4205.6157\r\n",
+      "logSha256": "fa6d1c9d8a4d0ea6a2da7cbe3cfa6c2681bf9cc3a581cb234b8cf6c99bdb5d3e"
+    },
+    {
+      "phase": "FINAL_INPUT_READINESS",
+      "cmd": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exit": 0,
+      "output": "✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (2.593ms)\r\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.9621ms)\r\nℹ tests 359\r\nℹ suites 0\r\nℹ pass 359\r\nℹ fail 0\r\nℹ cancelled 0\r\nℹ skipped 0\r\nℹ todo 0\r\nℹ duration_ms 90057.2233\r\n",
+      "logSha256": "7ac1c5688f0fbf40239c9bebfdb7b5e56321a227b15897041da4743d4cca2a9d"
+    },
+    {
+      "phase": "SOURCE_SECRET_AUDIT",
+      "cmd": "git diff --check; git diff --exit-code 3a12b167 -- apps/worker/src packages; bounded new-file secret scan",
+      "exit": 0,
+      "output": "No production/shared changes; no secret patterns in changed files. Original raw provider evidence untouched."
     }
   ],
   "preRefinementFull": {
