@@ -68,11 +68,11 @@ function writeReview(manifest,corpus,evidence) {
   const views=evidence.attempts.map(a=>humanView(corpus.cases.find(c=>c.evaluator.caseId===a.caseId),a));
   writeFileSync(inputUrl('a3-human-review.json'),JSON.stringify({rubric:manifest.scoring,attempts:views},null,2)+'\n');
   if(!existsSync(inputUrl('a3-human-scores.json')))writeFileSync(inputUrl('a3-human-scores.json'),JSON.stringify({scorer:null,scoredAt:null,a3RunSourceSha:evidence.a3RunSourceSha,attempts:views.map(a=>({attemptId:a.attemptId,scores:Object.fromEntries(manifest.scoring.dimensions.map(d=>[d,null]))}))},null,2)+'\n');
-  writeFileSync(inputUrl('A3_HUMAN_REVIEW.md'),'# Round52 actual terminal review\n\nAll registrations retained; unexecuted outcomes are not scored. Rejected drafts/verdicts excluded.\n\n'+views.map(v=>'## '+v.attemptId+'\n\n'+v.acceptedDialogue.map(x=>x.role+': '+x.text).join('\n\n')+'\n\ncustomer: '+v.customer+'\n\nActual terminal:\n```text\n'+(v.customerOutcome.text??'[UNEXECUTED / NO CUSTOMER REPLY]')+'\n```\n').join('\n'));
+  writeFileSync(inputUrl('A3_HUMAN_REVIEW.md'),'# Round'+manifest.round+' actual terminal review\n\nAll registrations retained; unexecuted outcomes are not scored. Rejected drafts/verdicts excluded.\n\n'+views.map(v=>'## '+v.attemptId+'\n\n'+v.acceptedDialogue.map(x=>x.role+': '+x.text).join('\n\n')+'\n\ncustomer: '+v.customer+'\n\nActual terminal:\n```text\n'+(v.customerOutcome.text??'[UNEXECUTED / NO CUSTOMER REPLY]')+'\n```\n').join('\n'));
 }
 
 async function main() {
-  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat(manifest.round===52,'FIXED_ROUND52_ONLY');
+  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53].includes(manifest.round),'FIXED_ROUND52_53_ONLY');
   const mode=process.argv.includes('--a2')?'A2':process.argv.includes('--a3-regression')?'REGRESSION':process.argv.includes('--a3-remaining')?'REMAINING':null;
   requireThat(mode,'STAGED_MODE_REQUIRED');
   const phase=mode==='A2'?'a2':'a3',corpus=phase==='a2'?a2:a3,head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
