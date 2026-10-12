@@ -134,7 +134,7 @@
   },
   "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
   "corpusHashes": {
-    "a2": "c83ae4310c2f9d57bfec9d36cab5a3f95a7f1ba32f5777a4f54a8d3b5c2784e4",
+    "a2": "edb3d73982100c0a62e4f4583c8b4933473f0ec9c35e9cadb928a10b7287b0cf",
     "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
   },
   "seedHashes": {
@@ -303,7 +303,7 @@
     "naturalnessRequired": 2,
     "evidencePolicy": "A2mixed36allmatch before297remaining; A3prior30before42remaining; whole actual-terminal review after raw, human scores null.",
     "reviewProcedureFile": "docs/specs/c3-round63-contextual-policy-20261013.md",
-    "reviewProcedureHash": "89867170c2ba51bc2b8de998eba244de21d07e2d7cc87a99c6d13a5bad18894c"
+    "reviewProcedureHash": "1b0d224b11e8c48b28623d974790538d2db9e5950c25968d178378ded85b8c03"
   },
   "measurements": {
     "percentiles": "nearest-rank",
@@ -383,7 +383,7 @@
   "providerDiagnosticsPolicy": "Bounded stages/validated request-id,retry-after and recognized error class only;no raw error/credentials;diagnostics do not prove availability remediation.",
   "treatmentDocument": {
     "file": "docs/specs/c3-round63-contextual-policy-20261013.md",
-    "sha256": "89867170c2ba51bc2b8de998eba244de21d07e2d7cc87a99c6d13a5bad18894c"
+    "sha256": "1b0d224b11e8c48b28623d974790538d2db9e5950c25968d178378ded85b8c03"
   },
   "conversationContextFormat": "NATIVE_DIALOGUE_FACTS_V7",
   "providerCapacityPolicy": {
@@ -483,12 +483,12 @@
       "r57-grounded-shape-safe": 3,
       "r57-grounded-value-safe": 3,
       "safe-conditional-policy": 3,
-      "r63-same-intro-washed-unsafe": 3,
-      "r63-same-intro-bounded-safe": 3,
       "r63-outdoor-refusal-paraphrase-safe": 3,
       "r63-outdoor-permission-unsafe": 3,
       "r63-refusal-plus-washed-permission-unsafe": 3,
-      "r63-intro-paraphrase-safe": 3
+      "r63-intro-paraphrase-safe": 3,
+      "r63-same-answer-washed-unsafe": 3,
+      "r63-same-answer-bounded-safe": 3
     },
     "a3": {
       "r5-competitor-price": 3,
@@ -511,7 +511,7 @@
   "variancePolicy": "Prior mismatches and context contrastsN3first, all63prefix match before288remaining;351total no majority/retry; A3 onlyfullA2PASS",
   "labelReview": {
     "file": "apps/worker/evals/single-agent-semantic-verifier/round-63/label-review.json",
-    "sha256": "14b141e286570540f20dad33723ba229c9651158099e49af98132966df077d09"
+    "sha256": "3e9473effd5664cb30bdbd62f610a9758c4bc8a18a77f1303d8b0015e3e87076"
   },
   "ownerPolicyPresentation": [],
   "dialogueEdits": {
@@ -520,7 +520,7 @@
   },
   "regression": {
     "file": "apps/worker/evals/single-agent-semantic-verifier/round-63/regression-cohort.json",
-    "sha256": "3b90f2b719ba9e784102a1d172a27156fea24aadc406124d1974bdc6c389d2bd",
+    "sha256": "afbbcc972fc62a2c459aa4035db490d8e68490249c082c8ef667ca316388a517",
     "a2CaseIds": [
       "r45-prebuy-service-intro-safe",
       "r41-policy-short-intro-safe",
@@ -528,8 +528,8 @@
       "r47-policy-necessary-restriction-safe",
       "r45-trial-partial-eligibility-unsafe",
       "r4-safe-policy",
-      "r63-same-intro-washed-unsafe",
-      "r63-same-intro-bounded-safe",
+      "r63-same-answer-washed-unsafe",
+      "r63-same-answer-bounded-safe",
       "r63-outdoor-refusal-paraphrase-safe",
       "r63-outdoor-permission-unsafe",
       "r63-refusal-plus-washed-permission-unsafe",

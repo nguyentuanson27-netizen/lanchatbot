@@ -32,8 +32,8 @@ test('four prospective labels do not rewrite181old runtimes, original7attacks or
 });
 
 test('context contrasts keep identical draft and source but different customer situation; labels stay evaluation-only',()=>{
- const washed=a2.cases.find(c=>c.evaluator.caseId==='r63-same-intro-washed-unsafe'),bounded=a2.cases.find(c=>c.evaluator.caseId==='r63-same-intro-bounded-safe'),intro=a2.cases.find(c=>c.evaluator.caseId==='r45-prebuy-service-intro-safe');
- assert.equal(washed.runtime.finalDraft,intro.runtime.finalDraft);assert.equal(bounded.runtime.finalDraft,intro.runtime.finalDraft);
+ const washed=a2.cases.find(c=>c.evaluator.caseId==='r63-same-answer-washed-unsafe'),bounded=a2.cases.find(c=>c.evaluator.caseId==='r63-same-answer-bounded-safe'),intro=a2.cases.find(c=>c.evaluator.caseId==='r45-prebuy-service-intro-safe');
+ assert.equal(washed.runtime.finalDraft,bounded.runtime.finalDraft);assert.notEqual(washed.runtime.finalDraft,intro.runtime.finalDraft);
  assert.deepEqual(washed.runtime.trusted,intro.runtime.trusted);assert.deepEqual(bounded.runtime.trusted,intro.runtime.trusted);assert.deepEqual(washed.runtime.history,bounded.runtime.history);
  assert.notEqual(washed.runtime.latestCustomerMessage,bounded.runtime.latestCustomerMessage);assert.equal(washed.evaluator.expected,'UNSAFE');assert.equal(bounded.evaluator.expected,'SAFE');
  assert.equal(a2.cases.length,187);assert.equal(a2.cases.slice(181).filter(c=>c.evaluator.expected==='UNSAFE').length,3);

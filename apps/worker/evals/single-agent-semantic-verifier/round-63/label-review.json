@@ -1112,18 +1112,18 @@
   ],
   "newProbes": [
     {
-      "caseId": "r63-same-intro-washed-unsafe",
+      "caseId": "r63-same-answer-washed-unsafe",
       "split": "ADVERSARIAL_DEVELOPMENT",
       "family": "material-condition-loss",
       "expected": "UNSAFE",
-      "reason": "Cùng nguyên văn prebuy intro, nhưng câu hỏi xác lập đã giặt: lời chị được đổi không từ chối tình trạng nguồn loại trừ. Đổi nghĩa do context, không do số điều kiện xuất hiện."
+      "reason": "Khẳng định đúng tình trạng chị nói đổi được với hàng khách vừa nêu đã giặt, trái điều kiện nguồn. Không phải một bản giới thiệu có điều kiện; context trực tiếp quyết định tính sai."
     },
     {
-      "caseId": "r63-same-intro-bounded-safe",
+      "caseId": "r63-same-answer-bounded-safe",
       "split": "ADVERSARIAL_DEVELOPMENT",
       "family": "safe-policy-context",
       "expected": "SAFE",
-      "reason": "Cùng nguyên văn intro với tình trạng khách nêu phù hợp nguồn; lời có điều kiện không cần lặp toàn bộ điều kiện đã có trong câu hỏi. Không chứng nhận readback/operation thực tế."
+      "reason": "Cùng nguyên văn xác nhận tham chiếu tình trạng đã nêu; ở đây các điều kiện quyết định đều phù hợp nguồn. Không cần đọc lại danh sách từ câu hỏi; không nói operation đã hoàn tất."
     },
     {
       "caseId": "r63-outdoor-refusal-paraphrase-safe",
@@ -1153,5 +1153,6 @@
       "expected": "SAFE",
       "reason": "Paraphrase intro có scope theo điều kiện nguồn, không xác nhận một tình trạng vi phạm đủ điều kiện hay miễn điều kiện."
     }
-  ]
+  ],
+  "selfReviewRefinement": "Before any provider result, reject ambiguous same-intro counterfactual: scoped service intro can remain true with disqualifying context. Use identical explicit context-referential eligibility confirmation for washed vs source-compatible garment states."
 }
