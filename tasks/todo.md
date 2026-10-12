@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** Owner authorized root-cause fix and up to THREE new rounds57–59 if A2fails. Round57 inputs/labels frozen; admission RED observed3/7 before implementation; provider/A3NOT_RUN. Mixed SAFE/UNSAFE prior-failureN3 before full. [Batch scope](../docs/specs/c3-round57-59-bounded-root-cause-batch-20261012.md). HistoricalRound56 remains STOP.
+**Current task (2026-10-12):** Authorized batch57–59, round2/3 preparing58. R57mixed24prefix qualified, fullA2FAIL at PR387conditional entitlement:1unsafeeligible/28executed,303NOT_RUN;A3NOT_RUN. R58verifier policy scope/prefix frozen, RED3/7 observed; no provider58yet. Historical evidence preserved.
 
 **Latest checkpoint:** [Round56](../apps/worker/evals/single-agent-semantic-verifier/round-56/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-56/FINDINGS.md), [scope](../docs/specs/c3-round56-meaning-contract-20261012.md). a2RunSourceSha=f68047a623559abb100bc31ac31933fce3c3cda2;a3RunSourceSha/null. NineR55sidecars/1169historicalfiles unchanged. Readiness310eval/59focus/79boundary+provider/41claims+assembly+size,workerbuild/typecheck/lintPASS. CanonicalpolicyV7presentation andmissingnativeV6/V7adaptercompatibility fixed locally;owner/A3notrun.
 
