@@ -72,7 +72,7 @@ function writeReview(manifest,corpus,evidence) {
 }
 
 async function main() {
-  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53,54,55,56,57,58].includes(manifest.round),'FIXED_ROUND52_53_54_ONLY');
+  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53,54,55,56,57,58,59].includes(manifest.round),'FIXED_ROUND52_53_54_ONLY');
   const mode=process.argv.includes('--a2')?'A2':process.argv.includes('--a3-regression')?'REGRESSION':process.argv.includes('--a3-remaining')?'REMAINING':null;
   requireThat(mode,'STAGED_MODE_REQUIRED');
   const phase=mode==='A2'?'a2':'a3',corpus=phase==='a2'?a2:a3,head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
