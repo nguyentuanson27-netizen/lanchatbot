@@ -1,0 +1,78 @@
+{
+  "round": 53,
+  "status": "DETERMINISTIC_READY_NOT_SEMANTIC_QUALIFICATION",
+  "checkedAt": "2026-10-12T05:16:48.532Z",
+  "providerGenerationsBeforeSeal": 0,
+  "commands": [
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/round-53.test.mjs",
+      "stage": "RED",
+      "exitCode": 1,
+      "result": "rifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-53.test.mjs:59:212)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)\n      at Test.postRun (node:internal/test_runner/test:1522:19)\n      at Test.run (node:internal/test_runner/test:1447:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/round-53.test.mjs",
+      "stage": "GREEN",
+      "exitCode": 1,
+      "result": "point-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-53.test.mjs:21:140)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.start (node:internal/test_runner/test:1242:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    expected: undefined,\n    operator: 'throws',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/round-53.test.mjs",
+      "stage": "FINAL_GREEN",
+      "exitCode": 0,
+      "result": "ever inherit indoor-wear permission (238.8274ms)\n✔ new-policyN3 and all prior repetitions remain in one fixed schedule, unsafe send-eligible PASS stops remainder (10.8125ms)\n✔ captured native owner and mandatory verifier requests exclude evaluator/policy/cohort audit labels (174.4223ms)\n✔ V6 actual encoded input remains bounded at max draft and keeps product-specific missing size inputs (53.4667ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1570.7629\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "ontext asks only missing chest and preserves existing chart/facts/binding without a new field (157.8487ms)\n✔ known waist is not requested again; unsupported height/weight is not advertised (1.0127ms)\n✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (1.2784ms)\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.6675ms)\nℹ tests 290\nℹ suites 0\nℹ pass 290\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 78642.5735\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-53.test.mjs",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "erifier status (4.2232ms)\n✔ generation error remains a terminal outcome and cannot cause generation retry (1.3528ms)\n✔ PII hard precheck terminates before verifier, using no-send (1.9369ms)\n✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (2.2703ms)\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (4.3046ms)\nℹ tests 46\nℹ suites 0\nℹ pass 46\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3081.7505\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "ents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker\n\n ✓ src/single-agent-semantic-verifier-boundary.test.ts (45 tests) 75ms\n ✓ src/vertex.test.ts (34 tests) 1291ms\n   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1015ms\n\n Test Files  2 passed (2)\n      Tests  79 passed (79)\n   Start at  12:02:22\n   Duration  4.31s (transform 1.98s, setup 0ms, collect 3.91s, tests 1.37s, environment 1ms, prepare 1.48s)\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\n\n ✓ src/reply-assembler.test.ts (14 tests) 146ms\n ✓ src/protected-claims.test.ts (7 tests) 44ms\n ✓ src/size-engine.test.ts (20 tests) 59ms\n\n Test Files  3 passed (3)\n      Tests  41 passed (41)\n   Start at  12:02:22\n   Duration  2.83s (transform 1.17s, setup 0ms, collect 2.57s, tests 250ms, environment 4ms, prepare 2.25s)\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "e prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 typecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "\n> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+    }
+  ],
+  "localCounts": {
+    "eval": 290,
+    "focused": 46,
+    "boundaryProvider": 79,
+    "claimsSizeAssembly": 41
+  },
+  "historicalFilesUnchanged": 1113,
+  "productionWiring": false,
+  "sourcePolicy": "shop-policy-customer-care-v2",
+  "providerAvailabilityInspection": "Exact Codex0.159.2/login and existing Vertex credential config available; no availability guarantee or generation probe."
+}

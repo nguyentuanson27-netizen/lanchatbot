@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** owner selected old repository customer-care v2 for [inactive source-data preparation](../docs/specs/c3-source-data-prompt-preparation-20261012.md); selected snapshot schema/hash and7focused/84local-envelope checks PASS. Prior284eval/79boundary+provider/41claims+size+assembly and worker build/typecheck/lint results retained as prior preparation evidence. 1.113historical round-folder files unchanged. Provider NOT_RUN; no new round or post-A qualification.
+**Current task (2026-10-12):** exactly one [Round53 run authorized](../docs/specs/c3-round53-source-policy-run-20261012.md). T1frozen325A2/72A3registrations; T2 observedRED2/6, intermediate5/6, GREEN6/6; readiness290eval/46focused/79boundary+provider/41claims+size+assembly and worker build/typecheck/lint PASS. 1.113historical files unchanged; no production wiring. T3/A2 pending clean seal/preflight; A3 conditional on A2PASS. No automatic54/post-A.
 
 **Latest checkpoint:** Round52 completed to the owner-requested conditional checkpoint: A2PASS277/277 (failure cohort90/90 then187remaining), A3failure cohort25/30PASS with5fallbacks;42remaining registrations NOT_RUN because prefixFAIL. Recommendation STOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-52/CHECKPOINT_A.md),[finding](../apps/worker/evals/single-agent-semantic-verifier/round-52/FINDINGS.md),[frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). All historical evidence retained;no automatic53/post-A.
 
