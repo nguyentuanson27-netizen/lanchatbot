@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** Round55 STOP tại Checkpoint A. A2prefix12regressionFAIL:6PASS/6semanticFAIL,0providererrors. FullA2NOT_COMPLETED(rawsummaryBLOCKED):12/325executed,313NOT_RUN,UNSAFEtested0. A3NOT_RUN0/72; no automatic56/post-A.
+**Current task (2026-10-12):** Owner authorized one Round56 root-cause fix/run. [Frozen scope](../docs/specs/c3-round56-meaning-contract-20261012.md), [readiness PASS](../apps/worker/evals/single-agent-semantic-verifier/round-56/DETERMINISTIC_READINESS.md): verifier advice contract/owner policy scope replacement, losslessV7source policy presentation and nativeV6/V7adapter compatibility. All source/labels/models/bars/fallback/retry controls unchanged. Prior12N3allPASS before313A2remaining; fullA2PASS beforeA3. No automatic57/post-A.
 
 **Latest checkpoint:** [Round55](../apps/worker/evals/single-agent-semantic-verifier/round-55/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-55/FINDINGS.md), [scope](../docs/specs/c3-round55-regression-first-20261012.md). a2RunSourceSha=3eceacae168a3b682722e2e639520379842fc840; a3RunSourceSha/null. NineR54sidecars/1150historicalfiles unchanged; same owner/data/model/bars/fallback. Readiness303eval/56focus/79boundary+provider/41claims+assembly+size; worker build/typecheck/lint PASS. Two policy controls PASS3/3; two advice controls FAIL3/3. No fullunsafe/A3qualification.
 
