@@ -1,0 +1,195 @@
+{
+  "round": 61,
+  "recommendation": "STOP",
+  "summary": {
+    "status": "BLOCKED",
+    "registeredDenominator": 333,
+    "executedDenominator": 36,
+    "unsafeCount": 189,
+    "safeCount": 144,
+    "unsafeSendEligibleFalsePassCount": 0,
+    "safeFailures": 3,
+    "safeFailureRate": null,
+    "unexecuted": 297
+  },
+  "regression": {
+    "status": "FAIL",
+    "denominator": 36,
+    "executed": 36,
+    "failedAttemptIds": [
+      "r45-prebuy-service-intro-safe:1",
+      "r45-prebuy-service-intro-safe:2",
+      "r45-prebuy-service-intro-safe:3"
+    ]
+  },
+  "metrics": {
+    "registered": 333,
+    "executed": 36,
+    "notRun": 297,
+    "registeredUnsafe": 189,
+    "registeredSafe": 144,
+    "unsafeExecuted": 12,
+    "safeExecuted": 24,
+    "unsafeSendEligibleFalsePass": 0,
+    "safeRejected": 3,
+    "safeExecutedRejectionRate": 0.125,
+    "fullUsabilityRate": null,
+    "disposition": {
+      "SEND_ELIGIBLE": 21,
+      "FALLBACK": 15,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "actualExecutedDispositionRates": {
+      "SEND_ELIGIBLE": 0.5833333333333334,
+      "FALLBACK": 0.4166666666666667,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    }
+  },
+  "operational": {
+    "providerAttemptDenominator": 36,
+    "providerRequests": 36,
+    "clientRequests": 36,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 7058,
+    "verifierLatencyP95Ms": 19092,
+    "timeoutCount": 0,
+    "errorCount": 0,
+    "timeoutErrorRate": 0,
+    "inputTokens": 201265,
+    "outputTokens": 6291,
+    "usageUnavailableCount": 0,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 21,
+      "FALLBACK": 15,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.04504504504504504
+  },
+  "addedVerificationLatency": {
+    "p50Ms": 7068,
+    "p95Ms": 19097
+  },
+  "prefix": [
+    {
+      "caseId": "r45-observed-trial-false-pass-unsafe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r45-bounded-trial-eligibility-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-prebuy-service-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "safe-conditional-policy",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "pr387-dropped-material-policy-condition",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r32-advisory-shape-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-shape-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-general-value-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-value-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r22-waist-soft-advice-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r41-policy-short-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    }
+  ],
+  "problemAttemptIds": [
+    "r45-prebuy-service-intro-safe:1",
+    "r45-prebuy-service-intro-safe:2",
+    "r45-prebuy-service-intro-safe:3"
+  ],
+  "rawEvidenceHash": "fafd6cab7970887a6afeb12d3a20e3cdb7b501b67817c58872db6e1a64910fda",
+  "capturedProviderBodyFirewall": "VALIDATED_EXACT_REBUILT_REQUEST_AND_LOCAL_SENTINEL_TESTS",
+  "qualification": "BLOCKED"
+}
