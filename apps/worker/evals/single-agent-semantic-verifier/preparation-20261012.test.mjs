@@ -6,7 +6,7 @@ import {buildPreparedRequest} from './preparation-20261012.mjs';
 
 const read=name=>JSON.parse(readFileSync(new URL('./round-52/'+name,import.meta.url),'utf8'));
 const manifest=read('manifest.json'),a3=read('corpus-a3.json');
-const ownerPolicy=JSON.parse(readFileSync(new URL('./prompts/owner-policy-source-preparation-20261012.json',import.meta.url),'utf8'));
+const selectedPolicy=JSON.parse(readFileSync(new URL('./prompts/repository-policy-source-preparation-20261012.json',import.meta.url),'utf8'));
 const context=request=>JSON.parse(request.contents[0].parts[0].text.split('\n')[1]);
 const sorted=items=>[...items].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
 const originalProfile=({codeSizeInput,...profile})=>profile;
@@ -33,13 +33,13 @@ test('preparation retains every business fact, profile qualifier and policy acro
 
 test('same prompts take conflicting policies and ETA anchors exclusively from current source data',()=>{
   const snapshots=[
-    {policy:ownerPolicy.policyLiterals[0].text,eta:'Dự kiến 4–6 ngày kể từ khi đơn vị vận chuyển nhận kiện, không cam kết giờ đến.'},
+    {policy:selectedPolicy.policyLiterals[0].text,eta:'Dự kiến 4–6 ngày kể từ khi đơn vị vận chuyển nhận kiện, không cam kết giờ đến.'},
     {policy:'Fixture đối chứng: đổi màu trong 11 ngày sau bàn giao; phí 41.000đ, không hỗ trợ hoàn tiền.',eta:'Fixture đối chứng: 1–2 ngày sau ngày thanh toán đã xác nhận.'},
   ];
   const requests=[];
   for(const snapshot of snapshots){
     const fixture=structuredClone(a3.cases[0]);
-    fixture.policySourceAudit=ownerPolicy;
+    fixture.policySourceAudit=selectedPolicy;
     fixture.runtime.finalDraft='Dạ, chị nhé.';
     fixture.runtime.trusted.policyLiterals=[
       {...fixture.runtime.trusted.policyLiterals[0],text:snapshot.policy,sourceVersion:'LOCAL_PREPARATION_ONLY:policy'},
@@ -55,7 +55,7 @@ test('same prompts take conflicting policies and ETA anchors exclusively from cu
       for(const rule of ['7 ngày','15 ngày','chỉ thử trong nhà','7ngày'])assert.ok(!prompt.includes(rule));
       assert.ok(!prompt.includes(snapshot.policy));assert.ok(!prompt.includes(snapshot.eta));
       const body=JSON.stringify(pair[role]);
-      for(const label of ['notEstablishedForThisRule','historicalRepositorySource','PREPARATION_ONLY_NOT_FROZEN_FOR_PROVIDER'])assert.ok(!body.includes(label));
+      for(const label of ['notEstablishedForThisRule','historicalRepositorySource','repositoryEvidence','selectedForCheckpointA','historicalPublishedVersionId','customerCarePayloadHash','PREPARATION_ONLY_NOT_FROZEN_FOR_PROVIDER'])assert.ok(!body.includes(label));
     }
     requests.push(pair);
   }
