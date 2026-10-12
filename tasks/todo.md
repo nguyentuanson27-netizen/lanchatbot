@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** Round54 dừng tại Checkpoint A theo yêu cầu lỗi trước/full sau. Prefix12FAIL: 4send-eligible,5semanticFAIL,3provider response-validation errors. FullA2BLOCKED/NOT_COMPLETED (12/325;313unexecuted), UNSAFEtested0; A3NOT_RUN72registrations. RecommendationSTOP; no automatic55/post-A.
+**Current task (2026-10-12):** Owner “fix và chạy vòng mới” authorized one Round55: narrow one verifier advice-boundary sentence and retain bounded SSE failure causes. [Frozen scope](../docs/specs/c3-round55-regression-first-20261012.md), [readiness PASS](../apps/worker/evals/single-agent-semantic-verifier/round-55/DETERMINISTIC_READINESS.md). Retain four prior-failure controls N3=12 before313remaining; fullA2PASS before A3. Corpus/source/model/bar/retry/fallback controls unchanged. No automatic56/post-A.
 
 **Latest checkpoint:** [Round54](../apps/worker/evals/single-agent-semantic-verifier/round-54/CHECKPOINT_A.md), [findings](../apps/worker/evals/single-agent-semantic-verifier/round-54/FINDINGS.md), [frozen scope](../docs/specs/c3-round54-regression-first-20261012.md). a2RunSourceSha=b81a65b846c3f213da247415a602173e7e164ff9; no a3RunSourceSha. NineR53sidecars/1131historicalfiles unchanged; policy/source separation and codeauthority preserved. Readiness294eval/44focus/79boundary+provider/41claims+assembly+size; worker build/typecheck/lint finalPASS; initial localtest failure retained.
 
