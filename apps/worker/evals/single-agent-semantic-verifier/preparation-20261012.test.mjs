@@ -2,14 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildRequest,projectRuntime,hash} from './protocol.mjs';
+import {buildPreparedRequest} from './preparation-20261012.mjs';
 
 const read=name=>JSON.parse(readFileSync(new URL('./round-52/'+name,import.meta.url),'utf8'));
 const manifest=read('manifest.json'),a3=read('corpus-a3.json');
-// During RED only, exercise the current envelope if the preparation does not exist yet.
-const {buildPreparedRequest}=await import('./preparation-20261012.mjs').catch(error=>{
-  if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;
-  return {buildPreparedRequest:buildRequest};
-});
 const context=request=>JSON.parse(request.contents[0].parts[0].text.split('\n')[1]);
 const sorted=items=>[...items].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
 const originalProfile=({codeSizeInput,...profile})=>profile;
