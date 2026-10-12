@@ -2,6 +2,8 @@
 
 **Phạm vi:** bản chuẩn bị chưa kích hoạt, owner yêu cầu sửa kỹ và giữ kết quả các vòng trước. Không đăng ký Round53, không chạy provider, không nối nguồn thật hoặc làm post-A. Round52 vẫn STOP.
 
+**Owner chọn policy cho A (2026-10-12):** “cứ dùng policy cũ, quan trọng chứng minh bot tuân policy, sau này có thể sửa đc”. Chọn phần customer-care của `shop-policy-customer-care-v2` trong repo làm snapshot đánh giá. Giữ nguyên điều khoản của bản đó, không trộn quy tắc đổi chỉ do lỗi shop vào quyền đổi tự nguyện của v2. Mục tiêu là quan sát bot tuân policy đã freeze; việc chọn snapshot này không cập nhật policy live.
+
 `preparationBaseSha = 4235f7d18cac0763b965e08b7a7522de8d98d8d5`. Đã refresh `origin/main`; `implementationBaseSha = 296cdcfbf5759f5bf9cbb24acf3dc63005589361`.
 
 Áp dụng [parent spec](c3-single-agent-commerce-architecture-20261004.md), [boundary amendment](c3-semantic-verifier-boundary-amendment-20261005.md), [plan](../../tasks/plan.md) và [R52 findings](../../apps/worker/evals/single-agent-semantic-verifier/round-52/FINDINGS.md). Các điều khoản 7 ngày/thử trong nhà trong tài liệu và kết quả cũ là hợp đồng của population lịch sử; không phải policy được chọn cho lần chạy tương lai.
@@ -14,11 +16,14 @@
 | `deploy/manifests/20260723-customer-care-policy-r10-1.json` | Identity/version/lifecycle PUBLISHED của bản lịch sử | Manifest không chứa toàn bộ policy payload |
 | `apps/worker/src/pre-sale-policy.test.ts`, `packages/chat-runtime/src/runtime-policy-resolver.test.ts` | Bản fixture cấu trúc: đổi size/màu/mẫu 15 ngày, một lần, phí hai chiều 30k; trả do lỗi trong 5 ngày, shop chịu ship, hoàn 1–3 ngày làm việc sau xác nhận lỗi; `HOLD_UP_ONLY` | Fixtures hỗ trợ đối chiếu baseline, không tự chứng minh policy live hay chính sách mới |
 | `packages/contracts/src/v4/admin-policy-control-base.ts` | Hợp đồng dữ liệu tách exchange/returns/inspection, inspection chỉ `HOLD_UP_ONLY` | Schema exchange hiện chưa có trường lý do lỗi shop; không thay schema/shared package ở Checkpoint A |
-| Owner trong chat hiện tại | Chỉ được ướm, không mặc thử; chỉ chấp nhận đổi do lỗi shop, như lỗi sản xuất/giao sai size/mẫu | Ghi riêng thành dữ liệu chuẩn bị; không giả danh version Admin đã publish |
+| Owner làm rõ trước khi chọn bản cũ | Chỉ được ướm, không mặc thử; chỉ chấp nhận đổi do lỗi shop, như lỗi sản xuất/giao sai size/mẫu | Giữ riêng như hướng sửa policy sau này; chưa áp dụng quy tắc fault-only vào snapshot v2 của A |
+| Owner chọn snapshot cho A | Dùng policy cũ trong repo để kiểm tra việc tuân policy được cấp | Chọn customer-care v2 nguyên bản, không chờ nguồn policy fault-only mới |
 
-Như vậy repo **có** nguồn policy; thiếu bản nguồn đầy đủ khớp quy tắc đổi chỉ do lỗi shop vừa chốt. Không mang 15 ngày/30k của exchange, hoặc 5 ngày/hoàn tiền của returns sang quy tắc exchange mới. Thời hạn, phí, hoàn tiền của quy tắc mới chưa xác lập trong nguồn đã tìm thấy. Không lấy policy 7 ngày/thử trong nhà của corpus C3 làm policy shop mới.
+Repo **có** nguồn đủ cho snapshot customer-care v2 đã được chọn. V2 cho đổi size/màu/mẫu 15 ngày theo điều kiện của nguồn, còn trả do lỗi là dịch vụ riêng với thời hạn/phí/hoàn tiền riêng. Không trộn hai dịch vụ hoặc policy 7 ngày/thử trong nhà của corpus C3. Sự thiếu nguồn đầy đủ cho quy tắc fault-only mới không còn là điều kiện chặn chuẩn bị A theo quyết định owner này.
 
-[Dữ liệu chuẩn bị từ xác nhận owner](../../apps/worker/evals/single-agent-semantic-verifier/prompts/owner-policy-source-preparation-20261012.json) giữ riêng hai quy tắc đã chốt và các phần chưa xác lập. Đây là owner clarification, không phải Admin published snapshot. Chỉ `policyLiterals` được dùng làm dữ liệu fixture trong tests; audit/status/unknowns không vào request model. Chưa có observedAt/expiresAt cho run, chưa freeze một policy đầy đủ để chạy provider.
+[Snapshot customer-care v2 đã chọn](../../apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json) giữ payload cấu trúc trong `policyLiterals.text`, không làm thêm một bản diễn giải nghiệp vụ trong prompt. Chỉ policy literals vào request; provenance/audit lựa chọn nằm ngoài model input. Nguồn từ baseline/manifest và fixture repo, chưa đọc lại published pointer live. Chưa freeze observedAt/expiresAt hoặc corpus/run mới.
+
+[Dữ liệu xác nhận owner trước đó](../../apps/worker/evals/single-agent-semantic-verifier/prompts/owner-policy-source-preparation-20261012.json) được giữ nguyên để tham chiếu hướng sửa sau này; không phải policy đang chọn cho A và không giả danh version Admin đã publish.
 
 Trong A, policy là snapshot fixture được freeze và đưa vào `trusted.policyLiterals`; cả hai model đọc cùng nguồn. Trong B, reuse `RuntimePolicySourcePort.loadActivePointers` / `RuntimePolicyResolver` cùng version/content hash/pointer revision để nối nguồn thật. Không implement connector/policy migration hoặc ghi Admin trong bản chuẩn bị này.
 
@@ -37,7 +42,7 @@ Policy text/profile/history vẫn là dữ liệu, không được ghi đè syst
 
 Các checks local: focused preparation RED→GREEN; toàn Node eval suite với môi trường compatibility R39 và transport stub; worker boundary/provider; protected-claims/reply-assembler/size-engine; worker build/typecheck/lint; diff và lịch sử đối chiếu với preparation base. Lưu commands thực sự chạy và kết quả tại bản evidence chuẩn bị.
 
-Trước provider phải có nguồn policy đầy đủ được chọn rõ, prospective corpus/nhãn/rubric khớp nguồn đó, prompt/context/protocol hashes và run authorization riêng. Đổi verifier prompt cần **fresh A2**; A2 PASS mới A3. Không kế thừa A2 qualification của R52, không đổi nhãn lịch sử, không claim chất lượng ngôn ngữ/safety model từ tests local. Model/provider/effort/bars/fallback/terminal/gate hiện có không bị thay trong bản chuẩn bị.
+Nguồn customer-care v2 đã được owner chọn. Trước provider vẫn cần prospective corpus/nhãn/rubric khớp nguồn đó, prompt/context/protocol hashes và run authorization riêng. Đổi verifier prompt cần **fresh A2**; A2 PASS mới A3. Không kế thừa A2 qualification của R52, không đổi nhãn lịch sử, không claim chất lượng ngôn ngữ/safety model từ tests local. Model/provider/effort/bars/fallback/terminal/gate hiện có không bị thay trong bản chuẩn bị.
 
 Không chỉ thay literal rồi giữ nguyên expectations: các lịch sử hứa được thử/đổi tự nguyện, câu hỏi, SAFE/UNSAFE labels và outcome rubric phải được chuẩn bị đồng bộ trong population mới. Các dữ kiện sản phẩm và ca đã tốt tiếp tục làm controls khi phù hợp. Đây là việc trước một run tương lai, chưa sửa corpus hoặc điểm lịch sử ở lần chuẩn bị này.
 
@@ -77,4 +82,14 @@ Các kiểm tra mới chứng minh giữ đầy đủ **business fields** của 
 
 Complexity: một helper preview 43 dòng, hai prompt thay thế, một data fixture riêng và 7 test local. Không thêm semantic role/layer/gate/runtime state/provider abstraction; không có per-SKU/ref overlay, parser, retry hoặc repair. Không đổi model: owner Gemini 3.5 Flash Lite/HIGH; verifier GPT-6.1 Sol/high, cấu hình R52 chỉ được reuse làm local envelopes.
 
-**Kết quả chuẩn bị:** local verification PASS; provider generations 0, fresh A2/A3 NOT_RUN, Checkpoint A vẫn STOP theo R52. Còn thiếu nguồn đầy đủ khớp policy mới, prospective population được freeze và quan sát chất lượng/an toàn/latency/usability mới. Không GO hoặc tự tiếp tục B/post-A.
+**Kết quả chuẩn bị:** local verification PASS; provider generations 0, fresh A2/A3 NOT_RUN, Checkpoint A vẫn STOP theo R52. Customer-care v2 đã được chọn; còn prospective population được freeze và quan sát chất lượng/an toàn/latency/usability mới. Không GO hoặc tự tiếp tục B/post-A.
+
+## Verification khi chọn lại policy — 2026-10-12
+
+`policySelectionBaseSha = ae439cb93b93cc46e1c87284220700d41ee86bcc`; `policySnapshotSourceSha = f3dce646b51187662b003b8802422a66fda3cff1`. Đây là savepoint chuẩn bị dữ liệu/test, không phải run-source qualification. Hai prompt, preview builder, các runner và production/shared source không đổi.
+
+Snapshot chép đầy đủ customer-care từ fixture v2: exchange/returns/inspection/marketplacePricing/customerFaq. Schema hiện có `CustomerCarePolicyAdminContentV1Schema.parse` PASS. Payload JSON 1.055 bytes, SHA-256 `52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b`. Không claim đây là content hash của toàn artifact Admin live.
+
+Đã chạy lại `$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/preparation-20261012.test.mjs`: exit0, 7/7, 0 skip. Test dùng snapshot đã chọn và fixture policy khác với cùng prompts; policy/audit/evaluator separation vẫn giữ. Inline Node readback kiểm tra schema/hash và 84 envelope local khi thay riêng exchange policy trong clones của 42 histories: max owner 17.950 bytes, verifier 30.613 với max draft; dưới 32.768. 1.113 file lịch sử không đổi; provider generations 0.
+
+Các kết quả 284/79/41 và worker build/typecheck/lint ở mục trước thuộc verification của bản chuẩn bị trước lựa chọn dữ liệu này; không chạy lại các commands đó và không ghi thành kết quả của một provider run. Tests local kiểm tra cơ chế cấp dữ liệu, chưa chứng minh model tuân policy; điều đó phải được đo trên fresh A2/A3 với nguồn và expectations mới đã freeze.

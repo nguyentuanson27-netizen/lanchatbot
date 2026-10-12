@@ -1,6 +1,6 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Current task (2026-10-12):** [inactive source-data prompt preparation](../docs/specs/c3-source-data-prompt-preparation-20261012.md) complete locally. 7focused/284eval/79boundary+provider/41claims+size+assembly PASS; worker build/typecheck/lint PASS. 1.113historical round-folder files unchanged. Provider NOT_RUN; no new round or post-A qualification.
+**Current task (2026-10-12):** owner selected old repository customer-care v2 for [inactive source-data preparation](../docs/specs/c3-source-data-prompt-preparation-20261012.md); selected snapshot schema/hash and7focused/84local-envelope checks PASS. Prior284eval/79boundary+provider/41claims+size+assembly and worker build/typecheck/lint results retained as prior preparation evidence. 1.113historical round-folder files unchanged. Provider NOT_RUN; no new round or post-A qualification.
 
 **Latest checkpoint:** Round52 completed to the owner-requested conditional checkpoint: A2PASS277/277 (failure cohort90/90 then187remaining), A3failure cohort25/30PASS with5fallbacks;42remaining registrations NOT_RUN because prefixFAIL. Recommendation STOP. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-52/CHECKPOINT_A.md),[finding](../apps/worker/evals/single-agent-semantic-verifier/round-52/FINDINGS.md),[frozen scope](../docs/specs/c3-round52-regression-first-20261012.md). All historical evidence retained;no automatic53/post-A.
 
@@ -12,7 +12,8 @@
 - [x] Replace owner/verifier prompt sections with source-based policy, ETA and grounded advice; preserve confident fit, useful fact citation, whole-turn quality and A-only authority boundaries.
 - [x] Prepare generic product grouping retaining source business values/charts/conditions; no per-SKU/ref overlays or metadata duplication in owner input. Canonical verifier/code identities unchanged.
 - [x] Observed control RED before GREEN; self-review; final local suite/build/typecheck/lint PASS, evaluator/private/source-audit request firewall checked.
-- [ ] Select complete policy source and prepare consistent prospective history/corpus/labels/quality contracts before any future freeze.
+- [x] Owner “cứ dùng policy cũ” selected full customer-care v2 repository snapshot for A; keep earlier fault-only clarification separate for later policy changes.
+- [ ] Prepare consistent prospective history/corpus/labels/quality contracts against selected v2 before any future freeze.
 - [ ] Separate run authorization/freeze/source seal; fresh A2 before A3. NOT_RUN in this preparation, no inherited R52 qualification.
 
 **Prior preparation (2026-10-11):** [Round48 preparation](../docs/specs/c3-round48-policy-contract-preparation-20261011.md), owner “thực hiện fix đi” / “tiếp tục fix”. R47 A2 FAIL / STOP remains; R48 provider A2/A3 NOT_RUN. Historical status entries below are retained.
