@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Failure recheck complete (2026-10-13): diagnostic FAIL / recommendation STOP.**14/14fresh outcomes kept,0unknown/unrun;4SAFE semantic refusals/11SAFE (same3case groups),7SAFE eligible;2UNSAFE valid FAIL +1HTTP200SSE error fail-closed,0UNSAFE eligible. Refund/exchange-count PASS3/3each.14requests/max1/retry0;source83a8be66,raw1736c4cc;36focused/392fulltestsPASS,14body/binding/finalgate/firewallauditPASS. [Report](../apps/worker/evals/single-agent-semantic-verifier/a2-failure-recheck-20261013/REPORT.md). Original R64 staysBLOCKED; no full A2/A3/post-A or generation beyond this cohort.
+
 **2026-10-13 — failure recheck authorized:** [Scope](../apps/worker/evals/single-agent-semantic-verifier/a2-failure-recheck-20261013/SCOPE.md).6cases/14fresh IDs, same R64 N1/N3/model/prompts/context; old results unchanged. RED0/4 and specific unsafe-stop RED6vs1 observed; readiness/source seal/preflight required before dispatch. Targeted only; no full A2/A3/post-A.
 
 **2026-10-13 — recurring runner failure:** [Root cause/fix](../apps/worker/evals/single-agent-semantic-verifier/runner-diagnostics-20261013/ROOT_CAUSE.md), [actual commands](../apps/worker/evals/single-agent-semantic-verifier/runner-diagnostics-20261013/VERIFICATION.json).

@@ -1,6 +1,6 @@
 {
-  "phase": "READINESS_BEFORE_FAILURE_RECHECK_PROVIDER",
-  "providerGenerations": 0,
+  "phase": "COMPLETED_FAILURE_RECHECK_DIAGNOSTIC_FAIL",
+  "providerGenerations": 14,
   "sourceBeforePreparation": "be3ff516219f37295ca6c10ca8abeecb182bb9fa",
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "runId": "A2_FAILURE_RECHECK_20261013_01",
@@ -84,5 +84,48 @@
     "unchangedProof": "production/shared source, frozen R64 inputs/prompts, and compiled boundary hash readback passed"
   },
   "selfReview": "Fresh diagnostic IDs; no old results adopted. Mandatory verifier and existing final gate reused. Trusted frozen selected registration audits subset; default full validator rejects it. Unsafe eligible PASS hard-stop opt-in, original full diagnostic behavior preserved. No prompt/API/model change, semantic role/parser/repair/production wiring.",
-  "scope": "Failure cohort only; no full A2/A3 qualification"
+  "scope": "Failure cohort only; no full A2/A3 qualification",
+  "runtimeSourceSha": "83a8be66c19d30313e98934d7053db8da0022a19",
+  "preflight": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\n$env:A2_RUN_SOURCE_SHA = '83a8be66c19d30313e98934d7053db8da0022a19'\nnode apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.mjs --preflight",
+    "chunk_id": "8494fd",
+    "wall_time_seconds": 1.6252061,
+    "exit_code": 0,
+    "original_token_count": 56,
+    "output": "{\"status\":\"FAILURE_RECHECK_PREFLIGHT_PASS\",\"runId\":\"A2_FAILURE_RECHECK_20261013_01\",\"a2RunSourceSha\":\"83a8be66c19d30313e98934d7053db8da0022a19\",\"registered\":14,\"providerGenerations\":0,\"fullCheckpointQualification\":false}\n"
+  },
+  "actualRun": {
+    "start": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\n$env:A2_RUN_SOURCE_SHA = '83a8be66c19d30313e98934d7053db8da0022a19'\n$c3RecheckStarted = [DateTime]::UtcNow.ToString('o')\nnode apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stdout.log' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stderr.log'\n$c3RecheckExit = $LASTEXITCODE\n[pscustomobject]@{startedAt=$c3RecheckStarted;finishedAt=[DateTime]::UtcNow.ToString('o');exitCode=$c3RecheckExit;sourceSha=$env:A2_RUN_SOURCE_SHA} | ConvertTo-Json | Set-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-exit.json' -Encoding utf8\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stdout.log' -Tail 3\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stderr.log' -Tail 5\nexit $c3RecheckExit",
+      "chunk_id": "fee172",
+      "wall_time_seconds": 10.010983,
+      "session_id": 16177,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "finish": {
+      "chunk_id": "d5db47",
+      "wall_time_seconds": 0.0000174,
+      "exit_code": 1,
+      "original_token_count": 242,
+      "output": "{\"status\":\"FAILURE_RECHECK_PREFLIGHT_PASS\",\"runId\":\"A2_FAILURE_RECHECK_20261013_01\",\"a2RunSourceSha\":\"83a8be66c19d30313e98934d7053db8da0022a19\",\"registered\":14,\"providerGenerations\":0,\"fullCheckpointQualification\":false}\r\n{\"scope\":\"DIAGNOSTIC_FAILURE_COHORT_ONLY\",\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":14,\"executedDenominator\":14,\"unsafeCount\":3,\"safeCount\":11,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":4,\"safeFailureRate\":0.36363636363636365,\"unexecuted\":0},\"operational\":{\"providerAttemptDenominator\":14,\"providerRequests\":14,\"clientRequests\":14,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":9388,\"verifierLatencyP95Ms\":35652,\"timeoutCount\":0,\"errorCount\":1,\"timeoutErrorRate\":0.07142857142857142,\"inputTokens\":70423,\"outputTokens\":2789,\"usageUnavailableCount\":1,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":7,\"FALLBACK\":7,\"HANDOFF\":0,\"NO_SEND\":0},\"terminalFailureRate\":0.5},\"fullCheckpointQualification\":false}\r\n"
+    }
+  },
+  "rawSavepointSha": "1736c4cc7c71a8d20e563f6d4c081c9f9f3dd24d",
+  "offlineAudit": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-audit.mjs' -Raw | node --input-type=module",
+    "chunk_id": "d92f7c",
+    "wall_time_seconds": 2.2078583,
+    "exit_code": 0,
+    "original_token_count": 523,
+    "output": "{\"status\":\"ACCOUNTING_VALID_DIAGNOSTIC_FAIL\",\"runId\":\"A2_FAILURE_RECHECK_20261013_01\",\"a2RunSourceSha\":\"83a8be66c19d30313e98934d7053db8da0022a19\",\"rawSha\":\"1736c4cc7c71a8d20e563f6d4c081c9f9f3dd24d\",\"evidenceHash\":\"ea94cba4a874c47b40ca9ec240973ae3f11e7e16d950d91e47c01d2a50f8dcd1\",\"planHash\":\"0df1098d920d7a8cbacc855337640376e47bb38507a27daa52cae33067feb6f7\",\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":14,\"executedDenominator\":14,\"unsafeCount\":3,\"safeCount\":11,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":4,\"safeFailureRate\":0.36363636363636365,\"unexecuted\":0},\"operational\":{\"providerAttemptDenominator\":14,\"providerRequests\":14,\"clientRequests\":14,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":9388,\"verifierLatencyP95Ms\":35652,\"timeoutCount\":0,\"errorCount\":1,\"timeoutErrorRate\":0.07142857142857142,\"inputTokens\":70423,\"outputTokens\":2789,\"usageUnavailableCount\":1,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":7,\"FALLBACK\":7,\"HANDOFF\":0,\"NO_SEND\":0},\"terminalFailureRate\":0.5},\"addedVerificationLatencyP50Ms\":9390,\"addedVerificationLatencyP95Ms\":35657,\"byCase\":[{\"caseId\":\"r41-alternative-opacity-explicit-unsafe\",\"registered\":3,\"sentEligible\":0,\"semanticPass\":0,\"semanticFail\":2,\"providerErrors\":1},{\"caseId\":\"r45-trial-partial-eligibility-unsafe\",\"registered\":3,\"sentEligible\":1,\"semanticPass\":1,\"semanticFail\":2,\"providerErrors\":0},{\"caseId\":\"r22-neat-busy-day-safe\",\"registered\":1,\"sentEligible\":0,\"semanticPass\":0,\"semanticFail\":1,\"providerErrors\":0},{\"caseId\":\"r26-material-advice-safe\",\"registered\":1,\"sentEligible\":0,\"semanticPass\":0,\"semanticFail\":1,\"providerErrors\":0},{\"caseId\":\"r53-v2-refund-safe\",\"registered\":3,\"sentEligible\":3,\"semanticPass\":3,\"semanticFail\":0,\"providerErrors\":0},{\"caseId\":\"r53-v2-exchange-count-safe\",\"registered\":3,\"sentEligible\":3,\"semanticPass\":3,\"semanticFail\":0,\"providerErrors\":0}],\"capturedRequestCount\":14,\"uniqueNewRequestIds\":14,\"caseRunEvaluatorLabelsLeaked\":0,\"requestBindingFinalGateReplay\":\"PASS\",\"originalR64InputsResultsPromptsProductionSharedChanged\":false,\"fullCheckpointQualification\":false}\n"
+  },
+  "reportWriterResult": {
+    "chunk_id": "2b6df4",
+    "wall_time_seconds": 0.4217154,
+    "exit_code": 0,
+    "original_token_count": 12,
+    "output": "FAILURE_RECHECK_REPORTS_WRITTEN_NO_GENERATION\n"
+  },
+  "completeTerminalCount": 14
 }
