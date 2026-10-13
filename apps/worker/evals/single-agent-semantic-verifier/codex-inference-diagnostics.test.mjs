@@ -6,7 +6,7 @@ import {projectRuntime,buildRequest} from './protocol.mjs';
 import {providerCapacityExhausted} from './run-a2.mjs';
 const read=f=>JSON.parse(readFileSync(new URL('./round-24/'+f,import.meta.url)));
 const m=read('manifest.json'),request=buildRequest(m,'verifier',projectRuntime(m,read('corpus-a2.json').cases[1],'verifier','opaque-local-diagnostics'));
-const client=auth=>async base=>{await fetch(base+'/responses',{method:'POST',headers:auth?{authorization:'synthetic-auth-not-retained'}:{},body:'{}'});};
+const client=auth=>async base=>{const response=await fetch(base+'/responses',{method:'POST',headers:{connection:'close',...(auth?{authorization:'synthetic-auth-not-retained'}:{})},body:'{}'});await response.arrayBuffer();};
 test('auth header absence is distinguished from upstream auth failure and costs zero generations',async()=>{
  let calls=0;const result=await runCodexModel(m,'verifier',request,{runClient:client(false),upstreamFetch:async()=>{calls++;throw Error('must not call');}});
  assert.equal(result.errorStage,'AUTH_HEADER');assert.equal(result.error,'AUTH_UNAVAILABLE');assert.equal(calls,0);assert.equal(result.providerRequests,0);
