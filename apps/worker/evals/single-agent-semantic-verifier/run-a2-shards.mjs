@@ -6,6 +6,21 @@ import {loadInputs,registerA2Attempts,evaluateA2Attempt,summarizeA2,operational,
 import {inspectCodex,runCodexModel} from './codex-inference.mjs';
 
 // Fixed Round64 evaluation orchestration only; no semantic interpretation.
+export function publishA2Evidence(value,temporary,output,checkSource,{write=writeFileSync,rename=renameSync,
+ pause=ms=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,ms)}={}) {
+ checkSource();
+ const failed=(stage,error)=>Object.assign(new Error('A2_EVIDENCE_PERSIST_FAILED:'+stage+':'+
+  (['EPERM','EACCES','EBUSY','ENOSPC','ENOENT','EIO','EROFS','EMFILE','ENFILE'].includes(error.code)?error.code:'OTHER')),{name:'A2EvidencePersistError'});
+ try{write(temporary,JSON.stringify(value,null,2)+'\n');}catch(error){throw failed('WRITE',error);}
+ // Retry publication of these exact bytes only; never retry a generation.
+ for(let n=0;;n++){
+  try{rename(temporary,output);return;}catch(error){
+   if(n>=3||!['EPERM','EACCES','EBUSY'].includes(error.code))throw failed('PUBLISH',error);
+   pause(50);
+  }
+ }
+}
+
 export function prepareShard(manifest,a2,plan,sourceSha,index) {
  const attempts=registerA2Attempts(manifest,a2),ids=attempts.map(a=>a.attemptId);
  if(manifest.round!==64||plan.round!==64||plan.phase!=='A2'||plan.concurrency!==3||plan.maximumGenerationRequestsPerAttempt!==1||plan.retry!==0||
@@ -28,7 +43,13 @@ export async function runShard(manifest,a2,evidence,generate,{save,checkSource,p
   const attempt=evidence.attempts.find(a=>a.attemptId===id);
   if(attempt.terminal||attempt.invocationStartedAt)throw new Error('A2_SHARD_ALREADY_ATTEMPTED');
   attempt.originRunSourceSha=evidence.a2RunSourceSha;attempt.invocationStartedAt=new Date().toISOString();update();
-  Object.assign(attempt,await evaluateA2Attempt(manifest,a2.cases.find(c=>c.evaluator.caseId===attempt.caseId),generate));
+  const onCheckpoint=checkpoint=>{
+   attempt.transportCheckpoint=checkpoint;
+   if(checkpoint.phase==='RESULT'&&providerCapacityExhausted(manifest,checkpoint.provider))evidence.shard.capacityBlock={attemptId:id,role:'verifier',providerErrorCode:checkpoint.provider.providerErrorCode,httpStatus:checkpoint.provider.httpStatus??null};
+   update();
+  };
+  Object.assign(attempt,await evaluateA2Attempt(manifest,a2.cases.find(c=>c.evaluator.caseId===attempt.caseId),request=>generate(request,{onCheckpoint})));
+  delete attempt.transportCheckpoint;
   if(providerCapacityExhausted(manifest,attempt.provider))evidence.shard.capacityBlock={attemptId:id,role:'verifier',providerErrorCode:attempt.provider.providerErrorCode,httpStatus:attempt.provider.httpStatus??null};
   update();log(JSON.stringify({shard:evidence.shard.index,attemptId:id,precheck:attempt.precheck,provider:attempt.provider?.status??null,
    outcome:attempt.terminal.disposition,reason:attempt.terminal.reason,requests:attempt.provider?.providerRequests??0,qualification:evidence.summary.status}));
@@ -77,14 +98,14 @@ async function main(){
  e.client=client;
  console.log(JSON.stringify({status:'A2_SHARD_PREFLIGHT_PASS',a2RunSourceSha:sourceSha,shard:index,registered:plan.registeredDenominator,assigned:e.shard.attemptIds.length,providerGenerationRequests:0}));
  if(process.argv.includes('--preflight'))return;
- const save=value=>{checkSource();writeFileSync(temporary,JSON.stringify(value,null,2)+'\n');renameSync(temporary,output);};
+ const save=value=>publishA2Evidence(value,temporary,output,checkSource);
  const peerCapacity=()=>{for(const name of names){if(name===names[index]||!existsSync(inputUrl(name)))continue;const peer=JSON.parse(readFileSync(inputUrl(name),'utf8'));if(peer.a2RunSourceSha!==sourceSha||peer.shard?.planHash!==manifest.a2ShardPlan.sha256)throw new Error('PEER_RUN_IDENTITY_CHANGED');if(peer.shard.capacityBlock)return peer.shard.capacityBlock;}return null;};
- await runShard(manifest,a2,e,request=>runCodexModel(manifest,'verifier',request),{save,checkSource,peerCapacity});
+ await runShard(manifest,a2,e,(request,options)=>runCodexModel(manifest,'verifier',request,options),{save,checkSource,peerCapacity});
  validateA2Evidence(manifest,a2,e);
  const own=e.attempts.filter(a=>e.shard.attemptIds.includes(a.attemptId));
  console.log(JSON.stringify({shard:index,assigned:own.length,executed:own.filter(a=>a.terminal).length,unsafeSendEligibleFalsePassCount:own.filter(a=>a.expected==='UNSAFE'&&a.terminal?.disposition==='SEND_ELIGIBLE').length,safeFailures:own.filter(a=>a.expected==='SAFE'&&a.terminal&&a.terminal.disposition!=='SEND_ELIGIBLE').length,operational:operational(own)}));
  if(own.some(a=>!a.terminal||a.expected==='UNSAFE'&&a.terminal.disposition==='SEND_ELIGIBLE')||e.shard.capacityBlock||e.peerCapacityBlock)process.exitCode=1;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(error=>{
- console.error(['A2_SHARD_SCOPE_CHANGED','A2_SHARD_ALREADY_ATTEMPTED','A2_SHARD_EVIDENCE_ALREADY_EXISTS','RUN_SOURCE_CHANGED','BOUNDARY_EXECUTABLE_CHANGED','CLIENT_IDENTITY_CHANGED','PEER_RUN_IDENTITY_CHANGED'].includes(error.message)?error.message:'A2_SHARD_FAILED_CLOSED; retain dispatched evidence');process.exitCode=1;
+ console.error(error.name==='A2EvidencePersistError'||['A2_SHARD_SCOPE_CHANGED','A2_SHARD_ALREADY_ATTEMPTED','A2_SHARD_EVIDENCE_ALREADY_EXISTS','RUN_SOURCE_CHANGED','BOUNDARY_EXECUTABLE_CHANGED','CLIENT_IDENTITY_CHANGED','PEER_RUN_IDENTITY_CHANGED'].includes(error.message)?error.message:'A2_SHARD_FAILED_CLOSED; retain dispatched evidence');process.exitCode=1;
 });

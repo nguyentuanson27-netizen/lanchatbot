@@ -86,10 +86,18 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
     config.reasoningEffort!==manifest.models[role].effort || request.tools.length!==0 || request.tool_choice!=='none')throw new Error('FROZEN_REQUEST');
   const started=performance.now();
   const controller=new AbortController();
-  let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client;
+  let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client,checkpointFailure;
   let upstreamRequestId=null,retryAfterSeconds=null,providerErrorCode=null;
   let complete;const completion=new Promise(resolve=>{complete=resolve;});
-  const finish=value=>{if(!settled){settled=true;record={providerTerminalEvent:null,providerIncompleteReason:null,...value,upstreamRequestId,retryAfterSeconds,providerErrorCode};complete();}};
+  const snapshot=value=>({...value,providerRequests,clientRequests,rejectedClientRequests,requestBody:JSON.parse(requestBody),
+    latencyMs:Math.round(performance.now()-started),cost:value.cost??null,usage:value.usage??null});
+  const checkpoint=(phase,value)=>{
+    if(!testDependencies.onCheckpoint||checkpointFailure)return;
+    try{testDependencies.onCheckpoint({phase,capturedAt:new Date().toISOString(),provider:snapshot(value)});}
+    catch(error){checkpointFailure=error;controller.abort();client?.stop();}
+  };
+  const finish=value=>{if(!settled){settled=true;record={providerTerminalEvent:null,providerIncompleteReason:null,...value,upstreamRequestId,retryAfterSeconds,providerErrorCode};
+    checkpoint('RESULT',record);complete();}};
   const route='/'+randomUUID();
   const server=createServer(async(req,res)=>{
     if(req.method!=='POST'||req.url!==route+'/responses') {res.writeHead(404);res.end();return;}
@@ -105,7 +113,11 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       const headers={'content-type':'application/json',authorization,accept:'text/event-stream',originator:'codex_cli_rs',
         'user-agent':'codex_cli_rs/0.159.2'};
       if(typeof req.headers['chatgpt-account-id']==='string')headers['chatgpt-account-id']=req.headers['chatgpt-account-id'];
-      const response=await(testDependencies.upstreamFetch??fetch)(config.endpoint,{method:'POST',headers,body:requestBody,signal:controller.signal});
+      const upstream=Promise.resolve((testDependencies.upstreamFetch??fetch)(config.endpoint,{method:'POST',headers,body:requestBody,signal:controller.signal}));
+      upstream.catch(()=>{}); // A persistence failure may abort before awaiting this request.
+      checkpoint('DISPATCHED',{status:'IN_FLIGHT'});
+      if(checkpointFailure)throw checkpointFailure;
+      const response=await upstream;
       httpStatus=response.status;
       // Keep only bounded operational identifiers, never arbitrary headers/body.
       const requestId=response.headers.get('x-request-id'),retryAfter=response.headers.get('retry-after');
@@ -142,6 +154,6 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
     await completion;
   }catch {finish({status:'PROVIDER_ERROR',error:'CLIENT_FAILURE',errorStage:'CLIENT',httpStatus:null});}
   finally {clearTimeout(timer);controller.abort();client?.stop();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
-  return {...record,providerRequests,clientRequests,rejectedClientRequests,requestBody:JSON.parse(requestBody),
-    latencyMs:Math.round(performance.now()-started),cost:record.cost??null,usage:record.usage??null};
+  if(checkpointFailure)throw checkpointFailure; // Do not mask failed evidence persistence as a provider verdict/error.
+  return snapshot(record);
 }

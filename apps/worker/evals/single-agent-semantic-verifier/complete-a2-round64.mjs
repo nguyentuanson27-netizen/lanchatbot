@@ -1,7 +1,7 @@
-import {readFileSync,writeFileSync,renameSync,existsSync} from 'node:fs';import {execFileSync} from 'node:child_process';import {pathToFileURL} from 'node:url';
+import {readFileSync,existsSync} from 'node:fs';import {execFileSync} from 'node:child_process';import {pathToFileURL} from 'node:url';
 import {hash,inputUrl,evidencePath,validateProtocol,preflight} from './protocol.mjs';
 import {loadInputs,registerA2Attempts,validateA2Evidence,assertSealedSource} from './run-a2.mjs';
-import {runShard} from './run-a2-shards.mjs';import {inspectCodex,runCodexModel} from './codex-inference.mjs';
+import {runShard,publishA2Evidence} from './run-a2-shards.mjs';import {inspectCodex,runCodexModel} from './codex-inference.mjs';
 export function prepareR64Completion(m,a2,p,priorRaw,sha,index){
  const prior=JSON.parse(priorRaw),missing=prior.attempts.filter(a=>!a.terminal&&!a.invocationStartedAt).map(a=>a.attemptId),unknown=prior.attempts.filter(a=>a.invocationStartedAt&&!a.terminal).map(a=>a.attemptId);
  if(m.round!==64||p.round!==64||p.retry!==0||p.noRetryStartedSlots!==true||p.diagnosticOnly!==true||p.maximumGenerationRequestsPerAttempt!==1||p.concurrency!==3||
@@ -23,9 +23,9 @@ async function main(){
  check();preflight(m,'a2',{a2RunSourceSha:sha},head,[]);const e=prepareR64Completion(m,a2,p,raw,sha,index);const output=inputUrl(names[index]),temp=inputUrl(names[index]+'.tmp');if(existsSync(output)||existsSync(temp))throw new Error('R64_COMPLETION_ALREADY_STARTED');
  const client=inspectCodex();if(JSON.stringify(client)!==JSON.stringify(JSON.parse(raw).client))throw new Error('CLIENT_IDENTITY_CHANGED');e.client=client;
  console.log(JSON.stringify({status:'R64_COMPLETION_PREFLIGHT_PASS',a2CompletionRunSourceSha:sha,preserved:p.preservedTerminalCount,unknownStarted:p.unknownStartedAttemptIds.length,assigned:e.shard.attemptIds.length,providerGenerations:0}));if(process.argv.includes('--preflight'))return;
- const save=v=>{check();writeFileSync(temp,JSON.stringify(v,null,2)+'\n');for(let n=0;;n++){try{renameSync(temp,output);break;}catch(error){if(n>=3||!['EPERM','EACCES','EBUSY'].includes(error.code))throw error;Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,50);}}};
+ const save=v=>publishA2Evidence(v,temp,output,check);
  const peer=()=>{for(const name of names){if(name===names[index]||!existsSync(inputUrl(name)))continue;const other=JSON.parse(readFileSync(inputUrl(name),'utf8'));if(other.a2RunSourceSha!==sha||other.shard.planHash!==e.shard.planHash)throw new Error('PEER_IDENTITY_CHANGED');if(other.shard.capacityBlock)return other.shard.capacityBlock;}return null;};
- await runShard(m,a2,e,r=>runCodexModel(m,'verifier',r),{save,checkSource:check,peerCapacity:peer});validateA2Evidence(m,a2,e);
+ await runShard(m,a2,e,(r,options)=>runCodexModel(m,'verifier',r,options),{save,checkSource:check,peerCapacity:peer});validateA2Evidence(m,a2,e);
  console.log(JSON.stringify({shard:index,assigned:e.shard.attemptIds.length,completed:e.attempts.filter(a=>e.shard.attemptIds.includes(a.attemptId)&&a.terminal).length,summary:e.summary}));if(e.shard.capacityBlock||e.peerCapacityBlock)process.exitCode=1;
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(error=>{console.error('R64_COMPLETION_FAILED_CLOSED:'+(['R64_COMPLETION_SCOPE_CHANGED','R64_PRIOR_OR_BOUNDARY_CHANGED','R64_COMPLETION_ALREADY_STARTED','RUN_SOURCE_CHANGED','CLIENT_IDENTITY_CHANGED'].includes(error.message)?error.message:'RETAIN_RAW_AND_TEMP_NO_RETRY'));process.exitCode=1;});
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main().catch(error=>{console.error('R64_COMPLETION_FAILED_CLOSED:'+(error.name==='A2EvidencePersistError'||['R64_COMPLETION_SCOPE_CHANGED','R64_PRIOR_OR_BOUNDARY_CHANGED','R64_COMPLETION_ALREADY_STARTED','RUN_SOURCE_CHANGED','CLIENT_IDENTITY_CHANGED'].includes(error.message)?error.message:'RETAIN_RAW_AND_TEMP_NO_RETRY'));process.exitCode=1;});
