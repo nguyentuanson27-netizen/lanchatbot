@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {generateKeyPairSync} from 'node:crypto';
+import {request as httpRequest} from 'node:http';
 import {hash,projectRuntime,buildRequest,validateProtocol} from './protocol.mjs';
 import {registerA2Attempts,evaluateA2Attempt} from './run-a2.mjs';
 import {runStagedAttempts} from './run-staged-round52.mjs';
@@ -42,14 +43,16 @@ test('twelve actual local verifier wire captures hide evaluator-only correction 
   for(const key of Object.keys(fixture.evaluator))fixture.evaluator[key]=marker;
   fixture.labelReview=marker;fixture.prospectiveReview=marker;fixture.regression=marker;
   const result=await evaluateA2Attempt(m,fixture,request=>runCodexModel(m,'verifier',request,{
-   runClient:async base=>{await fetch(base+'/responses',{method:'POST',headers:{authorization:'LOCAL_SYNTHETIC_AUTH'},body:'{}'});},
+   // Match the bounded native client lifetime: one unpooled request, fully drain
+   // its response before relay cleanup. Do not share a fetch pool across slots.
+   runClient:base=>new Promise((resolve,reject)=>{const req=httpRequest(base+'/responses',{method:'POST',agent:false,headers:{authorization:'LOCAL_SYNTHETIC_AUTH',connection:'close'}},res=>{res.resume();res.on('end',resolve);res.on('error',reject);});req.on('error',reject);req.end('{}');}),
    upstreamFetch:async(url,options)=>{
     calls++;assert.ok(!options.body.includes(marker));assert.deepEqual(JSON.parse(options.body),request);
     assert.deepEqual(request.tools,[]);assert.equal(request.tool_choice,'none');
     return new Response('data: '+JSON.stringify({type:'response.completed',response:{status:'completed',model:m.models.verifier.model,output:[{type:'message',content:[{type:'output_text',text:'{"verdict":"PASS","violations":[]}'}]}]}})+'\n\n',{status:200});
    }
   }));
-  assert.equal(result.precheck,'SURVIVED');assert.equal(result.provider.status,'OK');assert.equal(result.provider.providerRequests,1);assert.equal(result.terminal.text,fixture.runtime.finalDraft);
+  assert.equal(result.precheck,'SURVIVED');assert.equal(result.provider.status,'OK',JSON.stringify({error:result.provider.error,errorStage:result.provider.errorStage,providerRequests:result.provider.providerRequests,clientRequests:result.provider.clientRequests}));assert.equal(result.provider.providerRequests,1);assert.equal(result.terminal.text,fixture.runtime.finalDraft);
  }
  assert.equal(calls,12); // Local envelope/firewall test only, zero real provider calls or safety qualification.
 });

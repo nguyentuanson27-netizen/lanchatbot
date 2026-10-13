@@ -13,7 +13,7 @@ const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 
 export function regressionSummary(manifest,phase,corpus,attempts,scores=null) {
   const ids=manifest.regression[phase+'CaseIds'];
-  const expected=ids.flatMap(id=>[1,2,3].map(n=>id+':'+n));
+  const expected=ids.flatMap(id=>Array.from({length:repetitionCount(manifest,phase,id)},(_,i)=>id+':'+(i+1)));
   const prefix=attempts.filter(a=>ids.includes(a.caseId));
   const executed=prefix.filter(a=>a.terminal).length;
   if(JSON.stringify(prefix.map(a=>a.attemptId))!==JSON.stringify(expected)||executed!==expected.length)return {status:'BLOCKED',denominator:expected.length,executed,reason:'INCOMPLETE_REGRESSION'};
@@ -38,7 +38,7 @@ export function authorizeA3Continuation(manifest,corpus,evidence,packet,evidence
 }
 
 export async function runStagedAttempts(manifest,phase,corpus,evidence,execute,{save,checkSource,mode,log=console.log}) {
-  const prefixCount=manifest.regression[phase+'CaseIds'].length*3;
+  const prefixCount=manifest.regression[phase+'CaseIds'].reduce((n,id)=>n+repetitionCount(manifest,phase,id),0);
   if(mode==='REMAINING')requireThat(evidence.regression?.status==='PASS','REGRESSION_NOT_PASS');
   for(let i=0;i<evidence.attempts.length;i++) {
     if(mode==='REGRESSION'&&i===prefixCount)break;
@@ -50,7 +50,7 @@ export async function runStagedAttempts(manifest,phase,corpus,evidence,execute,{
     if(attempt.terminal)continue;
     requireThat(!attempt.dispatchStartedAt,'DISPATCH_OUTCOME_UNKNOWN');
     checkSource();attempt.dispatchStartedAt=new Date().toISOString();save();
-    const options=manifest.round===65?{onCheckpoint:checkpoint=>{attempt.transportCheckpoint=checkpoint;save();}}:undefined;
+    const options=[65,66].includes(manifest.round)?{onCheckpoint:checkpoint=>{attempt.transportCheckpoint=checkpoint;save();}}:undefined;
     const result=await execute(attempt,options);Object.assign(attempt,result);delete attempt.transportCheckpoint;save();
     if(phase==='a2'&&attempt.expected==='UNSAFE'&&attempt.terminal.disposition==='SEND_ELIGIBLE') {
       evidence.regression={status:'FAIL',reason:'UNSAFE_SEND_ELIGIBLE_PASS',attemptId:attempt.attemptId};save();return;
@@ -74,11 +74,11 @@ function writeReview(manifest,corpus,evidence) {
 }
 
 async function main() {
-  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53,54,55,56,57,58,59,60,61,62,63,65].includes(manifest.round),'FIXED_STAGED_ROUND_REQUIRED');
+  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53,54,55,56,57,58,59,60,61,62,63,65,66].includes(manifest.round),'FIXED_STAGED_ROUND_REQUIRED');
   const mode=process.argv.includes('--a2')?'A2':process.argv.includes('--a3-regression')?'REGRESSION':process.argv.includes('--a3-remaining')?'REMAINING':null;
   requireThat(mode,'STAGED_MODE_REQUIRED');
   const phase=mode==='A2'?'a2':'a3',corpus=phase==='a2'?a2:a3,head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
-  const output=phase+'-evidence.json',allowed=['a2-evidence.json','a3-evidence.json','a3-human-review.json','a3-human-scores.json','A3_HUMAN_REVIEW.md','a3-regression-scores.json','A3_REGRESSION_REVIEW.md',...(manifest.round===65?['a2-evidence.json.tmp','a3-evidence.json.tmp']:[])].map(evidencePath);
+  const output=phase+'-evidence.json',allowed=['a2-evidence.json','a3-evidence.json','a3-human-review.json','a3-human-scores.json','A3_HUMAN_REVIEW.md','a3-regression-scores.json','A3_REGRESSION_REVIEW.md',...([65,66].includes(manifest.round)?['a2-evidence.json.tmp','a3-evidence.json.tmp']:[])].map(evidencePath);
   const a2Evidence=phase==='a3'?JSON.parse(read('a2-evidence.json')):null;
   if(a2Evidence)requireThat(validateA2Evidence(manifest,a2,a2Evidence).status==='PASS'&&a2Evidence.regression.status==='PASS','A2_NOT_PASS');
   let evidence;
@@ -94,7 +94,7 @@ async function main() {
     const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
     preflight(manifest,phase,{[phase+'RunSourceSha']:process.env[phase.toUpperCase()+'_RUN_SOURCE_SHA'],a2Status:a2Evidence?.summary.status},head,status);
     const client=inspectCodex();
-    if(manifest.round===65)requireThat(client.version===manifest.inspectedClient.version&&client.binarySha256===manifest.inspectedClient.binarySha256,'CLIENT_IDENTITY_CHANGED');
+    if([65,66].includes(manifest.round))requireThat(client.version===manifest.inspectedClient.version&&client.binarySha256===manifest.inspectedClient.binarySha256,'CLIENT_IDENTITY_CHANGED');
     evidence={schemaVersion:1,phase:phase.toUpperCase(),[phase+'RunSourceSha']:head,...(a2Evidence?{a2RunSourceSha:a2Evidence.a2RunSourceSha}:{}),implementationBaseSha:manifest.implementationBaseSha,specSha:manifest.specSha,
       manifestHash:hash(read('manifest.json')),corpusHash:manifest.corpusHashes[phase],models:manifest.models,client,startedAt:new Date().toISOString(),
       ...(phase==='a2'?{promptHash:manifest.promptHashes.verifier,schemaHash:manifest.schemaHash}:{promptHashes:manifest.promptHashes,schemaHash:manifest.schemaHash,conversationClient:inspectGemini(manifest)}),
@@ -110,7 +110,7 @@ async function main() {
   const save=()=>{
     if(phase==='a2'){evidence.summary=summarizeA2(manifest,evidence.attempts);evidence.operational=operational(evidence.attempts);}
     else{evidence.quality=scoreWholeReplies(manifest,a3,evidence.attempts,null);evidence.operational=a3Operational(evidence.attempts);}
-    if(manifest.round===65)publishA2Evidence(evidence,inputUrl(output+'.tmp'),inputUrl(output),checkSource);
+    if([65,66].includes(manifest.round))publishA2Evidence(evidence,inputUrl(output+'.tmp'),inputUrl(output),checkSource);
     else writeFileSync(inputUrl(output),JSON.stringify(evidence,null,2)+'\n');
   };
   const gemini=phase==='a3'?createGeminiInference(manifest):null;
