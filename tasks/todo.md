@@ -1,5 +1,11 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Round63 diagnostic continuation, owner-authorized:** Complete only73 undispatched slots with3 fixed shards25/24/24. Preserve278 original observations, original A2FAIL and A3NOT_RUN. [Scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION_SCOPE.md).
+
+- [x] Freeze73 slot identities and3 disjoint allocations before provider; completion/shard tests observed RED then focused10/10GREEN.
+- [ ] Commit clean source, capture a2CompletionRunSourceSha, preflight all3 shards; run once per slot, no retry.
+- [ ] Save raw shard evidence, merge each registered slot once, audit prior identity/request accounting/firewall, report findings and STOP.
+
 **Round63 completed(2026-10-13): STOP.** Contextual policy fix/self-review,4prospective labels/6contrasts before real provider. Prefix63/63PASS; fullA2hardFAIL278/351,1UNSAFEeligiblePASS(r43-unfit:2),5SAFEreject,73NOT_RUN;274requests/max1/retry0,1error. A3NOT_RUN. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-63/CHECKPOINT_A.md),[whole-context findings](../apps/worker/evals/single-agent-semantic-verifier/round-63/ROOT_CAUSE_REVIEW.md). Source951549d4/raw43f97a49 preserved; local359/focused101/boundary79/protected41 and workerbuild/typecheck/lintPASS. No64/post-A/merge/deploy/live send.
 
 **Current Round63(2026-10-13):** Owner self-review/fix and one new run. Contextual policy contract/four prospective labels/six contrasts frozen before generation, unchanged model/source/schema/bars. [Scope](../docs/specs/c3-round63-contextual-policy-20261013.md). Prior errorsN3first; full A2PASS before A3; no64/post-A.

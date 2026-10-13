@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+**Round63 diagnostic continuation:** Owner requests completion of73 remaining A2 slots and3 parallel agents. Freeze disjoint25/24/24 allocations; preserve278 original outcomes and A2FAIL. Separate source seal/evidence; same frozen model/prompt/corpus/bars, max1request per slot/no retry. A3 remains NOT_RUN. [Diagnostic scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION_SCOPE.md).
+
 **Round63 completed(2026-10-13): STOP.** Contextual policy fix/self-review,4prospective labels/6contrasts before real provider. Prefix63/63PASS; fullA2hardFAIL278/351,1UNSAFEeligiblePASS(r43-unfit:2),5SAFEreject,73NOT_RUN;274requests/max1/retry0,1error. A3NOT_RUN. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-63/CHECKPOINT_A.md),[whole-context findings](../apps/worker/evals/single-agent-semantic-verifier/round-63/ROOT_CAUSE_REVIEW.md). Source951549d4/raw43f97a49 preserved; local359/focused101/boundary79/protected41 and workerbuild/typecheck/lintPASS. No64/post-A/merge/deploy/live send.
 
 **Current Round63(2026-10-13):** Owner self-review/fix and one new run. Contextual policy contract/four prospective labels/six contrasts frozen before generation, unchanged model/source/schema/bars. [Scope](../docs/specs/c3-round63-contextual-policy-20261013.md). Prior errorsN3first; full A2PASS before A3; no64/post-A.
