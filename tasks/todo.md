@@ -1,5 +1,11 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Round63 resume43, owner-authorized (2026-10-13):** Capacity readback available; freeze43undispatched slots15/14/14, preserve308outcomes. [Scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_RESUME_SCOPE.md).
+
+- [x] Native read-only availability check without model generation; exact43undispatched identities frozen; observed preflightRED then focused13/13GREEN.
+- [ ] Full eval regression, commit clean source, runtime a2ResumeRunSourceSha/preflight, execute only43new slots.
+- [ ] Raw savepoint, merge once, validate all prior outcomes/request firewall/binding/finalgate, findings/PR STOP; noA3/post-A.
+
 **Round63 supplementary A2 (2026-10-13): STOP / diagnostic BLOCKED.** Owner-requested3shards ran30/73extra, thenquota429stopped all3;43NOT_RUN. Total308/351,1UNSAFEeligiblePASS retained,8SAFEfailures(5semantic+3provider),304requests/max1/retry0/errors5/timeouts0.26newOKverdicts matched labels; no extrafalsePASS. A3NOT_RUN. [Report](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION.md). Source5c254f6fbbfa4c38132e509e0ba10157dfc60005,rawfc6af22db3d85f3522a2dd037e4ceeadf97d5647.
 
 **Round63 diagnostic continuation, owner-authorized:** Complete only73 undispatched slots with3 fixed shards25/24/24. Preserve278 original observations, original A2FAIL and A3NOT_RUN. [Scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION_SCOPE.md).

@@ -25,7 +25,7 @@ export function prepareCompletion(plan,priorRaw,manifest,a2,sourceSha) {
  const evidence=structuredClone(prior);
  evidence.a2RunSourceSha=sourceSha;
  evidence.completion={...structuredClone(plan),planHash:hash(JSON.stringify(plan,null,2)+'\n'),runSourceSha:sourceSha,startedAt:new Date().toISOString(),
-  priorInterruptionAccounting:diagnostic?'Original staged runner persisted dispatch starts and closed at unsafePASS. Only undispatched slots are completed; qualification remains FAIL.':'Original runner did not persist dispatch starts. The first missing slot may have had an unrecorded invocation; original evidence is retained and its total transport count is not certified complete.'};
+  priorInterruptionAccounting:diagnostic?'Prior closed source retained dispatch starts and failed qualification. Only undispatched slots are completed; qualification remains FAIL.':'Original runner did not persist dispatch starts. The first missing slot may have had an unrecorded invocation; original evidence is retained and its total transport count is not certified complete.'};
  delete evidence.finishedAt;
  return evidence;
 }
@@ -79,10 +79,12 @@ export function mergeCompletionShards(plan,priorRaw,manifest,a2,shards,sourceSha
 async function main(){
  if(!['47','63'].includes(process.env.C3_CHECKPOINT_A_ROUND)||process.env.C3_CHECKPOINT_A_ROUND==='63'&&!process.argv.includes('--diagnostic-remaining'))throw new Error('FIXED_COMPLETION_ROUND_REQUIRED');
  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);
+ const resume=process.argv.includes('--resume-remaining');
+ if(resume&&manifest.round!==63)throw new Error('FIXED_COMPLETION_ROUND_REQUIRED');
  const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
  const shardArg=process.argv.find(a=>a.startsWith('--shard=')),shard=shardArg?Number(shardArg.slice(8)):null;
  if(manifest.round===63&&(!Number.isInteger(shard)||shard<0||shard>2))throw new Error('COMPLETION_SHARD_CHANGED');
- const outputs=manifest.round===63?[0,1,2].map(i=>'a2-completed-evidence.shard-'+i+'.json'):['a2-completed-evidence.json'];
+ const outputs=manifest.round===63?[0,1,2].map(i=>(resume?'a2-resumed-evidence':'a2-completed-evidence')+'.shard-'+i+'.json'):['a2-completed-evidence.json'];
  // A peer may have started writing its evidence before this shard starts. Reuse
  // the existing source guard, allowing only the three frozen evidence paths.
  if(manifest.round===63){
@@ -93,7 +95,8 @@ async function main(){
   preflight(manifest,'a2',{a2RunSourceSha:process.env.A2_RUN_SOURCE_SHA},sha,status);
  }
  const output=inputUrl(manifest.round===63?outputs[shard]:outputs[0]);if(existsSync(output))throw new Error('COMPLETION_EVIDENCE_ALREADY_EXISTS');
- const priorRaw=readFileSync(inputUrl('a2-evidence.json'),'utf8'),plan=JSON.parse(readFileSync(inputUrl('a2-completion-plan.json'),'utf8'));
+ const priorFile=resume?'a2-completed-evidence.json':'a2-evidence.json';
+ const priorRaw=readFileSync(inputUrl(priorFile),'utf8'),plan=JSON.parse(readFileSync(inputUrl(resume?'a2-resume-plan.json':'a2-completion-plan.json'),'utf8'));
  validateA2Evidence(manifest,a2,JSON.parse(priorRaw));
  if(hash(readFileSync(inputUrl('manifest.json')))!==plan.manifestHash)throw new Error('MANIFEST_CHANGED');
  const client=inspectCodex();if(client.version!==manifest.inspectedClient.version||client.binarySha256!==manifest.inspectedClient.binarySha256)throw new Error('CLIENT_IDENTITY_CHANGED');
@@ -101,7 +104,7 @@ async function main(){
  const boundary=new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url);
  const save=value=>{
   assertSealedSource(sha,outputs.map(evidencePath));
-  if(hash(readFileSync(boundary))!==plan.boundaryExecutableHash||hash(readFileSync(inputUrl('a2-evidence.json'),'utf8'))!==plan.priorEvidenceHash)throw new Error('PRIOR_OR_BOUNDARY_CHANGED');
+  if(hash(readFileSync(boundary))!==plan.boundaryExecutableHash||hash(readFileSync(inputUrl(priorFile),'utf8'))!==plan.priorEvidenceHash)throw new Error('PRIOR_OR_BOUNDARY_CHANGED');
   writeFileSync(output,JSON.stringify(value,null,2)+'\n');
  };
  console.log(JSON.stringify({status:'COMPLETION_PREFLIGHT_PASS',a2CompletionRunSourceSha:sha,priorA2RunSourceSha:plan.priorA2RunSourceSha,

@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+**Round63 resume43, owner-authorized (2026-10-13):** Native read-only capacity check reports8%primary used/no reachedlimit. Freeze43undispatched slots as15/14/14; preserve all308prior outcomes/errors/unsafePASS. Reuse completion runner with fixed resume file selector, fresh source seal/evidence. Same provider/model/prompt/corpus/bar; max1request/slot/no retry. A2FAIL stays; A3NOT_RUN. [Scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_RESUME_SCOPE.md).
+
 **Round63 supplementary A2 (2026-10-13): STOP / diagnostic BLOCKED.** Owner-requested3shards ran30/73extra, thenquota429stopped all3;43NOT_RUN. Total308/351,1UNSAFEeligiblePASS retained,8SAFEfailures(5semantic+3provider),304requests/max1/retry0/errors5/timeouts0.26newOKverdicts matched labels; no extrafalsePASS. A3NOT_RUN. [Report](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION.md). Source5c254f6fbbfa4c38132e509e0ba10157dfc60005,rawfc6af22db3d85f3522a2dd037e4ceeadf97d5647.
 
 **Round63 diagnostic continuation:** Owner requests completion of73 remaining A2 slots and3 parallel agents. Freeze disjoint25/24/24 allocations; preserve278 original outcomes and A2FAIL. Separate source seal/evidence; same frozen model/prompt/corpus/bars, max1request per slot/no retry. A3 remains NOT_RUN. [Diagnostic scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION_SCOPE.md).

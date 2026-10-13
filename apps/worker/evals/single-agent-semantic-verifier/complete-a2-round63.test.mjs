@@ -41,3 +41,33 @@ test('shard selection/merge reject invalid allocation, duplicates and wrong sour
  const shards=[0,1,2].map(i=>selectCompletionShard(prepared(),i));assert.throws(()=>mergeCompletionShards(plan,priorRaw,m,a2,[shards[0],shards[0],shards[2]],sha));
  shards[1].a2RunSourceSha='c'.repeat(40);assert.throws(()=>mergeCompletionShards(plan,priorRaw,m,a2,shards,sha));
 });
+
+const resumeRaw=read('a2-completed-evidence.json'),resumePrior=JSON.parse(resumeRaw),resumePlan=JSON.parse(read('a2-resume-plan.json'));
+const resumePrepared=()=>prepareCompletion(resumePlan,resumeRaw,m,a2,sha);
+
+test('resume adopts all308outcomes including errors and unsafePASS; only43unstarted registrations form15/14/14shards',()=>{
+ const e=resumePrepared();assert.deepEqual(e.attempts,resumePrior.attempts);assert.equal(e.completion.missingAttemptIds.length,43);
+ assert.equal(e.summary.unsafeSendEligibleFalsePassCount,1);assert.equal(e.operational.errorCount,5);
+ const allocations=[0,1,2].map(i=>selectCompletionShard(resumePrepared(),i).completion.missingAttemptIds);
+ assert.deepEqual(allocations.map(a=>a.length),[15,14,14]);assert.equal(new Set(allocations.flat()).size,43);
+ assert.ok(allocations.flat().every(id=>!resumePrior.attempts.find(a=>a.attemptId===id).terminal));
+ const wrong={...resumePlan,priorEvidenceHash:plan.priorEvidenceHash};assert.throws(()=>prepareCompletion(wrong,resumeRaw,m,a2,sha),/COMPLETION_SCOPE_CHANGED/);
+});
+
+test('resume merges43new samples once with all308unchanged prior observations; errors stay counted and FAIL cannot become PASS',async()=>{
+ const shards=[];let calls=0;for(let i=0;i<3;i++){
+  const e=selectCompletionShard(resumePrepared(),i);await completeMissingAttempts(m,a2,e,async request=>{calls++;return provider(request);},()=>{});shards.push(e);
+ }
+ const combined=mergeCompletionShards(resumePlan,resumeRaw,m,a2,shards,sha);
+ assert.equal(calls,43);assert.equal(combined.summary.executedDenominator,351);assert.equal(combined.summary.unexecuted,0);
+ assert.equal(combined.summary.status,'FAIL');assert.equal(combined.operational.providerRequests,347);assert.equal(combined.operational.errorCount,5);assert.equal(combined.operational.maxRequestsPerAttempt,1);
+ for(let i=0;i<resumePrior.attempts.length;i++)if(resumePrior.attempts[i].terminal)assert.deepEqual(combined.attempts[i],resumePrior.attempts[i]);
+ assert.deepEqual(JSON.parse(resumeRaw),resumePrior);
+});
+
+test('resumed capacity failure consumes only its freshslot; remaining42stay undispatched and no old or fresh error is retried',async()=>{
+ const e=resumePrepared();let calls=0;await completeMissingAttempts(m,a2,e,async request=>{calls++;return {status:'PROVIDER_ERROR',providerErrorCode:'usage_limit_reached',providerRequests:1,clientRequests:1,rejectedClientRequests:0,requestBody:request};},()=>{});
+ assert.equal(calls,1);assert.equal(e.summary.unexecuted,42);assert.equal(e.operational.providerRequests,305);assert.equal(e.operational.errorCount,6);assert.equal(e.summary.status,'FAIL');
+ await assert.rejects(completeMissingAttempts(m,a2,e,async()=>{calls++;},()=>{}),/COMPLETION_ALREADY_ATTEMPTED/);assert.equal(calls,1);
+ for(let i=0;i<resumePrior.attempts.length;i++)if(resumePrior.attempts[i].terminal)assert.deepEqual(e.attempts[i],resumePrior.attempts[i]);
+});
