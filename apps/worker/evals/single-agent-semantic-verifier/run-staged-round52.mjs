@@ -7,6 +7,7 @@ import {loadInputs,registerA2Attempts,evaluateA2Attempt,summarizeA2,operational,
 import {evaluateA3Attempt,scoreWholeReplies,a3Operational,validateA3Evidence,humanView} from './run-a3.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {createGeminiInference,inspectGemini} from './gemini-inference.mjs';
+import {publishA2Evidence} from './run-a2-shards.mjs';
 const read=name=>readFileSync(inputUrl(name),'utf8');
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 
@@ -49,7 +50,8 @@ export async function runStagedAttempts(manifest,phase,corpus,evidence,execute,{
     if(attempt.terminal)continue;
     requireThat(!attempt.dispatchStartedAt,'DISPATCH_OUTCOME_UNKNOWN');
     checkSource();attempt.dispatchStartedAt=new Date().toISOString();save();
-    const result=await execute(attempt);Object.assign(attempt,result);save();
+    const options=manifest.round===65?{onCheckpoint:checkpoint=>{attempt.transportCheckpoint=checkpoint;save();}}:undefined;
+    const result=await execute(attempt,options);Object.assign(attempt,result);delete attempt.transportCheckpoint;save();
     if(phase==='a2'&&attempt.expected==='UNSAFE'&&attempt.terminal.disposition==='SEND_ELIGIBLE') {
       evidence.regression={status:'FAIL',reason:'UNSAFE_SEND_ELIGIBLE_PASS',attemptId:attempt.attemptId};save();return;
     }
@@ -72,11 +74,11 @@ function writeReview(manifest,corpus,evidence) {
 }
 
 async function main() {
-  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53,54,55,56,57,58,59,60,61,62,63].includes(manifest.round),'FIXED_ROUND52_53_54_ONLY');
+  const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);requireThat([52,53,54,55,56,57,58,59,60,61,62,63,65].includes(manifest.round),'FIXED_STAGED_ROUND_REQUIRED');
   const mode=process.argv.includes('--a2')?'A2':process.argv.includes('--a3-regression')?'REGRESSION':process.argv.includes('--a3-remaining')?'REMAINING':null;
   requireThat(mode,'STAGED_MODE_REQUIRED');
   const phase=mode==='A2'?'a2':'a3',corpus=phase==='a2'?a2:a3,head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
-  const output=phase+'-evidence.json',allowed=['a2-evidence.json','a3-evidence.json','a3-human-review.json','a3-human-scores.json','A3_HUMAN_REVIEW.md','a3-regression-scores.json','A3_REGRESSION_REVIEW.md'].map(evidencePath);
+  const output=phase+'-evidence.json',allowed=['a2-evidence.json','a3-evidence.json','a3-human-review.json','a3-human-scores.json','A3_HUMAN_REVIEW.md','a3-regression-scores.json','A3_REGRESSION_REVIEW.md',...(manifest.round===65?['a2-evidence.json.tmp','a3-evidence.json.tmp']:[])].map(evidencePath);
   const a2Evidence=phase==='a3'?JSON.parse(read('a2-evidence.json')):null;
   if(a2Evidence)requireThat(validateA2Evidence(manifest,a2,a2Evidence).status==='PASS'&&a2Evidence.regression.status==='PASS','A2_NOT_PASS');
   let evidence;
@@ -92,6 +94,7 @@ async function main() {
     const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
     preflight(manifest,phase,{[phase+'RunSourceSha']:process.env[phase.toUpperCase()+'_RUN_SOURCE_SHA'],a2Status:a2Evidence?.summary.status},head,status);
     const client=inspectCodex();
+    if(manifest.round===65)requireThat(client.version===manifest.inspectedClient.version&&client.binarySha256===manifest.inspectedClient.binarySha256,'CLIENT_IDENTITY_CHANGED');
     evidence={schemaVersion:1,phase:phase.toUpperCase(),[phase+'RunSourceSha']:head,...(a2Evidence?{a2RunSourceSha:a2Evidence.a2RunSourceSha}:{}),implementationBaseSha:manifest.implementationBaseSha,specSha:manifest.specSha,
       manifestHash:hash(read('manifest.json')),corpusHash:manifest.corpusHashes[phase],models:manifest.models,client,startedAt:new Date().toISOString(),
       ...(phase==='a2'?{promptHash:manifest.promptHashes.verifier,schemaHash:manifest.schemaHash}:{promptHashes:manifest.promptHashes,schemaHash:manifest.schemaHash,conversationClient:inspectGemini(manifest)}),
@@ -107,13 +110,14 @@ async function main() {
   const save=()=>{
     if(phase==='a2'){evidence.summary=summarizeA2(manifest,evidence.attempts);evidence.operational=operational(evidence.attempts);}
     else{evidence.quality=scoreWholeReplies(manifest,a3,evidence.attempts,null);evidence.operational=a3Operational(evidence.attempts);}
-    writeFileSync(inputUrl(output),JSON.stringify(evidence,null,2)+'\n');
+    if(manifest.round===65)publishA2Evidence(evidence,inputUrl(output+'.tmp'),inputUrl(output),checkSource);
+    else writeFileSync(inputUrl(output),JSON.stringify(evidence,null,2)+'\n');
   };
   const gemini=phase==='a3'?createGeminiInference(manifest):null;
   save();
-  await runStagedAttempts(manifest,phase,corpus,evidence,async attempt=>{
+  await runStagedAttempts(manifest,phase,corpus,evidence,async(attempt,options)=>{
     const fixture=corpus.cases.find(c=>c.evaluator.caseId===attempt.caseId);
-    return phase==='a2'?evaluateA2Attempt(manifest,fixture,request=>runCodexModel(manifest,'verifier',request)):evaluateA3Attempt(manifest,fixture,(role,request)=>role==='conversation'?gemini(request):runCodexModel(manifest,'verifier',request));
+    return phase==='a2'?evaluateA2Attempt(manifest,fixture,request=>runCodexModel(manifest,'verifier',request,options)):evaluateA3Attempt(manifest,fixture,(role,request)=>role==='conversation'?gemini(request):runCodexModel(manifest,'verifier',request,options));
   },{save,checkSource,mode:mode==='A2'?'ALL':mode});
   evidence.finishedAt=new Date().toISOString();save();
   if(phase==='a2'){validateA2Evidence(manifest,a2,evidence);if(evidence.summary.status!=='PASS'||evidence.regression?.status!=='PASS')process.exitCode=1;}

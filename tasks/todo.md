@@ -4,7 +4,7 @@
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect whole-context failures and approved semantics; freeze replacement verifier sections,12N3 controls and unchanged corpus/worlds/models/bars.
 - [x] Initial local RED observed2/5: Round65 protocol/profile admission and staged pre-cleanup callback missing; zero provider generations. Final prompt8403bytes versus8285(+118), no appended case exceptions.
-- [ ] Minimum protocol/native adapter/staged capture GREEN; focused/full eval and worker checks; self-review and clean source seal/preflight.
+- [x] Minimum protocol/native adapter/staged capture GREEN; self-review direct-A3 bypass RED→GREEN; final43focused/399full,79boundary+Vertex/21protected+assembler,workerbuild/typecheck/lint exit0. [Readiness](../apps/worker/evals/single-agent-semantic-verifier/round-65/READINESS.json),0provider generations. Clean source seal/preflight next.
 - [ ] Run36prefix once; only if all PASS run319remaining. Full fresh A2PASS before separately sealed A3. Retain complete denominators/request/errors; no generation retry.
 - [ ] Raw savepoint before findings/checkpoint; update tasks/draftPR390, verify exact delivery head/body, STOPowner. R64 remains BLOCKED; old diagnostic remains FAIL.
 

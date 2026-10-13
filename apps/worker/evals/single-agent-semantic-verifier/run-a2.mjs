@@ -129,7 +129,7 @@ export function validateA2Evidence(manifest,a2,evidence,{registeredAttemptIds}={
 
 async function main() {
   const {manifest,a2,a3}=loadInputs();validateProtocol(manifest,a2,a3);
-  if([52,53,54,55,56].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
+  if([52,53,54,55,56,65].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
   preflight(manifest,'a2',{a2RunSourceSha:process.env.A2_RUN_SOURCE_SHA},sha,status);
