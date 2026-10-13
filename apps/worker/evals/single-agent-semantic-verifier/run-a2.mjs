@@ -100,8 +100,9 @@ export function assertSealedSource(sha,allowedEvidence,{cwd,allowEvidenceCommits
   const changed=execFileSync('git',['status','--porcelain','--untracked-files=all'],options).split('\n').filter(Boolean);
   if(changed.some(line=>!allowedEvidence.some(path=>line.slice(3).replaceAll('\\','/').replaceAll('"','')===path)))throw new Error('RUN_SOURCE_CHANGED');
 }
-export function validateA2Evidence(manifest,a2,evidence) {
-  const expected=manifest.ownerAmendment?.registeredAttemptIds??orderedFixtures(manifest,a2,'a2').flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
+export function validateA2Evidence(manifest,a2,evidence,{registeredAttemptIds}={}) {
+  // An evaluation caller may supply its own frozen diagnostic registration.
+  const expected=registeredAttemptIds??manifest.ownerAmendment?.registeredAttemptIds??orderedFixtures(manifest,a2,'a2').flatMap(c=>Array.from({length:repetitionCount(manifest,'a2',c.evaluator.caseId)},(_,i)=>c.evaluator.caseId+':'+(i+1)));
   if(JSON.stringify(expected)!==JSON.stringify(evidence.attempts.map(v=>v.attemptId)))throw new Error('ATTEMPT_DENOMINATOR');
   if(!/^[a-f0-9]{40}$/.test(evidence.a2RunSourceSha)||evidence.manifestHash!==hash(read('manifest.json')))throw new Error('EVIDENCE_IDENTITY');
   if(evidence.capacityBlock) {

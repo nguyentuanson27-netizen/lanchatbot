@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**2026-10-13 — failure recheck authorized:** [Scope](../apps/worker/evals/single-agent-semantic-verifier/a2-failure-recheck-20261013/SCOPE.md).6cases/14fresh IDs, same R64 N1/N3/model/prompts/context; old results unchanged. RED0/4 and specific unsafe-stop RED6vs1 observed; readiness/source seal/preflight required before dispatch. Targeted only; no full A2/A3/post-A.
+
 **2026-10-13 — recurring runner failure:** [Root cause/fix](../apps/worker/evals/single-agent-semantic-verifier/runner-diagnostics-20261013/ROOT_CAUSE.md), [actual commands](../apps/worker/evals/single-agent-semantic-verifier/runner-diagnostics-20261013/VERIFICATION.json).
 
 - [x] Read R47/R63/R64 interrupted evidence; distinguish missing process exit, lost outcome, semantic rejection and provider availability.

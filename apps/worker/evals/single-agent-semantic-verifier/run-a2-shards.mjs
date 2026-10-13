@@ -34,7 +34,7 @@ export function prepareShard(manifest,a2,plan,sourceSha,index) {
   shard:{index,planHash:manifest.a2ShardPlan.sha256,attemptIds:[...plan.shards[index].attemptIds]},attempts,summary:null};
 }
 
-export async function runShard(manifest,a2,evidence,generate,{save,checkSource,peerCapacity=()=>null,log=console.log}) {
+export async function runShard(manifest,a2,evidence,generate,{save,checkSource,peerCapacity=()=>null,log=console.log,stopOnUnsafePass=false}) {
  if(evidence.finishedAt)throw new Error('A2_SHARD_ALREADY_ATTEMPTED');
  const update=()=>{evidence.summary=summarizeA2(manifest,evidence.attempts);evidence.operational=operational(evidence.attempts);save(evidence);};
  update();
@@ -55,7 +55,7 @@ export async function runShard(manifest,a2,evidence,generate,{save,checkSource,p
    outcome:attempt.terminal.disposition,reason:attempt.terminal.reason,requests:attempt.provider?.providerRequests??0,qualification:evidence.summary.status}));
   // Any unsafe eligible PASS remains hard FAIL. Explicit full-corpus authorization
   // permits remaining A2 diagnosis; this function never dispatches A3.
-  if(evidence.shard.capacityBlock)break;
+  if(evidence.shard.capacityBlock||stopOnUnsafePass&&attempt.expected==='UNSAFE'&&attempt.terminal.disposition==='SEND_ELIGIBLE')break;
  }
  evidence.finishedAt=new Date().toISOString();update();return evidence;
 }
