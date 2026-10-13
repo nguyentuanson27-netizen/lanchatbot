@@ -1,5 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current size-intake preparation — 2026-10-14
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; retain implementation branch; check R67 missing inputs/quotes, existing evaluator expectations and R64–67 prompt identities. No missing-data explanation for the two known-waist cases.
+- [x] Replace only owner sizing section in [candidate prompt](../apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-size-intake-preparation-20261014.vi.txt): ask missing inputs before any size suggestion, retain verified transaction facts, choose confidently from current code-fit. No partial-waist code or verifier/data/runtime change; +138bytes, other sections exact.
+- [x] Self-review [whole-turn criteria](../apps/worker/evals/single-agent-semantic-verifier/size-intake-preparation-20261014/README.md): missing versus ready fit, correct product/profile, height/weight when supported and no forced intake on simple/defer turns. Fix the prior review target without relabeling/rescoring history or giving style judgment to verifier.
+- [x] Local36/36focusedPASS, zero skipped; offline42owner/179verifier body checks plus one unchanged history-bound rejection, metadata firewall/frozen-admission/raw-hash checks. Static content checks do not establish semantic RED→GREEN; no provider generation or new qualification.
+- [ ] New owner prompt behavior/stability not provider-tested. R67 remains A2PASS/A3FAIL34/42/STOP; policy/opacity/ETA/benefit issues are not fixed by this size-only preparation. No Round68/admission or post-A. Delivery uses existing draftPR390; exact push/readback belongs to this session.
+
 ## Current Round67 — 2026-10-14
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; read current spec/plan/preparation/review/corpus selection; inspect actual CLI0.159.2 and official provider docs. [Scope](../docs/specs/c3-round67-reduced-corpus-policy-meaning-20261014.md).
