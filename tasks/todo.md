@@ -1,5 +1,12 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current policy fix and independent review preparation — 2026-10-13
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; retain isolated branch; read norms/64policy contexts/R63–66 variance and current source contracts.
+- [x] Candidate policy section and one evaluator-only future label adjudication; observed mechanical RED2/4→GREEN4/4, all runtime worlds/7PR387/owner/nonpolicy/frozen evidence preserved.
+- [x] Self-review → remove source-only eligibility backfill/absence-of-violation rationale; final60focused/409full PASS,0skip; worker/shared/adapters/boundary unchanged readback, earlier actual worker checks reused only. [Preparation and actual commands](../apps/worker/evals/single-agent-semantic-verifier/policy-meaning-preparation-20261013/README.md).
+- [ ] Commit exact candidate, independent **gpt-6-astra/high** review with [full packet](../apps/worker/evals/single-agent-semantic-verifier/policy-meaning-preparation-20261013/REVIEW_CONTEXT.md), fix actionable findings/readback, record final verdict and deliver draftPR390. No model eval run/admission, future labels not applied to old evidence; R66FAIL/A3NOT_RUN/STOP retained.
+
 ## Current Round66 — 2026-10-13
 
 - [x] Owner “KIỂM TRA ĐI”: [offline policy audit](../apps/worker/evals/single-agent-semantic-verifier/round-66/POLICY_ROOT_CAUSE_REVIEW.md), 64 whole-context cases/projections, 27 actual requests and R61–66 targeted history. Same-request FAIL/PASS/FAIL confirmed in R63/R64; near-boundary label pair flagged without relabel. No missing policy/evaluator leak/keyword-policy code observed. Zero provider generations; frozen inputs and R66 FAIL/STOP unchanged. No new round.
