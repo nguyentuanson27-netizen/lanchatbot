@@ -1,5 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current Round67 — 2026-10-14
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; read current spec/plan/preparation/review/corpus selection; inspect actual CLI0.159.2 and official provider docs. [Scope](../docs/specs/c3-round67-reduced-corpus-policy-meaning-20261014.md).
+- [x] Freeze reviewed verifier and138A2/42unchangedA3/authority/models/config/bars; latest two R66failed groups×3 first6, remaining136×1;142A2/conditional42A3. No provider generations at freeze; historical results unchanged.
+- [ ] Observe fixed-round/projection/native/direct-A2 admission RED, minimum GREEN/readiness/self-review and clean source seal/preflight.
+- [ ] Run A2 once per registered slot; preserve raw/native exit/audit; only complete fresh PASS permits separately sealed full42A3.
+- [ ] Whole actual-terminal review if A3 runs; CHECKPOINT_A/findings/commands/tasks/draftPR390 and STOPowner. No automatic68/post-A.
+
 ## Current A2 corpus reduction preparation — 2026-10-14
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect exact whole drafts/history/source and correctly handled versus failed/UNKNOWN outcomes in R63final/R64/R65/R66.

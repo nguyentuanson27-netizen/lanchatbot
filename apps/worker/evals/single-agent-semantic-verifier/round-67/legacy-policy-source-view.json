@@ -1,0 +1,43 @@
+{
+  "originalSourceText": "Đổi size hoặc mẫu: trong 7 ngày từ nhận hàng, chưa sử dụng, nguyên tem. Thử trong nhà: chưa giặt, sạch và không mùi, giữ tem. Mặc ra ngoài: không nhận đổi. Phí vận chuyển đổi: khách trả. Hoàn tiền: không áp dụng. Cách diễn đạt tóm tắt được shop xác nhận: đổi trong 7 ngày có cùng mốc tính từ ngày nhận hàng. Đây là giới thiệu chính sách có các giới hạn trên; không xác nhận mọi khách hoặc mọi hàng đều đủ điều kiện đổi. Quyền đổi cho tình huống cụ thể vẫn phụ thuộc thời hạn và tình trạng hàng; không hợp mẫu/size tự nó không đủ xác lập quyền đổi.",
+  "exchangeService": {
+    "actions": [
+      "đổi size",
+      "đổi mẫu"
+    ],
+    "window": {
+      "days": 7,
+      "startsFrom": "nhận hàng"
+    },
+    "conditions": [
+      "chưa sử dụng",
+      "nguyên tem"
+    ]
+  },
+  "handlingRules": [
+    {
+      "handling": "thử trong nhà",
+      "conditions": [
+        "chưa giặt",
+        "sạch",
+        "không mùi",
+        "giữ tem"
+      ]
+    },
+    {
+      "handling": "mặc ra ngoài",
+      "exchange": "không nhận đổi"
+    }
+  ],
+  "exchangeShippingPayer": "khách",
+  "refund": "không áp dụng",
+  "sourceApprovedShorthand": {
+    "wording": "đổi trong 7 ngày",
+    "meaning": "7 ngày từ nhận hàng"
+  },
+  "scopeLimits": [
+    "Giới thiệu chính sách có các giới hạn trên; không xác nhận mọi khách hoặc mọi hàng đều đủ điều kiện đổi.",
+    "Quyền đổi cho tình huống cụ thể vẫn phụ thuộc thời hạn và tình trạng hàng.",
+    "Không hợp mẫu/size tự nó không đủ xác lập quyền đổi."
+  ]
+}
