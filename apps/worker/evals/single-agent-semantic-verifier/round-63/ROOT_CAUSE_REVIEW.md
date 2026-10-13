@@ -1,5 +1,14 @@
 # R63 — review sau hard A2 FAIL
 
+## Latest — hoàn tất 43 lượt thiếu (2026-10-13)
+
+Diagnostic completion **COMPLETE: 43/43** (23 UNSAFE rejected, 20 SAFE send-eligible), 0 new unsafe false PASS / SAFE reject / provider error / timeout. **Toàn bộ 351/351** (186 UNSAFE / 165 SAFE), 0 NOT_RUN; original unsafe false PASS 1 retained. SAFE failures 8 = 5 semantic + 3 provider; usability failure 8/165 = 4.85%. Provider/client requests 347/347, max1/retry0/errors5/timeouts0. Verifier p50/p95 = 6696/12003ms; added verification = 6697/12009ms; input/output tokens 1741892/44845, usage342/347, cost unavailable.
+
+Resume source 2fac75e07e20dcd9b712ab6602569bc9ce975c91; raw savepoint e650f18acaadb5001d4472aaa1da79dd5ca87a7c trước review. Audit347 actual bodies/firewall/bindings/finalgate PASS; all308 prior outcomes unchanged. Focused13/full368/actualCLIpreflight1 PASS; earlier unchanged-worker checks reused, not rerun. Original hard-stop/quota-blocked status below is historical, not current missing-slot status.
+
+**A2 qualification FAIL; recommendation STOP; A3 NOT_RUN.** r43-unfit repetitions now FAIL/PASS/FAIL; no majority/relabel. [Final report](A2_RESUME.md), [all43 dialogues](A2_RESUME_DIALOGUES.md), [audit](A2_RESUME_AUDIT.json), [commands](A2_RESUME_COMMANDS.json). Prompt/model/world/labels/bars unchanged; no64/post-A.
+
+
 ## Owner-authorized supplementary A2 (2026-10-13)
 
 Original qualification and raw278outcomes below remain unchanged. Owner additionally authorized73missing slots and3parallel agents. Newsource `5c254f6fbbfa4c38132e509e0ba10157dfc60005`; rawshardsavepoint `fc6af22db3d85f3522a2dd037e4ceeadf97d5647`. Executed30/73additional (17UNSAFE/13SAFE);0additional unsafeeligiblePASS;4providererrors (3quota429,1HTTP503),3SAFEproviderfallbacks. All26providerOKjudgments matched frozen labels. Total308/351executed,43NOT_RUN; original1unsafeeligiblePASS remains, total8SAFEfailures =5semantic+3provider.304requests,max1/retry0/errors5/timeouts0. Combinedverifier p50/p95=6696/11759ms; addedverification=6697/11761ms (see audit for exact); input/outputtokens1522180/40475,5usageunavailable,costnull. A3NOT_RUN, recommendationSTOP; supplementary completionBLOCKED dueusage_limit_reached. [Supplementary report](A2_COMPLETION.md),[audit](A2_COMPLETION_AUDIT.json),[dialogues](A2_COMPLETION_DIALOGUES.md),[commands](A2_COMPLETION_COMMANDS.json).

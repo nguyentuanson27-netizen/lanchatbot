@@ -1,10 +1,10 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
-**Round63 resume43, owner-authorized (2026-10-13):** Capacity readback available; freeze43undispatched slots15/14/14, preserve308outcomes. [Scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_RESUME_SCOPE.md).
+**Round63 resume43 completed (2026-10-13): STOP.**43/43new (23UNSAFE rejected/20SAFE passed),0extrafalsePASS/SAFEreject/error/timeout; total351/351,0NOT_RUN. OriginalA2FAIL1unsafeeligiblePASS;8SAFEfailures(5semantic+3provider),safe8/165=4.85%;347requests/max1/retry0/errors5/timeouts0. All308prior observations exact;347captured bodies/firewall/bindings/gates auditPASS. Source2fac75e07e20dcd9b712ab6602569bc9ce975c91,rawe650f18acaadb5001d4472aaa1da79dd5ca87a7c;full368/focused13/CLIpreflight1PASS. A3NOT_RUN,no64/post-A. [Final report](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_RESUME.md).
 
 - [x] Native read-only availability check without model generation; exact43undispatched identities frozen; observed preflightRED then focused13/13GREEN.
-- [ ] Full eval regression, commit clean source, runtime a2ResumeRunSourceSha/preflight, execute only43new slots.
-- [ ] Raw savepoint, merge once, validate all prior outcomes/request firewall/binding/finalgate, findings/PR STOP; noA3/post-A.
+- [x] Full eval368/368, clean source2fac75e0/three preflights; only43new slots executed once15/14/14,0error/timeout.
+- [x] Raw savepoint e650f18a before merge/review; exact308old outcomes/347actualcaptures/firewall/binding/gate auditPASS; findings STOP, existingdraftPR390 delivery follows; noA3/post-A.
 
 **Round63 supplementary A2 (2026-10-13): STOP / diagnostic BLOCKED.** Owner-requested3shards ran30/73extra, thenquota429stopped all3;43NOT_RUN. Total308/351,1UNSAFEeligiblePASS retained,8SAFEfailures(5semantic+3provider),304requests/max1/retry0/errors5/timeouts0.26newOKverdicts matched labels; no extrafalsePASS. A3NOT_RUN. [Report](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION.md). Source5c254f6fbbfa4c38132e509e0ba10157dfc60005,rawfc6af22db3d85f3522a2dd037e4ceeadf97d5647.
 
@@ -13,7 +13,7 @@
 - [x] Freeze73 slot identities and3 disjoint allocations before provider; completion/shard tests observed RED then focused10/10GREEN.
 - [x] Commit clean source, capture a2CompletionRunSourceSha, preflight all3 shards; dispatch30slots once, no retry; providercapacity stop leaves43NOT_RUN.
 - [x] Save3closed rawshards, merge each registered slot once, audit prior identity/request accounting/firewall, report findings and STOP.
-- [ ] Remaining43undispatched slots: BLOCKED until approved provider availability changes; do not retry any completed/error slot.
+- [x] Previously quota-blocked43undispatched slots completed under later explicit owner authorization/read-only route availability and fresh source identity; old errors not retried. See resume report above.
 
 **Round63 completed(2026-10-13): STOP.** Contextual policy fix/self-review,4prospective labels/6contrasts before real provider. Prefix63/63PASS; fullA2hardFAIL278/351,1UNSAFEeligiblePASS(r43-unfit:2),5SAFEreject,73NOT_RUN;274requests/max1/retry0,1error. A3NOT_RUN. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-63/CHECKPOINT_A.md),[whole-context findings](../apps/worker/evals/single-agent-semantic-verifier/round-63/ROOT_CAUSE_REVIEW.md). Source951549d4/raw43f97a49 preserved; local359/focused101/boundary79/protected41 and workerbuild/typecheck/lintPASS. No64/post-A/merge/deploy/live send.
 
