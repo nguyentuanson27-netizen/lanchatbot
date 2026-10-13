@@ -15,10 +15,11 @@ export function prepareR64Completion(m,a2,p,priorRaw,sha,index){
 }
 async function main(){
  if(process.env.C3_CHECKPOINT_A_ROUND!=='64')throw new Error('FIXED_R64_REQUIRED');const {manifest:m,a2,a3}=loadInputs();validateProtocol(m,a2,a3);
- const raw=readFileSync(inputUrl('a2-initial-evidence.json'),'utf8'),p=JSON.parse(readFileSync(inputUrl('a2-completion-plan.json'),'utf8'));
+ const resume=process.argv.includes('--resume-remaining'),priorFile=resume?'a2-completed-evidence.json':'a2-initial-evidence.json';
+ const raw=readFileSync(inputUrl(priorFile),'utf8'),p=JSON.parse(readFileSync(inputUrl(resume?'a2-resume-plan.json':'a2-completion-plan.json'),'utf8'));
  validateA2Evidence(m,a2,JSON.parse(raw));const sha=process.env.A2_RUN_SOURCE_SHA,head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),index=Number(process.argv.find(v=>v.startsWith('--shard='))?.slice(8));
- const names=[0,1,2].map(i=>'a2-completion-evidence.shard-'+i+'.json'),allowed=names.flatMap(n=>[evidencePath(n),evidencePath(n+'.tmp')]);
- const check=()=>{assertSealedSource(sha,allowed);if(hash(readFileSync(inputUrl('a2-initial-evidence.json'),'utf8'))!==p.priorEvidenceHash||hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==p.boundaryExecutableHash)throw new Error('R64_PRIOR_OR_BOUNDARY_CHANGED');};
+ const names=[0,1,2].map(i=>(resume?'a2-resumed-evidence.shard-':'a2-completion-evidence.shard-')+i+'.json'),allowed=names.flatMap(n=>[evidencePath(n),evidencePath(n+'.tmp')]);
+ const check=()=>{assertSealedSource(sha,allowed);if(hash(readFileSync(inputUrl(priorFile),'utf8'))!==p.priorEvidenceHash||hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==p.boundaryExecutableHash)throw new Error('R64_PRIOR_OR_BOUNDARY_CHANGED');};
  check();preflight(m,'a2',{a2RunSourceSha:sha},head,[]);const e=prepareR64Completion(m,a2,p,raw,sha,index);const output=inputUrl(names[index]),temp=inputUrl(names[index]+'.tmp');if(existsSync(output)||existsSync(temp))throw new Error('R64_COMPLETION_ALREADY_STARTED');
  const client=inspectCodex();if(JSON.stringify(client)!==JSON.stringify(JSON.parse(raw).client))throw new Error('CLIENT_IDENTITY_CHANGED');e.client=client;
  console.log(JSON.stringify({status:'R64_COMPLETION_PREFLIGHT_PASS',a2CompletionRunSourceSha:sha,preserved:p.preservedTerminalCount,unknownStarted:p.unknownStartedAttemptIds.length,assigned:e.shard.attemptIds.length,providerGenerations:0}));if(process.argv.includes('--preflight'))return;
