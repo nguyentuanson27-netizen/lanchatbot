@@ -6,6 +6,7 @@ import {projectRuntime,buildRequest,validateProtocol,preflight,hash,inputUrl,evi
 import {loadInputs,evaluateA2Attempt,operational,assertSealedSource,validateA2Evidence,providerCapacityExhausted} from './run-a2.mjs';
 import {runCodexModel,inspectCodex} from './codex-inference.mjs';
 import {createGeminiInference,inspectGemini} from './gemini-inference.mjs';
+import {publishA2Evidence} from './run-a2-shards.mjs';
 import {terminalFallback,finalGate,makeBinding} from '../../dist/single-agent-semantic-verifier-boundary.js';
 const read=name=>readFileSync(inputUrl(name),'utf8');
 
@@ -124,12 +125,14 @@ async function main() {
   if([52,53,54,55,56,57,58,59,60,61,62,63,65,66].includes(manifest.round))throw new Error('STAGED_RUN_REQUIRED');
   const a2Evidence=JSON.parse(read('a2-evidence.json'));
   if(validateA2Evidence(manifest,a2,a2Evidence).status!=='PASS')throw new Error('A2_NOT_PASS');
+  if(manifest.round===67&&a2Evidence.regression?.status!=='PASS')throw new Error('A2_REGRESSION_NOT_PASS');
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   const status=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
   preflight(manifest,'a3',{a3RunSourceSha:process.env.A3_RUN_SOURCE_SHA,a2Status:a2Evidence.summary.status},sha,status);
   const output=inputUrl('a3-evidence.json');
   if(existsSync(output))throw new Error('A3_EVIDENCE_ALREADY_EXISTS');
   const client=inspectCodex();
+  if(manifest.round===67&&(client.version!==manifest.inspectedClient.version||client.binarySha256!==manifest.inspectedClient.binarySha256))throw new Error('CLIENT_IDENTITY_CHANGED');
   const gemini=manifest.variant === 'GEMINI_CONVERSATION' ? createGeminiInference(manifest) : null;
   const evidence={schemaVersion:1,phase:'A3',a3RunSourceSha:sha,a2RunSourceSha:a2Evidence.a2RunSourceSha,
     implementationBaseSha:manifest.implementationBaseSha,specSha:manifest.specSha,manifestHash:hash(read('manifest.json')),
@@ -138,15 +141,20 @@ async function main() {
     boundaryExecutableHash:hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url))),
     startedAt:new Date().toISOString(),attempts:a3.cases.flatMap(c=>Array.from({length:repetitionCount(manifest,'a3',c.evaluator.caseId)},(_,i)=>({attemptId:c.evaluator.caseId+':'+(i+1),
       caseId:c.evaluator.caseId,repetition:i+1,conversation:null,finalDraft:null,verification:null,terminal:null}))),quality:null,operational:null};
+  const allowed=[evidencePath('a3-evidence.json'),...(manifest.round===67?[evidencePath('a3-evidence.json.tmp')]:[])];
   const save=()=>{evidence.quality=scoreWholeReplies(manifest,a3,evidence.attempts,null);evidence.operational=a3Operational(evidence.attempts);
-    writeFileSync(output,JSON.stringify(evidence,null,2)+'\n');};
+    if(manifest.round===67)publishA2Evidence(evidence,inputUrl('a3-evidence.json.tmp'),output,()=>assertSealedSource(sha,allowed));
+    else writeFileSync(output,JSON.stringify(evidence,null,2)+'\n');};
   save();
   for(const attempt of evidence.attempts) {
-    assertSealedSource(sha,[evidencePath('a3-evidence.json')]);
+    assertSealedSource(sha,allowed);
     if(gemini && hash(readFileSync(new URL('../../dist/vertex.js',import.meta.url)))!==evidence.conversationClient.helperExecutableHash)throw new Error('A3_VERTEX_EXECUTABLE_CHANGED');
     if(hash(readFileSync(new URL('../../dist/single-agent-semantic-verifier-boundary.js',import.meta.url)))!==evidence.boundaryExecutableHash)throw new Error('A3_BOUNDARY_EXECUTABLE_CHANGED');
     const fixture=a3.cases.find(c=>c.evaluator.caseId===attempt.caseId);
-    Object.assign(attempt,await evaluateA3Attempt(manifest,fixture,(role,request)=>role === 'conversation' && gemini ? gemini(request) : runCodexModel(manifest,role,request)));
+    if(manifest.round===67){attempt.dispatchStartedAt=new Date().toISOString();save();}
+    const options=manifest.round===67?{onCheckpoint:checkpoint=>{attempt.transportCheckpoint=checkpoint;save();}}:undefined;
+    Object.assign(attempt,await evaluateA3Attempt(manifest,fixture,(role,request)=>role === 'conversation' && gemini ? gemini(request) : runCodexModel(manifest,role,request,options)));
+    delete attempt.transportCheckpoint;
     save();console.log(JSON.stringify({attemptId:attempt.attemptId,generation:attempt.conversation.status,verifier:attempt.verification?.provider?.status??null,
       terminal:attempt.terminal.disposition,reason:attempt.terminal.reason}));
     if(providerCapacityExhausted(manifest,attempt.verification?.provider)) {

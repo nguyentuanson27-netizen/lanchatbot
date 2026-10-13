@@ -1,0 +1,132 @@
+{
+  "round": 67,
+  "status": "DETERMINISTIC_READINESS_PASS",
+  "checkedAt": "2026-10-13T21:51:14.882Z",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "freezeSavepoint": "7e53f65b8cc4afc64dcab0feefe0707d3d7dff02",
+  "providerQualificationGenerations": 0,
+  "counts": {
+    "a2Cases": 138,
+    "a2RegisteredSlots": 142,
+    "a2Unsafe": 91,
+    "a2Safe": 51,
+    "a2Prefix": 6,
+    "a3Cases": 42,
+    "a3RegisteredSlots": 42
+  },
+  "hashes": {
+    "manifest": "5785b705acc75ad7cb43f33cc7a95ca8a62ed5e772fec85dd9966437d8c26e23",
+    "a2": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203",
+    "prompts": {
+      "verifier": "8288e06dc59da5f7f5ff98923ce2fa2192e8f4047adff4986cb0d884322a2a81",
+      "conversation": "e5a6e4beebdf80c53c77814e6fabe55c23d8918fc3395801a830d724c90f5b47"
+    },
+    "schema": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "boundaryExecutable": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37"
+  },
+  "commands": [
+    {
+      "command": "git fetch origin main\ngit rev-parse origin/main",
+      "exitCode": 0,
+      "result": "296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-67.test.mjs",
+      "exitCode": 1,
+      "tests": 4,
+      "pass": 1,
+      "fail": 3,
+      "observed": [
+        "UNREGISTERED_CONTEXT_PRESENTATION",
+        "missing Round67 early checkpoint callback",
+        "unsupported profile projection"
+      ],
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-red.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-67.test.mjs",
+      "exitCode": 0,
+      "tests": 4,
+      "pass": 4,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-green.stdout.log",
+      "intermediate": {
+        "pass": 3,
+        "fail": 1,
+        "cause": "Test incorrectly expected sanitized CLI stderr to expose guard reason; corrected child probe observes actual guard without changing runtime diagnostics",
+        "nativeLog": "overwritten by final green log; intermediate failure retained in tool output"
+      }
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-67.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-66.test.mjs apps/worker/evals/single-agent-semantic-verifier/policy-meaning-preparation.test.mjs apps/worker/evals/single-agent-semantic-verifier/corpus-reduction-preparation.test.mjs apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-59.test.mjs",
+      "exitCode": 0,
+      "tests": 46,
+      "pass": 46,
+      "skipped": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-focused.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "tests": 417,
+      "pass": 417,
+      "skipped": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-full.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "tests": 79,
+      "pass": 79,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-worker-focused.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "tests": 21,
+      "pass": 21,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-protected.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-build.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-typecheck.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-lint.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID"
+    },
+    {
+      "command": "Read-only inspectCodex/inspectGemini and native account/rateLimits/read",
+      "exitCode": 0,
+      "providerGenerations": 0
+    },
+    {
+      "command": "git diff --exit-code 85d6fc9f7ede40569e0153baae63b3e832b5628c -- apps/worker/src packages round-66/prompts/preparation folders; git diff --check; compiled boundary hash readback",
+      "exitCode": 0
+    }
+  ],
+  "selfReview": [
+    "Exact prepared policy prompt and reduced fixture records; original7PR387/source-policy/context contrasts and all latest failure groups retained; only already reviewed future evaluator label applied",
+    "Final direct-A2 guard proved with sanitized-error child probe; prefix6 hard stop/early capture uses existing scheduler and no new operator",
+    "Full A3 route lacked dispatch/early capture/atomic publication; R67 reuses existing tested publication/checkpoint helpers and dispatch persists before generation. Complete A2/prefix PASS and pinned client required. Actual A3 execution remains conditional/unverified",
+    "No production/shared code, owner prompt/config/schema/bounds/fallback, historical evidence, or provider API/retry semantics changed; five eval executables fixed admission/source-accounting only",
+    "Provider login/binary and Vertex credential route available; read-only quota26%primary27%secondary at inspection; generation availability/version/semantic reliability not proved by local tests"
+  ],
+  "limitations": [
+    "Primary subjective/nonblind A3 review if run, human scores remain null",
+    "Reduced development population cannot inherit/compare old qualification; alias backend immutability/cost not established",
+    "Intermediate3/4 native log overwritten; exact failure and correction retained in tool output/command record. No model attempt affected"
+  ]
+}

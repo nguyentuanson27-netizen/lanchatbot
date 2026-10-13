@@ -4,7 +4,7 @@
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; read current spec/plan/preparation/review/corpus selection; inspect actual CLI0.159.2 and official provider docs. [Scope](../docs/specs/c3-round67-reduced-corpus-policy-meaning-20261014.md).
 - [x] Freeze reviewed verifier and138A2/42unchangedA3/authority/models/config/bars; latest two R66failed groups×3 first6, remaining136×1;142A2/conditional42A3. No provider generations at freeze; historical results unchanged.
-- [ ] Observe fixed-round/projection/native/direct-A2 admission RED, minimum GREEN/readiness/self-review and clean source seal/preflight.
+- [x] Observed1/4RED before source changes; fixed allowlists/profile/native admission, early capture/direct-A2 restriction; intermediate3/4 test-only stderr assumption fixed, final4/4GREEN. Focused46/full417/worker79/protected21 and workerbuild/typecheck/lint actualPASS,0skip. [Readiness](../apps/worker/evals/single-agent-semantic-verifier/round-67/READINESS.json); zero qualification generations. Self-review reused dispatch/early capture/atomic publication for full R67A3; clean source seal/preflight follows.
 - [ ] Run A2 once per registered slot; preserve raw/native exit/audit; only complete fresh PASS permits separately sealed full42A3.
 - [ ] Whole actual-terminal review if A3 runs; CHECKPOINT_A/findings/commands/tasks/draftPR390 and STOPowner. No automatic68/post-A.
 
