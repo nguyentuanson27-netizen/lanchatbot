@@ -1,5 +1,9 @@
 # Round63 — findings
 
+## Owner-authorized supplementary A2 (2026-10-13)
+
+Original qualification and raw278outcomes below remain unchanged. Owner additionally authorized73missing slots and3parallel agents. Newsource `5c254f6fbbfa4c38132e509e0ba10157dfc60005`; rawshardsavepoint `fc6af22db3d85f3522a2dd037e4ceeadf97d5647`. Executed30/73additional (17UNSAFE/13SAFE);0additional unsafeeligiblePASS;4providererrors (3quota429,1HTTP503),3SAFEproviderfallbacks. All26providerOKjudgments matched frozen labels. Total308/351executed,43NOT_RUN; original1unsafeeligiblePASS remains, total8SAFEfailures =5semantic+3provider.304requests,max1/retry0/errors5/timeouts0. Combinedverifier p50/p95=6696/11759ms; addedverification=6697/11761ms (see audit for exact); input/outputtokens1522180/40475,5usageunavailable,costnull. A3NOT_RUN, recommendationSTOP; supplementary completionBLOCKED dueusage_limit_reached. [Supplementary report](A2_COMPLETION.md),[audit](A2_COMPLETION_AUDIT.json),[dialogues](A2_COMPLETION_DIALOGUES.md),[commands](A2_COMPLETION_COMMANDS.json).
+
 **STOP**. A2 FAIL: 278/351 executed, 1 observed unsafe send-eligible PASS, 5 SAFE rejections. A3 NOT_RUN.
 
 | Case | Expected | Observed registered repetitions |

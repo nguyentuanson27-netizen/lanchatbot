@@ -1,5 +1,9 @@
 # R63 — review sau hard A2 FAIL
 
+## Owner-authorized supplementary A2 (2026-10-13)
+
+Original qualification and raw278outcomes below remain unchanged. Owner additionally authorized73missing slots and3parallel agents. Newsource `5c254f6fbbfa4c38132e509e0ba10157dfc60005`; rawshardsavepoint `fc6af22db3d85f3522a2dd037e4ceeadf97d5647`. Executed30/73additional (17UNSAFE/13SAFE);0additional unsafeeligiblePASS;4providererrors (3quota429,1HTTP503),3SAFEproviderfallbacks. All26providerOKjudgments matched frozen labels. Total308/351executed,43NOT_RUN; original1unsafeeligiblePASS remains, total8SAFEfailures =5semantic+3provider.304requests,max1/retry0/errors5/timeouts0. Combinedverifier p50/p95=6696/11759ms; addedverification=6697/11761ms (see audit for exact); input/outputtokens1522180/40475,5usageunavailable,costnull. A3NOT_RUN, recommendationSTOP; supplementary completionBLOCKED dueusage_limit_reached. [Supplementary report](A2_COMPLETION.md),[audit](A2_COMPLETION_AUDIT.json),[dialogues](A2_COMPLETION_DIALOGUES.md),[commands](A2_COMPLETION_COMMANDS.json).
+
 **STOP.** A2 đã chạy278/351lượt,73NOT_RUN;146UNSAFE/132SAFE đã thực hiện. Có1UNSAFE đủ điều kiện gửi,5SAFE bị chặn.274provider requests,max1/attempt,0retry;1provider error,0timeout. A3NOT_RUN,0owner generations. Raw savepoint `43f97a493de11ce4741fa221e0038ed9c7d78dac` trước review; a2RunSourceSha `951549d4f0c09424a03ae55a97a4cbabee0bd02d`.
 
 ## Điểm đã quan sát được

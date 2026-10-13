@@ -1,10 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Round63 supplementary A2 (2026-10-13): STOP / diagnostic BLOCKED.** Owner-requested3shards ran30/73extra, thenquota429stopped all3;43NOT_RUN. Total308/351,1UNSAFEeligiblePASS retained,8SAFEfailures(5semantic+3provider),304requests/max1/retry0/errors5/timeouts0.26newOKverdicts matched labels; no extrafalsePASS. A3NOT_RUN. [Report](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION.md). Source5c254f6fbbfa4c38132e509e0ba10157dfc60005,rawfc6af22db3d85f3522a2dd037e4ceeadf97d5647.
+
 **Round63 diagnostic continuation, owner-authorized:** Complete only73 undispatched slots with3 fixed shards25/24/24. Preserve278 original observations, original A2FAIL and A3NOT_RUN. [Scope](../apps/worker/evals/single-agent-semantic-verifier/round-63/A2_COMPLETION_SCOPE.md).
 
 - [x] Freeze73 slot identities and3 disjoint allocations before provider; completion/shard tests observed RED then focused10/10GREEN.
-- [ ] Commit clean source, capture a2CompletionRunSourceSha, preflight all3 shards; run once per slot, no retry.
-- [ ] Save raw shard evidence, merge each registered slot once, audit prior identity/request accounting/firewall, report findings and STOP.
+- [x] Commit clean source, capture a2CompletionRunSourceSha, preflight all3 shards; dispatch30slots once, no retry; providercapacity stop leaves43NOT_RUN.
+- [x] Save3closed rawshards, merge each registered slot once, audit prior identity/request accounting/firewall, report findings and STOP.
+- [ ] Remaining43undispatched slots: BLOCKED until approved provider availability changes; do not retry any completed/error slot.
 
 **Round63 completed(2026-10-13): STOP.** Contextual policy fix/self-review,4prospective labels/6contrasts before real provider. Prefix63/63PASS; fullA2hardFAIL278/351,1UNSAFEeligiblePASS(r43-unfit:2),5SAFEreject,73NOT_RUN;274requests/max1/retry0,1error. A3NOT_RUN. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-63/CHECKPOINT_A.md),[whole-context findings](../apps/worker/evals/single-agent-semantic-verifier/round-63/ROOT_CAUSE_REVIEW.md). Source951549d4/raw43f97a49 preserved; local359/focused101/boundary79/protected41 and workerbuild/typecheck/lintPASS. No64/post-A/merge/deploy/live send.
 

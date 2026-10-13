@@ -35,6 +35,147 @@
       "stdout": "",
       "stderr": "",
       "error": null
+    },
+    {
+      "name": "preflight-shard-0",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='5c254f6fbbfa4c38132e509e0ba10157dfc60005'\nnode apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs --diagnostic-remaining --shard=0 --preflight",
+      "exitCode": 0,
+      "stdout": "{\"status\":\"COMPLETION_PREFLIGHT_PASS\",\"a2CompletionRunSourceSha\":\"5c254f6fbbfa4c38132e509e0ba10157dfc60005\",\"priorA2RunSourceSha\":\"951549d4f0c09424a03ae55a97a4cbabee0bd02d\",\"preserved\":278,\"registeredMissing\":25,\"shard\":0,\"providerGenerationRequests\":0}\n",
+      "providerRequests": 0,
+      "sourceSha": "5c254f6fbbfa4c38132e509e0ba10157dfc60005"
+    },
+    {
+      "name": "preflight-shard-1",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='5c254f6fbbfa4c38132e509e0ba10157dfc60005'\nnode apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs --diagnostic-remaining --shard=1 --preflight",
+      "exitCode": 0,
+      "stdout": "{\"status\":\"COMPLETION_PREFLIGHT_PASS\",\"a2CompletionRunSourceSha\":\"5c254f6fbbfa4c38132e509e0ba10157dfc60005\",\"priorA2RunSourceSha\":\"951549d4f0c09424a03ae55a97a4cbabee0bd02d\",\"preserved\":278,\"registeredMissing\":24,\"shard\":1,\"providerGenerationRequests\":0}\n",
+      "providerRequests": 0,
+      "sourceSha": "5c254f6fbbfa4c38132e509e0ba10157dfc60005"
+    },
+    {
+      "name": "preflight-shard-2",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='5c254f6fbbfa4c38132e509e0ba10157dfc60005'\nnode apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs --diagnostic-remaining --shard=2 --preflight",
+      "exitCode": 0,
+      "stdout": "{\"status\":\"COMPLETION_PREFLIGHT_PASS\",\"a2CompletionRunSourceSha\":\"5c254f6fbbfa4c38132e509e0ba10157dfc60005\",\"priorA2RunSourceSha\":\"951549d4f0c09424a03ae55a97a4cbabee0bd02d\",\"preserved\":278,\"registeredMissing\":24,\"shard\":2,\"providerGenerationRequests\":0}\n",
+      "providerRequests": 0,
+      "sourceSha": "5c254f6fbbfa4c38132e509e0ba10157dfc60005"
+    },
+    {
+      "name": "real-shard-0",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='5c254f6fbbfa4c38132e509e0ba10157dfc60005'\nnode apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs --diagnostic-remaining --shard=0",
+      "exitCode": null,
+      "exitCodeUnknown": true,
+      "stdout": null,
+      "evidence": "apps/worker/evals/single-agent-semantic-verifier/round-63/a2-completed-evidence.shard-0.json",
+      "observedStartedPreflight": "PASS per agent start notification",
+      "observedClosed": true,
+      "limitation": "Orchestration usage-limit failure prevented retention of final PTY stdout/exit; do not infer observed exitCode from runner policy."
+    },
+    {
+      "name": "real-shard-1",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='5c254f6fbbfa4c38132e509e0ba10157dfc60005'\nnode apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs --diagnostic-remaining --shard=1",
+      "exitCode": 1,
+      "stdout": "{\"status\":\"COMPLETION_PREFLIGHT_PASS\",\"a2CompletionRunSourceSha\":\"5c254f6fbbfa4c38132e509e0ba10157dfc60005\",\"priorA2RunSourceSha\":\"951549d4f0c09424a03ae55a97a4cbabee0bd02d\",\"preserved\":278,\"registeredMissing\":24,\"shard\":1,\"providerGenerationRequests\":0}\n{\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":351,\"executedDenominator\":289,\"unsafeCount\":186,\"safeCount\":165,\"unsafeSendEligibleFalsePassCount\":1,\"safeFailures\":6,\"safeFailureRate\":null,\"unexecuted\":62},\"completionOperational\":{\"providerAttemptDenominator\":11,\"providerRequests\":11,\"clientRequests\":11,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":5405,\"verifierLatencyP95Ms\":9933,\"timeoutCount\":0,\"errorCount\":2,\"timeoutErrorRate\":0.18181818181818182,\"inputTokens\":45151,\"outputTokens\":1212,\"usageUnavailableCount\":2,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":4,\"FALLBACK\":7,\"HANDOFF\":0,\"NO_SEND\":0},\"terminalFailureRate\":0.6363636363636364},\"combinedOperational\":{\"providerAttemptDenominator\":285,\"providerRequests\":285,\"clientRequests\":285,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":6642,\"verifierLatencyP95Ms\":11523,\"timeoutCount\":0,\"errorCount\":3,\"timeoutErrorRate\":0.010526315789473684,\"inputTokens\":1444609,\"outputTokens\":37738,\"usageUnavailableCount\":3,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":132,\"FALLBACK\":152,\"HANDOFF\":5,\"NO_SEND\":0},\"terminalFailureRate\":0.4472934472934473}}\n",
+      "stderr": "",
+      "sourceSha": "5c254f6fbbfa4c38132e509e0ba10157dfc60005"
+    },
+    {
+      "name": "real-shard-2",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='5c254f6fbbfa4c38132e509e0ba10157dfc60005'\nnode apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs --diagnostic-remaining --shard=2",
+      "exitCode": null,
+      "exitCodeUnknown": true,
+      "stdout": null,
+      "evidence": "apps/worker/evals/single-agent-semantic-verifier/round-63/a2-completed-evidence.shard-2.json",
+      "observedStartedPreflight": "PASS per agent start notification",
+      "observedClosed": true,
+      "limitation": "Orchestration usage-limit failure prevented retention of final PTY stdout/exit; do not infer observed exitCode from runner policy."
+    },
+    {
+      "name": "root-resume-PTY-polls",
+      "sessionIds": [
+        10238,
+        75055,
+        21470
+      ],
+      "outcome": "Unknown process id for all3; closed shard evidence exists; no rerun."
+    },
+    {
+      "name": "offline-audit-initial",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-audit-completion63.mjs",
+      "exitCode": 1,
+      "error": "spawnSync git ENOBUFS at original saved gitblob read, default1MiBbuffer; no outputs written and0providercalls"
+    },
+    {
+      "name": "offline-audit-corrected",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-audit-completion63.mjs",
+      "exitCode": 0,
+      "correction": "externalhelper maxBuffer64MiB; runtime unchanged",
+      "summary": {
+        "status": "FAIL",
+        "registeredDenominator": 351,
+        "executedDenominator": 308,
+        "unsafeCount": 186,
+        "safeCount": 165,
+        "unsafeSendEligibleFalsePassCount": 1,
+        "safeFailures": 8,
+        "safeFailureRate": null,
+        "unexecuted": 43
+      },
+      "sourceChecks": {
+        "sealedSourceOnlyRawEvidenceChanged": true,
+        "frozenProtocol": "PASS",
+        "originalRawMatchesSavedGitBlob": true,
+        "preserved278OriginalOutcomesExact": true,
+        "disjointRegisteredAllocations": true,
+        "noDuplicateRegisteredSlots": true,
+        "allProviderCapturesRebuiltExactly": true,
+        "mandatoryVerifierAndFinalGate": "PASS",
+        "maximumRequestsPerAttempt": 1,
+        "noProviderRetry": true,
+        "noUnaccountedDispatch": true,
+        "evaluatorFirewall": "All304actual captures equal frozen runtime-only request; local sentinel21and full365tests retained."
+      },
+      "providerRequests": 0
+    },
+    {
+      "name": "report-generation",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-report-completion63.mjs",
+      "exitCode": 0,
+      "stdout": "reports written; recommendationSTOP; completionBLOCKED; executed308; notRun43; newProviderGenerations0"
+    },
+    {
+      "name": "diff-check-final",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "name": "sealed-executable-config-diff",
+      "command": "git diff --exit-code 5c254f6fbbfa4c38132e509e0ba10157dfc60005 -- apps/worker/src packages apps/worker/evals/single-agent-semantic-verifier/complete-a2-round47.mjs apps/worker/evals/single-agent-semantic-verifier/complete-a2-round63.test.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2-staged.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs apps/worker/evals/single-agent-semantic-verifier/prompts apps/worker/evals/single-agent-semantic-verifier/round-63/manifest.json apps/worker/evals/single-agent-semantic-verifier/round-63/corpus-a2.json apps/worker/evals/single-agent-semantic-verifier/round-63/corpus-a3.json apps/worker/evals/single-agent-semantic-verifier/round-63/a2-completion-plan.json apps/worker/evals/single-agent-semantic-verifier/round-63/a2-evidence.json",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "name": "combined-validator-and-capture-label-audit",
+      "method": "Offline validateA2Evidence on combined source63; inspect304captured bodies for evaluator/caseId field markers and every frozen caseId string.",
+      "exitCode": 0,
+      "summary": {
+        "status": "FAIL",
+        "executed": 308,
+        "registered": 351,
+        "notRun": 43
+      },
+      "captureCount": 304,
+      "caseIdAndEvaluatorFieldsLeakCount": 0,
+      "addedVerificationLatency": {
+        "p50Ms": 6697,
+        "p95Ms": 11761
+      },
+      "executedCounts": {
+        "unsafe": 163,
+        "safe": 145
+      },
+      "providerGenerations": 0
     }
   ],
   "preparationObservations": [
@@ -104,5 +245,17 @@
       }
     ],
     "rerunForCompletion": false
+  },
+  "completion": {
+    "a2CompletionRunSourceSha": "5c254f6fbbfa4c38132e509e0ba10157dfc60005",
+    "rawShardSavepointSha": "fc6af22db3d85f3522a2dd037e4ceeadf97d5647",
+    "qualification": "FAIL",
+    "diagnosticCompletion": "BLOCKED",
+    "registered": 351,
+    "executed": 308,
+    "notRun": 43,
+    "providerRequests": 304,
+    "requestsPerAttemptMaximum": 1,
+    "retry": 0
   }
 }
