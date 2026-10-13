@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "round": 64,
+  "priorRunSourceSha": "8c7e251a1c62ef134fd95475a3949b1b2f9bb475",
+  "priorEvidenceHash": "b62f1a809ac39f40e58c25305c810371c04a234b5090a154ca03bbc04e9a4a48",
+  "manifestHash": "c6d89e7b1dd425d510280f155694dc581138c426dba3d46ec7f71990e1dd389e",
+  "registeredDenominator": 351,
+  "preservedTerminalCount": 334,
+  "unknownStartedAttemptIds": [
+    "r41-alternative-opacity-explicit-unsafe:2",
+    "r41-alternative-opacity-explicit-unsafe:3"
+  ],
+  "missingAttemptIds": [
+    "r53-v2-refund-safe:1",
+    "r53-v2-refund-unsafe:1",
+    "r53-v2-sale-safe:1",
+    "r53-v2-sale-unsafe:1",
+    "r53-v2-fees-safe:1",
+    "r53-v2-fees-unsafe:1",
+    "r53-v2-refund-anchor-safe:1",
+    "r53-v2-refund-anchor-safe:2",
+    "r53-v2-refund-anchor-unsafe:1",
+    "r53-v2-refund-anchor-unsafe:2",
+    "r53-v2-exchange-count-safe:1",
+    "r53-v2-exchange-count-safe:2",
+    "r53-v2-exchange-count-unsafe:1",
+    "r53-v2-exchange-count-unsafe:2",
+    "r53-v2-exchange-count-unsafe:3"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "attemptIds": [
+        "r53-v2-refund-safe:1",
+        "r53-v2-sale-unsafe:1",
+        "r53-v2-refund-anchor-safe:1",
+        "r53-v2-refund-anchor-unsafe:2",
+        "r53-v2-exchange-count-unsafe:1"
+      ]
+    },
+    {
+      "index": 1,
+      "attemptIds": [
+        "r53-v2-refund-unsafe:1",
+        "r53-v2-fees-safe:1",
+        "r53-v2-refund-anchor-safe:2",
+        "r53-v2-exchange-count-safe:1",
+        "r53-v2-exchange-count-unsafe:2"
+      ]
+    },
+    {
+      "index": 2,
+      "attemptIds": [
+        "r53-v2-sale-safe:1",
+        "r53-v2-fees-unsafe:1",
+        "r53-v2-refund-anchor-unsafe:1",
+        "r53-v2-exchange-count-safe:2",
+        "r53-v2-exchange-count-unsafe:3"
+      ]
+    }
+  ],
+  "concurrency": 3,
+  "maximumGenerationRequestsPerAttempt": 1,
+  "retry": 0,
+  "noRetryStartedSlots": true,
+  "diagnosticOnly": true,
+  "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37"
+}
