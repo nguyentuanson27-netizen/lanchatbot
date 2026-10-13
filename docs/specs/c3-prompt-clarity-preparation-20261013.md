@@ -1,5 +1,17 @@
 # C3 — chuẩn bị prompt rõ nghĩa (2026-10-13)
 
+## Final candidate status — sau independent review
+
+**APPROVE — preparation only**, reviewer gpt-6.1-sol/max/fresh context. Initial review found3required wording issues (protected scope, necessary code-fit, nullable protectedRef) and2optional suggestions (comparison scope/example spacing). All fixed; same reviewer read back exact prompt source **2ebb116c0c3bcf39538191cf24dbbe5bbe7d0cc5**, confirmed final hashes below and no remaining actionable finding. [Independent review record](c3-prompt-clarity-independent-review-20261013.md).
+
+Final prompt identities:
+- verifier 36fa1e8c5b1edf429e8d729ce70784e6fd37efafbf6b21f59e8bbf9c0393ba25, 6331chars versus6495control.
+- owner e5a6e4beebdf80c53c77814e6fabe55c23d8918fc3395801a830d724c90f5b47, 6582chars versus6524control.
+
+Revised local readback exit0, all229fixtures:228bodies unchanged exceptinstructions/1sameHISTORY_BOUND reject, maxbytes verifier27261/owner18038. Same data/snapshot/draft/role config/schema/bounds; evaluator labels absent; unregistered prompts still rejected for R63. Full368/368 earlier control regression remains valid because executable/control source unchanged; not rerun or represented as semantic validation of the new prompts.
+
+0A2/A3 qualification generations in this preparation. The requested native developer reviewer did use gpt-6.1-sol/max for review/readback; it is outside the runtime/eval attempt denominator. Candidate quality/semantic safety/performance/most-effective wording unverified until a newly frozen authorized run. R63FAIL/STOP preserved; noRound64/source seal/A3/post-A/merge/deploy/live send performed. All earlier self-review identities/results below are the initial candidate stage, not the final prompt hashes.
+
 Owner yêu cầu audit toàn bộ prompt, sửa, self-review rồi một review độc lập gpt-6.1-sol/max. Đây là preparation-only, không chạy A2/A3 hay mở Round64. R63 FAIL/STOP và toàn bộ historical prompts/manifests/corpora/labels/raw outcomes giữ nguyên.
 
 Preparation main đã fetch: 296cdcfbf5759f5bf9cbb24acf3dc63005589361. Starting branch head: ed78e73dc54d53aa1cdf0f8c202f0e8171f7fdd4. Giữ branch implementation và draft PR390. Candidate mới chưa được runtime/admission registry chọn.
@@ -87,4 +99,4 @@ Non-blocking reads: attempted READINESS.json was absent, then actual DETERMINIST
 
 ## Independent review
 
-Requested reviewer: **gpt-6.1-sol / max / fresh context**, one developer reviewer outside runtime. Status: PENDING before dispatch. Reviewer must inspect actual candidate/control/spec/contracts, not accept this self-review as proof. Findings and exact candidate identity will be saved after completion. No A2/A3 run authorized by this preparation.
+Requested reviewer: **gpt-6.1-sol / max / fresh context**, one developer reviewer outside runtime. Completed: initial CHANGES_REQUESTED, then APPROVE after narrow fixes/readback of exact source2ebb116c. See final status above and independent review record. No A2/A3 run authorized by this preparation.
