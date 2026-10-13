@@ -1,5 +1,15 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**2026-10-13 — recurring runner failure:** [Root cause/fix](../apps/worker/evals/single-agent-semantic-verifier/runner-diagnostics-20261013/ROOT_CAUSE.md), [actual commands](../apps/worker/evals/single-agent-semantic-verifier/runner-diagnostics-20261013/VERIFICATION.json).
+
+- [x] Read R47/R63/R64 interrupted evidence; distinguish missing process exit, lost outcome, semantic rejection and provider availability.
+- [x] Observed RED 0/6; reproduce native Windows EPERM and result/accounting not saved before cleanup.
+- [x] Shared bounded publication retry, bounded OS diagnostics and early transport record in existing evidence; no generation retry/new semantic role.
+- [x] 29 focused GREEN; 9 persistence/hard-kill GREEN; full eval 388/388; boundary/Vertex79 and protected/assembler21 PASS; self-review.
+- [x] Worker build/typecheck/lint exit0; frozen protocol/R64 accounting valid but BLOCKED; production/shared/frozen/prompt and compiled-boundary hash readback unchanged.
+- [x] Source fix/tests committed at `eefcbe5671373e89f1c441b572701dcb7cb21e8a`; preparation report follows in existing draft PR390, final delivery readback belongs to that PR/current session. No provider run.
+- [ ] Exact OS cause of R64 lost processes remains unknown; no claim it is repaired. Keep native ownership until exit in future owner-authorized run. R64 BLOCKED and 6 SAFE failures unchanged; no provider/A3/new round/post-A.
+
 **Round64 kết thúc tại BLOCKED (2026-10-13):** Native verifier luôn gpt-6.1-sol/high; ba orchestration agents được đổi sang explicitHigh theo owner. 187ca/351registered,349terminal/2startedUNKNOWN/0undispatched;0observedunsafeeligiblePASS,6SAFEfailures(4semantic+2provider),345knownrequests +0–2uncaptured. Toàn bộ15lượt chưa gọi sauquota đã chạy1lần; lỗi/unknown khôngretry. A3NOT_RUN. Source8c7e251a/completioned21024c/resume6c370eb3; rawd86f0cd7. Finalfull379PASS,workerchecksactualPASS trướcseal/reuseunchangedproof,345capturefirewall/binding/gateauditPASS. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-64/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-64/FINDINGS.md). No further run/post-A/merge/deploy/live send.
 
 
