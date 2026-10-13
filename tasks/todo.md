@@ -1,5 +1,12 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current A2 corpus reduction preparation — 2026-10-14
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect exact whole drafts/history/source and correctly handled versus failed/UNKNOWN outcomes in R63final/R64/R65/R66.
+- [x] Remove49 purpose-overlapping successful cases (29SAFE/20UNSAFE) from future population only:138 retained (87UNSAFE/51SAFE). Keep mandatory34/exact7PR387/all16 recent problem groups/all16v2/world contrasts and reviewed new r48label; preserve exact retained runtime and all historical evidence. [Full mappings/provenance](../apps/worker/evals/single-agent-semantic-verifier/corpus-reduction-preparation-20261014/README.md).
+- [x] Four mechanical checks protect partition/coverage/matched-pass provenance/failure+startedUNKNOWN retention/evaluator firewall/frozen admission/counts; initial2/4 corrected wrong test ID and intentional bound-rejection classification; focused64/64PASS,0skip/native exit0. No semantic qualification or new provider generation.
+- [x] Count proposal:two latest R66failure groups×3 first,others×1 =142A2; conditional unchanged42A3 =184combined,49fewer than233. No runtime admission/registration/new run; preserve R66FAIL/STOP. Local final checks/self-review and existing draftPR390 delivery recorded in preparation evidence; no post-A.
+
 ## Current policy fix and independent review preparation — 2026-10-13
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; retain isolated branch; read norms/64policy contexts/R63–66 variance and current source contracts.
