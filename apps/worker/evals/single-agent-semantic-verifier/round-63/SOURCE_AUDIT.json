@@ -1,0 +1,22 @@
+{
+  "round": 63,
+  "status": "PASS",
+  "semanticQualification": "A2_FAIL",
+  "capturedRequestsRebuilt": 274,
+  "localEvaluatorSentinelCaptures": 21,
+  "rawEvidenceSha256": "43ac57272ae28fd25d1aa103fa9c486e5fa49d2f1d18d9ce2fb093475693e942",
+  "rawEvidenceBlob": "3d010d48b38255294d9172b590143efac3b271b2",
+  "rawSavepoint": "43f97a493de11ce4741fa221e0038ed9c7d78dac",
+  "a2RunSourceSha": "951549d4f0c09424a03ae55a97a4cbabee0bd02d",
+  "sourceInputsUnchangedAfterSeal": true,
+  "oldRuntimesAndOriginal7SeedsPreserved": true,
+  "historicalEvidenceUnchanged": true,
+  "productionSharedDiffEmpty": true,
+  "secretScan": "PASS",
+  "providerRequests": 274,
+  "retries": 0,
+  "modelRolesAdded": 0,
+  "layersAdded": 0,
+  "a3Status": "NOT_RUN",
+  "costExposed": false
+}

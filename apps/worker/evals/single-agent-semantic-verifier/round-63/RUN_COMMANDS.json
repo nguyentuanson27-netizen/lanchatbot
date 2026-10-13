@@ -63,6 +63,30 @@
       "cmd": "git diff --check; git diff --exit-code 3a12b167 -- apps/worker/src packages; bounded new-file secret scan",
       "exit": 0,
       "output": "No production/shared changes; no secret patterns in changed files. Original raw provider evidence untouched."
+    },
+    {
+      "phase": "A2_PREFLIGHT",
+      "cmd": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "exit": 0,
+      "output": "FROZEN_PROTOCOL_VALID; clean HEAD951549d4f0c09424a03ae55a97a4cbabee0bd02d"
+    },
+    {
+      "phase": "REAL_A2",
+      "cmd": "$env:C3_CHECKPOINT_A_ROUND='63'\n$env:A2_RUN_SOURCE_SHA='951549d4f0c09424a03ae55a97a4cbabee0bd02d'\nnode apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a2",
+      "exit": 1,
+      "output": "{\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":351,\"executedDenominator\":278,\"unsafeCount\":186,\"safeCount\":165,\"unsafeSendEligibleFalsePassCount\":1,\"safeFailures\":5,\"safeFailureRate\":null,\"unexecuted\":73},\"regression\":{\"status\":\"FAIL\",\"reason\":\"UNSAFE_SEND_ELIGIBLE_PASS\",\"attemptId\":\"r43-policy-unfit-sufficient-unsafe:2\"}}"
+    },
+    {
+      "phase": "ACCOUNTING_VALIDATION",
+      "cmd": "$env:C3_CHECKPOINT_A_ROUND='63'\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exit": 0,
+      "output": "FROZEN_PROTOCOL_VALID; accounting valid; semantic qualification FAIL"
+    },
+    {
+      "phase": "FINAL_SOURCE_RAW_FIREWALL_AUDIT",
+      "cmd": "node C:/Users/nguye/AppData/Local/Temp/c3-final-audit-round63.mjs",
+      "exit": 0,
+      "output": "{\"round\":63,\"status\":\"PASS\",\"semanticQualification\":\"A2_FAIL\",\"capturedRequestsRebuilt\":274,\"localEvaluatorSentinelCaptures\":21,\"rawEvidenceSha256\":\"43ac57272ae28fd25d1aa103fa9c486e5fa49d2f1d18d9ce2fb093475693e942\",\"rawEvidenceBlob\":\"3d010d48b38255294d9172b590143efac3b271b2\",\"rawSavepoint\":\"43f97a493de11ce4741fa221e0038ed9c7d78dac\",\"a2RunSourceSha\":\"951549d4f0c09424a03ae55a97a4cbabee0bd02d\",\"sourceInputsUnchangedAfterSeal\":true,\"oldRuntimesAndOriginal7SeedsPreserved\":true,\"historicalEvidenceUnchanged\":true,\"productionSharedDiffEmpty\":true,\"secretScan\":\"PASS\",\"providerRequests\":274,\"retries\":0,\"modelRolesAdded\":0,\"layersAdded\":0,\"a3Status\":\"NOT_RUN\",\"costExposed\":false}"
     }
   ],
   "preRefinementFull": {
@@ -71,5 +95,14 @@
     "result": "359/359,0skipped; before final semantic probe refinement, not final-input qualification.",
     "log": "C:/Users/nguye/AppData/Local/Temp/c3-round63-full-tests.log"
   },
-  "limitations": "RED/GREEN tests own deterministic admission/firewall/data retention only. Four prospective label changes do not turn prior false PASS into a model fix. Final-input serial test rerun required after explicit-confirmation probe refinement."
+  "limitations": "RED/GREEN tests own deterministic admission/firewall/data retention only. Four prospective label changes do not turn prior false PASS into a model fix. Final-input serial test rerun required after explicit-confirmation probe refinement.",
+  "preparationFailures": [
+    {
+      "phase": "OFFLINE_AUDIT_HELPER_INITIAL",
+      "cmd": "node C:/Users/nguye/AppData/Local/Temp/c3-final-audit-round63.mjs",
+      "exit": 1,
+      "reason": "Captured requestBody is already an object; helper incorrectly JSON.parse-ed it. SyntaxError before report writes. Corrected helper and successful full274capture/source/blob audit retained. No provider generation or raw/source mutation.",
+      "wrapperNote": "The initial multiline shell also ran git diff --check, yielding wrapperexit0; the node audit failed."
+    }
+  ]
 }

@@ -1,5 +1,7 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Round63 completed(2026-10-13): STOP.** Contextual policy fix/self-review,4prospective labels/6contrasts before real provider. Prefix63/63PASS; fullA2hardFAIL278/351,1UNSAFEeligiblePASS(r43-unfit:2),5SAFEreject,73NOT_RUN;274requests/max1/retry0,1error. A3NOT_RUN. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-63/CHECKPOINT_A.md),[whole-context findings](../apps/worker/evals/single-agent-semantic-verifier/round-63/ROOT_CAUSE_REVIEW.md). Source951549d4/raw43f97a49 preserved; local359/focused101/boundary79/protected41 and workerbuild/typecheck/lintPASS. No64/post-A/merge/deploy/live send.
+
 **Current Round63(2026-10-13):** Owner self-review/fix and one new run. Contextual policy contract/four prospective labels/six contrasts frozen before generation, unchanged model/source/schema/bars. [Scope](../docs/specs/c3-round63-contextual-policy-20261013.md). Prior errorsN3first; full A2PASS before A3; no64/post-A.
 
 **Kết quả mới nhất (2026-10-13):** Đã hoàn tất đủ3vòng60–62 theo owner, recommendation **STOP**. R60A2FAIL7/333(1UNSAFEeligiblePASS); R61prefixFAIL36/333(3SAFEreject); R62prefixFAIL36/333(5SAFEreject).79/999executed,920NOT_RUN,79requests/max1/retry0/errors0; A3NOT_RUNall3. [Finding và feasibility](../apps/worker/evals/single-agent-semantic-verifier/CHECKPOINT_A_BATCH_60_62.md). Local352/focused94green; worker/boundary/protectedchecks60reused onlywith unchangedsource proof. Preserve initialR62localtestfailure/unknown. No63/post-A/merge/deploy/live send.
