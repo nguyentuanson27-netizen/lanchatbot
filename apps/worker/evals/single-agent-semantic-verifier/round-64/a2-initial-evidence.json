@@ -32791,7 +32791,6 @@
     },
     "terminalFailureRate": 0.32763532763532766
   },
-  "finishedAt": "2026-10-13T04:14:42.067Z",
   "interruption": {
     "publicationFailureShard0": true,
     "validTempRecovered": true,
@@ -32824,6 +32823,8 @@
       }
     ],
     "tempHash": "573cf7a25c3950cdb778009e1ed7574e4eebf442415f776ae1ba7f5b53fa68f4",
-    "cause": "UNKNOWN; source0temp records completed result after publication failure; sessions1/2 unavailable without exits after orchestration handoff. No started slot may be retried."
+    "cause": "UNKNOWN; source0temp records completed result after publication failure; sessions1/2 unavailable without exits after orchestration handoff. No started slot may be retried.",
+    "closedObservedAt": "2026-10-13T04:23:24.630Z",
+    "timestampCorrection": "Recovery has no certified source finish timestamp. Removed the initially copied last-dispatch time from finishedAt before any completion generation."
   }
 }

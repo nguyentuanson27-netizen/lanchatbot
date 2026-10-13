@@ -8,6 +8,7 @@ import {registerA2Attempts,evaluateA2Attempt} from './run-a2.mjs';
 import {runCodexModel} from './codex-inference.mjs';
 import {createGeminiInference} from './gemini-inference.mjs';
 import {generateKeyPairSync} from 'node:crypto';
+import {request as httpRequest} from 'node:http';
 const raw=(r,f)=>readFileSync(new URL('./round-'+r+'/'+f,import.meta.url),'utf8');
 const m=JSON.parse(raw(64,'manifest.json')),old=JSON.parse(raw(63,'manifest.json')),a2=JSON.parse(raw(64,'corpus-a2.json')),a3=JSON.parse(raw(64,'corpus-a3.json')),plan=JSON.parse(raw(64,'a2-shard-plan.json'));
 
@@ -32,7 +33,7 @@ test('all surviving fixture wire captures exclude evaluator labels and preserve 
  const marker='ROUND64_PRIVATE_EVALUATOR_SENTINEL';let requests=0;
  for(const original of a2.cases){const fixture=structuredClone(original);for(const k of Object.keys(fixture.evaluator))fixture.evaluator[k]=marker;fixture.labelReview=marker;
   const result=await evaluateA2Attempt(m,fixture,request=>runCodexModel(m,'verifier',request,{
-   runClient:async base=>{const response=await fetch(base+'/responses',{method:'POST',headers:{authorization:'LOCAL_SYNTHETIC_AUTH',connection:'close'},body:'{}'});await response.arrayBuffer();},
+   runClient:base=>new Promise((resolve,reject)=>{const req=httpRequest(base+'/responses',{method:'POST',agent:false,headers:{authorization:'LOCAL_SYNTHETIC_AUTH',connection:'close'}},res=>{res.resume();res.on('end',resolve);res.on('error',reject);});req.on('error',reject);req.end('{}');}),
    upstreamFetch:async(url,options)=>{requests++;assert.deepEqual(JSON.parse(options.body),request);assert.ok(!options.body.includes(marker));
     for(const key of ['caseId','split','qualityTags','requiredBehaviors','forbiddenBehaviors','rubric'])assert.ok(!options.body.includes('"'+key+'"'));
     const p=JSON.parse(request.input[0].content[0].text);assert.equal(p.untrusted.finalDraft,original.runtime.finalDraft);assert.equal(p.untrusted.latestCustomerMessage,original.runtime.latestCustomerMessage);
