@@ -1,0 +1,43 @@
+{
+  "scope": "DIAGNOSTIC_ONLY_BEFORE_PROVIDER",
+  "observedRed": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014.test.mjs",
+    "exitCode": 1,
+    "pass": 0,
+    "fail": 3,
+    "reason": "Missing fixed entrypoint before implementation; mechanical accounting feature RED, not semantic model RED"
+  },
+  "focused": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014.test.mjs",
+    "exitCode": 0,
+    "pass": 3,
+    "fail": 0,
+    "skipped": 0
+  },
+  "full": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+    "exitCode": 0,
+    "pass": 420,
+    "fail": 0,
+    "skipped": 0,
+    "durationMs": 155895.8535,
+    "stderrBytes": 0
+  },
+  "readback": {
+    "command": "git diff --exit-code 2b7e42494eb70a929ceb8410d63cced6fe7c2812 -- apps/worker/src packages apps/worker/evals/single-agent-semantic-verifier/round-67 apps/worker/evals/single-agent-semantic-verifier/protocol.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs",
+    "exitCode": 0,
+    "workerSharedFrozenTransportUnchanged": true
+  },
+  "priorWorkerVerification": {
+    "round": 67,
+    "boundaryProviderTests": 79,
+    "protectedAssemblerTests": 21,
+    "build": 0,
+    "typecheck": 0,
+    "lint": 0,
+    "rerun": false,
+    "basis": "Worker/shared/source and compiled boundary/Vertex hashes unchanged; old checks are not claimed as newly executed"
+  },
+  "localLogs": "C:/Users/nguye/AppData/Local/Temp/c3-r67-failure-recheck-{red,green,full}.{stdout,stderr}.log",
+  "providerGenerations": 0
+}

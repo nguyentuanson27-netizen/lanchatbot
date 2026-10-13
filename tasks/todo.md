@@ -1,5 +1,12 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current R67 failure recheck — 2026-10-14
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect CLI0.159.2/login/Vertex route and official provider docs. Freeze exact3prior A2SAFE failures plus8A3failures, N1/max19requests; retain all prior data. [Scope](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014/SCOPE.md).
+- [x] Reuse exact-text evaluators/providers/final gate/source guard/atomic publisher in fixed diagnostic entrypoint; observed RED0/3→GREEN3/3 for selection/one-dispatch/early-save/capacity-stop. No semantic behavior claim from mock tests.
+- [x] Full420/420PASS, zero skip/stderr; worker/shared/frozen/adapter source and compiled-helper hashes unchanged. [Actual readiness commands](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014/READINESS.json). Self-review retains one owner/one verifier, one generation/role, early persistence and immutable R67. Clean source commit/runtime SHA/preflight required next before dispatch.
+- [ ] Execute11fresh registrations once; preserve every outcome/unknown/unrun. Raw savepoint, whole-terminal review, request/binding/source audit and actual commands/results; update PR390 thenSTOP. Not full Checkpoint A; no full corpus/post-A.
+
 ## Current size-intake preparation — 2026-10-14
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; retain implementation branch; check R67 missing inputs/quotes, existing evaluator expectations and R64–67 prompt identities. No missing-data explanation for the two known-waist cases.
