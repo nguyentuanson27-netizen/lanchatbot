@@ -180,3 +180,5 @@ Final **56/56 focused, 405/405 full**, không skip; worker boundary+Vertex **79/
 Delta: năm executable eval hiện có +28/-22 lines, một local test fixture +5/-2, sáu test mới. Reuse repetitionCount thay hardcoded3 cho scheduler/validator; không thêm gate/operator/executable/framework. Verifier prompt8850bytes so với8403 (+447), chỉ phần policy; owner prompt không đổi. Semantic roles/layers added: **0**. Giữ một conversational owner/max một verifier; worker/shared/production source và lịch sử R65 nguyên trạng. Không parser/router/regex/template/repair/reverify, persisted state/mutation hoặc production wiring.
 
 Dừng tại owner GO/STOP/BLOCKED với recommendation **STOP**. A2 hard FAIL nên A3 chưa được chạy. Không tự chạy Round67, post-A tool/state/mutation/promotion, merge/deploy/live send.
+
+Owner yêu cầu kiểm tra thêm sau báo cáo: [policy root-cause review](POLICY_ROOT_CAUSE_REVIEW.md). Audit chỉ đọc, không generation mới hoặc đổi frozen result; xác nhận same-request verdict variance và flag một ranh giới nhãn chưa giải thích đủ. Không quy toàn bộ lỗi cho thay prompt.
