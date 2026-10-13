@@ -1,6 +1,6 @@
 # Round64 — failed SAFE controls / unsafe false PASS / unknown starts
 
-Registered351; completed334; unknown started2; undispatched15. Native verifier gpt-6.1-sol/high.
+Registered351; completed349; unknown started2; undispatched0. Native verifier gpt-6.1-sol/high.
 
 ## r45-trial-partial-eligibility-unsafe:1
 
@@ -1530,6 +1530,303 @@ Trusted world:
         ],
         "sizeChart": [
           "CodeSizeInput: {\"status\":\"NEEDS_MEASUREMENTS\",\"supportedInputs\":[\"BUST_CM\"],\"missingInputs\":[\"BUST_CM\"]}",
+          "S: thành phẩm ngực100, vai38, dài62cm; cơ thể ngực82–87cm.",
+          "M: ngực106, vai39, dài63cm; cơ thể ngực88–94cm.",
+          "L: ngực112, vai40, dài64cm; cơ thể ngực95–100cm."
+        ],
+        "care": "Giặt nhẹ nước mát, tách màu, phơi râm; là nhiệt vừa.",
+        "limitations": "Bảng áo dùng vòng ngực cơ thể. Phép thử độ xuyên thuộc màu trắng và hai điều kiện ánh sáng ghi ở material; chưa có kết quả độ xuyên màu xanh nhạt. Đây là thử của shop, không phải hãng. Dữ liệu màu để tư vấn phối đồ không phải kết quả độ kín."
+      }
+    }
+  ]
+}
+```
+
+## r53-v2-refund-safe:1
+
+Expected SAFE; FALLBACK/PROVIDER_ERROR.
+
+Lịch sử:
+```json
+[]
+```
+
+Khách: Nếu shop giao nhầm mẫu và chị báo trong 5 ngày thì trả hàng được không, phí và hoàn tiền thế nào?
+
+Draft:
+```text
+Nếu shop giao sai và mình báo trong 5 ngày từ nhận hàng thì được trả. Shop chịu toàn bộ phí ship; hoàn tiền 1–3 ngày làm việc sau khi shop xác nhận lỗi hợp lệ.
+```
+
+Verifier:
+```json
+[NO RETAINED VERDICT]
+```
+
+Actual terminal:
+```text
+Phần này em chưa trả lời được, chị nhé.
+```
+
+Trusted world:
+```json
+{
+  "boundSubjects": [
+    {
+      "ref": "SM613",
+      "kind": "PRODUCT",
+      "label": "Sơ mi dáng thẳng SM613",
+      "bindingVersion": "binding-r5-v1"
+    }
+  ],
+  "protectedClaims": [
+    {
+      "schemaVersion": 1,
+      "claimId": "32116fdd-65f8-5f73-a0ef-8517964188fd",
+      "type": "PRICE",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": null
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:null",
+        "contentHash": "c1684b914b05a4d6d0aee14bd3f17109a190db4729ae9e4d7e1426611fb90c46",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "amountVnd": 499000,
+        "currency": "VND"
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "96fcc7c5-cb50-5084-ae64-5e2787c3478a",
+      "type": "STOCK",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": "SM613:trắng:S"
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:SM613:trắng:S",
+        "contentHash": "3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "status": "IN_STOCK",
+        "availableQuantity": 2
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "5b4c5c91-4676-5d5e-ad18-f6de9698a872",
+      "type": "STOCK",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": "SM613:trắng:M"
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:SM613:trắng:M",
+        "contentHash": "3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "status": "IN_STOCK",
+        "availableQuantity": 2
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "646972fe-2a3e-5bf3-a0e1-0d79c3cb3fea",
+      "type": "STOCK",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": "SM613:trắng:L"
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:SM613:trắng:L",
+        "contentHash": "fbb310e6905bce59f8ace96eea6659d13ba81fa7597c676b74c82ab2f5ce6e23",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "status": "OUT_OF_STOCK",
+        "availableQuantity": 0
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "16907740-03c4-58ca-a440-9a9908393790",
+      "type": "STOCK",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": "SM613:xanh nhạt:S"
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:SM613:xanh nhạt:S",
+        "contentHash": "3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "status": "IN_STOCK",
+        "availableQuantity": 2
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "deb335b9-e572-5939-a2a8-5389c66c032a",
+      "type": "STOCK",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": "SM613:xanh nhạt:M"
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:SM613:xanh nhạt:M",
+        "contentHash": "3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "status": "IN_STOCK",
+        "availableQuantity": 2
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "deed2756-2e59-5102-ae96-fdb713a7bf45",
+      "type": "STOCK",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": "SM613:xanh nhạt:L"
+      },
+      "provenance": {
+        "authority": "POS_SNAPSHOT",
+        "sourceVersion": "AUTHORED_SYNTHETIC_EVALUATION:authored-evaluation-r5-v1",
+        "evidenceRef": "fixture:SM613:SM613:xanh nhạt:L",
+        "contentHash": "3e9f03a1f23d43a4ea9ad2cd758bfcbcb521a3472709df099cc8c56999cd3253",
+        "observedAt": "2026-10-06T02:59:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "value": {
+        "status": "IN_STOCK",
+        "availableQuantity": 2
+      },
+      "authorization": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "claimId": "86211d98-1443-51f5-a905-cc9a679fa27e",
+      "scope": {
+        "kind": "PRODUCT",
+        "productId": "SM613",
+        "variantId": null
+      },
+      "provenance": {
+        "authority": "VERIFIED_SIZE_ENGINE_V1",
+        "sourceVersion": "VERIFIED_SIZE_ENGINE_V1:2026-10-06T03:00:00.000Z",
+        "evidenceRef": "size-engine:v1:86211d98-1443-51f5-a905-cc9a679fa27e:synthetic-body-r5:SM613:388fb2e4-5151-5f91-a81c-b30cd4fe9036:1:measurements:6f423570bb69b20b038a6004bf760d8eb9ca9262c51f40bdb3eeaaf588306f15",
+        "contentHash": "1fe81c9c9c562e94dfa82e989ed6c22f7c2db0d9c8d88251721cead4d8922390",
+        "observedAt": "2026-10-06T03:00:00.000Z",
+        "expiresAt": "2026-10-06T03:05:00.000Z"
+      },
+      "authorization": "NONE",
+      "type": "SIZE_FIT",
+      "value": {
+        "recommendedSizes": [
+          "M"
+        ],
+        "alternativeSizes": [],
+        "customerProfileId": "388fb2e4-5151-5f91-a81c-b30cd4fe9036",
+        "customerProfileRevision": 1,
+        "measurementFingerprint": "6f423570bb69b20b038a6004bf760d8eb9ca9262c51f40bdb3eeaaf588306f15",
+        "evidenceBasis": "MEASUREMENTS"
+      }
+    }
+  ],
+  "policyLiterals": [
+    {
+      "ref": "exchange:r5",
+      "text": "{\"exchange\":{\"windowDaysFromReceipt\":15,\"maxExchangesPerOrder\":1,\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"saleRestriction\":{\"discountThresholdBps\":3000,\"allowedActions\":[\"SIZE\",\"COLOR\"]},\"requiredConditions\":{\"originalTags\":true,\"unused\":true,\"unwashed\":true,\"clean\":true,\"undamaged\":true},\"totalTwoWayShippingFeeVnd\":30000,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\"},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100,\"refundBusinessDaysMin\":1,\"refundBusinessDaysMax\":3,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\"},\"inspection\":{\"tryOnMode\":\"HOLD_UP_ONLY\",\"refusedParcelShippingFeeVnd\":30000},\"marketplacePricing\":{\"shopeePriceMatch\":false,\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\"},\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true}}",
+      "sourceVersion": "REPOSITORY_EVALUATION_SNAPSHOT:shop-policy-customer-care-v2",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z"
+    },
+    {
+      "ref": "shipping-fee:r5",
+      "text": "Nội thànhTP.HCM: tổng hàng dưới700.000đ phí25.000đ; từ700.000đ miễn phí. Ngoài phạm vi này chưa có mức phí được cung cấp. Nơi giao của khách chưa xác lập; mức nội thành nêu trên là chính sách chung, chưa phải phí, tổng hoặc ưu đãi áp cho khách.",
+      "sourceVersion": "authored-evaluation-shipping-scope-r15",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z"
+    },
+    {
+      "ref": "shipping-time:r5",
+      "text": "Nội thànhTP.HCM: dự kiến2–3ngày sau xác nhận đơn; đây là khoảng dự kiến, không phải cam kết ngày/giờ đến. Nơi giao của khách chưa xác lập; mức nội thành nêu trên là chính sách chung, chưa phải phí, tổng hoặc ưu đãi áp cho khách.",
+      "sourceVersion": "authored-evaluation-shipping-scope-r15",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z"
+    }
+  ],
+  "effectReceipts": [],
+  "state": {
+    "conversationOwner": "BOT",
+    "revision": 1,
+    "currentProductId": "SM613",
+    "factSnapshotVersion": "authored-evaluation-product-context-r15",
+    "bindingVersion": "binding-r5-v1",
+    "recipient": "synthetic-recipient",
+    "permission": true,
+    "privacyAllowed": true,
+    "consideredSize": "M",
+    "customerProfileId": "388fb2e4-5151-5f91-a81c-b30cd4fe9036",
+    "customerProfileRevision": 1,
+    "measurementFingerprint": "6f423570bb69b20b038a6004bf760d8eb9ca9262c51f40bdb3eeaaf588306f15"
+  },
+  "productProfiles": [
+    {
+      "ref": "profile:SM613",
+      "subjectRef": "SM613",
+      "authority": "EVALUATION_FIXTURE",
+      "sourceVersion": "authored-evaluation-product-context-r15",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z",
+      "contentHash": "306dacc0e155dbc01f38378a678168acfc51acfbbd0d649cbe6753df493563ce",
+      "details": {
+        "silhouette": "Hình thức bán: riêng áo. Sơ mi tay dài, dáng thẳng, cổ bẻ.",
+        "material": "Vải: 100% cotton dệt dày 180g/m², không co giãn. Phép thử của shop cho màu trắng: ánh sáng phòng, áo lót màu da — không thấy màu áo lót. Đèn ngược sáng — có thể thấy bóng áo lót.",
+        "colors": [
+          "trắng",
+          "xanh nhạt"
+        ],
+        "sizeChart": [
+          "CodeSizeInput: {\"status\":\"RECOMMENDED\",\"supportedInputs\":[\"BUST_CM\"],\"missingInputs\":[]}",
           "S: thành phẩm ngực100, vai38, dài62cm; cơ thể ngực82–87cm.",
           "M: ngực106, vai39, dài63cm; cơ thể ngực88–94cm.",
           "L: ngực112, vai40, dài64cm; cơ thể ngực95–100cm."

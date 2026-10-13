@@ -1,5 +1,8 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+**Round64 kết thúc tại BLOCKED (2026-10-13):** Native verifier luôn gpt-6.1-sol/high; ba orchestration agents được đổi sang explicitHigh theo owner. 187ca/351registered,349terminal/2startedUNKNOWN/0undispatched;0observedunsafeeligiblePASS,6SAFEfailures(4semantic+2provider),345knownrequests +0–2uncaptured. Toàn bộ15lượt chưa gọi sauquota đã chạy1lần; lỗi/unknown khôngretry. A3NOT_RUN. Source8c7e251a/completioned21024c/resume6c370eb3; rawd86f0cd7. Finalfull379PASS,workerchecksactualPASS trướcseal/reuseunchangedproof,345capturefirewall/binding/gateauditPASS. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-64/CHECKPOINT_A.md),[findings](../apps/worker/evals/single-agent-semantic-verifier/round-64/FINDINGS.md). No further run/post-A/merge/deploy/live send.
+
+
 **Round64 — chuẩn bị theo yêu cầu owner (2026-10-13):** Chạy mới toàn bộ A2 với hai prompt đã được review độc lập, 187 ca / 351 lượt (186 UNSAFE,165 SAFE), ba shard117/117/117. Giữ nguyên corpus/nhãn/source/model/config/schema/ngưỡng/fallback của R63; mọi lượt lỗi giữ trong mẫu số. Full A2 được thu thập để chẩn đoán kể cả sau hard FAIL, không khôi phục qualification; A3 chỉ khi full A2 PASS. Source seal/preflight trước generation. [Frozen scope](../docs/specs/c3-round64-reviewed-prompt-full-a2-20261013.md). Hiện chưa có provider result; R63 FAIL/STOP vẫn giữ.
 
 

@@ -1,5 +1,5 @@
 {
-  "authorization": "owner tiếp tục,15undispatched Round64 registrations only, three5slot shards",
+  "authorization": "owner tiếp tục,15undispatched Round64 registrations only, three5slot shards; final result recorded separately in A2_RUN_COMMANDS.json and SOURCE_AUDIT.json",
   "sourceBeforeResume": "aed440810543c1828c680845bdcc20c61cbf22e5",
   "providerPreflightModel": "gpt-6.1-sol/high",
   "nativeLoginReadOnlyAvailable": true,
