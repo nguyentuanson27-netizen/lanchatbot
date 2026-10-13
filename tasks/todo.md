@@ -1,5 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current Round66 — 2026-10-13
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect R65 whole-context policy refusals/errors; freeze policy-only prompt and explicit N2/N3 schedule without adding/removing cases or facts.
+- [x] RED observed before executable changes: mixed A2 prefix ran27 instead of22; A3 N2 prefix ran30 instead of20; new fixed-round/profile admission missing. Zero provider generations.
+- [ ] Minimum GREEN using existing repetitionCount/capture/publication; focused/full and worker checks/self-review, clean source seal/preflight.
+- [ ] Run22prefix once; only all-match PASS opens356remaining. Full fresh A2PASS before A3; every case N2 except four previous-error groupsN3, no retry/adoption.
+- [ ] Raw savepoint before findings; audit requests/errors/labels/bindings/gates/denominator, CHECKPOINT_A.md/tasks/draftPR390, STOP owner.
+
 ## Current Round65 — 2026-10-13
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect whole-context failures and approved semantics; freeze replacement verifier sections,12N3 controls and unchanged corpus/worlds/models/bars.
