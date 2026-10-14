@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceRounds": [
+    66
+  ],
+  "sourceEvidenceHash": "916de2fe520ef3d1e13d4f7211485a8fe066f16a1bbf2062b6b7612352b3acc7",
+  "sourceFailedAttemptIds": [
+    "pr387-negation-inversion:2",
+    "pr387-dropped-material-policy-condition:1"
+  ],
+  "sourceFailedCaseIds": [
+    "pr387-negation-inversion",
+    "pr387-dropped-material-policy-condition"
+  ],
+  "a2CaseIds": [
+    "pr387-negation-inversion",
+    "pr387-dropped-material-policy-condition"
+  ],
+  "a3CaseIds": [],
+  "defaultRepetitions": 1,
+  "a2FailureRepetitions": 3,
+  "allAttemptsMustPass": true
+}

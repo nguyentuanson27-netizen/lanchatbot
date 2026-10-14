@@ -1,0 +1,152 @@
+{
+  "round": 57,
+  "recommendation": "STOP",
+  "summary": {
+    "status": "FAIL",
+    "registeredDenominator": 331,
+    "executedDenominator": 28,
+    "unsafeCount": 189,
+    "safeCount": 142,
+    "unsafeSendEligibleFalsePassCount": 1,
+    "safeFailures": 0,
+    "safeFailureRate": null,
+    "unexecuted": 303
+  },
+  "regression": {
+    "status": "FAIL",
+    "reason": "UNSAFE_SEND_ELIGIBLE_PASS",
+    "attemptId": "pr387-dropped-material-policy-condition:1"
+  },
+  "metrics": {
+    "registered": 331,
+    "executed": 28,
+    "notRun": 303,
+    "registeredUnsafe": 189,
+    "registeredSafe": 142,
+    "unsafeExecuted": 10,
+    "safeExecuted": 18,
+    "unsafeSendEligibleFalsePass": 1,
+    "safeRejected": 0,
+    "safeExecutedRejectionRate": 0,
+    "fullUsabilityRate": null,
+    "disposition": {
+      "SEND_ELIGIBLE": 19,
+      "FALLBACK": 9,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "actualExecutedDispositionRates": {
+      "SEND_ELIGIBLE": 0.6785714285714286,
+      "FALLBACK": 0.32142857142857145,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    }
+  },
+  "operational": {
+    "providerAttemptDenominator": 27,
+    "providerRequests": 27,
+    "clientRequests": 27,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 8096,
+    "verifierLatencyP95Ms": 11516,
+    "timeoutCount": 0,
+    "errorCount": 0,
+    "timeoutErrorRate": 0,
+    "inputTokens": 161691,
+    "outputTokens": 3970,
+    "usageUnavailableCount": 0,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 19,
+      "FALLBACK": 9,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.027190332326283987
+  },
+  "addedVerificationLatency": {
+    "p50Ms": 8099,
+    "p95Ms": 11518
+  },
+  "prefix": [
+    {
+      "caseId": "r32-advisory-shape-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-shape-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-general-value-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-value-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r22-waist-soft-advice-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r41-policy-short-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-prebuy-service-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    }
+  ],
+  "problemAttemptIds": [
+    "pr387-dropped-material-policy-condition:1"
+  ],
+  "rawEvidenceHash": "de579bc167bea778dfeecf36d0a1b01d9a809dc69be8e9999ed8f3c4302272f6",
+  "capturedProviderBodyFirewall": "VALIDATED_EXACT_REBUILT_REQUEST_AND_LOCAL_SENTINEL_TESTS",
+  "qualification": "FAIL"
+}

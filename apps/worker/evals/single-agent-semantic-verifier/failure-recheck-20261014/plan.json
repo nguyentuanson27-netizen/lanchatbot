@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "runId": "R67_FAILURE_RECHECK_20261014_01",
+  "scope": "OWNER_AUTHORIZED_TARGETED_DIAGNOSTIC",
+  "baseRound": 67,
+  "preparationBaseSha": "2b7e42494eb70a929ceb8410d63cced6fe7c2812",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "fullCheckpointQualification": false,
+  "fullA2Run": false,
+  "fullA3Run": false,
+  "repetitions": 1,
+  "retries": 0,
+  "maxGenerationRequestsPerRoleAttempt": 1,
+  "a2CaseIds": [
+    "r48-trial-incomplete-reordered-unsafe",
+    "r13-safe-workday-advice",
+    "r41-ordinary-shape-workday-safe"
+  ],
+  "a3CaseIds": [
+    "r5-try-exchange",
+    "r5-competitor-price",
+    "r5-delivery-timing",
+    "r12-pants-known-waist",
+    "r14-workday-choice",
+    "r14-stage-light-change",
+    "r15-fit-reassurance",
+    "r15-known-waist-next"
+  ],
+  "sourceA2Attempts": [
+    "r48-trial-incomplete-reordered-unsafe:1",
+    "r13-safe-workday-advice:1",
+    "r41-ordinary-shape-workday-safe:1"
+  ],
+  "sourceA3Attempts": [
+    "r5-try-exchange:1",
+    "r5-competitor-price:1",
+    "r5-delivery-timing:1",
+    "r12-pants-known-waist:1",
+    "r14-workday-choice:1",
+    "r14-stage-light-change:1",
+    "r15-fit-reassurance:1",
+    "r15-known-waist-next:1"
+  ],
+  "ownerPrompt": {
+    "file": "prompts/fashion-sales-owner-size-intake-preparation-20261014.vi.txt",
+    "hash": "d77cf63c96522bbfd5e900458f5969d2020d69d723c8cbd88344e0d02e3f9acf"
+  },
+  "models": {
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+      "generationConfig": {
+        "transport": "VERTEX_SINGLE_REQUEST_TEXT",
+        "wireApi": "generateContent",
+        "projectId": "project-388db62b-f5a4-4e76-a2b",
+        "location": "global",
+        "endpoint": "https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent",
+        "tools": [],
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false,
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "topK": "OMITTED_PROVIDER_DEFAULT",
+        "penalties": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": 8192,
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+        "tokenRefresh": "BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY"
+      }
+    }
+  },
+  "verifierPromptHash": "8288e06dc59da5f7f5ff98923ce2fa2192e8f4047adff4986cb0d884322a2a81",
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "frozenFiles": {
+    "round-67/manifest.json": "5785b705acc75ad7cb43f33cc7a95ca8a62ed5e772fec85dd9966437d8c26e23",
+    "round-67/corpus-a2.json": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "round-67/corpus-a3.json": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203",
+    "round-67/a2-evidence.json": "ae834e2edb61d6f568f397f8fd4973ba07d85a39abba80f0591508d9fc0a23bc",
+    "round-67/a3-evidence.json": "9d2b865b6c202810918ae86f8563c8a86cd839e596e6ae85d93e07f17beecd15",
+    "round-67/a3-primary-scores.json": "befd0e283e45e15371a3ea46e602026fb2b1cc4963d56b39e1aa429858ead0c7"
+  },
+  "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "vertexExecutableHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe",
+  "registeredAttempts": [
+    {
+      "phase": "A2",
+      "caseId": "r48-trial-incomplete-reordered-unsafe",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A2/r48-trial-incomplete-reordered-unsafe:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A2",
+      "caseId": "r13-safe-workday-advice",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A2/r13-safe-workday-advice:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A2",
+      "caseId": "r41-ordinary-shape-workday-safe",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A2/r41-ordinary-shape-workday-safe:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r5-try-exchange",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-try-exchange:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r5-competitor-price",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-competitor-price:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r5-delivery-timing",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-delivery-timing:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r12-pants-known-waist",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r12-pants-known-waist:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r14-workday-choice",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r14-workday-choice:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r14-stage-light-change",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r14-stage-light-change:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r15-fit-reassurance",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r15-fit-reassurance:1",
+      "repetition": 1
+    },
+    {
+      "phase": "A3",
+      "caseId": "r15-known-waist-next",
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r15-known-waist-next:1",
+      "repetition": 1
+    }
+  ],
+  "denominator": {
+    "a2": 3,
+    "a3": 8,
+    "total": 11,
+    "maximumGenerationRequests": 19
+  },
+  "execution": "All requested diagnostic cases once, even after a SAFE refusal; stop only on source/persistence failure or provider capacity/auth block. Every error/unknown/unrun retained. No qualification or automatic full run.",
+  "scoring": "Whole actual terminal outcome using existing R67 bars and latest owner ask-before-size clarification. No keyword/fact-count grading, no human or independent scores fabricated.",
+  "knownExcludedA2": "customer-injection malformed ref and oversized-context deterministic rejection are not the three SAFE usability failures requested here; prior records remain unchanged."
+}

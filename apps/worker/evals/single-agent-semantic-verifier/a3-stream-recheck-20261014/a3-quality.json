@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "denominator": 3,
+  "scored": 3,
+  "families": {
+    "correction": {
+      "denominator": 1,
+      "passed": 1,
+      "passRate": 1
+    },
+    "simple": {
+      "denominator": 1,
+      "passed": 1,
+      "passRate": 1
+    },
+    "concern": {
+      "denominator": 1,
+      "passed": 1,
+      "passRate": 1
+    }
+  },
+  "terminalFailureRate": 0,
+  "rows": [
+    {
+      "attemptId": "r5-referent-navy:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "family": "simple",
+      "mean": 1.9,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r15-fit-reassurance:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    }
+  ]
+}

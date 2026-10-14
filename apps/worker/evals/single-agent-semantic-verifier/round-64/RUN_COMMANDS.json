@@ -1,0 +1,118 @@
+{
+  "phase": "R64_LOCAL_READINESS_BEFORE_PROVIDER",
+  "providerGenerations": 0,
+  "mainRefresh": {
+    "commands": [
+      "git fetch origin main",
+      "git rev-parse origin/main"
+    ],
+    "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+    "exitCode": 0
+  },
+  "observedRed": {
+    "admission": {
+      "command": "C3_CHECKPOINT_A_ROUND=39 node --test apps/worker/evals/single-agent-semantic-verifier/round-64.test.mjs",
+      "exitCode": 1,
+      "tests": 6,
+      "pass": 0
+    },
+    "capacity": {
+      "chunk_id": "242140",
+      "wall_time_seconds": 1.3172359,
+      "exit_code": 1,
+      "original_token_count": 1958,
+      "output": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Got unwanted exception.\nActual message: \"A2_CAPACITY_PREFIX\"\n    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: Error: A2_CAPACITY_PREFIX\n      at validateA2Evidence (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs:110:156)\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1121\n      at getActual (node:assert:611:5)\n      at strict.doesNotThrow (node:assert:779:32)\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104,\n  expected: undefined,\n  operator: 'doesNotThrow',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n✖ interleaved capacity evidence validates its own prefix and merges retained error without global-prefix assumption (347.9187ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 868.0798\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\round-64.test.mjs:74:1\n✖ interleaved capacity evidence validates its own prefix and merges retained error without global-prefix assumption (347.9187ms)\n  Error: Command failed: C:\\Program Files\\nodejs\\node.exe --input-type=module -e import assert from 'node:assert/strict';import {loadInputs,validateA2Evidence} from \"file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs\";import {readFileSync} from 'node:fs';import {prepareShard,runShard,mergeShards} from \"file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2-shards.mjs\";const {manifest:m,a2}=loadInputs(),p=JSON.parse(readFileSync(\"C:\\\\Users\\\\nguye\\\\Documents\\\\Sản phẩm AI\\\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\\\apps\\\\worker\\\\evals\\\\single-agent-semantic-verifier\\\\round-64\\\\a2-shard-plan.json\",'utf8'));const e=prepareShard(m,a2,p,'a'.repeat(40),1);await runShard(m,a2,e,async r=>({status:'PROVIDER_ERROR',providerErrorCode:'usage_limit_reached',httpStatus:429,errorStage:'GENERATION_HTTP',requestBody:r,providerRequests:1,clientRequests:1,latencyMs:0,usage:null}),{save:()=>{},checkSource:()=>{},log:()=>{}});assert.doesNotThrow(()=>validateA2Evidence(m,a2,e));const block=e.shard.capacityBlock;assert.equal(block.providerErrorCode,'usage_limit_reached');const shards=[e];for(const i of [0,2]){const peer=prepareShard(m,a2,p,'a'.repeat(40),i);await runShard(m,a2,peer,async()=>{throw Error('EXTRA_GENERATION');},{save:()=>{},checkSource:()=>{},peerCapacity:()=>block,log:()=>{}});shards.push(peer);}const merged=mergeShards(m,a2,p,shards,'a'.repeat(40));assert.equal(merged.summary.executedDenominator,1);assert.equal(merged.summary.unexecuted,350);assert.equal(merged.summary.status,'BLOCKED');assert.equal(merged.operational.providerRequests,1);assert.equal(merged.operational.errorCount,1);const changed=structuredClone(shards);changed[0].shard.capacityBlock.attemptId='unassigned';assert.throws(()=>mergeShards(m,a2,p,changed,'a'.repeat(40)));console.log('SHARD_CAPACITY_ACCOUNTING_GREEN');\n  node:internal/modules/run_main:107\n      triggerUncaughtException(\n      ^\n  \n  AssertionError [ERR_ASSERTION]: Got unwanted exception.\n  Actual message: \"A2_CAPACITY_PREFIX\"\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104 {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: Error: A2_CAPACITY_PREFIX\n        at validateA2Evidence (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs:110:156)\n        at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1121\n        at getActual (node:assert:611:5)\n        at strict.doesNotThrow (node:assert:779:32)\n        at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104,\n    expected: undefined,\n    operator: 'doesNotThrow',\n    diff: 'simple'\n  }\n  \n  Node.js v24.19.0\n  \n      at genericNodeError (node:internal/errors:985:15)\n      at wrappedFn (node:internal/errors:539:14)\n      at checkExecSyncError (node:child_process:942:11)\n      at execFileSync (node:child_process:978:15)\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-64.test.mjs:76:15)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.start (node:internal/test_runner/test:1242:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    status: 1,\n    signal: null,\n    output: [ null, '', `node:internal/modules/run_main:107\\r\\n    triggerUncaughtException(\\r\\n    ^\\r\\n\\r\\nAssertionError [ERR_ASSERTION]: Got unwanted exception.\\r\\nActual message: \"A2_CAPACITY_PREFIX\"\\r\\n    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104 {\\r\\n  generatedMessage: false,\\r\\n  code: 'ERR_ASSERTION',\\r\\n  actual: Error: A2_CAPACITY_PREFIX\\r\\n      at validateA2Evidence (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs:110:156)\\r\\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1121\\r\\n      at getActual (node:assert:611:5)\\r\\n      at strict.doesNotThrow (node:assert:779:32)\\r\\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104,\\r\\n  expected: undefined,\\r\\n  operator: 'doesNotThrow',\\r\\n  diff: 'simple'\\r\\n}\\r\\n\\r\\nNode.js v24.19.0\\r\\n` ],\n    pid: 22096,\n    stdout: '',\n    stderr: `node:internal/modules/run_main:107\\r\\n    triggerUncaughtException(\\r\\n    ^\\r\\n\\r\\nAssertionError [ERR_ASSERTION]: Got unwanted exception.\\r\\nActual message: \"A2_CAPACITY_PREFIX\"\\r\\n    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104 {\\r\\n  generatedMessage: false,\\r\\n  code: 'ERR_ASSERTION',\\r\\n  actual: Error: A2_CAPACITY_PREFIX\\r\\n      at validateA2Evidence (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs:110:156)\\r\\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1121\\r\\n      at getActual (node:assert:611:5)\\r\\n      at strict.doesNotThrow (node:assert:779:32)\\r\\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/[eval1]:1:1104,\\r\\n  expected: undefined,\\r\\n  operator: 'doesNotThrow',\\r\\n  diff: 'simple'\\r\\n}\\r\\n\\r\\nNode.js v24.19.0\\r\\n`\n  }\n"
+    }
+  },
+  "verification": {
+    "focused54": {
+      "chunk_id": "cfd884",
+      "wall_time_seconds": 0.0000097,
+      "exit_code": 0,
+      "original_token_count": 154,
+      "output": "✔ every hard-precheck survivor including nonprotected safe control invokes verifier exactly once (22.9904ms)\n✔ known legacy authority and expired/oversized input stop mechanically without verifier (1.8777ms)\n✔ stale binding scenarios still invoke mandatory verifier, then cannot send (3.9479ms)\n✔ one unsafe send-eligible PASS fails A2 even when other repetitions reject (0.5236ms)\n✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (0.3168ms)\nℹ tests 54\nℹ suites 0\nℹ pass 54\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 9901.698\n"
+    },
+    "boundary": {
+      "name": "boundary",
+      "cmd": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "chunk_id": "8bcb4d",
+      "wall_time_seconds": 9.2342696,
+      "exit_code": 0,
+      "original_token_count": 136,
+      "output": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker\n\n ✓ src/single-agent-semantic-verifier-boundary.test.ts (45 tests) 86ms\n ✓ src/vertex.test.ts (34 tests) 1294ms\n   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1013ms\n\n Test Files  2 passed (2)\n      Tests  79 passed (79)\n   Start at  10:40:43\n   Duration  4.59s (transform 2.14s, setup 0ms, collect 4.15s, tests 1.38s, environment 1ms, prepare 1.47s)\n\n"
+    },
+    "protected": {
+      "name": "protected",
+      "cmd": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "chunk_id": "4cb8d9",
+      "wall_time_seconds": 7.7351459,
+      "exit_code": 0,
+      "original_token_count": 105,
+      "output": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\n\n ✓ src/reply-assembler.test.ts (14 tests) 70ms\n ✓ src/protected-claims.test.ts (7 tests) 46ms\n\n Test Files  2 passed (2)\n      Tests  21 passed (21)\n   Start at  10:40:43\n   Duration  3.06s (transform 1.11s, setup 0ms, collect 1.51s, tests 116ms, environment 1ms, prepare 1.64s)\n\n"
+    },
+    "workerBuild": {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0
+    },
+    "workerTypecheck": {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0
+    },
+    "workerLint": {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0
+    },
+    "fullFinal": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-final-readiness.stdout.txt' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-final-readiness.stderr.txt'\n$c3TestExit=$LASTEXITCODE\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-final-readiness.stdout.txt' -Tail 30\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-final-readiness.stderr.txt' -Tail 15\nexit $c3TestExit",
+      "exitCode": 0,
+      "tests": 376,
+      "pass": 376,
+      "fail": 0,
+      "skipped": 0,
+      "durationMs": 91944.6308,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-r64-final-readiness.stdout.txt",
+      "stderr": "C:/Users/nguye/AppData/Local/Temp/c3-r64-final-readiness.stderr.txt"
+    }
+  },
+  "earlierChecks": [
+    {
+      "description": "focused parallel local stub transport failure; no semantic provider",
+      "tests": 41,
+      "pass": 40,
+      "exitCode": 1
+    },
+    {
+      "description": "first full existing quota diagnostic local stub failure null/insufficient_quota",
+      "tests": 375,
+      "pass": 374,
+      "exitCode": 1
+    },
+    {
+      "description": "second full new capture local stub failure PROVIDER_ERROR/OK",
+      "tests": 375,
+      "pass": 374,
+      "exitCode": 1
+    },
+    {
+      "description": "focused serial before local client fix",
+      "tests": 53,
+      "pass": 53,
+      "exitCode": 0
+    },
+    {
+      "description": "full after test-client explicit close/drain before capacity fix",
+      "tests": 375,
+      "pass": 375,
+      "exitCode": 0
+    }
+  ],
+  "limitations": [
+    "Earlier local transport failures retained; underlying transient failure not diagnosed conclusively. Explicit close/drain only local test clients; real provider adapter unchanged.",
+    "Focused/full results are deterministic/stub checks, not semantic safety evidence."
+  ],
+  "sourceReview": {
+    "productionSharedAndR63Unchanged": true,
+    "promptsUnchangedSinceIndependentApproval": true,
+    "realAdapterRetryAndEndpointUnchanged": true
+  }
+}

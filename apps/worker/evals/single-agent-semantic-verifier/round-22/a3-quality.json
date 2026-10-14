@@ -1,0 +1,329 @@
+{
+  "status": "FAIL",
+  "denominator": 42,
+  "scored": 42,
+  "families": {
+    "concern": {
+      "denominator": 11,
+      "passed": 7,
+      "passRate": 0.6363636363636364
+    },
+    "partial": {
+      "denominator": 9,
+      "passed": 7,
+      "passRate": 0.7777777777777778
+    },
+    "correction": {
+      "denominator": 10,
+      "passed": 6,
+      "passRate": 0.6
+    },
+    "policy": {
+      "denominator": 9,
+      "passed": 8,
+      "passRate": 0.8888888888888888
+    },
+    "simple": {
+      "denominator": 3,
+      "passed": 3,
+      "passRate": 1
+    }
+  },
+  "terminalFailureRate": 0.11904761904761904,
+  "rows": [
+    {
+      "attemptId": "r5-workday-comfort:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-wardrobe-budget:1",
+      "family": "concern",
+      "mean": 1.8,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-white-opacity:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-size-price-stock:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-missing-customer-size:1",
+      "family": "partial",
+      "mean": 1.9,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-white-variant-alternative:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-delivery-timing:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-correct-product:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-correct-measurement:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-referent-navy:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-budget-correction:1",
+      "family": "correction",
+      "mean": 1.8,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-defer:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-try-exchange:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-exchange-cost:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-shipping-threshold:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "family": "simple",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-simple-stock:1",
+      "family": "simple",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r5-simple-ack:1",
+      "family": "simple",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r7-price-ready-fit:1",
+      "family": "concern",
+      "mean": 1.9,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r7-shirt-missing-measure:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r7-opacity-context-change:1",
+      "family": "policy",
+      "mean": 1.7,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r7-exchange-after-use:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r12-office-color:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r12-pants-known-waist:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r12-change-color-only:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r12-indoor-exchange-eligible:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r14-workday-choice:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r14-pants-size-input:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r14-stage-light-change:1",
+      "family": "correction",
+      "mean": 1.7,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r14-refund-before-buy:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r14-freeship-extra-pants:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r15-value-use:1",
+      "family": "concern",
+      "mean": 0.5,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r15-fit-reassurance:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r15-known-waist-next:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r15-color-final-confirm:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r16-effort-and-use:1",
+      "family": "concern",
+      "mean": 0.5,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r16-budget-alternative:1",
+      "family": "partial",
+      "mean": 0.5,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r16-change-to-indoor-dress:1",
+      "family": "correction",
+      "mean": 0.5,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:1",
+      "family": "correction",
+      "mean": 0.5,
+      "pass": false,
+      "factualActionSafety": 2
+    }
+  ]
+}

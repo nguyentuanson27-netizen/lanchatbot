@@ -1,0 +1,177 @@
+{
+  "status": "ACCOUNTING_PROVENANCE_FIREWALL_PASS_SEMANTICS_FAIL",
+  "recordedAt": "2026-10-11T04:14:09.374Z",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "1458b340d4015cf8e1421dc797e04ff299211971",
+  "priorA2RunSourceSha": "ebca9492b4c31eb933e9920595413847385159b4",
+  "a2CompletionRunSourceSha": "ca9e6230cff7f29d2c5d7b082dc369dedd9cbf79",
+  "priorRawCommit": "97726d140e55e00940a4c9c8c9fa2e536638510f",
+  "completionRawCommit": "3d5f75330f655335f42832ec628ee81252fe3cdb",
+  "priorEvidenceHash": "f2f7b10b5db641ca80fbef142cc31a9551ee54519243f5ae39f6157d15934e4b",
+  "completionEvidenceHash": "ed3c76269dfa9640d70d6dc60b375a09e9b16c9321d74b2c6de5ddd80833807a",
+  "logicalRegisteredDenominator": 235,
+  "completedLogicalOutcomes": 218,
+  "preservedOutcomes": 168,
+  "completionRegistered": 67,
+  "completionExecuted": 50,
+  "completionUnexecuted": 17,
+  "executedUnsafe": 126,
+  "executedSafe": 92,
+  "semanticVerdictUnsafe": 96,
+  "semanticVerdictSafe": 64,
+  "unsafeSendEligibleFalsePassCount": 1,
+  "unsafeHardStopAt": "r45-observed-trial-false-pass-unsafe:1",
+  "safeTerminalFailures": 32,
+  "safeAuthFailures": 27,
+  "safeHttp503Failures": 1,
+  "safeSemanticRejections": 4,
+  "summary": {
+    "status": "FAIL",
+    "registeredDenominator": 235,
+    "executedDenominator": 218,
+    "unsafeCount": 134,
+    "safeCount": 101,
+    "unsafeSendEligibleFalsePassCount": 1,
+    "safeFailures": 32,
+    "safeFailureRate": null,
+    "unexecuted": 17
+  },
+  "completionOperational": {
+    "providerAttemptDenominator": 50,
+    "providerRequests": 50,
+    "clientRequests": 50,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 7112,
+    "verifierLatencyP95Ms": 12140,
+    "timeoutCount": 0,
+    "errorCount": 0,
+    "timeoutErrorRate": 0,
+    "inputTokens": 231465,
+    "outputTokens": 8881,
+    "usageUnavailableCount": 0,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 20,
+      "FALLBACK": 30,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.6
+  },
+  "combinedRecordedOperational": {
+    "providerAttemptDenominator": 214,
+    "providerRequests": 161,
+    "clientRequests": 214,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 6062,
+    "verifierLatencyP95Ms": 11359,
+    "timeoutCount": 0,
+    "errorCount": 54,
+    "timeoutErrorRate": 0.2523364485981308,
+    "inputTokens": 726604,
+    "outputTokens": 21876,
+    "usageUnavailableCount": 54,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 61,
+      "FALLBACK": 152,
+      "HANDOFF": 5,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.6680851063829787
+  },
+  "addedVerificationLatency": {
+    "completion": {
+      "p50Ms": 7118,
+      "p95Ms": 12142
+    },
+    "combined": {
+      "p50Ms": 6065,
+      "p95Ms": 11376
+    }
+  },
+  "retainedOutcomeDispositionRates": {
+    "completion": {
+      "denominator": 50,
+      "fallbackHandoffNoSend": 30,
+      "rate": 0.6
+    },
+    "combined": {
+      "denominator": 218,
+      "fallbackHandoffNoSend": 157,
+      "rate": 0.7201834862385321
+    }
+  },
+  "fullSafeUsabilityRate": null,
+  "minimumAttainableFullSafeFailureRate": 0.31683168316831684,
+  "completeOriginalTransportAccounting": false,
+  "accountingUnknown": "Original runner did not persist dispatch starts. The first missing slot may have had an unrecorded invocation; original evidence is retained and its total transport count is not certified complete.",
+  "capturedRuntimeRequestBodiesChecked": 214,
+  "duplicateRequestIds": 0,
+  "unchangedSourceAndFrozenInputs": [
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/manifest.json",
+      "sha256": "130be5d1b59debf0c24367890e09a3639000e01ca6c42a1540bb8fef922cf7b2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/corpus-a2.json",
+      "sha256": "e95ad5d0a3d730ef57e8dea611f2b77130092f6b07a296a8d40680300dccea5b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/corpus-a3.json",
+      "sha256": "a0438f119ba6db24d339b51ad03ba3a8630c068e6c78282e457c14dbf07a0176"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/fashion-profiles.json",
+      "sha256": "e71c7246ebfcdc65cd3fb12ae8245adcda44159a2d5373ef7c92305b92c29763"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/size-inputs.json",
+      "sha256": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/quote-inputs.json",
+      "sha256": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/context-preparation.json",
+      "sha256": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/round-47/reference-replies.json",
+      "sha256": "08ece3be422b42248803ad03ae6bccb743966741a8d6e0013dac8a6ab198e62b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round47.vi.txt",
+      "sha256": "962a0963b2e9f1ae77fab622d6b6cc6f9eff4fd11a0f20c3da072022d4f3e0e7"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round47.vi.txt",
+      "sha256": "e47b064d870402941d0a4d9de86c11587d0879534222e7e4d020ef171ea4118e"
+    },
+    {
+      "path": "docs/specs/c3-round47-direct-buying-advice-and-policy-act-20261011.md",
+      "sha256": "67a189010e8cad165b1d3d4bdd98de1bdf007196a548d50d587b132a508bde45"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "sha256": "d0ab33e2ca748e951f55001df85c25932a76619f7ed3308e1e13a8523a9a35df"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs",
+      "sha256": "47a079cb10366e6778ef28319ab70a465262e5887efe629b7822bdfe57935e83"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs",
+      "sha256": "973b95f099cc4ca16ab82bd99d87d62b5acd9b475598dde668da922f7a6787bb"
+    }
+  ],
+  "compiledBoundaryHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "a3Status": "NOT_RUN",
+  "a3RunSourceSha": null,
+  "rolesOrSemanticLayersAdded": 0,
+  "offlineReviewersRequestedByOwner": 2,
+  "productionWiring": false
+}

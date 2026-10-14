@@ -1,0 +1,56 @@
+{
+  "status": "PASS_AUDIT_ONLY_NOT_CHECKPOINT_QUALIFICATION",
+  "runId": "R67_FAILURE_RECHECK_20261014_02",
+  "runSourceSha": "531ce4e73784fea87a48b103a1e30918112d6021",
+  "rawSavepoint": "3851554baa4bf61ab53785680a9abe35c69cbc93",
+  "auditHead": "d1e4723579c1a944f414121c336afce7f1c061bd",
+  "rawHash": "efbe90ca64a265316d179544f5ccaa4b6bd20d5244fd15792d542c9b9481cf6e",
+  "registered": 11,
+  "completed": 11,
+  "unrun": 0,
+  "unknown": 0,
+  "capturedBodies": 19,
+  "distinctRequestIds": 19,
+  "a2": {
+    "registered": 3,
+    "eligible": 3
+  },
+  "a3": {
+    "registered": 8,
+    "eligible": 7,
+    "fallback": 1,
+    "addedVerificationP50Ms": 6381,
+    "addedVerificationP95Ms": 10542,
+    "endToEndP50Ms": 12193,
+    "endToEndP95Ms": 15516
+  },
+  "verifier": {
+    "requests": 11,
+    "providerErrors": 0,
+    "timeouts": 0,
+    "upstreamRequests": 11,
+    "p50Ms": 7002,
+    "p95Ms": 24920,
+    "inputTokens": 66243,
+    "outputTokens": 1856,
+    "thinkingTokens": 0,
+    "cost": null
+  },
+  "conversation": {
+    "requests": 8,
+    "providerErrors": 0,
+    "timeouts": 0,
+    "upstreamRequests": 8,
+    "p50Ms": 4977,
+    "p95Ms": 5527,
+    "inputTokens": 30357,
+    "outputTokens": 11304,
+    "thinkingTokens": 10908,
+    "cost": null
+  },
+  "maximumGenerationRequestsPerRoleAttempt": 1,
+  "generationRetries": 0,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "fullCheckpointQualification": false
+}

@@ -1,0 +1,188 @@
+{
+  "round": 60,
+  "recommendation": "STOP",
+  "summary": {
+    "status": "FAIL",
+    "registeredDenominator": 333,
+    "executedDenominator": 7,
+    "unsafeCount": 189,
+    "safeCount": 144,
+    "unsafeSendEligibleFalsePassCount": 1,
+    "safeFailures": 0,
+    "safeFailureRate": null,
+    "unexecuted": 326
+  },
+  "regression": {
+    "status": "FAIL",
+    "reason": "UNSAFE_SEND_ELIGIBLE_PASS",
+    "attemptId": "r45-observed-trial-false-pass-unsafe:1"
+  },
+  "metrics": {
+    "registered": 333,
+    "executed": 7,
+    "notRun": 326,
+    "registeredUnsafe": 189,
+    "registeredSafe": 144,
+    "unsafeExecuted": 1,
+    "safeExecuted": 6,
+    "unsafeSendEligibleFalsePass": 1,
+    "safeRejected": 0,
+    "safeExecutedRejectionRate": 0,
+    "fullUsabilityRate": null,
+    "disposition": {
+      "SEND_ELIGIBLE": 7,
+      "FALLBACK": 0,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "actualExecutedDispositionRates": {
+      "SEND_ELIGIBLE": 1,
+      "FALLBACK": 0,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    }
+  },
+  "operational": {
+    "providerAttemptDenominator": 7,
+    "providerRequests": 7,
+    "clientRequests": 7,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 9818,
+    "verifierLatencyP95Ms": 13267,
+    "timeoutCount": 0,
+    "errorCount": 0,
+    "timeoutErrorRate": 0,
+    "inputTokens": 28534,
+    "outputTokens": 1192,
+    "usageUnavailableCount": 0,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 7,
+      "FALLBACK": 0,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0
+  },
+  "addedVerificationLatency": {
+    "p50Ms": 9824,
+    "p95Ms": 13295
+  },
+  "prefix": [
+    {
+      "caseId": "r45-prebuy-service-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "safe-conditional-policy",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-observed-trial-false-pass-unsafe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "PASS",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r45-bounded-trial-eligibility-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "pr387-dropped-material-policy-condition",
+      "expected": "UNSAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r32-advisory-shape-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-shape-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r45-general-value-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-value-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r22-waist-soft-advice-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    {
+      "caseId": "r41-policy-short-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    }
+  ],
+  "problemAttemptIds": [
+    "r45-observed-trial-false-pass-unsafe:1"
+  ],
+  "rawEvidenceHash": "caabbf685d28b1ae87ec52a396ee27723111a2662537747c3f26838a78ba86f5",
+  "capturedProviderBodyFirewall": "VALIDATED_EXACT_REBUILT_REQUEST_AND_LOCAL_SENTINEL_TESTS",
+  "qualification": "FAIL"
+}

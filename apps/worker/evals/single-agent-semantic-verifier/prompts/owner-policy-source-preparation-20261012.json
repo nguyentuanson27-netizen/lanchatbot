@@ -1,0 +1,23 @@
+{
+  "status": "PREPARATION_ONLY_NOT_FROZEN_FOR_PROVIDER",
+  "source": {
+    "kind": "OWNER_CHAT_CLARIFICATION",
+    "sourceVersion": "owner-policy-clarification-20261012",
+    "recordedOn": "2026-10-12",
+    "historicalRepositorySource": "shop-policy-customer-care-v2",
+    "historicalRepositorySourceIsCurrentPolicy": false
+  },
+  "policyLiterals": [
+    {
+      "ref": "customer-care:owner-20261012",
+      "text": "Khi kiểm tra hàng chỉ được ướm vào người, không được mặc thử. Chỉ chấp nhận đổi do lỗi shop, như lỗi sản xuất hoặc giao sai size/mẫu.",
+      "sourceVersion": "owner-policy-clarification-20261012"
+    }
+  ],
+  "notEstablishedForThisRule": [
+    "Thời hạn và mốc tính của đổi do lỗi shop",
+    "Phí vận chuyển và bên chịu phí",
+    "Dịch vụ trả/hoàn tiền và thời gian xử lý",
+    "Các điều kiện hàng độc lập nếu có"
+  ]
+}

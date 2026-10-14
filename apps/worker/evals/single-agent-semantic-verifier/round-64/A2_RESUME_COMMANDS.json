@@ -1,0 +1,39 @@
+{
+  "authorization": "owner tiếp tục,15undispatched Round64 registrations only, three5slot shards; final result recorded separately in A2_RUN_COMMANDS.json and SOURCE_AUDIT.json",
+  "sourceBeforeResume": "aed440810543c1828c680845bdcc20c61cbf22e5",
+  "providerPreflightModel": "gpt-6.1-sol/high",
+  "nativeLoginReadOnlyAvailable": true,
+  "red": {
+    "command": "C3_CHECKPOINT_A_ROUND=64 A2_RUN_SOURCE_SHA=aed440810543c1828c680845bdcc20c61cbf22e5 node apps/worker/evals/single-agent-semantic-verifier/complete-a2-round64.mjs --resume-remaining --shard=0 --preflight",
+    "exitCode": 1,
+    "reason": "R64_COMPLETION_ALREADY_STARTED",
+    "providerGenerations": 0
+  },
+  "focused": {
+    "chunk_id": "fc27ed",
+    "wall_time_seconds": 7.1070648,
+    "exit_code": 0,
+    "original_token_count": 335,
+    "output": "✔ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (243.4227ms)\n✔ completion rejects changed raw evidence, source or overlap before provider invocation (62.6297ms)\n✔ resuming15undispatched retains334outcomes including quotaerror and2started unknowns without retries (293.9192ms)\n✔ round64 admits only reviewed prompts with identical corpus, policy, authority and config (430.424ms)\n✔ full351 slots partition117each; duplicate allocations or altered registrations fail closed (17.3514ms)\n✔ all surviving fixture wire captures exclude evaluator labels and preserve exact draft and sources (1221.8316ms)\n✔ round64 owner native context retains existing one-request Gemini adapter semantics (81.5822ms)\n✔ dispatch start persists before generation, full diagnostic retains unsafe PASS and never retries (1109.3765ms)\n✔ capacity outcome remains in denominator and stops peer dispatch without extra generation (8.3286ms)\n✔ three complete shards merge every slot once, reject altered peer slots and preserve FAIL (2253.0724ms)\n✔ interleaved capacity evidence validates its own prefix and merges retained error without global-prefix assumption (366.784ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6764.8666\n"
+  },
+  "full": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-resume-readiness.stdout.txt' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-resume-readiness.stderr.txt'\n$c3TestExit=$LASTEXITCODE\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-resume-readiness.stdout.txt' -Tail 12\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-resume-readiness.stderr.txt' -Tail 8\nexit $c3TestExit",
+    "exitCode": 0,
+    "tests": 379,
+    "pass": 379,
+    "skipped": 0,
+    "durationMs": 96861.3915
+  },
+  "retention": {
+    "completed": 334,
+    "unknownStarted": 2,
+    "undispatched": 15,
+    "quotaErrorPreserved": true,
+    "modelsPromptCorpusSchemaBarsAndAuthoritySourceUnchanged": true
+  },
+  "limitations": [
+    "full/stub tests do not show provider quota restored",
+    "whitespace guard before aed44081 reported two trailing blanklines, commit proceeded; fixed in next source commit and diff check exit0",
+    "external audit helper first assumed every assigned completion slot was dispatched; corrected before merge by keeping untouched peer-capacity slots exact"
+  ]
+}

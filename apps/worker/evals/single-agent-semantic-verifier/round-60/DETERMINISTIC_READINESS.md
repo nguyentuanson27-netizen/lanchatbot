@@ -1,0 +1,13 @@
+# Round60 deterministic readiness
+
+New authorization: up to3new rounds60–62, prior failures firstN3. Previous57–59results unchanged. Main refreshed296cdcfbf5759f5bf9cbb24acf3dc63005589361.
+
+Observed local RED4/7 after correcting a test ordering assumption (first unsafe slot is7 after6SAFEslots). Minimum fixed60admission GREEN7/7. An intermediate failure caught a canonical-versus-pretty manifest hash mismatch, corrected before seal. These are mechanical admission tests; the semantic RED is the real R59prebuy rejection3/3. No model GREEN claimed before real R60.
+
+Current full338/338, focused protocol/provider/runners/57–6080/80, boundary+Vertex79/79, protected claims/reply assembly/size41/41 PASS. Workerbuild/typecheck/lint PASS. Local providers are stubs only; no semantic safety simulation or real generation in tests. Native owner wire and12actual local verifier captures retain current body/final hash/authority bindings and hide evaluator fields/sentinels.
+
+Self-review: all9copied corpus/sidecar/label files are byte-exact59; models/config/owner/source/schema/bars/fallbacks unchanged. Actual runtime requests for all bounded retained181cases differ only in verifier instructions; the oversized test remains a deterministic rejection at the frozen bound. General source-backed service description remains permitted; item/usage/outcome permissions must preserve material independent conditions. This is a prospective interpretation hypothesis, no phrase detector or expected label in requests. Possible remaining risk is the verifier's ability to distinguish those meanings; local tests cannot certify it.
+
+Executable delta against batchstart ec8df961114c985aa693b999be904792a33bb4d8:4existingevalfiles +19/-13, fixedround60admission/pin only. Semantic roles/layers/gates added0, existing1owner/max1verifier. No production/sharedcode, regex/parser/router, repair/reverify, reply template, eligibility engine, provider framework or new tool/state/effect/send. API/transport/auth contracts unchanged; approved clients inspected available,0real generation at preparation.
+
+Commit inputs/executable/readiness, requireclean, capture HEADat runtime as a2RunSourceSha withoutsource writeback, preflight. Mixed36prefix inside333mustallmatch before297remaining; any unsafeeligiblePASS immediatelyFAIL. Errors counted, max1generation/attempt,retry0. A3onlycompleteA2PASS/fresh cleanseal; prior30before42remaining with whole actual-terminal scoring. Otherwise rawsavepoint→review→next frozen authorized round if budget/availability permit. Stop atowner/aftermax3; no63/post-A/merge/deploy/live send.

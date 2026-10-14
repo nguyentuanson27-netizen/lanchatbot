@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "runId": "C3_TWO_CASE_SCREEN_20261014_01",
+  "scope": "OWNER_AUTHORIZED_TWO_CASE_SCREEN_BEFORE_FULL_A2_A3",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "preparationBaseSha": "1865c0584f4223d5c9ed6733aad089e06cc00764",
+  "fullCheckpointQualification": false,
+  "repetitions": 1,
+  "retry": 0,
+  "maximumGenerationRequests": 4,
+  "caseIds": [
+    "r5-competitor-price",
+    "r14-stage-light-change"
+  ],
+  "prompts": {
+    "conversation": {
+      "file": "prompts/fashion-sales-owner-sales-principles-20261014.vi.txt",
+      "hash": "097d7dca6ac7f1267cb7b581c2872b3fffa06d989963ccbddc2b57eef7f7185d"
+    },
+    "verifier": {
+      "file": "prompts/semantic-verifier-sales-principles-20261014.vi.txt",
+      "hash": "9aebc569176f6270d87e59c2ed856537f71ab72f3edbfd5e13ee9bbbe89d2222"
+    }
+  },
+  "models": {
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+      "generationConfig": {
+        "transport": "VERTEX_SINGLE_REQUEST_TEXT",
+        "wireApi": "generateContent",
+        "projectId": "project-388db62b-f5a4-4e76-a2b",
+        "location": "global",
+        "endpoint": "https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent",
+        "tools": [],
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false,
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "topK": "OMITTED_PROVIDER_DEFAULT",
+        "penalties": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": 8192,
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+        "tokenRefresh": "BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY"
+      }
+    }
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "frozenFiles": {
+    "round-67/manifest.json": "5785b705acc75ad7cb43f33cc7a95ca8a62ed5e772fec85dd9966437d8c26e23",
+    "round-67/corpus-a2.json": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "round-67/corpus-a3.json": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203",
+    "failure-recheck-20261014-02/evidence.json": "efbe90ca64a265316d179544f5ccaa4b6bd20d5244fd15792d542c9b9481cf6e",
+    "failure-recheck-20261014-02/a3-primary-scores.json": "4ad2485867602ac8883438fc4f86cb658709e4a0f0cf5090ef88228ae20e765d",
+    "failure-recheck-20261014-02/a3-quality.json": "7315680d86dd19441b1545e8f5ffb990f4be82543a953a2caa1cd0881c2c2816"
+  },
+  "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "vertexExecutableHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe",
+  "followup": {
+    "a2Registered": 142,
+    "a2UniqueCases": 138,
+    "a3Registered": 42,
+    "condition": "BOTH_SCREEN_ROWS_PASS_THEN_FULL_A2_PASS_BEFORE_FULL_A3",
+    "adoptScreenOutcomes": false
+  },
+  "scoring": "Use existing whole-turn10dimensions and numeric bars. Both actual-terminal rows must PASS and be SEND_ELIGIBLE, primary review before rejected/verdict diagnostics. No human/independent acceptance fabricated.",
+  "failureDisposition": "Keep every registered attempt; errors/timeout/malformed fail closed, no generation retry. Either screen case fails -> STOP/no full. If both pass -> prepare and seal complete new full run, retain same candidate/source data/config and no new cases/labels."
+}

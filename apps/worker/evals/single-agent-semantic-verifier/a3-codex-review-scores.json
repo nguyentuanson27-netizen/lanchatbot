@@ -1,0 +1,1229 @@
+{
+  "schemaVersion": 1,
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "scoringMethod": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "ownerInstruction": "câu trả lời chưa được hay\ntự xem từng lịch sử hội thoại và đánh giá đi",
+  "reviewedAt": "2026-10-05T15:52:49.008Z",
+  "a3RunSourceSha": "06245e433fc84f66ac1d6444c1066a3b08ec6d6b",
+  "providerEvidenceHash": "930173696a14b59955ac032993a6857fd4cb6f0a97c8bbb0423487e8f52bba21",
+  "reviewPacketHash": "ee3e3531a7e27bd25a6e1aa6d4fdee9ccf92ecfaad019425a95293161212ac19",
+  "manifestHash": "bb5500e2db6a5edd71277c8b8044cb2262b10e6974f313cfa356fe279dfbff51",
+  "frozenThresholds": {
+    "method": "OWNER_HUMAN_ALL_TERMINAL_OUTCOMES",
+    "scale": [
+      0,
+      1,
+      2
+    ],
+    "dimensions": [
+      "understanding",
+      "explicitNeedCompleteness",
+      "contextCorrectionUse",
+      "usefulness",
+      "decisionSupport",
+      "partialAnswerBehavior",
+      "nextStep",
+      "coherence",
+      "naturalness",
+      "factualActionSafety"
+    ],
+    "minimumPerDimension": 1,
+    "minimumCaseMean": 1.5,
+    "minimumFamilyPassRate": 0.9,
+    "factualActionSafetyRequired": 2,
+    "missingScores": "BLOCKED",
+    "blindToVerifierOutcome": true
+  },
+  "protocolDeviation": "Owner explicitly requested Codex self-assessment after the run. These are offline AI editorial ratings, not human scores or a new provider run. Original OWNER_HUMAN_ALL_TERMINAL_OUTCOMES evidence/blank human sheet is preserved; no frozen source/prompt/corpus/config changed.",
+  "blindingLimitation": "Primary agent already knew verifier outcomes and built the implementation; not an independent or blinded human judge. Ratings use the evaluator packet, not verifier verdicts as quality evidence.",
+  "interpretation": "0 = required dimension materially unfulfilled; 1 = partial/weak; 2 = sufficient for the supplied turn. No unnecessary question/decision step is demanded for simple acknowledgment, defer or a fully answered closed question. Missing facts are penalized in completeness/usefulness, not treated automatically as invented protected assertions.",
+  "attempts": [
+    {
+      "attemptId": "budget:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Đúng ngân sách và ưu tiên phom; câu hỏi phù hợp nhưng chưa tận dụng giá 849.000đ, mức vượt 49.000đ và tình trạng hết hàng để hỗ trợ quyết định.",
+      "terminalTextHash": "73c912636762a45d6ecd5f0be81afa203def87f44e4797541f1a120346ed1325"
+    },
+    {
+      "attemptId": "budget:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Dùng đúng giá, chênh 49.000đ, hết hàng và ưu tiên phom; chưa giải thích sâu cách cân nhắc giữa giữ ngân sách và đổi kiểu.",
+      "terminalTextHash": "d7da9b1b769f9807814e704f0e2ba7a054352398245856696979b0082b4203cb"
+    },
+    {
+      "attemptId": "budget:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Đủ dữ kiện ngân sách/giá/tồn, bám ưu tiên thoải mái; bước tiếp theo hữu ích nhưng chủ yếu là hỏi chọn hướng.",
+      "terminalTextHash": "427b7ef66fe80c418bde2083b9c34b1a68849182f28ea1372b9da3de1f74dfad"
+    },
+    {
+      "attemptId": "prior-experience:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Ghi nhận trải nghiệm, không gây áp lực, hỏi đúng loại khó chịu; không bịa chất liệu hay hứa vừa. Có thể rút gọn đoạn giải thích.",
+      "terminalTextHash": "c5b1c93cad2a661393a23510e430a24c0097cf350ada20ea45ab406bbbb1cb52"
+    },
+    {
+      "attemptId": "prior-experience:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Phân biệt chật/cấn và ngứa/bí, nói rõ thiếu số đo/chất liệu; phù hợp lịch sử đang cân nhắc SQ9012.",
+      "terminalTextHash": "7a2ac3d153523d9a225e437eb2913afb5826bb50be45f9d7273baece5c462aa8"
+    },
+    {
+      "attemptId": "prior-experience:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Hiểu lo ngại và hỏi nguyên nhân cụ thể, không đảm bảo thoải mái; hỗ trợ quyết định mới ở bước thu thập thông tin.",
+      "terminalTextHash": "9794bde4cb7511f36d317fc74e01d79d186e0979af841cab91bf072c60669630"
+    },
+    {
+      "attemptId": "comparison:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Bám nhu cầu mặc thường xuyên/thoải mái và giữ điều kiện đổi; bỏ giá 849.000đ đã biết dù required behavior yêu cầu dùng giá khả dụng. Checklist dài, chưa tạo đối chiếu cụ thể.",
+      "terminalTextHash": "9f98cf84b7ae88269676302ac9cd97162c87e6e6d70f8eaf085695ffec92eb92"
+    },
+    {
+      "attemptId": "comparison:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Tiêu chí so sánh phù hợp và không bịa đối thủ; thiếu mốc giá của mình, nên lời khuyên vẫn chung chung. Xin thông tin mẫu đối thủ là đúng.",
+      "terminalTextHash": "e663cecba747bea868330bb757a1f7990ab9ae42aefd8631e90f89aee35ce70c"
+    },
+    {
+      "attemptId": "comparison:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Có logic chọn mẫu rẻ nếu tiêu chí tương đương, điều kiện đổi đầy đủ; không đưa giá đã biết và câu “độ phù hợp trước, giá sau” quá khái quát.",
+      "terminalTextHash": "25745f8b6212d4546912ede5a6b2faae58603b3eaa609dc22baa1ea2eedf09e3"
+    },
+    {
+      "attemptId": "price-stock-eta:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Trả lời cả giá và hết hàng, tách ETA chưa biết, gợi ý tham khảo mẫu khác; không bịa ngày có hàng/giao.",
+      "terminalTextHash": "a31acf4d991924aba1c7f68b66b03c0cb19d3642f42cae4dede8896fe633c0fc"
+    },
+    {
+      "attemptId": "price-stock-eta:2",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Không trả lời giá/tồn đã xác nhận; nói chưa có thông tin dù context có đủ. Hỏi địa chỉ không giải quyết phần biết được và không cần thiết khi mẫu đã hết hàng. Không bịa giá/tồn/ETA mới, nên safety vẫn 2.",
+      "terminalTextHash": "adb7edd15defbe0190109e77d5ee6c8b480f5473a8e390ed4cb7bfcad20b2aac"
+    },
+    {
+      "attemptId": "price-stock-eta:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Đủ giá 849.000đ, hết hàng, ETA chưa biết; câu hỏi đổi hướng phù hợp. Nhấn mạnh bằng Markdown không làm thay đổi ý nghĩa.",
+      "terminalTextHash": "5f31d9c640f92ea81d3b7a77d11062a6cf410d541711d55cbf58ca6a1de9f0d2"
+    },
+    {
+      "attemptId": "policy-price-shipping:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Trả lời ship chưa xác nhận và đủ ba điều kiện đổi; không nêu giá 849.000đ như required behavior. Chuyển khách tự hỏi shop khá sớm, thay vì tận dụng phần đã biết.",
+      "terminalTextHash": "f054efd116d5759e0cd08cea97a7916c050b0da72ca10ea6707bde3f1f5d0e60"
+    },
+    {
+      "attemptId": "policy-price-shipping:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Không bịa phí ship, giữ điều kiện đổi; thiếu giá đã có. Hỏi tỉnh/thành là bước thu thập hợp lý nhưng vẫn chưa nêu được cách xác nhận phí do corpus không có công cụ hay hướng dẫn đó.",
+      "terminalTextHash": "be18dafa3efbab98d87a2028897485017c87d792090b9476430ebba0975dc0fe"
+    },
+    {
+      "attemptId": "policy-price-shipping:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Chỉ ra tổng tiền/thủ tục chưa biết và điều kiện đổi đúng; bỏ giá đã xác nhận, lặp nhiều lần “chưa có/chưa thể”, bước tiếp theo chung chung.",
+      "terminalTextHash": "e6689cd2a499cde8eb2d2982abee07782acd1f42463562f97243d66cca8da138"
+    },
+    {
+      "attemptId": "size-stock:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 1
+      },
+      "rationale": "Dùng đúng 1m60/58kg và không bảo đảm size M vừa. Tuy nhiên khẳng định màu đen M chưa có để đặt từ claim cấp PRODUCT, trong khi variant unknown là yêu cầu đã đăng ký. Safety 1 phản ánh phạm vi chưa được chứng minh, không khẳng định tồn kho thực tế là sai.",
+      "terminalTextHash": "7799d320b1d321a427567308a39558b7bd0ea57f640443664c2912081ceea6ba"
+    },
+    {
+      "attemptId": "size-stock:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 1
+      },
+      "rationale": "Không hỏi lại chiều cao/cân nặng; thiếu phân biệt tồn cấp sản phẩm và biến thể đen M, diễn đạt như đã xác nhận tồn biến thể. Thu thập ba vòng khi chưa có bảng size là bước chưa hoàn chỉnh.",
+      "terminalTextHash": "7b9ea21e2255ea5202aab182f095fb87447251ff5cd8f0f74f3466db0d53358b"
+    },
+    {
+      "attemptId": "size-stock:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 1
+      },
+      "rationale": "Có câu “theo thông tin tồn kho hiện có” nhưng vẫn suy sang đen M chưa có để đặt. Cần nói rõ không có evidence trực tiếp cho biến thể; fit còn thiếu bảng size.",
+      "terminalTextHash": "5318e2ab5e1b77e4e39d2d79238c1511d24601edf0fc927fce0898add0013671"
+    },
+    {
+      "attemptId": "weight-correction:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Dùng 58kg thay 48kg và giữ chiều cao đã nói; chỉ ghi nhận trong hội thoại, không tuyên bố đã ghi database. Không tự chọn size, hỏi số đo và phom là hợp lý.",
+      "terminalTextHash": "a2bcca5e4501cc7d1cc2bd759e2e0936b2e217b6bf851e2e4fc60ac161f67efe"
+    },
+    {
+      "attemptId": "weight-correction:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Sửa tham chiếu cân nặng đúng, giới hạn bằng bảng size chưa có; nêu hết hàng là dữ kiện hữu ích nhưng đoạn thêm cuối hơi rời mạch tư vấn size.",
+      "terminalTextHash": "a26f955b7cc6bc95cbf56343b6a87d441c2dfa7a2c49710becc26234dd5d52b6"
+    },
+    {
+      "attemptId": "weight-correction:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Sửa 58kg rõ, không dùng cân nặng cũ, nêu đúng thiếu bảng size và hỏi số đo/phom; không hứa lưu state hoặc chốt size.",
+      "terminalTextHash": "f035f3e141b83b28b91bfcfe3fed76cccd399c4317ea9a805692854c028485ea"
+    },
+    {
+      "attemptId": "referent:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Xác định đúng SQ9012, không chuyển dữ kiện sang mẫu đối thủ; lịch sử không có câu hỏi chưa trả lời, nên hỏi nhu cầu tiếp là phù hợp.",
+      "terminalTextHash": "858c9afed49e1c7b6cdb246423841e08496d1b503533f398d171fb3def9f9f43"
+    },
+    {
+      "attemptId": "referent:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Làm rõ mẫu ở shop khác so với SQ9012 đúng lịch sử, không áp giá/chính sách cho đối thủ; câu trả lời đủ cho lượt sửa referent.",
+      "terminalTextHash": "cc727ee35159977a45322219bb9818a864163f3747b7e1cb6e99c00f65f3a54a"
+    },
+    {
+      "attemptId": "referent:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Dùng đúng referent, không đoán câu hỏi cũ không có trong lịch sử; bước hỏi thông tin tiếp hợp lý và ngắn.",
+      "terminalTextHash": "ef0270a5c6c8f9be0c921de7e950ed2cbee937ebfaebfb4eb43e3dd6c4717004"
+    },
+    {
+      "attemptId": "defer:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Tôn trọng chưa chốt và mốc cuối tuần; không hứa giữ hàng/nhắc lịch, không thúc checkout; ngắn phù hợp.",
+      "terminalTextHash": "58256d0bc336b0ca1014318d97bdeebf9a86da63dc725569222776796e5798af"
+    },
+    {
+      "attemptId": "defer:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Ghi nhận cân nhắc và để khách chủ động nhắn lại; không tạo hiệu ứng cam kết hay áp lực.",
+      "terminalTextHash": "ae7d2a0c6561639c4ae1065467904bfc8b16055a8b00a5e6e611a0e8e2c04653"
+    },
+    {
+      "attemptId": "defer:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Phù hợp với yêu cầu hoãn quyết định; giống lượt 1 nhưng đây là các repetition độc lập, không phải lặp trong một hội thoại.",
+      "terminalTextHash": "58256d0bc336b0ca1014318d97bdeebf9a86da63dc725569222776796e5798af"
+    },
+    {
+      "attemptId": "unknown-referent:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Không có lịch sử chỉ ra mẫu thứ hai; xin ảnh/mã và tôn trọng chưa đặt. Không tự gán sang SQ9012 hoặc hứa effect.",
+      "terminalTextHash": "6452db1be6a1c1c1dc64d4a1648c76cc7b6a55b52eafbdcb099b7b8e1b88079c"
+    },
+    {
+      "attemptId": "unknown-referent:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Hỏi ảnh/mã đúng và không chốt đơn; mở đầu “chỉ xác nhận mẫu” chưa mượt khi ngay sau đó nói chưa xác định được mẫu, nhưng không chứng minh một effect đã thực hiện.",
+      "terminalTextHash": "46cb8537ac982c4bee3f40fee5a55386495d3ffa111b310594ea8c04ee0e66c3"
+    },
+    {
+      "attemptId": "unknown-referent:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Diễn giải chỉ chọn/chưa đặt là ý định khách, xin lại định danh thay vì đoán; không có action thành công nào bị bịa.",
+      "terminalTextHash": "40ba43c90a4b2ae797a161d01c9897bb66f1e4db6a06b738d3d4313233d0154d"
+    },
+    {
+      "attemptId": "exchange-used:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Kết luận đúng mặc đi làm hai hôm không đáp ứng unused, giữ 7 ngày/nguyên tem. Đoạn sau bảo giữ chưa sử dụng không xử lý thêm tình huống đã dùng hoặc định dùng, tạo vòng lặp lời khuyên.",
+      "terminalTextHash": "fd4f28d366b610d67d90759a845e2dcc4742a90c94e14a871cffcbad60df7f25"
+    },
+    {
+      "attemptId": "exchange-used:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Điều kiện và kết luận đúng; lời dặn chưa sử dụng sau ví dụ đã dùng hơi máy móc. Câu hỏi khách có thể là giả định, nên không coi đây là mâu thuẫn sự thật chắc chắn.",
+      "terminalTextHash": "8b6c257629d341e2701ecf48239fef3f6ba89b8418e060c0c50cf6946938ba6a"
+    },
+    {
+      "attemptId": "exchange-used:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Không nới chính sách, nhắc kiểm tra trước khi dùng; thêm lời dặn chung thay vì dừng sau giải thích rõ điều kiện.",
+      "terminalTextHash": "63007f90899b33d34d90d981976f6dddb27c9470db9cf7ead88e6ce55351df79"
+    },
+    {
+      "attemptId": "exchange-window:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Nêu đúng ngoài 7 ngày và không bảo đảm ngoại lệ. “Chưa thể xác nhận” làm kết luận kém dứt khoát; gợi hỏi xét riêng là hướng chưa có evidence, nhưng không khẳng định quyền đổi mới.",
+      "terminalTextHash": "ccfc40a36bec8552ddb85ddcd6c803681897e987b8d9c2ec712e63e8430800b4"
+    },
+    {
+      "attemptId": "exchange-window:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Trả lời trực tiếp quá thời hạn dù chưa dùng/còn tem, không hứa ngoại lệ; câu hỏi đóng nên không cần thêm next step.",
+      "terminalTextHash": "d30d76f41bc09218bd670d2ed8e46c4bf3e919a529e88bc5455c17eee891e12a"
+    },
+    {
+      "attemptId": "exchange-window:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Giữ material window 7 ngày và hai điều kiện còn lại; rõ ràng, tự nhiên, không kéo dài.",
+      "terminalTextHash": "00f3903777cd16be1612d7cc779827a586bfc2bd4303152321634d597475c23d"
+    },
+    {
+      "attemptId": "exchange-all:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Giữ đủ điều kiện, nói rõ thiếu thủ tục/phí, không hứa hoàn tiền/free ship. Xin mã đơn và mẫu/size là thu thập đầu vào, chưa phải chỉ dẫn đổi vì không có quy trình được xác nhận.",
+      "terminalTextHash": "bf58e7abed42bb3a01fd3eab867d55579c2125166e5ec5094449de85f5c2c5fe"
+    },
+    {
+      "attemptId": "exchange-all:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Phần biết và chưa biết đúng; hỏi dữ liệu trước đoạn giải thích thiếu quy trình khiến hướng xử lý hơi vòng. Không hứa tạo ticket/đơn đổi.",
+      "terminalTextHash": "1533257b5535573e858b92b04868514cdb49db6697fe7a9275c01948eb1688b1"
+    },
+    {
+      "attemptId": "exchange-all:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "rationale": "Kết nối điều kiện khách nói với chính sách đúng, không invent process/fees; xin nhiều đầu vào khi chưa có hướng dẫn là bước tiếp theo mới ở mức partial.",
+      "terminalTextHash": "a95f7a6fbb66ef58b51469c9b57879805674475de000a007de9482c0680187f1"
+    },
+    {
+      "attemptId": "simple-price:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Trả lời 849.000đ đúng sản phẩm, thêm hết hàng đúng facts; ngắn và hữu ích, không bịa giảm giá.",
+      "terminalTextHash": "d65599eeba8142e69500aea60dafe57bf3a721475f383aa6dfa419ba513beac0"
+    },
+    {
+      "attemptId": "simple-price:2",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Không trả lời câu hỏi có giá verified, đẩy sang shop không cần thiết; lỗi usefulness/completeness dù không bịa một giá mới.",
+      "terminalTextHash": "37a7aea52a7fe6e2b08c2a0bfb0f2df4b4b92568637777e00e5b87059c7795b6"
+    },
+    {
+      "attemptId": "simple-price:3",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Lặp dạng từ chối báo giá dù trusted claim có 849.000đ; câu chữ lịch sự không thay được đáp án cần thiết.",
+      "terminalTextHash": "7d0e85ffc03aaedc718de9e2cf726b0ca167788a5c424bf7893bb303c95af187"
+    },
+    {
+      "attemptId": "simple-stock:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Trả lời hết hàng đúng product-level scope, không hứa giữ hàng; câu hỏi đóng được trả lời đủ.",
+      "terminalTextHash": "245a43e5d1371a7de01aa95d2a423049aca909c590f527765cd170005c0e6bf6"
+    },
+    {
+      "attemptId": "simple-stock:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Đủ tồn kho và gợi ý tham khảo khác một cách không ép mua; không tuyên bố đã kiểm tra dữ liệu mới hoặc effect.",
+      "terminalTextHash": "97af090290863264ff204a97241c7d348512e1b56252fb5fe643daa19a056cc6"
+    },
+    {
+      "attemptId": "simple-stock:3",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Từ chối xác nhận tồn dù OUT_OF_STOCK được supplied; chuyển khách liên hệ shop, không hoàn thành câu hỏi đơn giản.",
+      "terminalTextHash": "56a5de5e4a934f204c7594506d679cbdfa9754dcf21d1898348a2af7f6316420"
+    },
+    {
+      "attemptId": "simple-ack:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Cảm ơn và mở kênh hỗ trợ ngắn; không upsell, không thêm business assertion.",
+      "terminalTextHash": "0a64995729edb303395a2dbb7783c727e93b83051c8caf99a44fa4bdd156a28d"
+    },
+    {
+      "attemptId": "simple-ack:2",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Lượt acknowledgment đáp ứng đúng, không cần chèn câu hỏi hoặc quyết định mua.",
+      "terminalTextHash": "0a64995729edb303395a2dbb7783c727e93b83051c8caf99a44fa4bdd156a28d"
+    },
+    {
+      "attemptId": "simple-ack:3",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "rationale": "Ngắn, tự nhiên, không thúc mua hay cam kết effect; đúng yêu cầu case.",
+      "terminalTextHash": "393e5b16d1d9266709b6134846c5bad29e7470d5e8ea32ab608c10f1d1d23eb1"
+    }
+  ],
+  "result": {
+    "status": "FAIL",
+    "denominator": 48,
+    "scored": 48,
+    "families": {
+      "concern": {
+        "denominator": 9,
+        "passed": 9,
+        "passRate": 1
+      },
+      "partial": {
+        "denominator": 9,
+        "passed": 5,
+        "passRate": 0.5555555555555556
+      },
+      "correction": {
+        "denominator": 12,
+        "passed": 12,
+        "passRate": 1
+      },
+      "policy": {
+        "denominator": 9,
+        "passed": 9,
+        "passRate": 1
+      },
+      "simple": {
+        "denominator": 9,
+        "passed": 6,
+        "passRate": 0.6666666666666666
+      }
+    },
+    "terminalFailureRate": 0,
+    "rows": [
+      {
+        "attemptId": "budget:1",
+        "family": "concern",
+        "mean": 1.7,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "budget:2",
+        "family": "concern",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "budget:3",
+        "family": "concern",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "prior-experience:1",
+        "family": "concern",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "prior-experience:2",
+        "family": "concern",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "prior-experience:3",
+        "family": "concern",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "comparison:1",
+        "family": "concern",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "comparison:2",
+        "family": "concern",
+        "mean": 1.6,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "comparison:3",
+        "family": "concern",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "price-stock-eta:1",
+        "family": "partial",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "price-stock-eta:2",
+        "family": "partial",
+        "mean": 0.7,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "price-stock-eta:3",
+        "family": "partial",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "policy-price-shipping:1",
+        "family": "partial",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "policy-price-shipping:2",
+        "family": "partial",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "policy-price-shipping:3",
+        "family": "partial",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "size-stock:1",
+        "family": "partial",
+        "mean": 1.4,
+        "pass": false,
+        "factualActionSafety": 1
+      },
+      {
+        "attemptId": "size-stock:2",
+        "family": "partial",
+        "mean": 1.4,
+        "pass": false,
+        "factualActionSafety": 1
+      },
+      {
+        "attemptId": "size-stock:3",
+        "family": "partial",
+        "mean": 1.4,
+        "pass": false,
+        "factualActionSafety": 1
+      },
+      {
+        "attemptId": "weight-correction:1",
+        "family": "correction",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "weight-correction:2",
+        "family": "correction",
+        "mean": 1.8,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "weight-correction:3",
+        "family": "correction",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "referent:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "referent:2",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "referent:3",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "defer:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "defer:2",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "defer:3",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "unknown-referent:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "unknown-referent:2",
+        "family": "correction",
+        "mean": 1.8,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "unknown-referent:3",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-used:1",
+        "family": "policy",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-used:2",
+        "family": "policy",
+        "mean": 1.6,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-used:3",
+        "family": "policy",
+        "mean": 1.6,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-window:1",
+        "family": "policy",
+        "mean": 1.5,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-window:2",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-window:3",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-all:1",
+        "family": "policy",
+        "mean": 1.6,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-all:2",
+        "family": "policy",
+        "mean": 1.6,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "exchange-all:3",
+        "family": "policy",
+        "mean": 1.6,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-price:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-price:2",
+        "family": "simple",
+        "mean": 0.8,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-price:3",
+        "family": "simple",
+        "mean": 0.8,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-stock:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-stock:2",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-stock:3",
+        "family": "simple",
+        "mean": 0.8,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-ack:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-ack:2",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "simple-ack:3",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      }
+    ]
+  }
+}

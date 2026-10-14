@@ -1,0 +1,685 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT_OFFLINE_WHOLE_CONVERSATION_REVIEW",
+  "scoredAt": "2026-10-09T23:46:40.419Z",
+  "rawIntegrityLimitation": "Pre-review temporary hash file found entirely NUL (463 bytes);original preserved outside repo. Only post-primary raw fingerprint verified;pre-review raw byte identity unavailable. A2 matches committed evidence;A3 captured request/response and generated human packet checked separately.",
+  "a3RunSourceSha": "2588db3aa57448a266a580e673c0b1b3071c46da",
+  "reviewProcedureHash": "0c26a54c778629a81927b3ff51d41b63133c6c42c05d574e645717131eea24e7",
+  "independent": false,
+  "humanAcceptance": false,
+  "ownerAcceptance": false,
+  "interpretation": "Every whole-turn actual terminal outcome reviewed before ten explicit diagnostic scores;no default all2,no keyword/isolated quote matching.",
+  "attempts": [
+    {
+      "attemptId": "r5-workday-comfort:1",
+      "review": "Shop chọn đúng ST411 và M trong ngân sách, dùng áo rộng/lưng chun để giải quyết lo ôm eo khi ngồi làm việc. Khách được một phương án mua rõ, không bị xin thêm dữ liệu đã có. Lời trấn an được đọc trong cả lời tư vấn thiết kế và code-fit đã xác nhận, không tự coi giọng tự tin là kết quả kiểm nghiệm. Điểm chưa đạt là kể lại cả ngực, eo, mông của khách để giải thích M dù khách chỉ nhờ chọn; đoạn xác nhận biến thành đọc hồ sơ, làm giọng máy móc. Đây là lỗi tự nhiên của cả lượt, không phải thiếu tên sản phẩm hay sai size.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "review": "Khách đã thích navy và đang cân nhắc liệu chênh 129k có đáng cho việc mặc đi làm thường xuyên. Hồ sơ shop đủ để nói giá trị thiết kế, phối tách món và chính sách đúng phạm vi, không cần bịa chất lượng đối thủ. Kết quả khách thực sự nhận chỉ là chờ nhân viên: không có lý do mua, quan điểm về giá hay bước giúp quyết định. Vì vậy cả lượt thất bại về tư vấn dù fallback không tạo claim sai. Draft bị chặn không được dùng thay câu khách nhận để nâng điểm.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-wardrobe-budget:1",
+      "review": "Hiểu đúng khách lo mua thừa và có ngân sách cứng dưới 600k, tận dụng quần navy thay vì diễn giải phí thành nhu cầu freeship. Đề xuất áo riêng, tổng 524k đúng quote và giải thích vì sao bỏ set là một quyết định mua dùng được. Hỏi trắng hay xanh nhạt có thể chốt thuộc tính còn mở; khách chưa giao chọn màu nên không bắt buộc shop tự chốt màu hoặc xin vòng ngực ngay cùng lượt. Có thể tư vấn phối màu chủ động hơn và bớt nhắc ngân sách, nhưng câu hiện tại vẫn hợp lý, dễ theo dõi và trả lời đúng băn khoăn mua cả set.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-white-opacity:1",
+      "review": "Khách đã xác lập họp trong phòng, có áo lót màu da và đưa vòng ngực để xác nhận áo trắng. Shop tiếp tục đúng lựa chọn, chọn M từ code và báo còn hàng; điều kiện độ che khớp phép thử, không mở sang mọi ánh sáng. Ba câu đủ để khách quyết định, không hỏi lại hoặc tạo lo mới. Nhắc riêng vòng ngực có thể bỏ cho gọn, nhưng ở lượt khách vừa xin xác nhận dựa trên số đo, đây là lời giải thích fit ngắn; không hạ điểm chỉ vì xuất hiện một con số khi cả lượt vẫn tư vấn tự nhiên và hữu ích.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-size-price-stock:1",
+      "review": "Khách đã chọn váy rêu và chỉ cần size cùng tổng ship. Shop giữ đúng món/màu, chọn L từ fit hiện tại và trả tổng 829k đã miễn ship đúng quote HCM. Câu nhắc ngân sách giúp xác nhận phương án mua nằm trong mức khách đưa, không kéo sang catalog/chính sách hay xin lại số đo. Lượt trả lời ngắn, hoàn tất việc được giao và không cần ép thêm CTA hoặc giả đặt đơn.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-missing-customer-size:1",
+      "review": "Shop trả trước phần có thể xác nhận: navy còn S/M/L, giá và tổng 484k đúng HCM. Sau đó chỉ xin eo/mông là hai đầu vào bảng quần đang thiếu, không đoán size hoặc yêu cầu khách bổ sung dữ liệu của shop. Câu hỏi tiếp gắn trực tiếp với việc khách đang muốn mua quần, còn áo trắng đã có không bị tư vấn lại. Hai đoạn nói tự nhiên, tiến hành được trong khả năng hiện có và không tạo lời hứa giao hàng ngoài câu hỏi.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-white-variant-alternative:1",
+      "review": "Giữ size L đã xác nhận, báo trắng L hết và chọn xanh nhạt L có tồn để phối quần đen. Khách giao chọn màu thay thế và shop thực sự chọn, giải thích về màu/dáng như lời tư vấn phong cách thông thường. Không bịa đợt nhập lại hay suy xanh nhạt kín hơn trắng. Giá không được nhắc lại nhưng vẫn là cùng áo 499k nằm trong 550k, còn tin mới chỉ hỏi tồn và màu; không chấm thất bại vì thiếu một keyword giá hay câu hỏi xác nhận bắt buộc khi quyết định thay thế đã rõ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-delivery-timing:1",
+      "review": "Khách cần biết có chắc kịp sáng thứ Sáu từ ETA 2–3 ngày hay không. Shop trả thẳng không thể cam kết trước giờ đó, giữ đúng khoảng dự kiến và không biến thành chắc chắn giao trễ. Trong context không có món/phương án giao kịp đã xác nhận, câu ngắn này đủ giải quyết điều kiện đặt mua theo deadline; không đòi shop bịa alternative, bảo khách chuẩn bị đồ khác hoặc gắn thêm một CTA. Chưa có delivery capability mới nhưng vẫn là một câu trả lời dùng được cho quyết định hiện tại, không phải fallback.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-correct-product:1",
+      "review": "Theo ngay yêu cầu đổi từ set sang áo xanh nhạt, không để state còn ST411 kéo câu trả lời về bộ cũ. Giá 499k, M và tồn đúng SM613 hiện tại, giải quyết trọn câu hỏi mua áo riêng. Nhắc một vòng ngực để giải thích size vừa được hỏi có thể rút bớt nhưng không thành đọc cả hồ sơ hay hỏi lại; giọng và độ dài vẫn bình thường. Không tạo effect đặt hàng hoặc quyền lợi mới.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-correct-measurement:1",
+      "review": "Tiếp nhận số đo sửa và đổi khuyến nghị sang L đúng fit revision2, báo đen L còn. Không giữ M theo state/history cũ, không xin lại ba số đo hoặc lặp câu hỏi khách đã đồng ý chuyển L. Cách nói em chuyển sang L trong ngữ cảnh thống nhất lựa chọn là ACK hội thoại, không xác nhận đã sửa đơn/giữ hàng ở backend. Hai câu rõ, tự tin và hoàn tất việc khách giao.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-referent-navy:1",
+      "review": "Mẫu đó được hiểu là quần QU714 navy đã thống nhất, không phải set xuất hiện trước đó. Xác nhận navy M có sẵn là đủ đáp lại khách chọn mua, không hỏi lại lấy M không, xin dữ liệu checkout hay hứa đã giữ/tạo đơn. Câu chat ngắn tự nhiên; không cần thêm câu gọi mua để được điểm bước tiếp theo vì khách đã quyết định cấu hình.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-budget-correction:1",
+      "review": "Dùng ngân sách mới 550k và nơi giao đã rõ, chọn áo riêng thay set vượt tiền, trả quote524k và tận dụng quần navy. Xin đúng vòng ngực còn thiếu để chọn size, không hỏi lại ngân sách/nơi nhận hoặc bộ quần áo sẵn. Chưa chọn thay khách một màu, nhưng tin mới giao chọn món và shop đã chọn SM613; trắng/xanh nhạt là thuộc tính còn mở, không tự coi thiếu một màu chốt là không có quyết định mua. Có thể tăng tư vấn phối màu và bớt hai chữ rất, song lượt hiện tại vẫn logic, dễ hiểu và tiến được đến size trong ngân sách.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-defer:1",
+      "review": "Khách yêu cầu dừng đến cuối tuần và không giữ/hỏi thêm. Shop đáp thân thiện, tôn trọng điểm dừng, không tạo khan hiếm, giữ hàng hay cam kết tồn tương lai. Lời mời nhắn khi cần không phải câu hỏi ép mua. Đây là phục vụ đúng ý khách ở lượt tạm hoãn; không hạ usefulness/nextStep vì không tiếp tục bán khi khách đã yêu cầu dừng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-try-exchange:1",
+      "review": "Giải thích đúng hai tình huống khách hỏi: thử trong nhà với tem/sạch/không mùi/chưa giặt và thời hạn, đã mặc đi tiệc ra ngoài thì không đổi. Phân biệt này giúp khách biết phải thử trước khi sử dụng thực tế, không cần một câu chứa keyword thử trước tiệc riêng. Điều kiện mốc từ nhận và phí đã có ở history nên không bắt lặp, không mở thêm catalog hoặc xin size không liên quan. Câu nói trực tiếp, đủ căn cứ và không tạo quyền hoàn tiền.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-exchange-cost:1",
+      "review": "Trả đúng khách chịu phí đổi và giữ M theo code-fit đã có, không suy khách muốn L hoặc mở lại lựa chọn. Câu trấn an cuối được đọc trong ngữ cảnh khuyên size phù hợp để giảm lo mất phí, không xác nhận miễn phí đổi hay một quyền lợi mới; không tự phán một cụm tự tin là cam kết kỹ thuật. Có thể bỏ phần không phải đổi để tránh quá lời, nhưng cả lượt hiện tại ngắn, có lập trường, dùng được và không tạo điều kiện/chứng từ giả. Không bắt giọng dè dặt khi M đã được xác nhận.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-shipping-threshold:1",
+      "review": "Đây là upsell dùng được: gợi navy khác quần đen đã có, nêu lợi ích phối áo và công bố rõ tổng 958k cùng phần chi thêm 434k so với áo riêng524k. Không nói thêm quần rẻ hơn, không vượt một trần tiền đã đặt hoặc gán đặc tính mới cho quần. Câu cuối hơi quảng cáo nhưng khách đang hỏi có nên thêm để freeship, nên lý do giá trị và chi phí có liên quan. Không chấm sai chỉ vì khách đã có quần đen hoặc phương án không phải rẻ nhất; chưa chốt size khi thiếu fit.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "review": "Giữ lựa chọn trắng M khách vừa xác nhận, nói rõ không hoàn tiền và giải thích đổi size/mẫu7ngày với tem/chưa sử dụng. Cả lượt là giới thiệu chính sách trước mua, không kết luận một hàng đã dùng cụ thể đủ quyền đổi, nên không bắt liệt kê mọi điều kiện/phí/opacity một lần nữa. Giá499k không lẫn tổng ship, câu ACK không thành tạo đơn. Hai câu đủ giải tỏa nhầm đổi với hoàn và tiếp tục ý định mua, không xin consent thừa.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "review": "Khách chỉ hỏi giá sơ mi và nhận ngay499.000đ đúng nguồn. Một câu chị/em bình thường, không kéo catalog, chính sách hoặc đo size vào trước khi khách cần. Hỏi mua thêm không bắt buộc ở control giá này; trả trực tiếp là hoàn thành bước hiện tại.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-stock:1",
+      "review": "Nhận đúng navy M của quần đang xem và xác nhận còn hàng đúng snapshot. Không cần đọc con số tồn2 vì khách chỉ hỏi còn hay hết, không hỏi lại size hoặc giả giữ hàng. Câu ngắn đủ cho khách tiếp tục quyết định và không ép CTA.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-ack:1",
+      "review": "Đáp lời cảm ơn bằng một câu thân thiện rồi dừng, không chèn ưu đãi/câu hỏi hay hành động giữ hàng. Có lặp ý cứ xem thêm từ lượt trước, nhưng đây là closing bình thường, không phải một thiếu sót vật chất về tự nhiên hoặc mua hàng. Không đòi đúng một câu cảm ơn mẫu để được điểm.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-price-ready-fit:1",
+      "review": "Đã chọn M navy đúng code/tồn và đưa lý do mua set cho việc mặc đi làm thường xuyên: chất liệu ít nhăn hơn linen, thiết kế và khả năng phối tách món. Không suy hàng đối thủ kém, không dùng giá cao làm chứng cứ; lời giữ dáng/thoải mái được hiểu như tư vấn thiết kế/chất liệu đã được owner chấp nhận, không kể một phép thử mới. Tuy nhiên mở bằng toàn bộ ba số đo rồi nối một đoạn lợi ích dài với thêm vào đó, nhiều tính từ và ạ làm giọng giống bài giới thiệu sản phẩm. Quyết định mua/size hữu ích nhưng naturalness chưa đạt chuẩn chat bán hàng của vòng này.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-shirt-missing-measure:1",
+      "review": "Theo màu xanh nhạt đã quyết định và trả tổng524k đúng HCM trước khi xin đúng vòng ngực. Không mở lại set, eo/mông, màu hay nơi giao, không tự chọn size lúc thiếu đầu vào. Đoạn giá hơi giải thích lại phép cộng nhưng khách đang hỏi tổng dưới600k nên có ích; câu hỏi size gắn trực tiếp với tiến trình mua áo. Cả lượt rõ và tự nhiên đủ, không cần thêm lời thuyết phục khi món/màu đã chốt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-opacity-context-change:1",
+      "review": "Trả đúng tồn trắng M và nhận ra đổi từ ánh sáng phòng sang đèn chiếu ngược; không dùng kết quả cũ để hứa kín. Điểm yếu là vẫn dừng ở không chắc tuyệt đối thay vì đưa lập trường chọn hàng theo ưu tiên không thấy bóng của khách. Khách nhận được rủi ro nhưng phải tự ra quyết định có dùng áo này cho dịp mới hay không. Không hạ điểm vì thiếu một alternative chưa có căn cứ trong context; hạ usefulness/decisionSupport/nextStep vì lời tư vấn hiện tại chưa chuyển dữ kiện đã rõ thành lựa chọn phù hợp. Câu ngắn và không sai factual, nhưng thiên về báo thông tin.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-exchange-after-use:1",
+      "review": "Giải đúng băn khoăn mặc đi làm vài buổi rồi đổi: đã mặc ra ngoài không đổi, phí cho đổi hợp lệ do khách trả. Nêu thử trong nhà/hàng chưa dùng/nguyên tem7ngày như mô tả chính sách trước mua, không xác nhận việc mặc đi làm đủ điều kiện. Khách có cách phân biệt thử với sử dụng để quyết định trước mua; không đòi thêm câu thử trước đi làm hoặc mọi điều kiện lặp lại như checklist. Không đổi size vô cớ, không hứa nhân viên kiểm tra hay miễn phí.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-office-color:1",
+      "review": "Khách giao chọn màu và hỏi dữ liệu để chọn size: shop thực sự chọn xanh nhạt, liên hệ sắc nhẹ/sáng với quần navy và xin đúng vòng ngực. Không đẩy set hay thêm quần trái ưu tiên, không đoán size hoặc độ kín xanh. Chưa nhắc tổng524k nhưng cùng áo499k với quote HCM vẫn trong600k; tin mới tập trung màu/đầu vào size nên không tự chấm FAIL vì vắng keyword tổng. Câu ngắn, có lý do phong cách và một bước thực hiện được, đạt mục tiêu lượt tư vấn này.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-pants-known-waist:1",
+      "review": "Khách đã chọn navy, có eo74 và chỉ cần tổng484k cùng biết đo thêm gì. Context có quote và CodeSizeInput thiếu riêng mông, nên có thể trả phần tiền rồi lấy một thông tin để tiến đến size. Actual terminal chỉ bảo chờ nhân viên, bỏ cả phần đã biết và phần đầu vào dùng được; không giúp khách tiếp tục mua. Đây là quality FAIL của fallback dù code không gửi claim sai. Không chấm candidate thay actual terminal và không quy việc chưa có số đo mông thành thiếu dữ liệu sản phẩm của shop.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-change-color-only:1",
+      "review": "Giữ M khi khách chỉ đổi màu, trả xanh nhạt có hàng và499k, thêm một lý do phối navy phù hợp. Câu chốt xanh nhạt M là thống nhất lựa chọn trong hội thoại, không xác nhận đã tạo/sửa đơn hay giữ hàng. Có thể bỏ một lần lặp màu/size để gọn, nhưng không thành vòng hỏi lại hoặc một paragraph catalog. Không nhắc opacity trắng, số đo hay tổng ship khi nơi nhận chưa rõ; hoàn tất việc khách giao.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-indoor-exchange-eligible:1",
+      "review": "Khách đặt tình huống đã đủ thời hạn/tình trạng và hỏi ai chịu phí; shop xác nhận đúng được đổi mẫu, khách thanh toán vận chuyển. Nhắc lại điều kiện hơi đầy đủ hơn cần thiết, nhưng đây là giải thích quyền cho chính giả định khách nêu, hai câu vẫn dễ theo dõi và không hỏi lại các điều kiện. Không miễn phí, hoàn tiền hoặc tạo receipt, không bắt consent mới. Có thể rút gọn để giống chat hơn, song nội dung và tiến trình mua đã được giải quyết.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-workday-choice:1",
+      "review": "Khách khó quyết giữa set và váy, shop chọn ngay ST411 M trong850k và giải thích lưng chun theo nhu cầu ngồi nhiều. Không đọc lại ba số đo, không xin thêm dữ liệu khi code-fit đủ. Lời về cảm giác bụng được đọc như tư vấn thiết kế/fit tự tin trong cả lượt, không kể phép thử hoặc bảo hành cảm giác mới. Hai câu ngắn có lập trường, giúp khách chọn mua và không cần gắn thêm câu hỏi màu để đủ điểm.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:1",
+      "review": "Có quan điểm đáng mua và lý do liên quan đi làm/tách phối, chọn đúng M navy còn hàng. Không so độ bền/chi phí của shop khác, thông tin ít nhăn hơn linen có căn cứ; giữ phom/chỉn chu là nhận định tư vấn đã chấp nhận trong context. Nhưng hai đoạn dài lặp toàn bộ số đo, rồi giải thích lại không co giãn/phom suông/khoảng size sau khi M đã rõ, cộng một chuỗi tính từ và ngoài ra/tính ứng dụng rất cao. Khách được nội dung quyết định đúng nhưng cách nói giống brochure và đọc hồ sơ, naturalness chưa đạt; không chấm fail chỉ do độ dài hay nhiều facts riêng lẻ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-pants-size-input:1",
+      "review": "Trả đúng tổng484k và hỏi cùng lúc eo/mông để chọn quần navy, không tự chốt fit từ tồn. Khách đã có áo trắng nên shop không kéo sang áo hay một bộ mới; chỉ lấy đầu vào đúng bảng và đúng việc được giao. Hai câu đủ, bình thường, không thêm ETA/capability/PII ngoài khả năng hiện có.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-stage-light-change:1",
+      "review": "Khách đổi sang sân khấu, hỏi có nên lấy trắng và tồn M. Nguồn đủ để khuyên tránh mẫu trắng cho ưu tiên không thấy bóng và trả tồn; thiếu áo khác đã xác nhận kín dưới đèn này vẫn là coverage gap cho replacement. Actual fallback không trả cả phần cơ bản có căn cứ, không giúp khách chọn mua hay phân biệt rủi ro. Vì vậy thất bại cả lượt chứ không phải do reviewer bắt có một áo thay thế giả. Candidate/verdict chỉ dùng chẩn đoán sau, không nâng điểm kết quả khách nhận.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-refund-before-buy:1",
+      "review": "Khách giữ trắng M và hỏi quy định hoàn tiền hay đổi trước khi mua. Chính sách đã có đủ để giải thích ngắn khác nhau giữa hai quyền mà không xác nhận một hàng đã dùng đủ điều kiện. Khách chỉ nhận câu chờ nhân viên, mất cả câu trả lời chính sách và sự tiếp nối lựa chọn đã quyết. Fallback không tạo benefit sai nhưng không dùng được cho mua hàng, nên FAIL các phần hiểu/đủ/hữu ích/decision/partial; không score bằng nội dung candidate chưa được gửi.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-freeship-extra-pants:1",
+      "review": "Shop khuyên áo riêng khi khách đã có nhiều quần, giải thích phần chi thêm lớn hơn tiền ship25k và chốt tổng524k đúng quote. Đây là một lựa chọn mua hợp lý có lý do, không chỉ đọc chính sách miễn ship. Có thể bán thêm navy nếu đưa giá trị khác, nhưng protocol không bắt upsell hoặc mặc định rẻ nhất; trường hợp này áo riêng vẫn đáp nhu cầu đã nói. Chữ không tối ưu có thể đổi cho gần lời nói hơn nhưng không làm cả ba câu trở thành máy móc hay thiếu bước thực hiện; không chốt size chưa có fit.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-value-use:1",
+      "review": "Trả đúng băn khoăn giá trị khi đi làm rồi phối cuối tuần: có lập trường đáng mua, dùng thiết kế/tách món/lưng chun và ít nhăn từ hồ sơ, không né sang xin số đo hoặc bịa hàng đối thủ. Lời giữ dáng được xét như tư vấn hàng shop trong phạm vi owner chấp nhận. Tuy nhiên cùng một ý linh hoạt được lặp với tính linh hoạt cao/dễ phối linh hoạt, rồi nối nhiều cặp chỉn chu/lịch sự/gọn gàng/thanh lịch và thêm nữa vào một đoạn quảng cáo. Nội dung giúp mua nhưng giọng chưa giống một lượt chat bán hàng tự nhiên; lỗi ở cách diễn đạt cả đoạn, không phải vắng keyword129k hay một giá cụ thể.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-fit-reassurance:1",
+      "review": "Giữ be M đã chọn và dùng lưng chun để trấn an đúng lo cạp khi ngồi, không đọc lại số đo hay chuyển sang size khác. Co giãn ở đây gắn với lưng chun trong câu nói, không được diễn giải thành vải toàn quần co giãn hoặc phép thử cạp. Điểm yếu là ACK em ghi nhận khá hành chính rồi nối thêm cả đoạn áo rộng/quần suông/gọn gàng/lịch sự/dễ chịu sau khi băn khoăn cạp đã được trả lời. Đoạn chốt giá trị dư làm lời đáp giống công thức quảng cáo hơn chat tập trung vào câu hỏi; naturalness1, các phần chọn mua/fit vẫn đủ căn cứ và có ích.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-known-waist-next:1",
+      "review": "Giữ quần navy và eo đã có, chỉ xin thêm mông là đầu vào còn thiếu, rồi trả phí25k/tổng484k đúng quote. Không chọn M từ riêng eo hoặc xin lại vòng eo/cao cân nặng. Đúng việc khách đang muốn tiến hành mua quần, câu hỏi dùng được với bảng hiện tại và lời trả tiền dễ hiểu, không kể lại hồ sơ hoặc mở bước checkout.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-color-final-confirm:1",
+      "review": "Khách vừa chốt xanh M và hỏi đổi giá: một câu xác nhận vẫn499k giữ đúng biến thể/size hiện tại là đủ. Không nhắc vòng ngực, bảng, opacity trắng hoặc hỏi lại lựa chọn, không biến ACK thành đổi đơn thành công. Lượt tự nhiên và hoàn tất quyết định trong phạm vi tư vấn; không cần tự tạo bước tiếp theo.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-effort-and-use:1",
+      "review": "Khách yêu cầu thuyết phục cho đi làm lẫn cuối tuần; shop liên hệ dáng áo/quần với vẻ lịch sự khi làm việc và thiết kế thoải mái khi đi chơi, giữ giá749k trong850k. Không bịa thử nghiệm/chất lượng đối thủ hoặc dùng fit như lý do né giá trị. Đoạn đầu hơi văn giới thiệu nhưng vẫn có đối chiếu hai dịp rõ và không lặp một bộ số đo. Sau khi đã giải thích phương án navy khách thích, xin ba đầu vào đúng bảng set có thể tiến tới chọn size; không tự hạ nextStep chỉ vì khách chưa viết một câu đồng ý mua, miễn lời tư vấn trước đó đã có ích. Có thể bớt câu xác nhận navy để gần chat hơn, nhưng cả lượt vẫn đạt mục tiêu bán hàng trong khả năng hiện có.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-budget-alternative:1",
+      "review": "Giữ trần600k, bỏ việc thêm quần và dùng áo riêng tổng524k đúng quote. Màu áo/quần vẫn trắng/đen nhưng shop tạo cách mặc khác có ích: thả áo dáng thẳng bên ngoài cho nét phóng khoáng, đối chiếu sơ vin khi cần đi làm chỉn chu. Protocol cho phép thay màu hoặc cách mặc nên không chấm fail chỉ vì không đổi sang xanh hoặc không khớp một đáp án mẫu. Xin vòng ngực đúng áo để chọn size là một bước dùng được. Có thể chọn cách thả áo dứt khoát hơn, nhưng có phương án phối mới thực sự, không chỉ lặp đồ cũ để lách câu hỏi.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-change-to-indoor-dress:1",
+      "review": "Nhận ra khách đổi sang váy dự tiệc trong nhà, chọn đúng VA512 M và giá829k trong850k; không bị state còn set kéo ngược lựa chọn. Nhưng khách giao shop chọn cả màu, reply lại đưa đen/rêu rồi hỏi chị thích tone nào. Việc đã biết hai màu không thiếu dữ liệu để một owner đưa ý kiến lựa chọn; hỏi lại trả phần quyết định đó cho khách, nên mức hiểu nhiệm vụ/đủ/hữu ích/decision/nextStep chỉ1 dù facts và cách nói rõ. Không chấm theo một màu đáp án cứng, màu nào có lý do phù hợp cũng được; vấn đề là shop chưa chọn.",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:1",
+      "review": "Chọn đúng QU714 navy thay quần đen để phối áo trắng và không kéo freeship vào lựa chọn. Lý do phong cách tự nhiên, không chốt size hoặc bịa thuộc tính. Tuy nhiên bước sau xin cả ngực/eo/mông trong khi đang giới thiệu quần, CodeSizeInput QU714 chỉ cần eo/mông; tin về áo và state SM613 không đổi yêu cầu hiện tại của khách. Đây là hỏi thêm sai phạm vi làm bước mua kém dùng được, không phải thiếu dữ liệu trong request. Hạ context/usefulness/partial/nextStep/coherence, giữ điểm quyết định màu và factual safety vì chưa tạo fit sai hay effect. Lỗi đã tồn tại ở vòng33 vẫn chưa hết.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "readiness": "READINESS.json",
+  "native": {
+    "startUtc": "2026-10-14T00:46:02.1472110Z",
+    "endUtc": "2026-10-14T00:48:25.2818228Z",
+    "exitCode": 0,
+    "sourceSha": "531ce4e73784fea87a48b103a1e30918112d6021"
+  },
+  "commands": [
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'; $env:DIAGNOSTIC_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); $env:C3_VERTEX_CREDENTIAL_FILE='C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json'; $env:C3_TEST_CODEX_TRANSPORT=$null; node apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02/run.mjs --preflight",
+      "exitCode": 0,
+      "generations": 0
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02/run.mjs",
+      "exitCode": 0,
+      "registered": 11,
+      "completed": 11,
+      "actualGenerations": 19,
+      "stderrBytes": 0
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-failure-recheck-02-human-view.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "primaryReviewBeforeRejectedDrafts": true
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-failure-recheck-02-audit.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005 3851554baa4bf61ab53785680a9abe35c69cbc93",
+      "exitCode": 0,
+      "capturedBodyReconstructions": 19
+    },
+    {
+      "command": "Existing scoreWholeReplies over8selected actual-terminal primary reviews; a3Operational cross-check of retained usage",
+      "exitCode": 0,
+      "primaryPassed": 6,
+      "scored": 8,
+      "quality": "FAIL",
+      "fullCheckpointQualification": false
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    }
+  ],
+  "logs": "C:/Users/nguye/AppData/Local/Temp/c3-failure-recheck-02-{preflight,run,red,focused}.{stdout,stderr}.log",
+  "recommendation": "STOP"
+}

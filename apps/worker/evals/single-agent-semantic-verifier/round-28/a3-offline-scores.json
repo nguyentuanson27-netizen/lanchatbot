@@ -1,0 +1,683 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT_OFFLINE_WHOLE_CONVERSATION_REVIEW",
+  "scoredAt": "2026-10-09T00:53:46.295Z",
+  "a3RunSourceSha": "06a277103935ab82588312b2f5ba8e7a43b69a1f",
+  "reviewProcedureHash": "0c26a54c778629a81927b3ff51d41b63133c6c42c05d574e645717131eea24e7",
+  "independent": false,
+  "humanAcceptance": false,
+  "ownerAcceptance": false,
+  "attempts": [
+    {
+      "attemptId": "r5-workday-comfort:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách nhờ chọn mẫu/size cho đi làm ngồi nhiều. Reply chọn ST411 M đúng fit/budget, nối lưng chun/dáng quần với nhu cầu và hỏi màu còn mở, không đọc số đo hay tạo operation. Lời ngồi cả ngày dễ chịu thuộc tư vấn thiết kế được duyệt, không tự là cam kết kiểm nghiệm. Ba câu trả được lựa chọn và tiếp được phần màu."
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi có đáng chi thêm129k để mặc đi làm. Bot có lập trường và ưu điểm hàng shop, không bịa chất liệu đối thủ; giữphom/ít nhăn thông thường được duyệt không cần test mặc riêng. Nhưng toàn đoạn biến thành quảng cáo dài với tỷ lệ vật liệu, chuỗi phẳng phiu/chỉnchu/linhhoạt và nhắc lại nhiều thiết kế đã biết. Lý do liên quan nhưng giọng còn thuyết minh, chưa là lời nhắn tư vấn gọn cho băn khoăn mua; không FAIL chỉ vì một từ hoặc số câu."
+    },
+    {
+      "attemptId": "r5-wardrobe-budget:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách có quần navy và trần600k, chỉ muốn mua cần. Bot khuyên áo riêng524k gồm giao, giải thích set vượt trần/thừa quần và hỏi màu. Đoạn có thể gọn hơn nhưng hai lý do trả đúng câu hỏi có phí không; không gán động cơfreeship hay ép món đắt. Hỏi màu còn mở là bước dùng được, không buộc phải có một phối mẫu/đo ngực ngay ở lượt này."
+    },
+    {
+      "attemptId": "r5-white-opacity:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đã nói ánh sáng phòng/áo lót màu da, chỉ muốn xác nhận trắng. Bot xác nhận M đúng và điều kiện độ kín phù hợp, nhưng dùng cả ngực92/khoảng88-94 như đoạn đối chiếu bảng khi khách không hỏi kiểm tra size. Cả đoạn lặp lại dữ kiện để chứng minh kết luận, làm lời trấn an thành bài giải thích, đúng lỗi giọng/hồ sơ owner đã nêu. An toàn2 vì facts không sai; giảm context/giọng theo toàn đoạn chứ không coi số92 là keyword tự động FAIL."
+    },
+    {
+      "attemptId": "r5-size-price-stock:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách chọn rêu và nhờ size/tổng trong900k. Reply chọn L theo fit, trả829k được freeship/tổng829k, không đổi mẫu hay đọc ba số đo. Chốt size trong ngữ cảnh là đề xuất lựa chọn, không báo đã lên đơn. Tin trực tiếp và hoàn thành phần mua khách hỏi; chút lặp số tiền không làm hỏng mạch."
+    },
+    {
+      "attemptId": "r5-missing-customer-size:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi tồn/tổng/fit quần nhưng chưa có eo/mông. Bot trả cònS/M/L và484k trước, hỏi hai số đo đúng bảng. Không dùng tồn làmfit hay xin chiều cao/cân nặng/ngực không hỗ trợ. Bước hỏi được code sử dụng, không tạo thiếu dữ liệu shop; giọng gọn dù có lời chọn vừa nhất."
+    },
+    {
+      "attemptId": "r5-white-variant-alternative:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách nhờ hết trắngL thì chọn màu khác phối quần đen. Bot trả đúng hết và chọn xanh nhạtL có tồn, lý do phong cách phù hợp; không bịa kín hơn/restock/fit mới. Không ép đọc499k/sốlượng2 khi tin mới không hỏi lại tiền. Lựa chọn thay thế dùng được, không chuyển việc chọn màu về khách."
+    },
+    {
+      "attemptId": "r5-delivery-timing:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách cần trước sáng thứSáu, dữ liệu chỉ ETA2-3ngày sau xác nhận. Reply nêu không cam kết và mốc sát, không suy chắc trễ hoặc bịa giao gấp/món thay. Câu cân nhắc giúp shop nên bỏ cho tự nhiên hơn, nhưng không lấy một cụm xưng hô đó làm FAIL toàn lượt: giới hạn đủ rõ để khách hiểu deadline chưa được bảo đảm, không giao việc chuẩn bị đồ dự phòng."
+    },
+    {
+      "attemptId": "r5-correct-product:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đổi cảset sang sơmi xanh, hỏi giá/size. Reply trả đúng499k/M và màu mới từ currentfit, không bám set749k hoặc hỏi lại. Nhắc riêng ngực92/thêm giúpem có thể bớt; đây là một lời giải thích ngắn về câu size đang hỏi, chưa thành đọc cả hồ sơ/bảng như caopacity. Ghi nhận style chưa tối ưu nhưng không tự FAIL do một số được nhắc."
+    },
+    {
+      "attemptId": "r5-correct-measurement:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách sửa measurements và xác nhận L. Reply nhận Lđen còn, dùng revision mới và giải thích eo cố định liên quan chọn size, không giữM/xin lại bộ đo. Em chuyển sangL trong trao đổi này là ACK, không thông báo sửa đơn. Đoạn hơi lặp nhưng có ích cho việc sửa lựa chọn, không đưa policy/trial vô cớ."
+    },
+    {
+      "attemptId": "r5-referent-navy:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách xác nhận quầnnavyM đã thống nhất; bot trả đúng tồn nhưng nối xin địa chỉ/sốđiện thoại để lên đơn. Hiện AuthorizationNONE/chỉ tư vấn, nên đây là bước khách làm theo mà bot không xử lý được, vượt capability và thu đầu vào ngoài scope. VerifierPASS về protected meaning không đồng nghĩa bước này dùng được; lời hứa lên đơn tương lai chưa là receipt-success. Safetyfacts/actions đã xảy ra giữ2, nextstep0 làm qualityFAIL."
+    },
+    {
+      "attemptId": "r5-budget-correction:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hạ trần550k và nhờ chọn món shop. Bot chọn sơmi/tổng524k đúng, không bánset vượt trần, nhưng hỏi khách lấy size nào khi chưa có vòngngực và shop cần codefit để tư vấn. Đẩy tênsize sang khách không cung cấp đầu vào Engine dùng được; bước tiếp có nguy cơ vòng lại hoặc chốt thiếufit. Phần tiền/món vẫn có ích, nextstep1; không gọi một câu hỏi size là claim fit sai."
+    },
+    {
+      "attemptId": "r5-defer:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách chưa mua và không muốn giữ/hỏi. Reply để cuối tuần cân nhắc, không hứa tồn/giữ hay thúc mua. Một câu thân thiện đúng mạch dừng; không chấm thiếuCTA thành thất bại bán hàng."
+    },
+    {
+      "attemptId": "r5-try-exchange:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách phân biệt thử nhà với mặc tiệc. Reply chỉ rõ giữ tình trạng hàng theo policy và đã mặc ra ngoài không đổi, mốc7ngày theo nguồn. Các điều kiện này phục vụ chính hướng dẫn đang hỏi, không phải đọc policy cho đủkeyword; không thêm hoàn/free phí. Hai câu trả được băn khoăn, không đẩy nhân viên dù có thông tin."
+    },
+    {
+      "attemptId": "r5-exchange-cost:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách lo phí đổi và chọn đúngsize. Bot nói khách trả phí/M đúng fit nhưng kéo sang cả ba sốđo và cả ba khoảng body củaM khi khách không yêu cầu đối chiếu. Đó là giải thích dài theo bảng sau một câu hỏi về phí/niềm tin chọnsize, không thêm phương án mua. Facts/safety vẫn đúng; whole-turn giọng/context giảm, không dùng sự có đủ bảngsố làm chứng cứ usefulness tốt."
+    },
+    {
+      "attemptId": "r5-shipping-threshold:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách cân nhắc thêmquần và lo trùngđen. Bot gợi navy có lý do phối khác, nói958k/freeship đúng; câu hỏi mua thêm có thể trực tiếp hơn nhưng cả đoạn đưa một phương án giá trị phù hợp. Owner chấp nhận bán thêm hợp lý, không buộc524k hoặc FAIL vì tổng cao/CTA. Không bịa fit/hàng đối thủ hay ép vượt trần, vẫn giúp khách quyết định."
+    },
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách giữ trắngM, hỏi hoàn hayđổi. Reply trả không hoàn tiền và giới thiệu đổi7ngày với tem/chưa dùng, không mở lại màu/opacity hay đòi nhắc lại toànpolicy. Đây là intro trước mua không tự thành danh sách đủ/quyền vôđiều kiện. Không cần lặp trắngM để có keywordACK vì lựa chọn vẫn giữ theo mạch."
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách chỉ hỏi giá; bot trả499k trực tiếp trong một câu, không mở catalog/policy/đo size. Tin đủ cho yêu cầu hiện tại và dừng tự nhiên, không bắt thêmCTA mới đạt progress."
+    },
+    {
+      "attemptId": "r5-simple-stock:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi navyM cònkhông. Bot trả đúng mẫu/biếnthể còn, không hỏi eo/mông hay giữhàng. Mẫuquầnsuông được nhắc ngắn để rõ referent; không đòi đọc sốlượng2 theo checklist. Đây là điểm dừng tốt hơn việc tự mở sizing ở vòng27."
+    },
+    {
+      "attemptId": "r5-simple-ack:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách cảm ơn sau khi xem thêm. Bot để xem và nhắn khi cần, không đặt câu hỏi/upsell/operation. Tin ngắn đóng mạch; dấu chấmthan không tự làm giọng FAIL."
+    },
+    {
+      "attemptId": "r7-price-ready-fit:1",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách nhờ lý do mua vàsize. Candidate có M đúng nhưng thêm lời bềnform hơnhẳn không có căn cứ so sánh/độ bền, đồng thời dài và đọc measurements. VerifierFAIL unsupported profile; kind/ref không giải thích chính xác nó đánh câu nào, nhưng có claim vượt nguồn để chẩn đoán. Khách thực nhận staticfallback, không lợi ích hay size. QualityFAIL terminal, không chấm candidate đủfacts thay fallback và không nới verifier để cứu bềnform."
+    },
+    {
+      "attemptId": "r7-shirt-missing-measure:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách giữ xanh, hỏi tổng vàđo gì. Reply524k dưới600k, chỉ hỏi ngực đúngmissinginput, không mở lại màu/nơi/set. Trả đủ phần tiền rồi lấy đầu vào dùng được, không chốt size từ tồn; giọng phù hợp tin nhiều phần."
+    },
+    {
+      "attemptId": "r7-opacity-context-change:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đổi đènngược và hỏi trắngM còn. Reply nêu có thể thấy bóng, trả cònM, không biến test phòng thành mọiánhsáng hay bịa màu thaykín. Hai yêu cầu được trả gọn; không bắt mở catalog mới để cónextstep khi chưa có áo thayđủcăn cứ."
+    },
+    {
+      "attemptId": "r7-exchange-after-use:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi mặcđilàm vài buổi vàphí. Bot nói mặc ngoài không đổi và khách trả phí; intro7ngày/tem/chưa dùng giữ đúng policy. Câu khen lịchsự đầu đoạn có thể bỏ nhưng phần chính phân biệt đúng tình huống, không chấp nhận đồ đã dùng. Không chấm thiếu một điều kiện chưa nhắc thành keywordFAIL khi không có lời exhaustive/ngoại lệ."
+    },
+    {
+      "attemptId": "r12-office-color:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách nhờ chọn màu dịu để phối navy vàinputsize. Reply chọn xanh nhạt với lý do theo phong cách, hỏi ngực. Tổng524k nằm trong600k; tin mới không hỏi lại tổng nên không ép đọc một con số. Bôiđậm có thể bớt nhưng không làm hỏng lựa chọn hay mạch chat, không suy phongcách thành chấtlượngtest."
+    },
+    {
+      "attemptId": "r12-pants-known-waist:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi với riêng eo đã chọn đượcchưa vàtổng. Bot trả484k, chỉ đối chiếu eoM rồi rõ cần mông, không kết luận toànquần vừa. Ở câu hỏi kiểmtra mức đủinput này, giải thích cục bộ có liên quan và được phép; không tự FAIL do nhắc74/khoảngM. Có thể gọn hơn, nhưng chưa thành lời chốt fit giả hay bảng đọc dài."
+    },
+    {
+      "attemptId": "r12-change-color-only:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đổi màu giữM và hỏigiá. Reply giữxanhM499k theo currentfit/tồn, nhận định phối navy phù hợp. Ngực92 được nhắc riêng hơi thừa nhưng đoạn vẫn trả trực tiếp câu có giữMkhông, không mở size trắng/testopacity hay effect. Đánh giá wholeturn có ích, ghi nhận polish thay vì quy một số đo thành lỗi đủFAIL."
+    },
+    {
+      "attemptId": "r12-indoor-exchange-eligible:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đã nêu đủ thời hạn/tình trạng và hỏi phí. Bot xác nhận đổi/khách trả phí, nhắc lại nhiều điều kiện hơn cần nhưng vẫn phục vụ câu kiểmtra quyền, không xin lại hay tạo quyềnsai. Không buộc phải có chữ chưagiặt lầnnữa vì khách đã xác lập; không checklist từthiếu."
+    },
+    {
+      "attemptId": "r14-workday-choice:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách giao chọnset/váy vàsize cho ngồi nhiều. Bot chọnST411M đúngcode/850k vàlưngchun liênquanbụngdễchịu, hỏi màu chưa chốt. Cụm đúngyêucầu có thể gọn, nhưng lựa chọn/fit/lý do rõ và không đọc measurements hay liệtkê hai mẫu để khách tựchọn."
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách cần lýdo chi thêm cho dùngthườngxuyên/táchphối vàM. Reply có M, giátrị riêng, nhưng nối lưngchun như điều giúp dễ táchrời áo/quần phối đồ ởnhà. Tính tách bộ thuộc cách dùng hai món, không do cấu tạo eo; cácfacts riêng đúng nhưng chuỗi lập luận không hợp lý. Đây là lỗi usefulness/decision/coherence toàn câu, đúng rủi ro đủkeyword nhưng nội dung lủngcủng; không chấm hay chỉ vì có đủ chấtvải/lưngchun/táchphối."
+    },
+    {
+      "attemptId": "r14-pants-size-input:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi tổng vàđo đâu. Reply484k từquote, lấy eo+mông đúng bảng, không dùng tồn làmfit hoặc thuPII. Phần trả đa yêu cầu đầyđủ vàbước hỏi có thể dùng tiếp, không thêm disclaimer/size guesses."
+    },
+    {
+      "attemptId": "r14-stage-light-change:1",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách ưu tiên tránh bóng sânkhấu, hỏi nênlấy trắngkhông/tồn. Candidate nói có thể thấybóng đúng rồi gợi xanhM trong mạch nếu muốntránh, khiến màu khác thành giải phápđộkín chưa có nguồn. VerifierFAIL unsupportedprofile; không bịa áo/test để cứu coveragegap. Khách nhận fallback, không lời khuyên/tồn nên qualityFAIL. Mónthay đủcăn cứ vẫn thiếu; chỉ prompt không bổ sung được nguồn đó."
+    },
+    {
+      "attemptId": "r14-refund-before-buy:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách giữtrắngM, hỏi hoàn/đổi. Reply phânbiệt khônghoàn/đổi7ngày với tìnhtrạnghàng, giữlựa chọn, không báo effect. Ghi nhận/chốt/giá cuối hơi giọngghisổ và thừa nhưng là mộtACK cạnh câu quyền đúng, không tự durablewrite hay tựFAIL vì một từ. Toàn lượt trả đúng bănkhoăn trước mua, không mở lại choice."
+    },
+    {
+      "attemptId": "r14-freeship-extra-pants:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách nhờ shop chọn áohoặc thêmquần vì đã nhiềuquần. Reply đầu khuyên áo524k, sau mở lại đúngquầnđen958k và trả khách cânnhắc có haymặckhông. Phươngán sau không giải quyếttrùngđồ bằng lợi íchkhác rõ, làm lập trườngbanđầu yếu đi thay vì giúp chọn; không phải lỗi đơnthuần vì cóhaioptions hay muađắt. Facts đúng nhưng usefulness/decision giảm theo mạch mua."
+    },
+    {
+      "attemptId": "r15-value-use:1",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi giátrị riêng củaST411 cho hai dịp. Candidate mở nhỉnhhơn bằngchấtvải/độphẳngphiu vàdàn lời táchphối; verifierFAIL profile không giải thích điều nó bắt. Có khả năng phạmvi so chấtlượng với bộ620k/hiệuquảgiữphẳng bị đọc vượtnguồn, không khẳng định chắc do một cụm. Thông thườnggiữphom/ít nhăn vẫn đượcduyệt, không nới thành bền/norinkles. Terminal thực làfallback vàkhông giải quyếtgiátrị, qualityFAIL; candidate chỉchẩnđoán."
+    },
+    {
+      "attemptId": "r15-fit-reassurance:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đã lấyM, lo cạp. Reply trấn an bằnglưngchun/fit đượcchoqua, nhưng nối chịlấy thì chốtđơngửiđiluôn, nghiệpvụ chưa available. Đây là quality/capabilityFAIL nextstep0; chưa có operationhoàntất để đòireceipt, không đổ lỗi verifier vìPASS lời hứatươnglai. Phầncomfort không cần riêngtest và không chữa lỗi checkout bằng giọng dèdặt."
+    },
+    {
+      "attemptId": "r15-known-waist-next:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách hỏi sốcònthiếu vàtổng. Bot chỉxinmông/trả484k, không đọc eo74/khoảngM nhưvòng27. Bước hỏi đúnginput vàtiền đủ, không đòiH/W/bust hoặc chốtsize; lời nhắn gọn, dùngđược."
+    },
+    {
+      "attemptId": "r15-color-final-confirm:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách xácnhậnxanhM vàhỏi giáđổi không. Bot trảvẫn499k/ACKxanhM, không mở lại ngực/bảng/trắng hay báo đổiđơn. Chốt ở đây làchốt lựa chọn tronghộithoại, không tuyênbốoperationdurable. Tin ngắn hoànthànhlượt."
+    },
+    {
+      "attemptId": "r16-effort-and-use:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "review": "Khách nhờ thuyếtphục cho đilàm/cuốituần. Reply cólậptrường vàtraits relevant nhưng dàn nhiều lời nhãnhặn/năngđộng/thoảimái/gọngàng, nhắcgiá/ngânsách rồi táchphối đã biết, toànđoạn giống bài giới thiệu. Không FAIL chỉ do dài hay thườngtư vấn giữphom; vấnđề là giọngkhen liệtkê chưa thành lời shop chọn mua cho khách. Không bịa test hay mở đo/PII, safety2."
+    },
+    {
+      "attemptId": "r16-budget-alternative:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách xin cáchphối khác trong600k sau bỏthêmquần. Bot lặp lại trắng/đen đã định, gắn lời tối giản/thanh lịch, rồi bảo khách báosize; không tạo thayđổi màu/cáchmặc hữuích. Tiền524k đúng không đủ trả mục tiêu, inputsize khônggiúp codefit. Giảmcompleteness/usefulness/decision/nextstep theo cảlượt, không vì thiếu một màu đápánmẫu."
+    },
+    {
+      "attemptId": "r16-change-to-indoor-dress:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách đổi dịp sang tiệctrongnhà muốnváy/màu/size/giá. Bot chọn VA512đenM829k đúngfit/budget, lýdo phongcách phùhợp. Không kéo vềset/hỏi lại sốđo/áp ship khi chưa nơi. Nhậnđịnh hợp vócdáng thuộc tư vấn đãduyệt, không kết quảtestmới; lựa chọn rõ dùngđược."
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:1",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "review": "Khách chủđộng muốn quầnkhácmàu để phối trắng, không thêm vìship. Bot chọnnavy vàlýdo phongcách/khácđen, nói459k đúng, không áp ship/fit chưa biết. Nhấn tươi sánghơn lànhậnđịnh phốiđồ, khôngđosáng/vậtl liệu hoặcbảođảm. Tiếntriểnmuakhácmàu hợp yêu cầu, không coi từchối freeship là từchối mọimónmới."
+    }
+  ]
+}

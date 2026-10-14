@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceRounds": [
+    53
+  ],
+  "sourceEvidenceHash": "c92a65e0db14ad617919307372e4ee5c5b3b6c369f88c9cd398305af85dafc5e",
+  "a2CaseIds": [
+    "r32-advisory-shape-safe",
+    "r41-policy-short-intro-safe",
+    "r45-prebuy-service-intro-safe",
+    "r45-general-value-safe"
+  ],
+  "a3CaseIds": [
+    "r5-refund-distinction",
+    "r14-stage-light-change",
+    "r14-refund-before-buy",
+    "r15-color-final-confirm",
+    "r5-competitor-price",
+    "r7-opacity-context-change",
+    "r7-exchange-after-use",
+    "r14-price-repeat-wear",
+    "r15-value-use",
+    "r16-pants-color-alternative"
+  ],
+  "repetitions": 3,
+  "allAttemptsMustPass": true
+}

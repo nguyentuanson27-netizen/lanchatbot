@@ -1,0 +1,513 @@
+{
+  "round": 45,
+  "recordedAt": "2026-10-11T01:29:51.478Z",
+  "cutoff": "Actual commands through T3 evidence savepoint; report/delivery checks have separate receipt.",
+  "cwd": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+  "notes": [
+    "Only actual commands/exits and completed sessions, expected3 admission RED preserved.",
+    "Two freeze length guards and omitted credential-env inspection failed before generation and were corrected; no registered generation retried.",
+    "run-a2 exited1 because the recorded A2 status isFAIL. validate-a2 and audit exit0 prove integrity/accounting, not semantic safety/usability PASS. Read-only progress polling omitted."
+  ],
+  "commands": [
+    {
+      "label": "Refresh current main before Round45",
+      "command": "git fetch origin main",
+      "result": {
+        "chunk_id": "506b08",
+        "wall_time_seconds": 4.8002062,
+        "exit_code": 0,
+        "original_token_count": 25,
+        "output": "From github.com:nguyentuanson27-netizen/lanchatbot\n * branch              main       -> FETCH_HEAD\n"
+      }
+    },
+    {
+      "label": "T1 freeze",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-freeze-round45.mjs",
+      "result": {
+        "chunk_id": "f3e343",
+        "wall_time_seconds": 0.7481412,
+        "exit_code": 1,
+        "original_token_count": 163,
+        "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\r\n\r\n  assert(owner.length<=old.prompts.conversation.length)\r\n\r\n    at file:///C:/Users/nguye/AppData/Local/Temp/c3-freeze-round45.mjs:14:1\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.19.0\r\n"
+      }
+    },
+    {
+      "label": "T1 freeze corrected before writing inputs",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-freeze-round45.mjs",
+      "result": {
+        "chunk_id": "180c92",
+        "wall_time_seconds": 0.4232822,
+        "exit_code": 1,
+        "original_token_count": 163,
+        "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\r\n\r\n  assert(owner.length<=old.prompts.conversation.length)\r\n\r\n    at file:///C:/Users/nguye/AppData/Local/Temp/c3-freeze-round45.mjs:14:1\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.19.0\r\n"
+      }
+    },
+    {
+      "label": "T1 freeze minimum prompts",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-freeze-round45.mjs",
+      "result": {
+        "chunk_id": "c22f55",
+        "wall_time_seconds": 0.5996284,
+        "exit_code": 0,
+        "original_token_count": 208,
+        "output": "{\"round\":45,\"implementationBaseSha\":\"296cdcfbf5759f5bf9cbb24acf3dc63005589361\",\"specSha\":\"bb39ac88f530f17b4250d9ae30face152be67d08\",\"manifestHash\":\"0e6f369d25ee76bb5d35a4b7305e2aa8f5ed8d57dbf1d6030116c8207c594e76\",\"promptHashes\":{\"conversation\":\"804ae37c68471773a7e703aa2ea02ea133e56c0af79bb83d35b7a177c6a1e6a5\",\"verifier\":\"3d4b858d6c77262e9cd3ed2eae4a547886b74b5061e3a7b97c6e782990e7db53\"},\"corpusHashes\":{\"a2\":\"aecec56fa3e12dabed33a66bb3c3b08c9918ee6a486308891279c0b41a09b929\",\"a3\":\"a0438f119ba6db24d339b51ad03ba3a8630c068e6c78282e457c14dbf07a0176\"},\"treatmentHash\":\"b6d6a2cd878a4af3d914742e419ead07e8d24f23dc4bdc266a0e1c108dbefd1c\",\"counts\":{\"a2Cases\":155,\"a2Attempts\":229,\"a3Histories\":42,\"a3Attempts\":66},\"promptChars\":{\"ownerBefore\":5959,\"ownerAfter\":5879,\"verifierBefore\":5926,\"verifierAfter\":5916},\"providerGenerations\":0}\n"
+      }
+    },
+    {
+      "label": "T1 diff check",
+      "command": "git diff --check",
+      "result": {
+        "chunk_id": "d8dbef",
+        "wall_time_seconds": 0.3203361,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "T1 stage",
+      "command": "git add tasks/plan.md tasks/todo.md docs/specs/c3-round45-whole-meaning-and-buying-decisions-20261011.md apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round45.vi.txt apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round45.vi.txt apps/worker/evals/single-agent-semantic-verifier/round-45",
+      "result": {
+        "chunk_id": "71f450",
+        "wall_time_seconds": 0.3643982,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "T1 savepoint",
+      "command": "git commit -m 'freeze round45 whole-meaning and buying-decision treatment'",
+      "result": {
+        "chunk_id": "68aaef",
+        "wall_time_seconds": 0.7295346,
+        "exit_code": 0,
+        "original_token_count": 310,
+        "output": "[feat/c3-semantic-verifier-checkpoint-a-20261005 12c9afb1] freeze round45 whole-meaning and buying-decision treatment\n 13 files changed, 298 insertions(+)\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-round45.vi.txt\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round45.vi.txt\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/context-preparation.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/corpus-a2.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/corpus-a3.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/fashion-profiles.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/manifest.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/quote-inputs.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/reference-replies.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/size-inputs.json\n create mode 100644 docs/specs/c3-round45-whole-meaning-and-buying-decisions-20261011.md\n"
+      }
+    },
+    {
+      "label": "observed Round45 admission RED",
+      "command": "node --test apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs",
+      "result": {
+        "chunk_id": "3ff2b6",
+        "wall_time_seconds": 0.8762218,
+        "exit_code": 1,
+        "original_token_count": 2315,
+        "output": "file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16\nif (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');\n                                                                                                                                                                                                                                                            ^\n\nError: UNKNOWN_CHECKPOINT_ROUND\n    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16:253\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\n    at async node:internal/modules/esm/loader:643:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.19.0\n✖ fixed45 admits frozen prompt scope and contrasts while preserving existing world and quality contracts (69.3692ms)\n✖ fixed45 registers every repeated contrast and preserves the full terminal outcome denominator (2.6954ms)\n✖ fixed45 captured requests exclude all evaluator/source labels and preserve canonical snapshots (36.1767ms)\nℹ tests 3\nℹ suites 0\nℹ pass 0\nℹ fail 3\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 556.6514\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\round-45.test.mjs:12:1\n✖ fixed45 admits frozen prompt scope and contrasts while preserving existing world and quality contracts (69.3692ms)\n  Error: Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-semantic-verifier\\protocol.mjs\n  file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16\n  if (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');\n                                                                                                                                                                                                                                                              ^\n  \n  Error: UNKNOWN_CHECKPOINT_ROUND\n      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16:253\n      at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\n      at async node:internal/modules/esm/loader:643:26\n      at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n  \n  Node.js v24.19.0\n  \n      at genericNodeError (node:internal/errors:985:15)\n      at wrappedFn (node:internal/errors:539:14)\n      at checkExecSyncError (node:child_process:942:11)\n      at execFileSync (node:child_process:978:15)\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs:13:15)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.start (node:internal/test_runner/test:1242:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    status: 1,\n    signal: null,\n    output: [ null, '', \"file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16\\r\\nif (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');\\r\\n                                                                                                                                                                                                                                                            ^\\r\\n\\r\\nError: UNKNOWN_CHECKPOINT_ROUND\\r\\n    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16:253\\r\\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\\r\\n    at async node:internal/modules/esm/loader:643:26\\r\\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\\r\\n\\r\\nNode.js v24.19.0\\r\\n\" ],\n    pid: 23372,\n    stdout: '',\n    stderr: \"file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16\\r\\nif (!['1','2','3','4','5','6','7','8','8-gemini','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44'].includes(round)) throw new Error('UNKNOWN_CHECKPOINT_ROUND');\\r\\n                                                                                                                                                                                                                                                            ^\\r\\n\\r\\nError: UNKNOWN_CHECKPOINT_ROUND\\r\\n    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:16:253\\r\\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\\r\\n    at async node:internal/modules/esm/loader:643:26\\r\\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\\r\\n\\r\\nNode.js v24.19.0\\r\\n\"\n  }\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\round-45.test.mjs:28:1\n✖ fixed45 registers every repeated contrast and preserves the full terminal outcome denominator (2.6954ms)\n  Error: UNREGISTERED_CONTEXT_PRESENTATION\n      at requireThat (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:10:54)\n      at validateDraft (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:160:3)\n      at validateProtocol (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:207:19)\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs:29:2)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)\n      at Test.postRun (node:internal/test_runner/test:1522:19)\n      at Test.run (node:internal/test_runner/test:1447:12)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\round-45.test.mjs:48:1\n✖ fixed45 captured requests exclude all evaluator/source labels and preserve canonical snapshots (36.1767ms)\n  Error: PROFILE_BOUND\n      at requireThat (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:10:54)\n      at projectRuntime (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:46:5)\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs:56:35)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)\n      at Test.postRun (node:internal/test_runner/test:1522:19)\n      at Test.run (node:internal/test_runner/test:1447:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)\n"
+      }
+    },
+    {
+      "label": "minimum45 admission",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-admit-round45.mjs",
+      "result": {
+        "chunk_id": "b1ad7f",
+        "wall_time_seconds": 0.3047354,
+        "exit_code": 0,
+        "original_token_count": 14,
+        "output": "FIXED45_ADMITTED_NO_PROVIDER_API_OR_FINAL_GATE_CHANGE\n"
+      }
+    },
+    {
+      "label": "Round45 admission GREEN",
+      "command": "node --test apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs",
+      "result": {
+        "chunk_id": "0a3847",
+        "wall_time_seconds": 1.3502727,
+        "exit_code": 0,
+        "original_token_count": 114,
+        "output": "✔ fixed45 admits frozen prompt scope and contrasts while preserving existing world and quality contracts (395.7939ms)\n✔ fixed45 registers every repeated contrast and preserves the full terminal outcome denominator (87.9095ms)\n✔ fixed45 captured requests exclude all evaluator/source labels and preserve canonical snapshots (256.2568ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1043.2118\n"
+      }
+    },
+    {
+      "label": "serial full protocol/evaluation tests",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs *> C:/Users/nguye/AppData/Local/Temp/c3-round45-node-full.txt; $testExit = $LASTEXITCODE; Get-Content C:/Users/nguye/AppData/Local/Temp/c3-round45-node-full.txt -Tail 12; exit $testExit",
+      "result": {
+        "chunk_id": "f29f6c",
+        "wall_time_seconds": 10.0048452,
+        "session_id": 79718,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "focused protocol/provider tests",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/context-presentation.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs",
+      "result": {
+        "chunk_id": "b70b48",
+        "wall_time_seconds": 5.6865669,
+        "exit_code": 0,
+        "original_token_count": 680,
+        "output": "✔ actual forwarded body equals frozen runtime request and excludes CLI tools/context/evaluator labels (184.6175ms)\n✔ CLI retry/continuation never forwards a second upstream generation (46.9114ms)\n✔ upstream 401 is retained without generation retry (29.0307ms)\n✔ upstream 429 is retained without generation retry (61.028ms)\n✔ upstream 500 is retained without generation retry (35.4704ms)\n✔ upstream 503 is retained without generation retry (29.4514ms)\n✔ missing login acquisition fails closed with zero upstream generations (16.2314ms)\n✔ wrong returned model and malformed response fail closed (22.1562ms)\n✔ Codex streaming final item owns the reply; completed event may contain metadata only (17.1232ms)\n✔ timeout after one request is retained; no retry (1007.5544ms)\n✔ installed Codex login reaches relay; upstream is a local stub, no provider generation (2038.9997ms)\n✔ actual captured Gemini request preserves exact final text and usage without evaluator/secret leakage (720.7603ms)\n✔ Gemini HTTP401 terminates current slot with one generation, no retry (8.2213ms)\n✔ Gemini HTTP429 terminates current slot with one generation, no retry (6.8176ms)\n✔ Gemini HTTP500 terminates current slot with one generation, no retry (7.2038ms)\n✔ failed OAuth is retained without generation or hidden auth retry (5.6694ms)\n✔ 401 permits token refresh only before later registered slot, never current-slot retry (12.1626ms)\n✔ timeout and network error each terminate without generation retry (24.6871ms)\n✔ malformed/model/tool/truncation/oversize responses fail closed with one generation and no rewrite (46.3475ms)\n✔ response byte bound aborts at1MiB and cache reuses token for subsequent successful slot (15.188ms)\n✔ draft corpora contain exact seeds, required A2 families and whole-reply A3 coverage (19.5044ms)\n✔ each exact PR387 segment/literal input remains pinned independently of new cases (3.4002ms)\n✔ captured conversation and verifier request bodies exclude evaluator-only data (2.8553ms)\n✔ projection binds exact draft and allowlisted trusted snapshot, excludes draft from conversation input (1.1711ms)\n✔ frozen bounds reject oversized input instead of silently truncating authoritative truth (3.5688ms)\n✔ owner decisions and bounded Codex inference configuration are frozen (33.9011ms)\n✔ A2 and A3 preflight reject missing or mismatched runtime source SHA (1.9047ms)\n✔ fallback text/hash, terminal map and corpus tampering invalidate protocol inputs (2.718ms)\n✔ CLI validates retained A2 evidence without a circular top-level await (952.0795ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4031.9392\n"
+      }
+    },
+    {
+      "label": "worker boundary and Vertex adapter",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "result": {
+        "chunk_id": "87bc14",
+        "wall_time_seconds": 10.0063363,
+        "session_id": 68432,
+        "original_token_count": 72,
+        "output": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker\n\n ✓ src/vertex.test.ts (34 tests) 1388ms\n   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1017ms\n"
+      }
+    },
+    {
+      "label": "protected claims/reply assembler/size",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "result": {
+        "chunk_id": "de2e5a",
+        "wall_time_seconds": 8.5728232,
+        "exit_code": 0,
+        "original_token_count": 116,
+        "output": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\n\n ✓ src/reply-assembler.test.ts (14 tests) 156ms\n ✓ src/protected-claims.test.ts (7 tests) 70ms\n ✓ src/size-engine.test.ts (20 tests) 92ms\n\n Test Files  3 passed (3)\n      Tests  41 passed (41)\n   Start at  08:00:57\n   Duration  3.52s (transform 1.93s, setup 0ms, collect 3.40s, tests 318ms, environment 1ms, prepare 2.70s)\n\n"
+      }
+    },
+    {
+      "label": "worker typecheck",
+      "command": "pnpm --filter @lana/worker typecheck",
+      "result": {
+        "chunk_id": "2a3de3",
+        "wall_time_seconds": 10.0075436,
+        "session_id": 36134,
+        "original_token_count": 138,
+        "output": "\n> @lana/worker@0.1.0 pretypecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> pnpm -r --filter \"@lana/worker^...\" build\n\nScope: 12 of 21 workspace projects\n../../packages/contracts build$ tsc -p tsconfig.json\n../../packages/contracts build: Done\n../../packages/conversation-engine build$ tsc -p tsconfig.json\n../../packages/commerce-kernel build$ tsc -p tsconfig.json\n../../packages/durable-messaging build$ tsc -p tsconfig.json\n../../packages/meta-delivery build$ tsc -p tsconfig.json\n"
+      }
+    },
+    {
+      "label": "worker build",
+      "command": "pnpm --filter @lana/worker build",
+      "result": {
+        "chunk_id": "abccc1",
+        "wall_time_seconds": 10.0012691,
+        "session_id": 27734,
+        "original_token_count": 137,
+        "output": "\n> @lana/worker@0.1.0 prebuild C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> pnpm -r --filter \"@lana/worker^...\" build\n\nScope: 12 of 21 workspace projects\n../../packages/contracts build$ tsc -p tsconfig.json\n../../packages/contracts build: Done\n../../packages/commerce-kernel build$ tsc -p tsconfig.json\n../../packages/conversation-engine build$ tsc -p tsconfig.json\n../../packages/durable-messaging build$ tsc -p tsconfig.json\n../../packages/meta-delivery build$ tsc -p tsconfig.json\n"
+      }
+    },
+    {
+      "label": "worker lint",
+      "command": "pnpm --filter @lana/worker lint",
+      "result": {
+        "chunk_id": "2c2eb2",
+        "wall_time_seconds": 10.0079074,
+        "session_id": 7545,
+        "original_token_count": 42,
+        "output": "\n> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+      }
+    },
+    {
+      "label": "approved provider client inspection",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; node C:/Users/nguye/AppData/Local/Temp/c3-inspect-round45.mjs",
+      "result": {
+        "chunk_id": "760bc8",
+        "wall_time_seconds": 2.8279183,
+        "exit_code": 1,
+        "original_token_count": 223,
+        "output": "file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs:17\r\n } catch {throw new Error('VERTEX_CREDENTIAL_UNAVAILABLE_OR_PROJECT_MISMATCH');}\r\n                ^\r\n\r\nError: VERTEX_CREDENTIAL_UNAVAILABLE_OR_PROJECT_MISMATCH\r\n    at readCredential (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs:17:17)\r\n    at inspectGemini (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs:20:34)\r\n    at file:///C:/Users/nguye/AppData/Local/Temp/c3-inspect-round45.mjs:6:35\r\n\r\nNode.js v24.19.0\r\n"
+      }
+    },
+    {
+      "label": "read-only provider capacity",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round45-read-limits.mjs",
+      "result": {
+        "chunk_id": "7727ea",
+        "wall_time_seconds": 5.0511037,
+        "exit_code": 0,
+        "original_token_count": 244,
+        "output": "{\"checkedAt\":\"2026-10-11T01:00:58.011Z\",\"identity\":{\"version\":\"codex-cli 0.159.2\",\"binarySha256\":\"52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a\"},\"methods\":[\"initialize\",\"initialized\",\"account/rateLimits/read\"],\"generationRequests\":0,\"status\":\"OK\",\"rateLimits\":{\"limitId\":\"codex\",\"primary\":{\"usedPercent\":12,\"windowDurationMins\":300,\"resetsAt\":1791696371,\"resetsAtUtc\":\"2026-10-11T05:26:11.000Z\"},\"secondary\":{\"usedPercent\":91,\"windowDurationMins\":10080,\"resetsAt\":1791963029,\"resetsAtUtc\":\"2026-10-14T07:30:29.000Z\"},\"rateLimitReachedType\":null,\"credits\":{\"hasCredits\":true,\"unlimited\":false}},\"rateLimitsByLimitId\":[{\"limitId\":\"codex\",\"primary\":{\"usedPercent\":12,\"windowDurationMins\":300,\"resetsAt\":1791696371,\"resetsAtUtc\":\"2026-10-11T05:26:11.000Z\"},\"secondary\":{\"usedPercent\":91,\"windowDurationMins\":10080,\"resetsAt\":1791963029,\"resetsAtUtc\":\"2026-10-14T07:30:29.000Z\"},\"rateLimitReachedType\":null,\"credits\":{\"hasCredits\":true,\"unlimited\":false}}]}\n"
+      }
+    },
+    {
+      "label": "complete serial full protocol/evaluation tests",
+      "pollFor": 79718,
+      "result": {
+        "chunk_id": "0d7fca",
+        "wall_time_seconds": 5.0145251,
+        "session_id": 79718,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "complete worker boundary and Vertex adapter",
+      "pollFor": 68432,
+      "result": {
+        "chunk_id": "807316",
+        "wall_time_seconds": 0.0000181,
+        "exit_code": 0,
+        "original_token_count": 65,
+        "output": " ✓ src/single-agent-semantic-verifier-boundary.test.ts (45 tests) 149ms\n\n Test Files  2 passed (2)\n      Tests  79 passed (79)\n   Start at  08:00:57\n   Duration  7.85s (transform 4.08s, setup 0ms, collect 7.30s, tests 1.54s, environment 1ms, prepare 1.08s)\n\n"
+      }
+    },
+    {
+      "label": "complete worker typecheck",
+      "pollFor": 36134,
+      "result": {
+        "chunk_id": "4a052f",
+        "wall_time_seconds": 5.0143531,
+        "session_id": 36134,
+        "original_token_count": 268,
+        "output": "../../packages/meta-delivery build: Done\n../../packages/meta-webhook build$ tsc -p tsconfig.json\n../../packages/durable-messaging build: Done\n../../packages/pancake-handoff build$ tsc -p tsconfig.json\n../../packages/conversation-engine build: Done\n../../packages/commerce-kernel build: Done\n../../packages/meta-webhook build: Done\n../../packages/pancake-handoff build: Done\n../../packages/business-tools build$ tsc -p tsconfig.json\n../../packages/database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/database prebuild: > tsc -p tsconfig.json\n../../packages/business-tools build: Done\n../../packages/database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/database prebuild: > tsc -p tsconfig.json\n"
+      }
+    },
+    {
+      "label": "complete worker build",
+      "pollFor": 27734,
+      "result": {
+        "chunk_id": "95a17a",
+        "wall_time_seconds": 5.0142298,
+        "session_id": 27734,
+        "original_token_count": 268,
+        "output": "../../packages/meta-delivery build: Done\n../../packages/meta-webhook build$ tsc -p tsconfig.json\n../../packages/durable-messaging build: Done\n../../packages/pancake-handoff build$ tsc -p tsconfig.json\n../../packages/conversation-engine build: Done\n../../packages/commerce-kernel build: Done\n../../packages/pancake-handoff build: Done\n../../packages/meta-webhook build: Done\n../../packages/database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/business-tools build$ tsc -p tsconfig.json\n../../packages/database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/database prebuild: > tsc -p tsconfig.json\n../../packages/business-tools build: Done\n../../packages/database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/database prebuild: > tsc -p tsconfig.json\n"
+      }
+    },
+    {
+      "label": "complete worker lint",
+      "pollFor": 7545,
+      "result": {
+        "chunk_id": "843c08",
+        "wall_time_seconds": 0.0000161,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "approved provider client inspection",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; $env:C3_VERTEX_CREDENTIAL_FILE='C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json'; node C:/Users/nguye/AppData/Local/Temp/c3-inspect-round45.mjs",
+      "result": {
+        "chunk_id": "4954de",
+        "wall_time_seconds": 1.6342831,
+        "exit_code": 0,
+        "original_token_count": 140,
+        "output": "{\"status\":\"APPROVED_CLIENTS_AVAILABLE\",\"codex\":{\"version\":\"codex-cli 0.159.2\",\"binarySha256\":\"52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a\"},\"gemini\":{\"provider\":\"VERTEX_AI\",\"model\":\"gemini-3.5-flash-lite\",\"projectId\":\"project-388db62b-f5a4-4e76-a2b\",\"location\":\"global\",\"transport\":\"NODE_FETCH_NO_RETRY\",\"credentialRoute\":\"EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT\",\"credentialAvailable\":true,\"nodeVersion\":\"v24.19.0\",\"helperExecutableHash\":\"fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe\"},\"providerGenerationRequests\":0}\n"
+      }
+    },
+    {
+      "pollFor": 79718,
+      "result": {
+        "chunk_id": "29928a",
+        "wall_time_seconds": 5.0009665,
+        "session_id": 79718,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "pollFor": 36134,
+      "result": {
+        "chunk_id": "4a9584",
+        "wall_time_seconds": 5.0009526,
+        "session_id": 36134,
+        "original_token_count": 708,
+        "output": "../../packages/database prebuild: Done\n../../packages/database build$ tsc -p tsconfig.json\n../../packages/database build: Done\n../../packages/chat-runtime build$ tsc -p tsconfig.json\n../../packages/dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/chat-runtime build: Done\n../../packages/dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-review prebuild: Done\n../../packages/dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-review build: Done\n../../packages/dataset-store prebuild$ pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build\n../../packages/dataset-store prebuild: Scope: 3 of 21 workspace projects\n../../packages/dataset-store prebuild: ../contracts build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../contracts build: Done\n../../packages/dataset-store prebuild: ../dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/dataset-store prebuild: ../database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n"
+      }
+    },
+    {
+      "pollFor": 27734,
+      "result": {
+        "chunk_id": "51a79f",
+        "wall_time_seconds": 5.000635,
+        "session_id": 27734,
+        "original_token_count": 744,
+        "output": "../../packages/database prebuild: Done\n../../packages/database build$ tsc -p tsconfig.json\n../../packages/database build: Done\n../../packages/chat-runtime build$ tsc -p tsconfig.json\n../../packages/dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/chat-runtime build: Done\n../../packages/dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-review prebuild: Done\n../../packages/dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-review build: Done\n../../packages/dataset-store prebuild$ pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build\n../../packages/dataset-store prebuild: Scope: 3 of 21 workspace projects\n../../packages/dataset-store prebuild: ../contracts build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../contracts build: Done\n../../packages/dataset-store prebuild: ../dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/dataset-store prebuild: ../database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n"
+      }
+    },
+    {
+      "pollFor": 79718,
+      "result": {
+        "chunk_id": "38023b",
+        "wall_time_seconds": 0.0000137,
+        "exit_code": 0,
+        "original_token_count": 138,
+        "output": "✔ code size context asks only missing chest and preserves existing chart/facts/binding without a new field (119.2449ms)\r\n✔ known waist is not requested again; unsupported height/weight is not advertised (1.1173ms)\r\n✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (1.2825ms)\r\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.6099ms)\r\nℹ tests 239\r\nℹ suites 0\r\nℹ pass 239\r\nℹ fail 0\r\nℹ cancelled 0\r\nℹ skipped 0\r\nℹ todo 0\r\nℹ duration_ms 79287.0318\r\n"
+      }
+    },
+    {
+      "pollFor": 36134,
+      "result": {
+        "chunk_id": "88ad91",
+        "wall_time_seconds": 0.0000126,
+        "exit_code": 0,
+        "original_token_count": 187,
+        "output": "../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 typecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+      }
+    },
+    {
+      "pollFor": 27734,
+      "result": {
+        "chunk_id": "bbb7ba",
+        "wall_time_seconds": 0.0000143,
+        "exit_code": 0,
+        "original_token_count": 148,
+        "output": "../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json\n\n"
+      }
+    },
+    {
+      "label": "readiness self-review",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; node C:/Users/nguye/AppData/Local/Temp/c3-readiness-round45.mjs",
+      "result": {
+        "chunk_id": "1bf199",
+        "wall_time_seconds": 2.7949595,
+        "exit_code": 0,
+        "original_token_count": 342,
+        "output": "{\"status\":\"READY\",\"selfReview\":{\"historicalFiles\":1035,\"historicalUnchanged\":1033,\"changedEvaluationExecutables\":[\"apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs\",\"apps/worker/evals/single-agent-semantic-verifier/protocol.mjs\"],\"executableDelta\":\"1\\t1\\tapps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs\\n18\\t11\\tapps/worker/evals/single-agent-semantic-verifier/protocol.mjs\\n\",\"productionSourceChanged\":false,\"sharedSourceChanged\":false,\"rolesAdded\":0,\"rolesTotal\":2,\"newSemanticLayers\":0,\"newEvaluationFunctions\":0,\"newParserRouterRepairFrameworkStateToolEffectSendProductionWiring\":0,\"caseSpecificProductionTemplatesRegex\":0,\"evaluatorLabelsLeaked\":0,\"a2RetainedByteExactCases\":146,\"a2AddedCases\":9,\"a3RuntimeEvaluatorByteExactCases\":42,\"a2RegisteredAttempts\":229,\"a3PlannedAttempts\":66,\"ownerMaxBytes\":15506,\"verifierMaxBytesAtDraftBound\":29971,\"promptCharacters\":{\"ownerBefore\":5959,\"ownerAfter\":5879,\"verifierBefore\":5926,\"verifierAfter\":5916},\"review\":\"Owner buying continuity/tradeoffs and verifier whole-meaning scope changed;9 paired A2 contrasts preregistered,146 retained exact. A3/world/review/models/bars/terminals unchanged44. Fixed45 admission/hash pins only; no historical-score/label rewrite or new production machinery. Semantics still requires fresh provider evidence.\"},\"providerGenerationRequests\":0}\n"
+      }
+    },
+    {
+      "label": "Round45 frozen protocol",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "result": {
+        "chunk_id": "44c511",
+        "wall_time_seconds": 0.4274561,
+        "exit_code": 0,
+        "original_token_count": 16,
+        "output": "{\"round\":45,\"a2Cases\":155,\"a3Cases\":42}\nFROZEN_PROTOCOL_VALID\n"
+      }
+    },
+    {
+      "label": "source diff check",
+      "command": "git diff --check",
+      "result": {
+        "chunk_id": "e865c4",
+        "wall_time_seconds": 0.3026782,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "T2 stage",
+      "command": "git add apps/worker/evals/single-agent-semantic-verifier/protocol.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-45/READINESS.json tasks/todo.md",
+      "result": {
+        "chunk_id": "2ecb2a",
+        "wall_time_seconds": 0.3534667,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "T2 savepoint",
+      "command": "git commit -m 'admit frozen round45 and record deterministic readiness'",
+      "result": {
+        "chunk_id": "833783",
+        "wall_time_seconds": 0.6156548,
+        "exit_code": 0,
+        "original_token_count": 87,
+        "output": "[feat/c3-semantic-verifier-checkpoint-a-20261005 1eb827ea] admit frozen round45 and record deterministic readiness\n 5 files changed, 568 insertions(+), 13 deletions(-)\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45.test.mjs\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/READINESS.json\n"
+      }
+    },
+    {
+      "label": "clean A2 source seal",
+      "command": "git status --porcelain; git rev-parse HEAD",
+      "result": {
+        "chunk_id": "66021c",
+        "wall_time_seconds": 0.3319367,
+        "exit_code": 0,
+        "original_token_count": 11,
+        "output": "1eb827ea61d5ab005cd6c9148ba82c92833c542a\n"
+      }
+    },
+    {
+      "label": "A2 preflight",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; $env:A2_RUN_SOURCE_SHA='1eb827ea61d5ab005cd6c9148ba82c92833c542a'; Remove-Item Env:C3_TEST_CODEX_TRANSPORT -ErrorAction SilentlyContinue; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "result": {
+        "chunk_id": "0fa3af",
+        "wall_time_seconds": 0.562756,
+        "exit_code": 0,
+        "original_token_count": 16,
+        "output": "{\"round\":45,\"a2Cases\":155,\"a3Cases\":42}\nFROZEN_PROTOCOL_VALID\n"
+      }
+    },
+    {
+      "label": "A2 actual provider run",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; $env:A2_RUN_SOURCE_SHA='1eb827ea61d5ab005cd6c9148ba82c92833c542a'; Remove-Item Env:C3_TEST_CODEX_TRANSPORT -ErrorAction SilentlyContinue; node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs",
+      "result": {
+        "chunk_id": "56af63",
+        "wall_time_seconds": 10.0093224,
+        "session_id": 60085,
+        "original_token_count": 36,
+        "output": "{\"attemptId\":\"pr387-undeclared-protected-claim:1\",\"precheck\":\"BLOCKED\",\"provider\":null,\"outcome\":\"FALLBACK\",\"reason\":\"AUTHORITY\",\"requests\":0}\n"
+      }
+    },
+    {
+      "label": "A2 process completion",
+      "pollFor": 60085,
+      "result": {
+        "chunk_id": "5cd047",
+        "wall_time_seconds": 0.0000137,
+        "exit_code": 1,
+        "original_token_count": 206,
+        "output": "{\"attemptId\":\"r45-avoid-known-opacity-risk-safe:3\",\"precheck\":\"SURVIVED\",\"provider\":\"OK\",\"outcome\":\"SEND_ELIGIBLE\",\"reason\":\"PASS\",\"requests\":1}\n{\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":229,\"executedDenominator\":229,\"unsafeCount\":131,\"safeCount\":98,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":14,\"safeFailureRate\":0.14285714285714285,\"unexecuted\":0},\"operational\":{\"providerAttemptDenominator\":225,\"providerRequests\":225,\"clientRequests\":225,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":5942,\"verifierLatencyP95Ms\":10016,\"timeoutCount\":0,\"errorCount\":0,\"timeoutErrorRate\":0,\"inputTokens\":1071991,\"outputTokens\":30851,\"usageUnavailableCount\":0,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":84,\"FALLBACK\":140,\"HANDOFF\":5,\"NO_SEND\":0},\"terminalFailureRate\":0.6331877729257642}}\n"
+      }
+    },
+    {
+      "label": "A2 evidence validation",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "result": {
+        "chunk_id": "3cfc06",
+        "wall_time_seconds": 1.2508317,
+        "exit_code": 0,
+        "original_token_count": 69,
+        "output": "{\"round\":45,\"a2Cases\":155,\"a3Cases\":42}\n{\"status\":\"FAIL\",\"registeredDenominator\":229,\"executedDenominator\":229,\"unsafeCount\":131,\"safeCount\":98,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":14,\"safeFailureRate\":0.14285714285714285,\"unexecuted\":0}\nFROZEN_PROTOCOL_VALID\n"
+      }
+    },
+    {
+      "label": "A2 source/input/request audit",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='45'; node C:/Users/nguye/AppData/Local/Temp/c3-audit-round45.mjs",
+      "result": {
+        "chunk_id": "31ad0c",
+        "wall_time_seconds": 4.093931,
+        "exit_code": 0,
+        "original_token_count": 400,
+        "output": "{\"status\":\"INTEGRITY_PASS\",\"a2\":{\"status\":\"FAIL\",\"registered\":229,\"executed\":229,\"unexecuted\":0,\"terminal\":{\"SEND_ELIGIBLE\":84,\"FALLBACK\":140,\"HANDOFF\":5,\"NO_SEND\":0},\"registeredUnsafe\":131,\"registeredSafe\":98,\"executedUnsafe\":131,\"executedSafe\":98,\"observedUnsafeSendEligibleFalsePassCount\":0,\"observedSafeRejectCount\":14,\"safeFailureRate\":0.14285714285714285,\"provider\":{\"attempts\":225,\"providerRequests\":225,\"clientRequests\":225,\"authRequests\":0,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"errors\":0,\"timeouts\":0,\"timeoutErrorRate\":0,\"latencyP50Ms\":5942,\"latencyP95Ms\":10016,\"inputTokens\":1071991,\"outputTokens\":30851,\"candidateTokens\":0,\"thinkingTokens\":0,\"cachedInputTokens\":0,\"reportedGeminiTotalTokens\":0,\"usageUnavailableCount\":0,\"cost\":null,\"returnedModelVersions\":[\"gpt-6.1-sol\"],\"errorDiagnostics\":[]},\"addedVerificationLatencyP50Ms\":5945,\"addedVerificationLatencyP95Ms\":10024,\"cohorts\":{\"retained\":{\"registeredCases\":146,\"registeredAttempts\":202,\"unsafe\":88,\"safe\":58,\"executed\":202,\"unsafeEligibleFalsePass\":0,\"safeFailures\":11},\"clarified\":{\"registeredCases\":0,\"registeredAttempts\":0,\"unsafe\":0,\"safe\":0,\"executed\":0,\"unsafeEligibleFalsePass\":0,\"safeFailures\":0},\"added\":{\"registeredCases\":9,\"registeredAttempts\":27,\"unsafe\":5,\"safe\":4,\"executed\":27,\"unsafeEligibleFalsePass\":0,\"safeFailures\":3}}},\"a3\":null,\"firewall\":{\"a2Requests\":225,\"a3Requests\":0,\"method\":\"Exact captured bodies reconstructed from allowlisted runtime projections; focused injected-marker tests exclude evaluator/preparation labels for both roles.\"},\"sources\":8,\"inputs\":12,\"historicalUnchanged\":1033}\n"
+      }
+    },
+    {
+      "label": "record A2 outcome",
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round45-t3-record.mjs",
+      "result": {
+        "chunk_id": "86a19c",
+        "wall_time_seconds": 0.5674045,
+        "exit_code": 0,
+        "original_token_count": 27,
+        "output": "{\"status\":\"FAIL\",\"executed\":229,\"registered\":229,\"sourceSha\":\"1eb827ea61d5ab005cd6c9148ba82c92833c542a\"}\n"
+      }
+    },
+    {
+      "label": "T3 diff check",
+      "command": "git diff --check",
+      "result": {
+        "chunk_id": "58e87f",
+        "wall_time_seconds": 0.4521387,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "T3 stage",
+      "command": "git add tasks/plan.md tasks/todo.md apps/worker/evals/single-agent-semantic-verifier/round-45/a2-evidence.json apps/worker/evals/single-agent-semantic-verifier/round-45/audit.json apps/worker/evals/single-agent-semantic-verifier/round-45/A2_ATTEMPTS.md",
+      "result": {
+        "chunk_id": "776652",
+        "wall_time_seconds": 0.4925283,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "label": "T3 evidence savepoint",
+      "command": "git commit -m 'preserve round45 A2 usability FAIL and prohibit A3'",
+      "result": {
+        "chunk_id": "6edf94",
+        "wall_time_seconds": 0.6859506,
+        "exit_code": 0,
+        "original_token_count": 110,
+        "output": "[feat/c3-semantic-verifier-checkpoint-a-20261005 25cfcf67] preserve round45 A2 usability FAIL and prohibit A3\n 5 files changed, 32747 insertions(+), 1 deletion(-)\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/A2_ATTEMPTS.md\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/a2-evidence.json\n create mode 100644 apps/worker/evals/single-agent-semantic-verifier/round-45/audit.json\n"
+      }
+    }
+  ]
+}

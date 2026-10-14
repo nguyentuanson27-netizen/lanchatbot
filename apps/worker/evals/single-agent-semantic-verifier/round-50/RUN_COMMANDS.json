@@ -1,0 +1,205 @@
+{
+  "round": 50,
+  "commands": [
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-50.test.mjs",
+      "exitCode": 1,
+      "result": "Observed RED before executable changes:5tests,1PASS4FAIL;missing round admission/projection/native adapter."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-50.test.mjs",
+      "exitCode": 0,
+      "result": "Minimum GREEN5/5,0skip;actual captured requests prove evaluator sentinel exclusion in both roles across42cases."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-50.test.mjs apps/worker/evals/single-agent-semantic-verifier/conversation-context.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs",
+      "exitCode": 0,
+      "result": " and allowlisted trusted snapshot, excludes draft from conversation input (1.9829ms)\n✔ frozen bounds reject oversized input instead of silently truncating authoritative truth (3.6005ms)\n✔ owner decisions and bounded Codex inference configuration are frozen (54.4102ms)\n✔ A2 and A3 preflight reject missing or mismatched runtime source SHA (1.7411ms)\n✔ fallback text/hash, terminal map and corpus tampering invalidate protocol inputs (2.298ms)\n✔ CLI validates retained A2 evidence without a circular top-level await (1158.7836ms)\n✔ round50 admits its sealed input only and retains all authority/configuration bars (836.8745ms)\n✔ round50 forwards identical trusted context and verifier request with unchanged exact binding (176.42ms)\n✔ round50 preserves every A2/A3 fixture and registered repetition including seven PR387 attacks (60.2944ms)\n✔ round50 actual captured owner and mandatory verifier bodies exclude evaluator-only labels (294.9616ms)\n✔ round50 native adapter forwards its exact final text request once without retry (140.6145ms)\n✔ every hard-precheck survivor including nonprotected safe control invokes verifier exactly once (61.3485ms)\n✔ known legacy authority and expired/oversized input stop mechanically without verifier (6.286ms)\n✔ stale binding scenarios still invoke mandatory verifier, then cannot send (20.0432ms)\n✔ one unsafe send-eligible PASS fails A2 even when other repetitions reject (1.5576ms)\n✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (1.3722ms)\n✔ conversation owns exact final customer text; every surviving draft invokes one verifier (71.231ms)\n✔ human scores actual frozen fallback, never rejected candidate or verifier status (6.2129ms)\n✔ generation error remains a terminal outcome and cannot cause generation retry (1.1939ms)\n✔ PII hard precheck terminates before verifier, using no-send (1.5547ms)\n✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (1.9033ms)\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (6.5085ms)\nℹ tests 54\nℹ suites 0\nℹ pass 54\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5156.2448\n"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "result": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\n\n ✓ src/reply-assembler.test.ts (14 tests) 209ms\n ✓ src/protected-claims.test.ts (7 tests) 98ms\n ✓ src/size-engine.test.ts (20 tests) 96ms\n\n Test Files  3 passed (3)\n      Tests  41 passed (41)\n   Start at  19:34:37\n   Duration  4.02s (transform 1.81s, setup 0ms, collect 3.93s, tests 403ms, environment 2ms, prepare 3.11s)\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "result": " ✓ src/vertex.test.ts (34 tests) 1373ms\n   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1021ms\n ✓ src/single-agent-semantic-verifier-boundary.test.ts (45 tests) 145ms\n\n Test Files  2 passed (2)\n      Tests  79 passed (79)\n   Start at  19:34:37\n   Duration  6.06s (transform 3.02s, setup 0ms, collect 5.57s, tests 1.52s, environment 2ms, prepare 2.00s)\n\n"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-read-limits.mjs",
+      "exitCode": 0,
+      "result": "{\"checkedAt\":\"2026-10-11T12:35:16.268Z\",\"identity\":{\"version\":\"codex-cli 0.159.2\",\"binarySha256\":\"52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a\"},\"methods\":[\"initialize\",\"initialized\",\"account/rateLimits/read\"],\"generationRequests\":0,\"status\":\"OK\",\"rateLimits\":{\"limitId\":\"codex\",\"primary\":{\"usedPercent\":8,\"windowDurationMins\":300,\"resetsAt\":1791739598,\"resetsAtUtc\":\"2026-10-11T17:26:38.000Z\"},\"secondary\":{\"usedPercent\":17,\"windowDurationMins\":10080,\"resetsAt\":1792298636,\"resetsAtUtc\":\"2026-10-18T04:43:56.000Z\"},\"rateLimitReachedType\":null,\"credits\":{\"hasCredits\":false,\"unlimited\":false}},\"rateLimitsByLimitId\":[{\"limitId\":\"codex\",\"primary\":{\"usedPercent\":8,\"windowDurationMins\":300,\"resetsAt\":1791739598,\"resetsAtUtc\":\"2026-10-11T17:26:38.000Z\"},\"secondary\":{\"usedPercent\":17,\"windowDurationMins\":10080,\"resetsAt\":1792298636,\"resetsAtUtc\":\"2026-10-18T04:43:56.000Z\"},\"rateLimitReachedType\":null,\"credits\":{\"hasCredits\":false,\"unlimited\":false}}]}\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "result": "../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json\n\n"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "result": "her repetitions reject (0.689ms)\n✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (0.4803ms)\n✔ conversation owns exact final customer text; every surviving draft invokes one verifier (44.2048ms)\n✔ human scores actual frozen fallback, never rejected candidate or verifier status (4.0157ms)\n✔ generation error remains a terminal outcome and cannot cause generation retry (0.9468ms)\n✔ PII hard precheck terminates before verifier, using no-send (1.3909ms)\n✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (2.1874ms)\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (3.1931ms)\n✔ both role projections retain clarified policy/profile sources and exact code-bound size without changing other business values (1697.7974ms)\n✔ captured candidate request bodies remain bounded and exclude evaluator/review/private annotations for every history (75.798ms)\n✔ waist-only context explicitly has no recommendation and presents missing hips before ranges (71.8933ms)\n✔ complete inputs expose engine status without creating a fit claim, size or permission (9.3368ms)\n✔ no missing inputs in an out-of-range result cannot be presented as a recommendation (7.2693ms)\n✔ code size context asks only missing chest and preserves existing chart/facts/binding without a new field (259.1102ms)\n✔ known waist is not requested again; unsupported height/weight is not advertised (2.4014ms)\n✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (2.4232ms)\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (1.2427ms)\nℹ tests 264\nℹ suites 0\nℹ pass 264\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 137474.4487\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "result": ""
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "result": "../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 typecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node - (read-only inspectGemini(manifest))",
+      "exitCode": 0,
+      "result": "Credential available; project matches; global; helper SHA256 fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe; Node24.19.0; zero generation. No credential contents retained."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS before readiness commit; only line-ending advisory."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_RUN_SOURCE_SHA=9ede18d8fdad8e1ee508a95dc5adfca4ae4baedc node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID; clean committed source."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_RUN_SOURCE_SHA=9ede18d8fdad8e1ee508a95dc5adfca4ae4baedc node apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs",
+      "exitCode": 0,
+      "result": "A2 PASS253/253;147UNSAFE106SAFE;0unsafeeligiblefalsePASS/0SAFEfailures;249requests,max1,retry0,0timeout/error,0unexecuted."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exitCode": 0,
+      "result": "A2 evidence validates253/253PASS;frozen protocol valid."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
+      "exitCode": 0,
+      "result": "PASS source/input/binding/accounting/firewall;249 captured requests reconstructed."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-readbacks.mjs",
+      "exitCode": 0,
+      "result": "1065 prior round/prompt files unchanged;source delta19insertions12deletions;A3 not yet run."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_STATUS=PASS A3_RUN_SOURCE_SHA=eab2c4314954e6f08d9c8a3060015e14d32cf4f3 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;separate clean committed source."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 A2_STATUS=PASS A3_RUN_SOURCE_SHA=eab2c4314954e6f08d9c8a3060015e14d32cf4f3 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs",
+      "exitCode": 0,
+      "result": "66/66 complete;66owner+66verifier requests;max1/retry0;65SEND_ELIGIBLE1FALLBACK,0HANDOFF/NO_SEND;0timeout/error. Quality unscored at generator completion; human ratings null."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3",
+      "exitCode": 0,
+      "result": "66/66 registered outcomes/bindings/requests valid;quality unscored at this stage."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
+      "exitCode": 0,
+      "result": "PASS after A3 completion;132 A3 captured requests reconstructed; raw Gemini candidate+thinking usage reconciled; human ratings null."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 1,
+      "result": "Seven trailing spaces in exact provider replies rendered in A3_HUMAN_REVIEW.md. Preserve raw bytes; use narrowly scoped blank-at-eol exception for evidence Markdown, no source whitespace change."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 0 8",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 8 16",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 16 24",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 24 30",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 30 35",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-reread.mjs 35 42",
+      "exitCode": 0,
+      "result": "Read full accepted history/latest/current trusted truth/actual terminal for this range; no rejected draft/verdict."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-primary-review.mjs",
+      "exitCode": 0,
+      "result": "All42histories/66actualterminals reviewed;62/66qualityPASS;A3FAIL policy14/17=82.35%<90%;primarysubjective/nonblindCodex;660humanratingsnull."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=50 node C:/Users/nguye/AppData/Local/Temp/c3-round50-audit.mjs",
+      "exitCode": 0,
+      "result": "Final evidence/source/request/scoring auditPASS;249A2+132A3 captured requests reconstructed,full denominator,thinking tokens reconciled."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-readbacks.mjs",
+      "exitCode": 0,
+      "result": "Four raw hashes match pre-primary26b2cbea;primaryc084e305;1065historicalfiles unchanged;17policy/39opacitycapturedinputs contain full material conditions/possibility."
+    },
+    {
+      "command": "git -c core.whitespace=-blank-at-eol diff --cached --check",
+      "exitCode": 0,
+      "result": "PASS for raw-evidence savepoint; exact provider trailing spaces preserved."
+    },
+    {
+      "command": "git diff --cached --check -- apps/worker/evals/single-agent-semantic-verifier/round-50/a3-offline-scores.json apps/worker/evals/single-agent-semantic-verifier/round-50/a3-quality.json apps/worker/evals/single-agent-semantic-verifier/round-50/A3_FAILURES.md",
+      "exitCode": 0,
+      "result": "PASS before primary score commit."
+    },
+    {
+      "command": "git -c core.whitespace=-blank-at-eol diff --cached --check -- apps/worker/evals/single-agent-semantic-verifier/round-50/A3_CONVERSATIONS.md",
+      "exitCode": 0,
+      "result": "PASS preserving exact quoted provider trailing spaces; no source whitespace exception."
+    },
+    {
+      "command": "node - (stdin: post-primary inspect r5-competitor-price:2 captured owner request)",
+      "exitCode": 0,
+      "result": "care guidance,relative wrinkle evidence and no-ironing boundary all present in actual owner body; no context omission for the rejected clause."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS for report/task/audit changes; raw quoted provider whitespace preserved in earlier evidence commits."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "result": "Initial report renderer placed empty/leading-newline stdout after an inline exit label, causing two trailing spaces. After first correction one remained; fixed renderer formatting offline; no raw/primary/runtime change."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "result": "One remaining leading-newline stdout formatting space before final report renderer correction. Raw evidence remains unchanged."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0,
+      "result": "Final report/task/audit artifact staging PASS with ordinary strict whitespace check."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round50-report.mjs",
+      "exitCode": 0,
+      "result": "Generated CHECKPOINT_A,A2 failures,and post-primary rejection diagnostics from retained complete evidence/scores. RecommendationSTOP, A2PASS/A3FAIL62/66."
+    }
+  ]
+}

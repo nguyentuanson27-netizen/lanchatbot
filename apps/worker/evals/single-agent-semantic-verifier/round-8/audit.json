@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "b72335e475d923c60b15fcc1633789885c408ad7",
+  "a2RunSourceSha": "5f5958bd001b7f662f7bb7d8602761272bcb0741",
+  "a3RunSourceSha": "18c18986bd4b8bd88b6cb5f5127a56f001e99eb0",
+  "manifestSha256": "d9920639300ff44e6c93c459e9ba575460fe1443d209c7428dcb4bee903ce3ad",
+  "sourceFilesMatchSealedHeads": 5,
+  "frozenInputsMatchSealedHeads": 9,
+  "compiledBoundarySha256": "34ebcecdc6a7e4b4dfbe4a675b1df9141afeffcf7a8baf809590f37ae631c4df",
+  "historicalArtifactCount": 111,
+  "historicalAggregateSha256": "8db1053358691853a6e348036f8451f028403d02b9a528b3f491bb367b983c91",
+  "capturedProviderRecords": 110,
+  "actualUpstreamRequests": 110,
+  "clientRequests": 110,
+  "rejectedClientRequests": 0,
+  "maxUpstreamRequestsPerRoleSlot": 1,
+  "evaluatorKeysExcluded": true,
+  "evaluatorCaseIdsAndReferenceTextExcludedFromContext": true,
+  "referenceScanPolicy": "Inspect actual model context/instructions; verifier exact finalDraft is evaluated output, not an evaluator context source. Reconstructed request equality checked by evidence validators.",
+  "capturedRequestAndBindingValidation": "PASS",
+  "returnedModelVersions": [
+    "gpt-6.1-sol"
+  ],
+  "providerRequestsByPhase": {
+    "A2": 62,
+    "A3": 48
+  },
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "inputTokens": 356429,
+  "outputTokens": 12794,
+  "missingUsage": 0,
+  "cost": null,
+  "roleCount": 2,
+  "rolesAdded": 0,
+  "layersAdded": 0,
+  "limitations": "One-pass authored development data, reused known cases, five SAFE-control corrections, mutable model alias, correlated owner/verifier errors, offline primary-agent review not independent/human approval; no conversion/production/holdout/causal improvement claim."
+}

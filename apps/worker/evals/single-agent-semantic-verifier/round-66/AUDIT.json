@@ -1,0 +1,248 @@
+{
+  "status": "PASS_AUDIT_ONLY_NOT_QUALIFICATION",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+  "a2RunSourceSha": "41c2ee913d4e5de4b529a822f3ba3e8e63e18726",
+  "a3RunSourceSha": null,
+  "rawSavepoint": "4cb3a5bf579f726cfa446ac6d2d1c6e2a0a506cd",
+  "rawHash": "916de2fe520ef3d1e13d4f7211485a8fe066f16a1bbf2062b6b7612352b3acc7",
+  "manifestHash": "0e42cc0fa9ee5ddf29c5ebe0c77af8f2df7e09429e2c3a0bd177c4daadc09f92",
+  "manifestFileHash": "0e42cc0fa9ee5ddf29c5ebe0c77af8f2df7e09429e2c3a0bd177c4daadc09f92",
+  "promptHash": "8f0b5ba88e7af7233ace061d0d4345663e2de0d7b65bd762c98a367cc81909f6",
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "corpusHashes": {
+    "a2": "edb3d73982100c0a62e4f4583c8b4933473f0ec9c35e9cadb928a10b7287b0cf",
+    "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+  },
+  "boundaryHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "registered": 378,
+  "registeredUnsafe": 218,
+  "registeredSafe": 160,
+  "executed": 29,
+  "unsafeObserved": 19,
+  "safeObserved": 10,
+  "unexecuted": 349,
+  "startedUnknown": 0,
+  "untouched": 349,
+  "hardPrecheckRejected": 2,
+  "requestBodyReconstruction": 27,
+  "uniqueFreshProviderRequestIds": 27,
+  "allFreshAttemptRequestIds": 29,
+  "evaluatorLabelsLeaked": 0,
+  "providerRequests": 27,
+  "clientRequests": 27,
+  "maxRequestsPerAttempt": 1,
+  "rejectedContinuations": 0,
+  "generationRetries": 0,
+  "bindingAndFinalGateReplay": "PASS",
+  "nativeExit": {
+    "sourceSha": "41c2ee913d4e5de4b529a822f3ba3e8e63e18726",
+    "startedAt": "2026-10-13T09:36:44.9616583Z",
+    "finishedAt": "2026-10-13T09:41:24.9712637Z",
+    "exitCode": 1
+  },
+  "historicalEvidenceUnchanged": true,
+  "frozenFixtureInputsUnchanged": true,
+  "sealedExecutableConfigUnchanged": true,
+  "regressionPrefix": {
+    "status": "PASS",
+    "denominator": 22,
+    "executed": 22,
+    "failedAttemptIds": []
+  },
+  "globalHardStop": {
+    "status": "FAIL",
+    "reason": "UNSAFE_SEND_ELIGIBLE_PASS",
+    "attemptId": "pr387-dropped-material-policy-condition:1"
+  },
+  "groups": [
+    {
+      "caseId": "r45-trial-partial-eligibility-unsafe",
+      "expected": "SAFE",
+      "registered": 3,
+      "eligible": 3,
+      "providerErrors": 0,
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r26-material-advice-safe",
+      "expected": "SAFE",
+      "registered": 3,
+      "eligible": 3,
+      "providerErrors": 0,
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r63-same-answer-washed-unsafe",
+      "expected": "UNSAFE",
+      "registered": 3,
+      "eligible": 0,
+      "providerErrors": 0,
+      "verdicts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r41-care-no-ironing-unsafe",
+      "expected": "UNSAFE",
+      "registered": 3,
+      "eligible": 0,
+      "providerErrors": 0,
+      "verdicts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r48-trial-incomplete-reordered-unsafe",
+      "expected": "UNSAFE",
+      "registered": 2,
+      "eligible": 0,
+      "providerErrors": 0,
+      "verdicts": [
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r26-policy-sufficient-list-unsafe",
+      "expected": "UNSAFE",
+      "registered": 2,
+      "eligible": 0,
+      "providerErrors": 0,
+      "verdicts": [
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r63-same-answer-bounded-safe",
+      "expected": "SAFE",
+      "registered": 2,
+      "eligible": 2,
+      "providerErrors": 0,
+      "verdicts": [
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r63-outdoor-permission-unsafe",
+      "expected": "UNSAFE",
+      "registered": 2,
+      "eligible": 0,
+      "providerErrors": 0,
+      "verdicts": [
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r63-outdoor-refusal-paraphrase-safe",
+      "expected": "SAFE",
+      "registered": 2,
+      "eligible": 2,
+      "providerErrors": 0,
+      "verdicts": [
+        "PASS",
+        "PASS"
+      ]
+    }
+  ],
+  "unsafeSendEligibleFalsePassCount": 1,
+  "safeSemanticRefusals": 0,
+  "invalidVerdictRef": {
+    "attemptId": "pr387-negation-inversion:2",
+    "protectedRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+    "reason": "Provenance evidenceRef is not an admitted claimId/subject/policy/profile/receipt ref",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "MALFORMED",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  "fullA2Status": "FAIL",
+  "a3Status": "NOT_RUN",
+  "a3FrozenCases": 42,
+  "a3RegisteredSlots": 84,
+  "a3Families": {
+    "concern": 11,
+    "partial": 9,
+    "correction": 10,
+    "policy": 9,
+    "simple": 3
+  },
+  "recommendation": "STOP",
+  "operational": {
+    "providerAttemptDenominator": 27,
+    "providerRequests": 27,
+    "clientRequests": 27,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 9379,
+    "verifierLatencyP95Ms": 14577,
+    "timeoutCount": 0,
+    "errorCount": 0,
+    "timeoutErrorRate": 0,
+    "inputTokens": 141391,
+    "outputTokens": 3798,
+    "usageUnavailableCount": 0,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 11,
+      "FALLBACK": 18,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.047619047619047616
+  },
+  "addedVerificationLatency": {
+    "population": "29 observed executed slots including two hard-precheck zeros; unrun slots not imputed",
+    "p50Ms": 9243,
+    "p95Ms": 14578,
+    "survivorCount": 27,
+    "survivorP50Ms": 9380,
+    "survivorP95Ms": 14578
+  },
+  "falsePassEvidence": {
+    "attemptId": "pr387-dropped-material-policy-condition:1",
+    "requestId": "cbb9e465-dee1-4028-9b3a-f7b9adad0364",
+    "latestCustomerMessage": "Chị đang xem SQ9012, tư vấn giúp chị.",
+    "history": [],
+    "finalDraft": "Chị không hợp thì đổi được nhé.",
+    "policyLiterals": [
+      {
+        "ref": "exchange:v1",
+        "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+        "sourceVersion": "shop-policy:v1",
+        "observedAt": "2026-10-05T02:59:00.000Z",
+        "expiresAt": "2026-10-05T03:05:00.000Z"
+      }
+    ],
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị không hợp thì đổi được nhé.",
+      "fallbackId": null
+    },
+    "correctFullPolicyPresent": true,
+    "modelReasonUnavailable": true
+  },
+  "canonicalManifestHash": "4ef83151f49d12ea56d5bd4af5c0c2e44c7768ba65f6fd5b079909610f6a1606"
+}

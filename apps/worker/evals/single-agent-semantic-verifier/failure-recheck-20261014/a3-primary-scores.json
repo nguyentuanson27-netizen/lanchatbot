@@ -1,0 +1,140 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "scoredAt": "2026-10-14T00:02:45.837Z",
+  "runSourceSha": "ce3bd9e96045991f18afb1ec8dda1d77997409ce",
+  "rawSavepoint": "b3c79ac2ad80aa47e6e16b02bde10361d0bf0a16",
+  "evidenceHash": "412df1c792c9c92455c59202c6202c7c3c6820cd9d9c205ccf813d03e7f51b28",
+  "fullCheckpointQualification": false,
+  "limitations": "Subjective/nonblind primary whole actual-terminal review, with source/history and latest owner ask-before-size requirement; before reading new rejected drafts and verifier diagnostics. No keyword/fact-count grading, no independent/human/owner acceptance or stability claim.",
+  "attempts": [
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-try-exchange:1",
+      "wholeTurnReview": "Khách hỏi mặc thử ở nhà và mặc đi tiệc. Reply lại cấp quyền đổi sau mặc thử ở nhà khi giữ tem/chưa giặt/sạch, trong khi nguồn hiện tại chỉ cho ướm. Việc từ chối đi tiệc và nói thêm chưa sử dụng không rút lại quyền mặc thử vừa cho. Sai chính sách ở đúng hành vi khách hỏi; không fail vì đếm thiếu điều kiện. Khách có thể làm theo lời tư vấn rồi mất quyền đổi.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 0
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-competitor-price:1",
+      "wholeTurnReview": "Khách so bộ 620k với hàng shop để đi làm thường xuyên. Reply giải thích lợi ích ít nhăn/chỉn chu và bớt công là ủi, rồi hỏi đầu vào size đang thiếu. Không bịa chất liệu đối thủ, giữ phom ở đây là nhận định vẻ ngoài thông thường owner đã duyệt, không miễn chăm sóc hay công bố độ bền/thử nghiệm mới. Lập luận còn ngắn nhưng liên quan việc dùng và có bước mua làm được; không fail chỉ vì cả ngày/giữ phom. Không có lời khẳng định vừa khi chưa có fit.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-delivery-timing:1",
+      "wholeTurnReview": "Khách cần biết có kịp sáng thứ Sáu để quyết định mua. Actual outcome chỉ báo chưa trả lời được, không dùng ETA 2–3 ngày sau xác nhận đã có để trả rõ chưa bảo đảm buổi sáng. An toàn nhưng không giải quyết deadline hay giúp quyết định.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r12-pants-known-waist:1",
+      "wholeTurnReview": "Khách hỏi M và tổng tiền khi chỉ có eo. Reply trả đúng 484k và chỉ hỏi thêm mông, không báo eo thuộc M hoặc kết luận M vừa. Cụm kiểm tra xem M có vừa hay không trả lời đúng lựa chọn khách đang hỏi, không phải tự đề xuất hay xác nhận size. Giữ số đo đã biết, không đòi thêm ngực, không bỏ phần giá; đáp ứng yêu cầu hỏi đủ trước khi tư vấn size.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r14-workday-choice:1",
+      "wholeTurnReview": "Khách đã cung cấp đủ số đo, code có ST411 M và dữ kiện so lưng chun với eo cố định. Actual fallback không chọn set/váy, không trả size hay lý do cho việc ngồi nhiều. Không có claim sai trong lời gửi nhưng không làm được việc khách nhờ dù có dữ liệu.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r14-stage-light-change:1",
+      "wholeTurnReview": "Reply trả tồn trắng M và rút lời chọn trắng cho sân khấu đèn ngược, giữ đúng mức có thể thấy bóng. Như vậy quyết định chính đã rõ. Cuối đoạn chỉ báo xanh M còn để tham khảo, không nói xanh kín hơn hay giải quyết đèn ngược như lần trước. Không tự coi một thông báo tồn là bằng chứng độ kín hoặc fail vì thiếu áo thay đã thử. Câu cuối có thể bỏ để gọn và tránh khách hiểu rộng; trên whole reply này chưa có khẳng định công năng xanh đủ rõ để kết luận sai. Đây là primary subjective judgment, không bảo đảm mọi người sẽ hiểu giống nhau.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r15-fit-reassurance:1",
+      "wholeTurnReview": "Khách đã chọn M nhưng còn lo cạp cứng. Actual fallback không dùng code-fit và lưng chun hiện có để trấn an hoặc giúp khách tự tin mua; không còn lời tư vấn nào khách dùng được. Safe terminal nhưng không đạt usefulness/decision support.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r15-known-waist-next:1",
+      "wholeTurnReview": "Reply trả đúng tổng 484k từ quote và chỉ xin thêm vòng mông trước khi chọn size. Không nói M vừa, không đọc lại eo hay bảng, không hỏi lại đầu vào đã có. Câu gọn, dễ hiểu và giúp hoàn thành bước chọn quần trong khả năng bot.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

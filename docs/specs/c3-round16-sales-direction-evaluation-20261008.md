@@ -1,0 +1,11 @@
+# C3 Round16 — tư vấn bán hàng và boundary theo hướng owner
+
+Owner yêu cầu sửa và chạy vòng kế tiếp ngày2026-10-08. Dùng đúng hai prompt đã chia sẻ trong c3-sales-stance-and-observable-claims-20261008.md. Model/config/bars/one attempt unchanged. Không đổi kết quả15 hoặc dùng lại qualification verifier.
+
+T1:72A2giữ exact +6SAFE/6UNSAFE kiểm tra effort-vs-outcome,ACK-vs-effect,fit,ETA,colour-opacity và relevant alternative.42A3=38questions/history/runtime retained +4author-known continuations. Chỉ sửa evaluator contracts của deadline,hai freeship vàstage theo hướng đã duyệt; mọi runtime38giữ byte serialization parsed-equivalent. Reference replies chỉ historical evaluator evidence, không model input/scorer/template. Review toàn tình huống và actual terminal trước10điểm; không reward keyword/CTA hay match câu mẫu. Numeric bars unchanged; whole-reply naturalness/completeness/decision usefulness/capability matter.
+
+Ngôn ngữ công sức/kỹ thuật không định lượng được phép nhưng không tạo observable-use result/test/manufacturing method. Confident bound SIZE_FIT allowed, partial measurement guessing not allowed. Natural ACK differs from completed durable operation. Alternatives/cross-sell phải nối nhu cầu và dữ liệu, không ép cộng thêm. Không hướng khách chuẩn bị đồ khác; uncertain ETA không thành assured late/early.
+
+Dữ liệu: chỉ existing synthetic evaluation facts của4profiles, không shop hiện tại. Không tìm thấy nguồn đã xác nhận áo khác kín dưới sân khấu hoặc món khác chắc giao kịp. Giữ stage case như coverage gap rõ, không tạo opacity/ETA phép thử giả. Lời an toàn thiếu giải pháp vẫn có thể qualityFAIL; khi đủ facts cho phương án khác phải chọn hợp lý. Không chấm đạt chỉ vì đúng hoặc từ chối. Các ca mới có facts phù hợp mục tiêu thông thường, không nhận là real-shop/independent holdout/stateful journey/conversion evidence.
+
+T2observed RED→GREEN selector/retention/bounds/captured request firewall,existing boundary/adapters/protectedclaims/replyassembly,worker build/typecheck/lint. T3commit clean seal/preflightA2once,anyunsafe eligiblePASS STOP,noA3. A2PASS mới T4commit clean seal/preflightA3once,review mọi generation/actual terminal,error denominator/accounting,histories/CHECKPOINT_A/todo/PR390,STOP owner. Không thêm role/router/parser/framework/loop/gate/schema/state/tool/runtime/production/post-A.

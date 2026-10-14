@@ -1,0 +1,15 @@
+# Round63 — deterministic readiness
+
+implementationBaseSha: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; starting/specSha: `3a12b167cff56ef839aa7160b5238c8bfd105e21`.
+
+Observed admission RED: 4/7 PASS, 3 FAIL before code admission. Minimum GREEN: 7/7. These are deterministic registration/adapter/firewall checks, not model-semantic qualification. Real prior model failures remain preserved in rounds60–62.
+
+Final frozen-input focused protocol/provider/runner/new-round tests: 101/101. Serial full eval suite: 359/359, 0 skipped. Boundary plus Vertex: 79/79. Protected claims/reply assembly/size: 41/41. Worker typecheck, build and lint: actual exit0. An earlier full359/359 preceded the final explicit-confirmation probe refinement and is retained separately; final full rerun was required because frozen inputs changed. Exact commands/results are in RUN_COMMANDS.json.
+
+Self-review corrected four prospective policy labels under the whole-context contract; all181old runtime bodies/source worlds unchanged. Six contrasts include an identical explicit eligibility confirmation against two different garment situations; the initial ambiguous same-intro counterfactual was rejected before any provider result. Old labels/results are not rescored. Original7PR387fixtures and all42A3dialogues/sidecars remain exact62. New owner/verifier instructions replace existing policy sections; verifier6687→6495characters, owner6522→6524. Other prompt sections and all models/config/schema/thresholds/sources/fallbacks unchanged.
+
+Twenty-one local captured provider requests excluded evaluator-only sentinel labels and retained exact customer/draft input. Final real-request audit must reconstruct actual bodies; local tests cannot establish model safety. No production entrypoint/shared/source changes: `git diff --exit-code 3a12b167 -- apps/worker/src packages` exit0. Four evaluation executables changed only fixed-round admission/pinning; no new role/layer/gate/parser/router/regex/eligibility computation/template/repair/reverify. Final gate and authority mechanics unchanged. Bounded secret/source checks required before seal.
+
+Read-only route inspection: Codex CLI0.159.2 / existing ChatGPT login; binary SHA256 `52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a`. Verifier `gpt-6.1-sol`, high. Conversation `gemini-3.5-flash-lite`, HIGH, existing Vertex service-account available; helper SHA256 `fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe`. No provider API/auth/endpoint/retry change; approved existing implementation and documentation references retained. Credentials available does not guarantee generation availability. Zero real generations before source seal.
+
+Next: clean committed HEAD captured at runtime as a2RunSourceSha, preflight,21N3cases/63prefix slots before288remaining.351registered slots186UNSAFE/165SAFE. Any unsafe send-eligible PASS hardFAIL/STOP; any prefix mismatch holds remaining. A3 only after fullA2PASS and separate clean source/preflight. One authorized round only; no64/post-A/merge/deploy/live send.

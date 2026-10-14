@@ -1,0 +1,27 @@
+{
+  "historicalArtifactsUnchanged": 53,
+  "sealedExecutableFiles": 5,
+  "sealedFrozenFiles": 7,
+  "manifestHash": "f70ee76099b5ad540cd2eb3b731bf8e0440d494b1a18b8bb3eb33270eeaafb6e",
+  "priorEvidenceHash": "49e086a4fc145e9a113340323f7d84c546ceb031b1f5fad066ea8cd6f1fdf0d3",
+  "originalRegisteredDenominator": 198,
+  "originalExecuted": 92,
+  "originalUnexecuted": 106,
+  "carriedForwardSlots": 35,
+  "ownerWithdrawnExtraSlots": 71,
+  "adoptedObservations": 92,
+  "continuationObservations": 35,
+  "capturedProviderRecords": 157,
+  "providerRequests": 157,
+  "maxProviderRequestsPerSlot": 1,
+  "clientRequests": 157,
+  "rejectedClientRequests": 0,
+  "firewall": "PASS_ALL_CAPTURED_MODEL_REQUESTS",
+  "returnedModels": [
+    "gpt-6.1-sol"
+  ],
+  "returnedModelUnavailable": 2,
+  "originalA2RunSourceSha": "6e371a13d8f257d556e3a5b28e50d16b41f15552",
+  "a2RunSourceSha": "651b2569df7553dd4f970496125b963d30924789",
+  "a3RunSourceSha": "1b701970cb168ea5722848cf274bde33e4150182"
+}

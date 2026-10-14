@@ -1,0 +1,151 @@
+{
+  "round": 67,
+  "shell": "PowerShell",
+  "scope": "Commands actually executed; core command strings include actual env/log paths. Native timing/exit records retained separately. No generation retry.",
+  "savepoints": {
+    "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+    "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+    "freeze": "7e53f65b8cc4afc64dcab0feefe0707d3d7dff02",
+    "a2RunSourceSha": "5cf3b473b5c4a3b2b995e51ed2b77c8e8a03c73f",
+    "a2Raw": "3d16a7096960511c1147c077ad298a7832fa4f69",
+    "a3RunSourceSha": "912c22d2d56355e77b59da93d55d3204854b52af",
+    "a3Raw": "21efb59a52fa9bb18b9da1576fe1fce2f1acf36f",
+    "primaryScores": "51ef944c85564ff1029c38d80d63d2ca74055619"
+  },
+  "commands": [
+    {
+      "command": "git fetch origin main\ngit rev-parse origin/main",
+      "exitCode": 0,
+      "result": "296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-67.test.mjs",
+      "exitCode": 1,
+      "tests": 4,
+      "pass": 1,
+      "fail": 3,
+      "observed": [
+        "UNREGISTERED_CONTEXT_PRESENTATION",
+        "missing Round67 early checkpoint callback",
+        "unsupported profile projection"
+      ],
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-red.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-67.test.mjs",
+      "exitCode": 0,
+      "tests": 4,
+      "pass": 4,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-green.stdout.log",
+      "intermediate": {
+        "pass": 3,
+        "fail": 1,
+        "cause": "Test incorrectly expected sanitized CLI stderr to expose guard reason; corrected child probe observes actual guard without changing runtime diagnostics",
+        "nativeLog": "overwritten by final green log; intermediate failure retained in tool output"
+      }
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-67.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-66.test.mjs apps/worker/evals/single-agent-semantic-verifier/policy-meaning-preparation.test.mjs apps/worker/evals/single-agent-semantic-verifier/corpus-reduction-preparation.test.mjs apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-59.test.mjs",
+      "exitCode": 0,
+      "tests": 46,
+      "pass": 46,
+      "skipped": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-focused.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "tests": 417,
+      "pass": 417,
+      "skipped": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-full.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "tests": 79,
+      "pass": 79,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-worker-focused.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "tests": 21,
+      "pass": 21,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-protected.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-build.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-typecheck.stdout.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "log": "C:/Users/nguye/AppData/Local/Temp/c3-round67-lint.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\n$env:C3_VERTEX_CREDENTIAL_FILE='C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json'\n$env:C3_TEST_CODEX_TRANSPORT=$null\nnode --input-type=module -e \"import {readFileSync} from 'node:fs'; import {inspectCodex} from './apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs'; import {inspectGemini} from './apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs'; const m=JSON.parse(readFileSync('apps/worker/evals/single-agent-semantic-verifier/round-67/manifest.json')); console.log(JSON.stringify({codex:inspectCodex(),gemini:inspectGemini(m),generations:0}));\"\nnode 'C:/Users/nguye/AppData/Local/Temp/c3-read-codex-capacity67.mjs'",
+      "exitCode": 0,
+      "qualificationGenerations": 0
+    },
+    {
+      "command": "git diff --exit-code 85d6fc9f7ede40569e0153baae63b3e832b5628c -- apps/worker/src packages 'apps/worker/evals/single-agent-semantic-verifier/round-66' apps/worker/evals/single-agent-semantic-verifier/prompts apps/worker/evals/single-agent-semantic-verifier/corpus-reduction-preparation-20261014 apps/worker/evals/single-agent-semantic-verifier/policy-meaning-preparation-20261013\ngit diff --check\n(Get-FileHash -Algorithm SHA256 -LiteralPath 'apps/worker/dist/single-agent-semantic-verifier-boundary.js').Hash",
+      "exitCode": 0,
+      "result": "unchanged source/frozen inputs; boundary344035c0"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\n$env:A2_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()\n$env:C3_TEST_CODEX_TRANSPORT=$null\nif ((git status --porcelain)) { throw 'UNSEALED_WORKTREE' }\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2\nnode apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a2 1> 'C:/Users/nguye/AppData/Local/Temp/c3-round67-a2.stdout.log' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-round67-a2.stderr.log'",
+      "exitCode": 0,
+      "sourceSha": "5cf3b473b5c4a3b2b995e51ed2b77c8e8a03c73f",
+      "startedAt": "2026-10-13T21:52:03.7801493Z",
+      "finishedAt": "2026-10-13T22:08:50.9931250Z",
+      "registered": 142,
+      "executed": 142,
+      "providerRequests": 138,
+      "result": "A2 PASS;0unsafeeligiblefalsePASS,3SAFErefusals/51"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-round67-a2-audit.mjs' 'C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005'",
+      "exitCode": 0,
+      "result": "138captured bodies/firewall/binding/final gate/source/accounting audit PASS; no generation"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\n$env:A3_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim()\n$env:A2_STATUS='PASS'\n$env:C3_VERTEX_CREDENTIAL_FILE='C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json'\n$env:C3_TEST_CODEX_TRANSPORT=$null\nif ((git status --porcelain)) { throw 'UNSEALED_WORKTREE' }\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3\nnode apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-round67-a3.stdout.log' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-round67-a3.stderr.log'",
+      "exitCode": 0,
+      "sourceSha": "912c22d2d56355e77b59da93d55d3204854b52af",
+      "startedAt": "2026-10-13T22:10:11.1663780Z",
+      "finishedAt": "2026-10-13T22:18:18.6864772Z",
+      "registered": 42,
+      "executed": 42,
+      "ownerRequests": 42,
+      "verifierRequests": 42,
+      "result": "42complete generation outcomes; raw quality BLOCKED pending offline primary scores, not provider blocked"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\nnode --input-type=module -e \"import {readFileSync,writeFileSync} from 'node:fs'; import {scoreWholeReplies} from './apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs'; const r='apps/worker/evals/single-agent-semantic-verifier/round-67/'; const j=f=>JSON.parse(readFileSync(r+f));const q=scoreWholeReplies(j('manifest.json'),j('corpus-a3.json'),j('a3-evidence.json').attempts,j('a3-primary-scores.json').attempts);writeFileSync(r+'a3-quality.json',JSON.stringify(q,null,2)+'\\n'); console.log(JSON.stringify({status:q.status,passed:q.rows.filter(v=>v.pass).length,denominator:q.denominator,families:q.families,terminalFailureRate:q.terminalFailureRate,failed:q.rows.filter(v=>!v.pass).map(v=>v.attemptId)}));\"",
+      "exitCode": 0,
+      "result": "Primary all42whole-turn assessments; qualityFAIL34/42. Scoring is offline authorized subjective primary, not provider judge/human acceptance."
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-round67-a3-audit.mjs' 'C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005'",
+      "exitCode": 0,
+      "result": "84captured bodies/firewall/binding/source audit PASS; primary before rejected diagnostics; camelCase Google token totals derived from raw"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2 --validate-a3",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID; A2PASS142; raw A3envelope42valid with deliberately unscored rawqualityBLOCKED. Separate primary a3-quality.json is FAIL."
+    }
+  ]
+}
