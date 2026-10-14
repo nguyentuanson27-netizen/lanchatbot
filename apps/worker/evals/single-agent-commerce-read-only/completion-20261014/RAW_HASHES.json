@@ -2,7 +2,6 @@
   "integration-bank.json": "1a276221d13f204aee79b340032072943e12fc7822d3a7e987abb5291cfefe19",
   "integration-cod.json": "714bc52dd2601fd31177fa759551e88092d687051244d37362f0469f8acad37a",
   "source-readback.json": "37753d940944a8d234e774395c2d2fc3dabe6483ed7b2287caecd3abd67f81dc",
-  "worker-full-baseline.log": "1b99518665b117effefccd2050e01a70c0c1ef8742d337fec1966c3df6bce5c0",
   "raw-b1/attempt-1.json": "ceab0d9d9c0bff2da3e05ae25934820d263c570d3521cd7db879d1b3557da252",
   "raw-b1/attempt-2.json": "6ae27de73d5349a905ac6f19e90601182e070a8b880928c03efa127d6f51f944",
   "raw-b1/attempt-3.json": "af040273f775b2a14c6cc6bae9065b05898ab393ee2b4bc84e3e6789a115726b",
@@ -13,5 +12,6 @@
   "raw-b1/attempt-8.json": "77077165b7b910bdce82f79b674718e18c03386e25cca13055e609c8f9efd509",
   "raw-b1/completion.json": "c15404f1c14ccbf610036a2e8324bc375485e32672687b6c306e324e2464ac4e",
   "raw-b1/registration.json": "2b2897c42a27f78663c21e86923fd4b0531f30f746ebec9a87ac24cf1c9f271a",
-  "raw-b1/requests.jsonl": "0e73fc89cc9aad0f51487a3af635ef0d85310800ba60f7ef4c72c2a839623caf"
+  "raw-b1/requests.jsonl": "0e73fc89cc9aad0f51487a3af635ef0d85310800ba60f7ef4c72c2a839623caf",
+  "worker-full-baseline.txt": "f1f6dcbcdd726fb5c27321a26fcddb3e8ef0c1dd3b097abdcc1cd33f43537050"
 }
