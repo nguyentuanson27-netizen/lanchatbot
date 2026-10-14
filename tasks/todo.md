@@ -3,7 +3,7 @@
 ## Current full Round68 execution — 2026-10-14
 
 - [x] Refresh main296cdcfb; clean intake0b30bed4. Freeze current prompt pair and exactR67 populations/configs under latest full-run authorization. Prior two-case screen remains historical FAIL.
-- [ ] Fixed68 admission RED→GREEN; required readiness/self-review; clean A2source/preflight/full142 with immediate unsafe hardSTOP.
+- [x] Fixed68 observedRED1/4→GREEN4/4 (intermediate native-admission enum failure retained); full430/focused29/worker79/protected21,0skip; worker typecheck/build/lint exit0; read-only routes available,0provider qualification requests. Self-review in round-68/READINESS.json. Clean A2seal/preflight/run follows.
 - [ ] Only A2PASS: raw A2savepoint/audit, separate clean A3source/preflight/full42; raw before primary before diagnostics.
 - [ ] Complete denominator/request/firewall/terminal/quality/operational findings, CHECKPOINT_A, tasks/draftPR390 delivery; STOP at owner recommendation.
 
