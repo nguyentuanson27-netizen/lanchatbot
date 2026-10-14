@@ -1,6 +1,6 @@
 # Phase B1–B3 — implementation evidence, 2026-10-14
 
-**Code candidate implemented; real-source verification BLOCKED.** Owner requested “thực hiện b1 b2 b3”. This is engineering evidence for isolated code, not a provider evaluation, measured A GO, qualification or live activation. [Execution scope](../../../../docs/specs/c3-phase-b-execution-20261014.md) / [B1 plan and B roadmap](../../../../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md) / [usage and limits](README.md).
+**Code candidate implemented; existing operational source connections verified; candidate source-backed/model validation NOT_RUN.** Owner requested “thực hiện b1 b2 b3”. This is engineering evidence for isolated code, not a provider evaluation, measured A GO, qualification or live activation. The initial claim that PostgreSQL/Redis/Qdrant/index configuration was missing was incorrect; the existing repo/VPS route is recorded below. [Execution scope](../../../../docs/specs/c3-phase-b-execution-20261014.md) / [B1 plan and B roadmap](../../../../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md) / [usage and limits](README.md).
 
 ## Source identity
 
@@ -8,7 +8,7 @@
 | --- | --- |
 | bImplementationBaseSha, refreshed main | `296cdcfbf5759f5bf9cbb24acf3dc63005589361` |
 | Candidate foundation, unmerged PR390 | `dd5c9d46f41f1514982210034f551a95cd356f68` |
-| Executable implementation savepoint | `40d69428a3222a86beb24a6d77fe59e441115e0e` |
+| Initial executable implementation savepoint | `40d69428a3222a86beb24a6d77fe59e441115e0e` |
 | Branch | `feat/c3-phase-b-commerce-20261014` |
 | Architecture spec Git blob SHA | `7e0265e3b6b3d556d8fb0f3c7267abccef5de86a` |
 | Boundary amendment Git blob SHA | `4a09b55d2f3a972a65697738876cc5eab21e7a2b` |
@@ -20,7 +20,7 @@ Final report/task commits may follow the executable savepoint. A future provider
 
 | Slice | Implemented and tested | Still unverified |
 | --- | --- | --- |
-| B1 | Existing policy/search/catalog/POS ports; public source context; refs/variants; independent missing facts; bounded native owner; mandatory verifier and current exact-draft gate | Actual PostgreSQL/Redis/Qdrant connection/readback and eight source-backed model conversations |
+| B1 | Existing policy/search/catalog/POS ports; public source context; refs/variants; independent missing facts; bounded native owner; mandatory verifier and current exact-draft gate; operational PostgreSQL/Redis/Qdrant connection readback | Candidate source-owned policy/product/freshness composition and eight source-backed model conversations |
 | B2 | Existing profile merge/CAS adapter; SET/REPLACE/CLEAR with source provenance; accepted state before size/quote; per-product fit/chart binding; current source quote; two-turn continuity | Real database CAS/expiry behavior through this candidate and real customer-state/history composition |
 | B3 | Existing canonical cart/sales-cycle executor; code permission/op IDs; atomic repository contract; current receipts; ambiguity reconciliation; COD/bank confirmation with private preview/revalidation; receipt-backed recovery | Real atomic repository adapter/effect delivery and upstream checkout/stage composition; external POS order creation is not implemented or claimed |
 
@@ -40,7 +40,7 @@ One conversational owner, at most one verifier. Code owns truth/freshness/identi
 | Verifier prompt | `fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957` |
 | Verdict schema JSON | `76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97` |
 | Manifest file bytes | `cb0a9f2deae5ce0057370cbebcbf1deaaad8228cc6d0352ed11815333828d568` |
-| Source-backed case population | **not registered; source configuration/approved inputs missing** |
+| Source-backed case population | **not prepared/registered; existing configuration and access route found** |
 
 The B prompts retain the approved Vietnamese sales/semantic boundaries, replace A's no-tool capability paragraph with explicit scoped native tool use, and make accepted verdict refs precise. `provenance.evidenceRef` is not silently remapped or accepted as a verdict ref. No case-specific production regex/template or shop policy values are added. API shape was checked against [official function-calling documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling) and [official FunctionDeclaration JSON-schema contract](https://docs.cloud.google.com/dotnet/docs/reference/Google.Cloud.AIPlatform.V1/latest/Google.Cloud.AIPlatform.V1.FunctionDeclaration).
 
@@ -113,10 +113,32 @@ Full command setup used the temporary Windows fixture junction described above; 
 
 ## Availability, metrics and recommendation
 
-Checked both this worktree and the main checkout: only `.env.example`, no configured shop routes; no SSH config route was available. Codex local relay/login is covered by the stub test. The already approved service-account file exists and is recognized by B preflight; **B OAuth/generation was not invoked**. Preflight lacks PostgreSQL URL, Redis URL, Qdrant URL/key, approved channel/collection/search thresholds, the index's embedding model/location/dimension and the eight approved source-backed runtime cases. A concise route question is pending; coding/tests proceeded independently.
+The initial inspection checked local process variables and root `.env` files only. That did not justify the conclusion that shop routes/configuration were missing. `deploy/docker-compose.vps.yml` already declares PostgreSQL/Redis, Qdrant and its secret-file route, collection, embedding and search thresholds. The project ops plugin already supplies SSH defaults and an available `LANA_SSH_PASSWORD_FILE`. No new infrastructure, index choice or credential is required to establish operational access.
+
+Read-only diagnosis on 2026-10-14T12:39:50.895Z used that existing credential and the project ops SSH transport. Its normal helper first failed with Windows `CreateProcessW error:2`; copying the identical askpass script to a temporary path without spaces made the authenticated status/readback succeed. The helper copy was removed; no plugin/VPS configuration was changed. Current worker image: `lana-chatbot-app:track-b-b0aeb8907`, healthy. Its image tag identifies the observed runtime, not the Phase B candidate source or a verified full Git SHA.
+
+[Sanitized readback](source-readback-20261014.json): PostgreSQL `SELECT1` and a read-only transaction succeeded against `lana_chatbot`; page1198992073286645 has PUBLISHED SHOP_POLICY/OFFER_POLICY/PAYMENT_POLICY/CLOSING_STRATEGY pointers and seven SIZE_CHART pointers. Redis PING returned PONG, customer-key reads0. Authenticated Qdrant collection metadata returned green,1055points and three Cosine vectors (`product_text`, `image_raw`, `image_cutout`), all1408dimensions. Runtime configuration confirms `multimodalembedding@001` / `us-central1`, thresholds0.72/0.78/gap0.04/max3. Its Vertex project and PUBLISHED channel differ from the compose defaults, so the example now uses the observed values rather than guessing from defaults.
+
+This readback also exposed a candidate composition error: its resolver omitted `publishedEnabled`, so explicitly configured PUBLISHED policy reads returned DISABLED before reaching PostgreSQL. A new test observed RED (3PASS/1FAIL, loader0calls), then the minimum candidate-only option fixed it; GREEN72/72 focused source/tool/owner/boundary tests. The resolver still receives only the SELECT port, with no pin/audit writes. Production runtime flags, entrypoints and source data are unchanged.
+
+The local preflight's earlier BLOCKED/zero-generation result remains an actual command result, but it described an unconfigured local invocation, not unavailable infrastructure. Local CLI composition through the remote route, exact eight-case inputs/registration and the candidate's real policy/product/freshness reads remain to be prepared and exercised. The independent operational probes do not prove those candidate paths. Codex relay/login remains stub-tested; the approved local service-account file exists; **B OAuth/generation was not invoked**. No further owner choice of provider/index or re-supply of existing credentials is needed for these findings.
+
+Follow-up commands after that correction (not a rerun of the initial full suite):
+
+```powershell
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-sources.test.ts
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-semantic-verifier-boundary.test.ts
+node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs
+pnpm --filter @lana/worker typecheck
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+git diff --check
+```
+
+The first invocation observed RED3PASS/1FAIL before the source edit; the second passed72/72, Node16/16, and all three worker scripts exited0. JSON consistency assertions confirm the config example matches the observed channel/collection/embedding/dimensions/thresholds and all three successful probes; no generation/customer-key read. VPS status was read through the existing local ops MCP, then existing ops `ssh_command` ran a bounded in-memory Node readback using deployed dependencies/secrets. PostgreSQL commands were `BEGIN READ ONLY`, `SELECT 1 AS ok, current_database() AS database`, `SELECT channel,artifact_kind,count(*)::int AS active_count FROM admin_active_pointers WHERE active AND page_id=$1 GROUP BY channel,artifact_kind ORDER BY channel,artifact_kind` (page1198992073286645), then `ROLLBACK`. Redis command: `PING`. Qdrant request: authenticated `GET /collections/lana_multimodal_data_v2`. Secret values never crossed into logs or Git. The initial full-suite counts above remain evidence for the initial implementation savepoint; that full suite was not repeated for this narrow correction.
 
 Therefore registered/executed provider turns, unsafe/safe population counts, observed model errors/false PASS, whole-reply quality, fallback/handoff/no-send rates, latency p50/p95, added verification latency, input/output tokens and cost are **N/A — no provider population/run**. There were **0 real B generation requests**. Do not substitute deterministic fixtures or past A numbers. B2/B3 real database/mutation/effect-delivery experiments were not run.
 
 Complexity at the executable savepoint versus foundation:29files,2182insertions/17deletions, including tests/prompts/config/docs. Six candidate TS modules total654lines; three read, three state/size/quote and three effect native tools. There is one bounded conversational loop; state/effect decorators reuse existing domain owners. Semantic roles added above A:0 (one owner and one verifier remain). New durable stores/tables/outbound send paths:0. Production entrypoints/shared packages:unchanged. Test runner selection and a fixed-round test input initialization are the only collateral harness edits and own the concrete failures described above.
 
-**Recommendation: review the code candidate; BLOCKED for real-source B verification.** Keep send-disabled and retain B2/B3 real-adapter work as unverified. No A GO, qualification/replacement, merge, deploy, live send or automatic Phase C follows from these tests.
+**Recommendation: continue source-backed candidate validation using the existing routes; operational access is available, provider validation NOT_RUN.** Keep send-disabled and retain B2/B3 real-adapter work as unverified. No A GO, qualification/replacement, merge, deploy, live send or automatic Phase C follows from these tests.

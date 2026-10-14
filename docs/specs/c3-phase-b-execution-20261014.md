@@ -27,7 +27,7 @@ Each implementation increment runs its focused tests before commit. New behavior
 
 ## Availability at intake
 
-Local process has no configured DATABASE_URL / REDIS_URL / QDRANT_BASE_URL / QDRANT_API_KEY / RUNTIME_POLICY_DATABASE_URL. This is an availability finding, not a reason to skip implementation/tests of the other boundaries. Do not substitute a fixture and call it real integration. The provider credential route may be configured from the already approved local route without logging credentials; required shop sources still need read-only access for the real-source run.
+The initial local process lacked DATABASE_URL / REDIS_URL / QDRANT_BASE_URL / QDRANT_API_KEY / RUNTIME_POLICY_DATABASE_URL. This did not establish source unavailability: compose already contains their routes/index settings and the project ops plugin has an available SSH credential route. Follow-up read-only PostgreSQL/Redis/Qdrant checks succeeded; [actual readback and candidate limits](../../apps/worker/evals/single-agent-commerce-read-only/RESULTS.md#availability-metrics-and-recommendation). Reuse the observed PUBLISHED channel and existing1408dimension index configuration; do not ask the owner to configure them again. Local candidate composition, source-backed inputs/provider evaluation and real B2/B3 adapter behavior remain NOT_RUN. Do not substitute a fixture and call it real integration or log credentials.
 
 ## Completion reporting
 

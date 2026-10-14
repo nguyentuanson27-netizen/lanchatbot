@@ -4,13 +4,13 @@ import { createCommerceReadSources } from "./single-agent-commerce-read-only-sou
 import { commerceScope, commerceNow, fixtureProduct } from "./single-agent-commerce.test-support.js";
 
 describe("scoped read-only source composition", () => {
-  async function setup() {
+  async function setup(channel: "CANARY_SHADOW" | "PUBLISHED" = "CANARY_SHADOW") {
     const f = fixtureProduct();
     const catalog = { findByExactCode: vi.fn(async () => f.product), findByAlias: async () => [],
       searchStableText: async () => [{ document: f.product, score: 0.99 }], searchStableImage: async () => [] };
     const policyStore = { loadActivePointers: vi.fn(async () => []), savePin: vi.fn(), appendAudit: vi.fn() };
     const facts = { readCatalogSnapshot: vi.fn(async () => f.snapshot) };
-    const sources = createCommerceReadSources({ scope: commerceScope(), channel: "CANARY_SHADOW", clock: () => commerceNow,
+    const sources = createCommerceReadSources({ scope: commerceScope(), channel, clock: () => commerceNow,
       policyStore, catalog, search: new ProductSearchService(catalog, { textMinScore: 0.8, imageMinScore: 0.8, minTopGap: 0.05, maxCandidates: 3 }), facts });
     return { sources, catalog, policyStore, facts, f };
   }
@@ -35,6 +35,13 @@ describe("scoped read-only source composition", () => {
     const s = await setup();
     await s.sources.policy();
     expect(s.policyStore.loadActivePointers).toHaveBeenCalledWith({ pageId: commerceScope().pageId, channel: "CANARY_SHADOW" });
+    expect(s.policyStore.savePin).not.toHaveBeenCalled();
+    expect(s.policyStore.appendAudit).not.toHaveBeenCalled();
+  });
+  it("reads the explicitly configured PUBLISHED channel without pin or audit writes", async () => {
+    const s = await setup("PUBLISHED");
+    await s.sources.policy();
+    expect(s.policyStore.loadActivePointers).toHaveBeenCalledWith({ pageId: commerceScope().pageId, channel: "PUBLISHED" });
     expect(s.policyStore.savePin).not.toHaveBeenCalled();
     expect(s.policyStore.appendAudit).not.toHaveBeenCalled();
   });

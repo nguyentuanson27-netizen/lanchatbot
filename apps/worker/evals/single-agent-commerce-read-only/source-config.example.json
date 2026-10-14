@@ -2,20 +2,25 @@
   "scope": {
     "pageId": "1198992073286645",
     "shopId": null,
-    "shopAlias": null,
+    "shopAlias": "LANA",
     "conversationId": null,
     "customerHash": null,
     "recipient": null,
     "bindingVersion": null,
     "revision": null
   },
-  "channel": null,
-  "qdrantCollection": null,
-  "searchThresholds": null,
+  "channel": "PUBLISHED",
+  "qdrantCollection": "lana_multimodal_data_v2",
+  "searchThresholds": {
+    "textMinScore": 0.72,
+    "imageMinScore": 0.78,
+    "minTopGap": 0.04,
+    "maxCandidates": 3
+  },
   "vertex": {
-    "projectId": null,
-    "embeddingModel": null,
-    "embeddingLocation": null,
-    "embeddingDimension": null
+    "projectId": "project-388db62b-f5a4-4e76-a2b",
+    "embeddingModel": "multimodalembedding@001",
+    "embeddingLocation": "us-central1",
+    "embeddingDimension": 1408
   }
 }

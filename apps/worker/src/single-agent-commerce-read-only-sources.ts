@@ -13,7 +13,9 @@ export function createCommerceReadSources(input: {
   facts: Required<Pick<BusinessFactsReader, "readCatalogSnapshot">>;
   initialProducts?: readonly StableProductDocument[];
 }) {
-  const resolver = new RuntimePolicyResolver({ loadActivePointers: q => input.policyStore.loadActivePointers(q) }, { enabled: true });
+  const resolver = new RuntimePolicyResolver({ loadActivePointers: q => input.policyStore.loadActivePointers(q) }, {
+    enabled: true, publishedEnabled: input.channel === "PUBLISHED",
+  });
   const known = new Map((input.initialProducts ?? []).map(p => [p.productId, p.canonicalCode]));
   const catalog: ReadOnlyCatalog = {
     async searchText(query) {
