@@ -1,0 +1,159 @@
+import { computeBusinessContentHash, executePersistedSalesCycleCommand, type RuntimePolicyBundle,
+  type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
+  type SalesCycleTrustedPortsV1, type ResolvedCartDraftV1 } from "@lana/chat-runtime";
+import type { CanonicalCartIdentityV2, CanonicalCartMutationV2 } from "@lana/business-tools";
+import { buildReadOnlyContext, commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
+import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
+import type { CommerceTools } from "./single-agent-commerce-read-only.js";
+import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
+import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+
+const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
+const uuid = (hash: string) => `${hash.slice(0,8)}-${hash.slice(8,12)}-5${hash.slice(13,16)}-8${hash.slice(17,20)}-${hash.slice(20,32)}`;
+
+/** Native tools bridge to existing atomic sales-cycle repository. No external order/send implementation. */
+export async function createCommerceEffectTools(input: {
+  base: CommerceTools; scope: CommerceScope; clock: () => Date; conversationKey: string;
+  repository: SalesCycleStateRepositoryV1; identity: CanonicalCartIdentityV2;
+  authorize: (effect: "CART_OPEN" | "CART_MUTATION" | "PURCHASE_CONFIRMATION", current: SalesCycleRuntimeState) => Promise<boolean>;
+  policy: () => Promise<RuntimePolicyBundle>;
+  select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
+  trustedPorts?: SalesCycleTrustedPortsV1;
+}): Promise<CommerceTools> {
+  async function read() {
+    const s = await input.repository.read(input.conversationKey);
+    if (!s || s.conversationKey !== input.conversationKey || s.routing.pageId !== input.scope.pageId ||
+      s.routing.conversationId !== input.scope.conversationId) throw new Error("COMMERCE_SCOPE");
+    return s;
+  }
+  let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
+  let receipt: TrustedContext["effectReceipts"][number] | undefined;
+  let receiptConversationRevision: number | undefined;
+  const snapshot = (): TrustedContext => {
+    const base = input.base.snapshot(), subjects = [...base.boundSubjects];
+    if (current.cart) {
+      subjects.push({ ref: current.cart.value.cartId, kind: "CART", label: "Giỏ hàng hiện tại", bindingVersion: base.state.bindingVersion });
+      for (const line of current.cart.value.lines) subjects.push({ ref: line.lineId, kind: "CART_LINE", label: line.parentProductId, bindingVersion: base.state.bindingVersion });
+    }
+    const cart = current.cart?.value;
+    return buildReadOnlyContext({ state: { ...base.state, conversationRevision: base.state.revision, revision: current.revision,
+      ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
+      ...(cart ? { cartQuote: base.state.cartQuote ?? { cartId: cart.cartId, cartVersion: cart.revision,
+        subtotalVnd: cart.subtotalVnd, shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } } : {}) },
+      subjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims,
+      policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
+      receipts: receipt ? [receipt] : [], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
+  };
+  async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
+    const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,
+      size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
+      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
+    if (result.status !== "READY" || result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
+      Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
+    return { ...result.line, lineId };
+  }
+  function recordReceipt(operationId: string, effect: string) {
+    if (!current.processedCommandIds.includes(operationId) || !current.cart || current.stage === "HANDED_OFF") return false;
+    receipt = { ref: `receipt:${operationId}`, operationId, subjectRef: current.cart.value.cartId, status: "SUCCESS", effect,
+      stateRevision: current.revision, recipient: input.scope.recipient, observedAt: current.updatedAt,
+      expiresAt: new Date(Math.min(Date.parse(current.cart.expiresAt), input.clock().getTime() + 300_000)).toISOString() };
+    receiptConversationRevision = input.base.snapshot().state.revision;
+    return true;
+  }
+  async function invokeEffect(call: CommerceToolCall): Promise<CommerceToolResult> {
+    if (!names.has(call.name)) return input.base.invoke(call);
+    const state = input.base.snapshot().state;
+    if (!state.permission || !state.privacyAllowed || state.conversationOwner !== "BOT" || uncertain) return { status: "REJECTED", reason: "PERMISSION_OR_UNKNOWN_COMMIT" };
+    let commitAttempted = false;
+    try {
+      current = await read();
+      const authorizedRevision = current.revision;
+      const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "size", "color", "quantity"] :
+        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : []);
+      if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      const product = call.name === "add_to_cart" ? state && input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.subjectRef) : undefined;
+      const line = current.cart?.value.lines.find(l => l.lineId === a.subjectRef);
+      if ((call.name === "add_to_cart" && !product) || (call.name === "change_cart_item" && !line)) return { status: "REJECTED", reason: "SUBJECT_REF" };
+      const effect = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMATION" : current.cart ? "CART_MUTATION" : "CART_OPEN";
+      if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
+      const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
+        sourceMessageId: input.scope.sourceMessageId, tool: call.name, args: a });
+      const effectName = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
+      if (current.processedCommandIds.includes(operationId)) return recordReceipt(operationId, effectName)
+        ? { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value } } : { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
+      policy = await input.policy();
+      publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
+      const policyRef = { id: policy.policy.policyBundleId, version: policy.policy.policyVersion, contentHash: computeBusinessContentHash(policy.policy) };
+      let draft: ResolvedCartDraftV1 | null = null, mutation: CanonicalCartMutationV2 | null = null;
+      let command: SalesCycleCommand;
+      if (call.name === "add_to_cart") {
+        if (a.quantity !== undefined && (!Number.isInteger(a.quantity) || (a.quantity as number) < 1 || (a.quantity as number) > 20)) return { status: "REJECTED", reason: "QUANTITY" };
+        const selected = await selection(product!.ref, a, uuid(operationId));
+        if (!current.cart) {
+          draft = { identity: input.identity, lines: [selected], shopId: input.scope.shopId, policyRef };
+          command = { kind: "CART_OPENED", commandId: operationId, cartDraftRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(input.clock().getTime()+1_800_000).toISOString() };
+        } else mutation = { kind: "ADD_LINE", line: selected };
+      } else if (call.name === "change_cart_item") {
+        if (a.action === "REMOVE_LINE") mutation = { kind: "REMOVE_LINE", lineId: line!.lineId };
+        else if (a.action === "SET_QUANTITY" && Number.isInteger(a.quantity) && (a.quantity as number) > 0 && (a.quantity as number) <= 20) mutation = { kind: "SET_QUANTITY", lineId: line!.lineId, quantity: a.quantity as number };
+        else if (a.action === "SET_COMPONENT_VARIANT" && typeof a.size === "string") {
+          const component = line!.components.find(c => c.componentRole === a.componentRole);
+          if (!component) return { status: "REJECTED", reason: "COMPONENT_REF" };
+          const selected = await selection(line!.parentProductId, { ...a, color: a.color ?? component.color, quantity: line!.quantity }, line!.lineId, line!.offerKind);
+          const variant = selected.components.find(c => c.componentProductId === component.componentProductId);
+          if (!variant || variant.size !== a.size) return { status: "REJECTED", reason: "VARIANT_UNAVAILABLE" };
+          mutation = { kind: "SET_COMPONENT_VARIANT", lineId: line!.lineId, componentProductId: component.componentProductId,
+            componentSku: variant.componentSku, size: variant.size!, color: variant.color };
+        } else return { status: "REJECTED", reason: "MUTATION_ARGUMENTS" };
+      }
+      if (mutation) command = { kind: "CART_MUTATED", commandId: operationId, expectedCartVersion: current.cart!.value.revision,
+        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: "OTHER" };
+      else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
+        intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
+      const ports: SalesCycleTrustedPortsV1 = {
+        resolveCartDraft: r => draft && r.contentHash === computeBusinessContentHash(draft) ? draft : null,
+        resolveCartMutation: r => mutation && r.contentHash === computeBusinessContentHash({ mutation }) ? { mutation } : null,
+        resolveShopPolicy: r => policy && r.contentHash === computeBusinessContentHash(policy.policy) ? policy.policy : null,
+        resolveInboundMessage: id => input.trustedPorts?.resolveInboundMessage(id) ?? null,
+        revalidateCheckout: q => input.trustedPorts?.revalidateCheckout(q) ?? null,
+      };
+      let result;
+      const repository: SalesCycleStateRepositoryV1 = { read: key => input.repository.read(key),
+        compareAndSwap: update => update.expectedRevision === authorizedRevision
+          ? input.repository.compareAndSwap(update) : Promise.resolve(false) };
+      try { commitAttempted = true; result = await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey, command: command!, now: input.clock(), trustedPorts: ports }); }
+      catch { current = await read(); if (!recordReceipt(operationId, effectName)) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; } }
+      if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
+      current = await read();
+      if (!recordReceipt(operationId, effectName)) return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" };
+      return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
+        purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
+    } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
+  }
+  async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
+    const result = await invokeEffect(call);
+    if (names.has(call.name) && result.status !== "OK") failedEffect = true;
+    return result;
+  }
+  return { invoke, snapshot, async invokeBatch(calls) {
+    const independent = calls.filter(c => !names.has(c.name) && c.name !== "quote_cart");
+    const results = new Map<CommerceToolCall, CommerceToolResult>();
+    const readResults = await input.base.invokeBatch(independent); independent.forEach((c, i) => results.set(c, readResults[i]!));
+    const stateRejected = independent.some(c => c.name === "apply_customer_state" && results.get(c)!.status !== "OK");
+    for (const c of calls.filter(c => names.has(c.name))) results.set(c, stateRejected ? { status: "REJECTED", reason: "DEPENDENT_STATE_REJECTED" } : await invoke(c));
+    const effectRejected = calls.some(c => names.has(c.name) && results.get(c)!.status !== "OK");
+    for (const c of calls.filter(c => c.name === "quote_cart")) results.set(c, effectRejected ? { status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" } : await input.base.invoke(c));
+    return calls.map(c => results.get(c)!);
+  }, async readback() { await input.base.readback(); current = await read(); if (policy) policy = await input.policy(); return snapshot(); },
+  async recover(outcome: TerminalOutcome) {
+    if (outcome.disposition === "NO_SEND") return outcome;
+    if (receipt && failedEffect) return { disposition: "HANDOFF", reason: uncertain ? "UNKNOWN_COMMIT" : "PARTIAL_EFFECT", text: null, fallbackId: null };
+    if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
+    await input.base.readback(); const world = input.base.snapshot(); current = await read();
+    if (!world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
+      world.state.recipient !== receipt.recipient || world.state.revision !== receiptConversationRevision ||
+      current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
+    return { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
+      ? "Shop đã nhận xác nhận mua hàng của chị." : "Giỏ hàng đã được cập nhật, chị nhé.", fallbackId: null };
+  } };
+}
