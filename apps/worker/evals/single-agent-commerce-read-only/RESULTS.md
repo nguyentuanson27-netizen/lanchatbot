@@ -1,6 +1,6 @@
 # Phase B1–B3 — implementation evidence, 2026-10-14
 
-Historical initial-delivery report. The later owner-authorized [completion scope](B_COMPLETION.md) adds real-source candidate validation and real PostgreSQL integration in disposable databases. Its final evidence will be recorded separately; the NOT_RUN statements and counts below refer to this earlier delivery, not to later completion runs.
+Historical initial-delivery report. The later owner-authorized [completion scope](B_COMPLETION.md) adds real-source candidate validation and real PostgreSQL integration in disposable databases. Its [final evidence](completion-20261014/CHECKPOINT_B.md) is recorded separately; the NOT_RUN statements and counts below refer to this earlier delivery, not to later completion runs.
 
 **Code candidate implemented; existing operational source connections verified; candidate source-backed/model validation NOT_RUN.** Owner requested “thực hiện b1 b2 b3”. This is engineering evidence for isolated code, not a provider evaluation, measured A GO, qualification or live activation. The initial claim that PostgreSQL/Redis/Qdrant/index configuration was missing was incorrect; the existing repo/VPS route is recorded below. [Execution scope](../../../../docs/specs/c3-phase-b-execution-20261014.md) / [B1 plan and B roadmap](../../../../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md) / [usage and limits](README.md).
 

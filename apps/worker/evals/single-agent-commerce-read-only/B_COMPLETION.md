@@ -2,6 +2,8 @@
 
 Owner requests identifying and implementing everything missing to complete B after the initial mock-only delivery. This extends the B1–B3 execution contract to isolated integration verification. It does not authorize production wiring, activation, live customer state/cart writes, source publication, external POS/Meta/Pancake effects, or Phase C qualification.
 
+Completed engineering readback: [final report](completion-20261014/CHECKPOINT_B.md). Clean97f24609real sources and two isolated PostgreSQL runs PASS,9groups each/cleanup confirmed. One eight-case B1batch,28requests/retry0,5eligible/3fallback, subjective whole-terminal4/8adequate. Sales usability and the explicitly recorded capability limits remain open; no automatic next batch or qualification follows.
+
 ## Missing work and acceptance
 
 | Slice | Required evidence |

@@ -1,6 +1,6 @@
 # C3 Phase B candidate
 
-Scope/authorization: [B1–B3 execution](../../../../docs/specs/c3-phase-b-execution-20261014.md). Current evidence: [RESULTS](RESULTS.md). The candidate is isolated from production entrypoints and always returns `sendEnabled=false`.
+Scope/authorization: [B1–B3 execution](../../../../docs/specs/c3-phase-b-execution-20261014.md). Current evidence: [real-source/real-PostgreSQL completion report](completion-20261014/CHECKPOINT_B.md), [all eight conversations](completion-20261014/B1_CONVERSATIONS.md), [findings](completion-20261014/FINDINGS.md). [RESULTS](RESULTS.md) preserves the initial delivery. The candidate is isolated from production entrypoints and always returns `sendEnabled=false`.
 
 ## Boundaries implemented
 
@@ -16,7 +16,7 @@ Native capabilities are explicit: B1 declares `search_products`, `read_product`,
 
 ## Read-only development run
 
-Models remain Vertex `gemini-3.5-flash-lite` / high and `gpt-6.1-sol` / high through the existing bounded Codex login relay. Provider versions/config, prompt/schema hashes and terminal map are in [manifest](manifest.json). [Eight frozen cases](cases.b1.json) and [observed non-secret source configuration](source-config.b1.json) are ready for one N1 batch. This is development integration, with no inherited A PASS or qualification claim.
+Models remain Vertex `gemini-3.5-flash-lite` / high and `gpt-6.1-sol` / high through the existing bounded Codex login relay. Provider versions/config, prompt/schema hashes and terminal map are in [manifest](manifest.json). [Eight frozen cases](cases.b1.json) and [observed non-secret source configuration](source-config.b1.json) were run once at clean source97f24609:8/8recorded,28requests/retry0,5eligible/3fallback. Whole-terminal subjective review is4/8adequate; quality remains open. No inherited A PASS, independent acceptance or qualification claim.
 
 Reuse the existing deployment routes, not a new database/index setup. [Compose](../../../../deploy/docker-compose.vps.yml) already configures PostgreSQL, Redis, Qdrant, file-backed secrets and the stable catalog index. [Lana ops](../../../../plugins/lana-chatbot-ops/README.md) supplies the existing SSH/credential route. A missing local `.env` does not mean these sources are unavailable.
 
