@@ -1,5 +1,12 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current owner-authorized A3 diagnostic bypass — 2026-10-14
+
+- [x] Inspect clean head24727880, refreshmain296cdcfb; freeze explicit bypass scope/plan, unchanged42cases/prompt pair/models/config/bars/fallback. A2FAIL remains recorded; no A2generation or prompt fix.
+- [ ] Focused observed RED→GREEN/readiness, existing full42mandatory-verifier/persistence/firewall coverage and unchanged source/helper readback; commit/clean a3source/preflight.
+- [ ] Execute all42N1, max84role requests/retry0; rawcommit before whole actual-terminal primarycommit before rejected diagnostics. Retain errors/missing/UNKNOWN, human420ratingsnull.
+- [ ] Full conversation/failure/provenance/body/accounting/metrics report, tasks/draftPR390; Checkpoint A unqualified/STOP regardless of diagnostic quality. No automatic next run or post-A.
+
 ## Current clear-boundaries full evaluation — 2026-10-14
 
 - [x] Refreshmain296cdcfb; clean starting527be366; freeze40f7b553 exact prepared Vietnamese prompts and current inputs/config/bars before provider. No existing code/input/history changes.
