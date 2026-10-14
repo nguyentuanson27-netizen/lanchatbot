@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current B prompt/tool follow-up — 2026-10-14
+
+- [x] Read full owner/verifier/tool descriptions, wire projections and eight conversations; [audit/fix rationale](../apps/worker/evals/single-agent-commerce-read-only/followup-20261014/PROMPT_REVIEW.md). Startclean0f4c4eba/refreshedmain296cdcfb; same branch/draft PR391. Scope is one same-eight B1batch, no B3 capability/Phase C expansion.
+- [x] Observed RED3worker+1native → minimumGREEN27worker+11native: use actual canonical selected offer, retain source failure status/reason, expose existing remaining budget, supply already allowed current profile/fingerprint fields. Savepointdf33d582. No new semantic roles/parser/repair/retry/state store; code budgets/gate unchanged.
+- [x] Replace owner wording/examples with coherent Vietnamese instructions; correct trusted.policy wire path, separate unknown physical evidence from negative claims and policy rules from complete eligibility. Keep verifier exact bytes/models/config/schema/fallback. Same8case objects/history/labels/source modes, only order changes to prior4inadequate first; no new examples/answers or relaxed scoring.
+- [ ] Complete current worker test/typecheck/build/lint/self-review, seal clean executable/config and freeze runtime sourceSHA after commit.
+- [ ] Preflight/source readback, one8N1/max32generation batch/retry0; rawcommit before whole actual-terminal primary, then rejected diagnosis/audit/metrics and full denominator. No automatic additional run.
+- [ ] Update report, tasks and same draft PR391 with exact result/unverified limits. No Phase C/merge/deploy/live send.
+
 ## Current Phase B completion — 2026-10-14
 
 - [x] Identify the missing real-source, persisted transaction/receipt and provider evidence; [bounded completion scope](../apps/worker/evals/single-agent-commerce-read-only/B_COMPLETION.md). Continue on the existing implementation branch/draft PR391; refreshed main remains296cdcfb.

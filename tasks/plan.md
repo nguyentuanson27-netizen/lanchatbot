@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current B prompt/tool follow-up — 2026-10-14
+
+Owner asks to review the complete prompts/fix direction, implement and rerun. [Bounded scope](../apps/worker/evals/single-agent-commerce-read-only/followup-20261014/SCOPE.md)/[full prompt and context review](../apps/worker/evals/single-agent-commerce-read-only/followup-20261014/PROMPT_REVIEW.md). Start0f4c4eba, refreshed main296cdcfb, same branch/draft PR391. Replace redundant owner wording and old examples, clarify unknown physical properties, policy versus eligibility, immediate versus future capability and ordinary customer language. Correct owner policy wire path and include existing current fit comparison fields. Expose actual resolver-selected offer, independent source statuses and remaining existing tool budget. Verifier/model/config/schema/fallback and prior evidence remain unchanged; no new role/parser/gate/retry/production wiring or B3 capability expansion.
+
+Observed RED3worker+1native, minimumGREEN27worker+11native; broader focused145worker+18native/protocol and direct worker typecheck pass. Full current checks/self-review → commit/clean/runtime source seal → preflight/source readback → exactly same8worlds/expectations N1/max32requests/retry0, reordered prior4inadequate first → raw before whole-terminal primary before rejected diagnosis → audit/metrics/tasks/samePR391. No post-result patch or automatic next batch, A2/A3, stateful B2/B3 provider run, Phase C, deploy or live send. Earlier8case4/8subjective quality and18DBgroups remain historical independent evidence; no outcome adoption.
+
 ## Current Phase B completion — 2026-10-14
 
 Latest owner asks to identify and implement what remains for B. [Completion scope and acceptance](../apps/worker/evals/single-agent-commerce-read-only/B_COMPLETION.md) extends the already authorized B1–B3 candidate work to source-backed B1 validation and real PostgreSQL tests in uniquely named disposable databases. Reuse existing remote routes/index/current PUBLISHED policy; no new infrastructure request, live source/customer/cart mutation or deployment. Preserve historical A evidence and OWNER_BYPASS.
