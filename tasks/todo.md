@@ -1,16 +1,21 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current Phase B plan — 2026-10-14
+## Current Phase B implementation — 2026-10-14
 
-- [x] Inspect current specs/owner bypass and actual source interfaces; refresh main and record planning base. Write [Phase B roadmap and detailed B1 plan](../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md) with source ownership, dependencies, files, acceptance/tests, current risks and bounded development evaluation. Documentation only; no B implementation/provider generation.
-- [ ] Owner review of the concrete B1 scope before implementation; request to bypass A already stands and needs no reconfirmation.
-- [ ] B1.1 — Real-source evidence/context contract and current snapshot; RED→GREEN, source availability/read-only configuration recorded.
-- [ ] B1.2 — Source-owned policy reader/context without pin/audit/outbound writes; policy source swap/missing customerCare tests.
-- [ ] B1.3 — Product search/read, POS snapshot price/stock, bounded refs and partial failures; no source/freshness relabeling.
-- [ ] B1.4 — Small same-owner native tool loop/adapter; max3owner generations/2rounds/6tools, zero generation retries; preserve native continuation.
-- [ ] B1.5 — Mandatory verifier/exact final text/current readback/final gate; fail-closed and send-disabled.
-- [ ] B1.6 — Focused verification, real-adapter readback, separately frozen eight-scenario N1 run (max32generations) and full outcome/request/complexity report. No execution yet.
-- [ ] After B1: detail B2 accepted effective state before size/quote, then B3 mutation/receipt/recovery. Qualification/promotion/rollout remain separate; no automatic continuation.
+- [x] Latest owner instruction “thực hiện b1 b2 b3” authorizes all three source slices; [execution contract](../docs/specs/c3-phase-b-execution-20261014.md). Refresh main296cdcfb, foundationdd5c9d46, branch `feat/c3-phase-b-commerce-20261014`; no repeated scope approval.
+- [x] B1.1 candidate evidence/context and boundary RED→GREEN: policy-only absence, existing product evidence/hash/freshness, multiple variants and exact current snapshot. Frozen A data/evidence unchanged.
+- [x] B1.2 public policy from existing active-pointer resolver; no pin/audit/outbound writer. Source swaps invalidate binding; LAST_KNOWN_GOOD does not prove a current pointer read; missing customerCare stays missing.
+- [x] B1.3 scoped search/read ports for ProductSearchService/Qdrant/Redis snapshots, code-issued refs, independent facts/attributes failures, current readback and variant bindings. No timestamp/authority relabeling.
+- [x] B1.4 same-owner native loop/adapter: max3owner generations/2tool rounds/6calls; preserve native content/signatures/call IDs; generation retries0; provider version/errors/bounds/firewall covered by stub HTTP tests.
+- [x] B1.5 every hard-precheck-surviving exact final text takes one verifier/current final gate; no rewrite or send. B prompts/protocol/runner have separate identity and explicit runtime/evaluator projections.
+- [x] B2 candidate accepted SET/REPLACE/CLEAR, existing profile CAS, dependency ordering, missing-input behavior, per-product SIZE_FIT/fingerprint/chart binding and existing policy arithmetic. Two turns reuse the same stored profile and apply the later correction; no reset perfect state.
+- [x] B3 candidate existing sales-cycle/cart executor and atomic repository ports, code permission/op identity/revision, duplicate/ambiguous-commit handling, current receipts and post-effect recovery. Isolated COD/bank-confirmation tests retain private checkout/preview/revalidation and commit effect intents together; no external POS order or live writer.
+- [x] B1 source preflight executed: BLOCKED,0provider generations. Local Codex relay tested against a stub; approved service-account file available. PostgreSQL/Redis/Qdrant/index configuration and eight approved source-backed inputs are missing; no fixture/provider substitution.
+- [x] Final verification/report: focused139, native/protocol16, existing A transport/protocol29, shared protected/size52, full worker125Vitest files/1693tests plus458Node tests all PASS,0skip; worker typecheck/build/lint exit0. [Actual commands, failed checks/fixes, source/complexity and limits](../apps/worker/evals/single-agent-commerce-read-only/RESULTS.md). Windows fixture alias restored byte-for-byte; no source-backed provider result claimed.
+- [ ] B1 real-source readback and separately registered8N1/max32-generation development batch — BLOCKED on source access/config/inputs. No `bRunSourceSha`, replies, quality/latency/token/cost result is fabricated.
+- [ ] B2/B3 real database CAS/atomic commerce repository/effect-delivery verification — NOT_RUN. Existing upstream sales-stage/private-checkout preconditions remain required; no migration or live mutation.
+
+OWNER_BYPASS and historical A outcomes remain unchanged. Phase C qualification/replacement/rollout is outside this implementation scope. Entries below describe earlier scopes, not a new approval requirement for the already authorized B1–B3 code.
 
 ## Current owner decision: bypass Checkpoint A — 2026-10-14
 
