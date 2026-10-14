@@ -33,6 +33,14 @@ describe("read-only domain tools", () => {
     const after = await changed.readback();
     expect(makeBinding("turn", "Phí theo nguồn.", after).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
   });
+  it("does not treat last-known-good policy as a successful current-pointer readback", async () => {
+    const { catalog } = setup(); const resolution = await fixturePolicy(); let failed = false;
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, catalog,
+      policy: async () => failed ? { ...resolution, status: "LAST_KNOWN_GOOD" as const } : resolution });
+    expect((await tools.invoke({ name: "read_policy", args: {} })).status).toBe("OK");
+    failed = true;
+    await expect(tools.readback()).rejects.toThrow("POLICY_READBACK_UNAVAILABLE");
+  });
   it("rejects invented refs and privileged arguments before I/O", async () => {
     const { tools, readProduct } = setup();
     expect((await tools.invoke({ name: "read_product", args: { subjectRef: "OTHER" } })).status).toBe("REJECTED");

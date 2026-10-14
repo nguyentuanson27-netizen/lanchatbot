@@ -16,7 +16,7 @@ export interface ReadOnlyCatalog {
   searchText(query: string): Promise<ProductSearchResult>;
   readProduct(productId: string): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
 }
-export interface CommerceToolCall { name: string; args: unknown }
+export interface CommerceToolCall { name: string; args: unknown; id?: string }
 export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string }
 export function toolArgs(value: unknown, fields: readonly string[]): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
@@ -45,7 +45,8 @@ export function createReadOnlyTools(input: {
     products: [...products.values()], claims: [...claims.values()].flat(), policies: policyLiteral });
   async function readPolicy(): Promise<CommerceToolResult> {
     policy = await input.policy();
-    if (!policy.bundle || !["RESOLVED", "PINNED", "LAST_KNOWN_GOOD"].includes(policy.status)) return { status: "UNAVAILABLE", reason: "POLICY_UNAVAILABLE" };
+    // This candidate reads active pointers; an old cached bundle cannot prove their current identity.
+    if (!policy.bundle || policy.status !== "RESOLVED") return { status: "UNAVAILABLE", reason: "POLICY_UNAVAILABLE" };
     policyLiteral = [publicPolicyLiteral(policy.bundle, scope.pageId, scope.shopId, input.clock())];
     policyRead = true;
     return { status: "OK", data: { policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
