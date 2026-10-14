@@ -71,6 +71,20 @@ test('native call identity remains paired with its function response',()=>{
  const result=parseGeminiGeneration(body([{functionCall:{id:'native-call-1',name:'read_policy',args:{}}}]));
  assert.equal(result.calls[0].id,'native-call-1');
 });
+test('owner sees field availability without internal operational diagnostics or loss of native parts',()=>{
+ const r=request();
+ const response={status:'OK',data:{content:{description:'Áo cotton.'},facts:[],
+  availability:{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'},stock:{status:'STALE',reason:'CATALOG_SNAPSHOT_STALE'}}}};
+ r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response}}]});
+ const built=buildGeminiCommerceRequest(r),part=built.contents[3].parts[0];
+ assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE'},stock:{status:'STALE'}});
+ assert.equal(part.functionResponse.id,'read-1');
+ assert.equal(part.functionResponse.response.data.content.description,'Áo cotton.');
+ assert.equal(built.contents[2].parts[0].thoughtSignature,'opaque');
+ assert.equal(response.data.availability.price.reason,'POS_SNAPSHOT_UNAVAILABLE');
+ assert.doesNotMatch(JSON.stringify(built),/POS_SNAPSHOT_UNAVAILABLE|CATALOG_SNAPSHOT_STALE/);
+});
 test('a different or absent model version is not accepted as the approved model',async()=>{
  for(const version of ['other-model',undefined]){
   const data=body([{text:'Dạ chị.'}]);data.modelVersion=version;

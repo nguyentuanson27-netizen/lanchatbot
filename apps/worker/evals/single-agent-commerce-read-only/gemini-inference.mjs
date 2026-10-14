@@ -5,9 +5,9 @@ const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
- {name:'search_products',description:'Tìm sản phẩm của shop; dùng ref trong kết quả để đọc sản phẩm.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
+ {name:'search_products',description:'Tìm sản phẩm của shop; trả ref cùng mô tả/thuộc tính có nguồn để tư vấn. Chỉ read_product khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
  {name:'read_product',description:'Đọc sản phẩm, bảng size, giá và tồn theo ref shop đã cấp. Kết quả offerType cho biết lựa chọn bán thực tế của facts; chỉ truyền offerType khi cần lựa chọn khác từ availableOffers. size dùng xem tồn, không chứng minh mặc vừa. availability giữ trạng thái nguồn của giá/tồn.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string},required:['subjectRef']}},
- {name:'read_policy',description:'Đọc chính sách hiện hành từ nguồn của shop.',parameters:{type:'OBJECT',properties:{}}},
+ {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
  {name:'apply_customer_state',description:'Cập nhật đúng thông tin khách vừa cung cấp, sửa hoặc yêu cầu bỏ. Gọi trước các tool phụ thuộc thông tin đó.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]}}}}}}},
@@ -21,6 +21,13 @@ export const effectDeclarations=[
 ];
 export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarations){
  const c=request.context;
+ const contents=structuredClone(request.contents);
+ for(const message of contents)for(const part of message.parts??[]){
+  const response=part.functionResponse;
+  if(response?.name!=='read_product'||!response.response?.data?.availability)continue;
+  const availability=response.response.data.availability;
+  response.response.data.availability=Object.fromEntries(Object.entries(availability).map(([field,value])=>[field,{status:value.status}]));
+ }
  const ownerView={subjects:c.boundSubjects,products:(c.runtimeProducts??[]).map(p=>({ref:p.ref,subjectRef:p.subjectRef,
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
@@ -30,7 +37,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
      .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]])),
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
-  contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...structuredClone(request.contents)],
+  contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
   tools:[{functionDeclarations:declarations}],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  requireThat(bytes(body)<=32768,'OWNER_REQUEST_BOUND');return body;

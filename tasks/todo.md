@@ -1120,3 +1120,11 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [x] Conditional remainder withheld:primary25/30PASS,policy7/12<90%,5/30fallback16.67%;authorizeA3Continuation rejects REGRESSION_NOT_PASS;42unexecuted/undispatched,720humanratingsnull. FullA3BLOCKED,not whole-corpus qualification.
 - [x] Audit333bodies/bindings/gates/source/raw/score,1089historical tracked files unchanged,9R51sidecars byte-exact;report/checkpoint/finding/fivefailures complete. Remaining owner-condition3clear conditional losses+2scope ambiguities;not context/provider missing. STOPowner,no automatic53/post-A.
 - [x] Report8c597c32719cf4560ce3f739414bd18e0599b818 pushed;draftPR390 title/body updated and exactbody/head/base/main/branch/draft/open/clean readback PASS. First checks readback empty,later pnpmcheckQUEUED,notPASS. Delivery documentation savepoint follows;no further generation,STOPowner.
+# B1 two correction rounds — 2026-10-15
+
+- [ ] Source/tool/context corrections with observed RED->GREEN and self-review.
+- [ ] Current focused/full worker checks, typecheck/build/lint.
+- [ ] Round1: frozen source, real preflight/readback, prefix3 then conditional remaining5, retain all evidence.
+- [ ] Round2: review/fix if justified, new frozen source and same bounded dispatch.
+- [ ] Whole-terminal reports/findings, tasks and draft PR391; STOP after two rounds.
+

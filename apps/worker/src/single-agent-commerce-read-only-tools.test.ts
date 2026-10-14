@@ -14,6 +14,40 @@ const setup = (options: { fee?: number } = {}) => {
     policy: () => fixturePolicy(options.fee), catalog }) };
 };
 describe("read-only domain tools", () => {
+  it("search supplies source-bound static evidence without hidden POS reads and revalidates it before eligibility", async () => {
+    const f = fixtureProduct(); f.product.descriptionXml = "Áo cotton dáng suông.";
+    const readProduct = vi.fn(async () => structuredClone(f));
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      catalog: { searchText: async () => ({status:"MATCHED",matchKind:"EXACT_CODE",product:structuredClone(f.product),score:1,gap:null}), readProduct } });
+    const found = await tools.invoke({name:"search_products",args:{query:"áo cotton"}});
+    expect(found.data).toMatchObject({products:[{subjectRef:"SM613",attributes:{materials:["cotton"]},
+      content:{description:"Áo cotton dáng suông."}}]});
+    expect(readProduct).not.toHaveBeenCalled();
+    expect(tools.snapshot().protectedClaims).toEqual([]);
+    expect(tools.snapshot().runtimeProducts![0]!.content!.description).toBe("Áo cotton dáng suông.");
+    const before = makeBinding("turn","Áo cotton dáng suông.",tools.snapshot());
+    expect(makeBinding("turn","Áo cotton dáng suông.",await tools.readback())).toEqual(before);
+    f.product.descriptionXml = "Mô tả nguồn đã đổi.";
+    expect(makeBinding("turn","Áo cotton dáng suông.",await tools.readback()).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+  });
+  it("policy lookup never represents a checked or approved individual exchange", async () => {
+    const {tools} = setup();
+    expect((await tools.invoke({name:"read_policy",args:{}})).data).toMatchObject({scope:"SHOP_RULES",orderEligibility:null});
+  });
+  it("search and the trusted verifier snapshot use the same existing product evidence after a full read", async () => {
+    const f = fixtureProduct(); f.product.descriptionXml = "Mô tả đã đọc.";
+    const catalog = {readProduct:async()=>structuredClone(f),searchText:async()=>({status:"MATCHED" as const,
+      matchKind:"EXACT_CODE" as const,product:structuredClone(f.product),score:1,gap:null})};
+    const tools = createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:()=>fixturePolicy(),
+      initialProducts:[f.product],catalog});
+    await tools.invoke({name:"read_product",args:{subjectRef:"SM613"}});
+    f.product.descriptionXml = "Mô tả nguồn thay đổi giữa lượt.";
+    const search = await tools.invoke({name:"search_products",args:{query:"SM613"}});
+    expect((search.data as {products:unknown[]}).products).toEqual(tools.snapshot().runtimeProducts);
+    expect(tools.snapshot().protectedClaims).not.toHaveLength(0);
+    const before = makeBinding("turn","Mô tả đã đọc.",tools.snapshot());
+    expect(makeBinding("turn","Mô tả đã đọc.",await tools.readback()).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+  });
   it("identifies the resolver's default selling offer and canonical aliases without losing price scope", async () => {
     const f = fixtureProduct(), { catalog } = setup();
     f.snapshot.offers.SET_VAY = { ...structuredClone(f.snapshot.offers.DIRECT!), sale_price: 799_000,

@@ -40,6 +40,7 @@ export function createReadOnlyTools(input: {
   let policyLiteral: TrustedContext["policyLiterals"] = [];
   let policyRead = false;
   const reads = new Map<string, Record<string, unknown>>();
+  const searchReads = new Set<string>();
   const bind = (p: StableProductDocument) => {
     if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
   };
@@ -47,13 +48,30 @@ export function createReadOnlyTools(input: {
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
     products: [...products.values()], claims: [...claims.values()].flat(), policies: policyLiteral });
+  const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
+    if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
+      throw new Error("PRODUCT_SOURCE_FRESHNESS");
+    }
+    const evidence: RuntimeProductEvidence = { ref: `product:${p.productId}`, subjectRef: p.productId };
+    if (p.attributes) {
+      const attrs = verifyProductAttributesV1(p.attributes, p.productId);
+      if (attrs && attrs.metadata.freshnessState === "FRESH" && Date.parse(attrs.metadata.observedAt) <= now.getTime()) evidence.attributes = attrs;
+    }
+    if (p.observedAt) evidence.content = ProductContentV1Schema.parse({ productName: p.title,
+      description: p.descriptionXml?.trim() || null, productUrl: null, metadata: {
+        authority: p.descriptionAuthority ?? "WEBSTORE_XML", sourceVersion: p.descriptionSourceVersion ?? p.catalogVersion,
+        observedAt: p.observedAt, expiresAt: null, freshForSeconds: null, freshnessState: "FRESH",
+      } });
+    return evidence;
+  };
   async function readPolicy(): Promise<CommerceToolResult> {
     policy = await input.policy();
     // This candidate reads active pointers; an old cached bundle cannot prove their current identity.
     if (!policy.bundle || policy.status !== "RESOLVED") return { status: "UNAVAILABLE", reason: "POLICY_UNAVAILABLE" };
     policyLiteral = [publicPolicyLiteral(policy.bundle, scope.pageId, scope.shopId, input.clock())];
     policyRead = true;
-    return { status: "OK", data: { policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
+    return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
+      policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
   }
   async function readProduct(args: Record<string, unknown>): Promise<CommerceToolResult> {
     const id = args.subjectRef as string, now = input.clock();
@@ -79,17 +97,8 @@ export function createReadOnlyTools(input: {
       return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
         scope: c.scope.kind === "PRODUCT" ? { ...c.scope, variantId } : c.scope }));
     });
-    const evidence: RuntimeProductEvidence = { ref: `product:${id}`, subjectRef: id };
-    if (p.attributes) {
-      const attrs = verifyProductAttributesV1(p.attributes, id);
-      if (attrs && attrs.metadata.freshnessState === "FRESH" && Date.parse(attrs.metadata.observedAt) <= now.getTime()) evidence.attributes = attrs;
-    }
+    const evidence = staticEvidence(p, now);
     const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
-    if (p.observedAt) evidence.content = ProductContentV1Schema.parse({ productName: p.title,
-      description: p.descriptionXml?.trim() || null, productUrl: null, metadata: {
-        authority: p.descriptionAuthority ?? "WEBSTORE_XML", sourceVersion: p.descriptionSourceVersion ?? p.catalogVersion,
-        observedAt: p.observedAt, expiresAt: null, freshForSeconds: null, freshnessState: "FRESH",
-      } });
     const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
     if (presentation) evidence.presentation = presentation;
     const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
@@ -130,7 +139,14 @@ export function createReadOnlyTools(input: {
         const candidates = found.status === "MATCHED" ? [found.product] : found.status === "AMBIGUOUS" ? found.candidates.map(c => c.document) : [];
         if (subjects.size + candidates.filter(p => !subjects.has(p.productId)).length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
         candidates.forEach(bind);
-        return { status: "OK", data: { status: found.status, subjects: candidates.map(p => subjects.get(p.productId)) } };
+        const evidence = candidates.map(p => staticEvidence(p, input.clock()));
+        for (const p of evidence) {
+          searchReads.add(p.subjectRef);
+          // Search must not replace a fuller, already verified product read.
+          if (!products.has(p.subjectRef) && (p.attributes || p.content)) products.set(p.subjectRef, p);
+        }
+        return { status: "OK", data: { status: found.status, subjects: candidates.map(p => subjects.get(p.productId)),
+          products: evidence.map(p => products.get(p.subjectRef) ?? p) } };
       }
       if (call.name === "read_product") {
         const a = toolArgs(call.args, ["subjectRef", "offerType", "color", "size"]);
@@ -143,6 +159,15 @@ export function createReadOnlyTools(input: {
   }
   return { invoke, snapshot, invokeBatch: (calls: CommerceToolCall[]) => Promise.all(calls.map(invoke)), async readback() {
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
+    const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
+    for (const id of searchReads) if (!fullReads.has(id)) {
+      const {product} = await input.catalog.readProduct(id);
+      if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");
+      const evidence = staticEvidence(product, input.clock());
+      products.delete(id);
+      if (evidence.attributes || evidence.content) products.set(id, evidence);
+      subjects.set(id, {...subjects.get(id)!, label:product.title});
+    }
     for (const [ref, subject] of subjects) if (subject.kind === "VARIANT") subjects.delete(ref);
     for (const a of reads.values()) if ((await readProduct(a)).status !== "OK") throw new Error("PRODUCT_READBACK_UNAVAILABLE");
     return snapshot();
