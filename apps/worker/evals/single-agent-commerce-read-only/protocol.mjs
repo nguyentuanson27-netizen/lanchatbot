@@ -3,6 +3,11 @@ import {readFileSync,existsSync} from 'node:fs';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
+export function dispatchRange(value=undefined){
+ if(value===undefined)return {first:1,last:8};
+ check(typeof value==='string'&&/^[1-8]:[1-8]$/.test(value),'DISPATCH_RANGE');
+ const [first,last]=value.split(':').map(Number);check(first<=last,'DISPATCH_RANGE');return {first,last};
+}
 const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');

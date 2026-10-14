@@ -3,12 +3,13 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
-import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256} from './protocol.mjs';
+import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'}}});
+const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'}}});
+const dispatch=dispatchRange(args.range);
 const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8')));
 const configBytes=args.config?readFileSync(resolve(args.config)):null;
 const config=configBytes?JSON.parse(configBytes):{};
@@ -39,6 +40,7 @@ const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.str
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
  promptHashes:m.promptHashes,schemaHash:m.schemaHash,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
  inputHash,caseIds:samples.map(c=>c.caseId),registered:8,repetitions:1,maximumGenerationRequests:32,
+ dispatch,
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});
 const [{PostgresRuntimePolicyStore},{ProductSearchService,QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
  {VertexShadowModel},{createCommerceReadSources},{createReadOnlyTools},{runCommerceTurn}]=await Promise.all([
@@ -82,7 +84,7 @@ const ownerInference=createGeminiCommerceInference({model:m.models.conversation.
 const verifier=createCommerceVerifier(m,undefined,(id,value)=>audit(id,value.phase,value.provider));
 const clock=()=>new Date();
 try{
- for(let i=0;i<inputs.length;i++){
+ for(let i=dispatch.first-1;i<dispatch.last;i++){
   const sample=inputs[i],started=performance.now(),requestId=sha256(bRunSourceSha+':'+i+':'+sha256(JSON.stringify(sample)));
   const scope={...config.scope,requestId,sourceMessageId:requestId,sourceObservedAt:clock().toISOString(),conversationOwner:'BOT',permission:true,privacyAllowed:true};
   let result;
@@ -93,7 +95,10 @@ try{
     catalog:{findByExactCode:async code=>{counters.catalogReads++;return index.findByExactCode(code);}},
     policyStore:{loadActivePointers:async q=>{counters.policyReads++;return database.loadActivePointers(q);}},
     facts:{readCatalogSnapshot:async(alias,id)=>{counters.posReads++;return samples[i].sourceMode==='POS_UNAVAILABLE'?null:redis.readCatalogSnapshot(alias,id);}}});
-   const tools=createReadOnlyTools({scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds});
+   const rawTools=createReadOnlyTools({scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds});
+   const tools={...rawTools,invokeBatch:async calls=>{
+    const results=await rawTools.invokeBatch(calls);audit(requestId,'TOOL_RESULTS',{calls,results});return results;
+   }};
    const owner=async request=>{audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
     const generated=await ownerInference(request);audit(request.generationId,'OWNER_RESULT',generated);return generated;};
    result=await runCommerceTurn({scope,clock,tools,latest:sample.latest,history:sample.history,
@@ -101,9 +106,10 @@ try{
   }catch(error){result={terminal:{disposition:'NO_SEND',reason:'SOURCE_OR_ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},errorType:error.name,
    errorCode:typeof error.message==='string'&&/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:null,sendEnabled:false};}
   writeFileSync(join(out,`attempt-${i+1}.json`),JSON.stringify({caseId:samples[i].caseId,sourceMode:samples[i].sourceMode??'LIVE',elapsedMs:performance.now()-started,runtime:sample,result,counters:{...counters}},null,2),{flag:'wx'});
-  console.log(JSON.stringify({recorded:i+1,registered:8,terminal:result.terminal.disposition}));
+  console.log(JSON.stringify({slot:i+1,recorded:i-dispatch.first+2,registered:8,terminal:result.terminal.disposition}));
  }
- const status=head()===bRunSourceSha&&!dirty()?'AWAITING_WHOLE_REPLY_REVIEW':'INVALID_SOURCE_IDENTITY';
- writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered:8,recorded:8,counters,sendEnabled:false},null,2),{flag:'wx'});
- console.log(JSON.stringify({status,registered:8,out,sendEnabled:false}));
+ const recorded=dispatch.last-dispatch.first+1;
+ const status=head()===bRunSourceSha&&!dirty()?(recorded===8?'AWAITING_WHOLE_REPLY_REVIEW':'DISPATCH_RANGE_COMPLETE_REVIEW_PENDING'):'INVALID_SOURCE_IDENTITY';
+ writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered:8,recorded,dispatch,counters,sendEnabled:false},null,2),{flag:'wx'});
+ console.log(JSON.stringify({status,registered:8,recorded,out,sendEnabled:false}));
 }finally{await Promise.allSettled([database.close(),redis.close()]);}

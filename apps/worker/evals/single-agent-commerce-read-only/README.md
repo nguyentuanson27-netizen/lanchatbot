@@ -1,5 +1,7 @@
 # C3 Phase B candidate
 
+Latest authorized work: [two bounded correction rounds](two-round-20261015/SCOPE.md), same eight worlds with the three prior fallbacks first. Search now shares static source evidence with owner/verifier; policy lookup is rules-only; raw diagnostics stay in tool accounting and the owner sees field availability. Explicit `--range 1:3` then conditional `--range 4:8` partition a round's eight registrations. No automatic quality judge, retry, increased model/tool budget or third round. Results are pending until actual source-backed dispatch/review.
+
 Scope/authorization: [B1–B3 execution](../../../../docs/specs/c3-phase-b-execution-20261014.md). Latest evidence: [prompt/tool follow-up](followup-20261014/CHECKPOINT_B.md), [full prompt review](followup-20261014/PROMPT_REVIEW.md), [eight conversations](followup-20261014/B1_CONVERSATIONS.md), [concrete findings](followup-20261014/FINDINGS.md). Earlier [real-source/real-PostgreSQL completion report](completion-20261014/CHECKPOINT_B.md) and [RESULTS](RESULTS.md) retain their original meaning. The candidate is isolated from production entrypoints and always returns `sendEnabled=false`.
 
 ## Boundaries implemented

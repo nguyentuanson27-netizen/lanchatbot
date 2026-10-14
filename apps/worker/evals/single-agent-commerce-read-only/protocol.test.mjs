@@ -3,11 +3,17 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,mkdtempSync,unlinkSync,rmdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {runtimeCase,readRegisteredCases,buildVerifierRequest,createCommerceVerifier,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
+import {runtimeCase,readRegisteredCases,buildVerifierRequest,createCommerceVerifier,validateProtocol,requiredSourceConfig,sha256,dispatchRange} from './protocol.mjs';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
 const request=()=>({generationId:'turn:verifier:1',instructions:'Kiểm reply.',finalDraft:'Dạ chị.',
  trusted:{boundSubjects:[],protectedClaims:[],policyLiterals:[],effectReceipts:[],runtimeProducts:[],state:{}},
  latest:'Em ơi',history:[],binding:{requestId:'turn'},signal:new AbortController().signal});
+test('explicit dispatch ranges partition the eight registered slots without retries or hidden selection',()=>{
+ assert.deepEqual(dispatchRange(),{first:1,last:8});
+ assert.deepEqual(dispatchRange('1:3'),{first:1,last:3});
+ assert.deepEqual(dispatchRange('4:8'),{first:4,last:8});
+ for(const value of ['0:3','4:9','4:3','1:3:5','3','1.0:3','',null])assert.throws(()=>dispatchRange(value),/DISPATCH_RANGE/);
+});
 
 test('protocol identity is fixed before any provider invocation',()=>{
  assert.doesNotThrow(()=>validateProtocol(manifest));

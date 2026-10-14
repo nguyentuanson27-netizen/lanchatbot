@@ -60,7 +60,7 @@
     }
   },
   "promptHashes": {
-    "owner": "36be248c69caa541071a8f65542ec6c1db2eb0a2d39224b4f80f7a5468b8a223",
+    "owner": "722e5958260b1abbc3a12282c55df7b4d792805ade8ee7b812b535f7b22fcbb2",
     "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
   },
   "verdictSchema": {
@@ -118,7 +118,7 @@
     "scenarios": 8,
     "repetitions": 1,
     "maximumGenerationRequests": 32,
-    "status": "FROZEN_EIGHT_N1_FOLLOWUP_AWAITING_RUN_SOURCE_SEAL"
+    "status": "TWO_OWNER_AUTHORIZED_BOUNDED_ROUNDS_N1_FAILURE_PREFIX_FIRST"
   },
   "terminalMap": {
     "PASS": "SEND_ELIGIBLE_SEND_DISABLED",

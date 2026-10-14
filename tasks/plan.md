@@ -1558,4 +1558,3 @@ All5fallbacks MATERIAL_CONDITION_LOSS,not provider or missing data;3direct condi
 # B1 two bounded correction rounds — 2026-10-15
 
 Latest owner authorizes two fix/run rounds. [Scope](../apps/worker/evals/single-agent-commerce-read-only/two-round-20261015/SCOPE.md): existing search document evidence with current readback, explicit rules-only policy result, owner-only source-status projection/raw diagnostics, replacement owner guidance; verifier/models/schema/fallback/budgets unchanged. Same eight case objects, prior three fallbacks first; N1 per round, max32generations each, prefix3 then conditional remaining5. No hidden retry/adoption/third round or live mutation/send. Start bf586d56; refreshed main296cdcfb. RED->GREEN/current checks->clean source->real preflight/readback->raw-sealed prefix triage->conditional remainder->rawcommit/whole-terminal review->report/tasks/PR391.
-

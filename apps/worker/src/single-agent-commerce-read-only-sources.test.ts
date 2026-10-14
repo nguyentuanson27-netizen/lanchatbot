@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { ProductSearchService } from "@lana/business-tools";
 import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
+import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
+import { makeBinding } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceScope, commerceNow, fixtureProduct } from "./single-agent-commerce.test-support.js";
 
 describe("scoped read-only source composition", () => {
@@ -21,6 +23,15 @@ describe("scoped read-only source composition", () => {
     expect(read.product.productId).toBe("SM613");
     expect(s.facts.readCatalogSnapshot).toHaveBeenCalledWith("LANA", "SM613");
     expect(s.catalog.findByExactCode).toHaveBeenCalledTimes(2);
+  });
+  it("rechecks search-only product content without depending on an unrelated POS read", async () => {
+    const s = await setup();
+    const tools = createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,...s.sources});
+    expect((await tools.invoke({name:"search_products",args:{query:"SM613"}})).status).toBe("OK");
+    const before = makeBinding("turn","Áo cotton.",tools.snapshot());
+    s.facts.readCatalogSnapshot.mockRejectedValue(new Error("POS_UNAVAILABLE"));
+    expect(makeBinding("turn","Áo cotton.",await tools.readback())).toEqual(before);
+    expect(s.facts.readCatalogSnapshot).not.toHaveBeenCalled();
   });
   it("does not allow a model-selected unbound identity or a source identity swap", async () => {
     const s = await setup();

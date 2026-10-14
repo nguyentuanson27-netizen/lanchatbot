@@ -15,7 +15,7 @@ export interface CommerceScope {
 }
 export interface ReadOnlyCatalog {
   searchText(query: string): Promise<ProductSearchResult>;
-  readProduct(productId: string): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
+  readProduct(productId: string, readPos?: boolean): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
 }
 export interface CommerceToolCall { name: string; args: unknown; id?: string }
 export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string }
@@ -161,7 +161,7 @@ export function createReadOnlyTools(input: {
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
     const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
     for (const id of searchReads) if (!fullReads.has(id)) {
-      const {product} = await input.catalog.readProduct(id);
+      const {product} = await input.catalog.readProduct(id, false);
       if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");
       const evidence = staticEvidence(product, input.clock());
       products.delete(id);

@@ -24,12 +24,12 @@ export function createCommerceReadSources(input: {
       for (const p of found) known.set(p.productId, p.canonicalCode);
       return result;
     },
-    async readProduct(productId) {
+    async readProduct(productId, readPos = true) {
       const code = known.get(productId);
       if (!code) throw new Error("UNBOUND_PRODUCT");
       const product = await input.catalog.findByExactCode(code);
       if (!product || product.productId !== productId || product.canonicalCode !== code) throw new Error("PRODUCT_SOURCE_CHANGED");
-      return { product, snapshot: await input.facts.readCatalogSnapshot(input.scope.shopAlias, productId) };
+      return { product, snapshot: readPos ? await input.facts.readCatalogSnapshot(input.scope.shopAlias, productId) : null };
     },
   };
   return { catalog, policy: () => resolver.resolve({ pageId: input.scope.pageId, channel: input.channel, now: input.clock() }) };

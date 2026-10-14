@@ -1127,4 +1127,3 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [ ] Round1: frozen source, real preflight/readback, prefix3 then conditional remaining5, retain all evidence.
 - [ ] Round2: review/fix if justified, new frozen source and same bounded dispatch.
 - [ ] Whole-terminal reports/findings, tasks and draft PR391; STOP after two rounds.
-
