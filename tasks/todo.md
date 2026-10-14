@@ -3,7 +3,7 @@
 ## Current full A3 followup execution — 2026-10-14
 
 - [x] Clean intake71facab8/no running eval; refreshedmain296cdcfb; freeze exact completedA2PASS/current configuration/42A3N1/rubric before provider.
-- [ ] Fixed loader/prerequisite/persistence/firewall RED→GREEN; fresh focused/full eval; same-day worker readiness source/compiled readback, self-review/routes, clean A3source/preflight.
+- [x] Observed RED2/3→GREEN3/3; fresh focused40/full437PASS,0skip. Both approved routes read-only available; exact A2prerequisite and worker/helper source readbackPASS. Same-day worker79/protected21/typecheck/build/lint explicitly reused, not rerun. Self-review/readiness saved; clean A3seal/preflight follows.
 - [ ] Run fresh42once, commit raw before whole actual-terminal primary; keep human scores null; primarycommit before rejected/verdict diagnostics.
 - [ ] Audit bodies/bindings/gates/provenance/denominator/metrics, report all histories/findings/CHECKPOINT_A/tasks/draftPR390; STOP at GO/STOP/BLOCKED recommendation.
 
