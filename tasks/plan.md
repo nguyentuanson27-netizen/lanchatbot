@@ -1,6 +1,14 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current Phase B execution — 2026-10-14
+## Current Phase B completion — 2026-10-14
+
+Latest owner asks to identify and implement what remains for B. [Completion scope and acceptance](../apps/worker/evals/single-agent-commerce-read-only/B_COMPLETION.md) extends the already authorized B1–B3 candidate work to source-backed B1 validation and real PostgreSQL tests in uniquely named disposable databases. Reuse existing remote routes/index/current PUBLISHED policy; no new infrastructure request, live source/customer/cart mutation or deployment. Preserve historical A evidence and OWNER_BYPASS.
+
+Source fixes preserve Qdrant `source_updated_at`, independent product description and explicit selling-offer price/stock refs, with the observed7200second freshness bound. Native effects now bridge into existing current-inbox/authority/atomic transactions, current authority readback and ledger-backed receipts; delayed commit responses cannot renew receipt lifetime. No new table, parser, role or repair loop. Persisted component-variant changes remain explicitly unsupported and unadvertised; quantity/removal/addition retain existing engine contracts.
+
+Development real-PostgreSQL COD and bank suites each pass9groups, with synthetic customer/product inputs and current captured public policy; each test database was dropped. Commit/clean-source reruns and the frozen8N1/max32-generation B1 batch remain pending. Freeze cases/config/tool identities separately from evaluator metadata; one batch, no automatic retries or expansion. Review whole actual terminal replies and report owner/context/source/guard/provider causes separately. Update the same draft PR391 after evidence; Phase C qualification and live delivery are outside scope.
+
+## Historical initial Phase B execution — 2026-10-14
 
 Owner explicitly authorizes **“thực hiện b1 b2 b3”**. [Execution scope/files/acceptance](../docs/specs/c3-phase-b-execution-20261014.md) supersedes the earlier planning-only/pause-between-slices wording for these three candidate code slices. B1 read-only sources/native owner/verifier, B2 effective profile/size/quote, and B3 existing cart/confirmation/receipts/recovery are implemented in isolated modules on `feat/c3-phase-b-commerce-20261014`. This does not authorize deployment, live customer send/mutation, policy publication, migration or qualification.
 

@@ -6,7 +6,7 @@ const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm của shop; dùng ref trong kết quả để đọc sản phẩm.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc dữ liệu, bảng size, giá và tồn của ref shop đã cấp. size là biến thể muốn xem tồn, không phải kết luận vừa người.',parameters:{type:'OBJECT',properties:{subjectRef:string,color:string,size:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc dữ liệu, bảng size, giá và tồn của ref shop đã cấp. offerType chọn lựa chọn bán từ availableOffers (cả set hoặc món lẻ); size là biến thể xem tồn, không phải kết luận vừa người.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc chính sách hiện hành từ nguồn của shop.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
@@ -15,15 +15,15 @@ export const stateDeclarations=[
  {name:'quote_cart',description:'Tính tiền từ lựa chọn, giá, phí và ưu đãi hiện hành do code cấp. Không truyền tổng tiền hoặc tự chọn ưu đãi.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const effectDeclarations=[
- {name:'add_to_cart',description:'Thêm lựa chọn khách muốn mua vào giỏ qua code; chỉ báo đã thêm khi tool có kết quả commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
- {name:'change_cart_item',description:'Sửa dòng giỏ hiện tại bằng ref code đã cấp. Code quyết định revision, quyền và kết quả commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
+ {name:'add_to_cart',description:'Thêm lựa chọn khách muốn mua vào giỏ qua code; offerType chọn đúng cả set hoặc món lẻ từ nguồn. Chỉ báo đã thêm khi tool có kết quả commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
+ {name:'change_cart_item',description:'Đổi số lượng hoặc bỏ dòng giỏ bằng ref code đã cấp. Code quyết định revision, quyền và kết quả commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE']},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','action']}},
  {name:'confirm_purchase',description:'Gửi ý định xác nhận mua của tin khách hiện tại vào luồng checkout đã có. Cần preview, thông tin riêng tư và revalidation hợp lệ từ code; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarations){
  const c=request.context;
  const ownerView={subjects:c.boundSubjects,products:(c.runtimeProducts??[]).map(p=>({ref:p.ref,subjectRef:p.subjectRef,
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
-   sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
+   content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
    policy:c.policyLiterals.map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote']
      .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]))};

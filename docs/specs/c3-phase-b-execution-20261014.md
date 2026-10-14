@@ -31,4 +31,6 @@ The initial local process lacked DATABASE_URL / REDIS_URL / QDRANT_BASE_URL / QD
 
 ## Completion reporting
 
+Latest owner request “làm đi, xác định những gì còn thiếu để hoàn thành mục B và thực hiện” authorizes the [bounded completion scope](../../apps/worker/evals/single-agent-commerce-read-only/B_COMPLETION.md): source-backed B1 and real B2/B3 transactions in uniquely named disposable test databases on existing infrastructure. This supersedes the earlier NOT_RUN intake status when actual new evidence is saved. No live migration/customer mutation/delivery or Phase C qualification is implied.
+
 Report code/tests delivered separately from real-adapter/provider evidence. B2/B3 isolated repositories prove candidate integration behavior, not production persistence or an external order. Retain any BLOCKED source/run boundary explicitly. No A PASS, replacement readiness, sealed qualification, migration/removal, deploy or live send follows from this implementation request.

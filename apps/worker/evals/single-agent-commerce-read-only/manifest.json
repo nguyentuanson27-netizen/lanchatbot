@@ -118,7 +118,7 @@
     "scenarios": 8,
     "repetitions": 1,
     "maximumGenerationRequests": 32,
-    "status": "NOT_REGISTERED_SOURCE_INPUTS_MISSING"
+    "status": "FROZEN_EIGHT_N1_AWAITING_RUN_SOURCE_SEAL"
   },
   "terminalMap": {
     "PASS": "SEND_ELIGIBLE_SEND_DISABLED",

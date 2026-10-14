@@ -1,0 +1,28 @@
+{
+  "scope": {
+    "pageId": "1198992073286645",
+    "shopId": "LANA_DESIGN",
+    "shopAlias": "LANA",
+    "conversationId": "fbfbdc8d-418d-4aa2-9f6c-edec1f1f0ab1",
+    "customerHash": "f9f1fb0c7a5c6e19d50ac570193cae0dab35b96eecd22a8f1aaaf79577d0853a",
+    "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+    "bindingVersion": "c3-b1-source-v1",
+    "revision": 1
+  },
+  "channel": "PUBLISHED",
+  "qdrantCollection": "lana_multimodal_data_v2",
+  "maxFactAgeSeconds": 7200,
+  "sourceSearchProbe": "set váy ren tơ Hàn",
+  "searchThresholds": {
+    "textMinScore": 0.72,
+    "imageMinScore": 0.78,
+    "minTopGap": 0.04,
+    "maxCandidates": 3
+  },
+  "vertex": {
+    "projectId": "project-388db62b-f5a4-4e76-a2b",
+    "embeddingModel": "multimodalembedding@001",
+    "embeddingLocation": "us-central1",
+    "embeddingDimension": 1408
+  }
+}

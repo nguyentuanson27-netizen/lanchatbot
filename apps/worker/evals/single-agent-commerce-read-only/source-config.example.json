@@ -11,6 +11,7 @@
   },
   "channel": "PUBLISHED",
   "qdrantCollection": "lana_multimodal_data_v2",
+  "maxFactAgeSeconds": 7200,
   "searchThresholds": {
     "textMinScore": 0.72,
     "imageMinScore": 0.78,

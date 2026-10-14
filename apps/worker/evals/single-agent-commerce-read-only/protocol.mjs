@@ -33,6 +33,7 @@ export function readRegisteredCases(path){
  const source=readFileSync(path),samples=JSON.parse(source.toString('utf8'));
  check(Array.isArray(samples)&&samples.length===8&&samples.every(c=>typeof c.caseId==='string'&&c.caseId.length>0&&c.caseId.length<=128)&&
   new Set(samples.map(c=>c.caseId)).size===8,'EXACT_EIGHT_CASES_REQUIRED');
+ check(samples.every(c=>['LIVE','POS_UNAVAILABLE'].includes(c.sourceMode??'LIVE')),'SOURCE_MODE');
  return {samples,inputs:samples.map(runtimeCase),hash:sha256(source)};
 }
 export function buildVerifierRequest(m,r){
@@ -61,5 +62,6 @@ export function requiredSourceConfig(config,env=process.env){
  if(!env.C3_VERTEX_CREDENTIAL_FILE||!existsSync(env.C3_VERTEX_CREDENTIAL_FILE))missing.push('C3_VERTEX_CREDENTIAL_FILE');
  for(const key of ['projectId','embeddingModel','embeddingLocation','embeddingDimension'])if(!config.vertex?.[key])missing.push('config.vertex.'+key);
  for(const key of ['scope','channel','qdrantCollection','searchThresholds'])if(!config[key])missing.push('config.'+key);
+ if(!Number.isSafeInteger(config.maxFactAgeSeconds)||config.maxFactAgeSeconds<60||config.maxFactAgeSeconds>86400)missing.push('config.maxFactAgeSeconds');
  return missing;
 }

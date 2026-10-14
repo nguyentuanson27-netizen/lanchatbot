@@ -57,3 +57,14 @@ test('registered cases bind the exact bytes loaded once, without later file edit
   assert.throws(()=>readRegisteredCases(file));
  }finally{unlinkSync(file);rmdirSync(dir);}
 });
+test('source fault mode is registered outside runtime input and rejects unrecognized modes',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'c3-b-source-mode-')),file=join(dir,'cases.json');
+ try{
+  const cases=Array.from({length:8},(_,i)=>({caseId:'case-'+i,sourceMode:i===7?'POS_UNAVAILABLE':'LIVE',
+   runtime:{latest:'Áo bao nhiêu em?',history:[],initialProductCodes:[]}}));
+  writeFileSync(file,JSON.stringify(cases));const loaded=readRegisteredCases(file);
+  assert.doesNotMatch(JSON.stringify(loaded.inputs),/POS_UNAVAILABLE|sourceMode/);
+  cases[7].sourceMode='REPLACE_PRICE';writeFileSync(file,JSON.stringify(cases));
+  assert.throws(()=>readRegisteredCases(file),/SOURCE_MODE/);
+ }finally{unlinkSync(file);rmdirSync(dir);}
+});

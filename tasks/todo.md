@@ -1,6 +1,18 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current Phase B implementation — 2026-10-14
+## Current Phase B completion — 2026-10-14
+
+- [x] Identify the missing real-source, persisted transaction/receipt and provider evidence; [bounded completion scope](../apps/worker/evals/single-agent-commerce-read-only/B_COMPLETION.md). Continue on the existing implementation branch/draft PR391; refreshed main remains296cdcfb.
+- [x] Observed RED→GREEN source contracts: source_updated_at, independent description, selling-offer refs/prices and observed7200second freshness. No invented registry attributes or source timestamps.
+- [x] Bridge native effects to existing current-inbox/authority/atomic transactions; current authority readback and scoped existing-ledger receipts. RED→GREEN delayed-response test prevents renewing old receipt lifetime. No new durable store/migration or production wiring.
+- [x] Development real PostgreSQL COD and bank suites each9groups PASS; correction/CLEAR/REPLACE/CAS/expiry, cart duplicate/new instance, quantity/lost-response recovery, supersession, private preview and atomic confirmation intents. Both disposable databases dropped; synthetic domain inputs/current public policy are labelled separately from live-source conversations.
+- [x] Completion baseline full worker:126Vitest files/1705tests PASS; Node457PASS/0FAIL/2opt-in installed-Codex-stub tests skipped. After receipt expiry fix: focused176worker+28existing protected/product+17native/protocol+38database+41business tests PASS; worker typecheck/build/lint and relevant shared typechecks/builds passed. Exact current clean-source validation follows; earlier counts below remain historical.
+- [ ] Commit/clean source; preflight and actual policy/product/offer/free-text-search adapter readback, zero owner/verifier generations.
+- [ ] Clean-source real PostgreSQL COD and bank reruns with database cleanup and source identity retained.
+- [ ] Exactly eight frozen B1 scenarios N1, at most32generations, retries0; retain all outcomes/error/request evidence, whole-reply review and metrics; no automatic next run.
+- [ ] Final report, honest capability/quality limits, todo and same draft PR391 delivery/readback. No Phase C, merge, deploy or live send.
+
+## Historical initial Phase B implementation — 2026-10-14
 
 - [x] Latest owner instruction “thực hiện b1 b2 b3” authorizes all three source slices; [execution contract](../docs/specs/c3-phase-b-execution-20261014.md). Refresh main296cdcfb, foundationdd5c9d46, branch `feat/c3-phase-b-commerce-20261014`; no repeated scope approval.
 - [x] B1.1 candidate evidence/context and boundary RED→GREEN: policy-only absence, existing product evidence/hash/freshness, multiple variants and exact current snapshot. Frozen A data/evidence unchanged.
