@@ -2,11 +2,42 @@
 import { RuntimePolicyResolver } from "@lana/chat-runtime";
 import { buildProductAttributesV1, CatalogSnapshotV3Schema, type StableProductDocument } from "@lana/business-tools";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
+import { CartLineV1Schema, CustomerProfileV1Schema, SizeChartV1Schema } from "@lana/contracts";
 
 export const commerceNow = new Date("2026-10-14T10:00:00.000Z");
 export const commerceScope = () => ({ pageId: "1198992073286645", shopId: "LANA_DESIGN", shopAlias: "LANA",
   conversationId: "conversation-test", customerHash: "a".repeat(64), sourceMessageId: "message-test", requestId: "turn-test",
-  recipient: "recipient-hash", bindingVersion: "binding-1", revision: 1, conversationOwner: "BOT", permission: true, privacyAllowed: true });
+  recipient: "recipient-hash", bindingVersion: "binding-1", revision: 1, sourceObservedAt: commerceNow.toISOString(),
+  conversationOwner: "BOT", permission: true, privacyAllowed: true });
+
+export function fixtureProfile() {
+  const at = "2026-10-14T09:00:00.000Z";
+  return { profile: CustomerProfileV1Schema.parse({ schemaVersion: 1, profileId: "30000000-0000-4000-8000-000000000001",
+    customerKey: { namespace: "test", algorithm: "HMAC_SHA256", digest: "a".repeat(64) }, revision: 1,
+    measurements: [{ kind: "WAIST_CM", value: 74 }, { kind: "HIPS_CM", value: 95 }].map(m => ({ ...m,
+      provenance: { source: "CUSTOMER_MESSAGE", sourceEventHash: "b".repeat(64), observedAt: at, confidence: 1 } })),
+    fitPreference: "REGULAR", preferences: { colors: [], styles: [], materials: [] }, sizeHistory: [], createdAt: at, updatedAt: at,
+  }), fieldEvidence: {} };
+}
+export function fixtureSizeInput(productId = "QU714") {
+  const chart = SizeChartV1Schema.parse({ schemaVersion: 1, reference: { chartId: "pants-chart", version: "1",
+    source: "IMAGE_EXTRACTION", sourceArtifactRef: "https://example.invalid/chart.jpg", sourceContentSha256: "c".repeat(64),
+    verificationStatus: "VERIFIED", verifiedByRef: "owner", verifiedAt: "2026-10-14T09:00:00.000Z" },
+    brand: "LANA_DESIGN", category: "PANTS", componentRole: "PANTS", boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
+    bands: [ { size: "M", ranges: [{ kind: "WAIST_CM", minInclusive: 70, maxInclusive: 79 }, { kind: "HIPS_CM", minInclusive: 90, maxInclusive: 99 }], note: null },
+      { size: "L", ranges: [{ kind: "WAIST_CM", minInclusive: 80, maxInclusive: 90 }, { kind: "HIPS_CM", minInclusive: 100, maxInclusive: 110 }], note: null } ] });
+  return { target: { brand: "LANA_DESIGN", parentProductId: productId, componentProductId: productId, componentRole: "PANTS" as const,
+    category: "PANTS", form: null, material: null }, charts: [{ chart, scope: { level: "COMPONENT" as const, parentProductIds: [productId], componentRole: "PANTS" as const } }] };
+}
+export function fixtureCartLine() {
+  return CartLineV1Schema.parse({ lineId: "40000000-0000-4000-8000-000000000001", parentProductId: "SM613", offerId: "SM613-DIRECT",
+    offerKind: "DIRECT", quantity: 1, components: [{ componentProductId: "SM613", componentSku: "SM613-NAVY-M",
+      componentRole: "TOP", color: "navy", size: "M", quantity: 1 }], allowMixedSizes: false, allowComponentSale: false,
+    posUnitPriceVnd: 499_000, lineTotalVnd: 499_000, priceAuthority: { priceFactRef: "pos:SM613", shopId: "LANA_DESIGN", parentProductId: "SM613",
+      offerId: "SM613-DIRECT", offerPriceKind: "DIRECT", componentProductId: null, metadata: { authority: "PANCAKE_POS",
+        sourceVersion: "pos-v1", observedAt: commerceNow.toISOString(), expiresAt: new Date(commerceNow.getTime()+172_800_000).toISOString(),
+        freshForSeconds: 172800, freshnessState: "FRESH" } } });
+}
 
 export function policyResolver(defaultFeeVnd = 25_000) {
   const meta = { source: "ADMIN", sourceReference: null, sourceVersion: "fixture-policy-v1", observedAt: commerceNow.toISOString() };

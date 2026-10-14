@@ -94,7 +94,8 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   if (claims.some(claim => claim.type === "SIZE_FIT" &&
     (claim.value.customerProfileId !== s.customerProfileId ||
       claim.value.customerProfileRevision !== s.customerProfileRevision ||
-      claim.value.measurementFingerprint !== s.measurementFingerprint))) return "STALE";
+      claim.value.measurementFingerprint !== (record(s.sizeMeasurementFingerprints) && claim.scope.kind === "PRODUCT"
+        ? s.sizeMeasurementFingerprints[claim.scope.productId] : s.measurementFingerprint)))) return "STALE";
   const authorization = authorizeRealtimeProtectedClaimProposal({
     declaredClaimIds: claims.map(claim => claim.claimId), observedClaimTypes: [], availableClaims: claims,
     expectedProductIds: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT").map(subject => subject.ref), now,

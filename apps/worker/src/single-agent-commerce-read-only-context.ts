@@ -6,7 +6,8 @@ import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-sema
 export const commerceHash = (value: unknown): string =>
   createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",
-  "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint"];
+  "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint",
+  "customerMeasurements", "fitPreference", "preferences", "cartQuote", "sizeMeasurementFingerprints", "conversationRevision"];
 
 /** The resolver already validates artifact hashes/lifecycle. This bridge owns scope and public projection. */
 export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string, shopId: string, now: Date): TrustedContext["policyLiterals"][number] {
