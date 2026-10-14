@@ -13,6 +13,19 @@ const attributes = () => buildProductAttributesV1({ productId: "SM613", observed
 } });
 
 describe("read-only source context", () => {
+  it("accepts current source content and invalidates its changed or expired version", () => {
+    const content = { productName: "Áo thử nghiệm", description: "Vải cotton, dáng suông.", productUrl: null,
+      metadata: { authority: "WEBSTORE_XML" as const, sourceVersion: "xml-v1", observedAt: now.toISOString(),
+        expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const } };
+    const c = buildReadOnlyContext({ state: testState(), subjects: [{ ref: "SM613", kind: "PRODUCT", label: "Áo", bindingVersion: "binding-1" }],
+      products: [{ ref: "product:SM613", subjectRef: "SM613", content }] });
+    expect(hardPrecheck(c, "Áo dáng suông chị nhé.", now)).toBeNull();
+    const old = makeBinding("request", "Áo dáng suông chị nhé.", c), changed = structuredClone(c);
+    changed.runtimeProducts![0]!.content!.description = "Vải khác.";
+    expect(makeBinding("request", "Áo dáng suông chị nhé.", changed)).not.toEqual(old);
+    changed.runtimeProducts![0]!.content!.metadata.freshnessState = "STALE";
+    expect(hardPrecheck(changed, "Áo dáng suông chị nhé.", now)).toBe("STALE");
+  });
   it("does not create a fake product for a clarification", () => {
     const c = buildReadOnlyContext({ state: testState() });
     expect(c.boundSubjects).toEqual([]);

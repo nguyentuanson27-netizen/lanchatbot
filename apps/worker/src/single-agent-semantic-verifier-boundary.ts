@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { ProtectedClaimV1Schema, SizeChartV1Schema, type ProductAttributesV1,
-  type ProductPresentationEvidenceV1, type SizeChartV1 } from "@lana/contracts";
+import { ProtectedClaimV1Schema, ProductContentV1Schema, SizeChartV1Schema, type ProductAttributesV1,
+  type ProductFactsV2, type ProductPresentationEvidenceV1, type SizeChartV1 } from "@lana/contracts";
 import { verifyProductAttributesV1, verifyProductPresentationEvidenceV1 } from "@lana/business-tools";
 import { hasResidualPii } from "@lana/dataset-review";
 import { authorizeRealtimeProtectedClaimProposal } from "./realtime-protected-claim-boundary.js";
@@ -26,6 +26,7 @@ function validProfile(v: unknown): v is ProductProfile {
 export interface RuntimeProductEvidence {
   ref: string; subjectRef: string; attributes?: ProductAttributesV1;
   presentation?: ProductPresentationEvidenceV1; sizeCharts?: SizeChartV1[];
+  content?: ProductFactsV2["content"];
 }
 export interface TrustedContext {
   boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string; variantId?: string | null; productId?: string }[];
@@ -131,13 +132,14 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
     for (const p of trusted.runtimeProducts) {
       if (!record(p) || !boundedText(p.ref, 128) || !boundedText(p.subjectRef, 128) ||
         Buffer.byteLength(JSON.stringify(p)) > 8192 ||
-        Object.keys(p).some(key => !["ref", "subjectRef", "attributes", "presentation", "sizeCharts"].includes(key)) ||
-        (!p.attributes && !p.presentation && !p.sizeCharts?.length)) return "MALFORMED";
+        Object.keys(p).some(key => !["ref", "subjectRef", "attributes", "presentation", "sizeCharts", "content"].includes(key)) ||
+        (!p.attributes && !p.presentation && !p.sizeCharts?.length && !p.content)) return "MALFORMED";
       if (!trusted.boundSubjects.some(subject => subject.kind === "PRODUCT" && subject.ref === p.subjectRef)) return "STALE";
       const metadataFresh = (m: { observedAt: string; expiresAt: string | null; freshnessState: string }) =>
         m.freshnessState === "FRESH" && Number.isFinite(Date.parse(m.observedAt)) && Date.parse(m.observedAt) <= now.getTime() &&
         (m.expiresAt === null || Date.parse(m.expiresAt) > now.getTime());
       if (p.attributes && (!verifyProductAttributesV1(p.attributes, p.subjectRef) || !metadataFresh(p.attributes.metadata))) return "STALE";
+      if (p.content && (!ProductContentV1Schema.safeParse(p.content).success || !metadataFresh(p.content.metadata))) return "STALE";
       if (p.presentation && (!verifyProductPresentationEvidenceV1(p.presentation, p.subjectRef) ||
         ![p.presentation.provenance.identity, p.presentation.provenance.content, p.presentation.provenance.inventory].every(metadataFresh))) return "STALE";
       if (p.sizeCharts && (!Array.isArray(p.sizeCharts) || p.sizeCharts.length > 4 || p.sizeCharts.some(chart => {

@@ -14,6 +14,19 @@ const setup = (options: { fee?: number } = {}) => {
     policy: () => fixturePolicy(options.fee), catalog }) };
 };
 describe("read-only domain tools", () => {
+  it("uses the explicitly supplied source freshness bound and preserves content without POS", async () => {
+    const f = fixtureProduct(), { catalog } = setup();delete f.product.attributes;
+    f.snapshot.synced_at = new Date(commerceNow.getTime()-3600_000).toISOString();
+    const make = (maxFactAgeSeconds: number, missing = false) => createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow,
+      policy: () => fixturePolicy(), initialProducts: [f.product], maxFactAgeSeconds,
+      catalog: { ...catalog, readProduct: async () => ({ ...f, snapshot: missing ? null : f.snapshot }) } });
+    const accepted = make(7200), expired = make(1200), partial = make(7200,true);
+    for (const t of [accepted,expired,partial]) await t.invoke({name:"read_product",args:{subjectRef:"SM613"}});
+    expect(accepted.snapshot().protectedClaims.some((c: unknown) => (c as {type:string}).type === "PRICE")).toBe(true);
+    expect(expired.snapshot().protectedClaims).toEqual([]);
+    expect(partial.snapshot().runtimeProducts![0]!.content!.description).toBeNull();
+    expect(partial.snapshot().runtimeProducts![0]!.content!.metadata.observedAt).toBe(f.product.observedAt);
+  });
   it("reads source policy, keeps missing customerCare explicit and never exposes negotiation internals", async () => {
     const { tools } = setup();
     expect((await tools.invoke({ name: "read_policy", args: {} })).status).toBe("OK");
@@ -103,5 +116,32 @@ describe("read-only domain tools", () => {
     expect(hardPrecheck(tools.snapshot(), "Hai size đều còn chị nhé.", commerceNow)).toBeNull();
     const before = makeBinding("turn", "Hai size đều còn chị nhé.", tools.snapshot());
     expect(makeBinding("turn", "Hai size đều còn chị nhé.", await tools.readback())).toEqual(before);
+  });
+  it("retains current POS facts without inventing missing catalog timestamps or attributes", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    delete f.product.observedAt; delete f.product.attributes;
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("OK");
+    expect(tools.snapshot().protectedClaims.some((c: unknown) => (c as {type: string}).type === "PRICE")).toBe(true);
+    expect(tools.snapshot().runtimeProducts).toEqual([]);
+    expect(f.product.observedAt).toBeUndefined();
+  });
+  it("selects the requested selling offer and keeps its claims distinct from another offer", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    f.snapshot.offers.AO = { ...structuredClone(f.snapshot.offers.DIRECT!), sale_price: 300_000,
+      rows: f.snapshot.offers.DIRECT!.rows.map(r => ({ ...r, offer_type: "AO", sale_price: 300_000 })) };
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "AO" } })).status).toBe("OK");
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } })).status).toBe("OK");
+    const price = tools.snapshot().protectedClaims.filter((c: unknown) => (c as {type: string}).type === "PRICE");
+    expect(price).toHaveLength(2);
+    expect(JSON.stringify(price)).toContain("300000");
+    expect(JSON.stringify(price)).toContain("499000");
+    expect(JSON.stringify(price)).toContain('"variantId":"offer:SM613:AO"');
+    expect(tools.snapshot().boundSubjects.some(s => s.ref === "offer:SM613:AO" && s.label.includes("AO"))).toBe(true);
+    const binding = makeBinding("turn", "Giá theo lựa chọn chị nhé.", tools.snapshot());
+    expect(makeBinding("turn", "Giá theo lựa chọn chị nhé.", await tools.readback())).toEqual(binding);
   });
 });

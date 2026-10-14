@@ -23,6 +23,12 @@ const payload = {
 };
 
 describe("Qdrant stable catalog adapter", () => {
+  it("preserves the publisher source timestamp without synthesizing registry attributes", () => {
+    const source = stableProductDocumentFromQdrantPayload({ ...payload, source_updated_at: "2026-09-28T04:31:05.725Z", source: "WEBSTORE_XML" });
+    expect(source?.observedAt).toBe("2026-09-28T04:31:05.725Z");
+    expect(source?.attributes).toBeNull();
+    expect(stableProductDocumentFromQdrantPayload(payload)?.observedAt).toBeNull();
+  });
   it("reads integrity-valid registry attributes and preserves the base product on invalid attributes", () => {
     const attributes = buildProductAttributesV1({
       productId: "SQ149",

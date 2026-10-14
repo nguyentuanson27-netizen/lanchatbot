@@ -1,4 +1,5 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
+import { ProductContentV1Schema } from "@lana/contracts";
 import { buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
   resolveCatalogFacts, verifyProductAttributesV1,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
@@ -27,8 +28,11 @@ const text = (v: unknown, max: number): v is string => typeof v === "string" && 
 export function createReadOnlyTools(input: {
   scope: CommerceScope; clock: () => Date; policy: () => Promise<RuntimePolicyResolution>; catalog: ReadOnlyCatalog;
   initialProducts?: StableProductDocument[]; state?: () => TrustedContext["state"];
+  maxFactAgeSeconds?: number;
 }) {
   const { scope } = input;
+  const maxAge = input.maxFactAgeSeconds ?? 1200;
+  if (!Number.isInteger(maxAge) || maxAge < 60 || maxAge > 86400) throw new Error("FACT_FRESHNESS_BOUND");
   const subjects = new Map<string, TrustedContext["boundSubjects"][number]>();
   const products = new Map<string, RuntimeProductEvidence>();
   const claims = new Map<string, unknown[]>();
@@ -55,17 +59,19 @@ export function createReadOnlyTools(input: {
     const id = args.subjectRef as string, now = input.clock();
     const source = await input.catalog.readProduct(id), p = source.product;
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
-    if (p.productId !== id || !p.observedAt || !Number.isFinite(Date.parse(p.observedAt)) ||
-      Date.parse(p.observedAt) > now.getTime() || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
+    if (p.productId !== id || (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) ||
+      Date.parse(p.observedAt) > now.getTime())) || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
       parsed.data.shop_alias !== scope.shopAlias))) return { status: "STALE", reason: "PRODUCT_SOURCE_SCOPE" };
     const raw = parsed.success ? parsed.data : null;
-    const query = { shopAlias: scope.shopAlias, productId: id, offerType: null,
+    const query = { shopAlias: scope.shopAlias, productId: id, offerType: (args.offerType as string | undefined) ?? null,
       color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null, deliveryRegion: null };
-    const price = raw ? resolveCatalogFacts(raw, { ...query, intent: "PRICE" }, now, 1200) : null;
-    const stock = raw ? resolveCatalogFacts(raw, { ...query, intent: "STOCK" }, now, 1200) : null;
-    const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: null,
+    const price = raw ? resolveCatalogFacts(raw, { ...query, intent: "PRICE" }, now, maxAge) : null;
+    const stock = raw ? resolveCatalogFacts(raw, { ...query, intent: "STOCK" }, now, maxAge) : null;
+    const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: query.offerType,
       mentionedSize: query.size, mentionedColor: query.color }, now) : null;
-    const variantId = variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null;
+    // An offer-only read is a code-bound selling option, never a selected SKU or a personal fit.
+    const offer = query.offerType && raw?.offers[query.offerType] ? query.offerType : null;
+    const variantId = (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
     if (variantId && !subjects.has(variantId) && subjects.size >= 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
     const nextClaims = [[price, "PRICE"], [stock, "STOCK"]].flatMap(([facts, type]) => {
       const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
@@ -78,22 +84,28 @@ export function createReadOnlyTools(input: {
       if (attrs && attrs.metadata.freshnessState === "FRESH" && Date.parse(attrs.metadata.observedAt) <= now.getTime()) evidence.attributes = attrs;
     }
     const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
-    const presentation = full && buildProductPresentationEvidenceV1(full, now);
+    if (p.observedAt) evidence.content = ProductContentV1Schema.parse({ productName: p.title,
+      description: p.descriptionXml?.trim() || null, productUrl: null, metadata: {
+        authority: p.descriptionAuthority ?? "WEBSTORE_XML", sourceVersion: p.descriptionSourceVersion ?? p.catalogVersion,
+        observedAt: p.observedAt, expiresAt: null, freshForSeconds: null, freshnessState: "FRESH",
+      } });
+    const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
     if (presentation) evidence.presentation = presentation;
     const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
     if (charts.length) evidence.sizeCharts = charts;
     products.delete(id);
-    if (evidence.attributes || evidence.presentation || evidence.sizeCharts?.length) products.set(id, evidence);
+    if (evidence.attributes || evidence.presentation || evidence.content || evidence.sizeCharts?.length) products.set(id, evidence);
     subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });
     if (variantId) subjects.set(variantId, { ref: variantId, kind: "VARIANT", productId: id,
-      label: `${p.title} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
-    const readKey = commerceHash({ id, color: query.color, size: query.size });
+      label: `${p.title} ${offer ?? ""} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
+    const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
-    return { status: "OK", data: { subjectRef: id, label: p.title, variantId,
+    return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: query.offerType, availableOffers: Object.keys(raw?.offers ?? {}),
       attributes: evidence.attributes ?? null, sizeCharts: charts,
+      content: evidence.content ?? null,
       facts: nextClaims.map(c => ({ type: c.type, scope: c.scope, value: c.value })),
       missing: [...(price?.status === "OK" ? [] : ["PRICE"]), ...(stock?.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
@@ -115,9 +127,9 @@ export function createReadOnlyTools(input: {
         return { status: "OK", data: { status: found.status, subjects: candidates.map(p => subjects.get(p.productId)) } };
       }
       if (call.name === "read_product") {
-        const a = toolArgs(call.args, ["subjectRef", "color", "size"]);
+        const a = toolArgs(call.args, ["subjectRef", "offerType", "color", "size"]);
         if (!a || !text(a.subjectRef, 128) || subjects.get(a.subjectRef)?.kind !== "PRODUCT" ||
-          (a.color !== undefined && !text(a.color, 64)) || (a.size !== undefined && !text(a.size, 16))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
+          (a.offerType !== undefined && !text(a.offerType, 64)) || (a.color !== undefined && !text(a.color, 64)) || (a.size !== undefined && !text(a.size, 16))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
         return await readProduct(a);
       }
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
