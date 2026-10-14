@@ -15,6 +15,15 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it("exposes the remaining existing tool budget to each native continuation without granting extra rounds", async () => {
+    const s = setup(), requests: unknown[] = [];
+    const outputs = [tool("read_product", {subjectRef:"SM613"}),tool("read_policy"),final()];
+    await runCommerceTurn({ ...s, owner: async request => {requests.push(structuredClone(request));return outputs.shift()!;} });
+    expect(requests.map(r => (r as {toolBudget:unknown}).toolBudget)).toEqual([
+      {roundsRemaining:2,callsRemaining:6},{roundsRemaining:1,callsRemaining:5},{roundsRemaining:0,callsRemaining:4},
+    ]);
+    expect(s.verifier).toHaveBeenCalledTimes(1);
+  });
   it("measures verification through the current-source readback, including its added delay", async () => {
     const s = setup(), readback = s.tools.readback;
     s.tools.readback = async () => { await new Promise(resolve => setTimeout(resolve,20));return readback(); };

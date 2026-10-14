@@ -70,7 +70,8 @@ export function createReadOnlyTools(input: {
     const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: query.offerType,
       mentionedSize: query.size, mentionedColor: query.color }, now) : null;
     // An offer-only read is a code-bound selling option, never a selected SKU or a personal fit.
-    const offer = query.offerType && raw?.offers[query.offerType] ? query.offerType : null;
+    const offer = (price?.status === "OK" ? price.facts?.offerType : null)
+      ?? (stock?.status === "OK" ? stock.facts?.offerType : null) ?? null;
     const variantId = (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
     if (variantId && !subjects.has(variantId) && subjects.size >= 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
     const nextClaims = [[price, "PRICE"], [stock, "STOCK"]].flatMap(([facts, type]) => {
@@ -103,10 +104,15 @@ export function createReadOnlyTools(input: {
     const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
-    return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: query.offerType, availableOffers: Object.keys(raw?.offers ?? {}),
+    return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: offer, requestedOfferType: query.offerType,
+      availableOffers: Object.keys(raw?.offers ?? {}),
       attributes: evidence.attributes ?? null, sizeCharts: charts,
       content: evidence.content ?? null,
       facts: nextClaims.map(c => ({ type: c.type, scope: c.scope, value: c.value })),
+      availability: {
+        price: { status: price?.status ?? "UNAVAILABLE", reason: price?.reasonCode ?? (price ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+        stock: { status: stock?.status ?? "UNAVAILABLE", reason: stock?.reasonCode ?? (stock ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+      },
       missing: [...(price?.status === "OK" ? [] : ["PRICE"]), ...(stock?.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
   }

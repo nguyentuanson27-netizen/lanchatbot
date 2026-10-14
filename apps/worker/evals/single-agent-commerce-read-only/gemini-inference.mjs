@@ -6,7 +6,7 @@ const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm của shop; dùng ref trong kết quả để đọc sản phẩm.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc dữ liệu, bảng size, giá và tồn của ref shop đã cấp. offerType chọn lựa chọn bán từ availableOffers (cả set hoặc món lẻ); size là biến thể xem tồn, không phải kết luận vừa người.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc sản phẩm, bảng size, giá và tồn theo ref shop đã cấp. Kết quả offerType cho biết lựa chọn bán thực tế của facts; chỉ truyền offerType khi cần lựa chọn khác từ availableOffers. size dùng xem tồn, không chứng minh mặc vừa. availability giữ trạng thái nguồn của giá/tồn.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc chính sách hiện hành từ nguồn của shop.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
@@ -25,8 +25,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
    policy:c.policyLiterals.map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
-   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote']
-     .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]))};
+   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote',
+    'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']
+     .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]])),
+   execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...structuredClone(request.contents)],
   tools:[{functionDeclarations:declarations}],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},

@@ -14,6 +14,45 @@ const setup = (options: { fee?: number } = {}) => {
     policy: () => fixturePolicy(options.fee), catalog }) };
 };
 describe("read-only domain tools", () => {
+  it("identifies the resolver's default selling offer and canonical aliases without losing price scope", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    f.snapshot.offers.SET_VAY = { ...structuredClone(f.snapshot.offers.DIRECT!), sale_price: 799_000,
+      rows: f.snapshot.offers.DIRECT!.rows.map(r => ({ ...r, offer_type: "SET_VAY", sale_price: 799_000 })) };
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    const initial = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    expect(initial.data).toMatchObject({ offerType: "SET_VAY", requestedOfferType: null,
+      facts: expect.arrayContaining([expect.objectContaining({ type: "PRICE", value: { amountVnd: 799_000, currency: "VND" } })]) });
+    const alias = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: " direct " } });
+    expect(alias.data).toMatchObject({ offerType: "DIRECT", requestedOfferType: " direct " });
+    const prices = tools.snapshot().protectedClaims.filter(c => (c as {type:string}).type === "PRICE");
+    expect(prices).toHaveLength(2);
+    expect(prices.map(c => (c as {scope:unknown}).scope)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ variantId: "offer:SM613:SET_VAY" }), expect.objectContaining({ variantId: "offer:SM613:DIRECT" }),
+    ]));
+    const before = makeBinding("turn", "Giá theo đúng lựa chọn.", tools.snapshot());
+    expect(makeBinding("turn", "Giá theo đúng lựa chọn.", await tools.readback())).toEqual(before);
+  });
+  it("distinguishes absent POS, stale POS and unavailable offer without deleting independent product content", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    const missing = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => ({ ...f, snapshot: null }) } });
+    expect((await missing.invoke({name:"read_product",args:{subjectRef:"SM613"}})).data).toMatchObject({
+      availability: { price: {status:"UNAVAILABLE",reason:"POS_SNAPSHOT_UNAVAILABLE"}, stock:{status:"UNAVAILABLE",reason:"POS_SNAPSHOT_UNAVAILABLE"} },
+    });
+    expect(missing.snapshot().runtimeProducts).toHaveLength(1);
+    f.snapshot.synced_at = new Date(commerceNow.getTime()-3_600_000).toISOString();
+    const stale = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    expect((await stale.invoke({name:"read_product",args:{subjectRef:"SM613"}})).data).toMatchObject({
+      availability: {price:{status:"STALE",reason:"CATALOG_SNAPSHOT_STALE"}}, offerType:null,
+    });
+    f.snapshot.synced_at = commerceNow.toISOString();
+    expect((await stale.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"ABSENT"}})).data).toMatchObject({
+      availability:{price:{status:"NOT_FOUND",reason:"OFFER_NOT_FOUND"}}, offerType:null,
+    });
+    expect(stale.snapshot().protectedClaims).toEqual([]);
+  });
   it("uses the explicitly supplied source freshness bound and preserves content without POS", async () => {
     const f = fixtureProduct(), { catalog } = setup();delete f.product.attributes;
     f.snapshot.synced_at = new Date(commerceNow.getTime()-3600_000).toISOString();

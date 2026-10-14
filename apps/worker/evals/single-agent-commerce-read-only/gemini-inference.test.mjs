@@ -53,6 +53,20 @@ test('state/effect capabilities are explicit and the accepted quote reaches the 
  r.toolsAllowed=false;assert.equal(buildGeminiCommerceRequest(r).toolConfig.functionCallingConfig.mode,'NONE');
 });
 
+test('current fit comparison fields and actual remaining tool capabilities reach the owner without private authority',()=>{
+ const r=request();Object.assign(r.context.state,{customerProfileId:'profile-1',customerProfileRevision:4,
+  measurementFingerprint:'current-fingerprint',sizeMeasurementFingerprints:{SM613:'size-fingerprint'},recipient:'PRIVATE_RECIPIENT',permission:true});
+ r.toolBudget={roundsRemaining:1,callsRemaining:4};
+ const trusted=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
+ assert.equal(trusted.state.customerProfileRevision,4);assert.equal(trusted.state.customerProfileId,'profile-1');
+ assert.equal(trusted.state.measurementFingerprint,'current-fingerprint');assert.deepEqual(trusted.state.sizeMeasurementFingerprints,{SM613:'size-fingerprint'});
+ assert.deepEqual(trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolBudget:{roundsRemaining:1,callsRemaining:4}});
+ assert.doesNotMatch(JSON.stringify(trusted),/PRIVATE_RECIPIENT|"permission"/);
+ r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:4};
+ const last=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
+ assert.deepEqual(last.execution.availableTools,[]);assert.equal(last.execution.toolBudget.roundsRemaining,0);
+});
+
 test('native call identity remains paired with its function response',()=>{
  const result=parseGeminiGeneration(body([{functionCall:{id:'native-call-1',name:'read_policy',args:{}}}]));
  assert.equal(result.calls[0].id,'native-call-1');
