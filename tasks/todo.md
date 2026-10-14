@@ -4,8 +4,8 @@
 
 - [x] Inspect clean head24727880, refreshmain296cdcfb; freeze explicit bypass scope/plan, unchanged42cases/prompt pair/models/config/bars/fallback. A2FAIL remains recorded; no A2generation or prompt fix.
 - [x] New scoped diagnostic test observedRED0/1→GREEN1/1; focused47/full441PASS,0skip. Existing full42mandatory-verifier/persistence/firewall/no-retry coverage, read-only routes and unchanged source/helper readbackPASS; same-day worker79/protected21/typecheck/build/lint explicitly reused. [Readiness](../apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014/READINESS.json). Commit/clean runtimea3SHA/preflight follows.
-- [ ] Execute all42N1, max84role requests/retry0; rawcommit before whole actual-terminal primarycommit before rejected diagnostics. Retain errors/missing/UNKNOWN, human420ratingsnull.
-- [ ] Full conversation/failure/provenance/body/accounting/metrics report, tasks/draftPR390; Checkpoint A unqualified/STOP regardless of diagnostic quality. No automatic next run or post-A.
+- [x] Clean A3source2a6de436/preflight0/runner0;all42N1,42owner+42verifier requests/max1perrole/retry0;raw95b3ffe4 before whole-terminal primary98182736 before rejected diagnostics.39eligible/3fallbacks7.14%,all3verifierstreamerrors/HTTP200/noverdict;0NOT_RUN/UNKNOWN/timeouts. Primary38/42,diagnosticA3FAIL;policy8/9/simple2/3 below90%, one eligible opacity turn lacks buying advice.420humanratingsnull; no primary-marked eligible unsafe outcome, not owner acceptance/stability.
+- [x] Full84captured-body/firewall/binding/final-gate/accounting/source/raw/primary auditPASS. [Checkpoint/all42conversations/fourfailures/findings/commands](../apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014/CHECKPOINT_A.md) saved; priorA2FAIL unchanged and zero newA2generations. RecommendationSTOP; report delivery target existing draftPR390. No post-resultfix/rescore/retry/new generation, automatic next run or post-A.
 
 ## Current clear-boundaries full evaluation — 2026-10-14
 
