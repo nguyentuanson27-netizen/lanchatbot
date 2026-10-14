@@ -6,7 +6,7 @@
 - [x] Prepare both prompts for action-specific policy, grounded comfort, deadline response and concern-relevant substitutes; retain sizing/style/authority/capability. Policy values remain source-owned; keep legacy/v2 contrast and short-policy summaries. [Changes/self-review](../apps/worker/evals/single-agent-semantic-verifier/whole-turn-preparation-20261014/README.md).
 - [x] Fix one token aggregation line using both existing adapter aliases; observed RED0/2→GREEN2/2.52focused/422full/79worker/21protected PASS,0skip; workerbuild/typecheck/lint exit0.
 - [x] Offline42owner/179verifier bodies: instructions only, no evaluator leak, one unchanged bound reject; frozen raw/scores unchanged. Owner+310bytes/verifier+36bytes; no new runtime role/layer/gate/parser/regex/template/repair or production/shared/provider API change.
-- [ ] Verify exact preparation delivery on existing draftPR390. No new provider run/Round68, qualification or GO; R67 and targeted recheck remain STOP. Future model behavior/stability unverified; no merge/deploy/live send/post-A.
+- [x] Push preparation189291a35e85fa076e8f1493fed7b4122b0fffb4; read back local=remote=draftPR390head, exact title/body, OPEN/draft/base main, clean tree. Remote pnpm check QUEUED, not PASS. No new provider run/Round68, qualification or GO; R67 and targeted recheck remain STOP. Future model behavior/stability unverified; no merge/deploy/live send/post-A.
 
 ## Current R67 failure recheck — 2026-10-14
 
