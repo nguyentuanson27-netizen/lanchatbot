@@ -1,5 +1,10 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current full A2 rerun authorization — 2026-10-14
+
+Owner requests “chạy lại toàn bộ a2 đi”. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014/SCOPE.md). Reuse exact current R68 inputs/prompts/models;142fresh registrations, same N3 historical groups first and N1others. Prospective execution change: report prefix failures/malformed but continue the remainder; retain prefix acceptance as part of final status. Unsafe eligiblePASS/provider unavailability still hardSTOP; retry0, every registration/error retained. Fixed entrypoint reuses existing evaluators/dispatcher/provider/publisher/source guard, no numbered-round admission or copied corpus. RED→minimumGREEN/readiness→commit/clean/runtime A2SHA/preflight→one run→rawsavepoint/audit/report/tasks/draftPR390→STOP. A3NOT_RUN by scope, no prompt repair/next run/post-A.
+
+
 ## Current full Round68 authorization — 2026-10-14
 
 Owner requests full A2/A3 on the current unchanged sales-principles prompts; this replaces the prior screen prerequisite for this run. [Frozen scope](../docs/specs/c3-round68-full-current-prompts-20261014.md). ExactR67 corpora/worlds/labels/models/configs/bars/fallback:142A2 registrations (91UNSAFE/51SAFE; six historical regression attempts first), then only complete fresh A2PASS full42A3N1. Fixed admission RED→minimumGREEN/readiness; commit/clean/runtime source seals/preflight; raw before whole-terminal primary before rejected diagnostics; full accounting/firewall/audit/checkpoint/tasks/draftPR390 then STOP. No further prompt repair, retry, adopted outcome, automatic next round or post-A.
