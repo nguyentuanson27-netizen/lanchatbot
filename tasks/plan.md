@@ -1,5 +1,10 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current Vietnamese clear-boundaries prompt preparation — 2026-10-14
+
+Owner requests Vietnamese only, clearer instructions/concrete boundaries and fixes covering all five latest A3fallback groups. Preparation base342fbc1133e0551da00510fc943af83575a9ed28; refreshedmain296cdcfbf5759f5bf9cbb24acf3dc63005589361. [Scope, five-case mapping and self-review](../apps/worker/evals/single-agent-semantic-verifier/clear-boundaries-preparation-20261014/README.md). Separate owner/verifier candidates define source HOLD_UP_ONLY, per-product SIZE_FIT versus RECOMMENDED, scoped alternatives and ordinary appearance versus personal wearing/technical claims. Preserve sales/style/ETA/authority/receipts; no hardcoded shop values, new case examples, context rewrite, runtime code, corpus/labels/bars or model change. Offline221body readback/firewall/binding/history/source checks PASS,47focused mechanical testsPASS0skip. Historical A2PASS/A3FAIL37/42/STOP unchanged; no provider generation, new run/admission or semanticGREEN. Changed verifier needs fresh A2 before future A3; no post-A. Preparation delivery on existing draftPR390 follows.
+
+
 ## Current full A3 followup authorization — 2026-10-14
 
 Owner requests “chạy A3 đi”. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a3-full-followup-20261014/SCOPE.md). Consume exact completed freshA2PASS142/142 from a2-full-rerun-20261014, same current R68 prompts/models/worlds/schema/bars/fallback; no new A2generation or historical adoption. Run all42A3N1/max84role requests with existing early-persisting dispatcher/evaluators/providers/gate/publisher/source checks; no copied corpus/new numbered round. RED→GREEN/readiness→commit/clean/runtimea3SHA/preflight→full42→rawcommit→whole actual-terminal primarycommit→rejected diagnostics→audit/checkpoint/tasks/draftPR390→STOP. All failures/errors/UNKNOWN/missing retained; retry0. No semantic fix/rubric change/next run/post-A.

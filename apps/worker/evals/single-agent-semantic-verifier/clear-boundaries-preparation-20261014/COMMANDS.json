@@ -1,0 +1,74 @@
+{
+  "scope": "Vietnamese prompt preparation only; zero provider generations; no new run or semantic GREEN",
+  "preparationBaseSha": "342fbc1133e0551da00510fc943af83575a9ed28",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+  "commands": [
+    {
+      "command": "git status --short\ngit branch --show-current\ngit rev-parse HEAD\ngit fetch origin main\ngit rev-parse origin/main",
+      "exitCode": 0,
+      "result": "Clean implementation branch; starting head342fbc1133e0551da00510fc943af83575a9ed28; main296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode C:/Users/nguye/AppData/Local/Temp/c3-clear-boundaries-preparation-readback.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005'",
+      "exitCode": 0,
+      "result": "42owner/179verifier bodies,1unchanged bound rejection,0evaluator leaks; only instructions change; historical identities and mechanical boundaries unchanged",
+      "providerGenerations": 0
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/size-input-context.test.mjs apps/worker/evals/single-agent-semantic-verifier/size-input-context-decision.test.mjs apps/worker/evals/single-agent-semantic-verifier/preparation-20261012.test.mjs apps/worker/evals/single-agent-semantic-verifier/policy-meaning-preparation.test.mjs",
+      "exitCode": 0,
+      "tests": 47,
+      "passCount": 47,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-clear-boundaries-focused.stdout.log",
+      "stderr": "C:/Users/nguye/AppData/Local/Temp/c3-clear-boundaries-focused.stderr.log",
+      "nativeExitRecord": "C:/Users/nguye/AppData/Local/Temp/c3-clear-boundaries-focused.exit.json",
+      "meaning": "Existing mechanical protocol/adapter/context controls; no model semantics qualification"
+    }
+  ],
+  "reviewOperations": {
+    "wholeFailureTurnsReviewed": 5,
+    "productBenefitContrastTurnsReviewed": 21,
+    "policyContrastTurnsReviewed": 8,
+    "candidateSelfReview": "completed; retained verifier allowance for bounded chart statements and legacy policy conditions",
+    "semanticRed": "Five historical actual-terminal fallbacks, preserved unchanged; not a fresh provider reproduction",
+    "semanticGreen": null,
+    "finalSelfReview": "Read both complete final candidates; clarified intake status, kept bounded-chart statement safety separate from advice quality, removed evaluation-phase naming, retained current source definitions and every unchanged protected section."
+  },
+  "reusedNotRerun": {
+    "source": "a3-full-followup-20261014/READINESS.json",
+    "fullEval": 437,
+    "workerBoundaryVertex": 79,
+    "protectedClaimsReplyAssembler": 21,
+    "workerTypecheckBuildLint": "same-day actual exit0 for unchanged source; not fresh command claims"
+  },
+  "preparationReadFailuresRetained": [
+    {
+      "operation": "Read guessed source-data-context.test.mjs filename",
+      "result": "Not found; found existing preparation-20261012.test.mjs via rg; actual focused command uses it. No provider request."
+    }
+  ],
+  "finalChecks": [
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "operation": "Executed inline Python final readback",
+      "exitCode": 0,
+      "checks": [
+        "Final candidate bytes/hashes match READBACK",
+        "No evaluator case/rubric/phase names in either prompt",
+        "Bounded secret scan of two prompts and three preparation artifacts",
+        "All local preparation links resolve",
+        "Only two prompts/three reporting artifacts/two task files changed; zero runtime executable delta"
+      ]
+    },
+    {
+      "command": "git diff --no-index -- apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-sales-principles-20261014.vi.txt apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-clear-boundaries-20261014.vi.txt",
+      "exitCode": 1,
+      "meaning": "Expected difference for manual review, not a failed test; intermediate content subsequently shortened and reviewed in full."
+    }
+  ]
+}

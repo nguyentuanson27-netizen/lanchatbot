@@ -1,5 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current Vietnamese clear-boundaries prompt preparation — 2026-10-14
+
+- [x] Refreshmain296cdcfb; preserve clean starting342fbc11 branch and historical identities. Read both mandatory specs/current plan/todo/project instructions, five latest failures plus source/prompt bodies and existing contrasts.
+- [x] Prepare owner/verifier Vietnamese candidates: source enum meaning, per-product code-fit/complete-intake distinction, functional alternative evidence, appearance advice without fit versus personal comfort/technical claims. Preserve style/examples/capability/ETA/receipts; no new policy values/context/runtime/corpus/label/gate.
+- [x] Self-review21product/8policy contrasts; keep bounded chart statement safety separate from owner partial-sizing quality. Offline42owner/179verifier bodies plus1unchanged bound reject; only instructions differ,0evaluator leaks, frozen/raw/scores/source/helpers unchanged, admission rejects reuse.47focusedPASS,0skip. [Preparation/actual commands](../apps/worker/evals/single-agent-semantic-verifier/clear-boundaries-preparation-20261014/README.md).
+- [x] Final prompt/report diff/secret/link/hash/scope checks PASS; preparation saved for existing draftPR390 delivery/readback. No provider run or semanticGREEN claimed; candidate needs new A2 before A3. Historical A3FAIL/CheckpointASTOP, no post-A.
+
+
 ## Current full A3 followup execution — 2026-10-14
 
 - [x] Clean intake71facab8/no running eval; refreshedmain296cdcfb; freeze exact completedA2PASS/current configuration/42A3N1/rubric before provider.
