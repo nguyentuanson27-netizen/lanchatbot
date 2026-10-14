@@ -1,5 +1,11 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current principles fix / two-case-first — 2026-10-14
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect interrupted-turn state (clean/no running eval); retain existing branch/history. Freeze price/stage2N1 and conditional full138A2/142slots +42A3, same data/models/configs/bars. [Scope](../apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/SCOPE.md).
+- [x] Replace current product-advice paragraphs/general changed-context instruction, no new examples/templates/labels; preserve size/policy/ETA/style/source and authority. Reused dispatcher; new fixed-loader/request RED0/2→GREEN2/2 within34focusedPASS,0skip.
+- [ ] Clean source seal/preflight, run two once, raw before actual-terminal primary review/verdict diagnostics. Either case FAIL→STOP/fullNOT_RUN; only bothPASS→fresh fullA2 and onlyA2PASS fullA3, with exact readiness/source provenance, no adopted results. Report/update draftPR390 then stop at Checkpoint A.
+
 ## Current failure recheck02 — 2026-10-14
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; freeze same3A2/8A3, freshN1/max19requests, new prepared owner+verifier with unchanged configs/worlds/bars/fallback. [Scope](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02/SCOPE.md).
