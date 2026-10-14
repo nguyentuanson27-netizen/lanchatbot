@@ -3,7 +3,7 @@
 ## Current full A2 rerun execution — 2026-10-14
 
 - [x] Clean intake97f3d826/no running eval; refreshedmain296cdcfb; freeze current configuration/138cases/142slots and report-only prefix execution before provider.
-- [ ] Observe RED→GREEN; focused/full eval checks, unchanged-source readback of same-day worker readiness; self-review, clean runtime source seal/preflight.
+- [x] Observed RED2/4→GREEN4/4; fresh full434/focused33,0skip. Same-day worker79/protected21/typecheck/build/lint reused after exact source+compiled readback; not claimed rerun. Self-review/readback preparation failure retained in READINESS.json. Clean source seal/preflight follows.
 - [ ] Fresh all A2 once with unsafe/capacity hardSTOP; commit raw; retain all failed/unknown/unrun; audit actual bodies/counts/binding/gates.
 - [ ] Publish full A2 findings/checkpoint/commands/tasks/draftPR390 and STOP; A3NOT_RUN by scope.
 

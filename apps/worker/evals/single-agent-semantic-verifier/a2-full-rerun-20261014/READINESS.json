@@ -1,0 +1,138 @@
+{
+  "status": "DETERMINISTIC_READINESS_PASS",
+  "runId": "C3_FULL_A2_RERUN_20261014_01",
+  "checkedAt": "2026-10-14T04:06:56.808025+00:00",
+  "freezeSavepoint": "075bf31c47ccc476ee9545437c97494b78e87930",
+  "providerGenerationRequestsBeforeSeal": 0,
+  "freshCommands": [
+    {
+      "command": "git fetch origin main\ngit rev-parse origin/main",
+      "exitCode": 0,
+      "result": "296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014.test.mjs",
+      "exitCode": 1,
+      "tests": 4,
+      "pass": 2,
+      "fail": 2,
+      "observed": [
+        "Missing fixed entrypoint module",
+        "Report-only requested but dispatcher stopped at6, expected142"
+      ],
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-a2-rerun-red.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014.test.mjs",
+      "exitCode": 0,
+      "tests": 4,
+      "pass": 4,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-a2-rerun-green.stdout.log"
+    },
+    {
+      "exitCode": 0,
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "finishedAt": "2026-10-14T04:06:10.8021977+00:00",
+      "tests": 434,
+      "passCount": 434,
+      "skipped": 0,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-a2-rerun-full.stdout.log"
+    },
+    {
+      "finishedAt": "2026-10-14T04:04:32.1538369+00:00",
+      "exitCode": 0,
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-68.test.mjs",
+      "tests": 33,
+      "passCount": 33,
+      "skipped": 0,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-a2-rerun-focused.stdout.log"
+    }
+  ],
+  "readbackCommands": [
+    {
+      "command": "git diff --quiet deb50e8eaa62dde221a559ef3cc598c7a207d811 -- apps/worker/src packages pnpm-lock.yaml apps/worker/evals/single-agent-semantic-verifier/prompts\ngit diff --quiet 97f3d8265b7e4c9010351db920d2819f84fcf930 -- apps/worker/evals/single-agent-semantic-verifier/round-68",
+      "exitCode": 0,
+      "result": "Worker/shared/prompts unchanged since same-day readiness; prior R68 inputs/evidence unchanged."
+    },
+    {
+      "command": "Get-FileHash -Algorithm SHA256 -LiteralPath apps/worker/dist/single-agent-semantic-verifier-boundary.js,apps/worker/dist/vertex.js",
+      "exitCode": 0,
+      "result": "Exact same-day compiled hashes match retained READINESS.json."
+    },
+    {
+      "command": "inspectCodex()",
+      "exitCode": 0,
+      "result": "codex-cli0.159.2/binary52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a; existing ChatGPT login, no provider generation."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "reusedChecks": {
+    "source": "round-68/READINESS.json",
+    "meaning": "Same-day previously executed worker79/protected21/typecheck/build/lint reused after exact source/compiled-helper readback. Not claimed rerun for this A2-only dispatch change.",
+    "commands": [
+      {
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:32:57.0606003+00:00",
+        "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stderr.log",
+        "tests": 79,
+        "passCount": 79,
+        "skipped": 0
+      },
+      {
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:32:55.7874415+00:00",
+        "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stderr.log",
+        "tests": 21,
+        "passCount": 21,
+        "skipped": 0
+      },
+      {
+        "command": "pnpm --filter @lana/worker typecheck",
+        "finishedAt": "2026-10-14T03:35:52.7551383+00:00",
+        "exitCode": 0,
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stderr.log"
+      },
+      {
+        "command": "pnpm --filter @lana/worker build",
+        "finishedAt": "2026-10-14T03:36:36.4906694+00:00",
+        "exitCode": 0,
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stderr.log"
+      },
+      {
+        "command": "pnpm --filter @lana/worker lint",
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:34:58.6647179+00:00",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stderr.log"
+      }
+    ]
+  },
+  "preparationFailure": {
+    "command": "git diff --exit-code deb50e8e -- ... round-68",
+    "exitCode": 1,
+    "reason": "Readback incorrectly compared entire historical evidence directory to pre-run seal; later reports/raw were expected additions. Corrected targets: worker sources vs deb50e8e; entire historical R68 vs intake97f3d826. No source repair, provider request or data change."
+  },
+  "selfReview": {
+    "change": "Two-line existing dispatcher change, default behavior retained; one fixed A2 entrypoint reusing same manifest/adapters/evaluator/gate/publisher/source guard. No copied corpus or numbered-round admission.",
+    "execution": "Failed/malformed prefix recorded; remainder continues. Every unsafe eligible PASS and existing provider availability stop retained. Full final status still requires summary and prefix PASS; no acceptance change.",
+    "identity": "All current prompts/models/schema/input worlds exact; all captured mock-provider projections exclude evaluator metadata. No alias, regex, repair or verdict rewrite.",
+    "bounds": "One owner/maxone verifier architecture retained; this scope uses verifier only, no owner/A3 call.",
+    "testLimits": "Mechanical tests establish schedule, stop boundaries and request projection, not semantic safety or model output stability.",
+    "complexityDelta": "0new semantic roles/layers/gates/framework; fixed A2 entrypoint plus optional existing execution-control argument.",
+    "limitations": [
+      "Current output-contract ambiguity intentionally unchanged for this owner-requested rerun.",
+      "A3 not authorized in this run.",
+      "No production/holdout/conversion/independent-review claim.",
+      "Provider availability not guaranteed by successful credential inspection."
+    ]
+  }
+}

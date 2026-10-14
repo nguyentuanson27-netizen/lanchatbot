@@ -37,14 +37,14 @@ export function authorizeA3Continuation(manifest,corpus,evidence,packet,evidence
   return result;
 }
 
-export async function runStagedAttempts(manifest,phase,corpus,evidence,execute,{save,checkSource,mode,log=console.log}) {
+export async function runStagedAttempts(manifest,phase,corpus,evidence,execute,{save,checkSource,mode,stopAfterFailedPrefix=true,log=console.log}) {
   const prefixCount=manifest.regression[phase+'CaseIds'].reduce((n,id)=>n+repetitionCount(manifest,phase,id),0);
   if(mode==='REMAINING')requireThat(evidence.regression?.status==='PASS','REGRESSION_NOT_PASS');
   for(let i=0;i<evidence.attempts.length;i++) {
     if(mode==='REGRESSION'&&i===prefixCount)break;
     if(phase==='a2'&&i===prefixCount) {
       evidence.regression=regressionSummary(manifest,phase,corpus,evidence.attempts);save();
-      if(evidence.regression.status!=='PASS')return;
+      if(evidence.regression.status!=='PASS'&&stopAfterFailedPrefix)return;
     }
     const attempt=evidence.attempts[i];
     if(attempt.terminal)continue;
