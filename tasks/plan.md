@@ -1,5 +1,9 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current owner-authorized failure recheck02 — 2026-10-14
+
+Owner again requests the three prior A2 failures plus7A3fallbacks and1unsafe eligible reply. [Frozen eleven-case scope](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02/SCOPE.md). Fresh N1/max19generations with both whole-turn candidate prompts, same models/high configs/source worlds/schema/bars/fallback; no adopted outcome or new case. Reuse prior dispatcher/evaluators/adapters/final gate/publisher/source checks; new fixed entrypoint only. Mechanical RED0/2→GREEN2/2 within36focusedPASS; earlier422/79/21/build/typecheck/lint reused only after unchanged source/helper readback. Commit clean source→runtimeSHA/preflight→all11once/raw commit→actual-terminal primary before rejected/verdict diagnostics→audit/report/tasks/draftPR390→STOP. No full qualification/automatic full run/round68/post-A/merge/deploy/live send.
+
 ## Current whole-turn correction preparation — 2026-10-14
 
 Owner asks why the preceding fix covered only sizing. Correct that scope: retain ask-first sizing and prepare both owner/verifier changes for action-specific policy permissions, source-backed comfort versus unsupported guarantees, ETA/deadline handling and concern-relevant substitutes. [Exact changes, contrast review and actual commands](../apps/worker/evals/single-agent-semantic-verifier/whole-turn-preparation-20261014/README.md). Policy values remain current source data; legacy indoor trial and v2 HOLD_UP_ONLY remain separate worlds. No new cases/labels/bar/model/config/fallback or keyword rules; no new role/layer/repair/tool/state/production work. One existing operational aggregation line now reads both adapters' token aliases without double counting; observed RED0/2 then GREEN2/2. Candidate owner+310bytes/verifier+36bytes versus prior prompts. Self-review restored conditional-summary versus sufficient-entitlement distinction.
