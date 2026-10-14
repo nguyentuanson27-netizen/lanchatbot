@@ -1122,8 +1122,9 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [x] Report8c597c32719cf4560ce3f739414bd18e0599b818 pushed;draftPR390 title/body updated and exactbody/head/base/main/branch/draft/open/clean readback PASS. First checks readback empty,later pnpmcheckQUEUED,notPASS. Delivery documentation savepoint follows;no further generation,STOPowner.
 # B1 two correction rounds — 2026-10-15
 
-- [ ] Source/tool/context corrections with observed RED->GREEN and self-review.
-- [ ] Current focused/full worker checks, typecheck/build/lint.
-- [ ] Round1: frozen source, real preflight/readback, prefix3 then conditional remaining5, retain all evidence.
-- [ ] Round2: review/fix if justified, new frozen source and same bounded dispatch.
-- [ ] Whole-terminal reports/findings, tasks and draft PR391; STOP after two rounds.
+- [x] Source/tool/context corrections with observed RED->GREEN and self-review.
+- [x] Current focused/full worker checks, typecheck/build/lint; final worker1713PASS, native/protocol20PASS, Node full460PASS/2optionalSKIP.
+- [x] Round1: source9564b4a5, real preflight/readback, prefix3:1eligible/2fallback; remaining5NOT_RUN, all evidence retained.
+- [x] Round2: owner-only wording fix, source22457e0a, same prefix result1eligible/2fallback; remaining5NOT_RUN, no third round.
+- [x] Whole-terminal reports/findings and tasks; draft PR391 updated with exact source/outcomes/limits.
+- [ ] B1 sales usability: two owner overclaims persist; five other provider controls and stateful conversations remain unverified by these runs. [STOP report](../apps/worker/evals/single-agent-commerce-read-only/two-round-20261015/CHECKPOINT_B.md).

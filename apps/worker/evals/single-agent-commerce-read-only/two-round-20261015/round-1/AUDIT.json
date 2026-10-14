@@ -1,7 +1,7 @@
 {
   "status": "PASS",
   "bRunSourceSha": "9564b4a59871f1e096c72f8d50f60b41ee06577d",
-  "rawSavepoint": "5c3a313d",
+  "rawSavepoint": "5c3a313d85f7b7530a08f1c68306ee976ac10a27",
   "capturedProviderBodies": 9,
   "ownerBodies": 6,
   "verifierBodies": 3,
@@ -20,5 +20,5 @@
     "current final-gate readback snapshots not separately retained; source readback and actual gate outcome plus focused tests are retained",
     "small development sample, no semantic proof or sales qualification"
   ],
-  "primarySavepoint": "a33c2821"
+  "primarySavepoint": "a33c28218e3613285e78590e9f2bf1769a8d2bfc"
 }
