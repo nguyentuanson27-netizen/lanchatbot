@@ -1,0 +1,139 @@
+{
+  "status": "FAIL",
+  "denominator": 8,
+  "scored": 8,
+  "families": {
+    "policy": {
+      "denominator": 1,
+      "passed": 1,
+      "passRate": 1
+    },
+    "concern": {
+      "denominator": 3,
+      "passed": 2,
+      "passRate": 0.6666666666666666
+    },
+    "partial": {
+      "denominator": 3,
+      "passed": 3,
+      "passRate": 1
+    },
+    "correction": {
+      "denominator": 1,
+      "passed": 0,
+      "passRate": 0
+    }
+  },
+  "terminalFailureRate": 0.125,
+  "rows": [
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r5-try-exchange:1",
+      "family": "policy",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r5-competitor-price:1",
+      "family": "concern",
+      "mean": 0.4,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r5-delivery-timing:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r12-pants-known-waist:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r14-workday-choice:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r14-stage-light-change:1",
+      "family": "correction",
+      "mean": 1.4,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r15-fit-reassurance:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_02/A3/r15-known-waist-next:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    }
+  ],
+  "fullCheckpointQualification": false,
+  "operational": {
+    "conversation": {
+      "providerAttemptDenominator": 8,
+      "providerRequests": 8,
+      "clientRequests": 8,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 4977,
+      "verifierLatencyP95Ms": 5527,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 30357,
+      "outputTokens": 11304,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 7,
+        "FALLBACK": 1,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0.125
+    },
+    "verifier": {
+      "providerAttemptDenominator": 8,
+      "providerRequests": 8,
+      "clientRequests": 8,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 6172,
+      "verifierLatencyP95Ms": 10330,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 46614,
+      "outputTokens": 867,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 7,
+        "FALLBACK": 1,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0.125
+    },
+    "addedVerificationLatencyP50Ms": 6381,
+    "addedVerificationLatencyP95Ms": 10542,
+    "endToEndLatencyP50Ms": 12193,
+    "endToEndLatencyP95Ms": 15516
+  }
+}
