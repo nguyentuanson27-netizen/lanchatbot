@@ -3,7 +3,7 @@
 ## Current owner-authorized A3 diagnostic bypass — 2026-10-14
 
 - [x] Inspect clean head24727880, refreshmain296cdcfb; freeze explicit bypass scope/plan, unchanged42cases/prompt pair/models/config/bars/fallback. A2FAIL remains recorded; no A2generation or prompt fix.
-- [ ] Focused observed RED→GREEN/readiness, existing full42mandatory-verifier/persistence/firewall coverage and unchanged source/helper readback; commit/clean a3source/preflight.
+- [x] New scoped diagnostic test observedRED0/1→GREEN1/1; focused47/full441PASS,0skip. Existing full42mandatory-verifier/persistence/firewall/no-retry coverage, read-only routes and unchanged source/helper readbackPASS; same-day worker79/protected21/typecheck/build/lint explicitly reused. [Readiness](../apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014/READINESS.json). Commit/clean runtimea3SHA/preflight follows.
 - [ ] Execute all42N1, max84role requests/retry0; rawcommit before whole actual-terminal primarycommit before rejected diagnostics. Retain errors/missing/UNKNOWN, human420ratingsnull.
 - [ ] Full conversation/failure/provenance/body/accounting/metrics report, tasks/draftPR390; Checkpoint A unqualified/STOP regardless of diagnostic quality. No automatic next run or post-A.
 
