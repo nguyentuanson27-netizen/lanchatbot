@@ -9,13 +9,23 @@ export const readOnlyDeclarations=[
  {name:'read_product',description:'Đọc dữ liệu, bảng size, giá và tồn của ref shop đã cấp. size là biến thể muốn xem tồn, không phải kết luận vừa người.',parameters:{type:'OBJECT',properties:{subjectRef:string,color:string,size:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc chính sách hiện hành từ nguồn của shop.',parameters:{type:'OBJECT',properties:{}}},
 ];
+export const stateDeclarations=[
+ {name:'apply_customer_state',description:'Cập nhật đúng thông tin khách vừa cung cấp, sửa hoặc yêu cầu bỏ. Gọi trước các tool phụ thuộc thông tin đó.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]}}}}}}},
+ {name:'recommend_size',description:'Chọn size bằng hồ sơ khách đã được code nhận và bảng size của đúng sản phẩm. Thiếu đầu vào thì hỏi phần tool yêu cầu, chưa gợi size.',parameters:{type:'OBJECT',properties:{subjectRef:string},required:['subjectRef']}},
+ {name:'quote_cart',description:'Tính tiền từ lựa chọn, giá, phí và ưu đãi hiện hành do code cấp. Không truyền tổng tiền hoặc tự chọn ưu đãi.',parameters:{type:'OBJECT',properties:{}}},
+];
+export const effectDeclarations=[
+ {name:'add_to_cart',description:'Thêm lựa chọn khách muốn mua vào giỏ qua code; chỉ báo đã thêm khi tool có kết quả commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
+ {name:'change_cart_item',description:'Sửa dòng giỏ hiện tại bằng ref code đã cấp. Code quyết định revision, quyền và kết quả commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
+ {name:'confirm_purchase',description:'Gửi ý định xác nhận mua của tin khách hiện tại vào luồng checkout đã có. Cần preview, thông tin riêng tư và revalidation hợp lệ từ code; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
+];
 export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarations){
  const c=request.context;
  const ownerView={subjects:c.boundSubjects,products:(c.runtimeProducts??[]).map(p=>({ref:p.ref,subjectRef:p.subjectRef,
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
    policy:c.policyLiterals.map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
-   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences']
+   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote']
      .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]))};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...structuredClone(request.contents)],
@@ -26,7 +36,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
 export function parseGeminiGeneration(body){
  const candidate=body?.candidates?.[0],content=candidate?.content;
  requireThat(body.candidates?.length===1&&candidate.finishReason==='STOP'&&content?.role==='model'&&Array.isArray(content.parts)&&content.parts.length>0,'OWNER_COMPLETION');
- const calls=content.parts.filter(p=>p.functionCall).map(p=>({name:p.functionCall.name,args:p.functionCall.args}));
+ requireThat(content.parts.every(p=>p&&typeof p==='object'&&Object.keys(p).every(k=>['text','thought','thoughtSignature','functionCall'].includes(k))&&
+  (typeof p.text==='string'||p.functionCall)),'OWNER_OUTPUT_SURFACE');
+ const calls=content.parts.filter(p=>p.functionCall).map(p=>({name:p.functionCall.name,args:p.functionCall.args,
+  ...(typeof p.functionCall.id==='string'?{id:p.functionCall.id}:{})}));
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
   return {kind:'TOOLS',calls,content:structuredClone(content)};}
  const text=content.parts.filter(p=>p.thought!==true&&typeof p.text==='string').map(p=>p.text).join('');
@@ -68,6 +81,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    if(!response.ok){if(response.status===401)token=null;await response.body?.cancel();throw new Error('GENERATION_HTTP');}
    const data=await boundedJson(response,1048576),u=data.usageMetadata;
    telemetry.modelVersion=data.modelVersion??null;
+   requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
    telemetry.inputTokens=u?.promptTokenCount??null;
    telemetry.outputTokens=u?((u.candidatesTokenCount??0)+(u.thoughtsTokenCount??0)):null;
    telemetry.thinkingTokens=u?.thoughtsTokenCount??null;

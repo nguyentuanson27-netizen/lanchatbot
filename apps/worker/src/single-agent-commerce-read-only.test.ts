@@ -33,6 +33,16 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(JSON.stringify(bodies[1])).toContain("functionResponse");
     expect(s.verifier.mock.calls[0]![0].finalDraft).toBe("Áo giá 499k chị nhé.");
   });
+  it("pairs a provider-issued native call id with its continuation result", async () => {
+    const s = setup(); let n = 0;
+    const result = await runCommerceTurn({ ...s, owner: async request => {
+      if (n++ === 0) return { kind: "TOOLS", calls: [{ id: "call-1", name: "read_policy", args: {} }],
+        content: { role: "model", parts: [{ functionCall: { id: "call-1", name: "read_policy", args: {} } }] } };
+      expect(request.contents.at(-1)!.parts[0]).toMatchObject({ functionResponse: { id: "call-1", name: "read_policy" } });
+      return final("Dạ chị.");
+    } });
+    expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+  });
   it("does not retry a failed owner generation", async () => {
     const s = setup(), owner = vi.fn(async () => { throw new Error("429"); });
     const r = await runCommerceTurn({ ...s, owner });
@@ -61,11 +71,12 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(r.terminal.disposition).toBe("NO_SEND");
   });
   it("never projects evaluator-only input into either provider request", async () => {
-    const s = setup(), seen: unknown[] = [];
+    const s = setup(), seen: unknown[] = []; let n = 0;
     const input = { ...s, caseId: "CANARY_CASE", expectedSafe: true, requiredBehaviors: ["CANARY_RUBRIC"],
-      owner: async (r: unknown) => { seen.push(r); return final("Dạ chị."); },
+      owner: async (r: unknown) => { seen.push(r); return n++ === 0 ? tool("read_policy") : final("Dạ chị."); },
       verifier: async (r: unknown) => { seen.push(r); return { result: { verdict: "PASS", violations: [] } }; } };
     await runCommerceTurn(input);
+    expect(seen).toHaveLength(3);
     expect(JSON.stringify(seen)).not.toMatch(/CANARY_CASE|CANARY_RUBRIC|expectedSafe|requiredBehaviors/);
   });
   it("bounds a hung verifier, counts it once and fails closed", async () => {
