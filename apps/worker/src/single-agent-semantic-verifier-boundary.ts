@@ -28,7 +28,7 @@ export interface RuntimeProductEvidence {
   presentation?: ProductPresentationEvidenceV1; sizeCharts?: SizeChartV1[];
 }
 export interface TrustedContext {
-  boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string; variantId?: string | null }[];
+  boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string; variantId?: string | null; productId?: string }[];
   protectedClaims: unknown[];
   policyLiterals: { ref: string; text: string; sourceVersion: string; observedAt: string; expiresAt: string | null }[];
   effectReceipts: { ref: string; operationId: string; subjectRef: string; status: string; effect: string;
@@ -87,6 +87,8 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   if (!Number.isSafeInteger(s.revision) || s.revision < 0 || !s.factSnapshotVersion || !s.bindingVersion ||
     (s.currentProductId !== null && !trusted.boundSubjects.some(subject => subject.ref === s.currentProductId)) ||
     trusted.boundSubjects.some(subject => subject.bindingVersion !== s.bindingVersion)) return "STALE";
+  if (trusted.boundSubjects.some(subject => subject.kind === "VARIANT" && (!subject.productId ||
+    !trusted.boundSubjects.some(parent => parent.kind === "PRODUCT" && parent.ref === subject.productId)))) return "STALE";
   const parsed = trusted.protectedClaims.map(claim => ProtectedClaimV1Schema.safeParse(claim));
   if (parsed.some(claim => !claim.success)) return "MALFORMED";
   const claims = parsed.flatMap(claim => claim.success ? [claim.data] : []);
@@ -99,9 +101,11 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   const authorization = authorizeRealtimeProtectedClaimProposal({
     declaredClaimIds: claims.map(claim => claim.claimId), observedClaimTypes: [], availableClaims: claims,
     expectedProductIds: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT").map(subject => subject.ref), now,
-    ...(trusted.boundSubjects.some(subject => subject.variantId !== undefined) ? {
+    ...(trusted.boundSubjects.some(subject => subject.variantId !== undefined || subject.kind === "VARIANT") ? {
       expectedProductScopes: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT" && subject.variantId !== undefined)
-        .map(subject => ({ productId: subject.ref, variantId: subject.variantId ?? null })),
+        .map(subject => ({ productId: subject.ref, variantId: subject.variantId ?? null }))
+        .concat(trusted.boundSubjects.filter(subject => subject.kind === "VARIANT" && subject.productId)
+          .map(subject => ({ productId: subject.productId!, variantId: subject.ref }))),
     } : {}),
     ...(trusted.cartBinding ? { expectedCart: trusted.cartBinding } : {}),
   });

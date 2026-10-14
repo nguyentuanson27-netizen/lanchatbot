@@ -5,6 +5,8 @@ import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-sema
 
 export const commerceHash = (value: unknown): string =>
   createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
+export const commerceUuid = (hash: string): string =>
+  `${hash.slice(0,8)}-${hash.slice(8,12)}-5${hash.slice(13,16)}-8${hash.slice(17,20)}-${hash.slice(20,32)}`;
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",
   "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint",
   "customerMeasurements", "fitPreference", "preferences", "cartQuote", "sizeMeasurementFingerprints", "conversationRevision"];
@@ -40,7 +42,10 @@ export function buildReadOnlyContext(input: {
 }): TrustedContext {
   const subjects = [...(input.subjects ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const products = [...(input.products ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
-  const claims = [...(input.claims ?? [])].sort((a, b) => canonicalJsonV1(a).localeCompare(canonicalJsonV1(b)));
+  const seen = new Set<string>();
+  const claims = [...(input.claims ?? [])].filter(c => { const serialized = canonicalJsonV1(c);
+    if (seen.has(serialized)) return false; seen.add(serialized); return true;
+  }).sort((a, b) => canonicalJsonV1(a).localeCompare(canonicalJsonV1(b)));
   const policies = [...(input.policies ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const state = Object.fromEntries(stateFields.filter(k => Object.hasOwn(input.state, k)).map(k => [k, input.state[k]]));
   state.factSnapshotVersion = commerceHash({ subjects, products, claims, policies, cart: input.cartBinding ?? null });

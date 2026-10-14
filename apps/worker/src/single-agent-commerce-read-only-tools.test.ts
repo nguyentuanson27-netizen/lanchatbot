@@ -84,4 +84,16 @@ describe("read-only domain tools", () => {
     f.snapshot.shop_alias = "OTHER";
     expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("STALE");
   });
+  it("keeps both allowed variant claims when comparing sizes of one product", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    f.snapshot.offers.DIRECT!.rows.push({ ...f.snapshot.offers.DIRECT!.rows[0]!, size: "L", parent_variation_id: "SM613-NAVY-L" });
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    await tools.invokeBatch([ { name: "read_product", args: { subjectRef: "SM613", size: "M", color: "navy" } },
+      { name: "read_product", args: { subjectRef: "SM613", size: "L", color: "navy" } } ]);
+    expect(tools.snapshot().protectedClaims).toHaveLength(4);
+    expect(hardPrecheck(tools.snapshot(), "Hai size đều còn chị nhé.", commerceNow)).toBeNull();
+    const before = makeBinding("turn", "Hai size đều còn chị nhé.", tools.snapshot());
+    expect(makeBinding("turn", "Hai size đều còn chị nhé.", await tools.readback())).toEqual(before);
+  });
 });

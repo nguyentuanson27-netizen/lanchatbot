@@ -64,10 +64,10 @@ function claimReason(
     if (!input.expectedProductIds.includes(productScope.productId)) {
       return `PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH:${claim.claimId}`;
     }
-    const expectedScope = input.expectedProductScopes?.find(({ productId }) =>
+    const expectedScopes = input.expectedProductScopes?.filter(({ productId }) =>
       productId === productScope.productId
     );
-    if (expectedScope && productScope.variantId !== expectedScope.variantId) {
+    if (expectedScopes?.length && !expectedScopes.some(s => productScope.variantId === s.variantId)) {
       return `PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH:${claim.claimId}`;
     }
     return null;

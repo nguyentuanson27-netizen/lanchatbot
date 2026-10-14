@@ -2,7 +2,7 @@ import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
   resolveCatalogFacts, verifyProductAttributesV1,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
-import { buildReadOnlyContext, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
+import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
@@ -65,9 +65,10 @@ export function createReadOnlyTools(input: {
     const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: null,
       mentionedSize: query.size, mentionedColor: query.color }, now) : null;
     const variantId = variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null;
+    if (variantId && !subjects.has(variantId) && subjects.size >= 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
     const nextClaims = [[price, "PRICE"], [stock, "STOCK"]].flatMap(([facts, type]) => {
       const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
-      return result.claims.filter(c => c.type === type).map(c => ({ ...c,
+      return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
         scope: c.scope.kind === "PRODUCT" ? { ...c.scope, variantId } : c.scope }));
     });
     const evidence: RuntimeProductEvidence = { ref: `product:${id}`, subjectRef: id };
@@ -84,9 +85,12 @@ export function createReadOnlyTools(input: {
     if (charts.length) evidence.sizeCharts = charts;
     products.delete(id);
     if (evidence.attributes || evidence.presentation || evidence.sizeCharts?.length) products.set(id, evidence);
-    subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId });
-    claims.set(id, nextClaims);
-    reads.set(id, structuredClone(args));
+    subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });
+    if (variantId) subjects.set(variantId, { ref: variantId, kind: "VARIANT", productId: id,
+      label: `${p.title} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
+    const readKey = commerceHash({ id, color: query.color, size: query.size });
+    claims.set(readKey, nextClaims);
+    reads.set(readKey, structuredClone(args));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId,
       attributes: evidence.attributes ?? null, sizeCharts: charts,
       facts: nextClaims.map(c => ({ type: c.type, scope: c.scope, value: c.value })),
@@ -111,7 +115,7 @@ export function createReadOnlyTools(input: {
       }
       if (call.name === "read_product") {
         const a = toolArgs(call.args, ["subjectRef", "color", "size"]);
-        if (!a || !text(a.subjectRef, 128) || !subjects.has(a.subjectRef) ||
+        if (!a || !text(a.subjectRef, 128) || subjects.get(a.subjectRef)?.kind !== "PRODUCT" ||
           (a.color !== undefined && !text(a.color, 64)) || (a.size !== undefined && !text(a.size, 16))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
         return await readProduct(a);
       }
@@ -120,6 +124,7 @@ export function createReadOnlyTools(input: {
   }
   return { invoke, snapshot, invokeBatch: (calls: CommerceToolCall[]) => Promise.all(calls.map(invoke)), async readback() {
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
+    for (const [ref, subject] of subjects) if (subject.kind === "VARIANT") subjects.delete(ref);
     for (const a of reads.values()) if ((await readProduct(a)).status !== "OK") throw new Error("PRODUCT_READBACK_UNAVAILABLE");
     return snapshot();
   } };
