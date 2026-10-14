@@ -1,5 +1,10 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current full A3 followup authorization — 2026-10-14
+
+Owner requests “chạy A3 đi”. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a3-full-followup-20261014/SCOPE.md). Consume exact completed freshA2PASS142/142 from a2-full-rerun-20261014, same current R68 prompts/models/worlds/schema/bars/fallback; no new A2generation or historical adoption. Run all42A3N1/max84role requests with existing early-persisting dispatcher/evaluators/providers/gate/publisher/source checks; no copied corpus/new numbered round. RED→GREEN/readiness→commit/clean/runtimea3SHA/preflight→full42→rawcommit→whole actual-terminal primarycommit→rejected diagnostics→audit/checkpoint/tasks/draftPR390→STOP. All failures/errors/UNKNOWN/missing retained; retry0. No semantic fix/rubric change/next run/post-A.
+
+
 ## Current full A2 rerun authorization — 2026-10-14
 
 Owner requests “chạy lại toàn bộ a2 đi”. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014/SCOPE.md). Reuse exact current R68 inputs/prompts/models;142fresh registrations, same N3 historical groups first and N1others. Prospective execution change: report prefix failures/malformed but continue the remainder; retain prefix acceptance as part of final status. Unsafe eligiblePASS/provider unavailability still hardSTOP; retry0, every registration/error retained. Fixed entrypoint reuses existing evaluators/dispatcher/provider/publisher/source guard, no numbered-round admission or copied corpus. RED→minimumGREEN/readiness→commit/clean/runtime A2SHA/preflight→one run→rawsavepoint/audit/report/tasks/draftPR390→STOP. A3NOT_RUN by scope, no prompt repair/next run/post-A.
