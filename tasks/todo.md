@@ -1,5 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current whole-turn correction preparation — 2026-10-14
+
+- [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; read current specs/plan/todo and R67/targeted findings. Correct the prior sizing-only scope without changing historical evidence.
+- [x] Prepare both prompts for action-specific policy, grounded comfort, deadline response and concern-relevant substitutes; retain sizing/style/authority/capability. Policy values remain source-owned; keep legacy/v2 contrast and short-policy summaries. [Changes/self-review](../apps/worker/evals/single-agent-semantic-verifier/whole-turn-preparation-20261014/README.md).
+- [x] Fix one token aggregation line using both existing adapter aliases; observed RED0/2→GREEN2/2.52focused/422full/79worker/21protected PASS,0skip; workerbuild/typecheck/lint exit0.
+- [x] Offline42owner/179verifier bodies: instructions only, no evaluator leak, one unchanged bound reject; frozen raw/scores unchanged. Owner+310bytes/verifier+36bytes; no new runtime role/layer/gate/parser/regex/template/repair or production/shared/provider API change.
+- [ ] Verify exact preparation delivery on existing draftPR390. No new provider run/Round68, qualification or GO; R67 and targeted recheck remain STOP. Future model behavior/stability unverified; no merge/deploy/live send/post-A.
+
 ## Current R67 failure recheck — 2026-10-14
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect CLI0.159.2/login/Vertex route and official provider docs. Freeze exact3prior A2SAFE failures plus8A3failures, N1/max19requests; retain all prior data. [Scope](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014/SCOPE.md).

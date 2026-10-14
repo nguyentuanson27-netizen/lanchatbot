@@ -83,7 +83,7 @@ export function operational(attempts) {
     maxRequestsPerAttempt:Math.max(0,...providers.map(v=>v.providerRequests??0)),verifierLatencyP50Ms:percentile(.5),verifierLatencyP95Ms:percentile(.95),
     timeoutCount:providers.filter(v=>v.status==='TIMEOUT').length,errorCount:providers.filter(v=>v.status==='PROVIDER_ERROR').length,
     timeoutErrorRate:providers.length?providers.filter(v=>v.status!=='OK').length/providers.length:null,
-    inputTokens:providers.reduce((n,v)=>n+(v.usage?.input_tokens??0),0),outputTokens:providers.reduce((n,v)=>n+(v.usage?.output_tokens??0),0),
+    inputTokens:providers.reduce((n,v)=>n+(v.usage?.input_tokens??v.usage?.inputTokens??0),0),outputTokens:providers.reduce((n,v)=>n+(v.usage?.output_tokens??v.usage?.outputTokens??0),0),
     usageUnavailableCount:providers.filter(v=>!v.usage).length,cost:null,dispositions,
     terminalFailureRate:attempts.length?(dispositions.FALLBACK+dispositions.HANDOFF+dispositions.NO_SEND)/attempts.length:null};
 }
