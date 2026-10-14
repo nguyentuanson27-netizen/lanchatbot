@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
-import { ProtectedClaimV1Schema } from "@lana/contracts";
+import { ProtectedClaimV1Schema, SizeChartV1Schema, type ProductAttributesV1,
+  type ProductPresentationEvidenceV1, type SizeChartV1 } from "@lana/contracts";
+import { verifyProductAttributesV1, verifyProductPresentationEvidenceV1 } from "@lana/business-tools";
 import { hasResidualPii } from "@lana/dataset-review";
 import { authorizeRealtimeProtectedClaimProposal } from "./realtime-protected-claim-boundary.js";
 
-// Isolated Checkpoint-A mechanics. No provider, tool, mutation or send interface.
+// Shared isolated egress mechanics. No provider, tool, mutation or send interface.
 interface ProductProfile {
   ref: string; subjectRef: string; authority: "EVALUATION_FIXTURE"; sourceVersion: string;
   observedAt: string; expiresAt: string; contentHash: string;
@@ -21,14 +23,20 @@ function validProfile(v: unknown): v is ProductProfile {
     Array.isArray(d.colors) && d.colors.length <= 8 && d.colors.every(s => boundedText(s, 64)) &&
     Array.isArray(d.sizeChart) && d.sizeChart.length <= 4 && d.sizeChart.every(s => boundedText(s, 1024));
 }
+export interface RuntimeProductEvidence {
+  ref: string; subjectRef: string; attributes?: ProductAttributesV1;
+  presentation?: ProductPresentationEvidenceV1; sizeCharts?: SizeChartV1[];
+}
 export interface TrustedContext {
-  boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string }[];
+  boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string; variantId?: string | null }[];
   protectedClaims: unknown[];
-  policyLiterals: { ref: string; text: string; sourceVersion: string; observedAt: string; expiresAt: string }[];
+  policyLiterals: { ref: string; text: string; sourceVersion: string; observedAt: string; expiresAt: string | null }[];
   effectReceipts: { ref: string; operationId: string; subjectRef: string; status: string; effect: string;
     stateRevision: number; recipient: string; observedAt: string; expiresAt: string }[];
   productProfiles?: ProductProfile[];
-  state: { [key: string]: unknown; conversationOwner: string; revision: number; currentProductId: string;
+  runtimeProducts?: RuntimeProductEvidence[];
+  cartBinding?: { cartId: string; cartVersion: number };
+  state: { [key: string]: unknown; conversationOwner: string; revision: number; currentProductId: string | null;
     factSnapshotVersion: string; bindingVersion: string; recipient: string; permission: boolean; privacyAllowed: boolean };
 }
 export interface VerifierBinding {
@@ -77,7 +85,7 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   if (!draft.trim() || Buffer.byteLength(draft) > 4096 || Buffer.byteLength(JSON.stringify(trusted)) > 32768 ||
     trusted.boundSubjects.length > 8 || trusted.protectedClaims.length > 32 || trusted.effectReceipts.length > 8) return "MALFORMED";
   if (!Number.isSafeInteger(s.revision) || s.revision < 0 || !s.factSnapshotVersion || !s.bindingVersion ||
-    !trusted.boundSubjects.some(subject => subject.ref === s.currentProductId) ||
+    (s.currentProductId !== null && !trusted.boundSubjects.some(subject => subject.ref === s.currentProductId)) ||
     trusted.boundSubjects.some(subject => subject.bindingVersion !== s.bindingVersion)) return "STALE";
   const parsed = trusted.protectedClaims.map(claim => ProtectedClaimV1Schema.safeParse(claim));
   if (parsed.some(claim => !claim.success)) return "MALFORMED";
@@ -90,9 +98,16 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
   const authorization = authorizeRealtimeProtectedClaimProposal({
     declaredClaimIds: claims.map(claim => claim.claimId), observedClaimTypes: [], availableClaims: claims,
     expectedProductIds: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT").map(subject => subject.ref), now,
+    ...(trusted.boundSubjects.some(subject => subject.variantId !== undefined) ? {
+      expectedProductScopes: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT" && subject.variantId !== undefined)
+        .map(subject => ({ productId: subject.ref, variantId: subject.variantId ?? null })),
+    } : {}),
+    ...(trusted.cartBinding ? { expectedCart: trusted.cartBinding } : {}),
   });
   if (authorization.outcome !== "AUTHORIZED") return "STALE";
-  if (trusted.policyLiterals.some(policy => !fresh(policy, now))) return "STALE";
+  if (trusted.policyLiterals.some(policy => policy.expiresAt === null
+    ? !Number.isFinite(Date.parse(policy.observedAt)) || Date.parse(policy.observedAt) > now.getTime()
+    : !fresh({ observedAt: policy.observedAt, expiresAt: policy.expiresAt }, now))) return "STALE";
   if (trusted.effectReceipts.some(receipt => !fresh(receipt, now) || receipt.status !== "SUCCESS" ||
     receipt.recipient !== s.recipient || receipt.stateRevision !== s.revision ||
     !trusted.boundSubjects.some(subject => subject.ref === receipt.subjectRef))) return "STALE";
@@ -103,8 +118,33 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date):
       !trusted.boundSubjects.some(subject => subject.kind === "PRODUCT" && subject.ref === profile.subjectRef) ||
       profile.contentHash !== hash(JSON.stringify(profile.details)))) return "STALE";
   }
+  if (trusted.cartBinding && (!Number.isSafeInteger(trusted.cartBinding.cartVersion) ||
+    trusted.cartBinding.cartVersion < 0 || !trusted.boundSubjects.some(subject =>
+      subject.kind === "CART" && subject.ref === trusted.cartBinding!.cartId))) return "STALE";
+  if (trusted.runtimeProducts !== undefined) {
+    if (!Array.isArray(trusted.runtimeProducts) || trusted.runtimeProducts.length > 4) return "MALFORMED";
+    for (const p of trusted.runtimeProducts) {
+      if (!record(p) || !boundedText(p.ref, 128) || !boundedText(p.subjectRef, 128) ||
+        Buffer.byteLength(JSON.stringify(p)) > 8192 ||
+        Object.keys(p).some(key => !["ref", "subjectRef", "attributes", "presentation", "sizeCharts"].includes(key)) ||
+        (!p.attributes && !p.presentation && !p.sizeCharts?.length)) return "MALFORMED";
+      if (!trusted.boundSubjects.some(subject => subject.kind === "PRODUCT" && subject.ref === p.subjectRef)) return "STALE";
+      const metadataFresh = (m: { observedAt: string; expiresAt: string | null; freshnessState: string }) =>
+        m.freshnessState === "FRESH" && Number.isFinite(Date.parse(m.observedAt)) && Date.parse(m.observedAt) <= now.getTime() &&
+        (m.expiresAt === null || Date.parse(m.expiresAt) > now.getTime());
+      if (p.attributes && (!verifyProductAttributesV1(p.attributes, p.subjectRef) || !metadataFresh(p.attributes.metadata))) return "STALE";
+      if (p.presentation && (!verifyProductPresentationEvidenceV1(p.presentation, p.subjectRef) ||
+        ![p.presentation.provenance.identity, p.presentation.provenance.content, p.presentation.provenance.inventory].every(metadataFresh))) return "STALE";
+      if (p.sizeCharts && (!Array.isArray(p.sizeCharts) || p.sizeCharts.length > 4 || p.sizeCharts.some(chart => {
+        const parsed = SizeChartV1Schema.safeParse(chart);
+        return !parsed.success || parsed.data.reference.verificationStatus !== "VERIFIED" ||
+          !parsed.data.reference.verifiedAt || Date.parse(parsed.data.reference.verifiedAt) > now.getTime();
+      }))) return "STALE";
+    }
+  }
   const refs = [...trusted.boundSubjects.map(v => v.ref), ...claims.map(v => v.claimId),
-    ...trusted.policyLiterals.map(v => v.ref), ...trusted.effectReceipts.map(v => v.ref), ...(trusted.productProfiles ?? []).map(v => v.ref)];
+    ...trusted.policyLiterals.map(v => v.ref), ...trusted.effectReceipts.map(v => v.ref), ...(trusted.productProfiles ?? []).map(v => v.ref),
+    ...(trusted.runtimeProducts ?? []).map(v => v.ref)];
   if (new Set(refs).size !== refs.length) return "MALFORMED";
   return null;
 }
@@ -118,7 +158,8 @@ function parseVerdict(result: unknown, trusted: TrustedContext): "PASS" | "FAIL"
       typeof v.verdict !== "string" || !["PASS", "FAIL", "UNCERTAIN"].includes(v.verdict) || !Array.isArray(v.violations) || v.violations.length > 16) return null;
     const claims = trusted.protectedClaims.flatMap(c => { const p = ProtectedClaimV1Schema.safeParse(c); return p.success ? [p.data.claimId] : []; });
     const refs = new Set([...claims, ...trusted.boundSubjects.map(v => v.ref), ...trusted.policyLiterals.map(v => v.ref),
-      ...trusted.effectReceipts.map(v => v.ref), ...(trusted.productProfiles ?? []).map(v => v.ref)]);
+      ...trusted.effectReceipts.map(v => v.ref), ...(trusted.productProfiles ?? []).map(v => v.ref),
+      ...(trusted.runtimeProducts ?? []).map(v => v.ref)]);
     for (const violation of v.violations) {
       if (!violation || typeof violation !== "object" || Array.isArray(violation) ||
         Object.keys(violation).sort().join(",") !== "kind,protectedRef" || !kinds.has(violation.kind) ||

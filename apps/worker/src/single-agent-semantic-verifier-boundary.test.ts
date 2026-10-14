@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { buildProductAttributesV1 } from "@lana/business-tools";
 import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TrustedContext,
   type PostEffectRecoveryCompatibility } from "./single-agent-semantic-verifier-boundary.js";
 
@@ -13,6 +14,32 @@ const binding = makeBinding("opaque-request", draft, trusted);
 const pass = () => ({ kind: "VERDICT" as const, binding: structuredClone(binding), result: { verdict: "PASS", violations: [] } });
 const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now) =>
   finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at });
+
+describe("Phase B source evidence and absence", () => {
+  it("allows a policy-only turn without inventing a product", () => {
+    const t = { ...structuredClone(trusted), boundSubjects: [], protectedClaims: [],
+      state: { ...trusted.state, currentProductId: null } };
+    expect(hardPrecheck(t, "Shop áp dụng chính sách trong nguồn hiện tại.", now)).toBeNull();
+  });
+  it("rejects a claim for another variant of the same product", () => {
+    const t = structuredClone(trusted);
+    const claim = t.protectedClaims[0] as { scope: { productId: string; variantId: string | null } };
+    claim.scope.variantId = "VARIANT-M";
+    const scoped = { ...t, boundSubjects: t.boundSubjects.map(s => ({ ...s, variantId: "VARIANT-L" })) };
+    expect(hardPrecheck(scoped, draft, now)).toBe("STALE");
+  });
+  it("checks existing source-owned attributes instead of accepting a fixture authority label", () => {
+    const productId = trusted.state.currentProductId!;
+    const attributes = buildProductAttributesV1({ productId, observedAt: now.toISOString(), data: {
+      materials: ["cotton"], materialComponents: {}, colors: ["navy"], styles: [], silhouettes: [], occasions: [],
+      designAttributes: null, careInstructions: null, wearProperties: null, backCoverage: null, designComplexity: null,
+    } });
+    const t = { ...structuredClone(trusted), runtimeProducts: [{ ref: "product-attributes-1", subjectRef: productId, attributes }] };
+    expect(hardPrecheck(t, draft, now)).toBeNull();
+    t.runtimeProducts[0]!.attributes.materials = ["silk"];
+    expect(hardPrecheck(t, draft, now)).toBe("STALE");
+  });
+});
 
 describe("Round41 truthful static fallback compatibility", () => {
   const fallback = { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." };
