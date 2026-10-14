@@ -2,14 +2,13 @@ import { computeBusinessContentHash, executePersistedSalesCycleCommand, type Run
   type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1, type ResolvedCartDraftV1 } from "@lana/chat-runtime";
 import type { CanonicalCartIdentityV2, CanonicalCartMutationV2 } from "@lana/business-tools";
-import { buildReadOnlyContext, commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
+import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
-const uuid = (hash: string) => `${hash.slice(0,8)}-${hash.slice(8,12)}-5${hash.slice(13,16)}-8${hash.slice(17,20)}-${hash.slice(20,32)}`;
 
 /** Native tools bridge to existing atomic sales-cycle repository. No external order/send implementation. */
 export async function createCommerceEffectTools(input: {
@@ -19,6 +18,7 @@ export async function createCommerceEffectTools(input: {
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
   trustedPorts?: SalesCycleTrustedPortsV1;
+  resolveBankTransferPolicy?: Parameters<typeof executePersistedSalesCycleCommand>[0]["resolveBankTransferPolicy"];
 }): Promise<CommerceTools> {
   async function read() {
     const s = await input.repository.read(input.conversationKey);
@@ -29,6 +29,7 @@ export async function createCommerceEffectTools(input: {
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
   let receipt: TrustedContext["effectReceipts"][number] | undefined;
   let receiptConversationRevision: number | undefined;
+  let receiptBindingVersion: string | undefined;
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
     if (current.cart) {
@@ -38,7 +39,7 @@ export async function createCommerceEffectTools(input: {
     const cart = current.cart?.value;
     return buildReadOnlyContext({ state: { ...base.state, conversationRevision: base.state.revision, revision: current.revision,
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
-      ...(cart ? { cartQuote: base.state.cartQuote ?? { cartId: cart.cartId, cartVersion: cart.revision,
+      ...(cart ? { cartQuote: { cartId: cart.cartId, cartVersion: cart.revision,
         subtotalVnd: cart.subtotalVnd, shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } } : {}) },
       subjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims,
       policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
@@ -52,12 +53,13 @@ export async function createCommerceEffectTools(input: {
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
     return { ...result.line, lineId };
   }
-  function recordReceipt(operationId: string, effect: string) {
-    if (!current.processedCommandIds.includes(operationId) || !current.cart || current.stage === "HANDED_OFF") return false;
+  function recordReceipt(operationId: string, effect: string, expectedRevision: number) {
+    if (current.revision !== expectedRevision || !current.processedCommandIds.includes(operationId) || !current.cart || current.stage === "HANDED_OFF") return false;
     receipt = { ref: `receipt:${operationId}`, operationId, subjectRef: current.cart.value.cartId, status: "SUCCESS", effect,
       stateRevision: current.revision, recipient: input.scope.recipient, observedAt: current.updatedAt,
       expiresAt: new Date(Math.min(Date.parse(current.cart.expiresAt), input.clock().getTime() + 300_000)).toISOString() };
     receiptConversationRevision = input.base.snapshot().state.revision;
+    receiptBindingVersion = input.base.snapshot().state.bindingVersion;
     return true;
   }
   async function invokeEffect(call: CommerceToolCall): Promise<CommerceToolResult> {
@@ -71,6 +73,10 @@ export async function createCommerceEffectTools(input: {
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "size", "color", "quantity"] :
         call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      for (const [field, max] of [["size", 16], ["color", 64]] as const) {
+        const value = a[field];
+        if (value !== undefined && (typeof value !== "string" || !value.trim() || Buffer.byteLength(value) > max)) return { status: "REJECTED", reason: "VARIANT_ARGUMENTS" };
+      }
       const product = call.name === "add_to_cart" ? state && input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.subjectRef) : undefined;
       const line = current.cart?.value.lines.find(l => l.lineId === a.subjectRef);
       if ((call.name === "add_to_cart" && !product) || (call.name === "change_cart_item" && !line)) return { status: "REJECTED", reason: "SUBJECT_REF" };
@@ -79,7 +85,7 @@ export async function createCommerceEffectTools(input: {
       const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
         sourceMessageId: input.scope.sourceMessageId, tool: call.name, args: a });
       const effectName = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
-      if (current.processedCommandIds.includes(operationId)) return recordReceipt(operationId, effectName)
+      if (current.processedCommandIds.includes(operationId)) return receipt?.operationId === operationId && receipt.stateRevision === current.revision && Date.parse(receipt.expiresAt) > input.clock().getTime()
         ? { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value } } : { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
       policy = await input.policy();
       publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
@@ -88,7 +94,7 @@ export async function createCommerceEffectTools(input: {
       let command: SalesCycleCommand;
       if (call.name === "add_to_cart") {
         if (a.quantity !== undefined && (!Number.isInteger(a.quantity) || (a.quantity as number) < 1 || (a.quantity as number) > 20)) return { status: "REJECTED", reason: "QUANTITY" };
-        const selected = await selection(product!.ref, a, uuid(operationId));
+        const selected = await selection(product!.ref, a, commerceUuid(operationId));
         if (!current.cart) {
           draft = { identity: input.identity, lines: [selected], shopId: input.scope.shopId, policyRef };
           command = { kind: "CART_OPENED", commandId: operationId, cartDraftRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(input.clock().getTime()+1_800_000).toISOString() };
@@ -121,11 +127,13 @@ export async function createCommerceEffectTools(input: {
       const repository: SalesCycleStateRepositoryV1 = { read: key => input.repository.read(key),
         compareAndSwap: update => update.expectedRevision === authorizedRevision
           ? input.repository.compareAndSwap(update) : Promise.resolve(false) };
-      try { commitAttempted = true; result = await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey, command: command!, now: input.clock(), trustedPorts: ports }); }
-      catch { current = await read(); if (!recordReceipt(operationId, effectName)) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; } }
+      try { commitAttempted = true; result = await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey,
+        command: command!, now: input.clock(), trustedPorts: ports,
+        ...(input.resolveBankTransferPolicy ? { resolveBankTransferPolicy: input.resolveBankTransferPolicy } : {}) }); }
+      catch { current = await read(); if (!recordReceipt(operationId, effectName, authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; } }
       if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
       current = await read();
-      if (!recordReceipt(operationId, effectName)) return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" };
+      if (!recordReceipt(operationId, effectName, authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
@@ -151,7 +159,7 @@ export async function createCommerceEffectTools(input: {
     if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
     await input.base.readback(); const world = input.base.snapshot(); current = await read();
     if (!world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
-      world.state.recipient !== receipt.recipient || world.state.revision !== receiptConversationRevision ||
+      world.state.recipient !== receipt.recipient || world.state.revision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
     return { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
       ? "Shop đã nhận xác nhận mua hàng của chị." : "Giỏ hàng đã được cập nhật, chị nhé.", fallbackId: null };
