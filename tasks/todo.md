@@ -1,10 +1,22 @@
-# C3 Semantic-Verifier Checkpoint A — TODO
+# C3 — Phase B TODO and Historical Checkpoint A Evidence
+
+## Current Phase B plan — 2026-10-14
+
+- [x] Inspect current specs/owner bypass and actual source interfaces; refresh main and record planning base. Write [Phase B roadmap and detailed B1 plan](../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md) with source ownership, dependencies, files, acceptance/tests, current risks and bounded development evaluation. Documentation only; no B implementation/provider generation.
+- [ ] Owner review of the concrete B1 scope before implementation; request to bypass A already stands and needs no reconfirmation.
+- [ ] B1.1 — Real-source evidence/context contract and current snapshot; RED→GREEN, source availability/read-only configuration recorded.
+- [ ] B1.2 — Source-owned policy reader/context without pin/audit/outbound writes; policy source swap/missing customerCare tests.
+- [ ] B1.3 — Product search/read, POS snapshot price/stock, bounded refs and partial failures; no source/freshness relabeling.
+- [ ] B1.4 — Small same-owner native tool loop/adapter; max3owner generations/2rounds/6tools, zero generation retries; preserve native continuation.
+- [ ] B1.5 — Mandatory verifier/exact final text/current readback/final gate; fail-closed and send-disabled.
+- [ ] B1.6 — Focused verification, real-adapter readback, separately frozen eight-scenario N1 run (max32generations) and full outcome/request/complexity report. No execution yet.
+- [ ] After B1: detail B2 accepted effective state before size/quote, then B3 mutation/receipt/recovery. Qualification/promotion/rollout remain separate; no automatic continuation.
 
 ## Current owner decision: bypass Checkpoint A — 2026-10-14
 
 - [x] Record explicit “by pass check point A” as OWNER_BYPASS for progression to next-phase planning; [decision/scope/residuals](../docs/specs/c3-checkpoint-a-owner-bypass-20261014.md). No new A run is required solely to open planning.
 - [x] Preserve historical A2FAIL/fullA3FAIL38/42/separate3recheckPASS, all frozen artifacts and runtime mandatory-verifier/final-gate/fail-closed authority. Update active spec/plan pointers; no runtime flag or source change.
-- [ ] Prepare a separately scoped Phase B plan, first targeting real policy/product read-only sources and send-disabled owner→verifier→gate integration with existing domain tools. Implementation scope, files/interfaces and checks must be concrete before code; persistence/mutation/qualification remain later dependencies.
+- [x] Prepare a separately scoped Phase B plan: [roadmap and concrete read-only B1 slice](../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md). Implementation is still pending owner review of that scope; persistence/mutation/qualification remain later dependencies.
 
 ## Current three-case stream recheck — 2026-10-14
 

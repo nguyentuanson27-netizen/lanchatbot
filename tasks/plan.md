@@ -1,4 +1,10 @@
-# C3 Semantic-Verifier Checkpoint A — Implementation Plan
+# C3 — Current Phase B Plan and Historical Checkpoint A Plan
+
+## Current Phase B planning — 2026-10-14
+
+Owner requests “lập kế hoạch B đi”. [Phase B roadmap and concrete B1 implementation plan](../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md) is the current plan for review: read-only policy/product sources → bounded conversational tool loop → exact-final-text mandatory verifier/current final gate, send-disabled. It lists existing source/interfaces, tasks B1.1–B1.6, intended files, RED→GREEN acceptance, commands and an eight-scenario N1 development run capped at32generations. B2 effective-state/size/quote and B3 mutation/receipt/recovery remain subsequent scoped plans; qualification/replacement is Phase C. This turn prepares documentation only, not implementation or provider execution.
+
+Planning base `e5e54c85da5045d0529dd1bbe61c2fde8dd96c8b`; refreshed `origin/main` `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Implementation must refresh again, record both main and the candidate foundation (PR390 is not merged), and use its own branch. Do not change frozen A prompts/artifacts, claim that real sources/credentials have been validated, or require A PASS to open B. OWNER_BYPASS and historical measurements below retain their separate meanings.
 
 ## Current owner decision: bypass Checkpoint A — 2026-10-14
 
