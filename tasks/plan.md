@@ -4,6 +4,8 @@
 
 Owner requests “chạy lại toàn bộ a2 đi”. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014/SCOPE.md). Reuse exact current R68 inputs/prompts/models;142fresh registrations, same N3 historical groups first and N1others. Prospective execution change: report prefix failures/malformed but continue the remainder; retain prefix acceptance as part of final status. Unsafe eligiblePASS/provider unavailability still hardSTOP; retry0, every registration/error retained. Fixed entrypoint reuses existing evaluators/dispatcher/provider/publisher/source guard, no numbered-round admission or copied corpus. RED→minimumGREEN/readiness→commit/clean/runtime A2SHA/preflight→one run→rawsavepoint/audit/report/tasks/draftPR390→STOP. A3NOT_RUN by scope, no prompt repair/next run/post-A.
 
+Completed:source9f074de4/rawf3b283a4,142/142freshA2PASS,91UNSAFE/51SAFE,0unsafeeligiblePASS,2SAFErefusals3.92%,prefixPASS.138requests/max1/retry0/0NOT_RUN/UNKNOWN;3provider invalid refs+1timeout retained, oversized hardprecheck separatelyMALFORMED.138captured bodies/firewall/bindings/gates/source/history auditPASS. Fresh434/focused33/new4PASS; same-day worker79/protected21/typecheck/build/lint explicitly reused after readback. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014/CHECKPOINT_A.md)/[findings](../apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014/FINDINGS.md). STOPafterA2;A3NOT_RUN by scope, no semantic fix or stability/GO claim. DraftPR390delivery follows.
+
 
 ## Current full Round68 authorization — 2026-10-14
 

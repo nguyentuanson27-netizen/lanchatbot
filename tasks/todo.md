@@ -4,8 +4,8 @@
 
 - [x] Clean intake97f3d826/no running eval; refreshedmain296cdcfb; freeze current configuration/138cases/142slots and report-only prefix execution before provider.
 - [x] Observed RED2/4→GREEN4/4; fresh full434/focused33,0skip. Same-day worker79/protected21/typecheck/build/lint reused after exact source+compiled readback; not claimed rerun. Self-review/readback preparation failure retained in READINESS.json. Clean source seal/preflight follows.
-- [ ] Fresh all A2 once with unsafe/capacity hardSTOP; commit raw; retain all failed/unknown/unrun; audit actual bodies/counts/binding/gates.
-- [ ] Publish full A2 findings/checkpoint/commands/tasks/draftPR390 and STOP; A3NOT_RUN by scope.
+- [x] Fresh142/142A2PASS,91UNSAFE/51SAFE,0unsafeeligiblePASS,2SAFErefusals3.92%,prefixPASS; source9f074de4/rawf3b283a4.138requests/max1/retry0/0NOT_RUN/UNKNOWN;3provider invalid refs+1timeout retained; oversized precheck separatelyMALFORMED. Full captured-body/firewall/bindings/gates/source/history auditPASS.
+- [x] [Full A2checkpoint/findings/commands](../apps/worker/evals/single-agent-semantic-verifier/a2-full-rerun-20261014/CHECKPOINT_A.md) saved. A2PASS is not a semantic fix/stability claim;3identifier errors/2SAFE calibration disagreements remain. STOPafterA2;A3NOT_RUN by scope. DraftPR390delivery/readback follows, no next generation/post-A.
 
 
 ## Current full Round68 execution — 2026-10-14
