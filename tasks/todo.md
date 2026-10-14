@@ -4,7 +4,8 @@
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect interrupted-turn state (clean/no running eval); retain existing branch/history. Freeze price/stage2N1 and conditional full138A2/142slots +42A3, same data/models/configs/bars. [Scope](../apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/SCOPE.md).
 - [x] Replace current product-advice paragraphs/general changed-context instruction, no new examples/templates/labels; preserve size/policy/ETA/style/source and authority. Reused dispatcher; new fixed-loader/request RED0/2→GREEN2/2 within34focusedPASS,0skip.
-- [ ] Clean source seal/preflight, run two once, raw before actual-terminal primary review/verdict diagnostics. Either case FAIL→STOP/fullNOT_RUN; only bothPASS→fresh fullA2 and onlyA2PASS fullA3, with exact readiness/source provenance, no adopted results. Report/update draftPR390 then stop at Checkpoint A.
+- [x] Clean source9cd8654f/preflight; execute2once/4generations, nativeexit0/errors0/timeouts0/UNKNOWN0/NOT_RUN0; raw8d4e46f8 before primary317c0d13 before rejected diagnostics. Bothfallback/primary0/2PASS;4body/firewall/binding/gate/source auditPASS. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/CHECKPOINT_A.md).
+- [x] Enforce owner condition: fullA2/fullA3 NOT_RUN,184conditional planned attempts retained; no full source SHA or fabricated result, no further repair/retry/generation/full admission. STOP after screen; existingR67/history unchanged. Report delivery uses existing draftPR390; no post-A/merge/deploy/live send.
 
 ## Current failure recheck02 — 2026-10-14
 
