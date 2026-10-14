@@ -3,7 +3,7 @@
 ## Current three-case stream recheck — 2026-10-14
 
 - [x] Clean72a8e70a; refreshedmain296cdcfb; freeze exactly3prior stream-error cases, fresh end-to-endN1/max6requests/retry0. Models/prompts/worlds/bars unchanged; prior42A3/A2 evidence preserved.
-- [ ] Focused RED/GREEN/readiness/source-helper readback, commit clean runtimea3SHA/preflight; run threeN1 with mandatory verifier/gate and early persistence.
+- [x] New selection testRED0/1→GREEN1/1; fresh focused48/full442PASS0skip, routes/source/helper readbackPASS. Same-day unchanged worker79/protected21/typecheck/build/lint explicitly reused. [Readiness](../apps/worker/evals/single-agent-semantic-verifier/a3-stream-recheck-20261014/READINESS.json). Clean source/preflight/threeN1 execution follows, mandatory verifier/gate/early persistence unchanged.
 - [ ] Rawcommit→whole-terminal primarycommit→diagnostics/audit/report/tasks/draftPR390. Separate selected3outcomes, not a new full42qualification; STOP/no auto next run or post-A.
 
 ## Current owner-authorized A3 diagnostic bypass — 2026-10-14
