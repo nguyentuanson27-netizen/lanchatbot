@@ -4,8 +4,8 @@
 
 - [x] Clean intake71facab8/no running eval; refreshedmain296cdcfb; freeze exact completedA2PASS/current configuration/42A3N1/rubric before provider.
 - [x] Observed RED2/3→GREEN3/3; fresh focused40/full437PASS,0skip. Both approved routes read-only available; exact A2prerequisite and worker/helper source readbackPASS. Same-day worker79/protected21/typecheck/build/lint explicitly reused, not rerun. Self-review/readiness saved; clean A3seal/preflight follows.
-- [ ] Run fresh42once, commit raw before whole actual-terminal primary; keep human scores null; primarycommit before rejected/verdict diagnostics.
-- [ ] Audit bodies/bindings/gates/provenance/denominator/metrics, report all histories/findings/CHECKPOINT_A/tasks/draftPR390; STOP at GO/STOP/BLOCKED recommendation.
+- [x] Clean source387dc481/preflight0;42/42freshN1/84requests/max1perrole/retry0/errors0/timeouts0/malformed0/UNKNOWN0/NOT_RUN0/nativeexit0. Raw a4c24cab before primary144d7abf before rejected diagnostics;420humanratingsnull. Primary37/42,37eligible/5fallback11.90%;concern8/11/policy8/9 below90%, A3FAIL. CompletedA2PASS142/142 unchanged.
+- [x] Full84captured bodies/firewall/binding/final-gate/source/history/denominator/usage auditPASS. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/a3-full-followup-20261014/CHECKPOINT_A.md)/[all42histories](../apps/worker/evals/single-agent-semantic-verifier/a3-full-followup-20261014/A3_CONVERSATIONS.md)/[fivefailures](../apps/worker/evals/single-agent-semantic-verifier/a3-full-followup-20261014/A3_FAILURES.md)/[findings](../apps/worker/evals/single-agent-semantic-verifier/a3-full-followup-20261014/FINDINGS.md) saved. Three clear ownererrors; two advisory/calibration diagnoses uncertain. STOP, no semantic fix/new generation/post-A. Final report checks/draftPR390 delivery/readback follows.
 
 
 ## Current full A2 rerun execution — 2026-10-14
