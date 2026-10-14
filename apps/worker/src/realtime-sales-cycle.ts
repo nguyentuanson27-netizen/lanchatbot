@@ -90,6 +90,9 @@ const PREVIEW_TTL_MS = 30 * 60 * 1_000;
 const MAX_CHECKOUT_CLARIFICATION_ATTEMPTS = 3;
 
 export interface RealtimeSalesCycleInput {
+  /** Optional code-only binding for the isolated native-tool caller. All existing readiness checks still run. */
+  readonly commandIdentity?: { readonly primaryCommandId: string; readonly primarySuffix: string;
+    readonly cartIdentity?: import("@lana/business-tools").CanonicalCartIdentityV2; readonly cartExpiresAt?: string };
   readonly pageId: string;
   readonly conversationId: string;
   readonly customerHash: string;
@@ -1036,7 +1039,8 @@ export async function evaluateRealtimeSalesCycle(
     return result;
   };
 
-  const commandId = (suffix: string) => `sales:${input.eventKey}:${suffix}`;
+  const commandId = (suffix: string) => input.commandIdentity?.primarySuffix === suffix
+    ? input.commandIdentity.primaryCommandId : `sales:${input.eventKey}:${suffix}`;
   const setCartReplayContext = (
     customerState: "READY" | "HESITANT" | "CAUTIOUS",
   ): void => {
@@ -2252,7 +2256,7 @@ export async function evaluateRealtimeSalesCycle(
       return failedOutput("SALES_STAGE_NOT_READY_FOR_CART", plan());
     }
     const draft = {
-      identity: {
+      identity: input.commandIdentity?.cartIdentity ?? {
         cartId: deterministicUuid(`${input.conversationId}:${input.eventKey}:cart`),
         salesEpisodeId: deterministicUuid(`${input.conversationId}:sales-episode`),
         customerProfileId: deterministicUuid(`${input.customerHash}:customer-profile`),
@@ -2277,7 +2281,7 @@ export async function evaluateRealtimeSalesCycle(
       kind: "CART_OPENED",
       commandId: commandId("cart-open"),
       cartDraftRef: draftReference,
-      expiresAt: new Date(input.now.getTime() + CART_TTL_MS_V1).toISOString(),
+      expiresAt: input.commandIdentity?.cartExpiresAt ?? new Date(input.now.getTime() + CART_TTL_MS_V1).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
     const cartOpenPlaceholder = {

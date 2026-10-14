@@ -54,6 +54,18 @@ describe("code-owned commerce effects and recovery", () => {
     expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, subjectRef: "OTHER" } })).status).toBe("REJECTED");
     expect(s.commits).toHaveLength(0);
   });
+  it("uses the current runtime executor when composed, never falling back to the raw CAS port", async () => {
+    const s = await setup();
+    const executeCommand = vi.fn(async () => ({ status: "CONFLICT" as const, state: s.current(), reasonCode: "STATE_VERSION_CONFLICT" as const }));
+    const tools = await createCommerceEffectTools({ base: s.base, scope: s.scope, clock: () => commerceNow,
+      conversationKey: "test-cycle", repository: s.repository, authorize: s.authorize, policy: async () => s.policy,
+      select: s.select, identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001",
+        customerProfileId: fixtureProfile().profile.profileId }, executeCommand });
+    expect((await tools.invoke(s.add)).status).toBe("REJECTED");
+    expect(executeCommand).toHaveBeenCalledTimes(1);
+    expect(s.repository.compareAndSwap).not.toHaveBeenCalled();
+    expect(tools.snapshot().effectReceipts).toEqual([]);
+  });
   it("commits through the existing state machine and issues a receipt from readback only", async () => {
     const s = await setup();
     expect(await s.tools.invoke(s.add)).toMatchObject({ status: "OK" });

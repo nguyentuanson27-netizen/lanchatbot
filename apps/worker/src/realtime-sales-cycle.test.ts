@@ -390,6 +390,18 @@ async function previewState(eventPrefix: string) {
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it("keeps code-issued native command/cart identities inside the existing guarded plan", async () => {
+    const state = { ...createRealtimeSalesState(conversationId, pageId, now), stage: "SIZE_RECOMMENDED" as const };
+    const identity = { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001",
+      customerProfileId: "70000000-0000-4000-8000-000000000001" };
+    const output = await evaluateRealtimeSalesCycle({ ...input(state, "Chị lấy bộ này size M màu be", "native-event"),
+      commandIdentity: { primaryCommandId: "native-command", primarySuffix: "cart-open", cartIdentity: identity,
+        cartExpiresAt: "2026-07-23T03:30:00.000Z" } });
+    expect(output.plan?.state.processedCommandIds).toContain("native-command");
+    expect(output.plan?.state.cart?.value.cartId).toBe(identity.cartId);
+    expect(output.plan?.state.cart?.expiresAt).toBe("2026-07-23T03:30:00.000Z");
+    expect(output.plan?.effectReadiness).toEqual(expect.arrayContaining([expect.objectContaining({ effect: "CART_OPEN", outcome: "READY" })]));
+  });
   it.each([
     "Được, size M nhé",
     "ship cho chị mẫu trên",

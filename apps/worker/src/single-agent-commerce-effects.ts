@@ -19,6 +19,9 @@ export async function createCommerceEffectTools(input: {
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
   trustedPorts?: SalesCycleTrustedPortsV1;
   resolveBankTransferPolicy?: Parameters<typeof executePersistedSalesCycleCommand>[0]["resolveBankTransferPolicy"];
+  /** A real composition supplies the existing guarded runtime transaction; isolated tests may use the domain CAS. */
+  executeCommand?: (input: { command: SalesCycleCommand; expectedRevision: number; trustedPorts: SalesCycleTrustedPortsV1;
+    policy: RuntimePolicyBundle }) => ReturnType<typeof executePersistedSalesCycleCommand>;
 }): Promise<CommerceTools> {
   async function read() {
     const s = await input.repository.read(input.conversationKey);
@@ -127,13 +130,15 @@ export async function createCommerceEffectTools(input: {
       const repository: SalesCycleStateRepositoryV1 = { read: key => input.repository.read(key),
         compareAndSwap: update => update.expectedRevision === authorizedRevision
           ? input.repository.compareAndSwap(update) : Promise.resolve(false) };
-      try { commitAttempted = true; result = await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey,
+      try { commitAttempted = true; result = input.executeCommand
+        ? await input.executeCommand({ command: command!, expectedRevision: authorizedRevision, trustedPorts: ports, policy })
+        : await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey,
         command: command!, now: input.clock(), trustedPorts: ports,
         ...(input.resolveBankTransferPolicy ? { resolveBankTransferPolicy: input.resolveBankTransferPolicy } : {}) }); }
       catch { current = await read(); if (!recordReceipt(operationId, effectName, authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; } }
       if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
       current = await read();
-      if (!recordReceipt(operationId, effectName, authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
+      if (!recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
