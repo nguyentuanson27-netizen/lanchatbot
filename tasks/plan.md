@@ -1,5 +1,9 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current owner decision: bypass Checkpoint A — 2026-10-14
+
+Owner explicitly requests “by pass check point A”. Transition status is **OWNER_BYPASS**: preparing the next-phase plan is permitted without another A2/A3PASS attempt. [Authoritative decision, residual findings and first Phase B planning slice](../docs/specs/c3-checkpoint-a-owner-bypass-20261014.md). Measured A2FAIL/fullA3FAIL38/42/separate3recheckPASS and all frozen evidence remain unchanged; no measured GO, mixed41/42, quality/stability or replacement claim. Runtime mandatory verifier/final gate/code authority/fail-closed rules remain intact. Next plan should first scope real policy/product read-only integration in a send-disabled candidate, reuse existing domain boundaries, and keep persistence/mutation/qualification as later dependencies. This turn changes docs only; no Bimplementation/provider run/merge/deploy/live send or blanket post-A authorization.
+
 ## Current three-case stream recheck — 2026-10-14
 
 Owner “chạy lại 3 case lỗi stream” authorizes fresh end-to-end N1 for exactly r5-referent-navy/r5-simple-price/r15-fit-reassurance, maximum6role generations, retries0. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a3-stream-recheck-20261014/SCOPE.md). Same clear-boundaries prompts/models/config/sources/scoring/fallback; no transport/prompt fix or new A2generation. Reuse loader/dispatcher/providers/evaluator/gate/publisher; empty new slots selected from actual prior stream failures. Freeze/readiness→clean source/preflight→3fresh→rawcommit→whole-terminal primarycommit→diagnostics/audit/report/tasks/draftPR390→STOP. Preserve full42A3FAIL38/42 and A2FAIL; no replacement outcomes/mixed qualification, auto retry or post-A.
@@ -741,7 +745,7 @@ Use `BLOCKED` rather than simulated evidence when:
 
 ### Owner decision
 
-Only an explicit owner GO permits a later post-A implementation plan.
+An explicit owner GO or the scoped [OWNER_BYPASS decision of 2026-10-14](../docs/specs/c3-checkpoint-a-owner-bypass-20261014.md) permits preparing a later post-A plan. The bypass does not rewrite failed evidence as GO/PASS or authorize unscoped implementation/runtime actions.
 
 A Checkpoint A GO means **egress + conversational ownership are feasible enough to justify deeper state/tool/effect work**. It does not mean:
 
@@ -756,7 +760,7 @@ A Checkpoint A GO means **egress + conversational ownership are feasible enough 
 
 ## 11. Post-A compatibility skeleton — NOT implementation tasks
 
-If owner GO is issued, write a new plan covering these phases in dependency order.
+After owner GO or the recorded OWNER_BYPASS, write a new separately scoped plan covering these phases in dependency order. Owner has waived A as the planning prerequisite; no automatic implementation of the entire skeleton is authorized by that waiver.
 
 ### Future Phase B — real candidate behavior
 

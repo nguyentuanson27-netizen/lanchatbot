@@ -7,6 +7,8 @@
 **Evidence input:** draft PR387, exact head `1c6f1c9ec38be13ee59efd827e6b73c8cb5a04da`  
 **Principle:** **Models may reason about language semantics. Code remains sole authority over business truth, identity, state, permissions and effects.**
 
+**Current owner transition decision (2026-10-14): OWNER_BYPASS.** Owner explicitly waived Checkpoint A as the prerequisite for preparing the next-phase plan. Measured A2/A3 results and GO criteria remain unchanged; no runtime verifier/final-gate bypass. [Decision, remaining findings and Phase B planning direction](c3-checkpoint-a-owner-bypass-20261014.md).
+
 This is a narrow amendment to the protected-egress boundary proposed by the parent spec. It does not approve production rollout, C3 removal, live send, new durable semantic state, a repair loop, a third model role, or a generic semantic framework.
 
 If approved, this amendment supersedes only the parent-spec clauses that require arbitrary protected customer-facing meaning to be certified by deterministic code alone. All other tool, state, mutation, recovery, evaluation and replacement-readiness contracts remain in force unless explicitly changed here.
@@ -670,7 +672,7 @@ A STOP result is evidence, not a request to patch the experiment indefinitely.
 
 ## 11. Post-Checkpoint-A architecture compatibility
 
-If and only if Checkpoint A receives explicit owner GO, a later plan may detail implementation beyond egress feasibility.
+A later post-A plan may be prepared after explicit owner GO or the scoped [owner-authorized Checkpoint A bypass of 2026-10-14](c3-checkpoint-a-owner-bypass-20261014.md). OWNER_BYPASS permits progression to planning without measured A PASS; it does not satisfy §10.5, change recorded evaluation results, authorize live send or bypass verifier/final-gate checks. Post-A implementation still needs its separately scoped plan and owner authorization.
 
 The amendment must remain compatible with the parent lifecycle:
 

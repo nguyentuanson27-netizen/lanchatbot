@@ -1,5 +1,11 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current owner decision: bypass Checkpoint A — 2026-10-14
+
+- [x] Record explicit “by pass check point A” as OWNER_BYPASS for progression to next-phase planning; [decision/scope/residuals](../docs/specs/c3-checkpoint-a-owner-bypass-20261014.md). No new A run is required solely to open planning.
+- [x] Preserve historical A2FAIL/fullA3FAIL38/42/separate3recheckPASS, all frozen artifacts and runtime mandatory-verifier/final-gate/fail-closed authority. Update active spec/plan pointers; no runtime flag or source change.
+- [ ] Prepare a separately scoped Phase B plan, first targeting real policy/product read-only sources and send-disabled owner→verifier→gate integration with existing domain tools. Implementation scope, files/interfaces and checks must be concrete before code; persistence/mutation/qualification remain later dependencies.
+
 ## Current three-case stream recheck — 2026-10-14
 
 - [x] Clean72a8e70a; refreshedmain296cdcfb; freeze exactly3prior stream-error cases, fresh end-to-endN1/max6requests/retry0. Models/prompts/worlds/bars unchanged; prior42A3/A2 evidence preserved.

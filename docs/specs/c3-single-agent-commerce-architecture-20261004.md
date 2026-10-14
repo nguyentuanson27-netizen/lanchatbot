@@ -8,6 +8,8 @@
 
 This spec proposes a bounded architecture experiment. It does not approve a rewrite, migration, production rollout, new durable state, or removal of current C3.
 
+**Current transition decision (2026-10-14):** owner explicitly requests [bypass Checkpoint A](c3-checkpoint-a-owner-bypass-20261014.md), permitting next-phase planning despite the recorded evaluation failures. Historical STOP/PASS/FAIL statements below retain their original evidence scope; this decision does not establish replacement readiness or relax code authority/verifier/final-gate boundaries.
+
 ---
 
 ## 1. Objective
