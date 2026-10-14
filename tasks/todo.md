@@ -4,8 +4,9 @@
 
 - [x] Refresh main296cdcfb; clean intake0b30bed4. Freeze current prompt pair and exactR67 populations/configs under latest full-run authorization. Prior two-case screen remains historical FAIL.
 - [x] Fixed68 observedRED1/4→GREEN4/4 (intermediate native-admission enum failure retained); full430/focused29/worker79/protected21,0skip; worker typecheck/build/lint exit0; read-only routes available,0provider qualification requests. Self-review in round-68/READINESS.json. Clean A2seal/preflight/run follows.
-- [ ] Only A2PASS: raw A2savepoint/audit, separate clean A3source/preflight/full42; raw before primary before diagnostics.
-- [ ] Complete denominator/request/firewall/terminal/quality/operational findings, CHECKPOINT_A, tasks/draftPR390 delivery; STOP at owner recommendation.
+- [x] A2clean source deb50e8e/preflight0/runner1; raw03296e09 before audit.6/142executed,3MALFORMED+3validFAIL; prefixFAIL/fullA2BLOCKED,136NOT_RUN/0UNKNOWN.6requests/max1/retry0/errors0/timeouts0; no unsafeeligiblePASS in executed6, SAFE usability unmeasured.
+- [x] Conditional A3 withheld: all42NOT_RUN, no a3RunSourceSha, no fabricated scores/outcomes. Preserve current prompts/gate/results, no repair or additional generation.
+- [x] Source/input/raw/6captured bodies/firewall/binding/final-gate/accounting auditPASS; full denominator and limitations/metrics/root cause in [CHECKPOINT_A](../apps/worker/evals/single-agent-semantic-verifier/round-68/CHECKPOINT_A.md). RecommendationSTOP. DraftPR390 delivery/readback follows; no full A2/A3 qualification, automatic next run or post-A.
 
 
 ## Current principles fix / two-case-first — 2026-10-14

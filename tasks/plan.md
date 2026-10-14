@@ -4,6 +4,8 @@
 
 Owner requests full A2/A3 on the current unchanged sales-principles prompts; this replaces the prior screen prerequisite for this run. [Frozen scope](../docs/specs/c3-round68-full-current-prompts-20261014.md). ExactR67 corpora/worlds/labels/models/configs/bars/fallback:142A2 registrations (91UNSAFE/51SAFE; six historical regression attempts first), then only complete fresh A2PASS full42A3N1. Fixed admission RED→minimumGREEN/readiness; commit/clean/runtime source seals/preflight; raw before whole-terminal primary before rejected diagnostics; full accounting/firewall/audit/checkpoint/tasks/draftPR390 then STOP. No further prompt repair, retry, adopted outcome, automatic next round or post-A.
 
+Actual: source deb50e8e/raw03296e09; preflight0/runner1. A2BLOCKED6/142, frozen six-slot prefixFAIL because3negation replies use evidenceRef instead of claimId (MALFORMED), other3validFAIL.136NOT_RUN/0UNKNOWN,6requests/max1/retry0/errors0/timeouts0,0observedunsafeeligiblePASS on executed6only; SAFE usability unmeasured. A3all42NOT_RUN/no sourceSHA. Full430/focused29/worker79/protected21/build/typecheck/lintPASS. Raw/input/source/captured-body/firewall/binding/gate auditPASS. [Checkpoint](../apps/worker/evals/single-agent-semantic-verifier/round-68/CHECKPOINT_A.md)/[findings](../apps/worker/evals/single-agent-semantic-verifier/round-68/FINDINGS.md). STOP, no result-driven repair/gate change/retry/A3/post-A; report on draftPR390.
+
 
 ## Current principles fix and two-case-first authorization — 2026-10-14
 
