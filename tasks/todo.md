@@ -4,7 +4,7 @@
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; freeze same3A2/8A3, freshN1/max19requests, new prepared owner+verifier with unchanged configs/worlds/bars/fallback. [Scope](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02/SCOPE.md).
 - [x] Reuse existing dispatcher/early persistence/evaluators/providers/gate/source checks; fixed-loader/request RED0/2→GREEN2/2 within36focusedPASS,0skip. Existing422/79/21/build/typecheck/lint checks reused with unchanged source/helper readback, no fresh full-check claim.
-- [ ] Clean source commit/runtimeSHA/preflight, run11once and retain native exit/raw before review; primary actual outcomes before rejected/verdict diagnostics; audit/report/tasks/draftPR390 thenSTOP. No automatic full/next run or post-A.
+- [x] Clean source531ce4e7/preflight;11/11freshN1/max19generations, nativeexit0/errors0/timeouts0/UNKNOWN0/NOT_RUN0; raw3851554b before primaryd1e47235 before rejected diagnostics.3/3A2SAFE eligible; A3primary6/8,1fallback12.5% and1weak stage-light stance. Policy owner now correct, old unsafe draft not replayed; no new fullA2 qualification.19exact captured body/firewall/binding/gate/source auditsPASS. [Report/all11cases](../apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02/REPORT.md). STOP after diagnostic; no automatic full/next run or post-A. Deliver report on existing draftPR390.
 
 ## Current whole-turn correction preparation — 2026-10-14
 
