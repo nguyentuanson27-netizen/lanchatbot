@@ -4,7 +4,7 @@
 
 - [x] Clean72a8e70a; refreshedmain296cdcfb; freeze exactly3prior stream-error cases, fresh end-to-endN1/max6requests/retry0. Models/prompts/worlds/bars unchanged; prior42A3/A2 evidence preserved.
 - [x] New selection testRED0/1→GREEN1/1; fresh focused48/full442PASS0skip, routes/source/helper readbackPASS. Same-day unchanged worker79/protected21/typecheck/build/lint explicitly reused. [Readiness](../apps/worker/evals/single-agent-semantic-verifier/a3-stream-recheck-20261014/READINESS.json). Clean source/preflight/threeN1 execution follows, mandatory verifier/gate/early persistence unchanged.
-- [ ] Rawcommit→whole-terminal primarycommit→diagnostics/audit/report/tasks/draftPR390. Separate selected3outcomes, not a new full42qualification; STOP/no auto next run or post-A.
+- [x] Source59333da9/preflight0/runner0;3/3freshN1,6requests/max1perrole/retry0,all3verifierPASS/primary3/3cohortPASS,0errors/timeouts/fallback/NOT_RUN/UNKNOWN. Raw0cb27846 before primary6208c943 before diagnostics;30humanratingsnull. Sixbody/firewall/bindings/gates/source/helpers/raw/primary/history auditPASS. [Separate checkpoint/all3conversations](../apps/worker/evals/single-agent-semantic-verifier/a3-stream-recheck-20261014/CHECKPOINT_A.md) saved; full42A3FAIL38/42 and A2FAIL unchanged, no mixed qualification or stream-fix/stability claim. RecommendationSTOP; delivery target draftPR390, no further generation/automatic next run/post-A.
 
 ## Current owner-authorized A3 diagnostic bypass — 2026-10-14
 
