@@ -9,7 +9,7 @@ import { verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
-  sourceMessageId: string; requestId: string; recipient: string; bindingVersion: string; revision: number;
+  sourceMessageId: string; sourceObservedAt: string; requestId: string; recipient: string; bindingVersion: string; revision: number;
   conversationOwner: string; permission: boolean; privacyAllowed: boolean;
 }
 export interface ReadOnlyCatalog {

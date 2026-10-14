@@ -6,7 +6,7 @@ import type { CommerceScope, CommerceToolCall, CommerceToolResult } from "./sing
 export interface NativeContent { role: "user" | "model"; parts: Record<string, unknown>[] }
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
-export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; signal: AbortSignal }
+export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean; signal: AbortSignal }
 export interface VerifierRequest { generationId: string; instructions: string; finalDraft: string; trusted: TrustedContext;
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
@@ -66,7 +66,7 @@ export async function runCommerceTurn(input: {
       return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
     }
     const id = `${input.scope.requestId}:owner:${index + 1}`;
-    const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context };
+    const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, toolsAllowed: index < 2 };
     if (bytes(request) > 32768) return finish(fallback("CONTEXT_BOUND"));
     let output: OwnerGeneration;
     ownerGenerations++;
