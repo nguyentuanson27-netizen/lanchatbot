@@ -1,0 +1,68 @@
+{
+  "priorSource": "97f24609c0ab362893238fe1cabd3e1e6e8f690d",
+  "currentSource": "8bbea938bd947f02910b29976c75b47e8ce00c9c",
+  "denominatorEach": 8,
+  "priorAdequate": 4,
+  "currentAdequate": 5,
+  "priorFallbacks": 3,
+  "currentFallbacks": 3,
+  "note": "N1 development only; combined owner prompt/tool projection treatment with live source rereads, not a causal/stability or qualification result",
+  "cases": [
+    {
+      "caseId": "b1-price",
+      "priorJudgment": "FAIL",
+      "currentJudgment": "PASS",
+      "priorDisposition": "FALLBACK",
+      "currentDisposition": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "priorJudgment": "FAIL",
+      "currentJudgment": "FAIL",
+      "priorDisposition": "FALLBACK",
+      "currentDisposition": "FALLBACK"
+    },
+    {
+      "caseId": "b1-current-policy",
+      "priorJudgment": "FAIL",
+      "currentJudgment": "FAIL",
+      "priorDisposition": "FALLBACK",
+      "currentDisposition": "FALLBACK"
+    },
+    {
+      "caseId": "b1-partial-source",
+      "priorJudgment": "FAIL",
+      "currentJudgment": "FAIL",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "FALLBACK"
+    },
+    {
+      "caseId": "b1-component-stock",
+      "priorJudgment": "PASS",
+      "currentJudgment": "PASS",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "b1-search-read",
+      "priorJudgment": "PASS",
+      "currentJudgment": "PASS",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "priorJudgment": "PASS",
+      "currentJudgment": "PASS",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "b1-policy-used",
+      "priorJudgment": "PASS",
+      "currentJudgment": "PASS",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE"
+    }
+  ]
+}
