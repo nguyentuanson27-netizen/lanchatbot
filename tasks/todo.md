@@ -1,5 +1,14 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current clear-boundaries full evaluation — 2026-10-14
+
+- [x] Refreshmain296cdcfb; clean starting527be366; freeze40f7b553 exact prepared Vietnamese prompts and current inputs/config/bars before provider. No existing code/input/history changes.
+- [x] New fixed loader/prerequisite/early-save/firewall observedRED0/3→GREEN3/3; focused46PASS0skip; both pinned routes available read-only. Full440PASS0skip/readiness saved; same-day unchanged worker79/protected21/typecheck/build/lint explicitly reused before source seal.
+- [ ] Seal clean A2source/preflight; execute142fresh attempts, commit raw/audit; any unsafe eligiblePASS hardSTOP, retain all errors/missing, no retry. Only complete same-run effective-identityA2PASS/prefixPASS permits A3.
+- [ ] If permitted, clean A3source/preflight→full42freshN1→rawcommit→whole actual-terminal primarycommit→rejected diagnostics. Human420ratingsnull, no adopted outcome/rescore.
+- [ ] Full provenance/body/firewall/binding/gate/accounting/metrics audit; CHECKPOINT_A/all conversations/failures/tasks/draftPR390 then STOP. No automatic next run or post-A.
+
+
 ## Current Vietnamese clear-boundaries prompt preparation — 2026-10-14
 
 - [x] Refreshmain296cdcfb; preserve clean starting342fbc11 branch and historical identities. Read both mandatory specs/current plan/todo/project instructions, five latest failures plus source/prompt bodies and existing contrasts.
