@@ -1,5 +1,9 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current three-case stream recheck — 2026-10-14
+
+Owner “chạy lại 3 case lỗi stream” authorizes fresh end-to-end N1 for exactly r5-referent-navy/r5-simple-price/r15-fit-reassurance, maximum6role generations, retries0. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a3-stream-recheck-20261014/SCOPE.md). Same clear-boundaries prompts/models/config/sources/scoring/fallback; no transport/prompt fix or new A2generation. Reuse loader/dispatcher/providers/evaluator/gate/publisher; empty new slots selected from actual prior stream failures. Freeze/readiness→clean source/preflight→3fresh→rawcommit→whole-terminal primarycommit→diagnostics/audit/report/tasks/draftPR390→STOP. Preserve full42A3FAIL38/42 and A2FAIL; no replacement outcomes/mixed qualification, auto retry or post-A.
+
 ## Current A3 diagnostic with explicit A2 bypass — 2026-10-14
 
 Owner “chạy a3 đi, by pass a2” explicitly authorizes one diagnostic full42A3N1 using the exact clear-boundaries prompt pair/models/configuration. [Frozen scope](../apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014/SCOPE.md). Preserve prior A2qualificationFAIL/populationPASS/prefixFAIL and every historical artifact. Fixed diagnostic composition reuses existing loader/dispatcher/providers/evaluator/final gate; no fake A2PASS or change to qualified admission. Keep mandatory verifier for all hard-precheck survivors, one generation per role/attempt, retries0, early persistence and full denominator. Freeze→focused RED/GREEN/readiness→clean committed runtimea3SHA/preflight→42fresh→rawcommit→whole actual-terminal primarycommit→rejected diagnostics/audit/checkpoint/tasks/existing draftPR390→STOP. Even if A3diagnosticPASS, Checkpoint A remains unqualified/STOP; no post-A or automatic next round.

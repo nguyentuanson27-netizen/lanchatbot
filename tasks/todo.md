@@ -1,5 +1,11 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current three-case stream recheck — 2026-10-14
+
+- [x] Clean72a8e70a; refreshedmain296cdcfb; freeze exactly3prior stream-error cases, fresh end-to-endN1/max6requests/retry0. Models/prompts/worlds/bars unchanged; prior42A3/A2 evidence preserved.
+- [ ] Focused RED/GREEN/readiness/source-helper readback, commit clean runtimea3SHA/preflight; run threeN1 with mandatory verifier/gate and early persistence.
+- [ ] Rawcommit→whole-terminal primarycommit→diagnostics/audit/report/tasks/draftPR390. Separate selected3outcomes, not a new full42qualification; STOP/no auto next run or post-A.
+
 ## Current owner-authorized A3 diagnostic bypass — 2026-10-14
 
 - [x] Inspect clean head24727880, refreshmain296cdcfb; freeze explicit bypass scope/plan, unchanged42cases/prompt pair/models/config/bars/fallback. A2FAIL remains recorded; no A2generation or prompt fix.
