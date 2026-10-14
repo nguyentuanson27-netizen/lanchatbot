@@ -9,7 +9,7 @@ import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfi
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
   effectiveAt: "2026-10-01T00:00:00.000Z", effectiveUntil: null };
-async function setup() {
+async function setup(clock = () => commerceNow) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   // Existing domain precondition, representing earlier verified size advice; never fake it in the effect tool.
@@ -31,7 +31,7 @@ async function setup() {
     versions: { price: "p1", inventory: "i1", size: "s1", eta: null }, eta: null, etaExpiresAt: null,
     sourceAuthority: "POS_SNAPSHOT" as const, stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4,
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }));
-  const tools = await createCommerceEffectTools({ base, scope, clock: () => commerceNow, conversationKey: "test-cycle", repository, authorize,
+  const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
     policy: async () => policy,
     resolveBankTransferPolicy: () => bankPolicy,
     trustedPorts: {
@@ -48,11 +48,29 @@ async function setup() {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("keeps the requested selling offer through the trusted selection port", async () => {
+    const s = await setup();
+    expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "DIRECT" } })).status).toBe("OK");
+    expect(s.select).toHaveBeenCalledWith(expect.objectContaining({offerType:"DIRECT"}));
+  });
   it("requires code permission and a bounded subject before any write", async () => {
     const s = await setup(); s.authorize.mockResolvedValue(false);
     expect((await s.tools.invoke(s.add)).status).toBe("REJECTED");
     expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, subjectRef: "OTHER" } })).status).toBe("REJECTED");
     expect(s.commits).toHaveLength(0);
+  });
+  it("refreshes persisted permission before an effect and binds the conversation revision", async () => {
+    const s = await setup();let permission = true;
+    const readAuthority = async () => ({ revision: 9, recipient: s.scope.recipient, bindingVersion: s.scope.bindingVersion,
+      privacyAllowed: true, conversationOwner: "BOT", permission });
+    const executeCommand = vi.fn(async () => ({ status: "CONFLICT" as const, state: s.current(), reasonCode: "STATE_VERSION_CONFLICT" as const }));
+    const tools = await createCommerceEffectTools({ base: s.base, scope: s.scope, clock: () => commerceNow,
+      conversationKey: "test-cycle", repository: s.repository, authorize: s.authorize, policy: async () => s.policy,
+      select: s.select, identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001",
+        customerProfileId: fixtureProfile().profile.profileId }, executeCommand, readAuthority });
+    permission = false;expect((await tools.invoke(s.add)).status).toBe("REJECTED");expect(executeCommand).not.toHaveBeenCalled();
+    permission = true;await tools.invoke(s.add);
+    expect(executeCommand).toHaveBeenCalledWith(expect.objectContaining({ conversationRevision: 9, bindingVersion: s.scope.bindingVersion }));
   });
   it("uses the current runtime executor when composed, never falling back to the raw CAS port", async () => {
     const s = await setup();
@@ -79,6 +97,19 @@ describe("code-owned commerce effects and recovery", () => {
     expect(s.commits).toHaveLength(1);
     expect(s.tools.snapshot().effectReceipts[0]!.effect).toBe("CART_OPENED");
   });
+  it("rehydrates only a current committed receipt after recreating the tool instance", async () => {
+    const s = await setup();await s.tools.invoke(s.add);const receipt = s.tools.snapshot().effectReceipts[0]!;
+    const fresh = () => createCommerceEffectTools({ base: s.base, scope: s.scope, clock: () => commerceNow,
+      conversationKey: "test-cycle", repository: s.repository, authorize: s.authorize, policy: async () => s.policy,
+      select: s.select, identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001",
+        customerProfileId: fixtureProfile().profile.profileId }, readReceipt: async () => receipt });
+    const t = await fresh();expect((await t.invoke(s.add)).status).toBe("OK");
+    expect(t.snapshot().effectReceipts[0]!.effect).toBe("CART_OPENED");
+    expect(s.repository.compareAndSwap).toHaveBeenCalledTimes(1);
+    s.setCurrent({ ...s.current(), revision: s.current().revision+1 });
+    expect((await (await fresh()).invoke(s.add)).status).toBe("REJECTED");
+    expect(s.repository.compareAndSwap).toHaveBeenCalledTimes(1);
+  });
   it("rejects malformed variant inputs without selecting or writing a different variant", async () => {
     const s = await setup();
     for (const a of [{ size: {} }, { color: 1 }, { size: "" }, { color: "x".repeat(65) }]) {
@@ -95,6 +126,19 @@ describe("code-owned commerce effects and recovery", () => {
     expect((await missing.tools.invoke(missing.add)).status).toBe("UNAVAILABLE");
     expect(missing.tools.snapshot().effectReceipts).toEqual([]);
     expect(missing.repository.compareAndSwap).toHaveBeenCalledTimes(1);
+  });
+  it("does not renew a receipt's lifetime when a committed response arrives late", async () => {
+    let now = commerceNow;
+    const s = await setup(() => now), cas = s.repository.compareAndSwap;
+    s.repository.compareAndSwap = async update => {
+      const committed = await cas(update);
+      now = new Date(commerceNow.getTime()+360_000);
+      return committed;
+    };
+    await s.tools.invoke(s.add);
+    expect(s.commits).toHaveLength(1);
+    const terminal = await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: "fallback", fallbackId: null });
+    expect(terminal.disposition).toBe("NO_SEND");
   });
   it("cannot confirm a purchase outside the existing validated preview path", async () => {
     const s = await setup(); await s.tools.invoke(s.add);

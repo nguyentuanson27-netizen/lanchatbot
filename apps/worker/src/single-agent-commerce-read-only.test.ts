@@ -15,6 +15,15 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it("measures verification through the current-source readback, including its added delay", async () => {
+    const s = setup(), readback = s.tools.readback;
+    s.tools.readback = async () => { await new Promise(resolve => setTimeout(resolve,20));return readback(); };
+    const result = await runCommerceTurn({ ...s, clock: () => commerceNow, latest: "Em ơi", history: [],
+      ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm reply.", owner: async () => ({kind:"FINAL",text:"Dạ chị."}),
+      verifier: async () => ({result:{verdict:"PASS",violations:[]}}) });
+    expect(result.verificationLatencyMs).toBeGreaterThanOrEqual(10);
+    expect(result.toolLatencyMs).toBe(0);
+  });
   it("verifies even a simple non-protected reply and never sends", async () => {
     const s = setup();
     const result = await runCommerceTurn({ ...s, owner: async () => final("Dạ chị.") });

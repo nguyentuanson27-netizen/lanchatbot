@@ -2280,6 +2280,21 @@ export class PostgresRealtimeRuntimeStore {
     return result.rowCount === 1;
   }
 
+  /** PII-free readback of an effect committed by the existing transaction owner. Never infer it from dialogue. */
+  async readCommittedSalesCycleEvent(pageId: string, conversationId: string, commandId: string): Promise<
+    Pick<RealtimeSalesCycleEventPlan, "commandKind" | "stateRevisionAfter" | "cartId" | "occurredAt"> | null
+  > {
+    const result = await this.pool.query<{
+      command_kind: RealtimeSalesCycleEventPlan["commandKind"]; state_revision_after: string; cart_id: string | null; occurred_at: Date;
+    }>(`SELECT command_kind, state_revision_after, cart_id, occurred_at
+        FROM sales_cycle_events
+        WHERE page_id = $1 AND conversation_id = $2 AND command_id_hash = $3 AND outcome = 'APPLIED'`,
+      [pageId, conversationId, this.cipher.fingerprint(commandId, "sales-cycle-command:v1")]);
+    const row = result.rows[0];
+    return row ? { commandKind: row.command_kind, stateRevisionAfter: Number(row.state_revision_after), cartId: row.cart_id,
+      occurredAt: row.occurred_at } : null;
+  }
+
   async commit<TState, TSalesState = unknown>(
     input: RealtimeCommitInput<TState, TSalesState>,
     now = new Date(),

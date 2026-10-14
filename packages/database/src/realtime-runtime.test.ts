@@ -38,6 +38,19 @@ import {
   type RealtimeCommitInput,
 } from "./realtime-runtime.js";
 
+describe("committed sales effect readback", () => {
+  it("reads the existing scoped ledger using the keyed operation fingerprint", async () => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1");
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", cipher);
+    const query = vi.fn(async (_sql: string, _values: unknown[]) => ({rows: [{command_kind:"CART_OPENED",state_revision_after:"4",cart_id:"cart",occurred_at:new Date("2026-10-14T10:00:00Z")}]}));
+    (store as unknown as {pool: unknown}).pool = {query};
+    expect(await store.readCommittedSalesCycleEvent("page","conversation","private-operation")).toMatchObject({commandKind:"CART_OPENED",stateRevisionAfter:4,cartId:"cart"});
+    expect(query.mock.calls[0]![0]).toContain("outcome = 'APPLIED'");
+    expect(query.mock.calls[0]![1]).toEqual(["page","conversation",cipher.fingerprint("private-operation","sales-cycle-command:v1")]);
+    expect(JSON.stringify(query.mock.calls)).not.toContain("private-operation");
+  });
+});
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;

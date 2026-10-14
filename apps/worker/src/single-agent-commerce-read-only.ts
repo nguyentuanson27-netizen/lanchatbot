@@ -28,13 +28,15 @@ export async function runCommerceTurn(input: {
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
 }) {
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
+  let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
   const finish = async (terminal: TerminalOutcome) => {
     if (terminal.disposition !== "SEND_ELIGIBLE" && input.tools.recover) {
       try { terminal = await input.tools.recover(terminal); }
       catch { terminal = { disposition: "NO_SEND", reason: "RECOVERY_UNAVAILABLE", text: null, fallbackId: null }; }
     }
-    return { terminal, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds, toolCalls, generations };
+    return { terminal, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds, toolCalls, generations,
+      toolLatencyMs, verificationLatencyMs: verificationStarted === undefined ? null : performance.now()-verificationStarted };
   };
   async function generate<T>(role: "owner" | "verifier", id: string, fn: (signal: AbortSignal) => Promise<T>): Promise<T> {
     const started = performance.now(), controller = new AbortController();
@@ -75,7 +77,9 @@ export async function runCommerceTurn(input: {
     if (output.kind === "TOOLS") {
       if (!output.calls.length || toolRounds >= 2 || toolCalls + output.calls.length > 6) return finish(fallback("BUDGET"));
       toolRounds++; toolCalls += output.calls.length;
+      const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
+      toolLatencyMs += performance.now()-toolStarted;
       if (results.length !== output.calls.length || bytes(results) > 8192) return finish(fallback("TOOL_RESULT_BOUND"));
       contents.push(structuredClone(output.content), { role: "user", parts: results.map((result, i) => ({
         functionResponse: { name: output.calls[i]!.name, response: result,
@@ -89,6 +93,7 @@ export async function runCommerceTurn(input: {
     if (problem) return finish(finalGate({ expected: binding, response: { kind: "PROVIDER_ERROR" }, current: trusted,
       finalDraft: output.text, now: input.clock(), fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }));
     const verifyId = `${input.scope.requestId}:verifier:1`;
+    verificationStarted = performance.now();
     verifierGenerations++;
     let response;
     try {
