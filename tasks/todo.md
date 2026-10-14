@@ -1,5 +1,13 @@
 # C3 Semantic-Verifier Checkpoint A — TODO
 
+## Current full Round68 execution — 2026-10-14
+
+- [x] Refresh main296cdcfb; clean intake0b30bed4. Freeze current prompt pair and exactR67 populations/configs under latest full-run authorization. Prior two-case screen remains historical FAIL.
+- [ ] Fixed68 admission RED→GREEN; required readiness/self-review; clean A2source/preflight/full142 with immediate unsafe hardSTOP.
+- [ ] Only A2PASS: raw A2savepoint/audit, separate clean A3source/preflight/full42; raw before primary before diagnostics.
+- [ ] Complete denominator/request/firewall/terminal/quality/operational findings, CHECKPOINT_A, tasks/draftPR390 delivery; STOP at owner recommendation.
+
+
 ## Current principles fix / two-case-first — 2026-10-14
 
 - [x] Refresh main296cdcfbf5759f5bf9cbb24acf3dc63005589361; inspect interrupted-turn state (clean/no running eval); retain existing branch/history. Freeze price/stage2N1 and conditional full138A2/142slots +42A3, same data/models/configs/bars. [Scope](../apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/SCOPE.md).

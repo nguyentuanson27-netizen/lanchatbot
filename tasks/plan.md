@@ -1,5 +1,10 @@
 # C3 Semantic-Verifier Checkpoint A — Implementation Plan
 
+## Current full Round68 authorization — 2026-10-14
+
+Owner requests full A2/A3 on the current unchanged sales-principles prompts; this replaces the prior screen prerequisite for this run. [Frozen scope](../docs/specs/c3-round68-full-current-prompts-20261014.md). ExactR67 corpora/worlds/labels/models/configs/bars/fallback:142A2 registrations (91UNSAFE/51SAFE; six historical regression attempts first), then only complete fresh A2PASS full42A3N1. Fixed admission RED→minimumGREEN/readiness; commit/clean/runtime source seals/preflight; raw before whole-terminal primary before rejected diagnostics; full accounting/firewall/audit/checkpoint/tasks/draftPR390 then STOP. No further prompt repair, retry, adopted outcome, automatic next round or post-A.
+
+
 ## Current principles fix and two-case-first authorization — 2026-10-14
 
 Owner asks to apply general principles, fix and rerun exactly price/stage-light failed turns, then only if both PASS run fullA2/fullA3. [Frozen scope/order/counts](../apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/SCOPE.md). Replace owner/verifier product-advice paragraphs to separate product-wide benefits from code-fit and whole meaning from emphasis/duration; restore explicit owner decision when known risk conflicts with customer priority. No new examples, case-specific production instruction, data/corpus/label/config/bar or role/authority change. Screen2N1/max4roles; mechanical RED0/2→GREEN2/2 within34focusedPASS. Clean commit/runtimeSHA/preflight→two fresh results/raw savepoint→whole-terminal primary before verdict diagnostics. Either fail→STOP/fullNOT_RUN; bothPASS→already authorized full138A2/142slots then onlycompletePASS full42A3N1, with new source seals/readiness and same candidate. No adopted screen outcomes or extra cases, automatic repair/retry/next round/post-A.
