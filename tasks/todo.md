@@ -3,9 +3,9 @@
 ## Owner-requested B2/B3 replay — 2026-10-16
 
 - [x] Freeze current models/prompts/native tools and unchanged7case population. Focused worker118PASS/database48PASS/protocol-provider26PASS; canonical workerbuild exit0. No runtime/prompt/corpus/config change; full-suite/typecheck/lint evidence from preceding task is not claimed rerun here.
-- [ ] Commit/clean runtime source, COD/bank isolated PostgreSQL controls and zero-generation source/config preflight; preserve exact owned database cleanup.
-- [ ] Run exactly7N1outcomes/max24generation invocations with current public sources, COD private code-only input and capture delivery; raw savepoint before primary.
-- [ ] Review all actual outcomes/committed state; diagnose fallback/needed edits, audit privacy/accounting/bindings, update PR391 and stop without automatic further run or live action.
+- [x] Commit/clean runtime source6477c840; COD/bank isolated PostgreSQL12/12eachPASS/dropped, source/config preflight0generationPASS.
+- [x] Execute requested7stepN1replay,13generation responses/max24/retry0:6terminal records;7thhandoff commit confirmed after host/tool interruption, final terminal/captureUNKNOWN. Raw exact-byte savepointd6252104beforeprimary32fa82a1; no fake provider-attempt-7 or repeated request. All3owned testdatabases dropped, including interrupted run cleanup.
+- [x] [Review actual outcomes/state and remaining root causes](../apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016/CHECKPOINT_B.md):2eligible(1verifierPASS+1codeACK),1fallback,2no-send,1handoff,1unrecorded. Profile74/96andcart2beLcommit observed, checkout unfinished; gate claim coverage includes unrelated search candidates. Audit13raw/control/readback hashes,13requests/1exact verifier binding,0evaluator/private-input leaks;7registered steps retained with explicit unknown. Deliver draftPR391; STOP sales/live acceptance/no automatic rerun or live action. Final seventh terminal remains NOT_CAPTURED, not a completed7/7batch.
 
 ## Contract and sales correction — 2026-10-16
 
