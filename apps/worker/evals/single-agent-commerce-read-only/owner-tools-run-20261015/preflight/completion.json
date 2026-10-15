@@ -1,0 +1,11 @@
+{
+  "status": "SOURCE_PREFLIGHT_PASS",
+  "providerGenerations": 0,
+  "counters": {
+    "catalogReads": 9,
+    "posReads": 6,
+    "policyReads": 4,
+    "embeddingCalls": 1
+  },
+  "sendEnabled": false
+}
