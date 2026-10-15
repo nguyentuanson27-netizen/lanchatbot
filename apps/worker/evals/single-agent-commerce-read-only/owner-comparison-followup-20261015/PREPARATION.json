@@ -1,0 +1,29 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "preparationHead": "83061af529f3ce21cb9898823c2c2a1151f30753",
+  "priorOwnerPromptSha256": "d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67",
+  "ownerPromptSha256": "2e5b33a2808fb3eff415a7e92a62ec2673689a5327f5df45361f4bda20cf4f06",
+  "priorOwnerPromptBytes": 10353,
+  "ownerPromptBytes": 10627,
+  "verifierPromptSha256": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957",
+  "baseManifestSha256": "8582ab917d15e73b869fc591b8ca317ae757a924af9dabf0b2f820eca0388bf0",
+  "registrationFileSha256": "061a966389cfea32b9babb84713c8389564aedad2ec8d1ef87d9eef2eeae57fe",
+  "providerGenerationsBeforeFreeze": 0,
+  "skills": [
+    "OpenAI Docs",
+    "test-driven-development"
+  ],
+  "officialReferences": [
+    "https://developers.openai.com/api/docs/guides/reasoning-best-practices",
+    "https://developers.openai.com/api/docs/models/gpt-6.1-sol"
+  ],
+  "selfReview": {
+    "caseExamplesAdded": 0,
+    "shopPolicyValuesAddedToPrompt": 0,
+    "rewriterOrRoleAdded": 0,
+    "generationRetriesAdded": 0,
+    "runtimeChanges": false,
+    "modelsConfigVerifierSchemaCorpusFallbackUnchanged": true,
+    "scope": "Owner prompt and explicit comparison registration path; no context projection or verbosity change."
+  }
+}

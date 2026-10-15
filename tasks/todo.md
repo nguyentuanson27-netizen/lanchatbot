@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current two-owner prompt follow-up — 2026-10-15
+
+- [x] Refresh main296cdcfb, inspect source/actual replies and official guidance; freeze owner-only correction and12same-case slots in [scope](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/SCOPE.md).
+- [x] Explicit registration selection RED observed -> minimumGREEN7/7. Existing models/context/verifier/schema/fallback unchanged; no retry/rewrite or new role.
+- [ ] Focused/full checks and self-review; clean source seal and real preflight0generation.
+- [ ] Execute12slots once; commit raw before whole-terminal primary, then rejected diagnostics/latency/safety/style comparison.
+- [ ] Audit bindings/firewall/denominator/history; report exact results/limits, update draftPR391 and stop.
+
 ## Current B prompt/tool follow-up — 2026-10-14
 
 - [x] Read full owner/verifier/tool descriptions, wire projections and eight conversations; [audit/fix rationale](../apps/worker/evals/single-agent-commerce-read-only/followup-20261014/PROMPT_REVIEW.md). Startclean0f4c4eba/refreshedmain296cdcfb; same branch/draft PR391. Scope is one same-eight B1batch, no B3 capability/Phase C expansion.

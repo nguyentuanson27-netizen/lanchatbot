@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {comparisonSlots,comparisonOwnerRequest,createSolComparisonOwner,createGeminiComparisonOwner,dispatchComparison,validateComparison} from './owner-comparison.mjs';
+import {comparisonSlots,comparisonOwnerRequest,createSolComparisonOwner,createGeminiComparisonOwner,dispatchComparison,validateComparison,readComparisonManifest} from './owner-comparison.mjs';
 
 const base=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));
 const samples=JSON.parse(readFileSync(new URL('./cases.b1.json',import.meta.url)));
@@ -16,6 +16,16 @@ const request=()=>({generationId:'OPAQUE_ID',instructions:'Chỉ viết tin nh�
  context:{boundSubjects:[],runtimeProducts:[],protectedClaims:[],policyLiterals:[],effectReceipts:[],state:{permission:true}},
  toolsAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:6},signal:new AbortController().signal,
  caseId:'EVAL_CASE_CANARY',split:'EVAL_SPLIT_CANARY',expectedSafe:false,requiredBehaviors:['EVAL_RUBRIC_CANARY']});
+
+test('a fresh comparison selects its explicit registration without rewriting or falling back to the historical manifest',()=>{
+ const historical=new URL('./owner-comparison-20261015/manifest.json',import.meta.url);
+ const before=readFileSync(historical);
+ assert.deepEqual(readComparisonManifest(),JSON.parse(before));
+ const current=new URL('./manifest.json',import.meta.url);
+ assert.deepEqual(readComparisonManifest(current),base);
+ assert.throws(()=>readComparisonManifest(new URL('./unregistered-comparison/manifest.json',import.meta.url)),/ENOENT/);
+ assert.deepEqual(readFileSync(historical),before);
+});
 
 test('comparison freezes exactly two approved owners and twelve unique slots, without changing historical registrations',()=>{
  const c=config();assert.doesNotThrow(()=>validateComparison(c,base));

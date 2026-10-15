@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current two-owner prompt follow-up — 2026-10-15
+
+Owner asks to implement the proposed reply-style correction and rerun both models. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/SCOPE.md): same two post-read LIVE cases ×3/owner,12slots/max24generation requests; Gemini High vs Sol Low, verifier Sol High. Owner prompt only; context/config/labels/schema/fallback unchanged, no verbosity change or native Sol tools expansion. Refreshmain296cdcfb; preparationhead83061af5. Explicit registration selection RED observed0/1 -> minimumGREEN7/7; focused/full checks/self-review -> clean committed source/preflight0generation -> one batch -> rawcommit -> whole-terminal primary -> rejected diagnostics/metrics/audit/report/tasks/PR391 -> STOP. Historical A/previous B outcomes remain unchanged; no automatic next run or qualification claim.
+
 ## Current B prompt/tool follow-up — 2026-10-14
 
 Owner asks to review the complete prompts/fix direction, implement and rerun. [Bounded scope](../apps/worker/evals/single-agent-commerce-read-only/followup-20261014/SCOPE.md)/[full prompt and context review](../apps/worker/evals/single-agent-commerce-read-only/followup-20261014/PROMPT_REVIEW.md). Start0f4c4eba, refreshed main296cdcfb, same branch/draft PR391. Replace redundant owner wording and old examples, clarify unknown physical properties, policy versus eligibility, immediate versus future capability and ordinary customer language. Correct owner policy wire path and include existing current fit comparison fields. Expose actual resolver-selected offer, independent source statuses and remaining existing tool budget. Verifier/model/config/schema/fallback and prior evidence remain unchanged; no new role/parser/gate/retry/production wiring or B3 capability expansion.

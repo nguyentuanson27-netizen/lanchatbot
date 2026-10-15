@@ -10,6 +10,9 @@ import {buildGeminiCommerceRequest,createGeminiCommerceInference} from './gemini
 import {runCodexModel,inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
+export function readComparisonManifest(path=new URL('./owner-comparison-20261015/manifest.json',import.meta.url)){
+ return JSON.parse(readFileSync(path,'utf8'));
+}
 export function validateComparison(c,base){
  check(c.schemaVersion===1&&c.surface==='POST_READ_OWNER_DIAGNOSTIC'&&c.repetitions===3&&
   c.ownerGenerationsPerSlot===1&&c.verifierGenerationsPerSlot===1&&c.maximumGenerationRequests===24&&c.sendEnabled===false&&
@@ -76,10 +79,10 @@ export async function dispatchComparison(slots,execute,persist){
 
 async function main(){
  const root=fileURLToPath(new URL('../../../../',import.meta.url));
- const {values:args}=parseArgs({options:{run:{type:'boolean'},preflight:{type:'boolean'},out:{type:'string'}}});
+ const {values:args}=parseArgs({options:{run:{type:'boolean'},preflight:{type:'boolean'},out:{type:'string'},manifest:{type:'string'}}});
  check(args.out&&(args.run!==args.preflight),'EXPLICIT_RUN_OR_PREFLIGHT_REQUIRED');
  const base=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))));
- const c=validateComparison(JSON.parse(readFileSync(new URL('./owner-comparison-20261015/manifest.json',import.meta.url))),base);
+ const c=validateComparison(readComparisonManifest(args.manifest),base);
  const configBytes=readFileSync(new URL('./source-config.b1.json',import.meta.url)),config=JSON.parse(configBytes);
  const caseBytes=readFileSync(new URL('./cases.b1.json',import.meta.url)),samples=JSON.parse(caseBytes);
  check(sha256(configBytes)===c.sourceConfigHash&&sha256(caseBytes)===c.casesHash&&
