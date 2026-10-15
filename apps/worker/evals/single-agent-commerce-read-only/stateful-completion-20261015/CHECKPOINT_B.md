@@ -1,5 +1,7 @@
 # Phase B candidate integration — code delivered, acceptance STOP
 
+Latest owner-requested model replay: [post-review seven-turn run](../stateful-post-review-20261015/CHECKPOINT_B.md) at d9d96e4b completed7/7,15invocations/14HTTP,4fallback/2handoff/1no-send, no cart. New receipt appears in a real verifier request, but the target ACK turn fails before dispatch on OWNER_REQUEST_BOUND. Separate raw→primary→diagnosis evidence; no old output or score replaced. Sales/live acceptance remains STOP.
+
 Owner-requested follow-up: [independent review fixes and current verification](REVIEW_FIXES.md) close stale-source profile writes and final revision rebasing found at cb8bb5e. Corrected source0bbabea has independent GPT-6.1 Sol High re-review, worker1756PASS/database246PASS+30optionalSKIP, final build/typecheck/lint and composed PostgreSQL COD/bank12/12eachPASS/dropped. Historical provider/source evidence below is unchanged; it does not qualify the later correction. Acceptance remains STOP.
 
 Đã nối các phần B còn thiếu: đổi size/màu thành phần giỏ, nhiều mutation tuần tự trong cùng nguồn Inbox, hành trình có profile/cart/history lưu qua lượt, checkout riêng tư, handoff và Outbox/delivery capture. Đã sửa cả lỗi nguồn thật alias/canonical shop và receipt cập nhật hồ sơ. **Chưa có GO nghiệm thu hoặc chạy thật:** lượt model cuối còn lỗi; bản receipt cuối chưa chạy lại bằng model.

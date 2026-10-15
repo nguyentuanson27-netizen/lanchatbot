@@ -3,9 +3,9 @@
 ## Post-review test replay — 2026-10-15
 
 - [x] Freeze [the same seven stateful B cases, N1/max24generations](../apps/worker/evals/single-agent-commerce-read-only/stateful-post-review-20261015/SCOPE.md), approved models/config and whole-terminal review/accounting before generation. Rerun worker118/database48/protocol-provider23PASS; initial provider preflight0generationPASS.
-- [ ] Commit/clean source seal, composed PostgreSQL COD/bank controls and final zero-generation preflight.
-- [ ] Run the one owner-requested source-backed batch; commit raw before primary review, retain every failure/attempt and database cleanup; no automatic retry or further round.
-- [ ] Audit/review actual outcomes, update report/tasks/PR391 and stop; no live activation or inference of A PASS.
+- [x] Commit/clean source d9d96e4b; PostgreSQL COD/bank12/12eachPASS/dropped; final zero-generation preflightPASS. Runtime registration binds the unchanged prompt/schema/corpus/config and models.
+- [x] Run exactly7/7outcomes,15generationinvocations/14HTTP; retain one pre-dispatch OWNER_REQUEST_BOUND. Raw58ca01e4 before primaryeddcfc64; provider database dropped, zero retry or replacement.
+- [x] Audit all10raw blobs/14request envelopes/15IDs/2verifier bindings,0evaluator/private-checkout leak. [Report/STOP](../apps/worker/evals/single-agent-commerce-read-only/stateful-post-review-20261015/CHECKPOINT_B.md):4fallback/2handoff/1no-send,0eligible/no cart,0/4usable sales replies. Preserve primary labels, report actual owner/tool/context/verifier failures and stop; no live activation or inference of A PASS.
 
 ## Independent review corrections — 2026-10-15
 

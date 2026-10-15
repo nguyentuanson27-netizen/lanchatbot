@@ -4,6 +4,8 @@ Starting/reviewed head: cb8bb5efb0db920382cbfd874b30e836bb222d46. Owner requests
 
 **Reviewed executable source: `0bbabeafa8bea8b024a05af6d8893a3c1c502a8f`. Both findings resolved; no new substantiated P1/P2 in the independent re-review.** Final local and composed PostgreSQL verification passed. [Machine-readable results and log hashes](review-fixes-verification.json), [COD database report](review-fixes-integration-cod.json), [bank transfer database report](review-fixes-integration-bank.json). Later delivery commits contain only reports/tasks, not executable changes.
 
+Subsequent owner authorization produced a [separate model replay](../stateful-post-review-20261015/CHECKPOINT_B.md), source d9d96e4b. Its failures and results do not change the original review verdict or the historical statement that this correction step itself ran no provider batch.
+
 ## Findings and implementation
 
 - **P1:** a superseded Inbox could still update the customer profile because its CAS checked only profile revision. The persisted ingress now supplies the code-owned current authority, source hash and existing Inbox guard. The existing database CAS locks page → Inbox head/source → scoped conversation in one transaction before updating the profile. Current BOT ownership, conversation revision, source identity, lease and routing must agree; the existing lease remains retained. Unguarded legacy callers retain their original API behavior. A pre-write read alone is not the fix; the database transaction owns the race.
