@@ -33,7 +33,7 @@ test('both owners receive identical trusted text and native dialogue; evaluator 
  const r=request(),gemini=comparisonOwnerRequest('gemini',config(),r),sol=comparisonOwnerRequest('sol',config(),r);
  assert.equal(sol.model,'gpt-6.1-sol');assert.deepEqual(sol.reasoning,{effort:'low'});
  assert.equal(sol.instructions,gemini.systemInstruction.parts[0].text);
- assert.deepEqual(sol.input.map(m=>m.content[0].text),gemini.contents.map(m=>m.parts[0].text));
+ assert.deepEqual(sol.input.map(m=>m.content),gemini.contents.map(m=>m.parts[0].text));
  assert.deepEqual(sol.input.map(m=>m.role),['user','user','user','assistant','user']);
  assert.deepEqual(sol.tools,[]);assert.equal(sol.tool_choice,'none');
  assert.equal(gemini.toolConfig.functionCallingConfig.mode,'NONE');

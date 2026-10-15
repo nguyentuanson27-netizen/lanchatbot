@@ -44,7 +44,7 @@ export function comparisonOwnerRequest(owner,c,request){
  check(owner==='sol','COMPARISON_MODEL');
  const wire={model:c.owners.sol.model,reasoning:{effort:c.owners.sol.effort},instructions:body.systemInstruction.parts[0].text,
   input:body.contents.map(message=>({type:'message',role:message.role==='model'?'assistant':'user',
-   content:[{type:message.role==='model'?'output_text':'input_text',text:message.parts.map(p=>{check(typeof p.text==='string','COMPARISON_TEXT_ONLY');return p.text;}).join('')}]})),
+   content:message.parts.map(p=>{check(typeof p.text==='string','COMPARISON_TEXT_ONLY');return p.text;}).join('')})),
   tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true};
  check(Buffer.byteLength(JSON.stringify(wire))<=32768,'COMPARISON_INPUT_BOUND');return wire;
 }
@@ -151,7 +151,7 @@ async function main(){
    const {scope,tools,sourceReads}=await makeTools(slot,requestId);
    const owner=async request=>{
     const r={...request,sourceReads},body=comparisonOwnerRequest(slot.owner,c,r);
-    const texts=slot.owner==='gemini'?body.contents.map(m=>m.parts[0].text):body.input.map(m=>m.content[0].text);
+    const texts=slot.owner==='gemini'?body.contents.map(m=>m.parts[0].text):body.input.map(m=>m.content);
     const viewHash=sha256(JSON.stringify({instructions:ownerPrompt,texts}));
     if(!viewHashes.has(slot.caseId))viewHashes.set(slot.caseId,viewHash);
     if(viewHashes.get(slot.caseId)!==viewHash){

@@ -19,6 +19,13 @@
       "exitCode": 1,
       "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-tool-definitions.log",
       "logSha256": "33bb9fc2cbdc468ac264c51b6a6e1d9e9fb33d1777217f2c26477e5a9314c6d8"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+      "exitCode": 1,
+      "reason": "Use official EasyInputMessage string-content history form",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-history-content.log",
+      "logSha256": "cc2a82ff6bc980269a57dca47a65e14b971e8f0793df658899e864deb77ab9a8"
     }
   ],
   "green": {
@@ -109,5 +116,19 @@
     "all12SlotsCounted": true,
     "limitation": "Post-read owner diagnostic only; no GPT native tool calling, full B1/A qualification, or live delivery. FINAL_READBACK audit reuses the existing readback; no new source read or gate."
   },
-  "windowsAlias": "Tracked link-text file temporarily replaced by a junction for existing full-worker tests, restored byte-exact by helper finally block."
+  "windowsAlias": "Tracked link-text file temporarily replaced by a junction for existing full-worker tests, restored byte-exact by helper finally block.",
+  "finalWireVerification": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs",
+    "exitCode": 0,
+    "pass": 36,
+    "skip": 1,
+    "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\final-wire-tests.log",
+    "logSha256": "083662e8affc477597b6e86f316753d5960d98dc6828bc1c47e2dde22d93f4a6"
+  },
+  "initialPreflight": {
+    "sourceSha": "b11ac53aab0f56d655fe90335840ace53dea08d8",
+    "status": "SOURCE_PREFLIGHT_PASS",
+    "providerGenerations": 0,
+    "limitation": "Wire history representation subsequently changed to the official string-content form. A fresh clean-source preflight is required; no provider request occurred on the earlier seal."
+  }
 }
