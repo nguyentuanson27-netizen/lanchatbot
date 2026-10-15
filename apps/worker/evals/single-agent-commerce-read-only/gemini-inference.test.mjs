@@ -53,6 +53,17 @@ test('state/effect capabilities are explicit and the accepted quote reaches the 
  r.toolsAllowed=false;assert.equal(buildGeminiCommerceRequest(r).toolConfig.functionCallingConfig.mode,'NONE');
 });
 
+test('native variant changes and public current cart reach the owner without private checkout',()=>{
+ const r=request();r.context.state.cartItems=[{subjectRef:'line-ref',productRef:'SM613',quantity:1}];
+ r.context.state.checkoutStatus={previewAvailable:true,purchaseConfirmed:false};r.context.state.checkoutDraft={phone:'PRIVATE_PHONE'};
+ const b=buildGeminiCommerceRequest(r,effectDeclarations),d=b.tools[0].functionDeclarations.find(d=>d.name==='change_cart_item');
+ assert.ok(d.parameters.properties.action.enum.includes('SET_COMPONENT_VARIANT'));
+ assert.ok(d.parameters.properties.componentRole);assert.ok(d.parameters.properties.size);assert.ok(d.parameters.properties.color);
+ const view=JSON.parse(b.contents[0].parts[0].text).trusted.state;
+ assert.deepEqual(view.cartItems,r.context.state.cartItems);assert.deepEqual(view.checkoutStatus,r.context.state.checkoutStatus);
+ assert.doesNotMatch(JSON.stringify(b),/PRIVATE_PHONE|checkoutDraft/);
+});
+
 test('composed capabilities restrict the actual native declarations and expose only a handoff reason',()=>{
  const r=request();r.availableTools=['read_policy','request_handoff'];
  const built=buildGeminiCommerceRequest(r),decls=built.tools[0].functionDeclarations;

@@ -530,7 +530,7 @@ function modelPaymentMethod(
   return field.value;
 }
 
-function checkoutDetails(
+export function checkoutDetails(
   text: string,
   salesSignals: AgentSalesSignalsV1 | null | undefined,
 ): CheckoutDetails {
@@ -741,7 +741,7 @@ async function currentSelections(
 
 type ReadyCartSelection = Extract<CartSelectionResult, { status: "READY" }>;
 
-function selectionsMatchCartLines(
+export function selectionsMatchCartLines(
   lines: CartV1["lines"],
   selections: readonly ReadyCartSelection[],
 ): boolean {

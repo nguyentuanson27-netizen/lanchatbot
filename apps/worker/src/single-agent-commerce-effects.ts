@@ -2,13 +2,20 @@ import { computeBusinessContentHash, executePersistedSalesCycleCommand, type Run
   type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1, type ResolvedCartDraftV1 } from "@lana/chat-runtime";
 import type { CanonicalCartIdentityV2, CanonicalCartMutationV2 } from "@lana/business-tools";
+import { buildProtectedClaimsFromCartSelectionsV1, normalizeCatalogToken } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import { selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
+export type CommerceCommandResult =
+  | { status: "APPLIED"; state: SalesCycleRuntimeState; transferToHuman: boolean }
+  | { status: "DUPLICATE"; state: SalesCycleRuntimeState }
+  | { status: "HANDOFF"; state: SalesCycleRuntimeState; reasonCode: string }
+  | { status: "REJECTED" | "CONFLICT"; reasonCode: string };
 
 /** Native tools bridge to existing atomic sales-cycle repository. No external order/send implementation. */
 export async function createCommerceEffectTools(input: {
@@ -23,7 +30,7 @@ export async function createCommerceEffectTools(input: {
   readAuthority?: () => Promise<Pick<CommerceScope, "revision" | "conversationOwner" | "recipient" | "permission" | "privacyAllowed" | "bindingVersion">>;
   readReceipt?: (operationId: string) => Promise<TrustedContext["effectReceipts"][number] | null>;
   executeCommand?: (input: { command: SalesCycleCommand; expectedRevision: number; conversationRevision: number; bindingVersion: string; trustedPorts: SalesCycleTrustedPortsV1;
-    policy: RuntimePolicyBundle }) => ReturnType<typeof executePersistedSalesCycleCommand>;
+    policy: RuntimePolicyBundle }) => Promise<CommerceCommandResult>;
 }): Promise<CommerceTools> {
   async function read() {
     const s = await input.repository.read(input.conversationKey);
@@ -32,6 +39,7 @@ export async function createCommerceEffectTools(input: {
     return s;
   }
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
+  const selections = new Map<string, Extract<CartSelectionResult, { status: "READY" }>>();
   let authority = await input.readAuthority?.();
   if (authority && (authority.bindingVersion !== input.scope.bindingVersion || authority.recipient !== input.scope.recipient)) throw new Error("COMMERCE_SCOPE");
   const turnBinding = authority?.bindingVersion ?? input.scope.bindingVersion;
@@ -61,16 +69,29 @@ export async function createCommerceEffectTools(input: {
   }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
+    const active = [...selections.values()].filter(s => current.cart?.value.lines.some(l => selectionsMatchCartLines([l], [s])));
     if (current.cart) {
       subjects.push({ ref: current.cart.value.cartId, kind: "CART", label: "Giỏ hàng hiện tại", bindingVersion: base.state.bindingVersion });
       for (const line of current.cart.value.lines) subjects.push({ ref: line.lineId, kind: "CART_LINE", label: line.parentProductId, bindingVersion: base.state.bindingVersion });
     }
+    for (const s of active) if (!subjects.some(b => b.kind === "VARIANT" && b.ref === s.line.offerId && b.productId === s.line.parentProductId)) subjects.push({
+      ref: s.line.offerId, kind: "VARIANT", label: `${s.line.parentProductId} ${s.line.offerId}`, productId: s.line.parentProductId, bindingVersion: base.state.bindingVersion });
+    const selectionClaims = buildProtectedClaimsFromCartSelectionsV1(active.map(s => ({ productId: s.line.parentProductId, variantId: s.line.offerId, priceVnd: s.line.posUnitPriceVnd!,
+      priceVersion: s.versions.price, inventoryVersion: s.versions.inventory, etaVersion: s.versions.eta, eta: s.eta, etaExpiresAt: s.etaExpiresAt, sourceAuthority: s.sourceAuthority,
+      stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     const cart = current.cart?.value;
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
+      salesStage: current.stage, cartItems: cart?.lines.map(line => ({ subjectRef: line.lineId, productRef: line.parentProductId,
+        offerType: line.offerId, quantity: line.quantity, components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })) })) ?? [],
+      checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
+        missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
       ...(cart ? { cartQuote: { cartId: cart.cartId, cartVersion: cart.revision,
         subtotalVnd: cart.subtotalVnd, shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } } : {}) },
-      subjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims,
+      subjects, products: base.runtimeProducts ?? [], claims: [...base.protectedClaims.filter(c => {
+        const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
+        return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId && claim.scope.variantId === s.line.offerId);
+      }), ...selectionClaims],
       policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
       receipts: receipt ? [receipt] : [], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
@@ -80,7 +101,7 @@ export async function createCommerceEffectTools(input: {
       quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
     if (result.status !== "READY" || result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
-    return { ...result.line, lineId };
+    const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return line;
   }
   function recordReceipt(operationId: string, effect: string, expectedRevision: number) {
     if (current.revision !== expectedRevision || !current.processedCommandIds.includes(operationId) || !current.cart || current.stage === "HANDED_OFF") return false;
@@ -89,6 +110,14 @@ export async function createCommerceEffectTools(input: {
       expiresAt: new Date(Math.min(Date.parse(current.cart.expiresAt), Date.parse(current.updatedAt) + 300_000)).toISOString() };
     receiptConversationRevision = authority?.revision ?? input.base.snapshot().state.revision;
     receiptBindingVersion = turnBinding;
+    return true;
+  }
+  function acceptReceipt(recovered: TrustedContext["effectReceipts"][number] | null | undefined, operationId: string, allowed: string[]) {
+    if (!recovered || recovered.operationId !== operationId || recovered.status !== "SUCCESS" || !allowed.includes(recovered.effect) ||
+      !current.processedCommandIds.includes(operationId) || recovered.stateRevision !== current.revision || recovered.subjectRef !== current.cart?.value.cartId || recovered.recipient !== turnRecipient ||
+      !Number.isFinite(Date.parse(recovered.observedAt)) || !Number.isFinite(Date.parse(recovered.expiresAt)) || Date.parse(recovered.observedAt) > input.clock().getTime() ||
+      Date.parse(recovered.expiresAt) <= input.clock().getTime() || Date.parse(recovered.expiresAt) > Date.parse(current.cart.expiresAt)) return false;
+    receipt = recovered; receiptConversationRevision = authority?.revision ?? input.base.snapshot().state.revision; receiptBindingVersion = turnBinding;
     return true;
   }
   async function invokeEffect(call: CommerceToolCall): Promise<CommerceToolResult> {
@@ -119,12 +148,7 @@ export async function createCommerceEffectTools(input: {
       if (current.processedCommandIds.includes(operationId)) {
         const recovered = receipt?.operationId === operationId ? receipt : await input.readReceipt?.(operationId);
         const allowed = call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
-        if (!recovered || recovered.operationId !== operationId || recovered.status !== "SUCCESS" || !allowed.includes(recovered.effect) ||
-          recovered.stateRevision !== current.revision || recovered.subjectRef !== current.cart?.value.cartId || recovered.recipient !== turnRecipient ||
-          !Number.isFinite(Date.parse(recovered.observedAt)) || !Number.isFinite(Date.parse(recovered.expiresAt)) ||
-          Date.parse(recovered.observedAt) > input.clock().getTime() || Date.parse(recovered.expiresAt) <= input.clock().getTime() ||
-          Date.parse(recovered.expiresAt) > Date.parse(current.cart.expiresAt)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
-        receipt = recovered;receiptConversationRevision = authority?.revision ?? input.base.snapshot().state.revision;receiptBindingVersion = turnBinding;
+        if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
         return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value } };
       }
       policy = await input.policy();
@@ -142,18 +166,19 @@ export async function createCommerceEffectTools(input: {
       } else if (call.name === "change_cart_item") {
         if (a.action === "REMOVE_LINE") mutation = { kind: "REMOVE_LINE", lineId: line!.lineId };
         else if (a.action === "SET_QUANTITY" && Number.isInteger(a.quantity) && (a.quantity as number) > 0 && (a.quantity as number) <= 20) mutation = { kind: "SET_QUANTITY", lineId: line!.lineId, quantity: a.quantity as number };
-        else if (a.action === "SET_COMPONENT_VARIANT" && typeof a.size === "string") {
+        else if (a.action === "SET_COMPONENT_VARIANT" && (typeof a.size === "string" || typeof a.color === "string")) {
           const component = line!.components.find(c => c.componentRole === a.componentRole);
           if (!component) return { status: "REJECTED", reason: "COMPONENT_REF" };
-          const selected = await selection(line!.parentProductId, { ...a, color: a.color ?? component.color, quantity: line!.quantity }, line!.lineId, line!.offerKind);
+          const selected = await selection(line!.parentProductId, { ...a, size: a.size ?? component.size, color: a.color ?? component.color, quantity: line!.quantity }, line!.lineId, line!.offerId);
           const variant = selected.components.find(c => c.componentProductId === component.componentProductId);
-          if (!variant || variant.size !== a.size) return { status: "REJECTED", reason: "VARIANT_UNAVAILABLE" };
+          if (!variant || variant.size === null || normalizeCatalogToken(variant.size) !== normalizeCatalogToken(String(a.size ?? component.size ?? "")) ||
+            normalizeCatalogToken(variant.color ?? "") !== normalizeCatalogToken(String(a.color ?? component.color ?? ""))) return { status: "REJECTED", reason: "VARIANT_UNAVAILABLE" };
           mutation = { kind: "SET_COMPONENT_VARIANT", lineId: line!.lineId, componentProductId: component.componentProductId,
             componentSku: variant.componentSku, size: variant.size!, color: variant.color };
         } else return { status: "REJECTED", reason: "MUTATION_ARGUMENTS" };
       }
       if (mutation) command = { kind: "CART_MUTATED", commandId: operationId, expectedCartVersion: current.cart!.value.revision,
-        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: "OTHER" };
+        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
       else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
         intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
       const ports: SalesCycleTrustedPortsV1 = {
@@ -163,7 +188,7 @@ export async function createCommerceEffectTools(input: {
         resolveInboundMessage: id => input.trustedPorts?.resolveInboundMessage(id) ?? null,
         revalidateCheckout: q => input.trustedPorts?.revalidateCheckout(q) ?? null,
       };
-      let result;
+      let result, reconciledRevision: number | undefined;
       const repository: SalesCycleStateRepositoryV1 = { read: key => input.repository.read(key),
         compareAndSwap: update => update.expectedRevision === authorizedRevision
           ? input.repository.compareAndSwap(update) : Promise.resolve(false) };
@@ -174,7 +199,11 @@ export async function createCommerceEffectTools(input: {
         : await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey,
         command: command!, now: input.clock(), trustedPorts: ports,
         ...(input.resolveBankTransferPolicy ? { resolveBankTransferPolicy: input.resolveBankTransferPolicy } : {}) }); }
-      catch { current = await read(); await refreshAuthority(); if (!recordReceipt(operationId, effectName, authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; } }
+      catch { current = await read(); await refreshAuthority();
+        const proved = input.executeCommand && input.readReceipt ? acceptReceipt(await input.readReceipt(operationId), operationId, [effectName]) : recordReceipt(operationId, effectName, authorizedRevision+1);
+        if (!proved) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; }
+        reconciledRevision = current.revision;
+      }
       if (result?.status === "HANDOFF") {
         current = await read(); await refreshAuthority();
         if (current.stage !== "HANDED_OFF" || current.revision !== authorizedRevision+1 ||
@@ -189,7 +218,7 @@ export async function createCommerceEffectTools(input: {
       if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
       current = await read();
       await refreshAuthority();
-      if (!recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
+      if (reconciledRevision !== undefined ? current.revision !== reconciledRevision : !recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
       if (result?.status === "APPLIED" && result.transferToHuman) committedHandoff = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
@@ -210,7 +239,14 @@ export async function createCommerceEffectTools(input: {
     const effectRejected = calls.some(c => names.has(c.name) && results.get(c)!.status !== "OK");
     for (const c of calls.filter(c => c.name === "quote_cart")) results.set(c, effectRejected ? { status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" } : await input.base.invoke(c));
     return calls.map(c => results.get(c)!);
-  }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy(); return snapshot(); },
+  }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
+    for (const id of selections.keys()) { const line = current.cart?.value.lines.find(l => l.lineId === id);
+      if (!line) { selections.delete(id); continue; }
+      const sizes = [...new Set(line.components.map(c => c.size))], colors = [...new Set(line.components.map(c => c.color))];
+      try { await selection(line.parentProductId, { size: sizes.length === 1 ? sizes[0] : null, color: colors.length === 1 ? colors[0] : null, quantity: line.quantity }, id, line.offerId); }
+      catch { selections.delete(id); }
+    }
+    return snapshot(); },
   async recover(outcome: TerminalOutcome) {
     if (outcome.disposition === "NO_SEND") return outcome;
     const handoff = await terminalOutcome(); if (handoff) return handoff;

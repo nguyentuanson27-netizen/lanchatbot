@@ -48,6 +48,50 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("keeps verified cart selection price/stock in model context and re-reads it before accepting an old verdict", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    expect(s.tools.snapshot().protectedClaims).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: "PRICE", value: { amountVnd: 499000, currency: "VND" } }),
+      expect.objectContaining({ type: "STOCK", value: { status: "IN_STOCK", availableQuantity: 4 } }),
+    ]));
+    const selected = await s.select(); s.select.mockResolvedValue({ ...selected, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0 } as never);
+    await s.tools.readback();
+    expect(s.tools.snapshot().protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({ type: "STOCK", value: { status: "PRE_ORDER", availableQuantity: 0 } })]));
+  });
+  it("keeps selection evidence for the canonical SKU casing used by a committed variant", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const state = structuredClone(s.current());
+    state.cart!.value.lines[0]!.components[0]!.componentSku = state.cart!.value.lines[0]!.components[0]!.componentSku.toLowerCase();
+    s.setCurrent(state);
+    await s.tools.readback();
+    expect(s.tools.snapshot().protectedClaims).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: "STOCK", value: { status: "IN_STOCK", availableQuantity: 4 } }),
+    ]));
+  });
+  it("reconciles a lost native cart-open response whose accepted prerequisite transitions advanced more than one revision", async () => {
+    const s = await setup(); s.setCurrent(createSalesCycleRuntimeState("test-cycle", { pageId: s.scope.pageId, conversationId: s.scope.conversationId }, commerceNow));
+    let operationId = "";
+    const tools = await createCommerceEffectTools({ base: s.base, scope: s.scope, clock: () => commerceNow, conversationKey: "test-cycle", repository: s.repository,
+      identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001", customerProfileId: fixtureProfile().profile.profileId },
+      authorize: s.authorize, policy: async () => s.policy, select: s.select,
+      executeCommand: async call => { let state = s.current();
+        for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const) state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind, commandId: kind }, now: commerceNow }).state;
+        state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: call.command, trustedPorts: call.trustedPorts, now: commerceNow }).state;
+        s.setCurrent(state); operationId = call.command.commandId; throw new Error("CONTROLLED_LOST_RESPONSE"); },
+      readReceipt: async () => ({ ref: `receipt:${operationId}`, operationId, subjectRef: s.current().cart!.value.cartId, effect: "CART_OPENED", status: "SUCCESS", stateRevision: s.current().revision,
+        recipient: s.scope.recipient, observedAt: commerceNow.toISOString(), expiresAt: new Date(commerceNow.getTime()+300000).toISOString() }) });
+    expect(await tools.invoke(s.add)).toMatchObject({ status: "OK" });
+    expect(tools.snapshot().effectReceipts[0]?.stateRevision).toBe(4);
+  });
+  it("exposes current public cart refs and checkout status across turns without private checkout fields", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const state = s.tools.snapshot().state;
+    expect(state.salesStage).toBe("CART_OPEN");
+    expect(state.cartItems).toEqual([{ subjectRef: s.current().cart!.value.lines[0]!.lineId, productRef: "SM613", offerType: "SM613-DIRECT", quantity: 1,
+      components: [{ componentRole: "TOP", size: "M", color: "navy" }] }]);
+    expect(state.checkoutStatus).toMatchObject({ previewAvailable: false, purchaseConfirmed: false });
+    expect(JSON.stringify(state)).not.toContain("checkoutDraft");
+  });
   it("preserves an actual committed checkout handoff and stops the owner instead of falling back", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const executeCommand = vi.fn(async ({command}: {command:{commandId:string}}) => {
@@ -74,6 +118,18 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup();
     expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "DIRECT" } })).status).toBe("OK");
     expect(s.select).toHaveBeenCalledWith(expect.objectContaining({offerType:"DIRECT"}));
+  });
+  it("uses the cart's exact selling offer when changing a variant, rather than its generic offer kind", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const line = s.current().cart!.value.lines[0]!;
+    await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "M" } });
+    expect(s.select).toHaveBeenLastCalledWith(expect.objectContaining({ offerType: line.offerId }));
+  });
+  it("compares the source's canonical size/color identity when a native change uses lowercase labels", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const selected = await s.select(); selected.line.components[0]!.color = "NAVY"; s.select.mockResolvedValue(selected);
+    expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: s.current().cart!.value.lines[0]!.lineId,
+      action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "m", color: "navy" } })).toMatchObject({ status: "OK" });
   });
   it("requires code permission and a bounded subject before any write", async () => {
     const s = await setup(); s.authorize.mockResolvedValue(false);

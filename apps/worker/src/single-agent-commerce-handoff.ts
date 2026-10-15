@@ -66,8 +66,8 @@ export function createCommerceHandoffTools(input: {
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     if (uncertain) return { disposition: "NO_SEND", reason: "HANDOFF_COMMIT_UNPROVED", text: null, fallbackId: null };
     if (!committed) {
-      const inherited = await input.base.terminalOutcome?.(); if (inherited) return inherited;
       const current = await read();
+      const inherited = await input.base.terminalOutcome?.(); if (inherited) return inherited;
       return scopeMatches(current) && current.permission && current.state.conversationOwner === "BOT" ? null
         : { disposition: "NO_SEND", reason: "HANDOFF_AUTHORITY", text: null, fallbackId: null };
     }

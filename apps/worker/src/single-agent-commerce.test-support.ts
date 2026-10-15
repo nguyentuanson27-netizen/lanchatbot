@@ -72,17 +72,17 @@ export function policyResolver(defaultFeeVnd = 25_000) {
 export const fixturePolicy = async (fee = 25_000) => policyResolver(fee).resolve({ pageId: commerceScope().pageId,
   channel: "CANARY_SHADOW", now: commerceNow });
 
-export function fixtureProduct(productId = "SM613") {
+export function fixtureProduct(productId = "SM613", at = commerceNow) {
   const product: StableProductDocument = { productId, parentProductId: productId, canonicalCode: productId,
     aliases: [], title: `Sơ mi ${productId}`, colors: ["navy"], materials: ["cotton"], silhouettes: ["suông"],
-    occasions: ["đi làm"], imageUrls: [], images: [], catalogVersion: "catalog-v1", observedAt: commerceNow.toISOString(),
-    attributes: buildProductAttributesV1({ productId, observedAt: commerceNow.toISOString(), data: {
+    occasions: ["đi làm"], imageUrls: [], images: [], catalogVersion: "catalog-v1", observedAt: at.toISOString(),
+    attributes: buildProductAttributesV1({ productId, observedAt: at.toISOString(), data: {
       materials: ["cotton"], materialComponents: {}, colors: ["navy"], styles: [], silhouettes: ["suông"], occasions: ["đi làm"],
       designAttributes: null, careInstructions: null, wearProperties: null, backCoverage: null, designComplexity: null,
     } }) };
   const snapshot = CatalogSnapshotV3Schema.parse({ schema_version: 3, release_id: "pos-v1", catalog_version: "catalog-v1",
     policy_version: "fulfillment-v1", shop_alias: "LANA", brand: "LANA_DESIGN", product_id: productId,
-    synced_at: commerceNow.toISOString(), data_status: "OK", fulfillment_policy: null, selling_rules: {
+    synced_at: at.toISOString(), data_status: "OK", fulfillment_policy: null, selling_rules: {
       allow_mixed_sizes: false, allow_component_sale: false, source_version: "selling-v1" }, shipping_eta: {},
     offers: { DIRECT: { list_price: 499_000, sale_price: 499_000, price_status: "OK", rows: [{
       offer_type: "DIRECT", color: "navy", size: "M", stock_quantity: 4, stock_status: "OK", sale_price: 499_000,

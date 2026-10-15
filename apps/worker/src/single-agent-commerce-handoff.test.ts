@@ -19,6 +19,15 @@ async function setup() {
     change: (patch: Partial<HandoffAuthority>) => { current = { ...current, ...patch }; } };
 }
 describe("Phase B handoff follows current code policy and committed ownership", () => {
+  it("refreshes its authority snapshot when checkout commits the handoff in the underlying effect port", async () => {
+    const s = await setup(); let checkoutCommitted = false;
+    const tools = createCommerceHandoffTools({ base: { ...s.base, terminalOutcome: async () => checkoutCommitted ? { disposition: "HANDOFF", reason: "PURCHASE_CONFIRMED", text: null, fallbackId: null } : null },
+      scope: s.scope, clock: () => commerceNow, policy: async () => s.policy, read: s.read, commit: async () => false });
+    await tools.terminalOutcome!();
+    s.change({ stateVersion: 2, permission: false, state: { ...s.current().state, revision: 2, conversationOwner: "HUMAN" } }); checkoutCommitted = true;
+    expect(await tools.terminalOutcome!()).toMatchObject({ disposition: "HANDOFF" });
+    expect(tools.snapshot().state).toMatchObject({ revision: 2, conversationOwner: "HUMAN", permission: false });
+  });
   it("uses the configured rule and forbids model-authored messages, tags or identity", async () => {
     const s = await setup();
     Object.assign(s.policy.artifacts, { handoffMatrix: { schemaVersion: 1, kind: "HANDOFF_MATRIX", sourceMetadata: s.policy.artifacts.shopPolicy.sourceMetadata,

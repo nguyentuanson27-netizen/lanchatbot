@@ -1553,7 +1553,6 @@ async function validateLockedCartOpenTransitionV1(
   const next = salesStateRecordV1(plan.state);
   const nextCart = cartFromSalesStateV1(next);
   if (event.cartId !== nextCart.cartId || event.cartVersion !== nextCart.revision ||
-    event.stateRevisionBefore !== plan.expectedRevision ||
     event.stateRevisionAfter !== Number(next.revision)) {
     throw new Error("CART_OPEN_EVENT_BINDING_MISMATCH");
   }

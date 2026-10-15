@@ -17,7 +17,7 @@ export const stateDeclarations=[
 ];
 export const effectDeclarations=[
  {name:'add_to_cart',description:'Thêm lựa chọn khách muốn mua vào giỏ qua code; offerType chọn đúng cả set hoặc món lẻ từ nguồn. Chỉ báo đã thêm khi tool có kết quả commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
- {name:'change_cart_item',description:'Đổi số lượng hoặc bỏ dòng giỏ bằng ref code đã cấp. Code quyết định revision, quyền và kết quả commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE']},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','action']}},
+ {name:'change_cart_item',description:'Đổi số lượng, size/màu của thành phần hoặc bỏ dòng giỏ bằng ref code đã cấp. Đổi size/màu dùng SET_COMPONENT_VARIANT, componentRole từ giỏ hiện tại và size/color khách chọn. Code kiểm biến thể, quyền và commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
  {name:'confirm_purchase',description:'Gửi ý định xác nhận mua của tin khách hiện tại vào luồng checkout đã có. Cần preview, thông tin riêng tư và revalidation hợp lệ từ code; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const handoffDeclarations=[
@@ -40,7 +40,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
    policy:c.policyLiterals.map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
-   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote',
+   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
     'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']
      .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]])),
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
