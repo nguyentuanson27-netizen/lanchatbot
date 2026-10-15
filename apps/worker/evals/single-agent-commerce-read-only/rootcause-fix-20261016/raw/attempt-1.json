@@ -1,0 +1,78 @@
+{
+  "caseId": "b1-changed-occasion",
+  "sourceMode": "LIVE",
+  "elapsedMs": 10952.617299999998,
+  "runtime": {
+    "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
+    "history": [
+      {
+        "role": "customer",
+        "text": "Chị đang tính lấy set Thạch Thảo để mặc đi tiệc trong nhà."
+      },
+      {
+        "role": "shop",
+        "text": "Dịp đó mặc set này hợp chị ạ."
+      }
+    ],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "CONTEXT_BOUND",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "07e70521fb9648baf09879ba164d38f093a1ba1a31313addc927553755ac044f:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2031.4328999999998,
+        "telemetry": {
+          "generationId": "07e70521fb9648baf09879ba164d38f093a1ba1a31313addc927553755ac044f:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2395,
+          "outputTokens": 324,
+          "cost": null,
+          "thinkingTokens": 303
+        }
+      },
+      {
+        "id": "07e70521fb9648baf09879ba164d38f093a1ba1a31313addc927553755ac044f:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4618.6658000000025,
+        "telemetry": {
+          "generationId": "07e70521fb9648baf09879ba164d38f093a1ba1a31313addc927553755ac044f:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3362,
+          "outputTokens": 1374,
+          "cost": null,
+          "thinkingTokens": 1354
+        }
+      }
+    ],
+    "toolLatencyMs": 3611.704700000002,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 2,
+    "posReads": 1
+  }
+}
