@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current owner-requested prompt rollback — 2026-10-15
+
+- [x] Restore active owner prompt/base manifest byte-exact from83061af5; owner SHA256d6ba7b6c. Keep both model configurations, verifier, source/cache fix, current final gate and every historical run unchanged.
+- [x] Observed36PASS/1FAIL/1optionalSKIP after rollback: one test wrongly equated frozen rejected-run hash with active prompt. Remove that assumption; existing retired-registration CLI preflight rejects COMPARISON_FROZEN_INPUT before any source/provider work. No runtime gate added.
+- [x] Record [concrete next-direction plan](../apps/worker/evals/single-agent-commerce-read-only/OWNER_PROMPT_NEXT_STEPS.md), informed by all12paired drafts and older8case B1 replies; future candidate/context changes not implemented or run.
+- [x] Current focused37PASS/1optionalSKIP; full eval467PASS/2optionalSKIP; boundary60PASS/protected21PASS. Exact rollback/history/runtime identity and diff-checkPASS. Typecheck/build/lint/full worker src not rerun for this prompt/config/test-only rollback; no new semantic/provider evidence.
+- [ ] Commit/push/update and read back draftPR391 with active rollback identity and next-direction proposal. No new provider generation or automatic next batch.
+
 ## Current two-owner prompt follow-up — 2026-10-15
 
 - [x] Owner rejects both owners' tone; read all12new versus12prior drafts plus prompt/context/primary. [Review correction](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/REVIEW_CORRECTION.md) withdraws use of prior NATURAL labels as evidence of acceptable tone; records shortening-without-conversational-change, policy checklist voice, over-lenient review and limited diagnostic scope. Duplicate source text verified but inherited; effect remains hypothesis. No prompt/config/raw/primary rewrite or generation; proposed whole-owner/capability/context changes not implemented.

@@ -25,7 +25,8 @@ test('a fresh comparison selects its explicit registration without rewriting or 
  assert.deepEqual(readComparisonManifest(current),base);
  const fresh=readComparisonManifest(new URL('./owner-comparison-followup-20261015/manifest.json',import.meta.url));
  assert.doesNotThrow(()=>validateComparison(fresh,base));
- assert.deepEqual(fresh.promptHashes,base.promptHashes);
+ // Frozen registrations retain their own input identity across active-prompt rollbacks.
+ // The CLI's existing frozen-input check controls admission before source/provider work.
  assert.notEqual(fresh.promptHashes.owner,JSON.parse(before).promptHashes.owner);
  assert.equal(fresh.promptHashes.verifier,JSON.parse(before).promptHashes.verifier);
  assert.throws(()=>readComparisonManifest(new URL('./unregistered-comparison/manifest.json',import.meta.url)),/ENOENT/);

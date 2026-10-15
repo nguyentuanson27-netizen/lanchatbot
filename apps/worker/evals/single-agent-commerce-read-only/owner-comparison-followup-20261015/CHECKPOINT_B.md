@@ -1,5 +1,7 @@
 # Checkpoint B — so sánh hai owner sau sửa cách nhắn
 
+**Active prompt đã rollback theo yêu cầu owner:** prompt/base manifest hiện tại khôi phục từ83061af5, owner hashd6ba7b6c. Báo cáo này vẫn thuộc source08b98c2c/hash0a0abb5b và giữ nguyên toàn bộ evidence lịch sử; registration đó không khớp prompt hiện tại và sẽ bị từ chối trước provider. [Rollback và hướng sửa](../OWNER_PROMPT_NEXT_STEPS.md). Không generation mới hoặc kế thừa PASS.
+
 **Owner feedback và đính chính review:** Owner bác chất lượng giọng của cả hai model. [Review lại toàn bộ12cặp draft mới/cũ](REVIEW_CORRECTION.md) xác định primary đã chấp nhận NATURAL quá dễ ở Sol2/6 và Gemini3; các nhãn lịch sử dưới đây không chứng minh giọng đã đạt. Sol6/6 functional không phải chất lượng bán hàng6/6. Raw, primary và mọi số đo giữ nguyên; không generation hoặc sửa prompt mới. STOP vẫn có hiệu lực.
 
 **Recommendation: STOP.** Đã thực hiện đúng một batch12slot, không có generation tiếp theo. Sol bớt dài ở ca sân khấu nhưng vẫn đọc lại tình trạng hàng trong cả ba ca policy. Gemini ngắn hơn nhưng3eligible bị primary đánh giá vượt căn cứ (2rõ +1hàm ý cần owner xem); giảm fallback không đồng nghĩa chất lượng/an toàn tốt hơn. Đây là diagnostic hai ca, không phải full B1/A2/A3 hoặc quyết định đổi model.

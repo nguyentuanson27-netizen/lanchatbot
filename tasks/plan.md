@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current owner-requested prompt rollback and next direction — 2026-10-15
+
+Owner requests restoring the previous prompt and finding a suitable correction direction. Restore active owner text/base manifest byte-exact from83061af5 (owner hashd6ba7b6c); preserve all rejected-run raw/frozen inputs and review history. [Rollback scope and proposed next direction](../apps/worker/evals/single-agent-commerce-read-only/OWNER_PROMPT_NEXT_STEPS.md) proposes a separate whole-owner task/style candidate with existing source/tool authority intact, broader existing everyday sales cases, and whole-message review. No candidate activation/provider run/model/verbosity/context change in this task. Existing registration admission rejects a retired mismatched manifest before provider work; remove a test's incorrect coupling of a historical registration hash to whichever prompt is active. Verify current protocols/providers and eval suite, record exact rollback identity/results, update PR391, STOP. No native Sol tools/full B1 qualification or deploy.
+
+Rollback verification completed: owner/base manifest equal83061af5bytes, only active owner hash differs from pre-rollback config; model/verifier/schema/fallback unchanged. Focused37PASS/1optionalSKIP, full eval467PASS/2optionalSKIP, boundary60PASS/protected21PASS; existing mismatched registration rejected before source/provider. No new provider generations or quality claim; future prompt/capability/context proposals remain unimplemented.
+
 ## Current two-owner prompt follow-up — 2026-10-15
 
 Owner subsequently rejects both owners' tone. [Full paired re-review and correction](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/REVIEW_CORRECTION.md) records that prior NATURAL acceptance was too lenient and6/6functional is not sales-quality acceptance. Latest change shortened explanation without changing its administrative cadence; source duplication/capability mismatch are inherited facts with untested causal effect. Preserve raw/primary/config, STOP; this review does not implement a further fix or authorize another generation.
