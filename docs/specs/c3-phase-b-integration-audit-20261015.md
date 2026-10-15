@@ -6,6 +6,8 @@ The owner asks to finish the remaining B work, rather than leave it tracked. Con
 
 Reuse the existing typed cart evidence/replay, current Inbox lease, conversation/profile CAS and Outbox. Intermediate effects retain the source lease; final terminal commit completes it. Every write still checks the current source and revision, and partial effects remain receipt-backed. Extend the current typed contract for variants and native permission; do not add text matching, a new store, or a parallel readiness system. Observe focused RED before implementation, run affected package checks, and self-review before sealing source for a bounded provider batch. Preserve all provider attempts and distinguish engineering completion from observed sales quality.
 
+The current real-database tests also exposed a missing schema connection: migration0017 rejects the runtime's already-existing clarification commands. Compatibility migration0035 only adds those two values to the existing event CHECK. Its down path restores the exact prior constraint before new events exist and refuses destructive rollback afterward. This justified correction supersedes the earlier no-migration assumption; apply/test only in disposable databases. No serving-schema or role/table/data change is performed.
+
 Owner asks to inspect disconnected rules/capabilities, track them under B, connect them and review the result. Audit source: `814ef9872ec511cd8060c831c73d2bcae66d8a94`; refreshed main: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Continue on the existing B implementation branch/PR391. This supersedes earlier source-only pauses for the work below, not historical results or deployment restrictions.
 
 ## Coverage and work

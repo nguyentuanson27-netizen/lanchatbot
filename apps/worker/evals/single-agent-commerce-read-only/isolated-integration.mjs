@@ -50,6 +50,13 @@ try{
  const files=readdirSync(migrationRoot).filter(n=>n.endsWith('.up.sql')&&n<'0034').sort();
  for(const name of files){const sql=readFileSync(resolve(migrationRoot,name),'utf8');
   assert(!/\b(?:CREATE|ALTER)\s+ROLE|\bALTER\s+SYSTEM/i.test(sql),'CLUSTER_DDL_FORBIDDEN');await pool.query(sql);}
+ const clarificationMigration='0035_sales_cycle_clarification_commands',commandConstraint=async()=>(await pool.query("SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid='sales_cycle_events'::regclass AND conname='sales_cycle_events_command_kind_check'")).rows[0].definition;
+ const originalCommandConstraint=await commandConstraint(),clarificationUp=readFileSync(resolve(migrationRoot,clarificationMigration+'.up.sql'),'utf8'),clarificationDown=readFileSync(resolve(migrationRoot,clarificationMigration+'.down.sql'),'utf8');
+ await pool.query(clarificationUp);files.push(clarificationMigration+'.up.sql');
+ await check('B composed existing clarification migration rolls back exactly before new events',async()=>{
+  assert((await commandConstraint()).includes('CLARIFICATION_REQUESTED'));
+  await pool.query(clarificationDown);assert.equal(await commandConstraint(),originalCommandConstraint);await pool.query(clarificationUp);
+ });
  report.schemaFiles=files;report.testDatabase=databaseName;save();
  const cipher=new LocalEnvelopeCipher(randomBytes(32).toString('hex'),'c3-b-test-only');
  runtime=new PostgresRealtimeRuntimeStore(testUrl.toString(),cipher,3);
@@ -386,6 +393,11 @@ try{
  await check('B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged',async()=>{
   const j=await statefulFixture();const r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{afterVerify:async()=>j.changeVariantSource()});
   assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));assert.equal(r.result.enqueued,0);assert.equal(await inbox.isBatchCurrent(r.batch),false);
+ });
+ await check('B composed clarification rollback refuses to destroy existing append-only events',async()=>{
+  const definition=await commandConstraint(),count=Number((await pool.query("SELECT count(*) AS n FROM sales_cycle_events WHERE command_kind IN ('CLARIFICATION_REQUESTED','CLARIFICATION_RESOLVED')")).rows[0].n);assert(count>0);
+  await assert.rejects(withTransaction(pool,client=>client.query(clarificationDown)),/SALES_CLARIFICATION_EVENTS_REQUIRE_COMPATIBLE_SCHEMA/);
+  assert.equal(await commandConstraint(),definition);assert.equal(Number((await pool.query("SELECT count(*) AS n FROM sales_cycle_events WHERE command_kind IN ('CLARIFICATION_REQUESTED','CLARIFICATION_RESOLVED')")).rows[0].n),count);
  });
  if(providerRun){
   const journeys=new Map();report.outcomes=[];
