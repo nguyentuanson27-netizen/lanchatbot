@@ -7,7 +7,7 @@
 - [x] Focused37PASS/1optionalSKIP, boundary60PASS, protected/reply21PASS; full worker1715PASS/eval467PASS/2optionalSKIP, typecheck/build/lintPASS; self-review and clean source08b98c2c/preflight0generation/readbackPASS.
 - [x] Execute12slots/24HTTP200 once,0retry/error/timeout; rawc550d950 before whole-terminal primarya7b2b658 before rejection diagnostics. Sol6eligible/6functional; Gemini3eligible/3fallback/0functional;3primary-marked unsafe eligible (2clear +1implication needing owner adjudication).
 - [x] Audit12bindings/readbacks,18raw disk/Git blobs, source seal/firewall/denominator/history; same context exactly across owners/baseline. [STOP report](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/CHECKPOINT_B.md), full12conversations, latency/tokens/cost limits and subjective tone review complete. No model promotion/native Sol tools/full B1 or A2/A3 claim.
-- [ ] Update/read back draftPR391 on exact delivered head, preserve STOP and no further generation.
+- [x] Reportheada0a44b8f pushed; draftPR391 title/body updated and exact head/body/branch/base/draft/open readbackPASS. BodySHA2561d77da34472c6f4b9633aace2fef2ecbe0fcf1d85bf9463ee7c567e842d7d27f; remote checks empty, not CI PASS. This final documentation savepoint follows; no further generation or executable/config change, STOP owner review.
 
 ## Current B prompt/tool follow-up — 2026-10-14
 
