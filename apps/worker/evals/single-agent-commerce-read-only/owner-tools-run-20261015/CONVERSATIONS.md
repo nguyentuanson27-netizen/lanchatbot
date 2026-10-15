@@ -49,9 +49,9 @@ Khách: Giờ chị nhận được 10 ngày, mới ướm bên ngoài người,
 Kết quả: **SEND_ELIGIBLE** / `PASS`
 
 ```text
-Dạ, chị hoàn toàn đổi màu được ạ! 
+Dạ, chị hoàn toàn đổi màu được ạ!
 
-Sản phẩm của chị nhận mới 10 ngày (vẫn trong thời gian hỗ trợ đổi 15 ngày kể từ khi nhận hàng), lại đáp ứng đúng các điều kiện đổi là còn nguyên tem, sạch sẽ, chưa giặt hay mặc và mới ướm bên ngoài người. 
+Sản phẩm của chị nhận mới 10 ngày (vẫn trong thời gian hỗ trợ đổi 15 ngày kể từ khi nhận hàng), lại đáp ứng đúng các điều kiện đổi là còn nguyên tem, sạch sẽ, chưa giặt hay mặc và mới ướm bên ngoài người.
 
 Phí đổi 2 chiều là 30.000đ chị nhé. Ngoài ra, nếu sản phẩm đổi sang màu mới có giá cao hơn thì mình thanh toán thêm phần chênh lệch giá giúp shop ạ.
 ```
@@ -137,7 +137,7 @@ Khách: Chị mặc đi làm một buổi, không ưng thì đổi lại đượ
 Kết quả: **SEND_ELIGIBLE** / `PASS`
 
 ```text
-Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem mác, **chưa qua sử dụng**, chưa giặt và sạch sẽ trong vòng 15 ngày kể từ khi nhận hàng. Do đó nếu mình đã mặc đi làm một buổi thì sẽ không đủ điều kiện để đổi ạ. 
+Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem mác, **chưa qua sử dụng**, chưa giặt và sạch sẽ trong vòng 15 ngày kể từ khi nhận hàng. Do đó nếu mình đã mặc đi làm một buổi thì sẽ không đủ điều kiện để đổi ạ.
 
 Về chi phí, phí vận chuyển đổi hàng 2 chiều là 30.000đ do khách hàng thanh toán (ngoài ra nếu đổi sang sản phẩm có giá cao hơn thì mình sẽ trả thêm phần chênh lệch giá ạ).
 ```

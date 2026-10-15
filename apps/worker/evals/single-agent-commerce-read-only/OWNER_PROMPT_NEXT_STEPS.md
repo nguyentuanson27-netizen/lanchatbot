@@ -4,6 +4,8 @@
 
 Owner bác cách chỉ từ chối món thiếu thông tin vì không giúp bán hàng, rồi yêu cầu sửa/review/chạy lại. [Scope và cách chấm](owner-tools-run-20261015/SCOPE.md), [self-review](owner-tools-run-20261015/SELF_REVIEW.md): thay hai bullet giao việc tư vấn và mở ba tools B1 đã có cho cả hai owner; vẫn same5cases N1/model, verifier/gate/policy nguồn giữ nguyên. Owner hash82964a2a,6.335bytes; không thêm few-shot, câu cấm hoặc case-specific handling. Sol thêm native function-call continuation trên relay hiện có; không thêm role/parser/repair hoặc production wiring. Readiness green; đăng ký/run riêng, không sửa evidence cũ. Các phần dưới là lịch sử trước thay đổi này.
 
+Đã chạy source5cbcde98,10/10outcomes/23HTTP200. [Kết quả](owner-tools-run-20261015/CHECKPOINT_B.md):3USABLE/6NEEDS_EDIT/1fallback và1unsafe eligible được verifier cho qua, chưa cải thiện rõ. Native tool limitation đã sửa; [findings](owner-tools-run-20261015/FINDINGS.md) phân tách source→context còn thiếu thông tin chọn đồ, owner nói theo kiểm chứng/copy catalogue và verifier mở quyền đổi chưa đủ căn cứ. Giữ nguyên source/run đã freeze, STOP owner review; không tự thêm checklist hoặc chạy vòng tiếp.
+
 ## Bản sửa hiện tại — 2026-10-15
 
 Owner yêu cầu thực hiện hướng sửa sau khi đã rollback. Bắt đầu từ clean HEAD `611c82073ab2cc2ae0bb937ae554cfd235d96d7a`, trên branch B hiện tại; refresh `origin/main` vẫn là `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Chỉ thay [owner prompt](prompts/owner.vi.txt) và hash tương ứng trong base manifest, cùng tài liệu/task. Đây là sửa nội dung prompt, không phải một đợt provider mới.
