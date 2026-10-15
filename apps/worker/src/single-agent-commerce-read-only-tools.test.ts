@@ -17,7 +17,7 @@ describe("read-only domain tools", () => {
   it("binds delivery ETA to the requested region and invalidates a changed delivery source", async () => {
     const f = fixtureProduct();
     f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: false, prep_min_days: 1,
-      prep_max_days: 2, zero_stock_policy: "", zero_stock_prep_min_days: null, zero_stock_prep_max_days: null, eta_valid_until: "" };
+      prep_max_days: 2, zero_stock_policy: "", zero_stock_prep_min_days: null, zero_stock_prep_max_days: null, eta_valid_until: " " };
     f.snapshot.shipping_eta = { HANOI: { transit_min_days: 2, transit_max_days: 4 } };
     const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
       initialProducts: [f.product], catalog: { readProduct: async () => structuredClone(f),

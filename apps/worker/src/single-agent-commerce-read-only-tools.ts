@@ -88,7 +88,7 @@ export function createReadOnlyTools(input: {
     const price = raw ? resolveCatalogFacts(raw, { ...query, intent: "PRICE" }, now, maxAge) : null;
     const stock = raw ? resolveCatalogFacts(raw, { ...query, intent: "STOCK" }, now, maxAge) : null;
     const eta = raw && query.deliveryRegion ? resolveCatalogFacts(raw, { ...query, intent: "ETA" }, now, maxAge) : null;
-    if (eta?.status === "OK" && eta.expiresAt && raw?.fulfillment_policy?.eta_valid_until) {
+    if (eta?.status === "OK" && eta.expiresAt && raw?.fulfillment_policy?.eta_valid_until.trim()) {
       eta.expiresAt = new Date(Math.min(Date.parse(eta.expiresAt), Date.parse(raw.fulfillment_policy.eta_valid_until))).toISOString();
     }
     const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: query.offerType,
