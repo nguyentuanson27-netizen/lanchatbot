@@ -3,10 +3,13 @@
 ## Current Phase B integration audit — 2026-10-15
 
 - [x] Inspect actual B source paths against architecture/execution plan; record [coverage matrix](../docs/specs/c3-phase-b-integration-audit-20261015.md), clean starting head814ef987 and refreshed main296cdcfb.
-- [ ] Connect current-source ETA through the existing catalog resolver and protected-claim builder; preserve independent source failures.
-- [ ] Connect optional HANDOFF_MATRIX/default code rules, reason requests and terminal recovery to existing guarded ownership/event/tag persistence and current readback.
-- [ ] Compose B1/B2/B3 capabilities; stop after actual committed checkout handoff; test state correction before dependent effects across turns.
-- [ ] Focused RED→GREEN, full worker tests/typecheck/build/lint, self-review/fix, actual evidence and draft PR391 delivery. Keep unsupported component-variant readiness, full stateful provider qualification and live ingress/delivery explicitly open.
+- [x] Connect current-source ETA through the existing catalog resolver/claim builder, with region/expiry binding and independent source failures. Expose source-approved public payment methods without bank/checkout data.
+- [x] Connect optional HANDOFF_MATRIX/default code rules, reason requests and terminal recovery to existing guarded ownership/event/tag persistence and current readback. Consume the caller's lease fence; never issue a candidate fence.
+- [x] Compose B1/B2/B3 capabilities; stop after actual committed checkout handoff; test state correction before dependent effects across turns. Review/fix current revision readback, volatile policy fetch identity and dropped executor flags.
+- [x] Focused RED→GREEN and self-review/fix complete. Final source868b5b2b: full worker128files/1733testsPASS,0skip; full eval478PASS plus later focused34native/protocolPASS, protected/product/size52PASS; worker typecheck/build/lint and final lint/direct TypeScript emit exit0. Windows historical v4 alias restored byte-exact. Changed-file secret/private-field/link/frozen-source checksPASS.
+- [x] Preserve all five database reports including the initial8PASS/1FAIL bridge outcome; clean2d1a6a8eCOD/bank12/12PASS each and both test databases dropped. No provider generation/live effect delivery. Final reject-only scope/no-send fixes have focused50PASS and full1733PASS at their own source; database evidence retains its earlier SHA. [Report and commands](../apps/worker/evals/single-agent-commerce-read-only/integration-audit-20261015/CHECKPOINT_B.md).
+- [ ] Persisted component-variant replacement and multiple persisted mutations/recovery after consumed inbox lease remain unsupported/unproven. Full provider B2-B3 journeys, live ingress/fence/delivery and sales/semantic qualification remain open; no Phase-B-complete or GO claim.
+- [ ] Deliver current audit/source/evidence on existing draft PR391 and read back exact head/state/branch/base; remote CI is separate from local PASS.
 
 ## Current 24-case B1 corpus preparation — 2026-10-15
 
