@@ -7,7 +7,7 @@
 - [x] Focused44PASS/1optionalSKIP, full eval474PASS/2optionalSKIP, B boundary/state/effects122PASS, protected/reply21PASS; worker typecheck/build/lint exit0. [Self-review/readiness](../apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SELF_REVIEW.md); source fix3d5544e3. Invalid native tool hash rejected before credentials/source/provider. Commit registration and require clean source before preflight/run.
 - [x] Clean seal5cbcde98/source preflightPASS/0generations; batch10/10,23HTTP200,0retry/error/timeout;3runtime tool rounds/4calls. Raw9403e2e6 before primary91a12ffa before diagnostics. Primary3USABLE/6NEEDS_EDIT/1fallback;1unsafe send-eligible policy approval despite verifierPASS. No post-primary generation or prompt rescue.
 - [x] [Report/history/findings](../apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/CHECKPOINT_B.md), full23request accounting/latency/token/cost evidence,16rawblob/10binding/29envelope auditPASS, initial owner-view equality/firewall. Record actual source coverage/projection limits and Gemini HTTP evidence limitation; no human/stability/full B1/A2/A3 acceptance. STOP owner review.
-- [ ] Update draft PR391 and read back exact head/body; no merge/deploy/send or automatic next round.
+- [x] Draft PR391 updated, reporthead5da52f78/body readbackPASS; bodySHA256a8030915d3c9008be2ce7c93063ad83e45dfe8881c659ef9db64412f8fc09920, open/draft/right branch/base/clean worktree. Remote checks empty, no CI PASS claim. Final documentation savepoint records delivery; no generation after primary, merge/deploy/send or automatic next round.
 
 ## Current single-pass owner comparison — 2026-10-15
 
