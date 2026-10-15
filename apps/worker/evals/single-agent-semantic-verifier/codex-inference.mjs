@@ -35,7 +35,7 @@ function launchCodex(base,manifest,role,spawnClient=spawn) {
   const child=spawnClient(codexBinary(),args,{stdio:['ignore','ignore','ignore'],windowsHide:true});
   return {done:new Promise(resolve=>{child.on('error',()=>resolve());child.on('exit',()=>resolve());}),stop:()=>child.kill()};
 }
-function parseStream(text,requestedModel,headerModel) {
+function parseStream(text,requestedModel,headerModel,readTools=[]) {
   let completed;const doneItems=[];
   for(const line of text.split('\n')) {
     if(!line.startsWith('data: '))continue;
@@ -55,14 +55,20 @@ function parseStream(text,requestedModel,headerModel) {
   const model=completed.model??headerModel;
   if(model&&model!==requestedModel)throw Object.assign(new Error('PROVIDER_MODEL_MISMATCH'),{modelVersion:model});
   const items=Array.isArray(completed.output)&&completed.output.length?completed.output:doneItems;
-  if(items.some(item=>!['reasoning','message'].includes(item.type)))throw new Error('PROVIDER_TOOL_OUTPUT');
+  if(items.some(item=>!['reasoning','message',...(readTools.length?['function_call']:[])].includes(item.type)))throw new Error('PROVIDER_TOOL_OUTPUT');
+  const calls=items.filter(item=>item.type==='function_call');
+  if(calls.length){
+    if(calls.length>6||calls.some(c=>!readTools.includes(c.name)||typeof c.call_id!=='string'||!c.call_id||typeof c.arguments!=='string'||Buffer.byteLength(c.arguments)>4096))throw new Error('PROVIDER_TOOL_OUTPUT');
+    for(const c of calls){let args;try{args=JSON.parse(c.arguments);}catch{throw new Error('PROVIDER_TOOL_OUTPUT');}
+      if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('PROVIDER_TOOL_OUTPUT');}
+  }
   const messages=items.filter(item=>item.type==='message'&&item.phase!=='commentary');
-  if(messages.length!==1)throw new Error('PROVIDER_FINAL_MESSAGE_COUNT');
+  if(!calls.length&&messages.length!==1)throw new Error('PROVIDER_FINAL_MESSAGE_COUNT');
   const answer=messages.flatMap(item=>item.content??[]).filter(item=>item.type==='output_text').map(item=>item.text).join('');
-  if(!answer || Buffer.byteLength(answer)>4096)throw new Error('PROVIDER_OUTPUT_BOUND');
+  if((!answer&&!calls.length) || Buffer.byteLength(answer)>4096)throw new Error('PROVIDER_OUTPUT_BOUND');
   const usage=completed.usage ? Object.fromEntries(['input_tokens','output_tokens','total_tokens','input_tokens_details','output_tokens_details']
     .filter(k=>Object.hasOwn(completed.usage,k)).map(k=>[k,completed.usage[k]])) : null;
-  return {answer,modelVersion:model??null,responseId:completed.id??null,usage,cost:null};
+  return {answer:calls.length?null:answer,...(calls.length?{outputItems:items}:{}),modelVersion:model??null,responseId:completed.id??null,usage,cost:null};
 }
 
 const boundedErrorCode=code=>['rate_limit_exceeded','usage_limit_reached','insufficient_quota','too_many_requests','server_error'].includes(code)?code:null;
@@ -82,8 +88,18 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
   const config=manifest.models[role].generationConfig;
   const timeoutMs=testDependencies.timeoutMs??config.timeoutMs;
   const requestBody=JSON.stringify(request); // snapshot before any asynchronous client work
+  // Only the isolated commerce owner may ask for these existing read tools.
+  // The CLI is still an auth transport; it never executes a returned function.
+  const commerce=role==='conversation'&&manifest.readOnlyCommerce===true;
+  const names=request.tools.map(t=>t.name),readTools=commerce?names:[];
+  const toolContract=commerce
+    ? (request.tools.length===0&&request.tool_choice==='none'||request.tools.length===3&&
+       new Set(names).size===3&&names.every(n=>['search_products','read_product','read_policy'].includes(n))&&
+       request.tools.every(t=>t.type==='function')&&request.tool_choice==='auto')&&
+       JSON.stringify(request.include)==='["reasoning.encrypted_content"]'
+    : request.tools.length===0&&request.tool_choice==='none';
   if(request.model!==manifest.models[role].model || request.reasoning?.effort!==manifest.models[role].effort ||
-    config.reasoningEffort!==manifest.models[role].effort || request.tools.length!==0 || request.tool_choice!=='none')throw new Error('FROZEN_REQUEST');
+    config.reasoningEffort!==manifest.models[role].effort || !toolContract)throw new Error('FROZEN_REQUEST');
   const started=performance.now();
   const controller=new AbortController();
   let settled=false,providerRequests=0,clientRequests=0,rejectedClientRequests=0,record,client,checkpointFailure;
@@ -129,8 +145,10 @@ export async function runCodexModel(manifest,role,request,testDependencies={}) {
       while(true){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;
         if(size>config.maxResponseBytes){await reader.cancel();throw new Error('RESPONSE_BOUND');}chunks.push(Buffer.from(value));}
       const text=Buffer.concat(chunks).toString('utf8');
-      const parsed=parseStream(text,request.model,response.headers.get('openai-model')??response.headers.get('x-openai-model'));
-      res.writeHead(200,{'content-type':'text/event-stream'});res.end(text);
+      const parsed=parseStream(text,request.model,response.headers.get('openai-model')??response.headers.get('x-openai-model'),readTools);
+      // Native calls return only to the code-owned B loop, never to the CLI.
+      if(parsed.outputItems){res.writeHead(400);res.end();}
+      else {res.writeHead(200,{'content-type':'text/event-stream'});res.end(text);}
       finish({status:'OK',httpStatus:response.status,...parsed});
     }catch(error) {const streamError=['PROVIDER_STREAM_FAILED','PROVIDER_STREAM_INCOMPLETE','PROVIDER_STREAM_ERROR'].includes(error.message);
       const code=streamError||['PROVIDER_RESPONSE','PROVIDER_MODEL_MISMATCH','PROVIDER_TOOL_OUTPUT','PROVIDER_FINAL_MESSAGE_COUNT','PROVIDER_OUTPUT_BOUND','EMPTY_BODY','RESPONSE_BOUND'].includes(error.message)?error.message:'UPSTREAM_TRANSPORT';

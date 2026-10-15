@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {comparisonSlots,comparisonOwnerRequest,createSolComparisonOwner,createGeminiComparisonOwner,dispatchComparison,validateComparison,readComparisonManifest} from './owner-comparison.mjs';
+import {comparisonSlots,comparisonOwnerRequest,createSolComparisonOwner,createGeminiComparisonOwner,dispatchComparison,validateComparison,readComparisonManifest,solReadOnlyTools} from './owner-comparison.mjs';
 
 const base=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));
 const samples=JSON.parse(readFileSync(new URL('./cases.b1.json',import.meta.url)));
@@ -118,4 +118,72 @@ test('all registered repetitions retain fallback/error outcomes and later slots 
  assert.equal(saved[1].result.terminal.disposition,'NO_SEND');
  assert.equal(saved[1].result.errorCode,'SOURCE_UNAVAILABLE');
  assert.equal(saved[2].result.terminal.disposition,'STATIC_FALLBACK');
+});
+
+test('native read-only comparison exposes the same bounded tools to both owners, without evaluator labels',()=>{
+ const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON'};
+ const r=request(),gemini=comparisonOwnerRequest('gemini',c,r),sol=comparisonOwnerRequest('sol',c,r);
+ assert.equal(gemini.toolConfig.functionCallingConfig.mode,'AUTO');assert.equal(sol.tool_choice,'auto');
+ assert.deepEqual(sol.tools.map(t=>t.name),['search_products','read_product','read_policy']);
+ assert.deepEqual(sol.tools.map(t=>t.name),gemini.tools[0].functionDeclarations.map(t=>t.name));
+ assert.deepEqual(sol.include,['reasoning.encrypted_content']);
+ assert.deepEqual(sol.input.map(m=>m.content),gemini.contents.map(m=>m.parts[0].text));
+ assert.deepEqual(JSON.parse(gemini.contents[0].parts[0].text).trusted.execution,
+  {availableTools:['search_products','read_product','read_policy'],toolBudget:r.toolBudget});
+ for(const body of [gemini,sol])assert.doesNotMatch(JSON.stringify(body),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY|caseId|expectedSafe|requiredBehaviors/);
+ for(const owner of ['gemini','sol']){
+  const body=comparisonOwnerRequest(owner,c,{...r,toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:0}});
+  assert.equal(owner==='sol'?body.tool_choice:body.toolConfig.functionCallingConfig.mode,owner==='sol'?'none':'NONE');
+ }
+});
+
+test('native comparison freezes the existing B1 budgets and the exact Sol read-only configuration',()=>{
+ const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON',repetitions:1,ownerGenerationsPerSlot:3,
+  toolRounds:2,toolCalls:6,maximumGenerationRequests:16};
+ c.owners={...c.owners,sol:{...c.owners.sol,generationConfig:{...c.owners.sol.generationConfig,
+  tools:solReadOnlyTools,tool_choice:'auto',include:['reasoning.encrypted_content']}}};
+ assert.doesNotThrow(()=>validateComparison(c,base));
+ for(const invalid of [{...c,ownerGenerationsPerSlot:4},{...c,toolCalls:7},{...c,toolRounds:3},
+  {...c,maximumGenerationRequests:24},{...c,repetitions:3,maximumGenerationRequests:48},
+  {...c,owners:{...c.owners,sol:{...c.owners.sol,generationConfig:{...c.owners.sol.generationConfig,tools:[]}}}}]){
+  assert.throws(()=>validateComparison(invalid,base),/COMPARISON_REGISTRATION|COMPARISON_MODEL/);
+ }
+});
+
+test('Sol native continuation preserves ordered reasoning/call/output and delegates tool execution to the existing loop',async()=>{
+ const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON'},captured=[];
+ const outputItems=[{type:'reasoning',id:'rs_test',summary:[],encrypted_content:'opaque-test'},
+  {type:'function_call',id:'fc_test',call_id:'call_test',name:'read_product',arguments:'{"subjectRef":"product:TEST"}'}];
+ const owner=createSolComparisonOwner(c,async(m,role,wire)=>{
+  assert.equal(m.readOnlyCommerce,true);assert.equal(role,'conversation');captured.push(wire);
+  return captured.length===1?{status:'OK',providerRequests:1,answer:null,outputItems}:
+   {status:'OK',providerRequests:1,answer:'Mẫu này 799k chị nhé.'};
+ });
+ const r=request(),first=await owner(r);
+ assert.equal(first.kind,'TOOLS');assert.deepEqual(first.calls,[{name:'read_product',id:'call_test',args:{subjectRef:'product:TEST'}}]);
+ const response={status:'OK',data:{price:799000}};
+ const second=await owner({...r,contents:[...r.contents,first.content,{role:'user',parts:[
+  {functionResponse:{name:'read_product',id:'call_test',response}}]}]});
+ assert.equal(second.kind,'FINAL');assert.equal(second.text,'Mẫu này 799k chị nhé.');
+ assert.deepEqual(captured[1].input.slice(-3),[...outputItems,{type:'function_call_output',call_id:'call_test',output:JSON.stringify(response)}]);
+ assert.equal(captured.length,2);assert.deepEqual(captured[1].reasoning,{effort:'low'});
+});
+
+test('captured Gemini native requests preserve tool results and current rule scope without an automatic generation retry',async()=>{
+ const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON'},captured=[];
+ const owner=createGeminiComparisonOwner(c,'test-project',{getToken:async()=> 'test-token',fetchImpl:async(_url,init)=>{
+  captured.push(JSON.parse(init.body));
+  if(captured.length===3)return new Response('not retained',{status:429});
+  return new Response(JSON.stringify(geminiResponse(captured.length===1?
+   [{functionCall:{name:'read_policy',args:{}}}]:[{text:'Shop hỗ trợ đổi theo chính sách hiện tại chị nhé.'}])));
+ }});
+ const r=request(),first=await owner(r);assert.equal(first.kind,'TOOLS');
+ assert.equal(captured[0].toolConfig.functionCallingConfig.mode,'AUTO');
+ const result={status:'OK',data:{scope:'SHOP_RULES',orderEligibility:null,policy:{exchangeWindow:15}}};
+ const next={...r,contents:[...r.contents,first.content,{role:'user',parts:[{functionResponse:{name:'read_policy',response:result}}]}]};
+ assert.equal((await owner(next)).kind,'FINAL');assert.equal(captured.length,2);
+ assert.deepEqual(captured[1].contents.at(-1).parts[0].functionResponse.response,result);
+ await assert.rejects(owner(next),e=>e.telemetry.providerRequests===1&&e.telemetry.httpStatus===429);
+ assert.equal(captured.length,3);
+ for(const body of captured)assert.doesNotMatch(JSON.stringify(body),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY|caseId|expectedSafe|requiredBehaviors/);
 });

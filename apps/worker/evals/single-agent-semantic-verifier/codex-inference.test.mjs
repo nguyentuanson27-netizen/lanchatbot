@@ -13,6 +13,37 @@ const client=(count=1,auth=true)=>async base=>{
   for(let i=0;i<count;i++)await fetch(base+'/responses',{method:'POST',headers:auth?{authorization:'synthetic-auth-not-for-evidence'}:{},
     body:JSON.stringify({tools:[{name:'shell'}],input:'EVALUATOR_SENTINEL',model:'wrong-model'})});
 };
+
+test('read-only commerce owner receives native calls once; verifier retains its no-tool contract',async()=>{
+  const owner={readOnlyCommerce:true,models:{conversation:{...m.models.verifier,effort:'low',
+    generationConfig:{...m.models.verifier.generationConfig,reasoningEffort:'low'}}}};
+  const wire={...request,reasoning:{effort:'low'},tool_choice:'auto',
+    tools:['search_products','read_product','read_policy'].map(name=>({type:'function',name,parameters:{type:'object',properties:{}}})),
+    include:['reasoning.encrypted_content']};
+  const output=[{type:'reasoning',id:'rs_test',summary:[],encrypted_content:'opaque-native-continuation'},
+    {type:'function_call',id:'fc_test',call_id:'call_test',name:'search_products',arguments:'{"query":"áo có lót"}'}];
+  let calls=0;
+  const result=await runCodexModel(owner,'conversation',wire,{runClient:client(2),upstreamFetch:async()=>{
+    calls++;return new Response('data: '+JSON.stringify({type:'response.completed',response:{model:'gpt-6.1-sol',output}})+'\n\n');}});
+  assert.equal(result.status,'OK');assert.deepEqual(result.outputItems,output);
+  assert.equal(calls,1);assert.equal(result.providerRequests,1);assert.equal(result.rejectedClientRequests,1);
+  assert.equal(result.answer,null);
+  await assert.rejects(runCodexModel({...m,readOnlyCommerce:true},'verifier',{...wire,reasoning:{effort:'high'}}),/FROZEN_REQUEST/);
+  const forbidden={...wire,tools:[{type:'function',name:'add_to_cart'}]};
+  await assert.rejects(runCodexModel(owner,'conversation',forbidden),/FROZEN_REQUEST/);
+});
+
+test('read-only commerce rejects unadvertised tool output and tools after the budget is exhausted',async()=>{
+  const owner={readOnlyCommerce:true,models:{conversation:{...m.models.verifier,effort:'low',
+    generationConfig:{...m.models.verifier.generationConfig,reasoningEffort:'low'}}}};
+  const wire={...request,reasoning:{effort:'low'},include:['reasoning.encrypted_content']};
+  for(const name of ['read_product','add_to_cart','shell']){
+    const result=await runCodexModel(owner,'conversation',wire,{runClient:client(),upstreamFetch:async()=>
+      new Response('data: '+JSON.stringify({type:'response.completed',response:{model:'gpt-6.1-sol',output:[
+        {type:'function_call',call_id:'call_test',name,arguments:'{}'}]}})+'\n\n')});
+    assert.equal(result.status,'PROVIDER_ERROR');assert.equal(result.providerRequests,1);
+  }
+});
 test('actual forwarded body equals frozen runtime request and excludes CLI tools/context/evaluator labels',async()=>{
   let captured;
   const result=await runCodexModel(m,'verifier',request,{runClient:client(),upstreamFetch:async(url,init)=>{
