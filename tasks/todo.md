@@ -9,7 +9,7 @@
 - [x] Focused RED→GREEN and self-review/fix complete. Final source868b5b2b: full worker128files/1733testsPASS,0skip; full eval478PASS plus later focused34native/protocolPASS, protected/product/size52PASS; worker typecheck/build/lint and final lint/direct TypeScript emit exit0. Windows historical v4 alias restored byte-exact. Changed-file secret/private-field/link/frozen-source checksPASS.
 - [x] Preserve all five database reports including the initial8PASS/1FAIL bridge outcome; clean2d1a6a8eCOD/bank12/12PASS each and both test databases dropped. No provider generation/live effect delivery. Final reject-only scope/no-send fixes have focused50PASS and full1733PASS at their own source; database evidence retains its earlier SHA. [Report and commands](../apps/worker/evals/single-agent-commerce-read-only/integration-audit-20261015/CHECKPOINT_B.md).
 - [ ] Persisted component-variant replacement and multiple persisted mutations/recovery after consumed inbox lease remain unsupported/unproven. Full provider B2-B3 journeys, live ingress/fence/delivery and sales/semantic qualification remain open; no Phase-B-complete or GO claim.
-- [ ] Deliver current audit/source/evidence on existing draft PR391 and read back exact head/state/branch/base; remote CI is separate from local PASS.
+- [x] Push audit/source/evidence savepoint8e0257f3 and update existing draft PR391. Exact body/head/branch/base/state readbackPASS: OPEN/draft, bodySHA2566963fda73888cc5c0bc489b9107d9f599fe503d3cbedf250cd7fc023e5e07c6c, clean local/remote tree. Remote checks empty, not CI PASS. This documentation receipt changes no executable, model, source data, evidence outcome or provider count.
 
 ## Current 24-case B1 corpus preparation — 2026-10-15
 
