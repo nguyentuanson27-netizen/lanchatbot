@@ -1,5 +1,10 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current owner rollback to pre44% prompt — 2026-10-15
+
+- [x] Restore owner prompt/base manifest from611c8207 byte-exact:10.353bytes/hashd6ba7b6c; only owner hash changes in manifest. No new wording, runtime/source change or historical evidence rewrite.
+- [x] Focused protocol/provider44PASS/1optionalSKIP; exact source/hash/readback and old-manifest retirement checksPASS. Both latest registrations reject before credential/source/provider work, no output/0generations. No new batch, deploy/send or quality PASS claim. Publish current rollback on draft PR391 with exact-head readback.
+
 ## Current sales-owner read-tool correction — 2026-10-15
 
 - [x] Refresh main296cdcfb/start6897d0a8; confirm prior diagnostic had one preloaded product/tools0. [Scope/registration](../apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SCOPE.md): same5LIVE N1/model,10outcomes/max40generations; models/verifier/policy/schema/fallback unchanged.

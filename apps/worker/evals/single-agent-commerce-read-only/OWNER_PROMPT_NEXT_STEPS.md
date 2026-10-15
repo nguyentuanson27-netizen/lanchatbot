@@ -1,5 +1,11 @@
 # Prompt tư vấn bán hàng sau rollback
 
+## Đang dùng: bản trước lần rút gọn44,6% — 2026-10-15
+
+Owner yêu cầu quay lại phiên bản trước khi rút gọn44%. Khôi phục nguyên byte owner prompt và base manifest từ `611c82073ab2cc2ae0bb937ae554cfd235d96d7a`, parent của lần rút gọn `75f075b1`; cũng khớp bản prompt tại `83061af5`. Owner prompt10.353bytes/SHA256 `d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67`. So với HEAD trước rollback, manifest chỉ đổi promptHashes.owner. Không chỉnh lại nội dung bản cũ hoặc ghép những câu sửa từ hai phiên bản sau.
+
+Focused protocol/provider44PASS/1optionalSKIP, byte/hash/source readbackPASS, diff-checkPASS. Hai registration của batch rút gọn/native tools bị existing COMPARISON_FROZEN_INPUT chặn trước credential/source/provider khi dùng với prompt đã rollback; output không tạo. Không sửa frozen registrations/results/primary để chạy lại. Đây là restore prompt/config, giữ mã nguồn tool/source/gate và lịch sử;0provider generations, không source credential access/deploy/send hoặc acceptance mới. Không chạy lại full worker/eval suite/typecheck/build/lint cho thay đổi prompt/hash/docs-only. Các phần sau là lịch sử của hai phiên bản đã bị thay ở active prompt.
+
 ## Tiếp theo: tư vấn có công cụ đọc — 2026-10-15
 
 Owner bác cách chỉ từ chối món thiếu thông tin vì không giúp bán hàng, rồi yêu cầu sửa/review/chạy lại. [Scope và cách chấm](owner-tools-run-20261015/SCOPE.md), [self-review](owner-tools-run-20261015/SELF_REVIEW.md): thay hai bullet giao việc tư vấn và mở ba tools B1 đã có cho cả hai owner; vẫn same5cases N1/model, verifier/gate/policy nguồn giữ nguyên. Owner hash82964a2a,6.335bytes; không thêm few-shot, câu cấm hoặc case-specific handling. Sol thêm native function-call continuation trên relay hiện có; không thêm role/parser/repair hoặc production wiring. Readiness green; đăng ký/run riêng, không sửa evidence cũ. Các phần dưới là lịch sử trước thay đổi này.

@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current owner rollback to pre44% prompt — 2026-10-15
+
+Owner requests the version before44,6% simplification. Restore owner prompt/base manifest byte-exact from611c8207 (also prompt83061af5):10.353bytes/hashd6ba7b6c. [Active rollback record](../apps/worker/evals/single-agent-commerce-read-only/OWNER_PROMPT_NEXT_STEPS.md). Focused protocol/provider44PASS/1optionalSKIP, hash/byte readbackPASS, two superseded registrations reject COMPARISON_FROZEN_INPUT before credentials/source/provider, no output. Prompt/config restore only; current tool/source code and all historical frozen runs remain. No new generation, model qualification, source access, deploy/send or automatic batch. Deliver on existing draft PR391.
+
 ## Current sales-owner read-tool correction — 2026-10-15
 
 Owner asks fix → review → run after finding that a safe refusal alone has little sales value. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SCOPE.md) keeps the same five LIVE cases N1/model, opens existing B1 search/read tools to both Gemini High/Sol Low, verifier Sol High unchanged. Reuse one owner/one verifier/current gate; no production wiring, state/effects, parser/router/repair or live writes/send. Correct the two owner instructions around useful advice versus new physical claims; preserve historical runs and current policy source.
