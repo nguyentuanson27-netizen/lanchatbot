@@ -118,7 +118,8 @@ try{
    const prior=await repository.read(key),command=update.nextState.processedCommandIds.at(-1);
    return {pageId,customerHash:scope.customerHash,conversationId:key,expectedStateVersion:current.stateVersion,
     state:{...current.state,revision:current.stateVersion+1},inboxBatchGuard:lease,
-    salesCyclePlan:{expectedRevision:update.expectedRevision,state:update.nextState,cartExpiresAt:null,expiresAt:new Date(Date.now()+48*3600000),
+    // A short synthetic retention stays within the server-owned48h maximum despite client/server clock skew.
+    salesCyclePlan:{expectedRevision:update.expectedRevision,state:update.nextState,cartExpiresAt:null,expiresAt:new Date(Date.now()+3600000),
      readinessContractVersion:'DF06_EFFECT_READINESS_V1',sourceMessageIdHash:hash(scope.sourceMessageId),canonicalBuyingIntent:intent(),
      events:[{commandId:command,commandKind:command,outcome:'APPLIED',stateRevisionBefore:prior.revision,stateRevisionAfter:update.nextState.revision,
       stageBefore:prior.stage,stageAfter:update.nextState.stage,cartId:null,cartVersion:null,reasonCode:null,occurredAt:new Date(update.nextState.updatedAt)}]}};
