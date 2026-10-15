@@ -1,0 +1,115 @@
+{
+  "reviewer": "PRIMARY_CODING_AGENT_NONBLIND_NOT_HUMAN_ACCEPTANCE",
+  "rawCommit": "ab489e4d735e88f35372f6a76740c812b77c0b6d",
+  "runSourceSha": "0ad4b29d2ba5f5d7209f49c941d8c72689bbc607",
+  "basis": "Whole actual terminal turns and committed public state before rejected draft/tool diagnostics; no keyword score or post-hoc quality threshold.",
+  "salesJourneyCompleted": false,
+  "entries": [
+    {
+      "caseId": "stateful-open",
+      "ordinal": 1,
+      "label": "NEEDS_EDIT_FUNCTIONAL_CART_COMMIT",
+      "reasonVi": "Đã lưu đúng áo be M/số lượng1 và số đo. Khách chỉ nhận câu báo giỏ nội bộ từ recovery; chưa có phản hồi bán hàng cụ thể hoặc thông tin hàng đặt trước. Đúng thao tác, chưa đạt chất lượng tư vấn.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "RECEIPT_BACKED_ACK",
+        "text": "Giỏ hàng đã được cập nhật, chị nhé.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Giỏ hàng đã được cập nhật, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "ordinal": 2,
+      "label": "NEEDS_EDIT_FUNCTIONAL_MUTATIONS",
+      "reasonVi": "Hai thao tác đã lưu đúng L và2chiếc trong cùng lượt. Câu trả lời quy việc cập nhật cho “chị” và dùng giọng báo cáo giỏ, nên chưa tự nhiên dù kết quả nghiệp vụ đúng.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị đã đổi áo sang size L và cập nhật số lượng 2 chiếc trong giỏ hàng rồi ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Chị đã đổi áo sang size L và cập nhật số lượng 2 chiếc trong giỏ hàng rồi ạ."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "ordinal": 3,
+      "label": "USABLE",
+      "reasonVi": "Trả đúng tổng hai áo, phí ship, mức giảm và số phải trả978.100đ theo quote code hiện tại. Phần trình bày tiền đáp ứng đúng câu hỏi, không phải lặp lại hồ sơ khách.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Tổng tiền 2 áo là 998.000đ, phí ship 30.000đ, sau khi giảm 49.900đ thì tổng thanh toán là 978.100đ chị nhé.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Tổng tiền 2 áo là 998.000đ, phí ship 30.000đ, sau khi giảm 49.900đ thì tổng thanh toán là 978.100đ chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "ordinal": 4,
+      "label": "UNUSABLE_DESPITE_STATE_COMMIT",
+      "reasonVi": "Đã sửa eo/mông thành74/96 và giữ L, nhưng khách nhận fallback cho một lời sửa thông tin đơn giản; cuộc mua bị gián đoạn.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "ordinal": 5,
+      "label": "FUNCTIONAL_RECOVERY_JOURNEY_INCOMPLETE",
+      "reasonVi": "Checkout riêng tư chuyển quyền xử lý thực trong database;0request model và không có chat reply theo terminal policy. Chưa có preview/xác nhận mua thực nguồn và chưa chứng minh nhân viên đã nhận bên ngoài.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-confirm",
+      "ordinal": 6,
+      "label": "FUNCTIONAL_STOP_AFTER_HANDOFF",
+      "reasonVi": "Sau chuyển quyền HUMAN, bot không gọi model hoặc tiếp tục chốt. Đúng quyền sở hữu; giao dịch vẫn chưa hoàn tất.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-human-request",
+      "ordinal": 7,
+      "label": "FUNCTIONAL_HANDOFF",
+      "reasonVi": "Yêu cầu gặp nhân viên tạo handoff nội bộ và ngừng hội thoại bot. Silent policy không tạo chat reply; việc nhân viên xử lý chưa được đo.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    }
+  ]
+}
