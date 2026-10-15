@@ -2,9 +2,9 @@
 
 ## Contract and sales correction — 2026-10-16
 
-- [ ] Reproduce root-cause contracts RED and implement minimum GREEN, preserving authority, CAS/receipts, privacy, exact draft binding and no retry.
-- [ ] Correct owner sales/naturalness and policy semantics without case answers; verify focused/full worker/compiler/build/lint and protected/reply coverage.
-- [ ] One independent review of the committed fix, address findings and rerun affected checks.
+- [x] Reproduce root-cause contracts RED and implement minimum GREEN, preserving authority, CAS/receipts, privacy, exact draft binding and no retry. Fix56d653b4 plus status correction8c7099dd.
+- [x] Correct owner sales/naturalness and policy semantics without case answers; verify focused/full worker/compiler/build/lint and protected/reply coverage. [Actual command results and Windows symlink limitation](../apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016/PREPARATION.md): src1759PASS, eval480PASS/2SKIP, affected75PASS, boundary17PASS, protected/reply21PASS; aggregate test command failed before environment repair, not claimed PASS.
+- [x] [One independent GPT-6.1 Sol High review](../apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016/INDEPENDENT_REVIEW.md); oneP2 unresolved source→verified absence, fixed RED→GREEN and reviewer closed at8c7099dd.
 - [ ] Freeze clean source/models/hashes and run exactly existing24N1cases after source checks; raw savepoint before primary whole-terminal review.
 - [ ] Audit all attempts, review every conversation, diagnose remaining fallback/edit cases, update PR391 and STOP without automatic new round or live action.
 
