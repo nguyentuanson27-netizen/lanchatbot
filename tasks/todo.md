@@ -1133,5 +1133,7 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [x] Owner confirms Low, then both models; freeze12 slots and identical post-read input/prompt/verifier in [scope](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-20261015/SCOPE.md).
 - [x] Observed RED for missing comparison; provider-tool rejection RED5PASS/1FAIL; empty-tool projection RED; minimum GREEN6/6. No production wiring or prompt edits.
 - [x] Focused comparison6/6; focused Node36PASS/1optionalSKIP, boundary/runtime60PASS, protected/reply21PASS; full worker1713PASS and eval466PASS/2optionalSKIP, typecheck/build/lint PASS. Self-review in PREPARATION.json; clean source seal follows.
-- [ ] Source preflight0generation; two cases ×3/owner, all12 outcomes retained.
-- [ ] Raw→whole-terminal primary→diagnostics/report; update draft PR391 and stop with capability limits.
+- [x] Cache composition RED2FAIL/5PASS→GREEN90focused; full126worker files/1715PASS, typecheck/build/lint PASS. Existing scoped resolver cache invalidated before current-policy reads; no new gate/store.
+- [x] Clean source695f126d/preflight0generation (policyReads2); two cases ×3/owner,12/12 outcomes and24requests, max1/retry0, allHTTP200,0errors/timeouts. Equal owner text hashes per case, no evaluator labels.
+- [x] Raw23beeb81→primaryeeaa1b01→diagnostics/report. Sol6/6eligible/functional; Gemini2/6eligible,4fallback,1unsafe eligible. Primary subjective/nohuman acceptance; Sol still verbose, GPT native tools/full B1 controls not qualified. STOP; [report](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-20261015/CHECKPOINT_B.md).
+- [ ] Update draft PR391 and verify delivered head/body. No additional provider batch or automatic promotion.
