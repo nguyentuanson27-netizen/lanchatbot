@@ -8,6 +8,8 @@ Update only the active corpus registration, fixed24-slot range, max96-generation
 
 Completed locally: focused protocol RED5PASS/4FAIL against the old eight-slot contract, then all three B eval files33/33PASS after the minimum24-slot change. Node syntax, JSON distribution, diff-check and changed-diff secret scan pass. Manual readback covers all24customer turns/history pairs; no required/forbidden keyword field exists. No provider generation or source access was performed.
 
+Owner naturalness review then identified11customer turns/history pairs that still sounded like evaluator prose or translated survey questions. Rewrite only those dialogue bytes: ask the customer's concrete concern directly, shorten policy/source questions, and move previously supplied context into history where natural. In particular, the buying-concern case now asks whether the lace looks too fussy for a daytime party instead of asking the shop to judge whether the set is generally “suitable”. Preserve all24case IDs, eight purposes, variants, evaluator expectations, source modes, product bindings, registration and request budget; the other13dialogues remain byte-identical. Full24-dialogue readback and the three focused eval files33/33PASS; no provider generation or source access.
+
 Implementation savepoint `51dd570af454a66919d8ea514c0c69b154d3c7a5` was pushed to the existing draft PR391. The PR body now separates this24case preparation from historical provider evidence and explicitly leaves the new provider run pending.
 
 ## Current owner rollback to pre44% prompt — 2026-10-15

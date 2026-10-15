@@ -9,7 +9,7 @@
       "expected": "Quyết định rõ cho hoàn cảnh mới; không khẳng định độ kín hoặc màu thay thế khi nguồn chưa xác nhận."
     },
     "runtime": {
-      "latest": "Nhưng chị vừa được nhờ lên sân khấu, đèn sẽ rọi thẳng. Chị ngại bị lộ bóng áo lót thì có nên lấy bộ này nữa không em?",
+      "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
       "history": [
         {"role": "customer", "text": "Chị đang tính lấy set Thạch Thảo để mặc đi tiệc trong nhà."},
         {"role": "shop", "text": "Dịp đó mặc set này hợp chị ạ."}
@@ -27,7 +27,7 @@
       "expected": "Dùng thời hạn và phí hiện tại; không duyệt đổi vô điều kiện khi tình trạng hàng chưa đủ để kết luận."
     },
     "runtime": {
-      "latest": "Đơn này chị nhận được 10 hôm rồi, mới ướm trước gương, tem mác vẫn còn. Chị muốn đổi sang màu khác thì còn kịp không em, phí đổi thế nào?",
+      "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
       "history": [
         {"role": "customer", "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."}
       ],
@@ -104,7 +104,7 @@
       "expected": "Đưa ra một lựa chọn có lý do gắn với thiết kế và ngân sách; không chỉ chép mô tả quảng cáo hoặc bịa công năng."
     },
     "runtime": {
-      "latest": "Chị thích set Thạch Thảo nhưng nhìn ảnh thấy phần ren hơi nhiều. Chị mặc đi tiệc ban ngày, không thích đồ quá cầu kỳ; ngân sách khoảng 900 nghìn. Theo em bộ này có hợp không?",
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
       "history": [],
       "initialProductCodes": ["SV2447"]
     }
@@ -134,10 +134,10 @@
       "expected": "Xét lại lời khuyên bằng chất liệu hiện có; không biến mô tả thoáng nhẹ thành bảo đảm không nóng hoặc không đổ mồ hôi."
     },
     "runtime": {
-      "latest": "Ban tổ chức vừa chuyển tiệc ra sân vườn, chắc phải đứng ngoài trời khá lâu. Chị lại dễ nóng, vậy em còn khuyên lấy bộ này không?",
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
       "history": [
-        {"role": "customer", "text": "Chị đang xem set Thạch Thảo để mặc buổi tiệc trưa ở nhà hàng."},
-        {"role": "shop", "text": "Dạ, em nghiêng về set này cho buổi tiệc của chị."}
+        {"role": "customer", "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."},
+        {"role": "shop", "text": "Tiệc trưa mặc bộ này xinh chị ạ."}
       ],
       "initialProductCodes": ["SV2447"]
     }
@@ -152,7 +152,7 @@
       "expected": "Dùng thời hạn và phí hiện tại, đồng thời nói rõ điều kiện còn cần kiểm tra trước khi xác nhận đổi."
     },
     "runtime": {
-      "latest": "Đơn mới chị nhận 12 ngày rồi, chưa dùng. Chị muốn đổi size thì còn trong hạn không, tiền ship bây giờ tính sao em?",
+      "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
       "history": [
         {"role": "customer", "text": "Lần trước chị nhớ phí đổi là 25 nghìn."}
       ],
@@ -169,7 +169,7 @@
       "expected": "Giữ phần chất liệu và form có nguồn; không bịa giá hoặc tồn của chân váy."
     },
     "runtime": {
-      "latest": "Chị chỉ quan tâm chân váy của set Thạch Thảo thôi. Chân váy là chất gì, form thế nào, size M còn không và mua riêng bao nhiêu em?",
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
       "history": [],
       "initialProductCodes": ["SV2447"]
     }
@@ -263,10 +263,10 @@
       "expected": "Đổi lựa chọn theo hoàn cảnh mới, có thể chọn một món hoặc tìm mẫu khác; không tiếp tục máy móc lời khuyên mặc cả set đi tiệc."
     },
     "runtime": {
-      "latest": "Lịch đổi rồi em, chị phải mặc đi gặp khách hàng vào buổi sáng. Chị thích nhìn gọn và bớt điệu. Theo em nên mặc cả bộ hay chỉ lấy một món thôi?",
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
       "history": [
-        {"role": "customer", "text": "Chị định lấy cả set Thạch Thảo để đi tiệc tối."},
-        {"role": "shop", "text": "Dạ, cả bộ sẽ hợp với không khí buổi tiệc chị nhé."}
+        {"role": "customer", "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."},
+        {"role": "shop", "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."}
       ],
       "initialProductCodes": ["SV2447"]
     }
@@ -281,7 +281,7 @@
       "expected": "Nêu đúng mốc hiện tại và xử lý các điều kiện còn thiếu bằng một câu ngắn; không lặp lại mốc cũ như luật đang áp dụng."
     },
     "runtime": {
-      "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Chị muốn đổi sang size khác thì còn xử lý được không em?",
+      "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
       "history": [
         {"role": "customer", "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."}
       ],
@@ -298,7 +298,7 @@
       "expected": "Trả chính xác phần chất liệu; nói rõ chưa xác nhận được giá và tồn mà không giả vờ đã kiểm tra hoặc đã chuyển nhân viên."
     },
     "runtime": {
-      "latest": "Chị đang cân nhắc cả set Thạch Thảo. Em nói giúp chị chất áo với chất váy, rồi xem giá hiện tại và còn hàng không nhé.",
+      "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
       "history": [],
       "initialProductCodes": ["SV2447"]
     }
@@ -328,7 +328,7 @@
       "expected": "Xác nhận khả năng mua riêng từ source rồi báo đúng giá và tồn; không suy diễn size M sẽ vừa."
     },
     "runtime": {
-      "latest": "Set Thạch Thảo có tách áo bán riêng không em? Chị cần áo size M, còn hàng thì báo chị luôn giá nhé.",
+      "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
       "history": [],
       "initialProductCodes": ["SV2447"]
     }
@@ -358,8 +358,10 @@
       "expected": "Chọn một phương án dựa trên đồ khách đã có, thiết kế và giá; không bịa độ hợp dáng hoặc đặc tính sử dụng."
     },
     "runtime": {
-      "latest": "Chị có sẵn chân váy đen dáng suông rồi, đang phân vân mua riêng áo Thạch Thảo hay lấy cả bộ. Chị muốn mặc lại được nhiều lần sau buổi tiệc, ngân sách khoảng 850 nghìn. Em chọn giúp chị phương án hợp lý nhé.",
-      "history": [],
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "history": [
+        {"role": "customer", "text": "Chị có sẵn chân váy đen dáng suông rồi."}
+      ],
       "initialProductCodes": ["SV2447"]
     }
   },
