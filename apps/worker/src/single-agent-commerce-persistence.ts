@@ -1,4 +1,4 @@
-import type { PostgresRealtimeRuntimeStore, RealtimeCommitInput } from "@lana/database";
+import type { PostgresRealtimeRuntimeStore, RealtimeCommitInput, RealtimeInboxBatchGuard } from "@lana/database";
 import { createSalesCycleRuntimeState, type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1 } from "@lana/chat-runtime";
 import { buildCanonicalDecisionEvidenceV1 } from "@lana/business-tools";
@@ -6,6 +6,36 @@ import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleInput } from "./real
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
 import type { TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import type { CommerceHandoffCommit, HandoffAuthority } from "./single-agent-commerce-handoff.js";
+
+/** Reuse the current inbox/CAS transaction. A tag intent is not a Pancake delivery receipt. */
+export function createPersistedCommerceHandoffPort(input: {
+  scope: CommerceScope; clock: () => Date; read: () => Promise<HandoffAuthority>;
+  store: Pick<PostgresRealtimeRuntimeStore, "commitWithinTransaction">;
+  transaction: <T>(work: (client: Parameters<PostgresRealtimeRuntimeStore["commitWithinTransaction"]>[0]) => Promise<T>) => Promise<T>;
+  inboxBatchGuard: RealtimeInboxBatchGuard;
+  resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
+}) {
+  return { read: input.read, async commit({ before, next, decision }: CommerceHandoffCommit): Promise<boolean> {
+    const tagId = input.resolveTagId(decision.tag);
+    if (!tagId || !input.inboxBatchGuard.inboxIds.length) throw new Error("HANDOFF_TAG_OR_SOURCE_UNAVAILABLE");
+    const now = input.clock();
+    return input.transaction(async client => {
+      const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
+        customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
+        expectedStateVersion: before.stateVersion, state: next.state, inboxBatchGuard: input.inboxBatchGuard,
+        pancakeTagPlan: { desiredTag: decision.tag, tagId, handoffGeneration: next.stateVersion },
+        handoffEventPlan: { source: decision.category === "AFTER_SALES" ? "POST_SALE" : decision.reason === "CUSTOMER_REQUESTED_HUMAN" ? "CUSTOMER_REQUEST" : "BOT_POLICY",
+          reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion },
+          productId: before.state.currentProductId, factsStatus: null, factsReasonCode: null,
+          desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.scope.sourceMessageId,
+          triggerMessagePk: null, occurredAt: now } }, now);
+      if (!result.stateCommitted) return false;
+      if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated) throw new Error("ATOMIC_HANDOFF_INTENTS");
+      return true;
+    });
+  } };
+}
 
 export function createPersistedCommerceReceiptReader(input: {
   store: Pick<PostgresRealtimeRuntimeStore, "readCommittedSalesCycleEvent">;

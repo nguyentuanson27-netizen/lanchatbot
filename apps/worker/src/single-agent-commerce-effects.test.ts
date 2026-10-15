@@ -48,6 +48,28 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("preserves an actual committed checkout handoff and stops the owner instead of falling back", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const executeCommand = vi.fn(async ({command}: {command:{commandId:string}}) => {
+      const state = { ...s.current(), revision: s.current().revision+1, stage: "HANDED_OFF" as const,
+        processedCommandIds: [...s.current().processedCommandIds, command.commandId] };
+      s.setCurrent(state);
+      return { status: "HANDOFF" as const, state, reasonCode: "STOCK_UNAVAILABLE" as const, silent: true as const,
+        desiredPancakeTag: "NHAN_VIEN" as const, handoffDecision: {} as never };
+    });
+    const tools = await createCommerceEffectTools({ base: s.base, scope: s.scope, clock: () => commerceNow,
+      conversationKey: "test-cycle", repository: s.repository, authorize: s.authorize, policy: async () => s.policy,
+      select: s.select, identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001",
+        customerProfileId: fixtureProfile().profile.profileId }, executeCommand });
+    let calls = 0;
+    const verifier = vi.fn();
+    const result = await runCommerceTurn({ scope: s.scope, tools, clock: () => commerceNow, latest: "Chốt đơn chị nhé", history: [],
+      ownerPrompt: "Tư vấn", verifierPrompt: "Kiểm", owner: async () => { calls++; return {kind:"TOOLS", calls:[{name:"confirm_purchase",args:{}}],
+        content:{role:"model",parts:[{functionCall:{name:"confirm_purchase",args:{}}}]}}; }, verifier });
+    expect(result.terminal).toMatchObject({ disposition: "HANDOFF", reason: "STOCK_UNAVAILABLE", text: null });
+    expect(calls).toBe(1); expect(executeCommand).toHaveBeenCalledTimes(1); expect(verifier).not.toHaveBeenCalled();
+    expect(tools.snapshot().effectReceipts).toEqual([]);
+  });
   it("keeps the requested selling offer through the trusted selection port", async () => {
     const s = await setup();
     expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "DIRECT" } })).status).toBe("OK");

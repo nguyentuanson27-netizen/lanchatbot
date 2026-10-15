@@ -17,6 +17,8 @@ export interface CommerceTools {
   snapshot(): TrustedContext;
   readback(): Promise<TrustedContext>;
   recover?(outcome: TerminalOutcome): Promise<TerminalOutcome>;
+  /** Code-owned terminal effect, e.g. a committed handoff. Never a model draft. */
+  terminalOutcome?(): Promise<TerminalOutcome | null>;
 }
 const bytes = (v: unknown) => Buffer.byteLength(typeof v === "string" ? v : JSON.stringify(v));
 const fallback = (reason: string): TerminalOutcome => ({ ...terminalFallback("C3_A_NONPROTECTED_V2"), reason });
@@ -82,6 +84,8 @@ export async function runCommerceTurn(input: {
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       toolLatencyMs += performance.now()-toolStarted;
+      const effectTerminal = await input.tools.terminalOutcome?.();
+      if (effectTerminal) return finish(effectTerminal);
       if (results.length !== output.calls.length || bytes(results) > 8192) return finish(fallback("TOOL_RESULT_BOUND"));
       contents.push(structuredClone(output.content), { role: "user", parts: results.map((result, i) => ({
         functionResponse: { name: output.calls[i]!.name, response: result,

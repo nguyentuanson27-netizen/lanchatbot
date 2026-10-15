@@ -40,6 +40,18 @@ export async function createCommerceEffectTools(input: {
   let receipt: TrustedContext["effectReceipts"][number] | undefined;
   let receiptConversationRevision: number | undefined;
   let receiptBindingVersion: string | undefined;
+  let committedHandoff: { reason: string; revision: number; operationId: string; conversationRevision: number } | undefined;
+  async function terminalOutcome(): Promise<TerminalOutcome | null> {
+    if (!committedHandoff) return await input.base.terminalOutcome?.() ?? null;
+    current = await read(); await refreshAuthority();
+    const state = snapshot().state;
+    if (!state.privacyAllowed || state.recipient !== turnRecipient || state.bindingVersion !== turnBinding ||
+      current.revision !== committedHandoff.revision || !current.processedCommandIds.includes(committedHandoff.operationId) ||
+      (authority?.revision ?? input.scope.revision) !== committedHandoff.conversationRevision) {
+      return { disposition: "NO_SEND", reason: "HANDOFF_SCOPE_CHANGED", text: null, fallbackId: null };
+    }
+    return { disposition: "HANDOFF", reason: committedHandoff.reason, text: null, fallbackId: null };
+  }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
     if (current.cart) {
@@ -156,6 +168,17 @@ export async function createCommerceEffectTools(input: {
         command: command!, now: input.clock(), trustedPorts: ports,
         ...(input.resolveBankTransferPolicy ? { resolveBankTransferPolicy: input.resolveBankTransferPolicy } : {}) }); }
       catch { current = await read(); await refreshAuthority(); if (!recordReceipt(operationId, effectName, authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; } }
+      if (result?.status === "HANDOFF") {
+        current = await read(); await refreshAuthority();
+        if (current.stage !== "HANDED_OFF" || current.revision !== authorizedRevision+1 ||
+          !current.processedCommandIds.includes(operationId) || commerceHash(current) !== commerceHash(result.state)) {
+          uncertain = true; return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" };
+        }
+        committedHandoff = { reason: result.reasonCode, revision: current.revision, operationId,
+          conversationRevision: authority?.revision ?? input.scope.revision };
+        receipt = undefined;
+        return { status: "OK", data: { handoffAccepted: true } };
+      }
       if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
       current = await read();
       await refreshAuthority();
@@ -169,7 +192,7 @@ export async function createCommerceEffectTools(input: {
     if (names.has(call.name) && result.status !== "OK") failedEffect = true;
     return result;
   }
-  return { invoke, snapshot, async invokeBatch(calls) {
+  return { invoke, snapshot, terminalOutcome, async invokeBatch(calls) {
     const independent = calls.filter(c => !names.has(c.name) && c.name !== "quote_cart");
     const results = new Map<CommerceToolCall, CommerceToolResult>();
     const readResults = await input.base.invokeBatch(independent); independent.forEach((c, i) => results.set(c, readResults[i]!));
@@ -180,6 +203,7 @@ export async function createCommerceEffectTools(input: {
     return calls.map(c => results.get(c)!);
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy(); return snapshot(); },
   async recover(outcome: TerminalOutcome) {
+    const handoff = await terminalOutcome(); if (handoff) return handoff;
     if (outcome.disposition === "NO_SEND") return outcome;
     if (receipt && failedEffect) return { disposition: "HANDOFF", reason: uncertain ? "UNKNOWN_COMMIT" : "PARTIAL_EFFECT", text: null, fallbackId: null };
     if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
