@@ -99,6 +99,21 @@ describe("Phase B handoff follows current code policy and committed ownership", 
       verifier:async()=>{s.change({stateVersion:2,state:{...s.current().state,revision:2}});return {result:{verdict:"PASS",violations:[]}};}});
     expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");expect(s.commit).not.toHaveBeenCalled();
   });
+  it("rejects a current readback from another scope even if its visible revision and recipient match", async () => {
+    const s=await setup();
+    const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:"Em ơi",history:[],
+      ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner:async()=>({kind:"FINAL",text:"Dạ chị."}),
+      verifier:async()=>{s.change({pageId:"another-page"});return {result:{verdict:"PASS",violations:[]}};}});
+    expect(r.terminal.disposition).toBe("NO_SEND");expect(s.commit).not.toHaveBeenCalled();
+  });
+  it("preserves privacy no-send after a committed handoff and rejects later tool batches", async () => {
+    const s=await setup();await s.tools.invoke({name:"request_handoff",args:{reason:"EXCHANGE"}});
+    const noSend={disposition:"NO_SEND" as const,reason:"PRIVACY",text:null,fallbackId:null};
+    expect(await s.tools.recover!(noSend)).toEqual(noSend);
+    const batch=vi.spyOn(s.base,"invokeBatch");
+    expect(await s.tools.invokeBatch([{name:"read_policy",args:{}}])).toEqual([{status:"REJECTED",reason:"HANDOFF_TERMINAL"}]);
+    expect(batch).not.toHaveBeenCalled();
+  });
   it("persists terminal stale recovery but never converts ordinary fallback or privacy no-send to handoff", async () => {
     const s = await setup();
     const fallback = { disposition: "FALLBACK" as const, reason: "FAIL", text: "fallback", fallbackId: "f" };

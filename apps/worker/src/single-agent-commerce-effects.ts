@@ -212,8 +212,8 @@ export async function createCommerceEffectTools(input: {
     return calls.map(c => results.get(c)!);
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy(); return snapshot(); },
   async recover(outcome: TerminalOutcome) {
-    const handoff = await terminalOutcome(); if (handoff) return handoff;
     if (outcome.disposition === "NO_SEND") return outcome;
+    const handoff = await terminalOutcome(); if (handoff) return handoff;
     if (receipt && failedEffect) return { disposition: "HANDOFF", reason: uncertain ? "UNKNOWN_COMMIT" : "PARTIAL_EFFECT", text: null, fallbackId: null };
     if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
     await input.base.readback(); current = await read(); await refreshAuthority(); const world = snapshot();

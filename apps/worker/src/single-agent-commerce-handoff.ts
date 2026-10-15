@@ -53,7 +53,7 @@ export function createCommerceHandoffTools(input: {
     return buildReadOnlyContext({ state: { ...base.state,
       ...(base.state.conversationRevision === undefined ? { revision: authority.stateVersion } : { conversationRevision: authority.stateVersion }),
       recipient: authority.recipient, bindingVersion: authority.bindingVersion, privacyAllowed: authority.privacyAllowed,
-      permission: authority.permission && authority.fence === turnFence, conversationOwner: authority.state.conversationOwner },
+      permission: authority.permission && scopeMatches(authority), conversationOwner: authority.state.conversationOwner },
       subjects: base.boundSubjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims, policies: base.policyLiterals,
       receipts: base.effectReceipts, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
   };
@@ -108,12 +108,14 @@ export function createCommerceHandoffTools(input: {
   }
   return { ...input.base, invoke, snapshot, terminalOutcome,
     async readback() { await input.base.readback(); await read(); return snapshot(); }, async invokeBatch(calls) {
+    if (committed || uncertain) return calls.map(() => ({ status: "REJECTED", reason: "HANDOFF_TERMINAL" }));
     const handoffs = calls.filter(c => c.name === "request_handoff");
     if (!handoffs.length) return input.base.invokeBatch(calls);
     if (handoffs.length !== 1) return calls.map(() => ({ status: "REJECTED", reason: "MULTIPLE_HANDOFF_REQUESTS" }));
     const result = await invoke(handoffs[0]!);
     return calls.map(c => c === handoffs[0] ? result : { status: "REJECTED", reason: "HANDOFF_TAKES_PRECEDENCE" });
   }, async recover(outcome) {
+    if (outcome.disposition === "NO_SEND") return outcome;
     const actual = await terminalOutcome(); if (actual) return actual;
     const recovered = await input.base.recover?.(outcome) ?? outcome;
     if (recovered.disposition !== "HANDOFF") return recovered;
