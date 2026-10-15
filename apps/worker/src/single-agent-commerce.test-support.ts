@@ -39,7 +39,7 @@ export function fixtureCartLine() {
         freshForSeconds: 172800, freshnessState: "FRESH" } } });
 }
 
-export function policyResolver(defaultFeeVnd = 25_000) {
+export function fixturePolicyPointers(defaultFeeVnd = 25_000) {
   const meta = { source: "ADMIN", sourceReference: null, sourceVersion: "fixture-policy-v1", observedAt: commerceNow.toISOString() };
   const contents = [
     { schemaVersion: 1, kind: "SHOP_POLICY", shopId: "LANA_DESIGN", defaultShippingFeeVnd: defaultFeeVnd,
@@ -56,7 +56,7 @@ export function policyResolver(defaultFeeVnd = 25_000) {
         { state: "CAUTIOUS", nextAction: "HANDOFF", promptTemplate: "Nhân viên" },
       ], sourceMetadata: meta },
   ];
-  return new RuntimePolicyResolver({ loadActivePointers: async () => contents.map((content, i) => {
+  return contents.map((content, i) => {
     const id = `10000000-0000-4000-8000-00000000000${i + 1}`;
     return { pointer: { schemaVersion: 1, pointerId: `20000000-0000-4000-8000-00000000000${i + 1}`,
       artifactKey: `fixture.${content.kind}`, artifactKind: content.kind, pageId: commerceScope().pageId,
@@ -64,7 +64,10 @@ export function policyResolver(defaultFeeVnd = 25_000) {
       version: { schemaVersion: 1, versionId: id, artifactKey: `fixture.${content.kind}`, artifactKind: content.kind,
         versionNumber: 1, lifecycle: "CANARY", revision: 1, contentHash: `sha256:${commerceHash(content)}`,
         content, createdBy: "owner", createdAt: meta.observedAt, updatedAt: meta.observedAt } };
-  }) }, { enabled: true });
+  });
+}
+export function policyResolver(defaultFeeVnd = 25_000) {
+  return new RuntimePolicyResolver({ loadActivePointers: async () => fixturePolicyPointers(defaultFeeVnd) }, { enabled: true });
 }
 export const fixturePolicy = async (fee = 25_000) => policyResolver(fee).resolve({ pageId: commerceScope().pageId,
   channel: "CANARY_SHADOW", now: commerceNow });

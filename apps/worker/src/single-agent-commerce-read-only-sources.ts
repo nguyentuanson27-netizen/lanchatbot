@@ -32,5 +32,9 @@ export function createCommerceReadSources(input: {
       return { product, snapshot: readPos ? await input.facts.readCatalogSnapshot(input.scope.shopAlias, productId) : null };
     },
   };
-  return { catalog, policy: () => resolver.resolve({ pageId: input.scope.pageId, channel: input.channel, now: input.clock() }) };
+  return { catalog, policy: () => {
+    // This port promises a current active-pointer read, including the final readback.
+    resolver.invalidate(input.scope.pageId, input.channel);
+    return resolver.resolve({ pageId: input.scope.pageId, channel: input.channel, now: input.clock() });
+  } };
 }

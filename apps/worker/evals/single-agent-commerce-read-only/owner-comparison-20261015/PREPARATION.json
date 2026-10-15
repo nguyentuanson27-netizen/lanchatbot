@@ -130,5 +130,66 @@
     "status": "SOURCE_PREFLIGHT_PASS",
     "providerGenerations": 0,
     "limitation": "Wire history representation subsequently changed to the official string-content form. A fresh clean-source preflight is required; no provider request occurred on the earlier seal."
+  },
+  "sourceCacheCorrection": {
+    "reason": "Initial real preflight recorded only one active-pointer read across read_policy plus readback; resolver cached the resolved bundle for5s.",
+    "change": "Candidate source port invalidates existing scoped cache before every resolve. Existing tools reject LAST_KNOWN_GOOD on source failure.",
+    "observedRed": {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-sources.test.ts",
+      "exitCode": 1,
+      "pass": 5,
+      "fail": 2
+    },
+    "green": {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts",
+      "exitCode": 0,
+      "pass": 90
+    },
+    "checks": [
+      {
+        "durationSeconds": 41.3554025,
+        "command": "pnpm --filter @lana/worker exec vitest run src",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-src-tests.log",
+        "logSha256": "841bf725622ad90561fda109d78ef00c04a9f22ac739f83847f9348a2c3b8423"
+      },
+      {
+        "durationSeconds": 60.0603371,
+        "command": "pnpm --filter @lana/worker typecheck",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-typecheck.log",
+        "logSha256": "c1d43e6a3b7b59f5e125c306ad3c9eeaf5f14022d9ac8989b654f6741cb7f071"
+      },
+      {
+        "durationSeconds": 59.5018978,
+        "command": "pnpm --filter @lana/worker build",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-build.log",
+        "logSha256": "de935666542d9c07ccd6e2c45cc7593dda48e9da1f10608c98c79d07eb69cfce"
+      },
+      {
+        "durationSeconds": 8.2152658,
+        "command": "pnpm --filter @lana/worker lint",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-lint.log",
+        "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+      }
+    ],
+    "currentWorkerSourcePass": 1715,
+    "currentWorkerSourceFiles": 126,
+    "providerGenerationsBeforeCorrection": 0,
+    "supersededSeal": "97dcbbc4b388a66f04ac65816e052a78c15872f1",
+    "interruptedPreflightExit": -1,
+    "rawDirectoryExistedAtInterruption": false,
+    "rawLogs": {
+      "red-policy-cache.log": {
+        "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-policy-cache.log",
+        "sha256": "fc084730d25b49fa25fbd9f3ffa467755b7cea3017903ec877a1bd3a2605bd71"
+      },
+      "green-policy-cache.log": {
+        "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\green-policy-cache.log",
+        "sha256": "8b621bf16e845c301af087c5c76eccb5ec05792d6ff0064d9fafd43155106f7d"
+      }
+    }
   }
 }

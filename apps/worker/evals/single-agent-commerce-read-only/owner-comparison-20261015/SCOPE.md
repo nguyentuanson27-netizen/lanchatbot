@@ -12,6 +12,8 @@ Surface `POST_READ_OWNER_DIAGNOSTIC`: code dùng các adapter B1 hiện có đ�
 
 Không sửa hoặc wire production entrypoint. Chỉ tái dùng Gemini HTTP adapter, Codex login bounded relay, runtime `runCommerceTurn`, verifier và final deterministic gate. Không thêm semantic role, parser, regex, repair/reverify, store hoặc framework provider. Gemini không được thực thi tool kể cả provider trả tool ngoài chế độ NONE; lỗi này giữ request accounting.
 
+Trước generation, preflight còn phát hiện port policy tái dùng cache5s của RuntimePolicyResolver: lần đọc lại ngay sau đó chỉ có một active-pointer read. Hai regression dùng composer/resolver thật ở cùng một clock tái hiện đọc nhầm policy cũ và bỏ qua source failure (RED2FAIL/5PASS). Sửa port bằng `resolver.invalidate(pageId, channel)` sẵn có trước resolve; không đổi resolver toàn cục hoặc thêm gate/cache/store. Fixture cũ tạo resolver mới mỗi callback nên tools-only tests đã che seam này; tách factory pointers của chính fixture để kiểm đúng composition. Bản sửa áp dụng giống nhau cho cả hai arm; không đổi snapshot nội dung policy, prompt hay tiêu chí chấm. Hai seal trước đều0provider generations, bị supersede trước dispatch; run cuối phải dùng clean commit và preflight mới.
+
 ## Đăng ký trước provider
 
 - Hai input nguyên văn từ `cases.b1.json`: `b1-changed-occasion`, `b1-current-policy`; không sửa câu hỏi/lịch sử để dễ đạt. LIVE source, không fault injection/replay.
