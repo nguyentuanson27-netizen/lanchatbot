@@ -2,12 +2,12 @@
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "preparationHead": "83061af529f3ce21cb9898823c2c2a1151f30753",
   "priorOwnerPromptSha256": "d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67",
-  "ownerPromptSha256": "2e5b33a2808fb3eff415a7e92a62ec2673689a5327f5df45361f4bda20cf4f06",
+  "ownerPromptSha256": "0a0abb5bf036f5accb4f4fcb888e26bab0e0f4cc862c295abda803c12a8db233",
   "priorOwnerPromptBytes": 10353,
-  "ownerPromptBytes": 10627,
+  "ownerPromptBytes": 10626,
   "verifierPromptSha256": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957",
-  "baseManifestSha256": "8582ab917d15e73b869fc591b8ca317ae757a924af9dabf0b2f820eca0388bf0",
-  "registrationFileSha256": "061a966389cfea32b9babb84713c8389564aedad2ec8d1ef87d9eef2eeae57fe",
+  "baseManifestSha256": "5698b20e82f72d3eb91b0dd4b3e5083fc3bf90eeb9d96fd1a8ed401770e921b2",
+  "registrationFileSha256": "bd13acfa6f44de7899d4a38db5d9d6686c7c9b15d6392872ffe6c114ba0be453",
   "providerGenerationsBeforeFreeze": 0,
   "skills": [
     "OpenAI Docs",
@@ -25,5 +25,101 @@
     "runtimeChanges": false,
     "modelsConfigVerifierSchemaCorpusFallbackUnchanged": true,
     "scope": "Owner prompt and explicit comparison registration path; no context projection or verbosity change."
+  },
+  "checks": [
+    {
+      "durationSeconds": 1.5646687,
+      "exitCode": 0,
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs",
+      "logFile": "focused-node.log",
+      "logSha256": "be2a6f3ddbc4de9a9ce1427dcebe4795015a42783000a1d61776453716173bc0"
+    },
+    {
+      "durationSeconds": 4.9955433,
+      "exitCode": 0,
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts",
+      "logFile": "focused-boundary.log",
+      "logSha256": "1c1ce036eb407e15a6e4287b8769a0c651b4d352116972969f6b0e79bdd3e0b8"
+    },
+    {
+      "durationSeconds": 2.862336,
+      "exitCode": 0,
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "logFile": "protected-reply.log",
+      "logSha256": "40321392155d9ca36c466582d2c4f0eebf1d4a7e21fc9f9e972f753607ddefeb"
+    },
+    {
+      "durationSeconds": 191.0568104,
+      "exitCode": 0,
+      "command": "pnpm --filter @lana/worker test",
+      "logFile": "worker-test.log",
+      "logSha256": "20950764ae64174c5df460f5ca59989d319bf35e3cd391e2c1f452ff91254241"
+    },
+    {
+      "durationSeconds": 46.5653981,
+      "exitCode": 0,
+      "command": "pnpm --filter @lana/worker typecheck",
+      "logFile": "worker-typecheck.log",
+      "logSha256": "d9fa4d25fdc02a00c6fd6664b9cc61232e2176d71152d5219abccbcc67e7e91a"
+    },
+    {
+      "durationSeconds": 41.4295287,
+      "exitCode": 0,
+      "command": "pnpm --filter @lana/worker build",
+      "logFile": "worker-build.log",
+      "logSha256": "6f9364b59e14daf5ff7c742857d23da67c675a9b6e0f63f67b067446a48aaee2"
+    },
+    {
+      "durationSeconds": 5.3107813,
+      "exitCode": 0,
+      "command": "pnpm --filter @lana/worker lint",
+      "logFile": "worker-lint.log",
+      "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    }
+  ],
+  "red": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+    "observedExit": 1,
+    "reason": "readComparisonManifest export missing",
+    "logSha256": "763b67a71949b7afa2afbdb1c14d4f34d48735e714aa625ce993bfdf323acbe8"
+  },
+  "green": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+    "observedExit": 0,
+    "testsPassed": 7,
+    "logSha256": "2e77bd175a28126ba07597844727be854494c61509be40e974deb0a18e7ff8dd"
+  },
+  "specs": [
+    {
+      "path": "docs/specs/c3-single-agent-commerce-architecture-20261004.md",
+      "sha256": "78e83815495211386081ff646b93ab7f1bfc1cdbfb9fe4cb6c0a4533c2cf1343",
+      "gitBlobSha": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+      "lastChangedCommit": "e5e54c85da5045d0529dd1bbe61c2fde8dd96c8b"
+    },
+    {
+      "path": "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md",
+      "sha256": "14745e37eb9ec9b11bd8a47466c07e4c5ab91f75e5627c4e983aa4f408d1b411",
+      "gitBlobSha": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+      "lastChangedCommit": "e5e54c85da5045d0529dd1bbe61c2fde8dd96c8b"
+    },
+    {
+      "path": "docs/specs/c3-phase-b-execution-20261014.md",
+      "sha256": "b358241dc9fb0a86335ff87c0d5c3cf9f1574eb4f5d34f179911a9991a9340bd",
+      "gitBlobSha": "c397034d68897c0ee96947dce39b1a550e940920",
+      "lastChangedCommit": "0f4c4eba9be29d6033058ae1be3bebc9daafffbd"
+    }
+  ],
+  "readiness": {
+    "focusedNodePassed": 37,
+    "focusedNodeOptionalSkipped": 1,
+    "focusedBoundaryPassed": 60,
+    "protectedReplyPassed": 21,
+    "fullWorkerFiles": 126,
+    "fullWorkerPassed": 1715,
+    "fullEvalPassed": 467,
+    "fullEvalOptionalSkipped": 2,
+    "workerTypecheckBuildLint": "PASS",
+    "trackedWindowsAlias": "Temporarily junction during checks; finally restored byte-exact; not in diff.",
+    "providerRequestsBeforeSeal": 0
   }
 }
