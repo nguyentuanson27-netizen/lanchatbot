@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current sales-owner read-tool correction — 2026-10-15
+
+- [x] Refresh main296cdcfb/start6897d0a8; confirm prior diagnostic had one preloaded product/tools0. [Scope/registration](../apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SCOPE.md): same5LIVE N1/model,10outcomes/max40generations; models/verifier/policy/schema/fallback unchanged.
+- [x] Observed RED→GREEN for native Sol transport, ordered native continuation and registration budgets. Reuse B1 tool declarations/loop/source readback; verifier/legacy diagnostic remain tools0. Rewrite two owner instructions around advisory judgment and finding useful alternatives, without answer examples or case-specific rules.
+- [x] Focused44PASS/1optionalSKIP, full eval474PASS/2optionalSKIP, B boundary/state/effects122PASS, protected/reply21PASS; worker typecheck/build/lint exit0. [Self-review/readiness](../apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SELF_REVIEW.md); source fix3d5544e3. Invalid native tool hash rejected before credentials/source/provider. Commit registration and require clean source before preflight/run.
+- [ ] Run one frozen batch, preserve raw before primary, review all10actual terminal outcomes, then diagnose rejected drafts/source gaps; report complete accounting/firewall/bindings/metrics and STOP. Update draft PR391/read back exact head, no merge/deploy/send or automatic next round.
+
 ## Current single-pass owner comparison — 2026-10-15
 
 - [x] Freeze [5 existing LIVE cases ×1/model](../apps/worker/evals/single-agent-commerce-read-only/owner-task-prompt-run-20261015/SCOPE.md), 10 slots/max20requests. Promptc6cddd33, same models/context/verifier/config; new manifest, historical evidence untouched. Refresh main296cdcfb/start75f075b1.
