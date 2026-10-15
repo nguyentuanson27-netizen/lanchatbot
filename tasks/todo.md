@@ -5,7 +5,7 @@
 - [x] Refresh main; preserve clean starting head c5f053a0 and existing draft PR391.
 - [x] Observe focused RED and implement typed native variant/replay and retained Inbox lease (savepoint370259c9).
 - [x] Implement candidate persisted executor, current cart projection, Inbox/history/private-checkout/Outbox composition. Intermediate database reports preserve exposed defects and cleanup; final clean-source COD/bank verification follows the seal.
-- [x] Full worker129files/1747PASS and full eval479PASS/0skip; shared contracts220/business-tools353/database238PASS+30optionalSKIP/chat-runtime52PASS; worker typecheck/build/lint and affected shared typechecks/builds exit0. Self-review and focused160PASS include exact source-SKU invalidation, private history and canonical selection evidence. Historical Windows alias restored byte-exact.
+- [x] Full worker129files/1748PASS after current-quantity evidence fix and full eval479PASS/0skip before that worker-only correction; shared contracts220/business-tools353/database238PASS+30optionalSKIP/chat-runtime52PASS; final worker typecheck/build/lint and affected shared typechecks/builds exit0. Self-review and focused161PASS include exact source-SKU invalidation, private history and canonical selection evidence. Historical Windows alias restored byte-exact. Preserve both additional clean integration failures/cleanup at their exact sources; do not count receipt recovery as delivery of the original draft.
 - [ ] Commit/clean/seal; run the frozen six-public-turn + one-private-code-turn provider batch once on approved models; preserve raw evidence, then whole-terminal review.
 - [ ] Record actual outcomes, limitations, commands and cleanup; update PR391. No live send/deploy or automatic next round.
 

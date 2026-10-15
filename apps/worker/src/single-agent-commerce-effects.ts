@@ -103,6 +103,15 @@ export async function createCommerceEffectTools(input: {
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
     const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return line;
   }
+  async function refreshSelections() {
+    const lines = current.cart?.value.lines ?? [];
+    for (const id of selections.keys()) if (!lines.some(line => line.lineId === id)) selections.delete(id);
+    for (const line of lines) {
+      const sizes = [...new Set(line.components.map(c => c.size))], colors = [...new Set(line.components.map(c => c.color))];
+      try { await selection(line.parentProductId, { size: sizes.length === 1 ? sizes[0] : null, color: colors.length === 1 ? colors[0] : null, quantity: line.quantity }, line.lineId, line.offerId); }
+      catch { selections.delete(line.lineId); }
+    }
+  }
   function recordReceipt(operationId: string, effect: string, expectedRevision: number) {
     if (current.revision !== expectedRevision || !current.processedCommandIds.includes(operationId) || !current.cart || current.stage === "HANDED_OFF") return false;
     receipt = { ref: `receipt:${operationId}`, operationId, subjectRef: current.cart.value.cartId, status: "SUCCESS", effect,
@@ -219,6 +228,7 @@ export async function createCommerceEffectTools(input: {
       current = await read();
       await refreshAuthority();
       if (reconciledRevision !== undefined ? current.revision !== reconciledRevision : !recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
+      await refreshSelections();
       if (result?.status === "APPLIED" && result.transferToHuman) committedHandoff = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
@@ -230,6 +240,8 @@ export async function createCommerceEffectTools(input: {
     if (names.has(call.name) && result.status !== "OK") failedEffect = true;
     return result;
   }
+  // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
+  await refreshSelections();
   return { invoke, snapshot, terminalOutcome, async invokeBatch(calls) {
     const independent = calls.filter(c => !names.has(c.name) && c.name !== "quote_cart");
     const results = new Map<CommerceToolCall, CommerceToolResult>();
@@ -240,12 +252,7 @@ export async function createCommerceEffectTools(input: {
     for (const c of calls.filter(c => c.name === "quote_cart")) results.set(c, effectRejected ? { status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" } : await input.base.invoke(c));
     return calls.map(c => results.get(c)!);
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
-    for (const id of selections.keys()) { const line = current.cart?.value.lines.find(l => l.lineId === id);
-      if (!line) { selections.delete(id); continue; }
-      const sizes = [...new Set(line.components.map(c => c.size))], colors = [...new Set(line.components.map(c => c.color))];
-      try { await selection(line.parentProductId, { size: sizes.length === 1 ? sizes[0] : null, color: colors.length === 1 ? colors[0] : null, quantity: line.quantity }, id, line.offerId); }
-      catch { selections.delete(id); }
-    }
+    await refreshSelections();
     return snapshot(); },
   async recover(outcome: TerminalOutcome) {
     if (outcome.disposition === "NO_SEND") return outcome;

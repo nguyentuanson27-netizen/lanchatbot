@@ -5,6 +5,7 @@ import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js"
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
 import { hardPrecheck } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
+import type { CartSelectionQuery } from "./realtime-sales-catalog.js";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
@@ -27,10 +28,12 @@ async function setup(clock = () => commerceNow) {
   }) };
   const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
-  const authorize = vi.fn(async () => true), select = vi.fn(async () => ({ status: "READY" as const, line: fixtureCartLine(), shopId: scope.shopId,
+  const authorize = vi.fn(async () => true), select = vi.fn(async (query?: CartSelectionQuery) => {
+    const line = fixtureCartLine(); line.quantity = query?.quantity ?? 1; line.lineTotalVnd = line.posUnitPriceVnd! * line.quantity;
+    return { status: "READY" as const, line, shopId: scope.shopId,
     versions: { price: "p1", inventory: "i1", size: "s1", eta: null }, eta: null, etaExpiresAt: null,
     sourceAuthority: "POS_SNAPSHOT" as const, stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4,
-    sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }));
+    sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
   const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
     policy: async () => policy,
     resolveBankTransferPolicy: () => bankPolicy,
@@ -48,6 +51,16 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("does not replace a verified quantity-change reply because its own final readback first introduced current cart facts", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const lineId = s.current().cart!.value.lines[0]!.lineId;
+    await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } });
+    const text = "Em đổi số lượng hai chiếc rồi chị nhé.";
+    const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc cho chị nhé.", history: [],
+      ownerPrompt: "Tư vấn", verifierPrompt: "Kiểm", owner: async () => ({ kind: "FINAL", text }), verifier: async () => ({ result: { verdict: "PASS", violations: [] } }) });
+    expect(result.terminal).toMatchObject({ disposition: "SEND_ELIGIBLE", text });
+    expect(s.commits).toHaveLength(2);
+  });
   it("keeps verified cart selection price/stock in model context and re-reads it before accepting an old verdict", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     expect(s.tools.snapshot().protectedClaims).toEqual(expect.arrayContaining([
