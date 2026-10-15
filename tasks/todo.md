@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Finish remaining Phase B integration — 2026-10-15
+
+- [x] Refresh main; preserve clean starting head c5f053a0 and existing draft PR391.
+- [x] Observe focused RED and implement typed native variant/replay and retained Inbox lease (savepoint370259c9).
+- [x] Implement candidate persisted executor, current cart projection, Inbox/history/private-checkout/Outbox composition. Intermediate database reports preserve exposed defects and cleanup; final clean-source COD/bank verification follows the seal.
+- [x] Full worker129files/1747PASS and full eval479PASS/0skip; shared contracts220/business-tools353/database238PASS+30optionalSKIP/chat-runtime52PASS; worker typecheck/build/lint and affected shared typechecks/builds exit0. Self-review and focused160PASS include exact source-SKU invalidation, private history and canonical selection evidence. Historical Windows alias restored byte-exact.
+- [ ] Commit/clean/seal; run the frozen six-public-turn + one-private-code-turn provider batch once on approved models; preserve raw evidence, then whole-terminal review.
+- [ ] Record actual outcomes, limitations, commands and cleanup; update PR391. No live send/deploy or automatic next round.
+
 ## Current Phase B integration audit — 2026-10-15
 
 - [x] Inspect actual B source paths against architecture/execution plan; record [coverage matrix](../docs/specs/c3-phase-b-integration-audit-20261015.md), clean starting head814ef987 and refreshed main296cdcfb.

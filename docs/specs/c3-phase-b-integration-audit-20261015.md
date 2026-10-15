@@ -1,5 +1,11 @@
 # Phase B integration audit and completion
 
+## Follow-through authorized by owner — 2026-10-15
+
+The owner asks to finish the remaining B work, rather than leave it tracked. Continue from clean `c5f053a0920f3144835953fa69c7cb889af683f2` on PR391. Finish persisted variant replacement, serialized mutations within one bounded owner turn, stateful provider journeys, and candidate ingress/history/delivery composition. Keep the candidate send-disabled and exercise delivery only with a capture transport and disposable test database. No production activation, live customer writes, deploy, or Phase C follows.
+
+Reuse the existing typed cart evidence/replay, current Inbox lease, conversation/profile CAS and Outbox. Intermediate effects retain the source lease; final terminal commit completes it. Every write still checks the current source and revision, and partial effects remain receipt-backed. Extend the current typed contract for variants and native permission; do not add text matching, a new store, or a parallel readiness system. Observe focused RED before implementation, run affected package checks, and self-review before sealing source for a bounded provider batch. Preserve all provider attempts and distinguish engineering completion from observed sales quality.
+
 Owner asks to inspect disconnected rules/capabilities, track them under B, connect them and review the result. Audit source: `814ef9872ec511cd8060c831c73d2bcae66d8a94`; refreshed main: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Continue on the existing B implementation branch/PR391. This supersedes earlier source-only pauses for the work below, not historical results or deployment restrictions.
 
 ## Coverage and work

@@ -1,0 +1,28 @@
+# Commands and evidence — remaining B completion
+
+Repository: `C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005`. Commands below are actual local runs. Tests using a synthetic transport are deterministic engineering checks, not provider results.
+
+| Command / working directory | Observed result |
+| --- | --- |
+| `git fetch origin main`; `git rev-parse origin/main` | Main `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; start clean `c5f053a0920f3144835953fa69c7cb889af683f2` |
+| `vitest run` in `packages/contracts` (via package test script) |22files/220PASS |
+| `vitest run` in `packages/business-tools` |23files/353PASS, includes protected claims/reply assembly |
+| `vitest run` in `packages/database` |29passed files/238PASS;4opt-in PostgreSQL files/30SKIP, not claimed verified by this command |
+| `vitest run` in `packages/chat-runtime` |5files/52PASS |
+| `pnpm exec vitest run src/single-agent-commerce-effects.test.ts` in worker, before final comparator reuse |27PASS/1FAIL observed RED: canonical equivalent SKU incorrectly lost stock evidence |
+| `pnpm exec vitest run src/single-agent-commerce-effects.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-handoff.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/realtime-sales-cycle.test.ts` in worker |6files/160PASS after correction |
+| `pnpm exec vitest run src` in worker, final source |129files/1747PASS/0skip |
+| `$env:C3_CHECKPOINT_A_ROUND='68'; $env:C3_TEST_CODEX_TRANSPORT='1'; pnpm test:evals` in worker |479PASS/0skip; test transport only, no live generation |
+| `pnpm benchmark:c2:validate` in worker |All three existing benchmark/quality-harness/journey validators exit0 |
+| `pnpm --filter @lana/worker build` |Exit0; prebuild builds all worker dependency packages, including changed shared packages |
+| `pnpm --filter @lana/worker typecheck` |Exit0 |
+| `pnpm --filter @lana/worker lint` |Exit0; this repository's lint script is TypeScript noEmit |
+| `pnpm -r --filter @lana/contracts --filter @lana/business-tools --filter @lana/database --filter @lana/chat-runtime typecheck` |Exit0, including declared shared pretypecheck builds |
+| `node --check apps/worker/evals/single-agent-commerce-read-only/stateful-provider.mjs`; same for `isolated-integration.mjs` |Exit0 |
+| `git diff --check`; changed/untracked source/evidence scan for private-key blocks, Google API-key pattern and credential-bearing PostgreSQL/Redis URLs |Exit0;30files/0pattern matches before seal |
+
+The worker test script's three components were executed separately (benchmark validation, full source tests, full Node evals); this report does not claim an additional invocation of its umbrella `test` command. The historical tracked v4 symlink is a plain file on this Windows checkout. Full tests used a temporary verified junction; the exact original file was restored before clean seal. No historical input or result changed.
+
+Development database commands: `python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs <new-temp-evidence-directory> COD`, with later diagnostic runs adding `--composed-only`. Eight intermediate reports are retained here, each at its own source/dirty identity, including observed failures. Every disposable database was dropped. They are not relabeled as final clean-source evidence.
+
+Final clean-source COD/bank, provider preflight, provider batch and delivery readbacks will be appended with their actual SHA, commands, exit codes and reports. No provider generation has occurred at this preparation savepoint.

@@ -1,4 +1,5 @@
-// Real PostgreSQL, synthetic customer/product input, current captured policy. Never a provider/live-effect run.
+// Evaluation-only real PostgreSQL: synthetic inputs by default; explicit provider mode uses live public sources.
+// Delivery is always an in-memory capture transport, never a live customer effect.
 import assert from 'node:assert/strict';
 import {randomBytes,randomUUID,createHash} from 'node:crypto';
 import {readFileSync,readdirSync,writeFileSync,mkdirSync} from 'node:fs';
@@ -6,7 +7,10 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,LocalEnvelopeCipher,withTransaction} from '@lana/database';
+import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,PostgresChatHistoryStore,LocalEnvelopeCipher,withTransaction,redactAnalyticsMessage} from '@lana/database';
+import {MetaDeliveryAdapter} from '@lana/meta-delivery';
+import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
+import {runPersistedCommerceIngress} from '../../dist/single-agent-commerce-ingress.js';
 import {createSalesCycleRuntimeState,applySalesCycleCommand,executePersistedSalesCycleCommand,RuntimePolicyResolver,buildPurchaseConfirmedTagCommand} from '@lana/chat-runtime';
 import {createConversationState} from '@lana/conversation-engine';
 import {buildCanonicalDecisionEvidenceV1} from '@lana/business-tools';
@@ -17,22 +21,27 @@ import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-tools.js';
 import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
+import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
+const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
+const providerFreeze=providerRun||providerPreflight?statefulPreflight(root):null;
+if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
 const {Pool}=createRequire(new URL('../../../../packages/database/package.json',import.meta.url))('pg');
 const out=process.argv[2];assert(out,'NEW_EVIDENCE_DIRECTORY_REQUIRED');mkdirSync(resolve(out));
 const paymentMethod=process.argv[3]??'COD';assert(['COD','BANK_TRANSFER'].includes(paymentMethod));
 const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
  sourceDirty:!!execFileSync('git',['status','--porcelain','--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'],{cwd:root,encoding:'utf8'}).trim(),
- mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
+ mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
-const check=async(name,fn)=>{try{await fn();report.cases.push({name,status:'PASS'});save();console.log(name+': PASS');}
+const check=async(name,fn)=>{if(providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')))return;
+ try{await fn();report.cases.push({name,status:'PASS'});save();console.log(name+': PASS');}
  catch(error){report.cases.push({name,status:'FAIL',error:error.message});save();throw error;}};
 const adminUrl=process.env.C3_B_TEST_ADMIN_DATABASE_URL;assert(adminUrl,'C3_B_TEST_ADMIN_DATABASE_URL');
 const databaseName='c3_b_test_'+randomBytes(8).toString('hex');
 assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));
 const admin=new Pool({connectionString:adminUrl,max:1}),testUrl=new URL(adminUrl);testUrl.pathname='/'+databaseName;
-let pool,runtime,inbox,policyStore,livePolicyStore,created=false;
+let pool,runtime,inbox,policyStore,livePolicyStore,historyStore,providerPorts,created=false;
 try{
  await admin.query('CREATE DATABASE '+databaseName);created=true;
  pool=new Pool({connectionString:testUrl.toString(),max:4});
@@ -100,6 +109,7 @@ try{
  const policyResolution=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:key},now});
  assert(policyResolution.bundle,'CAPTURED_POLICY_UNAVAILABLE');scope.shopId=policyResolution.bundle.policy.shopId;
  report.policyBundleHash=policyResolution.bundle.bundleHash;
+ report.policyVersionReferences=policyResolution.bundle.versionReferences;
  let activePrepared;
  const repository=createPersistedCommerceRepository({store:runtime,transaction:fn=>withTransaction(pool,fn),conversationKey:key,pageId,conversationId:key,
   customerHash:scope.customerHash,clock:()=>new Date(),prepare:async update=>{
@@ -278,10 +288,133 @@ try{
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}})).status,'REJECTED');
   assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0});
  });
- report.status='PASS';save();
+ // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
+ // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
+ historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
+ await pool.query('UPDATE pages SET app_send_enabled=true,kill_switch=false WHERE page_id=$1',[pageId]);
+ if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
+ async function statefulFixture({live=false,missingEta=false}={}){
+  const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
+  const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
+  await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
+  let sourceVariantChanged=false;
+  const product=fixtureProduct('SM613',at),selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
+   const s=fixtureCartLine();s.lineId=q.lineId;s.quantity=q.quantity;s.lineTotalVnd=s.posUnitPriceVnd*s.quantity;
+   s.priceAuthority={...s.priceAuthority,shopId:bound.shopId,priceFactRef:'synthetic-pos-v1',metadata:{...s.priceAuthority.metadata,sourceVersion:'synthetic-pos-v1',observedAt:at.toISOString(),expiresAt:new Date(at.getTime()+172800000).toISOString()}};
+   s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
+   if(sourceVariantChanged)s.components[0].componentSku='CHANGED-SOURCE-SKU';
+   return {status:'READY',line:s,shopId:bound.shopId,versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:q.deliveryAddress?'synthetic-eta-v1':null},
+    eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
+    sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
+  const facts=live?providerPorts.facts:{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
+  const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');return resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});};
+  const read=live?await providerPorts.read(bound,policyStore,policy):{policy,catalog:{readProduct:async()=>product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  const capture=[],gateCalls=[],dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
+   const b=JSON.parse(r.body);capture.push(b.message.text??'[CODE_IMAGE]');return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
+   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),{authorize:async claim=>{gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},{workerId:'c3-b-capture'},undefined,historyStore);
+  const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{}}={}){
+   const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
+    senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
+   await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:id,providerMessageId:id,conversationHash:customerHash,occurredAt:now,receivedAt:now,signatureKeyVersion:'synthetic',envelope});
+   await pool.query('UPDATE conversation_ingress_heads SET quiet_until=now() WHERE page_id=$1 AND conversation_hash=$2',[pageId,customerHash]);
+   // Earlier supersession tests intentionally leave synthetic pending sources. Retire those test-only batches.
+   let batch;
+   for(let n=0;n<20;n++){batch=await inbox.claimNextBatch('c3-b-stateful',300000);if(!batch||batch.conversationHash===customerHash)break;await inbox.completeBatch(batch);}
+   assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
+   let owners=0,verifiers=0;const toolResponses=[];
+   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{return await withTransaction(pool,fn);}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
+    read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
+    ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
+    owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
+      const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
+    verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
+   return {result,owners,verifiers,batch,toolResponses};
+  }
+  const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
+  return {bound,turn,state,capture,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;}};
+ }
+ const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ let journey;
+ await check('B composed ingress commits an open cart, authorizes the exact reply and captures delivery once',async()=>{
+  journey=await statefulFixture();const r=await journey.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy',quantity:1}}]),say('Em đã thêm áo vào giỏ cho chị.')]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));assert.equal(r.result.enqueued,1);assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  const cart=(await journey.state()).cart;if(!cart){report.composedDiagnostic=r.toolResponses;save();}assert(cart,JSON.stringify(r.toolResponses));
+  assert.equal(cart.value.lines[0].quantity,1);await journey.drain();await journey.drain();
+  assert.equal(journey.capture.filter(s=>s==='Em đã thêm áo vào giỏ cho chị.').length,1);assert.equal(journey.gateCalls.length,1);
+ });
+ await check('B composed two native mutations retain one source and next owner receives accepted history and current cart',async()=>{
+  const line=(await journey.state()).cart.value.lines[0];let sawHistory=false;
+  const r=await journey.turn('Đổi áo sang L, cho chị hai chiếc nhé',[native([{name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_COMPONENT_VARIANT',componentRole:'TOP',size:'L'}},
+   {name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:2}}]),say('Em đổi áo sang L, số lượng hai chiếc rồi chị nhé.')],{inspect:req=>{sawHistory||=JSON.stringify(req.contents).includes('Em đã thêm áo vào giỏ cho chị.');}});
+  assert.equal(r.result.enqueued,1,JSON.stringify(r.result));assert(sawHistory);const s=await journey.state();assert.equal(s.cart.value.lines[0].quantity,2);assert.equal(s.cart.value.lines[0].components[0].size,'L');
+  await journey.drain();assert(journey.capture.includes('Em đổi áo sang L, số lượng hai chiếc rồi chị nhé.'));
+ });
+ await check('B composed private checkout bypasses both models and persists the existing guarded preview',async()=>{
+  const partial=await journey.turn('Tên: Khách thử nghiệm',[]);assert.equal(partial.owners,0);assert.equal(partial.result.enqueued,1);await journey.drain();
+  const r=await journey.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal((await journey.state()).stage,'ORDER_PREVIEW');assert(r.result.enqueued>0,JSON.stringify(r));await journey.drain();
+ });
+ await check('B composed confirmation uses existing revalidation and commits checkout handoff once',async()=>{
+  const r=await journey.turn('Chốt đơn cho chị nhé',[native([{name:'confirm_purchase',args:{}}])],{inspect:request=>{
+   assert(!JSON.stringify(request).includes('Khách thử nghiệm'),'PRIVATE_NAME_HISTORY_LEAK');assert(!JSON.stringify(request).includes('0900000000'),'PRIVATE_PHONE_HISTORY_LEAK');}});
+  assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal((await journey.state()).stage,'PURCHASE_CONFIRMED');
+  assert.equal((await runtime.loadOrCreate(pageId,journey.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+ });
+ await check('B composed later failed mutation hands off the partial committed result, without replay',async()=>{
+  const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
+  const line=(await j.state()).cart.value.lines[0],r=await j.turn('Lấy hai chiếc cho chị nhé',[native([{name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:2}},
+   {name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:0}}]),say('Để em kiểm tra lại.')],{verdict:'UNCERTAIN'});
+  assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal((await j.state()).cart.value.lines[0].quantity,2);
+  const counts=(await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0];assert.equal(counts.n,1);
+  const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.result.terminal.disposition,'NO_SEND');
+ });
+ await check('B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source',async()=>{
+  const j=await statefulFixture({missingEta:true});await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
+  const r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+ });
+ await check('B composed newer inbound between final readback and commit cancels eligibility without an Outbox',async()=>{
+  const j=await statefulFixture();let injected=false;
+  const r=await j.turn('Em ơi',[say('Dạ chị.')],{beforeCommit:async()=>{if(injected)return;injected=true;const id='newer-'+randomUUID(),at=new Date();
+   await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:id,providerMessageId:id,conversationHash:j.bound.customerHash,occurredAt:at,receivedAt:at,signatureKeyVersion:'synthetic',envelope:{synthetic:true}});}});
+  assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+ });
+ await check('B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged',async()=>{
+  const j=await statefulFixture();const r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{afterVerify:async()=>j.changeVariantSource()});
+  assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));assert.equal(r.result.enqueued,0);assert.equal(await inbox.isBatchCurrent(r.batch),false);
+ });
+ if(providerRun){
+  const journeys=new Map();report.outcomes=[];
+  for(const [index,c] of providerFreeze.cases.entries()){
+   providerPorts.setSlot(c.caseId);const beforeCounts={...providerPorts.counters};
+   const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true});journeys.set(c.journeyId,j);}
+   const capturedBefore=j.capture.length;
+   const latest=c.runtime.privateCheckoutFixture?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':c.runtime.latest;
+   let attempt;
+   try{attempt=await j.turn(latest,[]);await j.drain();}
+   catch(error){attempt={result:{terminal:{disposition:'NO_SEND',reason:'ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},sendEnabled:false},errorCode:/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name};}
+   const stored=await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,()=>createSalesCycleRuntimeState(j.bound.conversationId,{pageId,conversationId:j.bound.conversationId},new Date()));
+   const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
+   const result={caseId:c.caseId,journeyId:c.journeyId,elapsedMs:performance.now()-started,...attempt,
+    actualCapturedMessages:j.capture.slice(capturedBefore).map(t=>redactAnalyticsMessage(t).text),
+    committedPublicState:{stage:stored.state.stage,revision:stored.state.revision,cart:stored.state.cart?.value??null,measurements:profile.profile.measurements,customerProfileRevision:profile.profile.revision},
+    counts:{...providerPorts.counters}};
+   writeFileSync(resolve(out,'provider-attempt-'+(index+1)+'.json'),JSON.stringify(result,null,2),{flag:'wx'});
+   report.outcomes.push({caseId:c.caseId,disposition:attempt.result.terminal.disposition,captured:result.actualCapturedMessages.length,
+    ownerRequests:providerPorts.counters.owner-beforeCounts.owner,verifierRequests:providerPorts.counters.verifier-beforeCounts.verifier});
+   report.providerGenerations=providerPorts.counters.owner+providerPorts.counters.verifier;save();
+  }
+  report.providerCounts={...providerPorts.counters};report.registeredOutcomes=7;report.completedOutcomes=report.outcomes.length;
+  assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),providerFreeze.registration.sourceSha,'RUN_SOURCE_CHANGED');
+  const finalFreeze=statefulPreflight(root);assert.equal(finalFreeze.registration.sourceConfigHash,providerFreeze.registration.sourceConfigHash,'RUN_CONFIG_CHANGED');
+ }
+ report.status=providerRun?'COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW':'PASS';save();
 }catch(error){report.status='FAIL';report.errorType=error.name;report.error=error.message;save();console.error(error.stack);process.exitCode=1;}
 finally{
- await Promise.allSettled([runtime?.close(),inbox?.close(),policyStore?.close(),livePolicyStore?.close(),pool?.end()]);
+ await Promise.allSettled([runtime?.close(),inbox?.close(),policyStore?.close(),livePolicyStore?.close(),historyStore?.close(),providerPorts?.close(),pool?.end()]);
  if(created){assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));await admin.query('DROP DATABASE '+databaseName);report.testDatabaseDropped=true;save();}
  await admin.end();
 }

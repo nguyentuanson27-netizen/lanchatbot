@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Finish remaining B integration — 2026-10-15
+
+Owner asks to finish the previously deferred B work. [Current bounded scope and provider registration](../apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/SCOPE.md) supersedes the prior no-provider/current-port-only pause for this work. Complete native variant and multiple-effect persistence, candidate Inbox/history/private-checkout/Outbox composition, and one source-backed stateful provider batch after checks/clean seal. Existing one owner/one verifier, code authority, lease/CAS/replay/receipts and send-disabled candidate remain. No source publication, production activation, live delivery or Phase C. Source370259c9 adds native permission/variant replay and retained source leases; subsequent candidate composition and observed integration corrections are under verification. Record actual failures/results rather than marking the earlier audit as complete evidence for these additions.
+
 ## Current Phase B integration audit — 2026-10-15
 
 Owner authorizes auditing disconnected rules/capabilities, connecting the current B1–B3 scope and reviewing the result. [Coverage, implementation order and explicit remaining boundaries](../docs/specs/c3-phase-b-integration-audit-20261015.md). Start clean814ef987; refreshed main296cdcfb. Connect current-source ETA, optional handoff matrix/default policy and guarded ownership/event/tag transaction; compose existing read/state/effect ports and preserve actual committed handoff outcomes. Observe focused RED before fixes, run relevant/full worker checks and self-review. Retain private checkout/readiness/no retry/one owner+one verifier and send-disabled candidate. No provider rerun, production wiring, live mutation/delivery or Phase C qualification. Persisted component-variant replacement remains unavailable until the existing readiness contract supports it.
