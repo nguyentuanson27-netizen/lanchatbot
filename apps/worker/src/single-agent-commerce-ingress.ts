@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, type ProtectedClaimV1 } from "@lana/contracts";
-import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1 } from "@lana/business-tools";
+import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken } from "@lana/business-tools";
 import { createConversationState, type ConversationState } from "@lana/conversation-engine";
 import type { ClaimedInboundBatch, PostgresChatHistoryStore, PostgresRealtimeInboxStore, PostgresRealtimeRuntimeStore, RealtimeSalesCyclePlan } from "@lana/database";
 import { redactAnalyticsMessage, type ChatHistoryItem } from "@lana/database";
@@ -19,6 +19,7 @@ import { makeBinding, type TerminalOutcome } from "./single-agent-semantic-verif
 import { sizeChartTarget } from "./size-chart-target.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
+import type { BusinessFactsReader } from "./redis-business-facts.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const noSend = (reason: string) => ({ terminal: { disposition: "NO_SEND", reason, text: null, fallbackId: null } as TerminalOutcome, sendEnabled: false as const, enqueued: 0 });
@@ -34,6 +35,25 @@ export function commerceHistory(rows: readonly Pick<ChatHistoryItem, "text" | "s
     .map(r => ({ role: r.senderType === "CUSTOMER" ? "customer" as const : "shop" as const, text: r.text })).slice(-8);
   while (history.reduce((n, m) => n+Buffer.byteLength(m.text), 0) > 4096) history.shift();
   return history;
+}
+
+/** The caller's configured routing pair owns this mapping; the model cannot supply either identity. */
+export function bindCommerceFacts(reader: BusinessFactsReader, scope: { shopAlias: string; shopId: string }): BusinessFactsReader {
+  const alias = normalizeCatalogToken(scope.shopAlias), shopId = scope.shopId;
+  const invalid = () => ({ status: "INVALID" as const, reasonCode: "COMMERCE_SHOP_SCOPE_MISMATCH", availableSizes: [], availableColors: [] });
+  return { ready: reader.ready.bind(reader), resolve: reader.resolve.bind(reader), close: reader.close.bind(reader),
+    ...(reader.resolveVerifiedVariant ? { resolveVerifiedVariant: reader.resolveVerifiedVariant.bind(reader) } : {}),
+    ...(reader.readCatalogSnapshot ? { readCatalogSnapshot: reader.readCatalogSnapshot.bind(reader) } : {}),
+    async resolveCartSelection(query, now) {
+      if (normalizeCatalogToken(query.shopAlias) !== alias || !reader.resolveCartSelection) return invalid();
+      const selected = await reader.resolveCartSelection(query, now); if (selected.status !== "READY") return selected;
+      const authority = selected.line.priceAuthority;
+      if (!authority || authority.shopId !== selected.shopId) return invalid();
+      if (selected.shopId === shopId) return selected;
+      if (normalizeCatalogToken(selected.shopId) !== alias) return invalid();
+      return { ...selected, shopId, line: { ...selected.line, priceAuthority: { ...authority, shopId } } };
+    },
+  };
 }
 
 /** Explicit candidate consumer. Not imported by a production entrypoint; it can enqueue, never dispatch or send. */
@@ -64,6 +84,7 @@ export async function runPersistedCommerceIngress(input: {
     recipient: textHash(last.senderId), bindingVersion: `commerce:${batch.generation}:${textHash(last.senderId)}`, revision: record.stateVersion,
     conversationOwner: record.state.conversationOwner, permission: record.state.conversationOwner === "BOT", privacyAllowed: true };
   const guard = { generation: batch.generation, leaseToken: batch.leaseToken, inboxIds: batch.inboxIds };
+  const facts = bindCommerceFacts(input.facts, scope);
   const closeWithoutSend = async (reason: string) => { await input.inbox.completeBatch(batch); return noSend(reason); };
   const readAuthority = async () => {
     const row = await input.store.loadOrCreate<ConversationState>(scope.pageId, scope.customerHash, "APP", () => { throw new Error("CONVERSATION_REQUIRED"); }, input.clock());
@@ -74,7 +95,7 @@ export async function runPersistedCommerceIngress(input: {
   for (const m of messages) await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
     customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey, text: isPrivateCommerceText(m.text ?? "") ? null : m.text,
     occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
-  const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts: input.facts, policy: input.policy, readAuthority,
+  const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
     store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
   const policyBundle = async () => { const r = await input.policy(); if (!r.bundle) throw new Error("POLICY_UNAVAILABLE"); return r.bundle; };
   if (isPrivateCommerceText(latest)) {
@@ -106,7 +127,7 @@ export async function runPersistedCommerceIngress(input: {
     effects: { ...executor, conversationKey: scope.conversationId, identity: { cartId: commerceUuid(commerceHash([scope.conversationId, "cart"])),
       salesEpisodeId: commerceUuid(commerceHash([scope.conversationId, "episode"])), customerProfileId: profile.profile.profileId },
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
-      select: q => input.facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
+      select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
     handoff: { ...handoff, policy: policyBundle } });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 8 });
@@ -132,7 +153,7 @@ export async function runPersistedCommerceIngress(input: {
     orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, checkedAt: now };
   let parent: ReturnType<typeof evaluateDeterministicEffectReadinessV1> | undefined;
   if (cart && messagesOut.length) {
-    const selections = await Promise.all(cart.lines.map(l => input.facts.resolveCartSelection!({ shopAlias: scope.shopAlias, productId: l.parentProductId, offerType: l.offerId,
+    const selections = await Promise.all(cart.lines.map(l => facts.resolveCartSelection!({ shopAlias: scope.shopAlias, productId: l.parentProductId, offerType: l.offerId,
       size: l.components[0]?.size ?? null, color: l.components[0]?.color ?? null, quantity: l.quantity, lineId: l.lineId }, now)));
     const ready = selections.flatMap(s => s.status === "READY" ? [s] : []);
     if (!selectionsMatchCartLines(cart.lines, ready)) return { ...result, ...await closeWithoutSend("EGRESS_CART_SOURCE_CHANGED") };

@@ -49,6 +49,7 @@ export async function createCommerceEffectTools(input: {
   let receiptConversationRevision: number | undefined;
   let receiptBindingVersion: string | undefined;
   let committedHandoff: { reason: string; revision: number; operationId: string; conversationRevision: number } | undefined;
+  const selectionRef = (lineId: string) => `cart-variant:${lineId}`;
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     if (!committedHandoff) {
       await refreshAuthority();
@@ -74,9 +75,10 @@ export async function createCommerceEffectTools(input: {
       subjects.push({ ref: current.cart.value.cartId, kind: "CART", label: "Giỏ hàng hiện tại", bindingVersion: base.state.bindingVersion });
       for (const line of current.cart.value.lines) subjects.push({ ref: line.lineId, kind: "CART_LINE", label: line.parentProductId, bindingVersion: base.state.bindingVersion });
     }
-    for (const s of active) if (!subjects.some(b => b.kind === "VARIANT" && b.ref === s.line.offerId && b.productId === s.line.parentProductId)) subjects.push({
-      ref: s.line.offerId, kind: "VARIANT", label: `${s.line.parentProductId} ${s.line.offerId}`, productId: s.line.parentProductId, bindingVersion: base.state.bindingVersion });
-    const selectionClaims = buildProtectedClaimsFromCartSelectionsV1(active.map(s => ({ productId: s.line.parentProductId, variantId: s.line.offerId, priceVnd: s.line.posUnitPriceVnd!,
+    for (const s of active) subjects.push({ ref: selectionRef(s.line.lineId), kind: "VARIANT",
+      label: `${s.line.parentProductId} ${s.line.offerId}: ${s.line.components.map(c => [c.componentRole, c.size, c.color].filter(Boolean).join(" ")).join("; ")}`,
+      productId: s.line.parentProductId, bindingVersion: base.state.bindingVersion });
+    const selectionClaims = buildProtectedClaimsFromCartSelectionsV1(active.map(s => ({ productId: s.line.parentProductId, variantId: selectionRef(s.line.lineId), priceVnd: s.line.posUnitPriceVnd!,
       priceVersion: s.versions.price, inventoryVersion: s.versions.inventory, etaVersion: s.versions.eta, eta: s.eta, etaExpiresAt: s.etaExpiresAt, sourceAuthority: s.sourceAuthority,
       stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     const cart = current.cart?.value;
@@ -90,7 +92,8 @@ export async function createCommerceEffectTools(input: {
         subtotalVnd: cart.subtotalVnd, shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } } : {}) },
       subjects, products: base.runtimeProducts ?? [], claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
-        return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId && claim.scope.variantId === s.line.offerId);
+        return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
+          [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
       }), ...selectionClaims],
       policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
       receipts: receipt ? [receipt] : [], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });

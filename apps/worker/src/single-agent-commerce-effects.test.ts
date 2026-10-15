@@ -51,6 +51,16 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("distinguishes exact cart size/color stock from the aggregate selling-offer stock", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const claim = s.tools.snapshot().protectedClaims.find(c => (c as { type: string }).type === "STOCK") as { scope: { variantId: string }; value: { status: string; availableQuantity: number } };
+    const before = s.base.snapshot;
+    s.base.snapshot = () => { const c = before(); return { ...c, protectedClaims: [{ ...claim, scope: { ...claim.scope, variantId: "offer:SM613:SM613-DIRECT" }, value: { status: "IN_STOCK", availableQuantity: 116 } }] }; };
+    const context = s.tools.snapshot(), stocks = context.protectedClaims.filter(c => (c as { type: string }).type === "STOCK") as typeof claim[];
+    expect(stocks.map(c => c.value.availableQuantity)).toEqual([4]);
+    const exact = context.boundSubjects.find(b => b.ref === stocks[0]!.scope.variantId)!;
+    expect(exact.label).toContain("M"); expect(exact.label).toContain("navy");
+  });
   it("does not replace a verified quantity-change reply because its own final readback first introduced current cart facts", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const lineId = s.current().cart!.value.lines[0]!.lineId;

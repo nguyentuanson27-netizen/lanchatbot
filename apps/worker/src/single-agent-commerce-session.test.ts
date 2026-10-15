@@ -1,11 +1,26 @@
 import { describe, expect, it, vi } from "vitest";
 import { createPersistedCommerceExecutor } from "./single-agent-commerce-session.js";
-import { runPersistedCommerceIngress, commerceHistory, isPrivateCommerceText } from "./single-agent-commerce-ingress.js";
+import { runPersistedCommerceIngress, commerceHistory, isPrivateCommerceText, bindCommerceFacts } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixturePolicy, fixtureCartLine, fixtureProfile } from "./single-agent-commerce.test-support.js";
 import { createSalesCycleRuntimeState, applySalesCycleCommand, computeBusinessContentHash } from "@lana/chat-runtime";
 import { createConversationState } from "@lana/conversation-engine";
 
 describe("persisted native commerce session", () => {
+  it("binds the configured POS alias to canonical shop identity while preserving exact source evidence", async () => {
+    const line = fixtureCartLine(); line.priceAuthority!.shopId = "LANA";
+    const selected = { status: "READY", shopId: "LANA", line, versions: { price: "p1", inventory: "i1", size: "s1", eta: null } };
+    const facts = { ready: vi.fn(), resolve: vi.fn(), close: vi.fn(), resolveCartSelection: vi.fn(async () => structuredClone(selected)) };
+    const bound = bindCommerceFacts(facts as never, { shopAlias: "LANA", shopId: "LANA_DESIGN" });
+    const query = { shopAlias: "LANA", productId: "SM613", offerType: "DIRECT", size: "M", color: "navy", quantity: 1, lineId: line.lineId };
+    const result = await bound.resolveCartSelection!(query);
+    expect(result).toMatchObject({ status: "READY", shopId: "LANA_DESIGN", line: { priceAuthority: { shopId: "LANA_DESIGN", metadata: line.priceAuthority!.metadata } }, versions: selected.versions });
+    expect(selected.shopId).toBe("LANA"); expect(line.priceAuthority!.shopId).toBe("LANA");
+    facts.resolveCartSelection.mockResolvedValue({ ...selected, shopId: "OTHER" });
+    expect(await bound.resolveCartSelection!(query)).toMatchObject({ status: "INVALID" });
+    facts.resolveCartSelection.mockClear();
+    expect(await bound.resolveCartSelection!({ ...query, shopAlias: "OTHER" })).toMatchObject({ status: "INVALID" });
+    expect(facts.resolveCartSelection).not.toHaveBeenCalled();
+  });
   it("commits the existing code-owned checkout clarification without sending private input to a model", async () => {
     const scope = commerceScope(), fixture = await fixturePolicy(), policy = fixture.bundle!.policy;
     let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
