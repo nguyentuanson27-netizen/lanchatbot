@@ -171,7 +171,9 @@ try{
   await persistOutput(output,before,current,output.transferToHuman?{
    pancakeTagCommand:buildPurchaseConfirmedTagCommand({pageId,conversationId:key,confirmation:output.plan.state.confirmation}),transferToHuman:true,
    confirmation:output.plan.state.confirmation,handoffDecision:null,paymentMessageIntent:paymentMethod==='BANK_TRANSFER'?{idempotencyKey:'synthetic-payment-intent'}:null}:noEffects);
-  lastResult={status:'APPLIED',state:output.plan.state};if(failAfterCommit)throw new Error('CONTROLLED_LOST_COMMIT_RESPONSE');return lastResult;
+  lastResult={status:'APPLIED',state:output.plan.state,confirmation:output.plan.state.confirmation,paymentInstruction:null,
+   desiredPancakeTag:output.desiredTag,transferToHuman:output.transferToHuman};
+  if(failAfterCommit)throw new Error('CONTROLLED_LOST_COMMIT_RESPONSE');return lastResult;
  }
  const effects=async()=>{const f=fixtureProduct();return createCommerceEffectTools({scope,clock:()=>new Date(),conversationKey:key,repository,
   base:createReadOnlyTools({scope,clock:()=>new Date(),initialProducts:[f.product],policy:async()=>policyResolution,catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}}),

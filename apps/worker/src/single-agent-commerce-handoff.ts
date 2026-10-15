@@ -54,7 +54,7 @@ export function createCommerceHandoffTools(input: {
       subjects: base.boundSubjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims, policies: base.policyLiterals,
       receipts: base.effectReceipts, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
   };
-  const policyIdentity = (bundle: RuntimePolicyBundle) => commerceHash({ bundleHash: bundle.bundleHash,
+  const policyIdentity = (bundle: RuntimePolicyBundle) => commerceHash({
     policy: publicPolicyLiteral(bundle, input.scope.pageId, input.scope.shopId, input.clock()), matrix: bundle.artifacts.handoffMatrix });
   const scopeMatches = (a: HandoffAuthority) => a.pageId === input.scope.pageId && a.conversationId === input.scope.conversationId &&
     a.state.conversationId === input.scope.conversationId && a.customerHash === input.scope.customerHash &&

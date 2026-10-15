@@ -3,7 +3,7 @@ import { createConversationState } from "@lana/conversation-engine";
 import { createCommerceHandoffTools, selectCommerceHandoff, type HandoffAuthority } from "./single-agent-commerce-handoff.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn } from "./single-agent-commerce-read-only.js";
-import { commerceNow, commerceScope, fixturePolicy } from "./single-agent-commerce.test-support.js";
+import { commerceNow, commerceScope, fixturePolicy, policyResolver } from "./single-agent-commerce.test-support.js";
 
 async function setup() {
   const scope = commerceScope(), policy = (await fixturePolicy()).bundle!;
@@ -59,14 +59,20 @@ describe("Phase B handoff follows current code policy and committed ownership", 
     const s = await setup(); await s.tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } });
     s.change({ recipient: "other" });
     expect(await s.tools.terminalOutcome!()).toMatchObject({ disposition: "NO_SEND", text: null });
-    s.change({ recipient: s.scope.recipient }); Object.assign(s.policy, { bundleHash: "changed" });
+    s.change({ recipient: s.scope.recipient }); Object.assign(s.policy, { versionReferences: s.policy.versionReferences.map((r,i) =>
+      i === 0 ? { ...r, pointerRevision: r.pointerRevision+1 } : r) });
     expect(await s.tools.terminalOutcome!()).toMatchObject({ disposition: "NO_SEND", text: null });
     expect(s.commit).toHaveBeenCalledTimes(1);
   });
   it("does not mistake the next fetch time for a changed policy identity", async () => {
-    const s = await setup(); await s.tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } });
-    Object.assign(s.policy, { resolvedAt: new Date(commerceNow.getTime()+10).toISOString() });
-    expect(await s.tools.terminalOutcome!()).toMatchObject({ disposition: "HANDOFF" });
+    const s = await setup(); let sequence = 0;
+    const tools = createCommerceHandoffTools({ base:s.base,scope:s.scope,clock:()=>new Date(commerceNow.getTime()+1000),read:s.read,
+      commit:async({next})=>s.commit(next), policy:async()=>{
+        const r=await policyResolver().resolve({pageId:s.scope.pageId,channel:"CANARY_SHADOW",now:new Date(commerceNow.getTime()+(++sequence))});
+        return r.bundle!;
+      } });
+    expect((await tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } })).status).toBe("OK");
+    expect(await tools.terminalOutcome!()).toMatchObject({ disposition: "HANDOFF" });
   });
   it("stops the turn and suppresses sibling effects once handoff is requested", async () => {
     const s = await setup(), owner = vi.fn(async () => ({ kind: "TOOLS" as const,
