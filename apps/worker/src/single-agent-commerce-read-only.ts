@@ -7,11 +7,12 @@ export interface NativeContent { role: "user" | "model"; parts: Record<string, u
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
-  toolBudget: { roundsRemaining: number; callsRemaining: number }; signal: AbortSignal }
+  toolBudget: { roundsRemaining: number; callsRemaining: number }; availableTools?: readonly string[]; signal: AbortSignal }
 export interface VerifierRequest { generationId: string; instructions: string; finalDraft: string; trusted: TrustedContext;
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
   invokeBatch(calls: CommerceToolCall[]): Promise<CommerceToolResult[]>;
   snapshot(): TrustedContext;
@@ -41,6 +42,10 @@ export async function runCommerceTurn(input: {
     return { terminal, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds, toolCalls, generations,
       toolLatencyMs, verificationLatencyMs: verificationStarted === undefined ? null : performance.now()-verificationStarted };
   };
+  const effectTerminal = async () => {
+    try { return await input.tools.terminalOutcome?.() ?? null; }
+    catch { return { disposition: "NO_SEND" as const, reason: "TERMINAL_READBACK_UNAVAILABLE", text: null, fallbackId: null }; }
+  };
   async function generate<T>(role: "owner" | "verifier", id: string, fn: (signal: AbortSignal) => Promise<T>): Promise<T> {
     const started = performance.now(), controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -66,26 +71,29 @@ export async function runCommerceTurn(input: {
   const contents: NativeContent[] = [...input.history.map(m => ({ role: m.role === "customer" ? "user" as const : "model" as const,
     parts: [{ text: m.text }] })), { role: "user", parts: [{ text: input.latest }] }];
   for (let index = 0; index < 3; index++) {
+    const actual = await effectTerminal(); if (actual) return finish(actual);
     const context = input.tools.snapshot();
     if (!context.state.permission || context.state.conversationOwner !== "BOT" || !context.state.privacyAllowed) {
       return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
     }
     const id = `${input.scope.requestId}:owner:${index + 1}`;
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context,
+      ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
     if (bytes(request) > 32768) return finish(fallback("CONTEXT_BOUND"));
     let output: OwnerGeneration;
     ownerGenerations++;
     try { output = await generate("owner", id, signal => input.owner({ ...request, signal })); }
     catch { return finish(fallback(generations.at(-1)!.status)); }
+    if (!output || typeof output !== "object") return finish(fallback("MALFORMED"));
     if (output.kind === "TOOLS") {
       if (!output.calls.length || toolRounds >= 2 || toolCalls + output.calls.length > 6) return finish(fallback("BUDGET"));
       toolRounds++; toolCalls += output.calls.length;
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       toolLatencyMs += performance.now()-toolStarted;
-      const effectTerminal = await input.tools.terminalOutcome?.();
-      if (effectTerminal) return finish(effectTerminal);
+      const actual = await effectTerminal();
+      if (actual) return finish(actual);
       if (results.length !== output.calls.length || bytes(results) > 8192) return finish(fallback("TOOL_RESULT_BOUND"));
       contents.push(structuredClone(output.content), { role: "user", parts: results.map((result, i) => ({
         functionResponse: { name: output.calls[i]!.name, response: result,

@@ -50,7 +50,12 @@ export function createCommerceHandoffTools(input: {
     a.recipient === input.scope.recipient && a.bindingVersion === input.scope.bindingVersion && a.privacyAllowed;
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     if (uncertain) return { disposition: "NO_SEND", reason: "HANDOFF_COMMIT_UNPROVED", text: null, fallbackId: null };
-    if (!committed) return await input.base.terminalOutcome?.() ?? null;
+    if (!committed) {
+      const inherited = await input.base.terminalOutcome?.(); if (inherited) return inherited;
+      const current = await input.read();
+      return scopeMatches(current) && current.permission && current.state.conversationOwner === "BOT" ? null
+        : { disposition: "NO_SEND", reason: "HANDOFF_AUTHORITY", text: null, fallbackId: null };
+    }
     const current = await input.read();
     if (!scopeMatches(current) || current.stateVersion !== committed.next.stateVersion ||
       commerceHash(current.state) !== commerceHash(committed.next.state) ||
@@ -63,7 +68,8 @@ export function createCommerceHandoffTools(input: {
     if (committed) return { status: "REJECTED", reason: "ALREADY_HANDED_OFF" };
     const before = await input.read();
     if (!scopeMatches(before) || !before.permission || before.state.conversationOwner !== "BOT" || before.state.routingOwner !== "APP" ||
-      before.stateVersion !== input.scope.revision || before.state.revision !== before.stateVersion) return { status: "REJECTED", reason: "HANDOFF_AUTHORITY" };
+      before.stateVersion !== (input.base.snapshot().state.conversationRevision ?? input.scope.revision) ||
+      before.state.revision !== before.stateVersion) return { status: "REJECTED", reason: "HANDOFF_AUTHORITY" };
     const policy = await input.policy(), decision = selectCommerceHandoff(policy, input.scope, reason, input.clock());
     const engineReason = decision.category === "AFTER_SALES" ? reason === "AFTER_SALES_REQUEST" ? "POST_SALE" : reason
       : reason === "CUSTOMER_REQUESTED_HUMAN" ? reason : "AGENT_REQUEST";

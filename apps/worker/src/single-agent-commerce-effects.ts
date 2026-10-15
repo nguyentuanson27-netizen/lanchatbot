@@ -42,7 +42,14 @@ export async function createCommerceEffectTools(input: {
   let receiptBindingVersion: string | undefined;
   let committedHandoff: { reason: string; revision: number; operationId: string; conversationRevision: number } | undefined;
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
-    if (!committedHandoff) return await input.base.terminalOutcome?.() ?? null;
+    if (!committedHandoff) {
+      await refreshAuthority();
+      if (authority && (!authority.permission || !authority.privacyAllowed || authority.conversationOwner !== "BOT" ||
+        authority.recipient !== turnRecipient || authority.bindingVersion !== turnBinding)) {
+        return { disposition: "NO_SEND", reason: "CURRENT_AUTHORITY_CHANGED", text: null, fallbackId: null };
+      }
+      return await input.base.terminalOutcome?.() ?? null;
+    }
     current = await read(); await refreshAuthority();
     const state = snapshot().state;
     if (!state.privacyAllowed || state.recipient !== turnRecipient || state.bindingVersion !== turnBinding ||
@@ -183,6 +190,8 @@ export async function createCommerceEffectTools(input: {
       current = await read();
       await refreshAuthority();
       if (!recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
+      if (result?.status === "APPLIED" && result.transferToHuman) committedHandoff = {
+        reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }

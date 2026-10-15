@@ -44,9 +44,9 @@ if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSour
  dispatch,
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});
 const [{PostgresRuntimePolicyStore},{ProductSearchService,QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
- {VertexShadowModel},{createCommerceReadSources},{createReadOnlyTools},{runCommerceTurn}]=await Promise.all([
+ {VertexShadowModel},{createCommerceReadSources},{createCommerceTools},{runCommerceTurn}]=await Promise.all([
  import('@lana/database'),import('@lana/business-tools'),import('../../dist/redis-business-facts.js'),import('../../dist/vertex.js'),
- import('../../dist/single-agent-commerce-read-only-sources.js'),import('../../dist/single-agent-commerce-read-only-tools.js'),import('../../dist/single-agent-commerce-read-only.js')]);
+ import('../../dist/single-agent-commerce-read-only-sources.js'),import('../../dist/single-agent-commerce.js'),import('../../dist/single-agent-commerce-read-only.js')]);
 const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
 if(credential.type!=='service_account'||credential.project_id!==config.vertex.projectId)throw new Error('CREDENTIAL_SCOPE');
 const counters={embeddingCalls:0,policyReads:0,catalogReads:0,posReads:0};
@@ -67,7 +67,7 @@ if(args['source-check']){
  try{
   for(const code of codes){counters.catalogReads++;const p=await index.findByExactCode(code);if(!p)throw new Error('INITIAL_SOURCE_UNAVAILABLE');products.push(p);}
   const sources=createCommerceReadSources({scope,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog:index,policyStore:database,facts:redis});
-  const tools=createReadOnlyTools({scope,clock:()=>new Date(),...sources,initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds});
+  const tools=await createCommerceTools({read:{scope,clock:()=>new Date(),...sources,initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds}});
   result.policy=await tools.invoke({name:'read_policy',args:{}});if(result.policy.status!=='OK')throw new Error('POLICY_UNAVAILABLE');
   for(const p of products){const first=await tools.invoke({name:'read_product',args:{subjectRef:p.productId}});result.products.push(first);
    for(const offerType of first.data?.availableOffers??[])result.products.push(await tools.invoke({name:'read_product',args:{subjectRef:p.productId,offerType}}));}
@@ -96,7 +96,7 @@ try{
     catalog:{findByExactCode:async code=>{counters.catalogReads++;return index.findByExactCode(code);}},
     policyStore:{loadActivePointers:async q=>{counters.policyReads++;return database.loadActivePointers(q);}},
     facts:{readCatalogSnapshot:async(alias,id)=>{counters.posReads++;return samples[i].sourceMode==='POS_UNAVAILABLE'?null:redis.readCatalogSnapshot(alias,id);}}});
-   const rawTools=createReadOnlyTools({scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds});
+   const rawTools=await createCommerceTools({read:{scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds}});
    const tools={...rawTools,invokeBatch:async calls=>{
     const results=await rawTools.invokeBatch(calls);audit(requestId,'TOOL_RESULTS',{calls,results});return results;
    }};

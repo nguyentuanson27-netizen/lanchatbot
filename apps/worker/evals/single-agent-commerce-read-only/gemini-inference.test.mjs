@@ -53,6 +53,17 @@ test('state/effect capabilities are explicit and the accepted quote reaches the 
  r.toolsAllowed=false;assert.equal(buildGeminiCommerceRequest(r).toolConfig.functionCallingConfig.mode,'NONE');
 });
 
+test('composed capabilities restrict the actual native declarations and expose only a handoff reason',()=>{
+ const r=request();r.availableTools=['read_policy','request_handoff'];
+ const built=buildGeminiCommerceRequest(r),decls=built.tools[0].functionDeclarations;
+ assert.deepEqual(decls.map(d=>d.name),r.availableTools);
+ const handoff=decls.find(d=>d.name==='request_handoff');
+ assert.deepEqual(Object.keys(handoff.parameters.properties),['reason']);
+ assert.ok(handoff.parameters.properties.reason.enum.includes('CUSTOMER_REQUESTED_HUMAN'));
+ assert.ok(!handoff.parameters.properties.reason.enum.includes('ADMIN_REQUEST'));
+ r.availableTools=['invented'];assert.throws(()=>buildGeminiCommerceRequest(r),/CAPABILITY_UNAVAILABLE/);
+});
+
 test('current fit comparison fields and actual remaining tool capabilities reach the owner without private authority',()=>{
  const r=request();Object.assign(r.context.state,{customerProfileId:'profile-1',customerProfileRevision:4,
   measurementFingerprint:'current-fingerprint',sizeMeasurementFingerprints:{SM613:'size-fingerprint'},recipient:'PRIVATE_RECIPIENT',permission:true});

@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
+import {HandoffReasonV2Schema} from '@lana/contracts';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
@@ -19,7 +20,14 @@ export const effectDeclarations=[
  {name:'change_cart_item',description:'Đổi số lượng hoặc bỏ dòng giỏ bằng ref code đã cấp. Code quyết định revision, quyền và kết quả commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE']},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','action']}},
  {name:'confirm_purchase',description:'Gửi ý định xác nhận mua của tin khách hiện tại vào luồng checkout đã có. Cần preview, thông tin riêng tư và revalidation hợp lệ từ code; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
 ];
+export const handoffDeclarations=[
+ {name:'request_handoff',description:'Đề nghị chuyển người khi khách yêu cầu gặp nhân viên, cần xử lý hậu mãi hoặc công việc ngoài khả năng hiện có. Hỏi quy định trước mua thì đọc policy và trả lời. Code quyết định rule, tag và tin báo; tool chỉ thành công sau commit và đọc lại kết quả. Không hứa đã chuyển trước kết quả.',parameters:{type:'OBJECT',properties:{reason:{type:'STRING',enum:HandoffReasonV2Schema.options.filter(r=>r!=='ADMIN_REQUEST')}},required:['reason']}},
+];
 export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarations){
+ if(request.availableTools){
+  const known=[...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations];
+  declarations=request.availableTools.map(name=>{const d=known.find(d=>d.name===name);requireThat(d,'CAPABILITY_UNAVAILABLE');return d;});
+ }
  const c=request.context;
  const contents=structuredClone(request.contents);
  for(const message of contents)for(const part of message.parts??[]){
