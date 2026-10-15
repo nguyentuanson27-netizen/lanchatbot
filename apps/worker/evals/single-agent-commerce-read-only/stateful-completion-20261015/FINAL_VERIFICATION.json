@@ -1,0 +1,61 @@
+{
+  "sourceSha": "5b70fe87f28ef4c5e1c6f033f22ed8dc5868af96",
+  "providerRerunAfterReceiptFix": false,
+  "focusedStateEffectsCompositionBoundarySession": {
+    "passed": 99,
+    "failed": 0
+  },
+  "fullWorkerSource": {
+    "files": 129,
+    "passed": 1752,
+    "failed": 0
+  },
+  "emit": 0,
+  "typecheck": 0,
+  "lint": 0,
+  "composedDatabase": {
+    "COD": 11,
+    "BANK_TRANSFER": 11,
+    "bothDropped": true
+  },
+  "logs": [
+    {
+      "name": "c3-b-finish-worker-receipt-final.log",
+      "sha256": "553aca0297a4d49354a4e4279cb783df516c15afc5213b287308407b446b1ee0",
+      "tail": [
+        " ✓ src/redis-business-facts.test.ts (2 tests) 8ms",
+        "",
+        " Test Files  129 passed (129)",
+        "      Tests  1752 passed (1752)",
+        "   Start at  21:15:03",
+        "   Duration  37.60s (transform 22.58s, setup 0ms, collect 161.36s, tests 54.91s, environment 111ms, prepare 75.07s)",
+        ""
+      ]
+    },
+    {
+      "name": "c3-b-finish-worker-emit-receipt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tail": []
+    },
+    {
+      "name": "c3-b-finish-worker-typecheck-receipt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tail": []
+    },
+    {
+      "name": "c3-b-finish-worker-lint-receipt.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "tail": [
+        "",
+        "> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker",
+        "> tsc -p tsconfig.json --noEmit",
+        ""
+      ]
+    }
+  ],
+  "canonicalWorkerBuild": {
+    "command": "pnpm --filter @lana/worker build",
+    "exitCode": 0,
+    "logSha256": "f565cb16195107900eaa21e06d79586e543b525fc45731ad0b50588e31b9e7bb"
+  }
+}

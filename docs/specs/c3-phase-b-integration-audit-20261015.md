@@ -1,5 +1,11 @@
 # Phase B integration audit and completion
 
+## Current delivered result — final candidate source5b70fe87
+
+[Current implementation/evidence report](../../apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/CHECKPOINT_B.md) supersedes the deferred feature status below. Native cart variants/multiple mutations, candidate persisted executor/Inbox/history/private checkout/handoff/Outbox composition, real source alias binding and profile CAS receipts are implemented. Final composed real-PostgreSQL COD/bank11/11groups eachPASS/dropped; full worker1752PASS. Compatibility0035 only fixes two existing event command values, applied in disposable databases only.
+
+Two bounded stateful provider batches remain separate: latest source0ad4b29d creates/changes the real-source cart, returns the current quote and persists corrected measurements; actual terminals3eligible/1fallback/2handoff/1no-send. Final receipt/error-logging closure is later code and has not been rerun with either model. Sales quality/current-source private checkout/live delivery are not qualified; recommendationSTOP, no Phase C or activation. Earlier observations below retain their original scope and source, not current unsupported-feature claims.
+
 ## Follow-through authorized by owner — 2026-10-15
 
 The owner asks to finish the remaining B work, rather than leave it tracked. Continue from clean `c5f053a0920f3144835953fa69c7cb889af683f2` on PR391. Finish persisted variant replacement, serialized mutations within one bounded owner turn, stateful provider journeys, and candidate ingress/history/delivery composition. Keep the candidate send-disabled and exercise delivery only with a capture transport and disposable test database. No production activation, live customer writes, deploy, or Phase C follows.
