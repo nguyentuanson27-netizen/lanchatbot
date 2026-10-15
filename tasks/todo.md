@@ -9,7 +9,7 @@
 - [x] Implement candidate persisted executor, current cart projection, Inbox/history/private-checkout/Outbox composition. Intermediate database reports preserve exposed defects and cleanup; final clean-source COD/bank verification follows the seal.
 - [x] Full worker129files/1748PASS after current-quantity evidence fix and full eval479PASS/0skip before that worker-only correction; shared contracts220/business-tools353/database238PASS+30optionalSKIP/chat-runtime52PASS; final worker typecheck/build/lint and affected shared typechecks/builds exit0. Self-review and focused161PASS include exact source-SKU invalidation, private history and canonical selection evidence. Historical Windows alias restored byte-exact. Preserve both additional clean integration failures/cleanup at their exact sources; do not count receipt recovery as delivery of the original draft.
 - [x] Commit/clean/seal and run both bounded same-seven-turn batches on approved models; preserve all14outcomes, raw before primary, no dropped failure/retry. Distinguish29invocations from28actualHTTPrequests; one local pre-dispatch error was not an HTTP error. Receipt closure after follow-up was code/database-only, no third batch.
-- [ ] Record actual outcomes, limitations, commands and cleanup; update PR391. No live send/deploy or automatic next round.
+- [x] Record outcomes/limitations/commands/cleanup and deliver on draftPR391. Push/readback a1a9becd confirmed OPEN/draft/right branch/base/exact bodySHA256ce621343cc7551793f60f31e51d5d0046352d1b313441e7896f75bd43382fee5 and clean tree. Remote checks empty, not CI PASS. Final documentation receipt follows; no source/provider change, live send/deploy or automatic next round.
 
 ## Current Phase B integration audit — 2026-10-15
 
