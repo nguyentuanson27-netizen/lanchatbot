@@ -14,9 +14,12 @@ export function readComparisonManifest(path=new URL('./owner-comparison-20261015
  return JSON.parse(readFileSync(path,'utf8'));
 }
 export function validateComparison(c,base){
- check(c.schemaVersion===1&&c.surface==='POST_READ_OWNER_DIAGNOSTIC'&&c.repetitions===3&&
-  c.ownerGenerationsPerSlot===1&&c.verifierGenerationsPerSlot===1&&c.maximumGenerationRequests===24&&c.sendEnabled===false&&
-  JSON.stringify(c.caseIds)===JSON.stringify(['b1-changed-occasion','b1-current-policy']),'COMPARISON_REGISTRATION');
+ // These existing LIVE cases can be answered from the same preloaded product/policy surface.
+ const cases=['b1-changed-occasion','b1-current-policy','b1-price','b1-buying-concern','b1-policy-used'];
+ check(c.schemaVersion===1&&c.surface==='POST_READ_OWNER_DIAGNOSTIC'&&[1,3].includes(c.repetitions)&&
+  c.ownerGenerationsPerSlot===1&&c.verifierGenerationsPerSlot===1&&c.sendEnabled===false&&
+  Array.isArray(c.caseIds)&&c.caseIds.length>0&&new Set(c.caseIds).size===c.caseIds.length&&c.caseIds.every(id=>cases.includes(id))&&
+  c.maximumGenerationRequests===c.caseIds.length*c.repetitions*4&&c.maximumGenerationRequests<=24,'COMPARISON_REGISTRATION');
  const sol={...base.models.verifier,effort:'low',generationConfig:{...base.models.verifier.generationConfig,reasoningEffort:'low'}};
  check(JSON.stringify(c.owners.gemini)===JSON.stringify(base.models.conversation)&&
   JSON.stringify(c.owners.sol)===JSON.stringify(sol)&&JSON.stringify(c.verifier)===JSON.stringify(base.models.verifier),'COMPARISON_MODEL');
@@ -100,7 +103,7 @@ async function main(){
  const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.stringify({id,phase,value})+'\n');
  const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
  const verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
- const registration={runSourceSha,surface:c.surface,registered:12,repetitions:3,maximumGenerationRequests:24,
+ const registration={runSourceSha,surface:c.surface,registered:slots.length,repetitions:c.repetitions,maximumGenerationRequests:c.maximumGenerationRequests,
   manifest:c,manifestHash:sha256(JSON.stringify(c)),registeredAt:new Date().toISOString(),slots,codex,sendEnabled:false};
  writeFileSync(join(out,'registration.json'),JSON.stringify(registration,null,2),{flag:'wx'});
  const [{PostgresRuntimePolicyStore},{QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
@@ -171,10 +174,10 @@ async function main(){
    return {...result,elapsedMs:performance.now()-started};
   },async(slot,result)=>{
    writeFileSync(join(out,`attempt-${slot.slot}.json`),JSON.stringify({...slot,result},null,2),{flag:'wx'});
-   console.log(JSON.stringify({slot:slot.slot,registered:12,terminal:result.terminal.disposition}));
+   console.log(JSON.stringify({slot:slot.slot,registered:slots.length,terminal:result.terminal.disposition}));
   });
   writeFileSync(join(out,'completion.json'),JSON.stringify({status:head()===runSourceSha&&!dirty()?'COMPLETE_REVIEW_PENDING':'INVALID_SOURCE_IDENTITY',
-   registered:12,recorded:12,counters,ownerViewHashes:Object.fromEntries(viewHashes),sendEnabled:false},null,2),{flag:'wx'});
+   registered:slots.length,recorded:slots.length,counters,ownerViewHashes:Object.fromEntries(viewHashes),sendEnabled:false},null,2),{flag:'wx'});
  }finally{await Promise.allSettled([database.close(),redis.close()]);}
 }
 if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url)await main();

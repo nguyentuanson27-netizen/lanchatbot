@@ -45,6 +45,22 @@ test('comparison freezes exactly two approved owners and twelve unique slots, wi
  assert.throws(()=>comparisonSlots(c,samples.filter(s=>s.caseId!==c.caseIds[1])),/COMPARISON_CASES/);
 });
 
+test('ordinary sales and retained regressions share one frozen ten-slot comparison without raising the request budget',()=>{
+ const caseIds=['b1-changed-occasion','b1-current-policy','b1-price','b1-buying-concern','b1-policy-used'];
+ const c={...config(),caseIds,repetitions:1,maximumGenerationRequests:20};
+ assert.doesNotThrow(()=>validateComparison(c,base));
+ const slots=comparisonSlots(c,samples);
+ assert.equal(slots.length,10);assert.equal(new Set(slots.map(s=>s.slot)).size,10);
+ for(const caseId of caseIds)assert.deepEqual(slots.filter(s=>s.caseId===caseId).map(s=>[s.owner,s.repetition]),[['gemini',1],['sol',1]]);
+ assert.equal(c.maximumGenerationRequests,slots.length*2);
+ for(const invalid of [
+  {...c,maximumGenerationRequests:24},
+  {...c,repetitions:3,maximumGenerationRequests:60},
+  {...c,caseIds:[...caseIds,'b1-search-read'],maximumGenerationRequests:24},
+  {...c,caseIds:['b1-price','b1-price'],maximumGenerationRequests:8},
+ ])assert.throws(()=>validateComparison(invalid,base),/COMPARISON_REGISTRATION/);
+});
+
 test('both owners receive identical trusted text and native dialogue; evaluator labels and tool capability are excluded',()=>{
  const r=request(),gemini=comparisonOwnerRequest('gemini',config(),r),sol=comparisonOwnerRequest('sol',config(),r);
  assert.equal(sol.model,'gpt-6.1-sol');assert.deepEqual(sol.reasoning,{effort:'low'});

@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current single-pass owner comparison — 2026-10-15
+
+- [x] Freeze [5 existing LIVE cases ×1/model](../apps/worker/evals/single-agent-commerce-read-only/owner-task-prompt-run-20261015/SCOPE.md), 10 slots/max20requests. Promptc6cddd33, same models/context/verifier/config; new manifest, historical evidence untouched. Refresh main296cdcfb/start75f075b1.
+- [x] Eval-only bookkeeping RED7PASS/1FAIL → GREEN8PASS: bounded registration supports ordinary sales alongside two regressions and counts actual slots; no new runtime/provider mechanism or budget increase.
+- [ ] Checks/self-review PASS: focused38PASS/1optionalSKIP, full eval468PASS/2optionalSKIP, boundary/state/effects122PASS, protected/reply21PASS, worker typecheck/build/lint exit0; [preparation record](../apps/worker/evals/single-agent-commerce-read-only/owner-task-prompt-run-20261015/PREPARATION.json). Commit clean source and preflight with existing routes remain before generation.
+- [ ] Run one batch10slots; preserve raw before whole-terminal primary, then diagnose rejected drafts and audit requests/bindings/metrics. Report all outcomes and limits, update PR391, STOP; no new model/style acceptance assumed.
+
 ## Current owner task prompt simplification — 2026-10-15
 
 - [x] Refresh main `296cdcfb`; clean starting head `611c8207`. Rewrite active owner task/style from rollback baseline: 10,353 → 5,739 bytes (−44.6%), owner hash `c6cddd33`. Only base-manifest owner hash changes; historical runs and approved models/config/context stay unchanged.
