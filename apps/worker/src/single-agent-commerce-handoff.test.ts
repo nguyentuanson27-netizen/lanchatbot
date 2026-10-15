@@ -7,7 +7,7 @@ import { commerceNow, commerceScope, fixturePolicy, policyResolver } from "./sin
 
 async function setup() {
   const scope = commerceScope(), policy = (await fixturePolicy()).bundle!;
-  let current: HandoffAuthority = { ...scope, state: { ...createConversationState({ conversationId: scope.conversationId,
+  let current: HandoffAuthority = { ...scope, fence: 1, state: { ...createConversationState({ conversationId: scope.conversationId,
     routingOwner: "APP", now: commerceNow }), revision: scope.revision }, stateVersion: scope.revision };
   const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(),
     catalog: { readProduct: async () => { throw new Error("NOT_READ"); }, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
@@ -40,7 +40,7 @@ describe("Phase B handoff follows current code policy and committed ownership", 
     expect(s.commit).not.toHaveBeenCalled();
   });
   it("denies changed scope, privacy, permission or revision before committing", async () => {
-    for (const patch of [{ recipient: "other" }, { bindingVersion: "new" }, { permission: false }, { privacyAllowed: false }, { stateVersion: 2 }]) {
+    for (const patch of [{ recipient: "other" }, { bindingVersion: "new" }, { permission: false }, { privacyAllowed: false }, { stateVersion: 2 }, { fence: 0 }]) {
       const s = await setup(); s.change(patch);
       expect((await s.tools.invoke({ name: "request_handoff", args: { reason: "CUSTOMER_REQUESTED_HUMAN" } })).status).toBe("REJECTED");
       expect(s.commit).not.toHaveBeenCalled();

@@ -9,7 +9,7 @@ describe("existing transaction owner for candidate commerce", () => {
   it("commits ownership, handoff event and tag intent together and rolls back incomplete intents", async () => {
     const scope = commerceScope(), decision = selectCommerceHandoff((await fixturePolicy()).bundle!, scope, "EXCHANGE", commerceNow);
     const state = { ...createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow }), revision: 1 };
-    const before = { ...scope, state, stateVersion: 1 };
+    const before = { ...scope, state, stateVersion: 1, fence: 1 };
     const next = { ...before, stateVersion: 2, state: applySilentHandoff(state, "EXCHANGE", 1, 1, commerceNow).state };
     const commitWithinTransaction = vi.fn(async () => ({ stateCommitted: true, handoffEventCreated: false, pancakeTagOutboxCreated: true }));
     const port = createPersistedCommerceHandoffPort({ scope, clock: () => commerceNow, read: async () => before,

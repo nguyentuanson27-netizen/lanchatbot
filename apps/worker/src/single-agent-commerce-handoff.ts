@@ -10,6 +10,8 @@ import type { TerminalOutcome } from "./single-agent-semantic-verifier-boundary.
 export interface HandoffAuthority extends Pick<CommerceScope, "pageId" | "conversationId" | "customerHash" | "recipient" |
   "bindingVersion" | "permission" | "privacyAllowed"> {
   stateVersion: number;
+  /** Existing caller-owned lease fence; the candidate never issues a fence token. */
+  fence: number;
   state: ConversationState;
 }
 export interface CommerceHandoffCommit {
@@ -44,13 +46,14 @@ export function createCommerceHandoffTools(input: {
   let committed: { next: HandoffAuthority; decision: HandoffDecisionV2; policyHash: string } | undefined;
   let uncertain = false;
   let authority: HandoffAuthority | undefined;
-  const read = async () => { authority = await input.read(); return authority; };
+  let turnFence: number | undefined;
+  const read = async () => { authority = await input.read(); turnFence ??= authority.fence; return authority; };
   const snapshot = () => {
     const base = input.base.snapshot(); if (!authority) return base;
     return buildReadOnlyContext({ state: { ...base.state,
       ...(base.state.conversationRevision === undefined ? { revision: authority.stateVersion } : { conversationRevision: authority.stateVersion }),
       recipient: authority.recipient, bindingVersion: authority.bindingVersion, privacyAllowed: authority.privacyAllowed,
-      permission: authority.permission, conversationOwner: authority.state.conversationOwner },
+      permission: authority.permission && authority.fence === turnFence, conversationOwner: authority.state.conversationOwner },
       subjects: base.boundSubjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims, policies: base.policyLiterals,
       receipts: base.effectReceipts, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
   };
@@ -58,7 +61,8 @@ export function createCommerceHandoffTools(input: {
     policy: publicPolicyLiteral(bundle, input.scope.pageId, input.scope.shopId, input.clock()), matrix: bundle.artifacts.handoffMatrix });
   const scopeMatches = (a: HandoffAuthority) => a.pageId === input.scope.pageId && a.conversationId === input.scope.conversationId &&
     a.state.conversationId === input.scope.conversationId && a.customerHash === input.scope.customerHash &&
-    a.recipient === input.scope.recipient && a.bindingVersion === input.scope.bindingVersion && a.privacyAllowed;
+    a.recipient === input.scope.recipient && a.bindingVersion === input.scope.bindingVersion && a.privacyAllowed &&
+    Number.isSafeInteger(a.fence) && a.fence > 0 && a.fence >= a.state.lastFence && a.fence === turnFence;
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     if (uncertain) return { disposition: "NO_SEND", reason: "HANDOFF_COMMIT_UNPROVED", text: null, fallbackId: null };
     if (!committed) {
@@ -85,7 +89,7 @@ export function createCommerceHandoffTools(input: {
     const engineReason = decision.category === "AFTER_SALES" ? reason === "AFTER_SALES_REQUEST" ? "POST_SALE" : reason
       : reason === "CUSTOMER_REQUESTED_HUMAN" ? reason : "AGENT_REQUEST";
     const transitioned = applySilentHandoff(before.state, engineReason as Parameters<typeof applySilentHandoff>[1],
-      before.state.revision, Math.max(1, before.state.lastFence), input.clock());
+      before.state.revision, before.fence, input.clock());
     const next = { ...before, state: transitioned.state, stateVersion: transitioned.state.revision };
     // No automatic retry after an ambiguous transaction; a later reader may reconcile via the existing event ledger.
     try { if (!await input.commit({ before, next, decision })) return { status: "REJECTED", reason: "HANDOFF_CONFLICT" }; }

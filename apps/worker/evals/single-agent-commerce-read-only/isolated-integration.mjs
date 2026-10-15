@@ -244,6 +244,7 @@ try{
   };
   await enqueue(h.sourceMessageId);const batch=await inbox.claimNextBatch('c3-b-handoff',60000);assert(batch);
   h.bindingVersion='c3-b-handoff:'+batch.generation;
+  h.fence=batch.generation; // Synthetic candidate lease domain; not a live COMMERCE actor-fence qualification.
   if(supersede)await enqueue('newer-'+randomUUID());
   const read=async()=>{const r=await runtime.loadOrCreate(pageId,h.customerHash,'APP',()=>{throw new Error('EXISTING_REQUIRED');});
    return {...h,stateVersion:r.stateVersion,state:r.state,permission:r.state.conversationOwner==='BOT'};};
