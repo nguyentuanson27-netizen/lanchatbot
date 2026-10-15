@@ -5,7 +5,7 @@
 - [x] Keep the existing eight B1 purposes and author three distinct, plausible customer conversations for each:24total. Arrange them as three passes that each cover all eight purposes; evaluator purpose/variant/expected outcome remains outside runtime input, with no required/forbidden keyword lists.
 - [x] Observe focused RED against the old exact-eight/range contract, then update active registration/range/accounting to24N1/max96generations. Keep prompts, models, tools, schema, fallback, retry policy, send-disabled gate and all historical run artifacts unchanged.
 - [x] Focused RED5PASS/4FAIL against the old exact-eight contract → GREEN33/33 across protocol/Gemini/owner-comparison tests. Node syntax, 24-case JSON distribution, diff-check and changed-diff secret scan PASS; manual readback covers all24runtime conversations. No provider generation or source access.
-- [ ] Commit/push and update draft PR391 with exact-head readback. No merge, deploy or live send in this preparation.
+- [x] Push implementation savepoint `51dd570af454a66919d8ea514c0c69b154d3c7a5`; update draft PR391 and read back open/draft/right branch/base/head, body SHA256 `a4083ad6c1359b9611289200c2fb40000f4163d5eed0345fc76e70ad22e53c59`. Remote checks are empty, not CI PASS. Final documentation savepoint follows; no merge, deploy or live send.
 
 ## Current owner rollback to pre44% prompt — 2026-10-15
 
