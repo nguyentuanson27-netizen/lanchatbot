@@ -1,6 +1,6 @@
 # Toàn bộ 24 hội thoại B1 — kết quả khách thực nhận
 
-Owner Gemini 3.5 Flash Lite High; verifier GPT-6.1 Sol High. Mỗi ca một lần, chỉ đọc nguồn thật, send disabled. Bản nháp bị chặn không phải câu trả lời của khách và không được đưa vào primary review.
+Owner Gemini 3.5 Flash Lite High; verifier GPT-6.1 Sol High. Mỗi ca một lần, chỉ đọc nguồn thật, send disabled. Bản nháp bị chặn không phải câu trả lời của khách và không được đưa vào primary review. Raw giữ nguyên byte; bản hiển thị bỏ khoảng trắng cuối dòng.
 
 ## 1. b1-changed-occasion
 
@@ -36,7 +36,7 @@ Nhóm: PARTIAL_SOURCE.
 
 **Kết quả: SEND_ELIGIBLE.**
 
-Set váy Thạch Thảo được thiết kế với phần áo bằng tơ Hàn thêu cao cấp và chân váy làm từ ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng. 
+Set váy Thạch Thảo được thiết kế với phần áo bằng tơ Hàn thêu cao cấp và chân váy làm từ ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng.
 
 Hiện tại hệ thống chưa tra được thông tin giá và tình trạng còn hàng của size M, chị nha.
 
@@ -78,9 +78,9 @@ Nhóm: BUYING_CONCERN.
 
 **Kết quả: SEND_ELIGIBLE.**
 
-Dạ set này hoàn toàn hợp mặc đi tiệc ban ngày chị nhé! 
+Dạ set này hoàn toàn hợp mặc đi tiệc ban ngày chị nhé!
 
-Chất ren tơ Hàn mềm mại kết hợp với form dáng rũ tự nhiên nên lên đồ rất bay bổng và thanh thoát, không hề bị rườm rà hay nặng nề đâu ạ. Áo tơ thêu tinh tế đi cùng chân váy ren tạo tổng thể rất sang trọng và nhã nhặn. 
+Chất ren tơ Hàn mềm mại kết hợp với form dáng rũ tự nhiên nên lên đồ rất bay bổng và thanh thoát, không hề bị rườm rà hay nặng nề đâu ạ. Áo tơ thêu tinh tế đi cùng chân váy ren tạo tổng thể rất sang trọng và nhã nhặn.
 
 Giá set là 799.000đ, vừa vặn trong ngân sách 900.000đ của chị luôn ạ. Chị có muốn em tư vấn size cho vừa vặn không ạ?
 
@@ -218,7 +218,7 @@ Nhóm: PARTIAL_SOURCE.
 
 **Kết quả: SEND_ELIGIBLE.**
 
-Áo của set được làm từ tơ Hàn thêu cao cấp mềm mại, thoáng mát với các họa tiết thêu nổi tinh tế, còn chân váy là ren tơ Hàn tạo độ rũ và bay bổng tự nhiên. 
+Áo của set được làm từ tơ Hàn thêu cao cấp mềm mại, thoáng mát với các họa tiết thêu nổi tinh tế, còn chân váy là ren tơ Hàn tạo độ rũ và bay bổng tự nhiên.
 
 Hiện tại hệ thống bên em chưa tra được thông tin về giá và tình trạng còn hàng của set này, chị quan tâm mẫu này để em tìm thêm các thiết kế tương tự nhé ạ?
 
@@ -262,7 +262,7 @@ Nhóm: BUYING_CONCERN.
 
 **Kết quả: SEND_ELIGIBLE.**
 
-Chị lấy cả bộ Thạch Thảo luôn nhé ạ, giá 799.000đ vừa vặn trong ngân sách 850.000đ của mình. 
+Chị lấy cả bộ Thạch Thảo luôn nhé ạ, giá 799.000đ vừa vặn trong ngân sách 850.000đ của mình.
 
 Mua cả bộ sẽ linh hoạt hơn rất nhiều: chị vừa có nguyên set váy ren tơ bay bổng để mặc đi chơi, đi tiệc, lại vừa có thể tách riêng chiếc áo thêu tinh tế để phối cùng chân váy đen dáng suông sẵn có ở nhà đi làm. Áo thêu form nhẹ nhàng, dễ mix-match nên chị thoải mái mặc lại nhiều lần mà không lo nhàm chán ạ.
 

@@ -2,10 +2,10 @@
 
 ## Full24-case B1 replay — 2026-10-15
 
-- [x] Freeze [exact24cases/8families×3/N1](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/SCOPE.md), approved models/config, full-range budget and holistic review criteria before generation. Initial configuration preflight atd24b1812PASS/0generation; source connections still require readback.
-- [ ] Commit/clean source seal, actual source readback and canonical build; run full24cases once with all errors retained.
-- [ ] Commit raw before primary review, read every terminal conversation, score ten supporting dimensions and whole outcome, then inspect rejected drafts/verdicts and audit provenance/accounting/firewall.
-- [ ] Report family/quality/safety/operational findings, update PR391 and stop; keep the seven stateful turns separate and no live action.
+- [x] Freeze [exact24cases/8families×3/N1](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/SCOPE.md), approved models/config, full-range budget and holistic review criteria before generation. Initial configuration preflight atd24b1812PASS/0generation.
+- [x] Commit/clean source9a523979, actual source readback and canonical build PASS;24/24once,79generationHTTP (57owner/22verifier),0retry/error/timeout. Three preregistered POS_UNAVAILABLE controls remain in the denominator.
+- [x] Rawcf49effe before primary616be825 before diagnosis:10USABLE/4NEEDS_EDIT/10fallback. Audit28raw/source Git/disk hashes,79generationIDs,22exact verifier bindings/all final drafts verified,0evaluator-label leak; accounting complete and cost not exposed.
+- [x] [Report every case, family and operating metric](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/CHECKPOINT_B.md), preserve raw/primary, update PR391 and stop.14eligible/10fallback; fix candidates are ref contract, offer-context consistency, policy approval scope and sales next steps. Seven stateful turns remain separate; no new code/prompt fix, automatic batch, A/C promotion or live action.
 
 ## Post-review test replay — 2026-10-15
 
