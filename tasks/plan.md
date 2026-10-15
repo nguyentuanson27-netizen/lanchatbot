@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Owner-requested B2/B3 replay — 2026-10-16
+
+Run the [same seven stateful outcomes](../apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016/SCOPE.md) once on current9cd3f85e executable/prompts: six public turns plus one private code-only turn, approved Gemini3.5FlashLiteHigh/6.1SolHigh, max24generations/retry0. Focused checks/build → commit/clean seal → real PostgreSQL COD/bank composition controls → zero-generation preflight → one COD provider journey → raw before primary whole-terminal/state review → audit/diagnosis/report/PR391. No code/prompt fix, new corpus, live mutation/send or qualification inferred from the earlier24B1 population.
+
 ## Contract and sales correction — 2026-10-16
 
 Owner authorizes [one complete fix/review/full24case cycle](../apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016/CHANGE_PLAN.md). Start clean58ff4441; refreshed main296cdcfb. Reproduce public ref/offer-evidence/unknown/measurement projection and duplicated wire-context failures before fixes; reuse existing authority/context/final gate. Correct sales-task/policy wording without case templates, role growth or model changes. Focused/full worker verification → independent review → fix findings → freeze clean source → current source checks → one24N1run → raw before primary whole-terminal review → diagnosis/metrics/report/PR391. No extra stateful provider batch, automatic repeat, live activation, A or C qualification.

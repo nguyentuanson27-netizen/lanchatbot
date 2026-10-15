@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner-requested B2/B3 replay — 2026-10-16
+
+- [x] Freeze current models/prompts/native tools and unchanged7case population. Focused worker118PASS/database48PASS/protocol-provider26PASS; canonical workerbuild exit0. No runtime/prompt/corpus/config change; full-suite/typecheck/lint evidence from preceding task is not claimed rerun here.
+- [ ] Commit/clean runtime source, COD/bank isolated PostgreSQL controls and zero-generation source/config preflight; preserve exact owned database cleanup.
+- [ ] Run exactly7N1outcomes/max24generation invocations with current public sources, COD private code-only input and capture delivery; raw savepoint before primary.
+- [ ] Review all actual outcomes/committed state; diagnose fallback/needed edits, audit privacy/accounting/bindings, update PR391 and stop without automatic further run or live action.
+
 ## Contract and sales correction — 2026-10-16
 
 - [x] Reproduce root-cause contracts RED and implement minimum GREEN, preserving authority, CAS/receipts, privacy, exact draft binding and no retry. Fix56d653b4 plus status correction8c7099dd.
