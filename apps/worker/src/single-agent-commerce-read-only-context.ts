@@ -23,6 +23,7 @@ export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string,
     // Existing policy effectiveUntil=null is versioned, not a fabricated expiry. Active pointers are re-read at the final gate.
     expiresAt: policy.effectiveUntil,
     text: canonicalJsonV1({ customerCare: shop.customerCare ?? null,
+      payment: { allowedMethods: shop.allowedPaymentMethods },
       shipping: { defaultFeeVnd: policy.shipping.defaultFeeVnd }, multiItemOffer: {
         minimumProductCount: policy.multiItemOffer.minimumProductCount, discountBps: policy.multiItemOffer.discountBps,
         countingUnit: policy.multiItemOffer.countingUnit, setAndComboCountAsOne: policy.multiItemOffer.setAndComboCountAsOne,

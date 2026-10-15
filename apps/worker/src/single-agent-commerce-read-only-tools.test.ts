@@ -55,6 +55,11 @@ describe("read-only domain tools", () => {
     const {tools} = setup();
     expect((await tools.invoke({name:"read_policy",args:{}})).data).toMatchObject({scope:"SHOP_RULES",orderEligibility:null});
   });
+  it("exposes the source-approved payment methods without private payment or checkout data", async () => {
+    const {tools}=setup(), result=await tools.invoke({name:"read_policy",args:{}});
+    expect(result.data).toMatchObject({policy:{payment:{allowedMethods:["COD","BANK_TRANSFER"]}}});
+    expect(JSON.stringify(result.data)).not.toMatch(/accountNumber|accountHolder|qrImageUrl|requirePhoneNumber|requireDeliveryAddress/);
+  });
   it("search and the trusted verifier snapshot use the same existing product evidence after a full read", async () => {
     const f = fixtureProduct(); f.product.descriptionXml = "Mô tả đã đọc.";
     const catalog = {readProduct:async()=>structuredClone(f),searchText:async()=>({status:"MATCHED" as const,
