@@ -8,11 +8,12 @@ const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url
 const request=()=>({generationId:'turn:verifier:1',instructions:'Kiểm reply.',finalDraft:'Dạ chị.',
  trusted:{boundSubjects:[],protectedClaims:[],policyLiterals:[],effectReceipts:[],runtimeProducts:[],state:{}},
  latest:'Em ơi',history:[],binding:{requestId:'turn'},signal:new AbortController().signal});
-test('explicit dispatch ranges partition the eight registered slots without retries or hidden selection',()=>{
- assert.deepEqual(dispatchRange(),{first:1,last:8});
- assert.deepEqual(dispatchRange('1:3'),{first:1,last:3});
- assert.deepEqual(dispatchRange('4:8'),{first:4,last:8});
- for(const value of ['0:3','4:9','4:3','1:3:5','3','1.0:3','',null])assert.throws(()=>dispatchRange(value),/DISPATCH_RANGE/);
+test('explicit dispatch ranges partition the twenty-four registered slots without retries or hidden selection',()=>{
+ assert.deepEqual(dispatchRange(),{first:1,last:24});
+ assert.deepEqual(dispatchRange('1:8'),{first:1,last:8});
+ assert.deepEqual(dispatchRange('9:16'),{first:9,last:16});
+ assert.deepEqual(dispatchRange('17:24'),{first:17,last:24});
+ for(const value of ['0:3','17:25','4:3','1:3:5','3','1.0:3','',null])assert.throws(()=>dispatchRange(value),/DISPATCH_RANGE/);
 });
 
 test('protocol identity is fixed before any provider invocation',()=>{
@@ -20,10 +21,11 @@ test('protocol identity is fixed before any provider invocation',()=>{
  assert.throws(()=>validateProtocol({...manifest,models:{...manifest.models,verifier:{...manifest.models.verifier,effort:'max'}}}));
  assert.throws(()=>validateProtocol({...manifest,models:{...manifest.models,conversation:{...manifest.models.conversation,
   generationConfig:{...manifest.models.conversation.generationConfig,maxOutputTokens:100}}}}));
+ assert.throws(()=>validateProtocol({...manifest,providerBatch:{...manifest.providerBatch,scenarios:8}}));
  assert.throws(()=>validateProtocol({...manifest,fallback:{...manifest.fallback,text:'Changed fallback'}}));
 });
 test('runtime projection and captured verifier request exclude all evaluator fields',async()=>{
- const sample={caseId:'LABEL_CANARY',split:'HOLDOUT_CANARY',evaluator:{expectedSafe:false,requiredBehaviors:['RUBRIC_CANARY']},
+ const sample={caseId:'LABEL_CANARY',split:'HOLDOUT_CANARY',evaluator:{purposeId:'PURPOSE_CANARY',variant:3,expectedSafe:false,requiredBehaviors:['RUBRIC_CANARY']},
   runtime:{latest:'Em ơi',history:[],initialProductCodes:['SM613']}};
  const runtime=runtimeCase(sample);assert.deepEqual(Object.keys(runtime).sort(),['history','initialProductCodes','latest']);
  let captured;
@@ -31,7 +33,7 @@ test('runtime projection and captured verifier request exclude all evaluator fie
   return {status:'OK',answer:'{"verdict":"PASS","violations":[]}',providerRequests:1,usage:{input_tokens:4,output_tokens:3}};});
  const result=await infer({...request(),...sample});
  assert.equal(result.result,'{"verdict":"PASS","violations":[]}');
- assert.doesNotMatch(JSON.stringify(captured),/LABEL_CANARY|HOLDOUT_CANARY|RUBRIC_CANARY|expectedSafe|requiredBehaviors/);
+ assert.doesNotMatch(JSON.stringify(captured),/LABEL_CANARY|HOLDOUT_CANARY|PURPOSE_CANARY|RUBRIC_CANARY|purposeId|variant|expectedSafe|requiredBehaviors/);
  assert.equal(captured.tools.length,0);assert.equal(captured.reasoning.effort,'high');
 });
 test('failed verifier generation has retained accounting and no retry',async()=>{
@@ -54,11 +56,11 @@ test('source preflight reports missing names only without constructing adapters'
 test('registered cases bind the exact bytes loaded once, without later file edits changing in-memory inputs',()=>{
  const dir=mkdtempSync(join(tmpdir(),'c3-b-inputs-')),file=join(dir,'cases.json');
  try{
-  const cases=Array.from({length:8},(_,i)=>({caseId:'EVAL_'+i,evaluator:{requiredBehaviors:['PRIVATE_RUBRIC']},
+  const cases=Array.from({length:24},(_,i)=>({caseId:'EVAL_'+i,evaluator:{requiredBehaviors:['PRIVATE_RUBRIC']},
    runtime:{latest:'Áo bao nhiêu em?',history:[],initialProductCodes:[]}}));
   const original=JSON.stringify(cases);writeFileSync(file,original);
   const loaded=readRegisteredCases(file);writeFileSync(file,'[]');
-  assert.equal(loaded.hash,sha256(original));assert.equal(loaded.inputs.length,8);
+  assert.equal(loaded.hash,sha256(original));assert.equal(loaded.inputs.length,24);
   assert.doesNotMatch(JSON.stringify(loaded.inputs),/EVAL_|PRIVATE_RUBRIC|requiredBehaviors/);
   assert.throws(()=>readRegisteredCases(file));
  }finally{unlinkSync(file);rmdirSync(dir);}
@@ -66,11 +68,30 @@ test('registered cases bind the exact bytes loaded once, without later file edit
 test('source fault mode is registered outside runtime input and rejects unrecognized modes',()=>{
  const dir=mkdtempSync(join(tmpdir(),'c3-b-source-mode-')),file=join(dir,'cases.json');
  try{
-  const cases=Array.from({length:8},(_,i)=>({caseId:'case-'+i,sourceMode:i===7?'POS_UNAVAILABLE':'LIVE',
+  const cases=Array.from({length:24},(_,i)=>({caseId:'case-'+i,sourceMode:i>=21?'POS_UNAVAILABLE':'LIVE',
    runtime:{latest:'Áo bao nhiêu em?',history:[],initialProductCodes:[]}}));
   writeFileSync(file,JSON.stringify(cases));const loaded=readRegisteredCases(file);
   assert.doesNotMatch(JSON.stringify(loaded.inputs),/POS_UNAVAILABLE|sourceMode/);
-  cases[7].sourceMode='REPLACE_PRICE';writeFileSync(file,JSON.stringify(cases));
+  cases[23].sourceMode='REPLACE_PRICE';writeFileSync(file,JSON.stringify(cases));
   assert.throws(()=>readRegisteredCases(file),/SOURCE_MODE/);
  }finally{unlinkSync(file);rmdirSync(dir);}
+});
+
+test('the approved corpus registers three distinct dialogue variants for each of the eight purposes',()=>{
+ const cases=JSON.parse(readFileSync(new URL('./cases.b1.json',import.meta.url),'utf8'));
+ assert.equal(cases.length,24);
+ const grouped=new Map();
+ for(const c of cases)grouped.set(c.evaluator?.purposeId,[...(grouped.get(c.evaluator?.purposeId)??[]),c]);
+ assert.equal(grouped.size,8);
+ for(const variants of grouped.values()){
+  assert.deepEqual(variants.map(c=>c.evaluator.variant).sort((a,b)=>a-b),[1,2,3]);
+  assert.equal(new Set(variants.map(c=>c.runtime.latest)).size,3);
+ }
+ const firstPass=cases.slice(0,8).map(c=>c.evaluator.purposeId).sort();
+ for(let pass=0;pass<3;pass++){
+  const block=cases.slice(pass*8,(pass+1)*8);
+  assert.ok(block.every(c=>c.evaluator.variant===pass+1));
+  assert.deepEqual(block.map(c=>c.evaluator.purposeId).sort(),firstPass);
+ }
+ assert.ok(cases.every(c=>!('requiredKeywords' in c.evaluator)&&!('forbiddenKeywords' in c.evaluator)));
 });

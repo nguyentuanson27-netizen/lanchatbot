@@ -3,7 +3,8 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
-import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange} from './protocol.mjs';
+import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange,
+ REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 
@@ -14,7 +15,7 @@ const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',impor
 const configBytes=args.config?readFileSync(resolve(args.config)):null;
 const config=configBytes?JSON.parse(configBytes):{};
 const missing=requiredSourceConfig(config);
-if(!args.cases)missing.push('--cases (8 approved runtime cases with separate evaluator fields)');
+if(!args.cases)missing.push(`--cases (${REGISTERED_CASE_COUNT} approved runtime cases with separate evaluator fields)`);
 if(missing.length){console.log(JSON.stringify({status:'BLOCKED',stage:'SOURCE_PREFLIGHT',missing,providerGenerations:0,sendEnabled:false}));process.exit(2);}
 const {samples,inputs,hash:inputHash}=readRegisteredCases(resolve(args.cases));
 if(!['CANARY_SHADOW','CANARY_LIVE','PUBLISHED'].includes(config.channel)||config.scope.pageId!=='1198992073286645'||
@@ -22,7 +23,7 @@ if(!['CANARY_SHADOW','CANARY_LIVE','PUBLISHED'].includes(config.channel)||config
  !/^[a-f0-9]{64}$/.test(config.scope.customerHash)||!/^[a-f0-9]{64}$/.test(config.scope.recipient)||
  !Number.isSafeInteger(config.vertex.embeddingDimension)||config.vertex.embeddingDimension<1)throw new Error('SOURCE_CONFIG');
 const codex=inspectCodex();
-if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:8,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
+if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:REGISTERED_CASE_COUNT,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
 if(!args.out)throw new Error('NEW_OUTPUT_DIRECTORY_REQUIRED');
 const sourcePaths=['apps/worker/src','apps/worker/package.json','apps/worker/tsconfig.json','tsconfig.base.json','pnpm-lock.yaml',
  'apps/worker/evals/single-agent-commerce-read-only','apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs','packages'];
@@ -39,7 +40,7 @@ const out=resolve(args.out);mkdirSync(out); // Existing evidence is never overwr
 const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.stringify({id,phase,value})+'\n');
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
  promptHashes:m.promptHashes,schemaHash:m.schemaHash,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
- inputHash,caseIds:samples.map(c=>c.caseId),registered:8,repetitions:1,maximumGenerationRequests:32,
+ inputHash,caseIds:samples.map(c=>c.caseId),registered:REGISTERED_CASE_COUNT,repetitions:1,maximumGenerationRequests:MAXIMUM_GENERATION_REQUESTS,
  dispatch,
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});
 const [{PostgresRuntimePolicyStore},{ProductSearchService,QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
@@ -106,10 +107,10 @@ try{
   }catch(error){result={terminal:{disposition:'NO_SEND',reason:'SOURCE_OR_ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},errorType:error.name,
    errorCode:typeof error.message==='string'&&/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:null,sendEnabled:false};}
   writeFileSync(join(out,`attempt-${i+1}.json`),JSON.stringify({caseId:samples[i].caseId,sourceMode:samples[i].sourceMode??'LIVE',elapsedMs:performance.now()-started,runtime:sample,result,counters:{...counters}},null,2),{flag:'wx'});
-  console.log(JSON.stringify({slot:i+1,recorded:i-dispatch.first+2,registered:8,terminal:result.terminal.disposition}));
+  console.log(JSON.stringify({slot:i+1,recorded:i-dispatch.first+2,registered:REGISTERED_CASE_COUNT,terminal:result.terminal.disposition}));
  }
  const recorded=dispatch.last-dispatch.first+1;
- const status=head()===bRunSourceSha&&!dirty()?(recorded===8?'AWAITING_WHOLE_REPLY_REVIEW':'DISPATCH_RANGE_COMPLETE_REVIEW_PENDING'):'INVALID_SOURCE_IDENTITY';
- writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered:8,recorded,dispatch,counters,sendEnabled:false},null,2),{flag:'wx'});
- console.log(JSON.stringify({status,registered:8,recorded,out,sendEnabled:false}));
+ const status=head()===bRunSourceSha&&!dirty()?(recorded===REGISTERED_CASE_COUNT?'AWAITING_WHOLE_REPLY_REVIEW':'DISPATCH_RANGE_COMPLETE_REVIEW_PENDING'):'INVALID_SOURCE_IDENTITY';
+ writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered:REGISTERED_CASE_COUNT,recorded,dispatch,counters,sendEnabled:false},null,2),{flag:'wx'});
+ console.log(JSON.stringify({status,registered:REGISTERED_CASE_COUNT,recorded,out,sendEnabled:false}));
 }finally{await Promise.allSettled([database.close(),redis.close()]);}

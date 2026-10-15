@@ -20,18 +20,24 @@ Native capabilities are explicit: B1 declares `search_products`, `read_product`,
 
 Models remain Vertex `gemini-3.5-flash-lite` / high and `gpt-6.1-sol` / high through the existing bounded Codex login relay. Provider versions/config, prompt/schema hashes and terminal map are in [manifest](manifest.json); its status describes the frozen preparation, not a mutable run tracker. Latest owner-authorized follow-up at clean8bbea938uses the same eight cases/expectations with failures first, revised owner/tool projection and byte-identical verifier:8/8recorded,26requests/retry0,5eligible/3fallback, subjective5/8adequate. Earlier clean97f24609recorded28requests/5eligible/3fallback/subjective4/8adequate. Both full runs are retained, no outcome adoption, causal/stability claim, inherited A PASS or qualification. Sales quality stays open.
 
+The current prepared corpus has **24 N1 turns: three independently written dialogue variants for each of the same eight purposes**. The three passes each cover all eight purposes, with a maximum of 96 generation requests. Customer wording is written as a plausible shopping conversation; evaluator metadata describes the whole-turn decision to assess and contains no required/forbidden keyword list. This is frozen-input preparation only. It does not change or supersede any historical eight-case result, and no provider result is claimed for the 24-case corpus.
+
 Reuse the existing deployment routes, not a new database/index setup. [Compose](../../../../deploy/docker-compose.vps.yml) already configures PostgreSQL, Redis, Qdrant, file-backed secrets and the stable catalog index. [Lana ops](../../../../plugins/lana-chatbot-ops/README.md) supplies the existing SSH/credential route. A missing local `.env` does not mean these sources are unavailable.
 
 The [read-only operational readback](source-readback-20261014.json) verified all three connections on 2026-10-14: PUBLISHED policy pointers for the PREPROD page; Redis PONG without customer-key reads; Qdrant `lana_multimodal_data_v2` green, with `product_text`, `image_raw` and `image_cutout` vectors of1408dimensions. Current embedding is `multimodalembedding@001` / `us-central1`. The runtime Vertex project and policy channel differ from the compose defaults; [source-config.example.json](source-config.example.json) now uses the observed non-secret values. This is operational source evidence, not a source-backed candidate/model run.
 
 Prepare the actual config outside Git from that example, supplying synthetic demo scope instead of live customer identity. The local CLI currently expects `RUNTIME_POLICY_DATABASE_URL` (or `DATABASE_URL`), `REDIS_URL`, `QDRANT_BASE_URL`, `QDRANT_API_KEY`, and `C3_VERTEX_CREDENTIAL_FILE` in its process. Remote file secrets and Docker-internal hostnames are not automatically available to that local process; use the established access route without committing or printing credentials. Qdrant is used only for stable text/code lookup, Redis for ingested POS snapshots, and PostgreSQL for active policy pointers. The candidate permits reading an explicitly configured PUBLISHED channel through its read-only resolver; no send, policy pin/audit writer or production flag is enabled.
 
-Supply exactly eight approved cases in a separate JSON file. Each case has evaluator metadata beside the allowlisted runtime projection:
+Supply exactly 24 approved cases in a separate JSON file: three variants for each of eight approved purposes. Each case has evaluator metadata beside the allowlisted runtime projection:
 
 ```json
 {
   "caseId": "evaluator-only-id",
-  "evaluator": { "purpose": "whole reply review; never projected" },
+  "evaluator": {
+    "purposeId": "one of the eight evaluator-only purposes",
+    "variant": 1,
+    "purpose": "whole reply review; never projected"
+  },
   "runtime": {
     "latest": "Áo này bao nhiêu em?",
     "history": [],
@@ -40,7 +46,7 @@ Supply exactly eight approved cases in a separate JSON file. Each case has evalu
 }
 ```
 
-`history` messages are `{role:"customer"|"shop", text:string}`. Initial codes are operator-approved pre-turn refs; model tools can only use refs issued by code. Do not put synthetic A fixtures into this file and label them real shop data. The eight purposes/scoring protocol remain those in [B1 plan §7](../../../../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md#7-đợt-kiểm-tra-b-đầu-tiên-giới-hạn-chi-phí). Whole-turn review is required; keyword presence is not a quality pass.
+`history` messages are `{role:"customer"|"shop", text:string}`. Initial codes are operator-approved pre-turn refs; model tools can only use refs issued by code. Do not put synthetic A fixtures into this file and label them real shop data. The eight purposes/scoring protocol remain those in [B1 plan §7](../../../../docs/specs/c3-phase-b-read-only-integration-plan-20261014.md#7-đợt-kiểm-tra-b-phát-triển-giới-hạn-chi-phí); each purpose now has variants 1–3. Whole-turn review is required; keyword presence is not a quality pass.
 
 ```powershell
 node apps/worker/evals/single-agent-commerce-read-only/run.mjs --preflight --config <external-config.json> --cases <approved-cases.json>
@@ -49,7 +55,7 @@ node apps/worker/evals/single-agent-commerce-read-only/run.mjs --run --config <e
 
 Preflight without locally loaded routes reports their **names**, makes zero generations and returns BLOCKED for that invocation; it does not inspect the established remote route. Config readiness does not prove a connection/readback. A run requires clean executable/config paths, builds from them, captures runtime `bRunSourceSha`, hashes the exact bytes of config/cases and uses prompts frozen in memory. It never writes the run SHA back into source. A changed HEAD/executable worktree invalidates completion identity.
 
-The CLI exposes only B1's three read tools. It registers eight N1 turns, at most32generation requests; it never runs A2/A3 or expands repetitions. Raw request/result checkpoints and all terminal outcomes are retained, including provider/source failures. There is no automatic quality judge or automatic GO. An observed unsafe eligible reply requires stopping and review before another run.
+The CLI exposes only B1's three read tools. It registers 24 N1 turns, at most 96 generation requests; it never runs A2/A3 or expands repetitions. Raw request/result checkpoints and all terminal outcomes are retained, including provider/source failures. There is no automatic quality judge or automatic GO. An observed unsafe eligible reply requires stopping and review before another run.
 
 Owner/verifier request bodies are explicit projections; case IDs, expected labels, purpose and rubric remain evaluator-only. Bounds: history8/4096bytes, latest2048, final4096, provider input32768, tool results8192/round, refs8, claims32, runtime products4/8192bytes each. Oversized inputs fail closed rather than truncating policy/chart truth. Provider auth/error/timeout/malformed output terminates the generation; no hidden generation retry. Source counters are domain/embedding **calls**, not a claim that each corresponds to exactly one network request. Usage/error/version/latency evidence comes from provider accounting; unavailable cost remains null.
 

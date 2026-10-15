@@ -3,10 +3,13 @@ import {readFileSync,existsSync} from 'node:fs';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
+export const REGISTERED_CASE_COUNT=24;
+export const MAXIMUM_GENERATION_REQUESTS=REGISTERED_CASE_COUNT*4;
 export function dispatchRange(value=undefined){
- if(value===undefined)return {first:1,last:8};
- check(typeof value==='string'&&/^[1-8]:[1-8]$/.test(value),'DISPATCH_RANGE');
- const [first,last]=value.split(':').map(Number);check(first<=last,'DISPATCH_RANGE');return {first,last};
+ if(value===undefined)return {first:1,last:REGISTERED_CASE_COUNT};
+ check(typeof value==='string'&&/^\d+:\d+$/.test(value),'DISPATCH_RANGE');
+ const [first,last]=value.split(':').map(Number);
+ check(first>=1&&first<=last&&last<=REGISTERED_CASE_COUNT,'DISPATCH_RANGE');return {first,last};
 }
 const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 export function validateProtocol(m){
@@ -20,6 +23,8 @@ export function validateProtocol(m){
   owner.thinkingConfig.includeThoughts===false&&owner.retry===0&&owner.timeoutMs===90000&&
   m.models.verifier.version===m.models.verifier.model&&v.timeoutMs===90000&&v.maxResponseBytes===1048576&&
   v.relayUpstreamRequestsPerAttempt===1&&v.endpoint==='https://chatgpt.com/backend-api/codex/responses'&&v.cliVersion==='0.159.2','GENERATION_CONFIG');
+ check(m.providerBatch.scenarios===REGISTERED_CASE_COUNT&&m.providerBatch.repetitions===1&&
+  m.providerBatch.maximumGenerationRequests===MAXIMUM_GENERATION_REQUESTS,'PROVIDER_BATCH');
  for(const role of ['owner','verifier'])check(sha256(readFileSync(new URL('./prompts/'+role+'.vi.txt',import.meta.url)))===m.promptHashes[role],'PROMPT_HASH');
  check(sha256(JSON.stringify(m.verdictSchema))===m.schemaHash,'SCHEMA_HASH');
  check(m.fallback.id==='C3_A_NONPROTECTED_V2'&&m.fallback.text==='Phần này em chưa trả lời được, chị nhé.'&&sha256(m.fallback.text)===m.fallback.sha256,'FALLBACK_IDENTITY');
@@ -36,8 +41,8 @@ export function runtimeCase(sample){
 }
 export function readRegisteredCases(path){
  const source=readFileSync(path),samples=JSON.parse(source.toString('utf8'));
- check(Array.isArray(samples)&&samples.length===8&&samples.every(c=>typeof c.caseId==='string'&&c.caseId.length>0&&c.caseId.length<=128)&&
-  new Set(samples.map(c=>c.caseId)).size===8,'EXACT_EIGHT_CASES_REQUIRED');
+ check(Array.isArray(samples)&&samples.length===REGISTERED_CASE_COUNT&&samples.every(c=>typeof c.caseId==='string'&&c.caseId.length>0&&c.caseId.length<=128)&&
+  new Set(samples.map(c=>c.caseId)).size===REGISTERED_CASE_COUNT,'EXACT_TWENTY_FOUR_CASES_REQUIRED');
  check(samples.every(c=>['LIVE','POS_UNAVAILABLE'].includes(c.sourceMode??'LIVE')),'SOURCE_MODE');
  return {samples,inputs:samples.map(runtimeCase),hash:sha256(source)};
 }

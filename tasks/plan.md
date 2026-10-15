@@ -1,5 +1,13 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current 24-case B1 corpus preparation — 2026-10-15
+
+Owner requests three cases for each of the existing eight B1 purposes, total24. Starting head is `d4771213d09b4814d52f44892b095cd13c9c7e0a`; historical provider evidence remains immutable. Replace the active eight-case input with three independently written, natural shopping-dialogue variants per purpose, ordered as three complete eight-purpose passes. Keep evaluator purpose/variant/expected outcome outside runtime projection and use whole-turn meaning rather than keyword requirements.
+
+Update only the active corpus registration, fixed24-slot range, max96-generation accounting, README/plan and focused protocol coverage. Preserve one owner/one verifier, approved models/config, prompts/schema/fallback, read-only tools, no retry and send-disabled final gate. Observe focused RED on the old exact-eight contract, then GREEN; run relevant protocol/provider projection tests and static corpus review. Do not call providers, access live sources, merge, deploy or send in this preparation.
+
+Completed locally: focused protocol RED5PASS/4FAIL against the old eight-slot contract, then all three B eval files33/33PASS after the minimum24-slot change. Node syntax, JSON distribution, diff-check and changed-diff secret scan pass. Manual readback covers all24customer turns/history pairs; no required/forbidden keyword field exists. No provider generation or source access was performed.
+
 ## Current owner rollback to pre44% prompt — 2026-10-15
 
 Owner requests the version before44,6% simplification. Restore owner prompt/base manifest byte-exact from611c8207 (also prompt83061af5):10.353bytes/hashd6ba7b6c. [Active rollback record](../apps/worker/evals/single-agent-commerce-read-only/OWNER_PROMPT_NEXT_STEPS.md). Focused protocol/provider44PASS/1optionalSKIP, hash/byte readbackPASS, two superseded registrations reject COMPARISON_FROZEN_INPUT before credentials/source/provider, no output. Prompt/config restore only; current tool/source code and all historical frozen runs remain. No new generation, model qualification, source access, deploy/send or automatic batch. Deliver on existing draft PR391.

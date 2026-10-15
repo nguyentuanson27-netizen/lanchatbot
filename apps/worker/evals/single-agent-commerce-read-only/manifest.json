@@ -115,10 +115,10 @@
   },
   "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
   "providerBatch": {
-    "scenarios": 8,
+    "scenarios": 24,
     "repetitions": 1,
-    "maximumGenerationRequests": 32,
-    "status": "TWO_OWNER_AUTHORIZED_BOUNDED_ROUNDS_N1_FAILURE_PREFIX_FIRST"
+    "maximumGenerationRequests": 96,
+    "status": "OWNER_AUTHORIZED_24_CASE_CORPUS_PREPARED_NOT_RUN"
   },
   "terminalMap": {
     "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
