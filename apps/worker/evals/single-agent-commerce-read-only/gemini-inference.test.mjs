@@ -5,6 +5,44 @@ const config={model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-projec
 const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo dữ liệu nguồn.',contents:[{role:'user',parts:[{text:'Áo bao nhiêu em?'}]}],
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
+
+test('owner has one callable product identity and measurement fields match the write enum',()=>{
+ const r=request();r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Áo',bindingVersion:'b'}];
+ r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',content:{description:'Cotton.'}}];
+ r.context.state.customerMeasurements=[{kind:'WAIST_CM',value:74}];
+ r.contents.push({role:'model',parts:[{functionCall:{id:'s1',name:'search_products',args:{query:'P1'}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:{id:'s1',name:'search_products',response:{status:'OK',data:{status:'MATCHED',subjects:r.context.boundSubjects,products:r.context.runtimeProducts}}}}]});
+ const b=buildGeminiCommerceRequest(r),view=JSON.parse(b.contents[0].parts[0].text).trusted;
+ assert.equal(view.subjects[0].subjectRef,'P1');assert.equal(view.products[0].subjectRef,'P1');
+ assert.deepEqual(view.state.customerMeasurements,[{field:'measurements.WAIST_CM',value:74}]);
+ assert.ok(stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties.field.enum.includes(view.state.customerMeasurements[0].field));
+ assert.doesNotMatch(JSON.stringify(b),/product:P1/);
+ assert.equal(b.contents[2].parts[0].thoughtSignature,'opaque');
+});
+
+test('continuations reuse exact current source evidence once but retain changed results, receipts and native identities',()=>{
+ const r=request(),description='Áo cotton dáng suông. '.repeat(320),content={description};
+ r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',content}];
+ r.context.effectReceipts=[{ref:'receipt-1',effect:'CUSTOMER_STATE_UPDATED'}];
+ const fn={id:'r1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',content,facts:[{type:'PRICE',value:{amountVnd:499000}}],availableOffers:['AO'],availability:{price:{status:'OK'}}}}};
+ r.contents.push({role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:structuredClone(fn)}]});
+ const b=buildGeminiCommerceRequest(r),serialized=JSON.stringify(b);
+ assert.equal(serialized.split(description).length-1,1);assert.ok(Buffer.byteLength(serialized)<32768);
+ assert.equal(b.contents[3].parts[0].functionResponse.id,'r1');
+ assert.deepEqual(b.contents[3].parts[0].functionResponse.response.data.facts,fn.response.data.facts);
+ assert.deepEqual(JSON.parse(b.contents[0].parts[0].text).trusted.receipts,r.context.effectReceipts);
+ assert.equal(r.contents[2].parts[0].functionResponse.response.data.content.description,description);
+ r.context.runtimeProducts[0].content={description:'Nguồn mới.'};
+ const changed=buildGeminiCommerceRequest(r);assert.equal(changed.contents[3].parts[0].functionResponse.response.data.content.description,description);
+});
+test('canonical key ordering does not duplicate source evidence between snapshot and tool response',()=>{
+ const r=request();r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',content:{description:'Cotton.',metadata:{observedAt:'now',authority:'WEBSTORE_XML'}}}];
+ r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{subjectRef:'P1',content:{metadata:{authority:'WEBSTORE_XML',observedAt:'now'},description:'Cotton.'}}}}}]});
+ const b=buildGeminiCommerceRequest(r);
+ assert.equal(b.contents[2].parts[0].functionResponse.response.data.content,undefined);
+ assert.equal(JSON.parse(b.contents[0].parts[0].text).trusted.products[0].content.description,'Cotton.');
+});
 test('native function content keeps opaque signatures for the next invocation',()=>{
  const source=body([{functionCall:{name:'read_policy',args:{}},thoughtSignature:'opaque'}]);
  const result=parseGeminiGeneration(source);

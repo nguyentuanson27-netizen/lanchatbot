@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Contract and sales correction — 2026-10-16
+
+- [ ] Reproduce root-cause contracts RED and implement minimum GREEN, preserving authority, CAS/receipts, privacy, exact draft binding and no retry.
+- [ ] Correct owner sales/naturalness and policy semantics without case answers; verify focused/full worker/compiler/build/lint and protected/reply coverage.
+- [ ] One independent review of the committed fix, address findings and rerun affected checks.
+- [ ] Freeze clean source/models/hashes and run exactly existing24N1cases after source checks; raw savepoint before primary whole-terminal review.
+- [ ] Audit all attempts, review every conversation, diagnose remaining fallback/edit cases, update PR391 and STOP without automatic new round or live action.
+
 ## Full24-case B1 replay — 2026-10-15
 
 - [x] Freeze [exact24cases/8families×3/N1](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/SCOPE.md), approved models/config, full-range budget and holistic review criteria before generation. Initial configuration preflight atd24b1812PASS/0generation.

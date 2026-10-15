@@ -1,13 +1,13 @@
 import {readFileSync} from 'node:fs';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
-import {HandoffReasonV2Schema} from '@lana/contracts';
+import {HandoffReasonV2Schema,canonicalJsonV1} from '@lana/contracts';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
- {name:'search_products',description:'Tìm sản phẩm của shop; trả ref cùng mô tả/thuộc tính có nguồn để tư vấn. Chỉ read_product khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc sản phẩm, bảng size, giá và tồn theo ref shop đã cấp. Kết quả offerType cho biết lựa chọn bán thực tế của facts; chỉ truyền offerType khi cần lựa chọn khác từ availableOffers. size dùng xem tồn, không chứng minh mặc vừa. deliveryRegion là tỉnh/thành cần tra thời gian giao dự kiến; không phải địa chỉ nhận hàng. availability giữ trạng thái riêng của từng fact.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
+ {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
+ {name:'read_product',description:'Đọc giá/tồn, mô tả và bảng size của sản phẩm. subjectRef lấy nguyên giá trị từ products.subjectRef hoặc subjects.subjectRef, không ghép thêm tiền tố. Chọn offerType theo món khách muốn mua từ availableOffers; null nghĩa chưa biết các lựa chọn bán, không phải không bán lẻ. size dùng xem tồn, không chứng minh mặc vừa. deliveryRegion là tỉnh/thành cần tra ETA, không phải địa chỉ. availability giữ trạng thái từng dữ kiện.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
@@ -29,20 +29,40 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   declarations=request.availableTools.map(name=>{const d=known.find(d=>d.name===name);requireThat(d,'CAPABILITY_UNAVAILABLE');return d;});
  }
  const c=request.context;
+ const subject=s=>({subjectRef:s.ref,kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
+ const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
+ // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
+ const product=p=>{
+  const value={...p};delete value.ref;
+  const current=c.runtimeProducts?.find(x=>x.subjectRef===p.subjectRef);
+  for(const key of ['content','attributes','presentation','sizeCharts']){
+   if(value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
+  }
+  return value;
+ };
  const contents=structuredClone(request.contents);
  for(const message of contents)for(const part of message.parts??[]){
   const response=part.functionResponse;
-  if(response?.name!=='read_product'||!response.response?.data?.availability)continue;
-  const availability=response.response.data.availability;
-  response.response.data.availability=Object.fromEntries(Object.entries(availability).map(([field,value])=>[field,{status:value.status}]));
+  const data=response?.response?.data;if(!data)continue;
+  if(response.name==='search_products'){
+   if(data.subjects)data.subjects=data.subjects.map(subject);
+   if(data.products)data.products=data.products.map(product);
+  }
+  if(response.name==='read_product'){
+   response.response.data=product(data);
+   if(data.availability)response.response.data.availability=Object.fromEntries(Object.entries(data.availability).map(([field,value])=>[field,{status:value.status}]));
+  }
+  if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
  }
- const ownerView={subjects:c.boundSubjects,products:(c.runtimeProducts??[]).map(p=>({ref:p.ref,subjectRef:p.subjectRef,
+ const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
+  'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']
+  .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]));
+ if(Array.isArray(state.customerMeasurements))state.customerMeasurements=state.customerMeasurements.map(measurement);
+ const ownerView={subjects:c.boundSubjects.map(subject),products:(c.runtimeProducts??[]).map(p=>({subjectRef:p.subjectRef,
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
    policy:c.policyLiterals.map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
-   state:Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
-    'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']
-     .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]])),
+   state,
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],

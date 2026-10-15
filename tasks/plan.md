@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Contract and sales correction — 2026-10-16
+
+Owner authorizes [one complete fix/review/full24case cycle](../apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016/CHANGE_PLAN.md). Start clean58ff4441; refreshed main296cdcfb. Reproduce public ref/offer-evidence/unknown/measurement projection and duplicated wire-context failures before fixes; reuse existing authority/context/final gate. Correct sales-task/policy wording without case templates, role growth or model changes. Focused/full worker verification → independent review → fix findings → freeze clean source → current source checks → one24N1run → raw before primary whole-terminal review → diagnosis/metrics/report/PR391. No extra stateful provider batch, automatic repeat, live activation, A or C qualification.
+
 ## Full24-case replay and whole-conversation review — 2026-10-15
 
 Owner corrects the seven-turn-only test scope and explicitly requests the additional24approved B1 cases plus review. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/SCOPE.md): existing cases.b1.json,8families×3,N1/full1:24/max96invocations, unchanged Gemini3.5FlashLiteHigh and6.1SolHigh, prompts/config and read-only source adapters. Keep the seven stateful outcomes separate. Commit/clean source seal, run zero-generation config/source checks and canonical build, collect24raw attempts before primary whole-terminal scoring, then audit/diagnose and deliver. No runtime/prompt change or automatic additional round; no live action or A/PhaseC promotion.

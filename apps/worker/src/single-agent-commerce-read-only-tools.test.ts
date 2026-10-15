@@ -14,6 +14,41 @@ const setup = (options: { fee?: number } = {}) => {
     policy: () => fixturePolicy(options.fee), catalog }) };
 };
 describe("read-only domain tools", () => {
+  it("binds available selling options to the same current verifier snapshot and invalidates changed options", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => structuredClone(f) } });
+    const first = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } });
+    expect(first.data).toMatchObject({ availableOffers: ["DIRECT"] });
+    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual({ productId: "SM613", availableOffers: ["DIRECT"] });
+    const before = makeBinding("turn", "Có bán riêng áo.", tools.snapshot());
+    expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).toEqual(before);
+    f.snapshot.offers.AO = { ...structuredClone(f.snapshot.offers.DIRECT!),
+      rows: f.snapshot.offers.DIRECT!.rows.map(r => ({ ...r, offer_type: "AO" })) };
+    expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).not.toEqual(before);
+  });
+  it("never represents unavailable or stale selling options as verified absence", async () => {
+    const f = fixtureProduct(), { catalog } = setup(); let available = true;
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => ({ ...f, snapshot: available ? f.snapshot : null }) } });
+    await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    available = false;
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null });
+    expect(tools.snapshot().policyLiterals.some(p => JSON.parse(p.text).availableOffers)).toBe(false);
+    available = true; f.snapshot.synced_at = "2026-10-01T00:00:00.000Z";
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null });
+  });
+  it("keeps size-filtered stock attached to the code-read size when only an offer identity resolves", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    f.snapshot.offers.DIRECT!.rows.push({ ...f.snapshot.offers.DIRECT!.rows[0]!, color: "cream", parent_variation_id: "SM613-CREAM-M" });
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", size: "M" } });
+    const stock = tools.snapshot().protectedClaims.find(c => (c as {type:string}).type === "STOCK") as {claimId:string};
+    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual(expect.objectContaining({
+      productId: "SM613", size: "M", color: null, stockClaimId: stock.claimId,
+    }));
+  });
   it("binds delivery ETA to the requested region and invalidates a changed delivery source", async () => {
     const f = fixtureProduct();
     f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: false, prep_min_days: 1,

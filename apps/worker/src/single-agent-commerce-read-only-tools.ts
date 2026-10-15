@@ -40,6 +40,7 @@ export function createReadOnlyTools(input: {
   let policyLiteral: TrustedContext["policyLiterals"] = [];
   let policyRead = false;
   const deliveryContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  const offerContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const reads = new Map<string, Record<string, unknown>>();
   const searchReads = new Set<string>();
   const bind = (p: StableProductDocument) => {
@@ -48,7 +49,7 @@ export function createReadOnlyTools(input: {
   for (const p of input.initialProducts ?? []) bind(p);
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
-    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...policyLiteral, ...deliveryContexts.values()] });
+    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values()] });
   const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
     if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
       throw new Error("PRODUCT_SOURCE_FRESHNESS");
@@ -82,6 +83,14 @@ export function createReadOnlyTools(input: {
       Date.parse(p.observedAt) > now.getTime())) || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
       parsed.data.shop_alias !== scope.shopAlias))) return { status: "STALE", reason: "PRODUCT_SOURCE_SCOPE" };
     const raw = parsed.success ? parsed.data : null;
+    const observed = raw ? Date.parse(raw.synced_at) : NaN;
+    const expires = observed + maxAge * 1000;
+    const availableOffers = raw && observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
+    offerContexts.delete(id);
+    if (availableOffers !== null) offerContexts.set(id, { ref: `offers:${id}`,
+      sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers }),
+      observedAt: raw!.synced_at, expiresAt: new Date(expires).toISOString(),
+      text: JSON.stringify({ productId: id, availableOffers }) });
     const query = { shopAlias: scope.shopAlias, productId: id, offerType: (args.offerType as string | undefined) ?? null,
       color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null,
       deliveryRegion: (args.deliveryRegion as string | undefined) ?? null };
@@ -117,17 +126,21 @@ export function createReadOnlyTools(input: {
     if (variantId) subjects.set(variantId, { ref: variantId, kind: "VARIANT", productId: id,
       label: `${p.title} ${offer ?? ""} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
     const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
-    // Keep the delivery destination visible to the verifier; the shared ETA value alone contains only day counts.
+    // Preserve filters whose meaning is lost in an offer-only fact scope, including regional ETA.
     deliveryContexts.delete(readKey);
     const etaClaim = nextClaims.find(c => c.type === "ETA");
-    if (etaClaim && raw) deliveryContexts.set(readKey, { ref: `delivery:${readKey}`, sourceVersion: raw.release_id,
-      observedAt: etaClaim.provenance.observedAt, expiresAt: etaClaim.provenance.expiresAt,
-      text: JSON.stringify({ productId: id, variantId, deliveryRegion: Object.keys(raw.shipping_eta).find(r =>
-        normalizeCatalogToken(r) === normalizeCatalogToken(query.deliveryRegion ?? "")), etaClaimId: etaClaim.claimId }) });
+    const stockClaim = nextClaims.find(c => c.type === "STOCK"), priceClaim = nextClaims.find(c => c.type === "PRICE");
+    const filteredClaim = etaClaim ?? ((query.size || query.color) ? stockClaim ?? priceClaim : undefined);
+    if (filteredClaim && raw) deliveryContexts.set(readKey, { ref: `read:${readKey}`, sourceVersion: raw.release_id,
+      observedAt: filteredClaim.provenance.observedAt, expiresAt: filteredClaim.provenance.expiresAt,
+      text: JSON.stringify({ productId: id, variantId, offerType: offer, size: query.size, color: query.color,
+        priceClaimId: priceClaim?.claimId ?? null, stockClaimId: stockClaim?.claimId ?? null,
+        ...(etaClaim ? { deliveryRegion: Object.keys(raw.shipping_eta).find(r =>
+          normalizeCatalogToken(r) === normalizeCatalogToken(query.deliveryRegion ?? "")), etaClaimId: etaClaim.claimId } : {}) }) });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: offer, requestedOfferType: query.offerType,
-      availableOffers: Object.keys(raw?.offers ?? {}),
+      availableOffers,
       attributes: evidence.attributes ?? null, sizeCharts: charts,
       content: evidence.content ?? null,
       facts: nextClaims.map(c => ({ type: c.type, scope: c.scope, value: c.value })),
