@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Independent review corrections — 2026-10-15
+
+- [x] Reproduce P1/P2 before implementation: ingress2FAIL/1PASS; database8FAIL. Preserve RED logs.
+- [x] Reuse current source/authority locks inside profile CAS; retain the verified conversation revision for final readiness and Outbox commit. Worker1756PASS; database246PASS/30optionalSKIP; protected claims/reply assembly21PASS.
+- [ ] Complete final build/typecheck/lint, isolated PostgreSQL regression and independent GPT-6.1 Sol High re-review. Record actual results in [fix report](../apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/REVIEW_FIXES.md), push existing PR391; keep sales/live acceptance STOP.
+
 ## Finish remaining Phase B integration — 2026-10-15
 
 - [x] Refresh main; preserve clean starting head c5f053a0 and existing draft PR391.

@@ -2137,6 +2137,10 @@ export class PostgresRealtimeRuntimeStore {
       readonly fieldEvidence: TEvidence;
     },
     now = new Date(),
+    guard?: Pick<RealtimeCommitInput<unknown>, "conversationId" | "expectedStateVersion"> & {
+      readonly inboxBatchGuard: RealtimeInboxBatchGuard;
+      readonly sourceMessageIdHash: string;
+    },
   ): Promise<boolean> {
     if (
       !pageId.trim() ||
@@ -2149,30 +2153,42 @@ export class PostgresRealtimeRuntimeStore {
     ) {
       throw new Error("CUSTOMER_PROFILE_CAS_INPUT_INVALID");
     }
-    const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1_000);
-    const result = await this.pool.query(
-      `UPDATE realtime_customer_profiles
-       SET revision = $4,
-           profile_snapshot = $5::jsonb,
-           field_evidence = $6::jsonb,
-           expires_at = $7,
-           updated_at = $8
-       WHERE page_id = $1
-         AND customer_hash = $2
-         AND revision = $3
-         AND expires_at > $8`,
-      [
-        pageId,
-        customerHash,
-        expectedRevision,
-        next.revision,
-        JSON.stringify(next.profile),
-        JSON.stringify(next.fieldEvidence),
-        expiresAt,
-        now,
-      ],
-    );
-    return result.rowCount === 1;
+    const update = async (client: Pool | PoolClient, writeNow: Date): Promise<boolean> => {
+      const expiresAt = new Date(writeNow.getTime() + 48 * 60 * 60 * 1_000);
+      const result = await client.query(
+        `UPDATE realtime_customer_profiles
+         SET revision = $4,
+             profile_snapshot = $5::jsonb,
+             field_evidence = $6::jsonb,
+             expires_at = $7,
+             updated_at = $8
+         WHERE page_id = $1
+           AND customer_hash = $2
+           AND revision = $3
+           AND expires_at > $8`,
+        [pageId, customerHash, expectedRevision, next.revision, JSON.stringify(next.profile),
+          JSON.stringify(next.fieldEvidence), expiresAt, writeNow],
+      );
+      return result.rowCount === 1;
+    };
+    if (!guard) return update(this.pool, now);
+    return withTransaction(this.pool, async client => {
+      // Same lock order as Inbox enqueue and the existing conversation/effect commit.
+      const route = await client.query<{ routing_owner: string; kill_switch: boolean; transaction_now: Date }>(
+        `SELECT routing_owner, kill_switch, clock_timestamp() AS transaction_now
+         FROM pages WHERE page_id = $1 FOR UPDATE`, [pageId]);
+      const page = route.rows[0];
+      if (!page || page.routing_owner !== "APP" || page.kill_switch) return false;
+      if (!(page.transaction_now instanceof Date) || !Number.isFinite(page.transaction_now.getTime())) throw new Error("REALTIME_TRANSACTION_CLOCK_INVALID");
+      const source = await this.lockCurrentInboxBatch(client, { pageId, customerHash }, guard.inboxBatchGuard);
+      if (!source.current || source.sourceMessageIdHash !== guard.sourceMessageIdHash) return false;
+      const authority = await client.query<{ conversation_owner: string }>(
+        `SELECT conversation_owner FROM conversations
+         WHERE conversation_id = $1 AND page_id = $2 AND customer_hash = $3 AND state_version = $4
+         FOR UPDATE`, [guard.conversationId, pageId, customerHash, guard.expectedStateVersion]);
+      if (authority.rows[0]?.conversation_owner !== "BOT") return false;
+      return update(client, page.transaction_now);
+    });
   }
 
   async loadOrCreateSalesCycle<TState>(
@@ -3290,9 +3306,9 @@ export class PostgresRealtimeRuntimeStore {
     await this.pool.end();
   }
 
-  private async lockCurrentInboxBatch<TState>(
+  private async lockCurrentInboxBatch(
     client: PoolClient,
-    input: RealtimeCommitInput<TState>,
+    input: Pick<RealtimeCommitInput<unknown>, "pageId" | "customerHash">,
     guard: RealtimeInboxBatchGuard,
   ): Promise<Readonly<{ current: boolean; sourceMessageIdHash: string | null }>> {
     if (

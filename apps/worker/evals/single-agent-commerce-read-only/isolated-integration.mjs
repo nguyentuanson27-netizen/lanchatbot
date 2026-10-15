@@ -400,6 +400,18 @@ try{
   assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
  });
+ await check('B composed superseded source cannot persist customer measurements during generation',async()=>{
+  const j=await statefulFixture();
+  const r=await j.turn('Eo chị 85 nhé',[async()=>{
+   const id='newer-profile-'+randomUUID(),at=new Date();
+   await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:id,providerMessageId:id,conversationHash:j.bound.customerHash,occurredAt:at,receivedAt:at,signatureKeyVersion:'synthetic',envelope:{synthetic:true}});
+   return native([{name:'apply_customer_state',args:{ops:[{op:'SET',field:'measurements.WAIST_CM',value:85}]}}]);
+  }]);
+  const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_REQUIRED');});
+  assert.equal(r.result.terminal.disposition,'NO_SEND');assert.equal(r.verifiers,0);
+  assert.equal(profile.revision,1);assert.deepEqual(profile.profile.measurements,[]);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+ });
  await check('B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged',async()=>{
   const j=await statefulFixture();const r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{afterVerify:async()=>j.changeVariantSource()});
   assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));assert.equal(r.result.enqueued,0);assert.equal(await inbox.isBatchCurrent(r.batch),false);

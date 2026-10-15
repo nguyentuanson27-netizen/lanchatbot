@@ -113,7 +113,7 @@ export async function runPersistedCommerceIngress(input: {
     const at = input.clock().toISOString();
     return { profile: CustomerProfileV1Schema.parse({ schemaVersion: 1, profileId: randomUUID(), customerKey: { namespace: "meta", algorithm: "HMAC_SHA256", digest: scope.customerHash },
       revision: 1, measurements: [], fitPreference: null, preferences: { colors: [], styles: [], materials: [] }, sizeHistory: [], createdAt: at, updatedAt: at }), fieldEvidence: {} };
-  }, input.clock);
+  }, input.clock, { read: readAuthority, inboxBatchGuard: guard });
   const profile = await profilePort.read();
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId });
@@ -138,7 +138,9 @@ export async function runPersistedCommerceIngress(input: {
   let world;
   try { world = await tools.readback(); } catch { return { ...result, ...await closeWithoutSend("EGRESS_READBACK_UNAVAILABLE") }; }
   const current = await readAuthority();
-  if (commerceHash(accepted) !== commerceHash(makeBinding(scope.requestId, result.terminal.text ?? "", world)) || current.bindingVersion !== scope.bindingVersion) return { ...result, ...await closeWithoutSend("EGRESS_WORLD_CHANGED") };
+  const verifiedRevision = world.state.conversationRevision;
+  if (typeof verifiedRevision !== "number" || current.stateVersion !== verifiedRevision ||
+    commerceHash(accepted) !== commerceHash(makeBinding(scope.requestId, result.terminal.text ?? "", world)) || current.bindingVersion !== scope.bindingVersion) return { ...result, ...await closeWithoutSend("EGRESS_WORLD_CHANGED") };
   if (!await input.inbox.isBatchCurrent(batch)) return { ...result, enqueued: executor.outboxCount() }; // A confirmation already committed its atomic terminal intents.
   const state = (await executor.repository.read(scope.conversationId))!, cart = state.cart?.value;
   const allowedText = ["SEND_ELIGIBLE", "FALLBACK", "HANDOFF"].includes(result.terminal.disposition) ? result.terminal.text : null;
@@ -147,7 +149,7 @@ export async function runPersistedCommerceIngress(input: {
   const sourceHash = textHash(scope.sourceMessageId), productIds = cart ? [...new Set(cart.lines.map(l => l.parentProductId))].sort() : world.boundSubjects.filter(s => s.kind === "PRODUCT").map(s => s.ref).sort();
   let claims = world.protectedClaims as ProtectedClaimV1[], salesPlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | undefined;
   const now = input.clock();
-  const common = { pageId: scope.pageId, conversationId: scope.conversationId, sourceMessageIdHash: sourceHash, conversationRevision: current.stateVersion,
+  const common = { pageId: scope.pageId, conversationId: scope.conversationId, sourceMessageIdHash: sourceHash, conversationRevision: verifiedRevision,
     salesCycleRevision: cart ? state.revision : null, productIds, cartId: cart?.cartId ?? null, cartVersion: cart?.revision ?? null,
     cartStateHash: cart ? textHash(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart))) : null, ...(cart ? { cartLines: cart.lines } : {}),
     orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, checkedAt: now };
@@ -173,7 +175,7 @@ export async function runPersistedCommerceIngress(input: {
     deterministicEvidenceHash: payloadHash, payloadHash, ...(parent ? { parentReadinessHash: parent.readinessHash } : {}) });
   if (messagesOut.length && (readiness.outcome !== "READY" || parent?.outcome === "BLOCKED")) return { ...result, ...await closeWithoutSend("EGRESS_READINESS") };
   const committed = await input.transaction(client => input.store.commitWithinTransaction(client, { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
-    expectedStateVersion: current.stateVersion, state: { ...current.state, revision: current.stateVersion+1, currentProductId: world.state.currentProductId, salesStage: state.stage }, inboxBatchGuard: guard,
+    expectedStateVersion: verifiedRevision, state: { ...current.state, revision: verifiedRevision+1, currentProductId: world.state.currentProductId, salesStage: state.stage }, inboxBatchGuard: guard,
     ...(messagesOut.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: last.senderId, messages: messagesOut, sourceMessageIdHash: sourceHash,
       protectedClaims: claims, protectedClaimTypes: claimTypes, effectReadiness: readiness, sendAfterOwnerHandoff: result.terminal.disposition === "HANDOFF" } } : {}),
     ...(salesPlan ? { salesCyclePlan: salesPlan } : {}) }, now));

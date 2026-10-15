@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Close independent review findings — 2026-10-15
+
+Owner requests fixes and another review after GPT-6.1 Sol High found stale-source profile writes (P1) and final Outbox revision rebasing (P2) at cb8bb5e. Observe both regression failures first; extend the existing profile CAS with the current Inbox/conversation transaction locks, and keep the verified conversation revision through final readiness/CAS. Preserve legacy callers, source leases, receipts and the unchanged one-owner/one-verifier architecture. Run worker/database checks and isolated PostgreSQL composition, then reuse the independent reviewer on the committed fix. No prompt change, new provider batch, production wiring, live migration/send or deployment. [Fix evidence](../apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/REVIEW_FIXES.md); acceptance remains STOP.
+
 ## Finish remaining B integration — 2026-10-15
 
 Final implementation source5b70fe87: candidate connections delivered, acceptance STOP. [Complete report](../apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/CHECKPOINT_B.md) separates final1752worker/99focused/compiler/lint and11/11composed COD/bank/dropped from provider evidence at0ad4b29d. Latest7outcomes:2verifier-PASS replies,1current receipt acknowledgement,1static fallback,2handoff,1no-send. Total two batches14outcomes/29invocations/28HTTPrequests, all retained. Complete the missing profile CAS/readback receipt and pre-dispatch error logging after the model run; prove the receipt in final code/database tests, explicitly NOT_RERUN on the real verifier. Source region/checkout completion, natural sales wording, request-bound diagnosis and live delivery remain limitations. No third batch, Phase C, production migration/activation or deploy; deliver source/evidence on draftPR391 and stop for owner review.

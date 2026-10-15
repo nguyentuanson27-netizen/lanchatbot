@@ -6,7 +6,8 @@ import { buildReadOnlyContext, commerceHash } from "./single-agent-commerce-read
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
-import type { PostgresRealtimeRuntimeStore } from "@lana/database";
+import type { PostgresRealtimeRuntimeStore, RealtimeInboxBatchGuard } from "@lana/database";
+import { createHash } from "node:crypto";
 
 export interface CustomerStatePort {
   read(): Promise<CustomerProfileMergeState>;
@@ -15,14 +16,23 @@ export interface CustomerStatePort {
 /** Reuses current table/expiry/CAS implementation; callers supply a scoped initial-profile factory. */
 export function createRealtimeCustomerStatePort(store: Pick<PostgresRealtimeRuntimeStore,
   "loadOrCreateCustomerProfile" | "compareAndSwapCustomerProfile">, scope: CommerceScope,
-  create: () => CustomerProfileMergeState, clock: () => Date): CustomerStatePort {
+  create: () => CustomerProfileMergeState, clock: () => Date,
+  authority?: { read: () => Promise<Pick<CommerceScope, "permission" | "bindingVersion"> & { stateVersion: number }>;
+    inboxBatchGuard: RealtimeInboxBatchGuard }): CustomerStatePort {
   return { async read() {
     const row = await store.loadOrCreateCustomerProfile<CustomerProfileMergeState["profile"], CustomerProfileMergeState["fieldEvidence"]>(
       scope.pageId, scope.customerHash, () => { const initial = create(); return { ...initial, revision: initial.profile.revision }; }, clock());
     if (row.pageId !== scope.pageId || row.customerHash !== scope.customerHash) throw new Error("PROFILE_SCOPE");
     return { profile: CustomerProfileV1Schema.parse(row.profile), fieldEvidence: row.fieldEvidence };
-  }, compareAndSwap: (expected, next) => store.compareAndSwapCustomerProfile(scope.pageId, scope.customerHash, expected,
-    { ...next, revision: next.profile.revision }, clock()) };
+  }, async compareAndSwap(expected, next) {
+    if (!authority) return store.compareAndSwapCustomerProfile(scope.pageId, scope.customerHash, expected, { ...next, revision: next.profile.revision }, clock());
+    const current = await authority.read();
+    if (!current.permission || current.bindingVersion !== scope.bindingVersion) return false;
+    return store.compareAndSwapCustomerProfile(scope.pageId, scope.customerHash, expected,
+      { ...next, revision: next.profile.revision }, clock(), { conversationId: scope.conversationId,
+        expectedStateVersion: current.stateVersion, inboxBatchGuard: authority.inboxBatchGuard,
+        sourceMessageIdHash: createHash("sha256").update(scope.sourceMessageId, "utf8").digest("hex") });
+  } };
 }
 const measurementKinds = ["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"] as const;
 const preferenceKinds = ["colors", "styles", "materials"] as const;

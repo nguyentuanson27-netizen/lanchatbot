@@ -1,5 +1,7 @@
 # Phase B candidate integration — code delivered, acceptance STOP
 
+Owner-requested follow-up: [independent review fixes and current verification](REVIEW_FIXES.md) address stale-source profile writes and final revision rebasing found at cb8bb5e. Historical provider/source evidence below is unchanged; it does not qualify the later correction. Acceptance remains STOP.
+
 Đã nối các phần B còn thiếu: đổi size/màu thành phần giỏ, nhiều mutation tuần tự trong cùng nguồn Inbox, hành trình có profile/cart/history lưu qua lượt, checkout riêng tư, handoff và Outbox/delivery capture. Đã sửa cả lỗi nguồn thật alias/canonical shop và receipt cập nhật hồ sơ. **Chưa có GO nghiệm thu hoặc chạy thật:** lượt model cuối còn lỗi; bản receipt cuối chưa chạy lại bằng model.
 
 ## Source và phạm vi
