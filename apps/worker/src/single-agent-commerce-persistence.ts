@@ -1,7 +1,9 @@
 import type { PostgresRealtimeRuntimeStore, RealtimeCommitInput, RealtimeInboxBatchGuard } from "@lana/database";
+import { createHash } from "node:crypto";
 import { createSalesCycleRuntimeState, type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1 } from "@lana/chat-runtime";
 import { buildCanonicalDecisionEvidenceV1 } from "@lana/business-tools";
+import { CanonicalBuyingIntentV1Schema } from "@lana/contracts";
 import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleInput } from "./realtime-sales-cycle.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
@@ -14,6 +16,7 @@ export function createPersistedCommerceHandoffPort(input: {
   store: Pick<PostgresRealtimeRuntimeStore, "commitWithinTransaction">;
   transaction: <T>(work: (client: Parameters<PostgresRealtimeRuntimeStore["commitWithinTransaction"]>[0]) => Promise<T>) => Promise<T>;
   inboxBatchGuard: RealtimeInboxBatchGuard;
+  completeInboxBatch?: boolean;
   resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
 }) {
   return { read: input.read, async commit({ before, next, decision }: CommerceHandoffCommit): Promise<boolean> {
@@ -24,6 +27,7 @@ export function createPersistedCommerceHandoffPort(input: {
       const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
         customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
         expectedStateVersion: before.stateVersion, state: next.state, inboxBatchGuard: input.inboxBatchGuard,
+        ...(input.completeInboxBatch === false ? { completeInboxBatch: false } : {}),
         pancakeTagPlan: { desiredTag: decision.tag, tagId, handoffGeneration: next.stateVersion },
         handoffEventPlan: { source: decision.category === "AFTER_SALES" ? "POST_SALE" : decision.reason === "CUSTOMER_REQUESTED_HUMAN" ? "CUSTOMER_REQUEST" : "BOT_POLICY",
           reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion },
@@ -59,24 +63,31 @@ export async function prepareNativeCommerceTransition(input: {
   command: SalesCycleCommand; trustedPorts: SalesCycleTrustedPortsV1;
 }) {
   const { source, command, trustedPorts } = input;
+  const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
   const mutation = command.kind === "CART_MUTATED" && source.state.cart
     ? trustedPorts.resolveCartMutation(command.mutationRef, source.state.cart.value)?.mutation : null;
-  if (mutation?.kind === "SET_COMPONENT_VARIANT") return {
-    handled: false, messages: [], plan: null, transferToHuman: false, desiredTag: null, reasonCode: "PERSISTED_VARIANT_TRANSITION_UNAVAILABLE",
-  };
   const requestedAction = mutation?.kind === "SET_QUANTITY" ? "SET_QUANTITY" : mutation?.kind === "ADD_LINE" ? "ADD_TO_CART" : null;
   const quantity = mutation?.kind === "SET_QUANTITY" ? mutation.quantity : mutation?.kind === "ADD_LINE" ? mutation.line.quantity : null;
   const draft = command.kind === "CART_OPENED" ? trustedPorts.resolveCartDraft(command.cartDraftRef) : null;
   const suffix = command.kind === "CART_OPENED" ? "cart-open" : command.kind === "CONFIRM_PURCHASE" ? "confirm"
     : mutation?.kind === "ADD_LINE" ? "add-line" : mutation?.kind === "REMOVE_LINE" ? "remove-line" : "set-quantity";
-  const canonicalBuyingIntent = buildCanonicalDecisionEvidenceV1({ text: source.text, sourceMessageId: source.messageId,
+  const legacyIntent = buildCanonicalDecisionEvidenceV1({ text: source.text, sourceMessageId: source.messageId,
     productId: source.productId, evaluatedAt: source.now, modelBuyingIntent: requestedAction
       ? { decision: "COMMITTED" as const, requestedAction, quantity, evidenceText: source.text, confidence: 1 } : null }).buyingIntent;
+  const line = mutation?.kind === "ADD_LINE" ? mutation.line : mutation ? source.state.cart?.value.lines.find(l => l.lineId === mutation.lineId) : draft?.lines[0];
+  const canonicalBuyingIntent = (mutation || draft) && line ? CanonicalBuyingIntentV1Schema.parse({
+    schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1", decision: "COMMITTED",
+    requestedAction: mutation?.kind === "SET_COMPONENT_VARIANT" ? "SET_COMPONENT_VARIANT" : mutation?.kind === "REMOVE_LINE" ? "REMOVE_FROM_CART" : mutation?.kind === "SET_QUANTITY" ? "SET_QUANTITY" : draft ? "OPEN_CART" : "ADD_TO_CART",
+    quantity: mutation?.kind === "SET_QUANTITY" ? mutation.quantity : mutation?.kind === "REMOVE_LINE" || mutation?.kind === "SET_COMPONENT_VARIANT" ? null : line.quantity,
+    productId: line.parentProductId, contributors: ["NATIVE_TOOL_PERMISSION"], sourceMessageIdHash: textHash(source.messageId),
+    evidenceHash: commerceHash(["NATIVE_COMMERCE_PERMISSION_V1", textHash(source.messageId), textHash(command.commandId), commerceHash(mutation ? { mutation } : draft)]),
+    reasonCodes: [], evaluatedAt: source.now.toISOString(), authorization: "NONE",
+  }) : legacyIntent;
   return evaluateRealtimeSalesCycle({ ...source, canonicalBuyingIntent, commandIdentity: {
     primaryCommandId: command.commandId, primarySuffix: suffix,
-    ...(draft ? { cartIdentity: draft.identity } : {}),
+    ...(draft ? { cartIdentity: draft.identity, ...(draft.lines[0] ? { cartLineId: draft.lines[0].lineId } : {}) } : {}),
     ...(command.kind === "CART_OPENED" ? { cartExpiresAt: command.expiresAt } : {}),
-  } });
+  }, ...(mutation && command.kind === "CART_MUTATED" ? { nativeMutation: { command, mutation } } : {}) });
 }
 
 /** Reuse the existing inbox/revision/authority transaction; this adapter never writes SQL or sends. */

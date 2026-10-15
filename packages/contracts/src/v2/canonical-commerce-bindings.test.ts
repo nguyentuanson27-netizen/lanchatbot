@@ -350,6 +350,15 @@ describe("CartMutationBatchEvidenceV1", () => {
     expect(CartMutationBatchEvidenceV1Schema.parse(batch).receipts).toHaveLength(2);
   });
 
+  it("binds a component variant replacement to the same replay receipt instead of treating it as quantity", () => {
+    const replacement = { ...receipt(0, HASH_A, HASH_B), mutation: { kind: "SET_COMPONENT_VARIANT", lineId: "0b884806-7c77-4410-bc47-a3d2bb51c936",
+      componentProductId: "ÁO-001", componentSku: "AO-001-NAVY-L", size: "L", color: "navy" },
+      mutationReasonCode: "VARIANT_CHANGED", authority: { ...authority("SET_QUANTITY", "ÁO-001", "ÁO-001-DIRECT"), action: "SET_COMPONENT_VARIANT" } };
+    const parsed = CartMutationBatchEvidenceV1Schema.safeParse({ ...batch, finalCartStateHash: HASH_B, receipts: [replacement] });
+    expect(parsed.success).toBe(true);
+    expect(CartMutationBatchEvidenceV1Schema.safeParse({ ...batch, finalCartStateHash: HASH_B, receipts: [{ ...replacement, mutationReasonCode: "QUANTITY_CHANGED" }] }).success).toBe(false);
+  });
+
   it.each([
     { receipts: [receipt(0, HASH_A, HASH_B), receipt(1, HASH_D, HASH_C)] },
     { finalCartStateHash: HASH_D },

@@ -168,7 +168,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly cartId: string | null;
   readonly cartVersion: number | null;
   readonly reasonCode: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | null;
   readonly mutationPayloadHash?: string | null;
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
@@ -412,6 +412,8 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
    * no-op, so a stale model result can never be published.
    */
   readonly inboxBatchGuard?: RealtimeInboxBatchGuard;
+  /** Bounded native tool turns commit effects separately and acknowledge their source at the terminal commit. */
+  readonly completeInboxBatch?: boolean;
 }
 
 export interface RealtimeCommitResult {
@@ -426,7 +428,7 @@ export interface RealtimeCommitResult {
     | null;
   readonly sendAuthorized: boolean;
   readonly reasonCodes: readonly string[];
-  readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
+  readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED" | "RETAINED";
 }
 
 function sha256CanonicalV1(value: unknown): string {
@@ -720,7 +722,11 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       receipt.authority.productId !== receipt.mutation.line.parentProductId ||
       receipt.authority.offerId !== receipt.mutation.line.offerId
     )) throw new Error("CART_MUTATION_AUTHORITY_SCOPE_MISMATCH");
-    if (receipt.authority.action === "REMOVE_LINE") {
+    const native = receipt.authority.authorityKind === "NATIVE_TOOL_PERMISSION";
+    if (native !== buyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") || (native && buyingIntent.evidenceHash !== sha256CanonicalV1([
+      "NATIVE_COMMERCE_PERMISSION_V1", currentSourceMessageIdHash, receipt.commandIdHash, receipt.mutationPayloadHash,
+    ]))) throw new Error("NATIVE_COMMAND_BINDING_MISMATCH");
+    if (receipt.authority.authorityKind === "DETERMINISTIC_REMOVE_CLASSIFIER") {
       const removalAuthority = sha256CanonicalV1([
         "DETERMINISTIC_REMOVE_CLASSIFIER_V1",
         receipt.authority.sourceMessageIdHash,
@@ -1496,6 +1502,9 @@ async function validateLockedCartOpenTransitionV1(
   const evidence = CartOpenEvidenceV1Schema.parse(plan.cartOpenEvidence);
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse(plan.canonicalBuyingIntent);
   const seedLine = evidence.draft.lines[0]!;
+  if (buyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") && buyingIntent.evidenceHash !== sha256CanonicalV1([
+    "NATIVE_COMMERCE_PERMISSION_V1", evidence.sourceMessageIdHash, evidence.commandIdHash, evidence.cartDraftRef.contentHash.replace(/^sha256:/u, ""),
+  ])) throw new Error("NATIVE_COMMAND_BINDING_MISMATCH");
   if (evidence.sourceMessageIdHash !== plan.sourceMessageIdHash ||
     evidence.commandIdHash !== sha256TextV1(event.commandId) ||
     evidence.createdAt !== event.occurredAt.toISOString() ||
@@ -2315,6 +2324,9 @@ export class PostgresRealtimeRuntimeStore {
     input: RealtimeCommitInput<TState, TSalesState>,
     now = new Date(),
   ): Promise<RealtimeCommitResult> {
+      if (input.completeInboxBatch === false && (!input.inboxBatchGuard || input.metaPlan)) {
+        throw new Error("CURRENT_SOURCE_LEASE");
+      }
       // Keep the same lock order as webhook enqueue: pages -> ingress head.
       // Reversing these two locks allows an enqueue and a model commit for the
       // same page/conversation to deadlock under load.
@@ -2536,7 +2548,7 @@ export class PostgresRealtimeRuntimeStore {
         throw new Error("CONTEXT_V2_CAPTURE_REQUIRED");
       }
 
-      if (input.inboxBatchGuard) {
+      if (input.inboxBatchGuard && input.completeInboxBatch !== false) {
         await this.completeInboxBatch(
           client,
           input,
@@ -2556,7 +2568,7 @@ export class PostgresRealtimeRuntimeStore {
         sendAuthorized,
         reasonCodes,
         inboxBatchStatus: input.inboxBatchGuard
-          ? "COMMITTED"
+          ? input.completeInboxBatch === false ? "RETAINED" : "COMMITTED"
           : "NOT_REQUESTED",
       };
   }
@@ -3657,6 +3669,10 @@ export class PostgresRealtimeRuntimeStore {
       validateLockedCanonicalCartTransitionV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState, now,
       );
+      if (plan.events.length === 0) {
+        if (canonicalJsonV1(plan.state) !== canonicalJsonV1(lockedState)) throw new Error("SALES_READBACK_CHANGED");
+        return; // Lock/readback for the final response; do not manufacture a sales revision or renew its expiry.
+      }
     } else {
       throw new Error("CART_MUTATION_LOCKED_STATE_REQUIRED");
     }

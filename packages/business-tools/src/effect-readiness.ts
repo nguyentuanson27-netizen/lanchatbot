@@ -39,7 +39,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly deterministicEvidenceHash?: string | null;
   readonly parentReadinessHash?: string | null;
   readonly payloadHash?: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | null;
   readonly mutationQuantity?: number | null;
   readonly checkedAt: Date;
 }
@@ -64,7 +64,7 @@ export function evaluateDeterministicEffectReadinessV1(
   if (requiresIntent) {
     if (input.buyingIntent?.decision !== "COMMITTED") {
       reasons.add("BUYING_INTENT_MISSING");
-    } else if (!input.buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME")) {
+    } else if (!input.buyingIntent.contributors.some(c => c === "DETERMINISTIC_RUNTIME" || c === "NATIVE_TOOL_PERMISSION")) {
       reasons.add("BUYING_INTENT_MISSING");
     } else if (
       input.buyingIntent.productId === null ||
