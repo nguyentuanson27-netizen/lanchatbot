@@ -1,6 +1,6 @@
 # Phase B candidate integration — code delivered, acceptance STOP
 
-Owner-requested follow-up: [independent review fixes and current verification](REVIEW_FIXES.md) address stale-source profile writes and final revision rebasing found at cb8bb5e. Historical provider/source evidence below is unchanged; it does not qualify the later correction. Acceptance remains STOP.
+Owner-requested follow-up: [independent review fixes and current verification](REVIEW_FIXES.md) close stale-source profile writes and final revision rebasing found at cb8bb5e. Corrected source0bbabea has independent GPT-6.1 Sol High re-review, worker1756PASS/database246PASS+30optionalSKIP, final build/typecheck/lint and composed PostgreSQL COD/bank12/12eachPASS/dropped. Historical provider/source evidence below is unchanged; it does not qualify the later correction. Acceptance remains STOP.
 
 Đã nối các phần B còn thiếu: đổi size/màu thành phần giỏ, nhiều mutation tuần tự trong cùng nguồn Inbox, hành trình có profile/cart/history lưu qua lượt, checkout riêng tư, handoff và Outbox/delivery capture. Đã sửa cả lỗi nguồn thật alias/canonical shop và receipt cập nhật hồ sơ. **Chưa có GO nghiệm thu hoặc chạy thật:** lượt model cuối còn lỗi; bản receipt cuối chưa chạy lại bằng model.
 
@@ -10,7 +10,7 @@ Owner-requested follow-up: [independent review fixes and current verification](R
 - Parent architecture blob: `7e0265e3b6b3d556d8fb0f3c7267abccef5de86a`; boundary amendment blob: `4a09b55d2f3a972a65697738876cc5eab21e7a2b`. [Source document identities/test logs](PREPARATION.json), [B plan](../../../../../docs/specs/c3-phase-b-execution-20261014.md).
 - First provider runSourceSha: `e7765a71b7c9718a45fe591f7e20ab4649e6cc36`; raw `e8a5504fc2d5ee194fc99e25f53748854cf06479` before primary `280c55c6`.
 - Follow-up runSourceSha: `0ad4b29d2ba5f5d7209f49c941d8c72689bbc607`; raw `ab489e4d735e88f35372f6a76740c812b77c0b6d` before primary `f176ef881bd50575e08bb218ec03c4751d3733a3`.
-- Last executable source: `5b70fe87f28ef4c5e1c6f033f22ed8dc5868af96`: profile receipt/error-accounting closure after provider runs. **Provider evidence belongs to the earlier SHAs; it does not qualify this later source.** No third batch.
+- Original delivery's last executable source: `5b70fe87f28ef4c5e1c6f033f22ed8dc5868af96`: profile receipt/error-accounting closure after provider runs. **Provider evidence belongs to the earlier SHAs; it does not qualify this later source or the subsequent0bbabea review correction.** No third batch.
 - A remains OWNER_BYPASS, not PASS. No Phase C, production entrypoint import/activation, serving-schema application, policy publication, deploy, live customer write/send or external POS order.
 
 ## Code và dữ liệu
