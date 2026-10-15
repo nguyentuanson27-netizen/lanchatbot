@@ -2,6 +2,8 @@
 
 Surface: sau code đọc nguồn thật; prompt tư vấn đã sửa; 5 ca đã có, context/config giữ nguyên. Gửi khách tắt. Verifier GPT-6.1 Sol High. Primary review chỉ đọc câu hỏi/lịch sử/terminal trước, không lấy draft bị chặn làm kết quả.
 
+Bản hiển thị bỏ khoảng trắng cuối dòng. Exact text/bytes được giữ trong [PRIMARY_INPUT.json](PRIMARY_INPUT.json) và raw; không sửa dữ liệu model hoặc kết quả review.
+
 ## Slot 1: Gemini 3.5 Flash Lite High, lần 1
 
 Ca: `b1-changed-occasion`
@@ -101,7 +103,7 @@ Khách: Chị định mặc set Thạch Thảo SV2447 đi tiệc ban ngày, nhì
 Kết quả: **SEND_ELIGIBLE** / `PASS`
 
 ```text
-Dạ set Thạch Thảo không bị rườm rà đâu chị nhé! Thiết kế kết hợp giữa áo tơ Hàn thêu tinh tế và chân váy ren mềm có độ rũ tự nhiên, tạo cảm giác rất bay bổng, nhẹ nhàng và thanh thoát. Mặc đi tiệc ban ngày sẽ rất nhã nhặn, sang trọng mà không bị nặng nề hay quá đà đâu ạ. 
+Dạ set Thạch Thảo không bị rườm rà đâu chị nhé! Thiết kế kết hợp giữa áo tơ Hàn thêu tinh tế và chân váy ren mềm có độ rũ tự nhiên, tạo cảm giác rất bay bổng, nhẹ nhàng và thanh thoát. Mặc đi tiệc ban ngày sẽ rất nhã nhặn, sang trọng mà không bị nặng nề hay quá đà đâu ạ.
 
 Giá set này là 799.000đ, vừa vặn trong ngân sách dưới 900k của chị luôn đó ạ.
 ```
@@ -131,7 +133,7 @@ Khách: Chị mặc đi làm một buổi, không ưng thì đổi lại đượ
 Kết quả: **SEND_ELIGIBLE** / `PASS`
 
 ```text
-Dạ, quy định của shop là sản phẩm đổi phải chưa qua sử dụng, chưa giặt, còn nguyên tem mác và chế độ thử đồ là chỉ ướm bên ngoài người. Nên nếu chị mặc đi làm một buổi thì sẽ không đủ điều kiện để đổi hàng ạ. 
+Dạ, quy định của shop là sản phẩm đổi phải chưa qua sử dụng, chưa giặt, còn nguyên tem mác và chế độ thử đồ là chỉ ướm bên ngoài người. Nên nếu chị mặc đi làm một buổi thì sẽ không đủ điều kiện để đổi hàng ạ.
 
 Trường hợp đổi hàng bình thường thì phí vận chuyển 2 chiều là 30.000đ chị nha.
 ```
