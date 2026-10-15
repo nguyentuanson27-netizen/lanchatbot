@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Post-review test replay — 2026-10-15
+
+- [x] Freeze [the same seven stateful B cases, N1/max24generations](../apps/worker/evals/single-agent-commerce-read-only/stateful-post-review-20261015/SCOPE.md), approved models/config and whole-terminal review/accounting before generation. Rerun worker118/database48/protocol-provider23PASS; initial provider preflight0generationPASS.
+- [ ] Commit/clean source seal, composed PostgreSQL COD/bank controls and final zero-generation preflight.
+- [ ] Run the one owner-requested source-backed batch; commit raw before primary review, retain every failure/attempt and database cleanup; no automatic retry or further round.
+- [ ] Audit/review actual outcomes, update report/tasks/PR391 and stop; no live activation or inference of A PASS.
+
 ## Independent review corrections — 2026-10-15
 
 - [x] Reproduce P1/P2 before implementation: ingress2FAIL/1PASS; database8FAIL. Preserve RED logs.

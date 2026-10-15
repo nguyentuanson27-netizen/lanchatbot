@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Owner-requested post-review test run — 2026-10-15
+
+Owner explicitly requests running the cases after the two review fixes. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/stateful-post-review-20261015/SCOPE.md): one replay of the existing seven stateful outcomes, N1/max24generations, unchanged Gemini3.5FlashLiteHigh owner/6.1SolHigh verifier, prompts/config/corpus and actual public sources. This authorizes one requested batch beyond the prior stop; no automatic further round. Focused worker118/database48 and protocol/provider23PASS, initial zero-generation provider preflightPASS atd6b28f8. Commit this scope, require clean executable/config source, capture runtime HEAD, rerun composed PostgreSQL controls and preflight, then collect raw before primary whole-terminal review/diagnosis. No source/prompt/model changes, live send/deploy or Phase C. Keep historical evidence/acceptance distinctions intact.
+
 ## Close independent review findings — 2026-10-15
 
 Owner requests fixes and another review after GPT-6.1 Sol High found stale-source profile writes (P1) and final Outbox revision rebasing (P2) at cb8bb5e. Observe both regression failures first; extend the existing profile CAS with the current Inbox/conversation transaction locks, and keep the verified conversation revision through final readiness/CAS. Preserve legacy callers, source leases, receipts and the unchanged one-owner/one-verifier architecture. Run worker/database checks and isolated PostgreSQL composition, then reuse the independent reviewer on the committed fix. No prompt change, new provider batch, production wiring, live migration/send or deployment. [Fix evidence](../apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/REVIEW_FIXES.md); acceptance remains STOP.
