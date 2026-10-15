@@ -51,7 +51,9 @@ describe("Phase B capability composition", () => {
     ]), {kind:"FINAL" as const,text:"Shop đã thêm sản phẩm vào giỏ cho chị."}];
     const result=await runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:"Eo 85, mông 105. Lấy màu navy M cho chị.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
       owner:async request=>{expect(request.availableTools).toContain("add_to_cart");return outputs.shift()!;},
-      verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
+      verifier:async request=>{
+        expect(request.trusted.effectReceipts).toEqual(expect.arrayContaining([expect.objectContaining({ effect:"CUSTOMER_STATE_UPDATED",subjectRef:profile.profile.profileId,stateRevision:request.trusted.state.revision })]));
+        return {result:{verdict:"PASS",violations:[]}}; }});
     expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(result.sendEnabled).toBe(false);
     expect(cycle.cart).not.toBeNull();expect(profile.profile.revision).toBe(2);
     const second=await compose();

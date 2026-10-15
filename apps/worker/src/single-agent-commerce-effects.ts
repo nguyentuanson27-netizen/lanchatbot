@@ -82,6 +82,8 @@ export async function createCommerceEffectTools(input: {
       priceVersion: s.versions.price, inventoryVersion: s.versions.inventory, etaVersion: s.versions.eta, eta: s.eta, etaExpiresAt: s.etaExpiresAt, sourceAuthority: s.sourceAuthority,
       stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     const cart = current.cart?.value;
+    const stateReceipts = base.effectReceipts.filter(r => r.effect === "CUSTOMER_STATE_UPDATED" && r.subjectRef === base.state.customerProfileId &&
+      base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
       salesStage: current.stage, cartItems: cart?.lines.map(line => ({ subjectRef: line.lineId, productRef: line.parentProductId,
         offerType: line.offerId, quantity: line.quantity, components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })) })) ?? [],
@@ -96,7 +98,7 @@ export async function createCommerceEffectTools(input: {
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
       }), ...selectionClaims],
       policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
-      receipts: receipt ? [receipt] : [], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
+      receipts: [...stateReceipts, ...(receipt ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
   async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
     const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,

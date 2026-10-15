@@ -358,6 +358,16 @@ try{
   assert.equal(r.result.enqueued,1,JSON.stringify(r.result));assert(sawHistory);const s=await journey.state();assert.equal(s.cart.value.lines[0].quantity,2);assert.equal(s.cart.value.lines[0].components[0].size,'L');
   await journey.drain();assert(journey.capture.includes('Em đổi áo sang L, số lượng hai chiếc rồi chị nhé.'));
  });
+ await check('B composed committed profile correction carries its receipt through the effect bridge and final readback',async()=>{
+  let receiptSeen=false;
+  const text='Em đã cập nhật lại số đo eo 74, mông 96 cho chị rồi ạ. Chị vẫn giữ size L nhé.';
+  const r=await journey.turn('Số đo chị là eo 74, mông 96. Chị vẫn lấy size L nhé.',[native([{name:'apply_customer_state',args:{ops:[{op:'SET',field:'measurements.WAIST_CM',value:74},{op:'SET',field:'measurements.HIPS_CM',value:96}]}}]),say(text)],{inspect:req=>{
+   if(req.context.state.customerProfileRevision<2)return;
+   receiptSeen=req.context.effectReceipts.some(p=>p.effect==='CUSTOMER_STATE_UPDATED'&&p.subjectRef===req.context.state.customerProfileId&&p.stateRevision===req.context.state.revision);
+  }});
+  assert(receiptSeen);assert.equal(r.result.terminal.text,text,JSON.stringify(r.result));assert.equal(r.result.terminal.reason,'PASS');
+  await journey.drain();assert(journey.capture.includes(text));
+ });
  await check('B composed private checkout bypasses both models and persists the existing guarded preview',async()=>{
   const partial=await journey.turn('Tên: Khách thử nghiệm',[]);assert.equal(partial.owners,0);assert.equal(partial.result.enqueued,1);await journey.drain();
   const r=await journey.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);

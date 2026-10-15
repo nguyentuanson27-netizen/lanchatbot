@@ -18,6 +18,20 @@ async function setup() {
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("provides a receipt only after profile CAS and committed readback, and invalidates it on another profile revision", async () => {
+    const s = await setup();
+    await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74 }] } });
+    const world = s.tools.snapshot();
+    expect(world.effectReceipts).toEqual(expect.arrayContaining([expect.objectContaining({ effect: "CUSTOMER_STATE_UPDATED", status: "SUCCESS", subjectRef: s.getStored().profile.profileId })]));
+    expect(hardPrecheck(world, "Em đã cập nhật số đo cho chị.", commerceNow)).toBeNull();
+    const changed = structuredClone(s.getStored()); changed.profile.revision++; s.setStored(changed);
+    expect((await s.tools.readback()).effectReceipts).toEqual([]);
+  });
+  it("does not issue a profile receipt when CAS claims success but readback does not contain that committed state", async () => {
+    const s = await setup(); s.store.compareAndSwap = vi.fn(async () => true);
+    expect((await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74 }] } })).status).toBe("REJECTED");
+    expect(s.tools.snapshot().effectReceipts).toEqual([]);
+  });
   it("resolves a correction before size even when the model lists size first in the batch", async () => {
     const s = await setup();
     const results = await s.tools.invokeBatch([

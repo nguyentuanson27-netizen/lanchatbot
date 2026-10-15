@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "sourceSha": "0ad4b29d2ba5f5d7209f49c941d8c72689bbc607",
+  "rawDiskAndGitBlobs": 10,
+  "requestEnvelopes": 13,
+  "uniqueGenerationIds": 14,
+  "exactVerifierBindings": 3,
+  "actualCodexRelayBodies": 3,
+  "evaluatorLeaks": 0,
+  "privateCheckoutLeaksInRequests": 0,
+  "providerRequestsPerGenerationAtMostOne": true,
+  "allOutcomesRetained": true,
+  "rawImmutable": true,
+  "geminiWireEvidence": "Prepared body plus adapter fake-HTTP capture tests; no independent live echo",
+  "humanAcceptance": null,
+  "generationAttemptCount": 14,
+  "clientBeforeDispatchFailures": 1,
+  "preDispatchErrorDetailComplete": false,
+  "noMissingAttemptInDenominator": true
+}

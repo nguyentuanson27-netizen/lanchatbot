@@ -36,18 +36,20 @@ export async function createCustomerStateTools(input: {
   const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string }>();
   let cartQuote: unknown;
   let quoteRead = false;
+  let committedUpdate: { hash: string; receipt: TrustedContext["effectReceipts"][number] } | undefined;
   const profileHash = () => commerceHash(effective.profile);
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot();
     const valid = [...sizes.entries()].filter(([, s]) => !blockedDependencies && s.profileHash === profileHash());
+    const update = !blockedDependencies && committedUpdate?.hash === commerceHash(effective) ? committedUpdate.receipt : undefined;
     return buildReadOnlyContext({ ...base, state: { ...base.state,
       customerProfileId: effective.profile.profileId, customerProfileRevision: effective.profile.revision,
       customerMeasurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })),
       fitPreference: effective.profile.fitPreference, preferences: effective.profile.preferences,
       sizeMeasurementFingerprints: Object.fromEntries(valid.filter(([, s]) => s.fingerprint).map(([id, s]) => [id, s.fingerprint])),
       ...(!blockedDependencies && cartQuote ? { cartQuote } : {}) },
-      subjects: base.boundSubjects, products: base.runtimeProducts ?? [], policies: base.policyLiterals,
-      receipts: base.effectReceipts, claims: [...base.protectedClaims.filter(c => (c as { type: string }).type !== "SIZE_FIT"), ...valid.flatMap(([, s]) => s.claims)] });
+      subjects: [...base.boundSubjects, ...(update ? [{ ref: effective.profile.profileId, kind: "CUSTOMER_PROFILE", label: `Thông tin tư vấn, phiên bản ${effective.profile.revision}`, bindingVersion: base.state.bindingVersion }] : [])], products: base.runtimeProducts ?? [], policies: base.policyLiterals,
+      receipts: [...base.effectReceipts, ...(update ? [{ ...update, stateRevision: base.state.revision }] : [])], claims: [...base.protectedClaims.filter(c => (c as { type: string }).type !== "SIZE_FIT"), ...valid.flatMap(([, s]) => s.claims)] });
   };
   async function apply(args: unknown): Promise<CommerceToolResult> {
     const a = toolArgs(args, ["ops"]);
@@ -103,7 +105,13 @@ export async function createCustomerStateTools(input: {
     if (next.profile.revision !== current.profile.revision && !await input.store.compareAndSwap(current.profile.revision, next)) {
       blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
     }
-    effective = next; sizes.clear(); cartQuote = undefined; quoteRead = false;
+    const readback = await input.store.read();
+    if (commerceHash(readback) !== commerceHash(next)) { blockedDependencies = true; committedUpdate = undefined; return { status: "REJECTED", reason: "STATE_READBACK_CHANGED" }; }
+    effective = readback; blockedDependencies = false; sizes.clear(); cartQuote = undefined; quoteRead = false;
+    const operationId = commerceHash({ profileId: effective.profile.profileId, revision: effective.profile.revision, source: evidence.sourceEventHash, ops: a.ops });
+    committedUpdate = { hash: commerceHash(effective), receipt: { ref: `profile-receipt:${operationId}`, operationId, effect: "CUSTOMER_STATE_UPDATED", status: "SUCCESS",
+      subjectRef: effective.profile.profileId, stateRevision: input.base.snapshot().state.revision, recipient: input.scope.recipient,
+      observedAt: effective.profile.updatedAt, expiresAt: new Date(Date.parse(effective.profile.updatedAt)+300_000).toISOString() } };
     return { status: "OK", data: { revision: effective.profile.revision, measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
@@ -142,7 +150,7 @@ export async function createCustomerStateTools(input: {
   }, async readback() {
     await input.base.readback();
     const current = await input.store.read();
-    if (commerceHash(current) !== commerceHash(effective)) { effective = current; sizes.clear(); cartQuote = undefined; }
+    if (commerceHash(current) !== commerceHash(effective)) { effective = current; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; }
     for (const [id, result] of sizes) {
       const source = await input.sizeInput(id);
       if (result.sourceHash !== commerceHash({ target: source.target, charts: source.charts })) sizes.delete(id);
