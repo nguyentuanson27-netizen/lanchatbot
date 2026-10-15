@@ -2,6 +2,8 @@
 
 ## Current two-owner prompt follow-up — 2026-10-15
 
+- [x] Owner rejects both owners' tone; read all12new versus12prior drafts plus prompt/context/primary. [Review correction](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/REVIEW_CORRECTION.md) withdraws use of prior NATURAL labels as evidence of acceptable tone; records shortening-without-conversational-change, policy checklist voice, over-lenient review and limited diagnostic scope. Duplicate source text verified but inherited; effect remains hypothesis. No prompt/config/raw/primary rewrite or generation; proposed whole-owner/capability/context changes not implemented.
+
 - [x] Refresh main296cdcfb, inspect source/actual replies and official guidance; freeze owner-only correction and12same-case slots in [scope](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/SCOPE.md).
 - [x] Explicit registration selection RED observed -> minimumGREEN7/7. Existing models/context/verifier/schema/fallback unchanged; no retry/rewrite or new role.
 - [x] Focused37PASS/1optionalSKIP, boundary60PASS, protected/reply21PASS; full worker1715PASS/eval467PASS/2optionalSKIP, typecheck/build/lintPASS; self-review and clean source08b98c2c/preflight0generation/readbackPASS.
