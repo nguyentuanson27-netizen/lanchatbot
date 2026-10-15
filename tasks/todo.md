@@ -6,7 +6,7 @@
 - [x] Observed36PASS/1FAIL/1optionalSKIP after rollback: one test wrongly equated frozen rejected-run hash with active prompt. Remove that assumption; existing retired-registration CLI preflight rejects COMPARISON_FROZEN_INPUT before any source/provider work. No runtime gate added.
 - [x] Record [concrete next-direction plan](../apps/worker/evals/single-agent-commerce-read-only/OWNER_PROMPT_NEXT_STEPS.md), informed by all12paired drafts and older8case B1 replies; future candidate/context changes not implemented or run.
 - [x] Current focused37PASS/1optionalSKIP; full eval467PASS/2optionalSKIP; boundary60PASS/protected21PASS. Exact rollback/history/runtime identity and diff-checkPASS. Typecheck/build/lint/full worker src not rerun for this prompt/config/test-only rollback; no new semantic/provider evidence.
-- [ ] Commit/push/update and read back draftPR391 with active rollback identity and next-direction proposal. No new provider generation or automatic next batch.
+- [x] Rollback commit `0895df3c` pushed; draft PR391 updated and exact head/body/open/draft readback passed. Body SHA256 `b8adfdd32c834b610eb0d78669b1c8d2e916aff001af12b6ccd447c0ed3ee854`; remote checks empty, no CI PASS claimed. This documentation savepoint records delivery only. No new provider generation or automatic next batch.
 
 ## Current two-owner prompt follow-up — 2026-10-15
 
