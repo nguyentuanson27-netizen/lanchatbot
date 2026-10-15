@@ -85,7 +85,10 @@ export function createReadOnlyTools(input: {
     const raw = parsed.success ? parsed.data : null;
     const observed = raw ? Date.parse(raw.synced_at) : NaN;
     const expires = observed + maxAge * 1000;
-    const availableOffers = raw && observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
+    // Match the resolver's usable product statuses; missing price/ETA does not erase an independent offer mapping.
+    const productStatus = raw ? normalizeCatalogToken(raw.data_status) : null;
+    const availableOffers = raw && (productStatus === "OK" || productStatus === "FULFILLMENT_POLICY_NOT_FOUND") &&
+      observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
     offerContexts.delete(id);
     if (availableOffers !== null) offerContexts.set(id, { ref: `offers:${id}`,
       sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers }),

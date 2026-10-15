@@ -49,6 +49,33 @@ describe("read-only domain tools", () => {
       productId: "SM613", size: "M", color: null, stockClaimId: stock.claimId,
     }));
   });
+  it("invalidates verified selling options when a fresh snapshot cannot resolve the product", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => structuredClone(f) } });
+    await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    const before = makeBinding("turn", "Có bán riêng áo.", tools.snapshot());
+    f.snapshot.offers = {};
+    for (const status of ["PRODUCT_NOT_FOUND", "SHOP_ERROR", "ERROR"]) {
+      f.snapshot.data_status = status;
+      expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null });
+      expect(tools.snapshot().policyLiterals.some(p => p.ref === "offers:SM613")).toBe(false);
+      expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).not.toEqual(before);
+    }
+  });
+  it("keeps independent offer mappings when fulfillment policy or price is missing", async () => {
+    const f = fixtureProduct(), { catalog } = setup();
+    f.snapshot.data_status = "FULFILLMENT_POLICY_NOT_FOUND";
+    f.snapshot.fulfillment_policy = null;
+    f.snapshot.offers.DIRECT!.price_status = "PRICE_NOT_FOUND";
+    f.snapshot.offers.DIRECT!.sale_price = null;
+    f.snapshot.offers.DIRECT!.list_price = null;
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => f } });
+    const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    expect(result.data).toMatchObject({ availableOffers: ["DIRECT"], availability: { price: { status: "ERROR" } } });
+    expect(tools.snapshot().protectedClaims).toEqual([]);
+  });
   it("binds delivery ETA to the requested region and invalidates a changed delivery source", async () => {
     const f = fixtureProduct();
     f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: false, prep_min_days: 1,
