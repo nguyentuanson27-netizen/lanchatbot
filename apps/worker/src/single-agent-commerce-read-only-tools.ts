@@ -82,9 +82,11 @@ export function createReadOnlyTools(input: {
       parsed.data.shop_alias !== scope.shopAlias))) return { status: "STALE", reason: "PRODUCT_SOURCE_SCOPE" };
     const raw = parsed.success ? parsed.data : null;
     const query = { shopAlias: scope.shopAlias, productId: id, offerType: (args.offerType as string | undefined) ?? null,
-      color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null, deliveryRegion: null };
+      color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null,
+      deliveryRegion: (args.deliveryRegion as string | undefined) ?? null };
     const price = raw ? resolveCatalogFacts(raw, { ...query, intent: "PRICE" }, now, maxAge) : null;
     const stock = raw ? resolveCatalogFacts(raw, { ...query, intent: "STOCK" }, now, maxAge) : null;
+    const eta = raw && query.deliveryRegion ? resolveCatalogFacts(raw, { ...query, intent: "ETA" }, now, maxAge) : null;
     const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: query.offerType,
       mentionedSize: query.size, mentionedColor: query.color }, now) : null;
     // An offer-only read is a code-bound selling option, never a selected SKU or a personal fit.
@@ -92,7 +94,7 @@ export function createReadOnlyTools(input: {
       ?? (stock?.status === "OK" ? stock.facts?.offerType : null) ?? null;
     const variantId = (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
     if (variantId && !subjects.has(variantId) && subjects.size >= 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-    const nextClaims = [[price, "PRICE"], [stock, "STOCK"]].flatMap(([facts, type]) => {
+    const nextClaims = [[price, "PRICE"], [stock, "STOCK"], [eta, "ETA"]].flatMap(([facts, type]) => {
       const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
       return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
         scope: c.scope.kind === "PRODUCT" ? { ...c.scope, variantId } : c.scope }));
@@ -110,7 +112,7 @@ export function createReadOnlyTools(input: {
     subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });
     if (variantId) subjects.set(variantId, { ref: variantId, kind: "VARIANT", productId: id,
       label: `${p.title} ${offer ?? ""} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
-    const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size });
+    const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: offer, requestedOfferType: query.offerType,
@@ -121,6 +123,7 @@ export function createReadOnlyTools(input: {
       availability: {
         price: { status: price?.status ?? "UNAVAILABLE", reason: price?.reasonCode ?? (price ? null : "POS_SNAPSHOT_UNAVAILABLE") },
         stock: { status: stock?.status ?? "UNAVAILABLE", reason: stock?.reasonCode ?? (stock ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+        ...(query.deliveryRegion ? { eta: { status: eta?.status ?? "UNAVAILABLE", reason: eta?.reasonCode ?? (eta ? null : "POS_SNAPSHOT_UNAVAILABLE") } } : {}),
       },
       missing: [...(price?.status === "OK" ? [] : ["PRICE"]), ...(stock?.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
@@ -149,9 +152,10 @@ export function createReadOnlyTools(input: {
           products: evidence.map(p => products.get(p.subjectRef) ?? p) } };
       }
       if (call.name === "read_product") {
-        const a = toolArgs(call.args, ["subjectRef", "offerType", "color", "size"]);
+        const a = toolArgs(call.args, ["subjectRef", "offerType", "color", "size", "deliveryRegion"]);
         if (!a || !text(a.subjectRef, 128) || subjects.get(a.subjectRef)?.kind !== "PRODUCT" ||
-          (a.offerType !== undefined && !text(a.offerType, 64)) || (a.color !== undefined && !text(a.color, 64)) || (a.size !== undefined && !text(a.size, 16))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
+          (a.offerType !== undefined && !text(a.offerType, 64)) || (a.color !== undefined && !text(a.color, 64)) ||
+          (a.size !== undefined && !text(a.size, 16)) || (a.deliveryRegion !== undefined && !text(a.deliveryRegion, 64))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
         return await readProduct(a);
       }
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };

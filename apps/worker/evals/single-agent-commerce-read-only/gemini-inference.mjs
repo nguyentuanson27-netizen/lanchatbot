@@ -6,7 +6,7 @@ const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm của shop; trả ref cùng mô tả/thuộc tính có nguồn để tư vấn. Chỉ read_product khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc sản phẩm, bảng size, giá và tồn theo ref shop đã cấp. Kết quả offerType cho biết lựa chọn bán thực tế của facts; chỉ truyền offerType khi cần lựa chọn khác từ availableOffers. size dùng xem tồn, không chứng minh mặc vừa. availability giữ trạng thái nguồn của giá/tồn.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc sản phẩm, bảng size, giá và tồn theo ref shop đã cấp. Kết quả offerType cho biết lựa chọn bán thực tế của facts; chỉ truyền offerType khi cần lựa chọn khác từ availableOffers. size dùng xem tồn, không chứng minh mặc vừa. deliveryRegion là tỉnh/thành cần tra thời gian giao dự kiến; không phải địa chỉ nhận hàng. availability giữ trạng thái riêng của từng fact.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[

@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current Phase B integration audit — 2026-10-15
+
+Owner authorizes auditing disconnected rules/capabilities, connecting the current B1–B3 scope and reviewing the result. [Coverage, implementation order and explicit remaining boundaries](../docs/specs/c3-phase-b-integration-audit-20261015.md). Start clean814ef987; refreshed main296cdcfb. Connect current-source ETA, optional handoff matrix/default policy and guarded ownership/event/tag transaction; compose existing read/state/effect ports and preserve actual committed handoff outcomes. Observe focused RED before fixes, run relevant/full worker checks and self-review. Retain private checkout/readiness/no retry/one owner+one verifier and send-disabled candidate. No provider rerun, production wiring, live mutation/delivery or Phase C qualification. Persisted component-variant replacement remains unavailable until the existing readiness contract supports it.
+
 ## Current 24-case B1 corpus preparation — 2026-10-15
 
 Owner requests three cases for each of the existing eight B1 purposes, total24. Starting head is `d4771213d09b4814d52f44892b095cd13c9c7e0a`; historical provider evidence remains immutable. Replace the active eight-case input with three independently written, natural shopping-dialogue variants per purpose, ordered as three complete eight-purpose passes. Keep evaluator purpose/variant/expected outcome outside runtime projection and use whole-turn meaning rather than keyword requirements.

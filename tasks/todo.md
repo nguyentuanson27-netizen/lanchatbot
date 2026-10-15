@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current Phase B integration audit — 2026-10-15
+
+- [x] Inspect actual B source paths against architecture/execution plan; record [coverage matrix](../docs/specs/c3-phase-b-integration-audit-20261015.md), clean starting head814ef987 and refreshed main296cdcfb.
+- [ ] Connect current-source ETA through the existing catalog resolver and protected-claim builder; preserve independent source failures.
+- [ ] Connect optional HANDOFF_MATRIX/default code rules, reason requests and terminal recovery to existing guarded ownership/event/tag persistence and current readback.
+- [ ] Compose B1/B2/B3 capabilities; stop after actual committed checkout handoff; test state correction before dependent effects across turns.
+- [ ] Focused RED→GREEN, full worker tests/typecheck/build/lint, self-review/fix, actual evidence and draft PR391 delivery. Keep unsupported component-variant readiness, full stateful provider qualification and live ingress/delivery explicitly open.
+
 ## Current 24-case B1 corpus preparation — 2026-10-15
 
 - [x] Keep the existing eight B1 purposes and author three distinct, plausible customer conversations for each:24total. Arrange them as three passes that each cover all eight purposes; evaluator purpose/variant/expected outcome remains outside runtime input, with no required/forbidden keyword lists.

@@ -14,6 +14,25 @@ const setup = (options: { fee?: number } = {}) => {
     policy: () => fixturePolicy(options.fee), catalog }) };
 };
 describe("read-only domain tools", () => {
+  it("binds delivery ETA to the requested region and invalidates a changed delivery source", async () => {
+    const f = fixtureProduct();
+    f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: false, prep_min_days: 1,
+      prep_max_days: 2, zero_stock_policy: "", zero_stock_prep_min_days: null, zero_stock_prep_max_days: null, eta_valid_until: "" };
+    f.snapshot.shipping_eta = { HANOI: { transit_min_days: 2, transit_max_days: 4 } };
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [f.product], catalog: { readProduct: async () => structuredClone(f),
+        searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+    const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", deliveryRegion: "HANOI" } });
+    expect(result).toMatchObject({ status: "OK", data: { availability: { eta: { status: "OK" } },
+      facts: expect.arrayContaining([expect.objectContaining({ type: "ETA", value: { minDays: 3, maxDays: 6 } })]) } });
+    const binding = makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", tools.snapshot());
+    expect(makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", await tools.readback())).toEqual(binding);
+    f.snapshot.shipping_eta.HANOI!.transit_max_days = 5;
+    expect(makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", await tools.readback()).trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
+    const missing = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", deliveryRegion: "UNKNOWN" } });
+    expect(missing).toMatchObject({ status: "OK", data: { availability: { price: { status: "OK" }, stock: { status: "OK" },
+      eta: { status: "NOT_FOUND" } } } });
+  });
   it("search supplies source-bound static evidence without hidden POS reads and revalidates it before eligibility", async () => {
     const f = fixtureProduct(); f.product.descriptionXml = "Áo cotton dáng suông.";
     const readProduct = vi.fn(async () => structuredClone(f));
