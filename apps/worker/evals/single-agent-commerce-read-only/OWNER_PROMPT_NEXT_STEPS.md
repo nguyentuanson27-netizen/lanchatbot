@@ -1,4 +1,46 @@
-# Khôi phục prompt cũ và hướng sửa tiếp theo
+# Prompt tư vấn bán hàng sau rollback
+
+## Bản sửa hiện tại — 2026-10-15
+
+Owner yêu cầu thực hiện hướng sửa sau khi đã rollback. Bắt đầu từ clean HEAD `611c82073ab2cc2ae0bb937ae554cfd235d96d7a`, trên branch B hiện tại; refresh `origin/main` vẫn là `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Chỉ thay [owner prompt](prompts/owner.vi.txt) và hash tương ứng trong base manifest, cùng tài liệu/task. Đây là sửa nội dung prompt, không phải một đợt provider mới.
+
+Prompt chuyển từ hướng dẫn đối chiếu chi tiết sang giao việc cho nhân viên bán hàng: giúp khách chọn và mua, giải quyết phân vân, dùng lý do có ích, nhắn bằng tiếng Việt bình thường. Không thêm ví dụ theo bài kiểm tra, danh sách từ cấm hoặc khuôn trả lời. Quy định thời hạn/phí/điều kiện của shop vẫn đọc từ nguồn, không chép vào prompt.
+
+- Trước: 10.353 byte, SHA256 `d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67`.
+- Sau: 5.739 byte, giảm 44,6%; SHA256 `c6cddd33a50e09c69c50bf50ea83574c6d931578552778231b92bc1614983d82`.
+- Base manifest chỉ đổi `promptHashes.owner`. Gemini High, comparison Sol Low, verifier Sol High, context serialization, schema, corpus, fallback và generation policy không đổi. Hai registration comparison lịch sử giữ nguyên hash riêng, không dùng lại với prompt mới.
+
+Byte count mô tả input đã sửa, không phải kết quả giọng, token, latency hay chất lượng. Chưa có generation/whole-terminal review cho prompt mới; chưa kết luận model tư vấn tự nhiên hơn hoặc sales usability đã đạt. STOP/OWNER_BYPASS lịch sử giữ nguyên.
+
+### Self-review: rút phần gì và giữ ranh giới ở đâu
+
+| Phần rút/thay | Phần owner vẫn cần hiểu | Code/tool contract hiện có sở hữu |
+|---|---|---|
+| Bỏ chuỗi tên fingerprint/revision/profile và glossary số đo khỏi lời hướng dẫn chọn size | Phải có SIZE_FIT hiện tại đúng khách/món; thiếu input thì xin đủ phần thiếu, chưa gợi size; không hỏi lại dữ liệu đã có | State tools nhận sửa/bỏ thông tin, CAS, tạo/invalidate fit; current context và final gate kiểm binding/freshness. Existing state/boundary tests kiểm sửa số đo, chart đổi, profile đổi và thiếu input. |
+| Bỏ diễn giải lại từng tool và việc tính/kiểm tra của code | Chỉ dùng tool đang có, còn budget, ref đã cấp; giá/tồn theo offerType/biến thể thực tế; tổng/ưu đãi theo cartQuote | Native declarations, bounded owner loop, tool validation và quote arithmetic. Existing adapter/tools/state tests kiểm capability, budget, selling offer, partial source và quote hiện tại. |
+| Gộp các đoạn state/effects và bỏ hướng dẫn kỹ thuật của checkout | Áp dụng thay đổi khách trước bước phụ thuộc; thao tác theo yêu cầu; chỉ báo hoàn tất theo receipt; ACK không thành ghi hệ thống; không đưa PII vào model | Existing state/effect executors và final gate giữ CAS, quyền, subject/revision/recipient, receipt lifetime, reconcile và privacy. Không chuyển authority sang model. |
+| Gộp policy thành áp dụng quy định vào việc khách hỏi | Việc bị loại trừ phải từ chối đúng việc đó; giải thích quy định không thành duyệt đơn; chỉ hỏi điều quyết định còn thiếu | Current policy source/scope vẫn được truyền đủ, orderEligibility=null vẫn nguyên. Giữ nghĩa có điều kiện của mã HOLD_UP_ONLY; không hardcode policy shop hoặc giả vờ code đã quyết định mọi ngữ nghĩa. |
+| Bỏ ví dụ lỗi và danh sách yêu cầu giọng chi li | Tư vấn tự tin về phối/dáng từ dữ kiện; không tự thêm đặc tính/kết quả dùng thật; món thay cần giải quyết đúng yêu cầu | Verifier vẫn kiểm protected semantics của exact draft; code vẫn revalidate trước eligibility. Không bỏ yêu cầu grounding chỉ vì verifier đã có. Giọng và sự hữu ích vẫn cần provider/owner review sau. |
+
+Self-review giữ việc gợi một số đo/nhu cầu có ích, cho phép tư vấn tự tin và upsell phù hợp. Thiếu chứng cứ vật lý không tự thành khuyết điểm; không bịa món thay hoặc giao việc khách ngoài khả năng bot. Không dùng số câu/độ ngắn làm chuẩn đạt. Các instruction state/effect còn lại chỉ áp dụng khi có capability; không thêm prompt router hoặc code cắt context theo ý nghĩa. Thử bỏ source text trùng vẫn là thay đổi riêng chưa làm, để tránh đổi nhiều yếu tố cùng lúc.
+
+Đây là thay prompt tĩnh và manifest, không sửa logic TypeScript/JavaScript hoặc test. Không viết test đếm từ/so câu để tuyên bố sửa được giọng, không tạo RED/GREEN ngữ nghĩa giả. Dùng các test contract/boundary sẵn có và xác minh captured projection; các test fake transport không phải kết quả model thật.
+
+### Verification của bản sửa hiện tại
+
+- `node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs`: **37 PASS, 1 optional SKIP**, exit 0. Các test captured request/firewall và provider error/no-retry vẫn chạy bằng fake transport.
+- `pnpm --filter @lana/worker test:evals`: **467 PASS, 2 optional SKIP**, exit 0. Không thêm/sửa/bỏ test. Wrapper Windows dùng junction `v4` như baseline; finally đã khôi phục tracked link-text nguyên byte.
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts`: **122 PASS**, 7 files, exit 0.
+- `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts`: **21 PASS**, exit 0.
+- Chạy `node apps/worker/evals/single-agent-commerce-read-only/owner-comparison.mjs --manifest <historical manifest> --preflight --out <temporary must-not-dispatch>` cho cả `owner-comparison-20261015/manifest.json` và `owner-comparison-followup-20261015/manifest.json`: cả hai expected exit 1 / `COMPARISON_FROZEN_INPUT`, không tạo output. Đây là kiểm tra từ chối registration cũ trước credential/source/provider work, không phải preflight nguồn thật thành công.
+- Input/scope readback: owner hash khớp byte; base manifest chỉ đổi owner hash; đúng 5 file prompt/manifest/docs/tasks thay đổi. Historical frozen/raw/primary, test files và mọi worker/shared runtime source không đổi. Không tạo đăng ký/run mới.
+- `git diff --check`: PASS.
+
+Không chạy lại worker full src/typecheck/build/lint vì chỉ sửa prompt tĩnh/hash/tài liệu, không sửa TypeScript/runtime/shared package. Kết quả ở các source cũ vẫn thuộc lịch sử riêng. Tests trên không chứng minh model đã tuân thủ prompt mới hoặc giọng đã đạt; việc đó còn cần một run được đăng ký và review nguyên hội thoại. Lượt này tạo **0 provider generations**, không truy cập credential/nguồn live và không deploy/gửi tin. Complexity delta: 0 runtime abstractions/gates/parsers/roles, chỉ thay nội dung owner và hash.
+
+## Lịch sử: rollback và hướng sửa đã chốt
+
+Phần dưới lưu quyết định trước bản sửa hiện tại; identity và trạng thái rollback trong phần này là lịch sử, không phải active prompt hiện nay.
 
 Owner yêu cầu rollback bản vừa sửa và tìm hướng phù hợp. Phạm vi hiện tại là khôi phục prompt/config đang dùng, sửa một giả định sai trong test và ghi hướng xử lý. Không chuẩn bị hay chạy một batch provider mới.
 

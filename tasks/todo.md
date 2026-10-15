@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current owner task prompt simplification — 2026-10-15
+
+- [x] Refresh main `296cdcfb`; clean starting head `611c8207`. Rewrite active owner task/style from rollback baseline: 10,353 → 5,739 bytes (−44.6%), owner hash `c6cddd33`. Only base-manifest owner hash changes; historical runs and approved models/config/context stay unchanged.
+- [x] [Self-review](../apps/worker/evals/single-agent-commerce-read-only/OWNER_PROMPT_NEXT_STEPS.md) maps removed detailed wording to existing owning code/tool contracts; retain source grounding, missing-input-before-size, policy scope, quote, receipts/privacy and mandatory verifier/current final gate. No new role/router/parser/rewrite/retry, runtime logic or prompt-string tests.
+- [x] Focused protocol/provider 37 PASS/1 optional SKIP; full eval 467 PASS/2 optional SKIP; B boundary/context/source/tool/state/effect 122 PASS; protected/reply 21 PASS. Both historical registration preflights reject changed inputs before source/provider, no output created. Exact hash/scope/alias readback and diff-check PASS. Full worker src/typecheck/build/lint not rerun for prompt/hash/docs-only change. No provider run or voice/semantic PASS claim; source duplication experiment remains separate.
+
 ## Current owner-requested prompt rollback — 2026-10-15
 
 - [x] Restore active owner prompt/base manifest byte-exact from83061af5; owner SHA256d6ba7b6c. Keep both model configurations, verifier, source/cache fix, current final gate and every historical run unchanged.
