@@ -25,6 +25,8 @@ describe("read-only domain tools", () => {
     const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", deliveryRegion: "HANOI" } });
     expect(result).toMatchObject({ status: "OK", data: { availability: { eta: { status: "OK" } },
       facts: expect.arrayContaining([expect.objectContaining({ type: "ETA", value: { minDays: 3, maxDays: 6 } })]) } });
+    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual(expect.objectContaining({
+      productId: "SM613", deliveryRegion: "HANOI", etaClaimId: expect.any(String) }));
     const binding = makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", tools.snapshot());
     expect(makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", await tools.readback())).toEqual(binding);
     f.snapshot.shipping_eta.HANOI!.transit_max_days = 5;

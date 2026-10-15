@@ -86,6 +86,13 @@ describe("Phase B handoff follows current code policy and committed ownership", 
       ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner,verifier });
     expect(result.terminal.disposition).toBe("NO_SEND");expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
   });
+  it("feeds current conversation revision into the existing final gate after a verifier PASS", async () => {
+    const s=await setup();
+    const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:"Em ơi",history:[],
+      ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner:async()=>({kind:"FINAL",text:"Dạ chị."}),
+      verifier:async()=>{s.change({stateVersion:2,state:{...s.current().state,revision:2}});return {result:{verdict:"PASS",violations:[]}};}});
+    expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");expect(s.commit).not.toHaveBeenCalled();
+  });
   it("persists terminal stale recovery but never converts ordinary fallback or privacy no-send to handoff", async () => {
     const s = await setup();
     const fallback = { disposition: "FALLBACK" as const, reason: "FAIL", text: "fallback", fallbackId: "f" };

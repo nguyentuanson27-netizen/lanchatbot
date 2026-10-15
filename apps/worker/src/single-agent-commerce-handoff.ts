@@ -2,7 +2,7 @@ import { HandoffDecisionV2Schema, HandoffReasonV2Schema, HandoffMatrixAdminConte
   type HandoffDecisionV2, type HandoffReasonV2 } from "@lana/contracts";
 import { applySilentHandoff, decideHandoffFallbackV2, type ConversationState } from "@lana/conversation-engine";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
-import { commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
+import { buildReadOnlyContext, commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
@@ -43,6 +43,17 @@ export function createCommerceHandoffTools(input: {
 }): CommerceTools {
   let committed: { next: HandoffAuthority; decision: HandoffDecisionV2; policyHash: string } | undefined;
   let uncertain = false;
+  let authority: HandoffAuthority | undefined;
+  const read = async () => { authority = await input.read(); return authority; };
+  const snapshot = () => {
+    const base = input.base.snapshot(); if (!authority) return base;
+    return buildReadOnlyContext({ state: { ...base.state,
+      ...(base.state.conversationRevision === undefined ? { revision: authority.stateVersion } : { conversationRevision: authority.stateVersion }),
+      recipient: authority.recipient, bindingVersion: authority.bindingVersion, privacyAllowed: authority.privacyAllowed,
+      permission: authority.permission, conversationOwner: authority.state.conversationOwner },
+      subjects: base.boundSubjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims, policies: base.policyLiterals,
+      receipts: base.effectReceipts, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
+  };
   const policyIdentity = (bundle: RuntimePolicyBundle) => commerceHash({ bundleHash: bundle.bundleHash,
     policy: publicPolicyLiteral(bundle, input.scope.pageId, input.scope.shopId, input.clock()), matrix: bundle.artifacts.handoffMatrix });
   const scopeMatches = (a: HandoffAuthority) => a.pageId === input.scope.pageId && a.conversationId === input.scope.conversationId &&
@@ -52,11 +63,11 @@ export function createCommerceHandoffTools(input: {
     if (uncertain) return { disposition: "NO_SEND", reason: "HANDOFF_COMMIT_UNPROVED", text: null, fallbackId: null };
     if (!committed) {
       const inherited = await input.base.terminalOutcome?.(); if (inherited) return inherited;
-      const current = await input.read();
+      const current = await read();
       return scopeMatches(current) && current.permission && current.state.conversationOwner === "BOT" ? null
         : { disposition: "NO_SEND", reason: "HANDOFF_AUTHORITY", text: null, fallbackId: null };
     }
-    const current = await input.read();
+    const current = await read();
     if (!scopeMatches(current) || current.stateVersion !== committed.next.stateVersion ||
       commerceHash(current.state) !== commerceHash(committed.next.state) ||
       policyIdentity(await input.policy()) !== committed.policyHash) return { disposition: "NO_SEND", reason: "HANDOFF_SCOPE_CHANGED", text: null, fallbackId: null };
@@ -66,7 +77,7 @@ export function createCommerceHandoffTools(input: {
   async function request(reason: HandoffReasonV2): Promise<CommerceToolResult> {
     if (uncertain) return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" };
     if (committed) return { status: "REJECTED", reason: "ALREADY_HANDED_OFF" };
-    const before = await input.read();
+    const before = await read();
     if (!scopeMatches(before) || !before.permission || before.state.conversationOwner !== "BOT" || before.state.routingOwner !== "APP" ||
       before.stateVersion !== (input.base.snapshot().state.conversationRevision ?? input.scope.revision) ||
       before.state.revision !== before.stateVersion) return { status: "REJECTED", reason: "HANDOFF_AUTHORITY" };
@@ -91,7 +102,8 @@ export function createCommerceHandoffTools(input: {
     if (!a || !parsed.success || parsed.data === "ADMIN_REQUEST") return { status: "REJECTED", reason: "HANDOFF_ARGUMENTS" };
     try { return await request(parsed.data); } catch { return { status: "UNAVAILABLE", reason: "HANDOFF_POLICY_OR_SOURCE" }; }
   }
-  return { ...input.base, invoke, terminalOutcome, async invokeBatch(calls) {
+  return { ...input.base, invoke, snapshot, terminalOutcome,
+    async readback() { await input.base.readback(); await read(); return snapshot(); }, async invokeBatch(calls) {
     const handoffs = calls.filter(c => c.name === "request_handoff");
     if (!handoffs.length) return input.base.invokeBatch(calls);
     if (handoffs.length !== 1) return calls.map(() => ({ status: "REJECTED", reason: "MULTIPLE_HANDOFF_REQUESTS" }));

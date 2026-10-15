@@ -8,10 +8,12 @@ import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,LocalEnvelopeCipher,withTransaction} from '@lana/database';
 import {createSalesCycleRuntimeState,applySalesCycleCommand,executePersistedSalesCycleCommand,RuntimePolicyResolver,buildPurchaseConfirmedTagCommand} from '@lana/chat-runtime';
+import {createConversationState} from '@lana/conversation-engine';
 import {buildCanonicalDecisionEvidenceV1} from '@lana/business-tools';
 import {createRealtimeCustomerStatePort,createCustomerStateTools} from '../../dist/single-agent-commerce-state.js';
 import {createCommerceEffectTools} from '../../dist/single-agent-commerce-effects.js';
-import {createPersistedCommerceRepository,prepareNativeCommerceTransition,createPersistedCommerceReceiptReader} from '../../dist/single-agent-commerce-persistence.js';
+import {createPersistedCommerceRepository,prepareNativeCommerceTransition,createPersistedCommerceReceiptReader,createPersistedCommerceHandoffPort} from '../../dist/single-agent-commerce-persistence.js';
+import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-tools.js';
 import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
@@ -226,6 +228,52 @@ try{
   assert.equal(paymentIntents,paymentMethod==='BANK_TRANSFER'?activePaymentMessageCount:0);
   report.persistedPaymentIntents=paymentMethod==='BANK_TRANSFER'?1:0;report.persistedPaymentOutboxMessages=paymentIntents;
   assert.equal((await t.readback()).state.conversationOwner,'HUMAN');
+  assert.equal((await t.terminalOutcome()).disposition,'HANDOFF');
+ });
+ async function handoffFixture({link=true,supersede=false}={}){
+  const at=new Date(),h={...scope,customerHash:hash(randomUUID()),sourceMessageId:'handoff-'+randomUUID(),sourceObservedAt:at.toISOString()};
+  const row=await runtime.loadOrCreate(pageId,h.customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
+  h.conversationId=row.conversationId;h.revision=row.stateVersion;
+  if(link)await runtime.linkProviderConversation(pageId,h.conversationId,'PANCAKE','synthetic-handoff-'+randomUUID(),at,new Date(at.getTime()+3600000));
+  const enqueue=async eventKey=>{
+   await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey,providerMessageId:eventKey,conversationHash:h.customerHash,
+    occurredAt:new Date(),receivedAt:new Date(),signatureKeyVersion:'isolated-test',envelope:{synthetic:true}});
+   await pool.query('UPDATE conversation_ingress_heads SET quiet_until=now() WHERE page_id=$1 AND conversation_hash=$2',[pageId,h.customerHash]);
+  };
+  await enqueue(h.sourceMessageId);const batch=await inbox.claimNextBatch('c3-b-handoff',60000);assert(batch);
+  h.bindingVersion='c3-b-handoff:'+batch.generation;
+  if(supersede)await enqueue('newer-'+randomUUID());
+  const read=async()=>{const r=await runtime.loadOrCreate(pageId,h.customerHash,'APP',()=>{throw new Error('EXISTING_REQUIRED');});
+   return {...h,stateVersion:r.stateVersion,state:r.state,permission:r.state.conversationOwner==='BOT'};};
+  const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:fn=>withTransaction(pool,fn),
+   inboxBatchGuard:{generation:batch.generation,leaseToken:batch.leaseToken,inboxIds:batch.inboxIds},resolveTagId:()=> 'synthetic-handoff-tag'});
+  const hp=structuredClone(policyResolution.bundle);
+  // Synthetic HANDOFF_MATRIX in memory; current public policy is unchanged and never republished.
+  hp.artifacts.handoffMatrix={schemaVersion:1,kind:'HANDOFF_MATRIX',sourceMetadata:hp.artifacts.shopPolicy.sourceMetadata,
+   rules:[{reason:'EXCHANGE',customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF',holdingReply:'Shop đã nhận yêu cầu đổi hàng của chị.',tag:'VAN_DON'},
+    {reason:'CUSTOMER_REQUESTED_HUMAN',customerMessagePolicy:'SILENT_HANDOFF',holdingReply:null,tag:'NHAN_VIEN'}]};
+  const tools=await createCommerceTools({read:{scope:h,clock:()=>new Date(),policy:async()=>({...policyResolution,bundle:hp}),
+    catalog:{readProduct:async()=>{throw new Error('UNUSED');},searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}},
+   handoff:{...port,policy:async()=>hp}});
+  const counts=async()=>(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags',[h.conversationId])).rows[0];
+  return {h,tools,read,counts};
+ }
+ await check('B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate',async()=>{
+  const h=await handoffFixture(),r=await h.tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}});assert.equal(r.status,'OK',JSON.stringify(r));
+  assert.equal((await h.read()).state.conversationOwner,'HUMAN');assert.deepEqual(await h.counts(),{events:1,tags:1});
+  assert.equal((await h.tools.terminalOutcome()).text,'Shop đã nhận yêu cầu đổi hàng của chị.');
+  assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}})).status,'REJECTED');
+  assert.deepEqual(await h.counts(),{events:1,tags:1});
+ });
+ await check('B handoff missing provider link rolls back ownership/event and never acknowledges acceptance',async()=>{
+  const h=await handoffFixture({link:false}),r=await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}});
+  assert.equal(r.status,'UNAVAILABLE');assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0});
+  assert.equal((await h.tools.terminalOutcome()).disposition,'NO_SEND');
+ });
+ await check('B handoff superseded inbound cannot commit using the earlier source lease',async()=>{
+  const h=await handoffFixture({supersede:true});
+  assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}})).status,'REJECTED');
+  assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0});
  });
  report.status='PASS';save();
 }catch(error){report.status='FAIL';report.errorType=error.name;report.error=error.message;save();console.error(error.stack);process.exitCode=1;}

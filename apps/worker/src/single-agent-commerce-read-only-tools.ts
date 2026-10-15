@@ -1,7 +1,7 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { ProductContentV1Schema } from "@lana/contracts";
 import { buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
-  resolveCatalogFacts, verifyProductAttributesV1,
+  resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
@@ -39,6 +39,7 @@ export function createReadOnlyTools(input: {
   let policy: RuntimePolicyResolution | null = null;
   let policyLiteral: TrustedContext["policyLiterals"] = [];
   let policyRead = false;
+  const deliveryContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const reads = new Map<string, Record<string, unknown>>();
   const searchReads = new Set<string>();
   const bind = (p: StableProductDocument) => {
@@ -47,7 +48,7 @@ export function createReadOnlyTools(input: {
   for (const p of input.initialProducts ?? []) bind(p);
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
-    products: [...products.values()], claims: [...claims.values()].flat(), policies: policyLiteral });
+    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...policyLiteral, ...deliveryContexts.values()] });
   const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
     if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
       throw new Error("PRODUCT_SOURCE_FRESHNESS");
@@ -87,6 +88,9 @@ export function createReadOnlyTools(input: {
     const price = raw ? resolveCatalogFacts(raw, { ...query, intent: "PRICE" }, now, maxAge) : null;
     const stock = raw ? resolveCatalogFacts(raw, { ...query, intent: "STOCK" }, now, maxAge) : null;
     const eta = raw && query.deliveryRegion ? resolveCatalogFacts(raw, { ...query, intent: "ETA" }, now, maxAge) : null;
+    if (eta?.status === "OK" && eta.expiresAt && raw?.fulfillment_policy?.eta_valid_until) {
+      eta.expiresAt = new Date(Math.min(Date.parse(eta.expiresAt), Date.parse(raw.fulfillment_policy.eta_valid_until))).toISOString();
+    }
     const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: query.offerType,
       mentionedSize: query.size, mentionedColor: query.color }, now) : null;
     // An offer-only read is a code-bound selling option, never a selected SKU or a personal fit.
@@ -113,6 +117,13 @@ export function createReadOnlyTools(input: {
     if (variantId) subjects.set(variantId, { ref: variantId, kind: "VARIANT", productId: id,
       label: `${p.title} ${offer ?? ""} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
     const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
+    // Keep the delivery destination visible to the verifier; the shared ETA value alone contains only day counts.
+    deliveryContexts.delete(readKey);
+    const etaClaim = nextClaims.find(c => c.type === "ETA");
+    if (etaClaim && raw) deliveryContexts.set(readKey, { ref: `delivery:${readKey}`, sourceVersion: raw.release_id,
+      observedAt: etaClaim.provenance.observedAt, expiresAt: etaClaim.provenance.expiresAt,
+      text: JSON.stringify({ productId: id, variantId, deliveryRegion: Object.keys(raw.shipping_eta).find(r =>
+        normalizeCatalogToken(r) === normalizeCatalogToken(query.deliveryRegion ?? "")), etaClaimId: etaClaim.claimId }) });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: offer, requestedOfferType: query.offerType,
