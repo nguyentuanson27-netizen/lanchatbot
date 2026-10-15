@@ -1128,3 +1128,10 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [x] Round2: owner-only wording fix, source22457e0a, same prefix result1eligible/2fallback; remaining5NOT_RUN, no third round.
 - [x] Whole-terminal reports/findings and tasks; draft PR391 updated with exact source/outcomes/limits.
 - [ ] B1 sales usability: two owner overclaims persist; five other provider controls and stateful conversations remain unverified by these runs. [STOP report](../apps/worker/evals/single-agent-commerce-read-only/two-round-20261015/CHECKPOINT_B.md).
+## B1 owner comparison — 2026-10-15
+
+- [x] Owner confirms Low, then both models; freeze12 slots and identical post-read input/prompt/verifier in [scope](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-20261015/SCOPE.md).
+- [x] Observed RED for missing comparison; provider-tool rejection RED5PASS/1FAIL; empty-tool projection RED; minimum GREEN6/6. No production wiring or prompt edits.
+- [x] Focused comparison6/6; focused Node36PASS/1optionalSKIP, boundary/runtime60PASS, protected/reply21PASS; full worker1713PASS and eval466PASS/2optionalSKIP, typecheck/build/lint PASS. Self-review in PREPARATION.json; clean source seal follows.
+- [ ] Source preflight0generation; two cases ×3/owner, all12 outcomes retained.
+- [ ] Raw→whole-terminal primary→diagnostics/report; update draft PR391 and stop with capability limits.

@@ -38,7 +38,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
-  tools:[{functionDeclarations:declarations}],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
+  tools:declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  requireThat(bytes(body)<=32768,'OWNER_REQUEST_BOUND');return body;
 }
