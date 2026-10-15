@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Full24-case B1 replay — 2026-10-15
+
+- [x] Freeze [exact24cases/8families×3/N1](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/SCOPE.md), approved models/config, full-range budget and holistic review criteria before generation. Initial configuration preflight atd24b1812PASS/0generation; source connections still require readback.
+- [ ] Commit/clean source seal, actual source readback and canonical build; run full24cases once with all errors retained.
+- [ ] Commit raw before primary review, read every terminal conversation, score ten supporting dimensions and whole outcome, then inspect rejected drafts/verdicts and audit provenance/accounting/firewall.
+- [ ] Report family/quality/safety/operational findings, update PR391 and stop; keep the seven stateful turns separate and no live action.
+
 ## Post-review test replay — 2026-10-15
 
 - [x] Freeze [the same seven stateful B cases, N1/max24generations](../apps/worker/evals/single-agent-commerce-read-only/stateful-post-review-20261015/SCOPE.md), approved models/config and whole-terminal review/accounting before generation. Rerun worker118/database48/protocol-provider23PASS; initial provider preflight0generationPASS.

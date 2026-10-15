@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Full24-case replay and whole-conversation review — 2026-10-15
+
+Owner corrects the seven-turn-only test scope and explicitly requests the additional24approved B1 cases plus review. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015/SCOPE.md): existing cases.b1.json,8families×3,N1/full1:24/max96invocations, unchanged Gemini3.5FlashLiteHigh and6.1SolHigh, prompts/config and read-only source adapters. Keep the seven stateful outcomes separate. Commit/clean source seal, run zero-generation config/source checks and canonical build, collect24raw attempts before primary whole-terminal scoring, then audit/diagnose and deliver. No runtime/prompt change or automatic additional round; no live action or A/PhaseC promotion.
+
 ## Owner-requested post-review test run — 2026-10-15
 
 Owner explicitly requests running the cases after the two review fixes. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/stateful-post-review-20261015/SCOPE.md): one replay of the existing seven stateful outcomes, N1/max24generations, unchanged Gemini3.5FlashLiteHigh owner/6.1SolHigh verifier, prompts/config/corpus and actual public sources. This authorizes one requested batch beyond the prior stop; no automatic further round. Focused worker118/database48 and protocol/provider23PASS, initial zero-generation provider preflightPASS atd6b28f8. Commit this scope, require clean executable/config source, capture runtime HEAD, rerun composed PostgreSQL controls and preflight, then collect raw before primary whole-terminal review/diagnosis. No source/prompt/model changes, live send/deploy or Phase C. Keep historical evidence/acceptance distinctions intact.
