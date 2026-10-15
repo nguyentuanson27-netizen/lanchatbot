@@ -4,9 +4,10 @@
 
 - [x] Refresh main296cdcfb, inspect source/actual replies and official guidance; freeze owner-only correction and12same-case slots in [scope](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/SCOPE.md).
 - [x] Explicit registration selection RED observed -> minimumGREEN7/7. Existing models/context/verifier/schema/fallback unchanged; no retry/rewrite or new role.
-- [ ] Focused/full checks and self-review; clean source seal and real preflight0generation.
-- [ ] Execute12slots once; commit raw before whole-terminal primary, then rejected diagnostics/latency/safety/style comparison.
-- [ ] Audit bindings/firewall/denominator/history; report exact results/limits, update draftPR391 and stop.
+- [x] Focused37PASS/1optionalSKIP, boundary60PASS, protected/reply21PASS; full worker1715PASS/eval467PASS/2optionalSKIP, typecheck/build/lintPASS; self-review and clean source08b98c2c/preflight0generation/readbackPASS.
+- [x] Execute12slots/24HTTP200 once,0retry/error/timeout; rawc550d950 before whole-terminal primarya7b2b658 before rejection diagnostics. Sol6eligible/6functional; Gemini3eligible/3fallback/0functional;3primary-marked unsafe eligible (2clear +1implication needing owner adjudication).
+- [x] Audit12bindings/readbacks,18raw disk/Git blobs, source seal/firewall/denominator/history; same context exactly across owners/baseline. [STOP report](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-followup-20261015/CHECKPOINT_B.md), full12conversations, latency/tokens/cost limits and subjective tone review complete. No model promotion/native Sol tools/full B1 or A2/A3 claim.
+- [ ] Update/read back draftPR391 on exact delivered head, preserve STOP and no further generation.
 
 ## Current B prompt/tool follow-up — 2026-10-14
 
