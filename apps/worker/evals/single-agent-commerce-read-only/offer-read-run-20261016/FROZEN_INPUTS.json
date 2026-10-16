@@ -94,8 +94,8 @@
       "bytes": 10875
     },
     "offer-read-run-20261016/SCOPE.md": {
-      "sha256": "5ec2a9340a9e45114c1afcb477c187e039ee6a13c30bb0509dd3de2270164ebb",
-      "bytes": 5811
+      "sha256": "0c46189d4de6c0d443bfde685600f452e2c89efb223d079ec346c3c8eebf1a06",
+      "bytes": 6448
     }
   },
   "referenceBlobs": {
@@ -165,10 +165,18 @@
   "verificationSourceSha": "4ceaefa71acdf44a7fe3bda94cf10d503faa0ed6",
   "credentialLauncher": {
     "file": "c3-offer-replay-session-20261016.py",
-    "sha256": "d338f0a489653627a33b4943061b28097989e485997f0c528c27e357c016ecf9",
+    "sha256": "2f429f43b86509af8521e8c1aee19c2683e85e2fececb3dd93e1cc7d8f13d3f6",
     "route": "C3_VERTEX_CREDENTIAL_FILE",
     "source": "EXISTING_SERVING_VERTEX_CREDENTIAL_FILE_SAME_PROJECT",
     "secretsInEvidence": false
   },
-  "ownerProjection": "ROLLED_BACK_BASELINE_TRUSTED_PRODUCTS_CONTENT_WITH_BOUNDED_SELLING_OPTIONS"
+  "ownerProjection": "ROLLED_BACK_BASELINE_TRUSTED_PRODUCTS_CONTENT_WITH_BOUNDED_SELLING_OPTIONS",
+  "preGenerationFailures": [
+    {
+      "stage": "CREDENTIAL_LAUNCHER_BEFORE_RUNNER",
+      "code": "EXISTING_CREDENTIAL_SCOPE_MISMATCH",
+      "cause": "DEPLOYED_GOOGLE_API_REPRESENTATION_NOT_NATIVE_SERVICE_ACCOUNT_JSON",
+      "providerGenerations": 0
+    }
+  ]
 }
