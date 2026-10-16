@@ -2,7 +2,7 @@
 
 ## Current root-cause fix after independent review — 2026-10-16
 
-**Status: IMPLEMENTING; new provider batches NOT_RUN.** Owner yêu cầu “tiến hành fix đi” sau khi chốt phương án. Thực hiện F1–F7 và verification theo evidence thực tế; [implementation record](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-20261016/IMPLEMENTATION.md). Phần này không thay kết quả hoặc scope của các run lịch sử bên dưới. Source đã review: `7fe9643b747462a1c29a61308e365541be21bd19`, PR391. Refresh main trước implementation vẫn là `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Review độc lập GPT-6.1 Sol High xác nhận các finding, bổ sung thiếu sót P2 của phương án outbound và làm rõ đường tìm alias.
+**Status: IMPLEMENTED / CODE_VERIFICATION_PASS; new provider batches NOT_RUN; sales/live acceptance STOP.** Owner yêu cầu “tiến hành fix đi” sau khi chốt phương án. F1–F7 đã sửa và kiểm tra tại executable source `777616ddf32b3b824d50fb753828c370c275adc2`; [implementation record và exact commands](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-20261016/IMPLEMENTATION.md). Worker1779PASS/evals485PASS+2SKIP/compiler/build/lintPASS; shared contracts222/business356/database246PASS+30optionalSKIP; real PostgreSQL composed COD và bank12/12mỗi loạiPASS/dropped. Lần COD đầu phát hiện receipt vẫn ACK sau known-SKU contradiction; đã giữ evidence FAIL, sửa RED→GREEN bằng existing snapshot/receipt scope và chạy lại. Current-source checkout SV2447/TP.HCM còn BLOCKED/CART_ETA_UNAVAILABLE; không tính control synthetic là hoàn tất ca nguồn thật. Phần này không thay kết quả hoặc scope của các run lịch sử bên dưới. Source đã review: `7fe9643b747462a1c29a61308e365541be21bd19`, PR391. Refresh main trước implementation vẫn là `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Review độc lập GPT-6.1 Sol High xác nhận các finding, bổ sung thiếu sót P2 của phương án outbound và làm rõ đường tìm alias.
 
 Mục tiêu là khách được tư vấn chọn mua hợp lý, nhận câu trả lời tự nhiên và thực hiện được thao tác đã yêu cầu. Verifier PASS, tool gọi thành công và một tin tư vấn dùng được là ba kết quả phải báo riêng. Giữ một conversational owner, tối đa một verifier; code sở hữu identity/truth/freshness/state/permission/effects/receipts/privacy. Generated final draft sống sót hard precheck luôn phải qua verifier và current final gate, kể cả câu policy không có sản phẩm. Code-owned fallback/receipt ACK dùng đúng đường recovery đã có.
 
@@ -62,11 +62,11 @@ Review từng actual customer outcome: đã hiểu nhu cầu mua chưa, có ch�
 
 Context chỉ đưa dữ liệu đã xác nhận qua nguồn/projection hiện có; chưa chứng minh XML gây lỗi thì không tạo parser hay model tóm tắt mới. Chỉnh prompt theo nhiệm vụ bán hàng, không nhồi ví dụ/keyword theo ca. Code-owned receipt ACK sửa tại recovery theo effect thực sự và receipt/current state, không yêu cầu model sửa chuỗi static. Giữ code-owned bounded text tối thiểu, không mọc thư viện template theo case. Thiếu dữ liệu size cần thiết thì hỏi phần còn thiếu, không đề xuất size từ dữ kiện chưa đủ.
 
-### Verification và run kế tiếp — kế hoạch, NOT_RUN trong lần cập nhật này
+### Verification implementation — đã thực hiện; provider run kế tiếp NOT_RUN
 
 Mỗi thay đổi logic quan sát focused RED trước rồi minimum GREEN. Build dependency bị sửa trước consumer tests để không dùng dist cũ. Reuse tests hiện có ở worker ingress/read-only/state/effects/session/persistence/handoff, provider/protocol; shared effect-readiness/canonical-readiness/database runtime/search khi bị tác động. Bảo vệ protected claims/reply assembly, unknown≠absence, partial answers, CAS/source supersession, privacy, receipt recovery và HUMAN authority. Self-review diff và fix finding; không thêm vòng reviewer/gate mặc định.
 
-Các lệnh thực thi khi sửa code, chưa được chạy bởi bản cập nhật kế hoạch này:
+Các lệnh đã thực thi khi sửa code; kết quả, source, RED→GREEN, final checks và giới hạn Windows/optional coverage ghi trong implementation record:
 
 ```text
 pnpm -r --filter "@lana/worker^..." build

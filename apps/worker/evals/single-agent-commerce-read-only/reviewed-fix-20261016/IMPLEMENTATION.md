@@ -2,18 +2,18 @@
 
 Owner requests implementation of the reviewed [plan](../../../../../tasks/plan.md#current-root-cause-fix-after-independent-review--2026-10-16). Start `7fe9643b747462a1c29a61308e365541be21bd19` on existing PR391. Refreshed main / implementationBaseSha remains `296cdcfbf5759f5bf9cbb24acf3dc63005589361`.
 
-Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdicts remain unchanged. No production wiring, live source/customer writes, merge, deploy or send. Existing one-owner/one-verifier, exact draft/current snapshot, permission/privacy, CAS/fencing, receipts and no retry remain required.
+Status: IMPLEMENTED / CODE_VERIFICATION_PASS. Final executable source: `777616ddf32b3b824d50fb753828c370c275adc2`. Current real-source checkout prerequisite remains BLOCKED; sales/live acceptance remains STOP. New provider generations: 0. Historical raw/primary/verdicts remain unchanged. No production wiring, live source/customer writes, merge, deploy or send. Existing one-owner/one-verifier, exact draft/current snapshot, permission/privacy, CAS/fencing, receipts and no retry remain required.
 
 | Slice | Status |
 | --- | --- |
 | F1 bounded failure/recovery/checkout diagnostics | IMPLEMENTED; focused GREEN |
-| F2 outbound payload/readiness producer and consumers | IMPLEMENTED; focused GREEN |
+| F2 outbound payload/readiness producer and consumers | IMPLEMENTED; focused/full GREEN; composed recovery regression corrected below |
 | F3 exact serialized provider request bound | IMPLEMENTED; focused GREEN |
 | F4 typed tools and native final-only contract | IMPLEMENTED; offline focused GREEN; live behavior NOT_RUN |
 | F5 named alias lookup | IMPLEMENTED; full-name alias focused GREEN; partial-name coverage remains limited |
 | F6 private-checkout prerequisite correction | Failure reason corrected; current real-source checkout BLOCKED by missing ETA |
 | F7 sales task/context and code-owned receipt ACK | IMPLEMENTED; focused GREEN; sales quality remains unmeasured |
-| Focused/full verification and self-review | PENDING |
+| Focused/full verification and self-review | PASS; exact results and skipped coverage below |
 
 ## Commands actually run
 
@@ -47,7 +47,7 @@ F6 used the existing source-session/Ops credential route with read-only source P
 
 F6 RED: `pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.test.ts -t 'preserves the missing source prerequisite'`:2FAIL/62not-selected; missing ETA was misreported as ORDER_PREVIEW_CART_SNAPSHOT_CHANGED or CLAIM_MISSING. Minimum fix propagates an unavailable typed selection reason before preview/confirmation compare or readiness; no condition is waived, no ETA invented, no PII/events committed. GREEN: `pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-session.test.ts`:87PASS including old r31.3/effect/checkout controls. Composed missing-region test now also requires the original private planner reason; actual PostgreSQL runs follow final build.
 
-Compilation: first `pnpm --filter @lana/worker build` exited1 on the new test's undeclared static .mjs import; typed URL import fixes it. Later direct `pnpm --filter @lana/worker exec tsc -p tsconfig.json` initially found redundant union comparisons in F6; removed those comparisons, same command exit0. Final canonical worker build remains pending; neither earlier failure is claimed PASS.
+Compilation: first `pnpm --filter @lana/worker build` exited1 on the new test's undeclared static .mjs import; typed URL import fixes it. Later direct `pnpm --filter @lana/worker exec tsc -p tsconfig.json` initially found redundant union comparisons in F6; removed those comparisons, same command exit0. Final canonical worker build result is recorded below; neither earlier failure is claimed PASS.
 
 Current-source checkout completion remains BLOCKED until the authoritative fulfillment/ETA source covers this selection/region. Publishing that data is outside this code fix. Controlled COD/bank tests cannot substitute for it; handoff is not a completed checkout.
 
@@ -68,3 +68,51 @@ Real PostgreSQL command at that clean source: `python apps/worker/evals/single-a
 Added current-SKU contradiction and unknown→known-contradiction regressions, plus unavailable-source positive control. `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-effects.test.ts`: observed32PASS/1FAIL, then32PASS/2FAIL after the late-egress regression. Minimum fix reuses the already computed matching selection set when exposing a current receipt; recovery consumes that same context receipt, and the existing snapshot gate detects later invalidation. Missing source does not create a contradiction or require fresh CART_READY. No extra source call, schema, durable field, gate or retry. Focused GREEN: `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-effects.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-persistence.test.ts`:63PASS; `pnpm --filter @lana/worker exec tsc -p tsconfig.json`:exit0. Final full worker/compiler checks and COD/bank controls must follow this correction.
 
 A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.
+
+## Final-source results
+
+At clean executable source `777616ddf32b3b824d50fb753828c370c275adc2`:
+
+| Actual command | Result |
+| --- | --- |
+| `pnpm --filter @lana/worker exec vitest run src` | exit0;130files/1779PASS; same temporary Windows junction/restoration described above |
+| `pnpm --filter @lana/worker test:evals` | exit0;485PASS/2optional local-stub diagnostics SKIP/0FAIL |
+| `pnpm --filter @lana/worker typecheck` | exit0, including dependency prebuild |
+| `pnpm --filter @lana/worker build` | exit0, including dependency prebuild |
+| `pnpm --filter @lana/worker lint` | exit0 |
+| Exact eight-file focused worker command in tasks/plan.md | exit0;123PASS |
+| Exact Node adapter/protocol command in tasks/plan.md | exit0;31PASS; captured requests exclude evaluator labels |
+| Exact protected-claims/reply-assembler command in tasks/plan.md | exit0;21PASS |
+
+The eight-file command was `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-handoff.test.ts`. Node: `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs`. Protected/reply: `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts`.
+
+Canonical shared-package commands below all exited0 at7fb0732a; shared-package source is unchanged at777616dd. Contract222PASS, business356PASS, database246PASS/30optional PostgreSQL SKIP. The30skipped tests were not replaced by, or counted as, the separate composed controls.
+
+```text
+pnpm --filter @lana/contracts test
+pnpm --filter @lana/contracts typecheck
+pnpm --filter @lana/contracts build
+pnpm --filter @lana/business-tools test
+pnpm --filter @lana/business-tools typecheck
+pnpm --filter @lana/business-tools build
+pnpm --filter @lana/database test
+pnpm --filter @lana/database typecheck
+pnpm --filter @lana/database build
+```
+
+Real PostgreSQL composed commands, both exit0/12of12PASS, sourceDirty=false, providerGenerations=0, testDatabaseDropped=true:
+
+```text
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-reviewed-fix-cod-777616dd-20261016 COD --composed-only
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-reviewed-fix-bank-777616dd-20261016 BANK_TRANSFER --composed-only
+```
+
+Exact-byte reports: [COD](postgres-cod.json), [BANK_TRANSFER](postgres-bank-transfer.json). They use synthetic product/private-checkout inputs, current captured PUBLISHED policy, real isolated PostgreSQL transactions and capture delivery. No provider generation or external customer send. They prove the candidate composition under those inputs, not completion of the missing-ETA real-source checkout. The earlier failing control is preserved, with cleanup, rather than overwritten. Access used the existing [Lana Chatbot Ops](../../../../../plugins/lana-chatbot-ops/skills/lana-chatbot-ops/SKILL.md) credential route; source PostgreSQL read-only, test database admin scoped by the existing disposable harness, secrets in memory only.
+
+Self-review verified that the recovery correction also changes the snapshot if a missing source later becomes a known contradictory selection before egress. Existing freshness/authority/recipient/privacy/source/CAS/receipt and HUMAN controls remain green. No unit or composed expectation was relaxed. Full src/evals were rerun after the worker-only correction; no further code change followed these results. `git diff --check` passes. Full repository `pnpm check`, the30optional PostgreSQL tests and remote CI are not claimed PASS.
+
+Structural delta since7fe9643b:9runtime/adapter source files,+120/-46lines(net+74), plus tests/evidence/docs. Owner prompt+96bytes(+0.96%); verifier unchanged. Existing receipt ACK variants2→3 to distinguish cart open/change/confirmed purchase; no new fallback IDs, case templates or regex. Added semantic roles0, verification layers/gates0, schemas/contract fields0, durable stores0, migrations0, production entrypoints0. Rollback is a candidate source revert; these controls made no serving schema/data change.
+
+Spec Git blobs at final executable source: architecture `7e0265e3b6b3d556d8fb0f3c7267abccef5de86a`; semantic-boundary amendment `4a09b55d2f3a972a65697738876cc5eab21e7a2b`. Active schemaSHA256 `76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97`. Approved manifest models/generation settings remain Vertex/global `gemini-3.5-flash-lite` High owner and Codex-login `gpt-6.1-sol` High verifier; unchanged generation config/corpora, no substitution. No new provider registration/result is inferred from these compiler, fake-HTTP or composed tests.
+
+Remaining: actual provider adherence to NONE/tools[], tool choice/round usage, new sales quality/naturalness/usability and operational latency are NOT_RUN; partial-name alias coverage remains limited; current-source SV2447/AO/BE/L×2 checkout for TP.HCM remains CART_ETA_UNAVAILABLE. Historical unrecorded seventh terminal remains UNKNOWN. The next approved run population stays24B1/N1 +7stateful/N1, max120generation requests, without extra retries/cases. This task performs the fix and verification; no new model batch, A/C qualification, source publication, live activation, merge or deploy. Recommendation: **STOP sales/live acceptance; code fix ready for the next requested evaluation**.
