@@ -1,4 +1,5 @@
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {HandoffReasonV2Schema,canonicalJsonV1} from '@lana/contracts';
 
@@ -11,16 +12,16 @@ const safeFinishReasons=new Set(['STOP','MAX_TOKENS','SAFETY','RECITATION','OTHE
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc giá/tồn, mô tả và bảng size của sản phẩm. subjectRef lấy nguyên giá trị từ products.subjectRef hoặc subjects.subjectRef, không ghép thêm tiền tố. Chọn offerType theo món khách muốn mua từ availableOffers; null nghĩa chưa biết các lựa chọn bán, không phải không bán lẻ. size dùng xem tồn, không chứng minh mặc vừa. deliveryRegion là tỉnh/thành cần tra ETA, không phải địa chỉ. availability giữ trạng thái từng dữ kiện.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc phần thông tin sản phẩm còn thiếu. subjectRef là ref của PRODUCT, không dùng evidenceRef/variantId của offer. Truyền offerType theo món khách hỏi từ availableOffers; null là chưa biết lựa chọn bán. Có size/màu thì truyền ngay để đọc đúng biến thể. size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion là tỉnh/thành tra ETA. availability cho biết từng dữ kiện hiện có.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
- {name:'apply_customer_state',description:'Cập nhật đúng thông tin khách vừa cung cấp, sửa hoặc yêu cầu bỏ. Gọi trước các tool phụ thuộc thông tin đó.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]}}}}}}},
+ {name:'apply_customer_state',description:'Cập nhật thông tin khách vừa cung cấp/sửa/bỏ trước tool phụ thuộc. field dùng nguyên đường dẫn trong enum; số đo có cả tiền tố measurements., không dùng riêng tên kind.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]}}}}}}},
  {name:'recommend_size',description:'Chọn size bằng hồ sơ khách đã được code nhận và bảng size của đúng sản phẩm. Thiếu đầu vào thì hỏi phần tool yêu cầu, chưa gợi size.',parameters:{type:'OBJECT',properties:{subjectRef:string},required:['subjectRef']}},
  {name:'quote_cart',description:'Tính tiền từ lựa chọn, giá, phí và ưu đãi hiện hành do code cấp. Không truyền tổng tiền hoặc tự chọn ưu đãi.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const effectDeclarations=[
- {name:'add_to_cart',description:'Thêm lựa chọn khách muốn mua vào giỏ qua code; offerType chọn đúng cả set hoặc món lẻ từ nguồn. Chỉ báo đã thêm khi tool có kết quả commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
+ {name:'add_to_cart',description:'Thêm lựa chọn khách yêu cầu mua. subjectRef dùng PRODUCT; offerType, size, color, quantity theo lựa chọn khách. Code tự tra và kiểm giá/tồn của cấu hình này; không cần read_product lặp lại chỉ để cấp quyền thêm. Chỉ báo đã thêm sau commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
  {name:'change_cart_item',description:'Đổi số lượng, size/màu của thành phần hoặc bỏ dòng giỏ bằng ref code đã cấp. Đổi size/màu dùng SET_COMPONENT_VARIANT, componentRole từ giỏ hiện tại và size/color khách chọn. Code kiểm biến thể, quyền và commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
  {name:'confirm_purchase',description:'Gửi ý định xác nhận mua của tin khách hiện tại vào luồng checkout đã có. Cần preview, thông tin riêng tư và revalidation hợp lệ từ code; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
 ];
@@ -33,11 +34,17 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   declarations=request.availableTools.map(name=>{const d=known.find(d=>d.name===name);requireThat(d,'CAPABILITY_UNAVAILABLE');return d;});
  }
  const c=request.context;
- const subject=s=>({subjectRef:s.ref,kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
+ declarations=structuredClone(declarations);
+ for(const declaration of declarations){
+  const kind=['read_product','recommend_size','add_to_cart'].includes(declaration.name)?'PRODUCT':declaration.name==='change_cart_item'?'CART_LINE':null;
+  const refs=c.boundSubjects.filter(s=>s.kind===kind).map(s=>s.ref);
+  if(refs.length)declaration.parameters.properties.subjectRef={type:'STRING',enum:[...new Set(refs)]};
+ }
+ const subject=s=>({...(['PRODUCT','CART_LINE'].includes(s.kind)?{subjectRef:s.ref}:{evidenceRef:s.ref}),kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=p=>{
-  const value={...p};delete value.ref;
+  const value={...p};delete value.ref;delete value.requestedOfferType;
   const current=c.runtimeProducts?.find(x=>x.subjectRef===p.subjectRef);
   for(const key of ['content','attributes','presentation','sizeCharts']){
    if(value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
@@ -70,7 +77,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
-  tools:declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
+  tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  requireThat(bytes(body)<=32768,'OWNER_REQUEST_BOUND');return body;
 }
@@ -102,6 +109,10 @@ export function createGeminiCommerceInference(config,dependencies={}){
   const signal=AbortSignal.any([request.signal,AbortSignal.timeout(config.timeoutMs??90000)]);
   try{
    const body=buildGeminiCommerceRequest(request,config.declarations??readOnlyDeclarations);
+   const wire=JSON.stringify(body);
+   telemetry.requestBytes=Buffer.byteLength(wire);telemetry.requestHash=createHash('sha256').update(wire).digest('hex');
+   telemetry.functionCallingMode=body.toolConfig.functionCallingConfig.mode;
+   telemetry.declaredToolCount=body.tools.reduce((n,tool)=>n+tool.functionDeclarations.length,0);
    if(!token||token.expiresAt-Date.now()<60000){
     stage='AUTH';
     if(dependencies.getToken)token={value:await dependencies.getToken(),expiresAt:Date.now()+3600000};
@@ -119,7 +130,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    }
    stage='GENERATION';telemetry.providerRequests++;
    const response=await fetchImpl(vertexGenerateEndpoint(config.projectId,'global',config.model),{method:'POST',redirect:'error',signal,
-    headers:{authorization:'Bearer '+token.value,'content-type':'application/json'},body:JSON.stringify(body)});
+    headers:{authorization:'Bearer '+token.value,'content-type':'application/json'},body:wire});
    telemetry.httpStatus=response.status;
    if(!response.ok){if(response.status===401)token=null;await response.body?.cancel();throw new Error('GENERATION_HTTP');}
    stage='RESPONSE';
@@ -132,7 +143,9 @@ export function createGeminiCommerceInference(config,dependencies={}){
    telemetry.finishReason=finish==null?null:safeFinishReasons.has(finish)?finish:'UNKNOWN';
    stage='COMPLETION';
    requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
-   return {...parseGeminiGeneration(data),telemetry};
+   const parsed=parseGeminiGeneration(data);
+   telemetry.unexpectedToolCall=request.toolsAllowed===false&&parsed.kind==='TOOLS';
+   return {...parsed,telemetry};
   }catch(error){
    const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';
    telemetry.failureStage=stage;

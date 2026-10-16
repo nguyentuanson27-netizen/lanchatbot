@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
 const config={model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-project',location:'global'};
 const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo dữ liệu nguồn.',contents:[{role:'user',parts:[{text:'Áo bao nhiêu em?'}]}],
@@ -143,6 +144,43 @@ test('composed capabilities restrict the actual native declarations and expose o
  assert.ok(handoff.parameters.properties.reason.enum.includes('CUSTOMER_REQUESTED_HUMAN'));
  assert.ok(!handoff.parameters.properties.reason.enum.includes('ADMIN_REQUEST'));
  r.availableTools=['invented'];assert.throws(()=>buildGeminiCommerceRequest(r),/CAPABILITY_UNAVAILABLE/);
+});
+
+test('tool product identities are restricted to bound products, not offer evidence or cart lines',()=>{
+ const r=request();r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Áo'},
+  {ref:'offer:P1:AO',kind:'VARIANT',productId:'P1',label:'Áo lẻ'},{ref:'line-1',kind:'CART_LINE',label:'Áo trong giỏ'}];
+ r.availableTools=['read_product','recommend_size','add_to_cart','change_cart_item'];
+ const b=buildGeminiCommerceRequest(r),decls=b.tools[0].functionDeclarations,subjects=JSON.parse(b.contents[0].parts[0].text).trusted.subjects;
+ for(const name of ['read_product','recommend_size','add_to_cart'])assert.deepEqual(decls.find(d=>d.name===name).parameters.properties.subjectRef.enum,['P1']);
+ assert.deepEqual(decls.find(d=>d.name==='change_cart_item').parameters.properties.subjectRef.enum,['line-1']);
+ assert.equal(subjects.find(s=>s.kind==='VARIANT').subjectRef,undefined);
+ assert.equal(subjects.find(s=>s.kind==='VARIANT').evidenceRef,'offer:P1:AO');
+ assert.equal(effectDeclarations[0].parameters.properties.subjectRef.enum,undefined);
+});
+
+test('read results do not advertise an output-only field as an alternative input parameter',()=>{
+ const r=request();r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{
+  subjectRef:'P1',requestedOfferType:'AO',offerType:'AO',variantId:'offer:P1:AO',availableOffers:['AO','SET']}}}}]});
+ const projected=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+ assert.equal(projected.requestedOfferType,undefined);assert.equal(projected.offerType,'AO');
+ assert.equal(projected.variantId,'offer:P1:AO');assert.equal(r.contents.at(-1).parts[0].functionResponse.response.data.requestedOfferType,'AO');
+});
+
+test('the actual final-only HTTP body has no declarations and its hash and tool-mode violation are retained',async()=>{
+ const r=request();r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:2};
+ r.contents.push({role:'model',parts:[{functionCall:{id:'f1',name:'read_policy',args:{}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:{id:'f1',name:'read_policy',response:{status:'OK'}}}]});
+ let calls=0,wire;
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+  calls++;wire=init.body;return new Response(JSON.stringify(body([{functionCall:{name:'read_policy',args:{}}}])));
+ }});
+ const result=await infer(r),sent=JSON.parse(wire);
+ assert.deepEqual(sent.tools,[]);assert.equal(sent.toolConfig.functionCallingConfig.mode,'NONE');
+ assert.equal(sent.contents[2].parts[0].thoughtSignature,'opaque');assert.equal(sent.contents[3].parts[0].functionResponse.id,'f1');
+ assert.equal(result.telemetry.requestHash,createHash('sha256').update(wire).digest('hex'));
+ assert.equal(result.telemetry.requestBytes,Buffer.byteLength(wire));assert.equal(result.telemetry.functionCallingMode,'NONE');
+ assert.equal(result.telemetry.declaredToolCount,0);assert.equal(result.telemetry.unexpectedToolCall,true);
+ assert.equal(result.kind,'TOOLS');assert.equal(calls,1);
 });
 
 test('current fit comparison fields and actual remaining tool capabilities reach the owner without private authority',()=>{
