@@ -3,8 +3,8 @@
 ## Current owner-requested offer-read replay — 2026-10-16
 
 - [x] Register [scope](../apps/worker/evals/single-agent-commerce-read-only/offer-read-run-20261016/SCOPE.md), unchanged population/models/prompts and existing six-first stopping rule. Restore the existing approved credential route without substitution or printing secrets.
-- [ ] Commit/clean/seal runtime source; run zero-generation preflights/current source readback, then six priority outcomes once; conditionally finish the registered remainder at the same source.
-- [ ] Preserve raw before scored primary/diagnosis, audit request/binding/firewall/metrics/coverage and deliver actual results on PR391; no automatic fix or extra round.
+- [x] Seal10040a9d after credential format/output corrections; actual config/stateful/source preflightsPASS/0owner-verifier generations. Six once:2USABLE/2NEEDS_EDIT/2fallback;19HTTP/0retry/error/timeout. Hold18B1+7statefulNOT_RUN, no test DB created; not a full31-outcome run.
+- [x] Raw9bf1eeda before primary2ece05f2 before diagnosis;11raw hashes/13owner dispatch hashes/6exact verifier bindings/4eligible exact replies/0observed evaluator leaks audited. [Actual results/conversations/commands/limitations](../apps/worker/evals/single-agent-commerce-read-only/offer-read-run-20261016/CHECKPOINT_B.md). Stop sales/live acceptance; no post-result fix or extra generation, source publication, A/C promotion or live action.
 
 ## Current reviewed selling-option correction — 2026-10-16
 
