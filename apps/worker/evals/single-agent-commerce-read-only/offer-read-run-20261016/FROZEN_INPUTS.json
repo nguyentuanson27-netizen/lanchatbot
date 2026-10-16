@@ -165,7 +165,7 @@
   "verificationSourceSha": "4ceaefa71acdf44a7fe3bda94cf10d503faa0ed6",
   "credentialLauncher": {
     "file": "c3-offer-replay-session-20261016.py",
-    "sha256": "a779176d154c4b324e904a7b68f0e67c0b4e6e052da6f223001e59b2cc11e3b4",
+    "sha256": "875724a9b92ecc677a0549a41b701edbd49d3831fe9be69506bc12ffd6c5e218",
     "route": "C3_VERTEX_CREDENTIAL_FILE",
     "source": "EXISTING_SERVING_VERTEX_CREDENTIAL_FILE_SAME_PROJECT",
     "secretsInEvidence": false
@@ -185,6 +185,15 @@
       "code": "EXISTING_CREDENTIAL_SCOPE_MISMATCH",
       "cause": "EXTRACTED_EMAIL_PRIVATEKEY_REGION_REPRESENTATION_NOT_NATIVE_SERVICE_ACCOUNT_JSON",
       "providerGenerations": 0
+    }
+  ],
+  "preflightHarnessNotes": [
+    {
+      "stage": "CONFIG_PREFLIGHT",
+      "exitCode": 0,
+      "stdout": "NOT_CAPTURED_BY_WINDOWS_NESTED_CHILD",
+      "providerGenerations": 0,
+      "correction": "EXPLICIT_CHILD_OUTPUT_CAPTURE_SAME_AS_EXISTING_SOURCE_SESSION"
     }
   ]
 }
