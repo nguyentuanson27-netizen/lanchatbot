@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current native contract/continuation fix and replay — 2026-10-16
+
+- [x] Refresh main `296cdcfb`, giữ intake `40f400e7`, historical labels/raw và [plan/scope](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/PLAN.md). Không đổi policy/source hoặc đoán mapping ETA.
+- [x] RED→GREEN tại existing effect/adapter boundaries: 41 effect / 29 adapter PASS; native two-action semantics rõ, không lặng lẽ bỏ field; bỏ cart chỉ khi khớp exact public readback. Native identity/signature và original context giữ nguyên. Minimum GREEN `a2bc1208`.
+- [x] Sửa owner advice/policy/voice tại chỗ, giảm 921 bytes/7,83%, verifier giữ nguyên. Self-review/full worker 1.796 PASS; Node eval cuối 492 PASS/2 optional SKIP; typecheck/build/lint exit 0. [Commands, các failure/harness corrections và headroom còn hạn chế](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/PREPARATION.md). Không claim semantic/naturalness đã cải thiện bằng unit test.
+- [x] COD/bank controls đều 24/24 PASS, 0 provider generations, cả hai DB test đã drop; raw reports được giữ. Freeze/commit/clean source và preflights trước run mới.
+- [ ] Thu một run đủ 24 B1 + 7 stateful/N1, raw trước primary trước diagnosis; audit request/binding/firewall và review toàn actual outcomes. Update PR391 và dừng, không automatic next round, Phase C hoặc live action.
+
 ## Current advisory/context correction and full replay — 2026-10-16
 
 - [x] Refresh main `296cdcfb`, ghi intake `995b1d4a` và [kế hoạch/scope](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PLAN.md). Giữ raw/nhãn lịch sử; trace chỉ đọc xác nhận prep/transit có số nhưng chưa có ánh xạ TP.HCM tới vùng nguồn, không đoán ETA.

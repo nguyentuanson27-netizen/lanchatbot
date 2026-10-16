@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current native contract/continuation fix and replay — 2026-10-16
+
+Owner yêu cầu sửa và chạy lại sau run `c7105bd1`. Intake `40f400e7`, refreshed main/implementationBaseSha `296cdcfb`. [Plan](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/PLAN.md) / [scope](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/SCOPE.md): validate argument theo action trước effect, reuse đúng public cart readback để bỏ response trùng, làm rõ native descriptions và owner advice/policy/voice. Verifier/model/budget/source/corpus không đổi, không tăng bound hoặc cắt signature. Minimum GREEN `a2bc1208`; owner sau giảm 921 bytes/7,83%, không thêm ví dụ case.
+
+[Preparation và giới hạn](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/PREPARATION.md): observed effect RED 38 PASS/3 FAIL → 41 PASS, adapter RED 27 PASS/2 FAIL → 29 PASS. Full worker 1.796 PASS, Node eval cuối 492 PASS/2 optional SKIP sau một failure local-harness không reproduce, worker typecheck/build/lint exit 0. Controlled long-signature variation còn 284 bytes headroom, không chứng minh mọi variance đều vừa. Hoàn tất COD/bank controls rồi freeze/commit/clean source, preflight và chạy đúng một run đủ 24 B1 + 7 stateful/N1. Raw trước primary trước diagnosis; cập nhật PR391 rồi dừng, không extra run, source publication, A/C/live promotion. Mapping ETA vẫn cần nguồn có thẩm quyền, A OWNER_BYPASS giữ nguyên.
+
 ## Current advisory/context correction and full replay — 2026-10-16
 
 Owner yêu cầu sửa và chạy lại sau đủ 31 outcomes. [Kế hoạch](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PLAN.md) và [scope](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/SCOPE.md): thay tại chỗ đoạn verifier về cảm giác/công năng và policy theo phạm vi câu hỏi; owner về referent thành phần, thiếu POS và giọng chat/giữ lời khuyên nhất quán. Không thêm case answers, regex, parser, budget/retry hoặc đổi runtime authority. Đọc source chỉ đọc xác nhận prep/transit có số nhưng chưa có ánh xạ TP.HCM sang key vùng: không tự chọn vùng hoặc tạo ETA. A OWNER_BYPASS và checkout dependency giữ nguyên.
