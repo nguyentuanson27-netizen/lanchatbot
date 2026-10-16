@@ -85,12 +85,14 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    ...(offers.has(p.subjectRef)?{availableOffers:offers.get(p.subjectRef)}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
-   content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
+   presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
    policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state,
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
+ // Preserve source prose and provenance as reference data, apart from verified typed fields.
+ const catalogDescriptions=[...products.values()].filter(p=>p.content!=null).map(p=>({subjectRef:p.subjectRef,content:p.content}));
  const body={systemInstruction:{parts:[{text:request.instructions}]},
-  contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
+  contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView,catalogDescriptions})}]},...contents],
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  requireThat(bytes(body)<=32768,'OWNER_REQUEST_BOUND');return body;
