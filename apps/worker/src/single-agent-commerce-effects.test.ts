@@ -51,32 +51,6 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
-  it.each([
-    { action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "M", quantity: 2 },
-    { action: "SET_QUANTITY", quantity: 2, size: "M" },
-    { action: "REMOVE_LINE", quantity: 2 },
-  ])("rejects fields belonging to another action before any partial cart change ($action)", async args => {
-    const s = await setup(); await s.tools.invoke(s.add);
-    const before = structuredClone(s.current()), line = before.cart!.value.lines[0]!;
-    expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, ...args } }))
-      .toEqual({ status: "REJECTED", reason: "TOOL_ARGUMENTS" });
-    expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
-    expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
-  });
-  it("commits separate valid variant and quantity actions in one existing batch", async () => {
-    const s = await setup(); await s.tools.invoke(s.add);
-    const line = s.current().cart!.value.lines[0]!;
-    const calls = [
-      { name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "M" } },
-      { name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_QUANTITY", quantity: 2 } },
-    ];
-    const results = await s.tools.invokeBatch(calls);
-    expect(results.map(r => r.status)).toEqual(["OK", "OK"]);
-    expect(s.current().cart!.value.lines[0]).toMatchObject({ quantity: 2, components: [expect.objectContaining({ size: "M", color: "NAVY" })] });
-    const revision = s.current().revision;
-    expect((await s.tools.invoke(calls[1]!)).status).toBe("OK");
-    expect(s.current().revision).toBe(revision);
-  });
   it.each(["COLOR_REQUIRED", "INVALID"] as const)("preserves typed selection feedback without committing or granting a fit (%s)", async status => {
     const s = await setup();
     const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };

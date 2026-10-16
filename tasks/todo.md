@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current owner rollback to the preceding run — 2026-10-16
+
+- [x] Owner-requested rollback sau `7449679c`: sáu active Git blobs khớp `40f400e7d3d121fa12da7a2a02ca1cf8fdccb9ee`, gỡ toàn bộ treatment của lượt vừa sửa. Giữ mọi commit/raw/frozen inputs/verdict/review, không reset hoặc force-push; các mục dưới là lịch sử.
+- [x] Focused effects 37 PASS; adapter/protocol/comparison 47 PASS; worker build/lint exit 0, lint có `tsc --noEmit` typecheck. Self-review và exact restored-blob readback; không test mới hoặc full-suite/CI PASS claim.
+- [x] Không chạy model sau rollback, không đổi model/config ngoài restore. Giữ nguyên [baseline historical 24/5/2](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/CHECKPOINT_B.md) và [negative historical 17/5/9](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/CHECKPOINT_B.md), không dùng kết quả cũ làm một lần đo mới.
+- [ ] Sales/live STOP, source checkout BLOCKED, A OWNER_BYPASS. Rollback không sửa lỗi quantity/continuation hoặc giọng/decision còn tồn tại ở bản trước; không automatic run/fix, Phase C, publication, merge/deploy/live send.
+
 ## Current native contract/continuation fix and replay — 2026-10-16
 
 - [x] Refresh main `296cdcfb`, giữ intake `40f400e7`, historical labels/raw và [plan/scope](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/PLAN.md). Không đổi policy/source hoặc đoán mapping ETA.

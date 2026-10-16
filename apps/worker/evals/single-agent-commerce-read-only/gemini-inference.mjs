@@ -14,22 +14,22 @@ const publicSourceReasons=new Set(['POS_SNAPSHOT_UNAVAILABLE','CATALOG_SNAPSHOT_
  'SIZE_UNSUPPORTED','PRICE_NOT_FOUND','FULFILLMENT_POLICY_NOT_FOUND','DELIVERY_REGION_REQUIRED','ETA_DATA_MISSING_OR_EXPIRED']);
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
- {name:'search_products',description:'Tìm mã, tên hoặc nhu cầu. MATCHED xác định đúng mẫu; AMBIGUOUS chỉ là gợi ý, không nghĩa shop hết mẫu. products.subjectRef dùng đọc tiếp.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc PRODUCT ref. offerType chọn món bán; bỏ thì sellingOptions trả từng lựa chọn, facts ngoài cùng chỉ là mặc định. size/color tra biến thể, không chứng minh fit. deliveryRegion tra ETA; availability cho biết phần thiếu.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
- {name:'read_policy',description:'Đọc policy hiện hành. SHOP_RULES/orderEligibility=null chưa xét đơn riêng của khách.',parameters:{type:'OBJECT',properties:{}}},
+ {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
+ {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Có offerType thì chỉ đọc lựa chọn đó. Bỏ offerType thì sellingOptions trả giá/tồn riêng từng lựa chọn bán; offerType/facts ngoài cùng vẫn là lựa chọn mặc định, không phải giá chung cho áo lẻ và cả bộ. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
+ {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
- {name:'apply_customer_state',description:'Lưu thông tin khách vừa cho/sửa/bỏ trước tool phụ thuộc. field dùng đúng enum, số đo có tiền tố measurements.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]}}}}}}},
- {name:'recommend_size',description:'Code chọn size từ hồ sơ khách và bảng đúng sản phẩm. Thiếu đầu vào thì hỏi phần tool yêu cầu.',parameters:{type:'OBJECT',properties:{subjectRef:string},required:['subjectRef']}},
- {name:'quote_cart',description:'Code tính quote từ giỏ/giá/ưu đãi/phí hiện hành. Không truyền tổng tiền.',parameters:{type:'OBJECT',properties:{}}},
+ {name:'apply_customer_state',description:'Cập nhật thông tin khách vừa cung cấp/sửa/bỏ trước tool phụ thuộc. field dùng nguyên đường dẫn trong enum; số đo có cả tiền tố measurements., không dùng riêng tên kind.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]}}}}}}},
+ {name:'recommend_size',description:'Chọn size bằng hồ sơ khách đã được code nhận và bảng size của đúng sản phẩm. Thiếu đầu vào thì hỏi phần tool yêu cầu, chưa gợi size.',parameters:{type:'OBJECT',properties:{subjectRef:string},required:['subjectRef']}},
+ {name:'quote_cart',description:'Tính tiền từ lựa chọn, giá, phí và ưu đãi hiện hành do code cấp. Không truyền tổng tiền hoặc tự chọn ưu đãi.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const effectDeclarations=[
- {name:'add_to_cart',description:'Thêm lựa chọn mua bằng PRODUCT ref; code tự kiểm giá/tồn cho offer/size/color/quantity. Không cần read trước. Chỉ báo đã thêm sau commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
- {name:'change_cart_item',description:'Sửa CART_LINE ref. SET_COMPONENT_VARIANT chỉ nhận componentRole và size/color; SET_QUANTITY chỉ quantity; REMOVE_LINE không field sửa. Đổi cả biến thể và số lượng: hai action, có thể cùng batch. Argument lẫn action bị từ chối.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
- {name:'confirm_purchase',description:'Xác nhận ý định mua qua checkout preview đã được code kiểm. Không tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
+ {name:'add_to_cart',description:'Thêm lựa chọn khách yêu cầu mua. subjectRef dùng PRODUCT; offerType, size, color, quantity theo lựa chọn khách. Code tự tra và kiểm giá/tồn của cấu hình này; không cần read_product lặp lại chỉ để cấp quyền thêm. Chỉ báo đã thêm sau commit thành công.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:string,quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef']}},
+ {name:'change_cart_item',description:'Đổi số lượng, size/màu của thành phần hoặc bỏ dòng giỏ bằng ref code đã cấp. Đổi size/màu dùng SET_COMPONENT_VARIANT, componentRole từ giỏ hiện tại và size/color khách chọn. Code kiểm biến thể, quyền và commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
+ {name:'confirm_purchase',description:'Gửi ý định xác nhận mua của tin khách hiện tại vào luồng checkout đã có. Cần preview, thông tin riêng tư và revalidation hợp lệ từ code; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const handoffDeclarations=[
- {name:'request_handoff',description:'Đề nghị chuyển người theo reason enum; code quyết định rule/tag và commit. Hỏi policy trước mua thì đọc quy định. Chỉ báo đã chuyển sau commit.',parameters:{type:'OBJECT',properties:{reason:{type:'STRING',enum:HandoffReasonV2Schema.options.filter(r=>r!=='ADMIN_REQUEST')}},required:['reason']}},
+ {name:'request_handoff',description:'Đề nghị chuyển người khi khách yêu cầu gặp nhân viên, cần xử lý hậu mãi hoặc công việc ngoài khả năng hiện có. Hỏi quy định trước mua thì đọc policy và trả lời. Code quyết định rule, tag và tin báo; tool chỉ thành công sau commit và đọc lại kết quả. Không hứa đã chuyển trước kết quả.',parameters:{type:'OBJECT',properties:{reason:{type:'STRING',enum:HandoffReasonV2Schema.options.filter(r=>r!=='ADMIN_REQUEST')}},required:['reason']}},
 ];
 export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarations){
  if(request.availableTools){
@@ -70,15 +70,6 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
-  const cart=data.cart;
-  if(['add_to_cart','change_cart_item'].includes(response.name)&&response.response.status==='OK'&&cart?.status==='OPEN'&&cart.currency==='VND'&&
-   Array.isArray(cart.lines)&&c.state.cartQuote&&Array.isArray(c.state.cartItems)){
-   const quote={cartId:cart.cartId,cartVersion:cart.revision,subtotalVnd:cart.subtotalVnd,shippingFeeVnd:cart.shippingFeeVnd,
-    discountTotalVnd:cart.discountTotalVnd,grandTotalVnd:cart.grandTotalVnd};
-   const items=cart.lines.map(line=>({subjectRef:line.lineId,productRef:line.parentProductId,offerType:line.offerId,quantity:line.quantity,
-    components:line.components.map(x=>({componentRole:x.componentRole,size:x.size,color:x.color}))}));
-   if(canonicalJsonV1(quote)===canonicalJsonV1(c.state.cartQuote)&&canonicalJsonV1(items)===canonicalJsonV1(c.state.cartItems))delete data.cart;
-  }
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']

@@ -1,5 +1,13 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current owner rollback to the preceding run — 2026-10-16
+
+Owner yêu cầu “rollback về vòng trc” sau report head `7449679cd1b4e5dd2db3b27d8eda86305b6668b7`. Khôi phục toàn bộ treatment mới trong sáu active files (effects/tests, Gemini adapter/tests, owner prompt, manifest) về exact Git blobs của `40f400e7d3d121fa12da7a2a02ca1cf8fdccb9ee`. Bao gồm gỡ guard, cart-dedup và native/owner changes vừa thử; không tự giữ một phần bản sửa. Tạo commit mới, không reset/rewrite history; raw, frozen inputs, verdicts và reviews của run `f2289491` giữ nguyên theo source của chúng. Các mục dưới là lịch sử của từng source, không còn xác định active treatment nếu mâu thuẫn mục rollback này.
+
+Verification thực sự chạy: `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-effects.test.ts` → 37 PASS; `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs` → 47 PASS; worker build và lint mỗi command exit 0. Lint chạy `tsc -p tsconfig.json --noEmit`, có typechecking; không claim chạy riêng alias typecheck hoặc full suite. Self-review dùng six-blob readback, bounded diff và giữ nguyên evidence. Không thêm test/mechanism hoặc provider generation.
+
+Model vẫn Gemini 3.5 Flash Lite High owner / GPT-6.1 Sol High verifier theo restored config. [24/5/2 của run khôi phục](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/CHECKPOINT_B.md) và [17/5/9 của run bị rollback](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/CHECKPOINT_B.md) đều là historical N1, không phải kết quả mới sau rollback. Bản cũ vẫn còn lỗi quantity/continuation và giọng/decision; không coi rollback là sửa các lỗi đó. Cập nhật PR391 rồi dừng. Sales/live STOP, source checkout BLOCKED và A OWNER_BYPASS giữ nguyên; không deploy/live send, source publication hoặc Phase C.
+
 ## Current native contract/continuation fix and replay — 2026-10-16
 
 Owner yêu cầu sửa và chạy lại sau run `c7105bd1`. Intake `40f400e7`, refreshed main/implementationBaseSha `296cdcfb`. [Plan](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/PLAN.md) / [scope](../apps/worker/evals/single-agent-commerce-read-only/native-contract-run-20261016/SCOPE.md): validate argument theo action trước effect, reuse đúng public cart readback để bỏ response trùng, làm rõ native descriptions và owner advice/policy/voice. Verifier/model/budget/source/corpus không đổi, không tăng bound hoặc cắt signature. Minimum GREEN `a2bc1208`; owner sau giảm 921 bytes/7,83%, không thêm ví dụ case.
