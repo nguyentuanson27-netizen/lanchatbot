@@ -1,0 +1,98 @@
+{
+  "sourceSha": "183ad77ef8116a28c0f6cbec22056a9ae5b29f2b",
+  "registered": 7,
+  "recorded": 7,
+  "repetitions": 1,
+  "maximumGenerationInvocations": 24,
+  "generationInvocations": 13,
+  "ownerInvocations": 9,
+  "verifierInvocations": 4,
+  "generationHttpRequests": 13,
+  "unknownRequestAccounting": 0,
+  "httpStatusCounts": {
+    "200": 13
+  },
+  "models": {
+    "owner": [
+      "gemini-3.5-flash-lite"
+    ],
+    "verifier": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "automaticRetries": 0,
+  "knownOwnerAuthRequests": 1,
+  "codexAuthRequests": null,
+  "errors": 0,
+  "errorRate": 0,
+  "verifierErrors": 0,
+  "timeouts": 0,
+  "timeoutRate": 0,
+  "verifierTimeouts": 0,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 4,
+    "HANDOFF": 2,
+    "NO_SEND": 1
+  },
+  "nonEligibleRate": 0.42857142857142855,
+  "fallbackReasons": {},
+  "verifierVerdicts": {
+    "PASS": 4
+  },
+  "finalOnlyRequests": 1,
+  "finalOnlyToolViolations": 0,
+  "inputTokens": 61031,
+  "outputTokens": 6722,
+  "tokenCoverage": {
+    "complete": 13,
+    "denominator": 13
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "percentileMethod": "nearest rank; descriptive N1; no added threshold",
+  "ownerLatency": {
+    "n": 9,
+    "p50Ms": 1914.5211000000018,
+    "p95Ms": 4806.5202999999965
+  },
+  "verifierLatency": {
+    "n": 4,
+    "p50Ms": 5133.6219999999885,
+    "p95Ms": 7806.100899999998
+  },
+  "addedVerificationLatency": {
+    "n": 4,
+    "p50Ms": 6626.554799999998,
+    "p95Ms": 11253.699599999996
+  },
+  "endToEndLatency": {
+    "n": 7,
+    "p50Ms": 20466.997199999998,
+    "p95Ms": 39400.7214
+  },
+  "toolLatency": {
+    "n": 6,
+    "p50Ms": 1302.997199999998,
+    "p95Ms": 6971.201400000002
+  },
+  "runtimeToolCalls": 7,
+  "sourceCounters": {
+    "embedding": 0,
+    "owner": 9,
+    "verifier": 4
+  },
+  "sendEnabled": false,
+  "privateCheckout": [
+    {
+      "caseId": "stateful-private-checkout",
+      "mode": "PRIVATE_CODE_PATH",
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "failure": {
+        "stage": "PLANNER",
+        "reasonCode": "CART_ETA_UNAVAILABLE",
+        "readinessReasons": []
+      }
+    }
+  ]
+}

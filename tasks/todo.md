@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Latest model replay — 2026-10-16
+
+- [x] Freeze/commit/clean source `183ad77e`, unchanged models/config/corpora, then zero-generation preflights/source readback. Reuse unchanged executable tests and COD/bank controls; canonical builds actually rerun inside the source-check/B1 runner.
+- [x] Run exactly 24 B1 cases and seven ordered B2/B3 steps, N1, 90 generation HTTP requests / maximum 120, retry 0. All 31 outcomes retained; owned provider database dropped. Raw `725c4765` before primary `389fa355` before rejected-draft diagnosis.
+- [x] Review every whole actual terminal/state outcome: B1 18 USABLE / 1 NEEDS_EDIT / 5 fallback; B2/B3 four useful captured transaction replies and one successful requested handoff, with checkout handoff and downstream no-send. Current-source checkout still lacks authoritative ETA; no completed purchase.
+- [x] Audit 39 raw/source hashes, 65 owner dispatch hashes, 25 exact verifier bindings, complete request accounting and zero evaluator/private-input leaks in measured scope. Report latency/tokens/cost coverage, all failures and limits; [full report and conversations](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/CHECKPOINT_B.md). STOP sales/live acceptance; no post-result patch/new round or A/C/live promotion.
+
 ## Current reviewed root-cause fix — 2026-10-16
 
 - [x] Sửa [phương án fix theo review độc lập GPT-6.1 Sol High](plan.md#current-root-cause-fix-after-independent-review--2026-10-16) trên source7fe9643b: bổ sung productless/policy/cart fallback qua producer/schema/transaction, làm rõ alias path và giữ UNKNOWN của các nguyên nhân chưa chứng minh. Owner sau đó yêu cầu implementation; refresh main296cdcfb, [record](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-20261016/IMPLEMENTATION.md). Implementation/code verification PASS tại777616dd; provider NOT_RUN, kết quả lịch sử giữ nguyên.
@@ -12,7 +19,7 @@
 - [ ] F6 current-source checkout completion — BLOCKED/CART_ETA_UNAVAILABLE; cần dữ liệu fulfillment/ETA có thẩm quyền. Không điền fixture/default, publish nguồn hoặc tính handoff thành checkout hoàn tất.
 - [x] F7 — Thay các đoạn owner về hành động mua, bound ref và tên đầy đủ; owner9982→10078bytes (+0.96%), active hash only. ACK code phân biệt cart open/change, observed RED→GREEN effects31PASS; Node43PASS. Verifier/config/corpus/frozen evidence giữ nguyên; chất lượng hội thoại mới chưa đo.
 - [x] Chạy focused RED→GREEN và self-review; final777616dd worker130files/1779PASS, eval485PASS+2optionalSKIP; exact focused123/provider-protocol31/protected-reply21PASS; worker typecheck/build/lint exit0. Shared source unchanged từ checks7fb0732a: contracts222/business356/database246PASS+30optionalSKIP, typecheck/build exit0. Giữ failed COD control trước fix và hai raw composed PASS. Full repository pnpm check/remote CI không được claim PASS;0new provider generations.
-- [ ] Khi thực hiện run kế tiếp: freeze/commit/clean source và hashes; preflight0generation + COD/bank controls; cùng24B1 N1/max96 và7stateful N1/max24, không extra attempts. Raw trước primary actual-terminal review; giữ complete denominator/unknowns, metrics theo coverage, báo B1 usability và B2/B3 action completion riêng; STOP sau một batch, không A/C/live promotion.
+- [x] Subsequent requested model replay completed at183ad77e: 24B1 + 7stateful, N1, 90/120generations, no retry. Preflight/source checks and canonical builds ran; unchanged COD/bank controls were reused as explicitly frozen in SCOPE, not claimed rerun. Raw before primary, complete denominator and separate B1/B2 outcomes are linked in the latest section above. STOP after this batch; no A/C/live promotion.
 
 ## Owner-requested B2/B3 replay — 2026-10-16
 
