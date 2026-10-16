@@ -98,7 +98,9 @@ export async function createCommerceEffectTools(input: {
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
       }), ...selectionClaims],
       policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
-      receipts: [...stateReceipts, ...(receipt ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
+      // Reuse the selection readback: a known contradiction invalidates this
+      // receipt's current scope; unavailable source data adds no new assertion.
+      receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
   async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
     const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,
@@ -265,7 +267,7 @@ export async function createCommerceEffectTools(input: {
     if (receipt && failedEffect) return { disposition: "HANDOFF", reason: uncertain ? "UNKNOWN_COMMIT" : "PARTIAL_EFFECT", text: null, fallbackId: null };
     if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
     await input.base.readback(); current = await read(); await refreshAuthority(); const world = snapshot();
-    if (!world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
+    if (!world.effectReceipts.some(r => r.ref === receipt!.ref) || !world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
     return { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"

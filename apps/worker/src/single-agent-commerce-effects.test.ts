@@ -3,7 +3,7 @@ import { applySalesCycleCommand, computeBankTransferPolicyHash, computeOrderPrev
 import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
-import { hardPrecheck } from "./single-agent-semantic-verifier-boundary.js";
+import { hardPrecheck, makeBinding } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { CartSelectionQuery } from "./realtime-sales-catalog.js";
 
@@ -300,6 +300,32 @@ describe("code-owned commerce effects and recovery", () => {
   it("receipt recovery never overrides a privacy/permission no-send", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     expect((await s.tools.recover!({ disposition: "NO_SEND", reason: "PRIVACY", text: null, fallbackId: null })).disposition).toBe("NO_SEND");
+  });
+  it.each(["CHANGED", "UNAVAILABLE"] as const)("keeps receipt recovery distinct from contradictory or missing current selection (%s)", async source => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const selected = await s.select();
+    const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy áo cho chị nhé.", history: [],
+      ownerPrompt: "Tư vấn", verifierPrompt: "Kiểm", owner: async () => ({ kind: "FINAL", text: "Em đã thêm áo vào giỏ cho chị." }),
+      verifier: async () => {
+        if (source === "UNAVAILABLE") s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE"));
+        else { const changed = structuredClone(selected); changed.line.components[0]!.componentSku = "CHANGED-SOURCE-SKU"; s.select.mockResolvedValue(changed); }
+        return { result: { verdict: "PASS", violations: [] } };
+      } });
+    expect(result.terminal).toMatchObject(source === "CHANGED" ? { disposition: "NO_SEND", text: null }
+      : { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK" });
+    expect(s.tools.snapshot().effectReceipts).toHaveLength(source === "CHANGED" ? 0 : 1);
+    expect(s.commits).toHaveLength(1);
+  });
+  it("changes the egress snapshot when an unavailable selection becomes a known contradiction after recovery", async () => {
+    const s = await setup(); await s.tools.invoke(s.add); const selected = await s.select();
+    s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE")); await s.tools.readback();
+    const recovered = await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: "fallback", fallbackId: null });
+    const before = makeBinding(s.scope.requestId, recovered.text!, s.tools.snapshot());
+    const changed = structuredClone(selected); changed.line.components[0]!.componentSku = "CHANGED-SOURCE-SKU"; s.select.mockResolvedValue(changed);
+    const after = await s.tools.readback();
+    expect(after.effectReceipts).toEqual([]);
+    expect(makeBinding(s.scope.requestId, recovered.text!, after).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+    expect(s.commits).toHaveLength(1);
   });
   it("does not carry an old receipt acknowledgement into a changed binding", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
