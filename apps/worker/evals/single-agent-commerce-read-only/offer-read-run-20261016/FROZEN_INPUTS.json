@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "kind": "PRE_PROVIDER_FROZEN_INPUTS",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "intakeHead": "1fbad99d35d85d87600fa73040625e5a241e82ce",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "74c8102ef88e970fca18e84f5d186406a4d21ac5d27bafc383c6476b85394b43",
+    "verifier": "e8ba5ab607518cda125600c59d3130c9b17d5fbf3e62da485945cd2ae1ec449d"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "files": {
+    "manifest.json": {
+      "sha256": "bd1c8a4d491581a85977da6ee793d857518def7894b3296e30065e6bc00ba61d",
+      "bytes": 4219
+    },
+    "source-config.b1.json": {
+      "sha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+      "bytes": 901
+    },
+    "cases.b1.json": {
+      "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+      "bytes": 16225
+    },
+    "context-fix-20261016/cases.priority.json": {
+      "sha256": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+      "bytes": 16825
+    },
+    "stateful-cases.json": {
+      "sha256": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+      "bytes": 2075
+    },
+    "prompts/owner.vi.txt": {
+      "sha256": "74c8102ef88e970fca18e84f5d186406a4d21ac5d27bafc383c6476b85394b43",
+      "bytes": 10316
+    },
+    "prompts/verifier.vi.txt": {
+      "sha256": "e8ba5ab607518cda125600c59d3130c9b17d5fbf3e62da485945cd2ae1ec449d",
+      "bytes": 10875
+    },
+    "offer-read-run-20261016/SCOPE.md": {
+      "sha256": "5ec2a9340a9e45114c1afcb477c187e039ee6a13c30bb0509dd3de2270164ebb",
+      "bytes": 5811
+    }
+  },
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "tasks/plan.md": "0818e5a5dd274876eeca9c1666ee1499ae479f96",
+    "tasks/todo.md": "b1b5e8f5a4f6b7509a37316bf5c3c5b17d74be72"
+  },
+  "nativeToolSchemaHashes": {
+    "b1": "23867cc18d8d7c1fb37d789960f4807b8129b20cd607551b09021292ed0b40f8",
+    "stateful": "486f4134f7015c3281e335e425d62c62bd5a63dfd376fd277a866c917a3c859b"
+  },
+  "population": {
+    "b1": 24,
+    "stateful": 7,
+    "publicStateful": 6,
+    "privateCodeOnly": 1,
+    "repetitions": 1,
+    "firstSix": [
+      "b1-changed-occasion",
+      "b1-search-read",
+      "b1-buying-concern",
+      "b1-changed-occasion-v2",
+      "b1-partial-source-v2",
+      "b1-buying-concern-v2"
+    ],
+    "order": [
+      "b1-changed-occasion",
+      "b1-search-read",
+      "b1-buying-concern",
+      "b1-changed-occasion-v2",
+      "b1-partial-source-v2",
+      "b1-buying-concern-v2",
+      "b1-current-policy",
+      "b1-partial-source",
+      "b1-price",
+      "b1-component-stock",
+      "b1-policy-used",
+      "b1-current-policy-v2",
+      "b1-price-v2",
+      "b1-component-stock-v2",
+      "b1-search-read-v2",
+      "b1-policy-used-v2",
+      "b1-changed-occasion-v3",
+      "b1-current-policy-v3",
+      "b1-partial-source-v3",
+      "b1-price-v3",
+      "b1-component-stock-v3",
+      "b1-search-read-v3",
+      "b1-buying-concern-v3",
+      "b1-policy-used-v3"
+    ],
+    "maximumGenerationRequests": {
+      "b1": 96,
+      "stateful": 24,
+      "total": 120
+    }
+  },
+  "retry": 0,
+  "sendEnabled": false,
+  "humanAcceptance": null,
+  "stoppingRule": "Hold remaining18B1+7stateful if any first-six actual outcome is not USABLE and fact/action safe; no rerun",
+  "statefulCorpusUnchanged": true,
+  "canonicalB1Unchanged": true,
+  "sourcePublication": false,
+  "verificationSourceSha": "4ceaefa71acdf44a7fe3bda94cf10d503faa0ed6",
+  "credentialLauncher": {
+    "file": "c3-offer-replay-session-20261016.py",
+    "sha256": "d338f0a489653627a33b4943061b28097989e485997f0c528c27e357c016ecf9",
+    "route": "C3_VERTEX_CREDENTIAL_FILE",
+    "source": "EXISTING_SERVING_VERTEX_CREDENTIAL_FILE_SAME_PROJECT",
+    "secretsInEvidence": false
+  },
+  "ownerProjection": "ROLLED_BACK_BASELINE_TRUSTED_PRODUCTS_CONTENT_WITH_BOUNDED_SELLING_OPTIONS"
+}

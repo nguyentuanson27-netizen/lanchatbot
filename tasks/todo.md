@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current owner-requested offer-read replay — 2026-10-16
+
+- [x] Register [scope](../apps/worker/evals/single-agent-commerce-read-only/offer-read-run-20261016/SCOPE.md), unchanged population/models/prompts and existing six-first stopping rule. Restore the existing approved credential route without substitution or printing secrets.
+- [ ] Commit/clean/seal runtime source; run zero-generation preflights/current source readback, then six priority outcomes once; conditionally finish the registered remainder at the same source.
+- [ ] Preserve raw before scored primary/diagnosis, audit request/binding/firewall/metrics/coverage and deliver actual results on PR391; no automatic fix or extra round.
+
 ## Current reviewed selling-option correction — 2026-10-16
 
 - [x] Revise [plan](../apps/worker/evals/single-agent-commerce-read-only/offer-read-fix-20261016/PLAN.md) after independent REVISE_PLAN; record current main/intake, default/overflow semantics, unchanged fit prompt and separate later run identities.
