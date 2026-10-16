@@ -2,16 +2,16 @@
 
 ## Owner-requested replay after catalog prose correction — 2026-10-16
 
-- [ ] Freeze/commit/clean unchanged candidate and exact active inputs, then fresh preflights/source readback through approved route; no generation until identity is captured.
-- [ ] Run six priority cases once, review whole actual outcomes before rejected drafts; remaining18B1+7stateful only on six usable/safe results, same source/config and no retries. Keep every registered/recorded/held outcome.
-- [ ] Preserve raw before primary/diagnosis, audit current catalogDescriptions/fact preservation, label separation and complete request/binding/latency/token evidence; update report/PR391 and stop.
+- [x] Freeze cleanf6c4f368/exact inputs before generation; config/stateful preflight/source readbackPASS, canonical builds executed. Approved models/route unchanged, main296cdcfb.
+- [x] Six priority cases once:0USABLE/2NEEDS_EDIT/4fallback. Hold18B1+7statefulNOT_RUN per registered condition;19HTTP/0retry/error/timeout. One NONE/tool contract violation blocked; five generated finals all verified. No new repair batch.
+- [x] Raw74597c6d before primaryb8586708 before diagnosis;14catalog projections/5catalog+fact matches/11raw hashes/0observed evaluator leaks and complete metrics audited. [Report/STOP](../apps/worker/evals/single-agent-commerce-read-only/prose-boundary-run-20261016/CHECKPOINT_B.md); old labels unchanged, sales/liveSTOP/source checkoutBLOCKED/A OWNER_BYPASS.
 
 ## Owner-requested root-cause correction — 2026-10-16
 
 - [x] Refresh main296cdcfb; audit actual source/prompt/13captured requests and previous findings, separate confirmed context ambiguity, owner adherence, missing publication/mapping and unknown verifier trigger. No blanket verifier change or new source facts.
 - [x] Observed RED25PASS/3FAIL, implement minimal owner catalog/reference separation with original context/provenance/native history preserved; replace existing advisory/source paragraphs, owner+79bytes and active hash only. Code679c5343; [findings/implementation](../apps/worker/evals/single-agent-commerce-read-only/prose-boundary-fix-20261016/IMPLEMENTATION.md).
 - [x] Self-review; focused49/fullNodeeval491PASS+2optionalSKIP/worker consumer-boundary167/protected-reply21PASS; worker typecheck/build/lint exit0. Offline13bodies unchanged except intended fields, max17,560bytes/32KB; historical source/config/corpora/verdicts/primary unchanged.
-- [ ] Model adherence and sales-quality evidence for this new prompt/projection: NOT_RUN,0newprovider requests. Prior six outcomes/25held remain historical. Registry publication and authoritative destination mapping still unresolved; no source mutation or A/C/live promotion.
+- [x] Subsequent requested model replay measured this prompt/projection atf6c4f368:0USABLE/2NEEDS_EDIT/4fallback,25held, no sales-improvement claim. Registry publication and authoritative destination mapping still unresolved; no source mutation or A/C/live promotion. Original implementation-only0generation evidence remains unchanged.
 
 ## Owner-authorized context fix and priority replay — 2026-10-16
 
