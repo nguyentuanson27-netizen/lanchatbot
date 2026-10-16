@@ -3,8 +3,9 @@ import { runCommerceTurn, type OwnerGeneration, type VerifierRequest } from "./s
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct } from "./single-agent-commerce.test-support.js";
 
-const setup = () => {
+const setup = (description?: string) => {
   const f = fixtureProduct(), scope = commerceScope();
+  if (description) f.product.descriptionXml = description;
   const tools = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
   const verifier = vi.fn(async (_request: VerifierRequest) => ({ result: { verdict: "PASS", violations: [] } }));
@@ -15,6 +16,24 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it("lets the transport bound the exact provider projection instead of rejecting duplicated internal context", async () => {
+    const { buildGeminiCommerceRequest } = await import("../evals/single-agent-commerce-read-only/gemini-inference.mjs");
+    const s = setup("cotton ".repeat(850));
+    await s.tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    const context = s.tools.snapshot(), sizes: { internal: number; wire: number }[] = [];
+    const native = () => ({ ...tool("read_product", { subjectRef: "SM613" }), content: { role: "model" as const,
+      parts: [{ functionCall: { name: "read_product", args: { subjectRef: "SM613" } }, thoughtSignature: "s".repeat(3000) }] } });
+    const outputs = [native(), native(), final("Dạ chị.")];
+    const result = await runCommerceTurn({ ...s, ownerPrompt: "i".repeat(10000),
+      tools: { ...s.tools, invokeBatch: async () => [{ status: "OK", data: { subjectRef: "SM613", content: context.runtimeProducts![0]!.content } }] },
+      owner: async request => {
+        sizes.push({ internal: Buffer.byteLength(JSON.stringify(request)), wire: Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(request))) });
+        return outputs.shift()!;
+      } });
+    expect(sizes).toHaveLength(3); expect(sizes[2]!.internal).toBeGreaterThan(32768);
+    expect(sizes.every(s => s.wire <= 32768)).toBe(true);
+    expect(result.terminal.reason).toBe("PASS"); expect(s.verifier).toHaveBeenCalledOnce();
+  });
   it("exposes the remaining existing tool budget to each native continuation without granting extra rounds", async () => {
     const s = setup(), requests: unknown[] = [];
     const outputs = [tool("read_product", {subjectRef:"SM613"}),tool("read_policy"),final()];

@@ -28,6 +28,7 @@ const fallback = (reason: string): TerminalOutcome => ({ ...terminalFallback("C3
 export async function runCommerceTurn(input: {
   scope: CommerceScope; latest: string; history: { role: "customer" | "shop"; text: string }[];
   ownerPrompt: string; verifierPrompt: string; tools: CommerceTools; clock: () => Date; timeoutMs?: number;
+  /** The transport bounds its exact serialized provider body before dispatch. */
   owner: (request: OwnerRequest) => Promise<OwnerGeneration>;
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
 }) {
@@ -82,7 +83,8 @@ export async function runCommerceTurn(input: {
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context,
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
-    if (bytes(request) > 32768) return finish(fallback("CONTEXT_BOUND"));
+    // Internal context and tool responses may repeat evidence. The native
+    // transport owns the frozen 32KB wire bound after its exact projection.
     let output: OwnerGeneration;
     ownerGenerations++;
     try { output = await generate("owner", id, signal => input.owner({ ...request, signal })); }

@@ -8,7 +8,7 @@ Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdict
 | --- | --- |
 | F1 bounded failure/recovery/checkout diagnostics | IMPLEMENTED; focused GREEN |
 | F2 outbound payload/readiness producer and consumers | IMPLEMENTED; focused GREEN |
-| F3 exact serialized provider request bound | PENDING |
+| F3 exact serialized provider request bound | IMPLEMENTED; focused GREEN |
 | F4 typed tools and native final-only contract | PENDING |
 | F5 named alias lookup | PENDING |
 | F6 private-checkout prerequisite correction | PENDING |
@@ -28,5 +28,9 @@ F2 RED: contracts focused59tests/2FAIL; business readiness33tests/1FAIL; ingress
 F2 GREEN: contracts focused59PASS. Rebuild `pnpm --filter @lana/contracts build`, `pnpm --filter @lana/business-tools build`, `pnpm --filter @lana/database build` exit0 before consumers (first consumer rerun encountered stale dependency dist, not claimed PASS). Then business readiness/protected/reply54PASS; ingress/effects/session48PASS; database runtime40PASS with the same commands, adding `src/protected-claims.test.ts src/reply-assembler.test.ts` to business and `src/single-agent-commerce-effects.test.ts src/single-agent-commerce-session.test.ts` to worker.
 
 F2 uses actual claim subjects rather than all search candidates. PROTECTED_OUTBOUND coverage follows the individual typed claims and still requires each declared type and each bound product to have actual coverage; cart effects retain their full per-line requirements. No schema fields, proof modes or gates were added. Productless payloads require empty actual claims/types, no cart and an exact payload hash; transaction source/hash/type/freshness checks remain. Static fallback/receipt ACK do not rebuild CART_READY; an existing-cart terminal instead reuses the unchanged sales readback lock/CAS so it cannot acknowledge a changed cart. Generated cart replies retain current source/parent readiness. Existing database missing-product, conflict, stale/payload/revision and cart-mutation rejection tests remain green.
+
+F3: initial reproduction fixture omitted the product read and did not reach the intended size; corrected fixture materializes its source content first. Observed RED: `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only.test.ts`:13PASS/1FAIL, third generation blocked before the transport. Minimum fix removes only the internal-representation guard; transport owns the actual serialized bound. Same command GREEN14PASS, including internal body>32768 with all projected requests<=32768 and mandatory verifier. Existing hard-precheck trusted-context/input/history/tool-result bounds remain.
+
+`node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs`:19PASS, including exact32767/32768 wire bytes and32769 rejection before auth/generation (0dispatch), duplicate-source preservation and native signatures/call identity. This is offline evidence, not a claim the historical oversized request would fit or that real provider behavior improved.
 
 Record observed RED, subsequent GREEN, final commands and remaining unknowns below as they occur. A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.

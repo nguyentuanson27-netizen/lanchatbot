@@ -43,6 +43,18 @@ test('canonical key ordering does not duplicate source evidence between snapshot
  assert.equal(b.contents[2].parts[0].functionResponse.response.data.content,undefined);
  assert.equal(JSON.parse(b.contents[0].parts[0].text).trusted.products[0].content.description,'Cotton.');
 });
+
+test('the serialized HTTP body owns the exact 32768-byte bound before any auth or generation request',async()=>{
+ const r=request();r.instructions='';
+ const baseline=Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r)));
+ for(const size of [32767,32768]){
+  r.instructions='x'.repeat(size-baseline);assert.equal(Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r))),size);
+ }
+ r.instructions+='x';let auth=0,dispatch=0;
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>{auth++;return 'test-token';},fetchImpl:async()=>{dispatch++;}});
+ await assert.rejects(infer(r),e=>e.telemetry.failureCode==='OWNER_REQUEST_BOUND'&&e.telemetry.providerRequests===0);
+ assert.equal(auth,0);assert.equal(dispatch,0);
+});
 test('native function content keeps opaque signatures for the next invocation',()=>{
  const source=body([{functionCall:{name:'read_policy',args:{}},thoughtSignature:'opaque'}]);
  const result=parseGeminiGeneration(source);
