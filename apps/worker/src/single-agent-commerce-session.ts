@@ -44,7 +44,7 @@ export function createPersistedCommerceExecutor(input: {
     a.state.conversationId === scope.conversationId && a.bindingVersion === scope.bindingVersion && a.recipient === scope.recipient &&
     a.permission && a.privacyAllowed && a.state.conversationOwner === "BOT" && a.state.routingOwner === "APP";
   async function commit(output: RealtimeSalesCycleOutput, authority: HandoffAuthority, terminal: boolean) {
-    if (!output.plan) return false;
+    if (!output.plan) return null;
     const now = input.clock(), transfer = output.transferToHuman;
     const next = transfer ? applySilentHandoff(authority.state, "AGENT_REQUEST", authority.stateVersion, authority.fence, now).state
       : { ...authority.state, revision: authority.stateVersion+1 };
@@ -78,7 +78,7 @@ export function createPersistedCommerceExecutor(input: {
       const r = await input.store.commitWithinTransaction(client, prepared, now);
       if (r.stateCommitted && ((transfer && (!r.pancakeTagOutboxCreated || !r.handoffEventCreated)) || (messages.length && r.metaOutboxCreated !== messages.length))) throw new Error("ATOMIC_EFFECT_INTENTS");
       if (r.stateCommitted) outboxMessages += r.metaOutboxCreated;
-      return r.stateCommitted;
+      return r;
     });
   }
   return { repository, outboxCount: () => outboxMessages, readReceipt: createPersistedCommerceReceiptReader({ store: input.store, repository, scope, conversationKey: scope.conversationId }),
@@ -95,7 +95,7 @@ export function createPersistedCommerceExecutor(input: {
         source: { ...source(state, authority, resolution), ...(selected ? { productId: selected.parentProductId, offerType: selected.offerId, size: component?.size ?? null, color: component?.color ?? null } : {}) } });
       if (!output.plan) return { status: "REJECTED", reasonCode: output.reasonCode ?? "TRANSITION_UNAVAILABLE" };
       const terminal = call.command.kind === "CONFIRM_PURCHASE" || output.transferToHuman;
-      if (!await commit(output, authority, terminal)) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
+      if (!(await commit(output, authority, terminal))?.stateCommitted) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
       const actual = (await repository.read(scope.conversationId))!;
       if (commerceHash(actual) !== commerceHash(output.plan.state)) throw new Error("COMMITTED_STATE_CHANGED");
       return actual.stage === "HANDED_OFF" ? { status: "HANDOFF", state: actual, reasonCode: output.reasonCode ?? "DEPENDENCY_FAILURE" }
@@ -103,11 +103,17 @@ export function createPersistedCommerceExecutor(input: {
     },
     /** The existing private checkout parser/preview runs in code; no raw private input goes to a model. */
     async advancePrivateCheckout() {
-      const authority = await input.readAuthority(); if (!matches(authority)) return { committed: false, messages: 0 };
+      const authority = await input.readAuthority(); if (!matches(authority)) return { committed: false, messages: 0,
+        failure: { stage: "AUTHORITY" as const, reasonCode: "CURRENT_AUTHORITY_CHANGED" } };
       const state = (await repository.read(scope.conversationId))!, resolution = await input.policy();
       const output = await evaluateRealtimeSalesCycle({ ...source(state, authority, resolution), canonicalBuyingIntent: buildCanonicalDecisionEvidenceV1({
         text: input.latest, sourceMessageId: scope.sourceMessageId, productId: null, modelBuyingIntent: null, evaluatedAt: input.clock() }).buyingIntent });
-      return { committed: await commit(output, authority, true), messages: output.messages.length };
+      if (!output.plan) return { committed: false, messages: 0, failure: { stage: "PLANNER" as const,
+        reasonCode: output.reasonCode ?? "NO_TRANSITION_PLAN", readinessReasons: output.readinessAttempt?.reasonCodes ?? [] } };
+      const committed = await commit(output, authority, true);
+      return committed?.stateCommitted ? { committed: true, messages: output.messages.length } : { committed: false, messages: 0,
+        failure: { stage: "COMMIT" as const, reasonCode: "COMMIT_NOT_APPLIED", reasonCodes: committed?.reasonCodes ?? [],
+          inboxBatchStatus: committed?.inboxBatchStatus ?? null } };
     },
   };
 }

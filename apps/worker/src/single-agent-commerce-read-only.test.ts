@@ -68,6 +68,17 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(s.verifier).not.toHaveBeenCalled();
     expect(r.terminal.fallbackId).toBe("C3_A_NONPROTECTED_V2");
   });
+  it("retains the original failure when a code-owned receipt acknowledgement recovers it", async () => {
+    const s = setup();
+    const owner = vi.fn(async () => { throw new Error("provider rejected"); });
+    const result = await runCommerceTurn({ ...s, owner, tools: { ...s.tools, recover: async () => ({
+      disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: "Đã thêm áo vào giỏ.", fallbackId: null,
+    }) } });
+    expect(result.terminal.reason).toBe("RECEIPT_BACKED_ACK");
+    expect(result).toMatchObject({ recovery: { originalDisposition: "FALLBACK", originalReason: "PROVIDER_ERROR" } });
+    expect(owner).toHaveBeenCalledOnce(); expect(s.verifier).not.toHaveBeenCalled();
+    expect(JSON.stringify(result.recovery)).not.toContain("Đã thêm áo");
+  });
   it("stops after the tool budget, without using intermediate prose as a reply", async () => {
     const s = setup(), owner = vi.fn(async () => tool("read_policy"));
     const r = await runCommerceTurn({ ...s, owner });

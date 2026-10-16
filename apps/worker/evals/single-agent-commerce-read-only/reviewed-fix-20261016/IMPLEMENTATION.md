@@ -6,7 +6,7 @@ Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdict
 
 | Slice | Status |
 | --- | --- |
-| F1 bounded failure/recovery/checkout diagnostics | IN_PROGRESS |
+| F1 bounded failure/recovery/checkout diagnostics | IMPLEMENTED; focused GREEN |
 | F2 outbound payload/readiness producer and consumers | PENDING |
 | F3 exact serialized provider request bound | PENDING |
 | F4 typed tools and native final-only contract | PENDING |
@@ -18,5 +18,9 @@ Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdict
 ## Commands actually run
 
 - `git fetch origin main`: exit0; `git rev-parse origin/main`: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`.
+- F1 RED: `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs`:17PASS/1FAIL (missing bounded failure stage). `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-session.test.ts`:18PASS/2FAIL (lost recovery reason and private-checkout authority reason).
+- F1 GREEN: same Node command18PASS. `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-effects.test.ts`:54PASS. Later private planner/commit edge coverage: `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-session.test.ts`:9PASS.
+
+F1 retains allowlisted provider stage/failure/finish codes without copying arbitrary exception text; one failed generation still makes at most one provider request. Recovery reports its original disposition/reason separately from actual terminal. Private checkout distinguishes authority, absent plan/readiness reasons and transaction reasonCodes/status; ingress carries that diagnostic outside model context. Historical causes remain unknown until measured on a new attempt; these tests do not reconstruct a missing old response.
 
 Record observed RED, subsequent GREEN, final commands and remaining unknowns below as they occur. A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.

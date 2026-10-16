@@ -107,7 +107,7 @@ export async function runPersistedCommerceIngress(input: {
       base: createReadOnlyTools({ ...input.read, scope, clock: input.clock }) });
     await recovery.invoke({ name: "request_handoff", args: { reason: "DEPENDENCY_FAILURE" } });
     return { ...noSend("PRIVATE_CHECKOUT_UNAVAILABLE"), terminal: await recovery.terminalOutcome?.() ?? noSend("PRIVATE_CHECKOUT_UNAVAILABLE").terminal,
-      mode: "PRIVATE_CODE_PATH", enqueued: 0 };
+      mode: "PRIVATE_CODE_PATH", enqueued: 0, privateCheckoutFailure: privateResult.failure ?? null };
   }
   const profilePort = createRealtimeCustomerStatePort(input.store, scope, () => {
     const at = input.clock().toISOString();

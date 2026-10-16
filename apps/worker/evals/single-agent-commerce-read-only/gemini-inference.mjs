@@ -4,6 +4,10 @@ import {HandoffReasonV2Schema,canonicalJsonV1} from '@lana/contracts';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
+const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
+ 'EMPTY_BODY','RESPONSE_BOUND','OWNER_MODEL_VERSION','OWNER_COMPLETION','OWNER_OUTPUT_SURFACE','OWNER_TOOL_OUTPUT','OWNER_FINAL_BOUND']);
+const safeFinishReasons=new Set(['STOP','MAX_TOKENS','SAFETY','RECITATION','OTHER','BLOCKLIST','PROHIBITED_CONTENT','SPII',
+ 'MALFORMED_FUNCTION_CALL','UNEXPECTED_TOOL_CALL','NO_IMAGE','IMAGE_SAFETY','IMAGE_PROHIBITED_CONTENT','IMAGE_RECITATION','IMAGE_OTHER']);
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
@@ -93,11 +97,13 @@ export function createGeminiCommerceInference(config,dependencies={}){
  const fetchImpl=dependencies.fetchImpl??fetch;let token=null;
  return async request=>{
   const telemetry={generationId:request.generationId,providerRequests:0,authRequests:0,httpStatus:null,modelVersion:null,
-   inputTokens:null,outputTokens:null,cost:null};
+   inputTokens:null,outputTokens:null,cost:null,finishReason:null};
+  let stage='REQUEST';
   const signal=AbortSignal.any([request.signal,AbortSignal.timeout(config.timeoutMs??90000)]);
   try{
    const body=buildGeminiCommerceRequest(request,config.declarations??readOnlyDeclarations);
    if(!token||token.expiresAt-Date.now()<60000){
+    stage='AUTH';
     if(dependencies.getToken)token={value:await dependencies.getToken(),expiresAt:Date.now()+3600000};
     else {
      const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
@@ -111,18 +117,28 @@ export function createGeminiCommerceInference(config,dependencies={}){
      token={value:data.access_token,expiresAt:Date.now()+(data.expires_in??3600)*1000};
     }
    }
-   telemetry.providerRequests++;
+   stage='GENERATION';telemetry.providerRequests++;
    const response=await fetchImpl(vertexGenerateEndpoint(config.projectId,'global',config.model),{method:'POST',redirect:'error',signal,
     headers:{authorization:'Bearer '+token.value,'content-type':'application/json'},body:JSON.stringify(body)});
    telemetry.httpStatus=response.status;
    if(!response.ok){if(response.status===401)token=null;await response.body?.cancel();throw new Error('GENERATION_HTTP');}
+   stage='RESPONSE';
    const data=await boundedJson(response,1048576),u=data.usageMetadata;
    telemetry.modelVersion=data.modelVersion??null;
-   requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
    telemetry.inputTokens=u?.promptTokenCount??null;
    telemetry.outputTokens=u?((u.candidatesTokenCount??0)+(u.thoughtsTokenCount??0)):null;
    telemetry.thinkingTokens=u?.thoughtsTokenCount??null;
+   const finish=data.candidates?.[0]?.finishReason;
+   telemetry.finishReason=finish==null?null:safeFinishReasons.has(finish)?finish:'UNKNOWN';
+   stage='COMPLETION';
+   requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
    return {...parseGeminiGeneration(data),telemetry};
-  }catch(error){throw Object.assign(new Error(error?.name==='AbortError'?'PROVIDER_TIMEOUT':'PROVIDER_ERROR'),{telemetry});}
+  }catch(error){
+   const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';
+   telemetry.failureStage=stage;
+   telemetry.failureCode=timedOut?'TIMEOUT':safeFailureCodes.has(error?.message)?error.message:
+    stage==='AUTH'?'AUTH_UNAVAILABLE':stage==='GENERATION'?'TRANSPORT_ERROR':stage==='RESPONSE'?'RESPONSE_INVALID':'UNKNOWN';
+   throw Object.assign(new Error(timedOut?'PROVIDER_TIMEOUT':'PROVIDER_ERROR'),{telemetry});
+  }
  };
 }

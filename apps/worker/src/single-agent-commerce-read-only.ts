@@ -35,11 +35,13 @@ export async function runCommerceTurn(input: {
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
   const finish = async (terminal: TerminalOutcome) => {
+    let recovery: { originalDisposition: TerminalOutcome["disposition"]; originalReason: string } | null = null;
     if (terminal.disposition !== "SEND_ELIGIBLE" && input.tools.recover) {
+      recovery = { originalDisposition: terminal.disposition, originalReason: terminal.reason };
       try { terminal = await input.tools.recover(terminal); }
       catch { terminal = { disposition: "NO_SEND", reason: "RECOVERY_UNAVAILABLE", text: null, fallbackId: null }; }
     }
-    return { terminal, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds, toolCalls, generations,
+    return { terminal, recovery, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds, toolCalls, generations,
       toolLatencyMs, verificationLatencyMs: verificationStarted === undefined ? null : performance.now()-verificationStarted };
   };
   const effectTerminal = async () => {

@@ -67,6 +67,26 @@ test('auth failure stays in accounting without a generation request',async()=>{
  const infer=createGeminiCommerceInference(config,{getToken:async()=>{throw new Error('auth');},fetchImpl:async()=>{calls++;}});
  await assert.rejects(infer(request()),e=>e.telemetry.providerRequests===0);assert.equal(calls,0);
 });
+
+test('failed generations retain bounded stage and completion reason without leaking arbitrary errors',async()=>{
+ const completion=body([{text:'partial'}]);completion.candidates[0].finishReason='MAX_TOKENS';
+ const cases=[
+  {fetchImpl:async()=>new Response(JSON.stringify(completion)),stage:'COMPLETION',code:'OWNER_COMPLETION',finishReason:'MAX_TOKENS'},
+  {fetchImpl:async()=>new Response('not json'),stage:'RESPONSE',code:'RESPONSE_INVALID',finishReason:null},
+  {fetchImpl:async()=>{throw new Error('PRIVATE_CUSTOMER_AND_TOKEN');},stage:'GENERATION',code:'TRANSPORT_ERROR',finishReason:null},
+ ];
+ for(const c of cases){
+  let calls=0;
+  const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(...args)=>{calls++;return c.fetchImpl(...args);}});
+  await assert.rejects(infer(request()),error=>{
+   assert.equal(error.telemetry.failureStage,c.stage);assert.equal(error.telemetry.failureCode,c.code);
+   assert.equal(error.telemetry.finishReason,c.finishReason);assert.equal(error.telemetry.providerRequests,1);
+   assert.doesNotMatch(JSON.stringify(error.telemetry),/PRIVATE_CUSTOMER_AND_TOKEN|test-token|partial/);
+   return true;
+  });
+  assert.equal(calls,1);
+ }
+});
 test('only runtime request fields reach the captured HTTP body; usage is retained',async()=>{
  let captured;
  const infer=createGeminiCommerceInference(config,{getToken:async()=> 'test-token',fetchImpl:async(_url,init)=>{captured=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));}});
