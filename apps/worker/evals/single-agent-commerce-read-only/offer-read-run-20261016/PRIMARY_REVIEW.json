@@ -1,0 +1,191 @@
+{
+  "reviewType": "WHOLE_ACTUAL_CUSTOMER_OUTCOME_BEFORE_REJECTED_DRAFT_DIAGNOSIS",
+  "runSourceSha": "10040a9d99718a305cdd9d380e519c1e6e150101",
+  "rawSavepoint": "9bf1eeda6ed779373556b5767e6696ef904cf7af",
+  "reviewedAt": "2026-10-16T07:35:19.086Z",
+  "independent": false,
+  "humanAcceptance": null,
+  "blindToCurrentRejectedDrafts": true,
+  "blindToCurrentVerdictDetails": true,
+  "nonblindToTaskAndPublicSource": true,
+  "registered": 31,
+  "recorded": 6,
+  "reviewed": 6,
+  "b1Registered": 24,
+  "b1Recorded": 6,
+  "statefulRegistered": 7,
+  "statefulRecorded": 0,
+  "repetitions": 1,
+  "counts": {
+    "FALLBACK_OR_NO_SEND": 2,
+    "USABLE": 2,
+    "NEEDS_EDIT": 2
+  },
+  "dimensions": [
+    "understanding",
+    "explicitNeedCompleteness",
+    "contextCorrectionUse",
+    "usefulness",
+    "decisionSupport",
+    "partialAnswerBehavior",
+    "nextStep",
+    "coherence",
+    "naturalness",
+    "factualActionSafety"
+  ],
+  "scoreMeaning": "0 unmet,1 partial,2 met; supporting whole-turn assessment, no keyword test/sum threshold",
+  "rows": [
+    {
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "originalCaseNumber": 1,
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách đổi sang sân khấu và hỏi độ kín để quyết định đổi mẫu; actual terminal chỉ là static fallback, không giải quyết nhu cầu hoặc đưa phương án mua dùng được. Không dùng nháp bị chặn để cứu điểm.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 2,
+      "caseId": "b1-search-read",
+      "originalCaseNumber": 6,
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo dài mã SD375 hiện có 2 lựa chọn cho chị:\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả thẳng hai phạm vi giá đã được code đọc: áo lẻ929.000đ, cả bộ1.065.000đ. Khách hỏi giá nên việc phân biệt hai lựa chọn là cần thiết, không phải liệt kê fact thừa hoặc ép khách qua bước mua khác. Không gán giá cả bộ cho áo lẻ.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 3,
+      "caseId": "b1-buying-concern",
+      "originalCaseNumber": 7,
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Thiết kế kết hợp giữa áo tơ thêu thanh thoát và chân váy ren tơ Hàn mềm mại với độ rũ tự nhiên, mang lại nét bay bổng, tinh tế và sang trọng vừa đủ. \n\nCả set có giá 799.000đ, nằm trọn trong ngân sách 900.000đ của chị ạ. Chị có muốn em kiểm tra size phù hợp cho mình luôn không ạ?",
+        "fallbackId": null
+      },
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Có lập trường mặc đi tiệc ban ngày và giá799k đúng ngân sách, nhưng lý do chủ yếu là chuỗi lời khen bay bổng/tinh tế/sang trọng, chưa cho cách xử lý lo ren nhiều. Câu hỏi kiểm tra size còn vượt khả năng hiện có của B1: ba read tools, không recommend_size và chưa có chart/claim fit. Không đánh trượt chỉ vì nhắc ngân sách hay một cụm từ riêng.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 4,
+      "caseId": "b1-changed-occasion-v2",
+      "originalCaseNumber": 9,
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách đã sửa hoàn cảnh thành sân vườn và ở ngoài trời lâu, cần shop điều chỉnh tư vấn. Actual terminal bỏ toàn nhu cầu này và chỉ báo chưa trả lời được; chưa dùng nháp/verdict chi tiết để quy nguyên nhân.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "originalCaseNumber": 11,
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm từ ren tơ Hàn mềm mại, form nhẹ nhàng với độ rũ tự nhiên giúp tôn dáng và tạo chuyển động uyển chuyển. Dạ hiện tại hệ thống bên em chưa có sẵn dữ liệu tồn kho và giá chi tiết cho size M, chị thông cảm giúp em nhé.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Đây là control POS_UNAVAILABLE: vẫn trả chất ren tơ Hàn và dáng rũ của riêng chân váy, không bịa giá/tồn sizeM hoặc khẳng định chỉ bán set. Chấp nhận partial answer theo cùng ngưỡng của context-fix-run. Giọng còn giống catalog, nói về hệ thống và xin thông cảm chưa khéo; ghi naturalness1 nhưng không nâng thành lỗi loại toàn lượt hoặc bắt có CTA không thực hiện được.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 6,
+      "caseId": "b1-buying-concern-v2",
+      "originalCaseNumber": 15,
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo rất hợp mặc đi ăn cưới ban ngày vì tạo cảm giác thanh lịch, nhã nhặn và bay bổng vừa đủ. \n\nNếu chị quen mặc đồ trơn và ngại set đồ quá điệu, mình có thể mua riêng áo tơ thêu hoặc chân váy ren để phối với các item trơn sẵn có ở nhà, giúp tiết chế họa tiết và đúng với sở thích của chị hơn. Còn nếu diện cả set, chất liệu tơ Hàn thêu nổi tinh tế cùng form rũ nhẹ nhàng mang lại vẻ sang trọng, lịch sự mà không bị rườm rà, phô trương nên chị hoàn toàn yên tâm nhé.",
+        "fallbackId": null
+      },
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Có hướng mua món lẻ phối đồ trơn, nhưng vẫn để khách chọn áo hoặc váy, rồi quay sang trấn an cả set hoàn toàn yên tâm. Toàn lượt chưa quyết rõ nên mua gì cho người quen đồ trơn đi cưới ban ngày; giọng dài và giống mô tả quảng cáo. Nhận định thẩm mỹ và bán món lẻ có cơ sở vẫn được phép; không đòi kiểm nghiệm cho lời nhận xét phong cách.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    }
+  ],
+  "decision": "STOP_PRIORITY_REPLAY_HOLD_18_B1_AND_7_STATEFUL",
+  "notRunIsFailure": false
+}
