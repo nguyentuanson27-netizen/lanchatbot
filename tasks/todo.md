@@ -1,12 +1,19 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current full corrected-candidate replay — 2026-10-16
+
+- [x] Freeze [one full31-outcome run](../apps/worker/evals/single-agent-commerce-read-only/advisory-full-run-20261016/SCOPE.md), clean source `0d5a1d14`; run all24B1 and seven ordered stateful once with unchanged corrected prompts/models, N1/max120. No first-six stop, retry, reseed or imported historical outcome; disposable test DB dropped.
+- [x] Preserve raw `cebd5cb0` before primary `572e4b65` and diagnosis. B1:20eligible/4fallback, review15USABLE/5NEEDS_EDIT/4fallback; stateful:4eligible/2handoff/1no-send, review5USABLE/2unfinished buying outcomes. Read [all31 conversations and findings](../apps/worker/evals/single-agent-commerce-read-only/advisory-full-run-20261016/CHECKPOINT_B.md).
+- [x] Audit90HTTP200/0generationerror-timeout-retry,27verified finals/24exact eligible drafts/4exact captures/40raw hashes/13frozen files/0observed evaluator-private leaks. Reuse actual65b5e9b6 checks; canonical runner builds actually ran. Record offline EOL audit assumption failure and correction without changing input/evidence. Stop after report/tasks/PR update, with no post-result patch or generation.
+- [ ] Resolve advisory verifier calibration, catalog-like voice and partial-source tool selection before sales acceptance. Checkout ETA/source mapping still BLOCKED; full purchase/human service/stability remain unverified. A remains OWNER_BYPASS; no Phase C, source publication, merge/deploy or live send.
+
 ## Current full-population continuation and common correction — 2026-10-16
 
 - [x] Freeze owner override of first-six stop, unchanged models/prompts/corpus/config and25remaining outcomes at099ed3ab; run18B1range7:24 plus seven orderedstateful once. All recorded, no generation retry/replacement; testDB dropped. Keep six historical outcomes at their ownSHA.
 - [x] Preserve raw14a4eb70 before primary59df9d32 and diagnosis. New25primary16USABLE/3NEEDS_EDIT/6FALLBACK_OR_NO_SEND; actual18B1eligible, stateful4fallback/2handoff/1no-send.70HTTP/19verified finals/33raw hashes/0observed evaluator-private leaks. [Actual conversations/report](../apps/worker/evals/single-agent-commerce-read-only/offer-read-completion-20261016/CHECKPOINT_B.md).
 - [x] Record [owner sensory/style versus observable-claim boundary](../docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md), replace activeBvoice/advisory/tool paragraphs without per-case answers; preserve old twofallback verdicts and all frozen evidence. Keep quote/fit/receipt authority, no new role/parser/regex/framework or budget.
 - [x] Reuse typed failure feedback in the existing effect tool, allowlist four fields, no write/receipt/fit from failure. Observed twoRED→GREEN steps,37effecttests/1792worker/21protected-replyPASS and worker typecheck/build/lint exit0. Self-review and offline70requestbody compatibility complete. Full Nodeeval489PASS/2existingoptionalSKIP/0FAIL.
-- [ ] Corrected candidate provider behavior/naturalness/stability remain NOT_RUN; no automatic further generation. Source attributes/charts/publication and authoritative checkout destination mapping remain unresolved; sales/liveSTOP, checkoutBLOCKED/AOWNER_BYPASS, no PhaseC/merge/deploy/customer send.
+- [x] At correction savepoint provider behavior was NOT_RUN; the later explicit owner request completed [one full31-outcome run](../apps/worker/evals/single-agent-commerce-read-only/advisory-full-run-20261016/CHECKPOINT_B.md). Naturalness/stability and source checkout remain unresolved; no automatic further generation, Phase C or live action.
 
 ## Current owner-requested offer-read replay — 2026-10-16
 
