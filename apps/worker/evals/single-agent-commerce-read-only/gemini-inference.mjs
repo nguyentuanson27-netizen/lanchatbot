@@ -6,9 +6,12 @@ import {HandoffReasonV2Schema,canonicalJsonV1} from '@lana/contracts';
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
 const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
- 'EMPTY_BODY','RESPONSE_BOUND','OWNER_MODEL_VERSION','OWNER_COMPLETION','OWNER_OUTPUT_SURFACE','OWNER_TOOL_OUTPUT','OWNER_FINAL_BOUND']);
-const safeFinishReasons=new Set(['STOP','MAX_TOKENS','SAFETY','RECITATION','OTHER','BLOCKLIST','PROHIBITED_CONTENT','SPII',
+ 'EMPTY_BODY','RESPONSE_BOUND','OWNER_MODEL_VERSION','OWNER_CANDIDATE_COUNT','OWNER_FINISH_REASON','OWNER_CONTENT_ROLE','OWNER_CONTENT_PARTS',
+ 'OWNER_OUTPUT_SURFACE','OWNER_TOOL_OUTPUT','OWNER_FINAL_EMPTY','OWNER_FINAL_BOUND']);
+const safeFinishReasons=new Set(['FINISH_REASON_UNSPECIFIED','STOP','MAX_TOKENS','SAFETY','RECITATION','OTHER','BLOCKLIST','PROHIBITED_CONTENT','SPII','MODEL_ARMOR',
  'MALFORMED_FUNCTION_CALL','UNEXPECTED_TOOL_CALL','NO_IMAGE','IMAGE_SAFETY','IMAGE_PROHIBITED_CONTENT','IMAGE_RECITATION','IMAGE_OTHER']);
+const publicSourceReasons=new Set(['POS_SNAPSHOT_UNAVAILABLE','CATALOG_SNAPSHOT_STALE','OFFER_NOT_FOUND','VARIANT_NOT_FOUND',
+ 'SIZE_UNSUPPORTED','PRICE_NOT_FOUND','FULFILLMENT_POLICY_NOT_FOUND','DELIVERY_REGION_REQUIRED','ETA_DATA_MISSING_OR_EXPIRED']);
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
@@ -44,7 +47,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=p=>{
-  const value={...p};delete value.ref;delete value.requestedOfferType;
+  const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
   const current=c.runtimeProducts?.find(x=>x.subjectRef===p.subjectRef);
   for(const key of ['content','attributes','presentation','sizeCharts']){
    if(value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
@@ -61,7 +64,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   }
   if(response.name==='read_product'){
    response.response.data=product(data);
-   if(data.availability)response.response.data.availability=Object.fromEntries(Object.entries(data.availability).map(([field,value])=>[field,{status:value.status}]));
+   if(data.availability)response.response.data.availability=Object.fromEntries(Object.entries(data.availability).map(([field,value])=>[field,
+    {status:value.status,reason:value.reason==null?null:publicSourceReasons.has(value.reason)?value.reason:'SOURCE_UNAVAILABLE'}]));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
  }
@@ -69,10 +73,20 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']
   .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]));
  if(Array.isArray(state.customerMeasurements))state.customerMeasurements=state.customerMeasurements.map(measurement);
- const ownerView={subjects:c.boundSubjects.map(subject),products:(c.runtimeProducts??[]).map(p=>({subjectRef:p.subjectRef,
+ // Move only code-owned offer literals. Read/filter and verifier evidence remain intact.
+ const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,p])),offers=new Map(),offerRefs=new Set();
+ for(const s of c.boundSubjects.filter(s=>s.kind==='PRODUCT')){
+  const literal=c.policyLiterals.find(p=>p.ref===`offers:${s.ref}`);if(!literal)continue;
+  const data=JSON.parse(literal.text);
+  if(data.productId!==s.ref||!Array.isArray(data.availableOffers))continue;
+  offers.set(s.ref,data.availableOffers);offerRefs.add(literal.ref);
+  if(!products.has(s.ref))products.set(s.ref,{subjectRef:s.ref});
+ }
+ const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
+   ...(offers.has(p.subjectRef)?{availableOffers:offers.get(p.subjectRef)}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
-   policy:c.policyLiterals.map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
+   policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state,
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
@@ -83,7 +97,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
 }
 export function parseGeminiGeneration(body){
  const candidate=body?.candidates?.[0],content=candidate?.content;
- requireThat(body.candidates?.length===1&&candidate.finishReason==='STOP'&&content?.role==='model'&&Array.isArray(content.parts)&&content.parts.length>0,'OWNER_COMPLETION');
+ requireThat(Array.isArray(body?.candidates)&&body.candidates.length===1,'OWNER_CANDIDATE_COUNT');
+ requireThat(candidate?.finishReason==='STOP','OWNER_FINISH_REASON');
+ requireThat(content?.role==='model','OWNER_CONTENT_ROLE');
+ requireThat(Array.isArray(content.parts)&&content.parts.length>0,'OWNER_CONTENT_PARTS');
  requireThat(content.parts.every(p=>p&&typeof p==='object'&&Object.keys(p).every(k=>['text','thought','thoughtSignature','functionCall'].includes(k))&&
   (typeof p.text==='string'||p.functionCall)),'OWNER_OUTPUT_SURFACE');
  const calls=content.parts.filter(p=>p.functionCall).map(p=>({name:p.functionCall.name,args:p.functionCall.args,
@@ -91,7 +108,7 @@ export function parseGeminiGeneration(body){
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
   return {kind:'TOOLS',calls,content:structuredClone(content)};}
  const text=content.parts.filter(p=>p.thought!==true&&typeof p.text==='string').map(p=>p.text).join('');
- requireThat(text.trim()&&bytes(text)<=4096,'OWNER_FINAL_BOUND');return {kind:'FINAL',text};
+ requireThat(text.trim(),'OWNER_FINAL_EMPTY');requireThat(bytes(text)<=4096,'OWNER_FINAL_BOUND');return {kind:'FINAL',text};
 }
 async function boundedJson(response,max){
  const reader=response.body?.getReader();requireThat(reader,'EMPTY_BODY');const chunks=[];let length=0;

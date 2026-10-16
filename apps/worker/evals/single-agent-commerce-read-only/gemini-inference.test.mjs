@@ -84,7 +84,7 @@ test('auth failure stays in accounting without a generation request',async()=>{
 test('failed generations retain bounded stage and completion reason without leaking arbitrary errors',async()=>{
  const completion=body([{text:'partial'}]);completion.candidates[0].finishReason='MAX_TOKENS';
  const cases=[
-  {fetchImpl:async()=>new Response(JSON.stringify(completion)),stage:'COMPLETION',code:'OWNER_COMPLETION',finishReason:'MAX_TOKENS'},
+  {fetchImpl:async()=>new Response(JSON.stringify(completion)),stage:'COMPLETION',code:'OWNER_FINISH_REASON',finishReason:'MAX_TOKENS'},
   {fetchImpl:async()=>new Response('not json'),stage:'RESPONSE',code:'RESPONSE_INVALID',finishReason:null},
   {fetchImpl:async()=>{throw new Error('PRIVATE_CUSTOMER_AND_TOKEN');},stage:'GENERATION',code:'TRANSPORT_ERROR',finishReason:null},
  ];
@@ -98,6 +98,24 @@ test('failed generations retain bounded stage and completion reason without leak
    return true;
   });
   assert.equal(calls,1);
+ }
+});
+test('completion failures distinguish candidate count, finish, role, parts and empty visible output without retaining response text',async()=>{
+ const cases=[
+  {data:{modelVersion:config.model,candidates:[]},code:'OWNER_CANDIDATE_COUNT',finish:null},
+  {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'MODEL_ARMOR'}]},code:'OWNER_FINISH_REASON',finish:'MODEL_ARMOR'},
+  {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'FINISH_REASON_UNSPECIFIED'}]},code:'OWNER_FINISH_REASON',finish:'FINISH_REASON_UNSPECIFIED'},
+  {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'FUTURE_PRIVATE_RESPONSE'}]},code:'OWNER_FINISH_REASON',finish:'UNKNOWN'},
+  {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'STOP',content:{role:'user',parts:[{text:'PRIVATE_RESPONSE'}]}}]},code:'OWNER_CONTENT_ROLE',finish:'STOP'},
+  {data:body([]),code:'OWNER_CONTENT_PARTS',finish:'STOP'},
+  {data:body([{thought:true,text:'PRIVATE_RESPONSE'}]),code:'OWNER_FINAL_EMPTY',finish:'STOP'},
+ ];
+ for(const c of cases){
+  let calls=0;const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>{calls++;return new Response(JSON.stringify(c.data));}});
+  await assert.rejects(infer(request()),e=>{
+   assert.equal(e.telemetry.failureStage,'COMPLETION');assert.equal(e.telemetry.failureCode,c.code);assert.equal(e.telemetry.finishReason,c.finish);
+   assert.equal(e.telemetry.providerRequests,1);assert.doesNotMatch(JSON.stringify(e.telemetry),/PRIVATE_RESPONSE|test-token/);return true;
+  });assert.equal(calls,1);
  }
 });
 test('only runtime request fields reach the captured HTTP body; usage is retained',async()=>{
@@ -201,19 +219,49 @@ test('native call identity remains paired with its function response',()=>{
  const result=parseGeminiGeneration(body([{functionCall:{id:'native-call-1',name:'read_policy',args:{}}}]));
  assert.equal(result.calls[0].id,'native-call-1');
 });
-test('owner sees field availability without internal operational diagnostics or loss of native parts',()=>{
+test('owner retains bounded source reasons for partial answers without arbitrary diagnostics or loss of native parts',()=>{
  const r=request();
  const response={status:'OK',data:{content:{description:'Áo cotton.'},facts:[],
-  availability:{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'},stock:{status:'STALE',reason:'CATALOG_SNAPSHOT_STALE'}}}};
+  availability:{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'},stock:{status:'STALE',reason:'CATALOG_SNAPSHOT_STALE'},
+   eta:{status:'UNAVAILABLE',reason:'PRIVATE_CUSTOMER_AND_TOKEN'}}}};
  r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
   {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response}}]});
  const built=buildGeminiCommerceRequest(r),part=built.contents[3].parts[0];
- assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE'},stock:{status:'STALE'}});
+ assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'},
+  stock:{status:'STALE',reason:'CATALOG_SNAPSHOT_STALE'},eta:{status:'UNAVAILABLE',reason:'SOURCE_UNAVAILABLE'}});
  assert.equal(part.functionResponse.id,'read-1');
  assert.equal(part.functionResponse.response.data.content.description,'Áo cotton.');
  assert.equal(built.contents[2].parts[0].thoughtSignature,'opaque');
  assert.equal(response.data.availability.price.reason,'POS_SNAPSHOT_UNAVAILABLE');
- assert.doesNotMatch(JSON.stringify(built),/POS_SNAPSHOT_UNAVAILABLE|CATALOG_SNAPSHOT_STALE/);
+ assert.doesNotMatch(JSON.stringify(built),/PRIVATE_CUSTOMER_AND_TOKEN/);
+});
+
+test('selling options belong to owner products while rule and read literals retain their exact evidence',()=>{
+ const r=request();r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Set'}, {ref:'P2',kind:'PRODUCT',label:'Áo dài'}];
+ r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',content:{description:'Áo thêu, chân váy ren.'}}];
+ r.context.policyLiterals=[{ref:'offers:P1',text:JSON.stringify({productId:'P1',availableOffers:['AO','CV','SET']})},
+  {ref:'offers:P2',text:JSON.stringify({productId:'P2',availableOffers:['AO','COMPOSITE']})},
+  {ref:'policy:shop',text:'Current shop rules'}, {ref:'read:filters',text:JSON.stringify({productId:'P1',size:'M',color:'BE',deliveryRegion:'HANOI',stockClaimId:'claim-1'})}];
+ const before=structuredClone(r.context),view=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
+ assert.deepEqual(view.products.find(p=>p.subjectRef==='P1').availableOffers,['AO','CV','SET']);
+ assert.deepEqual(view.products.find(p=>p.subjectRef==='P2').availableOffers,['AO','COMPOSITE']);
+ assert.equal(view.products.find(p=>p.subjectRef==='P1').content.description,'Áo thêu, chân váy ren.');
+ assert.deepEqual(view.policy,r.context.policyLiterals.filter(p=>!p.ref.startsWith('offers:')));
+ assert.deepEqual(r.context,before);
+ r.context.policyLiterals=r.context.policyLiterals.filter(p=>!p.ref.startsWith('offers:'));
+ const unknown=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.products.find(p=>p.subjectRef==='P1');
+ assert.notDeepEqual(unknown.availableOffers,[]);assert.equal(unknown.availableOffers,undefined);
+});
+
+test('owner read responses keep independent content and missing field statuses without a duplicate missing checklist',()=>{
+ const r=request();const data={subjectRef:'P1',content:{description:'Áo thêu, chân váy ren.'},attributes:null,
+  availability:{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'},stock:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'}},
+  missing:['PRICE','STOCK','ATTRIBUTES'],availableOffers:null};
+ r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data}}}]});
+ const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+ assert.equal(out.missing,undefined);assert.equal(out.content.description,data.content.description);
+ assert.equal(out.availableOffers,null);assert.equal(out.availability.price.reason,'POS_SNAPSHOT_UNAVAILABLE');
+ assert.deepEqual(data.missing,['PRICE','STOCK','ATTRIBUTES']);
 });
 test('a different or absent model version is not accepted as the approved model',async()=>{
  for(const version of ['other-model',undefined]){
