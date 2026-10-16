@@ -154,6 +154,12 @@ export async function createCommerceEffectTools(input: {
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
         call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      if (call.name === "change_cart_item") {
+        const fields = a.action === "REMOVE_LINE" ? ["subjectRef", "action"] :
+          a.action === "SET_QUANTITY" ? ["subjectRef", "action", "quantity"] :
+          a.action === "SET_COMPONENT_VARIANT" ? ["subjectRef", "action", "componentRole", "size", "color"] : null;
+        if (!fields || !toolArgs(a, fields)) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      }
       for (const [field, max] of [["size", 16], ["color", 64], ["offerType", 64]] as const) {
         const value = a[field];
         if (value !== undefined && (typeof value !== "string" || !value.trim() || Buffer.byteLength(value) > max)) return { status: "REJECTED", reason: "VARIANT_ARGUMENTS" };
@@ -279,8 +285,13 @@ export async function createCommerceEffectTools(input: {
     if (!world.effectReceipts.some(r => r.ref === receipt!.ref) || !world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
+    const cart = current.cart!.value, components = cart.lines.flatMap(line => line.components);
+    const size = components[0]?.size, color = components[0]?.color;
+    const cartAck = `Giỏ hiện có ${cart.lines.reduce((total, line) => total + line.quantity, 0)} sản phẩm` +
+      (size && components.every(c => c.size === size) ? `, size ${size}` : "") +
+      (color && components.every(c => c.color === color) ? `, màu ${color}` : "") + ".";
     return { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
       ? "Shop đã nhận xác nhận mua hàng của chị." : receipt.effect === "CART_OPENED"
-        ? "Em đã thêm món chị chọn vào giỏ." : "Em đã cập nhật lựa chọn trong giỏ.", fallbackId: null };
+        ? "Em đã thêm món chị chọn vào giỏ." : cartAck, fallbackId: null };
   } };
 }

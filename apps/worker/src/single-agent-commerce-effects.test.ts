@@ -51,6 +51,49 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it.each([
+    { action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "M", quantity: 2 },
+    { action: "SET_QUANTITY", quantity: 2, size: "L" },
+    { action: "REMOVE_LINE", quantity: 2 },
+  ])("rejects cross-action cart fields before authorization or commit ($action)", async args => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const before = structuredClone(s.current()); s.authorize.mockClear(); s.select.mockClear();
+    expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: before.cart!.value.lines[0]!.lineId, ...args } }))
+      .toEqual({ status: "REJECTED", reason: "TOOL_ARGUMENTS" });
+    expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
+    expect(s.authorize).not.toHaveBeenCalled(); expect(s.select).not.toHaveBeenCalled();
+    expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
+  });
+  it("applies variant and quantity as two explicit commands and replays the final command without another commit", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const selected = await s.select(); selected.line.components[0]!.size = "L"; s.select.mockResolvedValue(selected);
+    const lineId = s.current().cart!.value.lines[0]!.lineId;
+    const calls = [
+      { name: "change_cart_item", args: { subjectRef: lineId, action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "L" } },
+      { name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } },
+    ];
+    expect((await s.tools.invokeBatch(calls)).map(r => r.status)).toEqual(["OK", "OK"]);
+    expect(s.current().cart!.value.lines[0]).toMatchObject({ quantity: 2, components: [expect.objectContaining({ size: "L" })] });
+    expect(s.commits).toHaveLength(3);
+    expect(await s.tools.invoke(calls[1]!)).toMatchObject({ status: "OK", data: { duplicate: true } });
+    expect(s.commits).toHaveLength(3);
+  });
+  it("does not turn a partially applied two-command batch into a success acknowledgement", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const selected = await s.select(); selected.line.components[0]!.size = "L"; s.select.mockResolvedValue(selected);
+    const lineId = s.current().cart!.value.lines[0]!.lineId;
+    const results = await s.tools.invokeBatch([
+      { name: "change_cart_item", args: { subjectRef: lineId, action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "L" } },
+      { name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 0 } },
+      { name: "quote_cart", args: {} },
+    ]);
+    expect(results.map(r => r.status)).toEqual(["OK", "REJECTED", "REJECTED"]);
+    expect(results[2]).toEqual({ status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" });
+    expect(s.current().cart!.value.lines[0]).toMatchObject({ quantity: 1, components: [expect.objectContaining({ size: "L" })] });
+    expect(s.commits).toHaveLength(2);
+    expect(await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: "fallback", fallbackId: null }))
+      .toMatchObject({ disposition: "HANDOFF", reason: "PARTIAL_EFFECT", text: null });
+  });
   it.each(["COLOR_REQUIRED", "INVALID"] as const)("preserves typed selection feedback without committing or granting a fit (%s)", async status => {
     const s = await setup();
     const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };
@@ -313,8 +356,33 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc chị nhé.", history: [],
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.", owner: async () => { throw new Error("provider unavailable"); },
       verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Em đã cập nhật lựa chọn trong giỏ." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Giỏ hiện có 2 sản phẩm, size M, màu navy." });
     expect(s.commits).toHaveLength(2);
+  });
+  it("reports the committed quantity after a variant-only change without claiming the whole customer request completed", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const selected = await s.select(); selected.line.components[0]!.size = "L"; s.select.mockResolvedValue(selected);
+    await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: s.current().cart!.value.lines[0]!.lineId,
+      action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "L" } });
+    const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow,
+      latest: "Đổi L, lấy hai chiếc cho chị nhé.", history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.",
+      owner: async () => { throw new Error("provider unavailable"); }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Giỏ hiện có 1 sản phẩm, size L, màu NAVY." });
+    expect(s.current().cart!.value.lines[0]!.quantity).toBe(1); expect(s.commits).toHaveLength(2);
+  });
+  it("does not describe one component's size or color as the configuration of a mixed cart", async () => {
+    const s = await setup(), selected = await s.select();
+    s.select.mockImplementation(async query => {
+      const line = fixtureCartLine(); line.quantity = query?.quantity ?? 1;
+      line.lineTotalVnd = line.posUnitPriceVnd! * line.quantity;
+      line.components[0]!.size = query?.size ?? "M"; line.components[0]!.color = query?.color ?? "navy";
+      return { ...selected, line };
+    });
+    await s.tools.invoke(s.add);
+    expect(await s.tools.invoke({ ...s.add, args: { ...s.add.args, size: "L", color: "black" } })).toMatchObject({ status: "OK" });
+    const recovered = await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: null, fallbackId: null });
+    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Giỏ hiện có 2 sản phẩm." });
+    expect(s.current().cart!.value.lines).toHaveLength(2); expect(s.commits).toHaveLength(2);
   });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
