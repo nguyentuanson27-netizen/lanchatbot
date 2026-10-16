@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Owner-requested replay after catalog prose correction — 2026-10-16
+
+Owner requests “chạy đi” after679c5343/77118d8a. Freeze [one new priority-first Phase B run](../apps/worker/evals/single-agent-commerce-read-only/prose-boundary-run-20261016/SCOPE.md), same approved Gemini High owner/Sol High verifier, unchanged24B1+7stateful/N1/max120. Run six original1/6/7/9/11/15 once, continue remaining18+7only if all six actual terminal outcomes are usable/safe. No code/prompt patch or retry between partitions; current source/config must stay clean. Reuse just-completed unchanged code checks, run fresh preflights/source readback and canonical builds. Raw before primary before diagnosis, full denominator/held coverage and source limitations retained. No source publication, new A qualification, C or live action.
+
 ## Owner-requested root-cause correction — 2026-10-16
 
 Owner requests “tiếp tục tìm rootcase và fix”. Intake1625cd30; refreshed main/implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361. [Implementation/findings/actual commands](../apps/worker/evals/single-agent-commerce-read-only/prose-boundary-fix-20261016/IMPLEMENTATION.md), code679c5343. Confirmed ambiguity: raw catalog advertising prose was placed inside owner trusted products while instructions described trusted as code-confirmed data. Owner projection now keeps exact source text/provenance under catalogDescriptions and typed facts in trusted, with original verifier context/binding untouched. Existing owner paragraphs now specify a usable buying/styling choice and confidence separate from unsupported use-result assurances. Prompt+79bytes/0.77%, no case examples, regex/parser/new role/gate/framework or production changes. Causal effect on model adherence remains unmeasured; do not count this as a sales-quality fix already proven.

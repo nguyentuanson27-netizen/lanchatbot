@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner-requested replay after catalog prose correction — 2026-10-16
+
+- [ ] Freeze/commit/clean unchanged candidate and exact active inputs, then fresh preflights/source readback through approved route; no generation until identity is captured.
+- [ ] Run six priority cases once, review whole actual outcomes before rejected drafts; remaining18B1+7stateful only on six usable/safe results, same source/config and no retries. Keep every registered/recorded/held outcome.
+- [ ] Preserve raw before primary/diagnosis, audit current catalogDescriptions/fact preservation, label separation and complete request/binding/latency/token evidence; update report/PR391 and stop.
+
 ## Owner-requested root-cause correction — 2026-10-16
 
 - [x] Refresh main296cdcfb; audit actual source/prompt/13captured requests and previous findings, separate confirmed context ambiguity, owner adherence, missing publication/mapping and unknown verifier trigger. No blanket verifier change or new source facts.
