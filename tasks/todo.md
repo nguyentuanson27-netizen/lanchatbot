@@ -1,5 +1,10 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current owner rollback — 2026-10-16
+
+- [x] Revert679c5343 without resetting history; restore four active code/test/prompt/manifest blobs exactly to1625cd30, owner hash74c8102e. All historical run evidence/labels retained.
+- [x] Focused adapter/protocol/comparison46PASS; no extra provider run or live action. Rollback does not change past results or grant sales acceptance. Sections below describe historical implementations/runs.
+
 ## Owner-requested replay after catalog prose correction — 2026-10-16
 
 - [x] Freeze cleanf6c4f368/exact inputs before generation; config/stateful preflight/source readbackPASS, canonical builds executed. Approved models/route unchanged, main296cdcfb.
