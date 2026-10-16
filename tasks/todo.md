@@ -3,9 +3,9 @@
 ## Current reviewed selling-option correction — 2026-10-16
 
 - [x] Revise [plan](../apps/worker/evals/single-agent-commerce-read-only/offer-read-fix-20261016/PLAN.md) after independent REVISE_PLAN; record current main/intake, default/overflow semantics, unchanged fit prompt and separate later run identities.
-- [ ] Observe owning RED; implement bounded same-snapshot selling-option summaries with existing scoped claims/readback and native projection.
-- [ ] Trace existing registry publication and record a concrete proposal/unknowns without live source writes.
-- [ ] Self-review and run affected tests, protected/reply tests, full worker/eval checks and worker typecheck/build/lint; record actual results and deliver on PR391. No provider batch in this task.
+- [x] Observe RED25PASS/6FAIL(worker) and25PASS/1FAIL(adapter); implement bounded same-snapshot selling-option summaries with existing scoped claims/readback and nested availability projection. Executable4ceaefa7; native declaration explains default versus per-option price, prompts unchanged.
+- [x] Trace existing registry publication using captured input hashes and offline existing producer/consumer; record [attribute-only proposal and explicit missing publication inputs](../apps/worker/evals/single-agent-commerce-read-only/offer-read-fix-20261016/SOURCE_TRACE.json),0live reads/writes/generations. Exact current target IDs/hash plan and publication-gap cause unknown; no new sync code or source publication.
+- [x] Self-review and actual verification: focused177/provider-protocol-comparison47/fullworker1789/eval489+2optionalSKIP/protected-reply21PASS; worker typecheck/build/lint exit0. [Commands, intermediate test/harness corrections and limitations](../apps/worker/evals/single-agent-commerce-read-only/offer-read-fix-20261016/IMPLEMENTATION.md). No provider batch or sales-improvement claim.
 
 ## Current owner rollback — 2026-10-16
 
