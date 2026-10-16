@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner-requested root-cause correction — 2026-10-16
+
+- [x] Refresh main296cdcfb; audit actual source/prompt/13captured requests and previous findings, separate confirmed context ambiguity, owner adherence, missing publication/mapping and unknown verifier trigger. No blanket verifier change or new source facts.
+- [x] Observed RED25PASS/3FAIL, implement minimal owner catalog/reference separation with original context/provenance/native history preserved; replace existing advisory/source paragraphs, owner+79bytes and active hash only. Code679c5343; [findings/implementation](../apps/worker/evals/single-agent-commerce-read-only/prose-boundary-fix-20261016/IMPLEMENTATION.md).
+- [x] Self-review; focused49/fullNodeeval491PASS+2optionalSKIP/worker consumer-boundary167/protected-reply21PASS; worker typecheck/build/lint exit0. Offline13bodies unchanged except intended fields, max17,560bytes/32KB; historical source/config/corpora/verdicts/primary unchanged.
+- [ ] Model adherence and sales-quality evidence for this new prompt/projection: NOT_RUN,0newprovider requests. Prior six outcomes/25held remain historical. Registry publication and authoritative destination mapping still unresolved; no source mutation or A/C/live promotion.
+
 ## Owner-authorized context fix and priority replay — 2026-10-16
 
 - [x] Refresh main296cdcfb; preserve intake59bd75ca and [reviewed plan](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/NEXT_FIX_PLAN.md). P1 observed21PASS/3FAIL →33PASS; P2 observed23PASS/2FAIL →34PASS at adapter/protocol, minimum correction saved1d71ac88.
