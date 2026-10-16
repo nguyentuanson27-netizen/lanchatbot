@@ -2,10 +2,12 @@
 
 ## Current advisory/context correction and full replay — 2026-10-16
 
-- [x] Refresh main296cdcfb; ghi intake995b1d4a và [kế hoạch/scope](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PLAN.md). Giữ raw/nhãn lịch sử; trace chỉ đọc xác nhận prep/transit có số nhưng chưa có ánh xạ địa chỉ TP.HCM tới vùng nguồn, không đoán ETA.
-- [x] Thay tại chỗ hướng dẫn cảm giác/công năng, policy theo phạm vi câu hỏi, referent thành phần, partial source và giọng chat. Active prompt hashes được cập nhật; không executable/provider API/model/budget/corpus/source mutation hoặc role mới.
-- [x] Self-review và kiểm tra thực tế: focused47/worker185/protected-reply21PASS; full Nodeeval489PASS+2optionalSKIP; worker typecheck/build/lint exit0; offline90requestbytes trong bound. [Implementation/giới hạn](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PREPARATION.md). Freeze/commit/clean source trước preflight.
-- [ ] Chạy đúng một lượt đủ24B1+7stateful/N1, raw trước primary trước diagnosis; audit request/binding/firewall và actual terminal outcomes. Update PR391 rồi dừng, không extra round, source publication, A/C/live promotion.
+- [x] Refresh main `296cdcfb`, ghi intake `995b1d4a` và [kế hoạch/scope](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PLAN.md). Giữ raw/nhãn lịch sử; trace chỉ đọc xác nhận prep/transit có số nhưng chưa có ánh xạ TP.HCM tới vùng nguồn, không đoán ETA.
+- [x] Thay tại chỗ hướng dẫn cảm giác/công năng, policy theo phạm vi câu hỏi, referent thành phần, partial source và giọng chat. Cập nhật active prompt hashes; không đổi executable/provider API/model/budget/corpus/source hoặc thêm role.
+- [x] Self-review và kiểm tra thực tế: focused 47 / worker 185 / protected-reply 21 PASS; full Node eval 489 PASS + 2 optional SKIP; worker typecheck/build/lint exit 0; offline 90 request bytes trong bound. [Implementation và giới hạn](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PREPARATION.md).
+- [x] Freeze/clean source `c7105bd1`; preflights/source readback PASS với 0 model generations, canonical builds thực sự chạy. Thu đủ 24 B1 + 7 stateful, N1. Raw `88f97757` trước primary `4c01efbf`, trước diagnosis; không retry/replacement. Tổng 24 USABLE / 5 NEEDS_EDIT / 2 FALLBACK_OR_NO_SEND. [Report và toàn bộ hội thoại](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/CHECKPOINT_B.md).
+- [x] Audit 40 raw hashes / 60 owner dispatch hashes / 27 exact bindings / 13 frozen inputs / zero observed evaluator-private leaks. 88 invocations / 87 HTTP200, một local pre-dispatch bound error, 0 HTTP error/timeout/retry. Cả 27 model finals đã verify; 4 stateful captures gồm 3 verified replies + 1 receipt ACK. Test DB đã drop. Giữ lỗi quantity 1 ở lượt đổi giỏ dù lượt sau hoàn tất 2; check 90 request cũ chưa bao phủ native signature mới dài hơn.
+- [ ] Sales/live acceptance còn STOP: ba lượt giọng/decision, một policy-summary boundary cần owner adjudication, một lượt mutation chưa hoàn tất; checkout nguồn thật BLOCKED do mapping ETA. Không post-result fix/extra generation, source publication, A/C promotion, merge/deploy hoặc live action. A vẫn OWNER_BYPASS.
 
 ## Current full corrected-candidate replay — 2026-10-16
 
