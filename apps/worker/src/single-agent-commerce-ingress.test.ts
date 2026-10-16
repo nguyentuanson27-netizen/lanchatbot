@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
-import { createSalesCycleRuntimeState } from "@lana/chat-runtime";
+import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRuntimeState } from "@lana/chat-runtime";
 import type { RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
 import { runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
-import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct } from "./single-agent-commerce.test-support.js";
+import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { OwnerGeneration } from "./single-agent-commerce-read-only.js";
 
-function fixture() {
-  const scope = commerceScope(), product = fixtureProduct();
+function fixture(productIds = ["SM613"]) {
+  const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
   let generation = 1, revision = 1, profile = fixtureProfile();
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
-  const cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+  let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   const profileWrite = vi.fn(async (_page: string, _customer: string, expected: number, next: ReturnType<typeof fixtureProfile>) => {
     if (expected !== profile.profile.revision) return false;
     profile = { profile: next.profile, fieldEvidence: next.fieldEvidence }; return true;
@@ -31,16 +31,59 @@ function fixture() {
     batch, fence: 1, scope, store, inbox: { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} },
     history: { recordInboundCustomerMessage: async () => {}, listConversationHistory: async () => [] }, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {} }, policy: () => fixturePolicy(),
-    read: { policy: () => fixturePolicy(), initialProducts: [product.product], catalog: { readProduct: async () => product, searchText: async () => ({ status: "NOT_FOUND" }) } },
+    read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
+      readProduct: async (id: string) => products.find(p => p.product.productId === id), searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => null, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, commit, verifier, profileWrite, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+    setCycle: (state: typeof cycle) => { cycle = state; },
     transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
 
 afterEach(() => vi.restoreAllMocks());
 
 describe("persisted ingress source and final revision", () => {
+  it.each([{ ids: [] }, { ids: ["SM613", "OTHER1", "OTHER2"] }])("enqueues a code-owned fallback without unrelated product coverage ($ids)", async ({ ids }) => {
+    const f = fixture(ids), result = await f.run(async () => { throw new Error("provider unavailable"); });
+    expect(result.terminal.disposition).toBe("FALLBACK"); expect(result.enqueued).toBe(1);
+    expect(f.verifier).not.toHaveBeenCalled();
+    const meta = f.commit.mock.calls[0]![1].metaPlan!;
+    expect(meta.protectedClaims).toEqual([]); expect(meta.effectReadiness).toMatchObject({ outcome: "READY", productIds: [], cartId: null });
+    expect(meta.sourceMessageIdHash).toBeTruthy();
+  });
+  it("enqueues a policy-only generated reply without a product and still verifies it", async () => {
+    const f = fixture([]), outputs: OwnerGeneration[] = [{ kind: "TOOLS", calls: [{ name: "read_policy", args: {} }],
+      content: { role: "model", parts: [{ functionCall: { name: "read_policy", args: {} } }] } },
+    { kind: "FINAL", text: "Shop có hỗ trợ đổi hàng chị nhé." }];
+    const result = await f.run(async () => outputs.shift()!);
+    expect(result.terminal.reason).toBe("PASS"); expect(result.enqueued).toBe(1); expect(f.verifier).toHaveBeenCalledOnce();
+    expect(f.commit.mock.calls[0]![1].metaPlan!.effectReadiness!.productIds).toEqual([]);
+  });
+  it("binds only products with actual verified claims after other candidates were loaded", async () => {
+    const f = fixture(["SM613", "OTHER1", "OTHER2"]), outputs: OwnerGeneration[] = [{ kind: "TOOLS", calls: [{ name: "read_product", args: { subjectRef: "SM613" } }],
+      content: { role: "model", parts: [{ functionCall: { name: "read_product", args: { subjectRef: "SM613" } } }] } },
+    { kind: "FINAL", text: "Áo SM613 giá 499k chị nhé." }];
+    const result = await f.run(async () => outputs.shift()!);
+    expect(result.terminal.reason).toBe("PASS"); expect(result.enqueued).toBe(1);
+    expect(f.commit.mock.calls[0]![1].metaPlan!.effectReadiness!.productIds).toEqual(["SM613"]);
+  });
+  it("enqueues a static fallback when an existing cart cannot be refreshed", async () => {
+    const f = fixture(), scope = commerceScope(), policy = (await fixturePolicy()).bundle!.policy;
+    let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+    for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const) state = applySalesCycleCommand({ state,
+      expectedRevision: state.revision, command: { kind, commandId: kind }, now: commerceNow }).state;
+    const draft = { identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001", customerProfileId: fixtureProfile().profile.profileId },
+      lines: [fixtureCartLine()], shopId: scope.shopId, policyRef: { id: policy.policyBundleId, version: policy.policyVersion, contentHash: computeBusinessContentHash(policy) } };
+    state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "CART_OPENED", commandId: "open",
+      cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1800000).toISOString() }, now: commerceNow,
+      trustedPorts: { resolveCartDraft: () => draft, resolveShopPolicy: () => policy, resolveCartMutation: () => null, resolveInboundMessage: () => null, revalidateCheckout: () => null } }).state;
+    f.setCycle(state);
+    const result = await f.run(async () => { throw new Error("provider unavailable"); });
+    expect(result.terminal.disposition).toBe("FALLBACK"); expect(result.enqueued).toBe(1);
+    const prepared = f.commit.mock.calls[0]![1];
+    expect(prepared.salesCyclePlan).toMatchObject({ expectedRevision: state.revision, state, events: [] });
+    expect(prepared.salesCyclePlan!.effectReadiness).toBeUndefined(); expect(prepared.metaPlan!.effectReadiness!.binding.cart).toBeNull();
+  });
   it("does not write customer state after a newer Inbox generation arrives during owner generation", async () => {
     const f = fixture();
     const result = await f.run(async () => {

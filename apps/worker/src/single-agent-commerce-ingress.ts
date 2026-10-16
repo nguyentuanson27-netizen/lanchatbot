@@ -146,15 +146,28 @@ export async function runPersistedCommerceIngress(input: {
   const allowedText = ["SEND_ELIGIBLE", "FALLBACK", "HANDOFF"].includes(result.terminal.disposition) ? result.terminal.text : null;
   const messagesOut = allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : [];
   if (allowedText && allowedText.length > 2000) return { ...result, ...await closeWithoutSend("DELIVERY_TEXT_BOUND") };
-  const sourceHash = textHash(scope.sourceMessageId), productIds = cart ? [...new Set(cart.lines.map(l => l.parentProductId))].sort() : world.boundSubjects.filter(s => s.kind === "PRODUCT").map(s => s.ref).sort();
-  let claims = world.protectedClaims as ProtectedClaimV1[], salesPlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | undefined;
+  const sourceHash = textHash(scope.sourceMessageId);
+  const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
+  // Static recovery text makes no catalog assertion. Its receipt/current state
+  // was checked by recovery; keep the transaction's unchanged sales readback.
+  let claims = generatedPass ? world.protectedClaims as ProtectedClaimV1[] : [];
+  const bindCart = generatedPass && cart !== undefined;
+  const productIds = bindCart ? [...new Set(cart!.lines.map(l => l.parentProductId))].sort() :
+    [...new Set(claims.flatMap(c => c.scope.kind === "PRODUCT" ? [c.scope.productId] : []))].sort();
+  let salesPlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | undefined;
   const now = input.clock();
   const common = { pageId: scope.pageId, conversationId: scope.conversationId, sourceMessageIdHash: sourceHash, conversationRevision: verifiedRevision,
-    salesCycleRevision: cart ? state.revision : null, productIds, cartId: cart?.cartId ?? null, cartVersion: cart?.revision ?? null,
-    cartStateHash: cart ? textHash(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart))) : null, ...(cart ? { cartLines: cart.lines } : {}),
+    salesCycleRevision: cart ? state.revision : null, productIds, cartId: bindCart ? cart!.cartId : null, cartVersion: bindCart ? cart!.revision : null,
+    cartStateHash: bindCart ? textHash(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart!))) : null, ...(bindCart ? { cartLines: cart!.lines } : {}),
     orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, checkedAt: now };
   let parent: ReturnType<typeof evaluateDeterministicEffectReadinessV1> | undefined;
   if (cart && messagesOut.length) {
+    salesPlan = { expectedRevision: state.revision, state, events: [], cartExpiresAt: new Date(state.cart!.expiresAt), expiresAt: new Date(state.cart!.expiresAt),
+      readinessContractVersion: "DF06_EFFECT_READINESS_V1", sourceMessageIdHash: sourceHash,
+      canonicalBuyingIntent: { schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1", decision: "NONE", requestedAction: "NONE", quantity: null, productId: null,
+        contributors: [], sourceMessageIdHash: sourceHash, evidenceHash: null, reasonCodes: [], evaluatedAt: now.toISOString(), authorization: "NONE" } };
+  }
+  if (cart && bindCart && messagesOut.length) {
     const selections = await Promise.all(cart.lines.map(l => facts.resolveCartSelection!({ shopAlias: scope.shopAlias, productId: l.parentProductId, offerType: l.offerId,
       size: l.components[0]?.size ?? null, color: l.components[0]?.color ?? null, quantity: l.quantity, lineId: l.lineId }, now)));
     const ready = selections.flatMap(s => s.status === "READY" ? [s] : []);
@@ -164,10 +177,7 @@ export async function runPersistedCommerceIngress(input: {
       sourceAuthority: s.sourceAuthority, stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     parent = evaluateDeterministicEffectReadinessV1({ ...common, effect: "CART_READY", claims: cartClaims });
     claims = [...cartClaims, ...buildProtectedCartPolicyClaimsV1({ cart, policySourceVersion: state.commerceContext!.policyRef.version, policyEvidenceRef: state.commerceContext!.policyRef.contentHash, expiresAt: state.cart!.expiresAt })];
-    salesPlan = { expectedRevision: state.revision, state, events: [], cartExpiresAt: new Date(state.cart!.expiresAt), expiresAt: new Date(state.cart!.expiresAt),
-      readinessContractVersion: "DF06_EFFECT_READINESS_V1", sourceMessageIdHash: sourceHash,
-      canonicalBuyingIntent: { schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1", decision: "NONE", requestedAction: "NONE", quantity: null, productId: null,
-        contributors: [], sourceMessageIdHash: sourceHash, evidenceHash: null, reasonCodes: [], evaluatedAt: now.toISOString(), authorization: "NONE" },
+    salesPlan = { ...salesPlan!,
       effectReadiness: [parent], effectClaimSets: [{ effect: "CART_READY", claims: cartClaims }] };
   }
   const claimTypes = [...new Set(claims.map(c => c.type))], payloadHash = commerceHash(messagesOut);

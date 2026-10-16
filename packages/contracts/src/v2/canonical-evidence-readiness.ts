@@ -482,11 +482,20 @@ export function validateEffectClaimSemanticsV1(input: Readonly<{
       return !input.claims.some((claim) => claim.type === type && claim.scope.kind === "CART" &&
         claim.scope.cartId === input.cartId && claim.scope.cartVersion === input.cartVersion);
     }
+    // Outbound claims already carry their individual product scopes. A reply can
+    // state one product's price and another's stock; cart effects still require
+    // every required fact for every cart product below.
+    if (input.effect === "PROTECTED_OUTBOUND") return !input.claims.some((claim) =>
+      claim.type === type && claim.scope.kind === "PRODUCT" && input.productIds.includes(claim.scope.productId)
+    );
     return input.productIds.some((productId) => !input.claims.some((claim) =>
       claim.type === type && claim.scope.kind === "PRODUCT" &&
       claim.scope.productId === productId
     ));
-  });
+  }) || (input.effect === "PROTECTED_OUTBOUND" && requiredTypes.some(type => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type)) &&
+    (input.productIds.length === 0 || input.productIds.some(productId => !input.claims.some(claim =>
+      claim.scope.kind === "PRODUCT" && claim.scope.productId === productId && requiredTypes.includes(claim.type)
+    ))));
   const contentByClaimKey = new Map<string, Set<string>>();
   for (const claim of input.claims) {
     if (claim.type === "PRODUCT_MEDIA" || claim.type === "PROMOTION_OFFER") continue;
@@ -677,9 +686,11 @@ export const DeterministicEffectReadinessV1Schema = z.object({
     const payloadOnlyProtectedOutbound = value.effect === "PROTECTED_OUTBOUND" &&
       value.protectedClaimTypes.length === 0 &&
       value.deterministicEvidenceHash !== null;
+    const productlessPayload = payloadOnlyProtectedOutbound && value.claimSetHash === null && value.cartId === null &&
+      value.binding.payloadHash === value.deterministicEvidenceHash;
     if (
       value.reasonCodes.length > 0 ||
-      value.productIds.length === 0 ||
+      (value.productIds.length === 0 && !productlessPayload) ||
       (value.claimSetHash === null && !payloadOnlyProtectedOutbound)
     ) {
       context.addIssue({

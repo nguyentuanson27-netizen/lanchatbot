@@ -803,6 +803,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(payloadOnlyInput, now)).resolves.toMatchObject({
       metaOutboxCreated: 1,
     });
+    await expect(store.commit({ ...payloadOnlyInput, metaPlan: { ...payloadOnlyInput.metaPlan!,
+      replyPlanId: "10000000-0000-4000-8000-00000000000c", responseGroupId: "10000000-0000-4000-8000-00000000000d",
+      effectReadiness: resealReadinessV1(payloadOnlyInput.metaPlan!.effectReadiness!, { productIds: [] }),
+    } }, now)).resolves.toMatchObject({ metaOutboxCreated: 1 });
     await expect(store.commit({
       ...payloadOnlyInput,
       metaPlan: {

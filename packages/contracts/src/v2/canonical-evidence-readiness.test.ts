@@ -378,6 +378,14 @@ describe("DF06 deterministic readiness contract", () => {
       ],
     }).conflict).toBe(true);
   });
+  it("uses each outbound claim's actual subject rather than requiring a product-by-type matrix", () => {
+    const input = { effect: "PROTECTED_OUTBOUND" as const, productIds: ["P-001", "P-002"], cartId: null, cartVersion: null,
+      protectedClaimTypes: ["PRICE", "STOCK"] as const, claims: [productClaim("PRICE", "P-001"), productClaim("STOCK", "P-002")] };
+    expect(validateEffectClaimSemanticsV1(input)).toEqual({ missing: false, conflict: false });
+    expect(validateEffectClaimSemanticsV1({ ...input, productIds: [...input.productIds, "P-003"] }).missing).toBe(true);
+    expect(validateEffectClaimSemanticsV1({ ...input, protectedClaimTypes: ["ETA"] }).missing).toBe(true);
+    expect(validateEffectClaimSemanticsV1({ ...input, claims: [] }).missing).toBe(true);
+  });
 
   it("requires exact offer-scoped cart claims with matching price and orderable stock", () => {
     const line = {
@@ -599,7 +607,7 @@ describe("DF06 deterministic readiness contract", () => {
     }).success).toBe(false);
   });
 
-  it("supports payload-only protected outbound readiness with a deterministic hash", () => {
+  it.each([{ productIds: ["SP-001"] }, { productIds: [] }])("supports payload-only protected outbound readiness with product scope $productIds", ({ productIds }) => {
     expect(DeterministicEffectReadinessV1Schema.parse({
       schemaVersion: 1,
       rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
@@ -610,7 +618,7 @@ describe("DF06 deterministic readiness contract", () => {
       sourceMessageIdHash: HASH,
       conversationRevision: 7,
       salesCycleRevision: 3,
-      productIds: ["SP-001"],
+      productIds,
       cartId: null,
       cartVersion: null,
       cartStateHash: null,
@@ -627,7 +635,7 @@ describe("DF06 deterministic readiness contract", () => {
         sourceMessageIdHash: HASH,
         conversationRevision: 7,
         salesCycleRevision: 3,
-        productIds: ["SP-001"],
+        productIds,
         cart: null,
         preview: null,
         claimSetHash: null,
