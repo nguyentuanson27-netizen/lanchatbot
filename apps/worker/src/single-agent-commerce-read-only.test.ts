@@ -136,4 +136,11 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(r.verifierGenerations).toBe(1);
     expect(verifier).toHaveBeenCalledTimes(1);
   });
+  it.each(["owner", "verifier"] as const)("counts an adapter timeout as TIMEOUT for %s, without retrying", async role => {
+    const s = setup(), timeout = vi.fn(async () => { throw Object.assign(new Error("PROVIDER_TIMEOUT"), { telemetry: { providerRequests: 1, failureCode: "TIMEOUT" } }); });
+    const result = await runCommerceTurn({ ...s, owner: role === "owner" ? timeout : async () => final("Dạ chị."),
+      verifier: role === "verifier" ? timeout : s.verifier });
+    expect(result.terminal.reason).toBe("TIMEOUT"); expect(timeout).toHaveBeenCalledOnce();
+    expect(result.generations.find(g => g.role === role)).toMatchObject({ status: "TIMEOUT", telemetry: { providerRequests: 1 } });
+  });
 });

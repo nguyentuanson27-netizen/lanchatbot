@@ -60,7 +60,7 @@ export async function runCommerceTurn(input: {
         ...(output && typeof output === "object" && "telemetry" in output ? { telemetry: output.telemetry } : {}) });
       return output;
     } catch (error) {
-      generations.push({ id, role, status: error instanceof Error && error.message === "TIMEOUT" ? "TIMEOUT" : "PROVIDER_ERROR", latencyMs: performance.now() - started,
+      generations.push({ id, role, status: error instanceof Error && ["TIMEOUT", "PROVIDER_TIMEOUT"].includes(error.message) ? "TIMEOUT" : "PROVIDER_ERROR", latencyMs: performance.now() - started,
         ...(error && typeof error === "object" && "telemetry" in error ? { telemetry: error.telemetry } : {}) });
       throw error;
     } finally { if (timer) clearTimeout(timer); }

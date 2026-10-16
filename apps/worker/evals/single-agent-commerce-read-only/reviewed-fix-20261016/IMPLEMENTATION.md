@@ -57,4 +57,6 @@ Owner prompt replaces the buying/source-tool paragraphs: act on a known customer
 
 After active hash update, focused Node protocol/adapter/comparison command43PASS. No prompt-string/rubric-fit tests or model generations; naturalness and actual sales action completion require a later run.
 
+Self-review caught an existing measurement mismatch: adapter PROVIDER_TIMEOUT was recorded by the runner as PROVIDER_ERROR. Added owner/verifier regressions: observed RED14PASS/2FAIL → minimum GREEN16PASS using `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only.test.ts`. Runner now recognizes both its own TIMEOUT and the adapter's PROVIDER_TIMEOUT; fail-closed/no-retry behavior is unchanged. Final full verification follows this correction.
+
 Record observed RED, subsequent GREEN, final commands and remaining unknowns below as they occur. A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.
