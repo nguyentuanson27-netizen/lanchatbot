@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner-authorized context fix and priority replay — 2026-10-16
+
+- [x] Refresh main296cdcfb; preserve intake59bd75ca and [reviewed plan](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/NEXT_FIX_PLAN.md). P1 observed21PASS/3FAIL →33PASS; P2 observed23PASS/2FAIL →34PASS at adapter/protocol, minimum correction saved1d71ac88.
+- [x] Correct owner-only offers/availability/missing projection and bounded completion reason categories; preserve non-offer/read literals, verifier context, native signatures, exact bound, one request/no retry and final-only fail-closed behavior. Actual provider compliance remains unverified.
+- [x] Trace source routes through audited reads; replace existing owner sales/unknown/voice paragraphs and disclose existing PRE_ORDER before purchase confirmation. No source facts are injected or relabeled. Source registry→index synchronization and authoritative destination mapping remain separate unexecuted proposals.
+- [x] Full worker1779PASS/eval488PASS+2optionalSKIP; focused119/provider-protocol34/protected-reply21PASS; worker typecheck/build/lint exit0. [Actual commands/limits](../apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/IMPLEMENTATION.md). No shared source or runtime authority changed; no new provider requests during preparation.
+- [ ] Freeze/commit/clean source and current hashes; run preflight/source checks and the six old B1 errors first, N1, then18remaining+7stateful only if all six actual outcomes are usable/safe. Preserve all outcomes/unknowns and partial coverage if stopped; raw before primary before diagnosis.
+- [ ] Record final actual results, latency/token/request accounting and revised findings on draftPR391; stop without automatic repair rounds, publication, A/C promotion or live action.
+
 ## Proposed next fix and independent plan review — 2026-10-16
 
 - [x] Review all 24 B1 conversations and seven actual B2/B3 outcomes against prompts, captured requests, verdicts and source contracts; distinguish owner, verifier, context, adapter and source failures.
