@@ -1,5 +1,16 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Proposed next fix and independent plan review — 2026-10-16
+
+- [x] Review all 24 B1 conversations and seven actual B2/B3 outcomes against prompts, captured requests, verdicts and source contracts; distinguish owner, verifier, context, adapter and source failures.
+- [x] Write the [concrete P1–P4 plan](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/NEXT_FIX_PLAN.md) without new architecture or per-case reply rules.
+- [x] [One independent plan review](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/INDEPENDENT_PLAN_REVIEW.md): no P1/two P2, incorporated frozen case permutation/range accounting and owning ETA resolver tests; narrow offer projection to keep read/filter literals. Same reviewer confirmed corrected proposal READY_TO_IMPLEMENT_PLAN. This is plan review, not source readiness or human sales acceptance.
+- [ ] P1: correct owner offer/availability presentation, retain verifier evidence/source bindings, observe focused RED→GREEN during implementation.
+- [ ] P2: diagnose native final-only/completion; fix only demonstrated contract defects and retain fail-closed/no-retry behavior.
+- [ ] P3: trace approved attributes/source presentation and correct sales decision/voice within the existing owner paragraphs; no synthetic shop facts or automatic source publication.
+- [ ] P4: trace missing ETA/mapping and preserve private checkout/handoff authority; real-source completion stays BLOCKED until authoritative data is available.
+- [ ] After a separate implementation/run request: execute the bounded preregistered replay and whole-terminal review described in the plan; no provider requests in this planning task.
+
 ## Latest model replay — 2026-10-16
 
 - [x] Freeze/commit/clean source `183ad77e`, unchanged models/config/corpora, then zero-generation preflights/source readback. Reuse unchanged executable tests and COD/bank controls; canonical builds actually rerun inside the source-check/B1 runner.
