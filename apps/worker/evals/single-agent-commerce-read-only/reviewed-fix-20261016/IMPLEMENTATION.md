@@ -10,7 +10,7 @@ Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdict
 | F2 outbound payload/readiness producer and consumers | IMPLEMENTED; focused GREEN |
 | F3 exact serialized provider request bound | IMPLEMENTED; focused GREEN |
 | F4 typed tools and native final-only contract | IMPLEMENTED; offline focused GREEN; live behavior NOT_RUN |
-| F5 named alias lookup | PENDING |
+| F5 named alias lookup | IMPLEMENTED; full-name alias focused GREEN; partial-name coverage remains limited |
 | F6 private-checkout prerequisite correction | PENDING |
 | F7 sales task/context and code-owned receipt ACK | PENDING |
 | Focused/full verification and self-review | PENDING |
@@ -38,5 +38,9 @@ F4 checked current official [Vertex function-calling modes](https://docs.cloud.g
 F4 RED: Node adapter22tests/3FAIL for callable product identity, confusing output-only field and actual final-only wire. Minimum GREEN: per-request declaration enums use bound PRODUCT refs (cart changes use CART_LINE); noncallable subjects expose evidenceRef; projection omits redundant requestedOfferType while retaining the actual offerType/facts/native calls. Field description requires the existing full measurement path. add_to_cart documents its existing code-owned resolution so a redundant read is not a permission prerequisite. Final-only sends NONE/tools[] and records exact serialized request hash/bytes/mode/count plus an unexpected-tool-call flag; it still returns the observed call to the runtime budget gate without executing/retrying it.
 
 `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs`:43PASS. `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts`:82PASS, including invalid state/ref rejection, accepted dependencies, effects and no extra rounds. Fake HTTP proves emitted bytes/accounting, not that the real provider will obey NONE. Historical API/client attribution remains UNKNOWN; a fresh registered run can compare actual dispatched request hashes without logging private data.
+
+F5 `pnpm --filter @lana/business-tools exec vitest run src/business-tools.test.ts src/qdrant.test.ts`: observed RED30PASS/3FAIL, then intermediate32PASS/1FAIL exposed a pre-existing broad keyword alias (`đầm đi tiệc`). Minimum correction reuses findByAlias for non-code queries but accepts that identity only when the full normalized source title matches; keyword aliases still take semantic search and collisions stay ambiguous. Final33PASS. Exact-code priority is unchanged; no new lookup/index/parser or source write. Non-code misses now incur the existing bounded alias read before embedding; actual latency is unmeasured.
+
+Captured public source-readback has SV1561 aliases `SET VÁY KHÁNH TRANG`/`SV1561`; bare `Khánh Trang` is not an exact alias. Full-name query can now reuse the alias path, but partial names remain semantic queries and the Qdrant compatibility scan remains bounded256points. This does not prove current full-catalog alias coverage or fix the historical partial-name result. Retain the supplied full name in owner search instructions rather than adding substring/regex matching or hardcoded names.
 
 Record observed RED, subsequent GREEN, final commands and remaining unknowns below as they occur. A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.

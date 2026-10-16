@@ -86,18 +86,22 @@ export class ProductSearchService {
       if (exact !== null) {
         return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateDocument(exact), score: 1, gap: null };
       }
+    }
 
-      const aliases = (await this.port.findByAlias(normalized)).map(validateDocument);
-      if (aliases.length === 1 && aliases[0] !== undefined) {
-        return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
-      }
-      if (aliases.length > 1) {
-        return {
-          status: "AMBIGUOUS",
-          reasonCode: "ALIAS_COLLISION",
-          candidates: aliases.slice(0, this.thresholds.maxCandidates).map((document) => ({ document, score: 1 })),
-        };
-      }
+    // Historical aliases also contain broad search keywords. For a non-code
+    // query, only the full source title identifies a product without narrowing
+    // an ordinary shopping need to one keyword-tagged item.
+    const aliases = (await this.port.findByAlias(normalized)).map(validateDocument)
+      .filter(document => codeLike || normalizeProductCode(document.title) === normalized);
+    if (aliases.length === 1 && aliases[0] !== undefined) {
+      return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
+    }
+    if (aliases.length > 1) {
+      return {
+        status: "AMBIGUOUS",
+        reasonCode: "ALIAS_COLLISION",
+        candidates: aliases.slice(0, this.thresholds.maxCandidates).map((document) => ({ document, score: 1 })),
+      };
     }
 
     const candidates = validateAndSortCandidates(

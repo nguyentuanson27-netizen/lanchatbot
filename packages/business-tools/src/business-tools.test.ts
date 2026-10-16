@@ -152,11 +152,31 @@ describe("stable product search", () => {
     expect(port.calls).toEqual(["exact:SD396"]);
   });
 
-  it("uses semantic search directly for natural-language needs", async () => {
+  it("uses semantic search after an exact alias miss for natural-language needs", async () => {
     const port = new FakeStableCatalogSearchPort([sd396], [{ document: sd397, score: 0.99 }]);
     const result = await new ProductSearchService(port, thresholds).searchText("đầm đi tiệc");
     expect(result).toMatchObject({ status: "MATCHED", matchKind: "SEMANTIC" });
-    expect(port.calls).toEqual(["text:đầm đi tiệc"]);
+    expect(port.calls).toEqual(["alias:ĐẦMĐITIỆC", "text:đầm đi tiệc"]);
+  });
+
+  it("uses an existing named alias before embedding search, preserving accents and full identity", async () => {
+    const named = { ...sd396, title: "Đầm Ngọc Lan", aliases: ["Đầm Ngọc Lan"] };
+    const port = new FakeStableCatalogSearchPort([named], [{ document: sd397, score: 0.99 }]);
+    const result = await new ProductSearchService(port, thresholds).searchText(" đầm Ngọc Lan ");
+    expect(result).toMatchObject({ status: "MATCHED", matchKind: "ALIAS", product: { productId: named.productId } });
+    expect(port.calls).toEqual(["alias:ĐẦMNGỌCLAN"]);
+  });
+
+  it("keeps a named alias collision ambiguous and a partial name on the semantic path", async () => {
+    const docs = [sd396, sd397].map(p => ({ ...p, title: "Đầm Ngọc Lan", aliases: ["Đầm Ngọc Lan"] }));
+    const collision = new FakeStableCatalogSearchPort(docs);
+    expect(await new ProductSearchService(collision, thresholds).searchText("Đầm Ngọc Lan"))
+      .toMatchObject({ status: "AMBIGUOUS", reasonCode: "ALIAS_COLLISION" });
+    expect(collision.calls).toEqual(["alias:ĐẦMNGỌCLAN"]);
+    const partial = new FakeStableCatalogSearchPort(docs, [{ document: sd396, score: 0.99 }]);
+    expect(await new ProductSearchService(partial, thresholds).searchText("Ngọc Lan"))
+      .toMatchObject({ matchKind: "SEMANTIC" });
+    expect(partial.calls).toEqual(["alias:NGỌCLAN", "text:Ngọc Lan"]);
   });
 
   it("returns up to three candidates when top score is low or top gap is too small", async () => {
