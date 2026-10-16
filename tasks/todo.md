@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current advisory/context correction and full replay — 2026-10-16
+
+- [x] Refresh main296cdcfb; ghi intake995b1d4a và [kế hoạch/scope](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PLAN.md). Giữ raw/nhãn lịch sử; trace chỉ đọc xác nhận prep/transit có số nhưng chưa có ánh xạ địa chỉ TP.HCM tới vùng nguồn, không đoán ETA.
+- [x] Thay tại chỗ hướng dẫn cảm giác/công năng, policy theo phạm vi câu hỏi, referent thành phần, partial source và giọng chat. Active prompt hashes được cập nhật; không executable/provider API/model/budget/corpus/source mutation hoặc role mới.
+- [x] Self-review và kiểm tra thực tế: focused47/worker185/protected-reply21PASS; full Nodeeval489PASS+2optionalSKIP; worker typecheck/build/lint exit0; offline90requestbytes trong bound. [Implementation/giới hạn](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PREPARATION.md). Freeze/commit/clean source trước preflight.
+- [ ] Chạy đúng một lượt đủ24B1+7stateful/N1, raw trước primary trước diagnosis; audit request/binding/firewall và actual terminal outcomes. Update PR391 rồi dừng, không extra round, source publication, A/C/live promotion.
+
 ## Current full corrected-candidate replay — 2026-10-16
 
 - [x] Freeze [one full31-outcome run](../apps/worker/evals/single-agent-commerce-read-only/advisory-full-run-20261016/SCOPE.md), clean source `0d5a1d14`; run all24B1 and seven ordered stateful once with unchanged corrected prompts/models, N1/max120. No first-six stop, retry, reseed or imported historical outcome; disposable test DB dropped.

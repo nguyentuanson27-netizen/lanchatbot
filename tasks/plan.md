@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current advisory/context correction and full replay — 2026-10-16
+
+Owner yêu cầu sửa và chạy lại sau đủ 31 outcomes. [Kế hoạch](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/PLAN.md) và [scope](../apps/worker/evals/single-agent-commerce-read-only/advisory-context-run-20261016/SCOPE.md): thay tại chỗ đoạn verifier về cảm giác/công năng và policy theo phạm vi câu hỏi; owner về referent thành phần, thiếu POS và giọng chat/giữ lời khuyên nhất quán. Không case answers, regex, parser, budget/retry hoặc runtime authority changes. Source read-only xác nhận có prep/transit nhưng chưa có ánh xạ TP.HCM sang key vùng: không tự chọn vùng hoặc tạo ETA. A OWNER_BYPASS và checkout dependency giữ nguyên.
+
+Self-review và focused checks trước freeze/commit/clean source. Một lượt mới đủ 24 B1 + 7 stateful, N1, Gemini Flash Lite High owner/Sol High verifier, tối đa 120 invocations; giữ toàn bộ lỗi, không first-six stop hoặc vòng phụ. Raw trước primary trước diagnosis; audit denominator/bindings/firewall và báo actual terminal, không tính handoff thành checkout hoàn tất. Update PR391 rồi dừng, không live action hoặc Phase C.
+
 ## Current full corrected-candidate replay — 2026-10-16
 
 Owner requests “chạy lại toàn bộ”, then “tiếp tục”. [Scope and frozen inputs](../apps/worker/evals/single-agent-commerce-read-only/advisory-full-run-20261016/SCOPE.md) committed before generation; clean bRunSourceSha `0d5a1d14916f9bcb587af37722dcf7cedd1c33c2`. Same corrected candidate `65b5e9b6`, unchanged Gemini High owner / Sol High verifier, 24 B1 + 7 ordered stateful, N1/max120; all 31 recorded at one source SHA, no historical result adoption or retry. Raw `cebd5cb0` before primary `572e4b65` before diagnosis. B1:20eligible/4fallback, primary15USABLE/5NEEDS_EDIT/4FALLBACK_OR_NO_SEND. Stateful:4eligible/2handoff/1no-send, primary5USABLE/2FALLBACK_OR_NO_SEND. Total20USABLE/5NEEDS_EDIT/6FALLBACK_OR_NO_SEND; that last review category is not six static fallbacks. Cart open/change/quote/profile correction work in this run; checkout stops at CART_ETA_UNAVAILABLE. Advisory verifier mismatch and naturalness remain unresolved.
