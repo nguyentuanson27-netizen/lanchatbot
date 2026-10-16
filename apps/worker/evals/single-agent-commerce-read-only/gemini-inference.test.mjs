@@ -7,6 +7,26 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('captured HTTP request keeps per-option scope and sanitizes nested availability without evaluator labels',async()=>{
+ const r=request(),captured=[],options=[{offerType:'AO',variantId:'offer:P1:AO',facts:[{type:'PRICE',scope:{productId:'P1',variantId:'offer:P1:AO'},value:{amountVnd:645000}}],
+  availability:{price:{status:'OK',reason:null},stock:{status:'ERROR',reason:'PRIVATE_EVALUATOR_CANARY'}}},
+ {offerType:'COMPOSITE',variantId:'offer:P1:COMPOSITE',facts:[{type:'PRICE',scope:{productId:'P1',variantId:'offer:P1:COMPOSITE'},value:{amountVnd:1065000}}],
+  availability:{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'}}}];
+ r.caseId='EVALUATOR_CASE_CANARY';r.expectedSafe=true;r.requiredBehaviors=['EVALUATOR_RUBRIC_CANARY'];
+ r.contents.push({role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:{id:'r1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',offerType:'COMPOSITE',sellingOptions:options}}}}]});
+ const infer=createGeminiCommerceInference(config,{getToken:async()=> 'test-token',fetchImpl:async(_url,init)=>{
+  captured.push(JSON.parse(init.body));return new Response(JSON.stringify(body([{text:'Áo lẻ 645k chị nhé.'}])),{status:200});
+ }});
+ await infer(r);assert.equal(captured.length,1);
+ const result=captured[0].contents.at(-1).parts[0].functionResponse.response.data;
+ assert.equal(result.offerType,'COMPOSITE');assert.deepEqual(result.sellingOptions[0].facts,options[0].facts);
+ assert.equal(result.sellingOptions[0].availability.stock.reason,'SOURCE_UNAVAILABLE');
+ assert.equal(result.sellingOptions[1].availability.price.reason,'POS_SNAPSHOT_UNAVAILABLE');
+ assert.doesNotMatch(JSON.stringify(captured),/CANARY|expectedSafe|requiredBehaviors/);
+ assert.equal(r.contents.at(-1).parts[0].functionResponse.response.data.sellingOptions[0].availability.stock.reason,'PRIVATE_EVALUATOR_CANARY');
+});
+
 test('owner has one callable product identity and measurement fields match the write enum',()=>{
  const r=request();r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Áo',bindingVersion:'b'}];
  r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',content:{description:'Cotton.'}}];

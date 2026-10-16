@@ -15,7 +15,7 @@ const publicSourceReasons=new Set(['POS_SNAPSHOT_UNAVAILABLE','CATALOG_SNAPSHOT_
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc phần thông tin sản phẩm còn thiếu. subjectRef là ref của PRODUCT, không dùng evidenceRef/variantId của offer. Truyền offerType theo món khách hỏi từ availableOffers; null là chưa biết lựa chọn bán. Có size/màu thì truyền ngay để đọc đúng biến thể. size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion là tỉnh/thành tra ETA. availability cho biết từng dữ kiện hiện có.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Có offerType thì chỉ đọc lựa chọn đó. Bỏ offerType thì sellingOptions trả giá/tồn riêng từng lựa chọn bán; offerType/facts ngoài cùng vẫn là lựa chọn mặc định, không phải giá chung cho áo lẻ và cả bộ. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
@@ -45,6 +45,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  }
  const subject=s=>({...(['PRODUCT','CART_LINE'].includes(s.kind)?{subjectRef:s.ref}:{evidenceRef:s.ref}),kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
+ const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
+  {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=p=>{
   const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
@@ -64,8 +66,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   }
   if(response.name==='read_product'){
    response.response.data=product(data);
-   if(data.availability)response.response.data.availability=Object.fromEntries(Object.entries(data.availability).map(([field,value])=>[field,
-    {status:value.status,reason:value.reason==null?null:publicSourceReasons.has(value.reason)?value.reason:'SOURCE_UNAVAILABLE'}]));
+   if(data.availability)response.response.data.availability=availability(data.availability);
+   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
  }

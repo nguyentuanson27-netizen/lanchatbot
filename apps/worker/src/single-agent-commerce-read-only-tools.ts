@@ -89,32 +89,57 @@ export function createReadOnlyTools(input: {
     const productStatus = raw ? normalizeCatalogToken(raw.data_status) : null;
     const availableOffers = raw && (productStatus === "OK" || productStatus === "FULFILLMENT_POLICY_NOT_FOUND") &&
       observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
-    offerContexts.delete(id);
-    if (availableOffers !== null) offerContexts.set(id, { ref: `offers:${id}`,
-      sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers }),
-      observedAt: raw!.synced_at, expiresAt: new Date(expires).toISOString(),
-      text: JSON.stringify({ productId: id, availableOffers }) });
     const query = { shopAlias: scope.shopAlias, productId: id, offerType: (args.offerType as string | undefined) ?? null,
       color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null,
       deliveryRegion: (args.deliveryRegion as string | undefined) ?? null };
-    const price = raw ? resolveCatalogFacts(raw, { ...query, intent: "PRICE" }, now, maxAge) : null;
-    const stock = raw ? resolveCatalogFacts(raw, { ...query, intent: "STOCK" }, now, maxAge) : null;
-    const eta = raw && query.deliveryRegion ? resolveCatalogFacts(raw, { ...query, intent: "ETA" }, now, maxAge) : null;
-    if (eta?.status === "OK" && eta.expiresAt && raw?.fulfillment_policy?.eta_valid_until.trim()) {
-      eta.expiresAt = new Date(Math.min(Date.parse(eta.expiresAt), Date.parse(raw.fulfillment_policy.eta_valid_until))).toISOString();
-    }
-    const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType: query.offerType,
-      mentionedSize: query.size, mentionedColor: query.color }, now) : null;
-    // An offer-only read is a code-bound selling option, never a selected SKU or a personal fit.
-    const offer = (price?.status === "OK" ? price.facts?.offerType : null)
-      ?? (stock?.status === "OK" ? stock.facts?.offerType : null) ?? null;
-    const variantId = (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
-    if (variantId && !subjects.has(variantId) && subjects.size >= 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-    const nextClaims = [[price, "PRICE"], [stock, "STOCK"], [eta, "ETA"]].flatMap(([facts, type]) => {
-      const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
-      return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
-        scope: c.scope.kind === "PRODUCT" ? { ...c.scope, variantId } : c.scope }));
-    });
+    // Do not expand an unbounded source record or silently truncate selling options.
+    if (!query.offerType && availableOffers && availableOffers.length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+    const summarizeAll = !query.offerType && availableOffers !== null && availableOffers.length > 1;
+    const resolveOption = (offerType: string | null) => {
+      const q = { ...query, offerType };
+      const price = raw ? resolveCatalogFacts(raw, { ...q, intent: "PRICE" }, now, maxAge) : null;
+      const stock = raw ? resolveCatalogFacts(raw, { ...q, intent: "STOCK" }, now, maxAge) : null;
+      const eta = raw && q.deliveryRegion ? resolveCatalogFacts(raw, { ...q, intent: "ETA" }, now, maxAge) : null;
+      if (eta?.status === "OK" && eta.expiresAt && raw?.fulfillment_policy?.eta_valid_until.trim()) {
+        eta.expiresAt = new Date(Math.min(Date.parse(eta.expiresAt), Date.parse(raw.fulfillment_policy.eta_valid_until))).toISOString();
+      }
+      const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType,
+        mentionedSize: q.size, mentionedColor: q.color }, now) : null;
+      const offer = (price?.status === "OK" ? price.facts?.offerType : null)
+        ?? (stock?.status === "OK" ? stock.facts?.offerType : null) ?? null;
+      // Options are not selected cart SKUs. A shared source SKU must not merge two offers' prices.
+      const variantId = summarizeAll && offer ? `offer:${id}:${offer}`
+        : (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
+      const optionClaims = [[price, "PRICE"], [stock, "STOCK"], [eta, "ETA"]].flatMap(([facts, type]) => {
+        const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
+        return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
+          scope: c.scope.kind === "PRODUCT" ? { ...c.scope, variantId } : c.scope }));
+      });
+      const etaClaim = optionClaims.find(c => c.type === "ETA"), stockClaim = optionClaims.find(c => c.type === "STOCK"),
+        priceClaim = optionClaims.find(c => c.type === "PRICE");
+      const filteredClaim = etaClaim ?? ((q.size || q.color) ? stockClaim ?? priceClaim : undefined);
+      return { offerType: offer ?? (offerType ? normalizeCatalogToken(offerType) : null), offer, variant, variantId, claims: optionClaims,
+        filter: filteredClaim ? { productId: id, variantId, offerType: offer, size: q.size, color: q.color,
+          priceClaimId: priceClaim?.claimId ?? null, stockClaimId: stockClaim?.claimId ?? null,
+          ...(etaClaim ? { deliveryRegion: Object.keys(raw!.shipping_eta).find(r =>
+            normalizeCatalogToken(r) === normalizeCatalogToken(q.deliveryRegion ?? "")), etaClaimId: etaClaim.claimId } : {}) } : null,
+        filterExpiry: filteredClaim?.provenance.expiresAt,
+        availability: {
+          price: { status: price?.status ?? "UNAVAILABLE", reason: price?.reasonCode ?? (price ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+          stock: { status: stock?.status ?? "UNAVAILABLE", reason: stock?.reasonCode ?? (stock ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+          ...(q.deliveryRegion ? { eta: { status: eta?.status ?? "UNAVAILABLE", reason: eta?.reasonCode ?? (eta ? null : "POS_SNAPSHOT_UNAVAILABLE") } } : {}),
+        } };
+    };
+    const selected = resolveOption(query.offerType);
+    const options = availableOffers === null ? [] : query.offerType ? [selected]
+      : availableOffers.map(offer => normalizeCatalogToken(offer) === selected.offer ? selected : resolveOption(offer));
+    const retained = summarizeAll ? options : [selected];
+    const nextClaims = retained.flatMap(o => o.claims);
+    const nextSubjects = new Set([...subjects.keys(), ...retained.flatMap(o => o.variantId ? [o.variantId] : [])]);
+    if (nextSubjects.size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+    const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
+    const allClaims = [...claims.entries()].filter(([key]) => key !== readKey).flatMap(([, values]) => values).concat(nextClaims);
+    if (new Set(allClaims.map(commerceHash)).size > 32) return { status: "REJECTED", reason: "CLAIM_BOUND" };
     const evidence = staticEvidence(p, now);
     const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
     const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
@@ -123,36 +148,36 @@ export function createReadOnlyTools(input: {
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
     if (charts.length) evidence.sizeCharts = charts;
+    offerContexts.delete(id);
+    if (availableOffers !== null) offerContexts.set(id, { ref: `offers:${id}`,
+      sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers }),
+      observedAt: raw!.synced_at, expiresAt: new Date(expires).toISOString(),
+      text: JSON.stringify({ productId: id, availableOffers }) });
     products.delete(id);
     if (evidence.attributes || evidence.presentation || evidence.content || evidence.sizeCharts?.length) products.set(id, evidence);
     subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });
-    if (variantId) subjects.set(variantId, { ref: variantId, kind: "VARIANT", productId: id,
-      label: `${p.title} ${offer ?? ""} ${variant?.selectedColorLabel ?? ""} ${variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
-    const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
+    for (const o of retained) if (o.variantId) subjects.set(o.variantId, { ref: o.variantId, kind: "VARIANT", productId: id,
+      label: `${p.title} ${o.offer ?? ""} ${o.variant?.selectedColorLabel ?? ""} ${o.variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
     // Preserve filters whose meaning is lost in an offer-only fact scope, including regional ETA.
     deliveryContexts.delete(readKey);
-    const etaClaim = nextClaims.find(c => c.type === "ETA");
-    const stockClaim = nextClaims.find(c => c.type === "STOCK"), priceClaim = nextClaims.find(c => c.type === "PRICE");
-    const filteredClaim = etaClaim ?? ((query.size || query.color) ? stockClaim ?? priceClaim : undefined);
-    if (filteredClaim && raw) deliveryContexts.set(readKey, { ref: `read:${readKey}`, sourceVersion: raw.release_id,
-      observedAt: filteredClaim.provenance.observedAt, expiresAt: filteredClaim.provenance.expiresAt,
-      text: JSON.stringify({ productId: id, variantId, offerType: offer, size: query.size, color: query.color,
-        priceClaimId: priceClaim?.claimId ?? null, stockClaimId: stockClaim?.claimId ?? null,
-        ...(etaClaim ? { deliveryRegion: Object.keys(raw.shipping_eta).find(r =>
-          normalizeCatalogToken(r) === normalizeCatalogToken(query.deliveryRegion ?? "")), etaClaimId: etaClaim.claimId } : {}) }) });
+    const filtered = retained.filter(o => o.filter !== null);
+    if (filtered.length && raw) deliveryContexts.set(readKey, { ref: `read:${readKey}`, sourceVersion: raw.release_id,
+      observedAt: raw.synced_at, expiresAt: new Date(Math.min(...filtered.map(o => Date.parse(o.filterExpiry!)))).toISOString(),
+      text: JSON.stringify(summarizeAll ? { productId: id, sellingOptions: filtered.map(o => o.filter) } : filtered[0]!.filter) });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
-    return { status: "OK", data: { subjectRef: id, label: p.title, variantId, offerType: offer, requestedOfferType: query.offerType,
+    const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
+    return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
       availableOffers,
+      sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
+        sourceVersion: raw!.release_id, observedAt: raw!.synced_at,
+        expiresAt: new Date(Math.min(expires, ...o.claims.map(c => Date.parse(c.provenance.expiresAt)))).toISOString(),
+        facts: publicFacts(o.claims), availability: o.availability })),
       attributes: evidence.attributes ?? null, sizeCharts: charts,
       content: evidence.content ?? null,
-      facts: nextClaims.map(c => ({ type: c.type, scope: c.scope, value: c.value })),
-      availability: {
-        price: { status: price?.status ?? "UNAVAILABLE", reason: price?.reasonCode ?? (price ? null : "POS_SNAPSHOT_UNAVAILABLE") },
-        stock: { status: stock?.status ?? "UNAVAILABLE", reason: stock?.reasonCode ?? (stock ? null : "POS_SNAPSHOT_UNAVAILABLE") },
-        ...(query.deliveryRegion ? { eta: { status: eta?.status ?? "UNAVAILABLE", reason: eta?.reasonCode ?? (eta ? null : "POS_SNAPSHOT_UNAVAILABLE") } } : {}),
-      },
-      missing: [...(price?.status === "OK" ? [] : ["PRICE"]), ...(stock?.status === "OK" ? [] : ["STOCK"]),
+      facts: publicFacts(selected.claims),
+      availability: selected.availability,
+      missing: [...(selected.availability.price.status === "OK" ? [] : ["PRICE"]), ...(selected.availability.stock.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {

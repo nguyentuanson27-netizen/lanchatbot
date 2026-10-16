@@ -13,7 +13,107 @@ const setup = (options: { fee?: number } = {}) => {
   return { readProduct, catalog, tools: createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow,
     policy: () => fixturePolicy(options.fee), catalog }) };
 };
+const sellingFixture = (prices: Record<string, number>) => {
+  const f = fixtureProduct(), template = f.snapshot.offers.DIRECT!;
+  f.snapshot.offers = Object.fromEntries(Object.entries(prices).map(([offer, price]) => [offer, {
+    ...structuredClone(template), sale_price: price,
+    rows: template.rows.map(r => ({ ...r, offer_type: offer, sale_price: price })),
+  }]));
+  const readProduct = vi.fn(async () => structuredClone(f));
+  const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+    initialProducts: [f.product], catalog: { readProduct, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+  return { f, readProduct, tools };
+};
 describe("read-only domain tools", () => {
+  it("reads all selling-option prices from one snapshot while keeping the top-level default price scoped", async () => {
+    const { tools, readProduct, f } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
+    const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    expect(readProduct).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({ status: "OK", data: { offerType: "COMPOSITE", requestedOfferType: null,
+      facts: expect.arrayContaining([{ type: "PRICE", scope: expect.objectContaining({ variantId: "offer:SM613:COMPOSITE" }), value: { amountVnd: 1_065_000, currency: "VND" } }]),
+      sellingOptions: [
+        expect.objectContaining({ offerType: "AO", variantId: "offer:SM613:AO", sourceVersion: "pos-v1", observedAt: f.snapshot.synced_at,
+          expiresAt: new Date(commerceNow.getTime() + 1200_000).toISOString(),
+          facts: expect.arrayContaining([{ type: "PRICE", scope: expect.objectContaining({ variantId: "offer:SM613:AO" }), value: { amountVnd: 645_000, currency: "VND" } }]) }),
+        expect.objectContaining({ offerType: "COMPOSITE", variantId: "offer:SM613:COMPOSITE" }),
+      ] } });
+    expect(tools.snapshot().protectedClaims).toHaveLength(4);
+    expect(hardPrecheck(tools.snapshot(), "Áo lẻ 645k chị nhé.", commerceNow)).toBeNull();
+    const before = makeBinding("turn", "Áo lẻ 645k chị nhé.", tools.snapshot());
+    expect(makeBinding("turn", "Áo lẻ 645k chị nhé.", await tools.readback())).toEqual(before);
+    f.snapshot.offers.AO!.sale_price = 650_000;
+    f.snapshot.offers.AO!.rows[0]!.sale_price = 650_000;
+    expect(makeBinding("turn", "Áo lẻ 645k chị nhé.", await tools.readback()).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+  });
+  it("keeps an explicitly requested option isolated from another option with an unavailable price", async () => {
+    const { tools, f } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
+    f.snapshot.offers.COMPOSITE!.price_status = "PRICE_NOT_FOUND";
+    const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "AO" } });
+    expect(result).toMatchObject({ status: "OK", data: { offerType: "AO", sellingOptions: [expect.objectContaining({ offerType: "AO" })] } });
+    expect(tools.snapshot().protectedClaims).toHaveLength(2);
+    expect(JSON.stringify(tools.snapshot().protectedClaims)).not.toContain("1065000");
+  });
+  it("retains a usable component and product content when the default offer cannot supply facts", async () => {
+    const { tools, f } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
+    f.snapshot.offers.COMPOSITE!.price_status = "PRICE_NOT_FOUND";
+    const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    expect(result).toMatchObject({ status: "OK", data: { offerType: null, sellingOptions: [
+      { offerType: "AO", availability: { price: { status: "OK" } } },
+      { offerType: "COMPOSITE", facts: [], availability: { price: { status: "ERROR" } } },
+    ] } });
+    expect(tools.snapshot().protectedClaims).toHaveLength(2);
+    expect(tools.snapshot().runtimeProducts).toHaveLength(1);
+  });
+  it("binds each option's filters and ETA even when two offers share a source SKU", async () => {
+    const { tools, f } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
+    f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: false, prep_min_days: 1,
+      prep_max_days: 2, zero_stock_policy: "", zero_stock_prep_min_days: null, zero_stock_prep_max_days: null, eta_valid_until: "" };
+    f.snapshot.shipping_eta = { HANOI: { transit_min_days: 2, transit_max_days: 4 } };
+    const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", size: "M", color: "navy", deliveryRegion: "HANOI" } });
+    expect(result).toMatchObject({ status: "OK", data: { sellingOptions: [
+      { offerType: "AO", variantId: "offer:SM613:AO", availability: { eta: { status: "OK" } } },
+      expect.objectContaining({ offerType: "COMPOSITE", variantId: "offer:SM613:COMPOSITE" }),
+    ] } });
+    const filter = tools.snapshot().policyLiterals.map(p => JSON.parse(p.text)).find(p => p.sellingOptions);
+    expect(filter).toMatchObject({ productId: "SM613", sellingOptions: [
+      expect.objectContaining({ offerType: "AO", size: "M", color: "navy", deliveryRegion: "HANOI", etaClaimId: expect.any(String) }),
+      expect.objectContaining({ offerType: "COMPOSITE", size: "M", color: "navy", deliveryRegion: "HANOI", stockClaimId: expect.any(String) }),
+    ] });
+    expect(tools.snapshot().protectedClaims).toHaveLength(6);
+    expect(hardPrecheck(tools.snapshot(), "Giá theo từng lựa chọn.", commerceNow)).toBeNull();
+    const before = makeBinding("turn", "Giá theo từng lựa chọn.", tools.snapshot());
+    expect(makeBinding("turn", "Giá theo từng lựa chọn.", await tools.readback())).toEqual(before);
+  });
+  it("rejects option expansion beyond the existing subject bound without a partial list or partial context write", async () => {
+    const { tools } = sellingFixture({ COMBO_3: 900_000, COMPOSITE: 800_000, SET_VAY: 700_000, SET_CV: 600_000,
+      SET_QUAN: 500_000, SET: 400_000, DIRECT: 300_000, AO: 200_000 });
+    const before = tools.snapshot();
+    expect(await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).toEqual({ status: "REJECTED", reason: "SUBJECT_BOUND" });
+    expect(tools.snapshot()).toEqual(before);
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "AO" } })).status).toBe("OK");
+  });
+  it("distinguishes confirmed empty selling options from absent or stale POS", async () => {
+    const { tools, f } = sellingFixture({ AO: 645_000 });
+    f.snapshot.offers = {};
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: [], sellingOptions: [] });
+    f.snapshot.synced_at = "2026-10-01T00:00:00.000Z";
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null, sellingOptions: null });
+  });
+  it("preserves the existing claim bound across independently filtered multi-option reads", async () => {
+    const { tools, f } = sellingFixture({ COMPOSITE: 800_000, SET_VAY: 700_000, SET_CV: 600_000,
+      SET_QUAN: 500_000, SET: 400_000, DIRECT: 300_000, AO: 200_000 });
+    f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: false, prep_min_days: 1,
+      prep_max_days: 2, zero_stock_policy: "", zero_stock_prep_min_days: null, zero_stock_prep_max_days: null, eta_valid_until: "" };
+    f.snapshot.shipping_eta = { A: { transit_min_days: 1, transit_max_days: 2 }, B: { transit_min_days: 2, transit_max_days: 3 },
+      C: { transit_min_days: 3, transit_max_days: 4 } };
+    for (const deliveryRegion of ["A", "B"]) expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", deliveryRegion } })).status).toBe("OK");
+    expect(tools.snapshot().protectedClaims).toHaveLength(28);
+    expect(tools.snapshot().boundSubjects).toHaveLength(8);
+    const before = tools.snapshot();
+    expect(await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", deliveryRegion: "C" } })).toEqual({ status: "REJECTED", reason: "CLAIM_BOUND" });
+    expect(tools.snapshot()).toEqual(before);
+    expect(await tools.readback()).toEqual(before);
+  });
   it("binds available selling options to the same current verifier snapshot and invalidates changed options", async () => {
     const f = fixtureProduct(), { catalog } = setup();
     const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),

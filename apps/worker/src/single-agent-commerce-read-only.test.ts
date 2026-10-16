@@ -16,6 +16,63 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it.each([false, true])("finishes search -> one option-summary read -> final in budget, changed source=%s", async changed => {
+    const s = setup(), f = fixtureProduct();
+    f.snapshot.offers.COMPOSITE = { ...structuredClone(f.snapshot.offers.DIRECT!), sale_price: 1_065_000,
+      rows: f.snapshot.offers.DIRECT!.rows.map(r => ({ ...r, offer_type: "COMPOSITE", sale_price: 1_065_000 })) };
+    f.snapshot.offers.AO = { ...structuredClone(f.snapshot.offers.DIRECT!), sale_price: 645_000,
+      rows: f.snapshot.offers.DIRECT!.rows.map(r => ({ ...r, offer_type: "AO", sale_price: 645_000 })) };
+    delete f.snapshot.offers.DIRECT;
+    const tools = createReadOnlyTools({ scope: s.scope, clock: s.clock, policy: () => fixturePolicy(), catalog: {
+      readProduct: async () => structuredClone(f),
+      searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: structuredClone(f.product), score: 1, gap: null }),
+    } });
+    let step = 0;
+    const result = await runCommerceTurn({ ...s, tools, owner: async request => {
+      if (step++ === 0) return tool("search_products", { query: "SM613" });
+      if (step === 2) return tool("read_product", { subjectRef: "SM613" });
+      expect(request.toolsAllowed).toBe(false);
+      expect(request.contents.at(-1)!.parts[0]).toMatchObject({ functionResponse: { response: { data: { sellingOptions: [
+        { offerType: "AO", facts: expect.arrayContaining([expect.objectContaining({ type: "PRICE", value: { amountVnd: 645_000, currency: "VND" } })]) },
+        { offerType: "COMPOSITE" },
+      ] } } } });
+      return final("Áo lẻ 645k chị nhé.");
+    }, verifier: async request => {
+      expect(request.finalDraft).toBe("Áo lẻ 645k chị nhé.");
+      expect(request.trusted.protectedClaims).toHaveLength(4);
+      if (changed) {
+        f.snapshot.offers.AO!.sale_price = 650_000;
+        f.snapshot.offers.AO!.rows[0]!.sale_price = 650_000;
+      }
+      return { result: { verdict: "PASS", violations: [] } };
+    } });
+    expect(result.ownerGenerations).toBe(3);
+    expect(result.toolRounds).toBe(2);
+    expect(result.toolCalls).toBe(2);
+    expect(result.verifierGenerations).toBe(1);
+    expect(result.terminal.disposition).toBe(changed ? "HANDOFF" : "SEND_ELIGIBLE");
+    expect(result.terminal.reason).toBe(changed ? "STALE" : "PASS");
+    expect(result.sendEnabled).toBe(false);
+  });
+  it("keeps the 8KB bound on the entire batch of product reads, not each result separately", async () => {
+    const s = setup(), products = [fixtureProduct("SM613"), fixtureProduct("SM614")];
+    for (const p of products) p.product.descriptionXml = "cotton ".repeat(400);
+    const tools = createReadOnlyTools({ scope: s.scope, clock: s.clock, policy: () => fixturePolicy(),
+      initialProducts: products.map(p => p.product), catalog: {
+        readProduct: async id => products.find(p => p.product.productId === id)!,
+        searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }),
+      } });
+    const calls = products.map(p => ({ name: "read_product", args: { subjectRef: p.product.productId } }));
+    const results = await tools.invokeBatch(calls);
+    expect(results.every(r => Buffer.byteLength(JSON.stringify(r)) <= 8192)).toBe(true);
+    expect(Buffer.byteLength(JSON.stringify(results))).toBeGreaterThan(8192);
+    const owner = vi.fn(async (): Promise<OwnerGeneration> => ({ kind: "TOOLS", calls,
+      content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } }));
+    const result = await runCommerceTurn({ ...s, tools, owner });
+    expect(result.terminal.reason).toBe("TOOL_RESULT_BOUND");
+    expect(owner).toHaveBeenCalledOnce();
+    expect(s.verifier).not.toHaveBeenCalled();
+  });
   it("lets the transport bound the exact provider projection instead of rejecting duplicated internal context", async () => {
     const adapterUrl = new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs", import.meta.url);
     const { buildGeminiCommerceRequest } = await import(adapterUrl.href) as { buildGeminiCommerceRequest: (request: OwnerRequest) => unknown };
