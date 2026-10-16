@@ -7,6 +7,50 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+function cartContinuation(){
+ const r=request(),cart={cartId:'cart-1',revision:3,status:'OPEN',currency:'VND',
+  lines:[{lineId:'line-1',parentProductId:'P1',offerId:'AO',quantity:2,
+   components:[{componentRole:'TOP',size:'L',color:'BE'}],priceAuthority:{sourceVersion:'internal-proof'.repeat(400)}}],
+  subtotalVnd:998000,shippingFeeVnd:30000,discountTotalVnd:49900,grandTotalVnd:978100};
+ r.context.state.cartQuote={cartId:cart.cartId,cartVersion:3,subtotalVnd:998000,shippingFeeVnd:30000,discountTotalVnd:49900,grandTotalVnd:978100};
+ r.context.state.cartItems=[{subjectRef:'line-1',productRef:'P1',offerType:'AO',quantity:2,components:[{componentRole:'TOP',size:'L',color:'BE'}]}];
+ r.context.effectReceipts=[{ref:'receipt-1',operationId:'op-1',effect:'CART_MUTATED'}];
+ r.contents.push({role:'model',parts:[{thoughtSignature:'opaque-signature',functionCall:{id:'call-1',name:'change_cart_item',args:{subjectRef:'line-1',action:'SET_QUANTITY',quantity:2}}}]},
+  {role:'user',parts:[{functionResponse:{id:'call-1',name:'change_cart_item',response:{status:'OK',data:{operationId:'op-1',effect:'CART_MUTATED',cart,purchaseConfirmed:false}}}}]});
+ return r;
+}
+test('current successful cart readback is supplied once while operation, receipt and native identity remain intact',()=>{
+ const r=cartContinuation(),before=structuredClone({context:r.context,contents:r.contents});
+ const b=buildGeminiCommerceRequest(r),data=b.contents.at(-1).parts[0].functionResponse.response.data;
+ assert.equal(data.cart,undefined);assert.equal(data.operationId,'op-1');assert.equal(data.effect,'CART_MUTATED');assert.equal(data.purchaseConfirmed,false);
+ const trusted=JSON.parse(b.contents[0].parts[0].text).trusted;
+ assert.deepEqual(trusted.state.cartQuote,r.context.state.cartQuote);assert.deepEqual(trusted.state.cartItems,r.context.state.cartItems);
+ assert.deepEqual(trusted.receipts,r.context.effectReceipts);assert.deepEqual(b.contents[2],r.contents[1]);
+ assert.equal(b.contents.at(-1).parts[0].functionResponse.id,'call-1');assert.deepEqual({context:r.context,contents:r.contents},before);
+});
+test('different or absent public cart readback and non-success responses retain the original cart',()=>{
+ for(const change of [r=>delete r.context.state.cartQuote,r=>r.context.state.cartItems[0].quantity=1,
+  r=>r.context.state.cartQuote.cartVersion=4,r=>r.contents.at(-1).parts[0].functionResponse.response.status='UNAVAILABLE',
+  r=>r.contents.at(-1).parts[0].functionResponse.response.data.cart.status='CANCELLED']){
+  const r=cartContinuation();change(r);
+  assert.deepEqual(buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data.cart,
+   r.contents.at(-1).parts[0].functionResponse.response.data.cart);
+ }
+});
+test('a long native signature survives a bounded composed continuation without duplicate internal cart proof',async()=>{
+ const r=cartContinuation();r.instructions='x'.repeat(11756);
+ r.availableTools=['search_products','read_product','read_policy','apply_customer_state','recommend_size','quote_cart','add_to_cart','change_cart_item','confirm_purchase','request_handoff'];
+ r.contents[1].parts[0].thoughtSignature='s'.repeat(13000);
+ let calls=0,captured;
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+  calls++;assert.ok(Buffer.byteLength(init.body)<=32768);captured=JSON.parse(init.body);
+  return new Response(JSON.stringify(body([{text:'Đã cập nhật giỏ chị nhé.'}])));
+ }});
+ const result=await infer(r);assert.equal(calls,1);assert.equal(result.kind,'FINAL');
+ assert.equal(captured.contents[2].parts[0].thoughtSignature,r.contents[1].parts[0].thoughtSignature);
+ assert.deepEqual(JSON.parse(captured.contents[0].parts[0].text).trusted.state.cartItems,r.context.state.cartItems);
+});
+
 test('captured HTTP request keeps per-option scope and sanitizes nested availability without evaluator labels',async()=>{
  const r=request(),captured=[],options=[{offerType:'AO',variantId:'offer:P1:AO',facts:[{type:'PRICE',scope:{productId:'P1',variantId:'offer:P1:AO'},value:{amountVnd:645000}}],
   availability:{price:{status:'OK',reason:null},stock:{status:'ERROR',reason:'PRIVATE_EVALUATOR_CANARY'}}},

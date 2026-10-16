@@ -70,6 +70,15 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
+  const cart=data.cart;
+  if(['add_to_cart','change_cart_item'].includes(response.name)&&response.response.status==='OK'&&cart?.status==='OPEN'&&cart.currency==='VND'&&
+   Array.isArray(cart.lines)&&c.state.cartQuote&&Array.isArray(c.state.cartItems)){
+   const quote={cartId:cart.cartId,cartVersion:cart.revision,subtotalVnd:cart.subtotalVnd,shippingFeeVnd:cart.shippingFeeVnd,
+    discountTotalVnd:cart.discountTotalVnd,grandTotalVnd:cart.grandTotalVnd};
+   const items=cart.lines.map(line=>({subjectRef:line.lineId,productRef:line.parentProductId,offerType:line.offerId,quantity:line.quantity,
+    components:line.components.map(x=>({componentRole:x.componentRole,size:x.size,color:x.color}))}));
+   if(canonicalJsonV1(quote)===canonicalJsonV1(c.state.cartQuote)&&canonicalJsonV1(items)===canonicalJsonV1(c.state.cartItems))delete data.cart;
+  }
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints']
