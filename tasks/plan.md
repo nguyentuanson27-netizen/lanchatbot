@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current reviewed action-contract fix and replay — 2026-10-16
+
+Owner yêu cầu fix/chạy lại sau independent review REVISE. Intake `938086a7`, refreshed main/implementationBaseSha `296cdcfb`. [Plan](../apps/worker/evals/single-agent-commerce-read-only/action-contract-run-20261016/PLAN.md) và [scope](../apps/worker/evals/single-agent-commerce-read-only/action-contract-run-20261016/SCOPE.md): allowlist theo action, recovery đọc đúng current committed quantity và chỉ nêu size/màu đồng nhất; change_cart_item description nói đúng hai action/từng command commit. Không combined atomic update, cart-dedup, rút owner/verifier prompt, đổi B1 capability/model/source/budget hoặc thêm gate/store/role. Minimum GREEN `72367940` sau RED 38 PASS/5 FAIL → 43 PASS, thêm mixed-cart control → 44 PASS; full worker 1.799 PASS.
+
+Một run N1 đủ 7 ordered stateful trước rồi 24 B1, không thêm canary/retry/reseed hoặc quality stop. Freeze/commit/clean source, preflights trước dispatch; raw trước primary trước diagnosis. Kiểm exact cùng prompts/projection/nguồn config; giữ signature-bound và ETA source dependency là giới hạn chưa sửa. Update PR391 rồi dừng, A OWNER_BYPASS/sales-live STOP, không publication/Phase C/live action.
+
 ## Current owner rollback to the preceding run — 2026-10-16
 
 Owner yêu cầu “rollback về vòng trc” sau report head `7449679cd1b4e5dd2db3b27d8eda86305b6668b7`. Khôi phục toàn bộ treatment mới trong sáu active files (effects/tests, Gemini adapter/tests, owner prompt, manifest) về exact Git blobs của `40f400e7d3d121fa12da7a2a02ca1cf8fdccb9ee`. Bao gồm gỡ guard, cart-dedup và native/owner changes vừa thử; không tự giữ một phần bản sửa. Tạo commit mới, không reset/rewrite history; raw, frozen inputs, verdicts và reviews của run `f2289491` giữ nguyên theo source của chúng. Các mục dưới là lịch sử của từng source, không còn xác định active treatment nếu mâu thuẫn mục rollback này.

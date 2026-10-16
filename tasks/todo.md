@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current reviewed action-contract fix and replay — 2026-10-16
+
+- [x] Refresh main `296cdcfb`, intake rollback `938086a7`, giữ raw/nhãn lịch sử. [Plan và scope](../apps/worker/evals/single-agent-commerce-read-only/action-contract-run-20261016/PLAN.md) giới hạn đúng review REVISE, không chọn combined atomic hoặc thay B1 capability.
+- [x] Observed RED 38 PASS/5 FAIL → GREEN 43 PASS; thêm mixed-cart control → 44 PASS, full worker 1.799 PASS. Minimum savepoint `72367940`. Guard trước authorize/select/commit; ACK dùng current committed readback, không suy phần khách còn yêu cầu. Chỉ description change_cart_item đổi; owner/verifier/projection và declaration khác giữ baseline.
+- [ ] Hoàn tất readiness/controlled integration và self-review, freeze/clean source/preflight; thu một run đủ 7 ordered stateful trước + 24 B1/N1, không thêm canary generations/quality gate. Raw trước primary trước diagnosis, audit bindings/accounting/firewall, cập nhật PR391 rồi dừng. A OWNER_BYPASS, ETA/source checkout và signature-bound vẫn là giới hạn đã biết; không live action.
+
 ## Current owner rollback to the preceding run — 2026-10-16
 
 - [x] Owner-requested rollback sau `7449679c`: sáu active Git blobs khớp `40f400e7d3d121fa12da7a2a02ca1cf8fdccb9ee`, gỡ toàn bộ treatment của lượt vừa sửa. Giữ mọi commit/raw/frozen inputs/verdict/review, không reset hoặc force-push; các mục dưới là lịch sử.
