@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current reviewed selling-option correction — 2026-10-16
+
+- [x] Revise [plan](../apps/worker/evals/single-agent-commerce-read-only/offer-read-fix-20261016/PLAN.md) after independent REVISE_PLAN; record current main/intake, default/overflow semantics, unchanged fit prompt and separate later run identities.
+- [ ] Observe owning RED; implement bounded same-snapshot selling-option summaries with existing scoped claims/readback and native projection.
+- [ ] Trace existing registry publication and record a concrete proposal/unknowns without live source writes.
+- [ ] Self-review and run affected tests, protected/reply tests, full worker/eval checks and worker typecheck/build/lint; record actual results and deliver on PR391. No provider batch in this task.
+
 ## Current owner rollback — 2026-10-16
 
 - [x] Revert679c5343 without resetting history; restore four active code/test/prompt/manifest blobs exactly to1625cd30, owner hash74c8102e. All historical run evidence/labels retained.

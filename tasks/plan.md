@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current reviewed selling-option correction — 2026-10-16
+
+Owner requests revising the independently reviewed plan and implementing it. [Current plan](../apps/worker/evals/single-agent-commerce-read-only/offer-read-fix-20261016/PLAN.md) incorporates all three P2 findings: bounded same-snapshot selling options with explicit default semantics; unchanged fit/advisory prompt baseline; separate identities/denominators for later runs. Trace existing registry publication, without claiming a demonstrated candidate drop or publishing source. Intake d09f2231; refreshed main/implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361. Implement using observed RED -> minimum GREEN -> affected verification/self-review. This task is not a provider replay; sales/liveSTOP, source checkoutBLOCKED and A OWNER_BYPASS remain unchanged.
+
 ## Current owner rollback — 2026-10-16
 
 Owner requests “roll back lại” after the unsuccessful prose-boundary replay. Revert679c5343 with a new commit; active `gemini-inference.mjs`, its tests, owner prompt and manifest exactly match `1625cd30f2ec9e1ec9558414045c37841947381f`. Owner prompt SHA256 restored to `74c8102ef88e970fca18e84f5d186406a4d21ac5d27bafc383c6476b85394b43`, descriptions again in trusted.products.content. Keep all raw/results/primary/diagnostics/frozen source identities unchanged, including the negative f6c4f368 replay. Sections below are historical evidence of their own source versions. Actual rollback verification: `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs` →46PASS; four Git blobs equal target. No new behavior/test, provider run, source mutation, merge/deploy or live action; sales/liveSTOP/source checkoutBLOCKED/A OWNER_BYPASS unchanged.
