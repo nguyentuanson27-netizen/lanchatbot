@@ -390,6 +390,15 @@ async function previewState(eventPrefix: string) {
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it.each(["PREVIEW", "CONFIRM"] as const)("preserves the missing source prerequisite for %s without misreporting a cart change", async phase => {
+    const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "source-gap-open"));
+    const state = phase === "PREVIEW" ? opened.plan!.state : await previewState("source-gap-confirm");
+    const text = phase === "PREVIEW" ? "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD" : "Chốt đơn cho chị nhé";
+    const result = await evaluateRealtimeSalesCycle({ ...input(state, text, "source-gap-" + phase), facts: { ...facts,
+      resolveCartSelection: async () => ({ status: "ETA_UNAVAILABLE", reasonCode: "CART_ETA_UNAVAILABLE", availableSizes: [], availableColors: [] }) } });
+    expect(result.reasonCode).toBe("CART_ETA_UNAVAILABLE"); expect(result.plan).toBeNull();
+    expect(result.messages).toEqual([]); expect(state.checkoutDraft?.fullName).not.toBe("Khách thử nghiệm");
+  });
   it("keeps code-issued native command/cart identities inside the existing guarded plan", async () => {
     const state = { ...createRealtimeSalesState(conversationId, pageId, now), stage: "SIZE_RECOMMENDED" as const };
     const identity = { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001",

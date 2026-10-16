@@ -11,7 +11,7 @@ Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdict
 | F3 exact serialized provider request bound | IMPLEMENTED; focused GREEN |
 | F4 typed tools and native final-only contract | IMPLEMENTED; offline focused GREEN; live behavior NOT_RUN |
 | F5 named alias lookup | IMPLEMENTED; full-name alias focused GREEN; partial-name coverage remains limited |
-| F6 private-checkout prerequisite correction | PENDING |
+| F6 private-checkout prerequisite correction | Failure reason corrected; current real-source checkout BLOCKED by missing ETA |
 | F7 sales task/context and code-owned receipt ACK | PENDING |
 | Focused/full verification and self-review | PENDING |
 
@@ -42,5 +42,13 @@ F4 RED: Node adapter22tests/3FAIL for callable product identity, confusing outpu
 F5 `pnpm --filter @lana/business-tools exec vitest run src/business-tools.test.ts src/qdrant.test.ts`: observed RED30PASS/3FAIL, then intermediate32PASS/1FAIL exposed a pre-existing broad keyword alias (`đầm đi tiệc`). Minimum correction reuses findByAlias for non-code queries but accepts that identity only when the full normalized source title matches; keyword aliases still take semantic search and collisions stay ambiguous. Final33PASS. Exact-code priority is unchanged; no new lookup/index/parser or source write. Non-code misses now incur the existing bounded alias read before embedding; actual latency is unmeasured.
 
 Captured public source-readback has SV1561 aliases `SET VÁY KHÁNH TRANG`/`SV1561`; bare `Khánh Trang` is not an exact alias. Full-name query can now reuse the alias path, but partial names remain semantic queries and the Qdrant compatibility scan remains bounded256points. This does not prove current full-catalog alias coverage or fix the historical partial-name result. Retain the supplied full name in owner search instructions rather than adding substring/regex matching or hardcoded names.
+
+F6 used the existing source-session/Ops credential route with read-only source PostgreSQL and no generation client. Command: `python apps/worker/evals/single-agent-commerce-read-only/source-session.py node C:/Users/nguye/AppData/Local/Temp/c3-b-checkout-2664b772200142038dbe7e16d7b0b4c9.mjs apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-20261016/checkout-source-readback.json`: exit0, [public readback](checkout-source-readback.json). At2026-10-16T02:23:17.163Z, SV2447/AO/BE/L×2 is READY/499000/PRE_ORDER without a delivery region; the same selection for synthetic TP.HCM checkout returns ETA_UNAVAILABLE/CART_ETA_UNAVAILABLE. Policy shop identity matches canonical LANA_DESIGN. This later mutable-source read diagnoses a current prerequisite; it does not reconstruct the old missing planner reason. HEADa3943433 production code was built; the only uncommitted source difference then was the typed test import fix.
+
+F6 RED: `pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.test.ts -t 'preserves the missing source prerequisite'`:2FAIL/62not-selected; missing ETA was misreported as ORDER_PREVIEW_CART_SNAPSHOT_CHANGED or CLAIM_MISSING. Minimum fix propagates an unavailable typed selection reason before preview/confirmation compare or readiness; no condition is waived, no ETA invented, no PII/events committed. GREEN: `pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-session.test.ts`:87PASS including old r31.3/effect/checkout controls. Composed missing-region test now also requires the original private planner reason; actual PostgreSQL runs follow final build.
+
+Compilation: first `pnpm --filter @lana/worker build` exited1 on the new test's undeclared static .mjs import; typed URL import fixes it. Later direct `pnpm --filter @lana/worker exec tsc -p tsconfig.json` initially found redundant union comparisons in F6; removed those comparisons, same command exit0. Final canonical worker build remains pending; neither earlier failure is claimed PASS.
+
+Current-source checkout completion remains BLOCKED until the authoritative fulfillment/ETA source covers this selection/region. Publishing that data is outside this code fix. Controlled COD/bank tests cannot substitute for it; handoff is not a completed checkout.
 
 Record observed RED, subsequent GREEN, final commands and remaining unknowns below as they occur. A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.

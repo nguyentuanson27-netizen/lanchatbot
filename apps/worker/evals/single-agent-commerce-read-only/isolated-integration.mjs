@@ -391,6 +391,7 @@ try{
   const j=await statefulFixture({missingEta:true});await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
   const r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);
   assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  assert.equal(r.result.privateCheckoutFailure.stage,'PLANNER');assert.equal(r.result.privateCheckoutFailure.reasonCode,'CONTROLLED_MISSING_REGION');
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
  });
  await check('B composed newer inbound between final readback and commit cancels eligibility without an Outbox',async()=>{

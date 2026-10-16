@@ -1603,6 +1603,8 @@ export async function evaluateRealtimeSalesCycle(
     const selections = await currentSelections(
       input, state.cart.value, state.checkoutDraft.address, effectNow(),
     );
+    const unavailable = selections.find(selection => selection.status !== "READY");
+    if (unavailable) return failedOutput(unavailable.reasonCode);
     const confirmationCheckedAt = effectNow();
     checkoutValidation = revalidation(
       state.cart.value,
@@ -1923,6 +1925,8 @@ export async function evaluateRealtimeSalesCycle(
       const selections = await currentSelections(
         input, state.cart.value, prospectiveCheckoutDraft.address!, preflightCheckedAt,
       );
+      const unavailable = selections.find(selection => selection.status !== "READY");
+      if (unavailable) return failedOutput(unavailable.reasonCode);
       const readySelections = selections.filter(
         (value): value is ReadyCartSelection => value.status === "READY",
       );

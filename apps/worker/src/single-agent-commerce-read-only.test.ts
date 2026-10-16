@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { runCommerceTurn, type OwnerGeneration, type VerifierRequest } from "./single-agent-commerce-read-only.js";
+import { runCommerceTurn, type OwnerGeneration, type OwnerRequest, type VerifierRequest } from "./single-agent-commerce-read-only.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct } from "./single-agent-commerce.test-support.js";
 
@@ -17,7 +17,8 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
 
 describe("one conversational owner, tools and exact egress", () => {
   it("lets the transport bound the exact provider projection instead of rejecting duplicated internal context", async () => {
-    const { buildGeminiCommerceRequest } = await import("../evals/single-agent-commerce-read-only/gemini-inference.mjs");
+    const adapterUrl = new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs", import.meta.url);
+    const { buildGeminiCommerceRequest } = await import(adapterUrl.href) as { buildGeminiCommerceRequest: (request: OwnerRequest) => unknown };
     const s = setup("cotton ".repeat(850));
     await s.tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
     const context = s.tools.snapshot(), sizes: { internal: number; wire: number }[] = [];
