@@ -1,5 +1,18 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current reviewed root-cause fix — 2026-10-16
+
+- [x] Sửa [phương án fix theo review độc lập GPT-6.1 Sol High](plan.md#current-root-cause-fix-after-independent-review--2026-10-16) trên source7fe9643b: bổ sung productless/policy/cart fallback qua producer/schema/transaction, làm rõ alias path và giữ UNKNOWN của các nguyên nhân chưa chứng minh. Owner sau đó yêu cầu implementation; refresh main296cdcfb, [record](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-20261016/IMPLEMENTATION.md). Implementation IN_PROGRESS/provider NOT_RUN, kết quả lịch sử giữ nguyên.
+- [ ] F1 — Giữ bounded original stage/reason qua provider parse/transport, receipt recovery và private planner/commit trong telemetry hiện có; không raw private input/secret, store mới hoặc generation retry.
+- [ ] F2 — Sửa outbound scope và existing payload-only contract xuyên ingress/readiness/schema/transaction. RED→GREEN cho fallback không product, policy-only, nhiều candidates, có cart, protected multi-product reply và receipt ACK; giữ source binding, authority/CAS/privacy/freshness, mutation/confirmation coverage.
+- [ ] F3 — Dùng một exact provider projection để sở hữu bound32768bytes; replay offline chuỗi context cũ, giữ native signatures/call IDs/receipts/changed evidence. Không nâng bound/budget hoặc claim dedup chắc chắn cứu case.
+- [ ] F4 — Làm rõ measurement paths/product-vs-offer/input-vs-output và dùng existing add-to-cart resolution. Kiểm official provider contract/exact HTTP body cho final-only; vẫn fail-closed khi hết budget, không parser/repair loop hay retry.
+- [ ] F5 — Kiểm normalization/coverage và dùng existing alias path cho query tên; bảo vệ exact code/collision/semantic fallback. Không giả định có exact-title lookup, hardcode tên hoặc ghi index.
+- [ ] F6 — Dựa trên F1 để xác định rồi sửa private-checkout mismatch thực sự; code-only PII, isolated composed COD/bank/cleanup, actual preview/confirmation/handoff/receipt và HUMAN authority. Không mặc định nguyên nhân ETA/policy/DB.
+- [ ] F7 — Review/sửa quyết định tư vấn, context, policy whole-turn và code-owned ACK đúng phần sở hữu. Giữ giọng tự tin/tự nhiên, upsell và dẫn fact hợp lý; không keyword checklist, template theo ca, prompt bloat hoặc thay kết quả lịch sử.
+- [ ] Chạy focused RED→GREEN và affected checks/self-review; worker test/typecheck/build/lint, protected/reply và shared tests/typecheck/build khi chạm package. Ghi lệnh thực chạy/exit/failure; chưa tính evidence cũ cho source mới.
+- [ ] Khi thực hiện run kế tiếp: freeze/commit/clean source và hashes; preflight0generation + COD/bank controls; cùng24B1 N1/max96 và7stateful N1/max24, không extra attempts. Raw trước primary actual-terminal review; giữ complete denominator/unknowns, metrics theo coverage, báo B1 usability và B2/B3 action completion riêng; STOP sau một batch, không A/C/live promotion.
+
 ## Owner-requested B2/B3 replay — 2026-10-16
 
 - [x] Freeze current models/prompts/native tools and unchanged7case population. Focused worker118PASS/database48PASS/protocol-provider26PASS; canonical workerbuild exit0. No runtime/prompt/corpus/config change; full-suite/typecheck/lint evidence from preceding task is not claimed rerun here.

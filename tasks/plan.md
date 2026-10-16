@@ -1,5 +1,90 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current root-cause fix after independent review — 2026-10-16
+
+**Status: IMPLEMENTING; new provider batches NOT_RUN.** Owner yêu cầu “tiến hành fix đi” sau khi chốt phương án. Thực hiện F1–F7 và verification theo evidence thực tế; [implementation record](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-20261016/IMPLEMENTATION.md). Phần này không thay kết quả hoặc scope của các run lịch sử bên dưới. Source đã review: `7fe9643b747462a1c29a61308e365541be21bd19`, PR391. Refresh main trước implementation vẫn là `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Review độc lập GPT-6.1 Sol High xác nhận các finding, bổ sung thiếu sót P2 của phương án outbound và làm rõ đường tìm alias.
+
+Mục tiêu là khách được tư vấn chọn mua hợp lý, nhận câu trả lời tự nhiên và thực hiện được thao tác đã yêu cầu. Verifier PASS, tool gọi thành công và một tin tư vấn dùng được là ba kết quả phải báo riêng. Giữ một conversational owner, tối đa một verifier; code sở hữu identity/truth/freshness/state/permission/effects/receipts/privacy. Generated final draft sống sót hard precheck luôn phải qua verifier và current final gate, kể cả câu policy không có sản phẩm. Code-owned fallback/receipt ACK dùng đúng đường recovery đã có.
+
+Evidence đầu vào: [B1 — toàn bộ24ca và root causes](../apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016/DIAGNOSTICS.md), [B2/B3 — từng bước, actual state và giới hạn evidence](../apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016/DIAGNOSTICS.md), [coverage diagnosis, không phải full readiness replay](../apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016/EGRESS_COVERAGE_DIAGNOSIS.json).
+
+- Đã xác nhận: candidates bị dùng làm phạm vi claim của outbound; guard internal request đứng trước provider projection; tool calls sai field/ref hoặc quá muộn; recovery/private checkout làm mất nguyên nhân lỗi. B1 policy-only chạy standalone chưa chứng minh persisted ingress gửi được câu không có product.
+- Có thể góp phần, chưa cô lập nhân quả: độ rối của tool interface và mô tả catalog khiến owner gọi sai/viết dài. Search tên bỏ qua alias là cấu trúc code đã xác nhận, nhưng chưa biết alias/index coverage tại thời điểm run.
+- Chưa biết: vì sao prepared `NONE` vẫn nhận TOOLS; trigger gốc của receipt ACK ở bước4; dependency/commit subreason của private checkout. Không quy sẵn cho API, context bound, ETA, policy, giá hoặc DB. Bước7 thiếu terminal do host/tool interruption, không tự tính là lỗi model.
+
+### F1. Giữ nguyên nhân lỗi trong telemetry đang có
+
+Sửa `gemini-inference.mjs`, `single-agent-commerce-read-only.ts`, `single-agent-commerce-session.ts` và ingress consumer đúng chỗ mất thông tin. Giữ bounded stage/reason/finish code an toàn cho lỗi trước dispatch, transport, HTTP200 không có completion hợp lệ, planner và commit; giữ nguyên nhân ban đầu khi terminal được thay bằng receipt recovery/handoff. Không ghi raw customer-private text, native thoughts, credential hoặc response body vào telemetry; không tạo store/log pipeline mới.
+
+Đạt khi regression phân biệt được các đường trên, request/error/token accounting vẫn giữ mọi attempt và receipt ACK không che lỗi khởi đầu. Thiếu reason thật thì giữ UNKNOWN; không suy reason từ tên fallback và không gọi lại generation. F1 phục vụ chẩn đoán, không thêm gate để chặn reply.
+
+### F2. Sửa outbound theo payload và claim scope, xuyên producer/schema/transaction
+
+Đọc và sửa cùng boundary hiện có ở `single-agent-commerce-ingress.ts`, `packages/business-tools/src/effect-readiness.ts`, `packages/contracts/src/v2/canonical-evidence-readiness.ts` và transaction consumer trong `packages/database/src/realtime-runtime.ts` nếu contract thay đổi. Không coi mọi search candidate là sản phẩm mà tin nhắn khẳng định đủ giá/tồn; không tạo tích chéo mọi claim type với mọi sản phẩm. Generated reply vẫn giữ exact draft/trusted snapshot binding và scope đã có của từng claim; không đoán claim đã dùng bằng regex, không thêm output JSON hoặc semantic role để trích claims.
+
+Existing payload-only outbound phải nhất quán khi không có product: hiện `effect-readiness.ts` thêm PRODUCT_UNRESOLVED và READY schema vẫn đòi productIds không rỗng. Khi có cart, ingress còn dựng CART_READY cho mọi messagesOut. Chỉ xóa productIds/claims sẽ không giải quyết đủ; cũng không được xóa sourceMessageIdHash hoặc bỏ readiness để lách transaction guard. Tách yêu cầu của thông điệp khỏi yêu cầu sẵn sàng mua của cart ngay tại effect contract hiện có; cart mutation/confirmation vẫn cần đầy đủ evidence theo từng line.
+
+Đạt khi focused regressions chứng minh:
+
+- Static fallback không có product, câu policy không có product và fallback sau search nhiều candidates đi được đường gửi hợp lệ khi current authority cho phép. Generated policy vẫn gọi verifier; fallback dùng đúng ID/text đã có.
+- Fallback khi đã có cart không bị đòi giá/tồn mới chỉ để báo fallback. Receipt ACK chỉ xác nhận operation đã commit, vẫn cần receipt/current-state readback; không thay bằng lời hứa mua/giao hàng hoặc replay mutation.
+- Reply nhiều sản phẩm vẫn giữ đúng subject/claim binding. PRICE/STOCK sai subject, snapshot/revision đổi, hết hạn, recipient/permission/privacy đổi, thiếu receipt và HUMAN authority vẫn bị chặn ở boundary sở hữu chúng. Không nới CART_READY/mutation/purchase coverage để cứu outbound. Shared contract phải giữ negative regressions của các protected-outbound consumers hiện có; không coi một claim list rỗng tùy ý là quyền bỏ kiểm tra protected reply.
+
+### F3. Một provider projection sở hữu giới hạn request32KB
+
+Sửa guard ở runner và projection trong `gemini-inference.mjs` để kiểm đúng serialized request sẽ dispatch, trước generation request. Reuse builder/dedup hiện có; không giữ hai phép đo representation khác nhau cho cùng invariant. Bảo toàn opaque native signatures/parts, function-call association/IDs, receipts, history đã bound và evidence khác biệt hoặc đã đổi; chỉ bỏ dữ liệu trùng thực sự.
+
+Đạt khi replay offline chuỗi tool/context gây CONTEXT_BOUND đo đúng provider body; body dưới/đúng/vượt32768bytes xử lý đúng và vượt bound không dispatch generation. Không mặc định dedup sẽ cứu ca cũ: nếu actual body vẫn quá lớn thì giữ fail-closed và số đo. Không tăng32KB, tool budget, cắt signature hoặc thêm model tóm tắt context.
+
+### F4. Làm rõ typed tool surface và final-only contract
+
+Nhất quán measurement paths giữa schema/read/write; làm rõ product ref dùng gọi tool, offer selection và evidence identities. Input không dùng field chỉ thuộc output. Reuse code resolution sẵn có của `add_to_cart`; không bắt owner luôn read default cả set rồi mới read component trước khi thực hiện mua. Invalid field/ref vẫn bị code từ chối, không strip prefix/đổi tham số bằng regex hoặc script định tuyến từ lời khách.
+
+Kiểm official provider documentation trước khi đổi API/client. Capture exact body tại HTTP boundary bằng tests và bounded live-request accounting hiện có, không gọi model riêng để debug. Làm rõ final-only mode/tools declarations/continuation/call association theo contract thực tế; chưa gán lỗi cho provider khi mới có prepared body. Giữ3owner generations/2tool rounds/6calls, tối đa1verifier và một upstream generation request/attempt, không retry/repair/reverify ngầm. Provider vẫn trả tool khi hết budget thì không execute và giữ fail-closed outcome.
+
+Đạt khi tests bảo vệ valid/invalid measurement paths, product-vs-offer ref, lựa chọn component đúng ngay lần đầu, add-to-cart resolution và final-only wire contract. Không claim provider tuân NONE chỉ vì fake-HTTP test PASS; hành vi thật được đo ở run đã đăng ký sau.
+
+### F5. Kiểm và dùng lại named alias lookup
+
+`ProductSearchService.searchText` hiện chỉ thử alias trong nhánh codeLike; query tên thường đi thẳng semantic search. Kiểm contract/normalization và coverage của `findByAlias` cùng source adapter trước khi dùng nó cho tên. Repo chưa có exact-title lookup để mặc định reuse; không thêm index/service/router hoặc ghi alias vào nguồn trong scope này. Nếu alias hiện có không đủ, báo rõ thiếu source/index coverage; không giả lập exact match hoặc hardcode Khánh Trang/SV1561.
+
+Đạt khi exact-code hiện có không đổi, alias đơn tìm đúng, alias collision vẫn AMBIGUOUS, alias miss còn dùng semantic path. Shortlist không khớp không trở thành bằng chứng shop không có. Readback sau run không được dùng để viết lại trạng thái index của run cũ.
+
+### F6. Sửa private checkout theo nguyên nhân thực tế
+
+Phụ thuộc F1 và tool/state contracts cần thiết ở F4. Dùng executor/readiness/readback hiện có để xác định planner không có plan, thiếu prerequisite hay commit conflict; sau đó mới sửa mismatch cụ thể. Không tự điền ETA/policy/address/price từ fixture hoặc giá trị mặc định. Private input vẫn code-only, không chuyển sang owner/verifier.
+
+Đạt khi composed tests chứng minh đường COD và BANK_TRANSFER với current cart/source prerequisites. Nếu nguồn thật còn thiếu prerequisite thì báo đúng phần thiếu và giữ checkout completion BLOCKED, không đánh dấu hoàn tất nhờ handoff. Kiểm preview/confirmation/atomic intents, duplicate/recovery và HUMAN authority; commit/handoff/event/tag intent không được tính là external notification hoặc live send. Dùng isolated disposable database/capture transport và cleanup harness hiện có, không đổi serving schema/data.
+
+### F7. Sửa tư vấn và code ACK sau khi đường thao tác đúng
+
+Review từng actual customer outcome: đã hiểu nhu cầu mua chưa, có chọn/giải thích phương án dùng được không, có trả đủ phần khách hỏi và bước tiếp theo có thực hiện được không. Giữ confident grounded advice, upsell hợp lý và trích fact có ích; không bắt lặp số đo/ngân sách, checklist policy, CTA mỗi tin hay chọn món rẻ nhất. Với policy, phân biệt câu hỏi thời hạn/phí với cấp quyền đổi hàng, xét cả lời khách và toàn câu trả lời. Chỉ chỉnh verifier khi đã xác định cụ thể nghĩa bị chặn sai; không nới chung hoặc chấm lại verdict cũ.
+
+Context chỉ đưa dữ liệu đã xác nhận qua nguồn/projection hiện có; chưa chứng minh XML gây lỗi thì không tạo parser hay model tóm tắt mới. Chỉnh prompt theo nhiệm vụ bán hàng, không nhồi ví dụ/keyword theo ca. Code-owned receipt ACK sửa tại recovery theo effect thực sự và receipt/current state, không yêu cầu model sửa chuỗi static. Giữ code-owned bounded text tối thiểu, không mọc thư viện template theo case. Thiếu dữ liệu size cần thiết thì hỏi phần còn thiếu, không đề xuất size từ dữ kiện chưa đủ.
+
+### Verification và run kế tiếp — kế hoạch, NOT_RUN trong lần cập nhật này
+
+Mỗi thay đổi logic quan sát focused RED trước rồi minimum GREEN. Build dependency bị sửa trước consumer tests để không dùng dist cũ. Reuse tests hiện có ở worker ingress/read-only/state/effects/session/persistence/handoff, provider/protocol; shared effect-readiness/canonical-readiness/database runtime/search khi bị tác động. Bảo vệ protected claims/reply assembly, unknown≠absence, partial answers, CAS/source supersession, privacy, receipt recovery và HUMAN authority. Self-review diff và fix finding; không thêm vòng reviewer/gate mặc định.
+
+Các lệnh thực thi khi sửa code, chưa được chạy bởi bản cập nhật kế hoạch này:
+
+```text
+pnpm -r --filter "@lana/worker^..." build
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-handoff.test.ts
+node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs
+pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts
+pnpm --filter @lana/worker test
+pnpm --filter @lana/worker typecheck
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+```
+
+Chạy thêm `test`, `typecheck`, `build` qua `pnpm --filter` cho từng shared package thực sự thay đổi (`@lana/contracts`, `@lana/business-tools`, `@lana/database`), cùng composed COD/bank harness. Ghi exact command/exit/result và Windows environment failures nếu có; PASS cũ không thay kết quả mới. Không thêm migration, abstraction, durable state, role hoặc gate cho phương án này; nếu phát hiện invariant chưa được cơ chế hiện có bảo vệ, nêu đúng gap trước khi mở scope.
+
+Khi thực hiện provider run tiếp theo: giữ đúng24B1ca N1/max96generations và7stateful steps N1/max24generations (6public +1private code-only), tổng31outcomes/max120generations, không thêm ca/lặp để làm đẹp kết quả. Giữ order hành trình stateful; chạy deterministic regressions của lỗi cũ trước, không cộng thêm provider attempts cho chúng. Owner Vertex/global Gemini3.5FlashLite High và verifier Codex-login GPT-6.1 Sol High cùng generation settings đã duyệt; freeze source/prompt/schema/native-tool/corpus/config hashes trước run. Commit, clean executable/config source, capture runtime HEAD không ghi ngược vào frozen source; zero-generation preflight/source readback và isolated COD/bank controls trước provider. Missing dependency/provider/credential thì BLOCKED, không substitute/simulate.
+
+Raw/accounting/cleanup trước primary review; primary đọc toàn hội thoại, actual terminal/captured messages và state đã commit trước rejected drafts. Tách B1 usability khỏi B2/B3 action completion và verifier safety. Giữ mọi generation/error/fallback/handoff/no-send/unknown trong mẫu số; không biến receipt ACK thành verifier PASS, interruption thành completed terminal hoặc bỏ downstream failures. Báo riêng nguồn/context, owner, verifier và code/adapter với confidence; đo latency/token/cost theo coverage thực có. Đối chiếu cả case đã tốt và fail cũ, không chấm theo keyword hoặc đổi rubric sau run. Không automatic vòng2, A PASS, Phase C, merge/deploy/live send. Checkpoint A vẫn OWNER_BYPASS; sales/live acceptance vẫn STOP cho đến khi có evidence/owner acceptance phù hợp.
+
 ## Owner-requested B2/B3 replay — 2026-10-16
 
 Run the [same seven stateful outcomes](../apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016/SCOPE.md) once on current9cd3f85e executable/prompts: six public turns plus one private code-only turn, approved Gemini3.5FlashLiteHigh/6.1SolHigh, max24generations/retry0. Focused checks/build → commit/clean seal → real PostgreSQL COD/bank composition controls → zero-generation preflight → one COD provider journey → raw before primary whole-terminal/state review → audit/diagnosis/report/PR391. No code/prompt fix, new corpus, live mutation/send or qualification inferred from the earlier24B1 population.
