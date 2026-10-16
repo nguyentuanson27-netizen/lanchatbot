@@ -3,22 +3,22 @@
 ## Owner-authorized context fix and priority replay — 2026-10-16
 
 - [x] Refresh main296cdcfb; preserve intake59bd75ca and [reviewed plan](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/NEXT_FIX_PLAN.md). P1 observed21PASS/3FAIL →33PASS; P2 observed23PASS/2FAIL →34PASS at adapter/protocol, minimum correction saved1d71ac88.
-- [x] Correct owner-only offers/availability/missing projection and bounded completion reason categories; preserve non-offer/read literals, verifier context, native signatures, exact bound, one request/no retry and final-only fail-closed behavior. Actual provider compliance remains unverified.
+- [x] Correct owner-only offers/availability/missing projection and bounded completion reason categories; preserve non-offer/read literals, verifier context, native signatures, exact bound, one request/no retry and final-only fail-closed behavior. Subsequent replay observes one final-only request with no violation; broad provider compliance remains unverified.
 - [x] Trace source routes through audited reads; replace existing owner sales/unknown/voice paragraphs and disclose existing PRE_ORDER before purchase confirmation. No source facts are injected or relabeled. Source registry→index synchronization and authoritative destination mapping remain separate unexecuted proposals.
 - [x] Full worker1779PASS/eval488PASS+2optionalSKIP; focused119/provider-protocol34/protected-reply21PASS; worker typecheck/build/lint exit0. [Actual commands/limits](../apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/IMPLEMENTATION.md). No shared source or runtime authority changed; no new provider requests during preparation.
-- [ ] Freeze/commit/clean source and current hashes; run preflight/source checks and the six old B1 errors first, N1, then18remaining+7stateful only if all six actual outcomes are usable/safe. Preserve all outcomes/unknowns and partial coverage if stopped; raw before primary before diagnosis.
-- [ ] Record final actual results, latency/token/request accounting and revised findings on draftPR391; stop without automatic repair rounds, publication, A/C promotion or live action.
+- [x] Freeze clean a53b0613 and current hashes; zero-generation preflights/source readbackPASS, then six old B1 errors once.19generation HTTP/0retry/error/timeout. Primary2USABLE/1NEEDS_EDIT/3fallback: hold18remainingB1+7statefulNOT_RUN per preregistration. Raw8529fe99 before primaryacdd8491 before diagnosis; no replacement attempt.
+- [x] Record [actual results, full six conversations, diagnosis and latency/token/request accounting](../apps/worker/evals/single-agent-commerce-read-only/context-fix-run-20261016/CHECKPOINT_B.md) for draftPR391. Audit11raw hashes/13native dispatch hashes/6exact bindings/0observed evaluator leaks. Coverage6/31, human acceptance unknown, sales/liveSTOP/source checkoutBLOCKED; stop without automatic repair rounds, publication or A/C/live promotion.
 
 ## Proposed next fix and independent plan review — 2026-10-16
 
 - [x] Review all 24 B1 conversations and seven actual B2/B3 outcomes against prompts, captured requests, verdicts and source contracts; distinguish owner, verifier, context, adapter and source failures.
 - [x] Write the [concrete P1–P4 plan](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/NEXT_FIX_PLAN.md) without new architecture or per-case reply rules.
 - [x] [One independent plan review](../apps/worker/evals/single-agent-commerce-read-only/reviewed-fix-run-20261016/INDEPENDENT_PLAN_REVIEW.md): no P1/two P2, incorporated frozen case permutation/range accounting and owning ETA resolver tests; narrow offer projection to keep read/filter literals. Same reviewer confirmed corrected proposal READY_TO_IMPLEMENT_PLAN. This is plan review, not source readiness or human sales acceptance.
-- [ ] P1: correct owner offer/availability presentation, retain verifier evidence/source bindings, observe focused RED→GREEN during implementation.
-- [ ] P2: diagnose native final-only/completion; fix only demonstrated contract defects and retain fail-closed/no-retry behavior.
-- [ ] P3: trace approved attributes/source presentation and correct sales decision/voice within the existing owner paragraphs; no synthetic shop facts or automatic source publication.
-- [ ] P4: trace missing ETA/mapping and preserve private checkout/handoff authority; real-source completion stays BLOCKED until authoritative data is available.
-- [ ] After a separate implementation/run request: execute the bounded preregistered replay and whole-terminal review described in the plan; no provider requests in this planning task.
+- [x] P1 implemented with observed RED→GREEN and captured owner projection; verifier evidence/source bindings intact. Current model adherence measured only on six cases.
+- [x] P2 inspected documented native contract; no API mismatch demonstrated, bounded completion categories added with RED→GREEN. Live historical causes remain unresolved; no retry or budget relaxation.
+- [x] P3 traced registry→index gap and replaced existing owner paragraphs without synthetic facts/publication. Sales quality still inadequate on concern cases; no acceptance claim.
+- [ ] P4 source completion: numeric prep/transit exist, authoritative address→shop-region mapping missing. Diagnosis complete, private authority preserved; real-source checkout remains BLOCKED, no resolver/source patch made.
+- [x] Subsequent owner request implemented the plan and dispatched six-case prefix under frozen stopping rule;25heldNOT_RUN and no further batch. This does not change the earlier planning-only evidence.
 
 ## Latest model replay — 2026-10-16
 
