@@ -269,6 +269,7 @@ export async function createCommerceEffectTools(input: {
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
     return { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
-      ? "Shop đã nhận xác nhận mua hàng của chị." : "Giỏ hàng đã được cập nhật, chị nhé.", fallbackId: null };
+      ? "Shop đã nhận xác nhận mua hàng của chị." : receipt.effect === "CART_OPENED"
+        ? "Em đã thêm món chị chọn vào giỏ." : "Em đã cập nhật lựa chọn trong giỏ.", fallbackId: null };
   } };
 }

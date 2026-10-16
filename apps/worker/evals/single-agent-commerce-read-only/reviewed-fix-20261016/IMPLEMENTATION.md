@@ -12,7 +12,7 @@ Status: IN_PROGRESS. New provider generations: 0. Historical raw/primary/verdict
 | F4 typed tools and native final-only contract | IMPLEMENTED; offline focused GREEN; live behavior NOT_RUN |
 | F5 named alias lookup | IMPLEMENTED; full-name alias focused GREEN; partial-name coverage remains limited |
 | F6 private-checkout prerequisite correction | Failure reason corrected; current real-source checkout BLOCKED by missing ETA |
-| F7 sales task/context and code-owned receipt ACK | PENDING |
+| F7 sales task/context and code-owned receipt ACK | IMPLEMENTED; focused GREEN; sales quality remains unmeasured |
 | Focused/full verification and self-review | PENDING |
 
 ## Commands actually run
@@ -50,5 +50,11 @@ F6 RED: `pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.tes
 Compilation: first `pnpm --filter @lana/worker build` exited1 on the new test's undeclared static .mjs import; typed URL import fixes it. Later direct `pnpm --filter @lana/worker exec tsc -p tsconfig.json` initially found redundant union comparisons in F6; removed those comparisons, same command exit0. Final canonical worker build remains pending; neither earlier failure is claimed PASS.
 
 Current-source checkout completion remains BLOCKED until the authoritative fulfillment/ETA source covers this selection/region. Publishing that data is outside this code fix. Controlled COD/bank tests cannot substitute for it; handoff is not a completed checkout.
+
+F7 observed ACK RED29PASS/2FAIL → GREEN31PASS with `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-effects.test.ts`. The existing bounded recovery text now distinguishes CART_OPENED from CART_MUTATED; purchase acknowledgement is unchanged. It still requires current receipt/revision/recipient/permission/privacy and never rewrites or retries a rejected model draft. No product/size/price claim or case template was added to code text.
+
+Owner prompt replaces the buying/source-tool paragraphs: act on a known customer-selected configuration through existing add-to-cart resolution, use the already bound correct product instead of searching its name again, retain a supplied full name for lookup, and distinguish callable product/line refs from evidence refs. Other sales/voice/policy/size boundaries remain; verifier was not changed to resolve a disputed N1 policy verdict. Owner9982→10078bytes (+96/+0.96%); active ownerSHA25622c97bd28703d2b3079cc06f8dbb6a4e7f1d38cc66e795175d94fedc4cc239be. Base manifest changes only this hash; verifierSHA256e8ba5ab607518cda125600c59d3130c9b17d5fbf3e62da485945cd2ae1ec449d and models/config/corpora/schema/fallback stay unchanged. Historical registrations/results are untouched and cannot qualify this source.
+
+After active hash update, focused Node protocol/adapter/comparison command43PASS. No prompt-string/rubric-fit tests or model generations; naturalness and actual sales action completion require a later run.
 
 Record observed RED, subsequent GREEN, final commands and remaining unknowns below as they occur. A source fix or fake-HTTP assertion is not a fresh provider result. Checkpoint A remains OWNER_BYPASS and sales/live acceptance remains STOP.

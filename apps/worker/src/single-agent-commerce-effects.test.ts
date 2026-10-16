@@ -284,8 +284,18 @@ describe("code-owned commerce effects and recovery", () => {
       }, verifier: async () => ({ result: { verdict: "PASS", violations: [] } }) });
     expect(s.commits).toHaveLength(1);
     expect(result.terminal.reason).toBe("RECEIPT_BACKED_ACK");
-    expect(result.terminal.text).toBe("Giỏ hàng đã được cập nhật, chị nhé.");
+    expect(result.terminal.text).toBe("Em đã thêm món chị chọn vào giỏ.");
     expect(result.sendEnabled).toBe(false);
+  });
+  it("acknowledges a committed cart change as a change, without claiming a new cart or order", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const lineId = s.current().cart!.value.lines[0]!.lineId;
+    await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } });
+    const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc chị nhé.", history: [],
+      ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.", owner: async () => { throw new Error("provider unavailable"); },
+      verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Em đã cập nhật lựa chọn trong giỏ." });
+    expect(s.commits).toHaveLength(2);
   });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
