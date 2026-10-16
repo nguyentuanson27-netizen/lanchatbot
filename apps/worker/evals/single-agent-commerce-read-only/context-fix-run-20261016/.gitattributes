@@ -1,0 +1,3 @@
+/b1/first/raw/** -text
+/source-readback.json -text
+/stateful-preflight.json -text
