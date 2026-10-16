@@ -106,16 +106,21 @@ export async function createCommerceEffectTools(input: {
     const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,
       size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
       quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
-    if (result.status !== "READY" || result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
+    if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
+      availableSizes: result.availableSizes, availableColors: result.availableColors };
+    if (result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
-    const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return line;
+    const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return { ...result, line };
   }
   async function refreshSelections() {
     const lines = current.cart?.value.lines ?? [];
     for (const id of selections.keys()) if (!lines.some(line => line.lineId === id)) selections.delete(id);
     for (const line of lines) {
       const sizes = [...new Set(line.components.map(c => c.size))], colors = [...new Set(line.components.map(c => c.color))];
-      try { await selection(line.parentProductId, { size: sizes.length === 1 ? sizes[0] : null, color: colors.length === 1 ? colors[0] : null, quantity: line.quantity }, line.lineId, line.offerId); }
+      try {
+        const selected = await selection(line.parentProductId, { size: sizes.length === 1 ? sizes[0] : null, color: colors.length === 1 ? colors[0] : null, quantity: line.quantity }, line.lineId, line.offerId);
+        if (selected.status !== "READY") selections.delete(line.lineId);
+      }
       catch { selections.delete(line.lineId); }
     }
   }
@@ -174,7 +179,9 @@ export async function createCommerceEffectTools(input: {
       let command: SalesCycleCommand;
       if (call.name === "add_to_cart") {
         if (a.quantity !== undefined && (!Number.isInteger(a.quantity) || (a.quantity as number) < 1 || (a.quantity as number) > 20)) return { status: "REJECTED", reason: "QUANTITY" };
-        const selected = await selection(product!.ref, a, commerceUuid(operationId), typeof a.offerType === "string" ? a.offerType : null);
+        const result = await selection(product!.ref, a, commerceUuid(operationId), typeof a.offerType === "string" ? a.offerType : null);
+        if (result.status !== "READY") return { status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: result };
+        const selected = result.line;
         if (!current.cart) {
           draft = { identity: input.identity, lines: [selected], shopId: input.scope.shopId, policyRef };
           command = { kind: "CART_OPENED", commandId: operationId, cartDraftRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(input.clock().getTime()+1_800_000).toISOString() };
@@ -185,7 +192,9 @@ export async function createCommerceEffectTools(input: {
         else if (a.action === "SET_COMPONENT_VARIANT" && (typeof a.size === "string" || typeof a.color === "string")) {
           const component = line!.components.find(c => c.componentRole === a.componentRole);
           if (!component) return { status: "REJECTED", reason: "COMPONENT_REF" };
-          const selected = await selection(line!.parentProductId, { ...a, size: a.size ?? component.size, color: a.color ?? component.color, quantity: line!.quantity }, line!.lineId, line!.offerId);
+          const result = await selection(line!.parentProductId, { ...a, size: a.size ?? component.size, color: a.color ?? component.color, quantity: line!.quantity }, line!.lineId, line!.offerId);
+          if (result.status !== "READY") return { status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: result };
+          const selected = result.line;
           const variant = selected.components.find(c => c.componentProductId === component.componentProductId);
           if (!variant || variant.size === null || normalizeCatalogToken(variant.size) !== normalizeCatalogToken(String(a.size ?? component.size ?? "")) ||
             normalizeCatalogToken(variant.color ?? "") !== normalizeCatalogToken(String(a.color ?? component.color ?? ""))) return { status: "REJECTED", reason: "VARIANT_UNAVAILABLE" };

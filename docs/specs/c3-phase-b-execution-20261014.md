@@ -7,6 +7,8 @@ Refreshed main / bImplementationBaseSha: `296cdcfbf5759f5bf9cbb24acf3dc630055893
 Candidate foundation: `dd5c9d46f41f1514982210034f551a95cd356f68` (PR390, unmerged at intake).
 Planning source: [B1 plan and B roadmap](c3-phase-b-read-only-integration-plan-20261014.md).
 
+Current owner clarification for the B candidate: [subjective advice, observable claims and chat voice](c3-phase-b-advisory-and-chat-boundary-20261016.md). The remaining18B1+7stateful were collected unchanged before the common correction; [results, exact commands and limits](../../apps/worker/evals/single-agent-commerce-read-only/offer-read-completion-20261016/CHECKPOINT_B.md). This does not relabel frozen A/B evidence or grant sales/live acceptance.
+
 ## Execution order and concrete scope
 
 1. **B1 context and tools:** extend the existing verifier boundary for policy-only absence, variant/cart scope and existing real product evidence types. Add narrow context and read-only tools modules. Reuse RuntimePolicyResolver without pin/audit ports; ProductSearchService; RedisBusinessFactsReader/catalog resolvers; protected-claim builders. Test stale sources, tampering, source swaps and missing input before continuation/provider code.

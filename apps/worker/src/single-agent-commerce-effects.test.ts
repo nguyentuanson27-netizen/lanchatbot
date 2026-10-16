@@ -51,6 +51,25 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it.each(["COLOR_REQUIRED", "INVALID"] as const)("preserves typed selection feedback without committing or granting a fit (%s)", async status => {
+    const s = await setup();
+    const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };
+    s.select.mockResolvedValue({ ...failure, evaluator: "PRIVATE_EVALUATOR_LABEL" } as never);
+    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: failure });
+    expect(s.commits).toHaveLength(0); expect(s.current().cart).toBeNull();
+    expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
+    expect(s.tools.snapshot().protectedClaims).not.toEqual(expect.arrayContaining([expect.objectContaining({ type: "SIZE_FIT" })]));
+  });
+  it("preserves failed variant feedback and the prior committed cart without a mutation receipt", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const before = structuredClone(s.current()), line = before.cart!.value.lines[0]!;
+    const failure = { status: "VARIANT_UNAVAILABLE", reasonCode: "CART_SIZE_NOT_FOUND", availableSizes: ["M"], availableColors: ["NAVY"] };
+    s.select.mockResolvedValue(failure as never);
+    expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: line.components[0]!.componentRole, size: "L" } }))
+      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: failure });
+    expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
+    expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
+  });
   it("distinguishes exact cart size/color stock from the aggregate selling-offer stock", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const claim = s.tools.snapshot().protectedClaims.find(c => (c as { type: string }).type === "STOCK") as { scope: { variantId: string }; value: { status: string; availableQuantity: number } };

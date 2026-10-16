@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current full-population continuation and common correction — 2026-10-16
+
+- [x] Freeze owner override of first-six stop, unchanged models/prompts/corpus/config and25remaining outcomes at099ed3ab; run18B1range7:24 plus seven orderedstateful once. All recorded, no generation retry/replacement; testDB dropped. Keep six historical outcomes at their ownSHA.
+- [x] Preserve raw14a4eb70 before primary59df9d32 and diagnosis. New25primary16USABLE/3NEEDS_EDIT/6FALLBACK_OR_NO_SEND; actual18B1eligible, stateful4fallback/2handoff/1no-send.70HTTP/19verified finals/33raw hashes/0observed evaluator-private leaks. [Actual conversations/report](../apps/worker/evals/single-agent-commerce-read-only/offer-read-completion-20261016/CHECKPOINT_B.md).
+- [x] Record [owner sensory/style versus observable-claim boundary](../docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md), replace activeBvoice/advisory/tool paragraphs without per-case answers; preserve old twofallback verdicts and all frozen evidence. Keep quote/fit/receipt authority, no new role/parser/regex/framework or budget.
+- [x] Reuse typed failure feedback in the existing effect tool, allowlist four fields, no write/receipt/fit from failure. Observed twoRED→GREEN steps,37effecttests/1792worker/21protected-replyPASS and worker typecheck/build/lint exit0. Self-review and offline70requestbody compatibility complete. Full Nodeeval489PASS/2existingoptionalSKIP/0FAIL.
+- [ ] Corrected candidate provider behavior/naturalness/stability remain NOT_RUN; no automatic further generation. Source attributes/charts/publication and authoritative checkout destination mapping remain unresolved; sales/liveSTOP, checkoutBLOCKED/AOWNER_BYPASS, no PhaseC/merge/deploy/customer send.
+
 ## Current owner-requested offer-read replay — 2026-10-16
 
 - [x] Register [scope](../apps/worker/evals/single-agent-commerce-read-only/offer-read-run-20261016/SCOPE.md), unchanged population/models/prompts and existing six-first stopping rule. Restore the existing approved credential route without substitution or printing secrets.
