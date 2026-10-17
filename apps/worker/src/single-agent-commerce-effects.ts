@@ -50,6 +50,13 @@ export async function createCommerceEffectTools(input: {
   let receiptBindingVersion: string | undefined;
   let committedHandoff: { reason: string; revision: number; operationId: string; conversationRevision: number } | undefined;
   const selectionRef = (lineId: string) => `cart-variant:${lineId}`;
+  const activeSelections = () => [...selections.values()].filter(s => current.cart?.value.lines.some(l => selectionsMatchCartLines([l], [s])));
+  const cartItems = (active = activeSelections()) => current.cart?.value.lines.map(line => {
+    const selected = active.find(s => s.line.lineId === line.lineId);
+    return { subjectRef: line.lineId, productRef: line.parentProductId, offerType: line.offerId, quantity: line.quantity,
+      components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })),
+      ...(selected ? { stockStatus: selected.stockStatus, stockAvailableQuantity: selected.stockAvailableQuantity } : {}) };
+  }) ?? [];
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     if (!committedHandoff) {
       await refreshAuthority();
@@ -70,7 +77,7 @@ export async function createCommerceEffectTools(input: {
   }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
-    const active = [...selections.values()].filter(s => current.cart?.value.lines.some(l => selectionsMatchCartLines([l], [s])));
+    const active = activeSelections();
     if (current.cart) {
       subjects.push({ ref: current.cart.value.cartId, kind: "CART", label: "Giỏ hàng hiện tại", bindingVersion: base.state.bindingVersion });
       for (const line of current.cart.value.lines) subjects.push({ ref: line.lineId, kind: "CART_LINE", label: line.parentProductId, bindingVersion: base.state.bindingVersion });
@@ -85,12 +92,7 @@ export async function createCommerceEffectTools(input: {
     const stateReceipts = base.effectReceipts.filter(r => r.effect === "CUSTOMER_STATE_UPDATED" && r.subjectRef === base.state.customerProfileId &&
       base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
-      salesStage: current.stage, cartItems: cart?.lines.map(line => {
-        const selected = active.find(s => s.line.lineId === line.lineId);
-        return { subjectRef: line.lineId, productRef: line.parentProductId, offerType: line.offerId, quantity: line.quantity,
-          components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })),
-          ...(selected ? { stockStatus: selected.stockStatus, stockAvailableQuantity: selected.stockAvailableQuantity } : {}) };
-      }) ?? [],
+      salesStage: current.stage, cartItems: cartItems(active),
       checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
@@ -182,7 +184,8 @@ export async function createCommerceEffectTools(input: {
         const recovered = receipt?.operationId === operationId ? receipt : await input.readReceipt?.(operationId);
         const allowed = call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
         if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
-        return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value } };
+        await refreshSelections();
+        return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems() } };
       }
       policy = await input.policy();
       publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
@@ -259,7 +262,7 @@ export async function createCommerceEffectTools(input: {
       await refreshSelections();
       if (result?.status === "APPLIED" && result.transferToHuman) committedHandoff = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
-      return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value,
+      return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(),
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
   }

@@ -10,6 +10,7 @@ import type { CartSelectionQuery } from "./realtime-sales-catalog.js";
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
   effectiveAt: "2026-10-01T00:00:00.000Z", effectiveUntil: null };
+const resultCartItems = (result: { data?: unknown }) => (result.data as { cartItems: Record<string, unknown>[] }).cartItems;
 async function setup(clock = () => commerceNow) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
@@ -51,6 +52,50 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("returns the current preorder summary beside a successful cart result and a duplicate without another commit", async () => {
+    const s = await setup(), selected = await s.select();
+    s.select.mockResolvedValue({ ...selected, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0 } as never);
+    const result = await s.tools.invoke(s.add);
+    expect(result).toMatchObject({ status: "OK", data: { cartItems: [expect.objectContaining({
+      productRef: "SM613", quantity: 1, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0,
+      components: [{ componentRole: "TOP", size: "M", color: "navy" }],
+    })] } });
+    expect(resultCartItems(result)).toEqual(s.tools.snapshot().state.cartItems);
+    const duplicate = await s.tools.invoke(s.add);
+    expect(duplicate).toMatchObject({ status: "OK", data: { duplicate: true, cartItems: resultCartItems(result) } });
+    expect(s.commits).toHaveLength(1);
+    s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE"));
+    const unavailable = await s.tools.invoke(s.add);
+    expect(unavailable).toMatchObject({ status: "OK", data: { duplicate: true, cartItems: [expect.objectContaining({ productRef: "SM613" })] } });
+    expect(resultCartItems(unavailable)).toEqual(s.tools.snapshot().state.cartItems);
+    expect(resultCartItems(unavailable)[0]).not.toHaveProperty("stockStatus");
+    expect(s.commits).toHaveLength(1);
+  });
+  it("keeps a proved commit but omits unavailable stock in its native summary after refresh fails", async () => {
+    const s = await setup(), selected = await s.select();
+    s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE")).mockResolvedValueOnce(selected);
+    const result = await s.tools.invoke(s.add);
+    expect(result).toMatchObject({ status: "OK", data: { effect: "CART_OPENED", cartItems: [expect.objectContaining({ quantity: 1 })] } });
+    expect(resultCartItems(result)[0]).not.toHaveProperty("stockStatus");
+    expect(s.tools.snapshot().effectReceipts).toEqual(expect.arrayContaining([expect.objectContaining({ status: "SUCCESS", effect: "CART_OPENED" })]));
+    expect(s.commits).toHaveLength(1);
+  });
+  it("returns only retained lines after removal, without a ghost selection", async () => {
+    const s = await setup(), selected = await s.select();
+    s.select.mockImplementation(async query => {
+      const value = structuredClone(selected);
+      value.line.components[0]!.color = query?.color ?? "navy";
+      return value;
+    });
+    await s.tools.invoke(s.add);
+    await s.tools.invoke({ ...s.add, args: { ...s.add.args, color: "black" } });
+    const removedId = s.current().cart!.value.lines[0]!.lineId;
+    const result = await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: removedId, action: "REMOVE_LINE" } });
+    expect(result).toMatchObject({ status: "OK", data: { cartItems: [expect.objectContaining({ components: [{ componentRole: "TOP", size: "M", color: "black" }] })] } });
+    expect(resultCartItems(result)).toEqual(s.tools.snapshot().state.cartItems);
+    expect(resultCartItems(result).map(item => item.subjectRef)).not.toContain(removedId);
+    expect(s.current().cart!.value.lines).toHaveLength(1);
+  });
   it("blocks a dependent effect in a later batch when customer state is unresolved", async () => {
     const s = await setup(), snapshot = s.base.snapshot;
     s.base.snapshot = () => { const world = snapshot(); world.state.customerStateUpdatePending = true; return world; };
@@ -85,13 +130,23 @@ describe("code-owned commerce effects and recovery", () => {
   });
   it("applies variant and quantity as two explicit commands and replays the final command without another commit", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
-    const selected = await s.select(); selected.line.components[0]!.size = "L"; s.select.mockResolvedValue(selected);
+    const selected = await s.select(); selected.line.components[0]!.size = "L";
+    s.select.mockImplementation(async query => {
+      const value = structuredClone(selected); value.line.quantity = query?.quantity ?? 1;
+      value.line.lineTotalVnd = value.line.posUnitPriceVnd! * value.line.quantity; return value;
+    });
     const lineId = s.current().cart!.value.lines[0]!.lineId;
     const calls = [
       { name: "change_cart_item", args: { subjectRef: lineId, action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "L" } },
       { name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } },
     ];
-    expect((await s.tools.invokeBatch(calls)).map(r => r.status)).toEqual(["OK", "OK"]);
+    const results = await s.tools.invokeBatch(calls);
+    expect(results.map(r => r.status)).toEqual(["OK", "OK"]);
+    expect(results.map(resultCartItems)).toEqual([
+      [expect.objectContaining({ quantity: 1, components: [{ componentRole: "TOP", size: "L", color: "NAVY" }], stockStatus: "IN_STOCK" })],
+      [expect.objectContaining({ quantity: 2, components: [{ componentRole: "TOP", size: "L", color: "NAVY" }], stockStatus: "IN_STOCK" })],
+    ]);
+    expect(Buffer.byteLength(JSON.stringify(results))).toBeLessThanOrEqual(8192);
     expect(s.current().cart!.value.lines[0]).toMatchObject({ quantity: 2, components: [expect.objectContaining({ size: "L" })] });
     expect(s.commits).toHaveLength(3);
     expect(await s.tools.invoke(calls[1]!)).toMatchObject({ status: "OK", data: { duplicate: true } });

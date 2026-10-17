@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import { createCommerceHandoffTools, selectCommerceHandoff, type HandoffAuthority } from "./single-agent-commerce-handoff.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
-import { runCommerceTurn } from "./single-agent-commerce-read-only.js";
-import { commerceNow, commerceScope, fixturePolicy, policyResolver } from "./single-agent-commerce.test-support.js";
+import { runCommerceTurn, type OwnerRequest } from "./single-agent-commerce-read-only.js";
+import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, policyResolver } from "./single-agent-commerce.test-support.js";
 
 async function setup() {
   const scope = commerceScope(), policy = (await fixturePolicy()).bundle!;
@@ -19,6 +19,32 @@ async function setup() {
     change: (patch: Partial<HandoffAuthority>) => { current = { ...current, ...patch }; } };
 }
 describe("Phase B handoff follows current code policy and committed ownership", () => {
+  it("uses the configured terminal after a partial POS-unavailable read without pretending to send the known product details", async () => {
+    const s = await setup(), { product } = fixtureProduct();
+    const base = createReadOnlyTools({ scope: s.scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [product],
+      catalog: { readProduct: async () => ({ product, snapshot: null }), searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+    const holding = "Shop đã nhận yêu cầu hỗ trợ của chị.";
+    Object.assign(s.policy.artifacts, { handoffMatrix: { schemaVersion: 1, kind: "HANDOFF_MATRIX", sourceMetadata: s.policy.artifacts.shopPolicy.sourceMetadata,
+      rules: [{ reason: "DEPENDENCY_FAILURE", customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF", holdingReply: holding, tag: "NHAN_VIEN" }] } });
+    const tools = createCommerceHandoffTools({ base, scope: s.scope, clock: () => commerceNow, policy: async () => s.policy,
+      read: s.read, commit: async ({ next }) => s.commit(next) });
+    let calls = 0;
+    const owner = vi.fn(async (request: OwnerRequest) => {
+      if (++calls === 2) expect((request.contents.at(-1)!.parts[0]!.functionResponse as { response: unknown }).response)
+        .toMatchObject({ status: "OK", data: { availability: { stock: { status: "UNAVAILABLE", reason: "POS_SNAPSHOT_UNAVAILABLE" } } } });
+      return calls === 1 ? { kind: "TOOLS" as const,
+      calls: [{ name: "read_product", args: { subjectRef: product.productId } }],
+      content: { role: "model" as const, parts: [{ functionCall: { name: "read_product", args: { subjectRef: product.productId } } }] } }
+      : { kind: "TOOLS" as const, calls: [{ name: "request_handoff", args: { reason: "DEPENDENCY_FAILURE" } }],
+        content: { role: "model" as const, parts: [{ functionCall: { name: "request_handoff", args: { reason: "DEPENDENCY_FAILURE" } } }] } };
+    });
+    const verifier = vi.fn(), result = await runCommerceTurn({ scope: s.scope, clock: () => commerceNow, tools, owner, verifier,
+      latest: "Áo chất gì, còn size M không em?", history: [], ownerPrompt: "Tư vấn", verifierPrompt: "Kiểm reply" });
+    expect(base.snapshot().runtimeProducts).toEqual(expect.arrayContaining([expect.objectContaining({ attributes: expect.objectContaining({ materials: product.attributes!.materials }) })]));
+    expect(result.terminal).toMatchObject({ disposition: "HANDOFF", reason: "DEPENDENCY_FAILURE", text: holding });
+    expect(owner).toHaveBeenCalledTimes(2); expect(verifier).not.toHaveBeenCalled(); expect(s.commit).toHaveBeenCalledTimes(1);
+    expect(s.current().state.conversationOwner).toBe("HUMAN");
+  });
   it("refreshes its authority snapshot when checkout commits the handoff in the underlying effect port", async () => {
     const s = await setup(); let checkoutCommitted = false;
     const tools = createCommerceHandoffTools({ base: { ...s.base, terminalOutcome: async () => checkoutCommitted ? { disposition: "HANDOFF", reason: "PURCHASE_CONFIRMED", text: null, fallbackId: null } : null },

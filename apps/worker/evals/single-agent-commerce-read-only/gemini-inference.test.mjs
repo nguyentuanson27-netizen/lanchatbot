@@ -214,6 +214,27 @@ test('native variant changes and public current cart reach the owner without pri
  assert.doesNotMatch(JSON.stringify(b),/PRIVATE_PHONE|checkoutDraft/);
 });
 
+test('two committed cart actions keep their own bounded stock summaries and native identities without repeating full carts',()=>{
+ const r=request(),summary=(size,quantity)=>[{subjectRef:'line-1',productRef:'SM613',offerType:'AO',quantity,
+  components:[{componentRole:'TOP',size,color:'BE'}],stockStatus:'PRE_ORDER',stockAvailableQuantity:0}];
+ const first=summary('L',1),second=summary('L',2);
+ r.context.state.cartItems=second;
+ const model={role:'model',parts:[{functionCall:{id:'variant',name:'change_cart_item',args:{subjectRef:'line-1',action:'SET_COMPONENT_VARIANT',componentRole:'TOP',size:'L'}},thoughtSignature:'opaque'},
+  {functionCall:{id:'quantity',name:'change_cart_item',args:{subjectRef:'line-1',action:'SET_QUANTITY',quantity:2}}}]};
+ r.contents.push(model,{role:'user',parts:[first,second].map((cartItems,i)=>({functionResponse:{id:i?'quantity':'variant',name:'change_cart_item',response:{status:'OK',data:{
+  operationId:'operation-'+i,effect:'CART_MUTATED',cart:{lines:[{internal:'FULL_CART_ONLY',padding:'x'.repeat(2000)}]},cartItems,purchaseConfirmed:false,externalOrderCreated:false}}}}))});
+ const original=structuredClone(r),built=buildGeminiCommerceRequest(r,effectDeclarations),data=built.contents.at(-1).parts.map(p=>p.functionResponse.response.data);
+ assert.deepEqual(data.map(d=>d.cartItems),[first,second]);assert.ok(data.every(d=>!Object.hasOwn(d,'cart')));
+ assert.deepEqual(built.contents.at(-1).parts.map(p=>p.functionResponse.id),['variant','quantity']);
+ assert.deepEqual(built.contents.at(-2),model);assert.deepEqual(r.contents,original.contents);
+ assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.state.cartItems,second);
+ assert.doesNotMatch(JSON.stringify(built),/FULL_CART_ONLY/);assert.ok(Buffer.byteLength(JSON.stringify(built))<32768);
+ assert.ok(Buffer.byteLength(JSON.stringify(built.contents.at(-1)))<8192);
+ assert.ok(Buffer.byteLength(JSON.stringify(r.contents.at(-1).parts.map(p=>p.functionResponse.response)))<8192);
+ const legacy=request();legacy.contents.push({role:'user',parts:[{functionResponse:{name:'add_to_cart',response:{status:'OK',data:{cart:{lines:[]}}}}}]});
+ assert.deepEqual(buildGeminiCommerceRequest(legacy).contents.at(-1).parts[0].functionResponse.response.data.cart,{lines:[]});
+});
+
 test('composed capabilities restrict the actual native declarations and expose only a handoff reason',()=>{
  const r=request();r.availableTools=['read_policy','request_handoff'];
  const built=buildGeminiCommerceRequest(r),decls=built.tools[0].functionDeclarations;
