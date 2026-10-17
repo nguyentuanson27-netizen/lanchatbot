@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current reviewed state acceptance fix and replay — 2026-10-17
+
+Owner authorizes implementation and one replay after independent REVISE. Intake3035c0e9, refreshed main/implementationBaseSha296cdcfb. [Plan](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-run-20261017/PLAN.md): per-message numeric grounding, C3-scoped same-source correction/no-op, unresolved state through dependent effects/normal FINAL/recovery; same-snapshot selection diagnosis and existing ACK/preview. Observe RED→GREEN and readiness before one7stateful+24B1 N1 capture-only batch. Keep models/budgets/authority/CAS, A OWNER_BYPASS and address-region dependency; no normal-reply assembler/parser/publication/live send/Phase C.
+
 ## Current customer-outcome model run — 2026-10-17
 
 Owner authorizes one new run at intake `5a158cdf`; refreshed main `296cdcfb`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-run-20261017/SCOPE.md): unchanged current runtime/prompts/models/config, 7ordered stateful outcomes then24existing B1, N1/max120invocations/retry0. Complete current-source readback/selection, freeze hashes and clean source, preflight before generation. Keep all terminal/errors; raw savepoint before whole-turn primary before trace diagnosis. Current fixes are tested, model behavior still unmeasured. Preserve A OWNER_BYPASS, source-checkout region dependency, capture-only delivery and no source publication/live effects/Phase C. One run/report/PR391 update, no automatic fix/rerun.

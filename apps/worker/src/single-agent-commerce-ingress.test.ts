@@ -101,7 +101,7 @@ describe("persisted ingress source and final revision", () => {
     const f = fixture();
     const result = await f.run(async () => {
       f.supersede();
-      return { kind: "TOOLS", calls: [{ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 85 }] } }],
+      return { kind: "TOOLS", calls: [{ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 85, sourceQuote: "85" }] } }],
         content: { role: "model", parts: [] } };
     });
     expect(result.terminal.disposition).toBe("NO_SEND");
@@ -128,7 +128,7 @@ describe("persisted ingress source and final revision", () => {
     const f = fixture();
     const result = await f.run(async () => {
       f.transferToHuman();
-      return { kind: "TOOLS", calls: [{ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 85 }] } }],
+      return { kind: "TOOLS", calls: [{ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 85, sourceQuote: "85" }] } }],
         content: { role: "model", parts: [] } };
     });
     expect(result.terminal.disposition).toBe("NO_SEND");

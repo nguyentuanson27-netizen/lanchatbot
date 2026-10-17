@@ -120,6 +120,7 @@ export async function runPersistedCommerceIngress(input: {
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId });
   const tools = await createCommerceTools({ read: { ...input.read, scope, clock: input.clock }, state: { store: profilePort,
+    sourceMessages: messages.map(m => ({ text: m.text ?? "", sourceMessageId: m.messageId ?? m.eventKey, observedAt: m.occurredAt })),
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false), target = sizeChartTarget(product);
       return { target, charts: evaluateSizeChartEligibility({ policy: await input.policy(), productId: ref, target }).charts }; },
     quoteInput: async () => { const state = (await executor.repository.read(scope.conversationId))!, policy = await policyBundle();

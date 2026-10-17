@@ -14,13 +14,13 @@ async function setup() {
   const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
   const sizeInput = vi.fn(async () => fixtureSizeInput());
-  const tools = await createCustomerStateTools({ base, scope, store, clock: () => commerceNow, sizeInput });
+  const tools = await createCustomerStateTools({ base, scope, store, clock: () => commerceNow, sizeInput, sourceMessages: [{ text: "Eo 74. Eo 85, mông 105.", sourceMessageId: scope.sourceMessageId, observedAt: scope.sourceObservedAt! }] });
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
   it("provides a receipt only after profile CAS and committed readback, and invalidates it on another profile revision", async () => {
     const s = await setup();
-    await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74 }] } });
+    await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74, sourceQuote: "74" }] } });
     const world = s.tools.snapshot();
     expect(world.effectReceipts).toEqual(expect.arrayContaining([expect.objectContaining({ effect: "CUSTOMER_STATE_UPDATED", status: "SUCCESS", subjectRef: s.getStored().profile.profileId })]));
     expect(hardPrecheck(world, "Em đã cập nhật số đo cho chị.", commerceNow)).toBeNull();
@@ -29,7 +29,7 @@ describe("accepted effective state before dependent tools", () => {
   });
   it("does not issue a profile receipt when CAS claims success but readback does not contain that committed state", async () => {
     const s = await setup(); s.store.compareAndSwap = vi.fn(async () => true);
-    expect((await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74 }] } })).status).toBe("REJECTED");
+    expect((await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74, sourceQuote: "74" }] } })).status).toBe("REJECTED");
     expect(s.tools.snapshot().effectReceipts).toEqual([]);
   });
   it("resolves a correction before size even when the model lists size first in the batch", async () => {
@@ -37,7 +37,7 @@ describe("accepted effective state before dependent tools", () => {
     const results = await s.tools.invokeBatch([
       { name: "recommend_size", args: { subjectRef: "QU714" } },
       { name: "apply_customer_state", args: { ops: [
-        { op: "SET", field: "measurements.WAIST_CM", value: 85 }, { op: "SET", field: "measurements.HIPS_CM", value: 105 },
+        { op: "SET", field: "measurements.WAIST_CM", value: 85, sourceQuote: "85" }, { op: "SET", field: "measurements.HIPS_CM", value: 105, sourceQuote: "105" },
       ] } },
     ]);
     expect(results[0]!.data).toMatchObject({ status: "RECOMMENDED", recommendedSizes: expect.arrayContaining([expect.objectContaining({ size: "L" })]) });
@@ -57,7 +57,7 @@ describe("accepted effective state before dependent tools", () => {
   it("does not run size on old values if state CAS conflicts", async () => {
     const s = await setup();
     s.store.compareAndSwap = vi.fn(async () => false);
-    const result = await s.tools.invokeBatch([{ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 85 }] } },
+    const result = await s.tools.invokeBatch([{ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 85, sourceQuote: "85" }] } },
       { name: "recommend_size", args: { subjectRef: "QU714" } }]);
     expect(result[1]!.status).toBe("REJECTED");
     expect(s.sizeInput).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe("accepted effective state before dependent tools", () => {
     const s = await setup();
     for (const field of ["profileId", "cart", "price", "permission", "recipient", "effectReceipts"]) {
       const r = await s.tools.invoke({ name: "apply_customer_state", args: { ops: [
-        { op: "SET", field: "measurements.WAIST_CM", value: 85 }, { op: "SET", field, value: "injected" },
+        { op: "SET", field: "measurements.WAIST_CM", value: 85, sourceQuote: "85" }, { op: "SET", field, value: "injected" },
       ] } });
       expect(r.status).toBe("REJECTED");
     }
@@ -144,11 +144,11 @@ describe("accepted effective state before dependent tools", () => {
       const f = fixtureProduct("QU714");
       const base = createReadOnlyTools({ scope, clock, policy: () => fixturePolicy(), initialProducts: [f.product],
         catalog: { readProduct: async () => f, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
-      const tools = await createCustomerStateTools({ base, scope, store: s.store, clock, sizeInput: s.sizeInput });
+      const tools = await createCustomerStateTools({ base, scope, store: s.store, clock, sizeInput: s.sizeInput, sourceMessages: [{ text: `Eo ${waist}, mông ${hips}.`, sourceMessageId: scope.sourceMessageId, observedAt: scope.sourceObservedAt! }] });
       expect(tools.snapshot().state.customerProfileRevision).toBe(index+1);
       if (index) expect(tools.snapshot().state.customerMeasurements).toEqual(expect.arrayContaining([{ kind: "WAIST_CM", value: 85 }]));
       const calls = [{ name: "apply_customer_state", args: { ops: [
-        { op: "SET", field: "measurements.WAIST_CM", value: waist }, { op: "SET", field: "measurements.HIPS_CM", value: hips }] } },
+        { op: "SET", field: "measurements.WAIST_CM", value: waist, sourceQuote: String(waist) }, { op: "SET", field: "measurements.HIPS_CM", value: hips, sourceQuote: String(hips) }] } },
         { name: "recommend_size", args: { subjectRef: "QU714" } }];
       const latest = index ? "Chị nhầm, eo 75 mông 95 nha." : "Eo chị 85, mông 105, chọn quần này size nào em?";
       let n = 0;

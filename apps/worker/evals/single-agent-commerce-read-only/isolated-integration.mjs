@@ -72,13 +72,13 @@ try{
  const statePort=createRealtimeCustomerStatePort(runtime,scope,createProfile,()=>now);
  const base=()=>{const f=fixtureProduct('QU714');return createReadOnlyTools({scope,clock:()=>now,policy:()=>fixturePolicy(),initialProducts:[f.product],
   catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});};
- const stateTools=()=>createCustomerStateTools({base:base(),scope,store:statePort,clock:()=>now,sizeInput:async()=>fixtureSizeInput()});
+ const stateTools=()=>createCustomerStateTools({base:base(),scope,store:statePort,clock:()=>now,sizeInput:async()=>fixtureSizeInput(),sourceMessages:[{text:"Eo 85, mông 105. Eo 75, mông 95.",sourceMessageId:scope.sourceMessageId,observedAt:scope.sourceObservedAt}]});
  await check('B2 real profile persists across turns and correction precedes dependent size',async()=>{
   for(const [index,waist,hips,size] of [[0,85,105,'L'],[1,75,95,'M']]){
    now=new Date(now.getTime()+1000);scope.sourceMessageId='b2-'+index;scope.sourceObservedAt=now.toISOString();
    const t=await stateTools(),before=await statePort.read();if(profileId)assert.equal(before.profile.profileId,profileId);else profileId=before.profile.profileId;
    const results=await t.invokeBatch([{name:'recommend_size',args:{subjectRef:'QU714'}},{name:'apply_customer_state',args:{ops:[
-    {op:'SET',field:'measurements.WAIST_CM',value:waist},{op:'SET',field:'measurements.HIPS_CM',value:hips}]}}]);
+    {op:'SET',field:'measurements.WAIST_CM',value:waist,sourceQuote:String(waist)},{op:'SET',field:'measurements.HIPS_CM',value:hips,sourceQuote:String(hips)}]}}]);
    assert.equal(results[0].status,'OK');assert.equal(results[0].data.recommendedSizes[0].size,size);
    assert.equal((await statePort.read()).profile.revision,index+2);
   }
@@ -369,7 +369,7 @@ try{
  await check('B composed committed profile correction carries its receipt through the effect bridge and final readback',async()=>{
   let receiptSeen=false;
   const text='Em đã cập nhật lại số đo eo 74, mông 96 cho chị rồi ạ. Chị vẫn giữ size L nhé.';
-  const r=await journey.turn('Số đo chị là eo 74, mông 96. Chị vẫn lấy size L nhé.',[native([{name:'apply_customer_state',args:{ops:[{op:'SET',field:'measurements.WAIST_CM',value:74},{op:'SET',field:'measurements.HIPS_CM',value:96}]}}]),say(text)],{inspect:req=>{
+  const r=await journey.turn('Số đo chị là eo 74, mông 96. Chị vẫn lấy size L nhé.',[native([{name:'apply_customer_state',args:{ops:[{op:'SET',field:'measurements.WAIST_CM',value:74,sourceQuote:'74'},{op:'SET',field:'measurements.HIPS_CM',value:96,sourceQuote:'96'}]}}]),say(text)],{inspect:req=>{
    if(req.context.state.customerProfileRevision<2)return;
    receiptSeen=req.context.effectReceipts.some(p=>p.effect==='CUSTOMER_STATE_UPDATED'&&p.subjectRef===req.context.state.customerProfileId&&p.stateRevision===req.context.state.revision);
   }});

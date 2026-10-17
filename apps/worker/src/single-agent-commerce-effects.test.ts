@@ -3,7 +3,7 @@ import { applySalesCycleCommand, computeBankTransferPolicyHash, computeOrderPrev
 import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
-import { hardPrecheck, makeBinding } from "./single-agent-semantic-verifier-boundary.js";
+import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { CartSelectionQuery } from "./realtime-sales-catalog.js";
 
@@ -51,6 +51,25 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("blocks a dependent effect in a later batch when customer state is unresolved", async () => {
+    const s = await setup(), snapshot = s.base.snapshot;
+    s.base.snapshot = () => { const world = snapshot(); world.state.customerStateUpdatePending = true; return world; };
+    expect((await s.tools.invokeBatch([s.add]))[0]!.status).toBe("REJECTED");
+    expect(s.commits).toHaveLength(0);
+  });
+  it("keeps current selected stock beside the accepted cart components for owner advice", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    expect(s.tools.snapshot().state.cartItems).toEqual(expect.arrayContaining([expect.objectContaining({
+      stockStatus: "IN_STOCK", stockAvailableQuantity: 4,
+    })]));
+  });
+  it("does not recover an unresolved correction as a successful old cart acknowledgement", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const snapshot = s.base.snapshot;
+    s.base.snapshot = () => { const world = snapshot(); world.state.customerStateUpdatePending = true; return world; };
+    expect((await s.tools.recover!(terminalFallback())).disposition).not.toBe("SEND_ELIGIBLE");
+    expect(s.current().cart).not.toBeNull();
+  });
   it.each([
     { action: "SET_COMPONENT_VARIANT", componentRole: "TOP", size: "M", quantity: 2 },
     { action: "SET_QUANTITY", quantity: 2, size: "L" },
@@ -173,7 +192,7 @@ describe("code-owned commerce effects and recovery", () => {
     const state = s.tools.snapshot().state;
     expect(state.salesStage).toBe("CART_OPEN");
     expect(state.cartItems).toEqual([{ subjectRef: s.current().cart!.value.lines[0]!.lineId, productRef: "SM613", offerType: "SM613-DIRECT", quantity: 1,
-      components: [{ componentRole: "TOP", size: "M", color: "navy" }] }]);
+      components: [{ componentRole: "TOP", size: "M", color: "navy" }], stockStatus: "IN_STOCK", stockAvailableQuantity: 4 }]);
     expect(state.checkoutStatus).toMatchObject({ previewAvailable: false, purchaseConfirmed: false });
     expect(JSON.stringify(state)).not.toContain("checkoutDraft");
   });

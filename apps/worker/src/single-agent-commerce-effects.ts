@@ -85,8 +85,12 @@ export async function createCommerceEffectTools(input: {
     const stateReceipts = base.effectReceipts.filter(r => r.effect === "CUSTOMER_STATE_UPDATED" && r.subjectRef === base.state.customerProfileId &&
       base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
-      salesStage: current.stage, cartItems: cart?.lines.map(line => ({ subjectRef: line.lineId, productRef: line.parentProductId,
-        offerType: line.offerId, quantity: line.quantity, components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })) })) ?? [],
+      salesStage: current.stage, cartItems: cart?.lines.map(line => {
+        const selected = active.find(s => s.line.lineId === line.lineId);
+        return { subjectRef: line.lineId, productRef: line.parentProductId, offerType: line.offerId, quantity: line.quantity,
+          components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })),
+          ...(selected ? { stockStatus: selected.stockStatus, stockAvailableQuantity: selected.stockAvailableQuantity } : {}) };
+      }) ?? [],
       checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
@@ -145,6 +149,7 @@ export async function createCommerceEffectTools(input: {
     if (!names.has(call.name)) return input.base.invoke(call);
     try { await refreshAuthority(); } catch { return { status: "UNAVAILABLE", reason: "CURRENT_AUTHORITY_UNAVAILABLE" }; }
     const state = snapshot().state;
+    if (state.customerStateUpdatePending === true) return { status: "REJECTED", reason: "DEPENDENT_STATE_REJECTED" };
     if (!state.permission || !state.privacyAllowed || state.conversationOwner !== "BOT" || uncertain ||
       state.bindingVersion !== turnBinding || state.recipient !== turnRecipient) return { status: "REJECTED", reason: "PERMISSION_OR_UNKNOWN_COMMIT" };
     let commitAttempted = false;
@@ -162,7 +167,8 @@ export async function createCommerceEffectTools(input: {
       }
       for (const [field, max] of [["size", 16], ["color", 64], ["offerType", 64]] as const) {
         const value = a[field];
-        if (value !== undefined && (typeof value !== "string" || !value.trim() || Buffer.byteLength(value) > max)) return { status: "REJECTED", reason: "VARIANT_ARGUMENTS" };
+        if (value !== undefined && !(field === "color" && value === null) &&
+          (typeof value !== "string" || !value.trim() || Buffer.byteLength(value) > max)) return { status: "REJECTED", reason: "VARIANT_ARGUMENTS" };
       }
       const product = call.name === "add_to_cart" ? state && input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.subjectRef) : undefined;
       const line = current.cart?.value.lines.find(l => l.lineId === a.subjectRef);
@@ -279,6 +285,7 @@ export async function createCommerceEffectTools(input: {
   async recover(outcome: TerminalOutcome) {
     if (outcome.disposition === "NO_SEND") return outcome;
     const handoff = await terminalOutcome(); if (handoff) return handoff;
+    if (input.base.snapshot().state.customerStateUpdatePending === true) return outcome;
     if (receipt && failedEffect) return { disposition: "HANDOFF", reason: uncertain ? "UNKNOWN_COMMIT" : "PARTIAL_EFFECT", text: null, fallbackId: null };
     if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
     await input.base.readback(); current = await read(); await refreshAuthority(); const world = snapshot();

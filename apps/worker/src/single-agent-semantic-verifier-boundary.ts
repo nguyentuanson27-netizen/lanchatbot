@@ -86,6 +86,7 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date, 
   if (!Number.isFinite(now.getTime())) return stale("INVALID_CLOCK");
   if (s.privacyAllowed !== true || hasResidualPii(draft)) return "PRIVACY";
   if (s.permission !== true || s.conversationOwner !== "BOT") return "PERMISSION";
+  if (s.customerStateUpdatePending === true) return "STATE_UPDATE_INCOMPLETE";
   if (typeof s.recipient !== "string" || s.recipient.length === 0) return "RECIPIENT";
   if (!draft.trim() || Buffer.byteLength(draft) > 4096 || Buffer.byteLength(JSON.stringify(trusted)) > 32768 ||
     trusted.boundSubjects.length > 8 || trusted.protectedClaims.length > 32 || trusted.effectReceipts.length > 8) return "MALFORMED";

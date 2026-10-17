@@ -32,7 +32,7 @@ describe("Phase B capability composition", () => {
     } };
     const compose = () => createCommerceTools({ read: {scope,clock:()=>commerceNow,initialProducts:[f.product],policy:()=>fixturePolicy(),
       catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
-      state:{store,sizeInput:async()=>fixtureSizeInput()},
+      state:{store, sourceMessages:[{text:"Eo 85, mông 105.",sourceMessageId:scope.sourceMessageId,observedAt:scope.sourceObservedAt!}],sizeInput:async()=>fixtureSizeInput()},
       effects:{conversationKey:scope.conversationId,repository,policy:async()=>policy,
         authorize:async()=>profile.profile.measurements.some(m=>m.kind==="WAIST_CM"&&m.value===85),
         identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:profile.profile.profileId},
@@ -47,7 +47,7 @@ describe("Phase B capability composition", () => {
     const tools=await compose(), outputs=[native([
       {name:"add_to_cart",args:{subjectRef:"QU714",size:"M",color:"navy"}},
       {name:"recommend_size",args:{subjectRef:"QU714"}},
-      {name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:85},{op:"SET",field:"measurements.HIPS_CM",value:105}]}}
+      {name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:85,sourceQuote:"85"},{op:"SET",field:"measurements.HIPS_CM",value:105,sourceQuote:"105"}]}}
     ]), {kind:"FINAL" as const,text:"Shop đã thêm sản phẩm vào giỏ cho chị."}];
     const result=await runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:"Eo 85, mông 105. Lấy màu navy M cho chị.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
       owner:async request=>{expect(request.availableTools).toContain("add_to_cart");return outputs.shift()!;},

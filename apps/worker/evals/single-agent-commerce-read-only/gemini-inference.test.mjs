@@ -7,6 +7,17 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('numeric writes expose bounded source quotes and cart adds require an explicit color or unknown',()=>{
+ const op=stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties;
+ assert.deepEqual(op.sourceQuote,{type:'string',minLength:1,maxLength:160});
+ const add=effectDeclarations.find(d=>d.name==='add_to_cart');
+ assert.ok(add.parameters.required.includes('color'));
+ assert.equal(add.parameters.properties.color.nullable,true);
+ const r=request();r.context.state.customerStateUpdatePending=true;
+ const view=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
+ assert.equal(view.state.customerStateUpdatePending,true);
+});
+
 test('captured HTTP request keeps per-option scope and sanitizes nested availability without evaluator labels',async()=>{
  const r=request(),captured=[],options=[{offerType:'AO',variantId:'offer:P1:AO',facts:[{type:'PRICE',scope:{productId:'P1',variantId:'offer:P1:AO'},value:{amountVnd:645000}}],
   availability:{price:{status:'OK',reason:null},stock:{status:'ERROR',reason:'PRIVATE_EVALUATOR_CANARY'}}},

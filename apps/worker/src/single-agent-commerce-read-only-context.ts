@@ -9,7 +9,7 @@ export const commerceUuid = (hash: string): string =>
   `${hash.slice(0,8)}-${hash.slice(8,12)}-5${hash.slice(13,16)}-8${hash.slice(17,20)}-${hash.slice(20,32)}`;
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",
   "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint",
-  "customerMeasurements", "fitPreference", "preferences", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "conversationRevision"];
+  "customerMeasurements", "fitPreference", "preferences", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "conversationRevision", "customerStateUpdatePending"];
 
 /** The resolver already validates artifact hashes/lifecycle. This bridge owns scope and public projection. */
 export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string, shopId: string, now: Date): TrustedContext["policyLiterals"][number] {

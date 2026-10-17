@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current reviewed state acceptance fix and replay — 2026-10-17
+
+- [x] Refresh main296cdcfb; preserve intake3035c0e9 and historical results. [Reviewed bounded plan](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-run-20261017/PLAN.md).
+- [ ] Observe state/dependency/recovery RED; implement minimum GREEN, sync numeric quote contract and existing source inputs.
+- [ ] Same-snapshot selection diagnosis; self-review and required worker/eval/build/typecheck/lint checks.
+- [ ] Freeze clean source, source/preflight, one ordered7stateful+24B1/N1 batch; raw before primary before diagnosis/accounting/audit.
+- [ ] Report actual outcomes/unknowns and update PR391; A OWNER_BYPASS, no live changes/Phase C.
+
 ## Current customer-outcome model run — 2026-10-17
 
 - [x] Owner authorizes one31outcome/N1 run after current fixes; same24B1+7stateful/model/budget/review bar. [Scope](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-run-20261017/SCOPE.md), intake `5a158cdf`, refreshed main `296cdcfb`.

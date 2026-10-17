@@ -36,13 +36,51 @@ export function createRealtimeCustomerStatePort(store: Pick<PostgresRealtimeRunt
 }
 const measurementKinds = ["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"] as const;
 const preferenceKinds = ["colors", "styles", "materials"] as const;
+export interface CustomerStateSourceMessage { text: string; sourceMessageId: string; observedAt: string }
+/** Numeric copy check only; the owner still interprets field, referent and correction meaning. */
+function measurementSource(sources: readonly CustomerStateSourceMessage[], quote: unknown, kind: MeasurementKind,
+  value: unknown, scope: CommerceScope, now: Date) {
+  if (typeof quote !== "string" || !quote.trim() || quote.length > 160 || typeof value !== "number") throw new Error("MEASUREMENT_SOURCE");
+  const matches = sources.flatMap(source => {
+    const index = source.text.indexOf(quote);
+    return index < 0 ? [] : source.text.indexOf(quote, index + 1) >= 0 ? [{ source, index }, { source, index }] : [{ source, index }];
+  });
+  if (matches.length !== 1) throw new Error("MEASUREMENT_SOURCE");
+  const { source, index } = matches[0]!;
+  const numbers = [...quote.matchAll(/[+-]?\d+(?:[.,]\d+)?/gu)];
+  if (!numbers.length) throw new Error("MEASUREMENT_SCALAR");
+  const first = index + numbers[0]!.index!, last = numbers.at(-1)!, lastEnd = index + last.index! + last[0].length;
+  if (/[\d+-]/u.test(source.text[first - 1] ?? "") || /\d/u.test(source.text[lastEnd] ?? "") ||
+    (/[.,]/u.test(source.text[first - 1] ?? "") && /\d/u.test(source.text[first - 2] ?? "")) ||
+    (/[.,]/u.test(source.text[lastEnd] ?? "") && /\d/u.test(source.text[lastEnd + 1] ?? ""))) throw new Error("MEASUREMENT_TOKEN");
+  const compact = quote.match(/([12])\s*m\s*(\d{1,2})(?!\d)/iu);
+  let scalar: number;
+  if (kind === "HEIGHT_CM" && numbers.length === 2 && compact && compact.index === numbers[0]!.index &&
+    compact.index! + compact[0].length === numbers[1]!.index! + numbers[1]![0].length) {
+    scalar = Number(compact[1]) * 100 + Number(compact[2]!.padEnd(2, "0"));
+  } else {
+    if (numbers.length !== 1) throw new Error("MEASUREMENT_SCALAR");
+    const number = numbers[0]!, start = index + number.index!, end = start + number[0].length;
+    const unit = source.text.slice(end).match(/^\s*(cm|kg|m)(?![\p{L}\p{N}])/iu)?.[1]?.toLowerCase();
+    scalar = Number(number[0].replace(",", "."));
+    if (unit === "m" && kind === "HEIGHT_CM") scalar *= 100;
+    else if ((unit === "kg" && kind !== "WEIGHT_KG") || (unit === "cm" && kind === "WEIGHT_KG") || unit === "m") throw new Error("MEASUREMENT_UNIT");
+  }
+  if (scalar !== value || !source.sourceMessageId || !Number.isFinite(Date.parse(source.observedAt)) ||
+    Date.parse(source.observedAt) > now.getTime()) throw new Error("MEASUREMENT_SOURCE");
+  return { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: scope.pageId,
+    conversationId: scope.conversationId, sourceMessageId: source.sourceMessageId }), observedAt: source.observedAt, confidence: 1 };
+}
 
 export async function createCustomerStateTools(input: {
   base: CommerceTools; scope: CommerceScope; store: CustomerStatePort; clock: () => Date;
   sizeInput: (subjectRef: string) => Promise<Omit<SizeEngineInput, "profile" | "generatedAt">>;
   quoteInput?: () => Promise<ShopPolicyEvaluationInput>;
+  sourceMessages?: readonly CustomerStateSourceMessage[];
 }): Promise<CommerceTools> {
   let effective = await input.store.read(), blockedDependencies = false;
+  const pendingFields = new Set<string>();
+  const blocked = () => blockedDependencies || pendingFields.size > 0;
   const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string }>();
   let cartQuote: unknown;
   let quoteRead = false;
@@ -50,14 +88,15 @@ export async function createCustomerStateTools(input: {
   const profileHash = () => commerceHash(effective.profile);
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot();
-    const valid = [...sizes.entries()].filter(([, s]) => !blockedDependencies && s.profileHash === profileHash());
-    const update = !blockedDependencies && committedUpdate?.hash === commerceHash(effective) ? committedUpdate.receipt : undefined;
+    const valid = [...sizes.entries()].filter(([, s]) => !blocked() && s.profileHash === profileHash());
+    const update = !blocked() && committedUpdate?.hash === commerceHash(effective) ? committedUpdate.receipt : undefined;
     return buildReadOnlyContext({ ...base, state: { ...base.state,
       customerProfileId: effective.profile.profileId, customerProfileRevision: effective.profile.revision,
       customerMeasurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })),
       fitPreference: effective.profile.fitPreference, preferences: effective.profile.preferences,
+      ...(blocked() ? { customerStateUpdatePending: true } : {}),
       sizeMeasurementFingerprints: Object.fromEntries(valid.filter(([, s]) => s.fingerprint).map(([id, s]) => [id, s.fingerprint])),
-      ...(!blockedDependencies && cartQuote ? { cartQuote } : {}) },
+      ...(!blocked() && cartQuote ? { cartQuote } : {}) },
       subjects: [...base.boundSubjects, ...(update ? [{ ref: effective.profile.profileId, kind: "CUSTOMER_PROFILE", label: `Thông tin tư vấn, phiên bản ${effective.profile.revision}`, bindingVersion: base.state.bindingVersion }] : [])], products: base.runtimeProducts ?? [], policies: base.policyLiterals,
       receipts: [...base.effectReceipts, ...(update ? [{ ...update, stateRevision: base.state.revision }] : [])], claims: [...base.protectedClaims.filter(c => (c as { type: string }).type !== "SIZE_FIT"), ...valid.flatMap(([, s]) => s.claims)] });
   };
@@ -73,7 +112,7 @@ export async function createCustomerStateTools(input: {
     const patch: CustomerProfilePatch = { profileId: current.profile.profileId, expectedRevision: current.profile.revision };
     const measurements = [], clears: MeasurementKind[] = [], absentClears: MeasurementKind[] = [], fields = new Set<string>();
     for (const raw of a.ops) {
-      const op = toolArgs(raw, ["op", "field", "value"]);
+      const op = toolArgs(raw, ["op", "field", "value", "sourceQuote"]);
       if (!op || !["SET", "REPLACE", "CLEAR"].includes(String(op.op)) || typeof op.field !== "string" ||
         fields.has(op.field) || (op.op === "CLEAR" && Object.hasOwn(op, "value"))) throw new Error("STATE_OPERATION");
       fields.add(op.field);
@@ -89,7 +128,8 @@ export async function createCustomerStateTools(input: {
             else if (previous.sourceEventHash !== evidence.sourceEventHash) throw new Error("STALE_CLEAR");
           }
         }
-        else measurements.push(BodyMeasurementV1Schema.parse({ kind, value: op.value, provenance: evidence }));
+        else measurements.push(BodyMeasurementV1Schema.parse({ kind, value: op.value,
+          provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) }));
       } else if (op.field === "fitPreference") {
         const value = op.op === "CLEAR" ? null : op.value;
         const parsed = CustomerProfileV1Schema.parse({ ...current.profile, fitPreference: value });
@@ -103,8 +143,20 @@ export async function createCustomerStateTools(input: {
         Object.assign(patch, { preferences: { ...patch.preferences, [key]: { value: list, evidence } } });
       }
     }
-    Object.assign(patch, { measurements });
-    const merged = mergeCustomerProfile(current, patch);
+    // Only this C3 writer may correct the same grounded event under the current CAS.
+    // Never weaken the shared timestamp/confidence/source ordering for other writers.
+    const mergeBase = { ...structuredClone(current), fieldEvidence: { ...current.fieldEvidence } };
+    const changedMeasurements = measurements.filter(m => {
+      if (clears.includes(m.kind)) return true;
+      const path = "measurements." + m.kind, old = current.profile.measurements.find(v => v.kind === m.kind);
+      if (old?.provenance.source !== "CUSTOMER_MESSAGE" || old.provenance.confidence !== m.provenance.confidence ||
+        old.provenance.sourceEventHash !== m.provenance.sourceEventHash || old.provenance.observedAt !== m.provenance.observedAt) return true;
+      if (old.value === m.value) return false;
+      mergeBase.profile.measurements = mergeBase.profile.measurements.filter(v => v.kind !== m.kind);
+      delete mergeBase.fieldEvidence[path]; return true;
+    });
+    Object.assign(patch, { measurements: changedMeasurements });
+    const merged = mergeCustomerProfile(mergeBase, patch);
     if (merged.ignoredFields.length) return { status: "REJECTED", reason: "STALE_CUSTOMER_EVIDENCE" };
     const fieldEvidence = { ...merged.fieldEvidence };
     for (const kind of absentClears) fieldEvidence[`measurements.${kind}`] = evidence;
@@ -117,7 +169,11 @@ export async function createCustomerStateTools(input: {
     }
     const readback = await input.store.read();
     if (commerceHash(readback) !== commerceHash(next)) { blockedDependencies = true; committedUpdate = undefined; return { status: "REJECTED", reason: "STATE_READBACK_CHANGED" }; }
-    effective = readback; blockedDependencies = false; sizes.clear(); cartQuote = undefined; quoteRead = false;
+    const changed = commerceHash(effective) !== commerceHash(readback);
+    effective = readback; blockedDependencies = false;
+    if (!changed) return { status: "OK", data: { revision: effective.profile.revision, applied: false,
+      measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
+    sizes.clear(); cartQuote = undefined; quoteRead = false;
     const operationId = commerceHash({ profileId: effective.profile.profileId, revision: effective.profile.revision, source: evidence.sourceEventHash, ops: a.ops });
     committedUpdate = { hash: commerceHash(effective), receipt: { ref: `profile-receipt:${operationId}`, operationId, effect: "CUSTOMER_STATE_UPDATED", status: "SUCCESS",
       subjectRef: effective.profile.profileId, stateRevision: input.base.snapshot().state.revision, recipient: input.scope.recipient,
@@ -128,10 +184,22 @@ export async function createCustomerStateTools(input: {
     const state = input.base.snapshot().state;
     if (!state.permission || !state.privacyAllowed || state.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
-      if (call.name === "apply_customer_state") return await apply(call.args);
+      if (call.name === "apply_customer_state") {
+        const args = toolArgs(call.args, ["ops"]);
+        const fields = args && Array.isArray(args.ops) && args.ops.length ? args.ops.map(op =>
+          op && typeof op === "object" && typeof op.field === "string" ? op.field as string : "*") : ["*"];
+        fields.forEach(field => pendingFields.add(field));
+        let result: CommerceToolResult;
+        try { result = await apply(call.args); }
+        catch (error) { result = { status: "REJECTED", reason: error instanceof Error &&
+          ["MEASUREMENT_SOURCE", "MEASUREMENT_SCALAR", "MEASUREMENT_TOKEN", "MEASUREMENT_UNIT"].includes(error.message)
+          ? "MEASUREMENT_SOURCE_INVALID" : "STATE_OR_DOMAIN_INPUT" }; }
+        if (result.status === "OK") fields.forEach(field => pendingFields.delete(field));
+        return result.status === "OK" ? result : { ...result, data: { applied: false, unresolvedFields: [...pendingFields] } };
+      }
       if (call.name === "recommend_size") {
         const a = toolArgs(call.args, ["subjectRef"]);
-        if (blockedDependencies || !a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        if (blocked() || !a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
         const source = await input.sizeInput(a.subjectRef);
         if (source.target.parentProductId !== a.subjectRef) return { status: "REJECTED", reason: "SIZE_SUBJECT" };
         const decision = recommendSize({ ...source, profile: effective.profile, generatedAt: input.clock().toISOString() });
@@ -142,7 +210,7 @@ export async function createCustomerStateTools(input: {
           missingInputs: decision.missingInputs, recommendedSizes: decision.recommendation.recommendedSizes } };
       }
       if (call.name === "quote_cart") {
-        if (blockedDependencies || !toolArgs(call.args, []) || !input.quoteInput) return { status: "REJECTED", reason: "QUOTE_UNAVAILABLE" };
+        if (blocked() || !toolArgs(call.args, []) || !input.quoteInput) return { status: "REJECTED", reason: "QUOTE_UNAVAILABLE" };
         const source = await input.quoteInput();
         const q = evaluateShopPolicy({ ...source, now: input.clock(), authorizationNow: input.clock() });
         cartQuote = q.status === "AUTHORIZED" ? { result: q, sourceHash: commerceHash({ policy: source.policy, lines: source.lines, closingEvidence: source.closingEvidence }) } : undefined;
@@ -154,7 +222,14 @@ export async function createCustomerStateTools(input: {
   }
   return { invoke, snapshot, async invokeBatch(calls) {
     const updates = calls.filter(c => c.name === "apply_customer_state");
-    if (updates.length > 1) blockedDependencies = true;
+    if (updates.length > 1) {
+      blockedDependencies = true;
+      for (const call of updates) {
+        const args = toolArgs(call.args, ["ops"]);
+        for (const op of args && Array.isArray(args.ops) ? args.ops : [{}]) pendingFields.add(
+          op && typeof op === "object" && typeof op.field === "string" ? op.field : "*");
+      }
+    }
     const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(invoke));
     return Promise.all(calls.map(c => c.name === "apply_customer_state" ? updateResults[updates.indexOf(c)]! : invoke(c)));
   }, async readback() {
