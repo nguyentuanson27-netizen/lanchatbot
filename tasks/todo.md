@@ -3,7 +3,9 @@
 ## Current customer-outcome model run — 2026-10-17
 
 - [x] Owner authorizes one31outcome/N1 run after current fixes; same24B1+7stateful/model/budget/review bar. [Scope](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-run-20261017/SCOPE.md), intake `5a158cdf`, refreshed main `296cdcfb`.
-- [ ] Current-source readback/selection, frozen inputs, clean source and existing preflights; then7stateful+24B1 with no retry/replacement/source changes. Raw before primary before diagnosis; update PR391 and stop. No result, naturalness improvement or successful source-backed checkout claimed yet.
+- [x] Current-source readback/selection PASS/0generations, frozen13inputs/models/config, clean `38beb4b0`, existing preflights. Complete7stateful+24B1 N1; raw `4ea4a2d4` before whole-turn primary `10d47b05` before diagnosis; no retry/replacement/source changes.
+- [x] Review31/31:15USABLE/8NEEDS_EDIT/1UNUSABLE/7FALLBACK_OR_NO_SEND; one USABLE is ownership-only. Audit88requests/88HTTP200,1owner completion UNKNOWN/0timeout-retry,25exact verifier bindings/42raw hashes/13frozen files/0observed evaluator-private leaks, DBdropped. [Report and all conversations](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-run-20261017/CHECKPOINT_B.md); PR391 updated, no automatic further run.
+- [ ] STOP sales/live: accepted wrong mông76 instead of96, later96 rejection leaves prior success receipt/ACK PASS. Need accepted-state/failed-update propagation review before another prompt-only cycle. Missing color→SELECTION_UNAVAILABLE→NONE violations/budget persists; preorder undisclosed; source checkout BLOCKED on region resolution, style/decision still needs work. AOWNER_BYPASS, no PhaseC/publication/live send.
 
 ## Current customer-outcome corrections after run review — 2026-10-17
 
