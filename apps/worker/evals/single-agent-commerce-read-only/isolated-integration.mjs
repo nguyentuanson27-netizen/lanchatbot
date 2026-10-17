@@ -409,11 +409,13 @@ try{
   assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
  });
- await check('B configured private dependency holding reply commits and is captured exactly once with the handoff',async()=>{
+ await check('B composed configured private dependency holding reply commits and is captured exactly once with the handoff',async()=>{
   const text='Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.',j=await statefulFixture({missingEta:true,dependencyHoldingReply:text});
   await j.turn('Chị lấy áo navy size M',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}}]),say('Dạ chị.')]);
+  await j.drain();
   const before=j.capture.length,r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);
   assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,1);
+  await j.drain();
   assert.deepEqual(j.capture.slice(before),[text]);assert.equal(await inbox.isBatchCurrent(r.batch),false);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
   const rows=await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1 ORDER BY created_at',[j.bound.conversationId]);
