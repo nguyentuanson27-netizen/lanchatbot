@@ -1,0 +1,16 @@
+{
+  "raw/registration.json": "8e9cf90b7827ba020bd0020a5f11d91622ce821ebed39938c9ca1b5ee7a363e6",
+  "raw/completion.json": "d0f33ded1679dc042f3278ce40461d8fbb6f05b2ebc88ec7158920a100ec74e1",
+  "raw/requests.jsonl": "3e62c66bbf5dbaf665dd7442965e08ad1f93798c299a0d0e1f8bca840c41b621",
+  "raw/attempt-18.json": "e2d772e3ce54799d597294312c4b1e91879dc71ef1ab630f7f63f9c95d65e7ae",
+  "raw/attempt-19.json": "3b4c8910bd11a16151c27ca4889d09e8e01a04e907410ce8a937eba1b2fae816",
+  "raw/attempt-20.json": "528b5b89f902bf8bdafed55d8678a5642f1c39201520a9637722dc19f8a8be03",
+  "raw/attempt-21.json": "4d4a4efc449c145d5428f2cd859643df801d77c559aa1ec8b908a226948f992d",
+  "raw/attempt-22.json": "e89081c6f13c015582e6d25b201f3ff4eb2f8681b5d4f4296941d5d619facf49",
+  "raw/attempt-23.json": "8da6445d93c6cb8a3848df4617cb786c3201043f427795b4d0e45789629a35c1",
+  "raw/attempt-24.json": "98b71b83b962c1973e96f11e4a64ee04c24faa152e3a8e585889d82124ab293a",
+  "config-preflight.json": "cb7137221c5b5c3c3ecda2e4b612beae357922f884b3c9521d491ded0b5b99f9",
+  "source-readback.json": "d0ddb981456441d351b3f3bb649462e202ddde9e83f2270975849d39c013ad0f",
+  "SCOPE.md": "955d73969fff3bc4d854099d005489434e01d9aefa00d56a883392f35a2ed2ef",
+  "FROZEN_INPUTS.json": "445ea5b8139d8cc8cf300f87b91f0698beff4f4a05eaea84467abea7ba3e266f"
+}
