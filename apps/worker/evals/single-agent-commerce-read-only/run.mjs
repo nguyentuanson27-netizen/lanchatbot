@@ -23,7 +23,7 @@ if(!['CANARY_SHADOW','CANARY_LIVE','PUBLISHED'].includes(config.channel)||config
  !/^[a-f0-9]{64}$/.test(config.scope.customerHash)||!/^[a-f0-9]{64}$/.test(config.scope.recipient)||
  !Number.isSafeInteger(config.vertex.embeddingDimension)||config.vertex.embeddingDimension<1)throw new Error('SOURCE_CONFIG');
 const codex=inspectCodex();
-if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:REGISTERED_CASE_COUNT,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
+if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:REGISTERED_CASE_COUNT,requestBounds:m.requestBounds,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
 if(!args.out)throw new Error('NEW_OUTPUT_DIRECTORY_REQUIRED');
 const sourcePaths=['apps/worker/src','apps/worker/package.json','apps/worker/tsconfig.json','tsconfig.base.json','pnpm-lock.yaml',
  'apps/worker/evals/single-agent-commerce-read-only','apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs','packages'];
@@ -39,7 +39,7 @@ const verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.met
 const out=resolve(args.out);mkdirSync(out); // Existing evidence is never overwritten.
 const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.stringify({id,phase,value})+'\n');
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
- promptHashes:m.promptHashes,schemaHash:m.schemaHash,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
+ promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
  inputHash,caseIds:samples.map(c=>c.caseId),registered:REGISTERED_CASE_COUNT,repetitions:1,maximumGenerationRequests:MAXIMUM_GENERATION_REQUESTS,
  dispatch,
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});

@@ -21,7 +21,7 @@ export function statefulPreflight(root){
  assert.equal(cases.length,7);assert.equal(cases.filter(c=>c.runtime.latest).length,6);assert.equal(new Set(cases.map(c=>c.caseId)).size,7);
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
-  models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations])),
+  models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations])),
   corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:7,publicTurns:6,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:24,retry:0,codex:inspectCodex(),sendEnabled:false}};
 }
 

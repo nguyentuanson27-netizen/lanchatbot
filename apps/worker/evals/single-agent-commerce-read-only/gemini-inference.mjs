@@ -5,6 +5,7 @@ import {HandoffReasonV2Schema,canonicalJsonV1} from '@lana/contracts';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
+export const OWNER_REQUEST_MAX_BYTES=65536;
 const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
  'EMPTY_BODY','RESPONSE_BOUND','OWNER_MODEL_VERSION','OWNER_CANDIDATE_COUNT','OWNER_FINISH_REASON','OWNER_CONTENT_ROLE','OWNER_CONTENT_PARTS',
  'OWNER_OUTPUT_SURFACE','OWNER_TOOL_OUTPUT','OWNER_FINAL_EMPTY','OWNER_FINAL_BOUND']);
@@ -49,11 +50,11 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
  const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value}));
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
- const product=p=>{
+ const product=(p,keepLocalEvidence=false)=>{
   const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
   const current=c.runtimeProducts?.find(x=>x.subjectRef===p.subjectRef);
   for(const key of ['content','attributes','presentation','sizeCharts']){
-   if(value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
+   if(!keepLocalEvidence&&value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
   }
   return value;
  };
@@ -63,10 +64,11 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   const data=response?.response?.data;if(!data)continue;
   if(response.name==='search_products'){
    if(data.subjects)data.subjects=data.subjects.map(subject);
-   if(data.products)data.products=data.products.map(product);
+   if(data.products)data.products=data.products.map(p=>product(p));
   }
   if(response.name==='read_product'){
-   response.response.data=product(data);
+   const partial=['price','stock'].some(field=>data.availability?.[field]&&data.availability[field].status!=='OK');
+   response.response.data=product(data,partial);
    if(data.availability)response.response.data.availability=availability(data.availability);
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
@@ -98,7 +100,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  const requestBytes=bytes(body);
- if(requestBytes>32768)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
+ if(requestBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
  return body;
 }
 export function parseGeminiGeneration(body){

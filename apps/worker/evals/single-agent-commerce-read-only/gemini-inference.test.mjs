@@ -103,19 +103,59 @@ test('changed values and different product scopes in prior tool results remain v
  }
 });
 
-test('the serialized HTTP body owns the exact 32768-byte bound before any auth or generation request',async()=>{
+test('the serialized B owner HTTP body owns the exact 65536-byte bound before any auth or generation request',async()=>{
  const r=request();r.instructions='';
  const baseline=Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r)));
- for(const size of [32767,32768]){
+ for(const size of [65535,65536]){
   r.instructions='x'.repeat(size-baseline);assert.equal(Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r))),size);
  }
  r.instructions+='x';let auth=0,dispatch=0;
  const infer=createGeminiCommerceInference(config,{getToken:async()=>{auth++;return 'test-token';},fetchImpl:async()=>{dispatch++;}});
  await assert.rejects(infer(r),e=>{
-  assert.equal(e.telemetry.requestBytes,32769);
+  assert.equal(e.telemetry.requestBytes,65537);
   return e.telemetry.failureCode==='OWNER_REQUEST_BOUND'&&e.telemetry.providerRequests===0;
  });
  assert.equal(auth,0);assert.equal(dispatch,0);
+});
+
+test('partial commerce reads retain independent product evidence locally even when trusted contains the identical evidence',async()=>{
+ for(const missing of ['price','stock']){
+  const r=request(),captured=[],evidence={content:{description:'Áo cotton, dáng suông.',metadata:{authority:'WEBSTORE_XML',sourceVersion:'current'}},
+   attributes:{material:'Cotton'},presentation:{text:'Dáng suông.'},sizeCharts:[{sizes:['M']}]};
+  r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',...structuredClone(evidence)}];
+  r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Áo',bindingVersion:'current'}];
+  const data={subjectRef:'P1',...structuredClone(evidence),sellingOptions:null,facts:[],
+   availability:{price:{status:'OK',reason:null},stock:{status:'OK',reason:null}}};
+  data.availability[missing]={status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'};
+  const model={role:'model',parts:[{functionCall:{id:'partial',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque-partial'}]};
+  r.contents.push(model,{role:'user',parts:[{functionResponse:{id:'partial',name:'read_product',response:{status:'OK',data}}}]});
+  r.caseId='EVALUATOR_ONLY';r.requiredBehaviors=['PRIVATE_RUBRIC'];const original=structuredClone(r.contents);
+  const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+   captured.push(JSON.parse(init.body));return new Response(JSON.stringify(body([{text:'Áo cotton dáng suông chị nhé.'}])));
+  }});
+  await infer(r);assert.equal(captured.length,1);
+  const wire=captured[0],local=wire.contents.at(-1).parts[0].functionResponse;
+  for(const [key,value] of Object.entries(evidence))assert.deepEqual(local.response.data[key],value);
+  assert.equal(local.response.data.sellingOptions,null);assert.deepEqual(local.response.data.facts,[]);
+  assert.deepEqual(local.response.data.availability[missing],data.availability[missing]);
+  assert.equal(local.id,'partial');assert.deepEqual(wire.contents.at(-2),model);assert.deepEqual(r.contents,original);
+  assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_ONLY|PRIVATE_RUBRIC|test-token/);
+ }
+});
+
+test('bounded long native continuations reach HTTP with the exact model parts and call identities',async()=>{
+ const r=request(),captured=[],signature='opaque-signature-'.repeat(2200);
+ const model={role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:signature}]};
+ const response={status:'OK',data:{subjectRef:'P1',content:{description:'Cotton.'},facts:[],
+  availability:{stock:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'}}}};
+ r.contents.push(model,{role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response}}]});
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+  captured.push(JSON.parse(init.body));return new Response(JSON.stringify(body([{text:'Áo cotton chị nhé.'}])));
+ }});
+ const result=await infer(r);assert.equal(captured.length,1);assert.equal(result.telemetry.providerRequests,1);
+ assert.ok(result.telemetry.requestBytes>32768&&result.telemetry.requestBytes<=65536);
+ assert.deepEqual(captured[0].contents.at(-2),model);assert.equal(captured[0].contents.at(-1).parts[0].functionResponse.id,'read-1');
+ assert.equal(result.telemetry.requestHash,createHash('sha256').update(JSON.stringify(captured[0])).digest('hex'));
 });
 test('native function content keeps opaque signatures for the next invocation',()=>{
  const source=body([{functionCall:{name:'read_policy',args:{}},thoughtSignature:'opaque'}]);

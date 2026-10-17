@@ -24,6 +24,12 @@ test('protocol identity is fixed before any provider invocation',()=>{
  assert.throws(()=>validateProtocol({...manifest,providerBatch:{...manifest.providerBatch,scenarios:8}}));
  assert.throws(()=>validateProtocol({...manifest,fallback:{...manifest.fallback,text:'Changed fallback'}}));
 });
+
+test('B request bounds are frozen per role and reject silent owner or verifier changes',()=>{
+ assert.deepEqual(manifest.requestBounds,{ownerWireBytes:65536,verifierWireBytes:32768});
+ for(const requestBounds of [undefined,{ownerWireBytes:32768,verifierWireBytes:32768},{ownerWireBytes:65536,verifierWireBytes:65536}])
+  assert.throws(()=>validateProtocol({...manifest,requestBounds}),/REQUEST_BOUNDS/);
+});
 test('runtime projection and captured verifier request exclude all evaluator fields',async()=>{
  const sample={caseId:'LABEL_CANARY',split:'HOLDOUT_CANARY',evaluator:{purposeId:'PURPOSE_CANARY',variant:3,expectedSafe:false,requiredBehaviors:['RUBRIC_CANARY']},
   runtime:{latest:'Em ơi',history:[],initialProductCodes:['SM613']}};

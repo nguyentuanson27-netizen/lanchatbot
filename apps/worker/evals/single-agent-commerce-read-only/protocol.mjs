@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 import {readFileSync,existsSync} from 'node:fs';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {OWNER_REQUEST_MAX_BYTES} from './gemini-inference.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
 export const REGISTERED_CASE_COUNT=24;
@@ -14,6 +15,7 @@ export function dispatchRange(value=undefined){
 const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
+ check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===32768,'REQUEST_BOUNDS');
  check(m.models.conversation.provider==='VERTEX_AI'&&m.models.conversation.model==='gemini-3.5-flash-lite'&&m.models.conversation.effort==='high'&&
   m.models.verifier.provider==='OPENAI'&&m.models.verifier.model==='gpt-6.1-sol'&&m.models.verifier.effort==='high'&&
   m.models.verifier.generationConfig.reasoningEffort==='high'&&m.models.verifier.generationConfig.retry===0,'MODEL_IDENTITY');
