@@ -1,6 +1,6 @@
 # Toàn bộ 31 hội thoại và actual outcomes
 
-Source `d894eb1afe0c3e1aca3d6599334b734decafc825`, N1. Owner Gemini3.5 Flash Lite High; verifier GPT6.1 Sol High. Stateful: một chuỗi 6 lượt + human control riêng, chỉ capture; B1: 24 ca chỉ kiểm send eligibility. Không gửi khách thật, không lấy rejected draft thay actual outcome.
+Source `d894eb1afe0c3e1aca3d6599334b734decafc825`, N1. Owner Gemini3.5 Flash Lite High; verifier GPT6.1 Sol High. Stateful: một chuỗi 6 lượt + human control riêng, chỉ capture; B1: 24 ca chỉ kiểm send eligibility. Không gửi khách thật, không lấy rejected draft thay actual outcome. B1 slot 4 có đính chính điểm sau primary; xem PRIMARY_REVIEW.md, raw và lời thoại giữ nguyên.
 
 ## B2_B3 1. stateful-open
 
@@ -359,7 +359,7 @@ Chất tơ Hàn thêu và ren tơ Hàn của set này rất nhẹ, mềm và tho
 
 Tuy nhiên, vì là chất vải tơ ren mỏng nhẹ bay bổng, nếu đứng dưới nắng gắt lâu chị có thể lưu ý mặc thêm lớp lót bên trong hoặc chuẩn bị thêm ô che nắng để thoải mái nhất nhé ạ.
 
-**Review UNUSABLE:** Khách dễ nóng, phải ở ngoài trời lâu; reply bảo chắc không hầm bí và vẫn dễ chịu chỉ từ mô tả mềm/thoáng của chất liệu. Nguồn chưa xác nhận khả năng chịu nóng trong hoàn cảnh đó; gợi mặc thêm lớp lót còn lệch nỗi lo. Đây là kết quả sử dụng cụ thể vượt căn cứ, khác lời nhận xét nhẹ nhàng/sang trọng.
+**Review NEEDS_EDIT (đính chính theo policy đã freeze):** Nguồn có mềm/nhẹ/thoáng; lời trấn an về cảm giác ngoài trời nằm trong ranh giới owner đã duyệt ở spec 2026-10-16, không đủ để kết luận verifier false PASS. Reply vẫn cần sửa vì khuyên thêm lớp lót khi khách dễ nóng và đưa ô che nắng thay cho quyết định chọn đồ; giọng dài, chưa giải quyết tốt lo ngại hiện tại.
 
 ## B1 5. b1-partial-source-v2
 

@@ -1,13 +1,15 @@
 # Review toàn bộ actual outcomes
 
-Source `d894eb1afe0c3e1aca3d6599334b734decafc825`, raw `bab60f7ccf294c1996967be717d61213bdbc0629` đã commit trước primary. Đọc nguyên câu/hội thoại, source public và state cuối lượt; không dùng nháp bị chặn hoặc chi tiết verdict để cứu/chỉnh điểm. Primary chủ quan/non-independent, human acceptance null. Supporting dimensions không cộng điểm hoặc chấm keyword. Im lặng đúng policy chỉ được xem là ownership control, không chứng minh văn phong hoặc nhân viên thật.
+Source `d894eb1afe0c3e1aca3d6599334b734decafc825`, raw `bab60f7ccf294c1996967be717d61213bdbc0629` đã commit trước primary `cf52f3033d7bd03664c14f18cee5e45e71d8efb2`, trước trace diagnosis. Đọc nguyên câu/hội thoại, source public và state cuối lượt; không chấm keyword hay lấy nháp bị chặn thay kết quả khách nhận. Primary do agent triển khai chấm, không độc lập; human acceptance null.
+
+**Đính chính sau primary:** B1 slot 4 ban đầu bị chấm UNUSABLE/safety 0 quá chặt so với ranh giới owner đã duyệt trong [spec tư vấn cảm nhận](../../../../../docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md). Sửa thành NEEDS_EDIT/safety 2; lý do còn lại là lời khuyên lớp lót/ô và quyết định mua chưa tốt. Bản ban đầu cùng lý do/điểm được giữ ở commit primary và postPrimaryCorrections trong JSON. Đính chính diễn ra sau khi bắt đầu đọc trace, dựa vào spec đã freeze, không đổi prompt, rubric, raw, verdict hay bỏ attempt. Các hàng khác giữ nguyên.
 
 | Phần | USABLE | NEEDS_EDIT | UNUSABLE | FALLBACK_OR_NO_SEND |
 | --- | --- | --- | --- | --- |
-| B1 | 10 | 4 | 1 | 9 |
+| B1 | 10 | 5 | 0 | 9 |
 | B2_B3 | 3 | 2 | 0 | 2 |
 
-13 USABLE gồm một ownership-only control; không phải số đơn mua hoặc toàn bộ Phase B đã đạt. B1 là eligibility/send-disabled; stateful chỉ capture. State sửa đúng eo 74/mông 96 và giữ L ở lượt correction, nhưng thiếu disclosure đặt trước còn kéo dài và checkout chưa hoàn tất. Không phạt upsell chỉ vì mua thêm, không bắt lặp checklist policy và không gọi mọi lợi ích cảm giác là thuộc tính phải có phép thử.
+13 USABLE gồm một ownership-only control; không phải số đơn mua hoặc toàn bộ Phase B đã đạt. B1 chỉ kiểm eligibility, stateful chỉ capture. Supporting dimensions không cộng điểm; naturalness của control im lặng không được đo. State correction 74/96 và giữ L đúng; disclosure đặt trước và checkout còn thiếu. Không phạt upsell chỉ vì mua thêm, không bắt lặp checklist policy, không đòi phép thử riêng cho tư vấn cảm nhận đã được phép.
 
 | Lượt | Cả lượt | Lý do |
 | --- | --- | --- |
@@ -21,7 +23,7 @@ Source `d894eb1afe0c3e1aca3d6599334b734decafc825`, raw `bab60f7ccf294c1996967be7
 | B1 1 — b1-changed-occasion | FALLBACK_OR_NO_SEND | Khách hỏi độ kín khi đổi sang sân khấu nhưng actual outcome chỉ là câu không trả lời được; không có tư vấn hay phương án giúp ra quyết định. Chưa xét nháp bị chặn hoặc lý do verdict ở primary. |
 | B1 2 — b1-search-read | USABLE | Tìm đúng SD375 và báo đúng áo lẻ 929.000đ/cả set 1.065.000đ. Hai lựa chọn giá ngắn, cần thiết cho câu hỏi; không phạt hình thức gạch đầu dòng. |
 | B1 3 — b1-buying-concern | NEEDS_EDIT | Đã tư vấn lấy cả set, trả đúng 799.000đ và giải thích theo ren/tơ. Nhưng cả đoạn đầu gần như lời giới thiệu catalog với nhiều tính từ nối tiếp, chưa phải nhịp chat gọn giải quyết nỗi lo rườm rà. Không chặn chỉ vì lời nhận xét thẩm mỹ tự tin hoặc nhắc ngân sách một lần. |
-| B1 4 — b1-changed-occasion-v2 | UNUSABLE | Khách dễ nóng, phải ở ngoài trời lâu; reply bảo chắc không hầm bí và vẫn dễ chịu chỉ từ mô tả mềm/thoáng của chất liệu. Nguồn chưa xác nhận khả năng chịu nóng trong hoàn cảnh đó; gợi mặc thêm lớp lót còn lệch nỗi lo. Đây là kết quả sử dụng cụ thể vượt căn cứ, khác lời nhận xét nhẹ nhàng/sang trọng. |
+| B1 4 — b1-changed-occasion-v2 | NEEDS_EDIT | Nguồn có mềm/nhẹ/thoáng; lời trấn an về cảm giác ngoài trời nằm trong ranh giới owner đã duyệt ở spec 2026-10-16, không đủ để kết luận verifier false PASS. Reply vẫn cần sửa vì khuyên thêm lớp lót khi khách dễ nóng và đưa ô che nắng thay cho quyết định chọn đồ; giọng dài, chưa giải quyết tốt lo ngại hiện tại. |
 | B1 5 — b1-partial-source-v2 | NEEDS_EDIT | Đã trả đúng phần vải/dáng và không bịa giá hay tồn khi thiếu nguồn. Phần còn lại nói theo giọng màn hình hệ thống và kết thúc ở không kiểm tra được, chưa giúp khách biết phải làm gì tiếp trong khả năng có thật. Không đòi bot bịa giá hoặc hứa nhân viên đang xử lý. |
 | B1 6 — b1-buying-concern-v2 | NEEDS_EDIT | Có khuyên lấy set cho tiệc ban ngày và đưa cách tiết chế bằng áo trơn sẵn có. Nhưng ba đoạn nhiều mỹ từ, lặp lại lý do thanh thoát/nhẹ nhàng từ catalog, làm lời tư vấn kém gần gũi và lựa chọn cuối bị loãng. Không xem upsell hoặc tự tin về phong cách là vi phạm an toàn. |
 | B1 7 — b1-current-policy | USABLE | Dùng policy hiện hành 15 ngày thay ký ức 7 ngày, trả đúng phí đổi hai chiều 30.000đ. Khách đã nói chỉ cầm ngắm, còn tem; không bắt lặp đủ mọi điều kiện trong một câu hỏi về thời hạn/phí. |

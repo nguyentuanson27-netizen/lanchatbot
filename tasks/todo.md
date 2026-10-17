@@ -3,10 +3,12 @@
 ## Current reviewed state acceptance fix and replay — 2026-10-17
 
 - [x] Refresh main296cdcfb; preserve intake3035c0e9 and historical results. [Reviewed bounded plan](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-run-20261017/PLAN.md).
-- [ ] Observe state/dependency/recovery RED; implement minimum GREEN, sync numeric quote contract and existing source inputs.
-- [ ] Same-snapshot selection diagnosis; self-review and required worker/eval/build/typecheck/lint checks.
-- [ ] Freeze clean source, source/preflight, one ordered7stateful+24B1/N1 batch; raw before primary before diagnosis/accounting/audit.
-- [ ] Report actual outcomes/unknowns and update PR391; A OWNER_BYPASS, no live changes/Phase C.
+- [x] Observe state/dependency/recovery RED→GREEN, add numeric sourceQuote/per-message provenance, C3 same-source correction/no-op and pending through existing normal-FINAL/effect/recovery boundaries. Code `c3951fc6`; shared merge ordering unchanged, no semantic parser or normal-reply assembler.
+- [x] Same-snapshot absent color→CART_VARIANT_AMBIGUOUS, BE→READY/PRE_ORDER; self-review and final worker1839/Node492+2optionalSKIP/protected-reply21PASS, worker typecheck/build/lint exit0. COD25/25 real-PG controls/0generations/DBdropped. BANK_TRANSFER not rerun.
+- [x] Freeze clean source `d894eb1a` after pre-provider CRLF-only byte correction; source/config/stateful preflights before generation. Complete7stateful+24B1/N1, raw `bab60f7c` before primary `cf52f303` before diagnosis. No retry/replacement/source changes; DBdropped.
+- [x] Review31/31 and preserve one explicit scoring correction to the already-approved sensory boundary: final13USABLE (one ownership-only)/7NEEDS_EDIT/11FALLBACK_OR_NO_SEND. Actual19eligible/9staticfallback/2handoff/1no-send; profile74/96 and cartBE/L×2 correct. Audit87HTTP/28mandatory verifier submissions/19exact eligible drafts/42raw hashes/13inputs/5runtime files/6reference blobs/0observed evaluator-private leaks. Seven verifier429 quota errors remain in denominator; no verdict inferred.
+- [x] [Report, findings, conversations and commands](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-run-20261017/CHECKPOINT_B.md) prepared for PR391 update; no post-result runtime fix or generation, A OWNER_BYPASS, no live changes/Phase C.
+- [ ] Sales/live STOP: disclose PRE_ORDER, improve catalog/system-style advice and adjudicate stage wording within the existing approved boundary; restore verifier quota before any owner-authorized next run. Source checkout BLOCKED on authoritative address→region mapping, not missing shipping durations. Numeric quotes still do not prove field/referent/negation/old-new semantics; N1 is not stability or sales acceptance.
 
 ## Current customer-outcome model run — 2026-10-17
 
