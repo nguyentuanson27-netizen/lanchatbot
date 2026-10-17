@@ -26,7 +26,24 @@ Intake `f654893074798dc064992b1eb98a8f659a23bb80`; refreshed main `296cdcfbf5759
 - Shared contracts full source: **22files / 223 PASS**, plus contracts build and typecheck exit0.
 - Focused worker owning group119PASS before adding the independent-read regression; that added file10PASS afterward, and all are covered by full worker1,816.
 - Focused provider/protocol/comparison **49 PASS**; conversation-engine handoff defaults **48 PASS**; protected claims/reply assembler **21 PASS**.
-- Worker build, typecheck and lint exit0. Full Node eval: **493 registered / 491 PASS / 0 FAIL / 2 existing optional SKIP**. Real-PG controls follow the clean code savepoint; no provider generation.
+- Worker build, typecheck and lint exit0. Full Node eval: **493 registered / 491 PASS / 0 FAIL / 2 existing optional SKIP**.
+
+## Final controlled PostgreSQL results
+
+At clean source `332ce14936a663976e2d27e40ba1205e4698e4c1`, **COD 25/25 PASS and BANK_TRANSFER 25/25 PASS**, both exit0, sourceDirty=false, providerGenerations=0, testDatabaseDropped=true. Runtime TS/contracts/prompt blobs remain identical to code savepoint `319616b1`; subsequent source changes correct only the integration harness. [COD raw](controls/cod-pass.json) SHA256 `f4b6bf387c9e3786fedad4a6589d4cf86acc265c96a7839e17ddaaae681b03e1`; [bank raw](controls/bank-pass.json) SHA256 `21d19fa1eed7d1f678d172150319e2ae893ff100a04a5c44b004c546ef8138aa`. Copies match original bytes.
+
+The new composed control proves that private dependency recovery uses zero owner/verifier calls, commits one configured holding-message intent with handoff, completes the Inbox, moves ownership to HUMAN and captures that exact text once; its outbox rows are SENT_ACCEPTED. Default dependency silence and supersession/CAS/variant rechecks also pass. Inputs/product availability are explicitly synthetic, current policy is read-only, and configured dependency holding is a synthetic in-memory matrix override, never published. Captured HTTP is an in-memory adapter, not Meta/Pancake delivery or employee service.
+
+| Finding | Implementation/evidence | Still unverified or blocked |
+| --- | --- | --- |
+| Receipt/system-style chat | Narrow owner voice replacement, +64bytes, no examples | Generated chat naturalness needs a new model run |
+| Missing preorder disclosure | First-ACK instruction; current PRE_ORDER preview text and STOCK binding tested, in-stock control unchanged | Generated first ACK and source-backed purchase remain unmeasured |
+| Configured holding lost | Matrix/decision contract aligned; atomic intent and exact capture pass both payment controls | No policy publication, actual employee service or live delivery |
+| Repeated/sequential authority reads | Immediate duplicate removed, independent reads concurrent; current authority/CAS regression controls pass | No causal E2E latency improvement measured |
+| Private address region | Existing Sheet ingestion and four current region-duration rows located/read-only | Authoritative private-address→shop-region resolution still BLOCKED |
+| Older NONE violations / narrow request headroom | Existing native integrity/signature/bounds retained | Old cause UNKNOWN; no speculative adapter patch or stability claim |
+
+Structural delta versus intake: six runtime TS files, +46/-16 lines (net+30), plus narrow prompt/hash and regression-harness changes. Semantic roles/layers added: **0**; existing one owner and at most one verifier remain. No new persistent state, gate, parser/router, case answer/template, retry/repair or framework. Self-review checked actual schema consumers, default after-sales/silent behavior, current final readback, privacy and atomic rollback. Retained failures above are test-harness corrections, not discarded model attempts.
 
 Commands actually run:
 
@@ -50,6 +67,14 @@ pnpm --filter @lana/contracts exec tsc -p tsconfig.json --noEmit
 pnpm --filter @lana/worker test:evals
 python apps/worker/evals/single-agent-commerce-read-only/source-session.py node C:/Users/nguye/AppData/Local/Temp/c3-current-shipping-source-20261017.mjs C:/Users/nguye/AppData/Local/Temp/c3-current-shipping-source-20261017.json
 node --check apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-cod-20261017 COD
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-bank-20261017 BANK_TRANSFER
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-cod-r2-20261017 COD
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-bank-r2-20261017 BANK_TRANSFER
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-cod-r3-20261017 COD
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-bank-r3-20261017 BANK_TRANSFER
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-cod-r4-20261017 COD
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-customer-outcome-bank-r4-20261017 BANK_TRANSFER
 git diff --check
 ```
 
