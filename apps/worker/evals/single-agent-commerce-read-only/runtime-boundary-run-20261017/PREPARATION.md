@@ -58,6 +58,8 @@ The controlled signature variation is still **35,905/32,768 bytes** under curren
 
 The initial offline helper incorrectly compared a round-tripped tool projection directly with captured JSON, where old null/empty fields had already been omitted. Comparing both serializers on the same reconstituted input resolved that tooling assumption. The helper also needed wire normalization before canonical comparison because internal undefined properties are omitted by JSON serialization. Neither correction changed runtime code, captured evidence or model requests; all offline checks used zero provider generations.
 
+The first freeze helper used the key `composed` while the retained hash record names the same declarations `stateful`, so the equality assertion rejected it before writing FROZEN_INPUTS. The preparation docs were saved separately; the helper key was corrected and freeze rerun successfully before preflight/provider collection. No native declaration changed or provider request occurred during this tooling correction.
+
 Official Google [function-calling](https://ai.google.dev/gemini-api/docs/function-calling) and [thought-signature](https://ai.google.dev/gemini-api/docs/thought-signatures) documentation checked 2026-10-17 before the serializer correction. No new provider API feature or model configuration was adopted.
 
 ## Self-review
