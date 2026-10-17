@@ -65,6 +65,31 @@ test('canonical key ordering does not duplicate source evidence between snapshot
  assert.equal(JSON.parse(b.contents[0].parts[0].text).trusted.products[0].content.description,'Cotton.');
 });
 
+test('current scoped product facts remain once when native continuations repeat them',()=>{
+ const r=request(),price={type:'PRICE',scope:{kind:'PRODUCT',productId:'P1',variantId:'offer:P1:AO'},value:{amountVnd:499000,currency:'VND'}};
+ r.context.protectedClaims=[{...price,claimId:'code-owned-id',provenance:{sourceVersion:'current'}}];
+ r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',sourceVersion:'current',
+   facts:[price],sellingOptions:[{offerType:'AO',sourceVersion:'current',availability:{price:{status:'OK'}},facts:[price]}]}}}}]});
+ const original=structuredClone(r.contents),b=buildGeminiCommerceRequest(r),data=b.contents.at(-1).parts[0].functionResponse.response.data;
+ assert.deepEqual(JSON.parse(b.contents[0].parts[0].text).trusted.facts,[price]);
+ assert.equal(data.facts,undefined);assert.equal(data.sellingOptions[0].facts,undefined);
+ assert.equal(data.sourceVersion,'current');assert.deepEqual(data.sellingOptions[0].availability,{price:{status:'OK',reason:null}});
+ assert.equal(b.contents.at(-1).parts[0].functionResponse.id,'read-1');assert.deepEqual(b.contents.at(-2),r.contents.at(-2));
+ assert.deepEqual(r.contents,original);
+});
+
+test('changed values and different product scopes in prior tool results remain visible',()=>{
+ for(const change of ['value','scope']){
+  const r=request(),old={type:'PRICE',scope:{kind:'PRODUCT',productId:'P1',variantId:'offer:P1:AO'},value:{amountVnd:499000}};
+  const current=structuredClone(old);if(change==='value')current.value.amountVnd=599000;else current.scope.variantId='offer:P1:CV';
+  r.context.protectedClaims=[current];
+  r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{subjectRef:'P1',facts:[old],sellingOptions:[{offerType:'AO',facts:[old],availability:{}}]}}}}]});
+  const data=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+  assert.deepEqual(data.facts,[old]);assert.deepEqual(data.sellingOptions[0].facts,[old]);
+ }
+});
+
 test('the serialized HTTP body owns the exact 32768-byte bound before any auth or generation request',async()=>{
  const r=request();r.instructions='';
  const baseline=Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r)));
@@ -73,7 +98,10 @@ test('the serialized HTTP body owns the exact 32768-byte bound before any auth o
  }
  r.instructions+='x';let auth=0,dispatch=0;
  const infer=createGeminiCommerceInference(config,{getToken:async()=>{auth++;return 'test-token';},fetchImpl:async()=>{dispatch++;}});
- await assert.rejects(infer(r),e=>e.telemetry.failureCode==='OWNER_REQUEST_BOUND'&&e.telemetry.providerRequests===0);
+ await assert.rejects(infer(r),e=>{
+  assert.equal(e.telemetry.requestBytes,32769);
+  return e.telemetry.failureCode==='OWNER_REQUEST_BOUND'&&e.telemetry.providerRequests===0;
+ });
  assert.equal(auth,0);assert.equal(dispatch,0);
 });
 test('native function content keeps opaque signatures for the next invocation',()=>{

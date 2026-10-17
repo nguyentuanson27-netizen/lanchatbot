@@ -75,6 +75,14 @@ function snapshot(stockQuantity = 3) {
 }
 
 describe("realtime sales catalog", () => {
+  it("distinguishes an unresolved destination region from missing ETA durations without guessing geography", () => {
+    const regional = { ...snapshot(), shipping_eta: { "MIEN-NAM": { transit_min_days: 3, transit_max_days: 6 } } };
+    const query = { shopAlias: "LANA", productId: "CB182", offerType: "SET", size: "M", color: "BE", quantity: 1,
+      lineId: "13000000-0000-4000-8000-000000000001", deliveryAddress: "Quận 1, TP Hồ Chí Minh" };
+    expect(cartSelectionFromSnapshot(regional, query, now)).toMatchObject({ status: "ETA_UNAVAILABLE", reasonCode: "CART_ETA_REGION_UNRESOLVED" });
+    expect(cartSelectionFromSnapshot(regional, { ...query, deliveryAddress: "MIEN-NAM" }, now)).toMatchObject({ status: "READY", eta: { minDays: 4, maxDays: 8 } });
+    expect(cartSelectionFromSnapshot(snapshot(), query, now)).toMatchObject({ status: "READY", eta: { minDays: 3, maxDays: 6 } });
+  });
   it("builds a POS-authoritative cart line with BOM, selling rules and ETA", () => {
     const result = cartSelectionFromSnapshot(snapshot(), {
       shopAlias: "LANA",

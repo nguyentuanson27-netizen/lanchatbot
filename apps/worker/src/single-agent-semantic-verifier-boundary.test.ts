@@ -111,6 +111,48 @@ describe("Round3 bounded synthetic fashion authority", () => {
   });
 });
 
+describe("Phase B bounded final-gate diagnostics", () => {
+  it("distinguishes a fact expiring after verifier PASS without exposing source or recipient data", () => {
+    const current = structuredClone(trusted), expiredAt = new Date(now.getTime() + 1000);
+    const claim = current.protectedClaims[0] as { claimId: string; provenance: { expiresAt: string; evidenceRef: string; sourceVersion: string } };
+    claim.provenance.expiresAt = expiredAt.toISOString();
+    current.state.recipient = "private-recipient-diagnostic-test";
+    current.policyLiterals[0]!.text = "Private source text must not appear in a terminal diagnostic.";
+    const ownBinding = makeBinding("expiry-request", draft, current);
+    expect(hardPrecheck(current, draft, now)).toBeNull();
+    const outcome = finalGate({ expected: ownBinding, response: { ...pass(), binding: ownBinding }, current, finalDraft: draft, now: expiredAt });
+    expect(outcome).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
+      diagnostic: { check: "HARD_PRECHECK", checkedAtMs: expiredAt.getTime(), expectedSnapshotId: ownBinding.trustedSnapshotId,
+        currentSnapshotId: ownBinding.trustedSnapshotId, expectedRevision: ownBinding.stateRevision, currentRevision: current.state.revision,
+        reasonCodes: ["PROTECTED_CLAIM_STALE"] } });
+    for (const secret of [current.state.recipient, draft, current.policyLiterals[0]!.text,
+      claim.claimId, claim.provenance.evidenceRef, claim.provenance.sourceVersion]) {
+      expect(JSON.stringify(outcome)).not.toContain(secret);
+    }
+  });
+  it.each(["snapshot", "revision"] as const)("distinguishes a changed current %s from expired evidence", change => {
+    const current = structuredClone(trusted);
+    if (change === "revision") current.state.revision++;
+    else current.policyLiterals[0]!.text = "Different current policy source text.";
+    expect(hardPrecheck(current, draft, now)).toBeNull();
+    const currentBinding = makeBinding(binding.requestId, draft, current);
+    expect(currentBinding.trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
+    expect(gate(pass(), current)).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
+      diagnostic: { check: "CURRENT_SNAPSHOT", checkedAtMs: now.getTime(), expectedSnapshotId: binding.trustedSnapshotId,
+        currentSnapshotId: currentBinding.trustedSnapshotId, expectedRevision: binding.stateRevision, currentRevision: current.state.revision,
+        reasonCodes: [] } });
+  });
+  it("distinguishes a replayed response binding while the current snapshot remains valid and unchanged", () => {
+    const response = pass();
+    response.binding.requestId = "another-request";
+    expect(hardPrecheck(trusted, draft, now)).toBeNull();
+    expect(gate(response)).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
+      diagnostic: { check: "RESPONSE_BINDING", checkedAtMs: now.getTime(), expectedSnapshotId: binding.trustedSnapshotId,
+        currentSnapshotId: binding.trustedSnapshotId, expectedRevision: binding.stateRevision, currentRevision: trusted.state.revision,
+        reasonCodes: [] } });
+  });
+});
+
 describe("isolated deterministic verifier boundary", () => {
   it("valid PASS with unchanged exact snapshot and draft is send eligible", () => {
     expect(gate()).toEqual({ disposition: "SEND_ELIGIBLE", reason: "PASS", text: draft, fallbackId: null });

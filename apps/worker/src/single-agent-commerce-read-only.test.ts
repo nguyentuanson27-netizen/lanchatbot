@@ -156,6 +156,16 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(owner).toHaveBeenCalledOnce(); expect(s.verifier).not.toHaveBeenCalled();
     expect(JSON.stringify(result.recovery)).not.toContain("Đã thêm áo");
   });
+  it("retains the final-gate diagnostic when existing code-owned recovery replaces a stale terminal", async () => {
+    const s = setup(), readback = s.tools.readback;
+    const result = await runCommerceTurn({ ...s, owner: async () => final("Dạ chị."), tools: { ...s.tools,
+      readback: async () => { const current = await readback(); current.state.revision++; return current; },
+      recover: async () => ({ disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: "Đã thêm áo vào giỏ.", fallbackId: null }),
+    } });
+    expect(result.terminal.reason).toBe("RECEIPT_BACKED_ACK");
+    expect(result.recovery).toMatchObject({ originalDisposition: "HANDOFF", originalReason: "STALE",
+      originalDiagnostic: { check: "CURRENT_SNAPSHOT", expectedRevision: s.scope.revision, currentRevision: s.scope.revision + 1, reasonCodes: [] } });
+  });
   it("stops after the tool budget, without using intermediate prose as a reply", async () => {
     const s = setup(), owner = vi.fn(async () => tool("read_policy"));
     const r = await runCommerceTurn({ ...s, owner });

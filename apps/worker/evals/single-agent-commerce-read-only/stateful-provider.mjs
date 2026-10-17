@@ -48,7 +48,8 @@ export async function createStatefulProvider(input){
    let completedTelemetry;
    try{const wire=buildGeminiCommerceRequest(request);assert(!/"(?:caseId|evaluator|purposeId|requiredBehaviors|expectedSafe|qualityScore)"/.test(JSON.stringify(wire)),'EVALUATOR_LABEL_LEAK');
     audit(request.generationId,'OWNER_REQUEST',wire);const r=await infer(request);completedTelemetry=r.telemetry;audit(request.generationId,'OWNER_RESULT',r);return r;}
-   catch(error){const telemetry=error.telemetry??completedTelemetry??{generationId:request.generationId,providerRequests:0,httpStatus:null,stage:'BEFORE_PROVIDER_DISPATCH'};
+   catch(error){const telemetry=error.telemetry??completedTelemetry??{generationId:request.generationId,providerRequests:0,httpStatus:null,stage:'BEFORE_PROVIDER_DISPATCH',
+    ...(error.message==='OWNER_REQUEST_BOUND'&&Number.isSafeInteger(error.requestBytes)?{requestBytes:error.requestBytes}:{})};
     audit(request.generationId,'OWNER_ERROR',{code:error.message,telemetry});throw Object.assign(error,{telemetry});}},
   async verifier(request){assert(counters.owner+counters.verifier<24,'GENERATION_BUDGET');counters.verifier++;
    audit(request.generationId,'VERIFIER_REQUEST',buildVerifierRequest(m,request));try{return await verify(request);}catch(error){audit(request.generationId,'VERIFIER_ERROR',{code:error.message,telemetry:error.telemetry});throw error;}},

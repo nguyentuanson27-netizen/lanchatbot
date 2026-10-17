@@ -47,6 +47,11 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
  const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
   {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
+ const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),factKeys=new Set(facts.map(canonicalJsonV1));
+ const reuseFacts=value=>{
+  if(Array.isArray(value.facts)&&value.facts.length&&value.facts.every(f=>factKeys.has(canonicalJsonV1(f))))delete value.facts;
+  return value;
+ };
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=p=>{
   const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
@@ -54,7 +59,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   for(const key of ['content','attributes','presentation','sizeCharts']){
    if(value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
   }
-  return value;
+  return reuseFacts(value);
  };
  const contents=structuredClone(request.contents);
  for(const message of contents)for(const part of message.parts??[]){
@@ -67,7 +72,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(response.name==='read_product'){
    response.response.data=product(data);
    if(data.availability)response.response.data.availability=availability(data.availability);
-   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
+   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>reuseFacts({...o,availability:availability(o.availability)}));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
  }
@@ -87,7 +92,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    ...(offers.has(p.subjectRef)?{availableOffers:offers.get(p.subjectRef)}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
-   content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts:c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),
+   content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts,
    policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state,
    execution:{availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),toolBudget:request.toolBudget??null}};
@@ -95,7 +100,9 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
- requireThat(bytes(body)<=32768,'OWNER_REQUEST_BOUND');return body;
+ const requestBytes=bytes(body);
+ if(requestBytes>32768)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
+ return body;
 }
 export function parseGeminiGeneration(body){
  const candidate=body?.candidates?.[0],content=candidate?.content;
@@ -167,6 +174,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    return {...parsed,telemetry};
   }catch(error){
    const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';
+   if(error?.message==='OWNER_REQUEST_BOUND'&&Number.isSafeInteger(error.requestBytes))telemetry.requestBytes=error.requestBytes;
    telemetry.failureStage=stage;
    telemetry.failureCode=timedOut?'TIMEOUT':safeFailureCodes.has(error?.message)?error.message:
     stage==='AUTH'?'AUTH_UNAVAILABLE':stage==='GENERATION'?'TRANSPORT_ERROR':stage==='RESPONSE'?'RESPONSE_INVALID':'UNKNOWN';
