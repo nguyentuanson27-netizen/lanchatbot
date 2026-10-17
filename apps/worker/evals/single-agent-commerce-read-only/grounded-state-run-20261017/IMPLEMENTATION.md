@@ -45,3 +45,7 @@ One optional trusted pending field, one sourceQuote tool argument and existing p
 ## Controlled PostgreSQL readback
 
 At clean c3951fc6610dbb8e047a75e6e83d9a94dc83773a: COD25/25 PASS, sourceDirty=false, providerGenerations=0, testDatabaseDropped=true. Exact raw copy: controls/cod-pass.json. Source readback PASS with zero owner/verifier generations. This scoped control covers the changed state/effect/egress boundary; BANK_TRANSFER was not rerun and older bank evidence is not a new PASS. Models still NOT_RUN at this savepoint.
+
+## Pre-provider byte identity correction
+
+The post-seal readback found CRLF-only disk/Git differences in source-config.b1.json and source-session.py. Config JSON values and source code were identical. Normalize only those two physical files to their existing Git LF bytes, update frozen byte hashes, and supersede the zero-generation b8642f3e preflight before collection. No provider result existed, model/config values and corpora did not change, and runtime TS is unchanged from tested c3951fc6. New preflight/run identity must use the next clean commit.

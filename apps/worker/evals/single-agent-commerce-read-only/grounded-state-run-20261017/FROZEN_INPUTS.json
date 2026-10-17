@@ -137,8 +137,8 @@
       "bytes": 4219
     },
     "source-config.b1.json": {
-      "sha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
-      "bytes": 901
+      "sha256": "dac8e541ed43770d641c60fbfd1ea7809c4c05b42932cd74278c0071ee55b60f",
+      "bytes": 873
     },
     "cases.b1.json": {
       "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
@@ -181,8 +181,8 @@
       "bytes": 6209
     },
     "source-session.py": {
-      "sha256": "abb7f898d2c087ce93f697f3b115561c12c303171f0e6af9a5aa066cd5b6dc7f",
-      "bytes": 4453
+      "sha256": "4d6140a6240f71874cde08d3579f31cf5b8562e3f042a24341104de1695b30c7",
+      "bytes": 4378
     }
   },
   "runtimeFiles": {
@@ -291,5 +291,24 @@
   "selectionPairProbe": {
     "path": "C:/Users/nguye/AppData/Local/Temp/c3-grounded-state-selection-pair-20261017.mjs",
     "sha256": "530951ec50ffa909516ee54119442cf78e2af64b4e45eece08a7f54bce83c1ca"
+  },
+  "preProviderNewlineCanonicalization": {
+    "reason": "DISK_GIT_CRLF_ONLY_MISMATCH_FOUND_BEFORE_ANY_GENERATION",
+    "files": [
+      {
+        "path": "source-config.b1.json",
+        "beforeSha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+        "afterSha256": "dac8e541ed43770d641c60fbfd1ea7809c4c05b42932cd74278c0071ee55b60f",
+        "semanticChange": false
+      },
+      {
+        "path": "source-session.py",
+        "beforeSha256": "abb7f898d2c087ce93f697f3b115561c12c303171f0e6af9a5aa066cd5b6dc7f",
+        "afterSha256": "4d6140a6240f71874cde08d3579f31cf5b8562e3f042a24341104de1695b30c7",
+        "semanticChange": false
+      }
+    ],
+    "supersededPreflightSourceSha": "b8642f3e84f0bd455077e99a1e31f11d26b01155",
+    "providerGenerations": 0
   }
 }
