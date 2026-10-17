@@ -41,3 +41,7 @@ python apps/worker/evals/single-agent-commerce-read-only/source-session.py node 
 Provider schema check used official [function calling documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling) and [Schema nullable/string bounds](https://docs.cloud.google.com/java/docs/reference/google-cloud-vertexai/latest/com.google.cloud.vertexai.api.Schema). No generation transport/retry/client framework change.
 
 One optional trusted pending field, one sourceQuote tool argument and existing per-field source evidence; no new durable store, semantic role/layer or independent gate. Full-repo pnpm check/remote CI/human acceptance not claimed. Code tests do not establish naturalness, early preorder disclosure or semantic-state understanding. Checkout region authority and prior NONE violation cause remain unresolved. A OWNER_BYPASS; no publication/live action/Phase C.
+
+## Controlled PostgreSQL readback
+
+At clean c3951fc6610dbb8e047a75e6e83d9a94dc83773a: COD25/25 PASS, sourceDirty=false, providerGenerations=0, testDatabaseDropped=true. Exact raw copy: controls/cod-pass.json. Source readback PASS with zero owner/verifier generations. This scoped control covers the changed state/effect/egress boundary; BANK_TRANSFER was not rerun and older bank evidence is not a new PASS. Models still NOT_RUN at this savepoint.
