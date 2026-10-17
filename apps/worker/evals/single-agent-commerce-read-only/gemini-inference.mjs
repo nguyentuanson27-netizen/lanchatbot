@@ -47,11 +47,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
  const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
   {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
- const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value})),factKeys=new Set(facts.map(canonicalJsonV1));
- const reuseFacts=value=>{
-  if(Array.isArray(value.facts)&&value.facts.length&&value.facts.every(f=>factKeys.has(canonicalJsonV1(f))))delete value.facts;
-  return value;
- };
+ const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value}));
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=p=>{
   const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
@@ -59,7 +55,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   for(const key of ['content','attributes','presentation','sizeCharts']){
    if(value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
   }
-  return reuseFacts(value);
+  return value;
  };
  const contents=structuredClone(request.contents);
  for(const message of contents)for(const part of message.parts??[]){
@@ -72,7 +68,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(response.name==='read_product'){
    response.response.data=product(data);
    if(data.availability)response.response.data.availability=availability(data.availability);
-   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>reuseFacts({...o,availability:availability(o.availability)}));
+   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
  }

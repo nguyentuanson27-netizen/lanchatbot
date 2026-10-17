@@ -12,6 +12,7 @@ test('captured HTTP request keeps per-option scope and sanitizes nested availabi
   availability:{price:{status:'OK',reason:null},stock:{status:'ERROR',reason:'PRIVATE_EVALUATOR_CANARY'}}},
  {offerType:'COMPOSITE',variantId:'offer:P1:COMPOSITE',facts:[{type:'PRICE',scope:{productId:'P1',variantId:'offer:P1:COMPOSITE'},value:{amountVnd:1065000}}],
   availability:{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'}}}];
+ r.context.protectedClaims=options.flatMap(o=>o.facts);
  r.caseId='EVALUATOR_CASE_CANARY';r.expectedSafe=true;r.requiredBehaviors=['EVALUATOR_RUBRIC_CANARY'];
  r.contents.push({role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
   {role:'user',parts:[{functionResponse:{id:'r1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',offerType:'COMPOSITE',sellingOptions:options}}}}]});
@@ -65,15 +66,16 @@ test('canonical key ordering does not duplicate source evidence between snapshot
  assert.equal(JSON.parse(b.contents[0].parts[0].text).trusted.products[0].content.description,'Cotton.');
 });
 
-test('current scoped product facts remain once when native continuations repeat them',()=>{
+test('current price and stock stay with their native offer even when also present in trusted facts',()=>{
  const r=request(),price={type:'PRICE',scope:{kind:'PRODUCT',productId:'P1',variantId:'offer:P1:AO'},value:{amountVnd:499000,currency:'VND'}};
- r.context.protectedClaims=[{...price,claimId:'code-owned-id',provenance:{sourceVersion:'current'}}];
+ const stock={type:'STOCK',scope:price.scope,value:{status:'IN_STOCK',quantity:12}},facts=[price,stock];
+ r.context.protectedClaims=facts.map((f,i)=>({...f,claimId:'code-owned-'+i,provenance:{sourceVersion:'current'}}));
  r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
   {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',sourceVersion:'current',
-   facts:[price],sellingOptions:[{offerType:'AO',sourceVersion:'current',availability:{price:{status:'OK'}},facts:[price]}]}}}}]});
+   facts,sellingOptions:[{offerType:'AO',sourceVersion:'current',availability:{price:{status:'OK'}},facts}]}}}}]});
  const original=structuredClone(r.contents),b=buildGeminiCommerceRequest(r),data=b.contents.at(-1).parts[0].functionResponse.response.data;
- assert.deepEqual(JSON.parse(b.contents[0].parts[0].text).trusted.facts,[price]);
- assert.equal(data.facts,undefined);assert.equal(data.sellingOptions[0].facts,undefined);
+ assert.deepEqual(JSON.parse(b.contents[0].parts[0].text).trusted.facts,facts);
+ assert.deepEqual(data.facts,facts);assert.deepEqual(data.sellingOptions[0].facts,facts);
  assert.equal(data.sourceVersion,'current');assert.deepEqual(data.sellingOptions[0].availability,{price:{status:'OK',reason:null}});
  assert.equal(b.contents.at(-1).parts[0].functionResponse.id,'read-1');assert.deepEqual(b.contents.at(-2),r.contents.at(-2));
  assert.deepEqual(r.contents,original);
