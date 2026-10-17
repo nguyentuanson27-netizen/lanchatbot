@@ -1,5 +1,15 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current reviewed runtime-boundary fix and stateful replay — 2026-10-17
+
+- [x] Refresh main296cdcfb, retain intake042cad7c/branch/PR391; apply independent review with [bounded plan](../apps/worker/evals/single-agent-commerce-read-only/runtime-boundary-run-20261017/PLAN.md).
+- [x] Observe diagnostic/fact-reuse/ETA/recovery/legacy-compatibility RED→GREEN; opt in B diagnostics while preserving old A terminal JSON. Source964c5270; prompts/declarations/models/budget/corpus unchanged.
+- [x] Final worker1.806/provider-protocol49/protected-reply21/legacy-focused21 PASS; full Node491 PASS/2 existing optional SKIP; worker typecheck/build/lint exit0. Preserve the first four historical-evidence failures and compatibility correction in preparation.
+- [x] Check60captured bodies: trusted view/native parts unchanged,66fact arrays reused/20.072bytes total; max31.352/32.768. Long-signature variation35.905bytes remains a known limit, not resolved by fact dedup.
+- [x] Controlled COD24/24 PASS/0provider generations, source964c5270/sourceDirty=false, disposable DB dropped. No new bank control claim.
+- [ ] Clean source freeze and zero-generation preflights; collect existing7stateful N1/max24 once, without B1/canary/retry/replacement.
+- [ ] Preserve raw before whole-terminal primary/diagnosis; report actual source checkout, request/error/binding/privacy/latency/token evidence and remaining limits; update PR391 and stop. A OWNER_BYPASS/source mapping unresolved; no live action or Phase C.
+
 ## Current reviewed action-contract fix and replay — 2026-10-16
 
 - [x] Refresh main `296cdcfb`, intake rollback `938086a7`, giữ raw/nhãn lịch sử. [Plan và scope](../apps/worker/evals/single-agent-commerce-read-only/action-contract-run-20261016/PLAN.md) giới hạn đúng review REVISE, không chọn combined atomic hoặc thay B1 capability.
