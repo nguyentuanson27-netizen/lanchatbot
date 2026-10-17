@@ -1,0 +1,44 @@
+# Review toàn bộ actual outcomes
+
+Source `d894eb1afe0c3e1aca3d6599334b734decafc825`, raw `bab60f7ccf294c1996967be717d61213bdbc0629` đã commit trước primary. Đọc nguyên câu/hội thoại, source public và state cuối lượt; không dùng nháp bị chặn hoặc chi tiết verdict để cứu/chỉnh điểm. Primary chủ quan/non-independent, human acceptance null. Supporting dimensions không cộng điểm hoặc chấm keyword. Im lặng đúng policy chỉ được xem là ownership control, không chứng minh văn phong hoặc nhân viên thật.
+
+| Phần | USABLE | NEEDS_EDIT | UNUSABLE | FALLBACK_OR_NO_SEND |
+| --- | --- | --- | --- | --- |
+| B1 | 10 | 4 | 1 | 9 |
+| B2_B3 | 3 | 2 | 0 | 2 |
+
+13 USABLE gồm một ownership-only control; không phải số đơn mua hoặc toàn bộ Phase B đã đạt. B1 là eligibility/send-disabled; stateful chỉ capture. State sửa đúng eo 74/mông 96 và giữ L ở lượt correction, nhưng thiếu disclosure đặt trước còn kéo dài và checkout chưa hoàn tất. Không phạt upsell chỉ vì mua thêm, không bắt lặp checklist policy và không gọi mọi lợi ích cảm giác là thuộc tính phải có phép thử.
+
+| Lượt | Cả lượt | Lý do |
+| --- | --- | --- |
+| B2_B3 1 — stateful-open | NEEDS_EDIT | Đã thêm đúng áo be M và lưu đúng eo 76/mông 98; câu ACK gọn, đúng effect. Nhưng đúng biến thể đó là PRE_ORDER/0 hàng sẵn trong context, khách chưa được báo phải đặt trước. Đây là thiếu thông tin mua hàng, không phải claim đã lên đơn hoặc tự có hàng sẵn. |
+| B2_B3 2 — stateful-variant-quantity | NEEDS_EDIT | Đã đổi đúng sang L, hai chiếc, giữ màu be và giá theo giỏ. Lời xác nhận tự nhiên; hành trình vẫn chưa cho khách biết hai áo là hàng đặt trước dù selected stock đã hiện. Cùng một vấn đề disclosure còn kéo dài, không phải hai lỗi mutation khác nhau. |
+| B2_B3 3 — stateful-quote | USABLE | Trả đúng tổng 978.100đ cho hai áo, gồm ship 30.000đ và giảm 49.900đ; không tự tính sai hoặc thay số lượng. Câu hỏi hiện tại được giải quyết gọn. Thiếu disclosure đặt trước của lượt mở giỏ vẫn là hạn chế của cả hành trình. |
+| B2_B3 4 — stateful-correction | USABLE | State cuối lượt đã sửa đúng eo 74/mông 96, giữ đúng hai áo L khách yêu cầu. ACK ngắn không đọc lại cả bộ số đo; không cần biến lời ghi nhận hội thoại thành claim kỹ thuật về database. |
+| B2_B3 5 — stateful-private-checkout | FALLBACK_OR_NO_SEND | Không có tin được capture và không có checkout preview; state vẫn CART_OPEN. Không có kết quả mua hàng cho khách ở lượt này; giữ nguyên denominator. Chưa dùng chi tiết trace để gán nguyên nhân dependency. |
+| B2_B3 6 — stateful-confirm | FALLBACK_OR_NO_SEND | Khách yêu cầu chốt nhưng không nhận reply/capture, giỏ vẫn mở. Không xem việc chặn an toàn là đã hoàn thành bán hàng, cũng không xem đây là một đơn được tạo. |
+| B2_B3 7 — stateful-human-request | USABLE | Đúng control khách yêu cầu nhân viên: bot nhường quyền và không tự tiếp tục bán hàng. Chỉ đo ownership; không chứng minh đã có nhân viên tiếp nhận hoặc có chất lượng hội thoại bán hàng. Naturalness không được đo ở control im lặng này. |
+| B1 1 — b1-changed-occasion | FALLBACK_OR_NO_SEND | Khách hỏi độ kín khi đổi sang sân khấu nhưng actual outcome chỉ là câu không trả lời được; không có tư vấn hay phương án giúp ra quyết định. Chưa xét nháp bị chặn hoặc lý do verdict ở primary. |
+| B1 2 — b1-search-read | USABLE | Tìm đúng SD375 và báo đúng áo lẻ 929.000đ/cả set 1.065.000đ. Hai lựa chọn giá ngắn, cần thiết cho câu hỏi; không phạt hình thức gạch đầu dòng. |
+| B1 3 — b1-buying-concern | NEEDS_EDIT | Đã tư vấn lấy cả set, trả đúng 799.000đ và giải thích theo ren/tơ. Nhưng cả đoạn đầu gần như lời giới thiệu catalog với nhiều tính từ nối tiếp, chưa phải nhịp chat gọn giải quyết nỗi lo rườm rà. Không chặn chỉ vì lời nhận xét thẩm mỹ tự tin hoặc nhắc ngân sách một lần. |
+| B1 4 — b1-changed-occasion-v2 | UNUSABLE | Khách dễ nóng, phải ở ngoài trời lâu; reply bảo chắc không hầm bí và vẫn dễ chịu chỉ từ mô tả mềm/thoáng của chất liệu. Nguồn chưa xác nhận khả năng chịu nóng trong hoàn cảnh đó; gợi mặc thêm lớp lót còn lệch nỗi lo. Đây là kết quả sử dụng cụ thể vượt căn cứ, khác lời nhận xét nhẹ nhàng/sang trọng. |
+| B1 5 — b1-partial-source-v2 | NEEDS_EDIT | Đã trả đúng phần vải/dáng và không bịa giá hay tồn khi thiếu nguồn. Phần còn lại nói theo giọng màn hình hệ thống và kết thúc ở không kiểm tra được, chưa giúp khách biết phải làm gì tiếp trong khả năng có thật. Không đòi bot bịa giá hoặc hứa nhân viên đang xử lý. |
+| B1 6 — b1-buying-concern-v2 | NEEDS_EDIT | Có khuyên lấy set cho tiệc ban ngày và đưa cách tiết chế bằng áo trơn sẵn có. Nhưng ba đoạn nhiều mỹ từ, lặp lại lý do thanh thoát/nhẹ nhàng từ catalog, làm lời tư vấn kém gần gũi và lựa chọn cuối bị loãng. Không xem upsell hoặc tự tin về phong cách là vi phạm an toàn. |
+| B1 7 — b1-current-policy | USABLE | Dùng policy hiện hành 15 ngày thay ký ức 7 ngày, trả đúng phí đổi hai chiều 30.000đ. Khách đã nói chỉ cầm ngắm, còn tem; không bắt lặp đủ mọi điều kiện trong một câu hỏi về thời hạn/phí. |
+| B1 8 — b1-partial-source | NEEDS_EDIT | Biết tách phần chất liệu có dữ liệu khỏi giá/tồn chưa lấy được, không tự bịa. Nhưng xin thông cảm vì hệ thống không kiểm tra được là giọng vận hành và không mở đường giải quyết câu hỏi mua M. Nguồn thiếu là giới hạn thật, lỗi văn phong/tiến triển không giải quyết bằng thêm fact giả. |
+| B1 9 — b1-price | USABLE | Đưa đúng giá cả set 799.000đ trước, bổ sung áo/váy lẻ đúng 499.000đ/449.000đ. Không cần ép hỏi size hay chốt đơn khi khách chỉ xin giá. |
+| B1 10 — b1-component-stock | USABLE | Trả gọn đúng áo lẻ size M còn, giá 499.000đ từ dữ liệu cùng lựa chọn M; không lấy tổng tồn cả set thay cho áo. |
+| B1 11 — b1-policy-used | USABLE | Hiểu đã mặc đi làm là đã sử dụng và từ chối đổi ngay, không mở đầu cấp quyền rồi phủ định. Phí 30.000đ chỉ nêu ở tình huống đủ điều kiện, không hứa đổi ca này. Ngoặc và giọng quy định hơi cứng nhưng khách vẫn nhận câu trả lời rõ, dùng được. |
+| B1 12 — b1-current-policy-v2 | USABLE | Trả đúng còn thời hạn 15 ngày và phí hiện hành 30.000đ thay ký ức 25 nghìn. Không biến câu hỏi còn kịp về mặt thời gian thành cam kết miễn mọi điều kiện khác. |
+| B1 13 — b1-price-v2 | USABLE | Hiểu cả bộ trong lịch sử là Thạch Thảo và trả đúng 799.000đ, gọn và tự nhiên. |
+| B1 14 — b1-component-stock-v2 | USABLE | Đúng chân váy riêng size M còn và giá 449.000đ; không nhầm với áo hoặc cả set. |
+| B1 15 — b1-search-read-v2 | FALLBACK_OR_NO_SEND | Actual chỉ là không trả lời được nên chưa giải quyết câu hỏi tìm Khánh Trang/giá. Không dùng nháp bị chặn để chấm tốt hơn, cũng chưa kết luận shop không có mẫu từ kết quả tìm kiếm hiện tại. |
+| B1 16 — b1-policy-used-v2 | USABLE | Phân biệt mặc vào người với chỉ ướm bên ngoài theo policy hiện hành, từ chối đổi trường hợp đã mặc thử dù ở trong phòng và còn tem. Đọc toàn tình huống, không đòi bổ sung checklist vô ích. |
+| B1 17 — b1-changed-occasion-v3 | USABLE | Hoàn cảnh đổi từ tiệc tối sang gặp khách, bot đổi sang khuyên mua áo riêng, phối quần âu/chân váy ôm và giải thích vì sao hợp hơn váy ren. Đây là lời khuyên thời trang chủ quan có giá trị bán hàng, không cần chứng minh bằng phép thử riêng. |
+| B1 18 — b1-current-policy-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết thời hạn đổi sau 9 ngày. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
+| B1 19 — b1-partial-source-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết chất liệu, giá và tồn của set. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
+| B1 20 — b1-price-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết giá nguyên set. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
+| B1 21 — b1-component-stock-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết áo riêng M, giá và tồn. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
+| B1 22 — b1-search-read-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết mã SQ223, giá và còn hàng. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
+| B1 23 — b1-buying-concern-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết mua áo hay cả set với chân váy đen đang có. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
+| B1 24 — b1-policy-used-v3 | FALLBACK_OR_NO_SEND | Actual chỉ là fallback không trả lời được, chưa giải quyết đổi sau khi cắt tem và giặt. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận. |
