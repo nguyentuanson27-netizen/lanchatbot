@@ -1,5 +1,7 @@
 # Review toàn bộ actual outcomes
 
+Post-primary self-review: rating/JSON tại62f1eba4 giữ nguyên. Riêng rep3/B1-12 có hai cách hiểu (tóm tắt thời hạn kèm vài điều kiện, hoặc lời hứa điều kiện đủ); chưa xác nhận đó là unsafe false PASS. Không coi bảng primary là ground truth độc lập hoặc bắt keyword “là”. Xem phần phân xử còn mở trong [báo cáo](CHECKPOINT_B.md). Không đổi điểm sau khi đọc verdict để cải thiện kết quả.
+
 Source `b2448a5726f454668fb1bf1756eac73e1e9af309`, raw `a931c587294c26bb10a01dc93a301704bd1f47b1` đã commit trước primary. Đọc cả lượt với lịch sử, public context và state cuối; chưa đọc nháp bị chặn/chi tiết verdict để chấm. Primary chủ quan, human acceptance null. Các chiều0/1/2 chỉ hỗ trợ nhận xét, không cộng điểm hoặc bắt keyword.
 
 | Phần | USABLE | NEEDS_EDIT | UNUSABLE | FALLBACK_OR_NO_SEND |

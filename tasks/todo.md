@@ -3,8 +3,10 @@
 ## Current two additional frozen repetitions — 2026-10-18
 
 - [x] Register owner request for exactly2more repetitions of31cases; subagents only operate frozen existing runners. [Scope](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/SCOPE.md), intake6cd8f506/main296cdcfb; unchanged13executable/input+5runtime+launcher hashes verified.
-- [ ] Freeze/clean source/current preflights; collect rep2 and rep3 in parallel, each7ordered stateful+24B1/max120/no generation retry. All62outcomes/own DB cleanup retained.
-- [ ] Raw before whole-outcome primary before diagnosis; report each repetition and all93denominator consistency without majority/best-of/new thresholds; update PR391. No runtime change/live action/A qualification/Phase C.
+- [x] Freeze/clean b2448a57/current source-config-stateful preflights; two runner subagents collected62/62 in parallel with serialized build startup. Both DBs distinct/dropped; unchanged13inputs/5runtime+launcher, same owner/verifier/criteria, retry0.
+- [x] Raw a931c587 before primary62f1eba4 before diagnosis. [Report/62conversations/all93comparison](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/CHECKPOINT_B.md): rep2=23/5/0/3, rep3=20/5/1/5 (USABLE/NEEDS_EDIT/UNUSABLE/unfinished); combined64/17/1/11 including three ownership-only controls.17of31usable all3,6never/8varying; no majority/best-of/changed threshold.
+- [x] Audit175HTTP200=121owner/54verifier (52PASS/2FAIL),1owner completion error/0timeout-retry and1NONE violation separately;78raw hashes/54bindings/52eligible matches/7eligible captures/0observed evaluator-private leaks. All24B1public projections same across new2; cost unexposed. Reuse3514691d checks honestly, no new full test/control claim. PR391 delivery updated with reporting head.
+- [ ] Sales/live STOP, source checkout BLOCKED/AOWNER_BYPASS. One primary policy-scope flag remains unresolved after self-review (ordinary summary is a possible reading, not confirmed false PASS); explicit-color loss/tool budget and UNKNOWN completion recur; concern/partial voice/source-availability reasoning still weak. Keep primary/raw judgments and human acceptance null. No post-result runtime fix/extra run/source publication/live action/Phase C.
 
 ## Current bounded-source fix and full replay — 2026-10-18
 
