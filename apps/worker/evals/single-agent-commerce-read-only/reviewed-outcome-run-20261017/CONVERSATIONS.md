@@ -1,5 +1,7 @@
 # Toàn bộ 31 hội thoại và actual outcomes
 
+Bản Markdown bỏ khoảng trắng cuối dòng để hiển thị; nguyên văn được giữ trong PRIMARY_REVIEW.json và raw.
+
 Source `c5921632f0fab677e370a1cfcc2eb766e09343c9`, N1. Owner Gemini3.5 Flash Lite High, verifier GPT6.1 Sol High. Stateful chỉ capture, B1 chỉ eligibility; không gửi khách thật hoặc lấy rejected draft làm actual outcome.
 
 ## B2_B3 1. stateful-open
@@ -336,7 +338,7 @@ Dạ vâng, em đã cập nhật lại số đo eo 74, mông 96 cho chị rồi 
 
 **Actual SEND_ELIGIBLE / PASS:**
 
-Set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Áo làm từ tơ Hàn thêu tinh tế kết hợp chân váy ren mềm có độ rũ tự nhiên, tạo cảm giác bay bổng, thanh thoát chứ không quá nặng nề hay sến. 
+Set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Áo làm từ tơ Hàn thêu tinh tế kết hợp chân váy ren mềm có độ rũ tự nhiên, tạo cảm giác bay bổng, thanh thoát chứ không quá nặng nề hay sến.
 
 Cả nguyên bộ giá 799.000đ, nằm trọn trong ngân sách 900k của mình luôn ạ. Chị có muốn em lấy size chuẩn cho mình không ạ?
 
@@ -372,7 +374,7 @@ Phần này em chưa trả lời được, chị nhé.
 
 **Actual SEND_ELIGIBLE / PASS:**
 
-Set Thạch Thảo nhìn nữ tính nhưng không hề bị sến hay rườm rà đâu chị nhé. Áo tơ thêu nổi thanh nhã kết hợp chân váy ren rũ nhẹ nhàng, tổng thể rất sang, nhã nhặn và có độ bay vừa phải. 
+Set Thạch Thảo nhìn nữ tính nhưng không hề bị sến hay rườm rà đâu chị nhé. Áo tơ thêu nổi thanh nhã kết hợp chân váy ren rũ nhẹ nhàng, tổng thể rất sang, nhã nhặn và có độ bay vừa phải.
 
 Đi ăn cưới ban ngày diện set này cực kỳ hợp vì vừa lịch sự, nổi bật vừa đủ mà vẫn giữ được nét thanh thoát. Dù chị quen mặc đồ trơn, mẫu này có điểm nhấn thêu và ren tinh tế chứ không bị quá cầu kỳ, mặc lên vẫn gọn gàng và sang trọng. Chị hoàn toàn có thể yên tâm lấy nguyên set diện tiệc nhé!
 
@@ -396,7 +398,7 @@ Dạ vẫn kịp chị nhé, thời gian đổi của shop là trong vòng 15 ng
 
 **Actual SEND_ELIGIBLE / PASS:**
 
-Set Thạch Thảo kết hợp giữa tơ Hàn thêu cao cấp cho áo và ren tơ Hàn mềm mại cho chân váy, chất vải nhẹ, thoáng và có độ bay tự nhiên. 
+Set Thạch Thảo kết hợp giữa tơ Hàn thêu cao cấp cho áo và ren tơ Hàn mềm mại cho chân váy, chất vải nhẹ, thoáng và có độ bay tự nhiên.
 
 Hiện tại hệ thống chưa kiểm tra được giá và tình trạng tồn kho size M, chị đợi chút hoặc nhắn lại để em kiểm tra khi hệ thống hoạt động nhé ạ!
 
@@ -432,7 +434,7 @@ Dạ set Thạch Thảo (mã SV2447) bên em có cả bán lẻ lẫn nguyên se
 
 **Actual SEND_ELIGIBLE / PASS:**
 
-Dạ, quy định đổi hàng bên em yêu cầu sản phẩm phải chưa qua sử dụng và còn nguyên tem mác ạ. Do chị đã mặc đi làm rồi nên shop không hỗ trợ đổi sang màu khác được nữa chị nha. 
+Dạ, quy định đổi hàng bên em yêu cầu sản phẩm phải chưa qua sử dụng và còn nguyên tem mác ạ. Do chị đã mặc đi làm rồi nên shop không hỗ trợ đổi sang màu khác được nữa chị nha.
 
 Nếu đổi hàng với sản phẩm đủ điều kiện, tổng phí ship 2 chiều là 30.000đ do khách chịu ạ.
 
@@ -504,7 +506,7 @@ Dạ, quy định của shop là sản phẩm chỉ hỗ trợ ướm bên ngoà
 
 **Actual SEND_ELIGIBLE / PASS:**
 
-Gặp khách hàng buổi sáng cần nét gọn gàng, sắc sảo thì chị lấy riêng áo phối cùng quần âu hoặc chân váy ôm sẵn có ở nhà sẽ hợp lý hơn. Form áo thêu thanh thoát kết hợp đồ cơ bản vừa lịch sự, vừa chuyên nghiệp. 
+Gặp khách hàng buổi sáng cần nét gọn gàng, sắc sảo thì chị lấy riêng áo phối cùng quần âu hoặc chân váy ôm sẵn có ở nhà sẽ hợp lý hơn. Form áo thêu thanh thoát kết hợp đồ cơ bản vừa lịch sự, vừa chuyên nghiệp.
 
 Còn nguyên set chân váy ren có độ rũ bay bổng, mặc đi tiệc hoặc gặp gỡ nhẹ nhàng sẽ hợp hơn nhiều.
 
@@ -573,7 +575,7 @@ Dạ Set quần Xuân Thảo (SQ223) bên em vẫn còn hàng nha chị:
 
 **Actual SEND_ELIGIBLE / PASS:**
 
-Chị lấy cả bộ Thạch Thảo 799k nhé ạ. Mức giá này vừa vặn trong ngân sách 850k của chị, lại tối ưu hơn mua riêng áo (499k) rất nhiều vì được trọn bộ thiết kế tơ thêu và ren bay bổng diện đi chơi, đi tiệc. 
+Chị lấy cả bộ Thạch Thảo 799k nhé ạ. Mức giá này vừa vặn trong ngân sách 850k của chị, lại tối ưu hơn mua riêng áo (499k) rất nhiều vì được trọn bộ thiết kế tơ thêu và ren bay bổng diện đi chơi, đi tiệc.
 
 Ngoài chân váy ren đi kèm, chị vẫn hoàn toàn có thể tách áo thêu này ra phối linh hoạt với chân váy đen dáng suông sẵn có ở nhà để mặc đi làm lịch sự, vừa đổi được nhiều kiểu vừa tiện dụng ạ.
 

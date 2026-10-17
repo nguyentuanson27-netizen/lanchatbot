@@ -4,8 +4,9 @@
 
 - [x] Refresh main296cdcfb, preserve intake33a64ab9 and independent REVISE_PLAN in [bounded scope](../apps/worker/evals/single-agent-commerce-read-only/reviewed-outcome-run-20261017/SCOPE.md).
 - [x] Observe effect3FAIL/47PASS and native1FAIL/29PASS → focused127/provider-protocol-comparison51PASS. Current cart/native projection preserves receipt/current scope/duplicate/source failures and bounds; owner+354bytes, verifier unchanged. Final full worker1843PASS, Node493PASS+2optionalSKIP, protected-reply21PASS, worker typecheck/build/lint exit0. [Implementation and known limits](../apps/worker/evals/single-agent-commerce-read-only/reviewed-outcome-run-20261017/IMPLEMENTATION.md). Source diagnosis only, no broad ambiguity filtering or source publication.
-- [ ] Complete current checks/self-review and existing configured handoff control; freeze clean source and exact inputs before one7stateful+24B1/N1 run.
-- [ ] Preserve raw before whole-dialogue primary before trace; report all outcomes/requests/limits, update PR391 and stop. A OWNER_BYPASS, source checkout dependency and no live actions remain.
+- [x] COD25/25 real-PG controls/0generations/DBdropped; fresh source-selection/readback/shipping checks, no source publication. Freeze13inputs/5runtime files; clean run sourcec5921632 after existing preflights. Complete exactly7stateful+24B1/N1/max120/no retry; DBdropped.
+- [x] Raw19a2fd8b before primary204a98a8 before diagnosis. [31outcomes/report](../apps/worker/evals/single-agent-commerce-read-only/reviewed-outcome-run-20261017/CHECKPOINT_B.md):21USABLE (one ownership-only)/6NEEDS_EDIT/4unfinished; actual26eligible/2staticfallback/2handoff/1no-send.85HTTP200/86invocations;25verifierPASS/0verifier errors,0retry/timeout/quota, one local33430>32768 guard and one owner completionUNKNOWN.43raw hashes/60owner wire hashes/25bindings/4captures/0observed evaluator-private leaks. No post-result runtime fix or additional generation.
+- [ ] Sales/live STOP, source checkout BLOCKED: first preorder disclosure lost through local request-bound recovery; owner concern/system voice, policy-scope phrasing and partial-source tool planning remain. Source attrs/mapping unresolved, exact UNKNOWN finish reason/NONE violation cause unknown. A OWNER_BYPASS, no source publication/PhaseC/live action.
 
 ## Current quota-failure subset replay — 2026-10-17
 
