@@ -250,6 +250,8 @@ try{
   assert.equal((await t.readback()).state.conversationOwner,'HUMAN');
   assert.equal((await t.terminalOutcome()).disposition,'HANDOFF');
  });
+ // Positive holding-message controls need an enabled capture-only test page in both payment branches.
+ await pool.query('UPDATE pages SET app_send_enabled=true,kill_switch=false WHERE page_id=$1',[pageId]);
  async function handoffFixture({link=true,supersede=false}={}){
   const at=new Date(),h={...scope,customerHash:hash(randomUUID()),sourceMessageId:'handoff-'+randomUUID(),sourceObservedAt:at.toISOString()};
   const row=await runtime.loadOrCreate(pageId,h.customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
@@ -266,7 +268,9 @@ try{
   if(supersede)await enqueue('newer-'+randomUUID());
   const read=async()=>{const r=await runtime.loadOrCreate(pageId,h.customerHash,'APP',()=>{throw new Error('EXISTING_REQUIRED');});
    return {...h,stateVersion:r.stateVersion,state:r.state,permission:r.state.conversationOwner==='BOT'};};
-  const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:fn=>withTransaction(pool,fn),deliveryRecipient:'synthetic-handoff-recipient',
+  const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:async fn=>{
+   try{return await withTransaction(pool,fn);}catch(error){report.directHandoffCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}
+  },deliveryRecipient:'synthetic-handoff-recipient',
    inboxBatchGuard:{generation:batch.generation,leaseToken:batch.leaseToken,inboxIds:batch.inboxIds},resolveTagId:()=> 'synthetic-handoff-tag'});
   const hp=structuredClone(policyResolution.bundle);
   // Synthetic HANDOFF_MATRIX in memory; current public policy is unchanged and never republished.
@@ -299,7 +303,6 @@ try{
  // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
- await pool.query('UPDATE pages SET app_send_enabled=true,kill_switch=false WHERE page_id=$1',[pageId]);
  if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null}={}){
   assert(!live||dependencyHoldingReply===null,'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -323,8 +326,8 @@ try{
     sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE',customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF',holdingReply:dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
   const read=live?await providerPorts.read(bound,policyStore,policy):{policy,catalog:{readProduct:async()=>product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const capture=[],gateCalls=[],dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
-   const b=JSON.parse(r.body);capture.push(b.message.text??'[CODE_IMAGE]');return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
-   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),{authorize:async claim=>{gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},{workerId:'c3-b-capture'},undefined,historyStore);
+   const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash)capture.push(b.message.text??'[CODE_IMAGE]');return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
+   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},{workerId:'c3-b-capture'},undefined,historyStore);
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
   async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{}}={}){
    const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
