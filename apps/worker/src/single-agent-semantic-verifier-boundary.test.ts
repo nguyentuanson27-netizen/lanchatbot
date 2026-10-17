@@ -12,8 +12,8 @@ const draft: string = fixture.finalDraft;
 const trusted: TrustedContext = fixture.trusted;
 const binding = makeBinding("opaque-request", draft, trusted);
 const pass = () => ({ kind: "VERDICT" as const, binding: structuredClone(binding), result: { verdict: "PASS", violations: [] } });
-const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now) =>
-  finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at });
+const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now, includeDiagnostic = false) =>
+  finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at, includeDiagnostic });
 
 describe("Phase B source evidence and absence", () => {
   it("allows a policy-only turn without inventing a product", () => {
@@ -112,6 +112,11 @@ describe("Round3 bounded synthetic fashion authority", () => {
 });
 
 describe("Phase B bounded final-gate diagnostics", () => {
+  it("preserves the legacy terminal JSON when diagnostic output is not requested", () => {
+    expect(gate(pass(), structuredClone(trusted), draft, new Date("2026-10-05T03:05:00Z"))).toEqual({
+      disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
+    });
+  });
   it("distinguishes a fact expiring after verifier PASS without exposing source or recipient data", () => {
     const current = structuredClone(trusted), expiredAt = new Date(now.getTime() + 1000);
     const claim = current.protectedClaims[0] as { claimId: string; provenance: { expiresAt: string; evidenceRef: string; sourceVersion: string } };
@@ -120,7 +125,7 @@ describe("Phase B bounded final-gate diagnostics", () => {
     current.policyLiterals[0]!.text = "Private source text must not appear in a terminal diagnostic.";
     const ownBinding = makeBinding("expiry-request", draft, current);
     expect(hardPrecheck(current, draft, now)).toBeNull();
-    const outcome = finalGate({ expected: ownBinding, response: { ...pass(), binding: ownBinding }, current, finalDraft: draft, now: expiredAt });
+    const outcome = finalGate({ expected: ownBinding, response: { ...pass(), binding: ownBinding }, current, finalDraft: draft, now: expiredAt, includeDiagnostic: true });
     expect(outcome).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
       diagnostic: { check: "HARD_PRECHECK", checkedAtMs: expiredAt.getTime(), expectedSnapshotId: ownBinding.trustedSnapshotId,
         currentSnapshotId: ownBinding.trustedSnapshotId, expectedRevision: ownBinding.stateRevision, currentRevision: current.state.revision,
@@ -137,7 +142,7 @@ describe("Phase B bounded final-gate diagnostics", () => {
     expect(hardPrecheck(current, draft, now)).toBeNull();
     const currentBinding = makeBinding(binding.requestId, draft, current);
     expect(currentBinding.trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
-    expect(gate(pass(), current)).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
+    expect(gate(pass(), current, draft, now, true)).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
       diagnostic: { check: "CURRENT_SNAPSHOT", checkedAtMs: now.getTime(), expectedSnapshotId: binding.trustedSnapshotId,
         currentSnapshotId: currentBinding.trustedSnapshotId, expectedRevision: binding.stateRevision, currentRevision: current.state.revision,
         reasonCodes: [] } });
@@ -146,7 +151,7 @@ describe("Phase B bounded final-gate diagnostics", () => {
     const response = pass();
     response.binding.requestId = "another-request";
     expect(hardPrecheck(trusted, draft, now)).toBeNull();
-    expect(gate(response)).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
+    expect(gate(response, structuredClone(trusted), draft, now, true)).toEqual({ disposition: "HANDOFF", reason: "STALE", text: null, fallbackId: null,
       diagnostic: { check: "RESPONSE_BINDING", checkedAtMs: now.getTime(), expectedSnapshotId: binding.trustedSnapshotId,
         currentSnapshotId: binding.trustedSnapshotId, expectedRevision: binding.stateRevision, currentRevision: trusted.state.revision,
         reasonCodes: [] } });

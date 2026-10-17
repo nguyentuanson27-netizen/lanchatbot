@@ -183,13 +183,14 @@ function parseVerdict(result: unknown, trusted: TrustedContext): "PASS" | "FAIL"
 
 /** Call immediately before send eligibility with a current code-owned readback. */
 export function finalGate(input: { expected: VerifierBinding; response: VerifierResponse;
-  current: TrustedContext; finalDraft: string; now: Date; fallback?: { id: string; text: string } }): TerminalOutcome {
+  current: TrustedContext; finalDraft: string; now: Date; fallback?: { id: string; text: string };
+  includeDiagnostic?: boolean }): TerminalOutcome {
   const { expected, response, current, finalDraft, now } = input;
   const stale = (check: NonNullable<TerminalOutcome["diagnostic"]>["check"], reasons: string[] = []): TerminalOutcome => ({
-    ...terminal("HANDOFF", "STALE"), diagnostic: { check, checkedAtMs: Number.isFinite(now.getTime()) ? now.getTime() : null,
+    ...terminal("HANDOFF", "STALE"), ...(input.includeDiagnostic ? { diagnostic: { check, checkedAtMs: Number.isFinite(now.getTime()) ? now.getTime() : null,
       expectedSnapshotId: expected.trustedSnapshotId, currentSnapshotId: makeBinding(expected.requestId, finalDraft, current).trustedSnapshotId,
       expectedRevision: expected.stateRevision, currentRevision: Number.isSafeInteger(current.state.revision) ? current.state.revision : null,
-      reasonCodes: [...new Set(reasons)] } });
+      reasonCodes: [...new Set(reasons)] } } : {}) });
   if (current.state.recipient !== expected.recipient) return terminal("NO_SEND", "RECIPIENT");
   let reasons: string[] = [];
   const problem = hardPrecheck(current, finalDraft, now, codes => { reasons = codes; });

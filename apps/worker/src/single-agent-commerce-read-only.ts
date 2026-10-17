@@ -111,7 +111,7 @@ export async function runCommerceTurn(input: {
     const trusted = input.tools.snapshot(), binding = makeBinding(input.scope.requestId, output.text, trusted);
     const problem = hardPrecheck(trusted, output.text, input.clock());
     if (problem) return finish(finalGate({ expected: binding, response: { kind: "PROVIDER_ERROR" }, current: trusted,
-      finalDraft: output.text, now: input.clock(), fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }));
+      finalDraft: output.text, now: input.clock(), includeDiagnostic: true, fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }));
     const verifyId = `${input.scope.requestId}:verifier:1`;
     verificationStarted = performance.now();
     verifierGenerations++;
@@ -125,7 +125,7 @@ export async function runCommerceTurn(input: {
     let current: TrustedContext;
     try { current = await input.tools.readback(); }
     catch { return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
-    return finish(finalGate({ expected: binding, response, current, finalDraft: output.text, now: input.clock(),
+    return finish(finalGate({ expected: binding, response, current, finalDraft: output.text, now: input.clock(), includeDiagnostic: true,
       fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }));
   }
   return finish(fallback("BUDGET"));
