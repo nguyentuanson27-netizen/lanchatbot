@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current quota-failure subset replay — 2026-10-17
+
+Owner asks only the7B1cases that had verifier429 in grounded-state-run to run again, once each, unchanged runtime/models/prompts/config/corpus. [Scope/report](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-quota-replay-20261017/REPORT.md), intake9e40a3ca; clean run source2529383d after freezing18unchanged input/runtime hashes. Existing --range18:24, max28invocations, no retry/extra batch. Raw0394a55e before primaryacedd4bb before diagnosis; complete7/7. Actual6eligible/1FAILfallback; primary5USABLE/1NEEDS_EDIT/1fallback. All22HTTP200=15owner+7verifier,0quota-error/timeout/retry,7exact bindings/6exact eligible drafts/0observed evaluator-private leaks. The remaining fallback says set799k saves money versus just shirt499k; block justified, not an upsell ban or missing source facts. Partial-source system tone remains. Original31/errors retained; not a new full31 run or stability proof. Source checkout BLOCKED, sales/live STOP, A OWNER_BYPASS; no post-result fix/generation/PhaseC/live action.
+
 ## Current reviewed state acceptance fix and replay — 2026-10-17
 
 Owner authorizes implementation and one replay after independent REVISE. Intake3035c0e9, refreshed main/implementationBaseSha296cdcfb. [Plan](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-run-20261017/PLAN.md): per-message numeric grounding, C3-scoped same-source correction/no-op, unresolved state through dependent effects/normal FINAL/recovery; same-snapshot selection diagnosis and existing ACK/preview. Observe RED→GREEN and readiness before one7stateful+24B1 N1 capture-only batch. Keep models/budgets/authority/CAS, A OWNER_BYPASS and address-region dependency; no normal-reply assembler/parser/publication/live send/Phase C.

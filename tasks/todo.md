@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current quota-failure subset replay — 2026-10-17
+
+- [x] Freeze unchanged18input/runtime hashes and exactly seven quota-failed cases/range18:24/N1/max28; clean source2529383d, existing preflight/source readback before generation, no model/prompt/config/runtime change.
+- [x] Complete7/7new attempts, raw0394a55e before primaryacedd4bb before verdict diagnosis. Actual6eligible/1FAILfallback; review5USABLE/1NEEDS_EDIT/1fallback, human acceptance null. Audit22HTTP200/0quota-error-timeout-retry/7bindings/6exact eligible drafts/14raw hashes/0observed evaluator-private leaks. Preserve old31/error evidence; no replacement or merged full-run claim.
+- [x] [Report and seven conversations](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-quota-replay-20261017/REPORT.md) prepared for PR391; no post-result fix or extra generation. Quota worked for these7; no stability claim.
+- [ ] Sales/live STOP: owner price comparison799kset vs499kshirt is wrong and was blocked; partial-source system voice and earlier full31 findings remain. Source checkout still BLOCKED on authoritative address→region; A OWNER_BYPASS, no PhaseC/source publication/live action.
+
 ## Current reviewed state acceptance fix and replay — 2026-10-17
 
 - [x] Refresh main296cdcfb; preserve intake3035c0e9 and historical results. [Reviewed bounded plan](../apps/worker/evals/single-agent-commerce-read-only/grounded-state-run-20261017/PLAN.md).
