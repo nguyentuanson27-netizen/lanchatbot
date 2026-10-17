@@ -2,8 +2,43 @@ import { describe, expect, it, vi } from "vitest";
 import { createPersistedCommerceRepository, createPersistedCommerceHandoffPort, prepareNativeCommerceTransition } from "./single-agent-commerce-persistence.js";
 import { createSalesCycleRuntimeState, applySalesCycleCommand, computeBusinessContentHash } from "@lana/chat-runtime";
 import { createConversationState, applySilentHandoff } from "@lana/conversation-engine";
+import type { RealtimeCommitInput } from "@lana/database";
 import { selectCommerceHandoff } from "./single-agent-commerce-handoff.js";
+import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureCartLine, fixtureProfile } from "./single-agent-commerce.test-support.js";
+
+async function handoffFixture(options: {
+  holdingReply?: string; reason?: "DEPENDENCY_FAILURE" | "CUSTOMER_REQUESTED_HUMAN";
+  completeInboxBatch?: boolean; outboxResult?: "TRUNCATED" | "ABSENT";
+} = {}) {
+  const scope = commerceScope(), policy = { ...(await fixturePolicy()).bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const };
+  const reason = options.reason ?? "DEPENDENCY_FAILURE";
+  if (options.holdingReply) Object.assign(policy.artifacts, { handoffMatrix: {
+    schemaVersion: 1, kind: "HANDOFF_MATRIX", sourceMetadata: policy.artifacts.shopPolicy.sourceMetadata,
+    rules: [{ reason, customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF", holdingReply: options.holdingReply, tag: "NHAN_VIEN" }],
+  } });
+  const decision = selectCommerceHandoff(policy, scope, reason, commerceNow);
+  const state = { ...createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow }), revision: scope.revision };
+  const before = { ...scope, state, stateVersion: scope.revision, fence: 1 };
+  const nextState = applySilentHandoff(state, reason === "CUSTOMER_REQUESTED_HUMAN" ? reason : "AGENT_REQUEST", scope.revision, 1, commerceNow).state;
+  const next = { ...before, state: nextState, stateVersion: nextState.revision };
+  const completed = vi.fn(), rollback = vi.fn(), client = {};
+  const commitWithinTransaction = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => {
+    const intents = { stateCommitted: true, handoffEventCreated: true, pancakeTagOutboxCreated: true };
+    return options.outboxResult === "ABSENT" ? intents : { ...intents,
+      metaOutboxCreated: options.outboxResult === "TRUNCATED" ? 0 : prepared.metaPlan?.messages.length ?? 0 };
+  });
+  const transaction: Parameters<typeof createPersistedCommerceHandoffPort>[0]["transaction"] = async work => {
+    try { const result = await work(client as never); completed(); return result; }
+    catch (error) { rollback(); throw error; }
+  };
+  const deliveryRecipient = "synthetic-private-provider-recipient";
+  const inboxBatchGuard = { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] };
+  const port = createPersistedCommerceHandoffPort({ scope, clock: () => commerceNow, read: async () => before,
+    inboxBatchGuard, ...(options.completeInboxBatch === undefined ? {} : { completeInboxBatch: options.completeInboxBatch }), deliveryRecipient, resolveTagId: () => "existing-tag-id",
+    store: { commitWithinTransaction } as never, transaction });
+  return { scope, before, next, decision, port, deliveryRecipient, inboxBatchGuard, client, commitWithinTransaction, completed, rollback };
+}
 
 describe("existing transaction owner for candidate commerce", () => {
   it.each(["open", "variant"])("prepares native %s with fresh facts and exact replay evidence, independent of text classifiers", async mode => {
@@ -36,17 +71,62 @@ describe("existing transaction owner for candidate commerce", () => {
     const state = { ...createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow }), revision: 1 };
     const before = { ...scope, state, stateVersion: 1, fence: 1 };
     const next = { ...before, stateVersion: 2, state: applySilentHandoff(state, "EXCHANGE", 1, 1, commerceNow).state };
-    const commitWithinTransaction = vi.fn(async () => ({ stateCommitted: true, handoffEventCreated: false, pancakeTagOutboxCreated: true }));
+    const commitWithinTransaction = vi.fn(async () => ({ stateCommitted: true, handoffEventCreated: false, pancakeTagOutboxCreated: true, metaOutboxCreated: 1 }));
     const port = createPersistedCommerceHandoffPort({ scope, clock: () => commerceNow, read: async () => before,
       inboxBatchGuard: { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] }, resolveTagId: () => "existing-tag-id",
+      deliveryRecipient: "synthetic-recipient",
       store: { commitWithinTransaction } as never, transaction: work => work({} as never) });
     await expect(port.commit({ before, next, decision })).rejects.toThrow("ATOMIC_HANDOFF_INTENTS");
     expect(commitWithinTransaction).toHaveBeenCalledWith({}, expect.objectContaining({ expectedStateVersion: 1,
       state: expect.objectContaining({ conversationOwner: "HUMAN" }), inboxBatchGuard: expect.any(Object),
       pancakeTagPlan: { desiredTag: "VAN_DON", tagId: "existing-tag-id", handoffGeneration: 2 },
       handoffEventPlan: expect.objectContaining({ source: "POST_SALE", reasonCode: "EXCHANGE", desiredTag: "VAN_DON" }) }), commerceNow);
-    commitWithinTransaction.mockResolvedValue({ stateCommitted: true, handoffEventCreated: true, pancakeTagOutboxCreated: true });
+    commitWithinTransaction.mockResolvedValue({ stateCommitted: true, handoffEventCreated: true, pancakeTagOutboxCreated: true, metaOutboxCreated: 1 });
     expect(await port.commit({ before, next, decision })).toBe(true);
+  });
+  it("atomically enqueues the configured dependency holding reply when handoff completes the source", async () => {
+    const holdingReply = "Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.", f = await handoffFixture({ holdingReply });
+    expect(await f.port.commit(f)).toBe(true);
+    expect(f.commitWithinTransaction).toHaveBeenCalledOnce();
+    expect(f.commitWithinTransaction).toHaveBeenCalledWith(f.client, expect.objectContaining({
+      expectedStateVersion: f.before.stateVersion, state: f.next.state, inboxBatchGuard: f.inboxBatchGuard,
+      pancakeTagPlan: { desiredTag: "NHAN_VIEN", tagId: "existing-tag-id", handoffGeneration: f.next.stateVersion },
+      handoffEventPlan: expect.objectContaining({ source: "BOT_POLICY", reasonCode: "DEPENDENCY_FAILURE", desiredTag: "NHAN_VIEN" }),
+      metaPlan: expect.objectContaining({ recipientId: f.deliveryRecipient, messages: [{ kind: "TEXT", text: holdingReply }],
+        sendAfterOwnerHandoff: true, protectedClaims: [], protectedClaimTypes: [] }),
+    }), commerceNow);
+    const prepared = f.commitWithinTransaction.mock.calls[0]![1], meta = prepared.metaPlan!;
+    expect(prepared.completeInboxBatch).not.toBe(false);
+    expect(meta.effectReadiness).toMatchObject({ effect: "PROTECTED_OUTBOUND", outcome: "READY",
+      pageId: f.scope.pageId, conversationId: f.scope.conversationId, conversationRevision: f.before.stateVersion,
+      sourceMessageIdHash: meta.sourceMessageIdHash, deterministicEvidenceHash: commerceHash(meta.messages),
+      binding: expect.objectContaining({ payloadHash: commerceHash(meta.messages) }) });
+    expect(meta.sourceMessageIdHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(JSON.stringify({ scope: f.scope, decision: f.decision, state: prepared.state, readiness: meta.effectReadiness })).not.toContain(f.deliveryRecipient);
+    expect(f.completed).toHaveBeenCalledOnce(); expect(f.rollback).not.toHaveBeenCalled();
+    expect(f.port.outboxCount()).toBe(1);
+  });
+  it.each(["TRUNCATED", "ABSENT"] as const)("rolls back handoff when its holding reply outbox intent is %s", async outboxResult => {
+    const f = await handoffFixture({ holdingReply: "Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.", outboxResult });
+    await expect(f.port.commit(f)).rejects.toThrow("ATOMIC_HANDOFF_INTENTS");
+    expect(f.commitWithinTransaction).toHaveBeenCalledOnce();
+    expect(f.rollback).toHaveBeenCalledOnce(); expect(f.completed).not.toHaveBeenCalled();
+    expect(f.port.outboxCount()).toBe(0);
+  });
+  it.each(["DEPENDENCY_FAILURE", "CUSTOMER_REQUESTED_HUMAN"] as const)("keeps the default %s handoff silent without a published holding rule", async reason => {
+    const f = await handoffFixture({ reason });
+    expect(f.decision.customerMessages).toEqual([]);
+    expect(await f.port.commit(f)).toBe(true);
+    expect(f.commitWithinTransaction.mock.calls[0]![1].metaPlan).toBeUndefined();
+    expect(f.port.outboxCount()).toBe(0);
+  });
+  it("leaves configured holding replies to public final egress when the handoff retains its source", async () => {
+    const holdingReply = "Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.", f = await handoffFixture({ holdingReply, completeInboxBatch: false });
+    expect(f.decision.customerMessages).toEqual([holdingReply]);
+    expect(await f.port.commit(f)).toBe(true);
+    const prepared = f.commitWithinTransaction.mock.calls[0]![1];
+    expect(prepared.completeInboxBatch).toBe(false); expect(prepared.metaPlan).toBeUndefined();
+    expect(f.port.outboxCount()).toBe(0);
   });
   it("requires the exact prepared transition and current source lease before commit", async () => {
     const state = createSalesCycleRuntimeState("key", { pageId: "1198992073286645", conversationId: "conversation" }, new Date());

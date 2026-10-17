@@ -87,8 +87,10 @@ export async function runPersistedCommerceIngress(input: {
   const facts = bindCommerceFacts(input.facts, scope);
   const closeWithoutSend = async (reason: string) => { await input.inbox.completeBatch(batch); return noSend(reason); };
   const readAuthority = async () => {
-    const row = await input.store.loadOrCreate<ConversationState>(scope.pageId, scope.customerHash, "APP", () => { throw new Error("CONVERSATION_REQUIRED"); }, input.clock());
-    const generation = await input.inbox.readGeneration(scope.pageId, scope.customerHash);
+    const [row, generation] = await Promise.all([
+      input.store.loadOrCreate<ConversationState>(scope.pageId, scope.customerHash, "APP", () => { throw new Error("CONVERSATION_REQUIRED"); }, input.clock()),
+      input.inbox.readGeneration(scope.pageId, scope.customerHash),
+    ]);
     return { ...scope, state: row.state, stateVersion: row.stateVersion, fence: input.fence,
       bindingVersion: `commerce:${generation}:${scope.recipient}`, permission: row.state.conversationOwner === "BOT" };
   };
@@ -102,12 +104,12 @@ export async function runPersistedCommerceIngress(input: {
     const privateResult = await executor.advancePrivateCheckout();
     if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
-      read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId });
+      read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
     const recovery = createCommerceHandoffTools({ ...handoff, scope, clock: input.clock, policy: policyBundle,
       base: createReadOnlyTools({ ...input.read, scope, clock: input.clock }) });
     await recovery.invoke({ name: "request_handoff", args: { reason: "DEPENDENCY_FAILURE" } });
     return { ...noSend("PRIVATE_CHECKOUT_UNAVAILABLE"), terminal: await recovery.terminalOutcome?.() ?? noSend("PRIVATE_CHECKOUT_UNAVAILABLE").terminal,
-      mode: "PRIVATE_CODE_PATH", enqueued: 0, privateCheckoutFailure: privateResult.failure ?? null };
+      mode: "PRIVATE_CODE_PATH", enqueued: handoff.outboxCount(), privateCheckoutFailure: privateResult.failure ?? null };
   }
   const profilePort = createRealtimeCustomerStatePort(input.store, scope, () => {
     const at = input.clock().toISOString();

@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current customer-outcome corrections after run review — 2026-10-17
+
+- [x] Trace/reproduce the reviewed risks; independent test author observes the missing holding-message path and conflicting matrix/decision contracts. Owner wording now acknowledges purchase choice, disclosure moves to the first selected preorder/status change; no case examples, verifier rewrite or authority relaxation. Existing preview binds/discloses current PRE_ORDER lines.
+- [x] Current configured holding reply uses existing provenance/readiness/transaction with ownership+event+tag+message atomicity; public egress stays deferred/default silence unchanged. Remove one immediate duplicate terminal read and run independent row/generation reads concurrently; keep freshness/CAS/privacy/supersession checks.
+- [x] Locate real shipping_eta ingestion and inspect current public source read-only: four region-duration rows, no province/alias mapping. [Exact source evidence](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-fix-20261017/SHIPPING_SOURCE.md). No guessed mapping/source publication.
+- [ ] Finish full checks and disposable-PG configured holding capture/control, self-review and PR391 update. No provider generations/new B1/A2/A3 or measured naturalness/latency improvement yet. Source checkout BLOCKED on region resolution; A OWNER_BYPASS, no live send/deploy/Phase C.
+
 ## Current reviewed native-fact restoration and stateful replay — 2026-10-17
 
 - [x] Independent review REVISE and owner authorization: restore native offer facts only; retain current prompt/model/budget/diagnostic boundaries. Refresh main `296cdcfb`; code savepoint `10276d54` after observed RED26PASS/2FAIL → focused49PASS.

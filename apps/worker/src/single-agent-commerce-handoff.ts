@@ -34,7 +34,7 @@ export function selectCommerceHandoff(bundle: RuntimePolicyBundle, scope: Commer
   if (!rule || Date.parse(matrix.sourceMetadata.observedAt) > now.getTime()) throw new Error("HANDOFF_RULE_UNAVAILABLE");
   return HandoffDecisionV2Schema.parse({ ...decision, customerMessagePolicy: rule.customerMessagePolicy,
     customerMessages: rule.holdingReply === null ? [] : [rule.holdingReply], tag: rule.tag,
-    provenance: { ...decision.provenance, rulesetVersion: `matrix:${commerceHash(matrix)}` } });
+    provenance: { ...decision.provenance, decisionSource: "ADMIN_CONTROL", rulesetVersion: `matrix:${commerceHash(matrix)}` } });
 }
 
 export function createCommerceHandoffTools(input: {

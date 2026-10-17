@@ -390,6 +390,26 @@ async function previewState(eventPrefix: string) {
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it.each([false, true])("discloses only current preordered lines in the protected checkout preview (preorder=%s)", async preorder => {
+    const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "preorder-open"));
+    const resolve = facts.resolveCartSelection!;
+    const currentFacts: BusinessFactsReader = { ...facts, resolveCartSelection: async (query, at) => {
+      const selected = await resolve(query, at);
+      return selected.status === "READY" && preorder ? { ...selected, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0 } : selected;
+    } };
+    const previewed = await evaluateRealtimeSalesCycle({ ...input(opened.plan!.state,
+      "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD", "preorder-details"), facts: currentFacts });
+    expect(previewed.plan?.state.stage).toBe("ORDER_PREVIEW");
+    const text = previewed.messages.filter(m => m.kind === "TEXT").map(m => m.text).join("\n");
+    if (preorder) {
+      expect(text).toContain("CB182: hàng đặt trước");
+      expect(previewed.protectedOutbound?.claimTypes).toContain("STOCK");
+      expect(previewed.protectedOutbound?.claims).toEqual(expect.arrayContaining([
+        expect.objectContaining({ type: "STOCK", value: expect.objectContaining({ status: "PRE_ORDER" }) }),
+      ]));
+    } else expect(text).not.toContain("hàng đặt trước");
+    expect(previewed.protectedOutbound?.readiness.outcome).toBe("READY");
+  });
   it.each(["PREVIEW", "CONFIRM"] as const)("preserves the missing source prerequisite for %s without misreporting a cart change", async phase => {
     const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "source-gap-open"));
     const state = phase === "PREVIEW" ? opened.plan!.state : await previewState("source-gap-confirm");

@@ -16,6 +16,14 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it("reuses the immediately completed terminal readback before the next owner call without skipping final freshness", async () => {
+    const s = setup(), checks = vi.fn(async () => null), readback = vi.spyOn(s.tools, "readback");
+    const owner = vi.fn().mockResolvedValueOnce(tool("read_policy")).mockResolvedValueOnce(final());
+    const result = await runCommerceTurn({ ...s, tools: { ...s.tools, terminalOutcome: checks }, owner });
+    expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+    expect(checks).toHaveBeenCalledTimes(2); // Entry and immediately after the tool, with no I/O before the next owner call.
+    expect(readback).toHaveBeenCalledOnce(); expect(s.verifier).toHaveBeenCalledOnce();
+  });
   it.each([false, true])("finishes search -> one option-summary read -> final in budget, changed source=%s", async changed => {
     const s = setup(), f = fixtureProduct();
     f.snapshot.offers.COMPOSITE = { ...structuredClone(f.snapshot.offers.DIRECT!), sale_price: 1_065_000,

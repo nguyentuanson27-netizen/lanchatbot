@@ -1316,6 +1316,7 @@ export async function evaluateRealtimeSalesCycle(
       "PRICE",
       ...cartClaims.map(({ type }) => type),
       ...(options.includeEta ? ["ETA" as const] : []),
+      ...(options.includeEta && options.selections.some(s => s.stockStatus === "PRE_ORDER") ? ["STOCK" as const] : []),
     ])].sort();
     const claimTypeSet = new Set(claimTypes);
     const claims = allClaims.filter(({ type }) => claimTypeSet.has(type));
@@ -2038,7 +2039,13 @@ export async function evaluateRealtimeSalesCycle(
       });
       if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED");
       return protectedCartReply(
-        (cart) => `${cartSummary(cart)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
+        (cart, currentSelections) => {
+          const preorders = currentSelections.filter(s => s.stockStatus === "PRE_ORDER").map(s =>
+            `${s.line.parentProductId}: hàng đặt trước`);
+          return [cartSummary(cart), ...preorders, `Người nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}`,
+            `Địa chỉ: ${preview.recipient.address}`, `Thanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}`,
+            `Dự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.`, "Chị xác nhận chốt đơn nhé."].join("\n");
+        },
         { selections: readySelections, includeEta: true, telemetry: {
           checkoutCapturedFields: capturedFields,
           checkoutMissingFields: [],

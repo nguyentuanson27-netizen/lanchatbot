@@ -27,20 +27,33 @@ function fixture(productIds = ["SM613"]) {
   const batch = { pageId: scope.pageId, conversationHash: scope.customerHash, eventKind: "CUSTOMER", generation: 1,
     evaluationGroupId: "turn", leaseToken: "lease", inboxIds: ["inbox"], items: [{ envelope: { message } }] };
   const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
+  const inbox = { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} };
   const run = (owner: () => Promise<OwnerGeneration> = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
-    batch, fence: 1, scope, store, inbox: { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} },
+    batch, fence: 1, scope, store, inbox,
     history: { recordInboundCustomerMessage: async () => {}, listConversationHistory: async () => [] }, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {} }, policy: () => fixturePolicy(),
     read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: async (id: string) => products.find(p => p.product.productId === id), searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => null, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, commit, verifier, profileWrite, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return { run, store, inbox, commit, verifier, profileWrite, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; },
     transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+it("starts the independent generation read while current authority is being loaded", async () => {
+  const f = fixture(), load = f.store.loadOrCreate;
+  let loads = 0, generationReads = 0;
+  vi.spyOn(f.inbox, "readGeneration").mockImplementation(async () => { generationReads++; return 1; });
+  vi.spyOn(f.store, "loadOrCreate").mockImplementation(async () => {
+    if (++loads === 2) { await Promise.resolve(); expect(generationReads).toBeGreaterThan(0); }
+    return load();
+  });
+  expect((await f.run()).terminal.disposition).toBe("SEND_ELIGIBLE");
+  expect(f.commit.mock.calls[0]![1].expectedStateVersion).toBe(1);
+});
 
 describe("persisted ingress source and final revision", () => {
   it.each([{ ids: [] }, { ids: ["SM613", "OTHER1", "OTHER2"] }])("enqueues a code-owned fallback without unrelated product coverage ($ids)", async ({ ids }) => {

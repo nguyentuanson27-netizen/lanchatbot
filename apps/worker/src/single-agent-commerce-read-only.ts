@@ -75,8 +75,8 @@ export async function runCommerceTurn(input: {
   }
   const contents: NativeContent[] = [...input.history.map(m => ({ role: m.role === "customer" ? "user" as const : "model" as const,
     parts: [{ text: m.text }] })), { role: "user", parts: [{ text: input.latest }] }];
+  const initialTerminal = await effectTerminal(); if (initialTerminal) return finish(initialTerminal);
   for (let index = 0; index < 3; index++) {
-    const actual = await effectTerminal(); if (actual) return finish(actual);
     const context = input.tools.snapshot();
     if (!context.state.permission || context.state.conversationOwner !== "BOT" || !context.state.privacyAllowed) {
       return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });

@@ -1,8 +1,8 @@
 import type { PostgresRealtimeRuntimeStore, RealtimeCommitInput, RealtimeInboxBatchGuard } from "@lana/database";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createSalesCycleRuntimeState, type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1 } from "@lana/chat-runtime";
-import { buildCanonicalDecisionEvidenceV1 } from "@lana/business-tools";
+import { buildCanonicalDecisionEvidenceV1, evaluateDeterministicEffectReadinessV1 } from "@lana/business-tools";
 import { CanonicalBuyingIntentV1Schema } from "@lana/contracts";
 import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleInput } from "./realtime-sales-cycle.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
@@ -17,13 +17,25 @@ export function createPersistedCommerceHandoffPort(input: {
   transaction: <T>(work: (client: Parameters<PostgresRealtimeRuntimeStore["commitWithinTransaction"]>[0]) => Promise<T>) => Promise<T>;
   inboxBatchGuard: RealtimeInboxBatchGuard;
   completeInboxBatch?: boolean;
+  /** Code-only provider recipient. Required only when this port owns a holding reply. */
+  deliveryRecipient?: string;
   resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
 }) {
-  return { read: input.read, async commit({ before, next, decision }: CommerceHandoffCommit): Promise<boolean> {
+  let outboxMessages = 0;
+  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision }: CommerceHandoffCommit): Promise<boolean> {
     const tagId = input.resolveTagId(decision.tag);
     if (!tagId || !input.inboxBatchGuard.inboxIds.length) throw new Error("HANDOFF_TAG_OR_SOURCE_UNAVAILABLE");
     const now = input.clock();
-    return input.transaction(async client => {
+    const messages = input.completeInboxBatch === false ? [] : decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }));
+    if (messages.length && !input.deliveryRecipient) throw new Error("HANDOFF_DELIVERY_ROUTE_REQUIRED");
+    const sourceMessageIdHash = createHash("sha256").update(input.scope.sourceMessageId, "utf8").digest("hex");
+    const payloadHash = commerceHash(messages);
+    const readiness = messages.length ? evaluateDeterministicEffectReadinessV1({ effect: "PROTECTED_OUTBOUND",
+      pageId: input.scope.pageId, conversationId: input.scope.conversationId, sourceMessageIdHash,
+      conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [], cartId: null, cartVersion: null,
+      cartStateHash: null, orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims: [], protectedClaimTypes: [],
+      deterministicEvidenceHash: payloadHash, payloadHash, checkedAt: now }) : null;
+    const applied = await input.transaction(async client => {
       const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
         customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
         expectedStateVersion: before.stateVersion, state: next.state, inboxBatchGuard: input.inboxBatchGuard,
@@ -33,11 +45,16 @@ export function createPersistedCommerceHandoffPort(input: {
           reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion },
           productId: before.state.currentProductId, factsStatus: null, factsReasonCode: null,
           desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.scope.sourceMessageId,
-          triggerMessagePk: null, occurredAt: now } }, now);
+          triggerMessagePk: null, occurredAt: now },
+        ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: input.deliveryRecipient!, messages,
+          sourceMessageIdHash, protectedClaims: [], protectedClaimTypes: [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
       if (!result.stateCommitted) return false;
-      if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated) throw new Error("ATOMIC_HANDOFF_INTENTS");
+      if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated ||
+        (messages.length && result.metaOutboxCreated !== messages.length)) throw new Error("ATOMIC_HANDOFF_INTENTS");
       return true;
     });
+    if (applied) outboxMessages += messages.length;
+    return applied;
   } };
 }
 
