@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current independently reviewed customer-outcome fix and replay — 2026-10-17
+
+- [x] Refresh main296cdcfb, preserve intake33a64ab9 and independent REVISE_PLAN in [bounded scope](../apps/worker/evals/single-agent-commerce-read-only/reviewed-outcome-run-20261017/SCOPE.md).
+- [ ] Observe focused RED→GREEN for current cart/native projection; preserve receipt/current scope/duplicate/source failures and native bounds. Narrow prompt correction; source diagnosis only, no broad ambiguity filtering or source publication.
+- [ ] Complete current checks/self-review and existing configured handoff control; freeze clean source and exact inputs before one7stateful+24B1/N1 run.
+- [ ] Preserve raw before whole-dialogue primary before trace; report all outcomes/requests/limits, update PR391 and stop. A OWNER_BYPASS, source checkout dependency and no live actions remain.
+
 ## Current quota-failure subset replay — 2026-10-17
 
 - [x] Freeze unchanged18input/runtime hashes and exactly seven quota-failed cases/range18:24/N1/max28; clean source2529383d, existing preflight/source readback before generation, no model/prompt/config/runtime change.
