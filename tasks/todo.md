@@ -3,8 +3,8 @@
 ## Current bounded-source fix and full replay — 2026-10-18
 
 - [x] Review all31 actual baseline outcomes then traces; refresh main296cdcfb at intake7f20f3f2. One independent REVISE_PLAN removes repeated prompt edits. [Revised plan](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-run-20261018/PLAN.md) accepts only owner wire bound and partial native evidence locality.
-- [ ] Observe focused RED->GREEN, self-review and required checks/COD controls; prompts/models/corpus/counts/verifier32KB unchanged.
-- [ ] Freeze/commit/clean source/preflights; one existing7stateful+24B1/N1/max120/retry0 run, preserve all raw before actual primary before diagnosis; update report/PR391.
+- [x] Observed focused38PASS/4FAIL->42PASS; worker1843PASS/Node496PASS+2optionalSKIP/protected52PASS, typecheck/build/lint exit0; COD25/25PASS/0generations/DBdropped. Code3514691d; both prompts/models/corpus/counts/verifier32KB unchanged.
+- [x] Freeze/clean487816d8, current preflights; exactly7stateful+24B1/N1/max120/retry0 collected. Raw17a74bf9 before primary50d8f8a4 before diagnosis. [Report/all31](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-run-20261018/CHECKPOINT_B.md):21USABLE(one ownership-only)/7NEEDS_EDIT/3unfinished;27eligible/1FAILfallback/2handoff/1no-send;88HTTP200/28bindings/43raw hashes/35native-part preservation occurrences/0observed evaluator-private leaks, DBdropped. Source unchanged after seal; delivery remains the existing draft PR391.
 - [ ] Voice/policy wording, recovery preorder, source attrs/mapping and provider NONE/UNKNOWN remain measured risks/dependencies. No publication/live action/Phase C/A qualification.
 
 ## Current independently reviewed customer-outcome fix and replay — 2026-10-17
