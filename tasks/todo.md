@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current two additional frozen repetitions — 2026-10-18
+
+- [x] Register owner request for exactly2more repetitions of31cases; subagents only operate frozen existing runners. [Scope](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/SCOPE.md), intake6cd8f506/main296cdcfb; unchanged13executable/input+5runtime+launcher hashes verified.
+- [ ] Freeze/clean source/current preflights; collect rep2 and rep3 in parallel, each7ordered stateful+24B1/max120/no generation retry. All62outcomes/own DB cleanup retained.
+- [ ] Raw before whole-outcome primary before diagnosis; report each repetition and all93denominator consistency without majority/best-of/new thresholds; update PR391. No runtime change/live action/A qualification/Phase C.
+
 ## Current bounded-source fix and full replay — 2026-10-18
 
 - [x] Review all31 actual baseline outcomes then traces; refresh main296cdcfb at intake7f20f3f2. One independent REVISE_PLAN removes repeated prompt edits. [Revised plan](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-run-20261018/PLAN.md) accepts only owner wire bound and partial native evidence locality.
