@@ -144,6 +144,7 @@ export const CartMutationActionV1Schema = z.enum([
   "ADD_LINE",
   "REMOVE_LINE",
   "SET_QUANTITY",
+  "SET_COMPONENT_VARIANT",
 ]);
 export type CartMutationActionV1 = z.infer<typeof CartMutationActionV1Schema>;
 
@@ -155,6 +156,9 @@ export const CanonicalCartMutationPayloadV1Schema = z.discriminatedUnion("kind",
     lineId: z.string().uuid(),
     quantity: z.number().int().positive().max(20),
   }).strict(),
+  z.object({ kind: z.literal("SET_COMPONENT_VARIANT"), lineId: z.string().uuid(),
+    componentProductId: CanonicalProductIdV1Schema, componentSku: ExactBoundedIdSchema,
+    size: ExactBoundedIdSchema, color: ExactBoundedIdSchema.nullable() }).strict(),
 ]);
 export type CanonicalCartMutationPayloadV1 = z.infer<
   typeof CanonicalCartMutationPayloadV1Schema
@@ -170,6 +174,7 @@ export const CartMutationAuthorityBindingV1Schema = z.object({
   authorityKind: z.enum([
     "CANONICAL_BUYING_INTENT",
     "DETERMINISTIC_REMOVE_CLASSIFIER",
+    "NATIVE_TOOL_PERMISSION",
   ]),
   authorityEvidenceHash: Sha256Schema,
   bindingHash: Sha256Schema,
@@ -177,7 +182,7 @@ export const CartMutationAuthorityBindingV1Schema = z.object({
   const expected = value.action === "REMOVE_LINE"
     ? "DETERMINISTIC_REMOVE_CLASSIFIER"
     : "CANONICAL_BUYING_INTENT";
-  if (value.authorityKind !== expected) {
+  if (value.authorityKind !== expected && value.authorityKind !== "NATIVE_TOOL_PERMISSION") {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["authorityKind"], message: "authority kind must match mutation action" });
   }
 });
@@ -203,6 +208,7 @@ export const CartMutationReceiptV1Schema = z.object({
     "LINE_ADDED",
     "LINE_REMOVED",
     "QUANTITY_CHANGED",
+    "VARIANT_CHANGED",
   ]),
   authority: CartMutationAuthorityBindingV1Schema,
   beforeCartStateHash: Sha256Schema,
@@ -227,7 +233,7 @@ export const CartMutationReceiptV1Schema = z.object({
     ? "LINE_ADDED"
     : value.mutation.kind === "REMOVE_LINE"
       ? "LINE_REMOVED"
-      : "QUANTITY_CHANGED";
+      : value.mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED";
   if (value.mutationReasonCode !== expectedReason) {
     context.addIssue({
       code: z.ZodIssueCode.custom,

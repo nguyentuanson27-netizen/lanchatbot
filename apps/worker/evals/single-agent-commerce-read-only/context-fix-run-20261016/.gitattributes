@@ -1,0 +1,5 @@
+/b1/first/raw/** -text -whitespace
+/source-readback.json -text -whitespace
+/stateful-preflight.json -text -whitespace
+# Preserve whitespace in quoted customer-visible outputs, as in raw JSON.
+/CONVERSATIONS.md -whitespace

@@ -1,0 +1,25 @@
+# One complete Phase B replay after the common advisory/tool correction
+
+Owner requests “chạy lại toàn bộ”. Intake65b5e9b6bed49bc1b94dd559c7f8790af77b348e; refreshed main/implementationBaseSha296cdcfbf5759f5bf9cbb24acf3dc63005589361. This is one NEW full24B1+7orderedstateful/N1 run of that corrected candidate, not a continuation or a combination of historical successes.
+
+Commit this scope/frozen inputs before generation, require a clean executable/config worktree, capture resulting HEAD at runtime as bRunSourceSha without writing it back into frozen source. No executable/prompt/config mutation or commit between collection partitions. B1 and the separate stateful journey may collect concurrently; steps within the stateful journey remain ordered. Fresh output directories outside the worktree, existing approved credential/source route, no provider substitution.
+
+## Fixed population and inference
+
+Use exact existing context-fix-20261016/cases.priority.json for all24B1 slots1:24 and exact existing stateful-cases.json for all7stateful outcomes:6public provider turns and1private code-only checkout step. One repetition, maximum120generation invocations:96B1+24stateful. Each role invocation makes at most1generation HTTP request, no automatic retry, repair/reverify, replacement/error exclusion or extra diagnostic generation. Gemini3.5FlashLite High owner / GPT6.1Sol High verifier via the same Vertex/global and Codex-login adapters, unchanged generation config/schema/fallback/bounds/native declarations. Active prompt hashes and code at intake are the corrected candidate, recorded in FROZEN_INPUTS.
+
+Run the entire requested population across semantic/quality failures; no first-six stop. Only unavailable source/auth, integrity or isolation failure may stop dependent dispatch. Preserve every dispatched attempt and any actual coverage limit. Failed stateful steps remain in sequence; no reseed or fabricated cart/preview to rescue downstream outcomes. Every hard-precheck-surviving final takes the one verifier and current final gate. Code-owned terminal/private paths may finish without a model final.
+
+## Review and evidence
+
+Read every complete actual customer outcome and chronological journey against public source facts before rejected drafts/verdict details. Primary categories USABLE / NEEDS_EDIT / UNUSABLE / FALLBACK_OR_NO_SEND; ten existing dimensions support a whole-turn reason, not a score sum, keyword count, fixed wording or mandatory CTA. Apply the same baseline bar: partial-source controls may be useful partial answers; requested policy-owned handoff may be usable for ownership transfer without proving real employee service. Concern replies need practical purchase help and natural chat, not catalog prose. Multiple reasonable buying/styling choices and useful upsell are permitted. Fallback/handoff/no-send remain in the denominator.
+
+Use the owner-approved subjective-advice/observable-claim boundary in docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md. A hypothetical risk or ordinary sensory/style judgment is not automatically a new physical fact; difficult-to-measure does not authorize fabricated concrete properties, guarantees, policy, totals, fit or receipts. The prior two drafts owner accepted are historical adjudications, not expected answers or a runtime phrase whitelist. Review is subjective/non-independent; human acceptance null. Runtime requests never receive case/journey IDs, evaluator expectations/rubrics/sourceMode/purpose labels.
+
+After collection, preserve and commit exact raw before scored primary, then diagnose. Audit raw disk/Git hashes, source/config/prompt/corpus identities, generation/error/token usage, one-request/no-retry accounting, exact draft/trusted binding, captured delivery and evaluator/private-data separation. Report measured p50/p95 verifier/added-verification/whole-turn latency and terminal rates by cohort; cost only if exposed. Compare historical results descriptively, without inferring stability/causality from N1/live-source changes.
+
+## Safety and checks
+
+Reuse existing source-session and hashed credential launcher; never print/store secrets in evidence. Live PostgreSQL sources, Redis and Qdrant are read-only. Only the harness's uniquely owned disposable PostgreSQL test DB may be created/migrated/written/dropped. Delivery is capture-only. No external POS order/payment/hold, human notification, customer send, source/index/policy publication, merge/deploy or PhaseC. Authoritative destination mapping remains unresolved and AOWNER_BYPASS is unchanged.
+
+Run existing config/stateful preflights and source readback with0owner/verifier generations before dispatch; separately account source embeddings. Reuse actual correction checks at65b5e9b6:37owning tests,1792worker,489NodeevalPASS+2optionalSKIP,21protected-replyPASS, worker typecheck/build/lint exit0. Canonical runner builds still run. No new runtime code is changed, so do not repeat unrelated full checks or claim fresh CI. This task authorizes this one run, review/report/tasks/PR391 update; stop without an automatic post-result fix or another run.

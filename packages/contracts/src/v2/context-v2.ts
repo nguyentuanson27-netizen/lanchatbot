@@ -295,7 +295,7 @@ export const ContextV2Schema = z.object({
   buyingIntent: z.object({
     decision: z.enum(["NONE", "CONSIDERING", "COMMITTED", "NEGATED"]),
     requestedAction: z.enum([
-      "NONE", "OPEN_CART", "ADD_TO_CART", "SET_QUANTITY", "PROCEED_TO_PAYMENT",
+      "NONE", "OPEN_CART", "ADD_TO_CART", "SET_QUANTITY", "SET_COMPONENT_VARIANT", "REMOVE_FROM_CART", "PROCEED_TO_PAYMENT",
     ]),
     productId: CanonicalProductIdV1Schema.nullable(),
     evidenceHash: Sha256Schema.nullable(),

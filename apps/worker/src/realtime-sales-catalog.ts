@@ -445,6 +445,7 @@ export function cartSelectionFromSnapshot(
   let etaExpiresAt: string | null = null;
   if (query.deliveryAddress) {
     const region = resolveRegion(snapshot, query.deliveryAddress);
+    if (!region) return failed("ETA_UNAVAILABLE", "CART_ETA_REGION_UNRESOLVED", matching);
     const zeroStock = stockQuantity === 0 && policy?.can_order_when_zero === true;
     const prepMin = zeroStock ? policy?.zero_stock_prep_min_days : policy?.prep_min_days;
     const prepMax = zeroStock ? policy?.zero_stock_prep_max_days : policy?.prep_max_days;

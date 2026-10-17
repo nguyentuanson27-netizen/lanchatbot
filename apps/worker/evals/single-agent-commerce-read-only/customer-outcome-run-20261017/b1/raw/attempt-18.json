@@ -1,0 +1,86 @@
+{
+  "caseId": "b1-current-policy-v3",
+  "sourceMode": "LIVE",
+  "elapsedMs": 4509.634300000005,
+  "runtime": {
+    "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+    "history": [
+      {
+        "role": "customer",
+        "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+      }
+    ],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "6920595f4e7f39d5e9d0d4f6ffff1e78e8f7cb983088db8a14a50200a14902f0:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1357.2980000000098,
+        "telemetry": {
+          "generationId": "6920595f4e7f39d5e9d0d4f6ffff1e78e8f7cb983088db8a14a50200a14902f0:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2765,
+          "outputTokens": 209,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 14292,
+          "requestHash": "9daf644848e335f3846b0755e452f20e97ccfceb3ff19ad85069d0049b71834a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 199,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "6920595f4e7f39d5e9d0d4f6ffff1e78e8f7cb983088db8a14a50200a14902f0:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 2311.601000000024,
+        "telemetry": {
+          "generationId": "6920595f4e7f39d5e9d0d4f6ffff1e78e8f7cb983088db8a14a50200a14902f0:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3767,
+          "outputTokens": 385,
+          "cost": null,
+          "finishReason": "UNKNOWN",
+          "requestBytes": 18890,
+          "requestHash": "393741d61c30f1a2d7141e3810890cc0ee038cda3967976cda02c611855c03a3",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 385,
+          "failureStage": "COMPLETION",
+          "failureCode": "OWNER_FINISH_REASON"
+        }
+      }
+    ],
+    "toolLatencyMs": 840.1189000000013,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 9,
+    "catalogReads": 38,
+    "posReads": 24
+  }
+}

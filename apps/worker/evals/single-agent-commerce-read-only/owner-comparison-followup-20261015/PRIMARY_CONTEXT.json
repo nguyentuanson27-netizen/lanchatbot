@@ -1,0 +1,1766 @@
+[
+  {
+    "slot": 1,
+    "caseId": "b1-changed-occasion",
+    "source": {
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "subjectRef": "SV2447",
+            "label": "Set váy Thạch Thảo",
+            "variantId": "offer:SV2447:SET_VAY",
+            "offerType": "SET_VAY",
+            "requestedOfferType": null,
+            "availableOffers": [
+              "SET_VAY",
+              "AO",
+              "CV"
+            ],
+            "attributes": null,
+            "sizeCharts": [],
+            "content": {
+              "productName": "Set váy Thạch Thảo",
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "productUrl": null,
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "sourceVersion": "catalog-v2",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH"
+              }
+            },
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 58
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "missing": [
+              "ATTRIBUTES"
+            ]
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "VARIANT",
+            "label": "Set váy Thạch Thảo SET_VAY",
+            "productId": "SV2447",
+            "ref": "offer:SV2447:SET_VAY"
+          },
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "PRODUCT",
+            "label": "Set váy Thạch Thảo",
+            "ref": "SV2447",
+            "variantId": null
+          }
+        ],
+        "effectReceipts": [],
+        "policyLiterals": [],
+        "protectedClaims": [
+          {
+            "authorization": "NONE",
+            "claimId": "4bd70994-964d-5d67-8deb-9cf7933b58d5",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+              "evidenceRef": "business-fact:price:6f40dc36ef774de2fed6264e69184c60fd3454c28ab575d6c45a0d20056ddb37",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "authorization": "NONE",
+            "claimId": "f5c51397-7f93-568b-85a2-a4853359b619",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "7eef2d8a07b7de7d74d73c117e96a0e49ecdd9309a3517d29bb0db6aac470f34",
+              "evidenceRef": "business-fact:stock:4b401e6e75bb61f832a7d8242b83d6dec571815fe66d40bddef9c4e00a72e79f",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "STOCK",
+            "value": {
+              "availableQuantity": 58,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "runtimeProducts": [
+          {
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "ref": "product:SV2447",
+            "subjectRef": "SV2447"
+          }
+        ],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "c9713feebb774f79164e1d1dfd388692c989c09e06cdb9d92a82ee7b1966def9",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 2,
+    "caseId": "b1-changed-occasion",
+    "source": {
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "subjectRef": "SV2447",
+            "label": "Set váy Thạch Thảo",
+            "variantId": "offer:SV2447:SET_VAY",
+            "offerType": "SET_VAY",
+            "requestedOfferType": null,
+            "availableOffers": [
+              "SET_VAY",
+              "AO",
+              "CV"
+            ],
+            "attributes": null,
+            "sizeCharts": [],
+            "content": {
+              "productName": "Set váy Thạch Thảo",
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "productUrl": null,
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "sourceVersion": "catalog-v2",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH"
+              }
+            },
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 58
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "missing": [
+              "ATTRIBUTES"
+            ]
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "VARIANT",
+            "label": "Set váy Thạch Thảo SET_VAY",
+            "productId": "SV2447",
+            "ref": "offer:SV2447:SET_VAY"
+          },
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "PRODUCT",
+            "label": "Set váy Thạch Thảo",
+            "ref": "SV2447",
+            "variantId": null
+          }
+        ],
+        "effectReceipts": [],
+        "policyLiterals": [],
+        "protectedClaims": [
+          {
+            "authorization": "NONE",
+            "claimId": "4bd70994-964d-5d67-8deb-9cf7933b58d5",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+              "evidenceRef": "business-fact:price:6f40dc36ef774de2fed6264e69184c60fd3454c28ab575d6c45a0d20056ddb37",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "authorization": "NONE",
+            "claimId": "f5c51397-7f93-568b-85a2-a4853359b619",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "7eef2d8a07b7de7d74d73c117e96a0e49ecdd9309a3517d29bb0db6aac470f34",
+              "evidenceRef": "business-fact:stock:4b401e6e75bb61f832a7d8242b83d6dec571815fe66d40bddef9c4e00a72e79f",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "STOCK",
+            "value": {
+              "availableQuantity": 58,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "runtimeProducts": [
+          {
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "ref": "product:SV2447",
+            "subjectRef": "SV2447"
+          }
+        ],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "c9713feebb774f79164e1d1dfd388692c989c09e06cdb9d92a82ee7b1966def9",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 3,
+    "caseId": "b1-current-policy",
+    "source": {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {}
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY"
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [],
+        "effectReceipts": [],
+        "policyLiterals": [
+          {
+            "expiresAt": null,
+            "observedAt": "2026-07-23T07:42:07.382Z",
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "protectedClaims": [],
+        "runtimeProducts": [],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "4ccc598c0ff4ddfeb0c30c7b2595cbf7f9ce2dd67b0839c81af2d509c5ca1b2a",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 4,
+    "caseId": "b1-current-policy",
+    "source": {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {}
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY"
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [],
+        "effectReceipts": [],
+        "policyLiterals": [
+          {
+            "expiresAt": null,
+            "observedAt": "2026-07-23T07:42:07.382Z",
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "protectedClaims": [],
+        "runtimeProducts": [],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "4ccc598c0ff4ddfeb0c30c7b2595cbf7f9ce2dd67b0839c81af2d509c5ca1b2a",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 5,
+    "caseId": "b1-changed-occasion",
+    "source": {
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "subjectRef": "SV2447",
+            "label": "Set váy Thạch Thảo",
+            "variantId": "offer:SV2447:SET_VAY",
+            "offerType": "SET_VAY",
+            "requestedOfferType": null,
+            "availableOffers": [
+              "SET_VAY",
+              "AO",
+              "CV"
+            ],
+            "attributes": null,
+            "sizeCharts": [],
+            "content": {
+              "productName": "Set váy Thạch Thảo",
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "productUrl": null,
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "sourceVersion": "catalog-v2",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH"
+              }
+            },
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 58
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "missing": [
+              "ATTRIBUTES"
+            ]
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "VARIANT",
+            "label": "Set váy Thạch Thảo SET_VAY",
+            "productId": "SV2447",
+            "ref": "offer:SV2447:SET_VAY"
+          },
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "PRODUCT",
+            "label": "Set váy Thạch Thảo",
+            "ref": "SV2447",
+            "variantId": null
+          }
+        ],
+        "effectReceipts": [],
+        "policyLiterals": [],
+        "protectedClaims": [
+          {
+            "authorization": "NONE",
+            "claimId": "4bd70994-964d-5d67-8deb-9cf7933b58d5",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+              "evidenceRef": "business-fact:price:6f40dc36ef774de2fed6264e69184c60fd3454c28ab575d6c45a0d20056ddb37",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "authorization": "NONE",
+            "claimId": "f5c51397-7f93-568b-85a2-a4853359b619",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "7eef2d8a07b7de7d74d73c117e96a0e49ecdd9309a3517d29bb0db6aac470f34",
+              "evidenceRef": "business-fact:stock:4b401e6e75bb61f832a7d8242b83d6dec571815fe66d40bddef9c4e00a72e79f",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "STOCK",
+            "value": {
+              "availableQuantity": 58,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "runtimeProducts": [
+          {
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "ref": "product:SV2447",
+            "subjectRef": "SV2447"
+          }
+        ],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "c9713feebb774f79164e1d1dfd388692c989c09e06cdb9d92a82ee7b1966def9",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 6,
+    "caseId": "b1-changed-occasion",
+    "source": {
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "subjectRef": "SV2447",
+            "label": "Set váy Thạch Thảo",
+            "variantId": "offer:SV2447:SET_VAY",
+            "offerType": "SET_VAY",
+            "requestedOfferType": null,
+            "availableOffers": [
+              "SET_VAY",
+              "AO",
+              "CV"
+            ],
+            "attributes": null,
+            "sizeCharts": [],
+            "content": {
+              "productName": "Set váy Thạch Thảo",
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "productUrl": null,
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "sourceVersion": "catalog-v2",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH"
+              }
+            },
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 58
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "missing": [
+              "ATTRIBUTES"
+            ]
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "VARIANT",
+            "label": "Set váy Thạch Thảo SET_VAY",
+            "productId": "SV2447",
+            "ref": "offer:SV2447:SET_VAY"
+          },
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "PRODUCT",
+            "label": "Set váy Thạch Thảo",
+            "ref": "SV2447",
+            "variantId": null
+          }
+        ],
+        "effectReceipts": [],
+        "policyLiterals": [],
+        "protectedClaims": [
+          {
+            "authorization": "NONE",
+            "claimId": "4bd70994-964d-5d67-8deb-9cf7933b58d5",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+              "evidenceRef": "business-fact:price:6f40dc36ef774de2fed6264e69184c60fd3454c28ab575d6c45a0d20056ddb37",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "authorization": "NONE",
+            "claimId": "f5c51397-7f93-568b-85a2-a4853359b619",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "7eef2d8a07b7de7d74d73c117e96a0e49ecdd9309a3517d29bb0db6aac470f34",
+              "evidenceRef": "business-fact:stock:4b401e6e75bb61f832a7d8242b83d6dec571815fe66d40bddef9c4e00a72e79f",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "STOCK",
+            "value": {
+              "availableQuantity": 58,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "runtimeProducts": [
+          {
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "ref": "product:SV2447",
+            "subjectRef": "SV2447"
+          }
+        ],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "c9713feebb774f79164e1d1dfd388692c989c09e06cdb9d92a82ee7b1966def9",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 7,
+    "caseId": "b1-current-policy",
+    "source": {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {}
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY"
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [],
+        "effectReceipts": [],
+        "policyLiterals": [
+          {
+            "expiresAt": null,
+            "observedAt": "2026-07-23T07:42:07.382Z",
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "protectedClaims": [],
+        "runtimeProducts": [],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "4ccc598c0ff4ddfeb0c30c7b2595cbf7f9ce2dd67b0839c81af2d509c5ca1b2a",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 8,
+    "caseId": "b1-current-policy",
+    "source": {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {}
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY"
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [],
+        "effectReceipts": [],
+        "policyLiterals": [
+          {
+            "expiresAt": null,
+            "observedAt": "2026-07-23T07:42:07.382Z",
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "protectedClaims": [],
+        "runtimeProducts": [],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "4ccc598c0ff4ddfeb0c30c7b2595cbf7f9ce2dd67b0839c81af2d509c5ca1b2a",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 9,
+    "caseId": "b1-changed-occasion",
+    "source": {
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "subjectRef": "SV2447",
+            "label": "Set váy Thạch Thảo",
+            "variantId": "offer:SV2447:SET_VAY",
+            "offerType": "SET_VAY",
+            "requestedOfferType": null,
+            "availableOffers": [
+              "SET_VAY",
+              "AO",
+              "CV"
+            ],
+            "attributes": null,
+            "sizeCharts": [],
+            "content": {
+              "productName": "Set váy Thạch Thảo",
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "productUrl": null,
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "sourceVersion": "catalog-v2",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH"
+              }
+            },
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 58
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "missing": [
+              "ATTRIBUTES"
+            ]
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "VARIANT",
+            "label": "Set váy Thạch Thảo SET_VAY",
+            "productId": "SV2447",
+            "ref": "offer:SV2447:SET_VAY"
+          },
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "PRODUCT",
+            "label": "Set váy Thạch Thảo",
+            "ref": "SV2447",
+            "variantId": null
+          }
+        ],
+        "effectReceipts": [],
+        "policyLiterals": [],
+        "protectedClaims": [
+          {
+            "authorization": "NONE",
+            "claimId": "4bd70994-964d-5d67-8deb-9cf7933b58d5",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+              "evidenceRef": "business-fact:price:6f40dc36ef774de2fed6264e69184c60fd3454c28ab575d6c45a0d20056ddb37",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "authorization": "NONE",
+            "claimId": "f5c51397-7f93-568b-85a2-a4853359b619",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "7eef2d8a07b7de7d74d73c117e96a0e49ecdd9309a3517d29bb0db6aac470f34",
+              "evidenceRef": "business-fact:stock:4b401e6e75bb61f832a7d8242b83d6dec571815fe66d40bddef9c4e00a72e79f",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "STOCK",
+            "value": {
+              "availableQuantity": 58,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "runtimeProducts": [
+          {
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "ref": "product:SV2447",
+            "subjectRef": "SV2447"
+          }
+        ],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "c9713feebb774f79164e1d1dfd388692c989c09e06cdb9d92a82ee7b1966def9",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 10,
+    "caseId": "b1-changed-occasion",
+    "source": {
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "subjectRef": "SV2447",
+            "label": "Set váy Thạch Thảo",
+            "variantId": "offer:SV2447:SET_VAY",
+            "offerType": "SET_VAY",
+            "requestedOfferType": null,
+            "availableOffers": [
+              "SET_VAY",
+              "AO",
+              "CV"
+            ],
+            "attributes": null,
+            "sizeCharts": [],
+            "content": {
+              "productName": "Set váy Thạch Thảo",
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "productUrl": null,
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "sourceVersion": "catalog-v2",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH"
+              }
+            },
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 58
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "missing": [
+              "ATTRIBUTES"
+            ]
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "VARIANT",
+            "label": "Set váy Thạch Thảo SET_VAY",
+            "productId": "SV2447",
+            "ref": "offer:SV2447:SET_VAY"
+          },
+          {
+            "bindingVersion": "c3-b1-source-v1",
+            "kind": "PRODUCT",
+            "label": "Set váy Thạch Thảo",
+            "ref": "SV2447",
+            "variantId": null
+          }
+        ],
+        "effectReceipts": [],
+        "policyLiterals": [],
+        "protectedClaims": [
+          {
+            "authorization": "NONE",
+            "claimId": "4bd70994-964d-5d67-8deb-9cf7933b58d5",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+              "evidenceRef": "business-fact:price:6f40dc36ef774de2fed6264e69184c60fd3454c28ab575d6c45a0d20056ddb37",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "authorization": "NONE",
+            "claimId": "f5c51397-7f93-568b-85a2-a4853359b619",
+            "provenance": {
+              "authority": "POS_SNAPSHOT",
+              "contentHash": "7eef2d8a07b7de7d74d73c117e96a0e49ecdd9309a3517d29bb0db6aac470f34",
+              "evidenceRef": "business-fact:stock:4b401e6e75bb61f832a7d8242b83d6dec571815fe66d40bddef9c4e00a72e79f",
+              "expiresAt": "2026-10-15T04:32:34.887Z",
+              "observedAt": "2026-10-15T02:32:34.887Z",
+              "sourceVersion": "POS_SNAPSHOT:2026-10-15T02:32:34.887Z"
+            },
+            "schemaVersion": 1,
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "type": "STOCK",
+            "value": {
+              "availableQuantity": 58,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "runtimeProducts": [
+          {
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "ref": "product:SV2447",
+            "subjectRef": "SV2447"
+          }
+        ],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "c9713feebb774f79164e1d1dfd388692c989c09e06cdb9d92a82ee7b1966def9",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 11,
+    "caseId": "b1-current-policy",
+    "source": {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {}
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY"
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [],
+        "effectReceipts": [],
+        "policyLiterals": [
+          {
+            "expiresAt": null,
+            "observedAt": "2026-07-23T07:42:07.382Z",
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "protectedClaims": [],
+        "runtimeProducts": [],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "4ccc598c0ff4ddfeb0c30c7b2595cbf7f9ce2dd67b0839c81af2d509c5ca1b2a",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  },
+  {
+    "slot": 12,
+    "caseId": "b1-current-policy",
+    "source": {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {}
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY"
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ],
+      "snapshot": {
+        "boundSubjects": [],
+        "effectReceipts": [],
+        "policyLiterals": [
+          {
+            "expiresAt": null,
+            "observedAt": "2026-07-23T07:42:07.382Z",
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "protectedClaims": [],
+        "runtimeProducts": [],
+        "state": {
+          "bindingVersion": "c3-b1-source-v1",
+          "conversationOwner": "BOT",
+          "currentProductId": null,
+          "factSnapshotVersion": "4ccc598c0ff4ddfeb0c30c7b2595cbf7f9ce2dd67b0839c81af2d509c5ca1b2a",
+          "permission": true,
+          "privacyAllowed": true,
+          "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+          "revision": 1
+        }
+      }
+    }
+  }
+]

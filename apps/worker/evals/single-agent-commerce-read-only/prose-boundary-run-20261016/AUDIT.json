@@ -1,0 +1,17 @@
+{
+  "status": "ACCOUNTING_BINDINGS_AND_PROJECTION_VERIFIED",
+  "rawDiskAndGitHashes": 11,
+  "ownerDispatchHashes": 14,
+  "ownerCatalogSeparatedRequests": 14,
+  "catalogAndFactsMatchVerifierContext": 5,
+  "verifierExactBindings": 5,
+  "eligibleExactDraftMatches": 2,
+  "allGeneratedFinalsVerified": true,
+  "evaluatorLeaks": 0,
+  "atMostOneRequestPerKnownGeneration": true,
+  "sourceIdentityPreserved": true,
+  "privateCodePathNotRun": true,
+  "testDatabasesCreated": 0,
+  "humanAcceptance": null,
+  "geminiWireLimit": "adapter prepared/dispatched body hash; no independent provider-side echo"
+}

@@ -1,0 +1,84 @@
+{
+  "caseId": "b1-search-read-v2",
+  "sourceMode": "LIVE",
+  "elapsedMs": 5678.733799999987,
+  "runtime": {
+    "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "5bac61f501991f78687f35688e6710a57ad0739731eb2251aa007c77f0cef615:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1189.0440999999992,
+        "telemetry": {
+          "generationId": "5bac61f501991f78687f35688e6710a57ad0739731eb2251aa007c77f0cef615:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2357,
+          "outputTokens": 156,
+          "cost": null,
+          "thinkingTokens": 137
+        }
+      },
+      {
+        "id": "5bac61f501991f78687f35688e6710a57ad0739731eb2251aa007c77f0cef615:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1099.3523999999743,
+        "telemetry": {
+          "generationId": "5bac61f501991f78687f35688e6710a57ad0739731eb2251aa007c77f0cef615:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4371,
+          "outputTokens": 129,
+          "cost": null,
+          "thinkingTokens": 106
+        }
+      },
+      {
+        "id": "5bac61f501991f78687f35688e6710a57ad0739731eb2251aa007c77f0cef615:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1181.1949000000022,
+        "telemetry": {
+          "generationId": "5bac61f501991f78687f35688e6710a57ad0739731eb2251aa007c77f0cef615:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4309,
+          "outputTokens": 147,
+          "cost": null,
+          "thinkingTokens": 126
+        }
+      }
+    ],
+    "toolLatencyMs": 2207.050099999993,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 3,
+    "policyReads": 6,
+    "catalogReads": 38,
+    "posReads": 22
+  }
+}

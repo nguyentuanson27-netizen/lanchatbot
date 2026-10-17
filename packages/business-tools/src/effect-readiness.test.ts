@@ -476,6 +476,16 @@ describe("deterministic effect readiness", () => {
     expect(result.outcome).toBe("BLOCKED");
     expect(result.reasonCodes).toContain("CLAIM_MISSING");
   });
+  it("allows a productless exact payload without weakening product or cart requirements", () => {
+    const input = { ...baseWithoutCartLines, effect: "PROTECTED_OUTBOUND" as const, buyingIntent: null,
+      productIds: [], cartId: null, cartVersion: null, cartStateHash: null, claims: [], protectedClaimTypes: [],
+      deterministicEvidenceHash: hash("a"), payloadHash: hash("a") };
+    expect(evaluateDeterministicEffectReadinessV1(input)).toMatchObject({ outcome: "READY", productIds: [], claimSetHash: null });
+    for (const invalid of [{ protectedClaimTypes: ["PRICE"] as const }, { payloadHash: null }, { productIds: [""] }]) {
+      expect(evaluateDeterministicEffectReadinessV1({ ...input, ...invalid }).outcome).toBe("BLOCKED");
+    }
+    expect(evaluateDeterministicEffectReadinessV1({ ...input, effect: "CART_READY" }).outcome).toBe("BLOCKED");
+  });
 
   it("accepts cart-scoped shipping claims once instead of requiring them per product", () => {
     const shipping = ProtectedClaimV1Schema.parse({

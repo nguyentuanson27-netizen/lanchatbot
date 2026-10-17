@@ -1,0 +1,120 @@
+{
+  "runSourceSha": "fec9c51ccf2ead4842f5525b368770b3567217f5",
+  "registered": 24,
+  "recorded": 24,
+  "repetitions": 1,
+  "maximumGenerationRequests": 96,
+  "terminals": {
+    "SEND_ELIGIBLE": 16,
+    "FALLBACK": 8,
+    "HANDOFF": 0,
+    "NO_SEND": 0
+  },
+  "fallbackRate": 0.3333333333333333,
+  "terminalReasons": {
+    "FAIL": 7,
+    "PASS": 16,
+    "BUDGET": 1
+  },
+  "generations": {
+    "owner": 57,
+    "verifier": 23,
+    "total": 80,
+    "ownerProviderRequests": 57,
+    "verifierProviderRequests": 23,
+    "automaticRetries": 0
+  },
+  "provider": {
+    "errors": 0,
+    "timeouts": 0,
+    "httpNon200": 0,
+    "costAvailable": false,
+    "cost": null
+  },
+  "tokens": {
+    "ownerInput": 186336,
+    "ownerOutput": 22063,
+    "ownerThinking": 19589,
+    "verifierInput": 83118,
+    "verifierOutput": 2516,
+    "verifierReasoning": 1720
+  },
+  "latencyMs": {
+    "attemptP50": 11989.638,
+    "attemptP95": 21893.587,
+    "ownerGenerationP50": 1622.922,
+    "ownerGenerationP95": 3796.819,
+    "verifierGenerationP50": 5869.216,
+    "verifierGenerationP95": 11243.86,
+    "addedVerificationP50": 6629.421,
+    "addedVerificationP95": 11995.63,
+    "toolP50": 543.085,
+    "toolP95": 3045.795
+  },
+  "tools": {
+    "rounds": 33,
+    "calls": 36,
+    "sourceCounters": {
+      "embeddingCalls": 5,
+      "policyReads": 12,
+      "catalogReads": 70,
+      "posReads": 42
+    }
+  },
+  "primaryReview": {
+    "USABLE": 11,
+    "NEEDS_EDIT": 5,
+    "FALLBACK_OR_NO_SEND": 8,
+    "observedUnsafeSendEligible": 1
+  },
+  "byPurpose": {
+    "CHANGED_OCCASION": {
+      "registered": 3,
+      "USABLE": 0,
+      "NEEDS_EDIT": 1,
+      "FALLBACK_OR_NO_SEND": 2
+    },
+    "CURRENT_POLICY": {
+      "registered": 3,
+      "USABLE": 0,
+      "NEEDS_EDIT": 0,
+      "FALLBACK_OR_NO_SEND": 3
+    },
+    "PARTIAL_SOURCE": {
+      "registered": 3,
+      "USABLE": 1,
+      "NEEDS_EDIT": 1,
+      "FALLBACK_OR_NO_SEND": 1
+    },
+    "PRICE": {
+      "registered": 3,
+      "USABLE": 2,
+      "NEEDS_EDIT": 1,
+      "FALLBACK_OR_NO_SEND": 0
+    },
+    "COMPONENT_PRICE_STOCK": {
+      "registered": 3,
+      "USABLE": 2,
+      "NEEDS_EDIT": 1,
+      "FALLBACK_OR_NO_SEND": 0
+    },
+    "SEARCH_READ": {
+      "registered": 3,
+      "USABLE": 1,
+      "NEEDS_EDIT": 1,
+      "FALLBACK_OR_NO_SEND": 1
+    },
+    "BUYING_CONCERN": {
+      "registered": 3,
+      "USABLE": 2,
+      "NEEDS_EDIT": 0,
+      "FALLBACK_OR_NO_SEND": 1
+    },
+    "USED_POLICY": {
+      "registered": 3,
+      "USABLE": 3,
+      "NEEDS_EDIT": 0,
+      "FALLBACK_OR_NO_SEND": 0
+    }
+  }
+}

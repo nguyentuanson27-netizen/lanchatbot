@@ -150,7 +150,7 @@ export function stableProductDocumentFromQdrantPayload(value: unknown): StablePr
     occasions: strings(payload.search_occasions ?? payload.occasions),
     imageUrls: [...new Set([...primaryImage, ...images])].slice(0, 20),
     catalogVersion: text(payload.catalog_version) || text(payload.ingestion_version) || "catalog-v2",
-    observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
+    observedAt: text(payload.published_at) || text(payload.ai_updated_at) || text(payload.source_updated_at) || null,
   };
 }
 

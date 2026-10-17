@@ -1,0 +1,1 @@
+{"status":"BLOCKED","stage":"SOURCE_PREFLIGHT","missing":["REDIS_URL","QDRANT_BASE_URL","QDRANT_API_KEY","RUNTIME_POLICY_DATABASE_URL or DATABASE_URL","C3_VERTEX_CREDENTIAL_FILE"],"providerGenerations":0,"sendEnabled":false}

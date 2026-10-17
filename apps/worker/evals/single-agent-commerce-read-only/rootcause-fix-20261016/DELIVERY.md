@@ -1,0 +1,7 @@
+# Delivery readback
+
+Pushed report head a81eed37bae498bbf120e11302dc6902a0e74089 and updated existing draft [PR391](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/391). GitHub readback confirmed OPEN/draft, head branch feat/c3-phase-b-commerce-20261014, base feat/c3-semantic-verifier-checkpoint-a-20261005 and matching report head. Exact normalized PR body matched the submitted body-file; remote body SHA25652d0b83d01fd75ea061220fd921050f9f2cd75270173c76ab6186328786c9b90. Remote statusCheckRollup=[]; no remote CI PASS inferred.
+
+Local JSON/report consistency check passed:24primary rows,14USABLE/2NEEDS_EDIT/8fallback,16eligible,74dispatches/73HTTP200/1uncaptured response,19verifier invocations. Primary JSON/Markdown/conversation bytes still equal savepoint57ac945a; raw/source28disk/Git hashes passed audit. No executable/config change after sealed runSourceea983ad0. One report-metadata helper initially failed because silent successful tsc commands created no Tee-Object log file; fixed the helper to record that absence instead of inventing a log hash. No provider retry or result change.
+
+This documentation-only delivery savepoint follows the report head; it does not change run/primary identity. No subsequent provider generation, stateful replay, A2/A3, source patch, live mutation/send, merge or deploy. Recommendation remains STOP sales/live acceptance; remaining root causes are in DIAGNOSTICS.md. Git/remote head and clean worktree are checked again after this savepoint is pushed.

@@ -1,0 +1,131 @@
+{
+  "sourceSha": "0d5a1d14916f9bcb587af37722dcf7cedd1c33c2",
+  "newOutcomes": 31,
+  "earlierOutcomes": 0,
+  "populationCoverage": 31,
+  "singleSourceFull31Run": true,
+  "b1": {
+    "recorded": 24,
+    "terminals": {
+      "FALLBACK": 4,
+      "SEND_ELIGIBLE": 20
+    },
+    "fallbackReasons": {
+      "FAIL": 3,
+      "BUDGET": 1
+    },
+    "wholeTurnLatency": {
+      "n": 24,
+      "p50Ms": 10863.094499999977,
+      "p95Ms": 17265.671499999997
+    },
+    "addedVerificationLatency": {
+      "n": 23,
+      "p50Ms": 5428.312099999981,
+      "p95Ms": 7081.938899999979
+    }
+  },
+  "stateful": {
+    "recorded": 7,
+    "terminals": {
+      "SEND_ELIGIBLE": 4,
+      "HANDOFF": 2,
+      "NO_SEND": 1
+    },
+    "fallbackReasons": {},
+    "wholeTurnLatency": {
+      "n": 7,
+      "p50Ms": 23960.079100000003,
+      "p95Ms": 37185.604600000006
+    },
+    "addedVerificationLatency": {
+      "n": 4,
+      "p50Ms": 6456.354200000002,
+      "p95Ms": 7504.504099999998
+    }
+  },
+  "generationInvocations": 90,
+  "maximumGenerationInvocations": 120,
+  "roles": {
+    "owner": 63,
+    "verifier": 27
+  },
+  "generationHttpRequests": 90,
+  "unknownRequestAccounting": 0,
+  "httpStatuses": {
+    "200": 90
+  },
+  "automaticRetries": 0,
+  "generationErrors": 0,
+  "timeouts": 0,
+  "verifierErrors": 0,
+  "inputTokens": 351369,
+  "outputTokens": 29461,
+  "usageCoverage": {
+    "complete": 90,
+    "denominator": 90
+  },
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "verifierLatency": {
+    "n": 27,
+    "p50Ms": 4940.164000000004,
+    "p95Ms": 6958.3591000000015
+  },
+  "ownerLatency": {
+    "n": 63,
+    "p50Ms": 1796.8994999999995,
+    "p95Ms": 4509.464000000007
+  },
+  "knownOwnerAuthRequests": 2,
+  "codexAuthRequests": null,
+  "finalOnlyRequests": 6,
+  "finalOnlyToolViolations": 1,
+  "testDatabaseDropped": true,
+  "sendEnabled": false,
+  "b1SourceCounters": {
+    "embeddingCalls": 1,
+    "policyReads": 12,
+    "catalogReads": 50,
+    "posReads": 35
+  },
+  "sourceCheckCounters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 1,
+    "posReads": 0
+  },
+  "statefulSourceCounters": {
+    "embedding": 0,
+    "owner": 11,
+    "verifier": 4
+  },
+  "rates": {
+    "b1": {
+      "denominator": 24,
+      "fallback": 0.16666666666666666,
+      "handoff": 0,
+      "noSend": 0
+    },
+    "stateful": {
+      "denominator": 7,
+      "fallback": 0,
+      "handoff": 0.2857142857142857,
+      "noSend": 0.14285714285714285
+    },
+    "allRegistered": {
+      "denominator": 31,
+      "fallback": 0.12903225806451613,
+      "handoff": 0.06451612903225806,
+      "noSend": 0.03225806451612903
+    }
+  },
+  "providerErrorTimeoutRates": {
+    "generationInvocations": 90,
+    "generationErrors": 0,
+    "timeouts": 0,
+    "verifierGenerations": 27,
+    "verifierTransportErrors": 0,
+    "verifierSemanticFail": 3,
+    "semanticFailIsNotProviderError": true
+  }
+}

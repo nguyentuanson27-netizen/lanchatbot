@@ -38,6 +38,68 @@ import {
   type RealtimeCommitInput,
 } from "./realtime-runtime.js";
 
+describe("committed sales effect readback", () => {
+  it("locks an unchanged sales readback for final Outbox authorization without inventing a new sales transition", async () => {
+    const now = new Date("2026-10-15T08:00:00Z"), cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), expiry = new Date(now.getTime()+60000);
+    const state = { schemaVersion: 2, conversationKey: "conversation", routing: { pageId: "page", conversationId: "conversation" }, revision: 0,
+      stage: "DISCOVERY", cart: null, commerceContext: null, negotiation: null, checkoutDraft: null, clarification: null, preview: null, confirmation: null,
+      processedCommandIds: [], updatedAt: now.toISOString() };
+    const encrypted = cipher.encryptJson(state, "lana:sales-cycle:v1:page:conversation", expiry), calls: string[] = [];
+    const client = { async query(sql: string) {
+      calls.push(sql);
+      if (sql.includes("SELECT routing_owner")) return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: false, kill_switch: true, transaction_now: now }] };
+      if (sql.includes("SELECT generation")) return { rowCount: 1, rows: [{ generation: "1" }] };
+      if (sql.includes("AS source_message_id")) return { rowCount: 1, rows: [{ source_message_id: "current-message" }] };
+      if (sql.includes("SELECT conversation_owner")) return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+      if (sql.includes("FROM sales_cycle_states")) return { rowCount: 1, rows: [{ state_revision: "0", conversation_id: "conversation", page_id: "page", cart_expires_at: null, expires_at: expiry,
+        state_ciphertext: encrypted.ciphertext, state_nonce: encrypted.nonce, state_auth_tag: encrypted.authTag, state_encrypted_dek: encrypted.encryptedDek, state_key_ref: encrypted.keyRef }] };
+      return { rowCount: 1, rows: [] };
+    } };
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", cipher), hash = rawSha256("current-message");
+    const r = await store.commitWithinTransaction(client as never, { pageId: "page", conversationId: "conversation", customerHash: "customer", expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" }, inboxBatchGuard: { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] },
+      salesCyclePlan: { expectedRevision: 0, state, events: [], cartExpiresAt: null, expiresAt: expiry, readinessContractVersion: "DF06_EFFECT_READINESS_V1", sourceMessageIdHash: hash,
+        canonicalBuyingIntent: { schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1", decision: "NONE", requestedAction: "NONE", quantity: null, productId: null,
+          contributors: [], sourceMessageIdHash: hash, evidenceHash: null, reasonCodes: [], evaluatedAt: now.toISOString(), authorization: "NONE" } } }, now);
+    expect(r.stateCommitted).toBe(true);
+    expect(calls.some(sql => sql.includes("UPDATE sales_cycle_states"))).toBe(false);
+  });
+  it("retains a current Inbox lease across intermediate commits and completes it only at turn end", async () => {
+    const now = new Date("2026-10-15T08:00:00Z"), calls: string[] = [];
+    const client = { async query(sql: string) {
+      calls.push(sql);
+      if (sql.includes("SELECT routing_owner")) return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: false, kill_switch: true, transaction_now: now }] };
+      if (sql.includes("SELECT generation")) return { rowCount: 1, rows: [{ generation: "1" }] };
+      if (sql.includes("AS source_message_id")) return { rowCount: 1, rows: [{ source_message_id: "current-message" }] };
+      if (sql.includes("SELECT conversation_owner")) return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+      return { rowCount: 1, rows: [] };
+    } };
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", new LocalEnvelopeCipher("00".repeat(32), "test"));
+    const input = { pageId: "page", customerHash: "customer", conversationId: "conversation", expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" },
+      inboxBatchGuard: { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] }, completeInboxBatch: false };
+    const result = await store.commitWithinTransaction(client as never, input, now);
+    expect(result).toMatchObject({ stateCommitted: true, inboxBatchStatus: "RETAINED" });
+    expect(calls.some(sql => sql.includes("status = 'PROCESSED'"))).toBe(false);
+    calls.length = 0;
+    expect(await store.commitWithinTransaction(client as never, { ...input, completeInboxBatch: true, expectedStateVersion: 1, state: { ...input.state, revision: 2 } }, now))
+      .toMatchObject({ stateCommitted: true, inboxBatchStatus: "COMMITTED" });
+    expect(calls.some(sql => sql.includes("status = 'PROCESSED'"))).toBe(true);
+    const { inboxBatchGuard: _guard, ...unguarded } = input;
+    await expect(store.commitWithinTransaction(client as never, unguarded, now)).rejects.toThrow("CURRENT_SOURCE_LEASE");
+  });
+  it("reads the existing scoped ledger using the keyed operation fingerprint", async () => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1");
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", cipher);
+    const query = vi.fn(async (_sql: string, _values: unknown[]) => ({rows: [{command_kind:"CART_OPENED",state_revision_after:"4",cart_id:"cart",occurred_at:new Date("2026-10-14T10:00:00Z")}]}));
+    (store as unknown as {pool: unknown}).pool = {query};
+    expect(await store.readCommittedSalesCycleEvent("page","conversation","private-operation")).toMatchObject({commandKind:"CART_OPENED",stateRevisionAfter:4,cartId:"cart"});
+    expect(query.mock.calls[0]![0]).toContain("outcome = 'APPLIED'");
+    expect(query.mock.calls[0]![1]).toEqual(["page","conversation",cipher.fingerprint("private-operation","sales-cycle-command:v1")]);
+    expect(JSON.stringify(query.mock.calls)).not.toContain("private-operation");
+  });
+});
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
@@ -741,6 +803,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(payloadOnlyInput, now)).resolves.toMatchObject({
       metaOutboxCreated: 1,
     });
+    await expect(store.commit({ ...payloadOnlyInput, metaPlan: { ...payloadOnlyInput.metaPlan!,
+      replyPlanId: "10000000-0000-4000-8000-00000000000c", responseGroupId: "10000000-0000-4000-8000-00000000000d",
+      effectReadiness: resealReadinessV1(payloadOnlyInput.metaPlan!.effectReadiness!, { productIds: [] }),
+    } }, now)).resolves.toMatchObject({ metaOutboxCreated: 1 });
     await expect(store.commit({
       ...payloadOnlyInput,
       metaPlan: {

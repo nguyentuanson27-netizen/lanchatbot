@@ -1,0 +1,103 @@
+{
+  "mode": "DEVELOPMENT_NOT_PROVIDER_OR_CLEAN_SOURCE_QUALIFICATION",
+  "reports": [
+    {
+      "file": "c3-b-integration-bank-dev-1.json",
+      "status": "FAIL",
+      "groups": 9,
+      "databaseDropped": true,
+      "error": "Expected values to be strictly equal:\n\n3 !== 1\n"
+    },
+    {
+      "file": "c3-b-integration-dev-1.json",
+      "status": "FAIL",
+      "groups": 3,
+      "databaseDropped": true,
+      "error": "null value in column \"updated_by_subject\" of relation \"admin_artifact_versions\" violates not-null constraint"
+    },
+    {
+      "file": "c3-b-integration-dev-10.json",
+      "status": "PASS",
+      "groups": 6,
+      "databaseDropped": true,
+      "error": null
+    },
+    {
+      "file": "c3-b-integration-dev-11.json",
+      "status": "PASS",
+      "groups": 9,
+      "databaseDropped": true,
+      "error": null
+    },
+    {
+      "file": "c3-b-integration-dev-2.json",
+      "status": "FAIL",
+      "groups": 4,
+      "databaseDropped": true,
+      "error": "SALES_STATE_ENVELOPE_REPLAY_MISMATCH"
+    },
+    {
+      "file": "c3-b-integration-dev-3.json",
+      "status": "FAIL",
+      "groups": 5,
+      "databaseDropped": true,
+      "error": "{\"status\":\"REJECTED\",\"reason\":\"CART_OPEN_FAILED\"}\n\n'REJECTED' !== 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-dev-4.json",
+      "status": "FAIL",
+      "groups": 5,
+      "databaseDropped": true,
+      "error": "{\"status\":\"REJECTED\",\"reason\":\"CART_OPEN_FAILED\"}\n\n'REJECTED' !== 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-dev-5.json",
+      "status": "FAIL",
+      "groups": 5,
+      "databaseDropped": true,
+      "error": "{\"status\":\"REJECTED\",\"reason\":\"CART_OPEN_FAILED\"}\n\n'REJECTED' !== 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-dev-6.json",
+      "status": "FAIL",
+      "groups": 5,
+      "databaseDropped": true,
+      "error": "{\"status\":\"REJECTED\",\"reason\":\"OFFER_BINDING_MISMATCH\"}\n\n'REJECTED' !== 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-dev-7.json",
+      "status": "FAIL",
+      "groups": 5,
+      "databaseDropped": true,
+      "error": "{\"status\":\"UNAVAILABLE\",\"reason\":\"UNKNOWN_COMMIT\"}\n+ actual - expected\n\n+ 'UNAVAILABLE'\n- 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-dev-8.json",
+      "status": "FAIL",
+      "groups": 5,
+      "databaseDropped": true,
+      "error": "{\"status\":\"UNAVAILABLE\",\"reason\":\"UNKNOWN_COMMIT\"}\n+ actual - expected\n\n+ 'UNAVAILABLE'\n- 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-dev-9.json",
+      "status": "FAIL",
+      "groups": 6,
+      "databaseDropped": true,
+      "error": "{\"status\":\"REJECTED\",\"reason\":\"BUYING_INTENT_MISSING\"}\n\n'REJECTED' !== 'OK'\n"
+    },
+    {
+      "file": "c3-b-integration-receipt-bank-dev.json",
+      "status": "PASS",
+      "groups": 9,
+      "databaseDropped": true,
+      "error": null
+    },
+    {
+      "file": "c3-b-integration-receipt-cod-dev.json",
+      "status": "PASS",
+      "groups": 9,
+      "databaseDropped": true,
+      "error": null
+    }
+  ]
+}

@@ -160,18 +160,22 @@ export const HandoffDecisionV2Schema = z
       return;
     }
 
-    if (value.customerMessagePolicy !== "SILENT_HANDOFF") {
+    // Published admin matrices can override the default silence. This shape is
+    // not authorization: the consumer must resolve and bind the actual policy.
+    const adminHolding = value.provenance.decisionSource === "ADMIN_CONTROL" &&
+      /^matrix:[a-f0-9]{64}$/.test(value.provenance.rulesetVersion) && value.customerMessagePolicy === "HOLDING_REPLY_THEN_HANDOFF";
+    if (value.customerMessagePolicy !== "SILENT_HANDOFF" && !adminHolding) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["customerMessagePolicy"],
         message: "non-after-sales handoff must remain silent",
       });
     }
-    if (value.customerMessages.length !== 0) {
+    if (value.customerMessages.length !== (adminHolding ? 1 : 0)) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["customerMessages"],
-        message: "silent handoff cannot contain a customer message",
+        message: "handoff message count must match the resolved policy",
       });
     }
     if (value.tag !== "NHAN_VIEN") {

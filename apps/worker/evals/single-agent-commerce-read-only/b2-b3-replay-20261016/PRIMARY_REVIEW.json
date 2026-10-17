@@ -1,0 +1,632 @@
+{
+  "reviewType": "PRIMARY_CODING_AGENT_WHOLE_TERMINAL_AND_COMMITTED_STATE",
+  "sourceSha": "6477c840e5cd678d795d336a55b1ba95e287116f",
+  "rawSavepoint": "d6252104ef1fbcf0b55c27a444335f1b3f9d487d",
+  "reviewedAt": "2026-10-15T23:50:58.322Z",
+  "registeredOutcomes": 7,
+  "persistedTerminalOutcomes": 6,
+  "interruptedWithCommitReadback": 1,
+  "repetitions": 1,
+  "independent": false,
+  "humanAcceptance": null,
+  "blindToCurrentRejectedDrafts": true,
+  "blindToCurrentVerdictDetails": true,
+  "nonblindToSourceAndTask": true,
+  "counts": {
+    "PARTIAL_REPLY_PURCHASE_NOT_EXECUTED": 1,
+    "UNUSABLE_NO_SEND": 1,
+    "UNUSABLE_FALLBACK": 1,
+    "PARTIAL_STATE_SUCCESS_REPLY_NEEDS_EDIT": 1,
+    "FUNCTIONAL_RECOVERY_CHECKOUT_INCOMPLETE": 1,
+    "FUNCTIONAL_AUTHORITY_STOP_PURCHASE_INCOMPLETE": 1,
+    "HANDOFF_COMMIT_OBSERVED_TERMINAL_UNRECORDED": 1
+  },
+  "dimensions": [
+    "understanding",
+    "explicitNeedCompleteness",
+    "contextCorrectionUse",
+    "usefulness",
+    "decisionSupport",
+    "partialAnswerBehavior",
+    "nextStep",
+    "coherence",
+    "naturalness",
+    "factualActionSafety"
+  ],
+  "scoreMeaning": "0=not met;1=partial;2=adequate for current request;null=not applicable or unobserved. Whole-turn judgments, no keyword/summed acceptance threshold. An observed commit is separate from observed terminal/customer usability.",
+  "outcomes": [
+    {
+      "caseId": "stateful-open",
+      "ordinal": 1,
+      "label": "PARTIAL_REPLY_PURCHASE_NOT_EXECUTED",
+      "reasonVi": "Lưu đúng eo76/mông98, trả giá499.000đ và trạng thái đặt trước của áo beM. Nhưng khách đã chọn mua, giỏ vẫn null; câu chỉ báo thông tin không thực hiện bước mua. Giọng ngắn, đọc được; chưa đạt mục tiêu thao tác.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo Thạch Thảo màu be size M giá 499.000đ, mẫu này hiện ở trạng thái đặt trước chị nhé.",
+        "fallbackId": null
+      },
+      "terminalIsRaw": true,
+      "actualCapturedMessages": [
+        "Áo Thạch Thảo màu be size M giá 499.000đ, mẫu này hiện ở trạng thái đặt trước chị nhé."
+      ],
+      "committedPublicState": {
+        "stage": "DISCOVERY",
+        "revision": 0,
+        "cart": null,
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 76,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:09:08.220Z",
+              "sourceEventHash": "707843ae5f01999b9324d6d7f0c568107f6f178abd2c02a7f9cae754b960f45f"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 98,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:09:08.220Z",
+              "sourceEventHash": "707843ae5f01999b9324d6d7f0c568107f6f178abd2c02a7f9cae754b960f45f"
+            }
+          }
+        ],
+        "customerProfileRevision": 2
+      },
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "ordinal": 2,
+      "label": "UNUSABLE_NO_SEND",
+      "reasonVi": "Khách đổiL và lấy2chiếc nhưng không nhận tin; giỏ vẫn chưa tồn tại. Không lấy việc giỏ xuất hiện muộn ở bước4 để chấm bước2là đã thực hiện.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "EGRESS_READINESS",
+        "text": null,
+        "fallbackId": null
+      },
+      "terminalIsRaw": true,
+      "actualCapturedMessages": [],
+      "committedPublicState": {
+        "stage": "DISCOVERY",
+        "revision": 0,
+        "cart": null,
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 76,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:09:08.220Z",
+              "sourceEventHash": "707843ae5f01999b9324d6d7f0c568107f6f178abd2c02a7f9cae754b960f45f"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 98,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:09:08.220Z",
+              "sourceEventHash": "707843ae5f01999b9324d6d7f0c568107f6f178abd2c02a7f9cae754b960f45f"
+            }
+          }
+        ],
+        "customerProfileRevision": 2
+      },
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 0,
+        "naturalness": 0,
+        "factualActionSafety": 2
+      },
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "ordinal": 3,
+      "label": "UNUSABLE_FALLBACK",
+      "reasonVi": "Không báo được tổng hai áo gồm ship; chỉ static fallback. Không có quote/giỏ ở bước này để khách tiếp tục mua.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "terminalIsRaw": true,
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "committedPublicState": {
+        "stage": "DISCOVERY",
+        "revision": 0,
+        "cart": null,
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 76,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:09:08.220Z",
+              "sourceEventHash": "707843ae5f01999b9324d6d7f0c568107f6f178abd2c02a7f9cae754b960f45f"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 98,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:09:08.220Z",
+              "sourceEventHash": "707843ae5f01999b9324d6d7f0c568107f6f178abd2c02a7f9cae754b960f45f"
+            }
+          }
+        ],
+        "customerProfileRevision": 2
+      },
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "ordinal": 4,
+      "label": "PARTIAL_STATE_SUCCESS_REPLY_NEEDS_EDIT",
+      "reasonVi": "Đã sửa đúng eo74/mông96 và tạo được giỏ2áo beL theo lựa chọn trước. Đây là tiến triển thật. Nhưng tin khách chỉ là “Giỏ hàng đã được cập nhật, chị nhé.”: không xác nhận rõ việc sửa số đo và nghe máy móc; chưa phải phản hồi tự nhiên, sát câu vừa nhắn. Không yêu cầu đọc lại cả bộ số đo.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "RECEIPT_BACKED_ACK",
+        "text": "Giỏ hàng đã được cập nhật, chị nhé.",
+        "fallbackId": null
+      },
+      "terminalIsRaw": true,
+      "actualCapturedMessages": [
+        "Giỏ hàng đã được cập nhật, chị nhé."
+      ],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 4,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "4b7674e3-e46a-59b1-8a65-d5d65b50f71c",
+          "salesEpisodeId": "78b6fee6-d010-5cb2-86c9-7741058dca3e",
+          "customerProfileId": "abd2794b-ccc4-44b9-9238-c815d2fd31d7",
+          "revision": 1,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "e9d2ea2c-33d7-5516-8736-4ea63cec814e",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-15T23:02:38.268Z",
+                  "expiresAt": "2026-10-17T23:02:38.268Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "265b5d71-5481-5403-a599-96e236f13bb9",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "1bc7b6df-2d40-5baf-a0e0-cc2808cfdfb1",
+                "authorizedAt": "2026-10-15T23:11:06.593Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-15T23:11:06.593Z",
+          "updatedAt": "2026-10-15T23:11:06.593Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 74,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:10:45.527Z",
+              "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 96,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:10:45.527Z",
+              "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+            }
+          }
+        ],
+        "customerProfileRevision": 3
+      },
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "ordinal": 5,
+      "label": "FUNCTIONAL_RECOVERY_CHECKOUT_INCOMPLETE",
+      "reasonVi": "Private code-only path không gọi model nhưng chuyển handoff DEPENDENCY_FAILURE, không có preview/checkout hoàn tất. Giỏ đã có nên không quy do thiếu giỏ; primary chưa đọc trace để gán dependency cụ thể. Không có tin capture cho khách.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "terminalIsRaw": true,
+      "actualCapturedMessages": [],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 4,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "4b7674e3-e46a-59b1-8a65-d5d65b50f71c",
+          "salesEpisodeId": "78b6fee6-d010-5cb2-86c9-7741058dca3e",
+          "customerProfileId": "abd2794b-ccc4-44b9-9238-c815d2fd31d7",
+          "revision": 1,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "e9d2ea2c-33d7-5516-8736-4ea63cec814e",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-15T23:02:38.268Z",
+                  "expiresAt": "2026-10-17T23:02:38.268Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "265b5d71-5481-5403-a599-96e236f13bb9",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "1bc7b6df-2d40-5baf-a0e0-cc2808cfdfb1",
+                "authorizedAt": "2026-10-15T23:11:06.593Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-15T23:11:06.593Z",
+          "updatedAt": "2026-10-15T23:11:06.593Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 74,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:10:45.527Z",
+              "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 96,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:10:45.527Z",
+              "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+            }
+          }
+        ],
+        "customerProfileRevision": 3
+      },
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": null,
+        "usefulness": 0,
+        "decisionSupport": null,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": 2
+      },
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-confirm",
+      "ordinal": 6,
+      "label": "FUNCTIONAL_AUTHORITY_STOP_PURCHASE_INCOMPLETE",
+      "reasonVi": "Sau handoff, code dừng lượt chốt với CURRENT_AUTHORITY_CHANGED và không gọi model. Đúng kiểm soát quyền; hành trình xác nhận mua vẫn chưa hoàn tất, không chấm thành bán hàng thành công.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "terminalIsRaw": true,
+      "actualCapturedMessages": [],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 4,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "4b7674e3-e46a-59b1-8a65-d5d65b50f71c",
+          "salesEpisodeId": "78b6fee6-d010-5cb2-86c9-7741058dca3e",
+          "customerProfileId": "abd2794b-ccc4-44b9-9238-c815d2fd31d7",
+          "revision": 1,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "e9d2ea2c-33d7-5516-8736-4ea63cec814e",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-15T23:02:38.268Z",
+                  "expiresAt": "2026-10-17T23:02:38.268Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "265b5d71-5481-5403-a599-96e236f13bb9",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "1bc7b6df-2d40-5baf-a0e0-cc2808cfdfb1",
+                "authorizedAt": "2026-10-15T23:11:06.593Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-15T23:11:06.593Z",
+          "updatedAt": "2026-10-15T23:11:06.593Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 74,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:10:45.527Z",
+              "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 96,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-15T23:10:45.527Z",
+              "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+            }
+          }
+        ],
+        "customerProfileRevision": 3
+      },
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 2,
+        "usefulness": 0,
+        "decisionSupport": null,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": 2
+      },
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-human-request",
+      "ordinal": 7,
+      "label": "HANDOFF_COMMIT_OBSERVED_TERMINAL_UNRECORDED",
+      "reasonVi": "Bước7bị host/tool ngắt trước khi lưu terminal và capture. Readback xác nhận HUMAN ownership/event/case/tag intent đã commit, nhưng Inbox còn PROCESSING và tag PENDING. Không đủ bằng chứng chấm final reply/delivery hoặc coi lượt hoàn tất; giữ UNKNOWN thay vì tạo outcome giả.",
+      "terminal": {
+        "disposition": "UNRECORDED_AFTER_HOST_INTERRUPTION",
+        "reason": "HANDOFF_COMMIT_READ_BACK_TERMINAL_UNKNOWN",
+        "text": null
+      },
+      "terminalIsRaw": false,
+      "actualCapturedMessages": null,
+      "committedPublicState": {
+        "conversationOwner": "HUMAN",
+        "handoffEvent": {
+          "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+          "direction": "BOT_TO_HUMAN",
+          "source": "CUSTOMER_REQUEST",
+          "reason_code": "CUSTOMER_REQUESTED_HUMAN",
+          "owner_before": "BOT",
+          "owner_after": "HUMAN",
+          "handoff_generation": "1",
+          "desired_tag": "NHAN_VIEN",
+          "occurred_at": "2026-10-15T23:11:55.376Z"
+        },
+        "tagIntent": {
+          "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+          "desired_tag": "NHAN_VIEN",
+          "handoff_generation": "1",
+          "status": "PENDING"
+        },
+        "handoffCase": {
+          "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+          "status": "NEW"
+        }
+      },
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "humanReview": null
+    }
+  ]
+}
