@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current reviewed native-fact restoration and stateful replay — 2026-10-17
+
+- [x] Independent review REVISE and owner authorization: restore native offer facts only; retain current prompt/model/budget/diagnostic boundaries. Refresh main `296cdcfb`; code savepoint `10276d54` after observed RED26PASS/2FAIL → focused49PASS.
+- [x] Current-source read-only selection: AO/be/M×1 and AO/be/L×2 READY/PRE_ORDER. Full worker1,806/Node491PASS2optionalSKIP/protected-reply21; build/typecheck/lint exit0. Offline60captured inputs restored exactly to prior action-contract projection; controlled long signature still exceeds32KB. [Preparation](../apps/worker/evals/single-agent-commerce-read-only/fact-locality-run-20261017/PREPARATION.md).
+- [ ] Freeze clean source/config/inputs; existing preflights/readback; collect exactly7stateful N1/max24 with no retry/replacement. Commit raw before primary whole-dialogue review, then detailed diagnosis and evidence report; update PR391. No provider result or B1/A2/A3 run yet.
+- [ ] Sales/live STOP; no authoritative region mapping or stability/whole-B acceptance. Preserve A OWNER_BYPASS and no publication/deploy/live send.
+
 ## Current reviewed runtime-boundary fix and stateful replay — 2026-10-17
 
 - [x] Refresh main296cdcfb, retain intake042cad7c/branch/PR391; apply independent review with [bounded plan](../apps/worker/evals/single-agent-commerce-read-only/runtime-boundary-run-20261017/PLAN.md).
