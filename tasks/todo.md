@@ -7,8 +7,9 @@
 - [x] Final worker1.806/provider-protocol49/protected-reply21/legacy-focused21 PASS; full Node491 PASS/2 existing optional SKIP; worker typecheck/build/lint exit0. Preserve the first four historical-evidence failures and compatibility correction in preparation.
 - [x] Check60captured bodies: trusted view/native parts unchanged,66fact arrays reused/20.072bytes total; max31.352/32.768. Long-signature variation35.905bytes remains a known limit, not resolved by fact dedup.
 - [x] Controlled COD24/24 PASS/0provider generations, source964c5270/sourceDirty=false, disposable DB dropped. No new bank control claim.
-- [ ] Clean source freeze and zero-generation preflights; collect existing7stateful N1/max24 once, without B1/canary/retry/replacement.
-- [ ] Preserve raw before whole-terminal primary/diagnosis; report actual source checkout, request/error/binding/privacy/latency/token evidence and remaining limits; update PR391 and stop. A OWNER_BYPASS/source mapping unresolved; no live action or Phase C.
+- [x] Freeze clean13e69d43, config/stateful/source preflight0generations; collect existing7stateful N1/max24 once, without B1/canary/retry/replacement. Actual4fallback/2handoff/1no-send, no cart/quote/preview.
+- [x] Raw691fd912 before primarya8b74138 before diagnosis:1USABLE ownership-only/6unresolved. 13owner HTTP200/0verifier/0retry-error-timeout, four NONE/native-call violations blocked.14raw/Git hashes,16frozen/runtime hashes,13wire hashes/0observed label-private leaks, DBdropped. [Report](../apps/worker/evals/single-agent-commerce-read-only/runtime-boundary-run-20261017/CHECKPOINT_B.md).
+- [x] Record STOP and limits: owner/tool behavior remains unstable, fact-reuse locality is a hypothesis not a proven fix, private checkout NO_TRANSITION_PLAN this run (not ETA), long-signature/mapping unresolved. Update PR391 and stop; no post-result patch/extra generation, A qualification, live action or Phase C.
 
 ## Current reviewed action-contract fix and replay — 2026-10-16
 
