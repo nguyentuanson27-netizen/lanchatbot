@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current customer-outcome model run — 2026-10-17
+
+Owner authorizes one new run at intake `5a158cdf`; refreshed main `296cdcfb`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-run-20261017/SCOPE.md): unchanged current runtime/prompts/models/config, 7ordered stateful outcomes then24existing B1, N1/max120invocations/retry0. Complete current-source readback/selection, freeze hashes and clean source, preflight before generation. Keep all terminal/errors; raw savepoint before whole-turn primary before trace diagnosis. Current fixes are tested, model behavior still unmeasured. Preserve A OWNER_BYPASS, source-checkout region dependency, capture-only delivery and no source publication/live effects/Phase C. One run/report/PR391 update, no automatic fix/rerun.
+
 ## Current customer-outcome corrections after run review — 2026-10-17
 
 Owner asks all latest findings be fixed, including system-style ACKs, preorder disclosure, handoff delivery and excess latency; asks to find the existing shipping source in repo. Intake `f6548930`, refreshed main/implementationBaseSha `296cdcfb`. [Bounded plan](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-fix-20261017/PLAN.md): replace only the relevant owner wording/timing, add current preorder labels+STOCK binding to the existing code-owned checkout preview, honour explicit admin holding policy and atomically enqueue it on source-completing private handoff, retain public deferred egress/default silence. Remove the immediate redundant terminal read and parallelize independent current row/generation reads; preserve post-tool/current final/Outbox CAS checks. No new gate/store/model/parser/repair/reverify, case answer or production wiring.

@@ -1,5 +1,10 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current customer-outcome model run — 2026-10-17
+
+- [x] Owner authorizes one31outcome/N1 run after current fixes; same24B1+7stateful/model/budget/review bar. [Scope](../apps/worker/evals/single-agent-commerce-read-only/customer-outcome-run-20261017/SCOPE.md), intake `5a158cdf`, refreshed main `296cdcfb`.
+- [ ] Current-source readback/selection, frozen inputs, clean source and existing preflights; then7stateful+24B1 with no retry/replacement/source changes. Raw before primary before diagnosis; update PR391 and stop. No result, naturalness improvement or successful source-backed checkout claimed yet.
+
 ## Current customer-outcome corrections after run review — 2026-10-17
 
 - [x] Trace/reproduce the reviewed risks; independent test author observes the missing holding-message path and conflicting matrix/decision contracts. Owner wording now acknowledges purchase choice, disclosure moves to the first selected preorder/status change; no case examples, verifier rewrite or authority relaxation. Existing preview binds/discloses current PRE_ORDER lines.
