@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current bounded-source fix and full replay — 2026-10-18
+
+- [x] Review all31 actual baseline outcomes then traces; refresh main296cdcfb at intake7f20f3f2. One independent REVISE_PLAN removes repeated prompt edits. [Revised plan](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-run-20261018/PLAN.md) accepts only owner wire bound and partial native evidence locality.
+- [ ] Observe focused RED->GREEN, self-review and required checks/COD controls; prompts/models/corpus/counts/verifier32KB unchanged.
+- [ ] Freeze/commit/clean source/preflights; one existing7stateful+24B1/N1/max120/retry0 run, preserve all raw before actual primary before diagnosis; update report/PR391.
+- [ ] Voice/policy wording, recovery preorder, source attrs/mapping and provider NONE/UNKNOWN remain measured risks/dependencies. No publication/live action/Phase C/A qualification.
+
 ## Current independently reviewed customer-outcome fix and replay — 2026-10-17
 
 - [x] Refresh main296cdcfb, preserve intake33a64ab9 and independent REVISE_PLAN in [bounded scope](../apps/worker/evals/single-agent-commerce-read-only/reviewed-outcome-run-20261017/SCOPE.md).
