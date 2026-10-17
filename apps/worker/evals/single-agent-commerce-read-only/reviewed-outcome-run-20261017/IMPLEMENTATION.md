@@ -49,3 +49,19 @@ git diff --check
 ~~~
 
 Model behavior, source-backed checkout and human acceptance remain unproven. Freeze one candidate before the separately authorized31-outcome run; no post-result patch or automatic second run, source publication/live action/Phase C.
+
+## Controlled source checks at code53b6008c
+
+Existing isolated real-PG COD controls25/25PASS, sourceDirty=false, providerGenerations0, disposable DB dropped. Exact results in controls/cod-pass.json. The added POS-unavailable composed unit control and existing real-PG configured dependency-holding control are separate evidence; neither adds handoff to B1 or demonstrates partial answer delivery. BANK_TRANSFER was not rerun; no old bank PASS is adopted.
+
+Current read-only source selection PASS: AO/BE/Mx1 and AO/BE/Lx2 both READY/PRE_ORDER. B1 actual source adapter readback PASS/0owner-verifier generations/one embedding search probe; all four SV2447 offer reads have no structured attributes. This locates the observable absence at the current candidate output, not the exact cause inside source/index publication. Fresh shipping read checked2026-10-17T16:17:08.949Z: the same four duration keys, header REGION/TRANSIT_MIN_DAYS/TRANSIT_MAX_DAYS/ENABLED, no city aliases/default. Preserve shipping-source-readback.json, do not infer a region. Live public source writes0.
+
+~~~text
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs C:/Users/nguye/AppData/Local/Temp/c3-reviewed-outcome-cod-20261017 COD
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node C:/Users/nguye/AppData/Local/Temp/c3-fact-locality-selection-20261017.mjs C:/Users/nguye/AppData/Local/Temp/c3-reviewed-outcome-selection-20261017.json
+python C:/Users/nguye/AppData/Local/Temp/c3-offer-replay-session-20261016.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json --source-check --out C:/Users/nguye/AppData/Local/Temp/c3-reviewed-outcome-source-20261017
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node C:/Users/nguye/AppData/Local/Temp/c3-current-shipping-source-20261017.mjs C:/Users/nguye/AppData/Local/Temp/c3-reviewed-outcome-shipping-20261017.json
+node C:/Users/nguye/AppData/Local/Temp/c3-reviewed-outcome-freeze-20261017.mjs
+~~~
+
+Each command exited0. Freeze validates unchanged models/verifier/schema/fallback/corpora/config, disk-to-Git bytes and clean code source before copying evidence.13input files/5runtime files are hashed; collection still NOT_RUN. No provider health generation was added.
