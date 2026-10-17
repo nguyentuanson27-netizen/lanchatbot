@@ -266,7 +266,7 @@ try{
   if(supersede)await enqueue('newer-'+randomUUID());
   const read=async()=>{const r=await runtime.loadOrCreate(pageId,h.customerHash,'APP',()=>{throw new Error('EXISTING_REQUIRED');});
    return {...h,stateVersion:r.stateVersion,state:r.state,permission:r.state.conversationOwner==='BOT'};};
-  const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:fn=>withTransaction(pool,fn),
+  const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:fn=>withTransaction(pool,fn),deliveryRecipient:'synthetic-handoff-recipient',
    inboxBatchGuard:{generation:batch.generation,leaseToken:batch.leaseToken,inboxIds:batch.inboxIds},resolveTagId:()=> 'synthetic-handoff-tag'});
   const hp=structuredClone(policyResolution.bundle);
   // Synthetic HANDOFF_MATRIX in memory; current public policy is unchanged and never republished.
@@ -276,25 +276,25 @@ try{
   const tools=await createCommerceTools({read:{scope:h,clock:()=>new Date(),policy:async()=>({...policyResolution,bundle:hp}),
     catalog:{readProduct:async()=>{throw new Error('UNUSED');},searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}},
    handoff:{...port,policy:async()=>hp}});
-  const counts=async()=>(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags',[h.conversationId])).rows[0];
+  const counts=async()=>(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags, (SELECT count(*)::int FROM meta_outbox WHERE conversation_id=$1) AS messages',[h.conversationId])).rows[0];
   return {h,tools,read,counts};
  }
  await check('B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate',async()=>{
   const h=await handoffFixture(),r=await h.tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}});assert.equal(r.status,'OK',JSON.stringify(r));
-  assert.equal((await h.read()).state.conversationOwner,'HUMAN');assert.deepEqual(await h.counts(),{events:1,tags:1});
+  assert.equal((await h.read()).state.conversationOwner,'HUMAN');assert.deepEqual(await h.counts(),{events:1,tags:1,messages:1});
   assert.equal((await h.tools.terminalOutcome()).text,'Shop đã nhận yêu cầu đổi hàng của chị.');
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}})).status,'REJECTED');
-  assert.deepEqual(await h.counts(),{events:1,tags:1});
+  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:1});
  });
  await check('B handoff missing provider link rolls back ownership/event and never acknowledges acceptance',async()=>{
   const h=await handoffFixture({link:false}),r=await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}});
-  assert.equal(r.status,'UNAVAILABLE');assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0});
+  assert.equal(r.status,'UNAVAILABLE');assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0,messages:0});
   assert.equal((await h.tools.terminalOutcome()).disposition,'NO_SEND');
  });
  await check('B handoff superseded inbound cannot commit using the earlier source lease',async()=>{
   const h=await handoffFixture({supersede:true});
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}})).status,'REJECTED');
-  assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0});
+  assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0,messages:0});
  });
  // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
