@@ -2,7 +2,11 @@
 
 ## Current agreed direction after rollback — 2026-10-18
 
-Owner chốt hướng xử lý sau khi review kế hoạch và lượt sửa thất bại. Mốc code `82833c0a39cb14720926ce04e91a1d3cdab5587a`, giữ F1–F3; A OWNER_BYPASS/B sales-live STOP. Đây là kế hoạch, chưa triển khai/chạy provider. Phần này thay đề xuất thực hiện tiếp của P1–P4.
+Owner chốt hướng xử lý sau khi review kế hoạch và lượt sửa thất bại. Mốc code `82833c0a39cb14720926ce04e91a1d3cdab5587a`, giữ F1–F3; A OWNER_BYPASS/B sales-live STOP. Phần này thay đề xuất thực hiện tiếp của P1–P4. Owner sau đó yêu cầu implementation; trạng thái và giới hạn bên dưới không phải kết quả model mới.
+
+Đã triển khai theo [báo cáo và trace](../docs/specs/c3-phase-b-agreed-fixes-implementation-20261018.md): cầu nối confirm_purchase → code hỏi thông tin trước preview (`1bb66325`), projection bỏ riêng missingFields (`e8c9aae4`), preview hiển thị lựa chọn từng component (`bd086b78`), thay một bullet exact lookup/discovery (`a43c1944`). RED→GREEN đã quan sát. Full worker 1878 PASS/131 files; Node 509 PASS/2 optional SKIP; protected claims/assembler 21 PASS; worker build/lint(noEmit) exit 0. Self-review không khôi phục gói voice/recovery/confirmation đã rollback. Không sửa historical artifacts, không provider request, không live action. Những checks này chưa chứng minh owner tư vấn tốt hơn hoặc chủ động gọi checkout đúng lúc.
+
+Trace màu đã đối chiếu: hai lượt thành công đọc kèm M/be, lượt lỗi đọc rộng rồi truyền null; còn nguyên lựa chọn trong tin khách. Ghi diagnostic đổi riêng phạm vi read trên cùng snapshot, chưa chạy và chưa sửa schema/điền màu. Source sân khấu đã có trong owner context nhưng thiếu căn cứ độ kín áo; partial-source B1 không có follow-up/handoff executor. Hai phần này vẫn unresolved về hành vi model/độ đủ nguồn; không thêm nhắc lặp vào prompt. Giữ các treatment độc lập khi được yêu cầu đo, không chạy combined HEAD rồi quy tác động cho một edit.
 
 Nguồn: [kế hoạch F1–F3](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md), [P1–P4 đã rollback](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md), [implementation](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md), [45 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/CONVERSATIONS_AND_REVIEW.md). Kết quả lịch sử 36/2/4/3 → 32/4/6/3 không phải đo mới trên rollback HEAD hoặc chứng minh tác động của từng edit.
 
@@ -46,9 +50,9 @@ Giữ giọng rollback. Không đưa lại yêu cầu mặc định phải nói 
 - Code: RED→GREEN cho boundary bị đổi, focused consumers, build/lint. Model khi được yêu cầu chạy: cùng model/config/rubric, ca lỗi và controls từng tốt; mỗi ca chọn 3 lần. Stateful giữ đủ mạch/downstream sau lỗi. Đăng ký danh sách, denominator/request cap và source sạch trước chạy; không tự thêm generation sau kết quả. Diagnostic từ request cố định không phải full journey PASS.
 - Không full45 cho từng edit. Khi cơ chế có bằng chứng và controls không hồi quy mới chạy tổng thể cùng45 priority; remaining16 theo criteria freeze. Giữ mọi lỗi, không majority/best-of/retry hoặc sửa rubric để tăng điểm; không ghép các run riêng thành một run PASS.
 - Giữ một owner/tối đa một verifier và code authority/freshness/state/CAS/permissions/receipts/privacy. Không thêm role/parser/router/repair loop/gate/store/framework, tăng budget hay nới verifier để giảm fallback. Không merge/deploy/live send/Phase C.
-- Yêu cầu hiện tại chỉ chốt kế hoạch; implementation/provider requests=0. Chưa có model PASS mới. Không tự chạy từ việc cập nhật tài liệu này.
+- Yêu cầu hiện tại đã cho phép implementation; provider requests=0. Chưa có model PASS mới. Không tự chạy từ việc sửa code/tài liệu này.
 
-Tiếp thu review độc lập: verdict REVISE tại `cca45a053681a78fc9cad81e27d5932f2f0f44fc`, hai finding P2 về cầu nối checkout và active search sau rollback. Bản này sửa cả hai; giữ chẩn đoán màu, preview riêng, voice rollback, models/verifier/budget và kiểm từng treatment. Chưa có verdict ACCEPT độc lập cho bản cập nhật. Đây là thay tài liệu theo yêu cầu owner, không implementation hoặc run mới.
+Tiếp thu review độc lập: verdict REVISE tại `cca45a053681a78fc9cad81e27d5932f2f0f44fc`, hai finding P2 về cầu nối checkout và active search sau rollback. Bản kế hoạch `7806c577` đã sửa cả hai trước implementation; giữ chẩn đoán màu, preview riêng, voice rollback, models/verifier/budget và kiểm từng treatment. Chưa có verdict ACCEPT độc lập cho implementation mới; self-review và kiểm chứng thực tế ở báo cáo trên.
 
 ## Completed owner-requested rollback — 2026-10-18
 
