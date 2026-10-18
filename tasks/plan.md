@@ -1,6 +1,12 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current F1–F3 provider replay — 2026-10-18
+## Current revised plan after independent review — 2026-10-18
+
+Owner requests a plan revision at `f70f5a9e`. [Revised implementation plan](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md) incorporates independent REVISE: V0 whole-reply adjudication first; P1 complete customer-visible cart choices without new durable display-name state; P2 code wording; P3 fit-tool scope and exact-lookup versus discovery search; P4 replace existing decision/voice guidance; V1 verifier change only if adjudication identifies a rule gap. Initial read without known offers is valid; quote remains a control, not another prompt patch. Preview text completeness is distinct from correct backend state. Stage rep1 is a candidate false PASS, not the automatic safe reference. Explicit acceptance, shared consumers and focused verification are recorded in the plan.
+
+Documentation only; implementation and provider run remain pending. A OWNER_BYPASS/B sales-live STOP. Future owner-requested run uses the same 45 priority outcomes and conditional16, with new frozen source/criteria and every attempt retained. No automatic generation or reinterpretation of frozen results. This revision is not a new independent ACCEPT.
+
+## Completed F1–F3 provider replay — 2026-10-18
 
 Owner requests one model run of2bfc568d. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md): same45priority outcomes, three ordered stateful journeys first then8B1×3; remaining16 once only if unchanged criteria met. Fresh source readback0generation succeeded; clean bRunSourceSha7d01e594 and0generation preflights preceded dispatch. All45collected: raw458230a7 before primary711233c7 before diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/CHECKPOINT_B.md):36USABLE/2NEEDS_EDIT/4UNUSABLE/3controls,117requests/0retry,4fallback, all3previews/confirmations. STOP before16, no post-result patch/second candidate.
 

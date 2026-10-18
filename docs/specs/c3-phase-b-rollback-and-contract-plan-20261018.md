@@ -1,5 +1,7 @@
 # Phase B — rollback hành vi và phương án sửa từ hai vòng gần nhất
 
+Sau implementation F1–F3 và replay 45 lượt, phương án tiếp theo được cập nhật tại [kế hoạch sau review độc lập](c3-phase-b-post-replay-fix-plan-20261018.md). Tài liệu dưới giữ lịch sử quyết định/kiểm chứng của rollback và F1–F3.
+
 Owner yêu cầu rollback, review hai vòng chạy và hai lượt sửa gần nhất, rồi đưa phương án fix. Phạm vi thực hiện lần này: rollback có chọn lọc, kiểm tra và kế hoạch; **không triển khai các bước fix đề xuất hoặc chạy provider mới**. A vẫn OWNER_BYPASS; B chưa đạt chất lượng bán hàng/live acceptance.
 
 Intake: `d170e3356cad50d32fce08e9d0c2f94e079f6c1d`. Main vừa fetch: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Tiếp tục branch `feat/c3-phase-b-commerce-20261014`, draft PR391. Không reset lịch sử Git hoặc sửa artifact đã seal.

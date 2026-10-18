@@ -1,6 +1,17 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current F1–F3 provider replay — 2026-10-18
+## Current revised fix plan — 2026-10-18
+
+- [x] Incorporate independent REVISE and self-review into the [concrete plan](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md); correct preview readback overclaim separately from frozen evidence. Documentation only, no implementation/provider PASS.
+- [ ] V0: adjudicate whole stage/compound replies against source, distinguish independent interpretation from observed verdict and leave unresolved readings explicit.
+- [ ] P1: show article/offer and per-component color/size in cart preview; use bound display names only if supplied by existing composition, otherwise code fallback; verify shared consumers.
+- [ ] P2: improve existing receipt/confirmation wording while keeping authority/freshness and actual handoff capability boundaries.
+- [ ] P3: clarify recommend_size/NO_VERIFIED_CHART scope and search exact lookup versus discovery; preserve initial read when offers are unknown and quote controls.
+- [ ] P4: replace decision/voice paragraphs with specific behavioral changes; retain subjective advice, upsell, correction readback and partial-source behavior.
+- [ ] V1 conditional: change verifier only for a rule gap established by V0; no keyword patch or new role/loop/schema.
+- [ ] Run changed-boundary checks, self-review and savepoints; register/run a new candidate only when owner requests execution. Same45 priority, conditional16; no automatic provider run in this planning task.
+
+## Completed F1–F3 provider replay — 2026-10-18
 
 - [x] Register owner-requested single replay at2bfc568d/main296cdcfb: same45priority outcomes and old criteria, stateful first, remaining16 conditional. [Scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md); fresh source readback0generation completed.
 - [x] Freeze inputs/tool schemas/runtime/helper hashes; clean source7d01e594 and0generation preflights. Complete45priority outcomes in six processes, all3DBdropped, no generation retry. Raw458230a7before whole primary711233c7before diagnosis.
