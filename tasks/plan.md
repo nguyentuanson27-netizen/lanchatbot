@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current execution-contract provider replay — 2026-10-18
+
+Owner authorizes one model replay of6c5befca. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md): same45priority outcomes, three stateful journeys first then8B1×3; conditional16 only if priority criteria met. Keep models/config/verifier/corpora/budgets and all failed attempts; no new diagnostic slots or post-result patch. Fresh source readback0generation → frozen inputs/clean source seal → preflight → raw45commit → whole-outcome primarycommit → diagnosis/audit/report/PR391 → STOP. Provider results NOT_RUN at registration.
+
 ## Current execution-contract fix — 2026-10-18
 
 Owner requests implementation after cross-run root-cause review. Intake571c4403/refreshed main296cdcfb. [Scope and observed checks](../docs/specs/c3-phase-b-execution-contract-fix-20261018.md): move only code-owned execution fields to system instructions, preserve customer choices across failed writes in owner guidance, distinguish final-only tool completion failures from ordinary budget exhaustion, and keep Sol comparison instructions complete. Observed RED→GREEN; focused63adapter/protocol/comparison and160runtime/effects/state/ingress/boundary PASS; full Vitest1857PASS with bounded concurrency after two default-concurrency timeouts; Node506PASS/2optionalSKIP; worker build/typecheck/lint exit0. No new provider run, model/config change, late effect/retry, new store/router/parser, verifier patch or relabeling. Provider-internal NONE cause and sales improvements remain unproven; A OWNER_BYPASS/B sales-live STOP.

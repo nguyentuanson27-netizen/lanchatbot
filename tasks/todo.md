@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current execution-contract provider replay — 2026-10-18
+
+- [x] Owner authorizes model replay at6c5befca; refresh main296cdcfb and [freeze45priority scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md), unchanged criteria/corpora/models/budgets, stateful first.
+- [ ] Fresh source readback0generation, frozen input hashes, clean seal and config/stateful preflights.
+- [ ] Complete45priority outcomes, rawcommit before primarycommit before diagnosis; conditional16 only on all-priority acceptance.
+- [ ] Audit all requests/errors/mode violations/bindings/label-private firewall/DB cleanup and report actual terminal sales/voice results. Update PR391 and STOP; no A PASS/deploy/live send.
+
 ## Current execution-contract fix — 2026-10-18
 
 - [x] Review repeated NONE/color/read-before-add traces; refresh main296cdcfb at intake571c4403. [Implementation scope](../docs/specs/c3-phase-b-execution-contract-fix-20261018.md); no model generation requested in this fix-only step.
