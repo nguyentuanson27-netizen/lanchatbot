@@ -19,8 +19,10 @@ export const readOnlyDeclarations=[
  {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Có offerType thì chỉ đọc lựa chọn đó. Bỏ offerType thì sellingOptions trả giá/tồn riêng từng lựa chọn bán; dữ kiện offer còn ở ngoài cùng chỉ thuộc offerType/variantId ghi tại đó, không phải giá chung cho áo lẻ và cả bộ. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
+const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
+const publicField=field=>Object.entries(stateFieldPaths).find(([,path])=>path===field)?.[0]??field;
 export const stateDeclarations=[
- {name:'apply_customer_state',description:'Chỉ ghi thông tin khách mới cung cấp/sửa/bỏ trong tin hiện tại trước tool phụ thuộc. Hồ sơ đã nhận nằm trong state; không gửi lại số đo hoặc sourceQuote của history. field dùng nguyên đường dẫn enum, số đo có tiền tố measurements. sourceQuote trích nguyên văn ngắn chứa đúng một giá trị từ tin hiện tại; code kiểm trước khi ghi. Bị từ chối thì cả batch chưa ghi; xử lý đủ unresolvedFields trước khi xác nhận đã cập nhật.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:['measurements.HEIGHT_CM','measurements.WEIGHT_KG','measurements.BUST_CM','measurements.WAIST_CM','measurements.HIPS_CM','fitPreference','preferences.colors','preferences.styles','preferences.materials']},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]},sourceQuote:{type:'string',minLength:1,maxLength:160}}}}}}},
+ {name:'apply_customer_state',description:'Chỉ ghi thông tin khách mới cung cấp/sửa/bỏ trong tin hiện tại trước tool phụ thuộc. Hồ sơ đã nhận nằm trong state; không gửi lại số đo hoặc sourceQuote của history. field dùng nguyên mã enum, code chuyển sang đường dẫn lưu trữ. sourceQuote trích nguyên văn ngắn chứa đúng một giá trị từ tin hiện tại; code kiểm trước khi ghi. Bị từ chối thì cả batch chưa ghi; xử lý đủ unresolvedFields trước khi xác nhận đã cập nhật.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['ops'],properties:{ops:{type:'array',minItems:1,maxItems:8,items:{type:'object',additionalProperties:false,required:['op','field'],properties:{op:{type:'string',enum:['SET','REPLACE','CLEAR']},field:{type:'string',enum:Object.keys(stateFieldPaths)},value:{anyOf:[{type:'number'},{type:'string'},{type:'array',items:{type:'string'}}]},sourceQuote:{type:'string',minLength:1,maxLength:160}}}}}}},
  {name:'recommend_size',description:'Chọn size bằng hồ sơ khách đã được code nhận và bảng size của đúng sản phẩm. Thiếu đầu vào thì hỏi phần tool yêu cầu, chưa gợi size.',parameters:{type:'OBJECT',properties:{subjectRef:string},required:['subjectRef']}},
  {name:'quote_cart',description:'Tính tổng khi chưa có cartQuote cho lựa chọn hiện tại. add_to_cart/change_cart_item đã cấp cartQuote trong trusted.state thì dùng luôn, không gọi lại chỉ để đọc tổng. Giá, phí và ưu đãi do code cấp; không truyền tổng tiền hoặc tự chọn ưu đãi.',parameters:{type:'OBJECT',properties:{}}},
 ];
@@ -45,7 +47,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(refs.length)declaration.parameters.properties.subjectRef={type:'STRING',enum:[...new Set(refs)]};
  }
  const subject=s=>({...(['PRODUCT','CART_LINE'].includes(s.kind)?{subjectRef:s.ref}:{evidenceRef:s.ref}),kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
- const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
+ const measurement=m=>({field:publicField('measurements.'+m.kind),value:m.value});
  const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
   {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
  const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value}));
@@ -84,7 +86,11 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    if(response.response.data.availability)response.response.data.availability=availability(data.availability);
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
-  if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
+  if(response.name==='apply_customer_state'){
+   if(data.measurements)data.measurements=data.measurements.map(measurement);
+   if(data.fieldErrors)data.fieldErrors=data.fieldErrors.map(e=>({...e,field:publicField(e.field)}));
+   if(data.unresolvedFields)data.unresolvedFields=data.unresolvedFields.map(publicField);
+  }
   if(['add_to_cart','change_cart_item','confirm_purchase'].includes(response.name)&&Array.isArray(data.cartItems))delete data.cart;
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
@@ -103,15 +109,22 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   offers.set(s.ref,data.availableOffers);offerRefs.add(literal.ref);
   if(!products.has(s.ref))products.set(s.ref,{subjectRef:s.ref});
  }
+ const preparationRefs=new Set();
+ for(const literal of c.policyLiterals.filter(p=>p.ref.startsWith('preparation:'))){
+  const result=JSON.parse(literal.text),p=products.get(result.subjectRef);
+  if(!p)products.set(result.subjectRef,{subjectRef:result.subjectRef});
+  products.get(result.subjectRef).preparation={availability:availability(result.availability),notRead:result.notRead};
+  preparationRefs.add(literal.ref);
+ }
  const add=declarations.find(d=>d.name==='add_to_cart'),productRefs=c.boundSubjects.filter(s=>s.kind==='PRODUCT').map(s=>s.ref);
  // An enum is only an argument hint; the selector still validates the chosen product/offer.
  if(add&&productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
   add.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
-   availableOffers:offers.get(p.subjectRef)??null,
+   availableOffers:offers.get(p.subjectRef)??null,...(p.preparation?{preparation:p.preparation}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts,
-   policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
+   policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)&&!preparationRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state};
  // Keep the prior owner data layout; native toolConfig and runtime checks enforce limits.
  // Retain validation and copy only known budget fields.
@@ -138,7 +151,12 @@ export function parseGeminiGeneration(body){
  const calls=content.parts.filter(p=>p.functionCall).map(p=>({name:p.functionCall.name,args:p.functionCall.args,
   ...(typeof p.functionCall.id==='string'?{id:p.functionCall.id}:{})}));
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
-  return {kind:'TOOLS',calls,content:structuredClone(content)};}
+  const domainCalls=calls.map(c=>{
+   if(c.name!=='apply_customer_state')return c;
+   requireThat(Array.isArray(c.args.ops)&&c.args.ops.every(op=>Object.hasOwn(stateFieldPaths,op.field)),'OWNER_TOOL_OUTPUT');
+   return {...c,args:{...c.args,ops:c.args.ops.map(op=>({...op,field:stateFieldPaths[op.field]}))}};
+  });
+  return {kind:'TOOLS',calls:domainCalls,content:structuredClone(content)};}
  const text=content.parts.filter(p=>p.thought!==true&&typeof p.text==='string').map(p=>p.text).join('');
  requireThat(text.trim(),'OWNER_FINAL_EMPTY');requireThat(bytes(text)<=4096,'OWNER_FINAL_BOUND');return {kind:'FINAL',text};
 }

@@ -1,4 +1,13 @@
 import test from 'node:test';
+test('native field contract maps domain paths without rewriting the signed transcript',()=>{
+ const b=body([{functionCall:{id:'m1',name:'apply_customer_state',args:{ops:[{op:'SET',field:'WAIST_CM',value:74,sourceQuote:'74'}]}},thoughtSignature:'signed'}]);
+ const parsed=parseGeminiGeneration(b);
+ assert.equal(parsed.calls[0].args.ops[0].field,'measurements.WAIST_CM');
+ assert.equal(parsed.content.parts[0].functionCall.args.ops[0].field,'WAIST_CM');
+ assert.equal(parsed.content.parts[0].thoughtSignature,'signed');
+ const invalid=body([{functionCall:{name:'apply_customer_state',args:{ops:[{op:'SET',field:'UNKNOWN',value:74}]}}}]);
+ assert.throws(()=>parseGeminiGeneration(invalid));
+});
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
@@ -127,7 +136,7 @@ test('owner has one callable product identity and measurement fields match the w
   {role:'user',parts:[{functionResponse:{id:'s1',name:'search_products',response:{status:'OK',data:{status:'MATCHED',subjects:r.context.boundSubjects,products:r.context.runtimeProducts}}}}]});
  const b=buildGeminiCommerceRequest(r),view=JSON.parse(b.contents[0].parts[0].text).trusted;
  assert.equal(view.subjects[0].subjectRef,'P1');assert.equal(view.products[0].subjectRef,'P1');
- assert.deepEqual(view.state.customerMeasurements,[{field:'measurements.WAIST_CM',value:74}]);
+ assert.deepEqual(view.state.customerMeasurements,[{field:'WAIST_CM',value:74}]);
  assert.ok(stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties.field.enum.includes(view.state.customerMeasurements[0].field));
  assert.doesNotMatch(JSON.stringify(b),/product:P1/);
  assert.equal(b.contents[2].parts[0].thoughtSignature,'opaque');
@@ -409,7 +418,7 @@ test('state/effect capabilities are explicit and the accepted quote reaches the 
  const names=built.tools[0].functionDeclarations.map(d=>d.name);
  assert.deepEqual(names,['apply_customer_state','recommend_size','quote_cart','add_to_cart','change_cart_item','confirm_purchase']);
  const fields=stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties;
- assert.ok(fields.field.enum.includes('measurements.WAIST_CM'));
+ assert.ok(fields.field.enum.includes('WAIST_CM'));
  assert.ok(!fields.field.enum.includes('permission'));
  assert.equal(JSON.parse(built.contents[0].parts[0].text).trusted.state.cartQuote.grandTotalVnd,524000);
  r.toolsAllowed=false;assert.equal(buildGeminiCommerceRequest(r).toolConfig.functionCallingConfig.mode,'NONE');
