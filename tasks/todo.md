@@ -1,6 +1,16 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current owner-requested rollback — 2026-10-18
+## Current agreed direction after rollback — 2026-10-18
+
+- [x] Review prior plans, implementation and45 outcomes; record agreed direction in [plan](plan.md#current-agreed-direction-after-rollback--2026-10-18). Baseline82833c0a; documentation only, no new model result.
+- [ ] First isolated treatment: remove checkout missingFields only from owner projection; preserve code intake/preview/confirmation. Measure private-field requests and purchase progress separately.
+- [ ] Trace known-color loss and select a falsifiable experiment before choosing a fix. Required color already exists; rejecting null alone does not prove correct selection. Preserve unknown/no-color/change-size controls and budget.
+- [ ] Audit stage query/source coverage and partial-source follow-up capability. Fix demonstrated information/contract defects; keep missing source explicit. Do not repeat existing prompt rules as a new fix.
+- [ ] Separately restore only preview selection display with deterministic consumer checks; do not restore bundled recovery/confirmation/decision/voice changes.
+- [ ] Keep rollback voice, subjective advice and upsell; no mandatory tradeoff paragraph. Diagnose transport separately; no verifier change without a concrete rule defect.
+- [ ] On execution request: changed-boundary tests, registered isolated model comparisons (selected cases ×3), errors/controls retained. After improvement without control regression, full45 priority and conditional16. No automatic run from this planning request.
+
+## Completed owner-requested rollback — 2026-10-18
 
 - [x] Restore the seven changed code/prompt/manifest/test files to4659fb73, removing all latest P1–P4 changes while retaining earlier F1–F3 and historical run evidence. No reset/force-push or provider request.
 - [x] Seven Git blobs exactly match4659fb73, owner hash/manifest restored and evidence unchanged; focused189worker/65NodePASS, canonical build/lint(noEmit) exit0, diff checkPASS. No new full-suite/CI/model PASS claimed.
@@ -15,7 +25,9 @@
 - [x] [Whole-turn report](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/CHECKPOINT_B.md):32USABLE/4NEEDS_EDIT/6UNUSABLE/3controls; preview choices fixed, color loss/future promises/decision voice persist.68raw hashes/33bindings/29eligible drafts/0observed evaluator-private leaks. Frozen audit capture equality assumption failed on existing artifact redaction; recorded read-only amendment passes using same redactor, original helper/raw/criteria unchanged.
 - [x] Complete report/self-review/final source-raw-helper/JSON/link/secret checks and deliver through PR391. STOP before16; no automatic second run/live action/Phase C. Remote head readback is the delivery check, not CI/model acceptance.
 
-## Current revised fix plan — 2026-10-18
+## Historical revised fix plan — superseded; do not execute this checklist
+
+The unchecked items below preserve the original planning snapshot. Their implementation/run/rollback is recorded above; use only the current agreed direction for future work.
 
 - [x] Incorporate independent REVISE and self-review into the [concrete plan](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md); correct preview readback overclaim separately from frozen evidence. Documentation only, no implementation/provider PASS.
 - [ ] V0: adjudicate whole stage/compound replies against source, distinguish independent interpretation from observed verdict and leave unresolved readings explicit.

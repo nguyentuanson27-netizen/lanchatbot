@@ -1,5 +1,7 @@
 # Phase B — phương án sửa sau review độc lập 45 lượt
 
+**Historical / superseded:** P1–P4 đã triển khai/chạy tại `f85144f5`, sau đó rollback tại `82833c0a`. Hướng thực hiện tiếp đã chốt ở [tasks/plan.md](../../tasks/plan.md#current-agreed-direction-after-rollback--2026-10-18). Phần PLANNED và tiêu chí bên dưới giữ bối cảnh lúc viết, không phải hàng đợi việc còn phải thực hiện.
+
 Trạng thái: **PLANNED**. Owner yêu cầu sửa phương án; lượt này chỉ cập nhật tài liệu. Intake `f70f5a9e0021c0ace9d3fdd61d72dfe7d65aca82`, branch `feat/c3-phase-b-commerce-20261014`, PR391. A vẫn OWNER_BYPASS; B chưa được chấp nhận cho bán hàng/live. Không có provider request hoặc implementation mới trong lần chỉnh kế hoạch này.
 
 Phương án này thay phần đề xuất tiếp theo sau F1–F3; không mở lại các bước F1–F3 đã hoàn thành trong [kế hoạch trước](c3-phase-b-rollback-and-contract-plan-20261018.md) và [implementation](c3-phase-b-contract-fixes-implementation-20261018.md). Nguồn: [45 hội thoại](../../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/CONVERSATIONS_AND_REVIEW.md), [trace/diagnosis](../../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/DIAGNOSIS.json), [report](../../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/CHECKPOINT_B.md). Reviewer độc lập đọc đủ 45 actual outcomes và code tại intake, kết luận **REVISE**. Bản chỉnh này chưa có verdict ACCEPT mới.

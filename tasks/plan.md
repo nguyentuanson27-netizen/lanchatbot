@@ -1,6 +1,48 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current owner-requested rollback — 2026-10-18
+## Current agreed direction after rollback — 2026-10-18
+
+Owner chốt hướng xử lý sau khi review kế hoạch và lượt sửa thất bại. Mốc code `82833c0a39cb14720926ce04e91a1d3cdab5587a`, giữ F1–F3; A OWNER_BYPASS/B sales-live STOP. Đây là kế hoạch, chưa triển khai/chạy provider. Phần này thay đề xuất thực hiện tiếp của P1–P4.
+
+Nguồn: [kế hoạch F1–F3](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md), [P1–P4 đã rollback](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md), [implementation](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md), [45 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/CONVERSATIONS_AND_REVIEW.md). Kết quả lịch sử 36/2/4/3 → 32/4/6/3 không phải đo mới trên rollback HEAD hoặc chứng minh tác động của từng edit.
+
+### 1. Context checkout — thay đổi hành vi đầu tiên
+
+Trong owner projection của `gemini-inference.mjs`, bỏ riêng `checkoutStatus.missingFields`; giữ previewAvailable/purchaseConfirmed. Danh sách trường thiếu và dữ liệu riêng tư vẫn thuộc code checkout. Không sửa domain state/persistence/verifier/prompt tư vấn hoặc mở intake mới. Request lỗi thực tế có FULL_NAME/PHONE/ADDRESS/PAYMENT_METHOD dù prompt giao intake cho code: đây là giả thuyết tác nhân kích hoạt, chưa chứng minh nhân quả.
+
+Đạt kỹ thuật: projection không làm biến đổi context gốc; code checkout vẫn yêu cầu đủ dữ liệu trước preview/xác nhận; confirm_purchase vẫn dùng được. Đạt hành vi: owner không tự xin trường riêng tư, nhận đúng lựa chọn/đặt trước và tiếp tục được hành trình mua. Không xin thông tin nhưng mất bước mua không tính cải thiện. Test projection không chứng minh model tuân theo.
+
+### 2. Mất màu — thử nghiệm phân biệt nguyên nhân trước khi chốt fix
+
+Lời khách chọn be vẫn có nguyên trước add; model truyền color=null rồi sửa BE dưới NONE. F1 đã require color và đã cảnh báo không chữa được lỗi này. Chưa chốt cấm null/enum màu/thêm required là fix: có thể gây hỏi lại hoặc chọn sai màu hợp lệ.
+
+Đối chiếu request thành công/thất bại ngay trước read/add, gồm tool response, vị trí lựa chọn và schema. Chọn một giả thuyết có khác biệt cụ thể để thử bằng runner hiện có trên request đã lưu, giữ model/config và context khác. Nếu thử schema bắt màu khi cấu hình yêu cầu, phải có nguồn xác nhận yêu cầu đó; không suy từ một màu tồn duy nhất. Trước provider ghi biến duy nhất thay đổi và kết quả nào bác bỏ giả thuyết. Không tìm được cơ chế có căn cứ thì ghi unresolved, không thêm lời nhắc lặp để đủ bản fix.
+
+Controls: màu đã chọn, đổi size/số lượng giữ màu, chưa chọn màu và cấu hình không cần màu. Đạt phải đúng ý khách/cart/receipt, trong budget và không hỏi lại dữ kiện đã có; hết null/NONE đơn thuần chưa đủ. Không regex suy ý, tự điền màu, thêm selection state hoặc chạy tool muộn.
+
+### 3. Sân khấu và partial-source — kiểm nguồn/khả năng trước prompt
+
+P3 đã cho tìm theo nhu cầu và cảnh báo mẫu tìm được chưa chứng minh độ kín; prompt đã cấm hẹn khi không có theo dõi. Không thêm lại hai quy tắc đó. Dùng source/request đã lưu để kiểm: query có mang nhu cầu thật không; kết quả có căn cứ cho đề xuất không; source unavailable còn đường hỗ trợ nào thực sự gọi được trong lượt đó.
+
+Chỉ sửa projection/retrieval khi chứng minh thông tin hiện có bị bỏ hoặc trình bày sai. Nguồn không có độ che phủ/lớp lót của mẫu thay thì ghi thiếu nguồn, không tự tạo fact/xuất bản dữ liệu shop. Giữ tư vấn phong cách/cảm giác và gợi phối thông thường; không suy mềm/thoáng thành món chắc xuyên hoặc mẫu khác đủ kín. Handoff phải phù hợp capability/policy và có kết quả thực hiện. Không có đường xử lý thì trả phần biết và giới hạn liên quan, không hẹn ngầm tiếp tục sau final.
+
+Đạt: whole reply giúp quyết định mua, không tạo đặc tính/kết quả kiểm chứng/lời hẹn ngoài khả năng; partial-source từng tốt, subjective advice và upsell không hồi quy. Nếu cần sửa prompt, chỉ thay một đoạn gắn mâu thuẫn đã chứng minh và đo riêng. Chưa chốt đổi verifier hoặc viết lại giọng toàn cục.
+
+### 4. Preview và giọng — riêng với các thử nghiệm trên
+
+Đưa lại riêng phần preview hiển thị loại hàng/màu/size từng component từ cart đã commit trong renderer hiện có. Không khôi phục nguyên gói P1/P2 hoặc gộp recovery/confirmation wording; không thêm lookup/state tên hàng. Kiểm actual preview text/shared consumers bằng focused tests; không cần provider riêng để chứng minh formatter.
+
+Giữ giọng rollback. Không đưa lại yêu cầu mặc định phải nói một đánh đổi. Model cân nhắc để chọn; chỉ nói bất tiện ảnh hưởng quyết định khách. Không tạo khuôn câu mới/cấm keyword. Vẫn ghi lỗi decision/voice trên toàn hội thoại kể cả outcome USABLE. Lỗi verifier transport kiểm từ log relay/kết nối hiện có, tách khỏi sửa ngữ nghĩa.
+
+### Thứ tự và kiểm chứng
+
+- Bắt đầu mục 1. Mục 2/3 trước hết đọc trace/nguồn để chốt giả thuyết; preview là thay đổi deterministic riêng. Không gom các thay đổi model-facing độc lập vào cùng treatment chỉ vì có commit riêng.
+- Code: RED→GREEN cho boundary bị đổi, focused consumers, build/lint. Model khi được yêu cầu chạy: cùng model/config/rubric, ca lỗi và controls từng tốt; mỗi ca chọn 3 lần. Stateful giữ đủ mạch/downstream sau lỗi. Đăng ký danh sách, denominator/request cap và source sạch trước chạy; không tự thêm generation sau kết quả. Diagnostic từ request cố định không phải full journey PASS.
+- Không full45 cho từng edit. Khi cơ chế có bằng chứng và controls không hồi quy mới chạy tổng thể cùng45 priority; remaining16 theo criteria freeze. Giữ mọi lỗi, không majority/best-of/retry hoặc sửa rubric để tăng điểm; không ghép các run riêng thành một run PASS.
+- Giữ một owner/tối đa một verifier và code authority/freshness/state/CAS/permissions/receipts/privacy. Không thêm role/parser/router/repair loop/gate/store/framework, tăng budget hay nới verifier để giảm fallback. Không merge/deploy/live send/Phase C.
+- Yêu cầu hiện tại chỉ chốt kế hoạch; implementation/provider requests=0. Chưa có model PASS mới. Không tự chạy từ việc cập nhật tài liệu này.
+
+## Completed owner-requested rollback — 2026-10-18
 
 Owner requests the previous version after post-review run/report head79b095f4. Restore all seven code/prompt/manifest/test files changed by d6ea3d4d/e8de0f80/2c53d7c0 to exact Git blobs at `4659fb73d6f07002e8b2bc61e558e24e071e87a4`. This rolls back preview formatting, code acknowledgements, fit-tool description and owner search/decision/voice changes together. Keep F1–F3 from the prior version and all sealed post-review artifacts/history. Use a new rollback commit, without resetting or rewriting history. Focused affected worker/adapter checks, canonical build/lint and exact file/source comparison precede PR391 delivery. No new model run/live action; A OWNER_BYPASS/B sales-live STOP. Previous36/2/4/3 remains historical evidence, not a fresh result for rollback HEAD.
 
@@ -12,11 +54,11 @@ Owner authorizes implementation and one model round after4659fb73. [Implementati
 
 Completed45/45 at clean sourcef85144f5, raw25be35e1 before primarya2eaff1f before diagnostics. [STOP report/all45](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/CHECKPOINT_B.md):32USABLE/4NEEDS_EDIT/6UNUSABLE/3controls; preview article/colour/size now visible, but color=null→lateNONE twice, code recovery once, verifier transport once, all3stage drafts rejected, two partial-source wait promises and one unresolved choice/private intake each need edits.117requests,29PASS/3FAIL/1verifiererror,0retry/timeout;68hashes/33bindings/29draftmatches/3DBdropped. Frozen capture-equality audit failed on existing redaction; separate post-run read-only amendment recorded, provider source/config/raw/criteria unchanged. Local1872worker/508Node+2skip/protected21/build/lintPASS; no remote CI or sales acceptance claim. Remaining16NOT_RUN; no next candidate automatically.
 
-## Current revised plan after independent review — 2026-10-18
+## Historical revised plan after independent review — superseded
 
 Owner requests a plan revision at `f70f5a9e`. [Revised implementation plan](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md) incorporates independent REVISE: V0 whole-reply adjudication first; P1 complete customer-visible cart choices without new durable display-name state; P2 code wording; P3 fit-tool scope and exact-lookup versus discovery search; P4 replace existing decision/voice guidance; V1 verifier change only if adjudication identifies a rule gap. Initial read without known offers is valid; quote remains a control, not another prompt patch. Preview text completeness is distinct from correct backend state. Stage rep1 is a candidate false PASS, not the automatic safe reference. Explicit acceptance, shared consumers and focused verification are recorded in the plan.
 
-Documentation only; implementation and provider run remain pending. A OWNER_BYPASS/B sales-live STOP. Future owner-requested run uses the same 45 priority outcomes and conditional16, with new frozen source/criteria and every attempt retained. No automatic generation or reinterpretation of frozen results. This revision is not a new independent ACCEPT.
+At its original savepoint this was documentation only. P1–P4 were subsequently implemented, evaluated and rolled back as recorded above; they are not a pending implementation queue. The current agreed direction at the top supersedes further execution of this plan. No new independent ACCEPT or behavioral PASS is implied.
 
 ## Completed F1–F3 provider replay — 2026-10-18
 
