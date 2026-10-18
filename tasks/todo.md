@@ -3,8 +3,9 @@
 ## Current F1–F3 provider replay — 2026-10-18
 
 - [x] Register owner-requested single replay at2bfc568d/main296cdcfb: same45priority outcomes and old criteria, stateful first, remaining16 conditional. [Scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md); fresh source readback0generation completed.
-- [ ] Freeze inputs/tool schemas/runtime/helper hashes; commit and capture clean runtime source SHA, then0generation preflights. Complete all registered priority attempts, preserve errors/downstream and DB cleanup; no automatic generation retry.
-- [ ] Commit raw before whole primary before diagnosis, audit requests/firewall/bindings and report sales/voice/state/provenance/metrics. Stop per evidence; A OWNER_BYPASS/B sales-live unresolved, no automatic next candidate or live work.
+- [x] Freeze inputs/tool schemas/runtime/helper hashes; clean source7d01e594 and0generation preflights. Complete45priority outcomes in six processes, all3DBdropped, no generation retry. Raw458230a7before whole primary711233c7before diagnosis.
+- [x] [Report/all45](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/CHECKPOINT_B.md):36USABLE/2NEEDS_EDIT/4UNUSABLE/3controls,4fallback, all3preview/confirmations but opening1fallback+1code recovery.117HTTP200=83owner/34verifier,31PASS/3FAIL;2NONEcompletion errors,0transport/quota/timeout/retry;34bindings/31exact drafts/68raw hashes/0observed evaluator-private leaks. Delivery via draftPR391 and STOP before16.
+- [ ] Owner fit-vs-purchase planning, redundant quote/NONE, stage/fit meaning and compound decision/voice still unresolved. No remaining16/new candidate/model qualification/live action automatically; A OWNER_BYPASS/B sales-live STOP.
 
 ## Historical F1–F3 contract implementation — 2026-10-18
 

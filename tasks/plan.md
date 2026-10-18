@@ -2,9 +2,9 @@
 
 ## Current F1–F3 provider replay — 2026-10-18
 
-Owner requests one model run of2bfc568d. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md): same45priority outcomes, three ordered stateful journeys first then8B1×3; remaining16 once only if unchanged criteria met. Fresh source readback0generation succeeded; freeze and clean source/preflights precede dispatch. Native processes max2 with serialized build/import, no subagent generation or generation retry.
+Owner requests one model run of2bfc568d. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md): same45priority outcomes, three ordered stateful journeys first then8B1×3; remaining16 once only if unchanged criteria met. Fresh source readback0generation succeeded; clean bRunSourceSha7d01e594 and0generation preflights preceded dispatch. All45collected: raw458230a7 before primary711233c7 before diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/CHECKPOINT_B.md):36USABLE/2NEEDS_EDIT/4UNUSABLE/3controls,117requests/0retry,4fallback, all3previews/confirmations. STOP before16, no post-result patch/second candidate.
 
-Review whole actual outcomes and committed fields before rejected drafts/verdict details. Inspect offer/default/read rounds, numeric state/field/person residual, unknown-source inference and actual next steps; keep ambiguous verdicts unresolved. Combined F1–F3 after rollback, not an isolated causal experiment. Stop after report/tasks/PR391; no automatic patch/next round/live action/A qualification or Phase C.
+Whole actual outcomes and committed fields were reviewed before rejected drafts/verdict details. Two numeric rejection events repaired within budget; nine partial-source replies usable, but unnecessary fit/NONE causes one opening fallback, another NONE call needs code recovery, and stage/fit readings remain unresolved.31modelPASS/3FAIL/1code summary;2completion errors/0transport-quota-timeout,34bindings/31exact drafts/0observed evaluator-private leaks/all3DBdropped. Combined F1–F3 after rollback, not an isolated causal experiment. Stop after report/tasks/PR391; no automatic patch/next round/live action/A qualification or Phase C.
 
 ## Historical F1–F3 contract implementation — 2026-10-18
 
