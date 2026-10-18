@@ -1,5 +1,13 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current direction: model–code division and separate advice diagnostic — 2026-10-19
+
+Owner chọn giữ kiến trúc, sửa phân công model–code và kiểm riêng tư vấn. [Kế hoạch chi tiết đã self-review](../docs/specs/c3-phase-b-model-code-division-plan-20261019.md), planning source `689e1e434be4a17b52e5e8525cb2a337bbda4cff`. PLAN_READY, chưa implementation/provider. Thay các đề xuất chạy tiếp ở mục lịch sử bên dưới; giữ nguyên evidence/kết luận cũ. A OWNER_BYPASS; B sales/live STOP.
+
+Thứ tự: freeze nguồn/rubric → P1 preload đúng current bound product bằng reader sẵn có và tính vào budget → P2 mapping field số đo tại native adapter, giữ domain checks → P3 advice-only diagnostic từ public snapshots → P4 tích hợp/whole-turn review. Không viết lại executor add/change đã có. Giữ F1–F3, MIEN-NAM, preview/intake/receipt recovery, verifier và giọng; chỉ sửa prompt tương thích wire field. Không default lựa chọn, parser, role hoặc gate mới.
+
+Run dự kiến tối đa 51 terminal outcomes: 12 advice-only, 3 baseline opening, 24 candidate stateful (8 lượt ×3, gồm actual intake invitation), 12 B1. Trần 180 generation requests; mọi error vào denominator. Đăng ký exact executable/config/source/commands trước run. Không tự nối full45/conditional16. Đánh giá gói thay đổi, không nhận là bằng chứng nhân quả riêng P1/P2 hoặc production GO.
+
 ## Isolated comparison result — 2026-10-18
 
 Completed66/66 registered outcomes across four sealed sources,168 provider requests/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/isolated-agreed-run-20261018/CHECKPOINT_B.md) records43 USABLE/7 NEEDS_EDIT/10 UNUSABLE/6 ownership controls; these are accounting totals, not a combined-source PASS. Checkout comparison14→13 usable/21; search8→8/12 despite fallback4→2. Shared old preview explains six NEEDS_EDIT; its new formatter was not in the checkout sources. STOP before full45/conditional16; no speculative post-result edit. Follow-up proposals target tool execution/read scope, source-supported advice, money wording and missing STALE readback evidence. The current provider run does not prove the new intake invitation or resolve historical color causality. Owner acceptance remains unset.

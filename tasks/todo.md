@@ -1,5 +1,15 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current model–code division plan — 2026-10-19
+
+- [x] Đối chiếu source/executor/native schema, 66-outcome review và các finding rollback; chốt [kế hoạch](../docs/specs/c3-phase-b-model-code-division-plan-20261019.md), self-review chống lặp cơ chế đã có. PLAN_READY; chưa runtime edit/provider.
+- [ ] P0: freeze cases/public sources/capabilities/rubric/config; không evaluator-label leak, không phục dựng giả snapshot cũ.
+- [ ] P1: bounded current-product preparation, source/call accounting; RED→GREEN scope/freshness/dependency controls.
+- [ ] P2: enum mapping native field → domain path, giữ source/CAS/atomic checks; RED→GREEN adapter/transcript/regression.
+- [ ] P3: advice-only diagnostic reuse runner, exact public contexts và một generation; draft/actual terminal chấm riêng.
+- [ ] P4: actual intake invitation trước private code path; capture public STALE diff; focused verification/seal.
+- [ ] Khi execution: tối đa 51 outcomes/180 generations theo kế hoạch, giữ mọi lỗi và các lượt chưa chạy; whole-turn review/voice/decision/authority riêng, không automatic full suite/vòng tiếp.
+
 ## Isolated model comparison completed — 2026-10-18
 
 - [x] Freeze four sources before dispatch; finish12/12 jobs and66/66 outcomes,168 provider requests, retry0. Preserve raw and lock primary review before verifier diagnosis.
