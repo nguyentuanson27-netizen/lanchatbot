@@ -630,11 +630,24 @@ function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" 
     : `Em hỗ trợ ${offer} cho giỏ này.`;
 }
 
-function cartSummary(cart: CartV1): string {
+/** Render only committed choices; retain the code when there is no bound display name. */
+export function formatCartLineSelection(line: CartV1["lines"][number]): string {
+  const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
+  const component = (c: typeof line.components[number]) => roles[c.componentRole] +
+    (c.quantity > 1 ? ` ×${c.quantity}` : "") + (c.color ? ` màu ${c.color}` : "") + (c.size ? `, size ${c.size}` : "");
+  if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
+    return `${line.offerKind === "SET" ? "Bộ" : "Combo"} ${line.parentProductId} (${line.components.map(component).join("; ")}) ×${line.quantity}`;
+  }
+  const c = line.components[0]!, role = roles[c.componentRole];
+  return `${role[0]!.toUpperCase()}${role.slice(1)} ${line.parentProductId}${c.color ? ` màu ${c.color}` : ""}${c.size ? `, size ${c.size}` : ""} ×${line.quantity}`;
+}
+
+function cartSummary(cart: CartV1, includeSelections = false): string {
   const hasFreeShipping = cart.adjustments.some(({ kind }) => kind === "FREE_SHIPPING");
   const lines = cart.lines.map((line) => {
     const sizes = [...new Set(line.components.map(({ size }) => size).filter(Boolean))].join("/");
-    return `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}: ${money(line.lineTotalVnd ?? 0)}`;
+    const label = includeSelections ? formatCartLineSelection(line) : `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}`;
+    return `${label}: ${money(line.lineTotalVnd ?? 0)}`;
   });
   return [
     ...lines,
@@ -2054,7 +2067,7 @@ export async function evaluateRealtimeSalesCycle(
         (cart, currentSelections) => {
           const preorders = currentSelections.filter(s => s.stockStatus === "PRE_ORDER").map(s =>
             `${s.line.parentProductId}: hàng đặt trước`);
-          return [cartSummary(cart), ...preorders, `Người nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}`,
+          return [cartSummary(cart, true), ...preorders, `Người nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}`,
             `Địa chỉ: ${preview.recipient.address}`, `Thanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}`,
             `Dự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.`, "Chị xác nhận chốt đơn nhé."].join("\n");
         },

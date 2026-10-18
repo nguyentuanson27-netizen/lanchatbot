@@ -20,6 +20,7 @@ import {
   evaluateRealtimeSalesCycle,
   buildGuardedModelNegotiationProposalV1,
   prepareHandoffStatePlanV1,
+  formatCartLineSelection,
   type ModelNegotiationProposalV1,
 } from "./realtime-sales-cycle.js";
 import {
@@ -29,6 +30,32 @@ import {
 } from "./realtime-reply-differential.js";
 
 const now = new Date("2026-07-23T03:00:00.000Z");
+
+describe("customer-visible cart choices", () => {
+  it("identifies a separately sold component and retains its colour and size", () => {
+    const selected = line(2);
+    selected.offerKind = "COMPONENT";
+    selected.offerId = "AO";
+    selected.allowComponentSale = true;
+    selected.components = [selected.components[0]!];
+    expect(formatCartLineSelection(selected)).toBe("Áo CB182 màu BE, size M ×2");
+  });
+  it("keeps different colours and sizes attached to their set components", () => {
+    const selected = line(1);
+    selected.components[1]!.color = "NAVY";
+    selected.components[1]!.size = "L";
+    expect(formatCartLineSelection(selected)).toBe("Bộ CB182 (áo màu BE, size M; chân váy màu NAVY, size L) ×1");
+  });
+  it("does not borrow a missing choice or a display name from another line", () => {
+    const first = line(1), second = line(2);
+    second.parentProductId = "OTHER42";
+    second.offerKind = "DIRECT";
+    second.components = [{ ...second.components[0]!, componentRole: "OTHER", color: null, size: null }];
+    expect([first, second].map(formatCartLineSelection)).toEqual([
+      "Bộ CB182 (áo màu BE, size M; chân váy màu BE, size M) ×1", "Sản phẩm OTHER42 ×2",
+    ]);
+  });
+});
 const pageId = "1198992073286645";
 const conversationId = "33333333-3333-4333-8333-333333333333";
 const metadata = {
@@ -401,6 +428,7 @@ describe("realtime Phase 3 sales cycle", () => {
       "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD", "preorder-details"), facts: currentFacts });
     expect(previewed.plan?.state.stage).toBe("ORDER_PREVIEW");
     const text = previewed.messages.filter(m => m.kind === "TEXT").map(m => m.text).join("\n");
+    expect(text).toContain("Bộ CB182 (áo màu BE, size M; chân váy màu BE, size M) ×1");
     if (preorder) {
       expect(text).toContain("CB182: hàng đặt trước");
       expect(previewed.protectedOutbound?.claimTypes).toContain("STOCK");
