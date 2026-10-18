@@ -1,2 +1,1 @@
-metadata/commands.json -text
-metadata/registry.json -text
+metadata/** -text

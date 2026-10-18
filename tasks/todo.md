@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Isolated model comparison completed — 2026-10-18
+
+- [x] Freeze four sources before dispatch; finish12/12 jobs and66/66 outcomes,168 provider requests, retry0. Preserve raw and lock primary review before verifier diagnosis.
+- [x] Read every actual outcome/history/public state/context; audit bindings, wire labels/private fixture, source hashes and disposable DB cleanup. [Report and full conversations](../apps/worker/evals/single-agent-commerce-read-only/isolated-agreed-run-20261018/CHECKPOINT_B.md).
+- [x] Record STOP: checkout usable14→13/21; search usable8→8/12. Do not combine sources into candidate PASS. Six preview edits belong to the shared old formatter, not the projection treatment.
+- [ ] Full45/conditional16 NOT_RUN; historical fixed-snapshot color diagnostic NOT_RUN. Provider-led intake invitation and updated preview journey still unverified by this run. No further fix/run, live action or Phase C authorized by the analysis alone.
+
 ## Current agreed direction after rollback — 2026-10-18
 
 - [x] Review prior plans, implementation and45 outcomes; record agreed direction in [plan](plan.md#current-agreed-direction-after-rollback--2026-10-18). Baseline82833c0a; documentation only, no new model result.

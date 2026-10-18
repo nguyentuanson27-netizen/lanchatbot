@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Isolated comparison result — 2026-10-18
+
+Completed66/66 registered outcomes across four sealed sources,168 provider requests/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/isolated-agreed-run-20261018/CHECKPOINT_B.md) records43 USABLE/7 NEEDS_EDIT/10 UNUSABLE/6 ownership controls; these are accounting totals, not a combined-source PASS. Checkout comparison14→13 usable/21; search8→8/12 despite fallback4→2. Shared old preview explains six NEEDS_EDIT; its new formatter was not in the checkout sources. STOP before full45/conditional16; no speculative post-result edit. Follow-up proposals target tool execution/read scope, source-supported advice, money wording and missing STALE readback evidence. The current provider run does not prove the new intake invitation or resolve historical color causality. Owner acceptance remains unset.
+
 ## Current agreed direction after rollback — 2026-10-18
 
 Owner chốt hướng xử lý sau khi review kế hoạch và lượt sửa thất bại. Mốc code `82833c0a39cb14720926ce04e91a1d3cdab5587a`, giữ F1–F3; A OWNER_BYPASS/B sales-live STOP. Phần này thay đề xuất thực hiện tiếp của P1–P4. Owner sau đó yêu cầu implementation; trạng thái và giới hạn bên dưới không phải kết quả model mới.
