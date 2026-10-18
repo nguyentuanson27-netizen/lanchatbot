@@ -6,7 +6,7 @@ import { hardPrecheck, makeBinding } from "./single-agent-semantic-verifier-boun
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
 import { commerceScope, commerceNow, fixturePolicy, fixtureProduct, fixtureProfile, fixtureSizeInput, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 
-async function setup() {
+async function setup(sourceText = "Eo 74. Eo 85, mông 105.") {
   let stored: CustomerProfileMergeState = fixtureProfile();
   const store: CustomerStatePort = { read: async () => structuredClone(stored),
     compareAndSwap: vi.fn(async (expected, next) => { if (stored.profile.revision !== expected) return false; stored = structuredClone(next); return true; }) };
@@ -14,10 +14,92 @@ async function setup() {
   const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
   const sizeInput = vi.fn(async () => fixtureSizeInput());
-  const tools = await createCustomerStateTools({ base, scope, store, clock: () => commerceNow, sizeInput, sourceMessages: [{ text: "Eo 74. Eo 85, mông 105.", sourceMessageId: scope.sourceMessageId, observedAt: scope.sourceObservedAt! }] });
+  const tools = await createCustomerStateTools({ base, scope, store, clock: () => commerceNow, sizeInput, sourceMessages: [{ text: sourceText, sourceMessageId: scope.sourceMessageId, observedAt: scope.sourceObservedAt! }] });
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("reports each numeric source issue without a partial write, then accepts a corrected batch", async () => {
+    const s = await setup("Chị sửa lại: eo 74, mông 96.");
+    const fields = ["measurements.WAIST_CM", "measurements.HIPS_CM"];
+    const result = await s.tools.invoke({ name: "apply_customer_state", args: { ops: [
+      { op: "SET", field: fields[0], value: 74, sourceQuote: "eo 74, mông 96" },
+      { op: "SET", field: fields[1], value: 96, sourceQuote: "eo 74, mông 96" },
+    ] } });
+    expect(result).toEqual({ status: "REJECTED", reason: "MEASUREMENT_SOURCE_INVALID", data: {
+      applied: false, unresolvedFields: fields, fieldErrors: fields.map(field => ({ field, reason: "QUOTE_MUST_CONTAIN_ONE_VALUE" })),
+    } });
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    expect(s.getStored().profile.revision).toBe(1);
+    expect(s.tools.snapshot().effectReceipts).toEqual([]);
+    expect(s.tools.snapshot().state.customerStateUpdatePending).toBe(true);
+    const corrected = await s.tools.invoke({ name: "apply_customer_state", args: { ops: [
+      { op: "SET", field: fields[0], value: 74, sourceQuote: "eo 74" },
+      { op: "SET", field: fields[1], value: 96, sourceQuote: "mông 96" },
+    ] } });
+    expect(corrected.status).toBe("OK");
+    expect(s.getStored().profile.measurements.map(({ kind, value }) => ({ kind, value }))).toEqual([
+      { kind: "WAIST_CM", value: 74 }, { kind: "HIPS_CM", value: 96 },
+    ]);
+    expect(s.store.compareAndSwap).toHaveBeenCalledTimes(1);
+    expect(s.tools.snapshot().state.customerStateUpdatePending).toBeUndefined();
+  });
+  it.each([
+    ["Eo 83.", "85", 85, "QUOTE_NOT_IN_CURRENT_MESSAGE"],
+    ["Eo 85. Eo 85.", "Eo 85", 85, "QUOTE_NOT_UNIQUE"],
+    ["Eo 84.", "84", 85, "VALUE_DOES_NOT_MATCH_QUOTE"],
+    ["Eo 85kg.", "85", 85, "UNIT_DOES_NOT_MATCH_FIELD"],
+    ["Eo 185.", "85", 85, "QUOTE_MUST_CONTAIN_COMPLETE_NUMBER"],
+  ])("returns a bounded field reason for invalid numeric evidence: %s", async (text, quote, value, reason) => {
+    const s = await setup(text as string);
+    expect(await s.tools.invoke({ name: "apply_customer_state", args: { ops: [
+      { op: "REPLACE", field: "preferences.colors", value: ["navy"] },
+      { op: "SET", field: "measurements.WAIST_CM", value, sourceQuote: quote },
+    ] } })).toEqual({ status: "REJECTED", reason: "MEASUREMENT_SOURCE_INVALID", data: {
+      applied: false, unresolvedFields: ["preferences.colors", "measurements.WAIST_CM"],
+      fieldErrors: [{ field: "measurements.WAIST_CM", reason }],
+    } });
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    expect(s.getStored().profile.preferences.colors).toEqual([]);
+  });
+  it.each(["1m65", "1,65m"])("keeps existing height conversion for %s", async height => {
+    const s = await setup(`Chị cao ${height}.`);
+    expect((await s.tools.invoke({ name: "apply_customer_state", args: { ops: [
+      { op: "SET", field: "measurements.HEIGHT_CM", value: 165, sourceQuote: height },
+    ] } })).status).toBe("OK");
+    expect(s.getStored().profile.measurements).toContainEqual(expect.objectContaining({ kind: "HEIGHT_CM", value: 165 }));
+  });
+  it("lets the owner fix numeric arguments within the existing two rounds before size and final verification", async () => {
+    const s = await setup("Chị sửa lại: eo 74, mông 96.");
+    const outputs: OwnerGeneration[] = ["eo 74, mông 96", null].map<OwnerGeneration>(quote => {
+      const calls = [{ name: "apply_customer_state", args: { ops: [
+        { op: "SET", field: "measurements.WAIST_CM", value: 74, sourceQuote: quote ?? "eo 74" },
+        { op: "SET", field: "measurements.HIPS_CM", value: 96, sourceQuote: quote ?? "mông 96" },
+      ] } }, { name: "recommend_size", args: { subjectRef: "QU714" } }];
+      return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } };
+    });
+    outputs.push({ kind: "FINAL", text: "Mình lấy M nhé chị." });
+    const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
+    let owners = 0;
+    const result = await runCommerceTurn({ scope: commerceScope(), tools: s.tools, clock: () => commerceNow,
+      latest: "Chị sửa lại: eo 74, mông 96.", history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm reply.",
+      owner: async request => {
+        if (owners === 1) {
+          expect(JSON.stringify(request.contents)).toContain("QUOTE_MUST_CONTAIN_ONE_VALUE");
+          expect(s.sizeInput).not.toHaveBeenCalled();
+        }
+        if (owners === 2) expect(s.sizeInput).toHaveBeenCalledTimes(1);
+        owners++;
+        return outputs.shift()!;
+      }, verifier });
+    expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+    expect(result.toolRounds).toBe(2); expect(result.toolCalls).toBe(4); expect(owners).toBe(3);
+    expect(verifier).toHaveBeenCalledTimes(1);
+    expect(s.sizeInput).toHaveBeenCalledTimes(2); // The final gate re-reads the chart after verification.
+    expect(s.store.compareAndSwap).toHaveBeenCalledTimes(1);
+    expect(s.getStored().profile.measurements).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "WAIST_CM", value: 74 }), expect.objectContaining({ kind: "HIPS_CM", value: 96 }),
+    ]));
+  });
   it("provides a receipt only after profile CAS and committed readback, and invalidates it on another profile revision", async () => {
     const s = await setup();
     await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "SET", field: "measurements.WAIST_CM", value: 74, sourceQuote: "74" }] } });

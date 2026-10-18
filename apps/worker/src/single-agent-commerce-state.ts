@@ -36,6 +36,15 @@ export function createRealtimeCustomerStatePort(store: Pick<PostgresRealtimeRunt
 }
 const measurementKinds = ["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"] as const;
 const preferenceKinds = ["colors", "styles", "materials"] as const;
+const measurementReasons: Record<string, string> = {
+  MEASUREMENT_SOURCE: "INVALID_QUOTE_OR_SOURCE",
+  MEASUREMENT_QUOTE_NOT_FOUND: "QUOTE_NOT_IN_CURRENT_MESSAGE",
+  MEASUREMENT_QUOTE_AMBIGUOUS: "QUOTE_NOT_UNIQUE",
+  MEASUREMENT_SCALAR: "QUOTE_MUST_CONTAIN_ONE_VALUE",
+  MEASUREMENT_TOKEN: "QUOTE_MUST_CONTAIN_COMPLETE_NUMBER",
+  MEASUREMENT_UNIT: "UNIT_DOES_NOT_MATCH_FIELD",
+  MEASUREMENT_VALUE: "VALUE_DOES_NOT_MATCH_QUOTE",
+};
 export interface CustomerStateSourceMessage { text: string; sourceMessageId: string; observedAt: string }
 /** Numeric copy check only; the owner still interprets field, referent and correction meaning. */
 function measurementSource(sources: readonly CustomerStateSourceMessage[], quote: unknown, kind: MeasurementKind,
@@ -45,7 +54,8 @@ function measurementSource(sources: readonly CustomerStateSourceMessage[], quote
     const index = source.text.indexOf(quote);
     return index < 0 ? [] : source.text.indexOf(quote, index + 1) >= 0 ? [{ source, index }, { source, index }] : [{ source, index }];
   });
-  if (matches.length !== 1) throw new Error("MEASUREMENT_SOURCE");
+  if (!matches.length) throw new Error("MEASUREMENT_QUOTE_NOT_FOUND");
+  if (matches.length !== 1) throw new Error("MEASUREMENT_QUOTE_AMBIGUOUS");
   const { source, index } = matches[0]!;
   const numbers = [...quote.matchAll(/[+-]?\d+(?:[.,]\d+)?/gu)];
   if (!numbers.length) throw new Error("MEASUREMENT_SCALAR");
@@ -66,7 +76,8 @@ function measurementSource(sources: readonly CustomerStateSourceMessage[], quote
     if (unit === "m" && kind === "HEIGHT_CM") scalar *= 100;
     else if ((unit === "kg" && kind !== "WEIGHT_KG") || (unit === "cm" && kind === "WEIGHT_KG") || unit === "m") throw new Error("MEASUREMENT_UNIT");
   }
-  if (scalar !== value || !source.sourceMessageId || !Number.isFinite(Date.parse(source.observedAt)) ||
+  if (scalar !== value) throw new Error("MEASUREMENT_VALUE");
+  if (!source.sourceMessageId || !Number.isFinite(Date.parse(source.observedAt)) ||
     Date.parse(source.observedAt) > now.getTime()) throw new Error("MEASUREMENT_SOURCE");
   return { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: scope.pageId,
     conversationId: scope.conversationId, sourceMessageId: source.sourceMessageId }), observedAt: source.observedAt, confidence: 1 };
@@ -111,6 +122,7 @@ export async function createCustomerStateTools(input: {
       conversationId: input.scope.conversationId, sourceMessageId: input.scope.sourceMessageId }), observedAt, confidence: 1 };
     const patch: CustomerProfilePatch = { profileId: current.profile.profileId, expectedRevision: current.profile.revision };
     const measurements = [], clears: MeasurementKind[] = [], absentClears: MeasurementKind[] = [], fields = new Set<string>();
+    const fieldErrors: { field: string; reason: string }[] = [];
     for (const raw of a.ops) {
       const op = toolArgs(raw, ["op", "field", "value", "sourceQuote"]);
       if (!op || !["SET", "REPLACE", "CLEAR"].includes(String(op.op)) || typeof op.field !== "string" ||
@@ -128,8 +140,15 @@ export async function createCustomerStateTools(input: {
             else if (previous.sourceEventHash !== evidence.sourceEventHash) throw new Error("STALE_CLEAR");
           }
         }
-        else measurements.push(BodyMeasurementV1Schema.parse({ kind, value: op.value,
-          provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) }));
+        else {
+          try {
+            measurements.push(BodyMeasurementV1Schema.parse({ kind, value: op.value,
+              provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) }));
+          } catch (error) {
+            if (!(error instanceof Error) || !Object.hasOwn(measurementReasons, error.message)) throw error;
+            fieldErrors.push({ field: op.field, reason: measurementReasons[error.message]! });
+          }
+        }
       } else if (op.field === "fitPreference") {
         const value = op.op === "CLEAR" ? null : op.value;
         const parsed = CustomerProfileV1Schema.parse({ ...current.profile, fitPreference: value });
@@ -143,6 +162,7 @@ export async function createCustomerStateTools(input: {
         Object.assign(patch, { preferences: { ...patch.preferences, [key]: { value: list, evidence } } });
       }
     }
+    if (fieldErrors.length) return { status: "REJECTED", reason: "MEASUREMENT_SOURCE_INVALID", data: { fieldErrors } };
     // Only this C3 writer may correct the same grounded event under the current CAS.
     // Never weaken the shared timestamp/confidence/source ordering for other writers.
     const mergeBase = { ...structuredClone(current), fieldEvidence: { ...current.fieldEvidence } };
@@ -191,11 +211,9 @@ export async function createCustomerStateTools(input: {
         fields.forEach(field => pendingFields.add(field));
         let result: CommerceToolResult;
         try { result = await apply(call.args); }
-        catch (error) { result = { status: "REJECTED", reason: error instanceof Error &&
-          ["MEASUREMENT_SOURCE", "MEASUREMENT_SCALAR", "MEASUREMENT_TOKEN", "MEASUREMENT_UNIT"].includes(error.message)
-          ? "MEASUREMENT_SOURCE_INVALID" : "STATE_OR_DOMAIN_INPUT" }; }
+        catch { result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
         if (result.status === "OK") fields.forEach(field => pendingFields.delete(field));
-        return result.status === "OK" ? result : { ...result, data: { applied: false, unresolvedFields: [...pendingFields] } };
+        return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, applied: false, unresolvedFields: [...pendingFields] } };
       }
       if (call.name === "recommend_size") {
         const a = toolArgs(call.args, ["subjectRef"]);
