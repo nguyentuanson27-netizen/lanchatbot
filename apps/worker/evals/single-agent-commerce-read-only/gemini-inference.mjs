@@ -91,6 +91,9 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','customerStateUpdatePending']
   .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]));
  if(Array.isArray(state.customerMeasurements))state.customerMeasurements=state.customerMeasurements.map(measurement);
+ // Code owns intake; the owner needs only the public confirmation stage, not its collection checklist.
+ if(state.checkoutStatus&&typeof state.checkoutStatus==='object')state.checkoutStatus=Object.fromEntries(
+  ['previewAvailable','purchaseConfirmed'].filter(k=>Object.hasOwn(state.checkoutStatus,k)).map(k=>[k,state.checkoutStatus[k]]));
  // Move only code-owned offer literals. Read/filter and verifier evidence remain intact.
  const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,p])),offers=new Map(),offerRefs=new Set();
  for(const s of c.boundSubjects.filter(s=>s.kind==='PRODUCT')){

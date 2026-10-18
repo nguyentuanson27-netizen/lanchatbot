@@ -7,6 +7,16 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('owner checkout projection omits code intake fields without changing confirmation state or source',()=>{
+ const r=request();r.context.state.checkoutStatus={missingFields:['FULL_NAME','PHONE','ADDRESS','PAYMENT_METHOD'],previewAvailable:false,purchaseConfirmed:false};
+ const before=structuredClone(r.context);
+ const state=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.state;
+ assert.deepEqual(state.checkoutStatus,{previewAvailable:false,purchaseConfirmed:false});
+ assert.deepEqual(r.context,before);
+ r.context.state.checkoutStatus={...r.context.state.checkoutStatus,previewAvailable:true,purchaseConfirmed:true};
+ assert.deepEqual(JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.state.checkoutStatus,{previewAvailable:true,purchaseConfirmed:true});
+});
+
 test('owner exposes source unavailability without naming the private source and retains actionable reasons',()=>{
  const r=request(),reasons=['POS_SNAPSHOT_UNAVAILABLE','SIZE_UNSUPPORTED','VARIANT_NOT_FOUND','DELIVERY_REGION_REQUIRED','CATALOG_SNAPSHOT_STALE'];
  const data={subjectRef:'P1',content:{description:'Áo thêu.'},availableOffers:null,sellingOptions:null,
