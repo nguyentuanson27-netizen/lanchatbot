@@ -1,6 +1,12 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current execution-contract provider replay — 2026-10-18
+## Current selective rollback and two-run review — 2026-10-18
+
+Owner requests rollback plus review of the latest two runs/fixes. [Rollback and concrete next plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md): restore owner prompt bytes from571c4403 and execution under trusted user data; retain numeric bounds, OWNER_TOOL_MODE accounting, all-system-parts consumer and cf137da4 offer projection. Historical45+45outcomes remain immutable. This task does not implement proposed F1–F4 or dispatch provider generations.
+
+Next proposed order: candidate add requires explicit offer scope; existing state validation returns bounded actionable field reasons; separately test source-unavailable presentation; only then consider capability-specific prompt cleanup. Color loss/NONE and stage interpretations remain explicit unresolved risks. No parser/router/proof store/extra loop/budget. A OWNER_BYPASS; B sales/live STOP.
+
+## Historical execution-contract provider replay — 2026-10-18
 
 Owner authorizes one model replay of6c5befca. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md): same45priority outcomes, three stateful journeys first then8B1×3; conditional16 only if priority criteria met. Fresh source/preflights0generation; clean source4619eaa5; all45raw374e8e0f before whole primary92738a5e before diagnosis. [Actual report](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/CHECKPOINT_B.md):23USABLE/8NEEDS_EDIT/11UNUSABLE/3controls,117requests/retry0, all3preview/confirmations but0/3successful openings.2final-only completion violations (HTTP200),8verifierFAIL,0transport/quota/timeout; all3DBdropped. STOP before16; source/prompts/criteria unchanged after seal, no new candidate or generation. A OWNER_BYPASS/B sales-live STOP; findings include optional offer scope and single-value proof friction for a future bounded review, not another prompt patch in this run.
 

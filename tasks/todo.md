@@ -1,6 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current execution-contract provider replay — 2026-10-18
+## Current selective rollback and two-run review — 2026-10-18
+
+- [x] Restore exact owner prompt from571c4403 and execution user-data placement; keep bound validation, completion-error accounting, consumer compatibility and prior offer projection. Update only active manifest hash; no historical evidence edits.
+- [x] Review both45-outcome runs and cf137da4/6c5befca fixes, trace offer default, measurement rejection, unknown-to-only-set, color/NONE and sales/voice regression. [Findings and self-reviewed next plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md).
+- [x] Observed rollback RED→GREEN; focused63Node/160worker PASS; Node eval506PASS/2optionalSKIP. No provider generation; model behavior after rollback unverified.
+- [x] Rollback savepoint fde1f627; worker build and lint (TypeScript noEmit) exit0; exact restored prompt/active hash, historical folders/runtime unchanged and diff check PASS. No new full worker/remote CI or sales PASS claim.
+- [ ] Proposed F1–F4 are not implemented: explicit offer at candidate effect boundary, actionable current-source measurement errors, isolated availability presentation, conditional voice/capability cleanup. Color retention/NONE remain unresolved; no new run/live acceptance implied.
+
+## Historical execution-contract provider replay — 2026-10-18
 
 - [x] Owner authorizes model replay at6c5befca; refresh main296cdcfb and [freeze45priority scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md), unchanged criteria/corpora/models/budgets, stateful first.
 - [x] Fresh source readback0generation, frozen input hashes, clean source4619eaa5 and config/stateful preflights0generation.
