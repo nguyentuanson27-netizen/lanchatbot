@@ -12,6 +12,7 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  prepare?(): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
   invokeBatch(calls: CommerceToolCall[]): Promise<CommerceToolResult[]>;
@@ -76,6 +77,14 @@ export async function runCommerceTurn(input: {
   const contents: NativeContent[] = [...input.history.map(m => ({ role: m.role === "customer" ? "user" as const : "model" as const,
     parts: [{ text: m.text }] })), { role: "user", parts: [{ text: input.latest }] }];
   const initialTerminal = await effectTerminal(); if (initialTerminal) return finish(initialTerminal);
+  const initial = input.tools.snapshot();
+  if (!initial.state.permission || initial.state.conversationOwner !== "BOT" || !initial.state.privacyAllowed) {
+    return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
+  }
+  const preparationStarted = performance.now();
+  try { toolCalls += await input.tools.prepare?.() ?? 0; }
+  catch { return finish(fallback("PREPARATION_UNAVAILABLE")); }
+  toolLatencyMs += performance.now() - preparationStarted;
   for (let index = 0; index < 3; index++) {
     const context = input.tools.snapshot();
     if (!context.state.permission || context.state.conversationOwner !== "BOT" || !context.state.privacyAllowed) {

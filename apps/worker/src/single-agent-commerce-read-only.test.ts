@@ -16,6 +16,20 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it("prepares after privacy and permission checks and charges one call before the first owner", async () => {
+    const s = setup();
+    const owner = vi.fn(async (r: OwnerRequest) => {
+      expect(r.toolBudget).toEqual({ roundsRemaining: 2, callsRemaining: 5 });
+      expect(r.context.runtimeProducts?.[0]?.content).toBeTruthy();
+      return final("Dạ chị.");
+    });
+    const result = await runCommerceTurn({ ...s, owner });
+    expect(result.toolCalls).toBe(1);
+    expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+    const prepare = vi.fn(async () => 1);
+    await runCommerceTurn({ ...s, latest: "SĐT 0900000000", tools: { ...s.tools, prepare }, owner });
+    expect(prepare).not.toHaveBeenCalled();
+  });
   it("reuses the immediately completed terminal readback before the next owner call without skipping final freshness", async () => {
     const s = setup(), checks = vi.fn(async () => null), readback = vi.spyOn(s.tools, "readback");
     const owner = vi.fn().mockResolvedValueOnce(tool("read_policy")).mockResolvedValueOnce(final());
@@ -105,7 +119,7 @@ describe("one conversational owner, tools and exact egress", () => {
     const outputs = [tool("read_product", {subjectRef:"SM613"}),tool("read_policy"),final()];
     await runCommerceTurn({ ...s, owner: async request => {requests.push(structuredClone(request));return outputs.shift()!;} });
     expect(requests.map(r => (r as {toolBudget:unknown}).toolBudget)).toEqual([
-      {roundsRemaining:2,callsRemaining:6},{roundsRemaining:1,callsRemaining:5},{roundsRemaining:0,callsRemaining:4},
+      {roundsRemaining:2,callsRemaining:5},{roundsRemaining:1,callsRemaining:4},{roundsRemaining:0,callsRemaining:3},
     ]);
     expect(s.verifier).toHaveBeenCalledTimes(1);
   });
@@ -116,7 +130,7 @@ describe("one conversational owner, tools and exact egress", () => {
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm reply.", owner: async () => ({kind:"FINAL",text:"Dạ chị."}),
       verifier: async () => ({result:{verdict:"PASS",violations:[]}}) });
     expect(result.verificationLatencyMs).toBeGreaterThanOrEqual(10);
-    expect(result.toolLatencyMs).toBe(0);
+    expect(result.toolLatencyMs).toBeGreaterThanOrEqual(0);
   });
   it("verifies even a simple non-protected reply and never sends", async () => {
     const s = setup();

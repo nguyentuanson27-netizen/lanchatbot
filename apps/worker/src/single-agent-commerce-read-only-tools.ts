@@ -43,13 +43,15 @@ export function createReadOnlyTools(input: {
   const offerContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const reads = new Map<string, Record<string, unknown>>();
   const searchReads = new Set<string>();
+  const prepared = new Set<string>();
+  const preparationContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const bind = (p: StableProductDocument) => {
     if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
   };
   for (const p of input.initialProducts ?? []) bind(p);
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
-    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values()] });
+    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values(), ...preparationContexts.values()] });
   const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
     if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
       throw new Error("PRODUCT_SOURCE_FRESHNESS");
@@ -74,6 +76,48 @@ export function createReadOnlyTools(input: {
     policyRead = true;
     return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
       policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
+  }
+  async function prepareProduct(id: string) {
+    const now = input.clock();
+    let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
+    try { source = await input.catalog.readProduct(id); }
+    catch {
+      // A failed POS read must not erase independent catalog content.
+      try { source = await input.catalog.readProduct(id, false); }
+      catch { source = { product: undefined!, snapshot: null }; }
+    }
+    const p = source.product;
+    let content = false;
+    if (p?.productId === id) {
+      const evidence = staticEvidence(p, now);
+      if (evidence.content || evidence.attributes) {
+        products.set(id, { ...products.get(id), ...evidence }); content = true;
+      }
+    }
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
+    const raw = parsed.success && parsed.data.product_id === id && parsed.data.shop_alias === scope.shopAlias ? parsed.data : null;
+    const observed = raw ? Date.parse(raw.synced_at) : NaN, expires = observed + maxAge * 1000;
+    const status = raw ? normalizeCatalogToken(raw.data_status) : null;
+    const offers = raw && ["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(status ?? "") &&
+      observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
+    if (offers !== null && offers.length <= 8) offerContexts.set(id, { ref: `offers:${id}`,
+      sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers: offers }),
+      observedAt: raw!.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers: offers }) });
+    else offerContexts.delete(id);
+    const availability = { content: { status: content ? "OK" : "UNAVAILABLE", reason: content ? null : "SOURCE_UNAVAILABLE" },
+      offers: { status: offers !== null && offers.length <= 8 ? "OK" : "UNAVAILABLE", reason: offers !== null && offers.length <= 8 ? null : "SOURCE_UNAVAILABLE" } };
+    const text = JSON.stringify({ subjectRef: id, availability, notRead: ["PRICE", "STOCK", "ETA", "SIZE_FIT"] });
+    preparationContexts.set(id, { ref: `preparation:${id}`, text, sourceVersion: commerceHash(text),
+      observedAt: scope.sourceObservedAt, expiresAt: null });
+  }
+  async function prepare(): Promise<number> {
+    if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return 0;
+    const current = snapshot(), bound = current.boundSubjects.filter(s => s.kind === "PRODUCT");
+    const id = current.state.currentProductId ?? (bound.length === 1 ? bound[0]!.ref : null);
+    if (!id || !bound.some(s => s.ref === id) || prepared.has(id) || [...reads.values()].some(a => a.subjectRef === id)) return 0;
+    prepared.add(id);
+    await prepareProduct(id);
+    return 1;
   }
   async function readProduct(args: Record<string, unknown>): Promise<CommerceToolResult> {
     const id = args.subjectRef as string, now = input.clock();
@@ -166,6 +210,7 @@ export function createReadOnlyTools(input: {
       text: JSON.stringify(summarizeAll ? { productId: id, sellingOptions: filtered.map(o => o.filter) } : filtered[0]!.filter) });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
+    preparationContexts.delete(id);
     const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
       availableOffers,
@@ -213,9 +258,10 @@ export function createReadOnlyTools(input: {
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
     } catch { return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" }; }
   }
-  return { invoke, snapshot, invokeBatch: (calls: CommerceToolCall[]) => Promise.all(calls.map(invoke)), async readback() {
+  return { invoke, snapshot, prepare, invokeBatch: (calls: CommerceToolCall[]) => Promise.all(calls.map(invoke)), async readback() {
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
     const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
+    for (const id of prepared) if (!fullReads.has(id)) await prepareProduct(id);
     for (const id of searchReads) if (!fullReads.has(id)) {
       const {product} = await input.catalog.readProduct(id, false);
       if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");

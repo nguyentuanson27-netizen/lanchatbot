@@ -25,6 +25,31 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("prepares offers and content without price/stock variants or full-read dependencies", async () => {
+    const { tools, f, readProduct } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
+    expect(await tools.prepare()).toBe(1);
+    const before = tools.snapshot();
+    expect(before.protectedClaims).toEqual([]);
+    expect(before.boundSubjects.map(s => s.kind)).toEqual(["PRODUCT"]);
+    expect(before.state.currentProductId).toBe(null);
+    expect(before.policyLiterals.find(p => p.ref === "offers:SM613")?.text).toContain('"AO"');
+    f.snapshot.offers.AO!.sale_price = 650_000;
+    f.snapshot.offers.AO!.rows[0]!.sale_price = 650_000;
+    expect(await tools.readback()).toEqual(before);
+    expect(readProduct).toHaveBeenCalledTimes(2);
+  });
+  it("retains content and an explicit missing-offer status when POS is unavailable", async () => {
+    const f = fixtureProduct(), tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow,
+      initialProducts: [f.product], policy: () => fixturePolicy(), catalog: {
+        readProduct: async () => ({ product: f.product, snapshot: null }),
+        searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }),
+      } });
+    await tools.prepare();
+    expect(tools.snapshot().runtimeProducts?.[0]?.content).toBeTruthy();
+    expect(JSON.parse(tools.snapshot().policyLiterals.find(p => p.ref === "preparation:SM613")!.text))
+      .toMatchObject({ subjectRef: "SM613", availability: { content: { status: "OK" }, offers: { status: "UNAVAILABLE", reason: "SOURCE_UNAVAILABLE" } } });
+    expect(tools.snapshot().protectedClaims).toEqual([]);
+  });
   it("reads all selling-option prices from one snapshot while keeping the top-level default price scoped", async () => {
     const { tools, readProduct, f } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
     const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });

@@ -14,7 +14,8 @@ export async function createCommerceTools(input: {
 }): Promise<CommerceTools> {
   if (input.effects && !input.state) throw new Error("EFFECTS_REQUIRE_CUSTOMER_STATE");
   const { scope, clock } = input.read;
-  let tools: CommerceTools = createReadOnlyTools(input.read);
+  const readTools = createReadOnlyTools(input.read);
+  let tools: CommerceTools = readTools;
   const availableTools = ["search_products", "read_product", "read_policy"];
   if (input.state) {
     tools = await createCustomerStateTools({ ...input.state, base: tools, scope, clock });
@@ -30,7 +31,7 @@ export async function createCommerceTools(input: {
     availableTools.push("request_handoff");
   }
   const composed = tools;
-  return { ...composed, availableTools, invoke: call => availableTools.includes(call.name) ? composed.invoke(call)
+  return { ...composed, prepare: () => readTools.prepare(), availableTools, invoke: call => availableTools.includes(call.name) ? composed.invoke(call)
     : Promise.resolve({ status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" }),
     async invokeBatch(calls) {
       const allowed = calls.filter(c => availableTools.includes(c.name)), results = await composed.invokeBatch(allowed);
