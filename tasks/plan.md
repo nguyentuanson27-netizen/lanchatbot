@@ -6,11 +6,15 @@ Owner chốt hướng xử lý sau khi review kế hoạch và lượt sửa th�
 
 Nguồn: [kế hoạch F1–F3](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md), [P1–P4 đã rollback](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md), [implementation](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md), [45 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/CONVERSATIONS_AND_REVIEW.md). Kết quả lịch sử 36/2/4/3 → 32/4/6/3 không phải đo mới trên rollback HEAD hoặc chứng minh tác động của từng edit.
 
-### 1. Context checkout — thay đổi hành vi đầu tiên
+### 1. Checkout — kiểm bước nối intake trước, thử context riêng
 
 Trong owner projection của `gemini-inference.mjs`, bỏ riêng `checkoutStatus.missingFields`; giữ previewAvailable/purchaseConfirmed. Danh sách trường thiếu và dữ liệu riêng tư vẫn thuộc code checkout. Không sửa domain state/persistence/verifier/prompt tư vấn hoặc mở intake mới. Request lỗi thực tế có FULL_NAME/PHONE/ADDRESS/PAYMENT_METHOD dù prompt giao intake cho code: đây là giả thuyết tác nhân kích hoạt, chưa chứng minh nhân quả.
 
-Đạt kỹ thuật: projection không làm biến đổi context gốc; code checkout vẫn yêu cầu đủ dữ liệu trước preview/xác nhận; confirm_purchase vẫn dùng được. Đạt hành vi: owner không tự xin trường riêng tư, nhận đúng lựa chọn/đặt trước và tiếp tục được hành trình mua. Không xin thông tin nhưng mất bước mua không tính cải thiện. Test projection không chứng minh model tuân theo.
+Review độc lập tại `cca45a05` xác nhận khoảng trống có sẵn: [session](../apps/worker/src/single-agent-commerce-session.ts) chỉ gửi output.messages khi terminal (confirm/handoff), nên thông điệp checkout dựng ở CART_OPENED không được gửi qua đường này. [Ingress](../apps/worker/src/single-agent-commerce-ingress.ts) vào advancePrivateCheckout khi tin khách đã chứa dữ liệu riêng tư; [runner](../apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs) tự cấp privateCheckoutFixture mà không đợi lời mời. Preview thành công hiện chỉ chứng minh xử lý sau khi khách chủ động cung cấp thông tin, chưa chứng minh bot dẫn khách vào checkout.
+
+Trước khi nhận mục 1 hoàn tất, kiểm actual message/transition mời khách cung cấp thông tin bằng consumer hiện hữu. Nếu chưa có đường nối hợp lệ, ghi rõ unresolved và tách sửa consumer/session hiện có thành thay đổi riêng; không mở intake framework hoặc tự bật gửi mọi output.messages của tool. Bước nối phải giữ một owner, đúng thời điểm/capability, không gửi trùng câu owner, không đưa raw PII vào model, và giữ authority/recipient/privacy/outbound checks hiện hữu. Không biến yêu cầu mua thành đã tạo đơn POS. Khi triển khai bước nối, chốt trigger và lời mời từ luồng checkout hiện có trước khi sửa; không mặc định mọi lần add/change đều phải xin thông tin.
+
+Đạt projection: không mutate context gốc, giữ previewAvailable/purchaseConfirmed; code vẫn yêu cầu đủ dữ liệu và confirm_purchase hoạt động. Đạt owner: không tự xin PII, nhận đúng lựa chọn/đặt trước. Đạt cầu nối: có lời mời/transition thực tế đúng scope, sau đó nhận thông tin qua private code path và tới preview/xác nhận; kiểm cả thiếu thông tin, thay giỏ và chống lặp. Ba kết quả báo riêng. Không lấy owner hết xin PII cộng fixture preview PASS làm bằng chứng hành trình hoàn chỉnh. Reuse focused session/ingress tests để kiểm cầu nối; chỉ sửa runner/đăng ký thêm ca tối thiểu nếu test hiện có không quan sát được boundary đó. Không sửa raw hoặc điểm các run cũ. Rep1/rep2 cùng có missingFields nhưng chỉ rep2 xin PII: tác động của việc bỏ field vẫn cần đo riêng với baseline.
 
 ### 2. Mất màu — thử nghiệm phân biệt nguyên nhân trước khi chốt fix
 
@@ -22,7 +26,9 @@ Controls: màu đã chọn, đổi size/số lượng giữ màu, chưa chọn m
 
 ### 3. Sân khấu và partial-source — kiểm nguồn/khả năng trước prompt
 
-P3 đã cho tìm theo nhu cầu và cảnh báo mẫu tìm được chưa chứng minh độ kín; prompt đã cấm hẹn khi không có theo dõi. Không thêm lại hai quy tắc đó. Dùng source/request đã lưu để kiểm: query có mang nhu cầu thật không; kết quả có căn cứ cho đề xuất không; source unavailable còn đường hỗ trợ nào thực sự gọi được trong lượt đó.
+P3 lịch sử đã cho tìm theo nhu cầu nhưng bị rollback. Active owner prompt hiện yêu cầu search đúng mã/tên đầy đủ, trong khi cũng yêu cầu tìm mẫu thay khi khách muốn đổi và tool description cho phép tìm theo nhu cầu. Đây là mâu thuẫn active cần sửa; việc P3 từng thất bại về độ kín không chứng minh exact-only là đủ.
+
+Treatment search riêng: thay đúng bullet exact lookup/discovery trong owner prompt để phân biệt khách gọi mẫu cụ thể (giữ mã/tên) với khách cần mẫu thay chưa có tên (dùng nhu cầu đã nói). Audit cùng tool contract/retrieval, không khôi phục P4 hoặc gộp thay đổi giọng/verifier. Kiểm exact lookup, ambiguous và discovery bằng các ca hiện có; query thực tế phải mang nhu cầu liên quan, không chỉ đổi câu hướng dẫn. Query tốt vẫn không cấp căn cứ độ kín. Giữ ranh giới opacity và quy tắc không hẹn khi thiếu theo dõi vốn vẫn có sau rollback, không viết lại chúng như fix mới. Dùng source/request đã lưu kiểm kết quả có căn cứ cho đề xuất và source unavailable còn đường hỗ trợ nào thực sự gọi được trong lượt đó.
 
 Chỉ sửa projection/retrieval khi chứng minh thông tin hiện có bị bỏ hoặc trình bày sai. Nguồn không có độ che phủ/lớp lót của mẫu thay thì ghi thiếu nguồn, không tự tạo fact/xuất bản dữ liệu shop. Giữ tư vấn phong cách/cảm giác và gợi phối thông thường; không suy mềm/thoáng thành món chắc xuyên hoặc mẫu khác đủ kín. Handoff phải phù hợp capability/policy và có kết quả thực hiện. Không có đường xử lý thì trả phần biết và giới hạn liên quan, không hẹn ngầm tiếp tục sau final.
 
@@ -36,11 +42,13 @@ Giữ giọng rollback. Không đưa lại yêu cầu mặc định phải nói 
 
 ### Thứ tự và kiểm chứng
 
-- Bắt đầu mục 1. Mục 2/3 trước hết đọc trace/nguồn để chốt giả thuyết; preview là thay đổi deterministic riêng. Không gom các thay đổi model-facing độc lập vào cùng treatment chỉ vì có commit riêng.
+- Bắt đầu mục 1 bằng kiểm cầu nối intake; sửa consumer nếu cần và thử projection phải được ghi/đo riêng. Mục 2 trước hết đọc trace để chốt giả thuyết; mục 3 sửa riêng mismatch exact/discovery đã xác nhận và kiểm source, chưa đổi quy tắc opacity. Preview là thay đổi deterministic riêng. Không gom các thay đổi model-facing độc lập vào cùng treatment chỉ vì có commit riêng.
 - Code: RED→GREEN cho boundary bị đổi, focused consumers, build/lint. Model khi được yêu cầu chạy: cùng model/config/rubric, ca lỗi và controls từng tốt; mỗi ca chọn 3 lần. Stateful giữ đủ mạch/downstream sau lỗi. Đăng ký danh sách, denominator/request cap và source sạch trước chạy; không tự thêm generation sau kết quả. Diagnostic từ request cố định không phải full journey PASS.
 - Không full45 cho từng edit. Khi cơ chế có bằng chứng và controls không hồi quy mới chạy tổng thể cùng45 priority; remaining16 theo criteria freeze. Giữ mọi lỗi, không majority/best-of/retry hoặc sửa rubric để tăng điểm; không ghép các run riêng thành một run PASS.
 - Giữ một owner/tối đa một verifier và code authority/freshness/state/CAS/permissions/receipts/privacy. Không thêm role/parser/router/repair loop/gate/store/framework, tăng budget hay nới verifier để giảm fallback. Không merge/deploy/live send/Phase C.
 - Yêu cầu hiện tại chỉ chốt kế hoạch; implementation/provider requests=0. Chưa có model PASS mới. Không tự chạy từ việc cập nhật tài liệu này.
+
+Tiếp thu review độc lập: verdict REVISE tại `cca45a053681a78fc9cad81e27d5932f2f0f44fc`, hai finding P2 về cầu nối checkout và active search sau rollback. Bản này sửa cả hai; giữ chẩn đoán màu, preview riêng, voice rollback, models/verifier/budget và kiểm từng treatment. Chưa có verdict ACCEPT độc lập cho bản cập nhật. Đây là thay tài liệu theo yêu cầu owner, không implementation hoặc run mới.
 
 ## Completed owner-requested rollback — 2026-10-18
 

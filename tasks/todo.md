@@ -3,9 +3,11 @@
 ## Current agreed direction after rollback — 2026-10-18
 
 - [x] Review prior plans, implementation and45 outcomes; record agreed direction in [plan](plan.md#current-agreed-direction-after-rollback--2026-10-18). Baseline82833c0a; documentation only, no new model result.
-- [ ] First isolated treatment: remove checkout missingFields only from owner projection; preserve code intake/preview/confirmation. Measure private-field requests and purchase progress separately.
+- [x] Incorporate independent REVISE at cca45a05: distinguish real checkout invitation from private fixture injection, and active exact-only search from rolled-back P3. No new reviewer ACCEPT, runtime edit or provider run.
+- [ ] Check actual code invitation/transition into private checkout first. If absent, separately fix the existing consumer/session or record unresolved; do not send every tool message or open an intake framework. Verify timing, no duplicate reply/PII exposure and existing outbound authority checks.
+- [ ] Isolated context treatment: remove checkout missingFields only from owner projection; preserve code intake/preview/confirmation. Report projection correctness, owner behavior and real checkout bridge separately; injected private fixture cannot prove the bridge.
 - [ ] Trace known-color loss and select a falsifiable experiment before choosing a fix. Required color already exists; rejecting null alone does not prove correct selection. Preserve unknown/no-color/change-size controls and budget.
-- [ ] Audit stage query/source coverage and partial-source follow-up capability. Fix demonstrated information/contract defects; keep missing source explicit. Do not repeat existing prompt rules as a new fix.
+- [ ] Separate search treatment: replace the active exact-only bullet with exact lookup versus need-based discovery, aligned with tool capability; preserve exact/ambiguous controls. Audit query/source coverage and partial-source follow-up capability. Do not restore P4 or rewrite existing opacity rules; search success is not coverage evidence.
 - [ ] Separately restore only preview selection display with deterministic consumer checks; do not restore bundled recovery/confirmation/decision/voice changes.
 - [ ] Keep rollback voice, subjective advice and upsell; no mandatory tradeoff paragraph. Diagnose transport separately; no verifier change without a concrete rule defect.
 - [ ] On execution request: changed-boundary tests, registered isolated model comparisons (selected cases ×3), errors/controls retained. After improvement without control regression, full45 priority and conditional16. No automatic run from this planning request.
