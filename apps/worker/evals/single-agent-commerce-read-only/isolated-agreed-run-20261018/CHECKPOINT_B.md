@@ -87,6 +87,8 @@ Audit109 raw hashes,40 source blobs,3 helper hashes,45 verifier bindings/35 exac
 
 Byte audit ban đầu của cases.b1.json thất bại do Git-normalized line endings khác temp dispatch file. File thực thi vẫn đúng frozen SHA và cùng records; giữ nguyên tại metadata/dispatched-cases.json, metadata dùng -text. Không thay input/nhãn hoặc chạy lại. [Audit bổ sung và giới hạn](SOURCE_AND_WIRE_AUDIT.json).
 
+Staged whitespace check sau đó báo CR cuối dòng trong file dispatch cần giữ nguyên bytes. Shell vẫn tiếp tục commit/push dù check đó thất bại; đã sửa bằng thuộc tính `whitespace=cr-at-eol` chỉ cho metadata giữ CRLF, không sửa raw bytes hoặc tắt các kiểm whitespace khác. Chạy lại diff check cho toàn bộ khoảng thay đổi và kiểm committed raw/corpus hashes trước khi chốt báo cáo.
+
 Commands thực sự chạy: `python C:/Users/nguye/AppData/Local/Temp/c3-isolated-agreed-20261018-run.py`; bốn preflight/12 job có exact argv và exit0 trong [commands](metadata/commands.json). Hai nhánh stateful build worker exit0. Fresh source readback PASS/providerGenerations0; B1 preflight chỉ config readiness, không tự nhận đã kiểm kết nối.
 
 Sau provider chạy `node .../c3-isolated-agreed-20261018-collect.mjs`, `...-render-primary.mjs`, `...-audit.mjs`, `...-diagnose.mjs`, exit0; kiểm Git/helper/corpus hashes/tools NONE theo audit bổ sung và `git diff --check`. Không chạy lại suite không bị thay đổi hoặc gán kết quả test implementation cũ thành test mới. Prior deterministic results nằm tại [implementation](../../../../../docs/specs/c3-phase-b-agreed-fixes-implementation-20261018.md).

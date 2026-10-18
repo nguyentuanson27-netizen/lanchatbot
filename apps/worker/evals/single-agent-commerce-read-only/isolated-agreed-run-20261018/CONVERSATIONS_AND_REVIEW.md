@@ -1,5 +1,7 @@
 # Review 66 kết quả trong bốn nhánh so sánh
 
+Bản Markdown bỏ khoảng trắng cuối dòng để hiển thị; exact text/bytes giữ nguyên trong PRIMARY_REVIEW.json và raw artifacts.
+
 Bốn source độc lập; raw savepoint fb85aabf53933869f1e3b1ae420ea697e5495429. Đọc actual history/capture/state/public context trước rejected drafts/verdict details. Kết quả {"USABLE":43,"UNUSABLE":10,"NEEDS_EDIT":7,"OWNERSHIP_CONTROL":6}. OwnerAcceptance=null.
 
 STOP_PRIORITY_NOT_MET; full45 and conditional16 NOT_RUN; no post-result patch or second candidate.
@@ -877,11 +879,11 @@ Raw: [attempt](raw/search-exact/rep1/attempt-2.json).
 Khách: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Ngân sách 900 nghìn của chị thoải mái chọn trọn set này luôn ạ, giá cả set là 799.000đ. 
+Ngân sách 900 nghìn của chị thoải mái chọn trọn set này luôn ạ, giá cả set là 799.000đ.
 
 Chị yên tâm là mặc đi tiệc ban ngày không bị rườm rà đâu chị nhé. Thiết kế dùng ren tơ Hàn mềm kết hợp form nhẹ và độ rũ tự nhiên, cộng với áo tơ thêu thanh thoát nên tổng thể rất bay bổng, sang trọng và nhã nhặn, vừa đủ nổi bật mà không bị nặng nề hay rối mắt.
 
-Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích. 
+Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích.
 Raw: [attempt](raw/search-exact/rep1/attempt-3.json).
 
 ## search-exact R1 b1-4: b1-search-read — USABLE
@@ -913,7 +915,7 @@ Raw: [attempt](raw/search-exact/rep2/attempt-1.json).
 Khách: Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Chân váy làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất bay bổng chị ạ. 
+Chân váy làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất bay bổng chị ạ.
 
 Hiện tại hệ thống chưa hiển thị thông tin giá và tồn kho riêng cho chân váy lẻ size M nên em chưa kiểm tra được phần này với chị nhé ạ.
 
@@ -925,11 +927,11 @@ Raw: [attempt](raw/search-exact/rep2/attempt-2.json).
 Khách: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Set cả bộ có giá 799.000đ, vừa vặn với ngân sách 900.000đ của chị ạ. 
+Set cả bộ có giá 799.000đ, vừa vặn với ngân sách 900.000đ của chị ạ.
 
 Chị yên tâm là chân váy dùng ren tơ Hàn mềm cùng form nhẹ, độ rũ tự nhiên kết hợp với áo tơ thêu bay bổng nên tổng thể rất thanh thoát, nhẹ nhàng, mặc đi tiệc ban ngày vừa sang trọng lại không bị rườm rà hay nặng nề đâu ạ.
 
-Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích. 
+Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích.
 Raw: [attempt](raw/search-exact/rep2/attempt-3.json).
 
 ## search-exact R2 b1-4: b1-search-read — USABLE
@@ -976,7 +978,7 @@ Khách: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc
 Actual terminal: SEND_ELIGIBLE/PASS.
 Set Thạch Thảo này mặc đi tiệc ban ngày rất sang và thanh lịch chị nhé, áo tơ Hàn thêu nổi kết hợp chân váy ren tơ mềm form nhẹ, có độ bay và rũ tự nhiên nên nhìn điệu đà vừa phải chứ không bị rườm rà đâu ạ. Cả set giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900.000đ của mình luôn nha chị.
 
-Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích. 
+Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích.
 Raw: [attempt](raw/search-exact/rep3/attempt-3.json).
 
 ## search-exact R3 b1-4: b1-search-read — USABLE
@@ -996,7 +998,7 @@ shop: Dịp đó mặc set này hợp chị ạ.
 Khách: Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Áo làm bằng chất tơ Hàn thêu nên có độ mềm và bay tự nhiên, dưới ánh đèn sân khấu rọi mạnh thì chất tơ mỏng nhẹ sẽ có thể hơi thấu quang và dễ lộ bên trong chị ạ. 
+Áo làm bằng chất tơ Hàn thêu nên có độ mềm và bay tự nhiên, dưới ánh đèn sân khấu rọi mạnh thì chất tơ mỏng nhẹ sẽ có thể hơi thấu quang và dễ lộ bên trong chị ạ.
 
 Để yên tâm nhất, chị có thể mặc thêm một lớp áo hai dây mỏng bên trong, hoặc nếu chị muốn tìm mẫu vải kín đáo hơn hẳn từ đầu thì báo em để em đổi sang mẫu khác cho mình nhé.
 
@@ -1008,7 +1010,7 @@ Raw: [attempt](raw/search-discovery/rep1/attempt-1.json).
 Khách: Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Chân váy được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên mặc rất thướt tha chị nhé. 
+Chân váy được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên mặc rất thướt tha chị nhé.
 
 Hiện tại hệ thống chưa xác nhận việc bán rời chân váy cũng như chưa tra được giá và tồn kho riêng cho size M nên em chưa báo chính xác cho chị được ạ.
 
@@ -1056,7 +1058,7 @@ Raw: [attempt](raw/search-discovery/rep2/attempt-1.json).
 Khách: Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Chân váy làm từ chất liệu ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất bay bổng ạ. 
+Chân váy làm từ chất liệu ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất bay bổng ạ.
 
 Hiện tại phần giá và tình trạng tồn kho size M cũng như thông tin có tách bán lẻ riêng chân váy hay không thì hệ thống bên em chưa tra được dữ liệu. Chị có muốn tham khảo lấy cả set để diện đồng bộ không ạ?
 
@@ -1104,7 +1106,7 @@ Raw: [attempt](raw/search-discovery/rep3/attempt-1.json).
 Khách: Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Chân váy làm từ ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên ạ. 
+Chân váy làm từ ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên ạ.
 
 Hiện tại hệ thống chưa kiểm tra được giá, tồn kho cũng như chưa xác nhận chế độ bán lẻ riêng chân váy, nên em chưa báo chính xác giá và tình trạng size M cho chị được ạ.
 
@@ -1116,11 +1118,11 @@ Raw: [attempt](raw/search-discovery/rep3/attempt-2.json).
 Khách: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
 
 Actual terminal: SEND_ELIGIBLE/PASS.
-Set này đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ vì chất liệu áo tơ Hàn thêu nổi kết hợp chân váy ren tơ Hàn mềm, form nhẹ và có độ bay, rũ tự nhiên nên nhìn rất thanh thoát, sang trọng. 
+Set này đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ vì chất liệu áo tơ Hàn thêu nổi kết hợp chân váy ren tơ Hàn mềm, form nhẹ và có độ bay, rũ tự nhiên nên nhìn rất thanh thoát, sang trọng.
 
 Cả set có giá 799.000đ, nằm trọn trong ngân sách 900 nghìn của mình luôn ạ. Chị có muốn em lấy set này theo size vừa vặn với mình không ạ?
 
-Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích. 
+Đưa ra lựa chọn mặc set đi tiệc ban ngày, giải thích vẻ thanh thoát từ form/chất liệu, báo đúng giá 799.000đ trong ngân sách. Những nhận xét sang/nhẹ nhàng/không rườm rà là tư vấn thẩm mỹ được chấp nhận. Còn dồn nhiều tính từ và nhắc ngân sách máy móc, nên chỉnh giọng khi có sửa phù hợp; riêng mức này chưa làm câu mất hữu ích.
 Raw: [attempt](raw/search-discovery/rep3/attempt-3.json).
 
 ## search-discovery R3 b1-4: b1-search-read — USABLE
@@ -1136,4 +1138,3 @@ Chị muốn lấy áo lẻ hay nguyên bộ ạ?
 
 Đúng mẫu SD375 và đúng hai lựa chọn giá: áo 929.000đ/cả set 1.065.000đ. Liệt kê ngắn ở đây giúp phân biệt lựa chọn mua, không phải đọc lại fact vô ích. Nếu hỏi áo lẻ/cả bộ thì đó là bước tiếp theo hợp lý.
 Raw: [attempt](raw/search-discovery/rep3/attempt-4.json).
-
