@@ -433,7 +433,8 @@ describe("code-owned commerce effects and recovery", () => {
         return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } };
       }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
     expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng." });
-    expect(result.recovery?.originalReason).toBe("BUDGET");
+    expect(result.recovery?.originalReason).toBe("OWNER_TOOL_MODE");
+    expect(result.generations.at(-1)?.status).toBe("PROVIDER_ERROR");
     expect(invoke.mock.calls.some(([call]) => call.name === "quote_cart")).toBe(false);
     expect(result).toMatchObject({ ownerGenerations: 3, verifierGenerations: 0, toolRounds: 2, sendEnabled: false });
     expect(s.commits).toHaveLength(1);

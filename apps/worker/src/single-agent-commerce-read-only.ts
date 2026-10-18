@@ -85,14 +85,19 @@ export async function runCommerceTurn(input: {
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context,
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
-    // Internal context and tool responses may repeat evidence. The native
-    // transport owns the frozen 32KB wire bound after its exact projection.
+    // The native transport owns its serialized wire bound after projection.
     let output: OwnerGeneration;
     ownerGenerations++;
     try { output = await generate("owner", id, signal => input.owner({ ...request, signal })); }
     catch { return finish(fallback(generations.at(-1)!.status)); }
     if (!output || typeof output !== "object") return finish(fallback("MALFORMED"));
     if (output.kind === "TOOLS") {
+      if (!request.toolsAllowed) {
+        // Retain output/telemetry, but do not count a final-only tool call as a
+        // successful completion or execute it after the budget is exhausted.
+        generations.at(-1)!.status = "PROVIDER_ERROR";
+        return finish(fallback("OWNER_TOOL_MODE"));
+      }
       if (!output.calls.length || toolRounds >= 2 || toolCalls + output.calls.length > 6) return finish(fallback("BUDGET"));
       toolRounds++; toolCalls += output.calls.length;
       const toolStarted = performance.now();

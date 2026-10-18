@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current execution-contract fix — 2026-10-18
+
+- [x] Review repeated NONE/color/read-before-add traces; refresh main296cdcfb at intake571c4403. [Implementation scope](../docs/specs/c3-phase-b-execution-contract-fix-20261018.md); no model generation requested in this fix-only step.
+- [x] Observed adapter/runtime/budget/consumer RED→GREEN. Execution instructions contain only allowlisted code fields; history/product/policy remain data. Existing tool permission check records OWNER_TOOL_MODE without late execution or retry; receipt recovery retains the failure.
+- [x] Clarify customer choice versus committed cart and purchase versus fit request; update active owner hash. Native AUTO/NONE, budgets, verifier, policy and historical evidence unchanged.
+- [x] Self-review fixes Sol consumer dropping the second system part; focused63Node/160Vitest PASS, worker build exit0.
+- [x] Full Vitest1857PASS at max2/min1 workers after retaining two default-concurrency timeouts; Node506PASS/2optionalSKIP; build/typecheck/lint exit0. Final hash/config/history and diff review passed; delivery via existing draft PR391.
+- [ ] Model behavior and sales acceptance still unverified for this candidate. No new A/B run, no automatic remaining16, no source publication/deploy/live send; A OWNER_BYPASS/B STOP.
+
 ## Current owner offer projection fix and one replay — 2026-10-18
 
 - [x] Owner authorizes fix/run atbca8805e; refresh main296cdcfb and retain [bounded scope](../apps/worker/evals/single-agent-commerce-read-only/offer-projection-run-20261018/SCOPE.md). No new cases/permutation or provider/model change.

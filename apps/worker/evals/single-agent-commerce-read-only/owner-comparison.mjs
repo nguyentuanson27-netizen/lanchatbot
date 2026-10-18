@@ -65,7 +65,7 @@ export function comparisonOwnerRequest(owner,c,request){
    }else throw new Error('COMPARISON_TEXT_ONLY');
   }
  }
- const wire={model:c.owners.sol.model,reasoning:{effort:c.owners.sol.effort},instructions:body.systemInstruction.parts[0].text,
+ const wire={model:c.owners.sol.model,reasoning:{effort:c.owners.sol.effort},instructions:body.systemInstruction.parts.map(p=>p.text).join('\n'),
   input,tools:native&&request.toolsAllowed?solReadOnlyTools:[],tool_choice:native&&request.toolsAllowed?'auto':'none',
   parallel_tool_calls:false,store:false,stream:true,...(native?{include:['reasoning.encrypted_content']}:{})};
  check(Buffer.byteLength(JSON.stringify(wire))<=32768,'COMPARISON_INPUT_BOUND');return wire;

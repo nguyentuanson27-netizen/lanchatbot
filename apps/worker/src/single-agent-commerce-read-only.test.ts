@@ -174,13 +174,25 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(result.recovery).toMatchObject({ originalDisposition: "HANDOFF", originalReason: "STALE",
       originalDiagnostic: { check: "CURRENT_SNAPSHOT", expectedRevision: s.scope.revision, currentRevision: s.scope.revision + 1, reasonCodes: [] } });
   });
-  it("stops after the tool budget, without using intermediate prose as a reply", async () => {
+  it("records final-only tool output as a conformance failure without executing, retrying or sending intermediate prose", async () => {
     const s = setup(), owner = vi.fn(async () => tool("read_policy"));
+    const invokeBatch = vi.spyOn(s.tools, "invokeBatch");
     const r = await runCommerceTurn({ ...s, owner });
     expect(owner).toHaveBeenCalledTimes(3);
     expect(r.toolRounds).toBe(2);
-    expect(r.terminal.reason).toBe("BUDGET");
+    expect(invokeBatch).toHaveBeenCalledTimes(2);
+    expect(r.terminal.reason).toBe("OWNER_TOOL_MODE");
+    expect(r.generations.map(g => g.status)).toEqual(["OK", "OK", "PROVIDER_ERROR"]);
     expect(s.verifier).not.toHaveBeenCalled();
+  });
+  it("preserves the tool-mode failure when existing receipt recovery supplies the terminal", async () => {
+    const s = setup();
+    const r = await runCommerceTurn({ ...s, owner: async () => tool("read_policy"), tools: { ...s.tools,
+      recover: async () => ({ disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: "Đã nhận lựa chọn.", fallbackId: null }),
+    } });
+    expect(r.recovery?.originalReason).toBe("OWNER_TOOL_MODE");
+    expect(r.generations.at(-1)?.status).toBe("PROVIDER_ERROR");
+    expect(r.ownerGenerations).toBe(3); expect(r.verifierGenerations).toBe(0);
   });
   it.each(["FAIL", "UNCERTAIN"])("%s scores the actual frozen fallback", async verdict => {
     const s = setup(); s.verifier.mockImplementation(async () => ({ result: { verdict, violations: [] } }));
