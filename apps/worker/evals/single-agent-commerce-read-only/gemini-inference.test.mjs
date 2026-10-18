@@ -37,10 +37,27 @@ test('numeric writes expose bounded source quotes and cart adds require an expli
  assert.deepEqual(op.sourceQuote,{type:'string',minLength:1,maxLength:160});
  const add=effectDeclarations.find(d=>d.name==='add_to_cart');
  assert.ok(add.parameters.required.includes('color'));
+ assert.ok(add.parameters.required.includes('offerType'));
  assert.equal(add.parameters.properties.color.nullable,true);
  const r=request();r.context.state.customerStateUpdatePending=true;
  const view=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
  assert.equal(view.state.customerStateUpdatePending,true);
+});
+
+test('cart offer arguments use confirmed source options without inventing an enum for unknown offers',()=>{
+ const r=request();r.availableTools=['add_to_cart'];
+ r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Mẫu'}];
+ r.context.policyLiterals=[{ref:'offers:P1',text:JSON.stringify({productId:'P1',availableOffers:['DIRECT']})}];
+ const declaration=()=>buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.deepEqual(declaration().parameters.properties.offerType,{type:'STRING',enum:['DIRECT']});
+ r.context.policyLiterals[0].text=JSON.stringify({productId:'P1',availableOffers:['AO','SET']});
+ assert.deepEqual(declaration().parameters.properties.offerType.enum,['AO','SET']);
+ r.context.policyLiterals=[];
+ assert.deepEqual(declaration().parameters.properties.offerType,{type:'STRING'});
+ assert.ok(declaration().parameters.required.includes('offerType'));
+ r.context.policyLiterals=[{ref:'offers:P1',text:JSON.stringify({productId:'P1',availableOffers:['DIRECT']})}];
+ r.context.boundSubjects.push({ref:'P2',kind:'PRODUCT',label:'Chưa tra'});
+ assert.deepEqual(declaration().parameters.properties.offerType,{type:'STRING'});
 });
 
 test('captured HTTP request keeps per-option scope and sanitizes nested availability without evaluator labels',async()=>{

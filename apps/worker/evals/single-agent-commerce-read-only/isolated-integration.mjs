@@ -202,7 +202,7 @@ try{
    return {revision:current.stateVersion,recipient:scope.recipient,bindingVersion:'c3-b-runtime:'+head.rows[0].generation,
     privacyAllowed:true,permission:current.state.conversationOwner==='BOT',conversationOwner:current.state.conversationOwner};}});};
  await check('B3 native cart commits once; duplicate does not repeat database transaction',async()=>{
-  await message('Chị lấy mẫu SM613 size M màu navy');const t=await effects();const call={name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy',quantity:1}};
+  await message('Chị lấy mẫu SM613 size M màu navy');const t=await effects();const call={name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}};
   const result=await t.invoke(call);assert.equal(result.status,'OK',JSON.stringify(result));const revision=(await repository.read(key)).revision;
   assert.equal((await t.invoke(call)).status,'OK');assert.equal((await repository.read(key)).revision,revision);assert.equal(t.snapshot().effectReceipts.length,1);
   const fresh=await effects();assert.equal((await fresh.invoke(call)).status,'OK');assert.equal(fresh.snapshot().effectReceipts[0].effect,'CART_OPENED');
@@ -354,7 +354,7 @@ try{
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
  await check('B composed generation failure preserves the committed total through cart readiness and captures recovery once',async()=>{
-  const j=await statefulFixture(),r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy',quantity:1}}])]);
+  const j=await statefulFixture(),r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}}])]);
   assert.equal(r.result.terminal.reason,'RECEIPT_BACKED_CART_SUMMARY',JSON.stringify(r.result));
   assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.enqueued,1);
   const stored=await j.state();assert.equal(stored.cart.value.lines[0].quantity,1);
@@ -363,7 +363,7 @@ try{
  });
  let journey;
  await check('B composed ingress commits an open cart, authorizes the exact reply and captures delivery once',async()=>{
-  journey=await statefulFixture();const r=await journey.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy',quantity:1}}]),say('Em đã thêm áo vào giỏ cho chị.')]);
+  journey=await statefulFixture();const r=await journey.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}}]),say('Em đã thêm áo vào giỏ cho chị.')]);
   assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));assert.equal(r.result.enqueued,1);assert.equal(await inbox.isBatchCurrent(r.batch),false);
   const cart=(await journey.state()).cart;if(!cart){report.composedDiagnostic=r.toolResponses;save();}assert(cart,JSON.stringify(r.toolResponses));
   assert.equal(cart.value.lines[0].quantity,1);await journey.drain();await journey.drain();
@@ -398,7 +398,7 @@ try{
   assert.equal((await runtime.loadOrCreate(pageId,journey.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
  });
  await check('B composed later failed mutation hands off the partial committed result, without replay',async()=>{
-  const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
+  const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
   const line=(await j.state()).cart.value.lines[0],r=await j.turn('Lấy hai chiếc cho chị nhé',[native([{name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:2}},
    {name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:0}}]),say('Để em kiểm tra lại.')],{verdict:'UNCERTAIN'});
   assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal((await j.state()).cart.value.lines[0].quantity,2);
@@ -406,7 +406,7 @@ try{
   const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.result.terminal.disposition,'NO_SEND');
  });
  await check('B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source',async()=>{
-  const j=await statefulFixture({missingEta:true});await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
+  const j=await statefulFixture({missingEta:true});await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();
   const r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);
   assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal(await inbox.isBatchCurrent(r.batch),false);
   assert.equal(r.result.privateCheckoutFailure.stage,'PLANNER');assert.equal(r.result.privateCheckoutFailure.reasonCode,'CONTROLLED_MISSING_REGION');
@@ -444,7 +444,7 @@ try{
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
  });
  await check('B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged',async()=>{
-  const j=await statefulFixture();const r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{afterVerify:async()=>j.changeVariantSource()});
+  const j=await statefulFixture();const r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{afterVerify:async()=>j.changeVariantSource()});
   assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));assert.equal(r.result.enqueued,0);assert.equal(await inbox.isBatchCurrent(r.batch),false);
  });
  await check('B composed clarification rollback refuses to destroy existing append-only events',async()=>{

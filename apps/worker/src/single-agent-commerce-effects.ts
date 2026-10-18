@@ -161,6 +161,9 @@ export async function createCommerceEffectTools(input: {
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
         call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      if (call.name === "add_to_cart" && (typeof a.offerType !== "string" || !a.offerType.trim())) {
+        return { status: "REJECTED", reason: "OFFER_REQUIRED" };
+      }
       if (call.name === "change_cart_item") {
         const fields = a.action === "REMOVE_LINE" ? ["subjectRef", "action"] :
           a.action === "SET_QUANTITY" ? ["subjectRef", "action", "quantity"] :
@@ -194,7 +197,7 @@ export async function createCommerceEffectTools(input: {
       let command: SalesCycleCommand;
       if (call.name === "add_to_cart") {
         if (a.quantity !== undefined && (!Number.isInteger(a.quantity) || (a.quantity as number) < 1 || (a.quantity as number) > 20)) return { status: "REJECTED", reason: "QUANTITY" };
-        const result = await selection(product!.ref, a, commerceUuid(operationId), typeof a.offerType === "string" ? a.offerType : null);
+        const result = await selection(product!.ref, a, commerceUuid(operationId), a.offerType as string);
         if (result.status !== "READY") return { status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: result };
         const selected = result.line;
         if (!current.cart) {

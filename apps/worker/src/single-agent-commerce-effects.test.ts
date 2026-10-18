@@ -6,11 +6,19 @@ import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-r
 import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
+import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
   effectiveAt: "2026-10-01T00:00:00.000Z", effectiveUntil: null };
 const resultCartItems = (result: { data?: unknown }) => (result.data as { cartItems: Record<string, unknown>[] }).cartItems;
+// This fixture uses a separate shop id and alias; adapt only that test identity.
+function fixtureSelection(snapshot: ReturnType<typeof fixtureProduct>["snapshot"], query: CartSelectionQuery) {
+  const result = cartSelectionFromSnapshot(snapshot, query, commerceNow);
+  if (result.status !== "READY") return result;
+  return { ...result, shopId: commerceScope().shopId, line: { ...result.line,
+    priceAuthority: { ...result.line.priceAuthority!, shopId: commerceScope().shopId } } };
+}
 async function setup(clock = () => commerceNow) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
@@ -48,11 +56,50 @@ async function setup(clock = () => commerceNow) {
     identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001", customerProfileId: fixtureProfile().profile.profileId },
     select,
   });
-  const add = { name: "add_to_cart", args: { subjectRef: "SM613", size: "M", color: "navy", quantity: 1 } };
+  const add = { name: "add_to_cart", args: { subjectRef: "SM613", offerType: "DIRECT", size: "M", color: "navy", quantity: 1 } };
   return { tools, base, scope, policy, readPolicy, authorize, select, repository, commits, add, setFault: (v: typeof fault) => { fault = v; }, current: () => current,
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("rejects a missing offer before selection or commit instead of reporting a default offer color", async () => {
+    const s = await setup(), { offerType: _offer, ...args } = s.add.args;
+    expect(await s.tools.invoke({ ...s.add, args })).toEqual({ status: "REJECTED", reason: "OFFER_REQUIRED" });
+    expect(s.select).not.toHaveBeenCalled();
+    expect(s.readPolicy).not.toHaveBeenCalled();
+    expect(s.repository.compareAndSwap).not.toHaveBeenCalled();
+    expect(s.current().cart).toBeNull();
+  });
+  it("adds a known singleton offer directly in one round without a product read", async () => {
+    const s = await setup(), read = vi.spyOn(s.base, "invokeBatch");
+    s.select.mockImplementation(async q => fixtureSelection(fixtureProduct().snapshot, q!) as never);
+    const results = await s.tools.invokeBatch([s.add]);
+    expect(results[0]!.status).toBe("OK");
+    expect(read).toHaveBeenCalledWith([]);
+    expect(s.current().cart!.value.lines[0]).toMatchObject({ offerId: "DIRECT", quantity: 1,
+      components: [expect.objectContaining({ size: "M", color: "navy" })] });
+    expect(s.commits).toHaveLength(1);
+    expect((await s.tools.invoke(s.add))).toMatchObject({ status: "OK", data: { duplicate: true } });
+    expect(s.commits).toHaveLength(1);
+  });
+  it("keeps article selection separate from real unavailable colors and unknown source", async () => {
+    const s = await setup(), source = fixtureProduct().snapshot;
+    source.offers = { AO: structuredClone(source.offers.DIRECT!), SET_VAY: structuredClone(source.offers.DIRECT!) };
+    source.offers.SET_VAY!.rows = source.offers.SET_VAY!.rows.map(row => ({ ...row, color: "black" }));
+    s.select.mockImplementation(async q => fixtureSelection(source, q!) as never);
+    const rejected = await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "SET_VAY" } });
+    expect(rejected).toMatchObject({ status: "UNAVAILABLE", data: { reasonCode: "CART_COLOR_NOT_FOUND", availableColors: ["BLACK"] } });
+    expect(s.commits).toHaveLength(0);
+    expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "AO" } })).status).toBe("OK");
+    expect(s.current().cart!.value.lines[0]!.offerId).toBe("AO");
+    const absent = await setup();
+    absent.select.mockImplementation(async q => fixtureSelection(source, q!) as never);
+    expect(await absent.tools.invoke(absent.add)).toMatchObject({ status: "UNAVAILABLE", data: { reasonCode: "CART_OFFER_NOT_FOUND" } });
+    expect(absent.commits).toHaveLength(0);
+    const unavailable = await setup();
+    unavailable.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE"));
+    expect((await unavailable.tools.invoke(unavailable.add)).status).toBe("UNAVAILABLE");
+    expect(unavailable.commits).toHaveLength(0);
+  });
   it("returns the current preorder summary beside a successful cart result and a duplicate without another commit", async () => {
     const s = await setup(), selected = await s.select();
     s.select.mockResolvedValue({ ...selected, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0 } as never);

@@ -45,7 +45,7 @@ describe("Phase B capability composition", () => {
           command,now:commerceNow,trustedPorts})}
     });
     const tools=await compose(), outputs=[native([
-      {name:"add_to_cart",args:{subjectRef:"QU714",size:"M",color:"navy"}},
+      {name:"add_to_cart",args:{subjectRef:"QU714",offerType:"DIRECT",size:"M",color:"navy"}},
       {name:"recommend_size",args:{subjectRef:"QU714"}},
       {name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:85,sourceQuote:"85"},{op:"SET",field:"measurements.HIPS_CM",value:105,sourceQuote:"105"}]}}
     ]), {kind:"FINAL" as const,text:"Shop đã thêm sản phẩm vào giỏ cho chị."}];
