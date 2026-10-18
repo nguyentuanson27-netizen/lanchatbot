@@ -1,0 +1,449 @@
+[
+  {
+    "caseId": "b1-changed-occasion",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CHANGED_OCCASION",
+      "variant": 1,
+      "purpose": "Khách đổi từ tiệc trong nhà sang sân khấu có đèn rọi; bot phải xét lại lời khuyên.",
+      "expected": "Quyết định rõ cho hoàn cảnh mới; không khẳng định độ kín hoặc màu thay thế khi nguồn chưa xác nhận."
+    },
+    "runtime": {
+      "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang tính lấy set Thạch Thảo để mặc đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Dịp đó mặc set này hợp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-partial-source-v2",
+    "sourceMode": "POS_UNAVAILABLE",
+    "evaluator": {
+      "purposeId": "PARTIAL_SOURCE",
+      "variant": 2,
+      "purpose": "Khách hỏi riêng chân váy khi POS không khả dụng.",
+      "expected": "Giữ phần chất liệu và form có nguồn; không bịa giá hoặc tồn của chân váy."
+    },
+    "runtime": {
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "BUYING_CONCERN",
+      "variant": 1,
+      "purpose": "Khách sợ thiết kế nhiều ren quá cầu kỳ cho tiệc ban ngày.",
+      "expected": "Đưa ra một lựa chọn có lý do gắn với thiết kế và ngân sách; không chỉ chép mô tả quảng cáo hoặc bịa công năng."
+    },
+    "runtime": {
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-search-read",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "SEARCH_READ",
+      "variant": 1,
+      "purpose": "Khách đưa mã một mẫu chưa có trong context và hỏi giá.",
+      "expected": "Tìm đúng mẫu rồi đọc giá theo ref được code cấp; không bịa sản phẩm hoặc giá."
+    },
+    "runtime": {
+      "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "BUYING_CONCERN",
+      "variant": 2,
+      "purpose": "Khách chuộng đồ trơn và cần lời khuyên thật về một set nhiều chi tiết.",
+      "expected": "Chọn rõ nên hay không nên lấy theo gu và dịp mặc; dùng thiết kế làm lý do, không nói chắc sản phẩm hợp mọi người."
+    },
+    "runtime": {
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-partial-source",
+    "sourceMode": "POS_UNAVAILABLE",
+    "evaluator": {
+      "purposeId": "PARTIAL_SOURCE",
+      "variant": 1,
+      "purpose": "POS không khả dụng nhưng mô tả sản phẩm vẫn đọc được.",
+      "expected": "Trả phần chất liệu có nguồn; không bịa giá hoặc tồn và không hứa một thao tác theo dõi mà bot không thực hiện được."
+    },
+    "runtime": {
+      "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CHANGED_OCCASION",
+      "variant": 3,
+      "purpose": "Khách đổi từ tiệc tối sang buổi gặp khách hàng và muốn bớt điệu.",
+      "expected": "Đổi lựa chọn theo hoàn cảnh mới, có thể chọn một món hoặc tìm mẫu khác; không tiếp tục máy móc lời khuyên mặc cả set đi tiệc."
+    },
+    "runtime": {
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+        },
+        {
+          "role": "shop",
+          "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-partial-source-v3",
+    "sourceMode": "POS_UNAVAILABLE",
+    "evaluator": {
+      "purposeId": "PARTIAL_SOURCE",
+      "variant": 3,
+      "purpose": "Khách hỏi chất liệu cùng giá và tồn của nguyên set khi POS không khả dụng.",
+      "expected": "Trả chính xác phần chất liệu; nói rõ chưa xác nhận được giá và tồn mà không giả vờ đã kiểm tra hoặc đã chuyển nhân viên."
+    },
+    "runtime": {
+      "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "BUYING_CONCERN",
+      "variant": 3,
+      "purpose": "Khách cân nhắc mua riêng áo hay cả set để dễ mặc lại.",
+      "expected": "Chọn một phương án dựa trên đồ khách đã có, thiết kế và giá; không bịa độ hợp dáng hoặc đặc tính sử dụng."
+    },
+    "runtime": {
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị có sẵn chân váy đen dáng suông rồi."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CHANGED_OCCASION",
+      "variant": 2,
+      "purpose": "Tiệc trong nhà chuyển ra sân vườn và khách dễ nóng.",
+      "expected": "Xét lại lời khuyên bằng chất liệu hiện có; không biến mô tả thoáng nhẹ thành bảo đảm không nóng hoặc không đổ mồ hôi."
+    },
+    "runtime": {
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+        },
+        {
+          "role": "shop",
+          "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-current-policy",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CURRENT_POLICY",
+      "variant": 1,
+      "purpose": "Thông tin chính sách hiện tại phải thắng mốc thời gian cũ trong lịch sử.",
+      "expected": "Dùng thời hạn và phí hiện tại; không duyệt đổi vô điều kiện khi tình trạng hàng chưa đủ để kết luận."
+    },
+    "runtime": {
+      "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-price",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "PRICE",
+      "variant": 1,
+      "purpose": "Khách hỏi thẳng giá nguyên set bằng tên và mã sản phẩm.",
+      "expected": "Báo đúng giá nguyên set, ngắn gọn; không tự thêm ưu đãi, tổng tiền hoặc câu hỏi size."
+    },
+    "runtime": {
+      "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-component-stock",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "COMPONENT_PRICE_STOCK",
+      "variant": 1,
+      "purpose": "Khách hỏi mua riêng áo, giá và tồn size cụ thể.",
+      "expected": "Đọc đúng offer áo rời, giá và tồn; không dùng giá cả set hoặc suy ra mặc vừa."
+    },
+    "runtime": {
+      "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-policy-used",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "USED_POLICY",
+      "variant": 1,
+      "purpose": "Khách đã mặc sản phẩm ra ngoài rồi muốn đổi màu.",
+      "expected": "Trả lời ngay tình huống này không đủ điều kiện đổi; phí chỉ được nói cho trường hợp đổi hợp lệ."
+    },
+    "runtime": {
+      "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-current-policy-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CURRENT_POLICY",
+      "variant": 2,
+      "purpose": "Khách nhớ mức phí cũ và hỏi đổi size ở ngày thứ mười hai.",
+      "expected": "Dùng thời hạn và phí hiện tại, đồng thời nói rõ điều kiện còn cần kiểm tra trước khi xác nhận đổi."
+    },
+    "runtime": {
+      "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Lần trước chị nhớ phí đổi là 25 nghìn."
+        }
+      ],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-price-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "PRICE",
+      "variant": 2,
+      "purpose": "Khách dùng từ tham chiếu tự nhiên sau khi đã nêu sản phẩm.",
+      "expected": "Hiểu 'cả bộ' là set đang nói tới và báo đúng giá; không lặp lại lịch sử không cần thiết."
+    },
+    "runtime": {
+      "latest": "Cho chị xin giá cả bộ với em.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem bộ Thạch Thảo bên mình."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-component-stock-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "COMPONENT_PRICE_STOCK",
+      "variant": 2,
+      "purpose": "Khách chỉ muốn mua chân váy rời.",
+      "expected": "Chọn đúng offer chân váy, báo đúng giá và tồn size khách hỏi; không kéo về giá cả set."
+    },
+    "runtime": {
+      "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị chỉ muốn lấy chân váy của set Thạch Thảo."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-search-read-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "SEARCH_READ",
+      "variant": 2,
+      "purpose": "Khách nhớ tên sản phẩm nhưng không đưa mã.",
+      "expected": "Tìm đúng set Khánh Trang rồi đọc giá từ nguồn; không chọn một kết quả mơ hồ như đã chắc chắn."
+    },
+    "runtime": {
+      "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-policy-used-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "USED_POLICY",
+      "variant": 2,
+      "purpose": "Khách đã mặc thử thay vì chỉ ướm ngoài người.",
+      "expected": "Áp dụng đúng giới hạn chỉ được ướm; không đồng ý đổi chỉ vì khách còn tem và chưa mang ra ngoài."
+    },
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-current-policy-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CURRENT_POLICY",
+      "variant": 3,
+      "purpose": "Khách dựa vào mốc bảy ngày cũ và hỏi đổi size ở ngày thứ chín.",
+      "expected": "Nêu đúng mốc hiện tại và xử lý các điều kiện còn thiếu bằng một câu ngắn; không lặp lại mốc cũ như luật đang áp dụng."
+    },
+    "runtime": {
+      "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-price-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "PRICE",
+      "variant": 3,
+      "purpose": "Khách hỏi giá nguyên set bằng cách nói ngắn gọn thường dùng.",
+      "expected": "Báo đúng giá nguyên set trong một câu tự nhiên, không đọc thêm dữ kiện khách không hỏi."
+    },
+    "runtime": {
+      "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-component-stock-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "COMPONENT_PRICE_STOCK",
+      "variant": 3,
+      "purpose": "Khách chưa biết set có tách áo và muốn giá, tồn size M.",
+      "expected": "Xác nhận khả năng mua riêng từ source rồi báo đúng giá và tồn; không suy diễn size M sẽ vừa."
+    },
+    "runtime": {
+      "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-search-read-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "SEARCH_READ",
+      "variant": 3,
+      "purpose": "Khách nhớ mã từ trang bán hàng và muốn tìm lại giá, tồn.",
+      "expected": "Tìm đúng mã SQ223, sau đó đọc giá và tồn có nguồn; không tự thay bằng mẫu gần giống."
+    },
+    "runtime": {
+      "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-policy-used-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "USED_POLICY",
+      "variant": 3,
+      "purpose": "Khách đã cắt tem và giặt sản phẩm rồi muốn đổi mẫu.",
+      "expected": "Từ chối đổi theo đúng tình trạng thực tế, trả lời thẳng; không mở bằng một câu đồng ý rồi mới phủ định."
+    },
+    "runtime": {
+      "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  }
+]
