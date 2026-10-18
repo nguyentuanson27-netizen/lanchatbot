@@ -2,13 +2,14 @@
 
 ## Current model–code division plan — 2026-10-19
 
-- [x] Đối chiếu source/executor/native schema, 66-outcome review và các finding rollback; chốt [kế hoạch](../docs/specs/c3-phase-b-model-code-division-plan-20261019.md), self-review chống lặp cơ chế đã có. PLAN_READY; chưa runtime edit/provider.
-- [ ] P0: freeze cases/public sources/capabilities/rubric/config; không evaluator-label leak, không phục dựng giả snapshot cũ.
-- [ ] P1: bounded current-product preparation, source/call accounting; RED→GREEN scope/freshness/dependency controls.
-- [ ] P2: enum mapping native field → domain path, giữ source/CAS/atomic checks; RED→GREEN adapter/transcript/regression.
-- [ ] P3: advice-only diagnostic reuse runner, exact public contexts và một generation; draft/actual terminal chấm riêng.
-- [ ] P4: actual intake invitation trước private code path; capture public STALE diff; focused verification/seal.
-- [ ] Khi execution: tối đa 51 outcomes/180 generations theo kế hoạch, giữ mọi lỗi và các lượt chưa chạy; whole-turn review/voice/decision/authority riêng, không automatic full suite/vòng tiếp.
+- [x] Đối chiếu source/executor/native schema, 66-outcome review và finding rollback; lập [kế hoạch](../docs/specs/c3-phase-b-model-code-division-plan-20261019.md), self-review chống lặp cơ chế đã có.
+- [x] Lưu [review độc lập REVISE](../docs/specs/c3-phase-b-model-code-division-independent-review-20261019.md), sửa ba contract và self-review: preparation scope/status, không full read dependencies, integrated capture trước advice replay. PLAN_REVISED_AFTER_REVIEW; chưa runtime edit/provider/re-review ACCEPT.
+- [ ] P0: freeze cases/capture rule/capabilities/rubric/config; live nguồn ghi version thực tế, không paired causal/frozen whole-journey hoặc evaluator-label leak.
+- [ ] P1: content/attributes/availableOffers preparation + public read scope/status tới first owner wire; không thêm price/stock/VARIANT/full-query read-set. RED→GREEN đổi sản phẩm/policy, scope/freshness và budget controls.
+- [ ] P2: enum mapping native field → domain path; map cả unresolvedFields, giữ raw native transcript/source/CAS/atomic checks; không drop state failure rồi chạy effect.
+- [ ] P3: integrated B1 capture full public TrustedContext trước projection theo rule cố định → khóa hash → advice-only một generation; không dựng từ lossy wire hoặc dùng rep khác; draft/replay terminal/actual integrated terminal chấm riêng.
+- [ ] P4: actual intake invitation trước private code path, failure chặn phần phụ thuộc; đồng bộ counts 8 lượt/nhóm và request bounds trong runner; public STALE diff; focused checks gồm read-only runner tests/seal.
+- [ ] Khi execution: tối đa 51 slots/180 generations; integrated B1 trước advice; giữ mọi lỗi/NOT_RUN/BLOCKED, không bù lượt; whole-turn review/voice/decision/authority riêng, không automatic full suite/vòng tiếp.
 
 ## Isolated model comparison completed — 2026-10-18
 
