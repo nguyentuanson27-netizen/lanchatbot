@@ -5,8 +5,9 @@
 - [x] V0 whole-reply adjudication recorded before provider; unsupported specific-product opacity is not legalized by old PASS; compound exact cause unresolved. Verifier unchanged.
 - [x] P1/P2 RED→GREEN, preview choices/code acknowledgements; LEGACY differential restored unchanged. P3/P4 replace fit-tool description and owner search/decision/voice;192focused worker/65Node PASS. [Implementation](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md).
 - [x] Full worker1872PASS/131files, Node508PASS/2optionalSKIP, protected21PASS; build/lint(noEmit), fresh source readback0generations and self-review completed. Freeze/preflight evidence follows in the registered run.
-- [ ] Complete45priority model outcomes, raw before primary before diagnosis, conditional16 only if criteria met; retain all accounting and drop test DBs.
-- [ ] Whole-turn review/audit/report, update PR391 and STOP. No automatic second run/live action/Phase C.
+- [x] Complete45priority at clean sourcef85144f5; sixprocesses exit0, raw25be35e1 before whole-primarya2eaff1f before diagnostics.117requests=84owner/33verifier,29PASS/3FAIL/1transporterror;3NONEerrors,0retry/timeouts;3DBdropped. Remaining16 NOT_RUN.
+- [x] [Whole-turn report](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/CHECKPOINT_B.md):32USABLE/4NEEDS_EDIT/6UNUSABLE/3controls; preview choices fixed, color loss/future promises/decision voice persist.68raw hashes/33bindings/29eligible drafts/0observed evaluator-private leaks. Frozen audit capture equality assumption failed on existing artifact redaction; recorded read-only amendment passes using same redactor, original helper/raw/criteria unchanged.
+- [x] Complete report/self-review/final source-raw-helper/JSON/link/secret checks and deliver through PR391. STOP before16; no automatic second run/live action/Phase C. Remote head readback is the delivery check, not CI/model acceptance.
 
 ## Current revised fix plan — 2026-10-18
 
