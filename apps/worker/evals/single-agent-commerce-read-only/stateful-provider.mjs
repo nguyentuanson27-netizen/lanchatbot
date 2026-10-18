@@ -9,6 +9,7 @@ import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-o
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,stateDeclarations,effectDeclarations,handoffDeclarations} from './gemini-inference.mjs';
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
 
 export function statefulPreflight(root){
  assert.notEqual(process.env.C3_TEST_CODEX_TRANSPORT,'1','TEST_TRANSPORT_FORBIDDEN_IN_PROVIDER_RUN');
@@ -22,6 +23,7 @@ export function statefulPreflight(root){
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations])),
+  catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
   corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:7,publicTurns:6,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:24,retry:0,codex:inspectCodex(),sendEnabled:false}};
 }
 
@@ -34,9 +36,11 @@ export async function createStatefulProvider(input){
  const counters={embedding:0,owner:0,verifier:0};
  const embedding=new VertexShadowModel({projectId:config.vertex.projectId,location:'global',modelName:m.models.conversation.model,embeddingModel:config.vertex.embeddingModel,
   embeddingLocation:config.vertex.embeddingLocation,embeddingDimension:config.vertex.embeddingDimension,serviceAccount:{email:credential.client_email,privateKey:credential.private_key}});
- const catalog=new QdrantStableCatalogSearchAdapter({baseUrl:process.env.QDRANT_BASE_URL,apiKey:process.env.QDRANT_API_KEY,collection:config.qdrantCollection,expectedDimension:config.vertex.embeddingDimension,
+ const sourceCatalog=new QdrantStableCatalogSearchAdapter({baseUrl:process.env.QDRANT_BASE_URL,apiKey:process.env.QDRANT_API_KEY,collection:config.qdrantCollection,expectedDimension:config.vertex.embeddingDimension,
   embedding:{embedText:async t=>{counters.embedding++;return embedding.embedText(t);},embedImageUrl:async()=>{throw new Error('IMAGE_SEARCH_NOT_EXPOSED');}}});
- const facts=new RedisBusinessFactsReader(process.env.REDIS_URL),search=new ProductSearchService(catalog,config.searchThresholds);
+ const facts=new RedisBusinessFactsReader(process.env.REDIS_URL),sourceSearch=new ProductSearchService(sourceCatalog,config.searchThresholds);
+ const catalog={findByExactCode:async code=>candidateDescription(await sourceCatalog.findByExactCode(code),config.candidateDescriptions)};
+ const search={searchText:async query=>candidateSearchResult(await sourceSearch.searchText(query),config.candidateDescriptions)};
  const infer=createGeminiCommerceInference({model:m.models.conversation.model,effort:'high',location:'global',projectId:config.vertex.projectId});
  const verify=createCommerceVerifier(m,undefined,(id,v)=>audit(id,v.phase,v.provider));
  const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');

@@ -7,6 +7,31 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('owner hides only POS source reason and retains actionable availability reasons',()=>{
+ const r=request(),reasons=['POS_SNAPSHOT_UNAVAILABLE','SIZE_UNSUPPORTED','VARIANT_NOT_FOUND','DELIVERY_REGION_REQUIRED','CATALOG_SNAPSHOT_STALE'];
+ const data={subjectRef:'P1',content:{description:'Áo thêu.'},availableOffers:null,sellingOptions:null,
+  availability:Object.fromEntries(reasons.map((reason,i)=>['field'+i,{status:'UNAVAILABLE',reason}]))};
+ r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data}}}]});
+ const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+ assert.deepEqual(out.availability.field0,{status:'UNAVAILABLE',reason:null});
+ for(let i=1;i<reasons.length;i++)assert.equal(out.availability['field'+i].reason,reasons[i]);
+ assert.equal(out.content.description,data.content.description);assert.equal(out.availableOffers,null);
+ assert.equal(data.availability.field0.reason,'POS_SNAPSHOT_UNAVAILABLE');
+});
+test('unknown bounded finish enum survives telemetry without accepting completion or retrying',async()=>{
+ for(const finish of ['NEW_PROVIDER_FINISH', 'private text should not be logged', 'A'.repeat(65), null]){
+  let calls=0;const data=body([{text:'Dạ chị.'}]);data.candidates[0].finishReason=finish;
+  const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>{
+   calls++;return new Response(JSON.stringify(data));}});
+  await assert.rejects(infer(request()),error=>{
+   assert.equal(error.telemetry.failureCode,'OWNER_FINISH_REASON');
+   assert.equal(error.telemetry.rawFinishReason,finish==='NEW_PROVIDER_FINISH'?finish:null);
+   return true;
+  });assert.equal(calls,1);
+ }
+});
+
+
 test('numeric writes expose bounded source quotes and cart adds require an explicit color or unknown',()=>{
  const op=stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties;
  assert.deepEqual(op.sourceQuote,{type:'string',minLength:1,maxLength:160});
@@ -34,7 +59,7 @@ test('captured HTTP request keeps per-option scope and sanitizes nested availabi
  const result=captured[0].contents.at(-1).parts[0].functionResponse.response.data;
  assert.equal(result.offerType,'COMPOSITE');assert.deepEqual(result.sellingOptions[0].facts,options[0].facts);
  assert.equal(result.sellingOptions[0].availability.stock.reason,'SOURCE_UNAVAILABLE');
- assert.equal(result.sellingOptions[1].availability.price.reason,'POS_SNAPSHOT_UNAVAILABLE');
+ assert.equal(result.sellingOptions[1].availability.price.reason,null);
  assert.doesNotMatch(JSON.stringify(captured),/CANARY|expectedSafe|requiredBehaviors/);
  assert.equal(r.contents.at(-1).parts[0].functionResponse.response.data.sellingOptions[0].availability.stock.reason,'PRIVATE_EVALUATOR_CANARY');
 });
@@ -137,7 +162,7 @@ test('partial commerce reads retain independent product evidence locally even wh
   const wire=captured[0],local=wire.contents.at(-1).parts[0].functionResponse;
   for(const [key,value] of Object.entries(evidence))assert.deepEqual(local.response.data[key],value);
   assert.equal(local.response.data.sellingOptions,null);assert.deepEqual(local.response.data.facts,[]);
-  assert.deepEqual(local.response.data.availability[missing],data.availability[missing]);
+  assert.deepEqual(local.response.data.availability[missing],{...data.availability[missing],reason:null});
   assert.equal(local.id,'partial');assert.deepEqual(wire.contents.at(-2),model);assert.deepEqual(r.contents,original);
   assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_ONLY|PRIVATE_RUBRIC|test-token/);
  }
@@ -206,7 +231,7 @@ test('completion failures distinguish candidate count, finish, role, parts and e
   {data:{modelVersion:config.model,candidates:[]},code:'OWNER_CANDIDATE_COUNT',finish:null},
   {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'MODEL_ARMOR'}]},code:'OWNER_FINISH_REASON',finish:'MODEL_ARMOR'},
   {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'FINISH_REASON_UNSPECIFIED'}]},code:'OWNER_FINISH_REASON',finish:'FINISH_REASON_UNSPECIFIED'},
-  {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'FUTURE_PRIVATE_RESPONSE'}]},code:'OWNER_FINISH_REASON',finish:'UNKNOWN'},
+  {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'FUTURE_PROVIDER_REASON'}]},code:'OWNER_FINISH_REASON',finish:'UNKNOWN'},
   {data:{...body([{text:'PRIVATE_RESPONSE'}]),candidates:[{finishReason:'STOP',content:{role:'user',parts:[{text:'PRIVATE_RESPONSE'}]}}]},code:'OWNER_CONTENT_ROLE',finish:'STOP'},
   {data:body([]),code:'OWNER_CONTENT_PARTS',finish:'STOP'},
   {data:body([{thought:true,text:'PRIVATE_RESPONSE'}]),code:'OWNER_FINAL_EMPTY',finish:'STOP'},
@@ -349,7 +374,7 @@ test('owner retains bounded source reasons for partial answers without arbitrary
  r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
   {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response}}]});
  const built=buildGeminiCommerceRequest(r),part=built.contents[3].parts[0];
- assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'},
+ assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE',reason:null},
   stock:{status:'STALE',reason:'CATALOG_SNAPSHOT_STALE'},eta:{status:'UNAVAILABLE',reason:'SOURCE_UNAVAILABLE'}});
  assert.equal(part.functionResponse.id,'read-1');
  assert.equal(part.functionResponse.response.data.content.description,'Áo cotton.');
@@ -382,7 +407,7 @@ test('owner read responses keep independent content and missing field statuses w
  r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data}}}]});
  const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
  assert.equal(out.missing,undefined);assert.equal(out.content.description,data.content.description);
- assert.equal(out.availableOffers,null);assert.equal(out.availability.price.reason,'POS_SNAPSHOT_UNAVAILABLE');
+ assert.equal(out.availableOffers,null);assert.equal(out.availability.price.reason,null);
  assert.deepEqual(data.missing,['PRICE','STOCK','ATTRIBUTES']);
 });
 test('a different or absent model version is not accepted as the approved model',async()=>{

@@ -1,5 +1,17 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current detailed fix plan after 93 outcomes — 2026-10-18
+
+- [x] Read all93 outcomes/history and relevant traces/source; add voice review and owner-confirmed shared southern transit. [Plan](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/FIX_PLAN.md), [review](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/REVIEW_93.md). Documentation only.
+- [ ] S1: resolve private southern destinations to existing MIEN-NAM source; RED→GREEN incl unknown/conflicting/outside region, fresh ETA and preorder; prove real-source isolated checkout preview/confirm.
+- [ ] S2: consolidate purchase-tool argument guidance; preserve null for genuinely missing choice and all guards; validate BE/M→BE/L×2 without unnecessary reads/NONE calls.
+- [x] S3: bounded provider finish reason telemetry, fail-closed and one request/no retry; focused adapter tests pass.
+- [x] S4 implementation/source readback: candidate neutral registry description through existing eval catalog ports; original hash matches current source; provenance and partial-source unknown semantics retained. Provider benefit still unverified.
+- [ ] S5 conditional: after eight source-first observations, replace overlapping advice/voice paragraphs only if needed; no examples/template/keyword grading or verifier style gate.
+- [ ] Verification/seal: focused45PASS, catalog9PASS, protected52PASS, full worker1844Vitest/499NodePASS+2optionalSKIP; typecheck/build/lint exit0; self-review and source readback done. Isolated controls/current provider preflights pending; see review93-fix-20261018/IMPLEMENTATION.md.
+- [ ] Owner has authorized implementation/run:61outcomes normal or69including one superseded eight-case diagnostic; eight B1priority×3 + three seven-turn journeys before remaining16. Stop on unresolved failed priority; no third candidate, hidden retries or duplicate full31. First8keep exact baseline prompt/tool hashes; S2/S5 deferred.
+- [ ] Preserve all attempts, review actual whole outcomes, report attribution/uncertainty and update draft PR391. Phase B not accepted; no A qualification/live send/deploy/Phase C.
+
 ## Current two additional frozen repetitions — 2026-10-18
 
 - [x] Register owner request for exactly2more repetitions of31cases; subagents only operate frozen existing runners. [Scope](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/SCOPE.md), intake6cd8f506/main296cdcfb; unchanged13executable/input+5runtime+launcher hashes verified.

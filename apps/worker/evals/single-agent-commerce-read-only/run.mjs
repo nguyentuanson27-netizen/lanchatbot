@@ -7,6 +7,7 @@ import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerce
  REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'}}});
@@ -41,7 +42,7 @@ const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.str
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
  promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
  inputHash,caseIds:samples.map(c=>c.caseId),registered:REGISTERED_CASE_COUNT,repetitions:1,maximumGenerationRequests:MAXIMUM_GENERATION_REQUESTS,
- dispatch,
+ dispatch,catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});
 const [{PostgresRuntimePolicyStore},{ProductSearchService,QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
  {VertexShadowModel},{createCommerceReadSources},{createCommerceTools},{runCommerceTurn}]=await Promise.all([
@@ -56,7 +57,9 @@ const embedding=new VertexShadowModel({projectId:config.vertex.projectId,locatio
 const index=new QdrantStableCatalogSearchAdapter({baseUrl:process.env.QDRANT_BASE_URL,apiKey:process.env.QDRANT_API_KEY,collection:config.qdrantCollection,
  expectedDimension:config.vertex.embeddingDimension,embedding:{embedText:async text=>{counters.embeddingCalls++;return embedding.embedText(text);},
   embedImageUrl:async()=>{throw new Error('IMAGE_SEARCH_NOT_EXPOSED');}}});
-const search=new ProductSearchService(index,config.searchThresholds);
+const sourceSearch=new ProductSearchService(index,config.searchThresholds);
+const search={searchText:async query=>candidateSearchResult(await sourceSearch.searchText(query),config.candidateDescriptions)};
+const catalog={findByExactCode:async code=>candidateDescription(await index.findByExactCode(code),config.candidateDescriptions)};
 const database=new PostgresRuntimePolicyStore(process.env.RUNTIME_POLICY_DATABASE_URL??process.env.DATABASE_URL);
 const redis=new RedisBusinessFactsReader(process.env.REDIS_URL);
 if(args['source-check']){
@@ -65,8 +68,8 @@ if(args['source-check']){
  const codes=[...new Set(inputs.flatMap(s=>s.initialProductCodes))],products=[];
  const result={mode:'ADAPTER_READBACK',sourceSha:bRunSourceSha,providerGenerations:0,sendEnabled:false,products:[]};
  try{
-  for(const code of codes){counters.catalogReads++;const p=await index.findByExactCode(code);if(!p)throw new Error('INITIAL_SOURCE_UNAVAILABLE');products.push(p);}
-  const sources=createCommerceReadSources({scope,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog:index,policyStore:database,facts:redis});
+  for(const code of codes){counters.catalogReads++;const p=await catalog.findByExactCode(code);if(!p)throw new Error('INITIAL_SOURCE_UNAVAILABLE');products.push(p);}
+  const sources=createCommerceReadSources({scope,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog,policyStore:database,facts:redis});
   const tools=await createCommerceTools({read:{scope,clock:()=>new Date(),...sources,initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds}});
   result.policy=await tools.invoke({name:'read_policy',args:{}});if(result.policy.status!=='OK')throw new Error('POLICY_UNAVAILABLE');
   for(const p of products){const first=await tools.invoke({name:'read_product',args:{subjectRef:p.productId}});result.products.push(first);
@@ -91,9 +94,9 @@ try{
   let result;
   try{
    const initialProducts=[];
-   for(const code of sample.initialProductCodes){counters.catalogReads++;const p=await index.findByExactCode(code);if(!p)throw new Error('INITIAL_SOURCE_UNAVAILABLE');initialProducts.push(p);}
+   for(const code of sample.initialProductCodes){counters.catalogReads++;const p=await catalog.findByExactCode(code);if(!p)throw new Error('INITIAL_SOURCE_UNAVAILABLE');initialProducts.push(p);}
    const sources=createCommerceReadSources({scope,channel:config.channel,clock,initialProducts,search,
-    catalog:{findByExactCode:async code=>{counters.catalogReads++;return index.findByExactCode(code);}},
+    catalog:{findByExactCode:async code=>{counters.catalogReads++;return catalog.findByExactCode(code);}},
     policyStore:{loadActivePointers:async q=>{counters.policyReads++;return database.loadActivePointers(q);}},
     facts:{readCatalogSnapshot:async(alias,id)=>{counters.posReads++;return samples[i].sourceMode==='POS_UNAVAILABLE'?null:redis.readCatalogSnapshot(alias,id);}}});
    const rawTools=await createCommerceTools({read:{scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds}});

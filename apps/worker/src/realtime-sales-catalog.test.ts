@@ -75,11 +75,36 @@ function snapshot(stockQuantity = 3) {
 }
 
 describe("realtime sales catalog", () => {
+
+  it("maps southern destination components, not street names, to current shared transit", () => {
+    const regional = { ...snapshot(), shipping_eta: { "MIEN-NAM": { transit_min_days: 3, transit_max_days: 6 } } };
+    const query = { shopAlias: "LANA", productId: "CB182", offerType: "SET", size: "M", color: "BE", quantity: 1,
+      lineId: "13000000-0000-4000-8000-000000000001" };
+    for (const deliveryAddress of ["Quận 1, TP.HCM", "Phường 1, Cần Thơ", "Phường 2, tỉnh Đồng Nai",
+      "Phường 2, Bình Dương, TP Hồ Chí Minh", "Phường 1, Long An", "Phường 1, Kiên Giang"]) {
+      expect(cartSelectionFromSnapshot(regional, { ...query, deliveryAddress }, now), deliveryAddress)
+        .toMatchObject({ status: "READY", eta: { minDays: 4, maxDays: 8 } });
+    }
+    for (const deliveryAddress of ["12 đường Cần Thơ, Hà Nội", "12 đường Đồng Nai", "Phường 1",
+      "Hà Nội, TP Hồ Chí Minh", "Tỉnh Đồng Nai, Cần Thơ", "Phường 1, Lâm Đồng"]) {
+      expect(cartSelectionFromSnapshot(regional, { ...query, deliveryAddress }, now), deliveryAddress)
+        .toMatchObject({ status: "ETA_UNAVAILABLE", reasonCode: "CART_ETA_REGION_UNRESOLVED" });
+    }
+    const preorder = { ...snapshot(0), shipping_eta: regional.shipping_eta,
+      fulfillment_policy: { ...regional.fulfillment_policy, can_order_when_zero: true, zero_stock_prep_min_days: 5, zero_stock_prep_max_days: 8 } };
+    expect(cartSelectionFromSnapshot(preorder, { ...query, deliveryAddress: "Quận 1, TP Hồ Chí Minh" }, now))
+      .toMatchObject({ status: "READY", eta: { minDays: 8, maxDays: 14 } });
+    expect(cartSelectionFromSnapshot({ ...preorder, shipping_eta: { "MIEN-NAM": { transit_min_days: 1, transit_max_days: 2 } } },
+      { ...query, deliveryAddress: "Quận 1, TP Hồ Chí Minh" }, now)).toMatchObject({ status: "READY", eta: { minDays: 6, maxDays: 10 } });
+    expect(cartSelectionFromSnapshot({ ...preorder, fulfillment_policy: { ...preorder.fulfillment_policy, eta_valid_until: observedAt } },
+      { ...query, deliveryAddress: "Quận 1, TP Hồ Chí Minh" }, now)).toMatchObject({ status: "ETA_UNAVAILABLE", reasonCode: "CART_ETA_STALE" });
+  });
+
   it("distinguishes an unresolved destination region from missing ETA durations without guessing geography", () => {
     const regional = { ...snapshot(), shipping_eta: { "MIEN-NAM": { transit_min_days: 3, transit_max_days: 6 } } };
     const query = { shopAlias: "LANA", productId: "CB182", offerType: "SET", size: "M", color: "BE", quantity: 1,
       lineId: "13000000-0000-4000-8000-000000000001", deliveryAddress: "Quận 1, TP Hồ Chí Minh" };
-    expect(cartSelectionFromSnapshot(regional, query, now)).toMatchObject({ status: "ETA_UNAVAILABLE", reasonCode: "CART_ETA_REGION_UNRESOLVED" });
+    expect(cartSelectionFromSnapshot(regional, query, now)).toMatchObject({ status: "READY", eta: { minDays: 4, maxDays: 8 } });
     expect(cartSelectionFromSnapshot(regional, { ...query, deliveryAddress: "MIEN-NAM" }, now)).toMatchObject({ status: "READY", eta: { minDays: 4, maxDays: 8 } });
     expect(cartSelectionFromSnapshot(snapshot(), query, now)).toMatchObject({ status: "READY", eta: { minDays: 3, maxDays: 6 } });
   });

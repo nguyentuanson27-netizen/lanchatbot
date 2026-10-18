@@ -47,7 +47,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const subject=s=>({...(['PRODUCT','CART_LINE'].includes(s.kind)?{subjectRef:s.ref}:{evidenceRef:s.ref}),kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
  const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
-  {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
+  {status:v.status,reason:v.reason==null||v.reason==='POS_SNAPSHOT_UNAVAILABLE'?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
  const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value}));
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=(p,keepLocalEvidence=false)=>{
@@ -166,6 +166,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    telemetry.thinkingTokens=u?.thoughtsTokenCount??null;
    const finish=data.candidates?.[0]?.finishReason;
    telemetry.finishReason=finish==null?null:safeFinishReasons.has(finish)?finish:'UNKNOWN';
+   telemetry.rawFinishReason=typeof finish==='string'&&/^[A-Z][A-Z0-9_]{0,63}$/.test(finish)?finish:null;
    stage='COMPLETION';
    requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
    const parsed=parseGeminiGeneration(data);

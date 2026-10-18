@@ -24,5 +24,11 @@
     "embeddingModel": "multimodalembedding@001",
     "embeddingLocation": "us-central1",
     "embeddingDimension": 1408
+  },
+  "candidateDescriptions": {
+    "SV2447": {
+      "originalSha256": "996dea11b6f90334423bace59f66094f1617c3d5b026989f4d53335ee6897dab",
+      "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren."
+    }
   }
 }

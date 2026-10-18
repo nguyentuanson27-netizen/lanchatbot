@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { southernDestination } from "./southern-delivery-region.js";
 import {
   CartLineV1Schema,
   type CartLineV1,
@@ -172,11 +173,17 @@ function resolveOffer(snapshot: CatalogSnapshotV3, requested: string | null) {
 function resolveRegion(snapshot: CatalogSnapshotV3, address: string) {
   const normalized = normalizeCatalogToken(address);
   const entries = Object.entries(snapshot.shipping_eta);
+  const southern = southernDestination(address);
+  if (southern === "CONFLICT") return null;
   const exact = entries
     .filter(([region]) => normalized.includes(normalizeCatalogToken(region)))
     .sort((left, right) => normalizeCatalogToken(right[0]).length - normalizeCatalogToken(left[0]).length)
     .at(0);
   if (exact) return exact;
+  if (southern === "MATCH") {
+    const shared = entries.find(([region]) => normalizeCatalogToken(region) === "MIEN_NAM");
+    if (shared) return shared;
+  }
   return entries.find(([region]) =>
     ["TOAN_QUOC", "DEFAULT", "OTHER", "VIET_NAM"].includes(normalizeCatalogToken(region))
   ) ?? null;
