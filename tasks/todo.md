@@ -3,9 +3,10 @@
 ## Current execution-contract provider replay — 2026-10-18
 
 - [x] Owner authorizes model replay at6c5befca; refresh main296cdcfb and [freeze45priority scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md), unchanged criteria/corpora/models/budgets, stateful first.
-- [ ] Fresh source readback0generation, frozen input hashes, clean seal and config/stateful preflights.
-- [ ] Complete45priority outcomes, rawcommit before primarycommit before diagnosis; conditional16 only on all-priority acceptance.
-- [ ] Audit all requests/errors/mode violations/bindings/label-private firewall/DB cleanup and report actual terminal sales/voice results. Update PR391 and STOP; no A PASS/deploy/live send.
+- [x] Fresh source readback0generation, frozen input hashes, clean source4619eaa5 and config/stateful preflights0generation.
+- [x] Complete45priority outcomes; raw374e8e0f before whole primary92738a5e before diagnosis.23USABLE/8NEEDS_EDIT/11UNUSABLE/3controls; remaining16NOT_RUN by frozen criteria.0/3opening success, all3late preview/confirmations; no post-result patch/second candidate.
+- [x] Audit117requests=84owner/33verifier,25PASS/8FAIL,1otherfinalblockedbyhardprecheck,33bindings/25eligible exactdrafts/68rawhashes/0observed evaluator-private leaks, all3DBdropped.2NONE completion violations countaserrors despiteHTTP200,0transport/quota/timeout/retry. [Actual sales/voice report](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/CHECKPOINT_B.md) and all45reviews retained; draftPR391 delivery and STOP.
+- [ ] Sales/live acceptance unresolved: optional offer defaults, measurement proof friction, lost color/NONE, unknown-to-only-set inference, next-step promises and ambiguous stage/price meanings. No new A qualification/provider substitution/live send/deploy/Phase C; ownerAcceptance=null.
 
 ## Current execution-contract fix — 2026-10-18
 

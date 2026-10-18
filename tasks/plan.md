@@ -2,7 +2,7 @@
 
 ## Current execution-contract provider replay — 2026-10-18
 
-Owner authorizes one model replay of6c5befca. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md): same45priority outcomes, three stateful journeys first then8B1×3; conditional16 only if priority criteria met. Keep models/config/verifier/corpora/budgets and all failed attempts; no new diagnostic slots or post-result patch. Fresh source readback0generation → frozen inputs/clean source seal → preflight → raw45commit → whole-outcome primarycommit → diagnosis/audit/report/PR391 → STOP. Provider results NOT_RUN at registration.
+Owner authorizes one model replay of6c5befca. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/SCOPE.md): same45priority outcomes, three stateful journeys first then8B1×3; conditional16 only if priority criteria met. Fresh source/preflights0generation; clean source4619eaa5; all45raw374e8e0f before whole primary92738a5e before diagnosis. [Actual report](../apps/worker/evals/single-agent-commerce-read-only/execution-contract-run-20261018/CHECKPOINT_B.md):23USABLE/8NEEDS_EDIT/11UNUSABLE/3controls,117requests/retry0, all3preview/confirmations but0/3successful openings.2final-only completion violations (HTTP200),8verifierFAIL,0transport/quota/timeout; all3DBdropped. STOP before16; source/prompts/criteria unchanged after seal, no new candidate or generation. A OWNER_BYPASS/B sales-live STOP; findings include optional offer scope and single-value proof friction for a future bounded review, not another prompt patch in this run.
 
 ## Current execution-contract fix — 2026-10-18
 
