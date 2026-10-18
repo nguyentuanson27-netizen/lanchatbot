@@ -1,6 +1,12 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current F1–F3 contract implementation — 2026-10-18
+## Current F1–F3 provider replay — 2026-10-18
+
+Owner requests one model run of2bfc568d. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md): same45priority outcomes, three ordered stateful journeys first then8B1×3; remaining16 once only if unchanged criteria met. Fresh source readback0generation succeeded; freeze and clean source/preflights precede dispatch. Native processes max2 with serialized build/import, no subagent generation or generation retry.
+
+Review whole actual outcomes and committed fields before rejected drafts/verdict details. Inspect offer/default/read rounds, numeric state/field/person residual, unknown-source inference and actual next steps; keep ambiguous verdicts unresolved. Combined F1–F3 after rollback, not an isolated causal experiment. Stop after report/tasks/PR391; no automatic patch/next round/live action/A qualification or Phase C.
+
+## Historical F1–F3 contract implementation — 2026-10-18
 
 Owner requests implementation of the independently revised [plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md). Intake863051c2/main296cdcfb. [Implementation and actual checks](../docs/specs/c3-phase-b-contract-fixes-implementation-20261018.md): F1 explicit offer at candidate effect/native boundary (8f30b546); F2 actionable bounded field reasons without partial writes (f379252a); F3 public source-unavailable reason instead of null (16977beb). Both prompts/manifest, shared selector, authority/CAS/receipt and all historical runs remain unchanged; six synthetic positive add calls adopt the required argument.
 

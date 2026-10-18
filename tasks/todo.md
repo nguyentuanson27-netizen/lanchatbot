@@ -1,6 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current F1–F3 contract implementation — 2026-10-18
+## Current F1–F3 provider replay — 2026-10-18
+
+- [x] Register owner-requested single replay at2bfc568d/main296cdcfb: same45priority outcomes and old criteria, stateful first, remaining16 conditional. [Scope](../apps/worker/evals/single-agent-commerce-read-only/contract-fixes-run-20261018/SCOPE.md); fresh source readback0generation completed.
+- [ ] Freeze inputs/tool schemas/runtime/helper hashes; commit and capture clean runtime source SHA, then0generation preflights. Complete all registered priority attempts, preserve errors/downstream and DB cleanup; no automatic generation retry.
+- [ ] Commit raw before whole primary before diagnosis, audit requests/firewall/bindings and report sales/voice/state/provenance/metrics. Stop per evidence; A OWNER_BYPASS/B sales-live unresolved, no automatic next candidate or live work.
+
+## Historical F1–F3 contract implementation — 2026-10-18
 
 - [x] F1 observed RED→GREEN: explicit offer required in native add/candidate effects, trusted options enum when complete, no missing-offer default selection. Single-offer direct add, scoped unavailable color/offer, source failure, change-cart and duplicate controls preserved. Savepoint8f30b546.
 - [x] F2 observed RED→GREEN: numeric fieldErrors, atomic rejection/pending dependencies, existing source/CAS/receipt semantics retained. Correction continuation stays2rounds/4calls/3owner generations with1verifier; semantic field/person correctness remains a provider-review obligation. Savepointf379252a.
