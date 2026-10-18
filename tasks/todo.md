@@ -1,16 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current detailed fix plan after 93 outcomes — 2026-10-18
+## Current completed review93 fix and bounded replay — 2026-10-18
 
-- [x] Read all93 outcomes/history and relevant traces/source; add voice review and owner-confirmed shared southern transit. [Plan](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/FIX_PLAN.md), [review](../apps/worker/evals/single-agent-commerce-read-only/bounded-source-repeat-2x-20261018/REVIEW_93.md). Documentation only.
-- [ ] S1: resolve private southern destinations to existing MIEN-NAM source; RED→GREEN incl unknown/conflicting/outside region, fresh ETA and preorder; prove real-source isolated checkout preview/confirm.
-- [ ] S2 implemented after8diagnostic: consolidate purchase-tool argument guidance, preserve null/schema/guards. BE/M→BE/L×2 provider validation pending.
-- [x] S3: bounded provider finish reason telemetry, fail-closed and one request/no retry; focused adapter tests pass.
-- [x] S4 implementation/source readback: candidate neutral registry description through existing eval catalog ports; original hash matches current source; provenance and partial-source unknown semantics retained. Provider benefit still unverified.
-- [x] S5 branch selected after8diagnostic:6USABLE/2NEEDS_EDIT despite8eligible. Replace advice/voice/partial paragraphs, no examples/template/keyword grading or verifier style gate; prompt -5.8% bytes. Provider effect pending.
-- [ ] Verification/seal: focused45PASS, catalog9PASS, protected52PASS, full worker1844Vitest/499NodePASS+2optionalSKIP; typecheck/build/lint exit0; self-review and source readback done. Isolated controls/current provider preflights pending; see review93-fix-20261018/IMPLEMENTATION.md.
-- [ ] Owner has authorized implementation/run:61outcomes normal or69including one superseded eight-case diagnostic; eight B1priority×3 + three seven-turn journeys before remaining16. Stop on unresolved failed priority; no third candidate, hidden retries or duplicate full31. First8keep exact baseline prompt/tool hashes; S2/S5 deferred.
-- [ ] Preserve all attempts, review actual whole outcomes, report attribution/uncertainty and update draft PR391. Phase B not accepted; no A qualification/live send/deploy/Phase C.
+- [x] Revised independent plan, implement S1/S3/S4 with observed RED→GREEN, source readback and controls; source42fa669d diagnostic8 completed, primary6USABLE/2NEEDS_EDIT before trace.
+- [x] Implement preregistered S2/S5, seal cleanbfb82f7f; complete24priority B1 plus21stateful outcomes. Retain raw4317bf01 before primary9b1132ea before diagnosis. No verifier/policy/model/corpus change or hidden retry.
+- [x] All3private checkouts/confirmations pass existing source-based ETA path; three DBs dropped. S2 implementation completed but only1of3open/change/quote journeys clean: reliability not accepted.
+- [x] Current checks: worker1844Vitest/499NodePASS+2optionalSKIP; focused168/protected52/adapter45PASS; typecheck/build/lint exit0; COD25PASS/0generations; source/preflight/binding/request/hash checks. No new full-repo CI PASS claim.
+- [x] Review all53outcomes. [Report](../apps/worker/evals/single-agent-commerce-read-only/review93-fix-20261018/CHECKPOINT_B.md): candidate25USABLE/2NEEDS_EDIT/15UNUSABLE/3controls,13fallback;117candidate requests/141total,5quota+2transport errors retained. One receipt ACK misses question and one opacity claim is review-identified unsafe PASS. No majority/best-of.
+- [x] Follow frozen stop:16remainingNOT_RUN; no third candidate or new provider dispatch. Preserve login pre-registration failure and explicit continuation of17undispatched jobs.
+- [ ] Phase B sales/live acceptance: STOP. Resolve selected-size vs fit contract, old measurement replay, unknown offer inference, receipt recovery completeness, opacity boundary and provider availability in a separately approved next scope. No source publication/deploy/Phase C; A OWNER_BYPASS.
 
 ## Current two additional frozen repetitions — 2026-10-18
 
