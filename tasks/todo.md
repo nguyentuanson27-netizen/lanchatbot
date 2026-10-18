@@ -1,6 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current authorized post-review implementation/run — 2026-10-18
+## Current owner-requested rollback — 2026-10-18
+
+- [x] Restore the seven changed code/prompt/manifest/test files to4659fb73, removing all latest P1–P4 changes while retaining earlier F1–F3 and historical run evidence. No reset/force-push or provider request.
+- [x] Seven Git blobs exactly match4659fb73, owner hash/manifest restored and evidence unchanged; focused189worker/65NodePASS, canonical build/lint(noEmit) exit0, diff checkPASS. No new full-suite/CI/model PASS claimed.
+- [x] Save rollback as a new commit and deliver through PR391 with remote head readback; retain source and result provenance separately. Stop; no new model/live action.
+
+## Historical post-review implementation/run, now rolled back — 2026-10-18
 
 - [x] V0 whole-reply adjudication recorded before provider; unsupported specific-product opacity is not legalized by old PASS; compound exact cause unresolved. Verifier unchanged.
 - [x] P1/P2 RED→GREEN, preview choices/code acknowledgements; LEGACY differential restored unchanged. P3/P4 replace fit-tool description and owner search/decision/voice;192focused worker/65Node PASS. [Implementation](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md).

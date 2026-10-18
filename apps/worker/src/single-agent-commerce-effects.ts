@@ -8,7 +8,7 @@ import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolR
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
-import { selectionsMatchCartLines, formatCartLineSelection } from "./realtime-sales-cycle.js";
+import { selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
 export type CommerceCommandResult =
@@ -301,9 +301,11 @@ export async function createCommerceEffectTools(input: {
     if (!world.effectReceipts.some(r => r.ref === receipt!.ref) || !world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
-    const cart = current.cart!.value;
-    const choices = cart.lines.map(formatCartLineSelection).join("; ");
-    const cartAck = `Dạ, ${choices[0]!.toLowerCase()}${choices.slice(1)} chị nhé.`;
+    const cart = current.cart!.value, components = cart.lines.flatMap(line => line.components);
+    const size = components[0]?.size, color = components[0]?.color;
+    const cartAck = `Giỏ hiện có ${cart.lines.reduce((total, line) => total + line.quantity, 0)} sản phẩm` +
+      (size && components.every(c => c.size === size) ? `, size ${size}` : "") +
+      (color && components.every(c => c.color === color) ? `, màu ${color}` : "") + ".";
     let summary = "";
     const active = activeSelections(), now = input.clock();
     const policyRef = current.commerceContext?.policyRef;
@@ -314,10 +316,11 @@ export async function createCommerceEffectTools(input: {
       try {
         publicPolicyLiteral(recoveryPolicy, input.scope.pageId, input.scope.shopId, now);
         summary = ` Tổng ${cart.grandTotalVnd.toLocaleString("vi-VN")}đ, đã gồm phí giao hàng.` +
-          active.filter(s => s.stockStatus === "PRE_ORDER").map(s => ` ${formatCartLineSelection(s.line)}: hàng đặt trước.`).join("");
+          (active.some(s => s.stockStatus === "PRE_ORDER") ? " Có món đặt trước, chị nhé." : "");
       } catch { /* No fresh policy means no current money or stock assertion. */ }
     }
     return { disposition: "SEND_ELIGIBLE", reason: summary && receipt.effect !== "PURCHASE_CONFIRMED" ? "RECEIPT_BACKED_CART_SUMMARY" : "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
-      ? "Dạ, shop nhận yêu cầu chốt đơn của chị rồi." : cartAck + summary, fallbackId: null };
+      ? "Shop đã nhận xác nhận mua hàng của chị." : receipt.effect === "CART_OPENED"
+        ? "Em đã thêm món chị chọn vào giỏ." + summary : cartAck + summary, fallbackId: null };
   } };
 }

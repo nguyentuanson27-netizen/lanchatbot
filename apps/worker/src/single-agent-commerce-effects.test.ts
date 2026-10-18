@@ -468,7 +468,7 @@ describe("code-owned commerce effects and recovery", () => {
       }, verifier: async () => ({ result: { verdict: "PASS", violations: [] } }) });
     expect(s.commits).toHaveLength(1);
     expect(result.terminal.reason).toBe("RECEIPT_BACKED_CART_SUMMARY");
-    expect(result.terminal.text).toBe("Dạ, áo SM613 màu navy, size M ×1 chị nhé. Tổng 524.000đ, đã gồm phí giao hàng.");
+    expect(result.terminal.text).toBe("Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng.");
     expect(result.sendEnabled).toBe(false);
   });
   it("recovers the committed total when an owner asks for another tool under NONE, without running that tool or generation again", async () => {
@@ -479,7 +479,7 @@ describe("code-owned commerce effects and recovery", () => {
           : n === 2 ? [s.add] : [{ name: "quote_cart", args: {} }];
         return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } };
       }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Dạ, áo SM613 màu navy, size M ×1 chị nhé. Tổng 524.000đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng." });
     expect(result.recovery?.originalReason).toBe("OWNER_TOOL_MODE");
     expect(result.generations.at(-1)?.status).toBe("PROVIDER_ERROR");
     expect(invoke.mock.calls.some(([call]) => call.name === "quote_cart")).toBe(false);
@@ -496,7 +496,7 @@ describe("code-owned commerce effects and recovery", () => {
     await s.tools.invoke({ ...s.add, args: { ...s.add.args, quantity: 2 } });
     const result = await s.tools.recover!(terminalFallback());
     expect(result.text).toContain("Tổng 973.100đ, đã gồm phí giao hàng.");
-    expect(result.text).toContain("Áo SM613 màu navy, size M ×2: hàng đặt trước.");
+    expect(result.text).toContain("Có món đặt trước, chị nhé.");
     expect(s.commits).toHaveLength(1);
   });
   it("does not authorize the old receipt if committed state changes while recovery reads business sources", async () => {
@@ -542,7 +542,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc chị nhé.", history: [],
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.", owner: async () => { throw new Error("provider unavailable"); },
       verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Dạ, áo SM613 màu navy, size M ×2 chị nhé. Tổng 973.100đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 2 sản phẩm, size M, màu navy. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.commits).toHaveLength(2);
   });
   it("reports the committed quantity after a variant-only change without claiming the whole customer request completed", async () => {
@@ -553,7 +553,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow,
       latest: "Đổi L, lấy hai chiếc cho chị nhé.", history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.",
       owner: async () => { throw new Error("provider unavailable"); }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Dạ, áo SM613 màu NAVY, size L ×1 chị nhé. Tổng 524.000đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 1 sản phẩm, size L, màu NAVY. Tổng 524.000đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines[0]!.quantity).toBe(1); expect(s.commits).toHaveLength(2);
   });
   it("does not describe one component's size or color as the configuration of a mixed cart", async () => {
@@ -567,7 +567,7 @@ describe("code-owned commerce effects and recovery", () => {
     await s.tools.invoke(s.add);
     expect(await s.tools.invoke({ ...s.add, args: { ...s.add.args, size: "L", color: "black" } })).toMatchObject({ status: "OK" });
     const recovered = await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: null, fallbackId: null });
-    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Dạ, áo SM613 màu navy, size M ×1; Áo SM613 màu black, size L ×1 chị nhé. Tổng 973.100đ, đã gồm phí giao hàng." });
+    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 2 sản phẩm. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines).toHaveLength(2); expect(s.commits).toHaveLength(2);
   });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {

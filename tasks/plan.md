@@ -1,6 +1,12 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current authorized post-review fixes and replay — 2026-10-18
+## Current owner-requested rollback — 2026-10-18
+
+Owner requests the previous version after post-review run/report head79b095f4. Restore all seven code/prompt/manifest/test files changed by d6ea3d4d/e8de0f80/2c53d7c0 to exact Git blobs at `4659fb73d6f07002e8b2bc61e558e24e071e87a4`. This rolls back preview formatting, code acknowledgements, fit-tool description and owner search/decision/voice changes together. Keep F1–F3 from the prior version and all sealed post-review artifacts/history. Use a new rollback commit, without resetting or rewriting history. Focused affected worker/adapter checks, canonical build/lint and exact file/source comparison precede PR391 delivery. No new model run/live action; A OWNER_BYPASS/B sales-live STOP. Previous36/2/4/3 remains historical evidence, not a fresh result for rollback HEAD.
+
+Observed rollback checks: seven Git blob identities exactly match4659fb73; owner prompt12478bytes/hashd5ce7385matches restored active manifest; all post-review run artifacts unchanged from79b095f4. Focused seven worker files189PASS; Node adapter/protocol/comparison65PASS; canonical worker build and lint(TypeScript noEmit) exit0; diff checkPASS. Commands use the same focused file lists as the prior implementation, without new model generation or repeat full-suite/CI claims. Logs `%TEMP%/c3-post-review-rollback-{worker,node,build,lint}.log`. Deliver rollback through existing PR391; no force-push/reset/deploy.
+
+## Historical post-review fixes and replay, now rolled back — 2026-10-18
 
 Owner authorizes implementation and one model round after4659fb73. [Implementation/adjudication](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md), [run scope](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/SCOPE.md): committed preview choices and code wording; fit-tool scope; owner decision/discovery/voice replacement. Verifier unchanged after V0 finds existing rules already cover unsupported product opacity. Preserve LEGACY differential, domain state/authority/receipts, source policy, corpora/models/budgets and fallback. Checks/self-review → fresh readback/freeze/clean source/preflights →45priority outcomes → rawcommit → whole-terminal primarycommit → diagnosis/audit/report; conditional16 only if registered priority criteria met. No second candidate or live action; A OWNER_BYPASS/B sales-live STOP.
 
