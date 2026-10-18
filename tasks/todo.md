@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current authorized post-review implementation/run — 2026-10-18
+
+- [x] V0 whole-reply adjudication recorded before provider; unsupported specific-product opacity is not legalized by old PASS; compound exact cause unresolved. Verifier unchanged.
+- [x] P1/P2 RED→GREEN, preview choices/code acknowledgements; LEGACY differential restored unchanged. P3/P4 replace fit-tool description and owner search/decision/voice;192focused worker/65Node PASS. [Implementation](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md).
+- [x] Full worker1872PASS/131files, Node508PASS/2optionalSKIP, protected21PASS; build/lint(noEmit), fresh source readback0generations and self-review completed. Freeze/preflight evidence follows in the registered run.
+- [ ] Complete45priority model outcomes, raw before primary before diagnosis, conditional16 only if criteria met; retain all accounting and drop test DBs.
+- [ ] Whole-turn review/audit/report, update PR391 and STOP. No automatic second run/live action/Phase C.
+
 ## Current revised fix plan — 2026-10-18
 
 - [x] Incorporate independent REVISE and self-review into the [concrete plan](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md); correct preview readback overclaim separately from frozen evidence. Documentation only, no implementation/provider PASS.

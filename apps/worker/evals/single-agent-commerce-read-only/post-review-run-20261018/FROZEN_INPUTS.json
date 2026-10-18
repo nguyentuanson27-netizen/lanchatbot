@@ -1,0 +1,453 @@
+{
+  "kind": "PRE_PROVIDER_POST_REVIEW_FIXES_REPLAY",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "intakeHead": "4659fb73d6f07002e8b2bc61e558e24e071e87a4",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "cea1529cbc51ab8d396b044bac4f385be8bf114d769154e63842599d9b6adb65",
+    "verifier": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "verdictSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "verdict",
+      "violations"
+    ],
+    "properties": {
+      "verdict": {
+        "type": "string",
+        "enum": [
+          "PASS",
+          "FAIL",
+          "UNCERTAIN"
+        ]
+      },
+      "violations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "protectedRef"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "UNSUPPORTED_PROTECTED_ASSERTION",
+                "SUBJECT_MISMATCH",
+                "CONTRADICTION_OR_NEGATION",
+                "MATERIAL_CONDITION_LOSS",
+                "POLICY_OR_BENEFIT_STRENGTHENING",
+                "EFFECT_WITHOUT_RECEIPT",
+                "STALE_OR_SUPERSEDED_MEANING",
+                "OTHER_PROTECTED_SEMANTIC_RISK"
+              ]
+            },
+            "protectedRef": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "terminalMap": {
+    "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+    "FAIL": "STATIC_FALLBACK",
+    "UNCERTAIN": "STATIC_FALLBACK",
+    "MALFORMED": "STATIC_FALLBACK",
+    "TIMEOUT": "STATIC_FALLBACK",
+    "PROVIDER_ERROR": "STATIC_FALLBACK",
+    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "PERMISSION": "NO_SEND",
+    "PRIVACY": "NO_SEND",
+    "RECIPIENT": "NO_SEND"
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "nativeToolSchemaHashes": {
+    "b1": "5f1e12f56463a9d803b8d62abb566529d89ae4bdb384824d5a82301b6d109105",
+    "stateful": "3362487ea75c04a80cd9eaf5a375143c43e268080905deef59e5c2bb171da4b9"
+  },
+  "files": {
+    "manifest.json": {
+      "sha256": "0028f6f2fd296c30658eabb183b76b20e5b19589ec8aefabf94f2572782c3eff",
+      "bytes": 4449
+    },
+    "source-config.b1.json": {
+      "sha256": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+      "bytes": 1272
+    },
+    "cases.b1.json": {
+      "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+      "bytes": 16225
+    },
+    "context-fix-20261016/cases.priority.json": {
+      "sha256": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+      "bytes": 16825
+    },
+    "stateful-cases.json": {
+      "sha256": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+      "bytes": 2075
+    },
+    "prompts/owner.vi.txt": {
+      "sha256": "cea1529cbc51ab8d396b044bac4f385be8bf114d769154e63842599d9b6adb65",
+      "bytes": 12684
+    },
+    "prompts/verifier.vi.txt": {
+      "sha256": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd",
+      "bytes": 12145
+    },
+    "run.mjs": {
+      "sha256": "5c5e64cb816643512fcdd7901af1939fb7e18e1a9aec624558efe4b417f85527",
+      "bytes": 12314
+    },
+    "stateful-provider.mjs": {
+      "sha256": "16e4e605b4f35d0f67e5487f6d98aafcbadd22e0483588fbd7b252572c2ef666",
+      "bytes": 6944
+    },
+    "isolated-integration.mjs": {
+      "sha256": "e1db6e0ffd9e57ab1a1c7ec2f2e816f2fe3eb89527be63aa37f61bade1979458",
+      "bytes": 54117
+    },
+    "gemini-inference.mjs": {
+      "sha256": "9d25ead62e80346b4a6787a5200ae1fac72a300279ecbfca2eed02bf56dcbc9d",
+      "bytes": 21239
+    },
+    "protocol.mjs": {
+      "sha256": "573384ff10035f0d288a4bd0d498f6e87c7bc880dcf9275ea0f8a3d05258aafe",
+      "bytes": 6400
+    },
+    "source-session.py": {
+      "sha256": "4d6140a6240f71874cde08d3579f31cf5b8562e3f042a24341104de1695b30c7",
+      "bytes": 4378
+    },
+    "candidate-description.mjs": {
+      "sha256": "133064d8499543106f25bdbe2c13fafbd96a61e9971112f4a8173eb6ae5e4283",
+      "bytes": 1330
+    },
+    "contract-replay-20261018/cases.priority.json": {
+      "sha256": "55788f7ad294a28c53e0763ee68cc48033aeca39b6f38e0b879573a94c58dfb5",
+      "bytes": 16825
+    }
+  },
+  "runtimeFiles": {
+    "single-agent-commerce-state.ts": {
+      "sha256": "39c90f0900437ab1b23543033f4854c1b7418fb636412e03618d107cf8e63a70",
+      "bytes": 20995
+    },
+    "single-agent-commerce-effects.ts": {
+      "sha256": "1f1cd705774b566caba3ec73f60cd865115dc2650c5998075b54941f6fd30eb0",
+      "bytes": 29300
+    },
+    "single-agent-commerce-ingress.ts": {
+      "sha256": "bfcd951a9f67583602f11d0d115a3cb1fd805e4d58f6980871931b7900ad1cfb",
+      "bytes": 20203
+    },
+    "single-agent-commerce-read-only-context.ts": {
+      "sha256": "a87dbfcaf6ce11826293d10eb6857707fe6e3dbc1b4d4da5a788a72efc5803f5",
+      "bytes": 4233
+    },
+    "single-agent-semantic-verifier-boundary.ts": {
+      "sha256": "9ecc2e41982aadb5d73ffe95bc60b28b1fe18536d47632fc5b101d8f22903d62",
+      "bytes": 17162
+    },
+    "realtime-sales-catalog.ts": {
+      "sha256": "510005e915ce40111a320982e5f47653b08bbff84297f0348a6aa6d90a12a044",
+      "bytes": 20323
+    },
+    "southern-delivery-region.ts": {
+      "sha256": "a1c098883713215a9619c12c7443c6b6d5a5b4cea494711467505f3fbc641a89",
+      "bytes": 2124
+    },
+    "single-agent-commerce-read-only.ts": {
+      "sha256": "dffb7fef9d7f2f097933eae7ac9b6e6ab27ef4057c2515a03b14b074f728440d",
+      "bytes": 10037
+    },
+    "single-agent-commerce-read-only-tools.ts": {
+      "sha256": "33619029198d525410b92d2a7c235a3cdd04c06ac10b553924fd5a388f86edca",
+      "bytes": 17929
+    },
+    "single-agent-commerce.ts": {
+      "sha256": "9217d1b1d9f7173c2f624fd067618286f369ed188c9769cb4cf939336a4c6357",
+      "bytes": 2478
+    },
+    "single-agent-commerce-persistence.ts": {
+      "sha256": "e8b7ffea74353b9b4d7791d1a1d87ed340261f37bf4c894a5d871079e6bd2d03",
+      "bytes": 12291
+    },
+    "realtime-sales-cycle.ts": {
+      "sha256": "82b44c3d51271aca43aad05f3eb9ec574692a4ef5ce2102e04e89284c300d958",
+      "bytes": 98083
+    }
+  },
+  "credentialLauncher": {
+    "sha256": "875724a9b92ecc677a0549a41b701edbd49d3831fe9be69506bc12ffd6c5e218",
+    "bytes": 3935
+  },
+  "schedule": {
+    "priorityB1Repetitions": 3,
+    "priorityB1Range": "1:8",
+    "orderedStatefulJourneys": 3,
+    "statefulOutcomesPerJourney": 7,
+    "priorityOutcomes": 45,
+    "priorityMaximumGenerationRequests": 168,
+    "remainingB1Range": "9:24",
+    "remainingB1Repetitions": 1,
+    "remainingCondition": "Only if all registered priority outcomes meet existing frozen plan criteria; otherwise STOP.",
+    "maximumOutcomes": 61,
+    "maximumGenerationRequests": 232,
+    "uniqueCases": 31,
+    "candidates": 1
+  },
+  "criteria": {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/SCOPE.md",
+    "sha256": "dceae0b023746e37836880cbaaa8bc499d0696f033a6cdb3280eb8cdd9780d5e",
+    "bytes": 5970
+  },
+  "scope": {
+    "sha256": "dceae0b023746e37836880cbaaa8bc499d0696f033a6cdb3280eb8cdd9780d5e",
+    "bytes": 5970
+  },
+  "sourceReadback": {
+    "sha256": "c688d7b642a72cafc3fcc27cb48e04f9dbdaccd04bfbfeb4d9d454efb4a8dc54",
+    "bytes": 27923
+  },
+  "perPublicAttempt": {
+    "ownerGenerations": 3,
+    "toolRounds": 2,
+    "toolCalls": 6,
+    "verifierGenerations": 1,
+    "upstreamRequestsPerGeneration": 1,
+    "retry": 0
+  },
+  "catalogInputMode": "LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION",
+  "sourceSnapshots": "LIVE_PUBLIC_PER_READ_NOT_IDENTICAL_WORLD",
+  "judging": "Read whole actual outcomes before rejected drafts/verdict detail; minor polish is not failure; frozen plan criteria, no keyword grading or relabeling.",
+  "runSourceShaPolicy": "Runtime captures clean committed HEAD; never write SHA back into source before that run.",
+  "sendEnabled": false,
+  "generationResults": "NOT_RUN_AT_FREEZE",
+  "dispatch": {
+    "caseOrder": [
+      {
+        "slot": 1,
+        "originalSlot": 1,
+        "caseId": "b1-changed-occasion"
+      },
+      {
+        "slot": 2,
+        "originalSlot": 3,
+        "caseId": "b1-buying-concern"
+      },
+      {
+        "slot": 3,
+        "originalSlot": 5,
+        "caseId": "b1-partial-source-v2"
+      },
+      {
+        "slot": 4,
+        "originalSlot": 6,
+        "caseId": "b1-buying-concern-v2"
+      },
+      {
+        "slot": 5,
+        "originalSlot": 8,
+        "caseId": "b1-partial-source"
+      },
+      {
+        "slot": 6,
+        "originalSlot": 17,
+        "caseId": "b1-changed-occasion-v3"
+      },
+      {
+        "slot": 7,
+        "originalSlot": 19,
+        "caseId": "b1-partial-source-v3"
+      },
+      {
+        "slot": 8,
+        "originalSlot": 23,
+        "caseId": "b1-buying-concern-v3"
+      },
+      {
+        "slot": 9,
+        "originalSlot": 2,
+        "caseId": "b1-search-read"
+      },
+      {
+        "slot": 10,
+        "originalSlot": 4,
+        "caseId": "b1-changed-occasion-v2"
+      },
+      {
+        "slot": 11,
+        "originalSlot": 7,
+        "caseId": "b1-current-policy"
+      },
+      {
+        "slot": 12,
+        "originalSlot": 9,
+        "caseId": "b1-price"
+      },
+      {
+        "slot": 13,
+        "originalSlot": 10,
+        "caseId": "b1-component-stock"
+      },
+      {
+        "slot": 14,
+        "originalSlot": 11,
+        "caseId": "b1-policy-used"
+      },
+      {
+        "slot": 15,
+        "originalSlot": 12,
+        "caseId": "b1-current-policy-v2"
+      },
+      {
+        "slot": 16,
+        "originalSlot": 13,
+        "caseId": "b1-price-v2"
+      },
+      {
+        "slot": 17,
+        "originalSlot": 14,
+        "caseId": "b1-component-stock-v2"
+      },
+      {
+        "slot": 18,
+        "originalSlot": 15,
+        "caseId": "b1-search-read-v2"
+      },
+      {
+        "slot": 19,
+        "originalSlot": 16,
+        "caseId": "b1-policy-used-v2"
+      },
+      {
+        "slot": 20,
+        "originalSlot": 18,
+        "caseId": "b1-current-policy-v3"
+      },
+      {
+        "slot": 21,
+        "originalSlot": 20,
+        "caseId": "b1-price-v3"
+      },
+      {
+        "slot": 22,
+        "originalSlot": 21,
+        "caseId": "b1-component-stock-v3"
+      },
+      {
+        "slot": 23,
+        "originalSlot": 22,
+        "caseId": "b1-search-read-v3"
+      },
+      {
+        "slot": 24,
+        "originalSlot": 24,
+        "caseId": "b1-policy-used-v3"
+      }
+    ],
+    "originalCorpus": {
+      "sha256": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+      "bytes": 16825
+    },
+    "permutationOnly": true,
+    "corpusPath": "apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/cases.priority.json",
+    "reusedWithoutPermutation": true
+  },
+  "attribution": "Combined preview/code wording, fit-tool description and owner decision/search/voice replacements; unchanged verifier. Descriptive comparison, not isolated causality; live snapshots and histories vary.",
+  "promptDecision": "OWNER_DECISION_SEARCH_VOICE_REPLACEMENTS_AND_FIT_TOOL_SCOPE; VERIFIER_UNCHANGED",
+  "taskLocalRunners": {
+    "run.py": {
+      "sha256": "d2743377ca5ae3fc8674a8cf3bcb8c57147e05d44aa9c82342208cb1bc91d780",
+      "bytes": 3187
+    },
+    "preflight.py": {
+      "sha256": "d6faedb5a7f01b8d68a5301a7db8b4333dd1adab3bc4dbcb3444820f2461c8e2",
+      "bytes": 951
+    },
+    "collect.mjs": {
+      "sha256": "4d75fd561d6d476950ac0693d4fff1a5e5322fc13de0f9ec43bc433b81263497",
+      "bytes": 5148
+    },
+    "audit.mjs": {
+      "sha256": "ffcf2fd521c136a2e0f25f0ad53a866d77bcc4b12bb290cd9f3395905b457394",
+      "bytes": 9342
+    },
+    "diagnose.mjs": {
+      "sha256": "2e881c80b64f2a722e30bb271d90f4c299c584e567e5c35657d320fa0036d47a",
+      "bytes": 2430
+    },
+    "render-primary.mjs": {
+      "sha256": "967a9f65147c4eabd73d9434f48657014a6d8ed8ea0cb708a8913bf08bbfa928",
+      "bytes": 3449
+    }
+  }
+}

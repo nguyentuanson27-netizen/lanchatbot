@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current authorized post-review fixes and replay — 2026-10-18
+
+Owner authorizes implementation and one model round after4659fb73. [Implementation/adjudication](../docs/specs/c3-phase-b-post-replay-implementation-20261018.md), [run scope](../apps/worker/evals/single-agent-commerce-read-only/post-review-run-20261018/SCOPE.md): committed preview choices and code wording; fit-tool scope; owner decision/discovery/voice replacement. Verifier unchanged after V0 finds existing rules already cover unsupported product opacity. Preserve LEGACY differential, domain state/authority/receipts, source policy, corpora/models/budgets and fallback. Checks/self-review → fresh readback/freeze/clean source/preflights →45priority outcomes → rawcommit → whole-terminal primarycommit → diagnosis/audit/report; conditional16 only if registered priority criteria met. No second candidate or live action; A OWNER_BYPASS/B sales-live STOP.
+
 ## Current revised plan after independent review — 2026-10-18
 
 Owner requests a plan revision at `f70f5a9e`. [Revised implementation plan](../docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md) incorporates independent REVISE: V0 whole-reply adjudication first; P1 complete customer-visible cart choices without new durable display-name state; P2 code wording; P3 fit-tool scope and exact-lookup versus discovery search; P4 replace existing decision/voice guidance; V1 verifier change only if adjudication identifies a rule gap. Initial read without known offers is valid; quote remains a control, not another prompt patch. Preview text completeness is distinct from correct backend state. Stage rep1 is a candidate false PASS, not the automatic safe reference. Explicit acceptance, shared consumers and focused verification are recorded in the plan.
