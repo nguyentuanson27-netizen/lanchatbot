@@ -128,6 +128,98 @@ test('changed values and different product scopes in prior tool results remain v
  }
 });
 
+const multiOfferRequest=()=>{
+ const r=request(),scope={kind:'PRODUCT',productId:'RP42',variantId:'offer:RP42:SET'};
+ const facts=[{type:'PRICE',scope,value:{amountVnd:590000,currency:'VND'}},
+  {type:'STOCK',scope,value:{status:'IN_STOCK',availableQuantity:8}}];
+ const availability={price:{status:'OK',reason:null},stock:{status:'OK',reason:null}};
+ const metadata={sourceVersion:'snapshot-2',observedAt:'2026-10-18T00:00:00Z',expiresAt:'2026-10-18T02:00:00Z'};
+ const data={subjectRef:'RP42',requestedOfferType:null,offerType:'SET',variantId:scope.variantId,...metadata,facts,availability,
+  availableOffers:['AO','SET'],content:{description:'Áo cotton và chân váy.'},sellingOptions:[
+   {offerType:'AO',variantId:'offer:RP42:AO',...metadata,availability:structuredClone(availability),facts:[
+    {type:'PRICE',scope:{...scope,variantId:'offer:RP42:AO'},value:{amountVnd:310000,currency:'VND'}}]},
+   {offerType:'SET',variantId:scope.variantId,...metadata,availability:structuredClone(availability),facts:structuredClone(facts)}]};
+ r.context.boundSubjects=[{ref:'RP42',kind:'PRODUCT',label:'Mẫu RP42',bindingVersion:'b'}];
+ r.context.protectedClaims=data.sellingOptions.flatMap(o=>o.facts);
+ r.contents.push({role:'model',parts:[{functionCall:{id:'multi-read',name:'read_product',args:{subjectRef:'RP42'}},thoughtSignature:'opaque-multi'}]},
+  {role:'user',parts:[{functionResponse:{id:'multi-read',name:'read_product',response:{status:'OK',data}}}]});
+ return {r,data};
+};
+
+test('captured multi-offer read removes only fully duplicated defaults while preserving every option and native identity',async()=>{
+ const {r,data}=multiOfferRequest(),captured=[],before=structuredClone(r);
+ r.caseId='EVALUATOR_MULTI_CANARY';r.requiredBehaviors=['EVALUATOR_RESPONSE_CANARY'];
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+  captured.push(JSON.parse(init.body));return new Response(JSON.stringify(body([{text:'Áo cotton chị nhé.'}])));
+ }});
+ await infer(r);assert.equal(captured.length,1);
+ const wire=captured[0],local=wire.contents.at(-1).parts[0].functionResponse;
+ for(const key of ['offerType','variantId','facts','availability'])assert.equal(Object.hasOwn(local.response.data,key),false,key);
+ assert.deepEqual(local.response.data.sellingOptions,data.sellingOptions);
+ assert.equal(local.response.data.sourceVersion,data.sourceVersion);assert.deepEqual(local.response.data.content,data.content);
+ assert.deepEqual(JSON.parse(wire.contents[0].parts[0].text).trusted.facts,before.context.protectedClaims);
+ assert.equal(local.id,'multi-read');assert.deepEqual(wire.contents.at(-2),before.contents.at(-2));
+ assert.deepEqual(r.context,before.context);assert.deepEqual(r.contents,before.contents);
+ assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_MULTI_CANARY|EVALUATOR_RESPONSE_CANARY|test-token/);
+});
+
+test('same-response evidence differences retain default scope instead of hiding version, expiry, availability or unique facts',()=>{
+ for(const change of ['sourceVersion','observedAt','expiresAt','metadata','value','scope','variantId','missingFact','availability','eta','unknownAvailability','maskedReason']){
+  const {r,data}=multiOfferRequest(),option=data.sellingOptions[1];
+  if(['sourceVersion','observedAt','expiresAt'].includes(change))option[change]='different';
+  if(change==='metadata'){data.metadata={authority:'POS',revision:2};option.metadata={authority:'POS',revision:1};}
+  if(change==='value')option.facts[0].value.amountVnd=600000;
+  if(change==='scope')option.facts[0].scope.productId='RP43';
+  if(change==='variantId')option.variantId='offer:RP42:OTHER';
+  if(change==='missingFact')option.facts.pop();
+  if(change==='availability')option.availability.stock={status:'UNAVAILABLE',reason:'SIZE_UNSUPPORTED'};
+  if(change==='eta')data.availability.eta={status:'UNAVAILABLE',reason:'DELIVERY_REGION_REQUIRED'};
+  if(change==='unknownAvailability')data.availability.stock={status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'};
+  if(change==='maskedReason'){
+   data.availability.eta={status:'UNAVAILABLE',reason:'PRIVATE_SOURCE_ONE'};
+   option.availability.eta={status:'UNAVAILABLE',reason:'PRIVATE_SOURCE_TWO'};
+  }
+  const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+  assert.deepEqual(out.facts,data.facts,change);assert.equal(out.offerType,'SET',change);assert.equal(out.variantId,data.variantId,change);
+  assert.equal(out.availability.stock.status,data.availability.stock.status,change);
+  if(change==='eta')assert.deepEqual(out.availability.eta,data.availability.eta);
+ }
+});
+
+test('unfiltered source defaults without root metadata can be folded while partial reads retain their current shape',()=>{
+ for(const partial of [false,true]){
+  const {r,data}=multiOfferRequest();for(const key of ['sourceVersion','observedAt','expiresAt'])delete data[key];
+  if(partial){data.availability.stock={status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'};data.sellingOptions[1].availability=structuredClone(data.availability);}
+  const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+  assert.equal(Object.hasOwn(out,'facts'),partial);assert.deepEqual(out.sellingOptions[1].facts,data.facts);
+  if(partial){assert.equal(out.availability.stock.status,'UNAVAILABLE');assert.equal(out.availability.stock.reason,null);}
+ }
+});
+
+test('an explicit offer read and an unproven request shape keep their scoped defaults',()=>{
+ for(const mode of ['explicit','missingRequestScope','emptyFacts','single','nullOptions']){
+  const {r,data}=multiOfferRequest();
+  if(mode==='explicit'){data.requestedOfferType='SET';r.contents.at(-2).parts[0].functionCall.args.offerType='SET';}
+  if(mode==='missingRequestScope')delete data.requestedOfferType;
+  if(mode==='emptyFacts')data.facts=[];
+  if(mode==='single')data.sellingOptions=[data.sellingOptions[1]];
+  if(mode==='nullOptions'){data.availableOffers=null;data.sellingOptions=null;}
+  const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+  assert.equal(out.offerType,'SET',mode);assert.deepEqual(out.facts,data.facts,mode);
+  assert.deepEqual(out.availableOffers,data.availableOffers,mode);
+ }
+});
+
+test('historical multi-offer results are compared locally rather than against newer trusted values',()=>{
+ const {r,data}=multiOfferRequest();r.context.protectedClaims=structuredClone(r.context.protectedClaims);
+ r.context.protectedClaims.find(f=>f.scope.variantId==='offer:RP42:SET'&&f.type==='PRICE').value.amountVnd=610000;
+ const out=buildGeminiCommerceRequest(r),local=out.contents.at(-1).parts[0].functionResponse.response.data;
+ assert.equal(Object.hasOwn(local,'facts'),false);
+ assert.deepEqual(local.sellingOptions,data.sellingOptions);
+ assert.equal(local.sellingOptions[1].facts[0].value.amountVnd,590000);
+ assert.equal(JSON.parse(out.contents[0].parts[0].text).trusted.facts.find(f=>f.scope.variantId==='offer:RP42:SET'&&f.type==='PRICE').value.amountVnd,610000);
+});
+
 test('the serialized B owner HTTP body owns the exact 65536-byte bound before any auth or generation request',async()=>{
  const r=request();r.instructions='';
  const baseline=Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r)));

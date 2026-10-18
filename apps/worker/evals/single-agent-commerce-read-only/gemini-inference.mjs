@@ -16,7 +16,7 @@ const publicSourceReasons=new Set(['POS_SNAPSHOT_UNAVAILABLE','CATALOG_SNAPSHOT_
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
- {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Có offerType thì chỉ đọc lựa chọn đó. Bỏ offerType thì sellingOptions trả giá/tồn riêng từng lựa chọn bán; offerType/facts ngoài cùng vẫn là lựa chọn mặc định, không phải giá chung cho áo lẻ và cả bộ. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Có offerType thì chỉ đọc lựa chọn đó. Bỏ offerType thì sellingOptions trả giá/tồn riêng từng lựa chọn bán; dữ kiện offer còn ở ngoài cùng chỉ thuộc offerType/variantId ghi tại đó, không phải giá chung cho áo lẻ và cả bộ. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const stateDeclarations=[
@@ -58,6 +58,16 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   }
   return value;
  };
+ const defaultInOptions=p=>{
+  if(p.requestedOfferType!==null||!Array.isArray(p.sellingOptions)||p.sellingOptions.length<2||
+   typeof p.offerType!=='string'||typeof p.variantId!=='string'||!Array.isArray(p.facts)||!p.facts.length)return false;
+  const matches=p.sellingOptions.filter(o=>o.offerType===p.offerType&&o.variantId===p.variantId);
+  if(matches.length!==1)return false;
+  const option=matches[0],same=(a,b)=>canonicalJsonV1(a)===canonicalJsonV1(b);
+  return Array.isArray(option.facts)&&p.facts.every(f=>option.facts.some(g=>same(f,g)))&&
+   ['sourceVersion','observedAt','expiresAt','metadata'].every(k=>!Object.hasOwn(p,k)||Object.hasOwn(option,k)&&same(p[k],option[k]))&&
+   Object.entries(p.availability??{}).every(([k,v])=>option.availability&&Object.hasOwn(option.availability,k)&&same(v,option.availability[k]));
+ };
  const contents=structuredClone(request.contents);
  for(const message of contents)for(const part of message.parts??[]){
   const response=part.functionResponse;
@@ -69,7 +79,9 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(response.name==='read_product'){
    const partial=['price','stock'].some(field=>data.availability?.[field]&&data.availability[field].status!=='OK');
    response.response.data=product(data,partial);
-   if(data.availability)response.response.data.availability=availability(data.availability);
+   // Compare only raw evidence in this response, before availability reasons are sanitized.
+   if(!partial&&defaultInOptions(data))for(const key of ['offerType','variantId','facts','availability'])delete response.response.data[key];
+   if(response.response.data.availability)response.response.data.availability=availability(data.availability);
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
   }
   if(response.name==='apply_customer_state'&&data.measurements)data.measurements=data.measurements.map(measurement);
