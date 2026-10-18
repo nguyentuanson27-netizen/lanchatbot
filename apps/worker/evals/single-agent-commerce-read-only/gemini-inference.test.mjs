@@ -7,16 +7,44 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
-test('owner hides only POS source reason and retains actionable availability reasons',()=>{
+test('owner exposes source unavailability without naming the private source and retains actionable reasons',()=>{
  const r=request(),reasons=['POS_SNAPSHOT_UNAVAILABLE','SIZE_UNSUPPORTED','VARIANT_NOT_FOUND','DELIVERY_REGION_REQUIRED','CATALOG_SNAPSHOT_STALE'];
  const data={subjectRef:'P1',content:{description:'Áo thêu.'},availableOffers:null,sellingOptions:null,
   availability:Object.fromEntries(reasons.map((reason,i)=>['field'+i,{status:'UNAVAILABLE',reason}]))};
  r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data}}}]});
  const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
- assert.deepEqual(out.availability.field0,{status:'UNAVAILABLE',reason:null});
+ assert.deepEqual(out.availability.field0,{status:'UNAVAILABLE',reason:'SOURCE_UNAVAILABLE'});
  for(let i=1;i<reasons.length;i++)assert.equal(out.availability['field'+i].reason,reasons[i]);
  assert.equal(out.content.description,data.content.description);assert.equal(out.availableOffers,null);
  assert.equal(data.availability.field0.reason,'POS_SNAPSHOT_UNAVAILABLE');
+});
+
+test('partial reads preserve unknown, unavailable, absent, stale and zero-stock evidence as distinct outcomes',async()=>{
+ for(const [status,reason,expected,offers] of [
+  ['UNAVAILABLE',null,null,null],
+  ['UNAVAILABLE','POS_SNAPSHOT_UNAVAILABLE','SOURCE_UNAVAILABLE',null],
+  ['UNAVAILABLE','OFFER_NOT_FOUND','OFFER_NOT_FOUND',['AO']],
+  ['STALE','CATALOG_SNAPSHOT_STALE','CATALOG_SNAPSHOT_STALE',['AO']],
+  ['OK',null,null,['AO']],
+ ]){
+  const r=request(),facts=status==='OK'?[{type:'STOCK',value:{status:'OUT_OF_STOCK',quantity:0}}]:[];
+  const data={subjectRef:'P1',content:{description:'Áo cotton.'},availableOffers:offers,sellingOptions:offers?[]:null,
+   facts,availability:{stock:{status,reason}}};
+  r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
+   {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response:{status:'OK',data}}}]});
+  let captured;
+  await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+   captured=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));
+  }})(r);
+  const native=captured.contents.at(-1).parts[0].functionResponse;
+  assert.equal(native.id,'read-1');assert.equal(native.response.status,'OK');
+  assert.deepEqual(native.response.data.availability.stock,{status,reason:expected});
+  assert.deepEqual(native.response.data.facts,facts);assert.deepEqual(native.response.data.availableOffers,offers);
+  assert.equal(native.response.data.content.description,data.content.description);
+  assert.equal(captured.contents.at(-2).parts[0].thoughtSignature,'opaque');
+  assert.equal(data.availability.stock.reason,reason);
+  assert.doesNotMatch(JSON.stringify(captured),/POS_SNAPSHOT_UNAVAILABLE/);
+ }
 });
 test('unknown bounded finish enum survives telemetry without accepting completion or retrying',async()=>{
  for(const finish of ['NEW_PROVIDER_FINISH', 'private text should not be logged', 'A'.repeat(65), null]){
@@ -76,7 +104,7 @@ test('captured HTTP request keeps per-option scope and sanitizes nested availabi
  const result=captured[0].contents.at(-1).parts[0].functionResponse.response.data;
  assert.equal(result.offerType,'COMPOSITE');assert.deepEqual(result.sellingOptions[0].facts,options[0].facts);
  assert.equal(result.sellingOptions[0].availability.stock.reason,'SOURCE_UNAVAILABLE');
- assert.equal(result.sellingOptions[1].availability.price.reason,null);
+ assert.equal(result.sellingOptions[1].availability.price.reason,'SOURCE_UNAVAILABLE');
  assert.doesNotMatch(JSON.stringify(captured),/CANARY|expectedSafe|requiredBehaviors/);
  assert.equal(r.contents.at(-1).parts[0].functionResponse.response.data.sellingOptions[0].availability.stock.reason,'PRIVATE_EVALUATOR_CANARY');
 });
@@ -209,7 +237,7 @@ test('unfiltered source defaults without root metadata can be folded while parti
   if(partial){data.availability.stock={status:'UNAVAILABLE',reason:'POS_SNAPSHOT_UNAVAILABLE'};data.sellingOptions[1].availability=structuredClone(data.availability);}
   const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
   assert.equal(Object.hasOwn(out,'facts'),partial);assert.deepEqual(out.sellingOptions[1].facts,data.facts);
-  if(partial){assert.equal(out.availability.stock.status,'UNAVAILABLE');assert.equal(out.availability.stock.reason,null);}
+  if(partial){assert.equal(out.availability.stock.status,'UNAVAILABLE');assert.equal(out.availability.stock.reason,'SOURCE_UNAVAILABLE');}
  }
 });
 
@@ -271,7 +299,7 @@ test('partial commerce reads retain independent product evidence locally even wh
   const wire=captured[0],local=wire.contents.at(-1).parts[0].functionResponse;
   for(const [key,value] of Object.entries(evidence))assert.deepEqual(local.response.data[key],value);
   assert.equal(local.response.data.sellingOptions,null);assert.deepEqual(local.response.data.facts,[]);
-  assert.deepEqual(local.response.data.availability[missing],{...data.availability[missing],reason:null});
+  assert.deepEqual(local.response.data.availability[missing],{...data.availability[missing],reason:'SOURCE_UNAVAILABLE'});
   assert.equal(local.id,'partial');assert.deepEqual(wire.contents.at(-2),model);assert.deepEqual(r.contents,original);
   assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_ONLY|PRIVATE_RUBRIC|test-token/);
  }
@@ -510,7 +538,7 @@ test('owner retains bounded source reasons for partial answers without arbitrary
  r.contents.push({role:'model',parts:[{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'opaque'}]},
   {role:'user',parts:[{functionResponse:{id:'read-1',name:'read_product',response}}]});
  const built=buildGeminiCommerceRequest(r),part=built.contents[3].parts[0];
- assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE',reason:null},
+ assert.deepEqual(part.functionResponse.response.data.availability,{price:{status:'UNAVAILABLE',reason:'SOURCE_UNAVAILABLE'},
   stock:{status:'STALE',reason:'CATALOG_SNAPSHOT_STALE'},eta:{status:'UNAVAILABLE',reason:'SOURCE_UNAVAILABLE'}});
  assert.equal(part.functionResponse.id,'read-1');
  assert.equal(part.functionResponse.response.data.content.description,'Áo cotton.');
@@ -543,7 +571,7 @@ test('owner read responses keep independent content and missing field statuses w
  r.contents.push({role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data}}}]});
  const out=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
  assert.equal(out.missing,undefined);assert.equal(out.content.description,data.content.description);
- assert.equal(out.availableOffers,null);assert.equal(out.availability.price.reason,null);
+ assert.equal(out.availableOffers,null);assert.equal(out.availability.price.reason,'SOURCE_UNAVAILABLE');
  assert.deepEqual(data.missing,['PRICE','STOCK','ATTRIBUTES']);
 });
 test('a different or absent model version is not accepted as the approved model',async()=>{

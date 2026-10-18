@@ -11,7 +11,7 @@ const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','
  'OWNER_OUTPUT_SURFACE','OWNER_TOOL_OUTPUT','OWNER_FINAL_EMPTY','OWNER_FINAL_BOUND','OWNER_EXECUTION_BOUND']);
 const safeFinishReasons=new Set(['FINISH_REASON_UNSPECIFIED','STOP','MAX_TOKENS','SAFETY','RECITATION','OTHER','BLOCKLIST','PROHIBITED_CONTENT','SPII','MODEL_ARMOR',
  'MALFORMED_FUNCTION_CALL','UNEXPECTED_TOOL_CALL','NO_IMAGE','IMAGE_SAFETY','IMAGE_PROHIBITED_CONTENT','IMAGE_RECITATION','IMAGE_OTHER']);
-const publicSourceReasons=new Set(['POS_SNAPSHOT_UNAVAILABLE','CATALOG_SNAPSHOT_STALE','OFFER_NOT_FOUND','VARIANT_NOT_FOUND',
+const publicSourceReasons=new Set(['CATALOG_SNAPSHOT_STALE','OFFER_NOT_FOUND','VARIANT_NOT_FOUND',
  'SIZE_UNSUPPORTED','PRICE_NOT_FOUND','FULFILLMENT_POLICY_NOT_FOUND','DELIVERY_REGION_REQUIRED','ETA_DATA_MISSING_OR_EXPIRED']);
 const string={type:'STRING'};
 export const readOnlyDeclarations=[
@@ -47,7 +47,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const subject=s=>({...(['PRODUCT','CART_LINE'].includes(s.kind)?{subjectRef:s.ref}:{evidenceRef:s.ref}),kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
  const measurement=m=>({field:'measurements.'+m.kind,value:m.value});
  const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
-  {status:v.status,reason:v.reason==null||v.reason==='POS_SNAPSHOT_UNAVAILABLE'?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
+  {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
  const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value}));
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=(p,keepLocalEvidence=false)=>{
