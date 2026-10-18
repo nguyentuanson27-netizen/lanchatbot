@@ -1,5 +1,16 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current revised fix plan after independent review — 2026-10-18
+
+- [x] Tích hợp independent REVISE vào [kế hoạch chính thức](../docs/specs/c3-phase-b-offer-projection-fix-plan-20261018.md), intake727d425d/main296cdcfb. Phân biệt quan sát root duplication với giả thuyết tác động; không coi cùng dữ liệu là thiếu context hoặc prompt rewrite là đã chữa root cause.
+- [x] Thu scope: projection + declaration đồng bộ; unknown/size giữ invariant, owner prompt chỉ tùy chọn thay/gộp có lý do; verifier/effects/models/config/corpus/policy/fallback/budgets không đổi. Planning-only, không provider generation hoặc implementation.
+- [x] Kiểm tài liệu: ba file đúng scope/chín local links hợp lệ/history giữ nguyên/0secret-pattern hits; diff whitespace sạch. T1–T4 vẫn chưa thực hiện, không claim worker/provider PASS mới.
+- [ ] T1: RED→GREEN multi-option root trùng/khác version-expiry-scope-value, explicit single, partial/unknown/ETA và native identity/authority conservation; sửa adapter projection + declaration rồi commit savepoint.
+- [ ] T2: Chốt giữ prompt hoặc diff giảm trùng/làm rõ quyết định trước seal; không nối luật/ví dụ theo ca, ghi hash/bytes nếu đổi. Không tự mở nhánh sửa sau provider results.
+- [ ] T3: Chạy exact focused/full-worker/typecheck/build/lint commands trong plan, ghi kết quả thật; không mở rộng effects/shared scope hoặc thêm DB ceremony không có risk mới.
+- [ ] T4 khi owner yêu cầu: freeze/clean source/preflights, đủ45priority/max168requests; chỉ toàn nhóm đạt tiêu chí cũ mới16once, tổngmax61/232. Giữ raw→whole primary→diagnosis, mọi lỗi/downstream trong denominator, không retry/majority/extra candidate.
+- [ ] Sales/live acceptance chưa đạt: A OWNER_BYPASS, B STOP, ownerAcceptance=null. Kế hoạch không cấp quyền publish/live send/deploy/merge/Phase C; evidence727d425d và45outcomes trước nguyên vẹn.
+
 ## Current contract-fix provider replay — 2026-10-18
 
 - [x] Refresh main296cdcfb/intake7e5cfc61; freeze [one45priority-outcome scope](../apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/SCOPE.md), only permute existing24case order, deep-equal per caseId. Keep models/prompts/config/policy/tool/schema/budgets and criteria; no extra candidate/retry.
