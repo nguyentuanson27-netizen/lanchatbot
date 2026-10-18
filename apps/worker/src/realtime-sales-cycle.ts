@@ -1399,6 +1399,7 @@ export async function evaluateRealtimeSalesCycle(
   const requestCheckoutClarification = (
     missing: readonly CheckoutFieldKey[],
     capturedFields: readonly CheckoutFieldKey[] = [],
+    nativeCommandId?: string,
   ): RealtimeSalesCycleOutput => {
     const productId = input.productId ?? state.cart?.value.lines.at(-1)?.parentProductId ?? null;
     const previous = state.clarification ?? null;
@@ -1424,7 +1425,7 @@ export async function evaluateRealtimeSalesCycle(
     const message = clarificationMessage(missing, attemptCount);
     const requested = apply({
       kind: "CLARIFICATION_REQUESTED",
-      commandId: commandId(`clarification-${attemptCount}`),
+      commandId: nativeCommandId ?? commandId(`clarification-${attemptCount}`),
       reasonCode: "CHECKOUT_DETAILS_MISSING",
       missingFields: missing,
       productId,
@@ -1577,6 +1578,17 @@ export async function evaluateRealtimeSalesCycle(
         confirmationAction: null,
       },
     };
+  }
+
+  // Candidate confirm can start the existing private intake, but cannot confirm an unseen preview.
+  if (input.commandIdentity?.primarySuffix === "confirm" && state.cart &&
+      ["CART_OPEN", "CHECKOUT_COLLECTING"].includes(state.stage) &&
+      confirmationDecision.decision === "CONFIRM" && confirmationDecision.source === "DETERMINISTIC_CLASSIFIER") {
+    if (state.processedCommandIds.includes(input.commandIdentity.primaryCommandId)) {
+      return { handled: true, messages: [], plan: null, transferToHuman: false, desiredTag: null, reasonCode: "CHECKOUT_REQUEST_REPLAY" };
+    }
+    const missing = missingCheckout(state);
+    if (missing.length) return requestCheckoutClarification(missing, [], input.commandIdentity.primaryCommandId);
   }
 
   if (state.stage === "ORDER_PREVIEW" && confirmationDecision.decision === "CONFIRM") {

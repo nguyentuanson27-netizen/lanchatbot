@@ -6,6 +6,49 @@ import { createSalesCycleRuntimeState, applySalesCycleCommand, computeBusinessCo
 import { createConversationState } from "@lana/conversation-engine";
 
 describe("persisted native commerce session", () => {
+  it("commits one code invitation before private details, then asks only for remaining fields", async () => {
+    const scope = commerceScope(), fixture = await fixturePolicy(), policy = fixture.bundle!.policy;
+    let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+    for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const)
+      state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now:commerceNow}).state;
+    const draft = { identity: {cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+      lines:[fixtureCartLine()],shopId:scope.shopId,policyRef:{id:policy.policyBundleId,version:policy.policyVersion,contentHash:computeBusinessContentHash(policy)} };
+    const ports = {resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null};
+    state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",
+      cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,trustedPorts:ports}).state;
+    let conversation = {...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:1};
+    const messages: string[] = [];
+    const commit = vi.fn(async (_client, prepared) => {
+      expect(prepared.expectedStateVersion).toBe(conversation.revision);
+      expect(prepared.completeInboxBatch).toBe(true);
+      expect(prepared.metaPlan.recipientId).toBe("synthetic-recipient");
+      expect(prepared.metaPlan.effectReadiness.outcome).toBe("READY");
+      expect(prepared.metaPlan.messages).toHaveLength(1);
+      state=prepared.salesCyclePlan.state; conversation=prepared.state;
+      messages.push(prepared.metaPlan.messages[0].text);
+      return {stateCommitted:true,metaOutboxCreated:1,handoffEventCreated:false,pancakeTagOutboxCreated:false};
+    });
+    const executor = (latest:string) => createPersistedCommerceExecutor({scope,clock:()=>commerceNow,latest,
+      facts:{resolveCartSelection:async()=>{throw new Error("NO_PRODUCT_READ_FOR_INTAKE");}} as never,
+      policy:async()=>({...fixture,mayAffectOutbound:true,bundle:{...fixture.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}}),
+      readAuthority:async()=>({...scope,stateVersion:conversation.revision,fence:1,state:conversation}),
+      store:{loadOrCreateSalesCycle:async()=>({state,stateRevision:state.revision}),commitWithinTransaction:commit} as never,
+      transaction:work=>work({} as never),inboxBatchGuard:{generation:1,leaseToken:"lease",inboxIds:["inbox"]},resolveTagId:()=>null,deliveryRecipient:"synthetic-recipient"});
+    const start=executor("Chốt đơn cho chị nhé");
+    const call = {command:{kind:"CONFIRM_PURCHASE" as const,commandId:"invite",intent:{source:"MODEL_STRUCTURED_OUTPUT" as const,intent:"PURCHASE_CONFIRMATION" as const,sourceMessageId:scope.sourceMessageId}},
+      expectedRevision:state.revision,conversationRevision:conversation.revision,bindingVersion:scope.bindingVersion,trustedPorts:ports,policy:fixture.bundle!};
+    expect(await start.executeCommand(call)).toMatchObject({status:"CHECKOUT_REQUESTED"});
+    expect(messages[0]).toContain("tên người nhận"); expect(messages[0]).toContain("địa chỉ");
+    expect(state.confirmation).toBeNull(); expect(state.preview).toBeNull();
+    expect(state.cart!.value.lines).toEqual(draft.lines);
+    await start.executeCommand({...call,expectedRevision:state.revision,conversationRevision:conversation.revision});
+    expect(messages).toHaveLength(1);
+    const partial=await executor("Tên: Khách thử nghiệm").advancePrivateCheckout();
+    expect(partial).toEqual({committed:true,messages:1});
+    expect(state.checkoutDraft?.fullName).toBe("Khách thử nghiệm");
+    expect(messages[1]).not.toContain("tên người nhận"); expect(messages[1]).not.toContain("Khách thử nghiệm");
+    expect(messages[1]).toContain("địa chỉ"); expect(state.confirmation).toBeNull();
+  });
   it("binds the configured POS alias to canonical shop identity while preserving exact source evidence", async () => {
     const line = fixtureCartLine(); line.priceAuthority!.shopId = "LANA";
     const selected = { status: "READY", shopId: "LANA", line, versions: { price: "p1", inventory: "i1", size: "s1", eta: null } };

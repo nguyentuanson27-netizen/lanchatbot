@@ -98,6 +98,8 @@ export function createPersistedCommerceExecutor(input: {
       if (!(await commit(output, authority, terminal))?.stateCommitted) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
       const actual = (await repository.read(scope.conversationId))!;
       if (commerceHash(actual) !== commerceHash(output.plan.state)) throw new Error("COMMITTED_STATE_CHANGED");
+      if (call.command.kind === "CONFIRM_PURCHASE" && output.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+          output.telemetry?.clarificationCase === true) return { status: "CHECKOUT_REQUESTED", state: actual };
       return actual.stage === "HANDED_OFF" ? { status: "HANDOFF", state: actual, reasonCode: output.reasonCode ?? "DEPENDENCY_FAILURE" }
         : { status: "APPLIED", state: actual, transferToHuman: output.transferToHuman };
     },

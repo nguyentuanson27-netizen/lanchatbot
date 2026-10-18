@@ -14,6 +14,7 @@ const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
 export type CommerceCommandResult =
   | { status: "APPLIED"; state: SalesCycleRuntimeState; transferToHuman: boolean }
   | { status: "DUPLICATE"; state: SalesCycleRuntimeState }
+  | { status: "CHECKOUT_REQUESTED"; state: SalesCycleRuntimeState }
   | { status: "HANDOFF"; state: SalesCycleRuntimeState; reasonCode: string }
   | { status: "REJECTED" | "CONFLICT"; reasonCode: string };
 
@@ -48,7 +49,7 @@ export async function createCommerceEffectTools(input: {
   let receipt: TrustedContext["effectReceipts"][number] | undefined;
   let receiptConversationRevision: number | undefined;
   let receiptBindingVersion: string | undefined;
-  let committedHandoff: { reason: string; revision: number; operationId: string; conversationRevision: number } | undefined;
+  let committedTerminal: { reason: string; revision: number; operationId: string; conversationRevision: number; disposition?: "NO_SEND" } | undefined;
   const selectionRef = (lineId: string) => `cart-variant:${lineId}`;
   const activeSelections = () => [...selections.values()].filter(s => current.cart?.value.lines.some(l => selectionsMatchCartLines([l], [s])));
   const cartItems = (active = activeSelections()) => current.cart?.value.lines.map(line => {
@@ -58,7 +59,7 @@ export async function createCommerceEffectTools(input: {
       ...(selected ? { stockStatus: selected.stockStatus, stockAvailableQuantity: selected.stockAvailableQuantity } : {}) };
   }) ?? [];
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
-    if (!committedHandoff) {
+    if (!committedTerminal) {
       await refreshAuthority();
       if (authority && (!authority.permission || !authority.privacyAllowed || authority.conversationOwner !== "BOT" ||
         authority.recipient !== turnRecipient || authority.bindingVersion !== turnBinding)) {
@@ -69,11 +70,11 @@ export async function createCommerceEffectTools(input: {
     current = await read(); await refreshAuthority();
     const state = snapshot().state;
     if (!state.privacyAllowed || state.recipient !== turnRecipient || state.bindingVersion !== turnBinding ||
-      current.revision !== committedHandoff.revision || !current.processedCommandIds.includes(committedHandoff.operationId) ||
-      (authority?.revision ?? input.scope.revision) !== committedHandoff.conversationRevision) {
+      current.revision !== committedTerminal.revision || !current.processedCommandIds.includes(committedTerminal.operationId) ||
+      (authority?.revision ?? input.scope.revision) !== committedTerminal.conversationRevision) {
       return { disposition: "NO_SEND", reason: "HANDOFF_SCOPE_CHANGED", text: null, fallbackId: null };
     }
-    return { disposition: "HANDOFF", reason: committedHandoff.reason, text: null, fallbackId: null };
+    return { disposition: committedTerminal.disposition ?? "HANDOFF", reason: committedTerminal.reason, text: null, fallbackId: null };
   }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
@@ -247,13 +248,26 @@ export async function createCommerceEffectTools(input: {
         if (!proved) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; }
         reconciledRevision = current.revision;
       }
+      if (result?.status === "CHECKOUT_REQUESTED") {
+        current = await read(); await refreshAuthority();
+        if (call.name !== "confirm_purchase" || current.confirmation !== null ||
+            current.clarification?.reasonCode !== "CHECKOUT_DETAILS_MISSING" ||
+            current.revision !== authorizedRevision+1 || !current.processedCommandIds.includes(operationId) ||
+            commerceHash(current) !== commerceHash(result.state)) {
+          uncertain = true; return { status: "UNAVAILABLE", reason: "CHECKOUT_COMMIT_UNPROVED" };
+        }
+        committedTerminal = { reason: "CHECKOUT_DETAILS_MISSING", disposition: "NO_SEND", revision: current.revision,
+          operationId, conversationRevision: authority?.revision ?? input.scope.revision };
+        receipt = undefined;
+        return { status: "OK", data: { checkoutRequested: true, purchaseConfirmed: false, externalOrderCreated: false } };
+      }
       if (result?.status === "HANDOFF") {
         current = await read(); await refreshAuthority();
         if (current.stage !== "HANDED_OFF" || current.revision !== authorizedRevision+1 ||
           !current.processedCommandIds.includes(operationId) || commerceHash(current) !== commerceHash(result.state)) {
           uncertain = true; return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" };
         }
-        committedHandoff = { reason: result.reasonCode, revision: current.revision, operationId,
+        committedTerminal = { reason: result.reasonCode, revision: current.revision, operationId,
           conversationRevision: authority?.revision ?? input.scope.revision };
         receipt = undefined;
         return { status: "OK", data: { handoffAccepted: true } };
@@ -263,7 +277,7 @@ export async function createCommerceEffectTools(input: {
       await refreshAuthority();
       if (reconciledRevision !== undefined ? current.revision !== reconciledRevision : !recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
       await refreshSelections();
-      if (result?.status === "APPLIED" && result.transferToHuman) committedHandoff = {
+      if (result?.status === "APPLIED" && result.transferToHuman) committedTerminal = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(),
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };

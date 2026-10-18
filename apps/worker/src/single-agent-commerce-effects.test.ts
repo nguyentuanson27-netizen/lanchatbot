@@ -299,6 +299,30 @@ describe("code-owned commerce effects and recovery", () => {
     expect(state.checkoutStatus).toMatchObject({ previewAvailable: false, purchaseConfirmed: false });
     expect(JSON.stringify(state)).not.toContain("checkoutDraft");
   });
+  it("stops after code commits the checkout invitation without creating a purchase receipt", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    const executeCommand = vi.fn(async ({command}: {command:{commandId:string}}) => {
+      const next = applySalesCycleCommand({ state: s.current(), expectedRevision: s.current().revision, now: commerceNow,
+        command: { kind: "CLARIFICATION_REQUESTED", commandId: command.commandId, reasonCode: "CHECKOUT_DETAILS_MISSING",
+          productId: "SM613", missingFields: ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"],
+          questionFingerprint: "c".repeat(64), maxAttempts: 3 } }).state;
+      s.setCurrent(next); return { status: "CHECKOUT_REQUESTED" as const, state: next };
+    });
+    const tools = await createCommerceEffectTools({ base: s.base, scope: s.scope, clock: () => commerceNow,
+      conversationKey: "test-cycle", repository: s.repository, authorize: s.authorize, policy: async () => s.policy,
+      select: s.select, identity: s.current().cart!.value, executeCommand });
+    const owner = vi.fn(async () => ({ kind: "TOOLS" as const, calls: [{name:"confirm_purchase",args:{}}],
+      content: {role:"model" as const,parts:[{functionCall:{name:"confirm_purchase",args:{}}}]} }));
+    const verifier = vi.fn();
+    const result = await runCommerceTurn({ scope:s.scope,tools,clock:()=>commerceNow,latest:"Chốt đơn cho chị nhé",history:[],
+      ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner,verifier });
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",reason:"CHECKOUT_DETAILS_MISSING",text:null});
+    expect(owner).toHaveBeenCalledTimes(1); expect(verifier).not.toHaveBeenCalled();
+    expect(tools.snapshot().effectReceipts).toEqual([]); expect(s.current().confirmation).toBeNull();
+    const calls = executeCommand.mock.calls.length;
+    expect((await tools.invoke({name:"confirm_purchase",args:{}})).status).toBe("REJECTED");
+    expect(executeCommand).toHaveBeenCalledTimes(calls);
+  });
   it("preserves an actual committed checkout handoff and stops the owner instead of falling back", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const executeCommand = vi.fn(async ({command}: {command:{commandId:string}}) => {

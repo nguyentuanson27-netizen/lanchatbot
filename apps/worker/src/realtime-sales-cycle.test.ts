@@ -2228,6 +2228,33 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(output.plan?.state.confirmation ?? null).toBeNull();
   });
+  it("starts code checkout on native confirm before preview without confirming the purchase", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "intake-open"));
+    const request = { ...input(opened.plan!.state, "Chốt đơn cho chị nhé", "intake-request"),
+      commandIdentity: { primaryCommandId: "native-intake", primarySuffix: "confirm" } };
+    const result = await evaluateRealtimeSalesCycle(request);
+    expect(result.reasonCode).toBe("CHECKOUT_DETAILS_MISSING");
+    expect(result.plan?.events).toEqual(expect.arrayContaining([expect.objectContaining({ commandId: "native-intake", commandKind: "CLARIFICATION_REQUESTED" })]));
+    expect(result.plan?.state.confirmation).toBeNull();
+    expect(result.plan?.state.clarification?.missingFields).toEqual(["ADDRESS", "FULL_NAME", "PAYMENT_METHOD", "PHONE"]);
+    expect(result.messages).toHaveLength(1);
+    const replay = await evaluateRealtimeSalesCycle({ ...request, state: result.plan!.state, stateRevision: result.plan!.state.revision });
+    expect(replay.messages).toEqual([]);
+    expect(replay.plan?.events ?? []).toEqual([]);
+    const preview = await evaluateRealtimeSalesCycle(input(result.plan!.state,
+      "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD", "intake-details"));
+    expect(preview.plan?.state.stage).toBe("ORDER_PREVIEW");
+    expect(preview.plan?.state.clarification).toBeNull();
+    expect(preview.plan?.state.confirmation).toBeNull();
+  });
+  it.each(["không chốt", "Chốt đơn được không?", "ok để chị suy nghĩ"])("does not start native checkout from rejected or uncertain confirmation: %s", async text => {
+    const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "intake-negative-open"));
+    const result = await evaluateRealtimeSalesCycle({ ...input(opened.plan!.state, text, "intake-negative"),
+      commandIdentity: { primaryCommandId: "native-intake-negative", primarySuffix: "confirm" } });
+    expect(result.reasonCode).not.toBe("CHECKOUT_DETAILS_MISSING");
+    expect(result.plan?.state.confirmation ?? null).toBeNull();
+    expect(result.plan?.events.some(e => e.commandKind === "CLARIFICATION_REQUESTED") ?? false).toBe(false);
+  });
   it("asks distinct clarification questions and hands off only after the retry budget", async () => {
     const opened = await evaluateRealtimeSalesCycle(input(
       createRealtimeSalesState(conversationId, pageId, now),
