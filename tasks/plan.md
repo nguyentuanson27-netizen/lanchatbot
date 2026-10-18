@@ -1,6 +1,12 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Current selective rollback and two-run review — 2026-10-18
+## Current F1–F3 contract implementation — 2026-10-18
+
+Owner requests implementation of the independently revised [plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md). Intake863051c2/main296cdcfb. [Implementation and actual checks](../docs/specs/c3-phase-b-contract-fixes-implementation-20261018.md): F1 explicit offer at candidate effect/native boundary (8f30b546); F2 actionable bounded field reasons without partial writes (f379252a); F3 public source-unavailable reason instead of null (16977beb). Both prompts/manifest, shared selector, authority/CAS/receipt and all historical runs remain unchanged; six synthetic positive add calls adopt the required argument.
+
+No provider run is part of this fix. F4 remains conditional; missing color, semantic field/person binding, NONE conformance and stage/price judgments remain unresolved. Deterministic/offline checks do not establish sales improvement or a new qualification. A OWNER_BYPASS; B sales/live STOP. Complete verification and self-review evidence before delivery; no new layer/router/parser/loop/budget or live activation.
+
+## Historical selective rollback and two-run review — 2026-10-18
 
 Owner requests rollback plus review of the latest two runs/fixes. [Rollback and concrete next plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md): restore owner prompt bytes from571c4403 and execution under trusted user data; retain numeric bounds, OWNER_TOOL_MODE accounting, all-system-parts consumer and cf137da4 offer projection. Historical45+45outcomes remain immutable. This task does not implement proposed F1–F4 or dispatch provider generations.
 

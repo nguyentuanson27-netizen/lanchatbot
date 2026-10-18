@@ -1,13 +1,22 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Current selective rollback and two-run review — 2026-10-18
+## Current F1–F3 contract implementation — 2026-10-18
+
+- [x] F1 observed RED→GREEN: explicit offer required in native add/candidate effects, trusted options enum when complete, no missing-offer default selection. Single-offer direct add, scoped unavailable color/offer, source failure, change-cart and duplicate controls preserved. Savepoint8f30b546.
+- [x] F2 observed RED→GREEN: numeric fieldErrors, atomic rejection/pending dependencies, existing source/CAS/receipt semantics retained. Correction continuation stays2rounds/4calls/3owner generations with1verifier; semantic field/person correctness remains a provider-review obligation. Savepointf379252a.
+- [x] F3 observed RED→GREEN: source failure becomes SOURCE_UNAVAILABLE, independent content/unknown/absent/stale/stock0/native identity stay distinct; no claim about owner behavior. Savepoint16977beb.
+- [x] Focused65Node/280worker/protected21PASS; canonical build exit0; offline historical-argument replay PASS on synthetic ports with0provider/DBwrites. Both prompts/manifest, shared selector and historical evidence unchanged. [Implementation report](../docs/specs/c3-phase-b-contract-fixes-implementation-20261018.md).
+- [x] Full worker1869PASS/131files at max2/min1workers; Node508PASS/2optionalSKIP; build/lint(noEmit)/C2validators exit0. Final diff/prompt-manifest/history/link/secret checks and runner syntax PASS; self-review/delivery through PR391, no new CI/model PASS claim.
+- [ ] Real-PG runner not rerun; F4/model behavior/live acceptance unverified. Color/NONE and semantic field/person binding remain measurement obligations. No automatic provider run/Phase C.
+
+## Historical selective rollback and two-run review — 2026-10-18
 
 - [x] Restore exact owner prompt from571c4403 and execution user-data placement; keep bound validation, completion-error accounting, consumer compatibility and prior offer projection. Update only active manifest hash; no historical evidence edits.
 - [x] Review both45-outcome runs and cf137da4/6c5befca fixes, trace offer default, measurement rejection, unknown-to-only-set, color/NONE and sales/voice regression. [Findings and self-reviewed next plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md).
 - [x] Observed rollback RED→GREEN; focused63Node/160worker PASS; Node eval506PASS/2optionalSKIP. No provider generation; model behavior after rollback unverified.
 - [x] Rollback savepoint fde1f627; worker build and lint (TypeScript noEmit) exit0; exact restored prompt/active hash, historical folders/runtime unchanged and diff check PASS. No new full worker/remote CI or sales PASS claim.
 - [x] Incorporate independent REVISE_PLAN at417392c3: F1 single-offer/unknown-source/budget-terminal controls; F2 numeric-copy versus semantic field/person residual and committed-state review; explicit acceptance per F1–F3. Documentation only, no new reviewer ACCEPT, code fix or model run.
-- [ ] Proposed F1–F4 are not implemented: explicit offer at candidate effect boundary, actionable current-source measurement errors, isolated availability presentation, conditional voice/capability cleanup. Color retention/NONE remain unresolved; no new run/live acceptance implied.
+- [x] F1–F3 proposal subsequently implemented under the separate current scope above. F4 remains conditional; color retention/NONE and sales/live acceptance remain unresolved. Historical rollback verification does not qualify the new implementation.
 
 ## Historical execution-contract provider replay — 2026-10-18
 

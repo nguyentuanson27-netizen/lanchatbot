@@ -4,6 +4,8 @@ Owner yêu cầu rollback, review hai vòng chạy và hai lượt sửa gần n
 
 Intake: `d170e3356cad50d32fce08e9d0c2f94e079f6c1d`. Main vừa fetch: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Tiếp tục branch `feat/c3-phase-b-commerce-20261014`, draft PR391. Không reset lịch sử Git hoặc sửa artifact đã seal.
 
+Owner sau đó yêu cầu triển khai kế hoạch đã chỉnh: [implementation F1–F3 và kiểm chứng thực tế](c3-phase-b-contract-fixes-implementation-20261018.md). Các phần dưới ghi kế hoạch và bằng chứng rollback tại thời điểm tương ứng; provider behavior/F4 chưa được chứng minh bởi implementation mới.
+
 ## 1. Rollback đã thực hiện
 
 - Khôi phục đúng bytes của `prompts/owner.vi.txt` tại `571c4403bc00198daaedc150c244659f55da750c` (trước `6c5befca`): 12.478 bytes; SHA256 `d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde`. Cập nhật riêng hash owner trong manifest đang dùng.
