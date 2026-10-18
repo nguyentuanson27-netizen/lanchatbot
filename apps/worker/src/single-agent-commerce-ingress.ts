@@ -151,10 +151,11 @@ export async function runPersistedCommerceIngress(input: {
   if (allowedText && allowedText.length > 2000) return { ...result, ...await closeWithoutSend("DELIVERY_TEXT_BOUND") };
   const sourceHash = textHash(scope.sourceMessageId);
   const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
-  // Static recovery text makes no catalog assertion. Its receipt/current state
-  // was checked by recovery; keep the transaction's unchanged sales readback.
+  const cartSummary = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "RECEIPT_BACKED_CART_SUMMARY";
+  // Recovery totals use the same cart/fact readiness as generated cart replies.
+  // A receipt-only ACK still makes no current catalog or price assertion.
   let claims = generatedPass ? world.protectedClaims as ProtectedClaimV1[] : [];
-  const bindCart = generatedPass && cart !== undefined;
+  const bindCart = (generatedPass || cartSummary) && cart !== undefined;
   const productIds = bindCart ? [...new Set(cart!.lines.map(l => l.parentProductId))].sort() :
     [...new Set(claims.flatMap(c => c.scope.kind === "PRODUCT" ? [c.scope.productId] : []))].sort();
   let salesPlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | undefined;

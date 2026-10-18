@@ -6,6 +6,7 @@ import * as composition from "./single-agent-commerce.js";
 import { runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { OwnerGeneration } from "./single-agent-commerce-read-only.js";
+import type { CartSelectionResult } from "./realtime-sales-catalog.js";
 
 function fixture(productIds = ["SM613"]) {
   const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
@@ -27,16 +28,17 @@ function fixture(productIds = ["SM613"]) {
   const batch = { pageId: scope.pageId, conversationHash: scope.customerHash, eventKind: "CUSTOMER", generation: 1,
     evaluationGroupId: "turn", leaseToken: "lease", inboxIds: ["inbox"], items: [{ envelope: { message } }] };
   const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
+  const select = vi.fn(async (): Promise<CartSelectionResult> => ({ status: "INVALID", reasonCode: "FIXTURE_SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] }));
   const inbox = { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} };
   const run = (owner: () => Promise<OwnerGeneration> = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history: { recordInboundCustomerMessage: async () => {}, listConversationHistory: async () => [] }, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
-    facts: { ready: async () => true, resolve: async () => {}, close: async () => {} }, policy: () => fixturePolicy(),
+    facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy: () => fixturePolicy(),
     read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: async (id: string) => products.find(p => p.product.productId === id), searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => null, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, store, inbox, commit, verifier, profileWrite, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return { run, store, inbox, commit, verifier, select, profileWrite, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; },
     transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
@@ -56,6 +58,45 @@ it("starts the independent generation read while current authority is being load
 });
 
 describe("persisted ingress source and final revision", () => {
+  it.each(["READY", "PRICE_CHANGED", "UNAVAILABLE"] as const)("binds a code-owned cart summary to current cart/fact readiness before enqueue (%s)", async source => {
+    const f = fixture(), scope = commerceScope(), policy = (await fixturePolicy()).bundle!.policy;
+    let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+    for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const) state = applySalesCycleCommand({ state,
+      expectedRevision: state.revision, command: { kind, commandId: kind }, now: commerceNow }).state;
+    const draft = { identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001", customerProfileId: fixtureProfile().profile.profileId },
+      lines: [fixtureCartLine()], shopId: scope.shopId, policyRef: { id: policy.policyBundleId, version: policy.policyVersion, contentHash: computeBusinessContentHash(policy) } };
+    state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "CART_OPENED", commandId: "open",
+      cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1800000).toISOString() }, now: commerceNow,
+      trustedPorts: { resolveCartDraft: () => draft, resolveShopPolicy: () => policy, resolveCartMutation: () => null, resolveInboundMessage: () => null, revalidateCheckout: () => null } }).state;
+    f.setCycle(state);
+    const selected: Extract<CartSelectionResult, { status: "READY" }> = { status: "READY", line: fixtureCartLine(), shopId: scope.shopId,
+      versions: { price: fixtureCartLine().priceAuthority!.priceFactRef, inventory: "i1", size: "s1", eta: null }, eta: null, etaExpiresAt: null,
+      sourceAuthority: "POS_SNAPSHOT", stockStatus: "IN_STOCK", stockAvailableQuantity: 4,
+      sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() };
+    f.select.mockResolvedValue(selected);
+    const create = composition.createCommerceTools;
+    vi.spyOn(composition, "createCommerceTools").mockImplementation(async input => {
+      const tools = await create(input); await tools.readback();
+      return { ...tools, recover: async () => ({ disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_CART_SUMMARY",
+        text: "Tổng 524.000đ, đã gồm phí giao hàng.", fallbackId: null }), async readback() {
+        const world = await tools.readback();
+        if (source === "UNAVAILABLE") f.select.mockResolvedValue({ status: "INVALID", reasonCode: "SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] });
+        if (source === "PRICE_CHANGED") f.select.mockResolvedValue({ ...selected, line: { ...selected.line, posUnitPriceVnd: 600_000, lineTotalVnd: 600_000 } });
+        return world;
+      } };
+    });
+    const result = await f.run(async () => { throw new Error("owner unavailable"); });
+    expect(f.verifier).not.toHaveBeenCalled();
+    if (source === "READY") {
+      expect(result.enqueued, JSON.stringify(result.terminal)).toBe(1);
+      const meta = f.commit.mock.calls[0]![1].metaPlan!;
+      expect(meta.effectReadiness!.binding.cart).toMatchObject({ cartId: draft.identity.cartId, cartRevision: state.cart!.value.revision });
+      expect(meta.protectedClaimTypes).toEqual(expect.arrayContaining(["PRICE", "STOCK", "SHIPPING_FEE"]));
+    } else {
+      expect(result).toMatchObject({ enqueued: 0, terminal: { disposition: "NO_SEND", reason: "EGRESS_CART_SOURCE_CHANGED" } });
+      expect(f.commit).not.toHaveBeenCalled();
+    }
+  });
   it.each([{ ids: [] }, { ids: ["SM613", "OTHER1", "OTHER2"] }])("enqueues a code-owned fallback without unrelated product coverage ($ids)", async ({ ids }) => {
     const f = fixture(ids), result = await f.run(async () => { throw new Error("provider unavailable"); });
     expect(result.terminal.disposition).toBe("FALLBACK"); expect(result.enqueued).toBe(1);

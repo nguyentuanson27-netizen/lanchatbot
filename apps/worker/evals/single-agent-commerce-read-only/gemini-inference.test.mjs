@@ -397,7 +397,7 @@ test('selling options belong to owner products while rule and read literals reta
  assert.deepEqual(r.context,before);
  r.context.policyLiterals=r.context.policyLiterals.filter(p=>!p.ref.startsWith('offers:'));
  const unknown=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.products.find(p=>p.subjectRef==='P1');
- assert.notDeepEqual(unknown.availableOffers,[]);assert.equal(unknown.availableOffers,undefined);
+ assert.notDeepEqual(unknown.availableOffers,[]);assert.equal(unknown.availableOffers,null);
 });
 
 test('owner read responses keep independent content and missing field statuses without a duplicate missing checklist',()=>{

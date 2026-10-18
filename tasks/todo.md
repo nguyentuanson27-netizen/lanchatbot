@@ -1,5 +1,13 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current contract fix after review93 replay — 2026-10-18
+
+- [x] Read current evidence/specs, refresh main296cdcfb at intake0942d0cf; [bounded implementation](../apps/worker/evals/single-agent-commerce-read-only/contract-fix-20261018/IMPLEMENTATION.md).
+- [x] Replace ambiguous selected-size/fit and old-state-write wording; expose unknown offers as null; clarify opacity outcome and useful concern handling. Policy/tool schemas/models/corpus/budgets unchanged; current prompt hashes updated, historical evidence intact.
+- [x] Observed recovery/projection/scope/Outbox RED→GREEN. Receipt-backed totals use current source/policy/cart checks and existing delivery readiness; receipt-only ACK remains possible without a new catalog assertion.
+- [x] Final worker1856Vitest/499NodePASS+2optionalSKIP, worker build/typecheck/lint exit0; protected52/adapter45PASS. Real-PG26PASS/0generations/DBdropped, including committed total through readiness/capture once. Self-review/schema/corpus/history and offline141wire-shape bounds checked.
+- [ ] New provider evidence/sales acceptance remains pending; this fix scope has no new provider run and does not resume16stopped cases. Delivery remains the existing draft PR391.
+
 ## Current completed review93 fix and bounded replay — 2026-10-18
 
 - [x] Revised independent plan, implement S1/S3/S4 with observed RED→GREEN, source readback and controls; source42fa669d diagnostic8 completed, primary6USABLE/2NEEDS_EDIT before trace.

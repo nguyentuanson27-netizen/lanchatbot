@@ -291,7 +291,10 @@ export async function createCommerceEffectTools(input: {
     if (input.base.snapshot().state.customerStateUpdatePending === true) return outcome;
     if (receipt && failedEffect) return { disposition: "HANDOFF", reason: uncertain ? "UNKNOWN_COMMIT" : "PARTIAL_EFFECT", text: null, fallbackId: null };
     if (!receipt) return uncertain ? { disposition: "HANDOFF", reason: "UNKNOWN_COMMIT", text: null, fallbackId: null } : outcome;
-    await input.base.readback(); current = await read(); await refreshAuthority(); const world = snapshot();
+    await input.base.readback(); await refreshSelections();
+    let recoveryPolicy: RuntimePolicyBundle | null = null;
+    try { recoveryPolicy = await input.policy(); } catch { /* A proved receipt can still acknowledge the commit without a current quote. */ }
+    current = await read(); await refreshAuthority(); const world = snapshot();
     if (!world.effectReceipts.some(r => r.ref === receipt!.ref) || !world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
@@ -300,8 +303,21 @@ export async function createCommerceEffectTools(input: {
     const cartAck = `Giỏ hiện có ${cart.lines.reduce((total, line) => total + line.quantity, 0)} sản phẩm` +
       (size && components.every(c => c.size === size) ? `, size ${size}` : "") +
       (color && components.every(c => c.color === color) ? `, màu ${color}` : "") + ".";
-    return { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
+    let summary = "";
+    const active = activeSelections(), now = input.clock();
+    const policyRef = current.commerceContext?.policyRef;
+    if (recoveryPolicy && policyRef?.id === recoveryPolicy.policy.policyBundleId && policyRef.version === recoveryPolicy.policy.policyVersion &&
+      policyRef.contentHash === computeBusinessContentHash(recoveryPolicy.policy) &&
+      selectionsMatchCartLines(cart.lines, active) && active.every(s => Date.parse(s.sourceObservedAt) <= now.getTime() && Date.parse(s.sourceExpiresAt) > now.getTime()) &&
+      Date.parse(current.cart!.expiresAt) > now.getTime() && cart.grandTotalVnd !== null && cart.shippingFeeVnd !== null) {
+      try {
+        publicPolicyLiteral(recoveryPolicy, input.scope.pageId, input.scope.shopId, now);
+        summary = ` Tổng ${cart.grandTotalVnd.toLocaleString("vi-VN")}đ, đã gồm phí giao hàng.` +
+          (active.some(s => s.stockStatus === "PRE_ORDER") ? " Có món đặt trước, chị nhé." : "");
+      } catch { /* No fresh policy means no current money or stock assertion. */ }
+    }
+    return { disposition: "SEND_ELIGIBLE", reason: summary && receipt.effect !== "PURCHASE_CONFIRMED" ? "RECEIPT_BACKED_CART_SUMMARY" : "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
       ? "Shop đã nhận xác nhận mua hàng của chị." : receipt.effect === "CART_OPENED"
-        ? "Em đã thêm món chị chọn vào giỏ." : cartAck, fallbackId: null };
+        ? "Em đã thêm món chị chọn vào giỏ." + summary : cartAck + summary, fallbackId: null };
   } };
 }

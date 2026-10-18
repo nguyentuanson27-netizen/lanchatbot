@@ -5,7 +5,7 @@ import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js"
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
 import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
-import type { CartSelectionQuery } from "./realtime-sales-catalog.js";
+import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
@@ -29,14 +29,15 @@ async function setup(clock = () => commerceNow) {
   }) };
   const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
-  const authorize = vi.fn(async () => true), select = vi.fn(async (query?: CartSelectionQuery) => {
+  const authorize = vi.fn(async () => true), select = vi.fn(async (query?: CartSelectionQuery): Promise<Extract<CartSelectionResult, { status: "READY" }>> => {
     const line = fixtureCartLine(); line.quantity = query?.quantity ?? 1; line.lineTotalVnd = line.posUnitPriceVnd! * line.quantity;
     return { status: "READY" as const, line, shopId: scope.shopId,
     versions: { price: "p1", inventory: "i1", size: "s1", eta: null }, eta: null, etaExpiresAt: null,
     sourceAuthority: "POS_SNAPSHOT" as const, stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4,
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
+  const readPolicy = vi.fn(async () => policy);
   const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
-    policy: async () => policy,
+    policy: readPolicy,
     resolveBankTransferPolicy: () => bankPolicy,
     trustedPorts: {
       resolveCartDraft: () => null, resolveCartMutation: () => null, resolveShopPolicy: () => null,
@@ -48,7 +49,7 @@ async function setup(clock = () => commerceNow) {
     select,
   });
   const add = { name: "add_to_cart", args: { subjectRef: "SM613", size: "M", color: "navy", quantity: 1 } };
-  return { tools, base, scope, policy, authorize, select, repository, commits, add, setFault: (v: typeof fault) => { fault = v; }, current: () => current,
+  return { tools, base, scope, policy, readPolicy, authorize, select, repository, commits, add, setFault: (v: typeof fault) => { fault = v; }, current: () => current,
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
@@ -419,10 +420,73 @@ describe("code-owned commerce effects and recovery", () => {
         throw new Error("provider stream failed");
       }, verifier: async () => ({ result: { verdict: "PASS", violations: [] } }) });
     expect(s.commits).toHaveLength(1);
-    expect(result.terminal.reason).toBe("RECEIPT_BACKED_ACK");
-    expect(result.terminal.text).toBe("Em đã thêm món chị chọn vào giỏ.");
+    expect(result.terminal.reason).toBe("RECEIPT_BACKED_CART_SUMMARY");
+    expect(result.terminal.text).toBe("Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng.");
     expect(result.sendEnabled).toBe(false);
   });
+  it("recovers the committed total when an owner asks for another tool under NONE, without running that tool or generation again", async () => {
+    const s = await setup(), invoke = vi.spyOn(s.base, "invoke"); let n = 0;
+    const result = await runCommerceTurn({ ...s, latest: "Cả tiền ship là bao nhiêu em?", history: [], clock: () => commerceNow,
+      ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm reply.", owner: async (): Promise<OwnerGeneration> => {
+        const calls = n++ === 0 ? [{ name: "read_product", args: { subjectRef: "SM613" } }]
+          : n === 2 ? [s.add] : [{ name: "quote_cart", args: {} }];
+        return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } };
+      }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng." });
+    expect(result.recovery?.originalReason).toBe("BUDGET");
+    expect(invoke.mock.calls.some(([call]) => call.name === "quote_cart")).toBe(false);
+    expect(result).toMatchObject({ ownerGenerations: 3, verifierGenerations: 0, toolRounds: 2, sendEnabled: false });
+    expect(s.commits).toHaveLength(1);
+  });
+  it("keeps a current preorder disclosure and canonical discount total in receipt recovery", async () => {
+    const s = await setup(), selected = await s.select();
+    s.select.mockImplementation(async query => {
+      const line = structuredClone(selected.line); line.quantity = query?.quantity ?? 1;
+      line.lineTotalVnd = line.posUnitPriceVnd! * line.quantity;
+      return { ...selected, line, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0 };
+    });
+    await s.tools.invoke({ ...s.add, args: { ...s.add.args, quantity: 2 } });
+    const result = await s.tools.recover!(terminalFallback());
+    expect(result.text).toContain("Tổng 973.100đ, đã gồm phí giao hàng.");
+    expect(result.text).toContain("Có món đặt trước, chị nhé.");
+    expect(s.commits).toHaveLength(1);
+  });
+  it("does not authorize the old receipt if committed state changes while recovery reads business sources", async () => {
+    const s = await setup(); await s.tools.invoke(s.add);
+    s.readPolicy.mockImplementation(async () => {
+      s.setCurrent({ ...s.current(), revision: s.current().revision + 1 });
+      return s.policy;
+    });
+    const result = await s.tools.recover!(terminalFallback());
+    expect(result).toMatchObject({ disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null });
+    expect(s.commits).toHaveLength(1);
+  });
+  it.each(["UNAVAILABLE", "EXPIRED", "PRICE_CHANGED", "POLICY_CHANGED", "POLICY_EXPIRED", "POLICY_UNAVAILABLE"] as const)(
+    "does not recover a current total or preorder assertion from invalid business evidence (%s)", async source => {
+      let now = commerceNow;
+      const s = await setup(() => now), selected = await s.select();
+      s.select.mockResolvedValue({ ...selected, stockStatus: "PRE_ORDER", stockAvailableQuantity: 0 });
+      await s.tools.invoke(s.add);
+      if (source === "UNAVAILABLE") s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE"));
+      if (source === "EXPIRED") {
+        now = new Date(commerceNow.getTime() + 60_000);
+        s.select.mockResolvedValue({ ...selected, sourceExpiresAt: now.toISOString() });
+      }
+      if (source === "PRICE_CHANGED") {
+        const changed = structuredClone(selected); changed.line.posUnitPriceVnd = 600_000; changed.line.lineTotalVnd = 600_000;
+        s.select.mockResolvedValue(changed);
+      }
+      if (source.startsWith("POLICY_")) {
+        const changed = structuredClone(s.policy);
+        if (source === "POLICY_CHANGED") changed.policy.shipping.defaultFeeVnd = 30_000;
+        if (source === "POLICY_EXPIRED") changed.policy.effectiveUntil = commerceNow.toISOString();
+        if (source === "POLICY_UNAVAILABLE") s.readPolicy.mockRejectedValue(new Error("POLICY_UNAVAILABLE"));
+        else s.readPolicy.mockResolvedValue(changed);
+      }
+      const result = await s.tools.recover!(terminalFallback());
+      expect(result.text ?? "").not.toMatch(/524\.000|600\.000|đặt trước/);
+      expect(s.commits).toHaveLength(1);
+    });
   it("acknowledges a committed cart change as a change, without claiming a new cart or order", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const lineId = s.current().cart!.value.lines[0]!.lineId;
@@ -430,7 +494,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc chị nhé.", history: [],
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.", owner: async () => { throw new Error("provider unavailable"); },
       verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Giỏ hiện có 2 sản phẩm, size M, màu navy." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 2 sản phẩm, size M, màu navy. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.commits).toHaveLength(2);
   });
   it("reports the committed quantity after a variant-only change without claiming the whole customer request completed", async () => {
@@ -441,7 +505,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow,
       latest: "Đổi L, lấy hai chiếc cho chị nhé.", history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.",
       owner: async () => { throw new Error("provider unavailable"); }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Giỏ hiện có 1 sản phẩm, size L, màu NAVY." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 1 sản phẩm, size L, màu NAVY. Tổng 524.000đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines[0]!.quantity).toBe(1); expect(s.commits).toHaveLength(2);
   });
   it("does not describe one component's size or color as the configuration of a mixed cart", async () => {
@@ -455,7 +519,7 @@ describe("code-owned commerce effects and recovery", () => {
     await s.tools.invoke(s.add);
     expect(await s.tools.invoke({ ...s.add, args: { ...s.add.args, size: "L", color: "black" } })).toMatchObject({ status: "OK" });
     const recovered = await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: null, fallbackId: null });
-    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_ACK", text: "Giỏ hiện có 2 sản phẩm." });
+    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 2 sản phẩm. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines).toHaveLength(2); expect(s.commits).toHaveLength(2);
   });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {

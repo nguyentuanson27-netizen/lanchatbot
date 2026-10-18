@@ -213,7 +213,9 @@ try{
   await message('Chị lấy 2 bộ SM613 nhé');const t=await effects(),line=(await repository.read(key)).cart.value.lines[0];failAfterCommit=true;
   const r=await t.invoke({name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:2}});failAfterCommit=false;
   assert.equal(r.status,'OK',JSON.stringify(r));assert.equal((await repository.read(key)).cart.value.lines[0].quantity,2);
-  assert.equal((await t.recover({disposition:'FALLBACK',reason:'CONTROLLED_PROVIDER_FAILURE',text:null,fallbackId:null})).reason,'RECEIPT_BACKED_ACK');
+  const recovered=await t.recover({disposition:'FALLBACK',reason:'CONTROLLED_PROVIDER_FAILURE',text:null,fallbackId:null});
+  assert.equal(recovered.reason,'RECEIPT_BACKED_CART_SUMMARY');
+  assert(recovered.text.includes((await repository.read(key)).cart.value.grandTotalVnd.toLocaleString('vi-VN')+'đ'));
  });
  await check('B3 newer inbox generation prevents an old tool from mutating the cart',async()=>{
   await message('Chị lấy 3 bộ SM613');const t=await effects(),prior=await repository.read(key);
@@ -351,6 +353,14 @@ try{
   return {bound,turn,state,capture,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('B composed generation failure preserves the committed total through cart readiness and captures recovery once',async()=>{
+  const j=await statefulFixture(),r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy',quantity:1}}])]);
+  assert.equal(r.result.terminal.reason,'RECEIPT_BACKED_CART_SUMMARY',JSON.stringify(r.result));
+  assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.enqueued,1);
+  const stored=await j.state();assert.equal(stored.cart.value.lines[0].quantity,1);
+  assert(r.result.terminal.text.includes(stored.cart.value.grandTotalVnd.toLocaleString('vi-VN')+'đ'));
+  await j.drain();await j.drain();assert.deepEqual(j.capture,[r.result.terminal.text]);assert.equal(j.gateCalls.length,1);
+ });
  let journey;
  await check('B composed ingress commits an open cart, authorizes the exact reply and captures delivery once',async()=>{
   journey=await statefulFixture();const r=await journey.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',size:'M',color:'navy',quantity:1}}]),say('Em đã thêm áo vào giỏ cho chị.')]);
