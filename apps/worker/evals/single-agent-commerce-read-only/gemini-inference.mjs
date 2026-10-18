@@ -106,14 +106,13 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts,
    policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state};
- // Execution limits are instructions from the runtime, not shop/customer data.
- // Project only code-owned fields here; native history and source text stay in contents.
+ // Keep the prior owner data layout; native toolConfig and runtime checks enforce limits.
+ // Retain validation and copy only known budget fields.
  if(request.toolBudget)for(const [field,max] of [['roundsRemaining',2],['callsRemaining',6]])
   requireThat(Number.isInteger(request.toolBudget[field])&&request.toolBudget[field]>=0&&request.toolBudget[field]<=max,'OWNER_EXECUTION_BOUND');
- const execution={mode:request.toolsAllowed===false?'NONE':'AUTO',
-  availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),
+ ownerView.execution={availableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining}:null};
- const body={systemInstruction:{parts:[{text:request.instructions},{text:JSON.stringify({execution})}]},
+ const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};

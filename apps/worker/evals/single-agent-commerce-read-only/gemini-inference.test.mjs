@@ -447,15 +447,16 @@ test('current fit comparison fields and actual remaining tool capabilities reach
  const built=buildGeminiCommerceRequest(r),trusted=JSON.parse(built.contents[0].parts[0].text).trusted;
  assert.equal(trusted.state.customerProfileRevision,4);assert.equal(trusted.state.customerProfileId,'profile-1');
  assert.equal(trusted.state.measurementFingerprint,'current-fingerprint');assert.deepEqual(trusted.state.sizeMeasurementFingerprints,{SM613:'size-fingerprint'});
- assert.equal(trusted.execution,undefined);
- assert.deepEqual(JSON.parse(built.systemInstruction.parts[1].text).execution,{mode:'AUTO',availableTools:['search_products','read_product','read_policy'],toolBudget:{roundsRemaining:1,callsRemaining:4}});
+ assert.deepEqual(built.systemInstruction,{parts:[{text:r.instructions}]});
+ assert.deepEqual(trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolBudget:{roundsRemaining:1,callsRemaining:4}});
  assert.doesNotMatch(JSON.stringify(trusted),/PRIVATE_RECIPIENT|"permission"/);
  r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:4};
- const last=JSON.parse(buildGeminiCommerceRequest(r).systemInstruction.parts[1].text).execution;
- assert.deepEqual(last.availableTools,[]);assert.equal(last.toolBudget.roundsRemaining,0);assert.equal(last.mode,'NONE');
+ const finalRequest=buildGeminiCommerceRequest(r),last=JSON.parse(finalRequest.contents[0].parts[0].text).trusted.execution;
+ assert.deepEqual(last.availableTools,[]);assert.equal(last.toolBudget.roundsRemaining,0);
+ assert.deepEqual(finalRequest.tools,[]);assert.equal(finalRequest.toolConfig.functionCallingConfig.mode,'NONE');
 });
 
-test('execution instructions never promote dialogue, product text or extra budget fields into system authority',()=>{
+test('rollback keeps bounded execution data and native dialogue outside system instructions',()=>{
  const r=request();r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:3,extra:'EVALUATOR_ONLY_CANARY'};
  r.contents=[{role:'user',parts:[{text:'Khách đã chọn màu xanh, size S. DATA_ONLY_CANARY'}]},
   {role:'model',parts:[{text:'Phần này em chưa trả lời được.'}]},
@@ -465,7 +466,8 @@ test('execution instructions never promote dialogue, product text or extra budge
  assert.deepEqual(built.contents.slice(1),before);assert.deepEqual(r.contents,before);
  assert.doesNotMatch(system,/DATA_ONLY_CANARY|PRODUCT_DATA_CANARY|EVALUATOR_ONLY_CANARY/);
  assert.doesNotMatch(JSON.stringify(built),/EVALUATOR_ONLY_CANARY/);
- assert.deepEqual(JSON.parse(built.systemInstruction.parts[1].text).execution,{mode:'NONE',availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:3}});
+ assert.deepEqual(built.systemInstruction,{parts:[{text:r.instructions}]});
+ assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.execution,{availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:3}});
 });
 
 test('execution budget accepts only bounded code-owned numbers before provider dispatch',async()=>{
