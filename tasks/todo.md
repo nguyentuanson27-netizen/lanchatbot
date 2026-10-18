@@ -5,9 +5,10 @@
 - [x] Owner authorizes fix/run atbca8805e; refresh main296cdcfb and retain [bounded scope](../apps/worker/evals/single-agent-commerce-read-only/offer-projection-run-20261018/SCOPE.md). No new cases/permutation or provider/model change.
 - [x] T1 observed RED→GREEN with same-response defaults/native identity/history/partial controls; codecf137da4. Focused adapter/protocol50/worker191/protected21PASS; full worker1856Vitest/504NodePASS+2optionalSKIP. Parameter schemas/domain tools/effects/verifier unchanged.
 - [x] T2 keep both prompts byte-identical: existing rules already cover unknown/size/advice, no new case-answer examples or prompt rewrite justified.
-- [ ] Complete all readiness/source checks, freeze/commit/clean runtime source and preflight before generation; record only commands actually run.
-- [ ] Collect all45priority outcomes; raw→whole primary→diagnosis/accounting. Remaining16only if old criteria pass, overallmax61/232; errors/downstream retained, no retries/extra candidate.
-- [ ] Report actual outcomes/provenance/latency/token/error/complexity and update draft PR391, STOP at owner decision; A OWNER_BYPASS, no sales/live acceptance inferred.
+- [x] Readiness/source checks completed, typecheck/build/lint exit0, source readback0generation; freeze cleanb3107465 then config/stateful preflights0generation.
+- [x] Collect all45priority outcomes, raw3a89caef before whole primary5fa86bfe before diagnosis/accounting.32USABLE/1NEEDS_EDIT/9UNUSABLE/3controls;7fallback+2unfinished checkout/confirmation;remaining16NOT_RUN under old criteria, no retry/extra candidate.
+- [x] Audit115HTTP200=84owner/31verifier (28PASS/3FAIL),31bindings/28eligible exact drafts/68hashes/0observed evaluator-private leaks/0provider error-timeout-retry; all3DBdropped.28multi-offer occurrences compacted,5NONE calls remain; one code summary recovery, third journey has no cart. Two stage verdicts unresolved, not relabeled.
+- [x] [Report/all45conversations](../apps/worker/evals/single-agent-commerce-read-only/offer-projection-run-20261018/CHECKPOINT_B.md) and draft PR391 delivery; STOP before16, A OWNER_BYPASS/ownerAcceptance=null. No useful-count gain, only2of3checkout/confirmation; no sales/live acceptance, source publication/deploy/merge/Phase C.
 
 ## Current revised fix plan after independent review — 2026-10-18
 
@@ -16,8 +17,8 @@
 - [x] Kiểm tài liệu: ba file đúng scope/chín local links hợp lệ/history giữ nguyên/0secret-pattern hits; diff whitespace sạch. T1–T4 vẫn chưa thực hiện, không claim worker/provider PASS mới.
 - [x] T1 sau owner authorization: codecf137da4 và observed RED→GREEN adapter; chi tiết ở scope/implementation mới phía trên.
 - [x] T2 sau owner authorization: giữ nguyên cả hai prompt; không nối luật/ví dụ theo ca hoặc mở nhánh sửa sau provider results.
-- [ ] T3: Chạy exact focused/full-worker/typecheck/build/lint commands trong plan, ghi kết quả thật; không mở rộng effects/shared scope hoặc thêm DB ceremony không có risk mới.
-- [ ] T4 khi owner yêu cầu: freeze/clean source/preflights, đủ45priority/max168requests; chỉ toàn nhóm đạt tiêu chí cũ mới16once, tổngmax61/232. Giữ raw→whole primary→diagnosis, mọi lỗi/downstream trong denominator, không retry/majority/extra candidate.
+- [x] T3 sau owner authorization: focused/full-worker/typecheck/build/lint/source checks đã chạy, actual commands và giới hạn ở implementation mới; effects/shared scope giữ nguyên.
+- [x] T4 sau owner authorization: sourceb3107465/45outcomes/115requests, raw→whole primary→diagnosis; STOP trước16 theo tiêu chí cũ. Mọi lỗi/downstream giữ trong denominator, không retry/majority/extra candidate.
 - [ ] Sales/live acceptance chưa đạt: A OWNER_BYPASS, B STOP, ownerAcceptance=null. Kế hoạch không cấp quyền publish/live send/deploy/merge/Phase C; evidence727d425d và45outcomes trước nguyên vẹn.
 
 ## Current contract-fix provider replay — 2026-10-18
