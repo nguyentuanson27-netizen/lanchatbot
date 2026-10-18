@@ -6,6 +6,7 @@
 - [x] Review both45-outcome runs and cf137da4/6c5befca fixes, trace offer default, measurement rejection, unknown-to-only-set, color/NONE and sales/voice regression. [Findings and self-reviewed next plan](../docs/specs/c3-phase-b-rollback-and-contract-plan-20261018.md).
 - [x] Observed rollback RED→GREEN; focused63Node/160worker PASS; Node eval506PASS/2optionalSKIP. No provider generation; model behavior after rollback unverified.
 - [x] Rollback savepoint fde1f627; worker build and lint (TypeScript noEmit) exit0; exact restored prompt/active hash, historical folders/runtime unchanged and diff check PASS. No new full worker/remote CI or sales PASS claim.
+- [x] Incorporate independent REVISE_PLAN at417392c3: F1 single-offer/unknown-source/budget-terminal controls; F2 numeric-copy versus semantic field/person residual and committed-state review; explicit acceptance per F1–F3. Documentation only, no new reviewer ACCEPT, code fix or model run.
 - [ ] Proposed F1–F4 are not implemented: explicit offer at candidate effect boundary, actionable current-source measurement errors, isolated availability presentation, conditional voice/capability cleanup. Color retention/NONE remain unresolved; no new run/live acceptance implied.
 
 ## Historical execution-contract provider replay — 2026-10-18

@@ -83,6 +83,8 @@ Thực hiện từng bước, giữ một owner/ít nhất quyền tool cần th
 2. Thiếu loại hàng trả lỗi đầu vào cụ thể, chưa gọi selector/mutation và không trả danh sách màu của loại mặc định. Sai loại đã truyền khác với chưa truyền; sai màu chỉ được báo trong loại đã xác định.
 3. Không đổi `resolveOffer` dùng chung cho read/legacy mặc định nếu có thể chặn ngay candidate boundary. Không thêm gate mới ngoài kiểm args hiện hữu.
 4. Test trước: missing offer không select/commit; explicit AO đúng màu thành công; set vẫn là set; sai màu đúng offer vẫn từ chối; change_cart_item giữ offer của CART_LINE; duplicate không thêm lần hai. Controls không pin tên/màu/giá của một case.
+5. Sản phẩm chỉ có một offer đã được code cấp trong context: owner truyền offer đó và add trực tiếp vẫn hoạt động, không bắt đọc lại để đáp ứng required field. Không tự điền singleton trong code. Kiểm số tool rounds bên cạnh đúng cart/receipt để phát hiện hồi quy trên đường mua đang hoạt động.
+6. Chưa biết offer hoặc nguồn offers không đọc được: không bịa offer, không gọi default priority, không suy không bán/hết hàng và không commit. Nếu còn khả năng đọc thì dùng tool hiện hữu; nếu vẫn thiếu hoặc hết budget, trả đúng phần đã biết/giới hạn qua verifier và final gate hiện có, không gọi muộn hoặc hứa đã thêm hàng. Nếu final không qua được các boundary, dùng terminal hiện hành. Kết quả an toàn nhưng chưa mua được phải ghi là chưa hoàn tất mua, không tính như F1 đạt chất lượng bán hàng.
 
 F1 không chữa được model truyền color=null dù khách đã nói màu: vòng cũ lỗi này lặp ở rep3, vòng mới rep2 mở giỏ và rep1 đổi giỏ. Schema đã bắt buộc field color, nên chỉ thêm required không giải quyết. Code không đủ thẩm quyền suy màu từ hội thoại để điền hộ. Giữ lỗi này trong priority evaluation; nếu còn xảy ra, cô lập request trước add để so cách trình bày tin hiện tại/history với state, không thêm persisted lựa chọn hoặc gán màu tồn duy nhất. Không tuyên bố F1/F2 giải quyết toàn bộ lỗi mua hàng.
 
@@ -93,6 +95,10 @@ F1 không chữa được model truyền color=null dù khách đã nói màu: v
 3. Nếu validation phát hiện lỗi từng op, cả batch vẫn không ghi một phần. Model sửa argument trong vòng tool còn lại, không sinh thêm vòng ngoài budget. Chỉ giữ quote gắn tin mới; không tự replay số đo history.
 4. Test trước: một câu chứa hai số báo đúng lỗi từng field, quote một số hợp lệ ghi đúng; sai giá trị/nguồn cũ/quote trùng/đơn vị sai vẫn chặn; height notation hiện được hỗ trợ không bị mất. CAS/revision/receipt và dependent-state blocking giữ nguyên.
 5. Nếu model vẫn không sửa được với lỗi cụ thể, đánh giá lại contract trước khi nghĩ đến một proof format khác. Không coi thêm chi tiết lỗi là đã sửa xong độ tin cậy.
+
+**Giới hạn phải kiểm riêng:** numeric-copy check chỉ xác nhận số được chép đúng từ nguồn, không chứng minh số đó là eo hay mông, hoặc thuộc khách hay người khác được nhắc tới. Quote hợp lệ với giá trị đúng nhưng model gán nhầm field/người có thể không sinh validation error; F2 không chữa được bằng cách thêm reason. Không viết test giả định validator hiện tại phát hiện được nghĩa này.
+
+Khi đánh giá provider, đối chiếu committed measurements với từng field và đúng người theo toàn lời khách, kể cả tool trả OK và có receipt thật. Tái dùng ca correction hiện có; nếu chưa có trường hợp phân biệt referent thì chỉ đăng ký thêm một control tối thiểu trước run, ghi riêng mục đích và denominator. Expected field/người chỉ ở evaluator, không đưa vào model request. Lưu sai field/người là lỗi state của outcome dù final nghe hợp lý; không nhận F2 đạt chỉ vì hết lỗi validation. Không thêm parser, verifier trước commit hay proof format mới trong F2; nếu lỗi này xuất hiện, ghi rõ giới hạn và review riêng trước khi mở rộng.
 
 ### F3 — Làm rõ dữ kiện chưa có ngay trong kết quả đọc, đo riêng
 
@@ -115,6 +121,16 @@ Review toàn câu: có giúp khách chọn/mua không, lý do có đúng và có
 - Ca ưu tiên dùng lại: nhận mua, đổi size/số lượng sau failure, sửa số đo, partial chân váy và set; controls gồm add đúng loại/màu, quote đã có, policy và tư vấn upsell. Stateful phải chạy cả mạch cần thiết và giữ downstream failures; không đếm một continuation tách lịch sử như hành trình thật.
 - Chỉ chạy full sau khi ca ưu tiên và controls đạt tiêu chí đã freeze. Không dùng majority, bỏ attempt hoặc sửa prompt giữa run. Không gán cả mức tăng/giảm cho một edit nếu source/history không được kiểm soát.
 - Ghi riêng: customer outcome, committed state, model tool adherence, verifier decision, giọng/quyết định. Giảm fallback nhờ code summary không chứng minh owner tư vấn tốt hơn; cuối hành trình mua thành công không xóa lỗi đầu hành trình.
+
+Acceptance phải được ghi theo từng thay đổi trong scope run hiện hữu trước provider, không thêm cổng kiểm duyệt:
+
+| Bước | Bằng chứng cần đạt | Control và kết quả không được che |
+| --- | --- | --- |
+| F1 | Thiếu offer bị chặn trước selector/commit; explicit offer tạo đúng loại, màu, size, số lượng; lỗi màu chỉ thuộc offer đã chọn. | Single-offer đã biết add trực tiếp không phát sinh read bắt buộc. Unknown/source-unavailable không bịa hoặc default; ghi riêng chưa hoàn tất mua. Đếm read/tool rounds và missing-color/NONE dù offer đã đúng. |
+| F2 | Lý do lỗi đúng field/validation; quote có thể sửa trong budget hiện tại; committed measurements đúng giá trị, field và người theo câu khách. | Ca correction từng pass vẫn giữ lựa chọn mua. Sai nguồn cũ, đơn vị, atomic batch/CAS vẫn được bảo vệ. Tool OK/receipt không thay đánh giá đúng nghĩa; không nâng budget hoặc bỏ lượt lỗi để báo thành công. |
+| F3 | Trên partial chân váy/set, trả được phần có nguồn, không suy chỉ bán bộ và không hẹn việc ngoài capability. | Known offers, offer absent, stock zero, stale và nguồn đầy đủ vẫn được phân biệt; các ca bán hàng từng pass vẫn hữu ích. Đổi reason đúng trong wire chưa chứng minh cải thiện owner. |
+
+Mỗi bước giữ nguyên tiêu chí whole-outcome đã freeze, báo toàn bộ lần lặp và ca control. Khi chưa đạt hoặc xuất hiện hồi quy, giữ bằng chứng và không tự mở full run. F1/F2 deterministic PASS chỉ chứng minh boundary tương ứng; F3 chỉ được ghi cải thiện quan sát khi có kết quả model so sánh phù hợp. Nếu source/history khác nhau, báo chênh lệch mô tả, không quy tác động nhân quả. Không dùng tổng điểm để che lỗi state hoặc thao tác mua.
 
 ## 7. Verification của rollback
 
@@ -152,3 +168,9 @@ Complexity delta: gỡ phần prompt +1.018 bytes và system execution part; gi�
 - Chưa mặc định chia prompt thành framework nhiều module. Capability mismatch đáng kiểm tra nhưng chưa được tách khỏi biến động generation.
 - Không sửa fallback để che failure, không đổi nhãn stage để cứu điểm, không tăng budget hoặc bỏ verifier. Thành công deterministic không đồng nghĩa thành công tư vấn.
 - Việc rollback chọn mốc cũ là quyết định hạn chế thay đổi chưa chứng minh được, không phải bằng chứng mốc cũ ổn định. Cần source identity mới nếu chạy provider lại.
+
+## 9. Tiếp thu review độc lập — 2026-10-18
+
+Reviewer độc lập kiểm tại HEAD `417392c3d5da64d922315dd5f2007c0029860413`, kết luận REVISE_PLAN với hai finding P2; không sửa code hoặc chạy provider. Bản kế hoạch này đã bổ sung F1 single-offer/unknown-source và expected terminal khi hết budget; F2 residual đúng số nhưng sai field/người cùng kiểm committed state; acceptance riêng F1–F3 và controls từng pass. Giữ F3 là giả thuyết, không mở rộng F4 hoặc coi mất màu/NONE đã giải quyết.
+
+Đây là cập nhật kế hoạch theo review, chưa phải reviewer đã ACCEPT bản sửa hoặc implementation mới. Chỉ thay tài liệu này và tasks/plan.md, tasks/todo.md; không đổi executable, prompt, manifest hoặc lịch sử run. Kiểm tra diff và link tài liệu, không chạy lại test/model cho thay đổi tài liệu.
