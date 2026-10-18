@@ -1,12 +1,21 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current contract-fix provider replay — 2026-10-18
+
+- [x] Refresh main296cdcfb/intake7e5cfc61; freeze [one45priority-outcome scope](../apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/SCOPE.md), only permute existing24case order, deep-equal per caseId. Keep models/prompts/config/policy/tool/schema/budgets and criteria; no extra candidate/retry.
+- [x] Current focused45PASS, source readback0generation, clean sourcef21ca386 then config/stateful preflights0generation. Complete all24B1+21stateful; all6runners exit0, all3testDBs dropped. Raw09ed5415 before whole-outcome primaryca60a6bf before rejected drafts/verdict details.
+- [x] [Review45actual outcomes](../apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/CHECKPOINT_B.md):32USABLE/2NEEDS_EDIT/8UNUSABLE/3ownership controls. Two clean first-four-turn journeys, all3preview/confirmations; previous failures stay denominator. Eight static fallback=6verifierFAIL+1tool budget+1owner completion error. One blocked acceptance/fit wording unresolved; no keyword-based relabeling or fixed-answer sales grading.
+- [x] Audit117invocations/117HTTP200 (83owner/34verifier),28PASS/6FAIL,34exact bindings/28exact eligible drafts/68raw hashes/0observed evaluator-private leaks,0private-checkout modelrequests/0timeout-retry. No HTTP/quota/transport error; one MALFORMED_RESPONSE generation error retained. Reuse prior implementation checks honestly; no new full-repo/CI PASS claim.
+- [x] Follow preregistered stop:remaining16NOT_RUN, no post-result patch/new candidate/run. Evidence and conclusions delivered in draft PR391; A remains OWNER_BYPASS.
+- [ ] Phase B sales/live acceptance STOP. Recurring owner tool selection/color loss, unknown-offer inference, unsupported replacement features/negative construction claims, invalid price comparison, long indecisive advice and one acceptance/fit boundary remain. Provider completion root cause unknown; ownerAcceptance=null, full-suite behavioral regression/staff service/POS/live delivery unverified. No source publication/merge/deploy/Phase C.
+
 ## Current contract fix after review93 replay — 2026-10-18
 
 - [x] Read current evidence/specs, refresh main296cdcfb at intake0942d0cf; [bounded implementation](../apps/worker/evals/single-agent-commerce-read-only/contract-fix-20261018/IMPLEMENTATION.md).
 - [x] Replace ambiguous selected-size/fit and old-state-write wording; expose unknown offers as null; clarify opacity outcome and useful concern handling. Policy/tool schemas/models/corpus/budgets unchanged; current prompt hashes updated, historical evidence intact.
 - [x] Observed recovery/projection/scope/Outbox RED→GREEN. Receipt-backed totals use current source/policy/cart checks and existing delivery readiness; receipt-only ACK remains possible without a new catalog assertion.
 - [x] Final worker1856Vitest/499NodePASS+2optionalSKIP, worker build/typecheck/lint exit0; protected52/adapter45PASS. Real-PG26PASS/0generations/DBdropped, including committed total through readiness/capture once. Self-review/schema/corpus/history and offline141wire-shape bounds checked.
-- [ ] New provider evidence/sales acceptance remains pending; this fix scope has no new provider run and does not resume16stopped cases. Delivery remains the existing draft PR391.
+- [x] Fresh provider evidence subsequently collected under the separate contract-replay scope above; implementation-only scope itself had no provider run. Historical16stopped cases remain untouched. New45priority outcomes do not meet sales acceptance; delivery remains draft PR391.
 
 ## Current completed review93 fix and bounded replay — 2026-10-18
 
