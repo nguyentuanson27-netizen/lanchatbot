@@ -24,7 +24,7 @@ export function statefulPreflight(root){
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations])),
   catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
-  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:cases.length,publicTurns:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:cases.filter(c=>c.runtime.latest).length*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
+  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
 }
 
 export async function createStatefulProvider(input){
@@ -33,13 +33,17 @@ export async function createStatefulProvider(input){
  let activeSlot=null;
  const audit=(id,phase,value)=>appendFileSync(out+'/provider-requests.jsonl',JSON.stringify({caseId:activeSlot,id,phase,value})+'\n');
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
- const counters={embedding:0,owner:0,verifier:0};
+ const counters={embedding:0,owner:0,verifier:0,catalogReads:0,posReads:0,selectorCalls:0,readPolicyCalls:0};
  const embedding=new VertexShadowModel({projectId:config.vertex.projectId,location:'global',modelName:m.models.conversation.model,embeddingModel:config.vertex.embeddingModel,
   embeddingLocation:config.vertex.embeddingLocation,embeddingDimension:config.vertex.embeddingDimension,serviceAccount:{email:credential.client_email,privateKey:credential.private_key}});
  const sourceCatalog=new QdrantStableCatalogSearchAdapter({baseUrl:process.env.QDRANT_BASE_URL,apiKey:process.env.QDRANT_API_KEY,collection:config.qdrantCollection,expectedDimension:config.vertex.embeddingDimension,
   embedding:{embedText:async t=>{counters.embedding++;return embedding.embedText(t);},embedImageUrl:async()=>{throw new Error('IMAGE_SEARCH_NOT_EXPOSED');}}});
- const facts=new RedisBusinessFactsReader(process.env.REDIS_URL),sourceSearch=new ProductSearchService(sourceCatalog,config.searchThresholds);
- const catalog={findByExactCode:async code=>candidateDescription(await sourceCatalog.findByExactCode(code),config.candidateDescriptions)};
+ const facts=new RedisBusinessFactsReader(process.env.REDIS_URL);
+ const rawRead=facts.readCatalogSnapshot.bind(facts),rawSelect=facts.resolveCartSelection.bind(facts);
+ facts.readCatalogSnapshot=async(...args)=>{counters.posReads++;return rawRead(...args);};
+ facts.resolveCartSelection=async(...args)=>{counters.selectorCalls++;return rawSelect(...args);};
+ const sourceSearch=new ProductSearchService(sourceCatalog,config.searchThresholds);
+ const catalog={findByExactCode:async code=>{counters.catalogReads++;return candidateDescription(await sourceCatalog.findByExactCode(code),config.candidateDescriptions);}};
  const search={searchText:async query=>candidateSearchResult(await sourceSearch.searchText(query),config.candidateDescriptions)};
  const infer=createGeminiCommerceInference({model:m.models.conversation.model,effort:'high',location:'global',projectId:config.vertex.projectId});
  const verify=createCommerceVerifier(m,undefined,(id,v)=>audit(id,v.phase,v.provider));
@@ -47,7 +51,7 @@ export async function createStatefulProvider(input){
  return {counters,ownerPrompt,verifierPrompt,facts,setSlot:id=>{activeSlot=id;},
   async read(bound,policyStore,policy){const product=await catalog.findByExactCode('SV2447');assert(product,'INITIAL_SOURCE_UNAVAILABLE');
    const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:[product],search,catalog,policyStore,facts});
-   return {catalog:sources.catalog,policy,initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds};},
+   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds};},
   async owner(request){assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
    let completedTelemetry;
    try{const wire=buildGeminiCommerceRequest(request);assert(!/"(?:caseId|evaluator|purposeId|requiredBehaviors|expectedSafe|qualityScore)"/.test(JSON.stringify(wire)),'EVALUATOR_LABEL_LEAK');

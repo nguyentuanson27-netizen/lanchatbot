@@ -79,23 +79,26 @@ export function createReadOnlyTools(input: {
   }
   async function prepareProduct(id: string) {
     const now = input.clock();
-    let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
+    let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null;
     try { source = await input.catalog.readProduct(id); }
     catch {
       // A failed POS read must not erase independent catalog content.
       try { source = await input.catalog.readProduct(id, false); }
-      catch { source = { product: undefined!, snapshot: null }; }
+      catch { source = null; }
     }
-    const p = source.product;
+    const p = source?.product;
     let content = false;
+    const previous = { ...products.get(id) };
+    delete previous.content; delete previous.attributes;
+    products.delete(id);
     if (p?.productId === id) {
       const evidence = staticEvidence(p, now);
       if (evidence.content || evidence.attributes) {
-        products.set(id, { ...products.get(id), ...evidence }); content = true;
+        products.set(id, { ...previous, ...evidence }); content = true;
       }
     }
-    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
-    const raw = parsed.success && parsed.data.product_id === id && parsed.data.shop_alias === scope.shopAlias ? parsed.data : null;
+    const parsed = CatalogSnapshotV3Schema.safeParse(source?.snapshot);
+    const raw = p?.productId === id && parsed.success && parsed.data.product_id === id && parsed.data.shop_alias === scope.shopAlias ? parsed.data : null;
     const observed = raw ? Date.parse(raw.synced_at) : NaN, expires = observed + maxAge * 1000;
     const status = raw ? normalizeCatalogToken(raw.data_status) : null;
     const offers = raw && ["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(status ?? "") &&

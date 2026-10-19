@@ -56,6 +56,7 @@ describe("Phase B capability composition", () => {
         return {result:{verdict:"PASS",violations:[]}}; }});
     expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(result.sendEnabled).toBe(false);
     expect(cycle.cart).not.toBeNull();expect(profile.profile.revision).toBe(2);
+    expect(tools.snapshot().policyLiterals.some(p=>p.ref==="offers:QU714")).toBe(true);
     const second=await compose();
     expect(second.snapshot().state.customerMeasurements).toContainEqual({kind:"WAIST_CM",value:85});
     const size=await second.invoke({name:"recommend_size",args:{subjectRef:"QU714"}});

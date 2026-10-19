@@ -25,6 +25,17 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("withdraws attributes missing from the current preparation readback instead of retaining old evidence", async () => {
+    const { tools, f } = sellingFixture({ DIRECT: 499_000 });
+    await tools.prepare();
+    const before = tools.snapshot();
+    expect(before.runtimeProducts?.[0]?.attributes).toBeTruthy();
+    delete f.product.attributes;
+    const after = await tools.readback();
+    expect(after.runtimeProducts?.[0]?.attributes).toBeUndefined();
+    expect(after.runtimeProducts?.[0]?.content).toBeTruthy();
+    expect(after.state.factSnapshotVersion).not.toBe(before.state.factSnapshotVersion);
+  });
   it("prepares offers and content without price/stock variants or full-read dependencies", async () => {
     const { tools, f, readProduct } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
     expect(await tools.prepare()).toBe(1);

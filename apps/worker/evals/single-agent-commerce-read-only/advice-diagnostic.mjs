@@ -7,7 +7,7 @@ import {randomUUID} from 'node:crypto';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest} from './gemini-inference.mjs';
 import {validateProtocol,createCommerceVerifier,buildVerifierRequest,sha256} from './protocol.mjs';
 
-export const selectAdviceCapture=rows=>rows.find(r=>r.toolsAllowed===false)??rows.at(-1)??null;
+export const selectAdviceCapture=rows=>{const dispatched=rows.filter(r=>r.providerRequests>0);return dispatched.find(r=>r.toolsAllowed===false)??dispatched.at(-1)??null;};
 
 async function main(){
  const [input,out]=process.argv.slice(2);if(!input||!out)throw new Error('CAPTURE_AND_NEW_OUT_REQUIRED');

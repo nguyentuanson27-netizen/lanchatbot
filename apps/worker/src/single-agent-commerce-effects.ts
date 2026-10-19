@@ -104,7 +104,8 @@ export async function createCommerceEffectTools(input: {
         return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
       }), ...selectionClaims],
-      policies: policy ? [publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
+      policies: policy ? [...base.policyLiterals.filter(p => !p.ref.startsWith("policy:")),
+        publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
       // Reuse the selection readback: a known contradiction invalidates this
       // receipt's current scope; unavailable source data adds no new assertion.
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });

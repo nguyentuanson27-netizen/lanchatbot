@@ -139,8 +139,9 @@ export async function runCommerceTurn(input: {
     let current: TrustedContext;
     try { current = await input.tools.readback(); }
     catch { return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
-    return finish(finalGate({ expected: binding, response, current, finalDraft: output.text, now: input.clock(), includeDiagnostic: true,
-      fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }));
+    const terminal = finalGate({ expected: binding, response, current, finalDraft: output.text, now: input.clock(), includeDiagnostic: true,
+      fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } });
+    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}) };
   }
   return finish(fallback("BUDGET"));
 }
