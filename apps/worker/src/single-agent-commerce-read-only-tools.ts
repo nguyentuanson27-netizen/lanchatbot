@@ -1,10 +1,10 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { ProductContentV1Schema } from "@lana/contracts";
 import { buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
-  resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken,
+  resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken, normalizeProductCode,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
-import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
 
@@ -87,6 +87,7 @@ export function createReadOnlyTools(input: {
       catch { source = null; }
     }
     const p = source?.product;
+    if (!products.has(id) && products.size >= MAX_RUNTIME_PRODUCTS) throw new Error("PRODUCT_BOUND");
     let content = false;
     const previous = { ...products.get(id) };
     delete previous.content; delete previous.attributes;
@@ -195,6 +196,7 @@ export function createReadOnlyTools(input: {
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
     if (charts.length) evidence.sizeCharts = charts;
+    if (!products.has(id) && products.size >= MAX_RUNTIME_PRODUCTS) return { status: "REJECTED", reason: "PRODUCT_BOUND" };
     offerContexts.delete(id);
     if (availableOffers !== null) offerContexts.set(id, { ref: `offers:${id}`,
       sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers }),
@@ -236,13 +238,22 @@ export function createReadOnlyTools(input: {
         return await readPolicy();
       }
       if (call.name === "search_products") {
-        const a = toolArgs(call.args, ["query"]);
-        if (!a || !text(a.query, 512)) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
-        const found = await input.catalog.searchText(a.query);
+        const a = toolArgs(call.args, ["query", "productCode"]);
+        if (!a || (a.query !== undefined && !text(a.query, 512)) ||
+          (Object.hasOwn(a, "productCode") ? !text(a.productCode, 64) : !text(a.query, 512)))
+          return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+        const code = typeof a.productCode === "string" ? normalizeProductCode(a.productCode) : null;
+        const found = await input.catalog.searchText(code ?? a.query as string);
+        // An explicit code must identify that product; nearby search suggestions are not a substitute.
+        if (code && (found.status !== "MATCHED" ||
+          ![found.product.productId, found.product.canonicalCode, ...found.product.aliases].some(id => normalizeProductCode(id) === code)))
+          return { status: "OK", data: { status: "NOT_FOUND", subjects: [], products: [] } };
         const candidates = found.status === "MATCHED" ? [found.product] : found.status === "AMBIGUOUS" ? found.candidates.map(c => c.document) : [];
-        if (subjects.size + candidates.filter(p => !subjects.has(p.productId)).length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-        candidates.forEach(bind);
+        if (new Set([...subjects.keys(), ...candidates.map(p => p.productId)]).size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
         const evidence = candidates.map(p => staticEvidence(p, input.clock()));
+        if (new Set([...products.keys(), ...evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)]).size > MAX_RUNTIME_PRODUCTS)
+          return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+        candidates.forEach(bind);
         for (const p of evidence) {
           searchReads.add(p.subjectRef);
           // Search must not replace a fuller, already verified product read.
@@ -269,6 +280,8 @@ export function createReadOnlyTools(input: {
       const {product} = await input.catalog.readProduct(id, false);
       if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");
       const evidence = staticEvidence(product, input.clock());
+      if (!products.has(id) && (evidence.attributes || evidence.content) && products.size >= MAX_RUNTIME_PRODUCTS)
+        throw new Error("PRODUCT_BOUND");
       products.delete(id);
       if (evidence.attributes || evidence.content) products.set(id, evidence);
       subjects.set(id, {...subjects.get(id)!, label:product.title});

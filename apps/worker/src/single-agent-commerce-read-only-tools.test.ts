@@ -25,6 +25,86 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("rejects search overflow before exposing or binding unretained product evidence", async () => {
+    const records = Array.from({ length: 7 }, (_, i) => fixtureProduct(`TEST${i + 1}`));
+    const searchText = vi.fn(async (query: string) => ({ status: "AMBIGUOUS" as const, reasonCode: "TOP_GAP_TOO_SMALL" as const,
+      candidates: (query === "first" ? records.slice(1, 4) : records.slice(4)).map(f => ({ document: f.product, score: 0.8 })) }));
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: [records[0]!.product], catalog: { searchText,
+        readProduct: async id => structuredClone(records.find(f => f.product.productId === id)!) } });
+    await tools.prepare();
+    expect((await tools.invoke({ name: "search_products", args: { query: "first" } })).status).toBe("OK");
+    const before = tools.snapshot();
+    expect(before.runtimeProducts).toHaveLength(4);
+    expect(await tools.invoke({ name: "search_products", args: { query: "second" } }))
+      .toEqual({ status: "REJECTED", reason: "PRODUCT_BOUND" });
+    expect(tools.snapshot()).toEqual(before);
+    expect(hardPrecheck(tools.snapshot(), "Em chọn mẫu này cho chị.", commerceNow)).toBeNull();
+    expect(await tools.readback()).toEqual(before);
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "TEST2" } })).status).toBe("OK");
+    expect(tools.snapshot().runtimeProducts).toHaveLength(4);
+  });
+  it("keeps concurrent searches within the same product budget without partial admission", async () => {
+    const groups = [Array.from({ length: 3 }, (_, i) => fixtureProduct(`A${i}`)),
+      Array.from({ length: 3 }, (_, i) => fixtureProduct(`B${i}`))];
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      catalog: { searchText: async query => ({ status: "AMBIGUOUS", reasonCode: "TOP_GAP_TOO_SMALL",
+        candidates: groups[Number(query)]!.map(f => ({ document: f.product, score: 0.8 })) }),
+      readProduct: async () => fixtureProduct() } });
+    const results = await tools.invokeBatch([0, 1].map(n => ({ name: "search_products", args: { query: String(n) } })));
+    expect(results.map(r => r.status).sort()).toEqual(["OK", "REJECTED"]);
+    expect(tools.snapshot().runtimeProducts).toHaveLength(3);
+    expect(tools.snapshot().boundSubjects).toHaveLength(3);
+  });
+  it("does not leave bound subjects behind when a search candidate fails source validation", async () => {
+    const f = fixtureProduct(); f.product.observedAt = "2099-01-01T00:00:00.000Z";
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      catalog: { searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }),
+        readProduct: async () => f } });
+    const before = tools.snapshot();
+    expect((await tools.invoke({ name: "search_products", args: { query: "SM613" } })).status).toBe("UNAVAILABLE");
+    expect(tools.snapshot()).toEqual(before);
+  });
+  it("rejects a fifth product read without dropping earlier source or claims", async () => {
+    const records = Array.from({ length: 5 }, (_, i) => fixtureProduct(`READ${i}`));
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: records.map(f => f.product), catalog: {
+        searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }),
+        readProduct: async id => ({ product: records.find(f => f.product.productId === id)!.product, snapshot: null }) } });
+    for (const f of records.slice(0, 4)) expect((await tools.invoke({ name: "read_product", args: { subjectRef: f.product.productId } })).status).toBe("OK");
+    const before = tools.snapshot();
+    expect(await tools.invoke({ name: "read_product", args: { subjectRef: "READ4" } })).toEqual({ status: "REJECTED", reason: "PRODUCT_BOUND" });
+    expect(tools.snapshot()).toEqual(before);
+  });
+  it("uses the supplied product code for lookup even when a garment query accompanies it", async () => {
+    const f = fixtureProduct(), searchText = vi.fn(async () => ({ status: "MATCHED" as const,
+      matchKind: "EXACT_CODE" as const, product: f.product, score: 1, gap: null }));
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      catalog: { searchText, readProduct: async () => f } });
+    expect((await tools.invoke({ name: "search_products", args: { productCode: " sm613 ", query: "sơ mi SM613" } })).status).toBe("OK");
+    expect(searchText).toHaveBeenCalledWith("SM613");
+    expect(tools.snapshot().boundSubjects.map(s => s.ref)).toEqual(["SM613"]);
+  });
+  it("does not overflow on readback when a previously empty search source gains content", async () => {
+    const records = Array.from({ length: 5 }, (_, i) => fixtureProduct(`LATER${i}`));
+    const partial = structuredClone(records[4]!.product); delete partial.observedAt; delete partial.attributes;
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      catalog: { searchText: async query => ({ status: "MATCHED", matchKind: "EXACT_CODE", score: 1, gap: null,
+        product: query === "LATER4" ? partial : records.find(f => f.product.productId === query)!.product }),
+        readProduct: async id => structuredClone(records.find(f => f.product.productId === id)!) } });
+    for (const f of records) expect((await tools.invoke({ name: "search_products", args: { productCode: f.product.productId } })).status).toBe("OK");
+    const before = tools.snapshot(); expect(before.runtimeProducts).toHaveLength(4);
+    await expect(tools.readback()).rejects.toThrow("PRODUCT_BOUND");
+    expect(tools.snapshot()).toEqual(before);
+  });
+  it("does not bind a similar product as the requested code, or treat an empty code as discovery", async () => {
+    const { tools } = setup();
+    expect(await tools.invoke({ name: "search_products", args: { productCode: "NOT999" } }))
+      .toMatchObject({ status: "OK", data: { status: "NOT_FOUND", subjects: [], products: [] } });
+    expect(tools.snapshot().boundSubjects).toEqual([]);
+    expect(await tools.invoke({ name: "search_products", args: { productCode: "", query: "sơ mi" } }))
+      .toEqual({ status: "REJECTED", reason: "TOOL_ARGUMENTS" });
+  });
   it("withdraws attributes missing from the current preparation readback instead of retaining old evidence", async () => {
     const { tools, f } = sellingFixture({ DIRECT: 499_000 });
     await tools.prepare();

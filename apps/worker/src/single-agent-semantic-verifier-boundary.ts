@@ -28,6 +28,7 @@ export interface RuntimeProductEvidence {
   presentation?: ProductPresentationEvidenceV1; sizeCharts?: SizeChartV1[];
   content?: ProductFactsV2["content"];
 }
+export const MAX_RUNTIME_PRODUCTS = 4;
 export interface TrustedContext {
   boundSubjects: { ref: string; kind: string; label: string; bindingVersion: string; variantId?: string | null; productId?: string }[];
   protectedClaims: unknown[];
@@ -133,7 +134,7 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date, 
     trusted.cartBinding.cartVersion < 0 || !trusted.boundSubjects.some(subject =>
       subject.kind === "CART" && subject.ref === trusted.cartBinding!.cartId))) return stale("CART_BINDING");
   if (trusted.runtimeProducts !== undefined) {
-    if (!Array.isArray(trusted.runtimeProducts) || trusted.runtimeProducts.length > 4) return "MALFORMED";
+    if (!Array.isArray(trusted.runtimeProducts) || trusted.runtimeProducts.length > MAX_RUNTIME_PRODUCTS) return "MALFORMED";
     for (const p of trusted.runtimeProducts) {
       if (!record(p) || !boundedText(p.ref, 128) || !boundedText(p.subjectRef, 128) ||
         Buffer.byteLength(JSON.stringify(p)) > 8192 ||
