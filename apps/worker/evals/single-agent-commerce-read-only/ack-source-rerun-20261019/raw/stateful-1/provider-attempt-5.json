@@ -1,0 +1,163 @@
+{
+  "caseId": "stateful-request-checkout",
+  "journeyId": "sales",
+  "elapsedMs": 23437.565399999992,
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "NO_SEND",
+      "originalReason": "CHECKOUT_DETAILS_MISSING"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "5f6cf5fa-5d99-4157-9479-696ff1cbbdba:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3138.7998999999836,
+        "telemetry": {
+          "generationId": "5f6cf5fa-5d99-4157-9479-696ff1cbbdba:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4417,
+          "outputTokens": 764,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 21351,
+          "requestHash": "a84c17266e07cc7e3cf674dba852daf18ad8df248f74ff7c02e8435a6c3d274a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 754,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 7336.295600000012,
+    "verificationLatencyMs": null,
+    "enqueued": 1
+  },
+  "owners": 1,
+  "verifiers": 0,
+  "toolResponses": [],
+  "actualCapturedMessages": [
+    "Chị gửi thêm [NAME]"
+  ],
+  "committedPublicState": {
+    "stage": "CART_OPEN",
+    "revision": 7,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "3ecd284d-99ee-5862-8320-fba0132f2607",
+      "salesEpisodeId": "d30c2c63-4a5c-57a1-8bcc-6ed38a8fd7a4",
+      "customerProfileId": "71d0aecf-600c-4ff8-85d8-b90a324d1aa9",
+      "revision": 3,
+      "currency": "VND",
+      "status": "OPEN",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "14e0fdf6-c606-56a8-88ea-506ad88a6fe6",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-19T10:34:12.629Z",
+              "expiresAt": "2026-10-21T10:34:12.629Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "adjustments": [
+        {
+          "adjustmentId": "fae66d0c-fc97-5d61-a3c5-e777209f9f29",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500,
+          "policyAuthorization": {
+            "policyBundleId": "admin-policy:1198992073286645",
+            "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "decisionId": "596a94f3-46c9-5cb7-8cba-e759f49f88fe",
+            "authorizedAt": "2026-10-19T11:04:16.203Z"
+          }
+        }
+      ],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 998000,
+      "discountTotalVnd": 49900,
+      "grandTotalVnd": 978100,
+      "createdAt": "2026-10-19T11:03:27.460Z",
+      "updatedAt": "2026-10-19T11:04:16.203Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-19T11:05:07.886Z",
+          "sourceEventHash": "110ba272976ea57ef2a29f98c5a447ea6e29069b5f5b980bcdfe124753b51d68"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-19T11:05:07.886Z",
+          "sourceEventHash": "110ba272976ea57ef2a29f98c5a447ea6e29069b5f5b980bcdfe124753b51d68"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 8,
+    "verifier": 4,
+    "catalogReads": 15,
+    "posReads": 14,
+    "selectorCalls": 25,
+    "readPolicyCalls": 0
+  }
+}
