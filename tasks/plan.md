@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Chat-expression model run — 2026-10-19
+
+Owner yêu cầu chạy bản promptae461e0d. Hoàn tất6/6targetedslots từ2fixedcaptures×3, source849585aa clean,12requests(6owner/6verifier),0providererrors/timeout/retry/thiếucapture. Primary ebdde894 trước diagnosis:4USABLE/1NEEDS_EDIT/1actualfallback; verifier5PASS/1FAIL.16conditional **NOT_DISPATCHED_CONDITION_NOT_MET** theo rule vì actualfallback, không tính chúng làmodeloutcomes.
+
+Lượt bịchặn vẫn điều kiện nhu cầu đãrõ, ngoặc catalog, câudài và hứa ngồilâu đứnglênvẫnmượt. Một câusendeligible ngắn hơn nhưng hứa giữformgọngàngsuốtchuyếnđi, primaryreview yêu cầusửa/khácverifierPASS; chưa owneradjudication, không nhậnzeroobservedunsafePASS. Concernvẫnmềm/nhẹ/rũ→thanhthoát→ngânsách, giọng chưa cải thiện rõ. [Đủ hội thoại/findings/commands](../apps/worker/evals/single-agent-commerce-read-only/chat-expression-run-20261019/CHECKPOINT_B.md). Audit6bindings/6ownerprompt/18wirebodies/6capturehashes/12exactrawPASS,0labelleaks. STOP sales/live readiness; không tựfix/chạy16/mẫubù/vòngmới. A OWNER_BYPASS.
+
 ## Active chat-expression fix — 2026-10-19
 
 Owner yêu cầu tổng hợp finding và fix sau khi nhấn mạnh nhịp câu/ngoặc/điều kiện/lời dẫn. **IMPLEMENTED, chưa chạy provider từ bản này.** [Findings, thay đổi và self-review](../docs/specs/c3-phase-b-chat-expression-fix-20261019.md).
