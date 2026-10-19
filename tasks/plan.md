@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Owner acceptance of verifier limitations — 2026-10-19
+
+Owner đã xem bảy draft bị chặn trong sales-voice-run-20261019 và tạm chấp nhận cách trả lời; coi verifier chặn quá tay ở sáu lượt sân khấu và một xác nhận giữ size là hạn chế còn tồn tại. [Quyết định cụ thể](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md). Không tiếp tục fix/run chỉ để bảy draft qua verifier; các mục lịch sử yêu cầu giải quyết chúng trước readiness được thay bằng quyết định này trong đúng phạm vi bảy draft.
+
+Giữ nguyên raw/primary/provider counts lịch sử. Chưa sửa runtime/verifier, nên fallback tương tự vẫn có thể xảy ra. Theo dõi riêng contract tìm mã, context acquisition và giọng owner/code. Quyết định này không tự mở run mới, GO toàn bộ B hay live action.
+
 ## Current direction: model–code division and separate advice diagnostic — 2026-10-19
 
 **Executed — STOP readiness.** Owner đã yêu cầu fix → independent review → fix → model run. [Báo cáo51/51 lượt](../apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/CHECKPOINT_B.md), source d699bb4a;119 generation requests/retry0, không lỗi provider/timeout. Một independent REVISE trên f9408330, bốn finding đã fix/self-verify. Baseline opening đúng giỏ2/3; candidate3/3; checkout invitation/private preview/confirm3/3 trên DB cô lập. Stateful19USABLE/2NEEDS_EDIT/3controls; B1 và advice replay mỗi nhóm8USABLE/1NEEDS_EDIT/3fallback. Primary lock dc0f4401 trước verdict diagnosis. Không cải thiện ổn định tư vấn sân khấu; không mở vòng/full45/conditional16 tự động. Chi tiết kế hoạch phía dưới giữ identity lúc lập/sửa, không phải trạng thái chưa thực thi hiện nay.

@@ -1,6 +1,6 @@
 # Findings — selective sales voice run
 
-Recommendation: STOP readiness. Completed 48/48 outcomes and 9/9 jobs. No automatic fix or further model run.
+**Owner update: accepted with known limitations.** Owner tạm chấp nhận cả bảy draft bị verifier chặn; không tiếp tục fix/run chỉ để giải quyết các ca này. [Phạm vi và quyết định](OWNER_DECISION.md). Các đối chiếu bên dưới giữ lịch sử review; mục3 và4 đã được chuyển sang hạn chế chấp nhận, không còn yêu cầu bắt buộc sửa. Recommendation STOP readiness là kết luận trước quyết định này; chưa có GO mới cho toàn bộ B.
 
 ## 1. Giọng owner chưa cải thiện ổn định
 
@@ -22,13 +22,13 @@ Cả ba integrated và ba replay đều FAIL. Có nguồn mô tả các món tha
 
 Verifier trả kind/ref, không trả giải thích đầy đủ; các nguyên nhân ở đây là đối chiếu người review với draft/source. Không coi mọi cảnh báo chất liệu hoặc mọi đề xuất món thay là sai. Đây không phải lỗi do mất phép thử cho mọi lợi ích hoặc do thiếu keyword. Lượt sửa chỉ đổi giọng owner, giữ nguyên ranh giới verifier, nên không có căn cứ kỳ vọng tự giải quyết bất đồng này.
 
-Hướng tiếp theo: thống nhất nghĩa được phép với đúng nguồn và hoàn cảnh trước khi đổi hành vi; nếu thiếu dữ kiện sản phẩm quyết định lựa chọn, bổ sung nguồn tương ứng. Giữ quyền tư vấn tự tin và suy luận thẩm mỹ; không tự hợp thức hóa thuộc tính vật lý mới hoặc bắt mọi tư vấn có test riêng.
+Disposition mới theo owner: tạm chấp nhận sáu draft sân khấu và ghi nhận false-block của verifier là hạn chế còn tồn tại. Không tiếp tục sửa prompt/nguồn hoặc chạy thêm chỉ để các ca này PASS. Giữ phân tích nguồn ở trên làm lịch sử, không coi nó là quyết định bác nội dung của owner.
 
 ## 4. Giữ size khách chọn bị biến thành nhận xét độ vừa
 
 Stateful rep2 correction đã ghi eo74/mông96, giữ L/hai áo đúng. Draft lại thêm “Chị giữ size L như vậy là chuẩn ạ!” dù lượt này không có SIZE_FIT. Verifier chặn, khách nhận fallback. Phân biệt việc mua đúng lựa chọn với đánh giá fit đã có trong prompt; lỗi tiếp diễn dù không thiếu số đo/state write.
 
-Hướng tiếp theo: rà context và kết quả tool đang khiến lời xác nhận bị viết thành đánh giá fit; giữ việc xác nhận thao tác và kết quả recommend_size có scope riêng. Không thêm câu mẫu theo đúng số đo của bài kiểm tra.
+Disposition mới theo owner: tạm chấp nhận draft xác nhận giữ L trong đúng hội thoại này; không tiếp tục fix/run riêng câu đó. Ghi nhận khả năng verifier chặn cách xác nhận owner chấp nhận là hạn chế, không thay runtime bằng ngoại lệ theo case.
 
 ## 5. Một câu hệ thống do readback/recovery, không phải owner
 
@@ -38,4 +38,4 @@ Stateful rep3 đổi L/hai áo: draft owner tự nhiên và verifier PASS. Final
 
 ## Hướng xử lý có căn cứ sau vòng này
 
-Ưu tiên contract tìm mã và tách rõ lời owner với lời code trong đánh giá giọng. Với owner, giữ bản sửa nhỏ để làm đối chứng; đánh giá riêng nguồn mô tả mang giọng catalog và nghĩa tư vấn đang tranh luận trước khi sửa tiếp. Không rollback hoặc chỉnh prompt tự động từ một tỷ lệ tổng hợp, không tăng corpus/repetition hay chạy thêm nếu chưa có yêu cầu mới.
+Các phần còn theo dõi ngoài bảy draft đã chấp nhận: contract tìm mã, context acquisition, nguồn mô tả mang giọng catalog và lời code formatter. Giữ bản owner hiện tại; không tiếp tục vòng chỉnh prompt cho các nghĩa owner vừa chấp nhận. Không tự rollback, tăng corpus/repetition hoặc chạy thêm từ báo cáo này.

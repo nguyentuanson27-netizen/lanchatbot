@@ -1,5 +1,7 @@
 # Bảy lượt fallback
 
+**Cập nhật sau review: owner tạm chấp nhận nội dung cả bảy draft dưới đây.** Việc verifier chặn chúng được ghi là hạn chế còn tồn tại; không tiếp tục fix/run chỉ để bảy câu qua verifier. [Quyết định](OWNER_DECISION.md). Nội dung và kết quả bên dưới là evidence lịch sử, không được chấm lại thành câu đã gửi.
+
 Đối chiếu sau primary lock91d192be. Verifier chỉ trả kind/ref; phần giải thích là nhận xét của người review từ draft và nguồn. Không dùng keyword để suy verdict.
 
 ## stateful-2 / stateful-correction
