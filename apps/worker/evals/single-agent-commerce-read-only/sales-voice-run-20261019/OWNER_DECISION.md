@@ -1,34 +1,20 @@
-# Owner decision — tạm chấp nhận bảy draft — 2026-10-19
+# Owner decision — chỉ chấp nhận sáu draft sân khấu — 2026-10-19
 
-Owner đã xem bảy lượt UNUSABLE/fallback của sales-voice-run-20261019 và quyết định:
+Owner làm rõ: chỉ tạm chấp nhận các câu sân khấu. Câu xác nhận số đo “Chị giữ size L như vậy là chuẩn” không được chấp nhận vì không tự nhiên và cần sửa. Owner cũng yêu cầu sửa verifier để chấp nhận sáu cách tư vấn sân khấu, không chỉ ghi hạn chế trong tài liệu. Quyết định này thay cách hiểu nhầm cả bảy draft ở9612cf2a.
 
-> verify chặn quá tay, tạm chấp nhận các cách trở lời đó đi, fix nữa thì ko bao giờ xong, chấp nhận và ghi vào như 1 hạn chế còn tồn tại
+## Phạm vi chấp nhận
 
-## Quyết định áp dụng
+ACCEPTED_WITH_KNOWN_LIMITATIONS áp dụng cho b1-1/b1-2/b1-3 và advice-1/advice-2/advice-3 của b1-changed-occasion. Owner chấp nhận lời khuyên phối thêm lớp mặc, chọn mẫu thay, so sánh độ kín/độ dày định tính và trấn an trong các đoạn đã xem. Không tiếp tục ép owner thêm giọng dè dặt hoặc viết lại sáu draft chỉ để qua verifier.
 
-**ACCEPTED_WITH_KNOWN_LIMITATIONS**, phạm vi là bảy draft đã trình owner, gồm:
+Hạn chế còn tồn tại: tư vấn dựa trên suy luận thời trang thông thường có thể chưa được kiểm chứng riêng cho mọi điều kiện sử dụng. Không ghi các suy luận đó thành kết quả kiểm nghiệm hoặc thuộc tính có cấu tạo cụ thể đã được nguồn xác nhận.
 
-| Lượt | Tình huống |
-| --- | --- |
-| stateful-2 / stateful-correction | Xác nhận sửa số đo và giữ size L khách chọn |
-| b1-1 / b1-changed-occasion | Sân khấu, phối áo trong hoặc đổi Ngọc Trâm |
-| b1-2 / b1-changed-occasion | Sân khấu, đổi Khánh Trang |
-| b1-3 / b1-changed-occasion | Sân khấu, đổi Diệp An |
-| advice-1 / b1-changed-occasion | Replay sân khấu, phối áo trong hoặc Ngọc Trâm |
-| advice-2 / b1-changed-occasion | Replay sân khấu, Khánh Trang hoặc Thanh Vũ |
-| advice-3 / b1-changed-occasion | Replay sân khấu, Diệp An hoặc phối áo trong |
+## Thực hiện theo yêu cầu mới
 
-Owner tạm chấp nhận các cách trả lời này cho mục tiêu tư vấn bán hàng. Không tiếp tục sửa prompt, thêm ví dụ hoặc chạy thêm vòng chỉ để bảy draft đó qua verifier. Chuyển bất đồng tư vấn/đặc tính và xác nhận lựa chọn/đánh giá fit ở các lượt này thành hạn chế còn tồn tại của verifier.
+- Sửa ranh giới chung trong verifier: nhận xét định tính/cách phối thông thường từ chất liệu và thiết kế được phép; không suy mọi lời khuyên trước một nỗi lo thành bảo đảm kỹ thuật. Không thêm ngoại lệ theo caseId hoặc tên sản phẩm.
+- Giữ việc chặn dữ kiện cấu tạo/kiểm nghiệm tự tạo, thông số/công năng mới, sai chính sách/tiền/receipt và đánh giá fit không có claim.
+- Sửa giọng owner khi tiếp nhận thông tin khách vừa sửa: xác nhận ngắn, không kể thao tác hồ sơ hoặc khen độ vừa của size khách đã tự chọn. stateful-2/stateful-correction vẫn là finding cần sửa, nằm ngoài sáu draft được chấp nhận.
+- Kiểm tra hẹp bằng exact sáu draft và captured context, cùng hai negative controls; không sinh lại cả vòng tư vấn. Kết quả ghi riêng sau run, không đổi evidence cũ.
 
-## Hạn chế được chấp nhận
+## Evidence lịch sử
 
-Verifier hiện hành vẫn có thể chặn lời tư vấn owner chấp nhận, làm mất câu trả lời bán hàng và thay bằng static fallback. Calibration giữa lời khuyên thông thường, hàm ý công năng và cách xác nhận lựa chọn chưa khớp hoàn toàn với mức owner mong muốn. Chấp nhận hạn chế này để dừng vòng sửa lặp; không yêu cầu giải quyết trước khi xử lý các phần khác.
-
-Đây là chấp nhận nội dung draft và tồn tại false-block theo đánh giá owner, không phải kết quả chạy lại. Runtime/verifier hiện chưa thay đổi nên vẫn có thể phát sinh fallback tương tự. Không thêm ngoại lệ theo caseId, không bypass runtime cho bảy câu hoặc đổi chúng thành facts sản phẩm đã xác minh.
-
-## Cách đọc evidence sau quyết định
-
-- Run source93db1d47, primary lock91d192be và raw evidence giữ nguyên. Bảy lượt thực tế vẫn là fallback; không đổi thành bảy câu đã gửi, không đổi29PASS/7FAIL thành36PASS.
-- Primary UNUSABLE mô tả kết quả khách thực nhận lúc chạy. Nội dung bảy draft được owner chấp nhận sau khi xem; đọc quyết định này cùng [báo cáo](CHECKPOINT_B.md) và [bảy draft](FALLBACKS.md).
-- Bảy draft này không còn là yêu cầu bắt buộc sửa để thoát STOP của báo cáo cũ. Không tự suy thành GO toàn bộ Phase B, kết quả A2 mới hoặc quyền deploy/live send.
-- Các finding ngoài phạm vi này vẫn được theo dõi riêng: contract tìm mã, giới hạn context do acquisition, giọng catalog và lời do code formatter dựng. Không mở vòng fix/run mới từ tài liệu này.
+Run source93db1d47 và primary lock91d192be giữ nguyên: thực tế7fallback/29PASS/7FAIL. Sáu draft được owner chấp nhận sau run; một correction chưa được chấp nhận. Việc sửa verifier và kiểm tra lại không biến các câu lịch sử thành tin đã gửi, không tự là GO toàn bộ B hoặc quyền live send.

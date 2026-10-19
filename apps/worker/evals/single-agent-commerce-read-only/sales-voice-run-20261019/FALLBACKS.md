@@ -1,6 +1,6 @@
 # Bảy lượt fallback
 
-**Cập nhật sau review: owner tạm chấp nhận nội dung cả bảy draft dưới đây.** Việc verifier chặn chúng được ghi là hạn chế còn tồn tại; không tiếp tục fix/run chỉ để bảy câu qua verifier. [Quyết định](OWNER_DECISION.md). Nội dung và kết quả bên dưới là evidence lịch sử, không được chấm lại thành câu đã gửi.
+**Owner làm rõ: chỉ tạm chấp nhận sáu draft sân khấu và yêu cầu sửa verifier để cho qua.** Draft xác nhận số đo ở đầu vẫn cần sửa vì không tự nhiên; không nằm trong phạm vi chấp nhận. [Quyết định](OWNER_DECISION.md). Nội dung và kết quả bên dưới là evidence lịch sử, không được chấm lại thành câu đã gửi.
 
 Đối chiếu sau primary lock91d192be. Verifier chỉ trả kind/ref; phần giải thích là nhận xét của người review từ draft và nguồn. Không dùng keyword để suy verdict.
 

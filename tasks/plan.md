@@ -1,10 +1,10 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
-## Owner acceptance of verifier limitations — 2026-10-19
+## Owner clarification and verifier change — 2026-10-19
 
-Owner đã xem bảy draft bị chặn trong sales-voice-run-20261019 và tạm chấp nhận cách trả lời; coi verifier chặn quá tay ở sáu lượt sân khấu và một xác nhận giữ size là hạn chế còn tồn tại. [Quyết định cụ thể](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md). Không tiếp tục fix/run chỉ để bảy draft qua verifier; các mục lịch sử yêu cầu giải quyết chúng trước readiness được thay bằng quyết định này trong đúng phạm vi bảy draft.
+Owner chỉ chấp nhận sáu draft sân khấu của sales-voice-run-20261019, yêu cầu sửa verifier để chấp nhận các lời tư vấn đó. Câu xác nhận số đo/giữ size không được chấp nhận và cần sửa giọng tự nhiên. [Quyết định chính xác](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md) thay cách hiểu nhầm cả bảy ở9612cf2a.
 
-Giữ nguyên raw/primary/provider counts lịch sử. Chưa sửa runtime/verifier, nên fallback tương tự vẫn có thể xảy ra. Theo dõi riêng contract tìm mã, context acquisition và giọng owner/code. Quyết định này không tự mở run mới, GO toàn bộ B hay live action.
+Sửa nguyên tắc tư vấn/đặc tính trong verifier, không thêm case-specific exception; sửa riêng lời xác nhận của owner, giữ contract tool/state/policy/fit/receipt. Kiểm tra hẹp exact sáu draft + hai negative controls, một request mỗi attempt, không sinh lại cả vòng owner. Giữ raw/primary/counts lịch sử; không tự GO hoặc live action.
 
 ## Current direction: model–code division and separate advice diagnostic — 2026-10-19
 

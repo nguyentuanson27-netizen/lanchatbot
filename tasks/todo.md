@@ -1,17 +1,17 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
-## Owner acceptance — seven verifier blocks — 2026-10-19
+## Owner clarification — six stage replies only — 2026-10-19
 
-- [x] Owner tạm chấp nhận cả bảy draft được trình bày (sáu sân khấu, một xác nhận giữ size). [Quyết định](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md): chuyển sang hạn chế verifier còn tồn tại; không tiếp tục fix/run chỉ để các ca này PASS.
-- [x] Cập nhật report/findings/plan theo quyết định mới; giữ raw, primary lock và số7fallback/29PASS/7FAIL lịch sử. Không sửa prompt/runtime hoặc thêm ngoại lệ theo case.
-- [ ] Ngoài phạm vi chấp nhận: contract tìm mã/context acquisition và giọng owner/code tiếp tục được theo dõi. Chưa có run/GO mới từ quyết định này.
+- [x] Sửa phạm vi sau đính chính owner: chỉ sáu draft sân khấu được chấp nhận; câu xác nhận số đo vẫn phải sửa vì không tự nhiên. [Quyết định](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md) thay cách hiểu nhầm cả bảy ở9612cf2a.
+- [x] Theo yêu cầu mới: sửa nguyên tắc verifier cho suy luận tư vấn/cách phối định tính; sửa giọng owner khi tiếp nhận thông tin vừa sửa, không thêm đánh giá fit. Không đưa tên/số đo/caseId hoặc câu mẫu benchmark vào prompt.
+- [ ] Kiểm tra hẹp sáu exact draft + hai negative controls sau seal; lưu kết quả mới riêng. Evidence48 lượt cũ giữ7fallback/29PASS/7FAIL.
 
 ## Sales voice model run — 2026-10-19
 
 - [x] Owner yêu cầu chạy sau ba51204b: freeze48 outcomes (stateful24/B1 integrated12/advice replay12), cùng models/config/corpora với vòng trước, trần156 generations/retry0. Run source93db1d47 clean; worker build/preflight/source-readback PASS,9/9 jobs exit0. Không sinh lại historical baseline openings.
 - [x] Đọc toàn bộ48 actual outcomes; khóa primary91d192be trước verifier diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/CHECKPOINT_B.md): stateful20U/1unusable/3controls, B1 6U/3edit/3unusable, replay7U/2edit/3unusable.106 requests,36 verdicts(29PASS/7FAIL),7fallback; error/timeout0, retry0;3disposable DB đã drop.
 - [x] Audit36 bindings/12 captures/9 child source registrations;166 wire captures không evaluator/private phone marker leak. Tìm rõ query có loại đồ+mã trả AMBIGUOUS nhưng mã đơn MATCHED; hai replay kế thừa context thiếu giá. Một STALE do offers metadata refresh được code recovery bằng receipt; không quy lời formatter cho owner. [Findings và hướng tiếp](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/FINDINGS.md).
-- [x] Owner đã tạm chấp nhận bảy draft sau khi xem: không tiếp tục sửa các ca này; verifier false-block là hạn chế đã chấp nhận. Kết quả run vẫn7fallback. Các finding khác theo dõi riêng; chưa GO toàn bộ B, A2 mới hoặc live delivery.
+- [x] Owner làm rõ chỉ chấp nhận sáu draft sân khấu và yêu cầu sửa verifier; câu correction vẫn phải sửa giọng. Kết quả run vẫn7fallback. Các finding khác theo dõi riêng; chưa GO toàn bộ B, A2 mới hoặc live delivery.
 
 ## Owner prompt — selective sales/voice update — 2026-10-19
 

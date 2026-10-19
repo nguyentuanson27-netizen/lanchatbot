@@ -1,8 +1,8 @@
 # Selective sales voice comparison — 2026-10-19
 
-**Cập nhật owner: tạm chấp nhận cả bảy draft bị chặn, ghi nhận verifier chặn quá tay là hạn chế còn tồn tại.** [Quyết định và phạm vi](OWNER_DECISION.md). Không tiếp tục fix/run chỉ để các draft này qua verifier. Phần số liệu bên dưới giữ kết quả thực tế của run; không đổi fallback lịch sử thành PASS.
+**Cập nhật owner: chỉ tạm chấp nhận sáu draft sân khấu; yêu cầu sửa verifier để cho qua. Câu xác nhận số đo vẫn phải sửa vì không tự nhiên.** [Quyết định và phạm vi](OWNER_DECISION.md). Không viết lại sáu draft tư vấn; sửa ranh giới verifier theo yêu cầu mới và kiểm tra hẹp riêng. Phần số liệu bên dưới giữ kết quả thực tế của run; không đổi fallback lịch sử thành PASS.
 
-Recommendation tại thời điểm review trước quyết định owner: STOP readiness. Hoàn tất48/48 lượt,9/9 jobs. Thay giọng chưa cho thấy cải thiện ổn định; phần giao dịch giữ được state đúng nhưng có thêm một fallback. Bảy draft này không còn là yêu cầu bắt buộc sửa; các finding khác vẫn được theo dõi riêng. Checkpoint A vẫn OWNER_BYPASS; chưa có đánh giá GO mới cho toàn bộ B hoặc run mới từ quyết định này.
+Recommendation tại thời điểm review trước quyết định owner: STOP readiness. Hoàn tất48/48 lượt,9/9 jobs. Thay giọng chưa cho thấy cải thiện ổn định; phần giao dịch giữ được state đúng nhưng có thêm một fallback. Sáu draft sân khấu được chấp nhận; câu xác nhận số đo vẫn cần sửa; các finding khác vẫn được theo dõi riêng. Checkpoint A vẫn OWNER_BYPASS; chưa có đánh giá GO mới cho toàn bộ B hoặc run mới từ quyết định này.
 
 ## Identity và phạm vi
 
@@ -14,7 +14,7 @@ Recommendation tại thời điểm review trước quyết định owner: STOP 
 
 ## Actual customer outcomes
 
-[Toàn bộ48 lượt cùng lịch sử và primary review](CONVERSATIONS_AND_REVIEW.md), [JSON đã khóa](PRIMARY_REVIEW.json). Chấm cả yêu cầu, lịch sử, lời thực nhận và public committed state; minor polish riêng, không đếm keyword. OwnerAcceptance=null tại thời điểm khóa; quyết định chấp nhận bảy draft sau đó nằm trong [OWNER_DECISION.md](OWNER_DECISION.md).
+[Toàn bộ48 lượt cùng lịch sử và primary review](CONVERSATIONS_AND_REVIEW.md), [JSON đã khóa](PRIMARY_REVIEW.json). Chấm cả yêu cầu, lịch sử, lời thực nhận và public committed state; minor polish riêng, không đếm keyword. OwnerAcceptance=null tại thời điểm khóa; quyết định chỉ chấp nhận sáu draft sân khấu sau đó nằm trong [OWNER_DECISION.md](OWNER_DECISION.md).
 
 | Nhóm | Vòng trước: U / cần sửa / không dùng được / control | Vòng này: U / cần sửa / không dùng được / control |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Recommendation tại thời điểm review trước quyết định owner: STOP 
 
 ## Fallback, recovery và nguồn giọng hệ thống
 
-**7 fallback thực tế**:6 sân khấu như nhóm lỗi cũ,1 correction. [Đủ bảy draft, verdict và đối chiếu](FALLBACKS.md). Owner đã tạm chấp nhận nội dung cả bảy draft; theo dõi khả năng bị verifier chặn như hạn chế đã chấp nhận, không tiếp tục bắt buộc sửa các câu này.
+**7 fallback thực tế**:6 sân khấu như nhóm lỗi cũ,1 correction. [Đủ bảy draft, verdict và đối chiếu](FALLBACKS.md). Owner chỉ chấp nhận sáu draft sân khấu và yêu cầu sửa verifier để chấp nhận chúng; câu correction vẫn phải sửa. Kết quả kiểm tra lại ghi riêng, không thay run này.
 
 Sáu sân khấu vẫn suy độ dày/độ kín hoặc giải pháp che phủ từ nguồn chưa đủ. Không coi mọi suy luận thời trang là sai; verifier chỉ trả kind/ref, việc đối chiếu nguồn cần tách nhận xét lựa chọn với lời hứa về kết quả sử dụng. Chỉ sửa giọng owner, giữ verifier và nguồn không tự giải quyết ranh giới này.
 
