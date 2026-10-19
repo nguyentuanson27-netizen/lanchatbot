@@ -8,8 +8,10 @@
 - [x] Nối transient name từ ingress initialProducts qua session executor/RealtimeSalesCycleInput tới formatter/preorder; recovery reuse current base world. Kế thừa source shop scope, match product/offer; không dùng variant label làm tên, không persist/migration/cosmetic-only read. Mã cũ là fallback khi thiếu tên phù hợp.
 - [x] RED→GREEN formatter và private ingress/session actual preview; đúng tên+offer, missing/mismatched name, nhiều variant/tổng giữ nguyên; private turn0model requests,0catalog reads thêm vì tên.
 - [x] Focused affected tests/callers/guards, adapter/protocol khi prompt/hash đổi, worker typecheck/build/lint; self-review với P4/rollback và32outcomes. Ghi exact commands/kết quả, không mở rộng test dư thừa.
-- [ ] Khi execution được yêu cầu: freeze6captured slots(2contexts×3)/max12requests. Lỗi thực chất/provider error dừng phần provider sau; polish nhẹ không chặn. Nếu đạt, existing16slots×1/max52requests. Max22slots/64requests,0retry/repair/extra rounds; tests code vẫn hoàn tất dù provider screen lỗi.
-- [ ] Báo riêng targeted replay và integrated16; không gộp22 thành tỷ lệ chất lượng/independent journeys. Whole-turn primary trước diagnosis, giữ raw/nhãn cũ; stop report, A OWNER_BYPASS/B no live GO.
+- [x] Đã chạy targeted6/6,12requests:5USABLE/1actualfallback,0providererrors/retry;16conditionalNOT_DISPATCHED theo rule. Kế hoạch freeze: freeze6captured slots(2contexts×3)/max12requests. Lỗi thực chất/provider error dừng phần provider sau; polish nhẹ không chặn. Nếu đạt, existing16slots×1/max52requests. Max22slots/64requests,0retry/repair/extra rounds; tests code vẫn hoàn tất dù provider screen lỗi.
+- [x] Báo riêng targeted replay và integrated16; không gộp22 thành tỷ lệ chất lượng/independent journeys. Whole-turn primary trước diagnosis, giữ raw/nhãn cũ; stop report, A OWNER_BYPASS/B no live GO.
+
+Kết quả: [sales-decision-run](../apps/worker/evals/single-agent-commerce-read-only/sales-decision-run-20261019/CHECKPOINT_B.md), source7e9ece0a/primarye825f3a9. Lỗi hứa giữ form toàn chuyến đi cho món thay vẫn tái diễn; verifier chặn đúng. Code preview-name có217focused+58adapterPASS và private-path evidence, chưa có integrated model evidence. STOP sales/live readiness, không tự chạy16.
 
 ## Hai vòng stability bổ sung — 2026-10-19
 

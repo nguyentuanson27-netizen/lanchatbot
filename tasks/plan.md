@@ -2,7 +2,7 @@
 
 ## Revised fix — sales decisions, voice and product labels — 2026-10-19
 
-Status: IMPLEMENTED_PENDING_MODEL_EVALUATION. Owner yêu cầu fix và chạy model sau review; code/prompt đã sửa, provider chưa chạy tại savepoint này. Baseline giữ nguyên: run source `35c9007b`, primary `b3d068e2`, report `df9b6ffe`; owner prompt hiện tại 9.435 bytes. Một conversational owner và verifier hiện hữu; code giữ authority về identity/truth/freshness/state/permission/effects/receipts/privacy. A vẫn OWNER_BYPASS; kế hoạch này không cấp live GO.
+Status: TARGETED_RUN_COMPLETE_STOP_BEFORE_CONDITIONAL16. Owner yêu cầu fix và chạy model sau review; code/prompt đã sửa, targeted6/6 đã chạy;1fallback tái diễn nên16conditional chưa dispatch. Baseline giữ nguyên: run source `35c9007b`, primary `b3d068e2`, report `df9b6ffe`; owner prompt hiện tại 9.435 bytes. Một conversational owner và verifier hiện hữu; code giữ authority về identity/truth/freshness/state/permission/effects/receipts/privacy. A vẫn OWNER_BYPASS; kế hoạch này không cấp live GO.
 
 ### 1. Thử một thay đổi rõ về cách owner chọn và giải thích
 
@@ -66,6 +66,12 @@ Thứ tự: rewrite có delta/giả thuyết rõ → nối transient name path b
 - `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs` PASS58/58. `pnpm --filter @lana/worker typecheck` lần đầu fail optional-property và2fixture types; sửa optional spread/test readback theo type thực tế, `pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit` PASS trên source cuối. `pnpm --filter @lana/worker build` PASS, `pnpm --filter @lana/worker lint` PASS (tsc noEmit), `git diff --check` PASS. Không sửa shared package hoặc chạy broad suites không liên quan.
 - Self-review đối chiếu P4: không khẳng định wording rewrite là cơ chế mới; giữ quyền chọn có điều kiện/upsell/material inference và relevant correction. Checkout label dùng nguyên tên có role riêng, không cắt tên bằng regex. Existing size/claims/CAS/receipt/privacy checks giữ nguyên. Complexity delta runtime: một optional transient argument qua callers và formatter lookup;0newroles/layers/gates/durablefields/frameworks.
 - Frozen plan/captures cho `sales-decision-run-20261019`: targeted2contexts×3/max12requests, conditional16/max52; input/registration committed trước provider, source SHA ghi runtime. Chưa có provider outcome tại mục này; kết quả sẽ báo riêng ở report.
+
+### Targeted model result — 2026-10-19
+
+Source `7e9ece0a10280ff0aa87e7083ce2bcc145d9bb13` clean trước dispatch; targeted6/6/12requests,5USABLE/1actualfallback,0providererror/timeout/retry/thiếucapture. Primary e825f3a9 trước diagnosis. Mẫu đổi hoàn cảnh thứ3 hứa Diễm Hoa/Thanh Vũ giữ form đẹp suốt chuyến đi, verifierFAIL đúng product:SV244/SV165. Hai mẫu còn lại chọn ưu tiên dùng được;3concern vẫn khen mềm/nhẹ/rũ/nhắc ngân sách, chưa có cải thiện rõ.16conditional **NOT_DISPATCHED_CONDITION_NOT_MET**; không tính chúng là modelfail hayPASS. [Đủ6hội thoại, findings, commands/audit](../apps/worker/evals/single-agent-commerce-read-only/sales-decision-run-20261019/CHECKPOINT_B.md).
+
+Audit6bindings/6ownerpromptcaptures/18wirebodies/6capturehashes/12exactrawartifactsPASS,0evaluatorleaks. Code preview label có private-path0model/0extra-read evidence; chưa có provider-integratedrun do stoprule. Canonical `pnpm --filter @lana/worker typecheck` rerun finalsource PASS/exit0; build/lint và217focused/58adapterPASS. Giữ định tính tư vấn được phép, không dùng lờiPASS khác cứu fallback hoặc nới verifier. Recommendation STOP sales/live readiness; không tự tiếp tục16/vòng mới.
 
 ## Hai vòng stability bổ sung — 2026-10-19
 
