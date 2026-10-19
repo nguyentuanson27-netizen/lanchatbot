@@ -96,9 +96,9 @@ Commands thực sự chạy gồm focused/full worker, adapter/protocol, protect
 Provider command thực sự:
 
 ```powershell
-python %TEMP%/c3-division-session-20261019.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs --provider-preflight
-python %TEMP%/c3-division-session-20261019.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/cases.prioritized.json --source-check --out %TEMP%/c3-division-source-check-20261019
-python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/run.py <baseline-worktree> %TEMP%/c3-division-session-20261019.py %TEMP%/c3-model-code-division-20261019
+python "$env:TEMP/c3-division-session-20261019.py" node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs --provider-preflight
+python "$env:TEMP/c3-division-session-20261019.py" node apps/worker/evals/single-agent-commerce-read-only/run.mjs --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/cases.prioritized.json --source-check --out "$env:TEMP/c3-division-source-check-20261019"
+python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/run.py "C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-division-baseline-20261019" "$env:TEMP/c3-division-session-20261019.py" "$env:TEMP/c3-model-code-division-20261019"
 ```
 
 Preflights PASS/0 generations; parent runner12 jobs exit0. Actual absolute arguments retained in commands.json. No remote CI/deploy/live delivery verification claimed.
