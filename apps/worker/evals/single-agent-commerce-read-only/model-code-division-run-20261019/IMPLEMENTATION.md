@@ -1,6 +1,6 @@
 # Implementation and independent review — 2026-10-19
 
-Plan: [revised model/code division](../../../../../../docs/specs/c3-phase-b-model-code-division-plan-20261019.md). Baseline runtime c2c535b0; candidate increments 21734771 (preparation), 61a19676 (wire field mapping), f9408330 (capture/intake). Not wired to production. A OWNER_BYPASS; B live STOP.
+Plan: [revised model/code division](../../../../../docs/specs/c3-phase-b-model-code-division-plan-20261019.md). Baseline runtime c2c535b0; candidate increments 21734771 (preparation), 61a19676 (wire field mapping), f9408330 (capture/intake). Not wired to production. A OWNER_BYPASS; B live STOP.
 
 One owner and one verifier remain. Code prepares only static product evidence/offer literals/status, charges a logical call after privacy/permission checks, and revalidates the same projection. Price/stock/ETA and variants are not materialized by preparation. Native measurement enum maps mechanically to domain paths; raw function-call content/signatures/IDs remain intact. The existing state/CAS/effect executor is reused. Advice is a separate evaluation on a captured public world, not live send authorization.
 

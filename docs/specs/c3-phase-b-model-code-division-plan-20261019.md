@@ -1,6 +1,6 @@
 # Phase B — sửa phân công model–code và kiểm riêng tư vấn
 
-Ngày 2026-10-19. **PLAN_REVISED_AFTER_REVIEW; chưa sửa runtime, chưa chạy provider.**
+Ngày 2026-10-19. **EXECUTED; STOP readiness.** [Báo cáo51 lượt](../../apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/CHECKPOINT_B.md): fix → independent REVISE → fix →119 provider requests, không retry; B1 và advice-only cùng8/12 USABLE. Nội dung dưới giữ kế hoạch đã khóa ở c2c535b0; câu “chưa” trong mô tả kế hoạch là trạng thái lúc chuẩn bị, không thay kết quả thực thi. Source run d699bb4a, primary lock dc0f4401. Không tự chạy thêm.
 Owner chọn: giữ kiến trúc, sửa phân công model–code, kiểm riêng khả năng tư vấn. Planning source: `689e1e434be4a17b52e5e8525cb2a337bbda4cff`, branch `feat/c3-phase-b-commerce-20261014`, PR391. Đây không phải run source SHA. implementationBaseSha lịch sử giữ nguyên `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; không khẳng định đó là main mới nhất.
 
 Kế hoạch này thay các đề xuất **chạy tiếp** ở đầu tasks/plan.md và tasks/todo.md. Không thay kết luận hoặc dữ liệu lịch sử. A vẫn OWNER_BYPASS; B chưa đạt, sales/live STOP. Đã sửa theo [review độc lập REVISE](c3-phase-b-model-code-division-independent-review-20261019.md) của bản f5b8f209; revision base là c9c777d07e1c7b4e5e2dde346de359bac9bd1ee8. Chưa có verdict độc lập mới trên bản sửa. Phạm vi lượt hiện tại: sửa và self-review kế hoạch; các bước implementation/provider bên dưới chưa thực hiện.

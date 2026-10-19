@@ -4,12 +4,13 @@
 
 - [x] Đối chiếu source/executor/native schema, 66-outcome review và finding rollback; lập [kế hoạch](../docs/specs/c3-phase-b-model-code-division-plan-20261019.md), self-review chống lặp cơ chế đã có.
 - [x] Lưu [review độc lập REVISE](../docs/specs/c3-phase-b-model-code-division-independent-review-20261019.md), sửa ba contract và self-review: preparation scope/status, không full read dependencies, integrated capture trước advice replay. PLAN_REVISED_AFTER_REVIEW; chưa runtime edit/provider/re-review ACCEPT.
-- [ ] P0: freeze cases/capture rule/capabilities/rubric/config; live nguồn ghi version thực tế, không paired causal/frozen whole-journey hoặc evaluator-label leak.
-- [ ] P1: content/attributes/availableOffers preparation + public read scope/status tới first owner wire; không thêm price/stock/VARIANT/full-query read-set. RED→GREEN đổi sản phẩm/policy, scope/freshness và budget controls.
-- [ ] P2: enum mapping native field → domain path; map cả unresolvedFields, giữ raw native transcript/source/CAS/atomic checks; không drop state failure rồi chạy effect.
-- [ ] P3: integrated B1 capture full public TrustedContext trước projection theo rule cố định → khóa hash → advice-only một generation; không dựng từ lossy wire hoặc dùng rep khác; draft/replay terminal/actual integrated terminal chấm riêng.
-- [ ] P4: actual intake invitation trước private code path, failure chặn phần phụ thuộc; đồng bộ counts 8 lượt/nhóm và request bounds trong runner; public STALE diff; focused checks gồm read-only runner tests/seal.
-- [ ] Khi execution: tối đa 51 slots/180 generations; integrated B1 trước advice; giữ mọi lỗi/NOT_RUN/BLOCKED, không bù lượt; whole-turn review/voice/decision/authority riêng, không automatic full suite/vòng tiếp.
+- [x] P0: freeze51 slots/capture rule/config/rubric; live sources được readback, source/config clean tại d699bb4a; không paired causal.181 captured bodies không thấy evaluator/private fixture leak.
+- [x] P1: content/attributes/availableOffers preparation + public source status, giữ budget. RED3fail→GREEN; review tìm retained old attributes và mất non-policy literals sau effect, đã sửa bằng regression RED→GREEN. Preparation controls gồm empty/multiple binding và partial-POS first wire. Không tuyên bố đã chữa mất màu/tool planning mọi tình huống.
+- [x] P2: wire enum→domain paths, unresolvedFields và raw native transcript/source/CAS giữ nguyên; RED→GREEN. Source I/O port counters bổ sung sau independent review.
+- [x] P3: integrated B1 capture → khóa hashes → advice-only one generation;12/12 capture hashes khớp, chỉ chọn dispatched request. Không dựng từ lossy wire hoặc rep khác; primary actual outcomes khóa dc0f4401 trước rejected draft/verdict detail.
+- [x] P4: actual invitation3/3 trước private code path, preview/confirm3/3; counts8/nhóm đồng bộ. Private code0 model requests,6 disposable DB đã drop. currentPublicContext carrier cho STALE thêm vào telemetry; provider vòng này không có STALE sample.
+- [x] Hoàn tất51/51 slots/12jobs,119 requests trong trần180, retry0; không bù/best-of. [Report](../apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/CHECKPOINT_B.md): stateful19U/2E/3controls, B1 và advice mỗi nhóm8U/1E/3fallback. STOP readiness; không automatic full suite/vòng tiếp.
+- [ ] Còn mở sau vòng: sáu draft sân khấu vẫn suy đặc tính/độ kín vượt nguồn; hai partial-source explanations và giọng catalog/vai xưng hô cần xử lý. Chưa có independent final-fix ACCEPT, provider A2 mới, remote CI, live delivery hoặc owner GO. Lời mời code bị redactor rút gọn trong artifact nên chưa chấm chi tiết giọng invitation.
 
 ## Isolated model comparison completed — 2026-10-18
 
