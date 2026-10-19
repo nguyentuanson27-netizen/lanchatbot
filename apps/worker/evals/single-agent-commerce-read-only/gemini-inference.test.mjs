@@ -16,6 +16,50 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('search exposes exact product codes independently of discovery text and preserves signed call arguments',()=>{
+ const declaration=buildGeminiCommerceRequest(request()).tools[0].functionDeclarations.find(d=>d.name==='search_products');
+ assert.equal(declaration.parameters.properties.productCode.type,'STRING');
+ assert.ok(!declaration.parameters.required?.includes('query'));
+ const native={id:'lookup',name:'search_products',args:{productCode:'AB824',query:'áo AB824'}};
+ const parsed=parseGeminiGeneration(body([{functionCall:native,thoughtSignature:'signed-lookup'}]));
+ assert.deepEqual(parsed.calls[0].args,native.args);
+ assert.deepEqual(parsed.content.parts[0],{functionCall:native,thoughtSignature:'signed-lookup'});
+});
+
+test('captured owner context names only confirmed selling choices and leaves unknown offers unknown',async()=>{
+ const r=request();r.context.boundSubjects=['P1','P2','P3'].map(ref=>({ref,kind:'PRODUCT',label:ref}));
+ r.context.runtimeProducts=r.context.boundSubjects.map(s=>({subjectRef:s.ref,content:{productName:s.label,description:'Áo và chân váy.'}}));
+ r.context.policyLiterals=[{ref:'offers:P1',text:JSON.stringify({productId:'P1',availableOffers:['AO','CV','SET','DIRECT','CUSTOM']})},
+  {ref:'offers:P3',text:JSON.stringify({productId:'P3',availableOffers:[]})}];
+ r.caseId='EVALUATOR_CASE_DISPLAY';r.requiredBehaviors=['EVALUATOR_LABEL_DISPLAY'];
+ const before=structuredClone(r.context);let captured;
+ await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+  captured=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Chị xem áo này nhé.'}])));
+ }})(r);
+ const view=JSON.parse(captured.contents[0].parts[0].text).trusted;
+ assert.deepEqual(view.products[0].offerLabels,{AO:'áo lẻ',CV:'chân váy lẻ',SET:'cả bộ',DIRECT:'sản phẩm',CUSTOM:null});
+ assert.equal(view.products[1].availableOffers,null);assert.equal(view.products[1].offerLabels,null);
+ assert.deepEqual(view.products[2].availableOffers,[]);assert.deepEqual(view.products[2].offerLabels,{});
+ assert.deepEqual(r.context,before);
+ assert.doesNotMatch(JSON.stringify(captured),/EVALUATOR_CASE_DISPLAY|EVALUATOR_LABEL_DISPLAY/);
+});
+
+test('owner current product view keeps advice evidence and variant bindings without source bookkeeping',()=>{
+ const r=request(),content={productName:'Áo An',description:'Cotton, tay dài. Không có thông tin lớp lót.',productUrl:null,metadata:{sourceVersion:'CONTENT_VERSION'}};
+ const presentation={schemaVersion:1,productId:'P1',displayName:'Áo An',variants:[{variantId:'P1-M',color:'BE',size:'M'}],provenance:{contentHash:'CONTENT_HASH'}};
+ r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',content,presentation}];
+ r.contents.push({role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'signed'}]},
+  {role:'user',parts:[{functionResponse:{id:'r1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',content:{...content,description:'Nguồn cũ.'}}}}}]});
+ const before=structuredClone(r.context),history=structuredClone(r.contents),built=buildGeminiCommerceRequest(r);
+ const product=JSON.parse(built.contents[0].parts[0].text).trusted.products[0];
+ assert.deepEqual(product.content,{productName:content.productName,description:content.description,productUrl:null});
+ assert.deepEqual(product.presentation,{displayName:presentation.displayName,variants:presentation.variants});
+ // Different historical evidence must remain distinguishable; only current trusted bookkeeping is omitted.
+ assert.deepEqual(built.contents.at(-1).parts[0].functionResponse.response.data.content,history.at(-1).parts[0].functionResponse.response.data.content);
+ assert.deepEqual(built.contents.at(-2),history.at(-2));
+ assert.deepEqual(r.context,before);assert.deepEqual(r.contents,history);
+});
+
 test('owner checkout projection omits code intake fields without changing confirmation state or source',()=>{
  const r=request();r.context.state.checkoutStatus={missingFields:['FULL_NAME','PHONE','ADDRESS','PAYMENT_METHOD'],previewAvailable:false,purchaseConfirmed:false};
  const before=structuredClone(r.context);

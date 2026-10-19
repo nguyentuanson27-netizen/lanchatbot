@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active fix — sales context and tool contract — 2026-10-19
+
+Owner yêu cầu sửa sau review các vòng gần đây, giữ mục tiêu giúp khách chọn và mua hàng. [Phạm vi, đối chiếu review và evidence](../docs/specs/c3-phase-b-sales-context-fix-20261019.md), base `58f1894a3fd2876e97a4637be92b90c8568ee7ca`. Sửa admission context ngay tại search/read/readback, tách productCode khỏi query, diễn giải lựa chọn bán bằng nhãn, bỏ metadata kỹ thuật khỏi current owner product view và sửa formatter giỏ/confirmation. Giữ một owner/một verifier, nguồn facts và lịch sử; không thêm ví dụ benchmark, policy hardcode, role, parser, retry hoặc gate mới. Prompt chỉ đổi hai đoạn tương thích contract, verifier giữ nguyên.
+
+**Implementation/self-review hoàn tất.** RED → GREEN, full worker 1.889 tests PASS; eval 515 PASS/2 opt-in SKIP; final adapter/protocol 58/58; protected regression 119/119; build/typecheck/lint PASS. Self-review bổ sung readback admission và nhãn DIRECT trung tính, không suy thành cả bộ. Không sửa điểm/raw các run cũ. Chưa có provider run từ candidate này; không quy unit tests thành cải thiện bán hàng. Run tiếp theo nếu được thực hiện dùng registration mới trên source sạch, cùng models/config, 16 slots hiện hữu N1/retry0; không tự mở full A2/A3 hoặc deploy/live send. A OWNER_BYPASS, B live chưa GO.
+
 ## Current prompt rerun — 2026-10-19
 
 Owner yêu cầu một vòng mới với prompt hiện hành. [Scope và registration mới](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/SCOPE.md): giữ nguyên hai prompt/config/corpus/runtime, reuse runner cũ,16slots N1/52max generations/retry0. Không tự fix known context-bound/voice findings. Clean commit → preflight/source readback → đủ8stateful/4B1/4advice → khóa whole actual primary → diagnosis/accounting và STOP. A OWNER_BYPASS/B live chưa GO.

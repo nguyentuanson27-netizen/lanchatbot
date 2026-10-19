@@ -38,13 +38,13 @@ describe("customer-visible cart choices", () => {
     selected.offerId = "AO";
     selected.allowComponentSale = true;
     selected.components = [selected.components[0]!];
-    expect(formatCartLineSelection(selected)).toBe("Áo CB182 màu BE, size M ×2");
+    expect(formatCartLineSelection(selected)).toBe("2 áo CB182 màu be, size M");
   });
   it("keeps different colours and sizes attached to their set components", () => {
     const selected = line(1);
     selected.components[1]!.color = "NAVY";
     selected.components[1]!.size = "L";
-    expect(formatCartLineSelection(selected)).toBe("Bộ CB182 (áo màu BE, size M; chân váy màu NAVY, size L) ×1");
+    expect(formatCartLineSelection(selected)).toBe("1 bộ CB182 (áo màu be, size M; chân váy màu navy, size L)");
   });
   it("does not borrow a missing choice or a display name from another line", () => {
     const first = line(1), second = line(2);
@@ -52,7 +52,7 @@ describe("customer-visible cart choices", () => {
     second.offerKind = "DIRECT";
     second.components = [{ ...second.components[0]!, componentRole: "OTHER", color: null, size: null }];
     expect([first, second].map(formatCartLineSelection)).toEqual([
-      "Bộ CB182 (áo màu BE, size M; chân váy màu BE, size M) ×1", "Sản phẩm OTHER42 ×2",
+      "1 bộ CB182 (áo màu be, size M; chân váy màu be, size M)", "2 sản phẩm OTHER42",
     ]);
   });
 });
@@ -428,7 +428,7 @@ describe("realtime Phase 3 sales cycle", () => {
       "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD", "preorder-details"), facts: currentFacts });
     expect(previewed.plan?.state.stage).toBe("ORDER_PREVIEW");
     const text = previewed.messages.filter(m => m.kind === "TEXT").map(m => m.text).join("\n");
-    expect(text).toContain("Bộ CB182 (áo màu BE, size M; chân váy màu BE, size M) ×1");
+    expect(text).toContain("1 bộ CB182 (áo màu be, size M; chân váy màu be, size M)");
     if (preorder) {
       expect(text).toContain("CB182: hàng đặt trước");
       expect(previewed.protectedOutbound?.claimTypes).toContain("STOCK");
@@ -738,7 +738,7 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(confirmed.messages[0]).toEqual({
       kind: "TEXT",
-      text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị.",
+      text: "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé.",
     });
     const protectedReadiness = confirmed.protectedOutbound!.readiness;
     const salesParent = confirmed.plan!.effectReadiness!.find(

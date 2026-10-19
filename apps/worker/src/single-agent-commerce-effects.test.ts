@@ -566,7 +566,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc chị nhé.", history: [],
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.", owner: async () => { throw new Error("provider unavailable"); },
       verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 2 sản phẩm, size M, màu navy. Tổng 973.100đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ của chị: 2 áo SM613 màu navy, size M. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.commits).toHaveLength(2);
   });
   it("reports the committed quantity after a variant-only change without claiming the whole customer request completed", async () => {
@@ -577,7 +577,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow,
       latest: "Đổi L, lấy hai chiếc cho chị nhé.", history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.",
       owner: async () => { throw new Error("provider unavailable"); }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 1 sản phẩm, size L, màu NAVY. Tổng 524.000đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ của chị: 1 áo SM613 màu navy, size L. Tổng 524.000đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines[0]!.quantity).toBe(1); expect(s.commits).toHaveLength(2);
   });
   it("does not describe one component's size or color as the configuration of a mixed cart", async () => {
@@ -591,7 +591,7 @@ describe("code-owned commerce effects and recovery", () => {
     await s.tools.invoke(s.add);
     expect(await s.tools.invoke({ ...s.add, args: { ...s.add.args, size: "L", color: "black" } })).toMatchObject({ status: "OK" });
     const recovered = await s.tools.recover!({ disposition: "FALLBACK", reason: "PROVIDER_ERROR", text: null, fallbackId: null });
-    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ hiện có 2 sản phẩm. Tổng 973.100đ, đã gồm phí giao hàng." });
+    expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ của chị: 1 áo SM613 màu navy, size M; 1 áo SM613 màu black, size L. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines).toHaveLength(2); expect(s.commits).toHaveLength(2);
   });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {

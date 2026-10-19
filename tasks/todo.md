@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Active sales/context fix — 2026-10-19
+
+- [x] Đọc findings/whole-turn history gần nhất, ghi rõ khác biệt cách chấm concern để không suy chênh điểm thành hồi quy prompt. Giữ nguyên mọi frozen artifacts. [Phạm vi và self-review](../docs/specs/c3-phase-b-sales-context-fix-20261019.md).
+- [x] RED → GREEN: search/read/readback giữ bound bốn sản phẩm, overflow không bind/đẩy dữ liệu mới; exact productCode không lấy món gần giống. Focused boundary/tools 95/95 PASS.
+- [x] Current owner context giữ nội dung/variants, thêm nhãn lựa chọn bán đúng nguồn; unknown vẫn unknown, captured request không leak evaluator labels hoặc sửa signed native parts. Adapter 48/48 PASS; owner chỉ đổi hai đoạn (+114 bytes), verifier giữ nguyên.
+- [x] Reuse formatter preview/recovery để giữ riêng màu/size/số lượng từng món; bỏ câu confirmation hành chính. Focused sales/effects 136/136, protected-claims/reply/size regression 119/119 PASS.
+- [x] Full worker 1.889 tests và eval 515 PASS/2 opt-in SKIP; build/typecheck/lint PASS. Self-review sửa thêm readback admission và dùng nhãn DIRECT trung tính; final adapter/protocol 58/58 PASS. Lưu savepoint nguồn `5b75011c`, presentation/prompt/báo cáo commit tiếp theo; không claim provider improvement từ test code.
+- [ ] Chưa chạy model mới sau bản sửa; cần run identity/registration mới nếu chạy, không sửa hoặc bù kết quả cũ.
+
 ## Current prompt rerun — 2026-10-19
 
 - [x] Kiểm active prompts/models/config/cases giữ nguyên; freeze registration16slots N1/52max generations/retry0, reuse runner/inputs hiện hữu. [Scope](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/SCOPE.md).

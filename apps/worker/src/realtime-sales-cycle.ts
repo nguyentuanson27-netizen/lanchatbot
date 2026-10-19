@@ -633,13 +633,13 @@ function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" 
 /** Render only committed choices; retain the code when there is no bound display name. */
 export function formatCartLineSelection(line: CartV1["lines"][number]): string {
   const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
-  const component = (c: typeof line.components[number]) => roles[c.componentRole] +
-    (c.quantity > 1 ? ` ×${c.quantity}` : "") + (c.color ? ` màu ${c.color}` : "") + (c.size ? `, size ${c.size}` : "");
+  const component = (c: typeof line.components[number]) => (c.quantity > 1 ? `${c.quantity} ` : "") + roles[c.componentRole] +
+    (c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : "") + (c.size ? `, size ${c.size}` : "");
   if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
-    return `${line.offerKind === "SET" ? "Bộ" : "Combo"} ${line.parentProductId} (${line.components.map(component).join("; ")}) ×${line.quantity}`;
+    return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${line.parentProductId} (${line.components.map(component).join("; ")})`;
   }
   const c = line.components[0]!, role = roles[c.componentRole];
-  return `${role[0]!.toUpperCase()}${role.slice(1)} ${line.parentProductId}${c.color ? ` màu ${c.color}` : ""}${c.size ? `, size ${c.size}` : ""} ×${line.quantity}`;
+  return `${line.quantity} ${role} ${line.parentProductId}${c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : ""}${c.size ? `, size ${c.size}` : ""}`;
 }
 
 function cartSummary(cart: CartV1, includeSelections = false): string {
@@ -1716,7 +1716,7 @@ export async function evaluateRealtimeSalesCycle(
     const messages: RealtimeSalesCycleOutput["messages"] = [
       {
         kind: "TEXT",
-        text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị.",
+        text: "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé.",
       },
       ...(result.paymentInstruction
         ? [

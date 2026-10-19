@@ -8,7 +8,7 @@ import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolR
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
-import { selectionsMatchCartLines } from "./realtime-sales-cycle.js";
+import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
 export type CommerceCommandResult =
@@ -316,11 +316,8 @@ export async function createCommerceEffectTools(input: {
     if (!world.effectReceipts.some(r => r.ref === receipt!.ref) || !world.state.permission || !world.state.privacyAllowed || world.state.conversationOwner !== "BOT" ||
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
-    const cart = current.cart!.value, components = cart.lines.flatMap(line => line.components);
-    const size = components[0]?.size, color = components[0]?.color;
-    const cartAck = `Giỏ hiện có ${cart.lines.reduce((total, line) => total + line.quantity, 0)} sản phẩm` +
-      (size && components.every(c => c.size === size) ? `, size ${size}` : "") +
-      (color && components.every(c => c.color === color) ? `, màu ${color}` : "") + ".";
+    const cart = current.cart!.value;
+    const cartAck = `Giỏ của chị: ${cart.lines.map(formatCartLineSelection).join("; ")}.`;
     let summary = "";
     const active = activeSelections(), now = input.clock();
     const policyRef = current.commerceContext?.policyRef;

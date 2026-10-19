@@ -14,8 +14,11 @@ const safeFinishReasons=new Set(['FINISH_REASON_UNSPECIFIED','STOP','MAX_TOKENS'
 const publicSourceReasons=new Set(['CATALOG_SNAPSHOT_STALE','OFFER_NOT_FOUND','VARIANT_NOT_FOUND',
  'SIZE_UNSUPPORTED','PRICE_NOT_FOUND','FULFILLMENT_POLICY_NOT_FOUND','DELIVERY_REGION_REQUIRED','ETA_DATA_MISSING_OR_EXPIRED']);
 const string={type:'STRING'};
+// Display only keys actually supplied by the catalog; an unknown key has no inferred composition.
+const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'váy',SET:'cả bộ',COMPOSITE:'cả bộ',
+ SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
- {name:'search_products',description:'Tìm theo mã, tên hoặc nhu cầu; products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi, không chứng minh shop không có mẫu đó. Chỉ đọc tiếp khi còn cần giá, tồn hoặc chi tiết chưa có.',parameters:{type:'OBJECT',properties:{query:string},required:['query']}},
+ {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Chỉ đọc tiếp khi còn thiếu dữ liệu cần thiết. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
  {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Có offerType thì chỉ đọc lựa chọn đó. Bỏ offerType thì sellingOptions trả giá/tồn riêng từng lựa chọn bán; dữ kiện offer còn ở ngoài cùng chỉ thuộc offerType/variantId ghi tại đó, không phải giá chung cho áo lẻ và cả bộ. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
@@ -121,9 +124,13 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(add&&productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
   add.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
-   availableOffers:offers.get(p.subjectRef)??null,...(p.preparation?{preparation:p.preparation}:{}),
+   availableOffers:offers.get(p.subjectRef)??null,
+   offerLabels:offers.has(p.subjectRef)?Object.fromEntries(offers.get(p.subjectRef).map(code=>[code,Object.hasOwn(offerLabels,code)?offerLabels[code]:null])):null,
+   ...(p.preparation?{preparation:p.preparation}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,
-   content:p.content??null,presentation:p.presentation??null,sizeCharts:p.sizeCharts??[]})),facts,
+   content:p.content?Object.fromEntries(Object.entries(p.content).filter(([k])=>k!=='metadata')):null,
+   presentation:p.presentation?Object.fromEntries(Object.entries(p.presentation).filter(([k])=>!['schemaVersion','productId','provenance'].includes(k))):null,
+   sizeCharts:p.sizeCharts??[]})),facts,
    policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)&&!preparationRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
    state};
  // Keep the prior owner data layout; native toolConfig and runtime checks enforce limits.
