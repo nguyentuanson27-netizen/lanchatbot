@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner prompt — selective sales/voice update — 2026-10-19
+
+- [x] Theo yêu cầu owner, dùng prompt repo làm nền; chỉ áp dụng mục tiêu bán hàng, cách giải thích lựa chọn và giọng chat từ bản prompt mới. Không đưa tên/giá sản phẩm, câu trả lời mẫu hay hướng xử lý riêng cho benchmark vào bản sửa.
+- [x] Self-review diff: bốn phần nguồn/tool, ranh giới tư vấn, size/state/giao dịch và policy giữ nguyên nội dung; verifier giữ nguyên byte. Chỉ cập nhật owner prompt hash trong manifest hiện hành, không sửa registration/evidence cũ. Focused `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs`: 57 PASS.
+- [ ] Chất lượng hội thoại của bản này chưa đo bằng provider; chưa có run/GO mới. Không thay kết luận STOP của vòng trước.
+
 ## Current model–code division plan — 2026-10-19
 
 - [x] Đối chiếu source/executor/native schema, 66-outcome review và finding rollback; lập [kế hoạch](../docs/specs/c3-phase-b-model-code-division-plan-20261019.md), self-review chống lặp cơ chế đã có.
