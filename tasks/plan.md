@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## ACK/source wording run — 2026-10-19
+
+Owner yêu cầu chạy prompt c1251ae6. Source `1b6927849ba5339b0c06fc49940e15cb6bd25602`, giữ models/config/cases N1/16 slots/retry0. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/ack-source-run-20261019/CHECKPOINT_B.md): **BLOCKED mục tiêu đánh giá đủ vòng vì lỗi nguồn/kết nối**, không kết luận prompt kém đi. Có 14 actual outcome records + 2 advice BLOCKED thiếu capture; 25 generation requests (18 owner/7 verifier), 1 transport error, 0 recorded timeout, 6 verifier PASS/1 FAIL. B1 ghi đủ 4 attempts nhưng exit13 ở cleanup; chỉ chạy stage advice đã đăng ký/chưa chạy sau triage, không retry B1 hoặc sửa executable. Giữ toàn bộ denominator/source identity.
+
+Stateful có 7 USABLE/1 human control; correction một câu ngắn giữ đúng hai áo L. Hai partial-source target không có generation do Qdrant lỗi nên chưa đo được giọng. Primary: 8 USABLE/5 UNUSABLE actual outcomes/1 control/2 BLOCKED không quality label; không biến source failure thành lỗi hiểu của model. Draft integrated đổi hoàn cảnh bị verifier FAIL vì hứa treo vải tự phẳng; terminal còn bị readback unavailable, draft không gửi. Giữ 34 raw artifacts; source/prompt/binding/capture audit PASS, DB test đã drop, private turn 0 model requests. Ghi rõ operational triage trước primary, không claim blind review. Dừng run, không tự fix/rerun/live action; A OWNER_BYPASS/B chưa GO.
+
 ## Current owner wording fix — 2026-10-19
 
 Owner yêu cầu sửa các câu sau review bổ sung sales-context-run. Phạm vi chỉ là cách nói: ba bullet hiện hữu trong owner prompt về unknown offers/phần nguồn thiếu, nhắc thông tin vừa sửa và ACK. Giữ ranh giới nguồn, state/receipt/fit, giỏ/checkout, verifier và models. Không thêm câu mẫu, parser, template runtime hoặc gate. Prompt9.309→9.435bytes (+126), hash `81e187d379f017397897c513eeae0cad214f20cb7b05ad449ee69b7d84c9289f`; active manifest đồng bộ.

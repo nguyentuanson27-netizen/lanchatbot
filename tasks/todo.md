@@ -1,11 +1,18 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## ACK/source wording model run — 2026-10-19
+
+- [x] Freeze run 1b692784, 16 slots N1/retry0, models/config/corpus giữ nguyên. Preflight/source-check/stateful exit0; B1 exit13 sau 4 attempts/completion; giữ source/provider errors, không retries.
+- [x] Hoàn tất stage advice chưa chạy bằng capture của chính run, cùng HEAD/config: 2 records/2 BLOCKED thiếu capture. Tổng 25 requests (18 owner/7 verifier), 1 transport error/0 recorded timeout; thiếu model usage cho 1 request failed. Primary: 8 USABLE/5 UNUSABLE actual outcomes/1 control/2 BLOCKED không chấm quality.
+- [x] Correction ngắn hơn, stateflow vẫn đúng; hai câu partial-source cần đo chưa có generation. Draft hứa treo vải tự phẳng bị verifier FAIL, không gửi; readback còn lỗi. [Báo cáo và hội thoại](../apps/worker/evals/single-agent-commerce-read-only/ack-source-run-20261019/CHECKPOINT_B.md). BLOCKED mục tiêu đánh giá đủ vòng, không tự fix/chạy bù.
+- [x] Audit 7 bindings/18 owner prompt captures/31 wire bodies/2 capture hashes/34 public artifacts, 0 evaluator leaks, DB test drop/private turn 0 model requests; frozen Git hashes 5/5 và denominator/error validation PASS. Ghi rõ operational triage trước primary, không claim blind review hoặc full run exit0.
+
 ## Owner wording fix after supplemental review — 2026-10-19
 
 - [x] Sửa ba bullet hiện hữu: xác nhận gọn theo việc khách cần, cho phép nhắc phần vừa sửa có ích, báo ngắn phần nguồn chưa tra được thay vì kể hệ thống. Không có câu mẫu theo case hoặc thay verifier/runtime; prompt +126bytes, manifest hash đồng bộ.
 - [x] Self-review bảo toàn xác nhận lựa chọn/giỏ và quyền nhắc số đo hợp lý; unknown offers không thành có/không bán lẻ. Giữ nguyên raw/primary/counts lịch sử và ghi rõ ca correction chỉ cần trau chuốt theo review bổ sung.
 - [x] Focused adapter/protocol trước self-review cuối58/58 PASS; full `pnpm --filter @lana/worker test:evals` trên prompt cuối515PASS/2opt-inSKIP/0fail; manifest/hash và `git diff --check` PASS. Lưu savepoint prompt/manifest/tasks; không dùng test kỹ thuật làm bằng chứng giọng đã cải thiện.
-- [ ] Chưa sinh lại owner từ prompt mới; kết quả sales-context-run16lượt thuộc prompt trước. Không tự nhận fixes đã được provider chứng minh.
+- [x] Đã sinh owner từ prompt mới trong ack-source-run; correction quan sát ngắn hơn. Hai lượt thiếu nguồn bị lỗi nguồn trước generation nên còn chưa được đánh giá; không nhận fix đã được chứng minh cho chúng. Kết quả sales-context-run 16 lượt vẫn thuộc prompt trước.
 
 ## Sales context model run — 2026-10-19
 
