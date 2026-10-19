@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Hai vòng stability bổ sung — 2026-10-19
+
+Owner yêu cầu chạy thêm2vòng cùng cấu hình. Hoàn tất32/32slots, cùng clean source35c9007b, mỗi vòng16N1/retry0; không đổi prompt/models/runtime/cases/scoring. Mỗi vòng13USABLE/1NEEDS_EDIT/1actualfallback/1human-control; tổng70requests (46owner/24verifier),0provider/source errors/recorded timeout/thiếu capture,10child commands exit0, DB test drop/private checkout0model requests. Primary b3d068e2 trước diagnosis;24bindings/46owner captures/86wire bodies/8capture hashes/68public artifacts audit PASS,0evaluator leaks.
+
+Giỏ/tiền/correction/checkout đúng cả hai; ca đi xe dự cưới vẫn fallback (integrated vòng1, advice vòng2) vì owner hứa tự phẳng/giữ phẳng sau3giờ không có căn cứ, verifier chặn đúng. Còn1ACK sai vai và1reply trả việc chọn lại cho khách; báo thiếu nguồn đã bỏ lời hệ thống nhưng giọng vẫn dài. [So sánh độ ổn định và whole-turn findings](../apps/worker/evals/single-agent-commerce-read-only/wording-stability-2-20261019/WORDING_STABILITY.md). STOP sales/live readiness, A OWNER_BYPASS; không tự fix/chạy vòng3 hoặc suy subset thành full B GO.
+
 ## ACK/source wording rerun — 2026-10-19
 
 Owner yêu cầu chạy lại sau lỗi nguồn. **Hoàn tất 16/16 slots, STOP sales/live readiness.** Source `733a719dce7681d76e706b0a9c4e6948a613daa8`, primary `bc3e38da` trước diagnosis; prompt/models/config/runtime/corpus giữ nguyên so ack-source-run. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/ack-source-rerun-20261019/CHECKPOINT_B.md): 35 requests (23 owner/12 verifier), 0 source/provider errors/timeout/retry/BLOCKED; cả 5 child commands exit0, DB test đã drop, private turn 0 model requests.

@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Hai vòng stability bổ sung — 2026-10-19
+
+- [x] Freeze2rounds cùng source35c9007b/prompt/models/config/runtime/cases/rubric,16slots/vòngN1/max52/retry0; chạy đủ32, không sửa giữa vòng hoặc mẫu bù.
+- [x] Primary whole actual dialogue lock b3d068e2 trước diagnosis; mỗi vòng13USABLE/1NEEDS_EDIT/1actualfallback/1human-control, giữ voice findings và raw lịch sử.70generation requests/0provider or unexpected source errors/0timeout/0BLOCKED,10child commands exit0.
+- [x] Hai fallback đúng tại family đi xe dự cưới (hứa rũ/treo tự phẳng hoặc giữ phẳng sau3giờ); stateflow đúng, ACK/cách chọn/giọng vẫn dao động. [Full comparison + findings](../apps/worker/evals/single-agent-commerce-read-only/wording-stability-2-20261019/WORDING_STABILITY.md). STOP sales/live readiness; không tự fix/rerun thứ3.
+- [x] Audit24bindings/46owner prompt captures/86wire bodies/8capture hashes/68published artifacts,10frozen Git hashes,68staged raw Git blob hashes PASS,0evaluator leaks, DB test drop/private turn0model requests. Không thêm runtime/role/gate/parser/framework.
+
 ## ACK/source wording rerun — 2026-10-19
 
 - [x] Freeze vòng mới cùng prompt/models/runtime/cases/config; source733a719d sạch, 16 slots N1/max52/retry0. Preflight/source-check/stateful/B1/advice tất cả exit0.
