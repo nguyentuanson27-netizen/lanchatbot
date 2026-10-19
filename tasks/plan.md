@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## ACK/source wording rerun — 2026-10-19
+
+Owner yêu cầu chạy lại sau lỗi nguồn. **Hoàn tất 16/16 slots, STOP sales/live readiness.** Source `733a719dce7681d76e706b0a9c4e6948a613daa8`, primary `bc3e38da` trước diagnosis; prompt/models/config/runtime/corpus giữ nguyên so ack-source-run. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/ack-source-rerun-20261019/CHECKPOINT_B.md): 35 requests (23 owner/12 verifier), 0 source/provider errors/timeout/retry/BLOCKED; cả 5 child commands exit0, DB test đã drop, private turn 0 model requests.
+
+Primary: 14 USABLE/1 actual fallback/1 ownership control; USABLE có góp ý giọng, không tự là GO. Hai partial-source nay được sinh và bỏ kể hệ thống, advice gọn hơn; correction vẫn dài/hành chính, chất lượng chưa ổn định. Advice đi xe dự cưới bị verifier FAIL vì hứa giũ/treo vải suôn phẳng ngay, cùng family đã gặp; 11 verifier PASS/1 FAIL, không dùng integrated PASS cứu reply khác. Audit 12 bindings/23 owner prompt captures/43 wire bodies/4 capture hashes/34 artifacts và 5 frozen Git hashes PASS, 0 evaluator leaks. Giữ nguyên lịch sử; tăng điểm so vòng lỗi không chứng minh prompt cải thiện vì cùng prompt và vòng trước lỗi mạng. Không tự fix/chạy tiếp/live action; A OWNER_BYPASS/B chưa GO.
+
 ## ACK/source wording run — 2026-10-19
 
 Owner yêu cầu chạy prompt c1251ae6. Source `1b6927849ba5339b0c06fc49940e15cb6bd25602`, giữ models/config/cases N1/16 slots/retry0. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/ack-source-run-20261019/CHECKPOINT_B.md): **BLOCKED mục tiêu đánh giá đủ vòng vì lỗi nguồn/kết nối**, không kết luận prompt kém đi. Có 14 actual outcome records + 2 advice BLOCKED thiếu capture; 25 generation requests (18 owner/7 verifier), 1 transport error, 0 recorded timeout, 6 verifier PASS/1 FAIL. B1 ghi đủ 4 attempts nhưng exit13 ở cleanup; chỉ chạy stage advice đã đăng ký/chưa chạy sau triage, không retry B1 hoặc sửa executable. Giữ toàn bộ denominator/source identity.

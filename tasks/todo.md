@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## ACK/source wording rerun — 2026-10-19
+
+- [x] Freeze vòng mới cùng prompt/models/runtime/cases/config; source733a719d sạch, 16 slots N1/max52/retry0. Preflight/source-check/stateful/B1/advice tất cả exit0.
+- [x] Đủ 16 outcomes/35 requests (23 owner/12 verifier), 0 source/provider errors/timeout/BLOCKED, DB test đã drop, private turn 0 model requests. Primary bc3e38da trước diagnosis: 14 USABLE/1 actual fallback/1 control, giữ voice findings thay vì đếm từ.
+- [x] Hai partial-source bỏ lời hệ thống; correction vẫn dài nên chưa ổn định. Fallback advice changed-occasion do hứa giũ/treo vải tự phẳng bị chặn đúng; 11 verifier PASS/1 FAIL. [Đủ hội thoại/findings/report](../apps/worker/evals/single-agent-commerce-read-only/ack-source-rerun-20261019/CHECKPOINT_B.md). STOP sales/live readiness, không tự fix/rerun.
+- [x] Audit 12 bindings/23 owner prompt captures/43 wire bodies/4 capture hashes/34 artifacts, 0 evaluator leaks; 5 frozen Git hashes/complete denominator/error scan PASS. Không đổi evidence cũ, không claim tăng điểm do prompt so vòng mạng lỗi.
+
 ## ACK/source wording model run — 2026-10-19
 
 - [x] Freeze run 1b692784, 16 slots N1/retry0, models/config/corpus giữ nguyên. Preflight/source-check/stateful exit0; B1 exit13 sau 4 attempts/completion; giữ source/provider errors, không retries.
