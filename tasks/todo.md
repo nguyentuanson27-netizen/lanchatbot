@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Sales context model run — 2026-10-19
+
+- [x] Freeze registration mới16slots N1/52max/retry0 trên bản sửa; giữ Gemini3.5FlashLiteHIGH/Sol6.1high và exact runner/cases. Source94cb47d2 sạch, preflight/source-check và5child commands exit0.
+- [x] Chạy đủ8stateful/4B1/4captured advice,36requests,0provider errors/timeout/retry, DB đã drop. Khóa primary64b2cd67 trước diagnosis:12USABLE/3NEEDS_EDIT/1control,0fallback. Giữ ba câu cần sửa và góp ý giọng, không nâng verdictPASS thành qualityPASS.
+- [x] Audit12bindings/exact eligible texts,24owner prompt captures,44wire bodies,4capture hashes,3child source registrations,34public artifacts;0evaluator-label leaks. [Report](../apps/worker/evals/single-agent-commerce-read-only/sales-context-run-20261019/CHECKPOINT_B.md), [đủ16hội thoại](../apps/worker/evals/single-agent-commerce-read-only/sales-context-run-20261019/CONVERSATIONS_AND_REVIEW.md). STOP sales/live readiness; không tự fix/chạy tiếp.
+
 ## Active sales/context fix — 2026-10-19
 
 - [x] Đọc findings/whole-turn history gần nhất, ghi rõ khác biệt cách chấm concern để không suy chênh điểm thành hồi quy prompt. Giữ nguyên mọi frozen artifacts. [Phạm vi và self-review](../docs/specs/c3-phase-b-sales-context-fix-20261019.md).
@@ -7,7 +13,7 @@
 - [x] Current owner context giữ nội dung/variants, thêm nhãn lựa chọn bán đúng nguồn; unknown vẫn unknown, captured request không leak evaluator labels hoặc sửa signed native parts. Adapter 48/48 PASS; owner chỉ đổi hai đoạn (+114 bytes), verifier giữ nguyên.
 - [x] Reuse formatter preview/recovery để giữ riêng màu/size/số lượng từng món; bỏ câu confirmation hành chính. Focused sales/effects 136/136, protected-claims/reply/size regression 119/119 PASS.
 - [x] Full worker 1.889 tests và eval 515 PASS/2 opt-in SKIP; build/typecheck/lint PASS. Self-review sửa thêm readback admission và dùng nhãn DIRECT trung tính; final adapter/protocol 58/58 PASS. Lưu savepoint nguồn `5b75011c`, presentation/prompt/báo cáo commit tiếp theo; không claim provider improvement từ test code.
-- [ ] Chưa chạy model mới sau bản sửa; cần run identity/registration mới nếu chạy, không sửa hoặc bù kết quả cũ.
+- [x] Đã chạy model sau bản sửa bằng registration/source mới; kết quả và hạn chế trong sales-context-run-20261019 phía trên. Không sửa hoặc bù kết quả cũ.
 
 ## Current prompt rerun — 2026-10-19
 

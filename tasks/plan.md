@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Sales context model run — 2026-10-19
+
+Owner yêu cầu chạy sau bản sửa cd5d4da0. **Đã hoàn tất16/16 slots N1/retry0, STOP sales/live readiness.** [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/sales-context-run-20261019/CHECKPOINT_B.md): source94cb47d2, primary64b2cd67,36requests (24owner/12verifier),0provider error/timeout,0fallback. Primary12USABLE/3NEEDS_EDIT/1control; cả12model drafts sống sót đều verifierPASS. Còn correction và hai partial-source nói giọng hành chính/hệ thống. Fallback trước3→0 nhưng USABLE7→12 có phần do clarification review đã freeze; không quy hết cho prompt/model. Trace changed-occasion1→4→4 chỉ một search, không kích hoạt overflow rejection; lookup thực sự dùng productCode/MATCHED và diễn giải áo/cả bộ.
+
+Reuse exact runner/cases với registration mới, clean-source/preflight/source-check trước provider, không đổi executable/config giữa vòng hoặc thêm mẫu bù. Audit12bindings/24owner prompt captures/44wire bodies/4capture hashes/34public artifacts PASS,0evaluator-label leaks; DB đã drop, private turn0model requests. Không tự nới verifier (run không có rejection), sửa prompt tiếp hoặc mở vòng mới từ kết quả. A OWNER_BYPASS; không deploy/live send.
+
 ## Active fix — sales context and tool contract — 2026-10-19
 
 Owner yêu cầu sửa sau review các vòng gần đây, giữ mục tiêu giúp khách chọn và mua hàng. [Phạm vi, đối chiếu review và evidence](../docs/specs/c3-phase-b-sales-context-fix-20261019.md), base `58f1894a3fd2876e97a4637be92b90c8568ee7ca`. Sửa admission context ngay tại search/read/readback, tách productCode khỏi query, diễn giải lựa chọn bán bằng nhãn, bỏ metadata kỹ thuật khỏi current owner product view và sửa formatter giỏ/confirmation. Giữ một owner/một verifier, nguồn facts và lịch sử; không thêm ví dụ benchmark, policy hardcode, role, parser, retry hoặc gate mới. Prompt chỉ đổi hai đoạn tương thích contract, verifier giữ nguyên.
