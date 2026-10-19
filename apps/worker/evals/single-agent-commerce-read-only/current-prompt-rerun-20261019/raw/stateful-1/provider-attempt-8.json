@@ -1,0 +1,72 @@
+{
+  "caseId": "stateful-human-request",
+  "journeyId": "handoff",
+  "elapsedMs": 12675.646999999997,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "1742d467-e795-4cc5-b28c-ede9402a1af7:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1710.9452999999921,
+        "telemetry": {
+          "generationId": "1742d467-e795-4cc5-b28c-ede9402a1af7:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3638,
+          "outputTokens": 288,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18606,
+          "requestHash": "54cc77b6d3ed4f40070ecb9c30aa91bfd9014b00d8aab59645bbc0dd1548b7d1",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 265,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 1918.684499999974,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 1,
+  "verifiers": 0,
+  "toolResponses": [],
+  "actualCapturedMessages": [],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 12,
+    "verifier": 4,
+    "catalogReads": 20,
+    "posReads": 18,
+    "selectorCalls": 30,
+    "readPolicyCalls": 0
+  }
+}
