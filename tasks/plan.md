@@ -4,6 +4,8 @@
 
 Owner yêu cầu chạy lại bằng bản tư vấn Gemini đầy đủ trong file đã gửi. [Scope và registration](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/SCOPE.md): exact owner bytes, verifier hiện tại giữ nguyên; cùng phạm vi vòng gần nhất nhưng N1 thay N3, tổng16slots (8stateful/4B1/4paired-context advice), trần52generation requests/retry0. Freeze lại ca đi ô tô dự cưới từ corpus active, không dùng ca sân khấu cũ. Reuse runner/source/credential route; clean commit trước preflight/provider, review whole actual outcome trước verdict diagnosis. Không runtime fix, mở thêm corpus hoặc tự chạy vòng tiếp từ kết quả.
 
+**Completed — STOP readiness.** Source3cff648b,16/16slots/34requests/retry0/provider error0; primaryac6870c1 trước diagnosis. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/CHECKPOINT_B.md):7U/6NEEDS_EDIT/2UNUSABLE/1control; hai fallback do7runtimeProducts vượt bound4 trước verifier, replay kế thừa cùng context.10draft sống sót đều được verifierPASS; lookup lần này có giá nhưng chưa chứng minh fix contract cũ. Giọng vẫn mang nhịp catalog/hồ sơ và có thuật ngữ composite ở replay. Không tự sửa runtime/prompt hoặc mở vòng tiếp.
+
 ## Active changed-context case replacement — 2026-10-19
 
 Theo yêu cầu owner, thay ca sân khấu trong active [cases.b1.json](../apps/worker/evals/single-agent-commerce-read-only/cases.b1.json) bằng đi đám cưới sau chuyến ô tô dài, lo trang phục bị nhăn. Giữ mục tiêu xét lại lời khuyên theo thông tin mới, giúp quyết định mua và phân biệt suy luận chất liệu thông thường với tự thêm công năng/kiểm nghiệm. Không ép đổi mẫu, thêm phép thử cho mọi lợi ích hoặc dùng keyword để chấm. Giữ24 ca/8 nhóm/3 biến thể; các ca lo nóng và gặp khách hàng không đổi.

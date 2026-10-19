@@ -3,14 +3,14 @@
 ## Full Gemini owner prompt, one repetition — 2026-10-19
 
 - [x] Owner chọn bản tư vấn Gemini đầy đủ: copy exact bytes, giữ verifier hiện tại; freeze16slots/52max generations/retry0 và active wedding-travel case. [Scope](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/SCOPE.md).
-- [ ] Focused/hash/clean-source checks, source/provider preflight; chạy đủ8stateful/4B1/4advice mỗi ca một lần, không thêm mẫu hoặc retry.
-- [ ] Đọc toàn bộ actual conversations, khóa primary rồi diagnosis/accounting; báo cáo kết quả và giới hạn. Không live send/deploy hoặc GO tự động.
+- [x] Focused/hash/clean-source checks và source/provider preflight PASS; seal3cff648b, chạy đủ8stateful/4B1/4advice mỗi ca một lần,34requests/retry0, DB thử nghiệm đã drop.
+- [x] Khóa16actual outcomes/primary tạiac6870c1 trước diagnosis;7U/6NEEDS_EDIT/2UNUSABLE/1control. Hai fallback cùng nguyên nhân runtimeProducts7>bound4 trước verifier, không phải verdictFAIL.10surviving drafts đều verifierPASS/exact text,24owner captures đúng nguyên bản Gemini. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/CHECKPOINT_B.md). Giọng chưa cải thiện rõ; STOP readiness, không tự fix/chạy tiếp/live send.
 
 ## Active corpus — replace stage context — 2026-10-19
 
 - [x] Thay riêng biến thể sân khấu của CHANGED_OCCASION trong cases.b1.json bằng ngồi ô tô trước đám cưới/lo nhăn; lời khách ngắn, bám việc mua hàng, không chứa chỉ dẫn chấm hoặc đáp án. Giữ các ca khác và cấu hình24/8/3.
 - [x] Self-review: chỉ1case thay đổi,23case còn lại và mọi frozen input/result/prompt giữ nguyên.22 focused protocol/comparison tests PASS; kiểm runtime bounds,24case và evaluator-label firewall PASS. Không gọi provider.
-- [ ] Lượt model tiếp theo dùng corpus/priority subset mới và hash mới; không sửa/rerun registration lịch sử để giả thành cùng world. Chưa có provider result cho ca mới.
+- [x] Vòng gemini-prompt-once-20261019 freeze priority subset/hash mới từ active corpus, giữ lịch sử. Ca mới đã chạy integrated+captured advice, cả hai dừng structural context bound trước verifier; không ghi như hai semantic verdictFAIL.
 
 ## Owner clarification — six stage replies only — 2026-10-19
 
