@@ -1,10 +1,17 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Sales voice model run — 2026-10-19
+
+- [x] Owner yêu cầu chạy sau ba51204b: freeze48 outcomes (stateful24/B1 integrated12/advice replay12), cùng models/config/corpora với vòng trước, trần156 generations/retry0. Run source93db1d47 clean; worker build/preflight/source-readback PASS,9/9 jobs exit0. Không sinh lại historical baseline openings.
+- [x] Đọc toàn bộ48 actual outcomes; khóa primary91d192be trước verifier diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/CHECKPOINT_B.md): stateful20U/1unusable/3controls, B1 6U/3edit/3unusable, replay7U/2edit/3unusable.106 requests,36 verdicts(29PASS/7FAIL),7fallback; error/timeout0, retry0;3disposable DB đã drop.
+- [x] Audit36 bindings/12 captures/9 child source registrations;166 wire captures không evaluator/private phone marker leak. Tìm rõ query có loại đồ+mã trả AMBIGUOUS nhưng mã đơn MATCHED; hai replay kế thừa context thiếu giá. Một STALE do offers metadata refresh được code recovery bằng receipt; không quy lời formatter cho owner. [Findings và hướng tiếp](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/FINDINGS.md).
+- [ ] STOP readiness; giọng chưa cải thiện ổn định, sáu sân khấu và một correction vẫn fallback. Chưa owner GO, A2 mới, full provider suite hoặc live delivery. Không tự sửa/chạy thêm.
+
 ## Owner prompt — selective sales/voice update — 2026-10-19
 
 - [x] Theo yêu cầu owner, dùng prompt repo làm nền; chỉ áp dụng mục tiêu bán hàng, cách giải thích lựa chọn và giọng chat từ bản prompt mới. Không đưa tên/giá sản phẩm, câu trả lời mẫu hay hướng xử lý riêng cho benchmark vào bản sửa.
 - [x] Self-review diff: bốn phần nguồn/tool, ranh giới tư vấn, size/state/giao dịch và policy giữ nguyên nội dung; verifier giữ nguyên byte. Chỉ cập nhật owner prompt hash trong manifest hiện hành, không sửa registration/evidence cũ. Focused `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs`: 57 PASS.
-- [ ] Chất lượng hội thoại của bản này chưa đo bằng provider; chưa có run/GO mới. Không thay kết luận STOP của vòng trước.
+- [x] Đã đo bằng sales-voice-run-20261019 sau yêu cầu mới của owner; kết quả và giới hạn ở mục trên. Không có GO mới.
 
 ## Current model–code division plan — 2026-10-19
 

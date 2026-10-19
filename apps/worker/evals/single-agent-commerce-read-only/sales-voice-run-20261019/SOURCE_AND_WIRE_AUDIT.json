@@ -1,0 +1,27 @@
+{
+  "primaryReviewLockSha": "91d192be",
+  "runSourceSha": "93db1d47c49618a119a446ba4b0c86015672ae39",
+  "verifierBindingsRecomputed": 36,
+  "captureSelectionsAndHashesMatched": 12,
+  "sourceIdentity": "All 9 child registrations match sealed runtime source; previous records retained.",
+  "scope": "No delivery/deploy. Stateful effects only in disposable databases, all dropped.",
+  "specialCase": {
+    "run": "stateful-3",
+    "caseId": "stateful-variant-quantity",
+    "originalReason": "STALE",
+    "changedPublicPaths": [
+      "state.factSnapshotVersion",
+      "policyLiterals[0].sourceVersion",
+      "policyLiterals[0].observedAt",
+      "policyLiterals[0].expiresAt"
+    ],
+    "literalRef": "offers:SV2447",
+    "literalTextChanged": false,
+    "actualOutcome": "Receipt-backed current-cart summary. Preserve stale boundary; no old PASS used to send owner draft."
+  },
+  "childSourceAndPromptRegistrationsMatched": 9,
+  "privateFixturePhoneMarkersChecked": 1,
+  "privateFixturePhoneLeaks": 0,
+  "passExactTextMatches": 28,
+  "receiptBackedRecoveryOutcomes": 1
+}
