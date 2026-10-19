@@ -102,7 +102,7 @@
     "transformation": "EXACT_BYTES_COPY_TO_READ_NEW_SIBLING_REGISTRATION_AND_CASES"
   },
   "reviewClarification": "tasks/plan.md",
-  "reviewClarificationHash": "819630b21a05a53d6357a30ff6853ca791143e54e35acf727b82f22f58e14b68",
+  "reviewClarificationHash": "103f8175c17739b0bee53b537c5b0dd031d2c57bc6ef110f56c903adf873b36e",
   "supplementalReviewRule": "Acknowledge corrected information and preserve the customer-selected option; repeating the corrected values is legitimate when useful. Mild administrative wording is voice polish, not an automatic unusable reply. Missing POS deliberately injected remains a source limitation; assess how clearly and naturally the customer is told what cannot be confirmed, without forcing a fabricated price, retail permission or unavailable handoff. NEEDS_EDIT requires explaining what materially needs rewriting, not a forbidden-word count. Preserve original historical scores; explicitly disclose classification changes when comparing.",
   "reviewDecisionSource": "Supplemental rule frozen in ack-source-run-20261019 registration; owner correction review allows relevant repetition and treats minor administrative wording as polish. Current rerun retains this rule without change."
 }

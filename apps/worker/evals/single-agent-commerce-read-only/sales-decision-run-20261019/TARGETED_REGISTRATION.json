@@ -60,7 +60,7 @@
   "registeredSlots": 6,
   "maximumGenerationRequests": 12,
   "retry": 0,
-  "inputSha256": "4448dbd72b73ddb7f8d8bcbd137171743d97c43aeaee7172da8cfbfae075c9da",
+  "inputSha256": "898d5930cc5a712fa0f14b167e8b6bae7bf01584044c07514a0566ed4b5be3b2",
   "captureSource": "apps/worker/evals/single-agent-commerce-read-only/wording-stability-2-20261019/raw/advice-input-1.json",
   "captureSourceSha256": "859ef3a51985b838d45f811ebf417c3066c5420677f64634913ec59c60e1598a",
   "slotOrder": [
@@ -85,5 +85,6 @@
     "id": "C3_A_NONPROTECTED_V2",
     "text": "Phần này em chưa trả lời được, chị nhé.",
     "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
-  }
+  },
+  "freezeCorrection": "Pre-provider staged byte check detected Windows newline normalization. Input normalized to LF and hash corrected before any generation."
 }
