@@ -4,7 +4,8 @@
 
 - [x] Sửa phạm vi sau đính chính owner: chỉ sáu draft sân khấu được chấp nhận; câu xác nhận số đo vẫn phải sửa vì không tự nhiên. [Quyết định](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md) thay cách hiểu nhầm cả bảy ở9612cf2a.
 - [x] Theo yêu cầu mới: sửa nguyên tắc verifier cho suy luận tư vấn/cách phối định tính; sửa giọng owner khi tiếp nhận thông tin vừa sửa, không thêm đánh giá fit. Không đưa tên/số đo/caseId hoặc câu mẫu benchmark vào prompt.
-- [ ] Kiểm tra hẹp sáu exact draft + hai negative controls sau seal; lưu kết quả mới riêng. Evidence48 lượt cũ giữ7fallback/29PASS/7FAIL.
+- [x] Kiểm tra hẹp sau seal9fae4aa9: sáu exact draft sân khấu PASS6/6, hai negative controls thiếu fit/bịa lớp lót-kiểm nghiệm vẫn FAIL2/2;8requests,0retry/0error. [Kết quả](../apps/worker/evals/single-agent-commerce-read-only/verifier-advice-acceptance-20261019/RESULT.md).57 focused tests/preflight PASS. Evidence48 lượt cũ giữ7fallback/29PASS/7FAIL.
+- [ ] Giọng xác nhận số đo đã sửa hướng dẫn nhưng chưa sinh lại owner để đo; không gộp kiểm tra verifier thành kết quả owner mới/full A2/A3.
 
 ## Sales voice model run — 2026-10-19
 

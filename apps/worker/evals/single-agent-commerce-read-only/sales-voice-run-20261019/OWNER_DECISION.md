@@ -13,7 +13,7 @@ Hạn chế còn tồn tại: tư vấn dựa trên suy luận thời trang thô
 - Sửa ranh giới chung trong verifier: nhận xét định tính/cách phối thông thường từ chất liệu và thiết kế được phép; không suy mọi lời khuyên trước một nỗi lo thành bảo đảm kỹ thuật. Không thêm ngoại lệ theo caseId hoặc tên sản phẩm.
 - Giữ việc chặn dữ kiện cấu tạo/kiểm nghiệm tự tạo, thông số/công năng mới, sai chính sách/tiền/receipt và đánh giá fit không có claim.
 - Sửa giọng owner khi tiếp nhận thông tin khách vừa sửa: xác nhận ngắn, không kể thao tác hồ sơ hoặc khen độ vừa của size khách đã tự chọn. stateful-2/stateful-correction vẫn là finding cần sửa, nằm ngoài sáu draft được chấp nhận.
-- Kiểm tra hẹp bằng exact sáu draft và captured context, cùng hai negative controls; không sinh lại cả vòng tư vấn. Kết quả ghi riêng sau run, không đổi evidence cũ.
+- Đã kiểm tra hẹp tại source9fae4aa9: exact sáu draft sân khấu PASS6/6; hai negative controls thiếu fit/bịa cấu tạo vẫn FAIL2/2.8requests,0retry/0error; [kết quả riêng](../verifier-advice-acceptance-20261019/RESULT.md). Chưa sinh lại owner cho câu xác nhận số đo; không đổi evidence cũ.
 
 ## Evidence lịch sử
 
