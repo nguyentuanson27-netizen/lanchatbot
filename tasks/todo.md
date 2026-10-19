@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Chat-expression findings and fix — 2026-10-19
+
+- [x] Tổng hợp whole-reply findings: chú thích catalog trong ngoặc, đặt lại nhu cầu rõ thành giả định, lời dẫn/nối vế dài, khen chưa sát băn khoăn; giữ lỗi cam kết công năng riêng và nguyên evidence/labels cũ.
+- [x] Thay đoạn chọn/giọng hiện hữu, không thêm checklist/ví dụ benchmark hoặc blacklist từ. Giữ policy conditions, ngoặc giá/variant/đơn, inference định tính và dẫn chứng hữu ích. Prompt−81bytes, ownerHash đồng bộ.
+- [x] Self-review bỏ lặp và sửa wording về giả định tránh ảnh hưởng policy. So byte4sections authority không đổi; manifest chỉ ownerHash. Final adapter/protocol58/58PASS, diffcheckPASS; không thêm runtime/test keyword.
+- [ ] Provider evaluation cho hash mới chưa thực hiện; không dùng kết quả run trước để nhận đã cải thiện. [Findings/fix](../docs/specs/c3-phase-b-chat-expression-fix-20261019.md).16conditionalruntrước vẫn NOT_DISPATCHED; không tự mở vòng.
+
 ## Revised sales-decision/voice/label fix — 2026-10-19
 
 - [x] Đọc hai stability runs, prompt/context và formatter. Tích hợp review độc lập REVISE vào tasks/plan.md; giữ PLAN_ONLY và nguyên evidence lịch sử.

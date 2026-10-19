@@ -1,5 +1,13 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active chat-expression fix — 2026-10-19
+
+Owner yêu cầu tổng hợp finding và fix sau khi nhấn mạnh nhịp câu/ngoặc/điều kiện/lời dẫn. **IMPLEMENTED, chưa chạy provider từ bản này.** [Findings, thay đổi và self-review](../docs/specs/c3-phase-b-chat-expression-fix-20261019.md).
+
+Thay2bullet chọn/đổi hoàn cảnh và phần Giọng chat hiện hữu: nhu cầu đã rõ thì tư vấn trực tiếp, đặc điểm cần thiết đưa vào lời giải thích, không ngoặc chú thích catalog hoặc kể quá trình cân nhắc; tách câu khi đổi ý. Không blacklist nếu/thì/gợi ý hoặc cấm ngoặc/bảng đơn/chính sách hữu ích. Giữ dẫn chứng số đo/giá hữu ích, upsell và lựa chọn có điều kiện; không tạo công thức hay đáp án benchmark. Source/safety/size/state/policy sections byte-unchanged, verifier/models/fallback/runtime không đổi.
+
+Prompt9.791→9.710bytes(−81), ownerSHA `057fcb7a47d69ffce4731a8ee58bb7ecafe36204bd6726128325e7838a813d70`; chỉ manifest ownerHash đổi. Adapter/protocol cuối58/58PASS; diff/source-contract/manifest checks PASS. Không dùng tests làm bằng chứng tự nhiên. Lỗi lời hứa giữ form toàn chuyến đi của run trước còn nguyên evidence; việc fix giọng chưa chứng minh xử lý nó. Không tự chạy lại16conditional hoặc dùng report cũ cho hash mới; A OWNER_BYPASS/B chưa live GO.
+
 ## Revised fix — sales decisions, voice and product labels — 2026-10-19
 
 Status: TARGETED_RUN_COMPLETE_STOP_BEFORE_CONDITIONAL16. Owner yêu cầu fix và chạy model sau review; code/prompt đã sửa, targeted6/6 đã chạy;1fallback tái diễn nên16conditional chưa dispatch. Baseline giữ nguyên: run source `35c9007b`, primary `b3d068e2`, report `df9b6ffe`; owner prompt hiện tại 9.435 bytes. Một conversational owner và verifier hiện hữu; code giữ authority về identity/truth/freshness/state/permission/effects/receipts/privacy. A vẫn OWNER_BYPASS; kế hoạch này không cấp live GO.
