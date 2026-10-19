@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active changed-context case replacement — 2026-10-19
+
+Theo yêu cầu owner, thay ca sân khấu trong active [cases.b1.json](../apps/worker/evals/single-agent-commerce-read-only/cases.b1.json) bằng đi đám cưới sau chuyến ô tô dài, lo trang phục bị nhăn. Giữ mục tiêu xét lại lời khuyên theo thông tin mới, giúp quyết định mua và phân biệt suy luận chất liệu thông thường với tự thêm công năng/kiểm nghiệm. Không ép đổi mẫu, thêm phép thử cho mọi lợi ích hoặc dùng keyword để chấm. Giữ24 ca/8 nhóm/3 biến thể; các ca lo nóng và gặp khách hàng không đổi.
+
+Lượt tiếp theo phải freeze corpus/priority subset mới từ file active; không dùng lại file ca/capture trong registration lịch sử như đầu vào hiện hành. ID nhóm giữ nguyên nhưng world/hash đã đổi, nên không so điểm trực tiếp với ca sân khấu như cùng một câu hỏi. Không sửa dữ liệu hoặc kết quả các vòng cũ; không chạy model từ yêu cầu chỉnh corpus này.
+
 ## Owner clarification and verifier change — 2026-10-19
 
 Owner chỉ chấp nhận sáu draft sân khấu của sales-voice-run-20261019, yêu cầu sửa verifier để chấp nhận các lời tư vấn đó. Câu xác nhận số đo/giữ size không được chấp nhận và cần sửa giọng tự nhiên. [Quyết định chính xác](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md) thay cách hiểu nhầm cả bảy ở9612cf2a.

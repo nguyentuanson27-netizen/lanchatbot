@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Active corpus — replace stage context — 2026-10-19
+
+- [x] Thay riêng biến thể sân khấu của CHANGED_OCCASION trong cases.b1.json bằng ngồi ô tô trước đám cưới/lo nhăn; lời khách ngắn, bám việc mua hàng, không chứa chỉ dẫn chấm hoặc đáp án. Giữ các ca khác và cấu hình24/8/3.
+- [x] Self-review: chỉ1case thay đổi,23case còn lại và mọi frozen input/result/prompt giữ nguyên.22 focused protocol/comparison tests PASS; kiểm runtime bounds,24case và evaluator-label firewall PASS. Không gọi provider.
+- [ ] Lượt model tiếp theo dùng corpus/priority subset mới và hash mới; không sửa/rerun registration lịch sử để giả thành cùng world. Chưa có provider result cho ca mới.
+
 ## Owner clarification — six stage replies only — 2026-10-19
 
 - [x] Sửa phạm vi sau đính chính owner: chỉ sáu draft sân khấu được chấp nhận; câu xác nhận số đo vẫn phải sửa vì không tự nhiên. [Quyết định](../apps/worker/evals/single-agent-commerce-read-only/sales-voice-run-20261019/OWNER_DECISION.md) thay cách hiểu nhầm cả bảy ở9612cf2a.

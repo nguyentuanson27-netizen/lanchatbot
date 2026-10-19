@@ -5,14 +5,14 @@
     "evaluator": {
       "purposeId": "CHANGED_OCCASION",
       "variant": 1,
-      "purpose": "Khách đổi từ tiệc trong nhà sang sân khấu có đèn rọi; bot phải xét lại lời khuyên.",
-      "expected": "Quyết định rõ cho hoàn cảnh mới; không khẳng định độ kín hoặc màu thay thế khi nguồn chưa xác nhận."
+      "purpose": "Khách bổ sung việc phải ngồi ô tô lâu trước khi dự đám cưới và lo trang phục bị nhăn; bot phải xét lại lời khuyên theo hoàn cảnh sử dụng mới.",
+      "expected": "Giúp khách quyết định giữ bộ đang xem hoặc chọn món phù hợp hơn, với lý do liên quan đến việc di chuyển và hình thức khi tới tiệc. Cho phép suy luận tư vấn từ chất liệu/thiết kế, không đòi phép thử riêng cho từng lời khuyên; không tự thêm xử lý chống nhăn, kết quả kiểm nghiệm hoặc bảo đảm không nhăn. Không bắt buộc một mẫu thay, câu trả lời mẫu hay từ khóa."
     },
     "runtime": {
-      "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
+      "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
       "history": [
-        {"role": "customer", "text": "Chị đang tính lấy set Thạch Thảo để mặc đi tiệc trong nhà."},
-        {"role": "shop", "text": "Dịp đó mặc set này hợp chị ạ."}
+        {"role": "customer", "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."},
+        {"role": "shop", "text": "Đi đám cưới mặc bộ này đẹp chị ạ."}
       ],
       "initialProductCodes": ["SV2447"]
     }
