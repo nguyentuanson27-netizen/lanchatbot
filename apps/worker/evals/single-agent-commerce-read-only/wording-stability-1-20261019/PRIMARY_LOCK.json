@@ -1,0 +1,6 @@
+{
+  "primarySha256": "836f66abdae3c005f9a1337544b5b57289b630c775c88e1cfef46e4df63a91b5",
+  "lockedBeforeRejectedDraftDiagnosis": true,
+  "reviewer": "Codex, same active task; not an independent human score",
+  "ordering": "Primary reviewed/locked in task temp output before repository publication and verifier diagnosis. Both provider rounds ran at the same clean HEAD before publication."
+}
