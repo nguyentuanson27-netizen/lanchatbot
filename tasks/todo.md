@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Full Gemini owner prompt, one repetition — 2026-10-19
+
+- [x] Owner chọn bản tư vấn Gemini đầy đủ: copy exact bytes, giữ verifier hiện tại; freeze16slots/52max generations/retry0 và active wedding-travel case. [Scope](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/SCOPE.md).
+- [ ] Focused/hash/clean-source checks, source/provider preflight; chạy đủ8stateful/4B1/4advice mỗi ca một lần, không thêm mẫu hoặc retry.
+- [ ] Đọc toàn bộ actual conversations, khóa primary rồi diagnosis/accounting; báo cáo kết quả và giới hạn. Không live send/deploy hoặc GO tự động.
+
 ## Active corpus — replace stage context — 2026-10-19
 
 - [x] Thay riêng biến thể sân khấu của CHANGED_OCCASION trong cases.b1.json bằng ngồi ô tô trước đám cưới/lo nhăn; lời khách ngắn, bám việc mua hàng, không chứa chỉ dẫn chấm hoặc đáp án. Giữ các ca khác và cấu hình24/8/3.
