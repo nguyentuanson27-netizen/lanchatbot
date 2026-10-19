@@ -1,5 +1,13 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Current owner wording fix — 2026-10-19
+
+Owner yêu cầu sửa các câu sau review bổ sung sales-context-run. Phạm vi chỉ là cách nói: ba bullet hiện hữu trong owner prompt về unknown offers/phần nguồn thiếu, nhắc thông tin vừa sửa và ACK. Giữ ranh giới nguồn, state/receipt/fit, giỏ/checkout, verifier và models. Không thêm câu mẫu, parser, template runtime hoặc gate. Prompt9.309→9.435bytes (+126), hash `81e187d379f017397897c513eeae0cad214f20cb7b05ad449ee69b7d84c9289f`; active manifest đồng bộ.
+
+Self-review bỏ cách diễn đạt cấm kể trạng thái giỏ quá rộng vì có thể làm mất phần xác nhận lựa chọn hữu ích; chỉ tránh báo cáo trạng thái xử lý nội bộ. Nhắc lại hai số đo khách vừa sửa được phép khi có ích, không đếm một dữ kiện. Báo đúng phần chưa tra được mà không suy thành shop có/không bán lẻ; không giải thích hệ thống hoặc kéo dài mô tả để bù thiếu nguồn. Review bổ sung coi correction dùng được/cần trau chuốt; hai partial-source cùng vấn đề giọng cộng giới hạn nguồn. Primary/counts/raw của run94cb47d2 vẫn nguyên, không sửa để tăng điểm.
+
+Verification hoàn tất: `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs` PASS58/58 trước self-review cuối; `pnpm --filter @lana/worker test:evals` trên prompt cuối PASS515/517,2opt-inSKIP,0fail; `git diff --check` PASS. So manifest xác nhận chỉ owner prompt hash đổi, models/verifier/config khác giữ nguyên. Không sửa TypeScript/shared package nên không chạy lại worker build/typecheck/lint từ thay đổi chỉ prompt/manifest này. Không thêm test keyword/câu chữ để chứng minh hội thoại tự nhiên. Chưa có provider run từ prompt mới; evidence16lượt trước thuộc prompt5e9c8503, không phải bản này. Không tự chạy bù hoặc live action.
+
 ## Sales context model run — 2026-10-19
 
 Owner yêu cầu chạy sau bản sửa cd5d4da0. **Đã hoàn tất16/16 slots N1/retry0, STOP sales/live readiness.** [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/sales-context-run-20261019/CHECKPOINT_B.md): source94cb47d2, primary64b2cd67,36requests (24owner/12verifier),0provider error/timeout,0fallback. Primary12USABLE/3NEEDS_EDIT/1control; cả12model drafts sống sót đều verifierPASS. Còn correction và hai partial-source nói giọng hành chính/hệ thống. Fallback trước3→0 nhưng USABLE7→12 có phần do clarification review đã freeze; không quy hết cho prompt/model. Trace changed-occasion1→4→4 chỉ một search, không kích hoạt overflow rejection; lookup thực sự dùng productCode/MATCHED và diễn giải áo/cả bộ.

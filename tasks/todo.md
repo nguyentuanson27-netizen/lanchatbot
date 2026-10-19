@@ -1,5 +1,12 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner wording fix after supplemental review — 2026-10-19
+
+- [x] Sửa ba bullet hiện hữu: xác nhận gọn theo việc khách cần, cho phép nhắc phần vừa sửa có ích, báo ngắn phần nguồn chưa tra được thay vì kể hệ thống. Không có câu mẫu theo case hoặc thay verifier/runtime; prompt +126bytes, manifest hash đồng bộ.
+- [x] Self-review bảo toàn xác nhận lựa chọn/giỏ và quyền nhắc số đo hợp lý; unknown offers không thành có/không bán lẻ. Giữ nguyên raw/primary/counts lịch sử và ghi rõ ca correction chỉ cần trau chuốt theo review bổ sung.
+- [x] Focused adapter/protocol trước self-review cuối58/58 PASS; full `pnpm --filter @lana/worker test:evals` trên prompt cuối515PASS/2opt-inSKIP/0fail; manifest/hash và `git diff --check` PASS. Lưu savepoint prompt/manifest/tasks; không dùng test kỹ thuật làm bằng chứng giọng đã cải thiện.
+- [ ] Chưa sinh lại owner từ prompt mới; kết quả sales-context-run16lượt thuộc prompt trước. Không tự nhận fixes đã được provider chứng minh.
+
 ## Sales context model run — 2026-10-19
 
 - [x] Freeze registration mới16slots N1/52max/retry0 trên bản sửa; giữ Gemini3.5FlashLiteHIGH/Sol6.1high và exact runner/cases. Source94cb47d2 sạch, preflight/source-check và5child commands exit0.
