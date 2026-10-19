@@ -1,0 +1,5 @@
+{"slot":1,"recorded":1,"registered":24,"terminal":"FALLBACK"}
+{"slot":2,"recorded":2,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":3,"recorded":3,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":4,"recorded":4,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"status":"DISPATCH_RANGE_COMPLETE_REVIEW_PENDING","registered":24,"recorded":4,"out":"C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-sales-voice-run-20261019\\b1-3","sendEnabled":false}

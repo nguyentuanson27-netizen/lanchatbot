@@ -23,5 +23,7 @@
   "privateFixturePhoneMarkersChecked": 1,
   "privateFixturePhoneLeaks": 0,
   "passExactTextMatches": 28,
-  "receiptBackedRecoveryOutcomes": 1
+  "receiptBackedRecoveryOutcomes": 1,
+  "publishedRawByteHashesMatched": 89,
+  "secretMaterialScan": "PASS"
 }
