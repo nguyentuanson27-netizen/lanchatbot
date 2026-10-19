@@ -317,7 +317,10 @@ export async function createCommerceEffectTools(input: {
       world.state.recipient !== receipt.recipient || world.state.conversationRevision !== receiptConversationRevision || world.state.bindingVersion !== receiptBindingVersion ||
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
     const cart = current.cart!.value;
-    const cartAck = `Giỏ của chị: ${cart.lines.map(formatCartLineSelection).join("; ")}.`;
+    const cartAck = `Giỏ của chị: ${cart.lines.map(line => {
+      const product = world.runtimeProducts?.find(p => p.subjectRef === line.parentProductId);
+      return formatCartLineSelection(line, product?.content ? { productId: product.subjectRef, title: product.content.productName } : undefined);
+    }).join("; ")}.`;
     let summary = "";
     const active = activeSelections(), now = input.clock();
     const policyRef = current.commerceContext?.policyRef;

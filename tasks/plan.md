@@ -1,5 +1,72 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Revised fix — sales decisions, voice and product labels — 2026-10-19
+
+Status: IMPLEMENTED_PENDING_MODEL_EVALUATION. Owner yêu cầu fix và chạy model sau review; code/prompt đã sửa, provider chưa chạy tại savepoint này. Baseline giữ nguyên: run source `35c9007b`, primary `b3d068e2`, report `df9b6ffe`; owner prompt hiện tại 9.435 bytes. Một conversational owner và verifier hiện hữu; code giữ authority về identity/truth/freshness/state/permission/effects/receipts/privacy. A vẫn OWNER_BYPASS; kế hoạch này không cấp live GO.
+
+### 1. Thử một thay đổi rõ về cách owner chọn và giải thích
+
+Files dự kiến: `apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt`, manifest prompt hash. Thay các bullet trùng về phân vân/đổi hoàn cảnh/so sánh; không nối thêm checklist hoặc ví dụ benchmark.
+
+**Bằng chứng và giới hạn giả thuyết:** P4 cũ đã yêu cầu chọn ưu tiên, lý do liên quan, không trả việc chọn cho khách và không đọc catalog (`docs/specs/c3-phase-b-post-replay-fix-plan-20261018.md`, phần P4). Prompt hiện hành cũng có gần đủ những ý này. Hai fallback mới cho thấy owner tạo lời hứa giữ/phục hồi độ phẳng để giữ món cũ; chúng chưa chứng minh một nguyên nhân nội bộ của model. Viết lại yêu cầu chung không phải một cơ chế mới và chưa được coi là chữa root cause.
+
+**Treatment cần thể hiện trong diff:** dùng tiêu chí mua của khách và khác biệt liên quan giữa sản phẩm để đi đến lựa chọn, rồi giải thích lựa chọn đó. Không chọn món trước rồi tự thêm công năng để bảo vệ quyết định. Đây là một thử nghiệm có giới hạn về ưu tiên khi tư vấn; không yêu cầu model xuất kế hoạch, chain-of-thought hoặc object trung gian.
+
+- Khi khách giao shop chọn và dữ kiện đủ, nêu phương án ưu tiên với lý do có ích cho quyết định. Cho phép chọn có điều kiện, hỏi preference thực sự quyết định còn thiếu, hoặc đưa hai hướng có lý do khác nhau. Không ép mọi reply có một món thắng, một đánh đổi, phương án rẻ hơn hoặc mua lẻ.
+- Xử lý đúng băn khoăn khách đang có. Dùng thiết kế, vật liệu, cách phối và lựa chọn bán phù hợp với băn khoăn đó; không dùng một đoạn khen sản phẩm cho mọi trường hợp. Phân biệt băn khoăn về vẻ ngoài với cảm giác mặc là định hướng review, không thêm bảng ánh xạ từng câu hỏi sang câu trả lời vào production prompt.
+- Giữ quyền tư vấn tự tin về phong cách, phối đồ và so sánh định tính từ vật liệu/thiết kế. Không tự thêm cấu tạo, tính năng, kết quả thử nghiệm hoặc cam kết hiệu quả sử dụng cụ thể vượt căn cứ. Không yêu cầu phép thử riêng cho từng lợi ích tư vấn thông thường, không cấm toàn bộ inference chất liệu.
+
+Acceptance: lời trả lời giúp khách giải quyết lựa chọn thực tế; lý do liên quan và không tự tạo claim được bảo vệ. Mẫu PASS khác không xóa lỗi của một attempt. Không yêu cầu món/tính từ/CTA định sẵn. Giữ nguyên mô tả nguồn, không thêm semantic context như recommendedByEvaluator/safeToClaim, bảng công năng theo chất liệu, parser, regex hoặc repair loop. Context hiện đã có product content/offer labels; chỉ mở thay đổi context nếu tìm ra trường nguồn cụ thể bị mất, có bằng chứng riêng.
+
+### 2. Chỉnh giọng qua phần chỉ dẫn hiện có
+
+Cùng owner prompt. **Bỏ cap 9.435 bytes**: đây là độ dài baseline, không phải ngưỡng chất lượng. Báo delta bytes và các đoạn thay/xóa; giảm lặp nhưng không cắt contract về tool, size, receipt hay policy để đạt số byte. Giữ request-size bound hiện hành.
+
+- Trả lời bằng vai shop em–chị. Với yêu cầu sửa lựa chọn, xác nhận kết quả bằng lời chat; cho phép thêm chi tiết giúp xác nhận, tạo tin cậy hoặc quyết định mua, không chỉ chi tiết giải quyết ambiguity.
+- Giải thích vừa đủ cho quyết định hiện tại. Nhắc số đo vừa sửa, lựa chọn đang giữ hoặc so sánh giá khi hữu ích vẫn được phép. Không biến việc sửa giọng thành danh sách từ cấm, số câu/fact cố định hoặc công thức trả lời bắt buộc.
+- Bước tiếp theo phải giúp việc mua và nằm trong khả năng hiện có. Không ép câu hỏi chốt đơn vào mọi tin. Khi nguồn thiếu, trả phần hữu ích đã biết và nói rõ phần chưa xác nhận được; không kể tình trạng hệ thống hoặc hứa theo dõi khi không có khả năng.
+
+Acceptance: đúng vai, xác nhận rõ lựa chọn và phục vụ mục tiêu mua. Góp ý dài/tính từ/lặp ngân sách tự nó không làm reply thành NEEDS_EDIT. Nhãn cần sửa phải chỉ ra việc mua chưa được giải quyết, nội dung gây hiểu sai hoặc câu thật sự cần viết lại trước gửi. Verifier không chấm giọng. Giữ primary/raw/counts cũ; không đổi rubric sau khi thấy kết quả.
+
+### 3. Nối tên hàng tới đúng đường code dựng preview
+
+**Finding đã xác minh từ review độc lập:** private checkout ở `single-agent-commerce-ingress.ts` chạy trước `createCommerceTools`; executor dựng source ở `single-agent-commerce-session.ts` chưa nhận product content/label. `CartSelectionResult READY` trong `realtime-sales-catalog.ts` không có tên. Chỉ sửa `formatCartLineSelection` hoặc recovery sẽ không sửa được preview chính.
+
+Đường truyền tối thiểu cần thực hiện:
+
+`input.read.initialProducts` có sẵn ở ingress → `single-agent-commerce-session.ts` executor/source → transient optional name input của `RealtimeSalesCycleInput` → `formatCartLineSelection` / cart summary / preorder notice trong `realtime-sales-cycle.ts`.
+
+- Reuse dữ liệu sản phẩm đã được đọc và bound trong scope composition. Harness hiện có initial product ở `stateful-provider.mjs`; isolated integration giữ read inputs cho các turn. Không thêm catalog read chỉ để lấy tên hiển thị.
+- Shop binding kế thừa từ source/composition scope đã xác nhận; không giả định catalog document có field shopId. Tên phải khớp product của dòng giỏ. Không lấy CART_LINE/cart-variant label làm product name.
+- Recovery trong `single-agent-commerce-effects.ts` dùng current base snapshot/world có sẵn và cùng formatter. Không dùng tên từ một turn/sản phẩm khác nếu không còn binding hợp lệ. Đường thiếu tên phù hợp tiếp tục dùng mã hiện hữu.
+- Giữ tên nguồn và phân biệt offer/component đang mua. Với source name dạng tên set, hiển thị rõ áo thuộc mẫu đó thay vì nối thành “2 áo Set váy …”; không dùng regex cắt prefix để tự chế tên mới. Dùng cùng tên tại summary và dòng đặt trước.
+- Giữ quantity, màu/size từng component, giá/giảm giá/ship/tổng, recipient, ETA và receipt/CAS/privacy. Không persist display field, sửa cart schema, migration, tăng product bound hoặc thêm gate kiểm tra lại các identity đã được chứng minh.
+
+TDD: quan sát RED rồi GREEN với thay đổi nhỏ nhất. Test tại formatter cho tên+offer/đặt trước, missing/mismatched-name fallback và nhiều dòng khác variant/tổng; **bắt buộc thêm test đi qua private ingress/session đến actual preview**. Test integration này phải chứng minh tên đúng, không có model request cho private turn và không tăng số catalog reads vì tên. Test formatter riêng không đủ chứng minh đường nối đã hoạt động.
+
+### 4. Kiểm tra code và đo model có giới hạn
+
+Trước provider: focused tests cho formatter/callers/sales effects và private ingress/session bị thay đổi; adapter/protocol khi prompt/hash đổi. Chạy regression guard hiện hữu liên quan đến đường thay đổi, worker typecheck/build/lint. Không chạy thêm các nhóm test không bị ảnh hưởng chỉ vì có sẵn; xác định exact focused commands từ scripts/test filenames lúc implementation và ghi kết quả thực chạy. Self-review diff so P4/rollback và hai stability runs; verifier, models và fallback hiện hành giữ nguyên (Gemini 3.5 Flash Lite HIGH / Sol 6.1 high).
+
+**Đề xuất ngân sách provider khi được yêu cầu thực hiện:**
+
+1. Freeze hai captured contexts từ vòng mới nhất (changed-occasion, buying-concern), mỗi context sinh 3 mẫu: **6 advice slots, tối đa 12 generation requests** gồm verifier. Freeze source/prompt/config/capture hashes/rubric/order trước dispatch. Đây là phép thử tiết kiệm requests để xem lỗi cũ có tái hiện, không phải gate mới chứng nhận ổn định. Cùng capture/nguồn/replay clock, tools tắt và không có lịch sử tool đầy đủ của integrated turn; không gọi là sáu journey/context độc lập, không dùng để chứng minh owner tự tìm nguồn tốt hơn.
+2. Đọc whole actual outcome theo rubric đã freeze. Nếu tái hiện claim vượt căn cứ, fallback, không giải quyết yêu cầu chọn hoặc lỗi vận hành, giữ đủ denominator, chẩn đoán và dừng provider phần sau; không sửa/retry để gom PASS. **Polish nhẹ không làm trượt phép thử**, không cản chạy/hoàn tất deterministic tests của code đã đổi. Mọi generation/error đều giữ trong kết quả.
+3. Nếu không có lỗi thực chất trên, chạy **16 slots hiện hữu ×1**, tối đa 52 requests (8 stateful +4 integrated B1 +4 captured advice), để kiểm ACK/checkout/tên hàng/partial-source/lookup và hồi quy tư vấn. Tổng ceiling **22 slots/64 requests**, không tự tăng corpus hoặc mở vòng tiếp. Sáu captured slots không thay được kiểm tra integrated/source/tool. Báo kết quả hai giai đoạn riêng; không gộp 22 thành một tỷ lệ chất lượng, không suy một mẫu integrated/case thành ổn định toàn hệ thống hay causal improvement.
+4. Commit executable/config trước dispatch, yêu cầu clean source và capture runtime SHA; thay source/prompt tạo run identity mới. Primary review trước rejected-draft diagnosis; ghi mọi error/fallback và góp ý giọng, giữ nguyên lịch sử. Stop ở báo cáo; không tự deploy/live send/tạo POS order hoặc nhận full Phase B GO.
+
+Thứ tự: rewrite có delta/giả thuyết rõ → nối transient name path bằng RED/GREEN → focused regression/self-review → freeze phép thử6 → conditional16 → report. Không thêm model role, semantic router, repair/reverify loop hoặc framework. Review độc lập đã được tích hợp vào kế hoạch; implementation hoàn tất, provider sẽ chạy theo đúng giới hạn ở trên.
+
+### Implementation và self-review trước provider — 2026-10-19
+
+- Thay hai bullet lựa chọn/đổi hoàn cảnh, một bullet căn cứ và phần giọng hiện hữu; owner9.435→9.791bytes (+356), SHA256 `ce091f2cdd6baeb28dd7eaa5164e33d5ae0f1220b07d8b176967ffbdda7a47fd`. Không đổi verifier/models/fallback/source facts/policy hoặc thêm ví dụ sản phẩm/corpus. Đây vẫn là giả thuyết chưa được model run chứng minh.
+- Nối optional productNames từ ingress initialProducts→session source→private preview; tên khớp product, giữ component/offer và variant. Recovery đọc current runtime product content qua cùng formatter. Không thêm read/persisted field/schema/gate hoặc production wiring.
+- RED formatter:2tests fail vì còn mã. Private ingress test ban đầu fail ở fixture priceFactRef không khớp; sửa fixture theo contract, chạy lại thấy RED đúng tên ở actual preview (1fail/14pass). GREEN focused ban đầu163/163. Self-review thêm recovery-name coverage; test đầu quên action SET_QUANTITY, sửa fixture không sửa runtime để cứu;64/64effectsPASS.
+- Final focused: `pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-semantic-verifier-boundary.test.ts --maxWorkers=2 --minWorkers=1` PASS217/217. Private named/mismatched preview có0model calls/0catalog reads thêm và tổng524k giữ nguyên; named set/component/multiple-variant fallback có tests hiện hữu.
+- `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs` PASS58/58. `pnpm --filter @lana/worker typecheck` lần đầu fail optional-property và2fixture types; sửa optional spread/test readback theo type thực tế, `pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit` PASS trên source cuối. `pnpm --filter @lana/worker build` PASS, `pnpm --filter @lana/worker lint` PASS (tsc noEmit), `git diff --check` PASS. Không sửa shared package hoặc chạy broad suites không liên quan.
+- Self-review đối chiếu P4: không khẳng định wording rewrite là cơ chế mới; giữ quyền chọn có điều kiện/upsell/material inference và relevant correction. Checkout label dùng nguyên tên có role riêng, không cắt tên bằng regex. Existing size/claims/CAS/receipt/privacy checks giữ nguyên. Complexity delta runtime: một optional transient argument qua callers và formatter lookup;0newroles/layers/gates/durablefields/frameworks.
+- Frozen plan/captures cho `sales-decision-run-20261019`: targeted2contexts×3/max12requests, conditional16/max52; input/registration committed trước provider, source SHA ghi runtime. Chưa có provider outcome tại mục này; kết quả sẽ báo riêng ở report.
+
 ## Hai vòng stability bổ sung — 2026-10-19
 
 Owner yêu cầu chạy thêm2vòng cùng cấu hình. Hoàn tất32/32slots, cùng clean source35c9007b, mỗi vòng16N1/retry0; không đổi prompt/models/runtime/cases/scoring. Mỗi vòng13USABLE/1NEEDS_EDIT/1actualfallback/1human-control; tổng70requests (46owner/24verifier),0provider/source errors/recorded timeout/thiếu capture,10child commands exit0, DB test drop/private checkout0model requests. Primary b3d068e2 trước diagnosis;24bindings/46owner captures/86wire bodies/8capture hashes/68public artifacts audit PASS,0evaluator leaks.

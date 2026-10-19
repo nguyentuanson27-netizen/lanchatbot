@@ -594,6 +594,16 @@ describe("code-owned commerce effects and recovery", () => {
     expect(recovered).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ của chị: 1 áo SM613 màu navy, size M; 1 áo SM613 màu black, size L. Tổng 973.100đ, đã gồm phí giao hàng." });
     expect(s.current().cart!.value.lines).toHaveLength(2); expect(s.commits).toHaveLength(2);
   });
+  it("uses the current product name when recovering a committed quantity change", async () => {
+    const s = await setup();
+    await s.tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    await s.tools.invoke({ name: "add_to_cart", args: { subjectRef: "SM613", offerType: "SM613-DIRECT", size: "M", color: "navy", quantity: 1 } });
+    const lineId = s.current().cart!.value.lines[0]!.lineId;
+    await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } });
+    const recovered = await s.tools.recover!(terminalFallback());
+    expect(recovered.text).toContain("2 áo (mẫu “Sơ mi SM613”) màu navy, size M");
+    expect(recovered.text).toContain("Tổng 973.100đ");
+  });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     expect((await s.tools.recover!({ disposition: "NO_SEND", reason: "PRIVACY", text: null, fallbackId: null })).disposition).toBe("NO_SEND");

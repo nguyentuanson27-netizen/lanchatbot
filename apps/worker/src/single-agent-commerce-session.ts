@@ -8,7 +8,7 @@ import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
 import type { HandoffAuthority } from "./single-agent-commerce-handoff.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { createPersistedCommerceReceiptReader, prepareNativeCommerceTransition } from "./single-agent-commerce-persistence.js";
-import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleOutput } from "./realtime-sales-cycle.js";
+import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleOutput, type RealtimeSalesCycleInput } from "./realtime-sales-cycle.js";
 import type { createCommerceEffectTools, CommerceCommandResult } from "./single-agent-commerce-effects.js";
 
 type CommandInput = Parameters<NonNullable<Parameters<typeof createCommerceEffectTools>[0]["executeCommand"]>>[0];
@@ -22,6 +22,7 @@ export function createPersistedCommerceExecutor(input: {
   inboxBatchGuard: RealtimeInboxBatchGuard; resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON" | "DA_CHOT_DON") => string | null;
   /** Private provider recipient is supplied by code and never added to a model projection. */
   deliveryRecipient?: string;
+  productNames?: RealtimeSalesCycleInput["productNames"];
 }) {
   const { scope } = input;
   let outboxMessages = 0;
@@ -38,7 +39,7 @@ export function createPersistedCommerceExecutor(input: {
     pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash, state, stateRevision: state.revision,
     conversationRevision: authority.stateVersion, text: input.latest, messageId: scope.sourceMessageId, eventKey: scope.sourceMessageId,
     senderId: scope.customerHash, occurredAt: scope.sourceObservedAt!, attachmentIds: [], productId: state.cart?.value.lines[0]?.parentProductId ?? null,
-    offerType: null, size: null, color: null, shopAlias: scope.shopAlias, policyResolution, facts: input.facts, now: input.clock(), effectNow: input.clock,
+    offerType: null, size: null, color: null, shopAlias: scope.shopAlias, policyResolution, facts: input.facts, ...(input.productNames ? { productNames: input.productNames } : {}), now: input.clock(), effectNow: input.clock,
   });
   const matches = (a: HandoffAuthority) => a.pageId === scope.pageId && a.customerHash === scope.customerHash && a.conversationId === scope.conversationId &&
     a.state.conversationId === scope.conversationId && a.bindingVersion === scope.bindingVersion && a.recipient === scope.recipient &&

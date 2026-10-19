@@ -98,7 +98,8 @@ export async function runPersistedCommerceIngress(input: {
     customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey, text: isPrivateCommerceText(m.text ?? "") ? null : m.text,
     occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
   const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
-    store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
+    store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
+    productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })) });
   const policyBundle = async () => { const r = await input.policy(); if (!r.bundle) throw new Error("POLICY_UNAVAILABLE"); return r.bundle; };
   if (isPrivateCommerceText(latest)) {
     const privateResult = await executor.advancePrivateCheckout();

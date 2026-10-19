@@ -32,6 +32,22 @@ import {
 const now = new Date("2026-07-23T03:00:00.000Z");
 
 describe("customer-visible cart choices", () => {
+  it("uses a scoped product name without presenting a separate component as the whole set", () => {
+    const selected = line(2);
+    selected.offerKind = "COMPONENT"; selected.offerId = "AO";
+    selected.components = [selected.components[0]!];
+    expect(formatCartLineSelection(selected, { productId: "CB182", title: "Set váy Thạch Thảo" }))
+      .toBe("2 áo (mẫu “Set váy Thạch Thảo”) màu be, size M");
+    expect(formatCartLineSelection(selected, { productId: "OTHER42", title: "Mẫu khác" }))
+      .toBe("2 áo CB182 màu be, size M");
+  });
+  it("retains each component choice in a named set and leaves unlabelled items unchanged", () => {
+    const selected = line(1); selected.components[1]!.color = "NAVY"; selected.components[1]!.size = "L";
+    expect(formatCartLineSelection(selected, { productId: "CB182", title: "Set váy Thạch Thảo" }))
+      .toBe("1 bộ (mẫu “Set váy Thạch Thảo”) (áo màu be, size M; chân váy màu navy, size L)");
+    expect(formatCartLineSelection(selected, { productId: "CB182", title: " " })).toBe(formatCartLineSelection(selected));
+  });
+
   it("identifies a separately sold component and retains its colour and size", () => {
     const selected = line(2);
     selected.offerKind = "COMPONENT";
@@ -51,7 +67,7 @@ describe("customer-visible cart choices", () => {
     second.parentProductId = "OTHER42";
     second.offerKind = "DIRECT";
     second.components = [{ ...second.components[0]!, componentRole: "OTHER", color: null, size: null }];
-    expect([first, second].map(formatCartLineSelection)).toEqual([
+    expect([first, second].map(l => formatCartLineSelection(l))).toEqual([
       "1 bộ CB182 (áo màu be, size M; chân váy màu be, size M)", "2 sản phẩm OTHER42",
     ]);
   });

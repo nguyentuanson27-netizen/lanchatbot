@@ -4,6 +4,7 @@ import {
   buildProtectedClaimsFromCartSelectionsV1,
   evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
+  normalizeCatalogToken,
   hashCanonicalBuyingIntentV1,
 } from "@lana/business-tools";
 import {
@@ -118,6 +119,8 @@ export interface RealtimeSalesCycleInput {
    * negotiation semantics and wording; it never carries a monetary request.
    */
   readonly negotiationProposal?: ModelNegotiationProposalV1 | null;
+  /** Transient catalog labels from the caller’s existing shop-scoped source; never persisted in cart state. */
+  readonly productNames?: readonly { readonly productId: string; readonly title: string }[];
   readonly shopAlias: string;
   readonly behaviorModeResolution?: RuntimeBehaviorModeResolution;
   readonly policyResolution: RuntimePolicyResolution | null;
@@ -631,22 +634,24 @@ function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" 
 }
 
 /** Render only committed choices; retain the code when there is no bound display name. */
-export function formatCartLineSelection(line: CartV1["lines"][number]): string {
+export function formatCartLineSelection(line: CartV1["lines"][number], product?: NonNullable<RealtimeSalesCycleInput["productNames"]>[number]): string {
+  const label = product && normalizeCatalogToken(product.productId) === line.parentProductId && product.title.trim()
+    ? `(mẫu “${product.title}”)` : line.parentProductId;
   const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
   const component = (c: typeof line.components[number]) => (c.quantity > 1 ? `${c.quantity} ` : "") + roles[c.componentRole] +
     (c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : "") + (c.size ? `, size ${c.size}` : "");
   if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
-    return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${line.parentProductId} (${line.components.map(component).join("; ")})`;
+    return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${label} (${line.components.map(component).join("; ")})`;
   }
   const c = line.components[0]!, role = roles[c.componentRole];
-  return `${line.quantity} ${role} ${line.parentProductId}${c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : ""}${c.size ? `, size ${c.size}` : ""}`;
+  return `${line.quantity} ${role} ${label}${c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : ""}${c.size ? `, size ${c.size}` : ""}`;
 }
 
-function cartSummary(cart: CartV1, includeSelections = false): string {
+function cartSummary(cart: CartV1, includeSelections = false, productNames: RealtimeSalesCycleInput["productNames"] = []): string {
   const hasFreeShipping = cart.adjustments.some(({ kind }) => kind === "FREE_SHIPPING");
   const lines = cart.lines.map((line) => {
     const sizes = [...new Set(line.components.map(({ size }) => size).filter(Boolean))].join("/");
-    const label = includeSelections ? formatCartLineSelection(line) : `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}`;
+    const label = includeSelections ? formatCartLineSelection(line, productNames.find(p => normalizeCatalogToken(p.productId) === line.parentProductId)) : `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}`;
     return `${label}: ${money(line.lineTotalVnd ?? 0)}`;
   });
   return [
@@ -2066,8 +2071,8 @@ export async function evaluateRealtimeSalesCycle(
       return protectedCartReply(
         (cart, currentSelections) => {
           const preorders = currentSelections.filter(s => s.stockStatus === "PRE_ORDER").map(s =>
-            `${s.line.parentProductId}: hàng đặt trước`);
-          return [cartSummary(cart, true), ...preorders, `Người nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}`,
+            `${input.productNames?.find(p => normalizeCatalogToken(p.productId) === s.line.parentProductId && p.title.trim())?.title ?? s.line.parentProductId}: hàng đặt trước`);
+          return [cartSummary(cart, true, input.productNames), ...preorders, `Người nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}`,
             `Địa chỉ: ${preview.recipient.address}`, `Thanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}`,
             `Dự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.`, "Chị xác nhận chốt đơn nhé."].join("\n");
         },

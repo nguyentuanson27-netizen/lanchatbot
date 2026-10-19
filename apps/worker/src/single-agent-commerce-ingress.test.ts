@@ -30,15 +30,17 @@ function fixture(productIds = ["SM613"]) {
   const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
   const select = vi.fn(async (): Promise<CartSelectionResult> => ({ status: "INVALID", reasonCode: "FIXTURE_SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] }));
   const inbox = { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} };
+  const policy = vi.fn(() => fixturePolicy());
+  const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
   const run = (owner: () => Promise<OwnerGeneration> = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history: { recordInboundCustomerMessage: async () => {}, listConversationHistory: async () => [] }, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
-    facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy: () => fixturePolicy(),
+    facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
-      readProduct: async (id: string) => products.find(p => p.product.productId === id), searchText: async () => ({ status: "NOT_FOUND" }) } },
+      readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => null, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, store, inbox, commit, verifier, select, profileWrite, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; },
     transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
@@ -58,6 +60,40 @@ it("starts the independent generation read while current authority is being load
 });
 
 describe("persisted ingress source and final revision", () => {
+  it.each([true, false])("uses available scoped names in the actual private preview without model or extra catalog reads (named=%s)", async named => {
+    const f = fixture(named ? ["SM613"] : ["OTHER42"]), scope = commerceScope();
+    if (named) f.products[0]!.product.title = "Set váy thử nghiệm";
+    const resolution = await fixturePolicy(), policy = resolution.bundle!.policy;
+    f.policy.mockResolvedValue({ ...resolution, mayAffectOutbound: true,
+      bundle: { ...resolution.bundle!, channel: "PUBLISHED", sideEffects: "LIVE_OUTBOUND" } });
+    let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+    for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const)
+      state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind, commandId: kind }, now: commerceNow }).state;
+    const line = fixtureCartLine();
+    const draft = { identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001", customerProfileId: fixtureProfile().profile.profileId },
+      lines: [line], shopId: scope.shopId, policyRef: { id: policy.policyBundleId, version: policy.policyVersion, contentHash: computeBusinessContentHash(policy) } };
+    state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "CART_OPENED", commandId: "open",
+      cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1800000).toISOString() }, now: commerceNow,
+      trustedPorts: { resolveCartDraft: () => draft, resolveShopPolicy: () => policy, resolveCartMutation: () => null, resolveInboundMessage: () => null, revalidateCheckout: () => null } }).state;
+    f.setCycle(state);
+    f.select.mockResolvedValue({ status: "READY", line, shopId: scope.shopId, versions: { price: line.priceAuthority!.priceFactRef, inventory: "i1", size: "s1", eta: "e1" },
+      eta: { minDays: 8, maxDays: 14 }, etaExpiresAt: new Date(commerceNow.getTime()+1200000).toISOString(),
+      sourceAuthority: "POS_SNAPSHOT", stockStatus: "PRE_ORDER", stockAvailableQuantity: 0,
+      sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1200000).toISOString() });
+    f.message.text = "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD";
+    const owner = vi.fn(async (): Promise<OwnerGeneration> => { throw new Error("PRIVATE_TURN_MUST_NOT_GENERATE"); });
+    const result = await f.run(owner);
+    expect(result, JSON.stringify(result)).toMatchObject({ mode: "PRIVATE_CODE_PATH", enqueued: 1 });
+    expect(owner).not.toHaveBeenCalled(); expect(f.verifier).not.toHaveBeenCalled(); expect(f.catalogRead).not.toHaveBeenCalled();
+    const meta = f.commit.mock.calls.at(-1)![1].metaPlan!;
+    const text = meta.messages.map(m => m.kind === "TEXT" ? m.text : "").join("\n");
+    expect(text).toContain(named ? "1 áo (mẫu “Set váy thử nghiệm”) màu navy, size M" : "1 áo SM613 màu navy, size M");
+    expect(text).toContain(named ? "Set váy thử nghiệm: hàng đặt trước" : "SM613: hàng đặt trước");
+    expect(text).toContain("Tổng: 524.000đ"); expect(text).toContain("8-14 ngày");
+    expect(meta.effectReadiness!.outcome).toBe("READY");
+    expect(f.commit.mock.calls.at(-1)![1].salesCyclePlan).toMatchObject({ state: { cart: { value: { lines: [line] } } } });
+  });
+
   it.each(["READY", "PRICE_CHANGED", "UNAVAILABLE"] as const)("binds a code-owned cart summary to current cart/fact readiness before enqueue (%s)", async source => {
     const f = fixture(), scope = commerceScope(), policy = (await fixturePolicy()).bundle!.policy;
     let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);

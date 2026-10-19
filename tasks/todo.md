@@ -1,5 +1,16 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Revised sales-decision/voice/label fix — 2026-10-19
+
+- [x] Đọc hai stability runs, prompt/context và formatter. Tích hợp review độc lập REVISE vào tasks/plan.md; giữ PLAN_ONLY và nguyên evidence lịch sử.
+- [x] Ghi rõ proposal lặp nhiều ý P4 đã rollback; treatment mới chỉ là giả thuyết ưu tiên tiêu chí khách/khác biệt nguồn trước lựa chọn, chưa chứng minh sửa root cause. Bỏ cap9.435bytes và acceptance cấm mọi hiệu quả tư vấn.
+- [x] Thay các bullet owner trùng, báo diff/delta bytes; giữ inference định tính, upsell, lựa chọn có điều kiện và dẫn chứng số đo hữu ích. Không thêm ví dụ benchmark/công thức reply/semantic context. Giữ tool/size/policy/receipt contracts.
+- [x] Nối transient name từ ingress initialProducts qua session executor/RealtimeSalesCycleInput tới formatter/preorder; recovery reuse current base world. Kế thừa source shop scope, match product/offer; không dùng variant label làm tên, không persist/migration/cosmetic-only read. Mã cũ là fallback khi thiếu tên phù hợp.
+- [x] RED→GREEN formatter và private ingress/session actual preview; đúng tên+offer, missing/mismatched name, nhiều variant/tổng giữ nguyên; private turn0model requests,0catalog reads thêm vì tên.
+- [x] Focused affected tests/callers/guards, adapter/protocol khi prompt/hash đổi, worker typecheck/build/lint; self-review với P4/rollback và32outcomes. Ghi exact commands/kết quả, không mở rộng test dư thừa.
+- [ ] Khi execution được yêu cầu: freeze6captured slots(2contexts×3)/max12requests. Lỗi thực chất/provider error dừng phần provider sau; polish nhẹ không chặn. Nếu đạt, existing16slots×1/max52requests. Max22slots/64requests,0retry/repair/extra rounds; tests code vẫn hoàn tất dù provider screen lỗi.
+- [ ] Báo riêng targeted replay và integrated16; không gộp22 thành tỷ lệ chất lượng/independent journeys. Whole-turn primary trước diagnosis, giữ raw/nhãn cũ; stop report, A OWNER_BYPASS/B no live GO.
+
 ## Hai vòng stability bổ sung — 2026-10-19
 
 - [x] Freeze2rounds cùng source35c9007b/prompt/models/config/runtime/cases/rubric,16slots/vòngN1/max52/retry0; chạy đủ32, không sửa giữa vòng hoặc mẫu bù.
