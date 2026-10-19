@@ -19,12 +19,12 @@ export function statefulPreflight(root){
  const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)))),configBytes=readFileSync(new URL('./source-config.b1.json',import.meta.url)),config=JSON.parse(configBytes);
  assert.deepEqual(requiredSourceConfig(config),[],'SOURCE_CONFIG_UNAVAILABLE');
  const casesBytes=readFileSync(new URL('./stateful-cases.json',import.meta.url)),cases=JSON.parse(casesBytes);
- assert.equal(cases.length,7);assert.equal(cases.filter(c=>c.runtime.latest).length,6);assert.equal(new Set(cases.map(c=>c.caseId)).size,7);
+ assert.equal(cases.length,8);assert.equal(cases.filter(c=>c.runtime.latest).length,7);assert.equal(new Set(cases.map(c=>c.caseId)).size,cases.length);
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations])),
   catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
-  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:7,publicTurns:6,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:24,retry:0,codex:inspectCodex(),sendEnabled:false}};
+  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:cases.length,publicTurns:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:cases.filter(c=>c.runtime.latest).length*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
 }
 
 export async function createStatefulProvider(input){
@@ -48,14 +48,14 @@ export async function createStatefulProvider(input){
   async read(bound,policyStore,policy){const product=await catalog.findByExactCode('SV2447');assert(product,'INITIAL_SOURCE_UNAVAILABLE');
    const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:[product],search,catalog,policyStore,facts});
    return {catalog:sources.catalog,policy,initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds};},
-  async owner(request){assert(counters.owner+counters.verifier<24,'GENERATION_BUDGET');counters.owner++;
+  async owner(request){assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
    let completedTelemetry;
    try{const wire=buildGeminiCommerceRequest(request);assert(!/"(?:caseId|evaluator|purposeId|requiredBehaviors|expectedSafe|qualityScore)"/.test(JSON.stringify(wire)),'EVALUATOR_LABEL_LEAK');
     audit(request.generationId,'OWNER_REQUEST',wire);const r=await infer(request);completedTelemetry=r.telemetry;audit(request.generationId,'OWNER_RESULT',r);return r;}
    catch(error){const telemetry=error.telemetry??completedTelemetry??{generationId:request.generationId,providerRequests:0,httpStatus:null,stage:'BEFORE_PROVIDER_DISPATCH',
     ...(error.message==='OWNER_REQUEST_BOUND'&&Number.isSafeInteger(error.requestBytes)?{requestBytes:error.requestBytes}:{})};
     audit(request.generationId,'OWNER_ERROR',{code:error.message,telemetry});throw Object.assign(error,{telemetry});}},
-  async verifier(request){assert(counters.owner+counters.verifier<24,'GENERATION_BUDGET');counters.verifier++;
+  async verifier(request){assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.verifier++;
    audit(request.generationId,'VERIFIER_REQUEST',buildVerifierRequest(m,request));try{return await verify(request);}catch(error){audit(request.generationId,'VERIFIER_ERROR',{code:error.message,telemetry:error.telemetry});throw error;}},
   close:()=>facts.close(),
  };

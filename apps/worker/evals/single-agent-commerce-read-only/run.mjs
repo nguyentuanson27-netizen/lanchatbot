@@ -103,7 +103,7 @@ try{
    const tools={...rawTools,invokeBatch:async calls=>{
     const results=await rawTools.invokeBatch(calls);audit(requestId,'TOOL_RESULTS',{calls,results});return results;
    }};
-   const owner=async request=>{audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
+   const owner=async request=>{audit(request.generationId,'PUBLIC_CONTEXT_CAPTURE',{generationId:request.generationId,toolsAllowed:request.toolsAllowed,capturedAt:clock().toISOString(),context:request.context});audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
     const generated=await ownerInference(request);audit(request.generationId,'OWNER_RESULT',generated);return generated;};
    result=await runCommerceTurn({scope,clock,tools,latest:sample.latest,history:sample.history,
     ownerPrompt,verifierPrompt,owner,verifier});

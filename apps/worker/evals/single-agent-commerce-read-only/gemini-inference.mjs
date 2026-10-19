@@ -101,7 +101,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(state.checkoutStatus&&typeof state.checkoutStatus==='object')state.checkoutStatus=Object.fromEntries(
   ['previewAvailable','purchaseConfirmed'].filter(k=>Object.hasOwn(state.checkoutStatus,k)).map(k=>[k,state.checkoutStatus[k]]));
  // Move only code-owned offer literals. Read/filter and verifier evidence remain intact.
- const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,p])),offers=new Map(),offerRefs=new Set();
+ const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)])),offers=new Map(),offerRefs=new Set();
  for(const s of c.boundSubjects.filter(s=>s.kind==='PRODUCT')){
   const literal=c.policyLiterals.find(p=>p.ref===`offers:${s.ref}`);if(!literal)continue;
   const data=JSON.parse(literal.text);

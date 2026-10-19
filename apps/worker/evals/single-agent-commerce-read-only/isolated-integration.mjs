@@ -454,13 +454,19 @@ try{
  });
  if(providerRun){
   const journeys=new Map();report.outcomes=[];
-  for(const [index,c] of providerFreeze.cases.entries()){
+  let invitationSucceeded=false;
+  const selectedCases=process.argv.includes('--opening-only')?providerFreeze.cases.slice(0,1):providerFreeze.cases;
+  for(const [index,c] of selectedCases.entries()){
    providerPorts.setSlot(c.caseId);const beforeCounts={...providerPorts.counters};
    const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true});journeys.set(c.journeyId,j);}
    const capturedBefore=j.capture.length;
    const latest=c.runtime.privateCheckoutFixture?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':c.runtime.latest;
    let attempt;
-   try{attempt=await j.turn(latest,[]);await j.drain();}
+   try{
+    if((c.runtime.privateCheckoutFixture||c.caseId==='stateful-confirm')&&!invitationSucceeded)attempt={result:{terminal:{disposition:'NO_SEND',reason:'CHECKOUT_INVITATION_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
+    else {attempt=await j.turn(latest,[]);await j.drain();}
+    if(c.caseId==='stateful-request-checkout')invitationSucceeded=j.capture.length>capturedBefore&&(await j.state()).clarification?.reasonCode==='CHECKOUT_DETAILS_MISSING';
+   }
    catch(error){attempt={result:{terminal:{disposition:'NO_SEND',reason:'ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},sendEnabled:false},errorCode:/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name};}
    const stored=await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,()=>createSalesCycleRuntimeState(j.bound.conversationId,{pageId,conversationId:j.bound.conversationId},new Date()));
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
@@ -473,7 +479,7 @@ try{
     ownerRequests:providerPorts.counters.owner-beforeCounts.owner,verifierRequests:providerPorts.counters.verifier-beforeCounts.verifier});
    report.providerGenerations=providerPorts.counters.owner+providerPorts.counters.verifier;save();
   }
-  report.providerCounts={...providerPorts.counters};report.registeredOutcomes=7;report.completedOutcomes=report.outcomes.length;
+  report.providerCounts={...providerPorts.counters};report.registeredOutcomes=selectedCases.length;report.completedOutcomes=report.outcomes.length;
   assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),providerFreeze.registration.sourceSha,'RUN_SOURCE_CHANGED');
   const finalFreeze=statefulPreflight(root);assert.equal(finalFreeze.registration.sourceConfigHash,providerFreeze.registration.sourceConfigHash,'RUN_CONFIG_CHANGED');
  }
