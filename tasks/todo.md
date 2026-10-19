@@ -1,5 +1,11 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Current prompt rerun — 2026-10-19
+
+- [x] Kiểm active prompts/models/config/cases giữ nguyên; freeze registration16slots N1/52max generations/retry0, reuse runner/inputs hiện hữu. [Scope](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/SCOPE.md).
+- [ ] Clean seal/preflight/readback; chạy đủ8stateful/4B1/4advice vào output mới, không thêm mẫu hoặc fix giữa vòng.
+- [ ] Khóa whole actual primary trước verdict diagnosis; audit/accounting/report và giữ mọi lỗi trong denominator. Không live action hoặc GO tự động.
+
 ## Full Gemini owner prompt, one repetition — 2026-10-19
 
 - [x] Owner chọn bản tư vấn Gemini đầy đủ: copy exact bytes, giữ verifier hiện tại; freeze16slots/52max generations/retry0 và active wedding-travel case. [Scope](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/SCOPE.md).
