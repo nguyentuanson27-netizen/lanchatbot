@@ -3,8 +3,8 @@
 ## Current prompt rerun — 2026-10-19
 
 - [x] Kiểm active prompts/models/config/cases giữ nguyên; freeze registration16slots N1/52max generations/retry0, reuse runner/inputs hiện hữu. [Scope](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/SCOPE.md).
-- [ ] Clean seal/preflight/readback; chạy đủ8stateful/4B1/4advice vào output mới, không thêm mẫu hoặc fix giữa vòng.
-- [ ] Khóa whole actual primary trước verdict diagnosis; audit/accounting/report và giữ mọi lỗi trong denominator. Không live action hoặc GO tự động.
+- [x] Seal ae093c50/preflight/readback PASS; chạy đủ8stateful/4B1/4advice,36requests/retry0/provider error0, DB đã drop. Không thêm mẫu hoặc fix giữa vòng.
+- [x] Khóa whole actual primary tạicd035044 trước diagnosis;7U/5edit/3unusable/1control.2MALFORMEDcontext7>4,1UNCERTAINbán lẻ chưa xác nhận. Audit10bindings/26exact owner prompts/4captures/3source registrations và report PASS. [Kết quả](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/CHECKPOINT_B.md). STOP readiness, không live action hoặc GO tự động.
 
 ## Full Gemini owner prompt, one repetition — 2026-10-19
 

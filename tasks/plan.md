@@ -4,6 +4,8 @@
 
 Owner yêu cầu một vòng mới với prompt hiện hành. [Scope và registration mới](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/SCOPE.md): giữ nguyên hai prompt/config/corpus/runtime, reuse runner cũ,16slots N1/52max generations/retry0. Không tự fix known context-bound/voice findings. Clean commit → preflight/source readback → đủ8stateful/4B1/4advice → khóa whole actual primary → diagnosis/accounting và STOP. A OWNER_BYPASS/B live chưa GO.
 
+**Completed — STOP readiness.** Sourceae093c50/primarycd035044,16/16slots/36requests/retry0/provider error0, DB đã drop. [Report](../apps/worker/evals/single-agent-commerce-read-only/current-prompt-rerun-20261019/CHECKPOINT_B.md):7U/5NEEDS_EDIT/3UNUSABLE/1control;2fallbackcontext7>4 và1UNCERTAIN khi replay tự xác nhận bán lẻ dù availableOffers:null.10verifier attempts(9PASS/1UNCERTAIN), mọi surviving draft được kiểm. Prompt/runtime không sửa; giọng/thuật ngữ nội bộ chưa ổn định. Không tự chạy thêm hoặc live action.
+
 ## Full Gemini owner prompt, one repetition — 2026-10-19
 
 Owner yêu cầu chạy lại bằng bản tư vấn Gemini đầy đủ trong file đã gửi. [Scope và registration](../apps/worker/evals/single-agent-commerce-read-only/gemini-prompt-once-20261019/SCOPE.md): exact owner bytes, verifier hiện tại giữ nguyên; cùng phạm vi vòng gần nhất nhưng N1 thay N3, tổng16slots (8stateful/4B1/4paired-context advice), trần52generation requests/retry0. Freeze lại ca đi ô tô dự cưới từ corpus active, không dùng ca sân khấu cũ. Reuse runner/source/credential route; clean commit trước preflight/provider, review whole actual outcome trước verdict diagnosis. Không runtime fix, mở thêm corpus hoặc tự chạy vòng tiếp từ kết quả.
