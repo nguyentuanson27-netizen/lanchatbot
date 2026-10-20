@@ -59,7 +59,10 @@ with tempfile.TemporaryDirectory(prefix='c3-b-ssh-') as folder:
         env = os.environ.copy()
         env.update(RUNTIME_POLICY_DATABASE_URL=local_url(route['databaseUrl'], pg_port, True), DATABASE_URL=local_url(route['databaseUrl'], pg_port, True), REDIS_URL=local_url(route['redisUrl'], redis_port), QDRANT_BASE_URL=route['qdrantBaseUrl'], QDRANT_API_KEY=route['qdrantApiKey'])
         env.pop('C3_B_TEST_ADMIN_DATABASE_URL', None)
-        if len(sys.argv) > 2 and sys.argv[1] == 'node' and Path(sys.argv[2]).resolve() == Path(__file__).with_name('isolated-integration.mjs').resolve():
+        if len(sys.argv) > 2 and sys.argv[1] == 'node' and Path(sys.argv[2]).resolve() in {
+            Path(__file__).with_name('isolated-integration.mjs').resolve(),
+            Path(__file__).parent.joinpath('policy-handoff-run-20261020/run.mjs').resolve(),
+        }:
             env['C3_B_TEST_ADMIN_DATABASE_URL'] = local_url(route['databaseUrl'], pg_port)
         ops.audit('c3_b_source_session', 'started', 'Existing source access for authorized isolated B integration; live PostgreSQL reads enforced read-only; secrets remain in memory', {'read_only_sources': True})
         child = subprocess.run(sys.argv[1:], cwd=repo, env=env, creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True)

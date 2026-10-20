@@ -23,3 +23,9 @@ Primary review examines actual terminal outcome first, before draft/verdict diag
 Evaluate understanding, useful next step, concise/natural Vietnamese, factual/action safety over the whole reply. Count HANDOFF as a successful process only if state HUMAN/event/tag intent and correct terminal/capture agree. Separately report whether its holding message supplies a useful next step; no keyword scoring. Lock primary before secondary analysis, keep owner feedback separate from historical primary scores. No human adjudication claimed.
 
 After source seal: zero-generation preflight, then exactly five slots. No automatic fix/retry/expansion/full B run. Preserve raw, usage/errors/request count/latency, source/wire hashes and DB-drop evidence. A remains OWNER_BYPASS; no live GO/deploy/send.
+
+## Setup correction before any model dispatch
+
+Initial source8bee957f passed zero-generation preflight, then setup stopped because source-session.py intentionally supplied test-admin credentials only to isolated-integration.mjs. SETUP_FAILURE.json preserves that setup failure:0generations/0completed/0DBcreated. It is not a discarded model outcome or a generation retry.
+
+The same existing source-session bridge now additionally allows the exact versioned policy-handoff runner path. Other scripts/interpreters stay denied; live policy DATABASE_URL remains read-only, admin URL remains in child memory only. No new identity/role or credential source. Predicate test observed RED1FAIL/4PASS then GREEN5PASS, including the original route and negative paths/inline commands. New clean HEAD must be sealed/preflighted before the five unchanged slots run. No provider result was observed before this correction.
