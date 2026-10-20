@@ -1,0 +1,578 @@
+{
+  "generations": [
+    {
+      "run": "targeted",
+      "attempt": "attempt-1.json",
+      "generationId": "c26ccfce-080b-419c-927c-6f0d3bf8169f:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2758,
+      "outputTokens": 1027,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-1.json",
+      "generationId": "attempt-1.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5183,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3656,
+      "outputTokens": 61,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-10.json",
+      "generationId": "6819f5d9-e576-425d-bb94-ff921641463d:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2802,
+      "outputTokens": 1248,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-10.json",
+      "generationId": "attempt-10.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7933,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3666,
+      "outputTokens": 161,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-11.json",
+      "generationId": "1933c896-717a-48f9-bfa2-4189cd989eb2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2780,
+      "outputTokens": 574,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-11.json",
+      "generationId": "attempt-11.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4585,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3612,
+      "outputTokens": 49,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-2.json",
+      "generationId": "6039b699-41e0-46aa-a2e2-342606c92d94:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2807,
+      "outputTokens": 1187,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-2.json",
+      "generationId": "attempt-2.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4491,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3649,
+      "outputTokens": 61,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-3.json",
+      "generationId": "ed628ceb-4798-4136-9bde-988fe980ef47:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2758,
+      "outputTokens": 1526,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-3.json",
+      "generationId": "attempt-3.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6845,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3655,
+      "outputTokens": 42,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-4.json",
+      "generationId": "73faafb5-4f8a-4227-a68a-db18e236bfa6:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2807,
+      "outputTokens": 1505,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-4.json",
+      "generationId": "attempt-4.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5215,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3642,
+      "outputTokens": 57,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-5.json",
+      "generationId": "e1f50c64-7a08-4bc7-adf9-872e5f4e8b98:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2758,
+      "outputTokens": 1168,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-5.json",
+      "generationId": "attempt-5.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4614,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3662,
+      "outputTokens": 39,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-6.json",
+      "generationId": "f2d2087f-747d-47b3-b35c-84170062fab2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2807,
+      "outputTokens": 1550,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-6.json",
+      "generationId": "attempt-6.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 8467,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3633,
+      "outputTokens": 60,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-7.json",
+      "generationId": "3e908900-c02f-4221-8a5d-2946a2970fdc:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2800,
+      "outputTokens": 1124,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-7.json",
+      "generationId": "attempt-7.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7887,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3632,
+      "outputTokens": 210,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-8.json",
+      "generationId": "13f19792-f475-41c1-8e86-604753336ee1:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2788,
+      "outputTokens": 1611,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-8.json",
+      "generationId": "attempt-8.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6531,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3635,
+      "outputTokens": 82,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-9.json",
+      "generationId": "30582a6a-859e-49a2-bbe7-3452e37103a7:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "httpStatus": 200,
+      "providerStatus": null,
+      "inputTokens": 2787,
+      "outputTokens": 463,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "run": "targeted",
+      "attempt": "attempt-9.json",
+      "generationId": "attempt-9.json:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4287,
+      "httpStatus": 200,
+      "providerStatus": "OK",
+      "inputTokens": 3603,
+      "outputTokens": 52,
+      "modelVersion": "gpt-6.1-sol"
+    }
+  ],
+  "wireCaptures": [
+    {
+      "run": "targeted",
+      "id": "c26ccfce-080b-419c-927c-6f0d3bf8169f:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "3b1a1de67d0baeea1b13281d561905e2e254006304f4be68734ada46cd8b802a"
+    },
+    {
+      "run": "targeted",
+      "id": "c26ccfce-080b-419c-927c-6f0d3bf8169f:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "99f0c1b9bb6215a2fd9cf6d411ccc7b6fb9b7ffe66ceb9bb2eff929e6269fd9a"
+    },
+    {
+      "run": "targeted",
+      "id": "c26ccfce-080b-419c-927c-6f0d3bf8169f:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "99f0c1b9bb6215a2fd9cf6d411ccc7b6fb9b7ffe66ceb9bb2eff929e6269fd9a"
+    },
+    {
+      "run": "targeted",
+      "id": "c26ccfce-080b-419c-927c-6f0d3bf8169f:verifier:1",
+      "phase": "RESULT",
+      "sha256": "99f0c1b9bb6215a2fd9cf6d411ccc7b6fb9b7ffe66ceb9bb2eff929e6269fd9a"
+    },
+    {
+      "run": "targeted",
+      "id": "6039b699-41e0-46aa-a2e2-342606c92d94:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "a71b6fb7f1b33b950c9705a89d83bd8e2b7ee125df8180ccd8dd85813fc2e8dd"
+    },
+    {
+      "run": "targeted",
+      "id": "6039b699-41e0-46aa-a2e2-342606c92d94:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "23cdfde08c2c6d81e6c89e9fd2fd9ebf6a10033a96ce05ba55cbaf8194829f61"
+    },
+    {
+      "run": "targeted",
+      "id": "6039b699-41e0-46aa-a2e2-342606c92d94:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "23cdfde08c2c6d81e6c89e9fd2fd9ebf6a10033a96ce05ba55cbaf8194829f61"
+    },
+    {
+      "run": "targeted",
+      "id": "6039b699-41e0-46aa-a2e2-342606c92d94:verifier:1",
+      "phase": "RESULT",
+      "sha256": "23cdfde08c2c6d81e6c89e9fd2fd9ebf6a10033a96ce05ba55cbaf8194829f61"
+    },
+    {
+      "run": "targeted",
+      "id": "ed628ceb-4798-4136-9bde-988fe980ef47:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "3b1a1de67d0baeea1b13281d561905e2e254006304f4be68734ada46cd8b802a"
+    },
+    {
+      "run": "targeted",
+      "id": "ed628ceb-4798-4136-9bde-988fe980ef47:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "d65d6a76619ec7a6acb0af182427294de9a582c6cfc36c02f15fce24a975934e"
+    },
+    {
+      "run": "targeted",
+      "id": "ed628ceb-4798-4136-9bde-988fe980ef47:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "d65d6a76619ec7a6acb0af182427294de9a582c6cfc36c02f15fce24a975934e"
+    },
+    {
+      "run": "targeted",
+      "id": "ed628ceb-4798-4136-9bde-988fe980ef47:verifier:1",
+      "phase": "RESULT",
+      "sha256": "d65d6a76619ec7a6acb0af182427294de9a582c6cfc36c02f15fce24a975934e"
+    },
+    {
+      "run": "targeted",
+      "id": "73faafb5-4f8a-4227-a68a-db18e236bfa6:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "a71b6fb7f1b33b950c9705a89d83bd8e2b7ee125df8180ccd8dd85813fc2e8dd"
+    },
+    {
+      "run": "targeted",
+      "id": "73faafb5-4f8a-4227-a68a-db18e236bfa6:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "58de1f52ac9e3d268c2b520bb8bdf9a86f71ee29ef80cb42bf310e4e26b098df"
+    },
+    {
+      "run": "targeted",
+      "id": "73faafb5-4f8a-4227-a68a-db18e236bfa6:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "58de1f52ac9e3d268c2b520bb8bdf9a86f71ee29ef80cb42bf310e4e26b098df"
+    },
+    {
+      "run": "targeted",
+      "id": "73faafb5-4f8a-4227-a68a-db18e236bfa6:verifier:1",
+      "phase": "RESULT",
+      "sha256": "58de1f52ac9e3d268c2b520bb8bdf9a86f71ee29ef80cb42bf310e4e26b098df"
+    },
+    {
+      "run": "targeted",
+      "id": "e1f50c64-7a08-4bc7-adf9-872e5f4e8b98:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "3b1a1de67d0baeea1b13281d561905e2e254006304f4be68734ada46cd8b802a"
+    },
+    {
+      "run": "targeted",
+      "id": "e1f50c64-7a08-4bc7-adf9-872e5f4e8b98:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "3f161df963937f3f4874843a01bc563b1ba0b92e43ad54eab01b8d08e2184dff"
+    },
+    {
+      "run": "targeted",
+      "id": "e1f50c64-7a08-4bc7-adf9-872e5f4e8b98:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "3f161df963937f3f4874843a01bc563b1ba0b92e43ad54eab01b8d08e2184dff"
+    },
+    {
+      "run": "targeted",
+      "id": "e1f50c64-7a08-4bc7-adf9-872e5f4e8b98:verifier:1",
+      "phase": "RESULT",
+      "sha256": "3f161df963937f3f4874843a01bc563b1ba0b92e43ad54eab01b8d08e2184dff"
+    },
+    {
+      "run": "targeted",
+      "id": "f2d2087f-747d-47b3-b35c-84170062fab2:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "a71b6fb7f1b33b950c9705a89d83bd8e2b7ee125df8180ccd8dd85813fc2e8dd"
+    },
+    {
+      "run": "targeted",
+      "id": "f2d2087f-747d-47b3-b35c-84170062fab2:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "515d99314dc7d6494ef8d5672b0cf2710c3d464831c03f435894ffbe66d3b1e9"
+    },
+    {
+      "run": "targeted",
+      "id": "f2d2087f-747d-47b3-b35c-84170062fab2:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "515d99314dc7d6494ef8d5672b0cf2710c3d464831c03f435894ffbe66d3b1e9"
+    },
+    {
+      "run": "targeted",
+      "id": "f2d2087f-747d-47b3-b35c-84170062fab2:verifier:1",
+      "phase": "RESULT",
+      "sha256": "515d99314dc7d6494ef8d5672b0cf2710c3d464831c03f435894ffbe66d3b1e9"
+    },
+    {
+      "run": "targeted",
+      "id": "3e908900-c02f-4221-8a5d-2946a2970fdc:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "aa94afcead1ac6ac263905261546636f78a19df40d3015773d42f2918f3b7184"
+    },
+    {
+      "run": "targeted",
+      "id": "3e908900-c02f-4221-8a5d-2946a2970fdc:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "680d2cf2d0cf02224782e27e38d8df8dfed163eb036bf53d4b6abadbb96f3fce"
+    },
+    {
+      "run": "targeted",
+      "id": "3e908900-c02f-4221-8a5d-2946a2970fdc:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "680d2cf2d0cf02224782e27e38d8df8dfed163eb036bf53d4b6abadbb96f3fce"
+    },
+    {
+      "run": "targeted",
+      "id": "3e908900-c02f-4221-8a5d-2946a2970fdc:verifier:1",
+      "phase": "RESULT",
+      "sha256": "680d2cf2d0cf02224782e27e38d8df8dfed163eb036bf53d4b6abadbb96f3fce"
+    },
+    {
+      "run": "targeted",
+      "id": "13f19792-f475-41c1-8e86-604753336ee1:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "08fa00805c79f0136fd369eab1b3f66e9231529c99ffc17112d041cc4826e870"
+    },
+    {
+      "run": "targeted",
+      "id": "13f19792-f475-41c1-8e86-604753336ee1:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "b600e49726df17924b4c7213750203c34dcdc7fd381af4a5867e717aa962f259"
+    },
+    {
+      "run": "targeted",
+      "id": "13f19792-f475-41c1-8e86-604753336ee1:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "b600e49726df17924b4c7213750203c34dcdc7fd381af4a5867e717aa962f259"
+    },
+    {
+      "run": "targeted",
+      "id": "13f19792-f475-41c1-8e86-604753336ee1:verifier:1",
+      "phase": "RESULT",
+      "sha256": "b600e49726df17924b4c7213750203c34dcdc7fd381af4a5867e717aa962f259"
+    },
+    {
+      "run": "targeted",
+      "id": "30582a6a-859e-49a2-bbe7-3452e37103a7:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "f6949b9ec9d876121dcbd1e231b729324b412d15fa78364283b6ef4f0853f8d8"
+    },
+    {
+      "run": "targeted",
+      "id": "30582a6a-859e-49a2-bbe7-3452e37103a7:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "8a9b23b9673489b5ca0221b80d8a6a55bb9c2bf2f27321d97be1ca35ef0077b2"
+    },
+    {
+      "run": "targeted",
+      "id": "30582a6a-859e-49a2-bbe7-3452e37103a7:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "8a9b23b9673489b5ca0221b80d8a6a55bb9c2bf2f27321d97be1ca35ef0077b2"
+    },
+    {
+      "run": "targeted",
+      "id": "30582a6a-859e-49a2-bbe7-3452e37103a7:verifier:1",
+      "phase": "RESULT",
+      "sha256": "8a9b23b9673489b5ca0221b80d8a6a55bb9c2bf2f27321d97be1ca35ef0077b2"
+    },
+    {
+      "run": "targeted",
+      "id": "6819f5d9-e576-425d-bb94-ff921641463d:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "a1f18645a879e22dfe95698a7b43b385c9aab7188e0a9866cefd018ec1ab322b"
+    },
+    {
+      "run": "targeted",
+      "id": "6819f5d9-e576-425d-bb94-ff921641463d:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "14fcca8cfdc056148be099fa2937611c46563932064cd8d389ce47bcba151b3e"
+    },
+    {
+      "run": "targeted",
+      "id": "6819f5d9-e576-425d-bb94-ff921641463d:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "14fcca8cfdc056148be099fa2937611c46563932064cd8d389ce47bcba151b3e"
+    },
+    {
+      "run": "targeted",
+      "id": "6819f5d9-e576-425d-bb94-ff921641463d:verifier:1",
+      "phase": "RESULT",
+      "sha256": "14fcca8cfdc056148be099fa2937611c46563932064cd8d389ce47bcba151b3e"
+    },
+    {
+      "run": "targeted",
+      "id": "1933c896-717a-48f9-bfa2-4189cd989eb2:owner:1",
+      "phase": "OWNER_REQUEST",
+      "sha256": "ea30f5245651a157578781d582cad77b0626dfb44f21f853c5265ba12dc17e3c"
+    },
+    {
+      "run": "targeted",
+      "id": "1933c896-717a-48f9-bfa2-4189cd989eb2:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "sha256": "609497c60c083a94db1dc6babc3f53bb627367ee6ad2ed07eafc92766ba3599f"
+    },
+    {
+      "run": "targeted",
+      "id": "1933c896-717a-48f9-bfa2-4189cd989eb2:verifier:1",
+      "phase": "DISPATCHED",
+      "sha256": "609497c60c083a94db1dc6babc3f53bb627367ee6ad2ed07eafc92766ba3599f"
+    },
+    {
+      "run": "targeted",
+      "id": "1933c896-717a-48f9-bfa2-4189cd989eb2:verifier:1",
+      "phase": "RESULT",
+      "sha256": "609497c60c083a94db1dc6babc3f53bb627367ee6ad2ed07eafc92766ba3599f"
+    }
+  ]
+}

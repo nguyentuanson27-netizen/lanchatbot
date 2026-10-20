@@ -2,7 +2,7 @@
 
 ## Policy relationship model comparison — 2026-10-20
 
-**FROZEN_11_NOT_DISPATCHED**, base `0a01ffe1`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/policy-relationship-run-20261020/SCOPE.md):3paired repetitions of old/candidate policy section +5existing candidate controls, max22generations/retry0. Same new context/models/verifier/fallback. Current source read-only; synthetic7day/25k source-following control. Offline11projections/0labelleaks;65focusedPASS. Commit/clean source → provider preflight →11once; no automatic extra run/live action.
+**COMPLETE_11_STOP_BEFORE_FULL_REGISTRATION**, source `ad266ebf`. [Report/11 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-relationship-run-20261020/CHECKPOINT_B.md). Đủ11/11,22requests/retry0/error0/timeout0; verifier11PASS,0fallback. Primary `b1368ada` khóa trước diagnosis: CONTROL3/3USABLE, CANDIDATE7/8USABLE+1NEEDS_EDIT. Ca mặc thử đúng cả3 mỗi arm, nhưng cùng newcontext nên chưa tách tác dụng context/prompt. Còn hứa kiểm tra/lên đơn xử lý lỗi ngoài capability; chưa full24B1+8stateful.65focusedPASS, audit11bindings/44wirecaptures/17rawfiles/11unchangedblobs/0labelleaks; A OWNER_BYPASS/B chưa live GO. Không patch/chạy bù trong run.
 
 ## Policy relationship revision — 2026-10-20
 
