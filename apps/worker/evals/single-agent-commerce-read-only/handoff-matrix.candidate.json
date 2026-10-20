@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "kind": "HANDOFF_MATRIX",
+  "rules": [
+    {
+      "reason": "AFTER_SALES_REQUEST",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "ORDER_STATUS",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "DELIVERY_TRACKING",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "DELIVERY_DELAY",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "CHANGE_DELIVERY_INFO",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "CANCEL_ORDER",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "PAYMENT_AFTER_ORDER",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "EXCHANGE",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển nhân viên hỗ trợ đổi hàng cho chị. Nhân viên sẽ xác nhận món cần đổi và hẹn giao đổi với chị nhé.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "RETURN",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "REFUND",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "DEFECT",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển nhân viên hỗ trợ lỗi sản phẩm cho chị. Nhân viên sẽ kiểm tra và hướng dẫn chị đổi/trả nhé.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "WARRANTY",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "WRONG_OR_MISSING_ITEM",
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "tag": "VAN_DON"
+    },
+    {
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "PRICE_UNAVAILABLE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "STOCK_UNAVAILABLE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "ETA_UNAVAILABLE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "POLICY_UNAVAILABLE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "PRODUCT_AMBIGUOUS",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "UNSUPPORTED_REQUEST",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "SAFETY_OR_COMPLIANCE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "DEPENDENCY_FAILURE",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "ADMIN_REQUEST",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "PRICE_CHANGED_BEFORE_CONFIRMATION",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "STOCK_CHANGED_BEFORE_CONFIRMATION",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "SIZE_CHANGED_BEFORE_CONFIRMATION",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "ETA_CHANGED_BEFORE_CONFIRMATION",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    },
+    {
+      "reason": "PAYMENT_RECEIPT_REVIEW_REQUIRED",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
+      "tag": "NHAN_VIEN"
+    }
+  ],
+  "sourceMetadata": {
+    "source": "ADMIN",
+    "sourceReference": "repo:c3-phase-b-candidate-handoff-20261020",
+    "sourceVersion": "c3-phase-b-candidate-handoff-20261020-v1",
+    "observedAt": "2026-10-20T00:00:00.000Z"
+  }
+}

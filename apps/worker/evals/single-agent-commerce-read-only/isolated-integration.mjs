@@ -254,7 +254,7 @@ try{
  });
  // Positive holding-message controls need an enabled capture-only test page in both payment branches.
  await pool.query('UPDATE pages SET app_send_enabled=true,kill_switch=false WHERE page_id=$1',[pageId]);
- async function handoffFixture({link=true,supersede=false}={}){
+ async function handoffFixture({link=true,supersede=false,candidateMatrix=null}={}){
   const at=new Date(),h={...scope,customerHash:hash(randomUUID()),sourceMessageId:'handoff-'+randomUUID(),sourceObservedAt:at.toISOString()};
   const row=await runtime.loadOrCreate(pageId,h.customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
   h.conversationId=row.conversationId;h.revision=row.stateVersion;
@@ -265,25 +265,27 @@ try{
    await pool.query('UPDATE conversation_ingress_heads SET quiet_until=now() WHERE page_id=$1 AND conversation_hash=$2',[pageId,h.customerHash]);
   };
   await enqueue(h.sourceMessageId);const batch=await inbox.claimNextBatch('c3-b-handoff',60000);assert(batch);
+  assert.equal(batch.conversationHash,h.customerHash,'HANDOFF_FIXTURE_CLAIMED_ANOTHER_CONVERSATION');
   h.bindingVersion='c3-b-handoff:'+batch.generation;
   h.fence=batch.generation; // Synthetic candidate lease domain; not a live COMMERCE actor-fence qualification.
   if(supersede)await enqueue('newer-'+randomUUID());
   const read=async()=>{const r=await runtime.loadOrCreate(pageId,h.customerHash,'APP',()=>{throw new Error('EXISTING_REQUIRED');});
    return {...h,stateVersion:r.stateVersion,state:r.state,permission:r.state.conversationOwner==='BOT'};};
+  const deliveryRecipient='synthetic-handoff-'+h.customerHash;
   const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:async fn=>{
    try{return await withTransaction(pool,fn);}catch(error){report.directHandoffCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}
-  },deliveryRecipient:'synthetic-handoff-recipient',
+  },deliveryRecipient,
    inboxBatchGuard:{generation:batch.generation,leaseToken:batch.leaseToken,inboxIds:batch.inboxIds},resolveTagId:()=> 'synthetic-handoff-tag'});
   const hp=structuredClone(policyResolution.bundle);
   // Synthetic HANDOFF_MATRIX in memory; current public policy is unchanged and never republished.
-  hp.artifacts.handoffMatrix={schemaVersion:1,kind:'HANDOFF_MATRIX',sourceMetadata:hp.artifacts.shopPolicy.sourceMetadata,
+  hp.artifacts.handoffMatrix=candidateMatrix??{schemaVersion:1,kind:'HANDOFF_MATRIX',sourceMetadata:hp.artifacts.shopPolicy.sourceMetadata,
    rules:[{reason:'EXCHANGE',customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF',holdingReply:'Shop đã nhận yêu cầu đổi hàng của chị.',tag:'VAN_DON'},
     {reason:'CUSTOMER_REQUESTED_HUMAN',customerMessagePolicy:'SILENT_HANDOFF',holdingReply:null,tag:'NHAN_VIEN'}]};
   const tools=await createCommerceTools({read:{scope:h,clock:()=>new Date(),policy:async()=>({...policyResolution,bundle:hp}),
     catalog:{readProduct:async()=>{throw new Error('UNUSED');},searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}},
    handoff:{...port,policy:async()=>hp}});
   const counts=async()=>(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags, (SELECT count(*)::int FROM meta_outbox WHERE conversation_id=$1) AS messages',[h.conversationId])).rows[0];
-  return {h,tools,read,counts};
+  return {h,tools,read,counts,deliveryRecipient,batch};
  }
  await check('B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate',async()=>{
   const h=await handoffFixture(),r=await h.tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}});assert.equal(r.status,'OK',JSON.stringify(r));
@@ -296,11 +298,38 @@ try{
   const h=await handoffFixture({link:false}),r=await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}});
   assert.equal(r.status,'UNAVAILABLE');assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0,messages:0});
   assert.equal((await h.tools.terminalOutcome()).disposition,'NO_SEND');
+  // This negative case deliberately rolls back the handoff; finish only its synthetic input.
+  assert.equal(await inbox.completeBatch(h.batch),true);
  });
  await check('B handoff superseded inbound cannot commit using the earlier source lease',async()=>{
   const h=await handoffFixture({supersede:true});
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason:'CUSTOMER_REQUESTED_HUMAN'}})).status,'REJECTED');
   assert.equal((await h.read()).state.conversationOwner,'BOT');assert.deepEqual(await h.counts(),{events:0,tags:0,messages:0});
+  // Stale completion releases its rows and returns false; it cannot finish a newer generation.
+  assert.equal(await inbox.completeBatch(h.batch),false);
+  const newer=await inbox.claimNextBatch('c3-b-handoff-cleanup',60000);assert(newer);
+  assert.equal(newer.conversationHash,h.h.customerHash);assert.equal(await inbox.completeBatch(newer),true);
+ });
+ for(const reason of ['EXCHANGE','DEFECT'])await check('B handoff candidate '+reason+' captures the configured reply exactly once after commit',async()=>{
+  const candidateMatrix=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url)));
+  const expected=candidateMatrix.rules.find(r=>r.reason===reason).holdingReply;
+  const h=await handoffFixture({candidateMatrix}),captured=[];
+  const accepted=await h.tools.invoke({name:'request_handoff',args:{reason}});
+  assert.equal(accepted.status,'OK',JSON.stringify(accepted));
+  assert.equal((await h.read()).state.conversationOwner,'HUMAN');
+  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:1});
+  assert.equal((await h.tools.terminalOutcome()).text,expected);
+  const dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
+   const body=JSON.parse(r.body);if(body.recipient.id===h.deliveryRecipient)captured.push(body.message.text);
+   return {status:200,headers:{},body:{recipient_id:body.recipient.id,message_id:'captured-'+randomUUID()}};
+  }},{sendEnabled:true}),new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),
+  {authorize:async()=>({status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()})},{workerId:'handoff-candidate-capture'});
+  for(let n=0;n<20&&await dispatcher.processOne();n++);
+  assert.deepEqual(captured,[expected]);
+  assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
+  for(let n=0;n<20&&await dispatcher.processOne();n++);
+  assert.deepEqual(captured,[expected]);
+  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:1});
  });
  // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.

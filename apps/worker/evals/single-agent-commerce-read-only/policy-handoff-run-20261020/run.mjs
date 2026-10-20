@@ -5,7 +5,8 @@ import {randomBytes,randomUUID} from 'node:crypto';
 import {readFileSync,readdirSync,writeFileSync,appendFileSync,mkdirSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
-import {resolve} from 'node:path';
+import {resolve,join} from 'node:path';
+import {HandoffMatrixAdminContentV1Schema} from '@lana/contracts';
 import {execFileSync} from 'node:child_process';
 import {PostgresRuntimePolicyStore,PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,LocalEnvelopeCipher,withTransaction} from '@lana/database';
 import {RuntimePolicyResolver} from '@lana/chat-runtime';
@@ -21,8 +22,14 @@ import {createCommerceVerifier,buildVerifierRequest,sha256,runtimeCase} from '..
 import {statefulPreflight} from '../stateful-provider.mjs';
 
 const root=fileURLToPath(new URL('../../../../../',import.meta.url));
-const frozen=JSON.parse(readFileSync(new URL('./REGISTRATION.json',import.meta.url)));
-const bytes=readFileSync(new URL('./inputs.json',import.meta.url)),cases=JSON.parse(bytes);
+const directoryIndex=process.argv.indexOf('--registration-dir');
+assert(directoryIndex<0||process.argv[directoryIndex+1],'REGISTRATION_DIRECTORY_REQUIRED');
+const directory=directoryIndex<0?fileURLToPath(new URL('./',import.meta.url)):resolve(process.argv[directoryIndex+1]);
+const frozen=JSON.parse(readFileSync(join(directory,'REGISTRATION.json')));
+const frozenSource=JSON.parse(readFileSync(join(directory,'SOURCE.json')));
+assert.equal(commerceHash(frozenSource),frozen.sourceProjectionHash,'FROZEN_SOURCE_CHANGED');
+const candidateMatrix=frozen.candidateHandoff?HandoffMatrixAdminContentV1Schema.parse(frozenSource.matrix):null;
+const bytes=readFileSync(join(directory,'inputs.json')),cases=JSON.parse(bytes);
 assert.equal(sha256(bytes),frozen.inputHash);assert.equal(cases.length,5);
 const pf=statefulPreflight(root),{m,config}=pf;
 assert.deepEqual(m.models,frozen.models);assert.deepEqual(m.promptHashes,frozen.promptHashes);
@@ -39,7 +46,11 @@ const policy=async()=>{
  const now=new Date(),r=await resolver.resolve({pageId:config.scope.pageId,channel:config.channel,now});
  assert.equal(r.status,'RESOLVED');assert(r.bundle);
  const source={policy:publicPolicyLiteral(r.bundle,config.scope.pageId,config.scope.shopId,now),matrix:r.bundle.artifacts.handoffMatrix??null};
- assert.equal(commerceHash(source),frozen.sourceProjectionHash,'POLICY_CHANGED_SINCE_FREEZE');return r;
+ assert.equal(commerceHash(source),frozen.upstreamProjectionHash??frozen.sourceProjectionHash,'POLICY_CHANGED_SINCE_FREEZE');
+ if(!candidateMatrix)return r;
+ const bundle={...r.bundle,artifacts:{...r.bundle.artifacts,handoffMatrix:candidateMatrix}};
+ assert.equal(commerceHash({...source,matrix:bundle.artifacts.handoffMatrix}),frozen.sourceProjectionHash,'CANDIDATE_CHANGED_SINCE_FREEZE');
+ return {...r,bundle};
 };
 let admin,pool,runtime,inbox,databaseName,created=false;
 try{
