@@ -2,7 +2,7 @@
 
 ## Active next-fix plan — context comparison — 2026-10-20
 
-**PLAN_ONLY**, preparation base `e67b9fecb3508ef75e25252e8f3466b921cc8088`. [Kế hoạch chi tiết T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md). Mục tiêu: tư vấn giúp khách chọn/mua, tự nhiên; kiểm giả thuyết mô tả quảng cáo đang kéo lời giải thích về catalog. Chưa sửa executable/prompt/source hoặc chạy provider. Mục này sở hữu công việc tiếp theo; các mục cũ là lịch sử, không mở lại run đã dừng.
+**IMPLEMENTATION_AUTHORIZED, T1–T3_READY**, plan preparation base `e67b9fecb3508ef75e25252e8f3466b921cc8088`, implementation base `f9c9c4a9`. [Kế hoạch chi tiết T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md). Mục tiêu: tư vấn giúp khách chọn/mua, tự nhiên; kiểm giả thuyết mô tả quảng cáo đang kéo lời giải thích về catalog. Owner yêu cầu thực hiện theo plan; T1review anchors, T2description map và T3owner-only eval projection đã thực hiện; provider chưa chạy ở savepoint chuẩn bị này. Mục này sở hữu công việc tiếp theo; các mục cũ là lịch sử, không mở lại run đã dừng.
 
 Thứ tự: **T1** đối chiếu lại toàn câu/nguồn của các review mâu thuẫn, giữ nhãn lịch sử → **T2** biên tập mô tả của toàn bộ sản phẩm trong hai capture, bảo toàn thông tin có ích → **T3** projection owner-only trong harness có test, canonical verifier/gate context nguyên vẹn → **T4** control/candidate mới: 2 tình huống ×3 lần ×2 cách trình bày =12 slots/max24 requests → chỉ khi cải thiện có căn cứ, không lỗi thực chất ở candidate mới **T5** registration mới cho existing16 slots/max52 requests → **T6** báo cáo/dừng.
 
@@ -11,6 +11,8 @@ Giữ prompt owner/verifier, models Gemini3.5FlashLiteHIGH/Sol6.1high, history, 
 Self-review plan: không dùng kết quả cũ làm control duy nhất; không nhầm sửa source-config với owner-only projection; không bỏ chi tiết sản phẩm để lấy câu ngắn; không áp lỗi theo từ khóa; giữ tests/code fixes đã đúng. Prompt và verifier chỉ thay ở một kế hoạch khác nếu evidence yêu cầu. Bước provider thuộc triển khai kế hoạch khi owner yêu cầu, không chạy trong lượt lập plan này.
 
 Đã chỉnh theo review độc lập tại `212bde9e`: changed-occasion đo tác dụng biên tập mô tả dài; concern mặc định kiểm tra không suy giảm vì chỉ chứa SV2447 đã gọn. Freeze delta thực tế trước run, không đòi cả hai ca cải thiện hoặc cố lược thêm dữ kiện để tạo treatment. T1 thêm mốc whole-turn evaluator-only phân biệt tư vấn yếu với góp ý giọng; T2/T5 phân biệt hash capture, upstream trước transform và candidate. Không thay ngân sách12+16slots/max76requests, prompt/verifier hoặc nhãn lịch sử. Vẫn PLAN_ONLY.
+
+Implementation readiness2026-10-20: [preparation](../apps/worker/evals/single-agent-commerce-read-only/context-comparison-20261020/PREPARATION.md). Observed RED2PASS/3FAIL→GREEN5/5; focused64/64PASS, worker buildPASS;12actual input projections giữ canonical,6paired sources match,3concern pairs ownerbody identical,0label leak. Delta23lines owner presentation in eval +tests,3authored descriptions/no runtime role/layer/gate/state. Chuẩn bị commit executable/config/frozen inputs sạch trước preflight và12provider slots, không đổi prompt/verifier/model hoặc bù historical runs.
 
 ## Chat-expression model run — 2026-10-19
 

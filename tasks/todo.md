@@ -2,13 +2,13 @@
 
 ## Next fix — context comparison — 2026-10-20
 
-[Plan T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md), base `e67b9fec`. PLAN_ONLY; không có provider hoặc implementation mới trong lượt lập plan.
+[Plan T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md), plan base `e67b9fec`, implementation base `f9c9c4a9`. Owner đã yêu cầu thực hiện; T1–T3_READY, provider chưa chạy ở savepoint chuẩn bị.
 
 - [x] Đối chiếu 5 run gần nhất, owner/verifier/source flow; ghi giả thuyết, giới hạn và kế hoạch có đối chứng. Self-review tránh thay cả prompt/context/verifier, nhầm source override với owner-only, hoặc tự sửa nhãn lịch sử.
 - [x] Nhận review độc lập và chỉnh plan: một ca đo cải thiện, concern kiểm tra không suy giảm nếu input không đổi; bổ sung mốc review tư vấn/giọng và phân biệt hash capture/upstream. Chưa thực hiện T1–T6 hoặc chạy provider.
-- [ ] T1: review bổ sung nguyên câu/nguồn cho các claim đang tranh luận; thêm mốc toàn đoạn phân biệt tư vấn yếu cần viết lại với góp ý giọng; freeze cách đọc chung hai arm trước provider, giữ unresolved riêng nếu chưa thể kết luận.
-- [ ] T2: kiểm mọi sản phẩm trong hai capture, chỉ biên tập phần cần thiết; bảo toàn dữ kiện/đặc điểm phân biệt; ghi delta từng ca và hash capture/upstream/candidate riêng; không thêm suy luận/đáp án vào context.
-- [ ] T3: owner-only projection trong harness hiện hữu; RED→GREEN cho canonical immutability, field preservation, source mapping, captured/sent body và label firewall; focused checks/build thực chạy, self-review.
+- [x] T1: REVIEW_ANCHORS.json giữ5whole historical sections; thống nhất đọc lời tư vấn giữ form thông thường, không kết luận guarantee từ riêng thời lượng; phân biệt kết quả phục hồi/phẳng cụ thể với lời khuyên. Giữ nhãn cũ, ghi supplemental interpretation không phải human adjudication. Mốc chất lượng phân biệt thiếu lựa chọn thực chất với giọng cần trau chuốt.
+- [x] T2: DESCRIPTION_SOURCE_REVIEW.json đối chiếu4món; biên tập3món thay, SV2447 giữ nguyên; bảo toàn vật liệu/phom/lớp/trang trí/cảm giác/phong cách, không thêm công năng. Hash capture/candidate rõ; upstream chưa read lại, chỉ cần nếu T5 chạy.
+- [x] T3: advice-diagnostic owner-only clone + cùng constructor cho request test/runtime; observed2PASS/3FAIL→5/5PASS, focused64/64PASS; worker buildPASS. Offline12request projection/6paired canonical/3concern identical pairs/0label leaks. Không sửa adapter/API/runtime/prompt/verifier; self-review giữ provenance canonical và các code fix trước.
 - [ ] T4: freeze clean source; 12 slots control/candidate, max24requests, mỗi tình huống3lần/arm; changed-occasion đo tác dụng, concern kiểm tra không suy giảm theo delta đã freeze; whole-terminal primary trước diagnosis, giữ mọi attempt/error, không retry/mẫu bù.
 - [ ] T5 conditional: ca chính cải thiện, ca kiểm tra không suy giảm và candidate không lỗi thực chất; freeze registration/source mới cho16existing slots×1/max52requests. Kiểm đúng hash upstream trước transform, tool/stateflow và source presentation nhất quán. Không mở lại16slots cũ.
 - [ ] T6: report source/hash/commands/accounting/outcomes và hạn chế riêng từng giai đoạn; max28slots/76requests, STOP, không tự thêm vòng/production action. Nếu T4 không đạt thì T5 NOT_RUN, không đánh dấu hoàn tất bằng run cũ.

@@ -4,10 +4,32 @@ import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
+import assert from 'node:assert/strict';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest} from './gemini-inference.mjs';
 import {validateProtocol,createCommerceVerifier,buildVerifierRequest,sha256} from './protocol.mjs';
 
 export const selectAdviceCapture=rows=>{const dispatched=rows.filter(r=>r.providerRequests>0);return dispatched.find(r=>r.toolsAllowed===false)??dispatched.at(-1)??null;};
+
+// Evaluation-only presentation. Canonical evidence remains the verifier/gate input.
+export function adviceOwnerContext(context,descriptions={}){
+ const view=structuredClone(context);
+ for(const p of view.runtimeProducts??[]){
+  if(!Object.hasOwn(descriptions,p.subjectRef))continue;
+  const edit=descriptions[p.subjectRef];
+  assert.deepEqual(Object.keys(edit).sort(),['description','originalSha256'],'ADVICE_DESCRIPTION_FIELDS');
+  assert.equal(typeof p.content?.description,'string','ADVICE_DESCRIPTION_SOURCE_CHANGED');
+  assert.equal(sha256(p.content.description),edit.originalSha256,'ADVICE_DESCRIPTION_SOURCE_CHANGED');
+  assert(typeof edit.description==='string'&&edit.description.trim()&&Buffer.byteLength(edit.description)<=10000,'ADVICE_DESCRIPTION_BOUND');
+  p.content.description=edit.description;
+ }
+ return view;
+}
+
+export function buildAdviceOwnerRequest(row,capture,instructions,requestId,signal){
+ return {generationId:requestId+':owner:1',instructions,
+  contents:[...row.runtime.history.map(h=>({role:h.role==='customer'?'user':'model',parts:[{text:h.text}]})),{role:'user',parts:[{text:row.runtime.latest}]}],
+  context:adviceOwnerContext(capture.context,row.ownerDescriptions),toolsAllowed:false,availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:0},signal};
+}
 
 async function main(){
  const [input,out]=process.argv.slice(2);if(!input||!out)throw new Error('CAPTURE_AND_NEW_OUT_REQUIRED');
@@ -28,7 +50,7 @@ async function main(){
   let result={status:'BLOCKED',terminal:null};
   if(capture){
    const trusted=structuredClone(capture.context),now=new Date(capture.capturedAt),requestId=randomUUID(),controller=new AbortController();
-   const request={generationId:requestId+':owner:1',instructions:ownerPrompt,contents:[...row.runtime.history.map(h=>({role:h.role==='customer'?'user':'model',parts:[{text:h.text}]})),{role:'user',parts:[{text:row.runtime.latest}]}],context:trusted,toolsAllowed:false,availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:0},signal:controller.signal};
+   const request=buildAdviceOwnerRequest(row,capture,ownerPrompt,requestId,controller.signal);
    const generations=[];const started=performance.now();let draft=null;
    try {
     audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
