@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Policy application fix — 2026-10-20
+
+[Finding/fix/checks](../docs/specs/c3-phase-b-policy-application-fix-20261020.md), base `ab57daa2`, **IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**.
+
+- [x] Apply independent-review corrections: explain HOLD_UP_ONLY only where source supplies it; preserve separate returns rules, null customerCare/eligibility and source provenance; no unsupported test enum.
+- [x] Replace owner policy section with situation-based application; sync ownerHash, preserve other prompt sections/verifier/models/corpus/fallback.
+- [x] Observed RED2FAIL→GREEN2PASS; focused213PASS, captured-request/adapter/protocol59PASS; typecheck, worker build via tsc and lint PASS; self-review source/snapshot/capability scope.
+- [ ] Provider8slots proposed, not frozen or dispatched. No model-quality improvement claim; no automatic full run/live action.
+
 ## Full B1/B2/B3 rerun — 2026-10-20
 
 [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md), base `d8743ff0`, **COMPLETE_FULL32_STOP_SALES_READINESS**. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/CHECKPOINT_B.md), source `68694ce2`, current prompts/models unchanged.

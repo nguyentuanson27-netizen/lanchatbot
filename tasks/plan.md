@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active policy application fix — 2026-10-20
+
+**IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**, base `ab57daa2`. [Finding, independent-review corrections, implementation and exact checks](../docs/specs/c3-phase-b-policy-application-fix-20261020.md). Explain source inspection enum in existing policy projection, preserve raw source rules/provenance/null eligibility, replace only owner policy section. No verifier/model/schema/corpus change or customer-language parser. Observed RED2FAIL→GREEN2PASS; focused213PASS + adapter/protocol59PASS; worker typecheck/build via tsc/lint PASS. Provider8slots proposed only, not frozen/dispatched; no claim fallback fixed or live GO.
+
 ## Active full B1/B2/B3 run — 2026-10-20
 
 **COMPLETE_FULL32_STOP_SALES_READINESS**, source `68694ce209baf953a338e16f37853ce3e63af110`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md), [report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/CHECKPOINT_B.md):24/24B1×1 +8/8stateful×1,90requests/retry0. B1 19USABLE/4NEEDS_EDIT/1fallback; stateful7USABLE/1ownership control,1ownerfinal-onlytoolmodeerror recovered fromreceipt. COD26/26 +BANK_TRANSFER26/26 deterministic checksPASS;3testDBsdropped. Primary `9b5070c4` before diagnosis;0labelleaks/27bindings/49publishedrawhashes. Full run explicitly authorized after prior diagnostic STOP; no prompt/runtime/source/model edits or extra replay. Policy fallback applies HOLD_UP_ONLY incorrectly despite complete condition list; also voice/choice/fit-step findings. No A PASS/B live GO, no automatic fix/newround.

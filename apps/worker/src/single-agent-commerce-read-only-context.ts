@@ -19,10 +19,15 @@ export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string,
     (policy.effectiveUntil !== null && Date.parse(policy.effectiveUntil) <= now.getTime())) throw new Error("POLICY_SCOPE_OR_FRESHNESS");
   const version = commerceHash({ policyVersion: policy.policyVersion,
     references: [...bundle.versionReferences].sort((a, b) => a.artifactKey.localeCompare(b.artifactKey)) });
+  const care = shop.customerCare;
   return { ref: `policy:${version}`, sourceVersion: version, observedAt: shop.sourceMetadata.observedAt,
     // Existing policy effectiveUntil=null is versioned, not a fabricated expiry. Active pointers are re-read at the final gate.
     expiresAt: policy.effectiveUntil,
-    text: canonicalJsonV1({ customerCare: shop.customerCare ?? null,
+    // Explain the source code only; this does not decide exchange/return eligibility.
+    text: canonicalJsonV1({ customerCare: care ? { ...care, inspection: { ...care.inspection,
+      ...(care.inspection.tryOnMode === "HOLD_UP_ONLY"
+        ? { tryOnModeDescription: "Chỉ ướm bên ngoài, không mặc vào người." } : {}),
+    } } : null,
       payment: { allowedMethods: shop.allowedPaymentMethods },
       shipping: { defaultFeeVnd: policy.shipping.defaultFeeVnd }, multiItemOffer: {
         minimumProductCount: policy.multiItemOffer.minimumProductCount, discountBps: policy.multiItemOffer.discountBps,

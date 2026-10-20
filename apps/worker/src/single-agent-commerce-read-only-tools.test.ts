@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import { RuntimePolicyResolver } from "@lana/chat-runtime";
+import { CustomerCarePolicyAdminContentV1Schema } from "@lana/contracts";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
-import { commerceNow, commerceScope, fixturePolicy, fixtureProduct } from "./single-agent-commerce.test-support.js";
+import { commerceNow, commerceScope, fixturePolicy, fixturePolicyPointers, fixtureProduct } from "./single-agent-commerce.test-support.js";
+import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { hardPrecheck, makeBinding } from "./single-agent-semantic-verifier-boundary.js";
 
 const setup = (options: { fee?: number } = {}) => {
@@ -411,6 +414,53 @@ describe("read-only domain tools", () => {
     expect(data.shipping.defaultFeeVnd).toBe(25_000);
     expect(data.customerCare).toBeNull();
     expect(JSON.stringify(data)).not.toContain("finalConcession");
+    expect(JSON.stringify(data)).not.toContain("tryOnModeDescription");
+  });
+  it.each([[15, 30_000], [7, 25_000]])("explains the inspection code without changing source rules (%i days / %i VND)", async (days, fee) => {
+    const care = CustomerCarePolicyAdminContentV1Schema.parse({
+      exchange: { windowDaysFromReceipt: days, maxExchangesPerOrder: 1, supportedActions: ["SIZE", "COLOR", "MODEL"],
+        saleRestriction: { discountThresholdBps: 3000, allowedActions: ["SIZE", "COLOR"] },
+        requiredConditions: { clean: true, originalTags: true, undamaged: true, unused: true, unwashed: true },
+        totalTwoWayShippingFeeVnd: fee, modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+        customerPaysPositivePriceDifference: true, fulfillmentMethod: "COURIER_SWAP" },
+      returns: { eligibleReasons: ["MANUFACTURING_FABRIC_DEFECT", "MANUFACTURING_SEAM_DEFECT", "WRONG_PRODUCT_SENT"],
+        reportingWindowDaysFromReceipt: 5, shopShippingCoveragePercent: 100, refundBusinessDaysMin: 1,
+        refundBusinessDaysMax: 3, refundStartsAfter: "SHOP_CONFIRMS_ELIGIBLE_ERROR" },
+      inspection: { tryOnMode: "HOLD_UP_ONLY", refusedParcelShippingFeeVnd: fee },
+      marketplacePricing: { shopeePriceMatch: false, reason: "PLATFORM_SUBSIDY_AND_VOUCHERS" },
+      customerFaq: { discloseLightingAndDisplayColorVariance: true, handWashPreferred: true,
+        machineWashAllowedWithLaundryBagAndGentleCycle: true },
+    });
+    const pointers = fixturePolicyPointers().map(p => {
+      const content = p.version.content.kind === "SHOP_POLICY" ? { ...p.version.content, customerCare: care } : p.version.content;
+      return { ...p, version: { ...p.version, content, contentHash: `sha256:${commerceHash(content)}` } };
+    });
+    const resolver = new RuntimePolicyResolver({ loadActivePointers: async () => pointers }, { enabled: true });
+    const resolution = await resolver.resolve({ pageId: commerceScope().pageId, channel: "CANARY_SHADOW", now: commerceNow });
+    expect(resolution.status).toBe("RESOLVED");
+    const original = structuredClone(resolution);
+    let current = resolution;
+    const { catalog } = setup();
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, catalog, policy: async () => current });
+    const result = await tools.invoke({ name: "read_policy", args: {} });
+    const literal = tools.snapshot().policyLiterals[0]!;
+    const projected = JSON.parse(literal.text);
+    expect(result).toEqual({ status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
+      policy: projected, sourceVersion: literal.sourceVersion } });
+    const { tryOnModeDescription, ...inspection } = projected.customerCare.inspection;
+    expect(tryOnModeDescription).toBe("Chỉ ướm bên ngoài, không mặc vào người.");
+    expect({ ...projected.customerCare, inspection }).toEqual(care);
+    expect(resolution).toEqual(original);
+    expect(literal).toMatchObject({ ref: `policy:${literal.sourceVersion}`, observedAt: commerceNow.toISOString(), expiresAt: null });
+    expect(literal.sourceVersion).toBe(commerceHash({ policyVersion: resolution.bundle!.policy.policyVersion,
+      references: [...resolution.bundle!.versionReferences].sort((a, b) => a.artifactKey.localeCompare(b.artifactKey)) }));
+    const binding = makeBinding("turn", "Quy định theo nguồn hiện hành.", tools.snapshot());
+    expect(makeBinding("turn", "Quy định theo nguồn hiện hành.", await tools.readback())).toEqual(binding);
+    current = await fixturePolicy();
+    const withoutCare = await tools.readback();
+    expect(JSON.parse(withoutCare.policyLiterals[0]!.text).customerCare).toBeNull();
+    expect(JSON.stringify(withoutCare)).not.toContain("tryOnModeDescription");
+    expect(makeBinding("turn", "Quy định theo nguồn hiện hành.", withoutCare).trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
   });
   it("policy source changes invalidate old snapshots without changing prompt", async () => {
     let fee = 25_000;

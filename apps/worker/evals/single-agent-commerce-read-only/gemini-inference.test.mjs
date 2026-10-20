@@ -16,6 +16,27 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('captured policy request keeps the source code and explanation without deciding eligibility or leaking evaluator labels',async()=>{
+ const r=request(),policy={customerCare:{inspection:{tryOnMode:'HOLD_UP_ONLY',
+  tryOnModeDescription:'Chỉ ướm bên ngoài, không mặc vào người.'}}};
+ r.context.policyLiterals=[{ref:'policy:test',text:JSON.stringify(policy)}];
+ r.contents.push({role:'model',parts:[{functionCall:{name:'read_policy',args:{}}}]},
+  {role:'user',parts:[{functionResponse:{name:'read_policy',response:{status:'OK',data:{
+   scope:'SHOP_RULES',orderEligibility:null,policy,sourceVersion:'test-source'}}}}]});
+ r.caseId='POLICY_CASE_CANARY';r.evaluator={requiredBehaviors:['POLICY_RUBRIC_CANARY']};
+ const original=structuredClone({context:r.context,contents:r.contents});let captured;
+ const result=await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+  captured=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));
+ }})(r);
+ assert.equal(result.telemetry.providerRequests,1);
+ const view=JSON.parse(captured.contents[0].parts[0].text).trusted;
+ assert.deepEqual(view.policy,r.context.policyLiterals);
+ assert.deepEqual(captured.contents.at(-1).parts[0].functionResponse.response.data,
+  r.contents.at(-1).parts[0].functionResponse.response.data);
+ assert.deepEqual({context:r.context,contents:r.contents},original);
+ assert.doesNotMatch(JSON.stringify(captured),/POLICY_CASE_CANARY|POLICY_RUBRIC_CANARY|caseId|requiredBehaviors/);
+});
+
 test('search exposes exact product codes independently of discovery text and preserves signed call arguments',()=>{
  const declaration=buildGeminiCommerceRequest(request()).tools[0].functionDeclarations.find(d=>d.name==='search_products');
  assert.equal(declaration.parameters.properties.productCode.type,'STRING');
