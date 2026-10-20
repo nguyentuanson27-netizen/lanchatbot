@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Configured handoff reply + clarification fix — 2026-10-20
+
+**IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**,109 focused unit tests +28 PostgreSQL/capture checksPASS; DB dropped,0provider. Base `71941ab5`; [scope, exact texts, consumer and checks](../docs/specs/c3-phase-b-handoff-reply-fix-20261020.md). Use the existing HANDOFF_MATRIX for EXCHANGE/DEFECT messages, preserve other rules/tags/silent decisions, and ask the entitlement-deciding question before unrequested policy details. Candidate only; published sources/defaults unchanged. Existing five-case prepare/run supports a fresh registration directory and isolated frozen candidate matrix, bound separately from the upstream capture. No new runtime role/parser/state/gate or credential route. Model follow-up remains five existing cases once each, max20 requests/retry0, with a fresh clean source seal; not dispatched by this fix.
+
 ## Policy + handoff model run — 2026-10-20
 
 **COMPLETE_5_MECHANISM_VERIFIED_REPLY_QUALITY_NOT_COMPLETE**, source `b1a58d2d`. [Report/5 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-run-20261020/CHECKPOINT_B.md). Đủ5/5 một lần,12requests(9owner+3verifier),0retry/error/timeout/fallback/no-send.3SEND_ELIGIBLE qua verifierPASS;2HANDOFF với stateHUMAN/event/tag intent/message1/1/1 và dispatcher capture đúng. DB tạm đã drop; không live send/Pancake tag delivery hoặc staff response. Primary `a2493950` khóa trước diagnosis: cơ chế đúng5/5, reply2USABLE/3NEEDS_EDIT theo mục tiêu mới. Hai tin handoff do code default vì matrix=null, không phải model final; ca thử chưa rõ vẫn đọc policy dài.101 focused tests PASS, audit9owner/3bindings/18wire/10raw/14source identities/0labelleaks. Setup đầu0generation thiếu admin scope đã giữ; chỉ mở thêm đúng runner trong bridge với RED1FAIL→GREEN5PASS. Không patch/chạy bù/full hoặc claim B/liveGO; A OWNER_BYPASS.

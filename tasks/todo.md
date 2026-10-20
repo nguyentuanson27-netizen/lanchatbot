@@ -1,5 +1,16 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Configured handoff reply + clarification fix — 2026-10-20
+
+[Scope and verification](../docs/specs/c3-phase-b-handoff-reply-fix-20261020.md), base `71941ab5`.
+
+- [x] Existing-schema candidate changes only EXCHANGE/DEFECT holding text; covers all existing reasons and preserves other default decisions. Generic product/exchange wording; no eligibility approval or invented customer requirements.
+- [x] Replace one owner policy bullet to ask the missing decisive fact first; sync owner hash, retain verifier/models/source policy and historical provider artifacts.
+- [x] Reuse existing prepare/run with fresh registration directory, isolated candidate flag, separate upstream/effective hashes; no publish or auth route change.
+- [x] Observed RED2FAIL/1PASS → GREEN3PASS; protocol/adapter/config62PASS + worker handoff/persistence/runner47PASS; three syntax checks PASS.
+- [x] Real PostgreSQL/capture-dispatcher28/28PASS, exit0, DB dropped/provider0. Two earlier failed test runs retained (pending negative-fixture inbox work, then incorrect stale cleanup); corrected using the existing stale-completion API and exact conversation check. Both new reason texts captured exactly once after persisted HUMAN ownership/event/tag/outbox. No Meta/Pancake socket or real staff response.
+- [ ] New five-case provider measurement: not frozen/dispatched. No claim that model brevity or full B readiness improved; A OWNER_BYPASS remains.
+
 ## Policy + handoff model run — 2026-10-20
 
 **COMPLETE_5_MECHANISM_VERIFIED_REPLY_QUALITY_NOT_COMPLETE**, source `b1a58d2d`. [Report/5 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-run-20261020/CHECKPOINT_B.md). Đủ5/5 một lần,12requests(9owner+3verifier),0retry/error/timeout/fallback/no-send.3SEND_ELIGIBLE qua verifierPASS;2HANDOFF với stateHUMAN/event/tag intent/message1/1/1 và dispatcher capture đúng. DB tạm đã drop; không live send/Pancake tag delivery hoặc staff response. Primary `a2493950` khóa trước diagnosis: cơ chế đúng5/5, reply2USABLE/3NEEDS_EDIT theo mục tiêu mới. Hai tin handoff do code default vì matrix=null, không phải model final; ca thử chưa rõ vẫn đọc policy dài.101 focused tests PASS, audit9owner/3bindings/18wire/10raw/14source identities/0labelleaks. Setup đầu0generation thiếu admin scope đã giữ; chỉ mở thêm đúng runner trong bridge với RED1FAIL→GREEN5PASS. Không patch/chạy bù/full hoặc claim B/liveGO; A OWNER_BYPASS.
