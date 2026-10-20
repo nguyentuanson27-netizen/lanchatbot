@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { RuntimePolicyResolver } from "@lana/chat-runtime";
-import { CustomerCarePolicyAdminContentV1Schema } from "@lana/contracts";
+import { canonicalJsonV1, CustomerCarePolicyAdminContentV1Schema } from "@lana/contracts";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { commerceNow, commerceScope, fixturePolicy, fixturePolicyPointers, fixtureProduct } from "./single-agent-commerce.test-support.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
@@ -416,11 +416,15 @@ describe("read-only domain tools", () => {
     expect(JSON.stringify(data)).not.toContain("finalConcession");
     expect(JSON.stringify(data)).not.toContain("tryOnModeDescription");
   });
-  it.each([[15, 30_000], [7, 25_000]])("explains the inspection code without changing source rules (%i days / %i VND)", async (days, fee) => {
+  it.each([
+    { days: 15, fee: 30_000, unused: true },
+    { days: 7, fee: 25_000, unused: true },
+    { days: 15, fee: 30_000, unused: false },
+  ])("explains inspection and exchange together without changing source rules ($days days / $fee VND / unused=$unused)", async ({ days, fee, unused }) => {
     const care = CustomerCarePolicyAdminContentV1Schema.parse({
       exchange: { windowDaysFromReceipt: days, maxExchangesPerOrder: 1, supportedActions: ["SIZE", "COLOR", "MODEL"],
         saleRestriction: { discountThresholdBps: 3000, allowedActions: ["SIZE", "COLOR"] },
-        requiredConditions: { clean: true, originalTags: true, undamaged: true, unused: true, unwashed: true },
+        requiredConditions: { clean: true, originalTags: true, undamaged: true, unused, unwashed: true },
         totalTwoWayShippingFeeVnd: fee, modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
         customerPaysPositivePriceDifference: true, fulfillmentMethod: "COURIER_SWAP" },
       returns: { eligibleReasons: ["MANUFACTURING_FABRIC_DEFECT", "MANUFACTURING_SEAM_DEFECT", "WRONG_PRODUCT_SENT"],
@@ -448,13 +452,24 @@ describe("read-only domain tools", () => {
     expect(result).toEqual({ status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
       policy: projected, sourceVersion: literal.sourceVersion } });
     const { tryOnModeDescription, ...inspection } = projected.customerCare.inspection;
-    expect(tryOnModeDescription).toBe("Chỉ ướm bên ngoài, không mặc vào người.");
+    const inspectionMeaning = "Chỉ ướm bên ngoài, không mặc vào người.";
+    const exchangeMeaning = " Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns.";
+    expect(tryOnModeDescription).toBe(inspectionMeaning + (unused ? exchangeMeaning : ""));
     expect({ ...projected.customerCare, inspection }).toEqual(care);
     expect(resolution).toEqual(original);
     expect(literal).toMatchObject({ ref: `policy:${literal.sourceVersion}`, observedAt: commerceNow.toISOString(), expiresAt: null });
     expect(literal.sourceVersion).toBe(commerceHash({ policyVersion: resolution.bundle!.policy.policyVersion,
       references: [...resolution.bundle!.versionReferences].sort((a, b) => a.artifactKey.localeCompare(b.artifactKey)) }));
     const binding = makeBinding("turn", "Quy định theo nguồn hiện hành.", tools.snapshot());
+    if (unused) {
+      const beforeExplanation = structuredClone(tools.snapshot());
+      const oldPolicy = JSON.parse(beforeExplanation.policyLiterals[0]!.text);
+      oldPolicy.customerCare.inspection.tryOnModeDescription = inspectionMeaning;
+      beforeExplanation.policyLiterals[0]!.text = canonicalJsonV1(oldPolicy);
+      // Upstream source identity stays the same; exact trusted meaning still binds the verdict.
+      expect(beforeExplanation.policyLiterals[0]!.sourceVersion).toBe(literal.sourceVersion);
+      expect(makeBinding("turn", "Quy định theo nguồn hiện hành.", beforeExplanation).trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
+    }
     expect(makeBinding("turn", "Quy định theo nguồn hiện hành.", await tools.readback())).toEqual(binding);
     current = await fixturePolicy();
     const withoutCare = await tools.readback();

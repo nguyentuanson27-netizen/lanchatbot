@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Policy relationship revision — 2026-10-20
+
+[Finding, sửa và checks](../docs/specs/c3-phase-b-policy-application-fix-20261020.md#revision-sau-run-8-lượt--2026-10-20), base `e081d3e9`, **IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**.
+
+- [x] Đối chiếu ca cũ đã đúng với prompt migration và coverage; giữ nguyên raw/nhãn run 8 (3 USABLE / 5 fallback).
+- [x] Diễn giải quan hệ inspection/exchange trong field context hiện có, chỉ khi HOLD_UP_ONLY và unused=true; giữ returns, provenance, null eligibility. Owner hỏi rõ hành động chưa rõ, tách báo lỗi khỏi xác nhận lỗi; giữ giọng/tư vấn/verifier/models/corpus.
+- [x] Observed RED 2 FAIL / 1 PASS → focused GREEN 214 PASS; adapter/protocol 59 PASS, typecheck/build/lint PASS; self-review byte boundaries/manifest và source/snapshot.
+- [ ] Đo model mới: kế hoạch đối chứng section policy và candidate, 11 lượt; chưa freeze hoặc dispatch. Chưa nhận hết fallback/cải thiện, chưa full B/live GO.
+
 ## Policy application model run — 2026-10-20
 
 [Report/đủ8hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-application-run-20261020/CHECKPOINT_B.md), source `2b16a79a`, **COMPLETE_8_STOP_POLICY_APPLICATION**.

@@ -23,10 +23,14 @@ export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string,
   return { ref: `policy:${version}`, sourceVersion: version, observedAt: shop.sourceMetadata.observedAt,
     // Existing policy effectiveUntil=null is versioned, not a fabricated expiry. Active pointers are re-read at the final gate.
     expiresAt: policy.effectiveUntil,
-    // Explain the source code only; this does not decide exchange/return eligibility.
+    // Shared source meaning for both models, including the owner-approved relation
+    // between HOLD_UP_ONLY and unused exchange stock. Not a customer eligibility decision.
     text: canonicalJsonV1({ customerCare: care ? { ...care, inspection: { ...care.inspection,
       ...(care.inspection.tryOnMode === "HOLD_UP_ONLY"
-        ? { tryOnModeDescription: "Chỉ ướm bên ngoài, không mặc vào người." } : {}),
+        ? { tryOnModeDescription: "Chỉ ướm bên ngoài, không mặc vào người." +
+          (care.exchange.requiredConditions.unused
+            ? " Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns."
+            : "") } : {}),
     } } : null,
       payment: { allowedMethods: shop.allowedPaymentMethods },
       shipping: { defaultFeeVnd: policy.shipping.defaultFeeVnd }, multiItemOffer: {

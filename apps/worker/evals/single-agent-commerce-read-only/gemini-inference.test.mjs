@@ -10,15 +10,18 @@ test('native field contract maps domain paths without rewriting the signed trans
 });
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import {createCommerceVerifier} from './protocol.mjs';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
 const config={model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-project',location:'global'};
 const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo dữ liệu nguồn.',contents:[{role:'user',parts:[{text:'Áo bao nhiêu em?'}]}],
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
-test('captured policy request keeps the source code and explanation without deciding eligibility or leaking evaluator labels',async()=>{
+test('both captured model requests keep the same policy meaning without deciding eligibility or leaking evaluator labels',async()=>{
  const r=request(),policy={customerCare:{inspection:{tryOnMode:'HOLD_UP_ONLY',
-  tryOnModeDescription:'Chỉ ướm bên ngoài, không mặc vào người.'}}};
+  tryOnModeDescription:'Chỉ ướm bên ngoài, không mặc vào người. Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns.'},
+  exchange:{requiredConditions:{unused:true}}}};
  r.context.policyLiterals=[{ref:'policy:test',text:JSON.stringify(policy)}];
  r.contents.push({role:'model',parts:[{functionCall:{name:'read_policy',args:{}}}]},
   {role:'user',parts:[{functionResponse:{name:'read_policy',response:{status:'OK',data:{
@@ -35,6 +38,16 @@ test('captured policy request keeps the source code and explanation without deci
   r.contents.at(-1).parts[0].functionResponse.response.data);
  assert.deepEqual({context:r.context,contents:r.contents},original);
  assert.doesNotMatch(JSON.stringify(captured),/POLICY_CASE_CANARY|POLICY_RUBRIC_CANARY|caseId|requiredBehaviors/);
+ let verifierCaptured;
+ const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
+ await createCommerceVerifier(manifest,async(_manifest,_role,wire)=>{
+  verifierCaptured=wire;
+  return {status:'OK',answer:'{"verdict":"PASS","violations":[]}',providerRequests:1};
+ })({generationId:'turn:verifier:1',instructions:'Kiểm reply.',trusted:r.context,finalDraft:'Dạ chị.',
+  latest:'Em ơi',history:[],binding:{requestId:'turn'},signal:r.signal,caseId:r.caseId,evaluator:r.evaluator});
+ const verifierView=JSON.parse(verifierCaptured.input[0].content[0].text);
+ assert.deepEqual(verifierView.trusted.policyLiterals,view.policy);
+ assert.doesNotMatch(JSON.stringify(verifierCaptured),/POLICY_CASE_CANARY|POLICY_RUBRIC_CANARY|caseId|requiredBehaviors/);
 });
 
 test('search exposes exact product codes independently of discovery text and preserves signed call arguments',()=>{

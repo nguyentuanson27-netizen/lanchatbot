@@ -1,5 +1,11 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Policy relationship revision — 2026-10-20
+
+**IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**, base `e081d3e9`. [Revision, rationale và exact checks](../docs/specs/c3-phase-b-policy-application-fix-20261020.md#revision-sau-run-8-lượt--2026-10-20). Bổ sung quan hệ HOLD_UP_ONLY + unused trong field context hiện có dùng chung hai model, tách exchange/returns; owner phân biệt hành động chưa rõ và báo lỗi chưa xác nhận. Giữ phần tư vấn/giọng, verifier, models và corpus. RED 2 FAIL → focused 214 PASS, adapter/protocol 59 PASS; typecheck/build/lint PASS.
+
+Provider follow-up chưa freeze/chạy: ca gốc ×3 với policy section cũ làm đối chứng + ×3 candidate, thêm 5 control candidate đã có = 11 lượt. Giữ cùng context mới/config, chỉ section owner khác giữa arms; không dùng phép đo này để quy tác dụng riêng cho context. Candidate đạt cả nhóm nhỏ mới đăng ký full 24 B1 + 8 stateful; không mở rộng corpus hoặc tự thêm vòng. Lượt này sửa file/local verification, chưa có model evidence mới; A OWNER_BYPASS/B chưa live GO.
+
 ## Policy application model run — 2026-10-20
 
 **COMPLETE_8_STOP_POLICY_APPLICATION**, source `2b16a79a`, [report](../apps/worker/evals/single-agent-commerce-read-only/policy-application-run-20261020/CHECKPOINT_B.md). Đủ8/8captured-world policy slots/16generationrequests, retry0/error0/timeout0; primary `5b85b9d2` trước diagnosis:3USABLE/5actualfallback. Ca gốc3/3vẫn đồng ý đổi sau mặc thử dù request có nghĩa mã và prompt mới; không nhận đã fix. Hai ca fallback khác là thử chưa rõ và quyền xử lý lỗi đường may, không gom toàn bộ thành cùng lỗi đã chứng minh. Controls chỉ ướm/thời hạn-phí15ngày30k/nguồn synthetic7ngày25k dùng được.65focusedPASS; audit8bindings/32wirecaptures/14rawfiles/9unchangedblobs,0labelleaks. Không sửa tiếp/chạyfull hoặc live action; A OWNER_BYPASS/Bno liveGO.
