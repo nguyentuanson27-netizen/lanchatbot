@@ -26,6 +26,10 @@ export function adviceOwnerContext(context,descriptions={}){
 }
 
 export function buildAdviceOwnerRequest(row,capture,instructions,requestId,signal){
+ if(Object.hasOwn(row,'ownerInstructions')){
+  assert(typeof row.ownerInstructions==='string'&&row.ownerInstructions.trim()&&Buffer.byteLength(row.ownerInstructions)<=20000,'ADVICE_PROMPT_BOUND');
+  instructions=row.ownerInstructions;
+ }
  return {generationId:requestId+':owner:1',instructions,
   contents:[...row.runtime.history.map(h=>({role:h.role==='customer'?'user':'model',parts:[{text:h.text}]})),{role:'user',parts:[{text:row.runtime.latest}]}],
   context:adviceOwnerContext(capture.context,row.ownerDescriptions),toolsAllowed:false,availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:0},signal};
@@ -44,7 +48,7 @@ async function main(){
  const infer=createGeminiCommerceInference({model:m.models.conversation.model,effort:'high',location:'global',projectId:config.vertex.projectId});
  const verify=createCommerceVerifier(m,undefined,(id,v)=>audit(id,v.phase,v.provider));
  const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
- writeFileSync(resolve(out,'registration.json'),JSON.stringify({sourceSha:source,inputHash:sha256(readFileSync(input)),registered:rows.length,maximumGenerationRequests:rows.length*2,mode:'CAPTURED_PUBLIC_WORLD_REPLAY_NOT_LIVE_ELIGIBILITY',models:m.models,promptHashes:m.promptHashes,retry:0,sendEnabled:false},null,2));
+ writeFileSync(resolve(out,'registration.json'),JSON.stringify({sourceSha:source,inputHash:sha256(readFileSync(input)),registered:rows.length,maximumGenerationRequests:rows.length*2,mode:'CAPTURED_PUBLIC_WORLD_REPLAY_NOT_LIVE_ELIGIBILITY',models:m.models,promptHashes:m.promptHashes,ownerPromptHashes:rows.map(r=>sha256(r.ownerInstructions??ownerPrompt)),retry:0,sendEnabled:false},null,2));
  for(const [index,row] of rows.entries()){
   const captures=row.requests??[],capture=selectAdviceCapture(captures);
   let result={status:'BLOCKED',terminal:null};

@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active next-fix plan — advice focus — 2026-10-20
+
+**PLAN_ONLY**, base `fdb2a63e`. [Kế hoạch cụ thể đã chỉnh theo self-review](../docs/specs/c3-phase-b-advice-focus-plan-20261020.md). Finding owner: nhồi thông tin, chưa đúng trọng tâm, nhiều từ ít dùng trong văn nói. Thay/gộp hai phần chọn ý và giọng chat: mỗi chi tiết phục vụ lời khuyên/việc mua; giữ chủ động đề xuất hữu ích và trả đủ câu hỏi. Giữ context baseline để đo riêng prompt. T1 sửa hai phần → T2 self-review/focused checks → T3 control/candidate: 2 ca trọng tâm ×2 lần ×2 arm + 2 ca kiểm trả đủ/chủ động ×1 lần ×2 arm =12 outcomes/max24 generations → chỉ khi có cải thiện thực chất, không fallback/lỗi mới mới T4 existing16/max52 → report/STOP. Tách actual outcome khỏi diagnosis owner/verifier; fallback vẫn chặn T4 nhưng không tự chứng minh owner kém. Không promote mô tả candidate lần trước, không sửa verifier trong phép thử, không keyword scoring/answer examples/framework mới. Chưa sửa prompt hoặc chạy model trong lượt chỉnh kế hoạch.
+
 ## Active next-fix plan — context comparison — 2026-10-20
 
 **DIAGNOSTIC_COMPLETE_STOP_BEFORE_INTEGRATED16**, plan preparation base `e67b9fecb3508ef75e25252e8f3466b921cc8088`, implementation base `f9c9c4a9`. [Kế hoạch chi tiết T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md). T1–T4 và reportT6 hoàn tất; T5khôngdispatch vì candidate có2actualfallback. [Kết quả/commands/limits](../apps/worker/evals/single-agent-commerce-read-only/context-comparison-20261020/CHECKPOINT_B.md). Giả thuyết context chưa chứng minh cải thiện; dừng theo điều kiện, không tự sửa/chạy thêm hoặc mở lại run cũ.

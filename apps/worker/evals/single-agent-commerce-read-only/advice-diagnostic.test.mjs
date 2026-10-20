@@ -47,7 +47,7 @@ test('real advice request and inference use the same projected body without eval
  for(const candidate of [false,true]){
   const c=publicContext(),before=structuredClone(c),row={caseId:'EVAL_CASE',split:'EVAL_SPLIT',expectedSafe:'EVAL_SAFE',
    attackFamily:'EVAL_ATTACK',requiredBehaviors:['EVAL_REQUIRED'],forbiddenBehaviors:['EVAL_FORBIDDEN'],rubric:'EVAL_RUBRIC',arm:'EVAL_ARM',
-   runtime:{history:[{role:'shop',text:'Chị xem áo này nhé.'}],latest:'Áo này tay dài hả em?'},...(candidate?{ownerDescriptions:edits(c)}:{})};
+   runtime:{history:[{role:'shop',text:'Chị xem áo này nhé.'}],latest:'Áo này tay dài hả em?'},...(candidate?{ownerInstructions:'Tư vấn theo hướng dẫn đã đăng ký.',ownerDescriptions:edits(c)}:{})};
   const req=advice.buildAdviceOwnerRequest(row,{context:c},'Tư vấn cho khách.','request-1',new AbortController().signal);
   const expected=buildGeminiCommerceRequest(req);let sent;
   await createGeminiCommerceInference({model:'gemini-3.5-flash-lite',effort:'high',location:'global',projectId:'test-project'},
@@ -55,8 +55,15 @@ test('real advice request and inference use the same projected body without eval
     sent=JSON.parse(init.body);return new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Tay dài chị nhé.'}]}}]}));
    }})(req);
   assert.deepEqual(sent,expected);assert.deepEqual(c,before);
+  assert.deepEqual(sent.systemInstruction,{parts:[{text:candidate?row.ownerInstructions:'Tư vấn cho khách.'}]});
   const products=JSON.parse(sent.contents[0].parts[0].text).trusted.products;
   assert.equal(products[0].content.description,candidate?edits(c).P1.description:c.runtimeProducts[0].content.description);
   assert.doesNotMatch(JSON.stringify(sent),/EVAL_CASE|EVAL_SPLIT|EVAL_SAFE|EVAL_ATTACK|EVAL_REQUIRED|EVAL_FORBIDDEN|EVAL_RUBRIC|EVAL_ARM/);
  }
+});
+
+test('advice prompt override rejects empty or oversized instructions before dispatch',()=>{
+ const row={runtime:{history:[],latest:'Áo này còn không?'}};
+ for(const ownerInstructions of ['',null,42,'x'.repeat(20001)])
+  assert.throws(()=>advice.buildAdviceOwnerRequest({...row,ownerInstructions},{context:publicContext()},'Default','r',new AbortController().signal),/ADVICE_PROMPT_BOUND/);
 });
