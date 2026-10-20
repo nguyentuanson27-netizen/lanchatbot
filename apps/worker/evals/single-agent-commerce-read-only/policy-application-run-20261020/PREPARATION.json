@@ -1,0 +1,82 @@
+{
+  "preparedAt": "2026-10-20T05:14:34.738Z",
+  "mode": "CURRENT_PUBLIC_POLICY_CAPTURE_PLUS_SYNTHETIC_CONTROL",
+  "originalCaptureAt": "2026-10-20T04:41:12.989Z",
+  "livePolicy": {
+    "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+    "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+    "observedAt": "2026-07-23T07:42:07.382Z",
+    "expiresAt": null,
+    "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+  },
+  "variantPolicy": {
+    "ref": "policy:4fae6f26ebcc379f7bfefc82a0290ab6c9f6c5ba7cf236287a7a06db1e7148bf",
+    "sourceVersion": "4fae6f26ebcc379f7bfefc82a0290ab6c9f6c5ba7cf236287a7a06db1e7148bf",
+    "observedAt": "2026-10-14T10:00:00.000Z",
+    "expiresAt": null,
+    "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":25000,\"windowDaysFromReceipt\":7},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":25000}}"
+  },
+  "registeredSlots": 8,
+  "maximumGenerationRequests": 16,
+  "inputSha256": "444a6bd27f9d5161ceab376701b42a4375bd26ec61e915373e6a51fe287cc34c",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "28790ea5eaf56bd5a51f4aa8cc7089d6a51f057f334d04f1cd95114f7070d133",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "offlineOwnerRequests": 8,
+  "evaluatorLabelLeaks": 0,
+  "providerGenerations": 0,
+  "sendEnabled": false
+}
