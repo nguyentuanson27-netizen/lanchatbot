@@ -1,0 +1,14 @@
+{
+  "runSourceSha": "68694ce209baf953a338e16f37853ce3e63af110",
+  "primaryReviewLockSha": "9b5070c4",
+  "childSourceAndPromptRegistrationsMatched": 2,
+  "verifierBindingsRecomputed": 27,
+  "ownerExactPromptCaptures": 63,
+  "wireBodiesChecked": 93,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 26,
+  "captureHashesMatched": 0,
+  "publishedArtifactHashesMatched": 49,
+  "testDatabaseDropped": true,
+  "sendEnabled": false
+}

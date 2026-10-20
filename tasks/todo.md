@@ -2,12 +2,12 @@
 
 ## Full B1/B2/B3 rerun — 2026-10-20
 
-[Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md), base `d8743ff0`, current prompts/models unchanged.
+[Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md), base `d8743ff0`, **COMPLETE_FULL32_STOP_SALES_READINESS**. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/CHECKPOINT_B.md), source `68694ce2`, current prompts/models unchanged.
 
 - [x] Freeze existing24B1+8stateful, max124generations/retry0; protocol10PASS.
-- [ ] Clean source seal, provider/source preflight, deterministic PostgreSQL checks COD/BANK_TRANSFER.
-- [ ] Run all32registered outcomes once; preserve failures/downstream blocks; no extra advice replay.
-- [ ] Lock whole actual dialogue/state review before diagnosis, account provider requests/usage/latency, verify cleanup and report/STOP.
+- [x] Clean source seal/provider/source preflight; COD26/26/BANK_TRANSFER26/26 PostgreSQL checksPASS, bothDBsdropped.
+- [x] Full32/32once,90generationrequests/retry0. B1 19USABLE/4NEEDS_EDIT/1fallback; stateful7USABLE/1ownership control. Owner opening toolmodeerror preserved, actual code receipt recovery correct.
+- [x] Primary `9b5070c4` before diagnosis;0labelleaks/27bindings/49rawhashes;statefulDBdropped. Report/STOP, no runtime patch or extra round.
 
 ## Next fix — advice focus — 2026-10-20
 

@@ -2,7 +2,7 @@
 
 ## Active full B1/B2/B3 run — 2026-10-20
 
-Owner explicitly requests full rerun after advice diagnostic STOP. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md): existing24B1×1 +existing8stateful×1 =32outcomes/max124generation requests, plus deterministic isolated PostgreSQL checks COD/BANK_TRANSFER with0generations. Current prompts/models/source/runtime unchanged; no extra advice replay or retry. New clean committed source/preflight/readback, actual primary before diagnosis, cleanup/request accounting/report/STOP. Prior diagnostic evidence/STOP preserved; this request authorizes a new full run, not a runtime gate bypass.
+**COMPLETE_FULL32_STOP_SALES_READINESS**, source `68694ce209baf953a338e16f37853ce3e63af110`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md), [report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/CHECKPOINT_B.md):24/24B1×1 +8/8stateful×1,90requests/retry0. B1 19USABLE/4NEEDS_EDIT/1fallback; stateful7USABLE/1ownership control,1ownerfinal-onlytoolmodeerror recovered fromreceipt. COD26/26 +BANK_TRANSFER26/26 deterministic checksPASS;3testDBsdropped. Primary `9b5070c4` before diagnosis;0labelleaks/27bindings/49publishedrawhashes. Full run explicitly authorized after prior diagnostic STOP; no prompt/runtime/source/model edits or extra replay. Policy fallback applies HOLD_UP_ONLY incorrectly despite complete condition list; also voice/choice/fit-step findings. No A PASS/B live GO, no automatic fix/newround.
 
 ## Active next-fix plan — advice focus — 2026-10-20
 
