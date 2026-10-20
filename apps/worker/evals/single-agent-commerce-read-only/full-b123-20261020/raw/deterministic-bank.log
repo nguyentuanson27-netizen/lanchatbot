@@ -1,0 +1,26 @@
+B composed existing clarification migration rolls back exactly before new events: PASS
+B2 real profile persists across turns and correction precedes dependent size: PASS
+B2 stale writer loses CAS and CLEAR removes old fit: PASS
+B2 preference replace and expired profile cannot be updated: PASS
+B3 accepted prior stages persist through current inbox transaction: PASS
+B3 native cart commits once; duplicate does not repeat database transaction: PASS
+B3 native quantity change persists, unknown commit reconciles without replay: PASS
+B3 newer inbox generation prevents an old tool from mutating the cart: PASS
+B3 private checkout creates a persisted preview without exposing PII to the model: PASS
+B3 BANK_TRANSFER native confirmation commits state and effect intents atomically: PASS
+B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate: PASS
+B handoff missing provider link rolls back ownership/event and never acknowledges acceptance: PASS
+B handoff superseded inbound cannot commit using the earlier source lease: PASS
+B composed generation failure preserves the committed total through cart readiness and captures recovery once: PASS
+B composed ingress commits an open cart, authorizes the exact reply and captures delivery once: PASS
+B composed two native mutations retain one source and next owner receives accepted history and current cart: PASS
+B composed committed profile correction carries its receipt through the effect bridge and final readback: PASS
+B composed private checkout bypasses both models and persists the existing guarded preview: PASS
+B composed confirmation uses existing revalidation and commits checkout handoff once: PASS
+B composed later failed mutation hands off the partial committed result, without replay: PASS
+B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source: PASS
+B composed newer inbound between final readback and commit cancels eligibility without an Outbox: PASS
+B composed configured private dependency holding reply commits and is captured exactly once with the handoff: PASS
+B composed superseded source cannot persist customer measurements during generation: PASS
+B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged: PASS
+B composed clarification rollback refuses to destroy existing append-only events: PASS
