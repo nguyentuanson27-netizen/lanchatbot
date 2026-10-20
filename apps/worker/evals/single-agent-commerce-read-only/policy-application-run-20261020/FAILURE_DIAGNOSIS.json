@@ -1,0 +1,103 @@
+[
+  {
+    "slot": 1,
+    "classification": "OWNER_POLICY_APPLICATION",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    },
+    "reason": "Đồng ý đổi trong chính tình huống đã mặc thử; đọc lại điều kiện chưa sử dụng không giải quyết hành động khách đã kể. Verifier chặn đúng."
+  },
+  {
+    "slot": 2,
+    "classification": "OWNER_POLICY_APPLICATION",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        },
+        {
+          "kind": "MATERIAL_CONDITION_LOSS",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    },
+    "reason": "Vẫn đồng ý đổi sau mặc thử; thêm kết luận nguyên tem/chưa dùng là hoàn toàn đủ và khuyến khích cứ thử. Có cả mở rộng quyền và liệt kê điều kiện như đủ để được đổi. Verifier chặn đúng lỗi chính."
+  },
+  {
+    "slot": 3,
+    "classification": "OWNER_POLICY_APPLICATION",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    },
+    "reason": "Vẫn đồng ý đổi sau mặc thử, nối lời hỗ trợ thủ tục. Verifier chặn đúng lỗi chính; lời hứa hỗ trợ thuộc capability/quality, không tự là effect đã hoàn tất."
+  },
+  {
+    "slot": 4,
+    "classification": "USABLE_CONTROL",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    },
+    "reason": "Chỉ ướm, giới thiệu đổi size có điều kiện. Không tự thêm tình trạng bẩn/hỏng hoặc bắt đủ keyword để lật primary."
+  },
+  {
+    "slot": 5,
+    "classification": "AMBIGUOUS_TRY_NOT_CLARIFIED",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    },
+    "reason": "Khách chỉ nói thử; owner chưa hỏi đã mặc vào hay chỉ ướm, đã chuyển sang xin size muốn đổi. Chưa giải quyết thông tin quyết định. Verifier FAIL; không khẳng định đây là cho phép mặc thử đã chứng minh, hoặc toàn bộ FAIL là chắc chắn đúng khi nghĩa thử còn mơ hồ."
+  },
+  {
+    "slot": 6,
+    "classification": "USABLE_CONTROL",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    },
+    "reason": "Trả đúng thời hạn/phí của nguồn live capture, đúng phạm vi câu hỏi."
+  },
+  {
+    "slot": 7,
+    "classification": "RETURN_SCOPE_REVIEW_NEEDED",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    },
+    "reason": "Owner không từ chối vì khách đã mặc; nhận đúng nhánh báo lỗi nhưng nói lỗi kỹ thuật từ nhà sản xuất như đã xác định, đề xuất đổi sản phẩm mới hoặc trả hoàn và chịu toàn bộ ship rồi xin ảnh để làm thủ tục. Nguồn returns có lỗi đường may, 100% phí, hoàn sau SHOP_CONFIRMS_ELIGIBLE_ERROR; không có kết quả xét hồ sơ. Cần phân biệt giới thiệu dịch vụ với cam kết cho hồ sơ này, và quyền đổi sản phẩm mới/chi phí với nhánh returns. Câu xin ảnh cho thấy chưa xử lý xong, không gán EFFECT_WITHOUT_RECEIPT. Verifier chỉ trả loại lỗi, không có rationale; không tuyên bố mọi ý trong draft sai hoặc chặn chắc chắn đúng toàn bộ."
+  },
+  {
+    "slot": 8,
+    "classification": "USABLE_SOURCE_FOLLOWING_CONTROL",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    },
+    "reason": "Trả 7 ngày/25k theo snapshot synthetic, thay vì 15 ngày/30k từ policy live."
+  }
+]

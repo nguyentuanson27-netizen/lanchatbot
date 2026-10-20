@@ -1,0 +1,18 @@
+{
+  "runSourceSha": "2b16a79a832f8b938a28272d245d596468268d7b",
+  "registered": 8,
+  "recorded": 8,
+  "providerRequests": 16,
+  "retry": 0,
+  "bindingsRecomputed": 8,
+  "exactOwnerProjectionsAndTelemetryHashes": 8,
+  "canonicalVerifierContextsMatched": 8,
+  "wireBodiesChecked": 32,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 3,
+  "rawFilesMatched": 14,
+  "sourceBlobsUnchanged": 9,
+  "primarySha256": "ff3666640039451367e76c13430257d04799e6c2f60779d9a3bebd65d4bea590",
+  "databaseCreated": false,
+  "liveSend": false
+}

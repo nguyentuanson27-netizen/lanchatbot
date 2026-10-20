@@ -1,0 +1,63 @@
+{
+  "runSourceSha": "2b16a79a832f8b938a28272d245d596468268d7b",
+  "registeredSlots": 8,
+  "recordedSlots": 8,
+  "generationRequests": 16,
+  "retry": 0,
+  "families": {
+    "targeted": {
+      "slots": 8,
+      "terminal": {
+        "FALLBACK": 5,
+        "SEND_ELIGIBLE": 3
+      },
+      "reasons": {
+        "FAIL": 5,
+        "PASS": 3
+      },
+      "providerRequests": 16,
+      "verifierLatencyMs": {
+        "n": 8,
+        "p50": 7161.5,
+        "p95": 11071.149999999998
+      },
+      "addedVerificationLatencyMs": {
+        "n": 8,
+        "p50": 7164.442800000001,
+        "p95": 11072.465604999994
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 8,
+      "inputTokens": 21098,
+      "outputTokens": 7622,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "verifier": {
+      "requests": 8,
+      "inputTokens": 28611,
+      "outputTokens": 1619,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "verdictCounts": {
+    "FAIL": 5,
+    "PASS": 3
+  },
+  "wireCapturesChecked": 32,
+  "leaks": [],
+  "cleanup": {},
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 16
+  }
+}

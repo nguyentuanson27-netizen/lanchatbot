@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Policy application model run — 2026-10-20
+
+**COMPLETE_8_STOP_POLICY_APPLICATION**, source `2b16a79a`, [report](../apps/worker/evals/single-agent-commerce-read-only/policy-application-run-20261020/CHECKPOINT_B.md). Đủ8/8captured-world policy slots/16generationrequests, retry0/error0/timeout0; primary `5b85b9d2` trước diagnosis:3USABLE/5actualfallback. Ca gốc3/3vẫn đồng ý đổi sau mặc thử dù request có nghĩa mã và prompt mới; không nhận đã fix. Hai ca fallback khác là thử chưa rõ và quyền xử lý lỗi đường may, không gom toàn bộ thành cùng lỗi đã chứng minh. Controls chỉ ướm/thời hạn-phí15ngày30k/nguồn synthetic7ngày25k dùng được.65focusedPASS; audit8bindings/32wirecaptures/14rawfiles/9unchangedblobs,0labelleaks. Không sửa tiếp/chạyfull hoặc live action; A OWNER_BYPASS/Bno liveGO.
+
 ## Active policy application fix — 2026-10-20
 
 **IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**, base `ab57daa2`. [Finding, independent-review corrections, implementation and exact checks](../docs/specs/c3-phase-b-policy-application-fix-20261020.md). Explain source inspection enum in existing policy projection, preserve raw source rules/provenance/null eligibility, replace only owner policy section. No verifier/model/schema/corpus change or customer-language parser. Observed RED2FAIL→GREEN2PASS; focused213PASS + adapter/protocol59PASS; worker typecheck/build via tsc/lint PASS. Provider8slots proposed only, not frozen/dispatched; no claim fallback fixed or live GO.
