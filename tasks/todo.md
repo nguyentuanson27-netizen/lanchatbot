@@ -2,14 +2,14 @@
 
 ## Next fix — advice focus — 2026-10-20
 
-[Plan](../docs/specs/c3-phase-b-advice-focus-plan-20261020.md), base `fdb2a63e`, **PLAN_ONLY**.
+[Plan](../docs/specs/c3-phase-b-advice-focus-plan-20261020.md), base `fdb2a63e`, **DIAGNOSTIC_COMPLETE_STOP_BEFORE_INTEGRATED16**. [Report](../apps/worker/evals/single-agent-commerce-read-only/advice-focus-20261020/CHECKPOINT_B.md), runtime source `be9ec1c1`.
 
 - [x] Đối chiếu prompt hiện hành, kết quả context comparison và finding chọn ý/giọng văn của owner; ghi kế hoạch.
 - [x] Chỉnh theo self-review: làm rõ delta so với prompt cũ, giữ chủ động bán hàng, thêm coverage trả đủ/chủ động trong cùng 12 lượt, tách actual outcome khỏi diagnosis owner/verifier.
-- [ ] T1 thay/gộp phần chọn ý và giọng chat; self-review không mất quy tắc đã đúng.
-- [ ] T2 focused tests/build/diff; freeze prompt/input/review/config và clean run source.
-- [ ] T3 freeze exact 4 cases/captures: 2 ca trọng tâm ×2 lần/arm + 2 ca trả đủ/chủ động ×1 lần/arm =12 outcomes trên context baseline; primary toàn actual trước diagnosis.
-- [ ] T4 chỉ khi đạt điều kiện: registration mới cho existing16; report và STOP, không tự thêm vòng.
+- [x] T1 thay/gộp phần chọn ý và giọng chat; self-review bảo toàn các đoạn authority.9.710→10.044bytes, không dùng độ dài làm quality gate.
+- [x] T2 request prompt override RED4/2→GREEN6/6; focused65PASS/0skip/buildPASS. Freeze input/prompt/config và clean source.
+- [x] T3 đủ12outcomes/24requests, mỗi generation1request/retry0. Bốnca/captures, primary `3a18227d` trước diagnosis. Candidate1fallback/1NEEDS_EDIT; control2fallback/1NEEDS_EDIT;0provider errors.
+- [x] T4 đánh giá điều kiện: không đạt, existing16NOT_DISPATCHED; report/STOP. Không chạy vòng thứ hai hoặc đổi verifier để cứu tỷ lệ.
 
 ## Next fix — context comparison — 2026-10-20
 
