@@ -4,6 +4,8 @@
 
 [Đủ 11 hội thoại](CONVERSATIONS_AND_REVIEW.md), [primary review](PRIMARY_REVIEW.json), [diagnosis](FAILURE_DIAGNOSIS.json). Primary được khóa tại commit `b1368ada` trước khi xem draft/violations; không nhận là human adjudication.
 
+**Owner feedback sau run:** owner chấp nhận hướng nhận thông tin → kiểm tra → làm thủ tục, và yêu cầu nối handoff cho nhân viên tiếp tục. Cần sửa câu dài/đọc lại điều kiện và đo luồng handoff thật, không bác bỏ quy trình chỉ vì bot không tự làm toàn bộ. Xem [quyết định và bản sửa prompt](OWNER_FEEDBACK.md). Điểm/raw lịch sử dưới đây giữ nguyên; tools-OFF replay không chứng minh handoff thành công hoặc thất bại.
+
 ## Kết quả
 
 - Ca đã mặc thử: cả 3 đối chứng và 3 candidate đều từ chối đổi size đúng policy. Run trước cùng ca sai cả 3 lần. Cả hai arm lần này cùng nhận context mới; chưa tách được tác dụng của context khỏi các thay đổi khác, cũng chưa thấy candidate section vượt đối chứng.
