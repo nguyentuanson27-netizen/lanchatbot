@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Candidate handoff five-slot model run — 2026-10-20
+
+**COMPLETE_5_REPLY_QUALITY_NOT_COMPLETE**, source `05be90e8`. [Report/5hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-candidate-run-20261020/CHECKPOINT_B.md). Đủ5/5once,14requests(10owner+4verifier),0error/timeout/retry/fallback/no-send.4SEND_ELIGIBLE qua verifierPASS,1DEFECT HANDOFF/HUMAN/event/tag intent/message/capture đúng candidate; DB dropped. Primary `9fe9a504` khóa trước diagnosis:3USABLE/2NEEDS_EDIT. Ca chỉ ướm hỏi thêm nên chưa dùng EXCHANGE; ca thử chưa rõ vẫn đọc policy trước câu hỏi. Cải thiện rõ ở fixed DEFECT message, chưa chứng minh owner tự nhiên hơn ổn định. Audit10owner/4bindings/22wire/10raw/16source identities/0labelleaks; EOL assumption corrected in audit, giữ primary/raw. STOP; không patch/chạy thêm/full/liveGO; A OWNER_BYPASS.
+
 ## Configured handoff reply + clarification fix — 2026-10-20
 
 **IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**,109 focused unit tests +28 PostgreSQL/capture checksPASS; DB dropped,0provider. Base `71941ab5`; [scope, exact texts, consumer and checks](../docs/specs/c3-phase-b-handoff-reply-fix-20261020.md). Use the existing HANDOFF_MATRIX for EXCHANGE/DEFECT messages, preserve other rules/tags/silent decisions, and ask the entitlement-deciding question before unrequested policy details. Candidate only; published sources/defaults unchanged. Existing five-case prepare/run supports a fresh registration directory and isolated frozen candidate matrix, bound separately from the upstream capture. No new runtime role/parser/state/gate or credential route. Model follow-up remains five existing cases once each, max20 requests/retry0, with a fresh clean source seal; not dispatched by this fix.

@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Candidate handoff five-slot model run — 2026-10-20
+
+**COMPLETE_5_REPLY_QUALITY_NOT_COMPLETE**, source `05be90e8`. [Report/5hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-candidate-run-20261020/CHECKPOINT_B.md).
+
+- [x] Freeze5existing inputs/isolated candidate source, clean source seal/preflight, run once each:14requests(10owner+4verifier),0retry/error/timeout/fallback/no-send; DB dropped.
+- [x] Lock primary `9fe9a504` before diagnosis:3USABLE/2NEEDS_EDIT, not human adjudication.4drafts verifierPASS;1DEFECT handoff committed/captured, no live send/staff response. EXCHANGE model handoff not observed this time.
+- [x] Audit10owner hashes/4bindings/22wire/10raw/16source identities/0labelleaks; primary UTF8/LF hash matches locked Git blob, only working-file EOL assumption corrected. Full metrics/token evidence recorded; cost NOT_EXPOSED.
+- [ ] Remaining owner quality: opening agreement followed by bundled condition questions; policy details before the decisive hold-up/wearing question. No patch or further run within this registration, no full B/readiness/stability claim; A OWNER_BYPASS.
+
 ## Configured handoff reply + clarification fix — 2026-10-20
 
 [Scope and verification](../docs/specs/c3-phase-b-handoff-reply-fix-20261020.md), base `71941ab5`.
