@@ -1,5 +1,17 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Next fix — context comparison — 2026-10-20
+
+[Plan T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md), base `e67b9fec`. PLAN_ONLY; không có provider hoặc implementation mới trong lượt lập plan.
+
+- [x] Đối chiếu 5 run gần nhất, owner/verifier/source flow; ghi giả thuyết, giới hạn và kế hoạch có đối chứng. Self-review tránh thay cả prompt/context/verifier, nhầm source override với owner-only, hoặc tự sửa nhãn lịch sử.
+- [ ] T1: review bổ sung nguyên câu/nguồn cho các claim đang tranh luận; freeze cách đọc thống nhất trước provider, giữ unresolved riêng nếu chưa thể kết luận.
+- [ ] T2: biên tập mô tả mọi sản phẩm trong hai capture; đối chiếu bảo toàn dữ kiện, đặc điểm phân biệt và source hashes; không thêm suy luận/đáp án vào context.
+- [ ] T3: owner-only projection trong harness hiện hữu; RED→GREEN cho canonical immutability, field preservation, source mapping, captured/sent body và label firewall; focused checks/build thực chạy, self-review.
+- [ ] T4: freeze clean source; 12 slots control/candidate, max24requests, mỗi tình huống3lần/arm; whole-terminal primary trước diagnosis, giữ mọi attempt/error, không retry/mẫu bù.
+- [ ] T5 conditional: chỉ khi T4 có ích và candidate không lỗi thực chất, freeze registration/source mới cho16existing slots×1/max52requests; kiểm tool/stateflow và source presentation nhất quán. Không mở lại16slots cũ.
+- [ ] T6: report source/hash/commands/accounting/outcomes và hạn chế riêng từng giai đoạn; max28slots/76requests, STOP, không tự thêm vòng/production action. Nếu T4 không đạt thì T5 NOT_RUN, không đánh dấu hoàn tất bằng run cũ.
+
 ## Chat-expression model run — 2026-10-19
 
 - [x] Freeze newrun cùng6inputbytes/captures/config/models/rubric, chỉ ownerprompt mới; source849585aa clean trướcprovider, runtimeHEADkhôngđổi.

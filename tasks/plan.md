@@ -1,5 +1,15 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active next-fix plan — context comparison — 2026-10-20
+
+**PLAN_ONLY**, preparation base `e67b9fecb3508ef75e25252e8f3466b921cc8088`. [Kế hoạch chi tiết T1–T6](../docs/specs/c3-phase-b-context-comparison-plan-20261020.md). Mục tiêu: tư vấn giúp khách chọn/mua, tự nhiên; kiểm giả thuyết mô tả quảng cáo đang kéo lời giải thích về catalog. Chưa sửa executable/prompt/source hoặc chạy provider. Mục này sở hữu công việc tiếp theo; các mục cũ là lịch sử, không mở lại run đã dừng.
+
+Thứ tự: **T1** đối chiếu lại toàn câu/nguồn của các review mâu thuẫn, giữ nhãn lịch sử → **T2** biên tập mô tả của toàn bộ sản phẩm trong hai capture, bảo toàn thông tin có ích → **T3** projection owner-only trong harness có test, canonical verifier/gate context nguyên vẹn → **T4** control/candidate mới: 2 tình huống ×3 lần ×2 cách trình bày =12 slots/max24 requests → chỉ khi cải thiện có căn cứ, không lỗi thực chất ở candidate mới **T5** registration mới cho existing16 slots/max52 requests → **T6** báo cáo/dừng.
+
+Giữ prompt owner/verifier, models Gemini3.5FlashLiteHIGH/Sol6.1high, history, facts, policy, tool/state/effects/privacy. Không blacklist, ví dụ đáp án, parser, repair loop, role/gate/state mới. Candidate descriptions là dữ liệu biên tập eval có nguồn, không khẳng định shop đã cập nhật. T4 chỉ thay owner presentation; T5 dùng source candidate mechanism hiện hữu nên phải báo riêng thay đổi evidence verifier. Không gộp hai phép đo hoặc đổi điểm sau kết quả. Tổng trần28slots/76generation requests, retry0, không tự thêm vòng; A OWNER_BYPASS/B chưa live GO.
+
+Self-review plan: không dùng kết quả cũ làm control duy nhất; không nhầm sửa source-config với owner-only projection; không bỏ chi tiết sản phẩm để lấy câu ngắn; không áp lỗi theo từ khóa; giữ tests/code fixes đã đúng. Prompt và verifier chỉ thay ở một kế hoạch khác nếu evidence yêu cầu. Bước provider thuộc triển khai kế hoạch khi owner yêu cầu, không chạy trong lượt lập plan này.
+
 ## Chat-expression model run — 2026-10-19
 
 Owner yêu cầu chạy bản promptae461e0d. Hoàn tất6/6targetedslots từ2fixedcaptures×3, source849585aa clean,12requests(6owner/6verifier),0providererrors/timeout/retry/thiếucapture. Primary ebdde894 trước diagnosis:4USABLE/1NEEDS_EDIT/1actualfallback; verifier5PASS/1FAIL.16conditional **NOT_DISPATCHED_CONDITION_NOT_MET** theo rule vì actualfallback, không tính chúng làmodeloutcomes.
