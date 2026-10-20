@@ -1,0 +1,77 @@
+{
+  "inputSha256": "e0fad8d2bd153f21025213d6ff18378a9ae29c05b364df38dcb873b5864aa1de",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "b1d692e798e351a8f963c74a13de92d061c2b75bf0f48a7d675f66fd2b9d6d73",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "registeredSlots": 11,
+  "maximumGenerationRequests": 22,
+  "controlSource": "faf7c023a3e3dc42d36bbc7ac2d8470a0f837e55",
+  "controlOwnerHash": "3b74e4d13d042aa671172f45a3a98dde0ea31ce7f2ae3aec329bc521fe0587fb",
+  "controlPolicySectionHash": "996e9c962a3753976d5afcff08c8fe864657172894fed4cb41b933fc713f40e4",
+  "candidatePolicySectionHash": "4ff4988b7fab35f5cf33a93367c966d289d5dfb8c97a831caf286127416cba4a",
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "sourceSha": "CAPTURE_CLEAN_HEAD_AT_RUNTIME",
+  "retry": 0,
+  "sendEnabled": false,
+  "mode": "CAPTURED_PUBLIC_WORLD_REPLAY_NOT_LIVE_ELIGIBILITY",
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "repetitions": {
+    "wornOriginalPerArm": 3,
+    "eachCandidateControl": 1
+  },
+  "dispatch": "1:11; interleaved CONTROL/CANDIDATE then five candidate controls",
+  "acceptance": "Candidate 8/8 usable actual outcomes; no unsupported permission; ambiguity must be resolved rather than assumed. Keep all registered attempts and stop this run after eleven."
+}

@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Policy relationship model comparison — 2026-10-20
+
+**FROZEN_11_NOT_DISPATCHED**, base `0a01ffe1`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/policy-relationship-run-20261020/SCOPE.md):3paired repetitions of old/candidate policy section +5existing candidate controls, max22generations/retry0. Same new context/models/verifier/fallback. Current source read-only; synthetic7day/25k source-following control. Offline11projections/0labelleaks;65focusedPASS. Commit/clean source → provider preflight →11once; no automatic extra run/live action.
+
 ## Policy relationship revision — 2026-10-20
 
 **IMPLEMENTED_LOCAL_VERIFIED_PROVIDER_NOT_RUN**, base `e081d3e9`. [Revision, rationale và exact checks](../docs/specs/c3-phase-b-policy-application-fix-20261020.md#revision-sau-run-8-lượt--2026-10-20). Bổ sung quan hệ HOLD_UP_ONLY + unused trong field context hiện có dùng chung hai model, tách exchange/returns; owner phân biệt hành động chưa rõ và báo lỗi chưa xác nhận. Giữ phần tư vấn/giọng, verifier, models và corpus. RED 2 FAIL → focused 214 PASS, adapter/protocol 59 PASS; typecheck/build/lint PASS.
