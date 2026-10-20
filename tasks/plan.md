@@ -10,6 +10,8 @@ Giữ prompt owner/verifier, models Gemini3.5FlashLiteHIGH/Sol6.1high, history, 
 
 Self-review plan: không dùng kết quả cũ làm control duy nhất; không nhầm sửa source-config với owner-only projection; không bỏ chi tiết sản phẩm để lấy câu ngắn; không áp lỗi theo từ khóa; giữ tests/code fixes đã đúng. Prompt và verifier chỉ thay ở một kế hoạch khác nếu evidence yêu cầu. Bước provider thuộc triển khai kế hoạch khi owner yêu cầu, không chạy trong lượt lập plan này.
 
+Đã chỉnh theo review độc lập tại `212bde9e`: changed-occasion đo tác dụng biên tập mô tả dài; concern mặc định kiểm tra không suy giảm vì chỉ chứa SV2447 đã gọn. Freeze delta thực tế trước run, không đòi cả hai ca cải thiện hoặc cố lược thêm dữ kiện để tạo treatment. T1 thêm mốc whole-turn evaluator-only phân biệt tư vấn yếu với góp ý giọng; T2/T5 phân biệt hash capture, upstream trước transform và candidate. Không thay ngân sách12+16slots/max76requests, prompt/verifier hoặc nhãn lịch sử. Vẫn PLAN_ONLY.
+
 ## Chat-expression model run — 2026-10-19
 
 Owner yêu cầu chạy bản promptae461e0d. Hoàn tất6/6targetedslots từ2fixedcaptures×3, source849585aa clean,12requests(6owner/6verifier),0providererrors/timeout/retry/thiếucapture. Primary ebdde894 trước diagnosis:4USABLE/1NEEDS_EDIT/1actualfallback; verifier5PASS/1FAIL.16conditional **NOT_DISPATCHED_CONDITION_NOT_MET** theo rule vì actualfallback, không tính chúng làmodeloutcomes.

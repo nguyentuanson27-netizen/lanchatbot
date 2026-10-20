@@ -3,6 +3,8 @@
 Ngày: 2026-10-20. Trạng thái: PLAN_ONLY. Owner yêu cầu xây dựng plan; lượt này chưa sửa executable, prompt, nguồn hay chạy provider.
 Preparation base: `e67b9fecb3508ef75e25252e8f3466b921cc8088`. Kế hoạch này thay phạm vi sửa tiếp theo của các mục ngày 2026-10-19; không thay kết quả, nhãn hoặc điều kiện của các run đã kết thúc. A vẫn OWNER_BYPASS, B chưa live GO.
 
+Đã chỉnh theo review độc lập của plan tại `212bde9e`: phân biệt ca đo tác dụng với ca kiểm tra không suy giảm; bổ sung mốc review chất lượng tư vấn; tách hash capture khỏi hash nguồn upstream. Trạng thái vẫn PLAN_ONLY.
+
 ## Mục tiêu và giả thuyết
 
 Bot giúp khách chọn và mua hàng của shop bằng lời tư vấn dễ hiểu, tự nhiên, có lý do sát điều khách phân vân. Trả đúng dữ kiện là cần thiết nhưng chưa đủ. Không ép khách mua ít hơn, mua lẻ, chọn một mẫu cố định hoặc nhận một CTA theo công thức.
@@ -19,18 +21,22 @@ Phụ thuộc: không. Scope nhỏ: một review bổ sung bên cạnh evidence,
 
 - Đối chiếu nguyên câu hỏi/history/nguồn và actual reply của các trường hợp: lời khuyên tương đối; “giữ form gọn gàng suốt chuyến đi”; “ngồi lâu đứng lên vẫn mượt”; “rũ/treo lên là phẳng ngay”. Lấy cả câu PASS và fallback, không chỉ câu bị chặn. Ghi rõ sản phẩm/nguồn khác nhau có giải thích được kết luận khác nhau hay không.
 - Không tự phân loại câu thành cam kết chỉ vì có thời lượng, từ nhấn mạnh hoặc từ “giữ form”. Xác định kỳ vọng mà toàn đoạn tạo cho khách: nhận xét lựa chọn thông thường hay một kết quả sử dụng cụ thể không có căn cứ. Giữ quyền tư vấn tự tin, inference vật liệu/thẩm mỹ đã được owner chấp nhận. Không đòi phép thử cho mọi lời khuyên.
+- Trong cùng ghi chú T1, chọn vài toàn đoạn hội thoại lịch sử làm mốc phân biệt chất lượng tư vấn: đoạn đã giúp khách chọn/mua nhưng còn dài hoặc hơi khuôn; đoạn chỉ khen hàng mà chưa giải quyết điều khách đang ngại; đoạn trả lại việc chọn dù khách đã giao shop chọn. Ghi lý do dựa trên câu hỏi và toàn câu trả lời, không chọn một món/tính từ/CTA làm đáp án. Các câu mềm/nhẹ/rũ → thanh thoát từng được USABLE phải được đối chiếu rõ với finding “lý do chưa sát”; không âm thầm đổi tiêu chí sau khi thấy output mới.
+- Freeze các mốc review trước provider và áp dụng như nhau cho cả hai arm. Một câu hữu ích chỉ cần trau chuốt giọng không tự thành NEEDS_EDIT; yêu cầu viết lại phải chỉ rõ việc mua/băn khoăn chưa được giải quyết, nội dung gây hiểu sai, hoặc diễn đạt gây khó hiểu đáng kể. Các mốc và nhận xét chỉ dành cho evaluator, không vào prompt/context của model và không sửa nhãn lịch sử.
 - Nếu chưa giải quyết được khác biệt cách hiểu bằng chỉ dẫn hiện hành, ghi UNRESOLVED trong ghi chú review, nêu hai cách hiểu và ảnh hưởng tới quyết định. Đây không phải verdict/schema runtime mới. Không tự biến thành một lỗi safety đã xác nhận hay đổi verifier để đạt điểm. Trường hợp ảnh hưởng quyết định tiếp tục phải trình owner bằng nguyên đoạn trước khi chạy phần phụ thuộc.
 
-Hoàn thành khi có cùng tiêu chí review áp dụng cho cả control và candidate, trước provider; phân biệt lỗi căn cứ đã rõ với tranh luận và góp ý giọng. Câu giữ form trong baseline từng được USABLE nhưng câu tương tự ở run cuối NEEDS_EDIT phải được nêu công khai. Không viết đáp án này vào request model.
+Hoàn thành khi có cùng tiêu chí và mốc review toàn đoạn áp dụng cho cả control và candidate, trước provider; phân biệt lỗi căn cứ đã rõ, tư vấn chưa giúp quyết định, tranh luận và góp ý giọng. Câu giữ form trong baseline từng được USABLE nhưng câu tương tự ở run cuối NEEDS_EDIT phải được nêu công khai. Không viết đáp án này vào request model.
 
 ## T2 — biên tập dữ liệu, bảo toàn nội dung có ích
 
 Phụ thuộc T1 để tránh vô tình sửa nguồn nhằm cứu một verdict. Scope: một file dữ liệu candidate và bảng đối chiếu nguồn, không đổi nguồn shop dùng chung.
 
 - Bắt đầu từ hai capture đã dùng trong `chat-expression-run-20261019/targeted-input.json`. Kiểm mọi sản phẩm trong tập đó, gồm SV2447, SV1561, SV165, SV244; không chỉ sửa món được chọn trong câu lỗi. Cùng một sản phẩm có cùng cách trình bày ở mọi slot.
+- Kiểm tất cả không có nghĩa buộc sửa tất cả. SV2447 đã có mô tả ngắn; nếu không có phần cần biên tập thì giữ nguyên. Sau T2, ghi cụ thể sản phẩm và nội dung thực sự thay đổi trong từng tình huống trước khi freeze T4; không lược thêm dữ kiện chỉ để tạo khác biệt giữa hai arm.
 - Chỉ biên tập trường mô tả: giữ vật liệu theo từng phần áo/váy, kiểu dáng, lớp, họa tiết, chi tiết trang trí, cạp và đặc điểm có ích đã có nguồn. Bỏ câu quảng cáo lặp nghĩa hoặc gom các cụm trùng. Giữ nguyên các nhận xét nguồn độc nhất có ích, kể cả cảm giác/thẩm mỹ; không loại tất cả tính từ, không rút gọn để đạt số byte.
 - Mỗi phần bị lược có ghi chú là lặp hay quảng cáo chung; mỗi thông tin được giữ truy được về nguồn. Không tự suy thêm ít nhăn, tự hồi nếp, độ kín, size fit, khả năng giao kịp. Không biến chưa biết thành không có. Không thêm “mẫu nên chọn”, “được phép nói”, câu trả lời, rubric hay lựa chọn của evaluator vào dữ liệu.
 - Giữ nguyên tên, ID, biến thể, offers, giá/tồn/quote, size charts, policy, history, receipts, bounds và canonical snapshot. Hash bản nguồn cụ thể; nguồn đổi thì không áp bản biên tập cũ một cách im lặng. Đo bytes trước/sau để mô tả, không dùng làm quality gate.
+- Bảng đối chiếu hiện có phải phân biệt description/hash trong capture (đầu vào projection T4), description/hash upstream trước transform (đầu vào `candidateDescriptions` T5) và description/hash candidate sau biên tập. Đây là thông tin trong artifact eval, không thêm field vào schema runtime. Với SV2447, capture đã chứa bản biên tập cũ; `originalSha256` trong source-config hiện là `996dea11b6f90334423bace59f66094f1617c3d5b026989f4d53335ee6897dab`, thuộc upstream chứ không phải mô tả ngắn trong capture. T5 phải xác minh lại upstream hiện hành, không mặc định hash này còn đúng.
 
 Hoàn thành khi self-review bảng nguồn → bản biên tập không thấy mất thông tin phân biệt sản phẩm hoặc thêm đặc tính. Dữ liệu này là candidate do agent biên tập trong eval, không gọi là nguồn shop đã cập nhật/owner chứng nhận.
 
@@ -59,6 +65,7 @@ Build cung cấp dist hiện hành cho runner; nếu sửa TypeScript/runtime th
 Phụ thuộc T1–T3. Đây là kế hoạch cho lần owner yêu cầu thực hiện/chạy; yêu cầu lập plan hiện tại chưa chạy provider.
 
 - Hai tình huống hiện hữu: `b1-changed-occasion` và `b1-buying-concern`; mỗi tình huống 3 lần cho mỗi cách trình bày. **12 slots tổng cộng, tối đa 24 generation requests** (12 owner + 12 verifier). Không phải 12 case mới. Control dùng context cũ, candidate dùng bản T2; cả hai dùng prompt hiện hành và verifier không đổi. Không lấy kết quả lịch sử làm control duy nhất.
+- `b1-changed-occasion` là ca chính đo tác dụng biên tập vì có mô tả dài của SV1561/SV165/SV244. `b1-buying-concern` chỉ thấy SV2447 đã được biên tập ngắn: mặc định là ca kiểm tra không suy giảm nếu T2 giữ nguyên hoặc chỉ chỉnh rất ít. Nếu SV2447 thực sự có thay đổi đáng kể, ghi rõ thay đổi và mục đích đo trước provider; không tự gọi đó là cùng treatment “bỏ văn quảng cáo dài”. Nếu owner request của concern giữ nguyên giữa hai arm, báo đúng đây là các lần sinh mới trên cùng input; chênh lệch của ca này không được quy cho thay đổi context.
 - Cùng canonical capture, replay clock, model/config, history, câu hỏi, tools tắt. Freeze trước provider: exact inputs, candidate map/source hashes, thứ tự xen kẽ control/candidate (đảo bên bắt đầu giữa các repetition), review và ngân sách. Arm/caseId/split/expected/rubric chỉ ở evaluator, không vào model request. So nguồn verifier giữa các arm với cùng case: chỉ draft và binding/request ID đương nhiên khác.
 - Commit executable + frozen inputs; require clean source/config, capture HEAD runtime làm runSourceSha, không viết SHA đó ngược vào source. Preflight, tối đa một upstream generation mỗi generation đã đăng ký, retry 0. Source thay đổi thì evidence thuộc run mới.
 - Hoàn thành tập diagnostic đã đăng ký dù một slot có semantic rejection; không gửi khách và không sửa giữa chừng. Auth/quota/nguồn khiến không thể chạy tiếp thì giữ request/error accounting và đánh dấu phần chưa chạy. Không thay mẫu, retry, majority vote hoặc chạy thêm đến khi PASS. Đây là Phase B diagnostic theo OWNER_BYPASS, không gọi là A2 hay áp thành thay đổi hard-stop của A2.
@@ -70,14 +77,16 @@ Review trước khi xem rejected draft/verdict diagnosis: đọc whole actual ou
 Quyết định sau phép thử:
 
 - Candidate còn fallback/lỗi protected rõ, bỏ lỡ yêu cầu chọn hoặc giọng/lập luận vẫn phải viết lại: kết luận giả thuyết chưa đủ; dừng phần integrated. Không thêm prompt ngay rồi gọi cùng run là thành công.
-- Candidate chỉ ngắn hơn nhưng vẫn khen thay cho giải quyết băn khoăn, hoặc kết quả lẫn lộn: INCONCLUSIVE, không tuyên bố cải thiện/ổn định và không mở thêm mẫu tự động.
-- Chỉ tiếp tục nếu cả hai tình huống có cải thiện giải thích được bằng toàn câu trả lời, không có lỗi thực chất ở candidate và không có suy giảm chức năng. Không dùng đa số PASS xóa một failure. Sáu candidate outputs chỉ là bằng chứng thăm dò; không chứng minh conversion hoặc độ ổn định toàn hệ thống.
+- Ở ca thực sự nhận treatment, candidate chỉ ngắn hơn nhưng vẫn khen thay cho giải quyết băn khoăn, hoặc kết quả lẫn lộn: INCONCLUSIVE, không tuyên bố cải thiện/ổn định và không mở thêm mẫu tự động. Ca kiểm tra không suy giảm giữ mức hữu ích cũ không tự khiến phép thử thành INCONCLUSIVE chỉ vì chưa tốt hơn.
+- Chỉ tiếp tục nếu ca chính thực sự nhận treatment có cải thiện giải thích được bằng toàn câu trả lời, ca kiểm tra không suy giảm không có suy giảm thực chất theo các mốc T1, và không có lỗi thực chất ở candidate. Không đòi cả hai tình huống cùng cải thiện, không gọi dao động trên input nguyên vẹn là hồi quy do treatment. Một lỗi thực chất ở ca không đổi vẫn phải báo và xử lý theo điều kiện dừng hiện hành, nhưng không tự chứng minh candidate gây ra lỗi. Không dùng đa số PASS xóa một failure. Sáu candidate outputs chỉ là bằng chứng thăm dò; không chứng minh conversion hoặc độ ổn định toàn hệ thống.
 
 ## T5 — kiểm lại luồng có tool nếu phép thử có ích
 
 Phụ thuộc kết quả T4. Không mở lại 16 slots chưa chạy của run cũ. Freeze registration/source mới cho **16 slots hiện hữu ×1** (8 stateful + 4 integrated B1 + 4 captured advice), tối đa **52 requests**. Tổng trần hai giai đoạn **28 slots / 76 requests**; số thực có thể thấp hơn do code-only/control/hard precheck. Không phát sinh vòng thứ hai trong plan này.
 
 Chuyển dữ liệu T2 sang cấu hình `candidateDescriptions` của eval đã có, áp dụng đồng nhất exact lookup/search và source readback liên quan. Đối chiếu từng mô tả với source hiện hành trước run; nguồn hoặc tập sản phẩm khác phải được ghi rõ. Món ngoài map giữ nguyên, không bịa bản biên tập. Không tăng product bound, thêm fetch, lọc kết quả để ép tìm món “đúng”, thay signed native tool history hoặc viết shared registry/Qdrant/POS.
+
+`candidate-description.mjs` kiểm `originalSha256` trên description upstream trước transform. Lấy đúng hash upstream từ bảng T2 sau readback, không copy hash description capture dùng trong T4. Nếu SV2447 không được biên tập tiếp, giữ mapping hiện hữu sau khi xác minh upstream, không tạo một tầng transform thứ hai. Hash mismatch thì dừng áp mapping đó để đối chiếu lại nguồn; không nới check hoặc âm thầm chuyển sang mô tả khác để tiếp tục run.
 
 Ở bước này cả source evidence của verifier có thể nhận mô tả candidate qua cơ chế existing; đây là phép kiểm tích hợp riêng, không còn phép so sánh owner-only T4. Không ghép các tỷ lệ thành một số cải thiện nhân quả. Verify search/read/readback dùng nhất quán mô tả và version hiện hành; reuse các test candidate-description, tools/readback đang có. Nếu đường hiện tại không hỗ trợ nhất quán, sửa đúng đường đó với focused RED→GREEN trước seal, không thêm gate mới.
 
