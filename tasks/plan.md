@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Full B1/B2/B3 repeat — collected2026-10-20 / report2026-10-21
+
+**FULL_RUN_COMPLETE_REPLY_QUALITY_NOT_COMPLETE**, source `79bda169`. [Report/32hội thoại](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020-r2/CHECKPOINT_B.md). Đủ24B1+8stateful once, không quality early-stop; sixjobs exit0, COD28/28+BANK28/28,3DBsdropped.89owner/verifier requests(61+28),0error/timeout/retry/fallback;2source-embedding calls riêng. Primary `fd097e1` trước diagnosis: B118USABLE/6NEEDS_EDIT; stateful6USABLE/1NEEDS_EDIT/1ownershipcontrol. B1–16 đã mặc thử trả đúng thay fallback cũ; còn giọng và quyết định tư vấn. Audit28bindings/61promptcaptures/93wire/49rawGit/18sourceblobs/0labelleaks. Full provider dùng current-source/default matrix; candidateEXCHANGE/DEFECT chỉ kiểm trong deterministic branches, không publish/rewire. STOP sau đủpopulation; không patch/chạy thêm/liveGO, A OWNER_BYPASS.
+
 ## Candidate handoff five-slot model run — 2026-10-20
 
 **COMPLETE_5_REPLY_QUALITY_NOT_COMPLETE**, source `05be90e8`. [Report/5hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-candidate-run-20261020/CHECKPOINT_B.md). Đủ5/5once,14requests(10owner+4verifier),0error/timeout/retry/fallback/no-send.4SEND_ELIGIBLE qua verifierPASS,1DEFECT HANDOFF/HUMAN/event/tag intent/message/capture đúng candidate; DB dropped. Primary `9fe9a504` khóa trước diagnosis:3USABLE/2NEEDS_EDIT. Ca chỉ ướm hỏi thêm nên chưa dùng EXCHANGE; ca thử chưa rõ vẫn đọc policy trước câu hỏi. Cải thiện rõ ở fixed DEFECT message, chưa chứng minh owner tự nhiên hơn ổn định. Audit10owner/4bindings/22wire/10raw/16source identities/0labelleaks; EOL assumption corrected in audit, giữ primary/raw. STOP; không patch/chạy thêm/full/liveGO; A OWNER_BYPASS.

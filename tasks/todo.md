@@ -1,5 +1,15 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Full B1/B2/B3 repeat — collected2026-10-20 / report2026-10-21
+
+**FULL_RUN_COMPLETE_REPLY_QUALITY_NOT_COMPLETE**, source `79bda169`. [Report/32hội thoại](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020-r2/CHECKPOINT_B.md), [7câu cần sửa](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020-r2/FAILURES_AND_REVIEW.md).
+
+- [x] Freeze/clean full24B1+8stateful/max124/retry0; chạy hết6jobs, không dừng vì quality. COD28/28+BANK28/28;3DBsdropped; no live send/source publish/POS order write.
+- [x] Thu đủ32,89owner/verifier requests(61+28),mỗi generation1request/0error/timeout/retry/fallback;2embedding calls riêng. B1–16 policy-used đã trả từ chối đúng.4statefulPASS+2code-owned replies+2HANDOFF, không bỏ silent ownership control.
+- [x] Primary `fd097e1` khóa trước diagnosis: B118USABLE/6NEEDS_EDIT; stateful6USABLE/1NEEDS_EDIT/1control; humanAdjudication=false. Không keyword scoring, không siết ordinary material inference hoặc relabel lịch sử.
+- [x] Audit28bindings/61exactpromptcaptures/93wire/49rawGit/18sourceblobs/0labelleaks; retain41exact copies+8private-batch-removed copies. Preserve raw EOL/whitespace with local attributes; only indexed ignored logs force-added.
+- [ ] Remaining7quality edits: partial-source wordingB1–3/11; advice priority/voiceB1–7/15/23; comfort reassuranceB1–9 needs owner boundary review; state ACK voiceB2/B3–4. No automatic patch or rerun in this registration; no A PASS/B/liveGO.
+
 ## Candidate handoff five-slot model run — 2026-10-20
 
 **COMPLETE_5_REPLY_QUALITY_NOT_COMPLETE**, source `05be90e8`. [Report/5hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-candidate-run-20261020/CHECKPOINT_B.md).
