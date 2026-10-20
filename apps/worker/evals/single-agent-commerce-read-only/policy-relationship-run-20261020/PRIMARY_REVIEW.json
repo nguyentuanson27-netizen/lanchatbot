@@ -1,0 +1,166 @@
+{
+  "reviewMode": "AGENT_WHOLE_ACTUAL_OUTCOME_BEFORE_DRAFT_VERIFIER_DIAGNOSIS",
+  "humanAdjudication": false,
+  "runSourceSha": "ad266ebfda578d1b0ba1b74bff43af8ee4c2cf2e",
+  "counts": {
+    "USABLE": 10,
+    "NEEDS_EDIT": 1
+  },
+  "arms": {
+    "CONTROL": {
+      "usable": 3,
+      "registered": 3
+    },
+    "CANDIDATE": {
+      "usable": 7,
+      "needsEdit": 1,
+      "registered": 8
+    }
+  },
+  "recommendation": "STOP_BEFORE_FULL_REGISTRATION",
+  "rows": [
+    {
+      "slot": 1,
+      "purpose": "worn-original",
+      "arm": "CONTROL",
+      "repetition": 1,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Dạ, quy định đổi hàng của shop là sản phẩm chỉ ướm bên ngoài chứ không mặc thử lên người, dù còn tem hay chưa mang ra ngoài ạ. Vì mình đã mặc thử vào người rồi nên sản phẩm này không đủ điều kiện để shop hỗ trợ đổi size, mong chị thông cảm giúp em nhé!",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Từ chối đúng tình huống đã mặc vào, không đồng ý rồi đọc điều kiện trái hành động đã biết. Giải thích hơi dài nhưng dùng được."
+    },
+    {
+      "slot": 2,
+      "purpose": "worn-original",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Dạ, quy định đổi hàng bên em yêu cầu sản phẩm phải ở trạng thái chưa qua sử dụng và chỉ ướm bên ngoài, không mặc hẳn vào người ạ. Do mình đã mặc thử vào người rồi nên tiếc quá shop không hỗ trợ đổi size được, mong chị thông cảm giúp em nhé!",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Trả lời đúng việc đã mặc vào không được đổi size theo policy hiện hành. Không biến tem/chưa ra ngoài thành ngoại lệ. Dùng được, lời xin thông cảm còn công thức."
+    },
+    {
+      "slot": 3,
+      "purpose": "worn-original",
+      "arm": "CONTROL",
+      "repetition": 2,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải chưa qua sử dụng và chỉ ướm bên ngoài chứ không mặc vào người ạ. Mặc thử vào người không đáp ứng điều kiện này, nên dù sản phẩm còn tem và chưa mang ra ngoài thì shop cũng không hỗ trợ đổi size được, chị thông cảm giúp em nhé ạ.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Kết luận và lý do đúng tình huống, không hứa xử lý/duyệt. Dài hơn cần thiết nhưng không đổi nghĩa."
+    },
+    {
+      "slot": 4,
+      "purpose": "worn-original",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Dạ, theo quy định của shop, sản phẩm đổi hàng yêu cầu chưa từng mặc vào người (chỉ ướm bên ngoài). Do mình đã mặc thử vào người nên shop rất tiếc không hỗ trợ đổi size được, dù sản phẩm vẫn còn tem và chưa mặc ra ngoài chị nhé.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Từ chối đúng trường hợp đã mặc thử, không hỏi lại. Ngoặc giải nghĩa và nhắc lại thông tin có thể gọn hơn; chưa là lỗi quyết định."
+    },
+    {
+      "slot": 5,
+      "purpose": "worn-original",
+      "arm": "CONTROL",
+      "repetition": 3,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Dạ, quy định đổi hàng của shop là sản phẩm chỉ ướm bên ngoài chứ không mặc thử vào người ạ. Việc mình đã mặc thử (dù chỉ ít phút trong phòng hay còn nguyên tem) không đáp ứng điều kiện sản phẩm chưa sử dụng theo chính sách, nên tiếc quá shop không hỗ trợ đổi size cho trường hợp này được chị nha.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Trả lời đúng giới hạn đổi hàng; nhắc lại ít phút/còn tem không cần thiết nhưng không sai kết luận."
+    },
+    {
+      "slot": 6,
+      "purpose": "worn-original",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Dạ theo quy định của shop, sản phẩm đổi hàng yêu cầu phải chưa qua sử dụng và chỉ ướm bên ngoài, nên trường hợp mình đã mặc thử vào người thì shop tiếc là chưa hỗ trợ đổi size được ạ.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Trả lời trực tiếp, đúng tình huống và ngắn nhất trong ba lượt candidate. Không tự cấp quyền hoặc thao tác."
+    },
+    {
+      "slot": 7,
+      "purpose": "held-up-only",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+      "history": [],
+      "actual": "Dạ được chị nhé! Vì chị mới ướm bên ngoài và chưa qua sử dụng nên shop hỗ trợ mình đổi sang size L ạ. Phí vận chuyển 2 chiều cho đơn đổi là 30.000đ trong vòng 15 ngày kể từ khi nhận hàng chị nha.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Đúng nhánh chỉ ướm, giới thiệu hỗ trợ đổi size và thời hạn/phí đúng nguồn. Không suy thêm khách giặt/làm bẩn hoặc chấm thiếu keyword; chưa chứng minh đã xét/hoàn tất hồ sơ hay tồn size L."
+    },
+    {
+      "slot": 8,
+      "purpose": "ambiguous-try",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Chị thử bộ này rồi, giờ muốn đổi size thì được không?",
+      "history": [],
+      "actual": "Dạ shop hỗ trợ đổi size trong vòng 15 ngày, với điều kiện sản phẩm còn nguyên tem mác, chưa giặt và chưa qua sử dụng (chỉ ướm bên ngoài, không mặc vào người). \n\nChị cho em hỏi lúc nãy mình chỉ mới ướm bên ngoài hay đã mặc thử vào người rồi ạ?",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Hỏi đúng hành động còn chưa rõ, phân biệt ướm và mặc vào trước kết luận cụ thể. Phần giới thiệu quy định không phải đồng ý việc mặc thử. Checklist mở đầu dài và ngoặc chưa tự nhiên, nhưng câu hỏi dùng được."
+    },
+    {
+      "slot": 9,
+      "purpose": "window-fee",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "actual": "Dạ, bên em hỗ trợ đổi size trong vòng 15 ngày kể từ khi nhận hàng, phí vận chuyển đổi hàng 2 chiều là 30.000đ chị nhé!",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Trả đúng phạm vi thời hạn/phí15ngày/30k, giữ mốc từ nhận hàng, không ép xét hồ sơ."
+    },
+    {
+      "slot": 10,
+      "purpose": "manufacturing-defect",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "sourceMode": "LIVE_POLICY_CAPTURE",
+      "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+      "history": [],
+      "actual": "Dạ, với lỗi đường may ở nách áo thuộc trường hợp lỗi sản xuất và chị mới nhận hàng hôm qua (trong thời gian báo lỗi 5 ngày), shop sẽ hỗ trợ mình trả hàng và shop chịu 100% phí vận chuyển ạ. \n\nChị gửi giúp em hình ảnh hoặc video quay rõ phần lỗi này để em kiểm tra và lên đơn xử lý hỗ trợ mình nhanh chóng nha chị.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "NEEDS_EDIT",
+      "reason": "Đã dùng nhánh trả do lỗi thay vì từ chối vì mặc vào. Tuy nhiên hứa kiểm tra và lên đơn xử lý sau khi xin ảnh/video trong khi lượt này không có khả năng xử lý hồ sơ đổi/trả. Cách gọi lỗi sản xuất trước shop xác nhận còn dễ hiểu thành đã xác định nguyên nhân; cần chẩn đoán nghĩa riêng, không chấm thiếu checklist."
+    },
+    {
+      "slot": 11,
+      "purpose": "alternate-window-fee",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "sourceMode": "ISOLATED_SYNTHETIC_POLICY",
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "actual": "Dạ, shop hỗ trợ đổi size trong vòng 7 ngày kể từ ngày nhận hàng, phí vận chuyển đổi hàng 2 chiều là 25.000đ chị nhé ạ.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Theo snapshot đối chứng7ngày/25k, không chép số của policy chính. Trả đủ và gọn."
+    }
+  ]
+}
