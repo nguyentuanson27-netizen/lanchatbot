@@ -1,0 +1,1325 @@
+{
+  "rows": [
+    {
+      "run": "stateful-1",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "runtime": {
+        "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+      ],
+      "stage": "CART_OPEN",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 1,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "M",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 499000
+        }
+      ],
+      "grandTotalVnd": 529000,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 76,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:43:44.961Z",
+            "sourceEventHash": "a17c4f17221f7a8939d79012b51ea7476e0adec36c6d1ea5ef1bb819616c6565"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 98,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:43:44.961Z",
+            "sourceEventHash": "a17c4f17221f7a8939d79012b51ea7476e0adec36c6d1ea5ef1bb819616c6565"
+          }
+        }
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Thêm đúng áo be M, một chiếc vào giỏ và báo đặt trước. ACK tương ứng state/price, không tự chốt fit từ eo/mông.",
+      "voiceFindings": []
+    },
+    {
+      "run": "stateful-1",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "runtime": {
+        "latest": "Đổi áo sang L cho chị, lấy hai chiếc nhé.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, em đã đổi áo sang size L và giữ 2 chiếc trong giỏ cho chị rồi ạ."
+      ],
+      "stage": "CART_OPEN",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "grandTotalVnd": 978100,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 76,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:43:44.961Z",
+            "sourceEventHash": "a17c4f17221f7a8939d79012b51ea7476e0adec36c6d1ea5ef1bb819616c6565"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 98,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:43:44.961Z",
+            "sourceEventHash": "a17c4f17221f7a8939d79012b51ea7476e0adec36c6d1ea5ef1bb819616c6565"
+          }
+        }
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Đổi đúng L và hai chiếc, giữ màu be. Câu xác nhận ngắn; giữ trong giỏ không phải đã giữ tồn kho hay tạo đơn.",
+      "voiceFindings": []
+    },
+    {
+      "run": "stateful-1",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "runtime": {
+        "latest": "Hai áo cả phí ship là bao nhiêu em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo sang size L và giữ 2 chiếc trong giỏ cho chị rồi ạ."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, 2 áo màu be size L của chị tổng cộng là 978.100đ ạ (đã gồm 30.000đ phí ship và được giảm 49.900đ)."
+      ],
+      "stage": "CART_OPEN",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "grandTotalVnd": 978100,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 76,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:43:44.961Z",
+            "sourceEventHash": "a17c4f17221f7a8939d79012b51ea7476e0adec36c6d1ea5ef1bb819616c6565"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 98,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:43:44.961Z",
+            "sourceEventHash": "a17c4f17221f7a8939d79012b51ea7476e0adec36c6d1ea5ef1bb819616c6565"
+          }
+        }
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả đúng978.100đ gồm ship30k và giảm49,9k. Ngoặc ở đây giải thích tổng tiền khách đang hỏi, không coi mọi ngoặc hoặc lặp biến thể là lỗi.",
+      "voiceFindings": []
+    },
+    {
+      "run": "stateful-1",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "runtime": {
+        "latest": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo sang size L và giữ 2 chiếc trong giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, 2 áo màu be size L của chị tổng cộng là 978.100đ ạ (đã gồm 30.000đ phí ship và được giảm 49.900đ)."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ vâng, em đã cập nhật số đo mới và giữ nguyên 2 áo size L cho chị rồi ạ!"
+      ],
+      "stage": "CART_OPEN",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "grandTotalVnd": 978100,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 74,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 96,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        }
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Đã sửa đúng74/96 và giữ L, không suy L vừa người. Nhưng cách nói đã cập nhật số đo mới và giữ nguyên nghe như thông báo quản lý dữ liệu; giọng còn cứng theo finding owner đã nêu. Lỗi giọng, không phải ghi state hay trích số đo sai.",
+      "voiceFindings": [
+        "Giọng quản lý dữ liệu"
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "slot": 5,
+      "caseId": "stateful-request-checkout",
+      "runtime": {
+        "latest": "Chị đặt hai áo này nhé, lên đơn cho chị.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo sang size L và giữ 2 chiếc trong giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, 2 áo màu be size L của chị tổng cộng là 978.100đ ạ (đã gồm 30.000đ phí ship và được giảm 49.900đ)."
+          },
+          {
+            "role": "customer",
+            "text": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ vâng, em đã cập nhật số đo mới và giữ nguyên 2 áo size L cho chị rồi ạ!"
+          }
+        ]
+      },
+      "disposition": "NO_SEND",
+      "terminalReason": "CHECKOUT_DETAILS_MISSING",
+      "actual": [
+        "Chị gửi thêm [NAME]"
+      ],
+      "stage": "CART_OPEN",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "grandTotalVnd": 978100,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 74,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 96,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        }
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Có actual code-owned invitation trước private intake; public artifact đã redacted nhãn thành[NAME], không kết luận bot gửi placeholder. Không tự gọi NO_SEND model terminal là khách không nhận gì.",
+      "voiceFindings": []
+    },
+    {
+      "run": "stateful-1",
+      "slot": 6,
+      "caseId": "stateful-private-checkout",
+      "runtime": {
+        "latest": "[Thông tin checkout riêng tư được xử lý trong code]",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo sang size L và giữ 2 chiếc trong giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, 2 áo màu be size L của chị tổng cộng là 978.100đ ạ (đã gồm 30.000đ phí ship và được giảm 49.900đ)."
+          },
+          {
+            "role": "customer",
+            "text": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ vâng, em đã cập nhật số đo mới và giữ nguyên 2 áo size L cho chị rồi ạ!"
+          },
+          {
+            "role": "customer",
+            "text": "Chị đặt hai áo này nhé, lên đơn cho chị."
+          },
+          {
+            "role": "shop",
+            "text": "Chị gửi thêm [NAME]"
+          }
+        ]
+      },
+      "disposition": "NO_SEND",
+      "terminalReason": "PRIVATE_CHECKOUT_COMMITTED",
+      "actual": [
+        "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+      ],
+      "stage": "ORDER_PREVIEW",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "grandTotalVnd": 978100,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 74,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 96,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        }
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Private checkout tạo preview đúng2áo beL, tổng978.100đ, đặt trước và ETA dự kiến8–14ngày; có người nhận/phương thức và yêu cầu xác nhận. Đây là reply code-owned, không model đã nhìn dữ liệu riêng tư.",
+      "voiceFindings": []
+    },
+    {
+      "run": "stateful-1",
+      "slot": 7,
+      "caseId": "stateful-confirm",
+      "runtime": {
+        "latest": "Chốt đơn cho chị nhé.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo sang size L và giữ 2 chiếc trong giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, 2 áo màu be size L của chị tổng cộng là 978.100đ ạ (đã gồm 30.000đ phí ship và được giảm 49.900đ)."
+          },
+          {
+            "role": "customer",
+            "text": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ vâng, em đã cập nhật số đo mới và giữ nguyên 2 áo size L cho chị rồi ạ!"
+          },
+          {
+            "role": "customer",
+            "text": "Chị đặt hai áo này nhé, lên đơn cho chị."
+          },
+          {
+            "role": "shop",
+            "text": "Chị gửi thêm [NAME]"
+          },
+          {
+            "role": "customer",
+            "text": "[Thông tin checkout riêng tư được xử lý trong code]"
+          },
+          {
+            "role": "shop",
+            "text": "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          }
+        ]
+      },
+      "disposition": "HANDOFF",
+      "terminalReason": "PURCHASE_CONFIRMED",
+      "actual": [
+        "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+      ],
+      "stage": "PURCHASE_CONFIRMED",
+      "cart": [
+        {
+          "lineId": "c5a77368-ca77-530f-89f4-fe5418186c39",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-20T16:34:17.716Z",
+              "expiresAt": "2026-10-22T16:34:17.716Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "grandTotalVnd": 978100,
+      "profile": [
+        {
+          "kind": "WAIST_CM",
+          "value": 74,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        },
+        {
+          "kind": "HIPS_CM",
+          "value": 96,
+          "provenance": {
+            "source": "CUSTOMER_MESSAGE",
+            "confidence": 1,
+            "observedAt": "2026-10-20T16:45:44.957Z",
+            "sourceEventHash": "a0df6e27b9dbd6028891c7d4161cd1370876eb723089b7fea6552fac28ff3aca"
+          }
+        }
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Confirm hiện tại chuyển PURCHASE_CONFIRMED và báo chuyển nhân viên kiểm tra/lên đơn. Đúng quy trình owner chấp nhận, không báo đã tạo đơn POS thật.",
+      "voiceFindings": []
+    },
+    {
+      "run": "stateful-1",
+      "slot": 8,
+      "caseId": "stateful-human-request",
+      "runtime": {
+        "latest": "Cho chị gặp nhân viên shop nhé.",
+        "history": []
+      },
+      "disposition": "HANDOFF",
+      "terminalReason": "CUSTOMER_REQUESTED_HUMAN",
+      "actual": [],
+      "stage": "DISCOVERY",
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "OWNERSHIP_CONTROL",
+      "reason": "Đã chuyển quyền khi khách yêu cầu nhân viên; không có customer ACK trong capture. Ghi nhận giới hạn trải nghiệm, không bịa câu đã gửi hoặc chấm văn phong cho reply không tồn tại.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+          },
+          {
+            "role": "shop",
+            "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set Thạch Thảo dùng chất liệu tơ và ren mềm bay bổng nên khi ngồi ô tô gần 3 tiếng sẽ dễ bị hằn nếp nhăn ở phần váy chị nha. \n\nĐi xe đường dài, em gợi ý chị chuyển sang váy Ngọc Trâm nhé. Mẫu này thiết kế váy yếm 2 lớp tơ ống đứng form rất đẹp, ít bị nhăn khi ngồi lâu mà mặc lên vẫn sang trọng, thướt tha rất hợp đi đám cưới ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Đổi đề xuất theo việc đi xe lâu, chọn váy Ngọc Trâm và nêu lý do từ material/form2lớp đã đọc. Giữ phạm vi inference ít nhăn từ chất liệu/giữ form owner đã chấp nhận; không đòi phép thử riêng chỉ vì lời khuyên so sánh. Câu nhiều tính từ nhưng có quyết định hữu ích.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 2,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ mình đổi màu vẫn kịp chị nhé, thời hạn đổi hàng bên em là trong vòng 15 ngày kể từ ngày nhận ạ. Phí vận chuyển 2 chiều cho đơn đổi là 30.000đ chị nha."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Dùng policy hiện hành15ngày thay lịch sử7ngày, đối chiếu nhận10ngày/chỉ cầm ngắm và trả phí30k. Không ép nhắc toàn checklist.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 3,
+      "caseId": "b1-partial-source",
+      "runtime": {
+        "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set Thạch Thảo được may bằng chất liệu tơ Hàn thêu cho áo (mềm, thoáng, có độ bay tự nhiên và họa tiết thêu nổi) kết hợp cùng chân váy ren tơ Hàn mềm mại, có độ rũ tự nhiên rất thướt tha ạ. \n\nVề giá và tình trạng còn hàng size M, hiện tại hệ thống bên em chưa cập nhật được dữ liệu này nên em chưa báo chính xác cho chị ngay được ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Trả được chất vải nhưng dồn mô tả và ngoặc, rồi viện hệ thống chưa cập nhật. Trong source-fault case, thiếu giá/tồn là đầu vào có chủ đích; finding là cách nói với khách và trọng tâm, không quy mọi unknown thành model bịa.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 4,
+      "caseId": "b1-price",
+      "runtime": {
+        "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set Thạch Thảo (mã SV2447) shop có các lựa chọn và mức giá cụ thể như sau ạ:\n\n- Cả bộ: 799.000đ\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 449.000đ"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Giá cả bộ và hai phần chính xác, ba dòng dễ hiểu. Có thể dẫn cả bộ trước thay phần mở dài; không chấm hỏng chỉ vì dùng danh sách khi so lựa chọn giá.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 5,
+      "caseId": "b1-component-stock",
+      "runtime": {
+        "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, áo của bộ Thạch Thảo size M hiện còn hàng chị nhé. Áo bán riêng có giá 499.000đ ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả đúng áoM còn và giá499k, ngắn. Chưa có quyết định fit hay effect.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 6,
+      "caseId": "b1-search-read",
+      "runtime": {
+        "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, áo dài SD375 có giá tùy theo lựa chọn của mình chị nhé:\n\n- Mua áo lẻ: 929.000đ\n- Mua cả bộ: 1.065.000đ"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Tìm đúngSD375 và trả giááolẻ929k/cảbộ1.065k. Hai lựa chọn liên quan trực tiếp câu hỏi giá.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 7,
+      "caseId": "b1-buying-concern",
+      "runtime": {
+        "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ bộ này mặc đi tiệc ban ngày rất hợp và sang trọng, không bị rườm rà đâu chị ạ! Chân váy dùng chất ren tơ Hàn mềm, form nhẹ cùng độ rũ tự nhiên kết hợp với áo tơ thêu nổi thanh nhã, tạo cảm giác bay bổng và rất nhẹ nhàng. \n\nCả bộ Set váy Thạch Thảo có giá 799.000đ, hoàn toàn nằm trong ngân sách 900.000đ của mình luôn chị nhé. Chị có muốn em kiểm tra size phù hợp cho mình không ạ?"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Trấn an ren không rườm rà nhưng phần thuyết phục thành chuỗi tính từ, đọc lại ngân sách và xin phép kiểm size chung chung. Cần bám lo ren và dẫn bước chọn size rõ hơn; không phải thiếu keyword hay sai giá.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 8,
+      "caseId": "b1-policy-used",
+      "runtime": {
+        "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải còn nguyên vẹn, chưa qua sử dụng và chưa mặc ra ngoài ạ. Do mình đã mặc đi làm rồi nên shop rất tiếc không hỗ trợ đổi sang màu khác được cho mình chị nha. \n\nNếu là các đơn đổi hàng hợp lệ, chi phí vận chuyển 2 chiều là 30.000đ do khách hàng chi trả ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Từ chối đúng trường hợp đã mặc đi làm rồi; phí chỉ được nêu cho đơn đổi hợp lệ, không biến thành quyền được đổi của khách này.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "runtime": {
+        "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+          },
+          {
+            "role": "shop",
+            "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ áo dùng chất liệu tơ Hàn mềm, thoáng cùng chân váy ren tơ Hàn mềm, form nhẹ và có độ bay tự nhiên nên mặc rất nhẹ nhàng, thoải mái, không sợ bị bí nóng khi ở ngoài trời lâu đâu chị nha."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Khách dễ nóng và phải ở ngoài trời lâu, reply trấn an không sợ bí nóng khi ở ngoài trời lâu từ mô tả mềm/thoáng. Cần sửa độ mạnh của lời thuyết phục; ghi riêng ranh giới comfort theo material so với đảm bảo hoàn cảnh sử dụng. Chưa kết luận unsafe falsePASS hay tự siết verifier vì đây là vùng inference owner từng cho phép rộng.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 10,
+      "caseId": "b1-current-policy-v2",
+      "runtime": {
+        "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước chị nhớ phí đổi là 25 nghìn."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ mình vẫn đổi size kịp chị nhé, thời gian hỗ trợ đổi hàng là trong vòng 15 ngày kể từ khi nhận ạ. Phí ship đổi 2 chiều là 30.000đ chị nha."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Đối chiếu12ngày/chưa dùng với15ngày và sửa phí cũ25k thành30k, ngắn gọn.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 11,
+      "caseId": "b1-partial-source-v2",
+      "runtime": {
+        "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, chân váy Thạch Thảo làm bằng chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên rất đẹp chị nha. \n\nHiện chân váy bên em chưa có thông tin bán lẻ riêng nên em chưa kiểm tra được giá và tình trạng size M ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Chất/dáng trả đúng phần đã có, nhưng chưa có thông tin bán lẻ riêng dễ khiến khách hiểu shop không bán riêng; thực tế đây là unknown do source fault. Cần nói rõ đang chưa kiểm được giá/tồn, tránh diễn đạt như thiếu lựa chọn kinh doanh.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 12,
+      "caseId": "b1-price-v2",
+      "runtime": {
+        "latest": "Cho chị xin giá cả bộ với em.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem bộ Thạch Thảo bên mình."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set váy Thạch Thảo cả bộ có giá 799.000đ chị nhé."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Dùng đúng tham chiếu Thạch Thảo từ history, trả cả bộ799k trực tiếp.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 13,
+      "caseId": "b1-component-stock-v2",
+      "runtime": {
+        "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị chỉ muốn lấy chân váy của set Thạch Thảo."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ chân váy Thạch Thảo size M bên em còn hàng chị nhé, giá mua riêng là 449.000đ ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Đúng chân váyM còn và giá449k; không trả nhầm giá áo/cả bộ.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 14,
+      "caseId": "b1-search-read-v2",
+      "runtime": {
+        "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, shop có set váy Khánh Trang chị nhé. Set váy có giá 999.000đ ạ. Ngoài ra shop cũng có bán lẻ áo hoặc chân váy với giá 499.000đ mỗi món nếu mình muốn mua rời nha chị."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Tìm đúng Khánh Trang, trả có mẫu/giáset999k cùng giá mua rời theo source. Không tự tạo ưu đãi từ các giá này.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "runtime": {
+        "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ set Thạch Thảo này rất hợp để đi ăn cưới ban ngày đấy chị ạ. Dù là chất liệu tơ thêu và ren, nhưng nhờ form áo váy nhẹ nhàng, có độ bay và rũ tự nhiên nên lên người rất thanh thoát, sang trọng chứ không bị quá điệu hay phô trương đâu ạ.\n\nNếu chị vẫn ngại áo thêu nổi có thể hơi điệu so với phong cách thường ngày, mình có thể chọn mua riêng phần chân váy ren (449.000đ) để phối với một chiếc áo trơn đơn giản sẵn có trong tủ. Còn diện trọn bộ (799.000đ) thì tổng thể rất nhã nhặn, lịch sự và vừa vặn cho tiệc cưới ban ngày. \n\nChị thích lấy nguyên bộ hay mình thử phần chân váy trước ạ?"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Khách cần shop chọn có nên lấy, reply đầu khen cả bộ, giữa đưa váy lẻ, cuối lại giao lựa chọn cho khách. Chưa giải quyết ưu tiên đồ trơn/ngại điệu, lời thuyết phục dài và nhiều tính từ; không chấm chỉ theo có câu em chọn hay không.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 16,
+      "caseId": "b1-policy-used-v2",
+      "runtime": {
+        "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ theo quy định đổi hàng của shop, sản phẩm đổi cần ở trạng thái chưa từng mặc thử vào người (chỉ ướm bên ngoài), nên trường hợp chị đã mặc thử thì shop rất tiếc không hỗ trợ đổi size được ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Áp policy vào việc đã mặc vào và từ chối đổi đúng. Đã xử lý nguyên nhân fallback trước; không bắt thiếu các điều kiện khác khi hành động này đã loại trừ.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "runtime": {
+        "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+          },
+          {
+            "role": "shop",
+            "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Đi gặp khách hàng buổi sáng, để nhìn gọn gàng và lịch sự hơn, em gợi ý chị lấy áo lẻ (499.000đ) để phối với quần âu hoặc chân váy ôm gọn gàng sẵn có. Áo chất tơ Hàn thêu form nhẹ, tinh tế và sắc sảo, rất chuẩn phong cách chuyên nghiệp. \n\nCòn cả bộ (799.000đ) có chân váy ren bay bổng, mềm rũ, hợp với không gian tiệc tối điệu đà hơn chị nha."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Khi chuyển sang gặp khách hàng, chọn áo lẻ và lý giải giảm ren/bay bổng so cả bộ. Quyết định rõ hơn lượt trước; giọng vẫn nhiều tính từ nhưng logic giúp khách chọn.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 18,
+      "caseId": "b1-current-policy-v3",
+      "runtime": {
+        "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, bên em hỗ trợ đổi size trong vòng 15 ngày kể từ khi nhận hàng nên chị đổi được bình thường nha chị. Phí vận chuyển 2 chiều cho đổi hàng là 30.000đ ạ. \n\nChị muốn đổi sang size nào để em hỗ trợ mình nhé ạ?"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Sửa mốc7thành15ngày theo nguồn và tình huống chỉ mở xem; hỏi size muốn đổi là bước trao đổi tiếp, chưa báo đã đổi hay đã duyệt hồ sơ.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "runtime": {
+        "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, áo của set Thạch Thảo làm bằng chất tơ Hàn thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; còn chân váy là chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nha. Hiện tại giá và tình trạng còn hàng của mẫu này em chưa cập nhật được thông tin ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả chất áo/váy theo hai phần rồi nói chưa có giá/tồn. Vẫn có thể gọn hơn; không lộ chữ hệ thống như ca3 hoặc biến unknown thành không bán riêng như ca11.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 20,
+      "caseId": "b1-price-v3",
+      "runtime": {
+        "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ nguyên set Thạch Thảo có giá 799.000đ chị nha."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả đúng799k, ngắn đúng câu hỏi nguyên set.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "runtime": {
+        "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ áo Thạch Thảo bên em có bán riêng chị nhé. Áo size M hiện sẵn hàng, giá 499.000đ ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Giá499k và M IN_STOCK khớp context B1 cung cấp. Cụm sẵn hàng cần đối chiếu với đặt trước ở luồng stateful trong diagnosis; chưa quy thành model biết nguồn đặt trước nhưng vẫn nói sai khi context B1 không trình bày fulfillment.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 22,
+      "caseId": "b1-search-read-v3",
+      "runtime": {
+        "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, mẫu Set quần Xuân Thảo hiện vẫn còn hàng chị nhé. \n\nSản phẩm này shop có bán cả bộ lẫn bán lẻ từng món:\n- Cả bộ: 699.000đ\n- Áo lẻ: 429.000đ\n- Quần lẻ: 429.000đ\n\nChị muốn chọn mua theo set hay mua lẻ món nào thì báo em nhé ạ."
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Tìm đúng Xuân ThảoSQ223, báo tồn và ba lựa chọn giá phù hợp câu hỏi. Có thể dẫn giáset trước; không ép mọi câu chỉ có một con số.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "runtime": {
+        "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị có sẵn chân váy đen dáng suông rồi."
+          }
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Chị ơi, với ngân sách tầm 850 nghìn thì cả hai phương án đều vừa vặn với chị ạ:\n\n- **Mua riêng áo lẻ (499.000đ)**: Áo tơ thêu nổi form nhẹ rất dễ phối đồ. Chị có thể kết hợp linh hoạt với chân váy đen sẵn có hoặc các dáng quần, váy khác để mặc lại nhiều lần.\n- **Lấy cả bộ (799.000đ)**: Vẫn nằm trong ngân sách của chị, mang lại diện mạo đồng bộ, thướt tha và sang trọng chuẩn thiết kế set váy Thạch Thảo.\n\nNếu chị ưu tiên sự đa dạng khi mix & match với đồ có sẵn, mua riêng áo là lựa chọn rất tối ưu. Chị thích phương án nào hơn ạ?"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Khách đã nhờ shop chọn để mặc lại nhiều lần, reply phân tích cả hai rồi nếu ưu tiên đa dạng và hỏi chị thích phương án nào. Điều kiện đó khách đã nói; cần shop đứng vào lựa chọn và lý do, giảm trình bày như bài so sánh. Không tự ép mua rẻ hay cấm upsell cả bộ.",
+      "voiceFindings": []
+    },
+    {
+      "run": "b1-1",
+      "slot": 24,
+      "caseId": "b1-policy-used-v3",
+      "runtime": {
+        "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+        "history": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem và chưa qua giặt ạ. Do sản phẩm của mình đã cắt tem và giặt rồi nên shop rất tiếc không hỗ trợ đổi sang mẫu khác được, chị thông cảm giúp em nhé!"
+      ],
+      "stage": null,
+      "cart": [],
+      "grandTotalVnd": null,
+      "profile": [],
+      "primaryVerdict": "USABLE",
+      "reason": "Từ chối đúng do đã cắt tem và giặt, không bị đánh lạc hướng bởi chưa mặc ra ngoài. Giải thích đúng điều quyết định, dù câu xin thông cảm hơi hành chính.",
+      "voiceFindings": []
+    }
+  ],
+  "reviewMode": "AGENT_WHOLE_ACTUAL_DIALOGUE_STATE_AND_SOURCE_BEFORE_REJECTED_DRAFT_VERIFIER_DIAGNOSIS",
+  "humanAdjudication": false,
+  "runSourceSha": "79bda1692667846e0a543a404812ab1daead35c7",
+  "scope": "FULL_24_B1_8_STATEFUL_ONCE_NO_QUALITY_EARLY_STOP",
+  "note": "Context source readbacks used for material/fact scope; no rejected drafts or verifier reasoning used to assign primary labels. Qualitative judgement is not human owner adjudication."
+}
