@@ -1,5 +1,9 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Policy + handoff model run — 2026-10-20
+
+**FROZEN_5_NOT_DISPATCHED**, base `513072fe`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-run-20261020/SCOPE.md). Five existing policy questions once each, native tools/request_handoff enabled; max20generations/retry0. Real PostgreSQL disposable DB and existing handoff/CAS/event/tag/Outbox pipeline, capture-only Meta transport; no live socket or source policy/matrix writes. Current matrix absent, use default rule.96focused PASS and runner syntax checks before seal; no production/API changes. Clean source → preflight →5 once; lock actual-outcome review before diagnosis, no automatic full/extra run.
+
 ## Owner direction — concise exchange/return + real handoff — 2026-10-20
 
 **PROMPT_UPDATED_HANDOFF_MODEL_FLOW_NOT_RUN**, base `678dab0b`. [Owner feedback và exact checks](../apps/worker/evals/single-agent-commerce-read-only/policy-relationship-run-20261020/OWNER_FEEDBACK.md). Owner chấp nhận quy trình kiểm tra/làm thủ tục, yêu cầu chuyển nhân viên; đủ căn cứ thì báo ngắn kết luận và quy trình, không đọc lại điều kiện đã đối chiếu. Đã sửa riêng section Chính sách + owner hash; giữ verifier/policy data/runtime/corpus/raw/primary.37focused handoff/runner PASS +59adapter/protocol PASS. Cần đo ca hiện có với request_handoff bật, state HUMAN và actual holdingReply từ nguồn; replay tools OFF không chứng minh bước chuyển. Không chạy provider mới hoặc sửa upstream matrix/live send trong lượt này.
