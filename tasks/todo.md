@@ -1,5 +1,14 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Full B1/B2/B3 rerun — 2026-10-20
+
+[Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md), base `d8743ff0`, current prompts/models unchanged.
+
+- [x] Freeze existing24B1+8stateful, max124generations/retry0; protocol10PASS.
+- [ ] Clean source seal, provider/source preflight, deterministic PostgreSQL checks COD/BANK_TRANSFER.
+- [ ] Run all32registered outcomes once; preserve failures/downstream blocks; no extra advice replay.
+- [ ] Lock whole actual dialogue/state review before diagnosis, account provider requests/usage/latency, verify cleanup and report/STOP.
+
 ## Next fix — advice focus — 2026-10-20
 
 [Plan](../docs/specs/c3-phase-b-advice-focus-plan-20261020.md), base `fdb2a63e`, **DIAGNOSTIC_COMPLETE_STOP_BEFORE_INTEGRATED16**. [Report](../apps/worker/evals/single-agent-commerce-read-only/advice-focus-20261020/CHECKPOINT_B.md), runtime source `be9ec1c1`.

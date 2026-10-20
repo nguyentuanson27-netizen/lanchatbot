@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Active full B1/B2/B3 run — 2026-10-20
+
+Owner explicitly requests full rerun after advice diagnostic STOP. [Frozen scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020/SCOPE.md): existing24B1×1 +existing8stateful×1 =32outcomes/max124generation requests, plus deterministic isolated PostgreSQL checks COD/BANK_TRANSFER with0generations. Current prompts/models/source/runtime unchanged; no extra advice replay or retry. New clean committed source/preflight/readback, actual primary before diagnosis, cleanup/request accounting/report/STOP. Prior diagnostic evidence/STOP preserved; this request authorizes a new full run, not a runtime gate bypass.
+
 ## Active next-fix plan — advice focus — 2026-10-20
 
 **DIAGNOSTIC_COMPLETE_STOP_BEFORE_INTEGRATED16**, base `fdb2a63e`, implementation `ef3a1cfb`, runtime source `be9ec1c1f53976460b0c644afef4e100d0be0b7f`. [Kế hoạch đã thực hiện](../docs/specs/c3-phase-b-advice-focus-plan-20261020.md), [report](../apps/worker/evals/single-agent-commerce-read-only/advice-focus-20261020/CHECKPOINT_B.md). Hai phần chọn ý/giọng đã thay; các phần authority giữ nguyên.12outcomes/24generations: control3USABLE/1NEEDS_EDIT/2fallback; candidate4USABLE/1NEEDS_EDIT/1fallback. Primary commit `3a18227d` trước diagnosis.65focusedPASS/buildPASS; audit0labelleaks/12bindings/12unchangedverifiercontexts/18exactrawfiles. Candidate vẫn bảo đảm về nếp gấp, chuỗi lời khen và báo cáo dữ liệu; chưa chứng minh cải thiện, T4existing16khôngdispatch. No retry/newround/verifier change/source promotion/live send. A OWNER_BYPASS/B chưa live GO.
