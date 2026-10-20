@@ -1,0 +1,110 @@
+{
+  "reviewMode": "AGENT_WHOLE_ACTUAL_TERMINAL_BEFORE_TOOL_AND_VERIFIER_DIAGNOSIS",
+  "humanAdjudication": false,
+  "runSourceSha": "b1a58d2da288ff510972008b5a505f98ffaeb4b9",
+  "processCounts": {
+    "CORRECT_OBSERVED": 5
+  },
+  "replyCounts": {
+    "USABLE": 2,
+    "NEEDS_EDIT": 3
+  },
+  "rows": [
+    {
+      "slot": 1,
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "actual": "Dạ quy định đổi hàng của shop yêu cầu sản phẩm chỉ ướm bên ngoài chứ không mặc trực tiếp vào người ạ. Vì vậy trường hợp chị đã mặc thử, shop rất tiếc chưa thể hỗ trợ đổi size cho chị được dù sản phẩm vẫn còn nguyên tem và chưa mang ra ngoài.",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "USABLE",
+      "reason": "Trả lời đúng việc đã mặc vào không đủ điều kiện đổi size. Lý do liên quan; có thể gọn hơn nhưng không đổ checklist không cần thiết."
+    },
+    {
+      "slot": 2,
+      "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+      "actual": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "surface": "DISPATCHER_CAPTURE",
+      "disposition": "HANDOFF",
+      "committedPublicState": {
+        "conversationOwner": "HUMAN",
+        "revision": 1
+      },
+      "counts": {
+        "events": 1,
+        "tags": 1,
+        "messages": 1
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "NEEDS_EDIT",
+      "reason": "Handoff thật thành công. Tin khách nhận chỉ báo đã chuyển, chưa trả lời ngắn câu đổi size và chưa có hướng dẫn đổi/trả cụ thể theo mục tiêu owner. Đây là hạn chế actual code-owned message, chưa quy cho model."
+    },
+    {
+      "slot": 3,
+      "latest": "Chị thử bộ này rồi, giờ muốn đổi size thì được không?",
+      "actual": "Dạ, shop hỗ trợ đổi size trong vòng 15 ngày kể từ khi nhận hàng, với điều kiện sản phẩm còn nguyên tem mác, chưa giặt, chưa qua sử dụng và chỉ ướm bên ngoài không mặc vào người ạ (phí vận chuyển hai chiều là 30.000đ). \n\nChị cho em hỏi lúc nãy mình mới chỉ ướm bên ngoài hay đã mặc thử vào người rồi ạ?",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "NEEDS_EDIT",
+      "reason": "Đã hỏi đúng hành động ướm hay mặc, không tự quyết khi chưa rõ. Nhưng đọc nguyên đoạn điều kiện, thời hạn và phí không được hỏi trước câu hỏi chính; còn dài và dạng thông báo. Đây là finding cách diễn đạt, không phải sai policy hay thiếu từ điều kiện."
+    },
+    {
+      "slot": 4,
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "actual": "Dạ, shop hỗ trợ đổi size trong vòng 15 ngày kể từ ngày nhận hàng, phí vận chuyển 2 chiều là 30.000đ chị nhé.",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "USABLE",
+      "reason": "Trả đúng15ngày/30k và mốc nhận hàng, ngắn gọn, đúng câu hỏi; không chuyển nhân viên không cần thiết."
+    },
+    {
+      "slot": 5,
+      "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+      "actual": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "surface": "DISPATCHER_CAPTURE",
+      "disposition": "HANDOFF",
+      "committedPublicState": {
+        "conversationOwner": "HUMAN",
+        "revision": 1
+      },
+      "counts": {
+        "events": 1,
+        "tags": 1,
+        "messages": 1
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "NEEDS_EDIT",
+      "reason": "Handoff thật thành công cho yêu cầu báo lỗi. Tin khách nhận chỉ báo chuyển bộ phận vận đơn, chưa có bước khách cần làm/quy trình theo hướng owner chốt. Không coi thủ tục kiểm tra/làm đơn của nhân viên là sai; phần chưa đạt là nội dung terminal còn chung chung."
+    }
+  ],
+  "comparability": "New handoff-enabled run with current source-owned terminal, not directly comparable to tools-OFF replay. Previous mild style note on ambiguous case is now tracked as NEEDS_EDIT under owner brevity direction; do not infer a new semantic regression from a rating change."
+}
