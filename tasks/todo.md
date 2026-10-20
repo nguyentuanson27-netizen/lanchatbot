@@ -2,7 +2,7 @@
 
 ## Policy + handoff model run — 2026-10-20
 
-**FROZEN_5_NOT_DISPATCHED**, base `513072fe`. [Scope](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-run-20261020/SCOPE.md). Five existing policy questions once each, native tools/request_handoff enabled; max20generations/retry0. Real PostgreSQL disposable DB and existing handoff/CAS/event/tag/Outbox pipeline, capture-only Meta transport; no live socket or source policy/matrix writes. Current matrix absent, use default rule.96focused PASS and runner syntax checks before seal; no production/API changes. Clean source → preflight →5 once; lock actual-outcome review before diagnosis, no automatic full/extra run.
+**COMPLETE_5_MECHANISM_VERIFIED_REPLY_QUALITY_NOT_COMPLETE**, source `b1a58d2d`. [Report/5 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/policy-handoff-run-20261020/CHECKPOINT_B.md). Đủ5/5 một lần,12requests(9owner+3verifier),0retry/error/timeout/fallback/no-send.3SEND_ELIGIBLE qua verifierPASS;2HANDOFF với stateHUMAN/event/tag intent/message1/1/1 và dispatcher capture đúng. DB tạm đã drop; không live send/Pancake tag delivery hoặc staff response. Primary `a2493950` khóa trước diagnosis: cơ chế đúng5/5, reply2USABLE/3NEEDS_EDIT theo mục tiêu mới. Hai tin handoff do code default vì matrix=null, không phải model final; ca thử chưa rõ vẫn đọc policy dài.101 focused tests PASS, audit9owner/3bindings/18wire/10raw/14source identities/0labelleaks. Setup đầu0generation thiếu admin scope đã giữ; chỉ mở thêm đúng runner trong bridge với RED1FAIL→GREEN5PASS. Không patch/chạy bù/full hoặc claim B/liveGO; A OWNER_BYPASS.
 
 ## Owner direction — concise exchange/return + real handoff — 2026-10-20
 
