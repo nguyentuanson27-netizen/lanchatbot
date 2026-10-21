@@ -1,5 +1,9 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Full B1/B2/B3 offer-capability run — 2026-10-21
+
+**FULL32_COMPLETE_JOURNEY_NOT_COMPLETE**. Owner “chạy model đi” sau950d05b4. Source76d821bb; raw a79d549d; primary552260a7 trước diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-offer-capability/CHECKPOINT_B.md):24B1+8stateful once; B123USABLE/1NEEDS_EDIT, stateful4USABLE/1UNUSABLE/2dependent blocks/1HUMANcontrol. B1–4/15/21 cải thiện,9 còn tư vấn nóng ngoài trời chung chung. Checkout ownerHTTP429 trước verifier → finalNO_SEND/EGRESS_WORLD_CHANGED → hai lượt sau không dispatch; không quy lỗi provider cho prompt/verifier.88requests(60owner+28verifier), retry0, error1,timeout0;28verifierPASS,0finalfallback nhưng3lượt journey không hoàn tất. COD28/28+BANK28/28PASS,3DB dropped;14frozen files/60promptcaptures/28bindings/49rawGitblobs/0labelleaks. Một mẫu/ca, giọng còn polish và ACK sửa hồ sơ dài hơn; chưa stability/liveGO. STOPowner, không tự retry/fix/run.
+
 ## Phase B offer/capability/advice correction — 2026-10-21
 
 **IMPLEMENTED_DETERMINISTIC_CHECKED_MODEL_NOT_RUN**. Owner “sửa đi”. Base `f050868642ce4aa0735f65012078b10130a2696a`; [chi tiết và self-review](../docs/specs/c3-phase-b-offer-capability-advice-fix-20261021.md). B1–4 hướng dẫn đọc đúng offer; B1–9/15 thay chỉ dẫn tư vấn bằng lựa chọn giải quyết băn khoăn; B1–21 bỏ yêu cầu gọi giỏ vô điều kiện. Execution giữ capability và cờ toolsAllowed riêng, native/runtime authority giữ nguyên. RED 3 FAIL → GREEN 77 Node + 70 runtime/tool tests; worker build/diff check PASS. Không provider generation, chưa chứng minh chất lượng hội thoại tốt hơn; không sửa corpus/verifier/lịch sử, không live GO.

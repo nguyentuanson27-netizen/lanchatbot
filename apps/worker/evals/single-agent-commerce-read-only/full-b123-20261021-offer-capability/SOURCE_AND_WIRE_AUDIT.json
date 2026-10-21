@@ -1,0 +1,16 @@
+{
+  "runSourceSha": "76d821bb3dce1ee335d2210203e9ff8750762755",
+  "primaryReviewLockSha": "552260a7",
+  "childSourceAndPromptRegistrationsMatched": 2,
+  "verifierBindingsRecomputed": 28,
+  "ownerExactPromptCaptures": 60,
+  "wireBodiesChecked": 92,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 28,
+  "publishedArtifactHashesMatched": 49,
+  "testDatabaseDropped": true,
+  "sendEnabled": false,
+  "publishedGitBlobHashesMatched": 49,
+  "frozenFilesUnchanged": 14,
+  "rawBytePreservation": "Run-scoped raw/** -text preserves CRLF metadata exactly in Git; no model/source changes."
+}
