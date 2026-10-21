@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Owner-approved dialogue examples — 2026-10-21
+
+**PREPARED_NOT_RUN**. User approved five illustrative sales dialogues and implementation. [Scope](../apps/worker/evals/single-agent-commerce-read-only/advice-examples-20261021/SCOPE.md). Candidate replaces repetitive advice/voice guidance, retains all tool/authority/policy/receipt constraints; shared baseline remains control. Native B1 six existing situations × two arms × once =12 outcomes/max48 requests, no retries or automatic follow-up. Four known advice regressions + partial-source/multi-question and simple-price controls; examples are not test inputs. This is a small development comparison, not unseen holdout/stability or stateful coverage. A OWNER_BYPASS, no B/live GO.
+
 ## Native B1 capability comparison — 2026-10-21
 
 **COMPLETE_8_STOP_BEFORE_FULL**, source `eae41b53`, primary lock `9f7e0cba`. [Report](../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CHECKPOINT_B.md), [all8 conversations](../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CONVERSATIONS_AND_REVIEW.md). Implemented B1-only frozen prompt selection, candidate drops unavailable-tool operation instructions12135→11217bytes, retained search/read/native history/advice/voice/authority. RED→GREEN3 + focused62PASS/buildPASS. All8 native attempts/24requests(16owner+8verifier),0error/timeout/retry;7eligible/1actualfallback. Control1USABLE_WITH_POLISH/3NEEDS_EDIT; candidate1USABLE_WITH_POLISH/2NEEDS_EDIT/1fallback. No clear improved concern pairs. Candidate fallback correctly rejects set799k as cheaper than shirt499k. Four source pairs match,16promptcaptures/8bindings/13unchangedGitblobs/45exactraw/0labelleaks. STOP per conditional plan; no full32/automatic next candidate or verifier edits. Shared/stateful prompt unchanged; unresolved source/voice findings remain. A OWNER_BYPASS, no B/live GO.

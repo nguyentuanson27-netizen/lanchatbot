@@ -1,5 +1,9 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Owner-approved dialogue examples — 2026-10-21
+
+**PREPARED_NOT_RUN**. User approved five illustrative sales dialogues and implementation. [Scope](../apps/worker/evals/single-agent-commerce-read-only/advice-examples-20261021/SCOPE.md). Candidate replaces repetitive advice/voice guidance, retains all tool/authority/policy/receipt constraints; shared baseline remains control. Native B1 six existing situations × two arms × once =12 outcomes/max48 requests, no retries or automatic follow-up. Four known advice regressions + partial-source/multi-question and simple-price controls; examples are not test inputs. This is a small development comparison, not unseen holdout/stability or stateful coverage. A OWNER_BYPASS, no B/live GO.
+
 ## Native B1 capability comparison — 2026-10-21
 
 **COMPLETE_8_STOP_BEFORE_FULL**, [report](../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CHECKPOINT_B.md), [all8 replies](../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CONVERSATIONS_AND_REVIEW.md).
