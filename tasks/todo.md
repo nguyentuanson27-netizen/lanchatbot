@@ -2,7 +2,7 @@
 
 ## Decision/scope focused model run — 2026-10-21
 
-**REGISTERED_NOT_RUN**. Owner “chạy lại đi” sau2470a79d. [Scope](../apps/worker/evals/single-agent-commerce-read-only/decision-scope-focus-20261021/SCOPE.md): B1 existing2/4/9/15/17/23 ×3=18 attempts/max72generations, same models/current frozen prompts, no retry/replacement. Native range runner, source/provider preflight, clean runtime HEAD seal. Review all actual outcomes before verdict diagnostics; only all18usable/no observed protected violation admits fresh full24B1+8stateful once. Conditional total ceiling50outcomes/196requests; do not run full if focus fails. No live GO/deploy/send.
+**FOCUS18_COMPLETE_STOP_BEFORE_FULL**. Owner “chạy lại đi” sau2470a79d. [Report/18hội thoại](../apps/worker/evals/single-agent-commerce-read-only/decision-scope-focus-20261021/CHECKPOINT_B.md). Existing6ca ×3, sourcee2474d0d; raw176b2c95→primary01fa3d4b trước diagnosis.10USABLE/7NEEDS_EDIT/1UNUSABLE(no actual after snapshotSTALE);52requests(34owner+18verifier),18PASS,0providererror/timeout/retry/staticfallback.7cần sửa =ca4×3mở bảng/hỏi lại lựa chọn,ca15×3chưa giúp quyết định,ca2×1hứa lên đơn đổi ngoài B1 capability. Ca17/23đều3/3usable nhưng giọng còn polish; không quy hết cải thiện cho verifier khi draft thay đổi.14frozen files/34promptcaptures/18bindings/95Gitrawhashes/0evaluatorleaks. SnapshotSTALE đổi observedAt/factSnapshotVersion, business price/stock values bằng nhau; không retry/gửi lại. Chưa đạt điều kiện full nên **không chạy24B1+8stateful**, không tự fix/run vòng mới, không deploy/liveGO. Historical primary giữ nguyên.
 
 ## Phase B decision/scope prompt correction — 2026-10-21
 
