@@ -54,6 +54,23 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const availability=value=>Object.fromEntries(Object.entries(value).map(([field,v])=>[field,
   {status:v.status,reason:v.reason==null?null:publicSourceReasons.has(v.reason)?v.reason:'SOURCE_UNAVAILABLE'}]));
  const facts=c.protectedClaims.map(p=>({type:p.type,scope:p.scope,value:p.value}));
+ // Owner-only arithmetic on existing readback. This is not a quote, bundle composition or recommendation.
+ const priceDifferences=p=>{
+  if(!Array.isArray(p.availableOffers)||!Array.isArray(p.sellingOptions))return [];
+  const prices=p.sellingOptions.flatMap(o=>{
+   const values=o.facts?.filter(f=>f.type==='PRICE')??[],f=values[0];
+   if(o.availability?.price?.status!=='OK'||values.length!==1||!p.availableOffers.includes(o.offerType)||
+    typeof o.variantId!=='string'||f.scope?.kind!=='PRODUCT'||f.scope.productId!==p.subjectRef||f.scope.variantId!==o.variantId||
+    f.value?.currency!=='VND'||!Number.isSafeInteger(f.value.amountVnd)||f.value.amountVnd<0||
+    p.sellingOptions.filter(x=>x.offerType===o.offerType).length!==1)return [];
+   const current=facts.filter(g=>g.type==='PRICE'&&canonicalJsonV1(g.scope)===canonicalJsonV1(f.scope));
+   if(!current.length||current.some(g=>canonicalJsonV1(g.value)!==canonicalJsonV1(f.value)))return [];
+   return [{offerType:o.offerType,variantId:o.variantId,amountVnd:f.value.amountVnd}];
+  });
+  return prices.flatMap((from,i)=>prices.slice(i+1).map(to=>({subjectRef:p.subjectRef,
+   basis:'ONE_UNIT_EACH_EXCLUDING_SHIPPING_AND_DISCOUNTS',currency:'VND',from,to,
+   additionalAmountVnd:to.amountVnd-from.amountVnd})));
+ };
  // The same current evidence is already in trusted. Keep older/different values and native model parts intact.
  const product=(p,keepLocalEvidence=false)=>{
   const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
@@ -88,6 +105,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    if(!partial&&defaultInOptions(data))for(const key of ['offerType','variantId','facts','availability'])delete response.response.data[key];
    if(response.response.data.availability)response.response.data.availability=availability(data.availability);
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
+   const differences=priceDifferences(data);
+   if(differences.length)response.response.data.priceDifferences=differences;
   }
   if(response.name==='apply_customer_state'){
    if(data.measurements)data.measurements=data.measurements.map(measurement);

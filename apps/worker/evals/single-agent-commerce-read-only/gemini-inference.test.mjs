@@ -288,6 +288,45 @@ const multiOfferRequest=()=>{
  return {r,data};
 };
 
+test('owner receives scoped unit-price differences without changing source facts or choosing an offer',()=>{
+ const {r,data}=multiOfferRequest(),before=structuredClone(r);
+ const output=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+ assert.deepEqual(output.priceDifferences,[{
+  subjectRef:'RP42',basis:'ONE_UNIT_EACH_EXCLUDING_SHIPPING_AND_DISCOUNTS',currency:'VND',
+  from:{offerType:'AO',variantId:'offer:RP42:AO',amountVnd:310000},
+  to:{offerType:'SET',variantId:'offer:RP42:SET',amountVnd:590000},additionalAmountVnd:280000,
+ }]);
+ assert.deepEqual(output.sellingOptions,data.sellingOptions);
+ assert.deepEqual(r.context,before.context);assert.deepEqual(r.contents,before.contents);
+ // Input order, equal prices and a cheaper destination do not become a sales recommendation.
+ data.sellingOptions.reverse();
+ assert.equal(buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data.priceDifferences[0].additionalAmountVnd,-280000);
+ for(const option of data.sellingOptions)option.facts.find(f=>f.type==='PRICE').value.amountVnd=410000;
+ r.context.protectedClaims=data.sellingOptions.flatMap(o=>o.facts);
+ assert.equal(buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data.priceDifferences[0].additionalAmountVnd,0);
+});
+
+test('owner price differences require unambiguous same-product current VND price evidence',()=>{
+ for(const change of ['unavailable','missing','duplicate','stale','conflictingCurrent','otherProduct','otherVariant','currency','negative','fraction','unsafeInteger','unknownOffers']){
+  const {r,data}=multiOfferRequest(),option=data.sellingOptions[0];
+  if(change==='unavailable')option.availability.price.status='UNAVAILABLE';
+  if(change==='missing')option.facts=[];
+  if(change==='duplicate')option.facts.push(structuredClone(option.facts[0]));
+  if(change==='stale')r.context.protectedClaims=structuredClone(r.context.protectedClaims).map(f=>f.type==='PRICE'?{...f,value:{...f.value,amountVnd:1}}:f);
+  if(change==='conflictingCurrent')r.context.protectedClaims.push({...structuredClone(option.facts[0]),value:{amountVnd:1,currency:'VND'}});
+  if(change==='otherProduct')option.facts[0].scope.productId='RP43';
+  if(change==='otherVariant')option.facts[0].scope.variantId='another-variant';
+  if(change==='currency')option.facts[0].value.currency='USD';
+  if(change==='negative')option.facts[0].value.amountVnd=-10;
+  if(change==='fraction')option.facts[0].value.amountVnd=10.5;
+  if(change==='unsafeInteger')option.facts[0].value.amountVnd=Number.MAX_SAFE_INTEGER+1;
+  if(change==='unknownOffers')data.availableOffers=null;
+  const output=buildGeminiCommerceRequest(r).contents.at(-1).parts[0].functionResponse.response.data;
+  assert.equal(output.priceDifferences,undefined,change);
+  assert.deepEqual(output.sellingOptions,data.sellingOptions,change);
+ }
+});
+
 test('captured multi-offer read removes only fully duplicated defaults while preserving every option and native identity',async()=>{
  const {r,data}=multiOfferRequest(),captured=[],before=structuredClone(r);
  r.caseId='EVALUATOR_MULTI_CANARY';r.requiredBehaviors=['EVALUATOR_RESPONSE_CANARY'];
@@ -298,6 +337,7 @@ test('captured multi-offer read removes only fully duplicated defaults while pre
  const wire=captured[0],local=wire.contents.at(-1).parts[0].functionResponse;
  for(const key of ['offerType','variantId','facts','availability'])assert.equal(Object.hasOwn(local.response.data,key),false,key);
  assert.deepEqual(local.response.data.sellingOptions,data.sellingOptions);
+ assert.equal(local.response.data.priceDifferences[0].additionalAmountVnd,280000);
  assert.equal(local.response.data.sourceVersion,data.sourceVersion);assert.deepEqual(local.response.data.content,data.content);
  assert.deepEqual(JSON.parse(wire.contents[0].parts[0].text).trusted.facts,before.context.protectedClaims);
  assert.equal(local.id,'multi-read');assert.deepEqual(wire.contents.at(-2),before.contents.at(-2));
