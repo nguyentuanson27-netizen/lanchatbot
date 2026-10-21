@@ -19,7 +19,7 @@ const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'v�
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Chỉ đọc tiếp khi còn thiếu dữ liệu cần thiết. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
- {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. Khách hỏi một lựa chọn bán đã rõ: truyền offerType tương ứng từ availableOffers/offerLabels để đọc đúng lựa chọn đó. Bỏ offerType khi cần so sánh các lựa chọn hoặc chưa xác định được mã: sellingOptions trả giá/tồn riêng từng lựa chọn; dữ kiện ngoài cùng chỉ thuộc offerType/variantId ghi tại đó. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability chỉ rõ dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,color:string,size:string,deliveryRegion:string},required:['subjectRef']}},
+ {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. offerType bắt buộc: chọn mã từ availableOffers/offerLabels cho phần khách đang hỏi; truyền null khi cần so sánh các cách mua hoặc chưa biết mã. Mã cụ thể chỉ đọc lựa chọn đó; null đọc các sellingOptions riêng biệt, không chọn thay khách. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability cho biết dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:{type:'STRING',nullable:true},color:string,size:string,deliveryRegion:string},required:['subjectRef','offerType']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
@@ -138,10 +138,11 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   products.get(result.subjectRef).preparation={availability:availability(result.availability),notRead:result.notRead};
   preparationRefs.add(literal.ref);
  }
- const add=declarations.find(d=>d.name==='add_to_cart'),productRefs=c.boundSubjects.filter(s=>s.kind==='PRODUCT').map(s=>s.ref);
+ const productRefs=c.boundSubjects.filter(s=>s.kind==='PRODUCT').map(s=>s.ref);
  // An enum is only an argument hint; the selector still validates the chosen product/offer.
- if(add&&productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
-  add.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
+ if(productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
+  for(const d of declarations.filter(d=>['read_product','add_to_cart'].includes(d.name)))
+   d.parameters.properties.offerType={type:'STRING',...(d.name==='read_product'?{nullable:true}:{}),enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    availableOffers:offers.get(p.subjectRef)??null,
    offerLabels:offers.has(p.subjectRef)?Object.fromEntries(offers.get(p.subjectRef).map(code=>[code,Object.hasOwn(offerLabels,code)?offerLabels[code]:null])):null,
@@ -178,6 +179,12 @@ export function parseGeminiGeneration(body){
   ...(typeof p.functionCall.id==='string'?{id:p.functionCall.id}:{})}));
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
   const domainCalls=calls.map(c=>{
+   if(c.name==='read_product'){
+    requireThat(Object.hasOwn(c.args,'offerType')&&(c.args.offerType===null||
+     typeof c.args.offerType==='string'&&c.args.offerType.trim().length>0&&bytes(c.args.offerType)<=64),'OWNER_TOOL_OUTPUT');
+    if(c.args.offerType===null){const args={...c.args};delete args.offerType;return {...c,args};}
+    return c;
+   }
    if(c.name!=='apply_customer_state')return c;
    requireThat(Array.isArray(c.args.ops)&&c.args.ops.every(op=>Object.hasOwn(stateFieldPaths,op.field)),'OWNER_TOOL_OUTPUT');
    return {...c,args:{...c.args,ops:c.args.ops.map(op=>({...op,field:stateFieldPaths[op.field]}))}};

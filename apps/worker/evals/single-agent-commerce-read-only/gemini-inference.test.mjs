@@ -13,6 +13,31 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {createCommerceVerifier} from './protocol.mjs';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
+
+test('product reads require an explicit source offer or null while unknown offers remain discoverable',()=>{
+ const r=request();r.availableTools=['read_product'];
+ r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Mẫu'}];
+ r.context.policyLiterals=[{ref:'offers:P1',text:JSON.stringify({productId:'P1',availableOffers:['AO','SET']})}];
+ const declaration=()=>buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.ok(declaration().parameters.required.includes('offerType'));
+ assert.deepEqual(declaration().parameters.properties.offerType,{type:'STRING',nullable:true,enum:['AO','SET']});
+ r.context.boundSubjects.push({ref:'P2',kind:'PRODUCT',label:'Chưa tra'});
+ assert.deepEqual(declaration().parameters.properties.offerType,{type:'STRING',nullable:true});
+ r.context.policyLiterals=[];
+ assert.deepEqual(declaration().parameters.properties.offerType,{type:'STRING',nullable:true});
+});
+
+test('read offer null is explicit discovery, never an implicit default or a rewritten signed call',()=>{
+ const original=body([{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1',offerType:null}},thoughtSignature:'signed'}]);
+ const saved=structuredClone(original),parsed=parseGeminiGeneration(original);
+ assert.deepEqual(parsed.calls[0].args,{subjectRef:'P1'});
+ assert.deepEqual(parsed.content,original.candidates[0].content);
+ assert.deepEqual(original,saved);
+ const explicit=body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerType:'AO'}}}]);
+ assert.equal(parseGeminiGeneration(explicit).calls[0].args.offerType,'AO');
+ for(const args of [{subjectRef:'P1'},{subjectRef:'P1',offerType:''},{subjectRef:'P1',offerType:42}])
+  assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args}}])),/OWNER_TOOL_OUTPUT/);
+});
 const config={model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-project',location:'global'};
 const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo dữ liệu nguồn.',contents:[{role:'user',parts:[{text:'Áo bao nhiêu em?'}]}],
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});

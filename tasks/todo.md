@@ -1,3 +1,7 @@
+## Phase B explicit-offer/advice fix — 2026-10-21
+
+**IMPLEMENTED_CHECKED_MODEL_PENDING**. Owner yêu cầu fix và chạy lại. [Thiết kế và self-review](../docs/specs/c3-phase-b-explicit-offer-advice-fix-20261021.md). Native read_product bắt buộc offerType mã nguồn hoặc null; adapter giữ nguyên signed history, không chọn thay model. Thay phần tư vấn/giọng tại chỗ, owner prompt14170→13762bytes; verifier/models/corpora giữ nguyên. RED2→GREEN103Node/1optionalSKIP,71runtimePASS, worker build/lintPASS. POS-refresh là quan sát nguồn mới nên gate vẫn chặn đúng, không bỏ binding. Dự kiến18attempts:2/4/15×3 trước,9/17/23/3/5/6/8/16/21×1 đối chứng. Không auto retry/fix, không liveGO.
+
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
 ## Decision/scope focused model run — 2026-10-21

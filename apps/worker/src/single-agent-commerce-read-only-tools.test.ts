@@ -28,6 +28,22 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("keeps repeated reads stable but binds a new POS observation even when business values match", async () => {
+    const { f, tools } = sellingFixture({ DIRECT: 499_000 });
+    f.snapshot.synced_at = new Date(commerceNow.getTime() - 60_000).toISOString();
+    await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } });
+    const before = tools.snapshot(), binding = makeBinding("turn", "Giá 499k chị nhé.", before);
+    expect(makeBinding("turn", "Giá 499k chị nhé.", await tools.readback())).toEqual(binding);
+    f.snapshot.synced_at = new Date(commerceNow.getTime() - 1_000).toISOString();
+    const after = await tools.readback();
+    const businessValues = (context: typeof before) => context.protectedClaims.map(raw => {
+      const claim = raw as { type: string; scope: unknown; value: unknown };
+      return { type: claim.type, scope: claim.scope, value: claim.value };
+    });
+    expect(businessValues(after)).toEqual(businessValues(before));
+    expect(hardPrecheck(after, "Giá 499k chị nhé.", commerceNow)).toBeNull();
+    expect(makeBinding("turn", "Giá 499k chị nhé.", after).trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
+  });
   it("rejects search overflow before exposing or binding unretained product evidence", async () => {
     const records = Array.from({ length: 7 }, (_, i) => fixtureProduct(`TEST${i + 1}`));
     const searchText = vi.fn(async (query: string) => ({ status: "AMBIGUOUS" as const, reasonCode: "TOP_GAP_TOO_SMALL" as const,
