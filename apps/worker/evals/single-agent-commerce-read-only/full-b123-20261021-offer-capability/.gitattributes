@@ -1,1 +1,3 @@
-raw/** -text
+raw/** -text whitespace=cr-at-eol
+CONVERSATIONS_AND_REVIEW.md whitespace=-blank-at-eol
+FAILURES_AND_REVIEW.md whitespace=-blank-at-eol

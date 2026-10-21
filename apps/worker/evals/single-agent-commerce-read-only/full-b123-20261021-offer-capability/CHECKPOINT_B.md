@@ -63,7 +63,7 @@ python apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-offe
 
 Exit0; cả6child commands exit0: provider-preflight,source-check,deterministic-cod,deterministic-bank,stateful-1,b1-1. Exit0 của collector nghĩa là thu đủ outcome, không có nghĩa checkout thành công. Exact commands/logs trong raw/commands.json và raw/*.log.
 
-Collection/review/audit thực sự dùng task-temp `c3-gemini-prompt-once-publish.py`, `c3-gemini-prompt-once-primary.py`, `c3-full-b123-metrics.py`, `c3-offer-capability-report.py`, `c3-full-b123-audit.mjs`; one-off frozen-input/secret-scan/Git-blob comparisons. Primary commit trước diagnosis.147focused tests và worker build là evidence trên implementation950d05b4; không claim chạy lại full tests hoặc riêng lint/typecheck trong lượt này. Runner tự build worker trước các child dùng dist.
+Collection/review/audit thực sự dùng task-temp `c3-gemini-prompt-once-publish.py`, `c3-gemini-prompt-once-primary.py`, `c3-full-b123-metrics.py`, `c3-offer-capability-report.py`, `c3-full-b123-audit.mjs`; one-off frozen-input/secret-scan/Git-blob comparisons. Primary commit trước diagnosis. Initial staged diff check báo10 dòng trailing spaces do exact provider text trong hai transcript Markdown; giữ nguyên lời model và thêm scoped whitespace attributes cho đúng hai artifact đó. Full-run diff check còn nhận CRLF của92 dòng metadata gốc là trailing whitespace; khai báo raw whitespace=cr-at-eol, giữ exact bytes. Final full-run diff check PASS.147focused tests và worker build là evidence trên implementation950d05b4; không claim chạy lại full tests hoặc riêng lint/typecheck trong lượt này. Runner tự build worker trước các child dùng dist.
 
 ## Finding và hướng tiếp theo
 
