@@ -1,5 +1,9 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Decision/scope focused model run — 2026-10-21
+
+**REGISTERED_NOT_RUN**. Owner “chạy lại đi” sau2470a79d. [Scope](../apps/worker/evals/single-agent-commerce-read-only/decision-scope-focus-20261021/SCOPE.md): B1 existing2/4/9/15/17/23 ×3=18 attempts/max72generations, same models/current frozen prompts, no retry/replacement. Native range runner, source/provider preflight, clean runtime HEAD seal. Review all actual outcomes before verdict diagnostics; only all18usable/no observed protected violation admits fresh full24B1+8stateful once. Conditional total ceiling50outcomes/196requests; do not run full if focus fails. No live GO/deploy/send.
+
 ## Phase B decision/scope prompt correction — 2026-10-21
 
 **IMPLEMENTED_FOCUSED_CHECKS_PASS_MODEL_NOT_RUN**. Owner “thực hiện fix đi” sau review ba vòng cùng950d05b4; base9f75a9a0. [Chi tiết](../docs/specs/c3-phase-b-decision-scope-fix-20261021.md). Thay hướng dẫn chọn nội dung/lý do tư vấn, giới hạn câu policy theo phạm vi hỏi, giữ comparator giá; verifier phân biệt hợp dịp mặc với fit cơ thể và kiểm đúng hai cách mua. Không đổi executable/models/config/schema/fallback/corpus hoặc history labels. Review tiếp theo đọc cả lượt về lựa chọn, lý do và giọng, không chỉ nhãn USABLE hoặc verdict. Focused provider/protocol/adapter tests101PASS/1optionalSKIP, runtime70PASS; worker build/diff checkPASS. Offline61owner/28verifier capture replay vẫn dưới request bounds, không gọi provider. Chưa generation mới, chưa claim cải thiện model/liveGO.
