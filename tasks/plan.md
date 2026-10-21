@@ -1,5 +1,10 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Full B1/B2/B3 reply-focus run — 2026-10-21
+
+**REGISTERED_NOT_RUN**. Owner yêu cầu chạy model sau26e36330. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-reply-focus/SCOPE.md):24B1+8stateful, once/max124requests, complete all populations without quality early stop; no retries/replacements. Current prompt/context, unchanged verifier/models/corpora and source routes. Existing disposable COD/BANK checks, no live send. Runtime clean source capture → preflight → all jobs → raw → primary → diagnosis/audit/report.
+
+
 ## Phase B reply-focus correction — 2026-10-21
 
 **IMPLEMENTED_DETERMINISTIC_CHECKED_MODEL_NOT_RUN**. Owner yêu cầu sửa các finding của full32. [Chi tiết](../docs/specs/c3-phase-b-reply-focus-fix-20261021.md). Thay hướng dẫn tư vấn/giọng tại chỗ; code bổ sung chênh đơn giá giữa đúng offer, không suy ra thành phần bộ hoặc quyết định mua. Verifier stream error được kiểm tra bằng test sẵn có, không hidden retry hoặc đổi fallback. RED observed → GREEN; focused 88 PASS/1 optional SKIP, worker build PASS; offline B1 reconstruction 50 requests, đúng chênh 300k, 0 provider generation. Policy/state/effect/verifier giữ nguyên; lịch sử raw/nhãn không sửa. Chất lượng hội thoại sau sửa và regression provider vẫn cần một run mới.
