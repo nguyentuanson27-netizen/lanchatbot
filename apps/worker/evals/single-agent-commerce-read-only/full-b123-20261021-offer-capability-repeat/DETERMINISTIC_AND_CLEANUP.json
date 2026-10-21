@@ -1,0 +1,8 @@
+{
+  "stateful-1": {
+    "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+    "checks": 0,
+    "completedOutcomes": 8,
+    "testDatabaseDropped": true
+  }
+}

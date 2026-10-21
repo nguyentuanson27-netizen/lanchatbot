@@ -1,5 +1,9 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Full unchanged B1/B2/B3 repeat — 2026-10-21
+
+**FULL32_COMPLETE_QUALITY_AND_AVAILABILITY_NOT_COMPLETE**. Owner “chạy lại1lần nữa”; same950d05b4 implementation/prompt/models/corpus, source89c6965c; rawa5b369bc→primary65cfcbe0 trước diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-offer-capability-repeat/CHECKPOINT_B.md). B120USABLE/1NEEDS_EDIT/3providerfallback; stateful7USABLE/1HUMANcontrol, checkout lần này hoàn tất.85requests(58owner+27verifier),retry0; owner429×1,verifierstreamerror×1/HTTP504×1;25PASS/2verifiererrors/0FAIL. B1–9 vẫn overclaim không bí khi đứng ngoài trời lâu và đượcPASS; ghi1observed protected-language overclaim theo agent review, không claim zero falsePASS.14frozen files/58promptcaptures/27bindings/45Gitrawhashes/0labelleaks; freshDBdropped, COD/BANK evidence cũ được reuse vì code/config không đổi. Full denominator giữ mọi lỗi, không autoretry/fix/run/liveGO. STOPowner.
+
 ## Full B1/B2/B3 offer-capability run — 2026-10-21
 
 **FULL32_COMPLETE_JOURNEY_NOT_COMPLETE**. Owner “chạy model đi” sau950d05b4. Source76d821bb; raw a79d549d; primary552260a7 trước diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-offer-capability/CHECKPOINT_B.md):24B1+8stateful once; B123USABLE/1NEEDS_EDIT, stateful4USABLE/1UNUSABLE/2dependent blocks/1HUMANcontrol. B1–4/15/21 cải thiện,9 còn tư vấn nóng ngoài trời chung chung. Checkout ownerHTTP429 trước verifier → finalNO_SEND/EGRESS_WORLD_CHANGED → hai lượt sau không dispatch; không quy lỗi provider cho prompt/verifier.88requests(60owner+28verifier), retry0, error1,timeout0;28verifierPASS,0finalfallback nhưng3lượt journey không hoàn tất. COD28/28+BANK28/28PASS,3DB dropped;14frozen files/60promptcaptures/28bindings/49rawGitblobs/0labelleaks. Một mẫu/ca, giọng còn polish và ACK sửa hồ sơ dài hơn; chưa stability/liveGO. STOPowner, không tự retry/fix/run.
