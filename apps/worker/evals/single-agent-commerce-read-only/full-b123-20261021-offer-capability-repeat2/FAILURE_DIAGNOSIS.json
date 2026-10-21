@@ -1,0 +1,32 @@
+[
+  {
+    "slot": 2,
+    "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+    "actual": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedOrUnverifiedDraft": "Dạ vẫn kịp chị nhé! Shop hỗ trợ đổi hàng trong vòng 15 ngày kể từ ngày nhận, đơn của mình mới 10 hôm nên vẫn thoải mái ạ. Sản phẩm của chị còn tem mác và chưa qua sử dụng là đủ điều kiện đổi màu rồi. Phí đổi (vận chuyển 2 chiều) là 30.000đ chị nha.",
+    "verdicts": [
+      "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"MATERIAL_CONDITION_LOSS\",\"protectedRef\":\"policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86\"}]}"
+    ],
+    "errors": []
+  },
+  {
+    "slot": 17,
+    "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+    "actual": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedOrUnverifiedDraft": "Đi gặp khách hàng cần sự gọn gàng và chuyên nghiệp, chị lấy mẫu áo thêu lẻ (499.000đ) phối với quần âu hoặc chân váy ôm gọn gàng ở tủ là hợp nhất ạ. \n\nÁo chất tơ thêu nhã nhặn, form nhẹ nhàng giúp mình vừa thanh lịch lại vừa sắc sảo, lịch sự trong công việc. Chân váy ren của set có độ rũ bay bổng nên sẽ hơi điệu cho buổi gặp khách buổi sáng. Chị lấy áo lẻ mặc đi làm rất vừa vặn và tiện ạ.",
+    "verdicts": [
+      "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"product:SV2447\"}]}"
+    ],
+    "errors": []
+  }
+]
