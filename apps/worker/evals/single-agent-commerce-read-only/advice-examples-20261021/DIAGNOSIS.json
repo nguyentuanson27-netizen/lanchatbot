@@ -1,0 +1,257 @@
+{
+  "primaryLockedBeforeDiagnosis": true,
+  "allVerifierPass": true,
+  "observedExampleFactLeakage": 0,
+  "exampleLeakReview": "Read all actual replies; no fictional cardigan/bag/13-inch/420k/360k/690k/680k/270k or example cart receipt presented as real shop facts. Correct transferred extra price is300k.",
+  "currentFindings": [
+    "Persistent generic praise instead of relevant concern-specific reasoning",
+    "Known preference returned to customer as a new choice",
+    "Simple price answer expands into unrelated offers/materials/unavailable size invitation"
+  ],
+  "causalLimit": "One sample per arm; combined prompt treatment. Similar phrases or extra tool scope are observations, not proof of an internal model root cause.",
+  "records": [
+    {
+      "id": "s01",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_54125"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_160379"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_1683891"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_103321"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_163165"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_1249720"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_1446453"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_91600"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447",
+              "size": "M"
+            },
+            "id": "call_169933"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "size": "M",
+              "subjectRef": "SV2447"
+            },
+            "id": "call_550494"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            },
+            "id": "call_283625"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "calls": [
+        [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "id": "call_552202"
+          }
+        ]
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ]
+    }
+  ]
+}
