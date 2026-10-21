@@ -1,5 +1,9 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Phase B decision/scope prompt correction — 2026-10-21
+
+**IMPLEMENTED_FOCUSED_CHECKS_PASS_MODEL_NOT_RUN**. Owner “thực hiện fix đi” sau review ba vòng cùng950d05b4; base9f75a9a0. [Chi tiết](../docs/specs/c3-phase-b-decision-scope-fix-20261021.md). Thay hướng dẫn chọn nội dung/lý do tư vấn, giới hạn câu policy theo phạm vi hỏi, giữ comparator giá; verifier phân biệt hợp dịp mặc với fit cơ thể và kiểm đúng hai cách mua. Không đổi executable/models/config/schema/fallback/corpus hoặc history labels. Review tiếp theo đọc cả lượt về lựa chọn, lý do và giọng, không chỉ nhãn USABLE hoặc verdict. Focused provider/protocol/adapter tests101PASS/1optionalSKIP, runtime70PASS; worker build/diff checkPASS. Offline61owner/28verifier capture replay vẫn dưới request bounds, không gọi provider. Chưa generation mới, chưa claim cải thiện model/liveGO.
+
 ## Third unchanged full B1/B2/B3 observation — 2026-10-21
 
 **FULL32_COMPLETE_QUALITY_NOT_COMPLETE**. Owner “chạy lại thêm1lần nữa”; same950d05b4 implementation/prompt/config/corpus. Sourcea4e393e7, raw2c80adc2→primary11019939 trước diagnosis. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-offer-capability-repeat2/CHECKPOINT_B.md): B120USABLE/2NEEDS_EDIT/2verifierFAILfallback; stateful7USABLE/1HUMANcontrol, gồm1code receipt summary sau snapshotSTALE.89requests(61owner+28verifier),retry0/errors0/timeouts0;26PASS/2FAIL. B1–2 điều kiện đủ vàB1–17 vừa vặn là hai rejection;15quay lại trả quyết định cho khách,23comparator tiết kiệm mơ hồ.9có cách phối thay thế lần này,21không mời giỏ cả3mẫu.3vòng96outcomes/262requests/4providererrors: B163USABLE/4NEEDS_EDIT/5UNUSABLE trên72; stateful18USABLE/1UNUSABLE/2blocks/3controls trên24.14frozen files/61prompts/28bindings/45Gitrawhashes/0labelleaks; DBdropped, reuseCOD/BANK evidence. Chưa stability/safety/liveGO;STOPowner, không auto fix/retry/run.
