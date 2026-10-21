@@ -1,0 +1,40 @@
+{
+  "registered": 8,
+  "recorded": 8,
+  "requests": 24,
+  "errors": 0,
+  "automaticRetries": 0,
+  "cost": "NOT_EXPOSED",
+  "roles": {
+    "owner": {
+      "generations": 16,
+      "requests": 16,
+      "inputTokens": 57604,
+      "outputTokens": 13218,
+      "missingUsage": 0,
+      "latencyMsP50": 3140.1929999999993,
+      "latencyMsP95": 9998.068325
+    },
+    "verifier": {
+      "generations": 8,
+      "requests": 8,
+      "inputTokens": 41613,
+      "outputTokens": 904,
+      "missingUsage": 0,
+      "latencyMsP50": 6092.9135499999975,
+      "latencyMsP95": 11267.829134999993
+    }
+  },
+  "sourceEmbeddingCalls": {
+    "attempts": 0,
+    "sourceCheck": 1
+  },
+  "fallbacks": 1,
+  "sendEligible": 7,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.0,
+  "addedVerificationAndReadbackLatencyMs": {
+    "p50": 6849.883349999996,
+    "p95": 12049.215279999993
+  }
+}

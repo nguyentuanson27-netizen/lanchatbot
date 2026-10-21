@@ -1,5 +1,17 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Native B1 capability comparison — 2026-10-21
+
+**COMPLETE_8_STOP_BEFORE_FULL**, [report](../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CHECKPOINT_B.md), [all8 replies](../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CONVERSATIONS_AND_REVIEW.md).
+
+- [x] Audit AUTO/native history and source evidence; exact B1-only deletion diff retains authority/advice/voice/search/read; baseline/stateful unchanged.
+- [x] Frozen prompt-path/hash selection in existing run.mjs; observed RED then GREEN3, focused62PASS/buildPASS/syntaxPASS. Clean source seal `eae41b53`.
+- [x] Full registered8attempts/max32:24actualrequests(16owner+8verifier),0errors/timeouts/retries,7eligible/1fallback. No mid-run changes or sample replacement.
+- [x] Lock primary `9f7e0cba` before rejected draft diagnosis; no clear concern-pair improvements. Valid upsell not penalized for higher spend. Verifier correctly rejects explicit799k-vs499k cheaper claim.
+- [x] Four source pairs match;16promptcaptures/8bindings/7eligible exacttexts/13sourceblobs/45raw exactcopies/0labelleaks; retain all accounting and token/latency evidence.
+- [x] STOP conditional full32 because prerequisite not achieved; no promotion/automatic next branch/live send. Candidate retained for reproducibility, shared owner remains default.
+- [ ] Residual findings remain: advice/voice, unknown-source wordingB1–3/11, material reassuranceB1–9, stateful correction ACK; no claim these unrun cases fixed.
+
 ## Active plan — advice diagnosis before another rewrite — 2026-10-21
 
 [Detailed plan](../docs/specs/c3-phase-b-advice-diagnosis-and-fix-plan-20261021.md), base `a07552cb`, **PLAN_ONLY — REVISED_AFTER_INDEPENDENT_REVIEW**.

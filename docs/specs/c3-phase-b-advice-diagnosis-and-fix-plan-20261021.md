@@ -1,5 +1,7 @@
 # Phase B — xác định nguyên nhân trước khi sửa tiếp phần tư vấn
 
+**Kết quả triển khai 2026-10-21: COMPLETE_8_STOP_BEFORE_FULL.** [Report](../../apps/worker/evals/single-agent-commerce-read-only/advice-capability-20261021/CHECKPOINT_B.md). Source `eae41b53`;62focusedPASS/buildPASS;8/8native attempts,24requests,0error/timeout/retry,1actualfallback. Candidate không cho tiến bộ concern rõ theo tiêu chí, nên không chạy nhánh full32 và không promote. Phần PLAN_ONLY bên dưới giữ lại như kế hoạch trước triển khai, không phải trạng thái hiện tại. Không tự mở nhánh khác.
+
 Ngày 2026-10-21. Trạng thái **PLAN_ONLY**. Base `a07552cbf5dcafc78f32964721dcb713cf632996`.
 Yêu cầu hiện tại: lập kế hoạch chi tiết; chưa sửa runtime/prompt hoặc chạy provider.
 
