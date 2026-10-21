@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Full B1/B2/B3 with additive examples — 2026-10-21
+
+**PREPARED_NOT_RUN**. Owner explicitly authorized full B1/B2/B3 after diagnostic. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-additive/SCOPE.md).24B1 +8stateful once, max124requests, no quality early stop/retries/replacements. Eval shared prompt+manifest temporarily pinned to exact additive candidate so all surfaces match; restore both exact blobs from d94d2cf5 after audited collection. No new runtime logic/selector/framework, model/verifier/source/corpus change. Existing disposable PostgreSQL COD/BANK checks and capture-only delivery; A OWNER_BYPASS, no live GO.
+
 ## Additive dialogue examples — 2026-10-21
 
 **COMPLETE_12_MIXED_KEEP_BASELINE**, run source7258a79d, primary405782b8. [Report](../apps/worker/evals/single-agent-commerce-read-only/advice-examples-additive-20261021/CHECKPOINT_B.md), [12conversations](../apps/worker/evals/single-agent-commerce-read-only/advice-examples-additive-20261021/CONVERSATIONS_AND_REVIEW.md).62focusedPASS/buildPASS.12/12outcomes,36requests(24owner+12verifier),0error/timeout/retry/fallback. Botharms4/6usable; candidate has partial benefits but changed-occasion regression.24promptcaptures/12bindings/65exactraw/0labelleaks/sourcepairs6matched. Baseline retained, no full/default promotion. [Scope](../apps/worker/evals/single-agent-commerce-read-only/advice-examples-additive-20261021/SCOPE.md). Owner authorized follow-up: keep complete baseline byte-for-byte, append exact five approved examples only. Same6situations ×2arms ×once =12 native B1 outcomes/max48 requests; no retry or automatic extra run/default promotion. Review separates choice logic, voice, B1 capability and unavailable-source limits; aesthetic inference/valid upsell allowed. Historical primary labels unchanged. No B2/B3 or live send; A OWNER_BYPASS.
