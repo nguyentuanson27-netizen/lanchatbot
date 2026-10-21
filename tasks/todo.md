@@ -2,7 +2,7 @@
 
 ## Full B1/B2/B3 reply-focus run — 2026-10-21
 
-**REGISTERED_NOT_RUN**. Owner yêu cầu chạy model sau26e36330. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-reply-focus/SCOPE.md):24B1+8stateful, once/max124requests, complete all populations without quality early stop; no retries/replacements. Current prompt/context, unchanged verifier/models/corpora and source routes. Existing disposable COD/BANK checks, no live send. Runtime clean source capture → preflight → all jobs → raw → primary → diagnosis/audit/report.
+**FULL32_COMPLETE_REPLY_QUALITY_NOT_COMPLETE**. Source2bc7d5d2, primaryd5c9eb79. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-reply-focus/CHECKPOINT_B.md): B120USABLE/4NEEDS_EDIT/0fallback, stateful7USABLE/1HUMANcontrol.89requests(61owner/28verifier),0error/timeout/retry,28PASS. COD28/28+BANK28/28PASS,3DBsdropped;61exactprompts/28bindings/49rawGitblobhashes/0labelleaks. Four recurring findings remain4/9/15/21; correctionACK and changed-occasion choice improved in one sample. No stability/liveGO or automatic next run. Owner yêu cầu chạy model sau26e36330. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-reply-focus/SCOPE.md):24B1+8stateful, once/max124requests, complete all populations without quality early stop; no retries/replacements. Current prompt/context, unchanged verifier/models/corpora and source routes. Existing disposable COD/BANK checks, no live send. Runtime clean source capture → preflight → all jobs → raw → primary → diagnosis/audit/report.
 
 
 ## Phase B reply-focus correction — 2026-10-21
