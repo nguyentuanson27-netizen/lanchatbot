@@ -1,0 +1,820 @@
+{
+  "mode": "ADAPTER_READBACK",
+  "sourceSha": "89c6965c6a76ceab52380a5c8167c0b946bc06dd",
+  "providerGenerations": 0,
+  "sendEnabled": false,
+  "products": [
+    {
+      "status": "OK",
+      "data": {
+        "subjectRef": "SV2447",
+        "label": "Set váy Thạch Thảo",
+        "variantId": "offer:SV2447:SET_VAY",
+        "offerType": "SET_VAY",
+        "requestedOfferType": null,
+        "availableOffers": [
+          "AO",
+          "CV",
+          "SET_VAY"
+        ],
+        "sellingOptions": [
+          {
+            "offerType": "AO",
+            "variantId": "offer:SV2447:AO",
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-10-21T13:34:21.065Z",
+            "expiresAt": "2026-10-21T15:34:21.065Z",
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:AO"
+                },
+                "value": {
+                  "amountVnd": 499000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:AO"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 105
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            }
+          },
+          {
+            "offerType": "CV",
+            "variantId": "offer:SV2447:CV",
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-10-21T13:34:21.065Z",
+            "expiresAt": "2026-10-21T15:34:21.065Z",
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:CV"
+                },
+                "value": {
+                  "amountVnd": 449000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:CV"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 60
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            }
+          },
+          {
+            "offerType": "SET_VAY",
+            "variantId": "offer:SV2447:SET_VAY",
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-10-21T13:34:21.065Z",
+            "expiresAt": "2026-10-21T15:34:21.065Z",
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 48
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            }
+          }
+        ],
+        "attributes": null,
+        "sizeCharts": [],
+        "content": {
+          "productName": "Set váy Thạch Thảo",
+          "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+          "productUrl": null,
+          "metadata": {
+            "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+            "observedAt": "2026-09-28T04:31:05.725Z",
+            "expiresAt": null,
+            "freshForSeconds": null,
+            "freshnessState": "FRESH"
+          }
+        },
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "status": "IN_STOCK",
+              "availableQuantity": 48
+            }
+          }
+        ],
+        "availability": {
+          "price": {
+            "status": "OK",
+            "reason": null
+          },
+          "stock": {
+            "status": "OK",
+            "reason": null
+          }
+        },
+        "missing": [
+          "ATTRIBUTES"
+        ]
+      }
+    },
+    {
+      "status": "OK",
+      "data": {
+        "subjectRef": "SV2447",
+        "label": "Set váy Thạch Thảo",
+        "variantId": "offer:SV2447:AO",
+        "offerType": "AO",
+        "requestedOfferType": "AO",
+        "availableOffers": [
+          "AO",
+          "CV",
+          "SET_VAY"
+        ],
+        "sellingOptions": [
+          {
+            "offerType": "AO",
+            "variantId": "offer:SV2447:AO",
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-10-21T13:34:21.065Z",
+            "expiresAt": "2026-10-21T15:34:21.065Z",
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:AO"
+                },
+                "value": {
+                  "amountVnd": 499000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:AO"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 105
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            }
+          }
+        ],
+        "attributes": null,
+        "sizeCharts": [],
+        "content": {
+          "productName": "Set váy Thạch Thảo",
+          "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+          "productUrl": null,
+          "metadata": {
+            "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+            "observedAt": "2026-09-28T04:31:05.725Z",
+            "expiresAt": null,
+            "freshForSeconds": null,
+            "freshnessState": "FRESH"
+          }
+        },
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "amountVnd": 499000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "status": "IN_STOCK",
+              "availableQuantity": 105
+            }
+          }
+        ],
+        "availability": {
+          "price": {
+            "status": "OK",
+            "reason": null
+          },
+          "stock": {
+            "status": "OK",
+            "reason": null
+          }
+        },
+        "missing": [
+          "ATTRIBUTES"
+        ]
+      }
+    },
+    {
+      "status": "OK",
+      "data": {
+        "subjectRef": "SV2447",
+        "label": "Set váy Thạch Thảo",
+        "variantId": "offer:SV2447:CV",
+        "offerType": "CV",
+        "requestedOfferType": "CV",
+        "availableOffers": [
+          "AO",
+          "CV",
+          "SET_VAY"
+        ],
+        "sellingOptions": [
+          {
+            "offerType": "CV",
+            "variantId": "offer:SV2447:CV",
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-10-21T13:34:21.065Z",
+            "expiresAt": "2026-10-21T15:34:21.065Z",
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:CV"
+                },
+                "value": {
+                  "amountVnd": 449000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:CV"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 60
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            }
+          }
+        ],
+        "attributes": null,
+        "sizeCharts": [],
+        "content": {
+          "productName": "Set váy Thạch Thảo",
+          "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+          "productUrl": null,
+          "metadata": {
+            "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+            "observedAt": "2026-09-28T04:31:05.725Z",
+            "expiresAt": null,
+            "freshForSeconds": null,
+            "freshnessState": "FRESH"
+          }
+        },
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "amountVnd": 449000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "status": "IN_STOCK",
+              "availableQuantity": 60
+            }
+          }
+        ],
+        "availability": {
+          "price": {
+            "status": "OK",
+            "reason": null
+          },
+          "stock": {
+            "status": "OK",
+            "reason": null
+          }
+        },
+        "missing": [
+          "ATTRIBUTES"
+        ]
+      }
+    },
+    {
+      "status": "OK",
+      "data": {
+        "subjectRef": "SV2447",
+        "label": "Set váy Thạch Thảo",
+        "variantId": "offer:SV2447:SET_VAY",
+        "offerType": "SET_VAY",
+        "requestedOfferType": "SET_VAY",
+        "availableOffers": [
+          "AO",
+          "CV",
+          "SET_VAY"
+        ],
+        "sellingOptions": [
+          {
+            "offerType": "SET_VAY",
+            "variantId": "offer:SV2447:SET_VAY",
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-10-21T13:34:21.065Z",
+            "expiresAt": "2026-10-21T15:34:21.065Z",
+            "facts": [
+              {
+                "type": "PRICE",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "amountVnd": 799000,
+                  "currency": "VND"
+                }
+              },
+              {
+                "type": "STOCK",
+                "scope": {
+                  "kind": "PRODUCT",
+                  "productId": "SV2447",
+                  "variantId": "offer:SV2447:SET_VAY"
+                },
+                "value": {
+                  "status": "IN_STOCK",
+                  "availableQuantity": 48
+                }
+              }
+            ],
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            }
+          }
+        ],
+        "attributes": null,
+        "sizeCharts": [],
+        "content": {
+          "productName": "Set váy Thạch Thảo",
+          "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+          "productUrl": null,
+          "metadata": {
+            "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+            "observedAt": "2026-09-28T04:31:05.725Z",
+            "expiresAt": null,
+            "freshForSeconds": null,
+            "freshnessState": "FRESH"
+          }
+        },
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "status": "IN_STOCK",
+              "availableQuantity": 48
+            }
+          }
+        ],
+        "availability": {
+          "price": {
+            "status": "OK",
+            "reason": null
+          },
+          "stock": {
+            "status": "OK",
+            "reason": null
+          }
+        },
+        "missing": [
+          "ATTRIBUTES"
+        ]
+      }
+    }
+  ],
+  "policy": {
+    "status": "OK",
+    "data": {
+      "scope": "SHOP_RULES",
+      "orderEligibility": null,
+      "policy": {
+        "customerCare": {
+          "customerFaq": {
+            "discloseLightingAndDisplayColorVariance": true,
+            "handWashPreferred": true,
+            "machineWashAllowedWithLaundryBagAndGentleCycle": true
+          },
+          "exchange": {
+            "customerPaysPositivePriceDifference": true,
+            "fulfillmentMethod": "COURIER_SWAP",
+            "maxExchangesPerOrder": 1,
+            "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+            "requiredConditions": {
+              "clean": true,
+              "originalTags": true,
+              "undamaged": true,
+              "unused": true,
+              "unwashed": true
+            },
+            "saleRestriction": {
+              "allowedActions": [
+                "SIZE",
+                "COLOR"
+              ],
+              "discountThresholdBps": 3000
+            },
+            "supportedActions": [
+              "SIZE",
+              "COLOR",
+              "MODEL"
+            ],
+            "totalTwoWayShippingFeeVnd": 30000,
+            "windowDaysFromReceipt": 15
+          },
+          "inspection": {
+            "refusedParcelShippingFeeVnd": 30000,
+            "tryOnMode": "HOLD_UP_ONLY",
+            "tryOnModeDescription": "Chỉ ướm bên ngoài, không mặc vào người. Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns."
+          },
+          "marketplacePricing": {
+            "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+            "shopeePriceMatch": false
+          },
+          "returns": {
+            "eligibleReasons": [
+              "MANUFACTURING_FABRIC_DEFECT",
+              "MANUFACTURING_SEAM_DEFECT",
+              "WRONG_PRODUCT_SENT"
+            ],
+            "refundBusinessDaysMax": 3,
+            "refundBusinessDaysMin": 1,
+            "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+            "reportingWindowDaysFromReceipt": 5,
+            "shopShippingCoveragePercent": 100
+          }
+        },
+        "multiItemOffer": {
+          "countingUnit": "PARENT_PRODUCT_UNIT",
+          "discountBps": 500,
+          "minimumProductCount": 2,
+          "setAndComboCountAsOne": true
+        },
+        "payment": {
+          "allowedMethods": [
+            "COD",
+            "BANK_TRANSFER"
+          ]
+        },
+        "shipping": {
+          "defaultFeeVnd": 30000
+        }
+      },
+      "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+    }
+  },
+  "precheck": null,
+  "before": {
+    "requestId": "source-check",
+    "trustedSnapshotId": "0929b628e051b6065fcdb3f1416861c95846e2d8b0f604e24bc9e39f784bf825",
+    "stateRevision": 1,
+    "factSnapshotVersion": "38d0478a785e186fac51a734b07cf547c691302386982806885dbd43b5937916",
+    "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+    "finalDraftHash": "2e37adca6acbf08d7a9d0ca314bf74d78587097bfa7d1a721d20b4edb13ab472"
+  },
+  "after": {
+    "requestId": "source-check",
+    "trustedSnapshotId": "0929b628e051b6065fcdb3f1416861c95846e2d8b0f604e24bc9e39f784bf825",
+    "stateRevision": 1,
+    "factSnapshotVersion": "38d0478a785e186fac51a734b07cf547c691302386982806885dbd43b5937916",
+    "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+    "finalDraftHash": "2e37adca6acbf08d7a9d0ca314bf74d78587097bfa7d1a721d20b4edb13ab472"
+  },
+  "search": {
+    "status": "AMBIGUOUS",
+    "reasonCode": "LOW_SCORE",
+    "candidates": [
+      {
+        "document": {
+          "productId": "SV165",
+          "parentProductId": "SV165",
+          "canonicalCode": "SV165",
+          "aliases": [
+            "SET VÁY THANH VŨ",
+            "SV165"
+          ],
+          "title": "Set váy Thanh Vũ",
+          "descriptionXml": "Thiết kế nữ tính và thanh lịch với sự kết hợp giữa áo ren hoa dệt sợi cotton và chân váy tơ crep mềm nhẹ, mang lại cảm giác thoáng mát, nhẹ nhàng và dễ chịu khi mặc. Chất liệu ren có độ thoáng, mềm mại giúp tổng thể trang phục trở nên tinh tế và duyên dáng. Áo được thiết kế ren dệt sợi cotton tay hến, tạo độ bồng nhẹ nữ tính. Phần cổ áo đính hoa trang trí là điểm nhấn nổi bật, giúp tổng thể thiết kế trở nên mềm mại và thanh lịch hơn. Chân váy được thiết kế 2 lớp từ chất liệu tơ crep, form váy nhẹ nhàng với cạp chun co giãn giúp mặc thoải mái và phù hợp với nhiều dáng người. Phần chân váy tạo can bèo mềm mại, mang lại độ bay nhẹ và giúp tổng thể trang phục thêm phần duyên dáng.",
+          "descriptionAuthority": "WEBSTORE_XML",
+          "descriptionSourceVersion": "catalog-v2",
+          "attributes": null,
+          "colors": [],
+          "materials": [
+            "COTTON",
+            "REN",
+            "TƠ"
+          ],
+          "silhouettes": [],
+          "occasions": [],
+          "imageUrls": [
+            "https://content.pancake.vn/1/s3000x3000/ff/2b/5e/cb/45677ca2f4b91a37949f215b7df226dbf7c78f5fe2c81b9a98748c66-w:1536-h:2048-l:732102-t:image/jpeg.jpeg"
+          ],
+          "images": [
+            {
+              "url": "https://content.pancake.vn/1/s3000x3000/ff/2b/5e/cb/45677ca2f4b91a37949f215b7df226dbf7c78f5fe2c81b9a98748c66-w:1536-h:2048-l:732102-t:image/jpeg.jpeg",
+              "role": "ADDITIONAL",
+              "angle": "FRONT",
+              "imageType": "PRODUCT_ONLY",
+              "intents": [
+                "PRODUCT_OVERVIEW"
+              ],
+              "partsVisible": [
+                "AO"
+              ],
+              "sortOrder": 11,
+              "qualityScore": 0.95,
+              "feedback": false,
+              "observedAt": null,
+              "sourceContentSha256": "25e2ae411e0095245d17fd50f25b0b026ed497efafd467a41ec57ce574dc3a80",
+              "reviewStatus": "APPROVED",
+              "metadataVerified": true
+            }
+          ],
+          "catalogVersion": "catalog-v2",
+          "observedAt": "2026-09-28T04:31:05.725Z"
+        },
+        "score": 0.51285726
+      },
+      {
+        "document": {
+          "productId": "SV1561",
+          "parentProductId": "SV1561",
+          "canonicalCode": "SV1561",
+          "aliases": [
+            "SET VÁY KHÁNH TRANG",
+            "SV1561"
+          ],
+          "title": "Set váy Khánh Trang",
+          "descriptionXml": "Thiết kế nữ tính, nhẹ nhàng với chất liệu thô boi phối ren cho cả áo và chân váy, mang lại cảm giác thoáng mát, mềm nhẹ và dễ chịu khi mặc. Sự kết hợp giữa chất vải thô mộc mạc và ren tinh tế tạo nên tổng thể hài hòa, vừa gần gũi vừa thanh lịch. Áo được thiết kế form suông nhẹ, dễ mặc và phù hợp với nhiều dáng người. Các chi tiết phối ren tinh tế giúp tạo điểm nhấn mềm mại, tăng thêm nét nữ tính cho trang phục. Chân váy được làm từ thô boi phối ren, form váy nhẹ nhàng với độ rũ tự nhiên. Thiết kế cạp chun linh hoạt, giúp mặc thoải mái và dễ dàng, phù hợp với nhiều vóc dáng. Phần ren được xử lý khéo léo, tạo độ bay nhẹ và tăng tính thẩm mỹ cho tổng thể.",
+          "descriptionAuthority": "WEBSTORE_XML",
+          "descriptionSourceVersion": "catalog-v2",
+          "attributes": null,
+          "colors": [],
+          "materials": [
+            "REN",
+            "THÔ"
+          ],
+          "silhouettes": [
+            "SUÔNG"
+          ],
+          "occasions": [],
+          "imageUrls": [
+            "https://content.pancake.vn/1/s3000x3000/34/32/56/c8/6062c97675f6af64d1e97e5468769dd7aa8803060f67dd9718381639-w:3931-h:5897-l:502692-t:image/jpeg.jpeg"
+          ],
+          "images": [
+            {
+              "url": "https://content.pancake.vn/1/s3000x3000/34/32/56/c8/6062c97675f6af64d1e97e5468769dd7aa8803060f67dd9718381639-w:3931-h:5897-l:502692-t:image/jpeg.jpeg",
+              "role": "ADDITIONAL",
+              "angle": "FRONT",
+              "imageType": "PRODUCT_ONLY",
+              "intents": [
+                "PRODUCT_OVERVIEW"
+              ],
+              "partsVisible": [
+                "CHAN_VAY"
+              ],
+              "sortOrder": 5,
+              "qualityScore": 0.9,
+              "feedback": false,
+              "observedAt": null,
+              "sourceContentSha256": "6799602baef7a1fa986e5cafafbbeea94cb78c9102b98dc9ea81120c03b532f0",
+              "reviewStatus": "APPROVED",
+              "metadataVerified": true
+            }
+          ],
+          "catalogVersion": "catalog-v2",
+          "observedAt": "2026-09-28T04:31:05.725Z"
+        },
+        "score": 0.4974254
+      },
+      {
+        "document": {
+          "productId": "SV244",
+          "parentProductId": "SV244",
+          "canonicalCode": "SV244",
+          "aliases": [
+            "SET VÁY DIỄM HOA",
+            "SV244"
+          ],
+          "title": "Set váy Diễm Hoa",
+          "descriptionXml": "Thiết kế nữ tính và nổi bật với chất liệu ren lưới đính hoa 3D, kết hợp cùng chân váy tơ mềm mịn nhẹ bay, mang lại cảm giác thanh thoát và tinh tế khi mặc. Bề mặt vải được trang trí hoa 3D nổi bật, tạo điểm nhấn sang trọng và thu hút. Áo được thiết kế 2 lớp từ ren hoa 3D, chất liệu mát, nhẹ và thoáng. Form áo đuôi cá rủ xòe nhẹ, giúp tạo độ bay mềm mại và tôn dáng nữ tính. Thiết kế rộng suông nhẹ mang lại cảm giác thoải mái nhưng vẫn giữ được nét thanh lịch. Chân váy được thiết kế 2 lớp cạp chun, phần váy 3 tầng đan nhau tạo độ bồng bềnh và chuyển động mềm mại khi di chuyển. Form váy bay nhẹ giúp tổng thể trang phục thêm phần nổi bật và duyên dáng.",
+          "descriptionAuthority": "WEBSTORE_XML",
+          "descriptionSourceVersion": "catalog-v2",
+          "attributes": null,
+          "colors": [],
+          "materials": [
+            "REN",
+            "TƠ MỀM"
+          ],
+          "silhouettes": [
+            "SUÔNG",
+            "XÒE"
+          ],
+          "occasions": [],
+          "imageUrls": [
+            "https://content.pancake.vn/1/s3000x3000/43/3f/f1/bb/cef0a3f83d6ae54c25272101879b425e1a943b8190c359e46a61109a-w:3448-h:5173-l:880501-t:image/jpeg.jpeg"
+          ],
+          "images": [
+            {
+              "url": "https://content.pancake.vn/1/s3000x3000/43/3f/f1/bb/cef0a3f83d6ae54c25272101879b425e1a943b8190c359e46a61109a-w:3448-h:5173-l:880501-t:image/jpeg.jpeg",
+              "role": "ADDITIONAL",
+              "angle": "FRONT",
+              "imageType": "MODEL",
+              "intents": [
+                "LOOKBOOK",
+                "PRODUCT_OVERVIEW"
+              ],
+              "partsVisible": [
+                "FULL_SET",
+                "AO",
+                "CHAN_VAY",
+                "PHU_KIEN"
+              ],
+              "sortOrder": 4,
+              "qualityScore": 0.95,
+              "feedback": false,
+              "observedAt": null,
+              "sourceContentSha256": "b76eb1fc145e2c3dc8d201275b0be8482ca2c94397e7770527a747945dda946f",
+              "reviewStatus": "APPROVED",
+              "metadataVerified": true
+            }
+          ],
+          "catalogVersion": "catalog-v2",
+          "observedAt": "2026-09-28T04:31:05.725Z"
+        },
+        "score": 0.49377322
+      }
+    ]
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 1,
+    "posReads": 0
+  },
+  "status": "PASS"
+}
