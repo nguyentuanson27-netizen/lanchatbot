@@ -4,15 +4,16 @@ import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange,
- REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS} from './protocol.mjs';
+ REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'}}});
+const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'}}});
 const dispatch=dispatchRange(args.range);
 const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8')));
+const selectedOwner=readB1OwnerPrompt(args['owner-registration']);
 const configBytes=args.config?readFileSync(resolve(args.config)):null;
 const config=configBytes?JSON.parse(configBytes):{};
 const missing=requiredSourceConfig(config);
@@ -35,14 +36,16 @@ if(args.run&&dirty())throw new Error('DIRTY_EXECUTABLE_OR_CONFIG');
 if(process.platform==='win32')execFileSync(process.env.ComSpec??'cmd.exe',['/d','/c','pnpm --filter @lana/worker build'],{cwd:root,stdio:'pipe',windowsHide:true});
 else execFileSync('pnpm',['--filter','@lana/worker','build'],{cwd:root,stdio:'pipe'});
 const bRunSourceSha=head();
-const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+const ownerPrompt=selectedOwner.text;
 const verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
 const out=resolve(args.out);mkdirSync(out); // Existing evidence is never overwritten.
 const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.stringify({id,phase,value})+'\n');
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
  promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
  inputHash,caseIds:samples.map(c=>c.caseId),registered:REGISTERED_CASE_COUNT,repetitions:1,maximumGenerationRequests:MAXIMUM_GENERATION_REQUESTS,
- dispatch,catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
+ dispatch,effectiveOwnerPromptHash:selectedOwner.sha256,ownerRegistrationHash:selectedOwner.registrationHash,
+ dispatchedCases:dispatch.last-dispatch.first+1,dispatchedMaximumGenerationRequests:(dispatch.last-dispatch.first+1)*4,
+ catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});
 const [{PostgresRuntimePolicyStore},{ProductSearchService,QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
  {VertexShadowModel},{createCommerceReadSources},{createCommerceTools},{runCommerceTurn}]=await Promise.all([

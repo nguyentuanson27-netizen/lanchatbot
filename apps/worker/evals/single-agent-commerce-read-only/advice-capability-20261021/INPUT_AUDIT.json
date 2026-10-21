@@ -1,0 +1,226 @@
+{
+  "source": "full-b123-20261020-r2",
+  "findingCoverageFinalOnly": 0,
+  "b1": [
+    {
+      "slot": 3,
+      "caseId": "b1-partial-source",
+      "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+      "modes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "7cb8c85f6a681dcb6a6cb05bac66fe6b9251f5af7c352432da169d104151beac",
+      "nativeFunctionResponse": true,
+      "facts": []
+    },
+    {
+      "slot": 7,
+      "caseId": "b1-buying-concern",
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "modes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "0ff6a12c52fd8d65c7a220850abe11e03f60b64cce3b85bdbb50743df0cd1e5b",
+      "nativeFunctionResponse": true,
+      "facts": [
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        }
+      ]
+    },
+    {
+      "slot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+      "modes": [
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "81d05f2baaea14c7a6ad8141df49354bb9c4c652b28931958e052b02eb96aa6a",
+      "nativeFunctionResponse": false,
+      "facts": []
+    },
+    {
+      "slot": 11,
+      "caseId": "b1-partial-source-v2",
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+      "modes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "7cb8c85f6a681dcb6a6cb05bac66fe6b9251f5af7c352432da169d104151beac",
+      "nativeFunctionResponse": true,
+      "facts": []
+    },
+    {
+      "slot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "modes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "0ff6a12c52fd8d65c7a220850abe11e03f60b64cce3b85bdbb50743df0cd1e5b",
+      "nativeFunctionResponse": true,
+      "facts": [
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        }
+      ]
+    },
+    {
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "modes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "0ff6a12c52fd8d65c7a220850abe11e03f60b64cce3b85bdbb50743df0cd1e5b",
+      "nativeFunctionResponse": true,
+      "facts": [
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        }
+      ]
+    },
+    {
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "modes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "tools": [
+        "search_products",
+        "read_product",
+        "read_policy"
+      ],
+      "lastContextHash": "0ff6a12c52fd8d65c7a220850abe11e03f60b64cce3b85bdbb50743df0cd1e5b",
+      "nativeFunctionResponse": true,
+      "facts": [
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        },
+        {
+          "kind": null,
+          "subjectRef": null
+        }
+      ]
+    }
+  ],
+  "statefulCorrectionMode": "AUTO",
+  "scope": "B1 candidate; stateful correction remains untreated"
+}

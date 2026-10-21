@@ -1,9 +1,25 @@
 import {createHash} from 'node:crypto';
 import {readFileSync,existsSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {OWNER_REQUEST_MAX_BYTES} from './gemini-inference.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
+// Eval-only explicit B1 selection. Stateful callers keep the shared full prompt.
+export function readB1OwnerPrompt(registrationPath){
+ if(registrationPath===undefined){
+  const text=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+  return {text,sha256:sha256(text),registrationHash:null};
+ }
+ const bytes=readFileSync(registrationPath),registration=JSON.parse(bytes.toString('utf8'));
+ check(registration&&Object.keys(registration).sort().join(',')==='promptPath,sha256'&&
+  typeof registration.promptPath==='string'&&registration.promptPath.trim()&&
+  typeof registration.sha256==='string'&&/^[a-f0-9]{64}$/.test(registration.sha256),'B1_OWNER_REGISTRATION');
+ const text=readFileSync(resolve(dirname(resolve(registrationPath)),registration.promptPath),'utf8');
+ check(text.trim()&&Buffer.byteLength(text)<=20000,'B1_OWNER_PROMPT_BOUND');
+ check(sha256(text)===registration.sha256,'B1_OWNER_PROMPT_HASH');
+ return {text,sha256:registration.sha256,registrationHash:sha256(bytes)};
+}
 export const REGISTERED_CASE_COUNT=24;
 export const MAXIMUM_GENERATION_REQUESTS=REGISTERED_CASE_COUNT*4;
 export function dispatchRange(value=undefined){

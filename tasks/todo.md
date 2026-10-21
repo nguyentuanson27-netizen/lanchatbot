@@ -1,5 +1,19 @@
 # C3 — Phase B TODO and Historical Checkpoint A Evidence
 
+## Active plan — advice diagnosis before another rewrite — 2026-10-21
+
+[Detailed plan](../docs/specs/c3-phase-b-advice-diagnosis-and-fix-plan-20261021.md), base `a07552cb`, **PLAN_ONLY — REVISED_AFTER_INDEPENDENT_REVIEW**.
+
+- [x] Review repeated changes `ae461e0d`/`ef3a1cfb`, latest32 outcomes and existing replay capability; document distinct hypothesis and bounded work.
+- [x] Incorporate independent review: final AUTO in all7 findings, final-only coverage0/7; remove tools-OFF replay→final-only wiring branch.
+- [ ] T1: audit native B1 inputs/capability/source/mode for7/15/23/17; separately locate3/11 and stateful correction.
+- [ ] T2: B1-only candidate removes instructions for unavailable tools; retain search/read/native history/advice/voice/authority/policy. TDD explicit frozen prompt selection/hash/firewall before provider.
+- [ ] T3:8 native B1 outcomes/max32 requests, all attempts retained; source mismatch/error yields inconclusive, no retry/new candidate. One sample per case/arm is not stability evidence.
+- [ ] Conditional T4: reuse exact B1 candidate, keep full-capability stateful baseline; no final-only selection/extra model turn/router. Stateful ACK remains untreated.
+- [ ] Conditional full:24B1+8stateful once/max124 requests; review all outcomes and capability coverage. Total conditional cap40 outcomes/max156 requests.
+- [ ] Report residual source wording/state ACK/material inference and handoff coverage honestly; no automatic additional branch, source publication or live GO.
+
+
 ## Full B1/B2/B3 repeat — collected2026-10-20 / report2026-10-21
 
 **FULL_RUN_COMPLETE_REPLY_QUALITY_NOT_COMPLETE**, source `79bda169`. [Report/32hội thoại](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020-r2/CHECKPOINT_B.md), [7câu cần sửa](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261020-r2/FAILURES_AND_REVIEW.md).

@@ -1,0 +1,30 @@
+{
+  "red": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/b1-owner-prompt.test.mjs",
+    "result": "FAIL: missing readB1OwnerPrompt export",
+    "exitCode": 1
+  },
+  "green": {
+    "focusedTests": 62,
+    "failed": 0
+  },
+  "unchangedSections": [
+    "Công việc của bạn",
+    "Hiểu khách và tư vấn",
+    "Nguồn và công cụ",
+    "Tư vấn tự tin, đúng căn cứ",
+    "Giọng chat"
+  ],
+  "ownerSharedUnchanged": true,
+  "verifierUnchanged": true,
+  "runtimeTypeScriptChanges": false,
+  "providerGenerations": 0,
+  "workerBuild": {
+    "command": "pnpm --filter @lana/worker build",
+    "exitCode": 0
+  },
+  "syntaxChecks": {
+    "run.mjs": "PASS",
+    "protocol.mjs": "PASS"
+  }
+}
