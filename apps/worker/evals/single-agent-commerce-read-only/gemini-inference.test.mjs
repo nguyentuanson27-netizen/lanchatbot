@@ -622,7 +622,27 @@ test('the actual final-only HTTP body has no declarations and its hash and tool-
  assert.equal(result.kind,'TOOLS');assert.equal(calls,1);
 });
 
-test('current fit comparison fields and actual remaining tool capabilities reach the owner without private authority',()=>{
+test('captured requests distinguish configured capabilities from permission to call tools this generation',async()=>{
+ for(const availableTools of [['read_product','read_policy'],['read_product','add_to_cart','confirm_purchase']]){
+  for(const toolsAllowed of [true,false]){
+   const r=request();Object.assign(r,{availableTools,toolsAllowed,toolBudget:{roundsRemaining:toolsAllowed?1:0,callsRemaining:3}});
+   let wire;
+   const result=await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
+    wire=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));
+   }})(r);
+   const execution=JSON.parse(wire.contents[0].parts[0].text).trusted.execution;
+   assert.deepEqual(execution.availableTools,availableTools);
+   assert.equal(execution.toolsAllowed,toolsAllowed);
+   assert.deepEqual(wire.tools.flatMap(t=>t.functionDeclarations.map(d=>d.name)),toolsAllowed?availableTools:[]);
+   assert.equal(wire.toolConfig.functionCallingConfig.mode,toolsAllowed?'AUTO':'NONE');
+   assert.equal(result.telemetry.providerRequests,1);
+  }
+ }
+ const empty=request();empty.availableTools=[];empty.toolsAllowed=false;
+ assert.deepEqual(JSON.parse(buildGeminiCommerceRequest(empty).contents[0].parts[0].text).trusted.execution.availableTools,[]);
+});
+
+test('current fit comparison fields and configured tool capabilities reach the owner without private authority',()=>{
  const r=request();Object.assign(r.context.state,{customerProfileId:'profile-1',customerProfileRevision:4,
   measurementFingerprint:'current-fingerprint',sizeMeasurementFingerprints:{SM613:'size-fingerprint'},recipient:'PRIVATE_RECIPIENT',permission:true});
  r.toolBudget={roundsRemaining:1,callsRemaining:4};
@@ -630,11 +650,11 @@ test('current fit comparison fields and actual remaining tool capabilities reach
  assert.equal(trusted.state.customerProfileRevision,4);assert.equal(trusted.state.customerProfileId,'profile-1');
  assert.equal(trusted.state.measurementFingerprint,'current-fingerprint');assert.deepEqual(trusted.state.sizeMeasurementFingerprints,{SM613:'size-fingerprint'});
  assert.deepEqual(built.systemInstruction,{parts:[{text:r.instructions}]});
- assert.deepEqual(trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolBudget:{roundsRemaining:1,callsRemaining:4}});
+ assert.deepEqual(trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:true,toolBudget:{roundsRemaining:1,callsRemaining:4}});
  assert.doesNotMatch(JSON.stringify(trusted),/PRIVATE_RECIPIENT|"permission"/);
  r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:4};
  const finalRequest=buildGeminiCommerceRequest(r),last=JSON.parse(finalRequest.contents[0].parts[0].text).trusted.execution;
- assert.deepEqual(last.availableTools,[]);assert.equal(last.toolBudget.roundsRemaining,0);
+ assert.deepEqual(last.availableTools,['search_products','read_product','read_policy']);assert.equal(last.toolsAllowed,false);assert.equal(last.toolBudget.roundsRemaining,0);
  assert.deepEqual(finalRequest.tools,[]);assert.equal(finalRequest.toolConfig.functionCallingConfig.mode,'NONE');
 });
 
@@ -649,7 +669,7 @@ test('rollback keeps bounded execution data and native dialogue outside system i
  assert.doesNotMatch(system,/DATA_ONLY_CANARY|PRODUCT_DATA_CANARY|EVALUATOR_ONLY_CANARY/);
  assert.doesNotMatch(JSON.stringify(built),/EVALUATOR_ONLY_CANARY/);
  assert.deepEqual(built.systemInstruction,{parts:[{text:r.instructions}]});
- assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.execution,{availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:3}});
+ assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:3}});
 });
 
 test('execution budget accepts only bounded code-owned numbers before provider dispatch',async()=>{

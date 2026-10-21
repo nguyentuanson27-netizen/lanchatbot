@@ -71,7 +71,7 @@ test('both owners receive identical trusted text and native dialogue; evaluator 
  assert.equal(gemini.toolConfig.functionCallingConfig.mode,'NONE');
  assert.deepEqual(gemini.tools,[]);
  assert.deepEqual(JSON.parse(gemini.contents[0].parts[0].text).trusted.execution,
-  {availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:0}});
+  {availableTools:[],toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:0}});
  for(const wire of [gemini,sol])assert.doesNotMatch(JSON.stringify(wire),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY|caseId|expectedSafe|requiredBehaviors/);
 });
 
@@ -130,7 +130,7 @@ test('native read-only comparison exposes the same bounded tools to both owners,
  assert.deepEqual(sol.input.map(m=>m.content),gemini.contents.map(m=>m.parts[0].text));
  assert.equal(sol.instructions,gemini.systemInstruction.parts.map(p=>p.text).join('\n'));
  assert.deepEqual(JSON.parse(gemini.contents[0].parts[0].text).trusted.execution,
-  {availableTools:['search_products','read_product','read_policy'],toolBudget:r.toolBudget});
+  {availableTools:['search_products','read_product','read_policy'],toolsAllowed:true,toolBudget:r.toolBudget});
  for(const body of [gemini,sol])assert.doesNotMatch(JSON.stringify(body),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY|caseId|expectedSafe|requiredBehaviors/);
  for(const owner of ['gemini','sol']){
   const body=comparisonOwnerRequest(owner,c,{...r,toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:0}});

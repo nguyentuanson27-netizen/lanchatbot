@@ -1,5 +1,9 @@
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
+## Phase B offer/capability/advice correction — 2026-10-21
+
+**IMPLEMENTED_DETERMINISTIC_CHECKED_MODEL_NOT_RUN**. Owner “sửa đi”. Base `f050868642ce4aa0735f65012078b10130a2696a`; [chi tiết và self-review](../docs/specs/c3-phase-b-offer-capability-advice-fix-20261021.md). B1–4 hướng dẫn đọc đúng offer; B1–9/15 thay chỉ dẫn tư vấn bằng lựa chọn giải quyết băn khoăn; B1–21 bỏ yêu cầu gọi giỏ vô điều kiện. Execution giữ capability và cờ toolsAllowed riêng, native/runtime authority giữ nguyên. RED 3 FAIL → GREEN 77 Node + 70 runtime/tool tests; worker build/diff check PASS. Không provider generation, chưa chứng minh chất lượng hội thoại tốt hơn; không sửa corpus/verifier/lịch sử, không live GO.
+
 ## Full B1/B2/B3 reply-focus run — 2026-10-21
 
 **FULL32_COMPLETE_REPLY_QUALITY_NOT_COMPLETE**. Source2bc7d5d2, primaryd5c9eb79. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-reply-focus/CHECKPOINT_B.md): B120USABLE/4NEEDS_EDIT/0fallback, stateful7USABLE/1HUMANcontrol.89requests(61owner/28verifier),0error/timeout/retry,28PASS. COD28/28+BANK28/28PASS,3DBsdropped;61exactprompts/28bindings/49rawGitblobhashes/0labelleaks. Four recurring findings remain4/9/15/21; correctionACK and changed-occasion choice improved in one sample. No stability/liveGO or automatic next run. Owner yêu cầu chạy model sau26e36330. [Scope](../apps/worker/evals/single-agent-commerce-read-only/full-b123-20261021-reply-focus/SCOPE.md):24B1+8stateful, once/max124requests, complete all populations without quality early stop; no retries/replacements. Current prompt/context, unchanged verifier/models/corpora and source routes. Existing disposable COD/BANK checks, no live send. Runtime clean source capture → preflight → all jobs → raw → primary → diagnosis/audit/report.
