@@ -1,0 +1,531 @@
+{
+  "runSourceSha": "e2474d0df2f24e1600d3815e4baf8b926f02b703",
+  "registered": 18,
+  "reviewProtocol": "Whole-turn actual outcome first; no rejected draft/verdict diagnosis.",
+  "rows": [
+    {
+      "id": "r1-case02",
+      "caseSlot": 2,
+      "caseId": "b1-current-policy",
+      "repetition": 1,
+      "run": "r1-case02",
+      "slot": 2,
+      "runtime": {
+        "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ đơn nhận 10 hôm thì vẫn trong thời hạn đổi 15 ngày của shop nên mình đổi màu được chị nhé. Phí vận chuyển 2 chiều cho đơn đổi là 30.000đ ạ."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả đúng còn trong15ngày và phí30k hai chiều, thay thông tin7ngày cũ. Không tự tuyên bố đã duyệt hoặc liệt kê điều kiện đủ.",
+      "voiceFindings": []
+    },
+    {
+      "id": "r1-case04",
+      "caseSlot": 4,
+      "caseId": "b1-price",
+      "repetition": 1,
+      "run": "r1-case04",
+      "slot": 4,
+      "runtime": {
+        "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set váy Thạch Thảo (SV2447) bên em có các lựa chọn giá như sau ạ:\n\n- **Bộ có váy:** 799.000đ\n- **Áo lẻ:** 499.000đ\n- **Chân váy lẻ:** 449.000đ\n\nChị muốn lấy cả set hay mình mua lẻ món nào ạ?"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Khách hỏi giá set đã rõ; reply mở bảng cả bộ/áo/váy rồi hỏi lại muốn mua phần nào. Giá đúng nhưng shop tự mở lại quyết định, thay vì trả giá món khách hỏi. Không fail vì bản thân danh sách giá.",
+      "voiceFindings": [
+        "Mã nội bộ và bảng giá lẻ làm câu trả lời dài hơn nhu cầu."
+      ]
+    },
+    {
+      "id": "r1-case09",
+      "caseSlot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "repetition": 1,
+      "run": "r1-case09",
+      "slot": 9,
+      "runtime": {
+        "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+          },
+          {
+            "role": "shop",
+            "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Chị yên tâm, áo dùng tơ Hàn mềm thoáng cùng chân váy ren tơ có độ rũ tự nhiên, form nhẹ nên diện ngoài trời vẫn thoải mái ạ."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả thẳng lo bí bằng chất tơ mềm/thoáng và form nhẹ. Đây có thể là nhận xét cảm giác thông thường trong ranh giới đã cho phép, không tự coi nhắc ngoài trời là cam kết kỹ thuật. Chưa có phương án phối/món thay, nên sức tư vấn còn mỏng; không ép mọi câu hỏi chất liệu phải đổi món.",
+      "voiceFindings": [
+        "Trấn an chung, chưa xử lý sâu việc khách dễ nóng và ở ngoài trời lâu."
+      ]
+    },
+    {
+      "id": "r1-case15",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "repetition": 1,
+      "run": "r1-case15",
+      "slot": 15,
+      "runtime": {
+        "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, với phong cách quen mặc đồ trơn của chị thì việc ngại set này hơi điệu là dễ hiểu ạ. \n\nTuy nhiên, Set Thạch Thảo sử dụng chất liệu tơ Hàn và ren mềm, form dáng nhẹ nhàng với độ bay và rũ tự nhiên chứ không phải dạng bồng xòe cứng nhắc hay rườm rà. Nhờ vậy mà tổng thể lên người rất thanh nhã, lịch sự và rất hợp không gian tiệc cưới ban ngày.\n\nNếu chị muốn một bộ trang phục đồng bộ, sang trọng mà vẫn nhã nhặn, chị lấy nguyên set (799.000đ) mặc sẽ rất đẹp và lịch sự. Còn nếu chị vẫn muốn giữ nét giản dị quen thuộc, chị có thể chọn mua áo thêu lẻ (499.000đ) kết hợp với quần hoặc chân váy trơn sẵn có trong tủ, vừa có điểm nhấn tinh tế lại vừa thoải mái với phong cách thường ngày của mình. \n\nChị thấy phương án nào hợp ý hơn ạ?"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Khách nhờ shop nói có nên mua vì quen đồ trơn. Reply diễn giải dài, đưa cả set và áo lẻ rồi hỏi phương án nào hợp ý; shop chưa đưa được một đề xuất chính giải quyết băn khoăn. Vấn đề là phần chọn mua bị trả lại khách, không phải riêng độ dài.",
+      "voiceFindings": [
+        "Mở đầu nhắc lại lo lắng; nhiều lời khen thanh nhã/lịch sự/sang trọng/tinh tế cùng ý."
+      ]
+    },
+    {
+      "id": "r1-case17",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "repetition": 1,
+      "run": "r1-case17",
+      "slot": 17,
+      "runtime": {
+        "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+          },
+          {
+            "role": "shop",
+            "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Đi gặp khách hàng buổi sáng cần sự chỉn chu và gọn gàng, chị lấy áo lẻ (499.000đ) phối cùng quần âu hoặc chân váy ôm sẽ là lựa chọn sắc sảo và chuyên nghiệp hơn chị ạ. Áo tơ Hàn thêu form nhẹ, vừa thanh lịch lại giữ được độ gọn gàng cần thiết cho công việc. \n\nCòn nếu chị lấy cả bộ (799.000đ), chân váy ren có độ rũ mềm mại sẽ rất duyên dáng nhưng trông sẽ mềm mại, bay bổng hơn chứ không gọn gàng bằng áo mặc cùng đồ công sở."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Chọn áo499k phối đồ công sở, giải thích cả bộ ren có độ bay/rũ điệu hơn. Có so sánh giúp nhu cầu nhìn gọn khi gặp khách; không chỉ nhắc hoàn cảnh.",
+      "voiceFindings": [
+        "Sắc sảo/chuyên nghiệp/gọn gàng lặp ý; đoạn so sánh có thể gọn hơn."
+      ]
+    },
+    {
+      "id": "r1-case23",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "repetition": 1,
+      "run": "r1-case23",
+      "slot": 23,
+      "runtime": {
+        "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị có sẵn chân váy đen dáng suông rồi."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Chị lấy **cả bộ (799.000đ)** giúp em nhé, vì mức giá này hoàn toàn vừa vặn trong ngân sách 850 nghìn của mình ạ.\n\nShop gợi ý cả bộ vì sẽ mang lại cho chị trọn vẹn set áo tơ thêu và chân váy ren tơ mềm mại, diện đi tiệc hay đi chơi rất điệu đà, sang trọng. Đặc biệt, chiếc áo thêu này hoàn toàn có thể tách rời để phối linh hoạt với chân váy đen dáng suông sẵn có của chị, giúp mình nhân đôi cách mặc đi làm hay dạo phố rất tiện. \n\nNếu chị muốn tối ưu chi phí hơn nữa thì có thể chọn mua riêng **áo lẻ (499.000đ)** phối cùng chân váy đen cũng rất gọn gàng và hợp mốt ạ. Chị thích phương án nào cứ báo em nha!"
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Đề xuất chính là bộ799k với thêm cách mặc nguyên set và tách áo phối váy đen; áo499k là lựa chọn tiết giảm chi phí. Upsell có cách dùng, giá hai lựa chọn rõ, không nói bộ rẻ hơn áo. Câu hỏi kết chưa cần nhưng không xóa đề xuất chính.",
+      "voiceFindings": [
+        "Giúp em, nhắc lại ngân sách và chuỗi tính từ còn gượng; phần mua thêm nên đi vào cách dùng sớm hơn."
+      ]
+    },
+    {
+      "id": "r2-case02",
+      "caseSlot": 2,
+      "caseId": "b1-current-policy",
+      "repetition": 2,
+      "run": "r2-case02",
+      "slot": 2,
+      "runtime": {
+        "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ mình vẫn đổi được chị nhé! Quy định đổi hàng của shop trong vòng 15 ngày kể từ ngày nhận đơn, nên đơn của mình nhận 10 hôm là vẫn còn trong thời gian hỗ trợ ạ. \n\nPhí đổi hàng (phí vận chuyển 2 chiều) là 30.000đ chị nha. Chị muốn đổi sang màu nào để em hỗ trợ mình lên đơn đổi ạ?"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Mốc15ngày và phí30k đúng, nhưng mời khách chọn màu để bot hỗ trợ lên đơn đổi trong B1 chỉ có công cụ đọc. Đây là bước tiếp theo ngoài khả năng hiện có; không phải lỗi thiếu danh sách điều kiện policy hoặc báo thao tác đã xong.",
+      "voiceFindings": [
+        "Câu hỏi cuối tạo kỳ vọng shop/bot sẽ thực hiện bước không có tool trong luồng này."
+      ]
+    },
+    {
+      "id": "r2-case04",
+      "caseSlot": 4,
+      "caseId": "b1-price",
+      "repetition": 2,
+      "run": "r2-case04",
+      "slot": 4,
+      "runtime": {
+        "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set váy Thạch Thảo bên em có cả giá mua nguyên bộ lẫn bán lẻ từng món ạ:\n\n- Nguyên bộ: 799.000đ\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 449.000đ\n\nChị tham khảo xem mình thích lấy nguyên set hay mua lẻ món nào nha chị!"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Mở bảng ba lựa chọn và mời khách chọn lại nguyên set hay món lẻ dù khách đã hỏi giá set. Chưa khắc phục lỗi trọng tâm của ca hỏi giá; số tiền vẫn đúng.",
+      "voiceFindings": [
+        "Phần dẫn và CTA mở thêm lựa chọn không được yêu cầu."
+      ]
+    },
+    {
+      "id": "r2-case09",
+      "caseSlot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "repetition": 2,
+      "run": "r2-case09",
+      "slot": 9,
+      "runtime": {
+        "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+          },
+          {
+            "role": "shop",
+            "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Ra ngoài trời lâu và dễ nóng thì chất tơ ren của set Thạch Thảo có thể sẽ hơi bí cho chị. \n\nĐổi sang **set quần Uyển Hoa (SQ748)** sẽ hợp lý hơn cho không gian sân vườn đấy ạ. Set này dùng vải thô đũi cao cấp có độ thoáng khí và thấm hút rất tốt, giúp chị thoải mái vận động lâu ngoài trời mà vẫn giữ được nét ngọt ngào, thanh lịch với chi tiết áo xếp tầng và họa tiết tinh tế."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Chọn SQ748 thay Thạch Thảo cho sân vườn/dễ nóng. Source capture SQ748 có thô đũi, thoáng khí/thấm hút tốt và quần short; lý do tư vấn gắn với hoàn cảnh mới. Đã xem riêng PUBLIC_CONTEXT_CAPTURE để đối chiếu vật liệu trước khi chấm; không đọc verdict/rejected draft.",
+      "voiceFindings": [
+        "Phần khen ngọt ngào/thanh lịch cuối tin còn phụ; câu có thể ngắn hơn."
+      ]
+    },
+    {
+      "id": "r2-case15",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "repetition": 2,
+      "run": "r2-case15",
+      "slot": 15,
+      "runtime": {
+        "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, nếu chị thường mặc đồ trơn và ngại cảm giác quá điệu đà thì set Thạch Thảo này vẫn là một lựa chọn rất đáng cân nhắc cho dịp đi ăn cưới ban ngày ạ. \n\nChất liệu tơ Hàn và ren mềm của set có form nhẹ, độ bay và rũ tự nhiên nên nét đẹp thiên về sự thanh nhã, nhẹ nhàng chứ không bị rườm rà hay phô trương. Họa tiết thêu nổi và ren được tiết chế tinh tế, giữ được nét sang trọng, lịch sự cần có cho tiệc cưới mà không làm chị thấy lạc phong cách thường ngày.\n\nNếu vẫn lăn tăn, chị có thể chọn mua riêng áo thêu (499.000đ) để phối cùng quần hoặc chân váy trơn sẵn có trong tủ, hoặc chọn chân váy ren (449.000đ) kết hợp với một chiếc áo trơn tối giản. Tuy nhiên, diện nguyên bộ (799.000đ) sẽ mang lại tổng thể đồng điệu và chỉn chu nhất cho buổi tiệc đấy ạ. Chị thấy phương án phối nguyên set hay tách lẻ phù hợp với mình hơn ạ?"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Dù nghiêng về cả bộ ở cuối, reply tiếp tục ba cách mua/phối rồi hỏi khách chọn nguyên set hay tách lẻ. Lý do chính vẫn khen form/chất liệu và trấn an không lạc phong cách, chưa giải quyết băn khoăn về gu đồ trơn bằng một đề xuất rõ.",
+      "voiceFindings": [
+        "Dài, nhiều tính từ và nhắc lại cả nhu cầu trước khi đi vào lựa chọn."
+      ]
+    },
+    {
+      "id": "r2-case17",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "repetition": 2,
+      "run": "r2-case17",
+      "slot": 17,
+      "runtime": {
+        "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+          },
+          {
+            "role": "shop",
+            "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, gặp khách hàng buổi sáng thì em vẫn khuyên chị lấy **cả bộ** ạ. Áo tơ thêu nổi form nhẹ kết hợp cùng chân váy ren tơ mềm có độ rũ tự nhiên tạo tổng thể vừa thanh lịch, chỉn chu lại rất trang nhã, rất phù hợp khi gặp đối tác. \n\nTrường hợp chị thích phối cùng quần âu sẵn có ở nhà để tạo cảm giác gọn gàng, năng động hơn, chị có thể lấy áo lẻ (499.000đ). Nhưng để mặc đẹp đồng bộ mà không cần mất công phối đồ, em vẫn ưu tiên chọn cả bộ (799.000đ) cho mình nha chị."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Có đề xuất cả bộ799k với lý do đồng bộ, không mất công phối; áo499k là tradeoff gọn/năng động hơn. Không mặc định phải chọn áo lẻ để PASS. Đề xuất dùng được nhưng lý do giữ cả bộ chưa bám mạnh ưu tiên nhìn gọn của khách.",
+      "voiceFindings": [
+        "Còn thiên về nhã nhặn/trang nhã/thanh lịch; nên diễn đạt sát nhu cầu gọn hơn."
+      ]
+    },
+    {
+      "id": "r2-case23",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "repetition": 2,
+      "run": "r2-case23",
+      "slot": 23,
+      "runtime": {
+        "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị có sẵn chân váy đen dáng suông rồi."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Chị lấy áo lẻ (499.000đ) là hợp lý nhất với nhu cầu của mình nha chị. Áo chất tơ Hàn thêu nổi nhẹ nhàng, khi phối cùng chân váy đen dáng suông sẵn có sẽ tạo thành set đồ thanh lịch, rất dễ mặc lại nhiều lần và biến hóa với nhiều phong cách khác nhau. Lựa chọn này vừa giúp chị tận dụng đồ có sẵn, vừa thoải mái nằm trong ngân sách 850 nghìn. \n\nCòn nếu chị thích diện trọn bộ thiết kế ren tơ đồng điệu để có vẻ ngoài chỉn chu nhất thì bộ có váy (799.000đ) cũng vẫn vừa vặn trong ngân sách để chị cân nhắc nha!"
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Chọn áo499k tận dụng váy đen khách có và mặc lại nhiều lần; bộ799k là phương án phụ, không mất lựa chọn chính. Đúng hai giá, không nói tiết kiệm sai comparator.",
+      "voiceFindings": [
+        "Phần vừa ngân sách và cả bộ chỉn chu nhất cuối tin chưa cần; nhiều ý phối linh hoạt khá chung."
+      ]
+    },
+    {
+      "id": "r3-case02",
+      "caseSlot": 2,
+      "caseId": "b1-current-policy",
+      "repetition": 3,
+      "run": "r3-case02",
+      "slot": 2,
+      "runtime": {
+        "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ vẫn kịp chị nha, quy định hiện tại của shop cho phép đổi hàng trong vòng 15 ngày kể từ khi nhận (đơn của mình mới nhận 10 hôm và còn nguyên tem mác nên mình đổi màu thoải mái ạ). Phí vận chuyển 2 chiều cho việc đổi hàng là 30.000đ chị nhé."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Trả đúng15ngày và30k cho hỏi còn kịp/phí; trong toàn hội thoại đây là tóm tắt thời hạn cho đồ mới cầm xem, không tự coi là lời xét đủ mọi điều kiện. Không giả định khách đã vi phạm điều chưa nói.",
+      "voiceFindings": [
+        "Ngoặc dài nhắc lại10ngày/tem; đổi màu thoải mái có thể diễn đạt gọn và chính xác hơn."
+      ]
+    },
+    {
+      "id": "r3-case04",
+      "caseSlot": 4,
+      "caseId": "b1-price",
+      "repetition": 3,
+      "run": "r3-case04",
+      "slot": 4,
+      "runtime": {
+        "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Dạ, set váy Thạch Thảo (SV2447) bên em có cả nguyên bộ lẫn các món lẻ để chị linh hoạt lựa chọn ạ:\n\n- Nguyên bộ: 799.000đ\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 449.000đ\n\nChị muốn lấy cả bộ hay mình chọn món lẻ nào ạ?"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Lần thứ ba vẫn trả bảng các cách mua rồi hỏi lại mua set hay món lẻ. Lỗi mở lại lựa chọn tái diễn3/3; không phải lỗi dữ kiện giá.",
+      "voiceFindings": [
+        "Đọc lại mã nội bộ và phần linh hoạt lựa chọn thừa."
+      ]
+    },
+    {
+      "id": "r3-case09",
+      "caseSlot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "repetition": 3,
+      "run": "r3-case09",
+      "slot": 9,
+      "runtime": {
+        "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+          },
+          {
+            "role": "shop",
+            "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "HANDOFF",
+      "terminalReason": "STALE",
+      "actual": [],
+      "primaryVerdict": "UNUSABLE",
+      "reason": "Actual không có tin nhắn do HANDOFF/STALE trong B1 không có khả năng handoff thật. Khách không nhận lời tư vấn. Giữ outcome trong denominator; chưa đọc draft/verdict để suy diễn model sai hay lỗi nào làm snapshot stale.",
+      "voiceFindings": []
+    },
+    {
+      "id": "r3-case15",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "repetition": 3,
+      "run": "r3-case15",
+      "slot": 15,
+      "runtime": {
+        "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Em hiểu lo lắng của chị. Set Thạch Thảo gồm áo tơ thêu nổi và chân váy ren tơ, khi diện nguyên bộ sẽ khá điệu đà và nổi bật hơn so với phong cách đồ trơn quen thuộc của chị.\n\nĐi ăn cưới ban ngày thì thiết kế này rất hợp không khí tươi tắn vì chất tơ và ren có form nhẹ, độ bay và rũ tự nhiên nên mặc lên rất thanh thoát, không bị nặng nề hay cứng nhắc. \n\nTuy nhiên, nếu chị vẫn ngại mặc cả bộ quá điệu, mình hoàn toàn có thể chọn mua lẻ từng phần để phù hợp hơn với gu tối giản của mình:\n- Chị có thể lấy riêng chiếc áo tơ thêu phối cùng quần hoặc chân váy trơn đơn giản sẵn có trong tủ.\n- Hoặc lấy chân váy ren kết hợp với một chiếc áo trơn trơn thanh lịch. \n\nChị thấy cách phối lẻ này có vừa ý chị hơn không ạ?"
+      ],
+      "primaryVerdict": "NEEDS_EDIT",
+      "reason": "Thừa nhận set điệu nhưng sau đó đưa cả áo lẻ lẫn váy lẻ và hỏi khách thấy cách phối có hợp hơn không. Chưa chọn được một phương án mua/outfit cho khách cần đồ đi ăn cưới. Mô tả không thay cho quyết định shop được nhờ đưa ra.",
+      "voiceFindings": [
+        "Nhắc lại nhu cầu, nhiều đoạn giải thích và ví dụ phối nhưng vẫn để khách tự chọn."
+      ]
+    },
+    {
+      "id": "r3-case17",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "repetition": 3,
+      "run": "r3-case17",
+      "slot": 17,
+      "runtime": {
+        "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+          },
+          {
+            "role": "shop",
+            "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Chị lấy áo lẻ (499.000đ) sẽ gọn gàng và phù hợp đi gặp khách hàng hơn chị ạ. Áo chất tơ thêu form nhẹ nhàng, lịch sự, khi phối cùng quần âu hoặc chân váy ôm gọn gàng sẵn có sẽ tạo tổng thể đứng dáng và chuyên nghiệp hơn. \n\nCòn cả bộ váy ren tơ có độ rũ và bay tự nhiên nhiều hơn, mềm mại và hợp đi tiệc tối hơn là gặp khách hàng buổi sáng cần sự sắc sảo, gọn gàng."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Chọn áo499k, giải thích phối quần âu/váy ôm gọn để gặp khách và so với ren bay/rũ đi tiệc. Quyết định phù hợp hoàn cảnh mới; không khẳng định fit với cơ thể.",
+      "voiceFindings": [
+        "Lặp gọn gàng, câu dài hơn cần thiết."
+      ]
+    },
+    {
+      "id": "r3-case23",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "repetition": 3,
+      "run": "r3-case23",
+      "slot": 23,
+      "runtime": {
+        "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị có sẵn chân váy đen dáng suông rồi."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "disposition": "SEND_ELIGIBLE",
+      "terminalReason": "PASS",
+      "actual": [
+        "Theo em, chị nên lấy cả bộ (799.000đ) vì mức giá này vẫn nằm gọn trong ngân sách 850 nghìn của chị. \n\nSet váy Thạch Thảo gồm áo tơ Hàn thêu nổi và chân váy ren tơ Hàn mềm mại, mang đến cho chị vẻ ngoài bay bổng, đồng bộ rất đẹp khi đi chơi hay đi tiệc. Đặc biệt, chiếc áo này hoàn toàn có thể tách rời để phối lịch sự cùng chân váy đen dáng suông sẵn có của chị đi làm, giúp chị linh hoạt thay đổi và nhân đôi cách mặc cho nhiều dịp. \n\nNếu chị muốn tối ưu chi phí hơn thì mua riêng áo (499.000đ) phối với chân váy đen cũng rất hợp, nhưng lấy cả bộ sẽ trọn vẹn thiết kế và cho chị nhiều lựa chọn phối đồ hơn ạ."
+      ],
+      "primaryVerdict": "USABLE",
+      "reason": "Chọn bộ799k với hai cách mặc, kể cả áo với váy đen khách có; áo499k được nêu như lựa chọn giảm chi phí. Upsell có lý do dùng lại và không tự nói rẻ hơn áo. Không fail chỉ vì có phương án phụ.",
+      "voiceFindings": [
+        "Lý do ngân sách đi trước lợi ích mua thêm; nhiều tính từ và cụm nhân đôi cách mặc còn quảng cáo."
+      ]
+    }
+  ],
+  "reviewer": "Main agent whole-turn review, no human/blind adjudication; ordinary advice and justified upsell allowed.",
+  "fullDecision": "DO_NOT_RUN_FULL: focused population has NEEDS_EDIT and an actual no-send; no retry or next fix authorized in this run."
+}
