@@ -1,6 +1,10 @@
-## Phase B explicit-offer/advice fix — 2026-10-21
+## Phase B explicit-offer/advice observation — 2026-10-21
 
-**IMPLEMENTED_CHECKED_MODEL_PENDING**. Owner yêu cầu fix và chạy lại. [Thiết kế và self-review](../docs/specs/c3-phase-b-explicit-offer-advice-fix-20261021.md). Native read_product bắt buộc offerType mã nguồn hoặc null; adapter giữ nguyên signed history, không chọn thay model. Thay phần tư vấn/giọng tại chỗ, owner prompt14170→13762bytes; verifier/models/corpora giữ nguyên. RED2→GREEN103Node/1optionalSKIP,71runtimePASS, worker build/lintPASS. POS-refresh là quan sát nguồn mới nên gate vẫn chặn đúng, không bỏ binding. Dự kiến18attempts:2/4/15×3 trước,9/17/23/3/5/6/8/16/21×1 đối chứng. Không auto retry/fix, không liveGO.
+**FOCUS18_COMPLETE_STOP_BEFORE_FULL**. [Report](../apps/worker/evals/single-agent-commerce-read-only/explicit-offer-focus-20261021/CHECKPOINT_B.md). Implementationb0ff06c4/source219d7737; rawb8104e80→primary2a1756d trước diagnosis. Đủ18mẫu: prior failures2/4/15×3 và9controls×1.13USABLE/5NEEDS_EDIT,18SEND_ELIGIBLE/PASS,0fallback/providererror/timeout/retry;55requests(37owner+18verifier). Hai ca giá đọc null vẫn trả thừa, mẫu đọc SET_VAY trả gọn; công cụ explicit chưa sửa được lựa chọn ngữ nghĩa ổn định. Gu quá điệu2/3 vẫn điều kiện hóa lựa chọn, control gặp khách chưa giải thích nhìn gọn. Policy3/3 không hứa lên đơn; các control partial/source/component/policy-exclusion dùng được.14frozen/37ownerprompts/18bindings/95Gitrawhashes/0labelleaks. POS refresh vẫn giữ exact gate; không gặp stale lần này không phải đã sửa availability.103NodePASS/1optionalSKIP,71runtimePASS/build/lintPASS. Không full B1/B2/B3 hoặc auto fix/run tiếp; A OWNER_BYPASS, chưa liveGO.
+
+## Phase B explicit-offer/advice implementation — 2026-10-21
+
+**IMPLEMENTED_AND_OBSERVED**. Owner yêu cầu fix và chạy lại. [Thiết kế và self-review](../docs/specs/c3-phase-b-explicit-offer-advice-fix-20261021.md). Native read_product bắt buộc offerType mã nguồn hoặc null; adapter giữ nguyên signed history, không chọn thay model. Thay phần tư vấn/giọng tại chỗ, owner prompt14170→13762bytes; verifier/models/corpora giữ nguyên. RED2→GREEN103Node/1optionalSKIP,71runtimePASS, worker build/lintPASS. POS-refresh là quan sát nguồn mới nên gate vẫn chặn đúng, không bỏ binding. Đã thực hiện18attempts theo registration:2/4/15×3 trước,9/17/23/3/5/6/8/16/21×1 đối chứng. Không auto retry/fix, không liveGO.
 
 # C3 — Current Phase B Plan and Historical Checkpoint A Plan
 
