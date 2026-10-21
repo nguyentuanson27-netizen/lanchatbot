@@ -1,0 +1,20 @@
+{
+  "status": "EXACT_BYTES_RESTORED",
+  "paths": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+      "runSha256": "a7fc3efe8ca821c16bbba4692ac04cb2d4f8748e26a36d5091bcd79ad51e38e6",
+      "restoredSha256": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+      "baseSha": "d94d2cf5f7ca25a6e8ebd19278c967eebdb1788a"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/manifest.json",
+      "runSha256": "71ae418b930c934c091d7cb1da22ad436a8be3ac33ffe40a392a57bd2a57091d",
+      "restoredSha256": "40e54d815bea5ddf9448363ca273c434be0aa14328556bb72a3bb6dfa8aa372d",
+      "baseSha": "d94d2cf5f7ca25a6e8ebd19278c967eebdb1788a"
+    }
+  ],
+  "runSourceSha": "a3c0411781bd9ee11d424b7ec019d2bccb02c279",
+  "runtimeOrLiveChange": false,
+  "laterCommitRequired": true
+}
