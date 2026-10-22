@@ -2,8 +2,9 @@
 
 - [x] Owner yêu cầu chạy lại đúng 19 target, N1; giữ prompt/model/config. Quota read-only cho phép dùng lại verifier, không generation để dò quota.
 - [x] Bộ chạy eval có `--through-case` để giữ prerequisite thật và dừng sau target; RED missing export → GREEN; Node108 PASS. Không sửa runtime/prompt.
-- [ ] Chạy 15 B1 + 1 opening + 2 stateful + 1 negotiation; ghi riêng 4 lượt provider prerequisite dựng cart/history thật, không tính là 19 target.
-- [ ] Lưu toàn bộ outcome/error, actual customer captures, request accounting, so sánh paired target và hạn chế N1; không tự fix/rerun hoặc nhận B GO.
+- [x] Chạy 15 B1 + 1 opening + 2 stateful + 1 negotiation; ghi riêng 4 lượt provider prerequisite dựng cart/history thật, không tính là 19 target. Source24d8ec62; target18SEND_ELIGIBLE/1FALLBACK; 70requests/0error/0retry/0labelleak; 3DBdropped.
+- [x] Lưu outcome/error, actual captures, request accounting và hạn chế N1; [report](../apps/worker/evals/single-agent-commerce-read-only/fallback19-rerun-20261022/CHECKPOINT_B.md). Không ghép vào full39 cũ hoặc nhận B GO.
+- [x] Theo yêu cầu review đủ23actual/context/trace: [per-case review/root cause](../apps/worker/evals/single-agent-commerce-read-only/fallback19-rerun-20261022/REVIEW.md). Target15dùngđược/3cầnsửa/1fallback; prerequisite1draftFAIL được code recovery. Đủ quote nhưng owner bỏ qua khác với thiếu dữ liệu eo/phom; không tự sửa/rerun.
 
 ## Full39 sau contract fixes — 2026-10-22
 
