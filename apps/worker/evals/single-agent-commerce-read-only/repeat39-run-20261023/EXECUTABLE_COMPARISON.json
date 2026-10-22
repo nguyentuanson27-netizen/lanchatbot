@@ -1,0 +1,23 @@
+{
+  "previousRunSourceSha": "540b8129e2e52062ad5bc96ffa44dd84d0591bd5",
+  "currentRunSourceSha": "01e689b4c4f002cfd085b4038837901a14256a3e",
+  "frozenFileBytesEqual": {
+    "manifest.json": true,
+    "source-config.b1.json": true,
+    "cases.b1.json": true,
+    "stateful-cases.json": true,
+    "sales-journeys.candidate.json": true,
+    "handoff-matrix.candidate.json": true,
+    "prompts/owner.vi.txt": true,
+    "prompts/verifier.vi.txt": true,
+    "run.mjs": true,
+    "protocol.mjs": true,
+    "gemini-inference.mjs": true,
+    "stateful-provider.mjs": true,
+    "isolated-integration.mjs": true,
+    "candidate-handoff.mjs": true,
+    "advice-diagnostic.mjs": true,
+    "opening-advice-preparation-20261022/diagnostic-inputs.json": true
+  },
+  "scope": "Same executable/config/prompt/corpus; live public facts and generated histories may change."
+}

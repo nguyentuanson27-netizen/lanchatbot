@@ -1,3 +1,7 @@
+## Chạy lại full39 prompt hiện hành — 2026-10-23
+
+**FULL39_REPEAT_COMPLETE — CHƯA B GO.** [Kết quả/so sánh](../apps/worker/evals/single-agent-commerce-read-only/repeat39-run-20261023/CHECKPOINT_B.md), [39hội thoại](../apps/worker/evals/single-agent-commerce-read-only/repeat39-run-20261023/CONVERSATIONS.md). Source01e689b4;17frozenfilehashes giống lượt trước, chỉplan đổi.39/39N1,0diagnostic:31eligible/3fallback/3handoff/2codecheckout; manual34dùngđược/2cầnsửa/3fallback.109requests=77owner+32verifier,0retry/labelleak/quotaerror;2ownererrors,1verifierFAIL,1snapshotSTALE được code receipt recovery;3DBdropped. Concern-v2/gallery vẫn cần sửa; thương lượng lần này dùngquoteđúng nhưng không phải treatment improvement. Chưa triển khai kế hoạch rootcause mới hoặc chạy paired experiments, không tự sửa/rerun/deploy. A OWNER_BYPASS. Các đoạn dưới giữ lịch sử.
+
 ## Kế hoạch sửa root cause sau review — 2026-10-23
 
 **PLAN_REVISED_AND_SELF_REVIEWED; chưa implementation/model run.** [Kế hoạch đã sửa](../docs/specs/c3-phase-b-full39-rootcause-fix-plan-20261023.md), [review REVISE](../docs/specs/c3-phase-b-full39-rootcause-independent-review-20261023.md). Bổ sung offer expansion/bound và candidate coverage; tách quote one-variable/native-history replay khỏi paired advice diagnostic; không gọi hypothesis là confirmed cause. Deadline phân biệt không nhận hẹn với báo chắc lịch giao, không relabel draft cũ. Small evaluation đề xuất tối đa16outcomes/28requests, chưa chạy; full39 là bước riêng, không tự mở cap180. A OWNER_BYPASS, B chưa GO. Nội dung dưới giữ lịch sử.
