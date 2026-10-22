@@ -1,3 +1,14 @@
+## Full39 sau contract fixes — 2026-10-22
+
+**39/39COMPLETE; T5BLOCKED_VERIFIER_QUOTA; CHƯA B GO.** [Report/findings](../apps/worker/evals/single-agent-commerce-read-only/contract-advice-run-20261022/CHECKPOINT_B.md).
+
+- [x] T1–T5 implementation → independent review1 →fix →cùng reviewer2 APPROVE; worker1954/Node107/protected21/typecheck/build/lintPASS.
+- [x] Clean source6e38c541 +preflight/sourcecheck →full39N1 khôngretry/đổiinput/midrunfix;110requests,21verifier429 giữdenominator.
+- [x] Review actual39 trướcrejected;15USABLE/3NEEDS_EDIT/19FALLBACK/1SILENT_HANDOFF/1OWNERSHIP_CONTROL.17fallback doquota,2FAILsemantic riêng; không nhận qualityregression từ tổng19.
+- [x] COD32/BANK32PASS,5DBsdropped; lưu source/prompt/schema/corpus/requests/usage/hash/commands.
+- [ ] T5comparison12: prerequisiteảnh đãPASS, corpus/pins sẵn;0dispatch vìquota. Chưa córunSourceSHAriêng, không win/loss/defaultpromotion hoặc tựrunbù.
+- [ ] Finding mở: missingverifiedchart/perassetcolorbinding, giọnggallery/concern, quyếtđịnhnóng/deadline, correctionquality chưađánhgiáđượcdoquota; N3b/staffimage/N6b/28slots giữnguyên.
+
 ## Implementation hợp đồng công cụ và thử ảnh — 2026-10-22
 
 [Savepoints/review/commands](../docs/specs/c3-phase-b-contract-and-advice-implementation-20261022.md). **IMPLEMENTED_AND_INDEPENDENT_REVIEWED — MODEL_RUN_PENDING**; không dùng unit tests làm provider-quality evidence.

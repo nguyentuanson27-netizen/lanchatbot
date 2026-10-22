@@ -62,3 +62,14 @@ Commands thực sự chạy (22/10):
 Worker focused9files đã chạy279PASS trước bổ sung state/region tests; final133files gồm toàn bộ focused suites ở revision cuối. Không cần chạy lại cùng coverage chỉ đổi tên count. Node image-comparison4tests gồm actual composed runner/request preservation, dispatcher/registration bounds và label firewall. Logs được giữ ngoài source trước seal; raw source/run evidence sẽ lưu ở campaign report.
 
 Model/provider chưa chạy tại section này. COD disposable đang chạy, BANK control sẽ nằm trong full39 campaign operations (không tính thêm customer outcome).
+
+
+## Full model39 hoàn tất — source6e38c541
+
+Runtime source `6e38c54104010c7e137481a560b99da21e961e73`, clean executable/config trước run và không sửa trong run. [Checkpoint/counts](../../apps/worker/evals/single-agent-commerce-read-only/contract-advice-run-20261022/CHECKPOINT_B.md), [39actual hội thoại](../../apps/worker/evals/single-agent-commerce-read-only/contract-advice-run-20261022/CONVERSATIONS.md), [commands/failures](../../apps/worker/evals/single-agent-commerce-read-only/contract-advice-run-20261022/COMMANDS.md).
+
+39/39N1,110generation requests (76owner/34verifier),0retry/timeout/labelleak. Verifier21HTTP429usage_limit_reached;13verdicts còn lại11PASS/2FAIL. Terminal15eligible/19fallback/3handoff/2NO_SEND;19fallback=17quota+2semanticFAIL. Bốn eligible là code receipt recovery sau429, không verifierPASS. Hai NO_SEND vẫn có code intake/previewcapture. Primaryactual15USABLE/3NEEDS_EDIT/19FALLBACK/1SILENT_HANDOFF/1OWNERSHIP_CONTROL; N1/non-blind, không qualification hoặc giọng ổn định.
+
+T1 nhận158/52/RELAXED, thiếu chart thì handoff đúngnguồn; T2 không suy thiếuảnh=khôngbánmàu; T3 có ETA4–8ngày CầnThơ; T4 recovery báo ưuđãi30k/tổng499k và giữ ledger khi hỏi tổng. Giọng hệthống/né quyếtđịnh và deadline response vẫn cần sửa. Không tự đổi verifier/prompt để cứu run.
+
+COD32/32 và BANK32/32PASS;5DBs test đãdrop. Các sourcepreflight0generation và sourcecheckPASS/1embeddingriêng. T5 imageprerequisite6case/12slots đãchuẩnbị0generation, nhưng **0comparisondispatch/BLOCKED_VERIFIER_QUOTA**, chưaseal sourceSHAriêng. Không claim51outcomescomplete, BGO hoặc defaultpreloadpromotion. Không chạy bù. Report/evidence commit sau run không được coi là source đã thực thi.

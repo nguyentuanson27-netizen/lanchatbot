@@ -1,0 +1,4 @@
+
+> @lana/worker@0.1.0 lint C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> tsc -p tsconfig.json --noEmit
+
