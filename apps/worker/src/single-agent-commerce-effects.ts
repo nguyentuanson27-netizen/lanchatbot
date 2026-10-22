@@ -338,6 +338,12 @@ export async function createCommerceEffectTools(input: {
       current.revision !== receipt.stateRevision || !current.processedCommandIds.includes(receipt.operationId) || Date.parse(receipt.expiresAt) <= input.clock().getTime()) return { disposition: "NO_SEND", reason: "RECOVERY_SCOPE_CHANGED", text: null, fallbackId: null };
     const cart = current.cart!.value;
     const cartAck = `Giỏ của chị: ${cart.lines.map(line => {
+      // Prefer the exact component title when present. Never manufacture it from a parent set's name.
+      const component = line.components.length === 1 ? line.components[0] : undefined;
+      const componentName = component && world.runtimeProducts?.find(p => p.subjectRef === component.componentProductId)?.content?.productName;
+      if (component && componentName?.trim() && (line.offerKind === "DIRECT" || line.offerKind === "COMPONENT")) {
+        return `${line.quantity} ${componentName}${component.color ? ` màu ${component.color.toLocaleLowerCase("vi-VN")}` : ""}${component.size ? `, size ${component.size}` : ""}`;
+      }
       const product = world.runtimeProducts?.find(p => p.subjectRef === line.parentProductId);
       return formatCartLineSelection(line, product?.content ? { productId: product.subjectRef, title: product.content.productName } : undefined);
     }).join("; ")}.`;
@@ -357,6 +363,7 @@ export async function createCommerceEffectTools(input: {
     }
     return { disposition: "SEND_ELIGIBLE", reason: summary && receipt.effect !== "PURCHASE_CONFIRMED" ? "RECEIPT_BACKED_CART_SUMMARY" : "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
       ? "Shop đã nhận xác nhận mua hàng của chị." : receipt.effect === "CART_OPENED"
-        ? "Em đã thêm món chị chọn vào giỏ." + summary : cartAck + summary, fallbackId: null };
+        ? "Em đã thêm món chị chọn vào giỏ." + summary : receipt.effect === "NEGOTIATION_UPDATED" && summary
+          ? `${summary.trim()} ${cartAck}` : cartAck + summary, fallbackId: null };
   } };
 }

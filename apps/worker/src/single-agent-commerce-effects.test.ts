@@ -87,6 +87,7 @@ describe("code-owned commerce effects and recovery", () => {
     const cart=s.current().cart!.value;
     expect(result.text).toContain(`Ưu đãi ${cart.discountTotalVnd!.toLocaleString("vi-VN")}đ`);
     expect(result.text).toContain(`Tổng ${cart.grandTotalVnd!.toLocaleString("vi-VN")}đ`);
+    expect(result.text!.indexOf("Ưu đãi")).toBeLessThan(result.text!.indexOf("Giỏ của chị"));
     expect(result.text).not.toMatch(/giảm thêm|freeship|thêu tay/iu);
   });
 
@@ -669,7 +670,8 @@ describe("code-owned commerce effects and recovery", () => {
     const lineId = s.current().cart!.value.lines[0]!.lineId;
     await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } });
     const recovered = await s.tools.recover!(terminalFallback());
-    expect(recovered.text).toContain("2 áo (mẫu “Sơ mi SM613”) màu navy, size M");
+    expect(recovered.text).toContain("2 Sơ mi SM613 màu navy, size M");
+    expect(recovered.text).not.toContain("(mẫu");
     expect(recovered.text).toContain("Tổng 973.100đ");
   });
   it("receipt recovery never overrides a privacy/permission no-send", async () => {
