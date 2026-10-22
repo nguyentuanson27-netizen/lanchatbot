@@ -1,0 +1,131 @@
+{
+  "runSourceSha": "a39e45affbd1a8171d8e13ffe2d741cc6624278d",
+  "registeredOutcomes": 39,
+  "recordedOutcomes": 39,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false,
+  "terminalDispositions": {
+    "SEND_ELIGIBLE": 30,
+    "HANDOFF": 4,
+    "NO_SEND": 2,
+    "FALLBACK": 3
+  },
+  "cohorts": {
+    "b1": {
+      "registered": 24,
+      "recorded": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 23,
+        "HANDOFF": 1
+      }
+    },
+    "stateful": {
+      "registered": 8,
+      "recorded": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      }
+    },
+    "openings": {
+      "registered": 4,
+      "recorded": 4,
+      "terminal": {
+        "FALLBACK": 3,
+        "HANDOFF": 1
+      }
+    },
+    "negotiation": {
+      "registered": 3,
+      "recorded": 3,
+      "terminal": {
+        "SEND_ELIGIBLE": 3
+      }
+    }
+  },
+  "providerRequests": 111,
+  "requestsByRole": {
+    "owner": 79,
+    "verifier": 32
+  },
+  "maxRequestsPerGeneration": 1,
+  "capturedRequestBodies": 111,
+  "evaluatorLabelLeaks": 0,
+  "httpErrors": 0,
+  "generationStatusCounts": {
+    "OK": 110,
+    "PROVIDER_ERROR": 1
+  },
+  "ownerToolModeViolations": 1,
+  "verifierGenerationLatencyMs": {
+    "n": 32,
+    "p50": 5899.1514000000025,
+    "p95": 11856.759100000003
+  },
+  "addedVerificationStageLatencyMs": {
+    "p50": 6777.049200000009,
+    "p95": 18504.190199999997,
+    "n": 32
+  },
+  "tokenUsage": {
+    "owner": {
+      "input": 366042,
+      "output": 53432
+    },
+    "verifier": {
+      "input": 150472,
+      "output": 2261
+    }
+  },
+  "cost": null,
+  "costReason": "NOT_EXPOSED",
+  "unregisteredCandidateSlots": 28,
+  "wholeReplyReview": {
+    "counts": {
+      "NEEDS_EDIT": 6,
+      "USABLE": 27,
+      "NO_CUSTOMER_REPLY": 1,
+      "OWNERSHIP_CONTROL": 1,
+      "FALLBACK": 3,
+      "SILENT_HANDOFF": 1
+    },
+    "manual": true,
+    "blind": false,
+    "repetitions": 1,
+    "qualification": false
+  },
+  "verifierVerdicts": {
+    "PASS": 30,
+    "FAIL": 2
+  },
+  "timeouts": 0,
+  "sourceEmbeddingCalls": {
+    "sourceCheck": 1,
+    "b1": 1,
+    "openings": 1,
+    "stateful": 0,
+    "negotiation": 0,
+    "total": 3
+  },
+  "receiptBackedRecovery": 1,
+  "actualNoTextTurns": 3,
+  "codeCheckoutTextTurns": 2,
+  "fallbackRate": 0.07692307692307693,
+  "handoffTerminalRate": 0.10256410256410256,
+  "noSendTerminalRate": 0.05128205128205128,
+  "actualReportedModels": {
+    "owner": [
+      "gemini-3.5-flash-lite"
+    ],
+    "verifier": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "rawFileCount": 64,
+  "secretPatternHits": 0,
+  "temporaryDatabasesCreated": 4,
+  "temporaryDatabasesDropped": 4,
+  "bankControlChecks": 32
+}
