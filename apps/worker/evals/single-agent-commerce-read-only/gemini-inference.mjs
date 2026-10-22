@@ -5,6 +5,13 @@ import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema} from '@la
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
+export function publicTurnTime(value){
+ if(value===undefined)return undefined; // Older captures have no processing anchor; never infer one from a fact.
+ requireThat(value&&typeof value.processingAt==='string'&&value.processingAt.length===24&&
+  Number.isFinite(Date.parse(value.processingAt))&&new Date(value.processingAt).toISOString()===value.processingAt&&
+  value.timeZone==='Asia/Ho_Chi_Minh','TURN_TIME');
+ return {processingAt:value.processingAt,timeZone:value.timeZone};
+}
 export const OWNER_REQUEST_MAX_BYTES=65536;
 export const OWNER_IMAGE_BOUNDS={count:2,maxBytes:512*1024,maxRequestBytes:1507328};
 const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
@@ -177,7 +184,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  ownerView.execution={availableTools:declarations.map(d=>d.name),toolsAllowed:request.toolsAllowed!==false,
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining}:null};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
-  contents:[{role:'user',parts:[{text:JSON.stringify({trusted:ownerView})}]},...contents],
+  contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView})}]},...contents],
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  const requestBytes=bytes(body);

@@ -43,6 +43,26 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('owner wire includes bounded turn metadata, not private fields or mutable fact identity',()=>{
+ const r=request();r.turnTime={processingAt:'2026-10-22T17:05:00.000Z',timeZone:'Asia/Ho_Chi_Minh',private:'NEVER_FORWARD'};
+ const text=buildGeminiCommerceRequest(r).contents[0].parts[0].text;
+ assert.deepEqual(JSON.parse(text).turnTime,{processingAt:r.turnTime.processingAt,timeZone:r.turnTime.timeZone});
+ assert.doesNotMatch(text,/NEVER_FORWARD/);
+ for(const turnTime of [{...r.turnTime,processingAt:'not a date'},{...r.turnTime,timeZone:'invented'}])
+  assert.throws(()=>buildGeminiCommerceRequest({...r,turnTime}),/TURN_TIME/);
+});
+
+test('native effect projection keeps each historical quote after dropping the full cart',()=>{
+ const r=request(),first={cartId:'cart',cartVersion:1,grandTotalVnd:524000},second={...first,cartVersion:2,grandTotalVnd:499000};
+ r.context.state.cartQuote=second;
+ r.contents=[{role:'user',parts:[{functionResponse:{name:'add_to_cart',response:{status:'OK',data:{cart:{secret:'DO_NOT_EXPOSE'},cartItems:[],cartQuote:first}}}}]},
+  {role:'user',parts:[{functionResponse:{name:'record_negotiation',response:{status:'OK',data:{cart:{secret:'DO_NOT_EXPOSE'},cartItems:[],cartQuote:second}}}}]}];
+ const before=JSON.stringify(r),b=buildGeminiCommerceRequest(r);
+ assert.deepEqual(b.contents[1].parts[0].functionResponse.response.data.cartQuote,first);
+ assert.deepEqual(b.contents[2].parts[0].functionResponse.response.data.cartQuote,second);
+ assert.doesNotMatch(JSON.stringify(b),/DO_NOT_EXPOSE/);assert.equal(JSON.stringify(r),before);
+});
+
 test('only bound catalog image bytes reach native inlineData; evaluator fields and arbitrary media do not',()=>{
  const r=request(),data=Buffer.from('synthetic-public-catalog-bytes').toString('base64'),sha256=createHash('sha256').update(Buffer.from(data,'base64')).digest('hex');
  r.availableTools=['view_product_media'];r.context.boundSubjects=[{kind:'PRODUCT',ref:'P1',label:'Mẫu'}];

@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import assert from 'node:assert/strict';
-import {createGeminiCommerceInference,buildGeminiCommerceRequest} from './gemini-inference.mjs';
+import {createGeminiCommerceInference,buildGeminiCommerceRequest,publicTurnTime} from './gemini-inference.mjs';
 import {validateProtocol,createCommerceVerifier,buildVerifierRequest,sha256} from './protocol.mjs';
 
 export const selectAdviceCapture=rows=>{const dispatched=rows.filter(r=>r.providerRequests>0);return dispatched.find(r=>r.toolsAllowed===false)??dispatched.at(-1)??null;};
@@ -31,6 +31,7 @@ export function buildAdviceOwnerRequest(row,capture,instructions,requestId,signa
   instructions=row.ownerInstructions;
  }
  return {generationId:requestId+':owner:1',instructions,
+  turnTime:capture.capturedAt===undefined?undefined:publicTurnTime({processingAt:capture.capturedAt,timeZone:'Asia/Ho_Chi_Minh'}),
   contents:[...row.runtime.history.map(h=>({role:h.role==='customer'?'user':'model',parts:[{text:h.text}]})),{role:'user',parts:[{text:row.runtime.latest}]}],
   context:adviceOwnerContext(capture.context,row.ownerDescriptions),toolsAllowed:false,availableTools:[],toolBudget:{roundsRemaining:0,callsRemaining:0},signal};
 }
@@ -64,7 +65,7 @@ async function main(){
     let response={kind:'PROVIDER_ERROR'};
     const verificationStarted=performance.now();
     if(!problem){
-     const vr={generationId:requestId+':verifier:1',instructions:verifierPrompt,finalDraft:draft,trusted,latest:row.runtime.latest,history:row.runtime.history,binding,signal:controller.signal};
+     const vr={generationId:requestId+':verifier:1',instructions:verifierPrompt,finalDraft:draft,trusted,latest:row.runtime.latest,history:row.runtime.history,binding,turnTime:request.turnTime,signal:controller.signal};
      audit(vr.generationId,'VERIFIER_REQUEST',buildVerifierRequest(m,vr));
      try{const v=await verify(vr);generations.push({role:'verifier',status:'OK',telemetry:v.telemetry});response={kind:'VERDICT',binding,result:v.result};}
      catch(e){generations.push({role:'verifier',status:'ERROR',telemetry:e.telemetry??null});response={kind:'PROVIDER_ERROR'};}

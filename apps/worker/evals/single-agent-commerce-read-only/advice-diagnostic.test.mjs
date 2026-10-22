@@ -19,6 +19,14 @@ test('pre-dispatch failures cannot become advice captures',()=>{
  assert.equal(selectAdviceCapture([failed]),null);
 });
 
+test('diagnostic replays the captured processing time, not today or a source fact timestamp',()=>{
+ const capturedAt='2026-10-22T16:59:59.000Z',c=publicContext();
+ const req=advice.buildAdviceOwnerRequest({runtime:{history:[],latest:'Thứ Sáu có kịp không em?'}},{context:c,capturedAt},'Prompt chung','r',new AbortController().signal);
+ assert.deepEqual(req.turnTime,{processingAt:capturedAt,timeZone:'Asia/Ho_Chi_Minh'});
+ assert.equal(Object.hasOwn(req.context,'turnTime'),false);
+ assert.deepEqual(req.context,c);
+});
+
 const publicContext=()=>({boundSubjects:[{ref:'P1',kind:'PRODUCT',label:'Áo An'}],protectedClaims:[],policyLiterals:[],effectReceipts:[],
  runtimeProducts:[{ref:'product:P1',subjectRef:'P1',content:{productName:'Áo An',description:'Áo cotton tay dài. Nét thanh lịch tạo nên tổng thể thanh lịch.',metadata:{sourceVersion:'v1'}},
   presentation:{displayName:'Áo An',variants:[{variantId:'P1-M',size:'M',color:'BE'}]}},{ref:'product:P2',subjectRef:'P2',content:{description:'Váy hai lớp.'}}],

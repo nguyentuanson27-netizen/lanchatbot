@@ -8,6 +8,13 @@ const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url
 const request=()=>({generationId:'turn:verifier:1',instructions:'Kiểm reply.',finalDraft:'Dạ chị.',
  trusted:{boundSubjects:[],protectedClaims:[],policyLiterals:[],effectReceipts:[],runtimeProducts:[],state:{}},
  latest:'Em ơi',history:[],binding:{requestId:'turn'},signal:new AbortController().signal});
+
+test('verifier receives the same bounded turn time outside trusted facts',()=>{
+ const r=request();r.turnTime={processingAt:'2026-10-22T17:05:00.000Z',timeZone:'Asia/Ho_Chi_Minh',private:'NEVER_FORWARD'};
+ const projected=JSON.parse(buildVerifierRequest(manifest,r).input[0].content[0].text);
+ assert.deepEqual(projected.turnTime,{processingAt:r.turnTime.processingAt,timeZone:r.turnTime.timeZone});
+ assert.deepEqual(projected.trusted,r.trusted);assert.doesNotMatch(JSON.stringify(projected),/NEVER_FORWARD/);
+});
 test('explicit dispatch ranges partition the twenty-four registered slots without retries or hidden selection',()=>{
  assert.deepEqual(dispatchRange(),{first:1,last:24});
  assert.deepEqual(dispatchRange('1:8'),{first:1,last:8});
