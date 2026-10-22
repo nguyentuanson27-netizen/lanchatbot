@@ -77,13 +77,13 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         if(catalogImages().length-(viewed.get(key)?.images.length??0)+assets.length>COMMERCE_VISION_BOUNDS.count)return {status:"REJECTED",reason:"VISION_BOUND"};
         const images:CommerceCatalogImage[]=[];
         for(const asset of assets){
-          let bytes=Buffer.from(await downloader.download(asset.url,new AbortController().signal));
+          let bytes:Buffer=Buffer.from(await downloader.download(asset.url,new AbortController().signal));
           // Existing registry IMAGE_HASH is reconciliation metadata; the publisher permits CDN re-encoding.
           const downloadSha256=createHash("sha256").update(bytes).digest("hex");
           const dimensions=readImageDimensions(bytes);
           if(!dimensions||Math.max(dimensions.width,dimensions.height)>COMMERCE_VISION_BOUNDS.maxSourceDimension||Math.min(dimensions.width,dimensions.height)<1||
             dimensions.width*dimensions.height>COMMERCE_VISION_BOUNDS.maxSourcePixels)throw new Error("MEDIA_DIMENSION_BOUND");
-          let mimeType=bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))?"image/png":
+          let mimeType:CommerceCatalogImage["mimeType"]|null=bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))?"image/png":
             bytes[0]===255&&bytes[1]===216?"image/jpeg":bytes.subarray(0,4).toString()==="RIFF"&&bytes.subarray(8,12).toString()==="WEBP"?"image/webp":null;
           if(!mimeType)throw new Error("MEDIA_MIME_INVALID");
           if(Math.max(dimensions.width,dimensions.height)>COMMERCE_VISION_BOUNDS.maxDimension||bytes.length>COMMERCE_VISION_BOUNDS.maxBytes){
