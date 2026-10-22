@@ -7,8 +7,8 @@
 - [x] Sửa theo review độc lập: giữ negotiation tier/ledger khi reprice; tách N3b chưa giải terminal-focus trong2tool rounds; clarify active single-field checkout và public history projection; bỏ dependency giả, thêm batch-attachment linkage test design.
 - [x] Chỉnh12journeys từ44xuống32inbound slots: bỏ chọn lại, correction/mutation dày; giữ kiểm kỹ thuật riêng, không gold bot replies; tách runtime/evaluator, source/setup prerequisites và dependent-turn rules.4private-fixture slots chưa materialize; media fixtures chưa cấp bytes/source hash.
 - [x] Thêm offline corpus/projection checks; command gồm sales-journeys/protocol/gemini-inference tests:68PASS,0generation. Không nhận đây là runtime RED→GREEN hoặc model-run evidence.
-- [ ] N1: Checkout theo field đang chờ trước public model/history; partial/correction/cancel tests; không PII leakage hoặc ghi nhầm câu hỏi thành tên.
-- [ ] N2: Đọc bounded30 candidate rows, lọc rồi giữ tối đa8 public messages/4.096 byte; kiểm accepted-history/longer conversations, không summary/memory mới.
+- [ ] N1: IMPLEMENTED_FOCUSED_PASS — private pending intake/single-field, partial/question/pause/resume, captured zero model calls/null history; real-DB acceptance còn pending. [Evidence](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md).
+- [ ] N2: IMPLEMENTED_FOCUSED_PASS — bounded30→filter8/4.096byte, captured history/latest identity; longer DB journeys còn pending.106focused tests/typecheck PASS cho N1/N2, không model run.
 - [ ] N3a: Readback focus qua lượt/caller và adsContext→verified catalog refs; nhiều mẫu/chuyển mẫu không bind nhầm hoặc sửa giỏ ngầm.
 - [ ] N3b: RED search→read→final choice→next-turn; chốt contract terminal-focus trong2tool rounds mà không semantic object/generation mới. Chưa thiết kế xong thì không thêm select_product_context hoặc chặn các slice độc lập.
 - [ ] N4: Native bounded asset selection và TEXT+IMAGE Outbox qua gate hiện hữu; đúng product/component/source, thiếu ảnh không thay bừa, BANK QR regression.

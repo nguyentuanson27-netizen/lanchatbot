@@ -91,6 +91,8 @@ const PREVIEW_TTL_MS = 30 * 60 * 1_000;
 const MAX_CHECKOUT_CLARIFICATION_ATTEMPTS = 3;
 
 export interface RealtimeSalesCycleInput {
+  /** Candidate code-owned intake; does not change the legacy multi-field path. */
+  readonly checkoutCollection?: "SINGLE_FIELD";
   /** Optional code-only binding for the isolated native-tool caller. All existing readiness checks still run. */
   readonly commandIdentity?: { readonly primaryCommandId: string; readonly primarySuffix: string;
     readonly cartIdentity?: import("@lana/business-tools").CanonicalCartIdentityV2; readonly cartExpiresAt?: string; readonly cartLineId?: string };
@@ -536,7 +538,14 @@ function modelPaymentMethod(
 export function checkoutDetails(
   text: string,
   salesSignals: AgentSalesSignalsV1 | null | undefined,
+  pendingField?: CheckoutFieldKey,
 ): CheckoutDetails {
+  const bare = text.normalize("NFC").trim();
+  // Field syntax only, not a general-language intent/name extractor. Ambiguous replies stay private.
+  const bareName = pendingField === "FULL_NAME" && bare.length >= 2 && bare.length <= 160 &&
+    /^\p{Lu}[\p{L}\p{M}'’-]*(?:\s+\p{Lu}[\p{L}\p{M}'’-]*){0,5}$/u.test(bare) ? bare : undefined;
+  const bareAddress = pendingField === "ADDRESS" && bare.length >= 8 && bare.length <= 1000 &&
+    /^\d[\p{L}\p{M}\p{N}\s,./’-]+$/u.test(bare) ? bare : undefined;
   const extracted = salesSignals?.checkoutExtraction;
   const phone = labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
@@ -548,10 +557,10 @@ export function checkoutDetails(
       : modelPaymentMethod(text, extracted?.paymentMethod);
   const fullName =
     labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]) ??
-    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME");
+    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME") ?? bareName;
   const address =
     labeledValue(text, ["địa chỉ", "dia chi", "đ/c", "dc"]) ??
-    modelCheckoutValue(text, extracted?.address, "ADDRESS");
+    modelCheckoutValue(text, extracted?.address, "ADDRESS") ?? bareAddress;
   return {
     ...(fullName ? { fullName } : {}),
     ...(phone ? { phone } : {}),
@@ -1419,11 +1428,12 @@ export async function evaluateRealtimeSalesCycle(
     capturedFields: readonly CheckoutFieldKey[] = [],
     nativeCommandId?: string,
   ): RealtimeSalesCycleOutput => {
+    const asked = input.checkoutCollection === "SINGLE_FIELD" ? missing.slice(0, 1) : missing;
     const productId = input.productId ?? state.cart?.value.lines.at(-1)?.parentProductId ?? null;
     const previous = state.clarification ?? null;
     const sameRequest = previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       previous.productId === productId &&
-      sameMissingFields(previous.missingFields, missing);
+      sameMissingFields(previous.missingFields, asked);
     const attemptCount = sameRequest ? previous.attemptCount + 1 : 1;
     if (attemptCount > MAX_CHECKOUT_CLARIFICATION_ATTEMPTS) {
       return {
@@ -1440,12 +1450,14 @@ export async function evaluateRealtimeSalesCycle(
         },
       };
     }
-    const message = clarificationMessage(missing, attemptCount);
+    const message = input.checkoutCollection === "SINGLE_FIELD"
+      ? `${attemptCount === 1 ? "Chị cho em" : attemptCount === 2 ? "Chị gửi riêng" : "Em còn cần"} ${CHECKOUT_FIELD_LABELS[asked[0]!]} nhé.`
+      : clarificationMessage(missing, attemptCount);
     const requested = apply({
       kind: "CLARIFICATION_REQUESTED",
       commandId: nativeCommandId ?? commandId(`clarification-${attemptCount}`),
       reasonCode: "CHECKOUT_DETAILS_MISSING",
-      missingFields: missing,
+      missingFields: asked,
       productId,
       questionFingerprint: clarificationFingerprint(message),
       maxAttempts: MAX_CHECKOUT_CLARIFICATION_ATTEMPTS,
@@ -1474,6 +1486,14 @@ export async function evaluateRealtimeSalesCycle(
       },
     };
   };
+
+  if (input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      ["CART_OPEN", "ORDER_PREVIEW"].includes(state.stage) && classifyConfirmationContract(input.text, null).decision === "REJECT") {
+    const resolved = apply({kind:"CLARIFICATION_RESOLVED",commandId:commandId("checkout-paused")});
+    if (resolved.status !== "APPLIED") return failedOutput("CLARIFICATION_RESOLVE_REJECTED");
+    return {handled:true,messages:[{kind:"TEXT",text:"Dạ, khi nào đặt chị nhắn em nhé."}],plan:plan(),
+      transferToHuman:false,desiredTag:null,reasonCode:"CHECKOUT_PAUSED",telemetry:{clarificationCase:true}};
+  }
 
   if (
     state.stage === "PURCHASE_CONFIRMED" &&
@@ -1926,7 +1946,9 @@ export async function evaluateRealtimeSalesCycle(
         : { ...reply, wordingAuthority: "MODEL" };
     }
 
-    const details = checkoutDetails(input.text, input.salesSignals);
+    const pending = input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      state.clarification.missingFields.length === 1 ? state.clarification.missingFields[0] as CheckoutFieldKey : undefined;
+    const details = checkoutDetails(input.text, input.salesSignals, pending);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
       const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };

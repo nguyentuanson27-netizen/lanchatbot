@@ -5,7 +5,7 @@ import type { RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
 import { runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine } from "./single-agent-commerce.test-support.js";
-import type { OwnerGeneration } from "./single-agent-commerce-read-only.js";
+import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionResult } from "./realtime-sales-catalog.js";
 
 function fixture(productIds = ["SM613"]) {
@@ -32,20 +32,58 @@ function fixture(productIds = ["SM613"]) {
   const inbox = { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} };
   const policy = vi.fn(() => fixturePolicy());
   const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
-  const run = (owner: () => Promise<OwnerGeneration> = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
+  const history = {recordInboundCustomerMessage: vi.fn(async () => {}), listConversationHistory: vi.fn(async () => [] as unknown[])};
+  const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
-    history: { recordInboundCustomerMessage: async () => {}, listConversationHistory: async () => [] }, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
+    history, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => null, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; },
     transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+it("fills the public history window after private rows without duplicating the latest batch", async () => {
+  const f = fixture();
+  const publicRows = Array.from({length:8},(_,i)=>({senderType:i%2 ? "BOT" : "CUSTOMER",text:`Tin công khai ${i}`}));
+  const rows = [...publicRows,...Array.from({length:22},()=>({senderType:"CUSTOMER",text:"[PII_REDACTED_MESSAGE]"}))];
+  f.history.listConversationHistory.mockImplementation(async (...args: unknown[]) => rows.slice(-(args[1] as {limit:number}).limit));
+  let captured: OwnerRequest | undefined;
+  await f.run(async request => {captured = request; return {kind:"FINAL",text:"Dạ chị."};});
+  expect(f.history.listConversationHistory).toHaveBeenCalledWith(commerceScope().conversationId,{before:commerceNow,limit:30});
+  expect(captured!.contents.slice(0,-1).map(m=>m.parts[0]!.text)).toEqual(publicRows.map(r=>r.text));
+  expect(captured!.contents.at(-1)!.parts[0]!.text).toBe(f.message.text);
+  expect(JSON.stringify(captured!)).not.toContain("[PII_REDACTED_MESSAGE]");
+});
+
+it.each(["Nguyễn Thị Lan", "Khoan, áo này giặt máy được không em?"])("keeps pending checkout input private before history or either model (%s)", async text => {
+  const f = fixture(), scope = commerceScope(), resolution = await fixturePolicy(), policy = resolution.bundle!.policy;
+  f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});
+  let state = createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
+  for (const kind of ["FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED"] as const)
+    state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now:commerceNow}).state;
+  const draft = {identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+    lines:[fixtureCartLine()],shopId:scope.shopId,policyRef:{id:policy.policyBundleId,version:policy.policyVersion,contentHash:computeBusinessContentHash(policy)}};
+  state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
+    expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
+    trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
+  state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"asked",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],
+    productId:"SM613",questionFingerprint:"f".repeat(64),maxAttempts:3},now:commerceNow}).state;
+  f.setCycle(state); f.message.text = text;
+  const owner = vi.fn(async (): Promise<OwnerGeneration> => ({kind:"FINAL",text:"This must not run"}));
+  expect(await f.run(owner)).toMatchObject({mode:"PRIVATE_CODE_PATH",enqueued:1});
+  expect(owner).not.toHaveBeenCalled(); expect(f.verifier).not.toHaveBeenCalled();
+  expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:null}));
+  expect(f.history.listConversationHistory).not.toHaveBeenCalled();
+  const prepared = f.commit.mock.calls.at(-1)![1];
+  expect(prepared.salesCyclePlan?.state).toMatchObject({checkoutDraft:text.startsWith("Nguyễn") ? {fullName:text} : null});
+  expect(JSON.stringify(prepared.metaPlan?.messages)).not.toContain(text);
+});
 
 it("starts the independent generation read while current authority is being loaded", async () => {
   const f = fixture(), load = f.store.loadOrCreate;

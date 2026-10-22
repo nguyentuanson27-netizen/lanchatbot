@@ -94,14 +94,17 @@ export async function runPersistedCommerceIngress(input: {
     return { ...scope, state: row.state, stateVersion: row.stateVersion, fence: input.fence,
       bindingVersion: `commerce:${generation}:${scope.recipient}`, permission: row.state.conversationOwner === "BOT" };
   };
-  for (const m of messages) await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
-    customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey, text: isPrivateCommerceText(m.text ?? "") ? null : m.text,
-    occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
   const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
     store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
     productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })) });
+  const pendingCheckout = await executor.privateCheckoutPending();
+  const privateInput = pendingCheckout || isPrivateCommerceText(latest);
+  for (const m of messages) await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
+    customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey,
+    text: privateInput || isPrivateCommerceText(m.text ?? "") ? null : m.text,
+    occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
   const policyBundle = async () => { const r = await input.policy(); if (!r.bundle) throw new Error("POLICY_UNAVAILABLE"); return r.bundle; };
-  if (isPrivateCommerceText(latest)) {
+  if (privateInput) {
     const privateResult = await executor.advancePrivateCheckout();
     if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
@@ -134,7 +137,7 @@ export async function runPersistedCommerceIngress(input: {
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
     handoff: { ...handoff, policy: policyBundle } });
-  const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 8 });
+  const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
   const history = commerceHistory(rows);
   const result = await runCommerceTurn({ scope, tools, latest, history, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
   // Reuse the bounded current readback before creating Outbox eligibility; no second model or reply rewrite.

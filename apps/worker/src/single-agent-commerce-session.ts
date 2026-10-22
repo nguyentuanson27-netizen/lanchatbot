@@ -37,6 +37,7 @@ export function createPersistedCommerceExecutor(input: {
   };
   const source = (state: SalesCycleRuntimeState, authority: HandoffAuthority, policyResolution: RuntimePolicyResolution) => ({
     pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash, state, stateRevision: state.revision,
+    checkoutCollection: "SINGLE_FIELD" as const,
     conversationRevision: authority.stateVersion, text: input.latest, messageId: scope.sourceMessageId, eventKey: scope.sourceMessageId,
     senderId: scope.customerHash, occurredAt: scope.sourceObservedAt!, attachmentIds: [], productId: state.cart?.value.lines[0]?.parentProductId ?? null,
     offerType: null, size: null, color: null, shopAlias: scope.shopAlias, policyResolution, facts: input.facts, ...(input.productNames ? { productNames: input.productNames } : {}), now: input.clock(), effectNow: input.clock,
@@ -52,7 +53,7 @@ export function createPersistedCommerceExecutor(input: {
     const messages = terminal ? output.messages : [];
     const tag = transfer ? output.desiredTag ?? "NHAN_VIEN" : null, tagId = tag ? input.resolveTagId(tag) : null;
     if (tag && !tagId) throw new Error("HANDOFF_TAG_UNAVAILABLE");
-    const clarification = output.reasonCode === "CHECKOUT_DETAILS_MISSING" && output.telemetry?.clarificationCase === true;
+    const clarification = ["CHECKOUT_DETAILS_MISSING", "CHECKOUT_PAUSED"].includes(output.reasonCode ?? "") && output.telemetry?.clarificationCase === true;
     if (messages.length && (!input.deliveryRecipient || (!output.protectedOutbound && !clarification))) throw new Error("PRIVATE_DELIVERY_ROUTE_REQUIRED");
     // Same final-payload binding as realtime-runner: a planner readiness is not yet a Meta envelope.
     const original = output.protectedOutbound?.readiness, cart = output.plan.state.cart?.value;
@@ -83,6 +84,11 @@ export function createPersistedCommerceExecutor(input: {
     });
   }
   return { repository, outboxCount: () => outboxMessages, readReceipt: createPersistedCommerceReceiptReader({ store: input.store, repository, scope, conversationKey: scope.conversationId }),
+    async privateCheckoutPending() {
+      const current = await repository.read(scope.conversationId);
+      return !!current && ["CART_OPEN", "ORDER_PREVIEW"].includes(current.stage) &&
+        current.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING";
+    },
     async executeCommand(call: CommandInput): Promise<CommerceCommandResult> {
       const authority = await input.readAuthority();
       if (!matches(authority) || authority.stateVersion !== call.conversationRevision || call.bindingVersion !== scope.bindingVersion) return { status: "REJECTED", reasonCode: "CURRENT_AUTHORITY_CHANGED" };

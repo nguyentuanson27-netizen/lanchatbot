@@ -28,7 +28,7 @@ describe("persisted native commerce session", () => {
       messages.push(prepared.metaPlan.messages[0].text);
       return {stateCommitted:true,metaOutboxCreated:1,handoffEventCreated:false,pancakeTagOutboxCreated:false};
     });
-    const executor = (latest:string) => createPersistedCommerceExecutor({scope,clock:()=>commerceNow,latest,
+    const executor = (latest:string, sourceMessageId = scope.sourceMessageId) => createPersistedCommerceExecutor({scope:{...scope,sourceMessageId},clock:()=>commerceNow,latest,
       facts:{resolveCartSelection:async()=>{throw new Error("NO_PRODUCT_READ_FOR_INTAKE");}} as never,
       policy:async()=>({...fixture,mayAffectOutbound:true,bundle:{...fixture.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}}),
       readAuthority:async()=>({...scope,stateVersion:conversation.revision,fence:1,state:conversation}),
@@ -38,16 +38,28 @@ describe("persisted native commerce session", () => {
     const call = {command:{kind:"CONFIRM_PURCHASE" as const,commandId:"invite",intent:{source:"MODEL_STRUCTURED_OUTPUT" as const,intent:"PURCHASE_CONFIRMATION" as const,sourceMessageId:scope.sourceMessageId}},
       expectedRevision:state.revision,conversationRevision:conversation.revision,bindingVersion:scope.bindingVersion,trustedPorts:ports,policy:fixture.bundle!};
     expect(await start.executeCommand(call)).toMatchObject({status:"CHECKOUT_REQUESTED"});
-    expect(messages[0]).toContain("tên người nhận"); expect(messages[0]).toContain("địa chỉ");
+    expect(messages[0]).toContain("tên người nhận"); expect(messages[0]).not.toContain("địa chỉ");
+    expect(state.clarification?.missingFields).toEqual(["FULL_NAME"]);
     expect(state.confirmation).toBeNull(); expect(state.preview).toBeNull();
     expect(state.cart!.value.lines).toEqual(draft.lines);
     await start.executeCommand({...call,expectedRevision:state.revision,conversationRevision:conversation.revision});
     expect(messages).toHaveLength(1);
-    const partial=await executor("Tên: Khách thử nghiệm").advancePrivateCheckout();
+    const partial=await executor("Nguyễn Thị Lan").advancePrivateCheckout();
     expect(partial).toEqual({committed:true,messages:1});
-    expect(state.checkoutDraft?.fullName).toBe("Khách thử nghiệm");
-    expect(messages[1]).not.toContain("tên người nhận"); expect(messages[1]).not.toContain("Khách thử nghiệm");
-    expect(messages[1]).toContain("địa chỉ"); expect(state.confirmation).toBeNull();
+    expect(state.checkoutDraft?.fullName).toBe("Nguyễn Thị Lan");
+    expect(messages[1]).not.toContain("tên người nhận"); expect(messages[1]).not.toContain("Nguyễn Thị Lan");
+    expect(messages[1]).toContain("số điện thoại"); expect(state.confirmation).toBeNull();
+    await executor("Khoan, áo này giặt máy được không em?", "question").advancePrivateCheckout();
+    expect(state.checkoutDraft?.fullName).toBe("Nguyễn Thị Lan");
+    expect(state.checkoutDraft?.phone).toBeNull();
+    await executor("Đừng chốt đơn nữa nhé", "pause").advancePrivateCheckout();
+    expect(state.clarification).toBeNull();
+    expect(state.cart!.value.lines).toEqual(draft.lines);
+    const resumed = await executor("Chốt đơn cho chị nhé", "resume").executeCommand({...call,
+      command:{...call.command,commandId:"resume",intent:{...call.command.intent,sourceMessageId:"resume"}},
+      expectedRevision:state.revision,conversationRevision:conversation.revision});
+    expect(resumed).toMatchObject({status:"CHECKOUT_REQUESTED"});
+    expect(state.clarification?.missingFields).toEqual(["PHONE"]);
   });
   it("binds the configured POS alias to canonical shop identity while preserving exact source evidence", async () => {
     const line = fixtureCartLine(); line.priceAuthority!.shopId = "LANA";
