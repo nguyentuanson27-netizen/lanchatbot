@@ -4,12 +4,16 @@ import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TerminalOu
 import type { CommerceScope, CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 
 export interface NativeContent { role: "user" | "model"; parts: Record<string, unknown>[] }
+/** Request metadata, never part of the mutable world/fact snapshot. */
+export interface CommerceTurnTime { processingAt: string; timeZone: "Asia/Ho_Chi_Minh" }
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
+  turnTime?: CommerceTurnTime;
   catalogImages?: readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   toolBudget: { roundsRemaining: number; callsRemaining: number }; availableTools?: readonly string[]; signal: AbortSignal }
 export interface VerifierRequest { generationId: string; instructions: string; finalDraft: string; trusted: TrustedContext;
+  turnTime?: CommerceTurnTime;
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
@@ -36,6 +40,7 @@ export async function runCommerceTurn(input: {
   owner: (request: OwnerRequest) => Promise<OwnerGeneration>;
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
 }) {
+  const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
@@ -94,7 +99,7 @@ export async function runCommerceTurn(input: {
       return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
     }
     const id = `${input.scope.requestId}:owner:${index + 1}`;
-    const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context,
+    const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, turnTime,
       ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
@@ -137,7 +142,7 @@ export async function runCommerceTurn(input: {
     try {
       const result = await generate("verifier", verifyId, signal => input.verifier({ generationId: verifyId,
         instructions: input.verifierPrompt, finalDraft: output.text, trusted, latest: input.latest,
-        history: structuredClone(input.history), binding, signal }));
+        history: structuredClone(input.history), binding, turnTime, signal }));
       response = { kind: "VERDICT" as const, binding, result: result.result };
     } catch { response = { kind: generations.at(-1)!.status === "TIMEOUT" ? "TIMEOUT" as const : "PROVIDER_ERROR" as const }; }
     let current: TrustedContext;

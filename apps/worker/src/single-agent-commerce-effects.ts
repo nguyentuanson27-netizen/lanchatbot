@@ -60,6 +60,11 @@ export async function createCommerceEffectTools(input: {
       components: line.components.map(c => ({ componentRole: c.componentRole, size: c.size, color: c.color })),
       ...(selected ? { stockStatus: selected.stockStatus, stockAvailableQuantity: selected.stockAvailableQuantity } : {}) };
   }) ?? [];
+  const cartQuote = () => {
+    const cart = current.cart?.value;
+    return cart ? { cartId: cart.cartId, cartVersion: cart.revision, subtotalVnd: cart.subtotalVnd,
+      shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } : null;
+  };
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     if (!committedTerminal) {
       await refreshAuthority();
@@ -99,8 +104,7 @@ export async function createCommerceEffectTools(input: {
       checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
-      ...(cart ? { cartQuote: { cartId: cart.cartId, cartVersion: cart.revision,
-        subtotalVnd: cart.subtotalVnd, shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } } : {}) },
+      ...(cart ? { cartQuote: cartQuote() } : {}) },
       subjects, products: base.runtimeProducts ?? [], claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
         return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
@@ -202,7 +206,7 @@ export async function createCommerceEffectTools(input: {
         const allowed = call.name==="record_negotiation"?["NEGOTIATION_UPDATED"]:call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
         if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
         await refreshSelections();
-        return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems() } };
+        return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote() } };
       }
       policy = await input.policy();
       publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
@@ -296,7 +300,7 @@ export async function createCommerceEffectTools(input: {
       await refreshSelections();
       if (result?.status === "APPLIED" && result.transferToHuman) committedTerminal = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
-      return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(),
+      return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote(),
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
   }

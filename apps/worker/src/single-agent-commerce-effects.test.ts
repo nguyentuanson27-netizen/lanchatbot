@@ -61,6 +61,25 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("returns the committed bounded quote in each effect response, including duplicates, without rewriting earlier versions", async () => {
+    const s = await setup(), added = await s.tools.invoke(s.add);
+    const quote = (r: typeof added) => (r.data as { cartQuote?: unknown }).cartQuote;
+    const first = structuredClone(quote(added));
+    expect(first).toEqual(s.tools.snapshot().state.cartQuote);
+    expect(first).toBeDefined();
+    const changed = await s.tools.invoke({ name: "record_negotiation", args: { intent: "PRICE_OBJECTION", sourceQuote: "Giá hơi cao" } });
+    expect(quote(changed)).toEqual(s.tools.snapshot().state.cartQuote);
+    expect(quote(changed)).not.toEqual(first);
+    expect(quote(added)).toEqual(first);
+    const duplicate = await s.tools.invoke({ name: "record_negotiation", args: { intent: "PRICE_OBJECTION", sourceQuote: "Giá hơi cao" } });
+    expect(duplicate).toMatchObject({ status: "OK", data: { duplicate: true } });
+    expect(quote(duplicate)).toEqual(quote(changed));
+    s.setFault("BEFORE");
+    const failed = await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: s.current().cart!.value.lines[0]!.lineId, action: "SET_QUANTITY", quantity: 2 } });
+    expect(failed.status).not.toBe("OK");
+    expect(failed.data).toBeUndefined();
+  });
+
   it("recovers the current negotiated discount and total without claiming an additional discount",async()=>{
     const s=await setup();await s.tools.invoke(s.add);
     await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});

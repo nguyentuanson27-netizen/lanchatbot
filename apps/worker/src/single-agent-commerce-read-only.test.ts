@@ -16,6 +16,29 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it("shares a single processing clock with every owner generation and verifier, outside the world snapshot", async () => {
+    const s = setup(), anchors: unknown[] = [], before = s.tools.snapshot();
+    let now = new Date(commerceNow);
+    const outputs = [tool("read_policy"), final("Dạ chị.")];
+    const result = await runCommerceTurn({ ...s, clock: () => now, owner: async r => {
+      anchors.push((r as OwnerRequest & { turnTime?: unknown }).turnTime);
+      now = new Date(now.getTime()+1000);
+      return outputs.shift()!;
+    }, verifier: async r => {
+      anchors.push((r as VerifierRequest & { turnTime?: unknown }).turnTime);
+      expect(Object.hasOwn(r.trusted, "turnTime")).toBe(false);
+      expect(Object.hasOwn(r.trusted.state, "turnTime")).toBe(false);
+      return { result: { verdict: "PASS", violations: [] } };
+    } });
+    expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+    expect(anchors).toHaveLength(3);
+    for (const anchor of anchors) expect(anchor).toEqual({ processingAt: commerceNow.toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
+    expect(before.state.bindingVersion).toBe(s.tools.snapshot().state.bindingVersion);
+    await runCommerceTurn({ ...s, clock: () => now, owner: async r => {
+      expect((r as OwnerRequest & { turnTime?: unknown }).turnTime).toEqual({ processingAt: now.toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
+      return final("Dạ chị.");
+    } });
+  });
   it("prepares after privacy and permission checks and charges one call before the first owner", async () => {
     const s = setup();
     const owner = vi.fn(async (r: OwnerRequest) => {
