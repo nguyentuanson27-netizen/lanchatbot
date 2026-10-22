@@ -25,3 +25,11 @@ export function registerJourneyOpenings(corpus,purposes){
  assert.equal(samples.length,purposes.length,'UNKNOWN_PURPOSE');
  return {samples,deferred};
 }
+export function registerNegotiationProbe(corpus,baseline){
+ const opening=baseline.find(c=>c.caseId==='stateful-open'),objection=corpus.journeys.find(j=>j.purposeId==='J07')?.turns[0];
+ assert(opening&&objection,'NEGOTIATION_SOURCE_CASES');
+ const journeyId='negotiation-companion';
+ return [{...structuredClone(opening),caseId:'negotiation-cart-setup',journeyId},
+  {caseId:'negotiation-price-objection',journeyId,runtime:{latest:journeyMessages(objection).map(m=>m.text??'').join('\n'),initialProductCodes:['SV2447']},evaluator:{requiresCurrentCart:true,purpose:'One source-bound PRICE_OBJECTION; only current code quote is authorized.'}},
+  {caseId:'negotiation-total-control',journeyId,runtime:{latest:'Thế một áo cả ship là bao nhiêu em?',initialProductCodes:['SV2447']},evaluator:{requiresCurrentCart:true,purpose:'Ordinary total question must not add objection evidence or a concession.'}}];
+}

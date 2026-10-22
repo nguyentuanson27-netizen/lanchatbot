@@ -537,7 +537,8 @@ try{
    const latest=c.runtime.privateCheckoutFixture?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':c.runtime.latest;
    let attempt;
    try{
-    if((c.runtime.privateCheckoutFixture||c.caseId==='stateful-confirm')&&!invitationSucceeded)attempt={result:{terminal:{disposition:'NO_SEND',reason:'CHECKOUT_INVITATION_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
+    if(c.evaluator?.requiresCurrentCart&&!(await j.state()).cart)attempt={result:{terminal:{disposition:'NO_SEND',reason:'SETUP_CART_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
+    else if((c.runtime.privateCheckoutFixture||c.caseId==='stateful-confirm')&&!invitationSucceeded)attempt={result:{terminal:{disposition:'NO_SEND',reason:'CHECKOUT_INVITATION_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
     else {attempt=await j.turn(latest,[],c.runtime.messages?{messages:c.runtime.messages}:{});await j.drain();}
     if(c.caseId==='stateful-request-checkout')invitationSucceeded=j.capture.length>capturedBefore&&(await j.state()).clarification?.reasonCode==='CHECKOUT_DETAILS_MISSING';
    }
@@ -546,7 +547,8 @@ try{
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
    const result={caseId:c.caseId,journeyId:c.journeyId,elapsedMs:performance.now()-started,...attempt,
     actualCapturedMessages:j.capture.slice(capturedBefore).map(t=>redactAnalyticsMessage(t).text),
-    committedPublicState:{stage:stored.state.stage,revision:stored.state.revision,cart:stored.state.cart?.value??null,measurements:profile.profile.measurements,customerProfileRevision:profile.profile.revision},
+    committedPublicState:{stage:stored.state.stage,revision:stored.state.revision,cart:stored.state.cart?.value??null,measurements:profile.profile.measurements,customerProfileRevision:profile.profile.revision,
+     negotiation:stored.state.negotiation?{tier:stored.state.negotiation.customerState,version:stored.state.negotiation.stateVersion,objectionEvidenceCount:stored.state.negotiation.consumedObjectionEvidenceIds.length}:null},
     counts:{...providerPorts.counters}};
    writeFileSync(resolve(out,'provider-attempt-'+(index+1)+'.json'),JSON.stringify(result,null,2),{flag:'wx'});
    report.outcomes.push({caseId:c.caseId,disposition:attempt.result.terminal.disposition,captured:result.actualCapturedMessages.length,
