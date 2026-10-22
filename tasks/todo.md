@@ -1,3 +1,15 @@
+## Audit hành trình bán hàng thường ngày — 2026-10-22
+
+**AUDIT_ONLY_COMPLETE**. [Chi tiết](../docs/specs/c3-phase-b-normal-sales-coverage-audit-20261022.md).
+
+- [x] Tách phần đã nối, thành phần có sẵn chưa nối và năng lực chưa có adapter B được xác minh; không nhầm unit tests với model journey.
+- [x] Xác nhận24B1=8purpose×3,15ca seed product sẵn;8stateful có form COD và HUMAN control. Chưa là coverage bán hàng đầy đủ.
+- [x] Xác nhận ảnh vào bị chặn ở ingress, ảnh sản phẩm ra chưa có native tool/egress; QR payment code path đã có.
+- [x] Đối chiếu adsContext, negotiation event, product context bridge, pending checkout/intake và18nhóm case còn thiếu; lưu giới hạn kết luận.
+- [x] Pure privacy probes trên synthetic strings; tên chat tự nhiên chưa vào private code path.0provider generations/0external writes; chưa E2E leak claim.
+- [ ] Phương án triển khai tiếp cần ưu tiên checkout pending-field/privacy và media nhận/gửi theo capability hiện hữu; không sửa bằng regex/third model hoặc bật production.
+- [ ] Bổ sung native journey cho size/multi-item/color/remove/ETA/checkout chat trước khi nhận B đủ chức năng; chưa thêm corpus hoặc đăng ký provider run trong audit.
+
 ## Phương án sau hai vòng gần nhất — 2026-10-22
 
 **PLAN_ONLY**, chưa sửa runtime/prompt hoặc chạy provider. [Chi tiết](../docs/specs/c3-phase-b-two-run-fix-proposal-20261022.md).
