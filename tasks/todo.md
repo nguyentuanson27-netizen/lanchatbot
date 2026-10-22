@@ -1,3 +1,17 @@
+## Phương án sau hai vòng gần nhất — 2026-10-22
+
+**PLAN_ONLY**, chưa sửa runtime/prompt hoặc chạy provider. [Chi tiết](../docs/specs/c3-phase-b-two-run-fix-proposal-20261022.md).
+
+- [x] Đối chiếu36actual outcomes và lỗi hai vòng, giữ historical primary nguyên trạng.
+- [x] Audit71owner requests không có ảnh; đọc metadata source SV2447:11approved records/có source hash, PRIMARY/FRONT/MODEL có sẵn, observedAt=null;0generation/0source writes.
+- [ ] Thống nhất review: trả đúng giá rồi thêm giá phụ là polish; mở lại lựa chọn hoặc thiếu đề xuất hữu ích là lỗi tư vấn. Không đổi historical counts để claim cải thiện.
+- [ ] Chuẩn bị candidate chỉ đổi glossary set sang lời khách hiểu rõ cả bộ, giữ nullable/discovery/domain validation; không thêm tham số/tool gate.
+- [ ] Kiểm bytes/nội dung đúng product/offer của ảnh hiện có, existing media path, official provider input/bounds và freshness/identity phù hợp. Không xây subsystem mới hoặc bịa timestamp.
+- [ ] Nếu khả thi, candidate chỉ thêm ảnh cho owner, giữ exact prompt/verifier và ranh giới protected claims. Không gộp glossary vào phép thử ảnh.
+- [ ] Focused tests cho changed boundaries và các controls hiện hữu; freeze source/config/arms trước generation.
+- [ ] Chỉ khi được triển khai: hai phép thử riêng6giá+12tư vấn=18mẫu,3lần/ca/arm,max72requests theo budget hiện hữu; không retry/best-of, không tools-OFF replay, không nhận đã chạy đủ khi prerequisites ảnh thiếu.
+- [ ] Khóa actual-outcome review trước diagnosis; kiểm toàn lượt về lựa chọn/lý do/giọng/safety. Không tự chạy full B1/B2/B3 hoặc vòng vá tiếp.
+
 ## Phase B explicit-offer/advice observation — 2026-10-21
 
 **FOCUS18_COMPLETE_STOP_BEFORE_FULL**. [Report](../apps/worker/evals/single-agent-commerce-read-only/explicit-offer-focus-20261021/CHECKPOINT_B.md). Implementationb0ff06c4/source219d7737; rawb8104e80→primary2a1756d trước diagnosis. Đủ18mẫu: prior failures2/4/15×3 và9controls×1.13USABLE/5NEEDS_EDIT,18SEND_ELIGIBLE/PASS,0fallback/providererror/timeout/retry;55requests(37owner+18verifier). Hai ca giá đọc null vẫn trả thừa, mẫu đọc SET_VAY trả gọn; công cụ explicit chưa sửa được lựa chọn ngữ nghĩa ổn định. Gu quá điệu2/3 vẫn điều kiện hóa lựa chọn, control gặp khách chưa giải thích nhìn gọn. Policy3/3 không hứa lên đơn; các control partial/source/component/policy-exclusion dùng được.14frozen/37ownerprompts/18bindings/95Gitrawhashes/0labelleaks. POS refresh vẫn giữ exact gate; không gặp stale lần này không phải đã sửa availability.103NodePASS/1optionalSKIP,71runtimePASS/build/lintPASS. Không full B1/B2/B3 hoặc auto fix/run tiếp; A OWNER_BYPASS, chưa liveGO.
