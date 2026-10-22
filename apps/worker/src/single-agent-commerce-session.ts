@@ -23,6 +23,8 @@ export function createPersistedCommerceExecutor(input: {
   /** Private provider recipient is supplied by code and never added to a model projection. */
   deliveryRecipient?: string;
   productNames?: RealtimeSalesCycleInput["productNames"];
+  attachmentIds?: readonly string[];
+  handoffSource?: () => {eventKey:string;messagePk:string;attachmentCount:number} | undefined;
 }) {
   const { scope } = input;
   let outboxMessages = 0;
@@ -39,7 +41,7 @@ export function createPersistedCommerceExecutor(input: {
     pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash, state, stateRevision: state.revision,
     checkoutCollection: "SINGLE_FIELD" as const,
     conversationRevision: authority.stateVersion, text: input.latest, messageId: scope.sourceMessageId, eventKey: scope.sourceMessageId,
-    senderId: scope.customerHash, occurredAt: scope.sourceObservedAt!, attachmentIds: [], productId: state.cart?.value.lines[0]?.parentProductId ?? null,
+    senderId: scope.customerHash, occurredAt: scope.sourceObservedAt!, attachmentIds: input.attachmentIds ?? [], productId: state.cart?.value.lines[0]?.parentProductId ?? null,
     offerType: null, size: null, color: null, shopAlias: scope.shopAlias, policyResolution, facts: input.facts, ...(input.productNames ? { productNames: input.productNames } : {}), now: input.clock(), effectNow: input.clock,
   });
   const matches = (a: HandoffAuthority) => a.pageId === scope.pageId && a.customerHash === scope.customerHash && a.conversationId === scope.conversationId &&
@@ -72,7 +74,9 @@ export function createPersistedCommerceExecutor(input: {
       inboxBatchGuard: input.inboxBatchGuard, completeInboxBatch: terminal,
       ...(tag && tagId ? { pancakeTagPlan: { desiredTag: tag, tagId, handoffGeneration: next.revision }, handoffEventPlan: {
         source: "BOT_POLICY" as const, reasonCode: output.reasonCode ?? "DEPENDENCY_FAILURE", productId: output.plan.state.cart?.value.lines[0]?.parentProductId ?? null,
-        factsStatus: null, factsReasonCode: null, desiredTag: "NHAN_VIEN" as const, handoffGeneration: next.revision, triggerEventKey: scope.sourceMessageId, triggerMessagePk: null, occurredAt: now } } : {}),
+        reasonDetailSafe: {attachmentCount:input.handoffSource?.()?.attachmentCount ?? 0},
+        factsStatus: null, factsReasonCode: null, desiredTag: "NHAN_VIEN" as const, handoffGeneration: next.revision,
+        triggerEventKey: input.handoffSource?.()?.eventKey ?? scope.sourceMessageId, triggerMessagePk: input.handoffSource?.()?.messagePk ?? null, occurredAt: now } } : {}),
       ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: input.deliveryRecipient!, messages,
         sourceMessageIdHash: output.plan.sourceMessageIdHash!, protectedClaimTypes: output.protectedOutbound?.claimTypes ?? [],
         protectedClaims: output.protectedOutbound?.claims ?? [], effectReadiness: outbound!, sendAfterOwnerHandoff: transfer } } : {}) };

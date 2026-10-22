@@ -19,6 +19,7 @@ export function createPersistedCommerceHandoffPort(input: {
   completeInboxBatch?: boolean;
   /** Code-only provider recipient. Required only when this port owns a holding reply. */
   deliveryRecipient?: string;
+  triggerSource?: {eventKey:string;messagePk:string;attachmentCount:number};
   resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
 }) {
   let outboxMessages = 0;
@@ -42,10 +43,11 @@ export function createPersistedCommerceHandoffPort(input: {
         ...(input.completeInboxBatch === false ? { completeInboxBatch: false } : {}),
         pancakeTagPlan: { desiredTag: decision.tag, tagId, handoffGeneration: next.stateVersion },
         handoffEventPlan: { source: decision.category === "AFTER_SALES" ? "POST_SALE" : decision.reason === "CUSTOMER_REQUESTED_HUMAN" ? "CUSTOMER_REQUEST" : "BOT_POLICY",
-          reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion },
+          reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion,
+            ...(input.triggerSource ? {attachmentCount:input.triggerSource.attachmentCount} : {}) },
           productId: before.state.currentProductId, factsStatus: null, factsReasonCode: null,
-          desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.scope.sourceMessageId,
-          triggerMessagePk: null, occurredAt: now },
+          desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.triggerSource?.eventKey ?? input.scope.sourceMessageId,
+          triggerMessagePk: input.triggerSource?.messagePk ?? null, occurredAt: now },
         ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: input.deliveryRecipient!, messages,
           sourceMessageIdHash, protectedClaims: [], protectedClaimTypes: [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
       if (!result.stateCommitted) return false;

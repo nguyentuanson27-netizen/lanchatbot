@@ -60,3 +60,15 @@ node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.t
 ```
 
 Chưa real DB/media delivery hoặc provider run. Hash metadata được bind; N4 chưa download/verify actual image bytes (N6a). Source thiếu timestamp không được bịa mới. Complexity: one bounded selector wrapper + native declaration + reuse2existing guards, không role/store/gate mới.
+
+## Savepoint N5 — private intake and source linkage
+
+Thay blanket attachment→NO_SEND bằng private intake: không tải URL/bytes ảnh khách hoặc gửi sang owner/verifier. Unknown/customer image được handoff thật bằng policy hiện hành; pending payment receipt reuse sales-cycle attachment path. Cả batch được giữ ngoài public history; record attachmentCount và bind triggerMessagePk/eventKey tới message chứa ảnh đầu tiên, kể cả text đến sau. Không thêm durable store: encrypted Inbox giữ envelope gốc, history/handoff giữ source linkage. HUMAN tiếp tục no-send, không gọi model/fetch.
+
+RED1observed→GREEN46/46 ingress/session/persistence/handoff tests. Chưa chứng minh staff xem được image bytes qua admin UI: existing admin_handoff_history_v chỉ expose source message/type/count và liên kết Pancake conversation; không có endpoint ảnh khách có quyền trong admin. Đây là prerequisite N5 staff-image readback/N6b, không ghi hoàn thành N5. Unknown media handoff giữ context cho nhân viên; chưa claim vừa trả phần public độc lập vừa xử lý attachment. Không tải bytes nên downloader MIME/redirect không được mở rộng hoặc bypass.
+
+```powershell
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t 'unknown customer media'
+# RED1
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-handoff.test.ts
+```

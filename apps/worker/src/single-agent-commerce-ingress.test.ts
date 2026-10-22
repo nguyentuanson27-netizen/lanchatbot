@@ -10,14 +10,19 @@ import type { CartSelectionResult } from "./realtime-sales-catalog.js";
 
 function fixture(productIds = ["SM613"]) {
   const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
-  let generation = 1, revision = 1, profile = fixtureProfile();
+  let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null;
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
   let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   const profileWrite = vi.fn(async (_page: string, _customer: string, expected: number, next: ReturnType<typeof fixtureProfile>) => {
     if (expected !== profile.profile.revision) return false;
     profile = { profile: next.profile, fieldEvidence: next.fieldEvidence }; return true;
   });
-  const commit = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => ({ stateCommitted: true, metaOutboxCreated: prepared.metaPlan?.messages.length ?? 0, inboxBatchStatus: "COMMITTED" }));
+  const commit = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => {
+    conversation=prepared.state as typeof conversation;revision=conversation.revision;
+    if(prepared.salesCyclePlan)cycle=prepared.salesCyclePlan.state as typeof cycle;
+    return {stateCommitted:true,metaOutboxCreated:prepared.metaPlan?.messages.length??0,inboxBatchStatus:"COMMITTED",
+      handoffEventCreated:!!prepared.handoffEventPlan,pancakeTagOutboxCreated:!!prepared.pancakeTagPlan};
+  });
   const store = { loadOrCreate: async () => ({ conversationId: scope.conversationId, stateVersion: revision, state: { ...conversation, revision } }),
     loadOrCreateSalesCycle: async () => ({ state: cycle, stateRevision: cycle.revision }),
     loadOrCreateCustomerProfile: async () => ({ ...profile, pageId: scope.pageId, customerHash: scope.customerHash, revision: profile.profile.revision }),
@@ -32,22 +37,51 @@ function fixture(productIds = ["SM613"]) {
   const inbox = { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} };
   const policy = vi.fn(() => fixturePolicy());
   const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
-  const history = {recordInboundCustomerMessage: vi.fn(async () => {}), listConversationHistory: vi.fn(async () => [] as unknown[])};
+  const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
-    resolveTagId: () => null, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
+    resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; },
     setFocus: (currentProductId: string | null) => { conversation = {...conversation,currentProductId}; },
-    transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
+    appendMessage:(next:typeof message)=>{batch.items.push({envelope:{message:next}});},
+    enableHandoff:()=>{tagId="staff-tag";}, transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+it("hands unknown customer media to staff with the first media message linkage and no provider exposure",async()=>{
+  const f=fixture();f.enableHandoff();
+  f.message.attachments=[{type:"image",url:"https://content.pancake.vn/private-receipt.jpg",providerId:"private-id"}] as never;
+  f.message.text=null as never;
+  const second={...f.message,messageId:"second-message",eventKey:"second-event",attachments:[],text:"Chị gửi rồi nhé"};
+  // The attachment is in item 1, not the final text item.
+  const owner=vi.fn(async()=>({kind:"FINAL" as const,text:"Dạ chị."}));
+  f.appendMessage(second);
+  const result=await f.run(owner);
+  expect(result.terminal.disposition).toBe("HANDOFF");
+  expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+  expect(f.history.recordInboundCustomerMessage.mock.calls[0]![0]).toMatchObject({text:null,attachmentCount:1});
+  const handoff=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1].handoffEventPlan!;
+  expect(handoff.triggerEventKey).toBe("current-message");
+  expect(handoff.triggerMessagePk).toBe("90000000-0000-4000-8000-000000000001");
+  expect(handoff.reasonDetailSafe).toMatchObject({attachmentCount:1});
+  expect(JSON.stringify(handoff)).not.toContain("private-receipt");
+});
+
+it("does not fetch or expose hostile attachment URLs and preserves human ownership",async()=>{
+  const f=fixture();f.enableHandoff();f.transferToHuman();
+  f.message.attachments=[{type:"image",url:"http://127.0.0.1/secret"}] as never;
+  const owner=vi.fn(async()=>({kind:"FINAL" as const,text:"Dạ chị."})),fetch=vi.spyOn(globalThis,"fetch");
+  const result=await f.run(owner);
+  expect(result.terminal.reason).toBe("HUMAN_OWNS_CONVERSATION");
+  expect(fetch).not.toHaveBeenCalled();expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();expect(f.commit).not.toHaveBeenCalled();
+});
 
 it.each([false,true])("enqueues approved media and exact final text in one protected response group (cart=%s)",async withCart=>{
   const f=fixture(),p=f.products[0]!.product;

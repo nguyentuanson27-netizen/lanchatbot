@@ -76,13 +76,16 @@ export async function runPersistedCommerceIngress(input: {
   if (batch.eventKind !== "CUSTOMER" || !batch.items.length || batch.generation === null) return noSend("INGRESS_NOT_CUSTOMER");
   const messages = batch.items.map(i => InboundMessageV1Schema.parse(i.envelope.message)), last = messages.at(-1)!;
   if (batch.pageId !== input.scope.pageId || batch.conversationHash !== input.scope.customerHash ||
-    messages.some(m => m.pageId !== batch.pageId || m.senderId !== last.senderId || m.isEcho || m.attachments.length)) return noSend("INGRESS_SCOPE_OR_MEDIA");
+    messages.some(m => m.pageId !== batch.pageId || m.senderId !== last.senderId || m.isEcho)) return noSend("INGRESS_SCOPE_OR_MEDIA");
   if (!await input.inbox.isBatchCurrent(batch)) return noSend("INBOX_BATCH_SUPERSEDED");
   const record = await input.store.loadOrCreate<ConversationState>(batch.pageId, batch.conversationHash, "APP",
     id => createConversationState({ conversationId: id, routingOwner: "APP", now: input.clock() }), input.clock());
   if (record.conversationId !== input.scope.conversationId) return noSend("CONVERSATION_SCOPE");
-  const latest = messages.map(m => m.text ?? "").join("\n"), sourceId = last.messageId ?? last.eventKey;
-  const scope = { ...input.scope, sourceMessageId: sourceId, sourceObservedAt: last.occurredAt, requestId: batch.evaluationGroupId,
+  const mediaMessage=messages.find(m=>m.attachments.length>0),sourceMessage=mediaMessage??last;
+  const attachmentCount=messages.reduce((n,m)=>n+m.attachments.length,0);
+  let mediaLink:{eventKey:string;messagePk:string;attachmentCount:number}|undefined;
+  const latest = messages.map(m => m.text ?? "").join("\n"), sourceId = sourceMessage.messageId ?? sourceMessage.eventKey;
+  const scope = { ...input.scope, sourceMessageId: sourceId, sourceObservedAt: sourceMessage.occurredAt, requestId: batch.evaluationGroupId,
     recipient: textHash(last.senderId), bindingVersion: `commerce:${batch.generation}:${textHash(last.senderId)}`, revision: record.stateVersion,
     conversationOwner: record.state.conversationOwner, permission: record.state.conversationOwner === "BOT", privacyAllowed: true };
   const guard = { generation: batch.generation, leaseToken: batch.leaseToken, inboxIds: batch.inboxIds };
@@ -98,19 +101,29 @@ export async function runPersistedCommerceIngress(input: {
   };
   const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
     store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
+    attachmentIds:mediaMessage?.attachments.map((_,i)=>`${sourceId}:attachment:${i}`)??[],handoffSource:()=>mediaLink,
     productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })) });
   const pendingCheckout = await executor.privateCheckoutPending();
-  const privateInput = pendingCheckout || isPrivateCommerceText(latest);
-  for (const m of messages) await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
+  const privateInput = !!mediaMessage || pendingCheckout || isPrivateCommerceText(latest);
+  for (const m of messages) {
+    const recorded=await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
     customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey,
     text: privateInput || isPrivateCommerceText(m.text ?? "") ? null : m.text,
+    attachmentCount:m.attachments.length,
     occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
+    if(m===mediaMessage)mediaLink={eventKey:m.eventKey,messagePk:recorded.messagePk,attachmentCount};
+  }
+  if(record.state.conversationOwner!=="BOT")return closeWithoutSend("HUMAN_OWNS_CONVERSATION");
   const policyBundle = async () => { const r = await input.policy(); if (!r.bundle) throw new Error("POLICY_UNAVAILABLE"); return r.bundle; };
   if (privateInput) {
-    const privateResult = await executor.advancePrivateCheckout();
+    // Customer image contents have no approved privacy projection yet. Keep bytes/URLs in the encrypted Inbox.
+    // Only the existing payment-receipt state can consume attachment identity; other media goes to staff.
+    const receiptPending=mediaMessage&&(await executor.repository.read(scope.conversationId))?.stage==="PURCHASE_CONFIRMED";
+    const privateResult = !mediaMessage||receiptPending ? await executor.advancePrivateCheckout() : {committed:false,messages:0};
     if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
-      read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
+      read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
+      ...(mediaLink?{triggerSource:mediaLink}:{}) });
     const recovery = createCommerceHandoffTools({ ...handoff, scope, clock: input.clock, policy: policyBundle,
       base: createReadOnlyTools({ ...input.read, scope, clock: input.clock }) });
     await recovery.invoke({ name: "request_handoff", args: { reason: "DEPENDENCY_FAILURE" } });
