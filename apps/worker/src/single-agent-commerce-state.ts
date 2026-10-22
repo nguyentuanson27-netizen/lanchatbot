@@ -35,6 +35,7 @@ export function createRealtimeCustomerStatePort(store: Pick<PostgresRealtimeRunt
   } };
 }
 const measurementKinds = ["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"] as const;
+const fitValues = CustomerProfileV1Schema.innerType().shape.fitPreference.unwrap().options;
 const preferenceKinds = ["colors", "styles", "materials"] as const;
 const measurementReasons: Record<string, string> = {
   MEASUREMENT_SOURCE: "INVALID_QUOTE_OR_SOURCE",
@@ -90,6 +91,8 @@ export async function createCustomerStateTools(input: {
   sourceMessages?: readonly CustomerStateSourceMessage[];
 }): Promise<CommerceTools> {
   let effective = await input.store.read(), blockedDependencies = false;
+  let commitUnconfirmed = false;
+  const invalidateCommit = () => { commitUnconfirmed = true; blockedDependencies = true; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; quoteRead = false; };
   const pendingFields = new Set<string>();
   const blocked = () => blockedDependencies || pendingFields.size > 0;
   const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string }>();
@@ -112,17 +115,19 @@ export async function createCustomerStateTools(input: {
       receipts: [...base.effectReceipts, ...(update ? [{ ...update, stateRevision: base.state.revision }] : [])], claims: [...base.protectedClaims.filter(c => (c as { type: string }).type !== "SIZE_FIT"), ...valid.flatMap(([, s]) => s.claims)] });
   };
   async function apply(args: unknown): Promise<CommerceToolResult> {
+    if (commitUnconfirmed) return { status: "REJECTED", reason: "STATE_COMMIT_UNCONFIRMED" };
     const a = toolArgs(args, ["ops"]);
     if (!a || !Array.isArray(a.ops) || !a.ops.length || a.ops.length > 8) return { status: "REJECTED", reason: "STATE_ARGUMENTS" };
     const observedAt = input.scope.sourceObservedAt;
     if (!observedAt || !Number.isFinite(Date.parse(observedAt)) || Date.parse(observedAt) > input.clock().getTime()) return { status: "REJECTED", reason: "SOURCE_TIME" };
-    const current = await input.store.read();
+    let current: CustomerProfileMergeState;
+    try { current = await input.store.read(); } catch { return {status:"UNAVAILABLE",reason:"STATE_SOURCE_UNAVAILABLE"}; }
     if (commerceHash(current) !== commerceHash(effective)) { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" }; }
     const evidence = { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: input.scope.pageId,
       conversationId: input.scope.conversationId, sourceMessageId: input.scope.sourceMessageId }), observedAt, confidence: 1 };
     const patch: CustomerProfilePatch = { profileId: current.profile.profileId, expectedRevision: current.profile.revision };
     const measurements = [], clears: MeasurementKind[] = [], absentClears: MeasurementKind[] = [], fields = new Set<string>();
-    const fieldErrors: { field: string; reason: string }[] = [];
+    const fieldErrors: { field: string; reason: string; allowedValues?: readonly string[]; hint?: string }[] = [];
     for (const raw of a.ops) {
       const op = toolArgs(raw, ["op", "field", "value", "sourceQuote"]);
       if (!op || !["SET", "REPLACE", "CLEAR"].includes(String(op.op)) || typeof op.field !== "string" ||
@@ -142,27 +147,32 @@ export async function createCustomerStateTools(input: {
         }
         else {
           try {
-            measurements.push(BodyMeasurementV1Schema.parse({ kind, value: op.value,
-              provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) }));
+            const parsed = BodyMeasurementV1Schema.safeParse({ kind, value: op.value,
+              provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) });
+            if (parsed.success) measurements.push(parsed.data);
+            else fieldErrors.push({field:op.field,reason:"INVALID_DOMAIN_VALUE",hint:parsed.error.issues[0]!.message.slice(0,160)});
           } catch (error) {
-            if (!(error instanceof Error) || !Object.hasOwn(measurementReasons, error.message)) throw error;
-            fieldErrors.push({ field: op.field, reason: measurementReasons[error.message]! });
+            fieldErrors.push({ field: op.field, reason: error instanceof Error && Object.hasOwn(measurementReasons, error.message) ? measurementReasons[error.message]! : "INVALID_DOMAIN_VALUE" });
           }
         }
       } else if (op.field === "fitPreference") {
         const value = op.op === "CLEAR" ? null : op.value;
-        const parsed = CustomerProfileV1Schema.parse({ ...current.profile, fitPreference: value });
-        Object.assign(patch, { fitPreference: { value: parsed.fitPreference, evidence } });
+        const parsed = CustomerProfileV1Schema.safeParse({ ...current.profile, fitPreference: value });
+        if (!parsed.success) fieldErrors.push({ field: op.field, reason: "INVALID_DOMAIN_VALUE", allowedValues: fitValues });
+        else if (op.op !== "CLEAR" && (typeof op.sourceQuote !== "string" || !op.sourceQuote.trim() || op.sourceQuote.length > 160 ||
+          !(input.sourceMessages ?? []).some(source => source.sourceMessageId === input.scope.sourceMessageId && source.text.includes(op.sourceQuote as string)))) {
+          fieldErrors.push({field:op.field,reason:"QUOTE_NOT_IN_CURRENT_MESSAGE"});
+        } else Object.assign(patch, { fitPreference: { value: parsed.data.fitPreference, evidence } });
       } else {
         const key = op.field.slice("preferences.".length) as typeof preferenceKinds[number];
         if (!op.field.startsWith("preferences.") || !preferenceKinds.includes(key)) throw new Error("STATE_FIELD");
         const value = op.op === "CLEAR" ? [] : op.value;
-        if (!Array.isArray(value) || value.length > 20 || value.some(v => typeof v !== "string" || !v.trim() || v.length > 64)) throw new Error("STATE_VALUE");
+        if (!Array.isArray(value) || value.length > 20 || value.some(v => typeof v !== "string" || !v.trim() || v.length > 64)) { fieldErrors.push({field:op.field,reason:"INVALID_DOMAIN_VALUE"}); continue; }
         const list = op.op === "SET" ? [...current.profile.preferences[key], ...value] : value;
         Object.assign(patch, { preferences: { ...patch.preferences, [key]: { value: list, evidence } } });
       }
     }
-    if (fieldErrors.length) return { status: "REJECTED", reason: "MEASUREMENT_SOURCE_INVALID", data: { fieldErrors } };
+    if (fieldErrors.length) return { status: "REJECTED", reason: fieldErrors.some(f => !f.field.startsWith("measurements.") || f.reason === "INVALID_DOMAIN_VALUE") ? "STATE_FIELD_INVALID" : "MEASUREMENT_SOURCE_INVALID", data: { fieldErrors } };
     // Only this C3 writer may correct the same grounded event under the current CAS.
     // Never weaken the shared timestamp/confidence/source ordering for other writers.
     const mergeBase = { ...structuredClone(current), fieldEvidence: { ...current.fieldEvidence } };
@@ -184,11 +194,16 @@ export async function createCustomerStateTools(input: {
       ...(absentClears.length ? { revision: current.profile.revision + 1, updatedAt:
         new Date(Math.max(Date.parse(merged.profile.updatedAt), Date.parse(observedAt))).toISOString() } : {}),
       measurements: merged.profile.measurements.filter(m => !clears.includes(m.kind)) }), fieldEvidence };
-    if (next.profile.revision !== current.profile.revision && !await input.store.compareAndSwap(current.profile.revision, next)) {
-      blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
+    let readback: CustomerProfileMergeState;
+    try {
+      if (next.profile.revision !== current.profile.revision && !await input.store.compareAndSwap(current.profile.revision, next)) {
+        blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
+      }
+      readback = await input.store.read();
+    } catch {
+      invalidateCommit(); return { status: "REJECTED", reason: "STATE_COMMIT_UNCONFIRMED" };
     }
-    const readback = await input.store.read();
-    if (commerceHash(readback) !== commerceHash(next)) { blockedDependencies = true; committedUpdate = undefined; return { status: "REJECTED", reason: "STATE_READBACK_CHANGED" }; }
+    if (commerceHash(readback) !== commerceHash(next)) { invalidateCommit(); return { status: "REJECTED", reason: "STATE_READBACK_CHANGED" }; }
     const changed = commerceHash(effective) !== commerceHash(readback);
     effective = readback; blockedDependencies = false;
     if (!changed) return { status: "OK", data: { revision: effective.profile.revision, applied: false,
@@ -213,7 +228,7 @@ export async function createCustomerStateTools(input: {
         try { result = await apply(call.args); }
         catch { result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
         if (result.status === "OK") fields.forEach(field => pendingFields.delete(field));
-        return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, applied: false, unresolvedFields: [...pendingFields] } };
+        return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
       }
       if (call.name === "recommend_size") {
         const a = toolArgs(call.args, ["subjectRef"]);

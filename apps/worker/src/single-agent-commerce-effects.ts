@@ -346,7 +346,8 @@ export async function createCommerceEffectTools(input: {
       Date.parse(current.cart!.expiresAt) > now.getTime() && cart.grandTotalVnd !== null && cart.shippingFeeVnd !== null) {
       try {
         publicPolicyLiteral(recoveryPolicy, input.scope.pageId, input.scope.shopId, now);
-        summary = ` Tổng ${cart.grandTotalVnd.toLocaleString("vi-VN")}đ, đã gồm phí giao hàng.` +
+        summary = (receipt.effect === "NEGOTIATION_UPDATED" && cart.discountTotalVnd !== null && cart.discountTotalVnd > 0 ? ` Ưu đãi ${cart.discountTotalVnd.toLocaleString("vi-VN")}đ.` : "") +
+          ` Tổng ${cart.grandTotalVnd.toLocaleString("vi-VN")}đ, đã gồm phí giao hàng.` +
           (active.some(s => s.stockStatus === "PRE_ORDER") ? " Có món đặt trước, chị nhé." : "");
       } catch { /* No fresh policy means no current money or stock assertion. */ }
     }

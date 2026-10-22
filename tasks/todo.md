@@ -1,3 +1,21 @@
+## Đề xuất fix sau review xuyên suốt — 2026-10-22
+
+[Kế hoạch/acceptance/commands](../docs/specs/c3-phase-b-contract-and-advice-fix-plan-20261022.md). PLAN_APPROVED_AFTER_INDEPENDENT_RE_REVIEW; reviewer vòng trước đã duyệt kế hoạch sửa, chưa sửa runtime/prompt/chạy model.
+
+- [x] Đối chiếu lịch sử sửa, review và39 hội thoại mới; ghi nguyên nhân xác nhận/giả thuyết/unknown riêng.
+- [x] Lập kế hoạch và self-review: không prompt rewrite chung, không tăng tool rounds, không đổi verifier để cứu kết quả.
+- [x] Nhận review độc lập REVISE; sửa2required/3clarification trong plan; self-review và sửa tiếp consumer applied/cache, region conflict, treatment/bounds, corpus/registration, SHA riêng và denominator. Đây là hoàn tất tài liệu, không phải đóng lỗi runtime.
+- [x] Gọi lại reviewer vòng trước: APPROVE kế hoạch; lưu verdict và bổ sung hai lưu ý kiểm thử T1/T5. Không nhận đã đóng lỗi runtime hoặc B GO.
+- [ ] T0: áp cùng chuẩn actual whole-turn cho các cặp nhãn bất đồng; giữ primary lịch sử.
+- [ ] T1: field-specific state values + lỗi field công khai; tách validation chưa ghi khỏi commit/readback chưa rõ, kiểm consumer/pending/cache; RED→GREEN gồm CAS thực ghi rồi readback lỗi.
+- [ ] T2: media selection scope/reasons; thiếu ảnh không thành không bán màu; giữ exact group gate.
+- [ ] T3: kiểm source ETA, reuse cùng priority resolver với checkout khi xác nhận mismatch; tỉnh/MIEN-NAM/nationwide/conflict, ghi nguồn trái quy tắc chung transit; không tạo timestamp/ETA giả.
+- [ ] T4: dùng NEGOTIATION_UPDATED/discountTotalVnd cho recovery đúng scope; diff currentPublicContext và captured verifier context hiện có, không thêm runtime capture/gate.
+- [ ] Self-review và focused checks/typecheck/build/lint theo phần thực chạm; freeze source/input trước provider.
+- [ ] Khi triển khai/run được yêu cầu: full39 N1 giữ mọi outcome; không auto retry hoặc quality early-stop.
+- [ ] T5 conditional:6ca×2arm=12, preload-versus-on-demand; media tools cùng hai arm, binding/effective hashes/corpus riêng và SHA riêng; đủ6cặp đối chiếu, không loại lỗi để tăng tỷ lệ.
+- [ ] Báo actual outcomes/giới hạn, không claim full12journeys/A PASS/B GO; không auto fix/run tiếp.
+
 ## Kế hoạch nối tác vụ còn thiếu của Phase B — 2026-10-22
 
 **PARTIAL_IMPLEMENTED — CHƯA B GO**. [Acceptance/verification](../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md), [savepoints/evidence](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md). Giữ riêng kết quả code, DB/capture, provider và giới hạn chưa hoàn thành.

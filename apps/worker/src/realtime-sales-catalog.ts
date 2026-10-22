@@ -170,7 +170,7 @@ function resolveOffer(snapshot: CatalogSnapshotV3, requested: string | null) {
   return null;
 }
 
-function resolveRegion(snapshot: CatalogSnapshotV3, address: string) {
+export function resolveCatalogDeliveryRegion(snapshot: CatalogSnapshotV3, address: string) {
   const normalized = normalizeCatalogToken(address);
   const entries = Object.entries(snapshot.shipping_eta);
   const southern = southernDestination(address);
@@ -451,7 +451,7 @@ export function cartSelectionFromSnapshot(
   let etaVersion: string | null = null;
   let etaExpiresAt: string | null = null;
   if (query.deliveryAddress) {
-    const region = resolveRegion(snapshot, query.deliveryAddress);
+    const region = resolveCatalogDeliveryRegion(snapshot, query.deliveryAddress);
     if (!region) return failed("ETA_UNAVAILABLE", "CART_ETA_REGION_UNRESOLVED", matching);
     const zeroStock = stockQuantity === 0 && policy?.can_order_when_zero === true;
     const prepMin = zeroStock ? policy?.zero_stock_prep_min_days : policy?.prep_min_days;

@@ -43,9 +43,9 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
   };
   async function select(query:MediaQuery):Promise<CommerceMediaAsset[]> {
     const {product}=await input.catalog.readProduct(query.subjectRef,false);
-    if(product.productId!==query.subjectRef) return [];
+    if(product.productId!==query.subjectRef) throw new Error("MEDIA_SOURCE_UNAVAILABLE");
     // This source has no per-asset color field. Only a uniquely colored product can prove it.
-    if(query.color && (product.colors.length!==1 || normalizeCatalogToken(product.colors[0]!)!==normalizeCatalogToken(query.color))) return [];
+    if(query.color && (product.colors.length!==1 || normalizeCatalogToken(product.colors[0]!)!==normalizeCatalogToken(query.color))) throw new Error("MEDIA_COLOR_BINDING_UNVERIFIED");
     const now=input.clock().getTime();
     const images=(product.images??[]).filter(image=>{
       const observed=Date.parse(image.observedAt??product.observedAt??"");
@@ -72,7 +72,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     const query=a as unknown as MediaQuery,key=commerceHash(query);
     try{
       const view=call.name==="view_product_media",assets=(await select(query)).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
-      if(!assets.length)return {status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"};
+      if(!assets.length)return {status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA",data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY"}};
       if(view){
         if(catalogImages().length-(viewed.get(key)?.images.length??0)+assets.length>COMMERCE_VISION_BOUNDS.count)return {status:"REJECTED",reason:"VISION_BOUND"};
         const images:CommerceCatalogImage[]=[];
@@ -104,8 +104,8 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       }
       if(mediaSelection().length-(selections.get(key)?.assets.length??0)+assets.length>4)return {status:"REJECTED",reason:"MEDIA_BOUND"};
       selections.set(key,{query,assets});
-      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,assets:assets.map(({assetRef,angle,imageType,partsVisible})=>({assetRef,angle,imageType,partsVisible})),delivery:"PENDING_FINAL_GATE"}};
-    }catch{return {status:"UNAVAILABLE",reason:"MEDIA_SOURCE_UNAVAILABLE"};}
+      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,assets:assets.map(({assetRef,angle,imageType,partsVisible})=>({assetRef,angle,imageType,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
+    }catch(error){return {status:"UNAVAILABLE",reason:error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE",data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY"}};}
   }
   return {...input.base,mediaSelection,catalogImages,snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),

@@ -17,6 +17,14 @@ const setup = async () => {
   return {f,scope,tools,call,image};
 };
 describe("candidate product media",()=>{
+  it("distinguishes an unverified color binding from an unavailable source or missing approved image",async()=>{
+    const s=await setup();s.f.product.colors=["navy","be"];
+    expect(await s.tools.invoke({...s.call,args:{...s.call.args,color:"be"}})).toMatchObject({status:"UNAVAILABLE",reason:"MEDIA_COLOR_BINDING_UNVERIFIED",data:{subjectRef:s.f.product.productId,requested:{intent:"BACK",color:"be"},scope:"MEDIA_ONLY"}});
+    expect(await s.tools.invoke(s.call)).toMatchObject({status:"OK",data:{scope:"GENERIC_PRODUCT",colorMatched:false}});
+    s.f.product.images[0]!.reviewStatus=null;
+    expect(await s.tools.invoke(s.call)).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA",data:{scope:"MEDIA_ONLY"}});
+  });
+
   it("lets the same owner inspect verified public bytes without selecting an outbound image",async()=>{
     const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");
     const fetch=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>new Response(png,{headers:{"content-type":"image/png"}}));

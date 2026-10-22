@@ -6,7 +6,7 @@ import { buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEviden
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
-import { verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
+import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
@@ -139,7 +139,7 @@ export function createReadOnlyTools(input: {
       observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
     const query = { shopAlias: scope.shopAlias, productId: id, offerType: (args.offerType as string | undefined) ?? null,
       color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null,
-      deliveryRegion: (args.deliveryRegion as string | undefined) ?? null };
+      deliveryRegion: raw && typeof args.deliveryRegion === "string" ? resolveCatalogDeliveryRegion(raw, args.deliveryRegion)?.[0] ?? args.deliveryRegion : (args.deliveryRegion as string | undefined) ?? null };
     // Do not expand an unbounded source record or silently truncate selling options.
     if (!query.offerType && availableOffers && availableOffers.length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
     const summarizeAll = !query.offerType && availableOffers !== null && availableOffers.length > 1;

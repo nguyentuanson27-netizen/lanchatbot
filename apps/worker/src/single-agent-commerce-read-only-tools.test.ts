@@ -28,6 +28,17 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("uses checkout region priority for southern addresses and binds the resolved source key",async()=>{
+    const {f,tools}=sellingFixture({DIRECT:499000});
+    f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:false,prep_min_days:1,prep_max_days:2,zero_stock_policy:"",zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:" "};
+    f.snapshot.shipping_eta={"MIEN-NAM":{transit_min_days:2,transit_max_days:4},TOAN_QUOC:{transit_min_days:3,transit_max_days:5}};
+    const result=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",deliveryRegion:"Cần Thơ"}});
+    expect(result).toMatchObject({status:"OK",data:{availability:{eta:{status:"OK"}},facts:expect.arrayContaining([expect.objectContaining({type:"ETA",value:{minDays:3,maxDays:6}})])}});
+    expect(tools.snapshot().policyLiterals.map(p=>JSON.parse(p.text))).toContainEqual(expect.objectContaining({deliveryRegion:"MIEN-NAM"}));
+    const before=makeBinding("turn","Dự kiến 3–6 ngày.",tools.snapshot());
+    expect(makeBinding("turn","Dự kiến 3–6 ngày.",await tools.readback())).toEqual(before);
+  });
+
   it("keeps repeated reads stable but binds a new POS observation even when business values match", async () => {
     const { f, tools } = sellingFixture({ DIRECT: 499_000 });
     f.snapshot.synced_at = new Date(commerceNow.getTime() - 60_000).toISOString();

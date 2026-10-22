@@ -18,6 +18,75 @@ async function setup(sourceText = "Eo 74. Eo 85, mông 105.") {
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("returns the domain enum on a fit error without partially writing numeric fields", async () => {
+    const s = await setup("Eo 74, mông 96. Chị thích rộng một chút.");
+    const result = await s.tools.invoke({name:"apply_customer_state",args:{ops:[
+      {op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"},
+      {op:"SET",field:"fitPreference",value:"rộng một chút",sourceQuote:"rộng một chút"},
+    ]}});
+    expect(result).toMatchObject({status:"REJECTED",reason:"STATE_FIELD_INVALID",data:{applied:false,
+      fieldErrors:[{field:"fitPreference",reason:"INVALID_DOMAIN_VALUE",allowedValues:["FITTED","REGULAR","RELAXED"]}]}});
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}})).status).toBe("REJECTED");
+    expect((await s.tools.invoke({name:"apply_customer_state",args:{ops:[
+      {op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"},
+      {op:"SET",field:"fitPreference",value:"RELAXED",sourceQuote:"rộng một chút"},
+    ]}})).status).toBe("OK");
+    expect(s.getStored().profile.fitPreference).toBe("RELAXED");
+  });
+  it.each([
+    {field:"measurements.WEIGHT_KG",value:251,sourceQuote:"251kg"},
+    {field:"preferences.colors",value:[""]},
+  ])("reports domain input at the offending field without a partial write ($field)",async op=>{
+    const s=await setup("Eo 85, 251kg.");
+    const result=await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:85,sourceQuote:"85"},{op:"SET",...op}]}});
+    expect(result).toMatchObject({status:"REJECTED",reason:"STATE_FIELD_INVALID",data:{applied:false,fieldErrors:[{field:op.field,reason:"INVALID_DOMAIN_VALUE"}]}});
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+  });
+  it("distinguishes a store read outage before commit from invalid input",async()=>{
+    const s=await setup();s.store.read=async()=>{throw new Error("private database detail")};
+    expect(await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:85,sourceQuote:"85"}]}})).toMatchObject({status:"UNAVAILABLE",reason:"STATE_SOURCE_UNAVAILABLE",data:{applied:false}});
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+  });
+  it.each([undefined,"not in the message"])("rejects an ungrounded fit quote without a write (%s)",async sourceQuote=>{
+    const s=await setup();
+    expect(await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"fitPreference",value:"RELAXED",sourceQuote}]}})).toMatchObject({status:"REJECTED",reason:"STATE_FIELD_INVALID",data:{applied:false,fieldErrors:[{field:"fitPreference",reason:"QUOTE_NOT_IN_CURRENT_MESSAGE"}]}});
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+  });
+  it.each(["read-throw","read-different","cas-throw"])("keeps an unknown commit blocked after a real store write (%s)", async fault => {
+    const s = await setup();
+    await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}]}});
+    await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}});
+    expect(s.tools.snapshot().effectReceipts).toHaveLength(1);
+    const cas=s.store.compareAndSwap;
+    let afterWrite=false;
+    const read=s.store.read;
+    s.store.read=async()=>{
+      if(afterWrite && fault==="read-throw") throw new Error("private transport error");
+      const current=await read();
+      if(afterWrite && fault==="read-different") current.profile.revision++;
+      return current;
+    };
+    s.store.compareAndSwap=vi.fn(async(expected,next)=>{
+      const result=await cas(expected,next);afterWrite=true;
+      if(fault==="cas-throw")throw new Error("commit response lost");
+      return result;
+    });
+    const result=await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:85,sourceQuote:"85"}]}});
+    expect(s.getStored().profile.measurements.find(m=>m.kind==="WAIST_CM")!.value).toBe(85);
+    expect(result.status).toBe("REJECTED");
+    expect(result.data).not.toHaveProperty("applied");
+    expect(result.reason).toMatch(/STATE_(COMMIT_UNCONFIRMED|READBACK_CHANGED)/);
+    expect(s.tools.snapshot().effectReceipts).toEqual([]);
+    expect(s.tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toEqual([]);
+    expect(s.tools.snapshot().state.customerStateUpdatePending).toBe(true);
+    afterWrite=false;
+    expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}})).status).toBe("REJECTED");
+    expect((await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"CLEAR",field:"fitPreference"}]}})).status).toBe("REJECTED");
+    expect(s.store.compareAndSwap).toHaveBeenCalledTimes(1);
+    expect((await s.tools.readback()).state.customerStateUpdatePending).toBe(true);
+  });
+
   it("reports each numeric source issue without a partial write, then accepts a corrected batch", async () => {
     const s = await setup("Chị sửa lại: eo 74, mông 96.");
     const fields = ["measurements.WAIST_CM", "measurements.HIPS_CM"];

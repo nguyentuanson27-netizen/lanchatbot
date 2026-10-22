@@ -258,3 +258,15 @@ describe("realtime sales catalog", () => {
     });
   });
 });
+
+
+describe("shared configured delivery region priority",()=>{
+  it.each([
+    ["Cần Thơ","CAN_THO"], ["TP.HCM","MIEN-NAM"], ["Hà Nội","TOAN_QUOC"], ["unknown","TOAN_QUOC"],
+    ["Hà Nội, Cần Thơ",null],
+  ])("resolves %s using checkout priority (%s)",async(address,expected)=>{
+    const {resolveCatalogDeliveryRegion}=await import("./realtime-sales-catalog.js");
+    const snapshot={shipping_eta:{CAN_THO:{transit_min_days:2,transit_max_days:4},"MIEN-NAM":{transit_min_days:2,transit_max_days:4},TOAN_QUOC:{transit_min_days:3,transit_max_days:5}}};
+    expect(resolveCatalogDeliveryRegion(snapshot as never,address!)?.[0]??null).toBe(expected);
+  });
+});

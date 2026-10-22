@@ -61,6 +61,16 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("recovers the current negotiated discount and total without claiming an additional discount",async()=>{
+    const s=await setup();await s.tools.invoke(s.add);
+    await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+    const result=await s.tools.recover!(terminalFallback());
+    const cart=s.current().cart!.value;
+    expect(result.text).toContain(`Ưu đãi ${cart.discountTotalVnd!.toLocaleString("vi-VN")}đ`);
+    expect(result.text).toContain(`Tổng ${cart.grandTotalVnd!.toLocaleString("vi-VN")}đ`);
+    expect(result.text).not.toMatch(/giảm thêm|freeship|thêu tay/iu);
+  });
+
   it.each([
     {texts:["Giá hơi cao","Giá hơi cao"],quote:"Giá hơi cao"},
     {texts:["Giá hơi cao, Giá hơi cao"],quote:"Giá hơi cao"},

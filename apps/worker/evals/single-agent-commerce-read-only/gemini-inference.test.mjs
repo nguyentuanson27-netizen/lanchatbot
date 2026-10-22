@@ -811,3 +811,18 @@ test('captured continuation HTTP requests still exclude evaluator labels',async(
  assert.equal(captured.length,2);assert.doesNotMatch(JSON.stringify(captured),/EVALUATOR_CASE|EVALUATOR_SPLIT|EVALUATOR_RUBRIC|forbiddenBehaviors/);
  assert.equal(captured[1].contents[2].parts[0].thoughtSignature,'opaque');
 });
+
+
+test('state operation schema binds each field to its domain and separates CLEAR',()=>{
+ const item=stateDeclarations[0].parametersJsonSchema.properties.ops.items;
+ assert.ok(item.anyOf);
+ const fit=item.anyOf.find(b=>b.properties.field.enum.includes('fitPreference')&&b.properties.value);
+ assert.deepEqual(fit.properties.value.enum,['FITTED','REGULAR','RELAXED']);
+ const numeric=item.anyOf.find(b=>b.properties.field.enum.includes('WAIST_CM')&&b.properties.value);
+ assert.equal(numeric.properties.value.type,'number');
+ assert.ok(numeric.required.includes('sourceQuote'));
+ const clear=item.anyOf.find(b=>b.properties.op.enum.length===1&&b.properties.op.enum[0]==='CLEAR');
+ assert.ok(!clear.required.includes('value'));assert.equal(clear.additionalProperties,false);
+ assert.ok(!clear.properties.value);
+ assert.doesNotMatch(stateDeclarations[0].description,/Bị từ chối thì cả batch chưa ghi/);
+});
