@@ -1,3 +1,10 @@
+## Rerun 19 fallback — 2026-10-22
+
+- [x] Owner yêu cầu chạy lại đúng 19 target, N1; giữ prompt/model/config. Quota read-only cho phép dùng lại verifier, không generation để dò quota.
+- [x] Bộ chạy eval có `--through-case` để giữ prerequisite thật và dừng sau target; RED missing export → GREEN; Node108 PASS. Không sửa runtime/prompt.
+- [ ] Chạy 15 B1 + 1 opening + 2 stateful + 1 negotiation; ghi riêng 4 lượt provider prerequisite dựng cart/history thật, không tính là 19 target.
+- [ ] Lưu toàn bộ outcome/error, actual customer captures, request accounting, so sánh paired target và hạn chế N1; không tự fix/rerun hoặc nhận B GO.
+
 ## Full39 sau contract fixes — 2026-10-22
 
 **39/39COMPLETE; T5BLOCKED_VERIFIER_QUOTA; CHƯA B GO.** [Report/findings](../apps/worker/evals/single-agent-commerce-read-only/contract-advice-run-20261022/CHECKPOINT_B.md).

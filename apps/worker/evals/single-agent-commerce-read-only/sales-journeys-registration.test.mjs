@@ -1,8 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe} from './sales-journeys-registration.mjs';
+import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough} from './sales-journeys-registration.mjs';
 const corpus=JSON.parse(readFileSync(new URL('./sales-journeys.candidate.json',import.meta.url)));
+
+test('targeted stateful rerun retains actual prerequisite turns and stops before unrelated checkout',()=>{
+ const baseline=JSON.parse(readFileSync(new URL('./stateful-cases.json',import.meta.url)));
+ assert.deepEqual(selectStatefulThrough(baseline),baseline);
+ assert.deepEqual(selectStatefulThrough(baseline,'stateful-correction').map(c=>c.caseId),
+  ['stateful-open','stateful-variant-quantity','stateful-quote','stateful-correction']);
+ assert.throws(()=>selectStatefulThrough(baseline,''),/UNKNOWN_THROUGH_CASE/);
+ assert.throws(()=>selectStatefulThrough(baseline,'missing'),/UNKNOWN_THROUGH_CASE/);
+});
 test('explicit opening selection preserves the complete deferred denominator instead of pretending twelve journeys ran',()=>{
  const r=registerJourneyOpenings(corpus,['J02','J03','J05','J08']);
  assert.equal(r.samples.length,4);assert.equal(r.deferred.length,28);

@@ -1,5 +1,11 @@
 // Evaluator registration only. Never forwarded to a model or used as a production router.
 import assert from 'node:assert/strict';
+export function selectStatefulThrough(cases,through){
+ if(through===undefined)return cases;
+ const index=cases.findIndex(c=>c.caseId===through);
+ assert(index>=0,'UNKNOWN_THROUGH_CASE');
+ return cases.slice(0,index+1);
+}
 export function journeyMessages(turn){
  assert(!turn.runtime.privateFixture,'PRIVATE_FIXTURE_NOT_MATERIALIZED');
  assert(Array.isArray(turn.runtime.messages)&&turn.runtime.messages.length,'JOURNEY_MESSAGES');
