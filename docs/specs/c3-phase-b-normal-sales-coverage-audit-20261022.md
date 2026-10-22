@@ -28,6 +28,10 @@ Candidate không được production entrypoint import là hạn chế activatio
 
 ## 2. Có thành phần trong repo nhưng chưa nối hoặc nối chưa đủ vào B
 
+### Làm rõ sau review lịch sử hội thoại
+
+Lịch sử **text đã nối**, không phải capability hoàn toàn vắng mặt: ingress ghi inbound và nạp CUSTOMER/BOT/HUMAN; dispatcher ghi BOT khi provider chấp nhận. DB trả từ cũ tới mới. Candidate query tối đa8dòng trước rồi lọc PII, model nhận tối đa8tin/4.096byte; private/null rows có thể làm cửa sổ ít tin hữu ích hơn. Owner và verifier đều nhận history. Test DB/capture đã chứng minh lượt sau thấy câu bot trước và giỏ hiện tại, chưa chứng minh mọi tham chiếu qua cuộc trò chuyện dài. Ingress cũng có commit currentProductId từ snapshot; gap cần audit là nạp/bind focus này qua lượt trước giỏ, không phải chưa có field lưu. [Kế hoạch N1–N8](c3-phase-b-missing-capabilities-plan-20261022.md) tách rõ history/window, product focus và media continuity; chưa tăng context/model calls.
+
 | Phần | Repo có gì | B còn thiếu gì | Phân loại |
 |---|---|---|---|
 | Gửi ảnh sản phẩm | selectImages/selectRequestedImages; selectProductMediaV2; registry source và transport IMAGE | Native B không có tác vụ media; generated reply egress chỉ dựng TEXT. Chưa gửi ảnh tổng thể/màu/mặt sau/chi tiết/bảng size theo yêu cầu khách. | Chưa nối. |
