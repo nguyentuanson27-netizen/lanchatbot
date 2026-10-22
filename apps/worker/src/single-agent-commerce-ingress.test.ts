@@ -43,10 +43,26 @@ function fixture(productIds = ["SM613"]) {
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; },
+    setFocus: (currentProductId: string | null) => { conversation = {...conversation,currentProductId}; },
     transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+it.each([
+  {previous:"SM613",text:"Mẫu này chất gì em?",ad:null,expected:"SM613"},
+  {previous:"SM613",text:"Bộ này bao nhiêu em?",ad:"OTHER1",expected:"OTHER1"},
+  {previous:"SM613",text:"Cho chị xem SM613 nhé",ad:"OTHER1",expected:"SM613"},
+  {previous:"SM613",text:"Bộ này bao nhiêu em?",ad:"UNKNOWN999",expected:null},
+])("binds current context from verified explicit/ad/state sources without guessing from reads ($expected)", async sample => {
+  const f=fixture(["SM613","OTHER1"]); f.setFocus(sample.previous); f.message.text=sample.text;
+  if(sample.ad) Object.assign(f.message,{adsContext:{source:"ADS",adTitle:sample.ad,postId:null,adId:null,ref:null}});
+  let context: OwnerRequest["context"] | undefined;
+  await f.run(async request=>{context=request.context;return {kind:"FINAL",text:"Dạ chị."};});
+  expect(context!.state.currentProductId).toBe(sample.expected);
+  if(sample.expected) expect(context!.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===sample.expected)).toBe(true);
+  else expect(context!.boundSubjects.filter(s=>s.kind==="PRODUCT")).toEqual([]);
+});
 
 it("fills the public history window after private rows without duplicating the latest batch", async () => {
   const f = fixture();

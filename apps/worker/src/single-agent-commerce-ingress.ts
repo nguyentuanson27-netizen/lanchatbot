@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, type ProtectedClaimV1 } from "@lana/contracts";
-import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken } from "@lana/business-tools";
+import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken, normalizeProductCode } from "@lana/business-tools";
 import { createConversationState, type ConversationState } from "@lana/conversation-engine";
 import type { ClaimedInboundBatch, PostgresChatHistoryStore, PostgresRealtimeInboxStore, PostgresRealtimeRuntimeStore, RealtimeSalesCyclePlan } from "@lana/database";
 import { redactAnalyticsMessage, type ChatHistoryItem } from "@lana/database";
@@ -15,7 +15,8 @@ import { createCommerceHandoffTools } from "./single-agent-commerce-handoff.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn } from "./single-agent-commerce-read-only.js";
 import { commerceHash, commerceUuid } from "./single-agent-commerce-read-only-context.js";
-import { makeBinding, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
+import { makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
+import { extractAdProductCodes } from "./media-resolution.js";
 import { sizeChartTarget } from "./size-chart-target.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
@@ -115,6 +116,23 @@ export async function runPersistedCommerceIngress(input: {
     return { ...noSend("PRIVATE_CHECKOUT_UNAVAILABLE"), terminal: await recovery.terminalOutcome?.() ?? noSend("PRIVATE_CHECKOUT_UNAVAILABLE").terminal,
       mode: "PRIVATE_CODE_PATH", enqueued: handoff.outboxCount(), privateCheckoutFailure: privateResult.failure ?? null };
   }
+  // Hints select only source-verified identities, never prices or effects. A new unresolved ad must not fall back to an old product.
+  const lookup = async (ids: readonly string[]) => {
+    const products = await Promise.all([...new Set(ids)].slice(0,MAX_RUNTIME_PRODUCTS).map(async id => {
+      try { const source = await input.read.catalog.readProduct(id,false);
+        return source?.product && normalizeProductCode(source.product.productId) === id ? source.product : null;
+      } catch { return null; }
+    }));
+    return products.filter(p => p !== null);
+  };
+  const explicit = await lookup(extractAdProductCodes(latest));
+  const ads = messages.flatMap(m => m.adsContext ? [m.adsContext] : []);
+  const hinted = explicit.length ? explicit : ads.length ? await lookup(ads.flatMap(ad => extractAdProductCodes(ad.adTitle ?? ""))) : [];
+  const focused = hinted.length || ads.length ? hinted : record.state.currentProductId ? await lookup([normalizeProductCode(record.state.currentProductId)]) : [];
+  const currentProductId = focused.length === 1 ? focused[0]!.productId : null;
+  const initialProducts = [...new Map([...(ads.length && !hinted.length ? [] : [...focused,...(input.read.initialProducts ?? [])])]
+    .map(p => [p.productId,p])).values()].slice(0,MAX_RUNTIME_PRODUCTS);
+  const scopedRead = {...input.read,initialProducts,state:()=>({...scope,currentProductId,factSnapshotVersion:""})};
   const profilePort = createRealtimeCustomerStatePort(input.store, scope, () => {
     const at = input.clock().toISOString();
     return { profile: CustomerProfileV1Schema.parse({ schemaVersion: 1, profileId: randomUUID(), customerKey: { namespace: "meta", algorithm: "HMAC_SHA256", digest: scope.customerHash },
@@ -123,7 +141,7 @@ export async function runPersistedCommerceIngress(input: {
   const profile = await profilePort.read();
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId });
-  const tools = await createCommerceTools({ read: { ...input.read, scope, clock: input.clock }, state: { store: profilePort,
+  const tools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock }, state: { store: profilePort,
     sourceMessages: messages.map(m => ({ text: m.text ?? "", sourceMessageId: m.messageId ?? m.eventKey, observedAt: m.occurredAt })),
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false), target = sizeChartTarget(product);
       return { target, charts: evaluateSizeChartEligibility({ policy: await input.policy(), productId: ref, target }).charts }; },

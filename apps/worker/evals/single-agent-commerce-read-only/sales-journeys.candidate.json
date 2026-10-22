@@ -162,7 +162,7 @@
       },
       "turns": [
         {"turnId": "bank-confirm", "runtime": {"messages": [{"text": "Chị chuyển khoản nhé, gửi chị mã QR.", "attachments": []}]}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Valid BANK preview thực tế được capture trong setup.", "expected": "Cấp payment instructions đúng trạng thái/authority. Xin QR không tự chứng minh đã xác nhận mua hoặc đã thanh toán; không ép thêm từ chốt đơn vào lời khách để kích hoạt path cũ, không gọi gallery selector."}},
-        {"turnId": "receipt-batch", "runtime": {"messages": [{"text": null, "attachments": [{"fixtureRef": "synthetic-bank-receipt"}]}, {"text": "Chị chuyển rồi nhé.", "attachments": []}]}, "evaluator": {"route": "PRIVATE_OR_HUMAN_CODE", "advanceWhen": "Nhận inbound theo ownership hiện hành; nếu đã HUMAN thì kiểm đường staff đang có, không đưa về BOT.", "expected": "Staff linkage đến ảnh item1 và đúng conversation; không xác nhận thanh toán từ lời khách/ảnh hoặc bind nhầm chỉ item2."}}
+        {"turnId": "receipt-batch", "runtime": {"messages": [{"text": null, "attachments": [{"fixtureRef": "synthetic-bank-receipt"}]}, {"text": "Chị chuyển rồi nhé.", "attachments": []}]}, "evaluator": {"route": "PRIVATE_OR_HUMAN_CODE", "advanceWhen": "Authorized QR/payment instructions cho đúng payment context đã được capture thực tế. Nếu bước xin QR còn chờ xác nhận hoặc chưa cấp được thông tin thanh toán thì không dispatch biên lai, giữ nguyên failure/incomplete của bước đó. Nhận inbound theo ownership hiện hành; đã HUMAN thì kiểm staff path, không đưa về BOT.", "expected": "Staff linkage đến ảnh item1 và đúng conversation; không xác nhận thanh toán từ lời khách/ảnh hoặc bind nhầm chỉ item2."}}
       ]
     },
     {

@@ -28,3 +28,16 @@ pnpm --filter @lana/worker typecheck
 ## Còn phải thực hiện
 
 N3a focus/ad bridge; N4 ảnh ra; N5 media intake/staff linkage; N6a public image input; N7 negotiation event; N8 harness và real-DB/capture/model coverage theo prerequisites. N3b terminal-focus và N6b customer-image privacy/recognition vẫn cần chốt contract, không tăng model/tool budget hoặc bypass privacy. Worker build/lint và focused regressions tương ứng phải chạy sau các thay đổi cuối.
+
+## Savepoint N3a
+
+Ingress xác minh catalog refs từ mã khách vừa nhắn, code trong adTitle và currentProductId đã lưu. Explicit verified ref thắng ad hint; ad chưa xác minh không tái dùng mẫu cũ. Source facts vẫn được prepare/readback như cũ; không lấy read_product cuối làm lựa chọn focus. Không implement N3b/tool round3 hoặc adId→product mapping giả.
+
+Observed RED4/22 ingress tests; GREEN78/78 ingress + read-only-tools + session tests bằng:
+
+```powershell
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-session.test.ts
+```
+
+N3a mới có focused evidence, chưa real-DB/provider journey; không nhận N3b đã hoàn thành. J10 candidate đã bổ sung điều kiện chỉ gửi biên lai sau actual QR/payment instructions đúng payment context; giữ incomplete/failure bước trước khi chưa cấp được QR.
