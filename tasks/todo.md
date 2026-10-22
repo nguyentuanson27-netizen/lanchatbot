@@ -1,3 +1,17 @@
+## Checklist sửa sau independent review — 2026-10-23
+
+[Kế hoạch hiện hành](../docs/specs/c3-phase-b-full39-rootcause-fix-plan-20261023.md). Chỉ planning đã xong; chưa implementation/provider, không tự gọi review mới.
+
+- [x] Chỉnh proposal theo ba P2 required và self-review.
+- [ ] T0: ghi lại trace discovery, tách symptom/cause/hypothesis.
+- [ ] T1: sàng candidate trước offer reads, giữ bound8 và authority.
+- [ ] T2: chuẩn bị quote experiment một biến, hai captured native-history inputs/control.
+- [ ] T3: xác định treatment tư vấn có căn cứ; paired diagnostic4 cùng mode/context, hoặc giữ prompt nếu chưa có treatment rõ.
+- [ ] T4: owner/verifier deadline refusal và controls cả hai phía; không thêm fit exception.
+- [ ] T5: gallery wording; provider errors giữ accounting, không retry mới.
+- [ ] Focused verification phù hợp với implementation thực tế; clean commit/hash/preflight trước provider.
+- [ ] Small evaluation/report khi được yêu cầu; không tự nối full39 hoặc promote từ N1.
+
 ## Full39 sau sửa opening/advice — 2026-10-23
 
 **FULL39_COMPLETE — CHƯA B GO.** [Kết quả và phân tích](../apps/worker/evals/single-agent-commerce-read-only/opening-advice-run-20261023/CHECKPOINT_B.md), [39 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/opening-advice-run-20261023/CONVERSATIONS.md). Source540b8129, N1, đủ24B1+8stateful+4openings+3negotiation;4diagnostic riêng. Native30eligible/4fallback/3handoff/2code-checkout; manual32dùngđược/3cầnsửa/4fallback.106native+8diagnostic requests,0retry/labelleak/quotaerror,2ownererrors,3DBdropped. First handoff và ảnhchung cải thiện; owner vẫn bỏqua quoteưuđãi đã có và phân tán lựa chọn concern-v2; gallery còn giọnghệthống.4fallback=2Geminierrors+2verifierFAIL; không gọi tấtcả là lỗi tư vấn. Diagnostic2cầnsửa vẫn được giữ, full39 chạy theo yêu cầu owner mới nhất, không thay treatment. Không chạy thêm hoặc deploy; A OWNER_BYPASS. Các mục dưới giữ lịch sử theo thời điểm.
