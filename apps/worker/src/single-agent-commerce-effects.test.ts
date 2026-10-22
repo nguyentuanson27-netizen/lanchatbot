@@ -45,7 +45,7 @@ async function setup(clock = () => commerceNow) {
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
   const readPolicy = vi.fn(async () => policy);
   const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
-    policy: readPolicy,
+    policy: readPolicy,negotiationSource:"Giá hơi cao, bớt cho chị được không?",
     resolveBankTransferPolicy: () => bankPolicy,
     trustedPorts: {
       resolveCartDraft: () => null, resolveCartMutation: () => null, resolveShopPolicy: () => null,
@@ -61,6 +61,28 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("applies one source-bound objection and keeps its tier and evidence ledger when the cart reprices",async()=>{
+    const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");
+    const call={name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}};
+    expect(await s.tools.invoke(call)).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
+    expect(s.current().negotiation!.customerState).toBe("HESITANT");
+    const evidence=s.current().negotiation!.consumedObjectionEvidenceIds;
+    expect(evidence).toHaveLength(1);
+    expect(await s.tools.invoke({...call,args:{...call.args,sourceQuote:"bớt cho chị được không?"}})).toMatchObject({status:"OK",data:{duplicate:true}});
+    const line=s.current().cart!.value.lines[0]!;
+    expect((await s.tools.invoke({name:"change_cart_item",args:{subjectRef:line.lineId,action:"SET_QUANTITY",quantity:2}})).status).toBe("OK");
+    expect(s.current().negotiation!.customerState).toBe("HESITANT");
+    expect(s.current().negotiation!.consumedObjectionEvidenceIds).toEqual(evidence);
+    expect(s.commits).toHaveLength(3);
+  });
+  it("rejects invented quote, model-selected money and an event with no current cart",async()=>{
+    const s=await setup(),call={name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}};
+    expect((await s.tools.invoke(call)).status).toBe("REJECTED");
+    await s.tools.invoke(s.add);
+    expect((await s.tools.invoke({...call,args:{...call.args,sourceQuote:"Câu từ history"}})).status).toBe("REJECTED");
+    expect((await s.tools.invoke({...call,args:{...call.args,discount:100000}})).status).toBe("REJECTED");
+    expect(s.commits).toHaveLength(1);
+  });
   it("rejects a missing offer before selection or commit instead of reporting a default offer color", async () => {
     const s = await setup(), { offerType: _offer, ...args } = s.add.args;
     expect(await s.tools.invoke({ ...s.add, args })).toEqual({ status: "REJECTED", reason: "OFFER_REQUIRED" });

@@ -163,7 +163,7 @@ export async function runPersistedCommerceIngress(input: {
       const lines = state.cart && canonicalCartPolicyLinesV2(state.cart.value.lines, scope.shopId); if (!lines || !state.negotiation) throw new Error("CART_REQUIRED");
       const tier = state.negotiation.customerState;
       return { policy: policy.policy, lines, closingEvidence: { previousState: tier, purchaseReady: tier === "READY", priceObjectionCount: tier === "READY" ? 0 : tier === "HESITANT" ? 1 : 2, secondConcessionAlreadyApplied: tier === "CAUTIOUS" }, now: input.clock() }; } },
-    effects: { ...executor, conversationKey: scope.conversationId, identity: { cartId: commerceUuid(commerceHash([scope.conversationId, "cart"])),
+    effects: { ...executor, negotiationSource:latest, conversationKey: scope.conversationId, identity: { cartId: commerceUuid(commerceHash([scope.conversationId, "cart"])),
       salesEpisodeId: commerceUuid(commerceHash([scope.conversationId, "episode"])), customerProfileId: profile.profile.profileId },
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,

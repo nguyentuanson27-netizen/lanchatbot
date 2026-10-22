@@ -10,7 +10,7 @@ import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-c
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 
-const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase"]);
+const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
   | { status: "APPLIED"; state: SalesCycleRuntimeState; transferToHuman: boolean }
   | { status: "DUPLICATE"; state: SalesCycleRuntimeState }
@@ -25,6 +25,8 @@ export async function createCommerceEffectTools(input: {
   authorize: (effect: "CART_OPEN" | "CART_MUTATION" | "PURCHASE_CONFIRMATION", current: SalesCycleRuntimeState) => Promise<boolean>;
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
+  /** Current bounded public inbound text, supplied by code rather than tool arguments. */
+  negotiationSource?: string;
   trustedPorts?: SalesCycleTrustedPortsV1;
   resolveBankTransferPolicy?: Parameters<typeof executePersistedSalesCycleCommand>[0]["resolveBankTransferPolicy"];
   /** A real composition supplies the existing guarded runtime transaction; isolated tests may use the domain CAS. */
@@ -161,8 +163,14 @@ export async function createCommerceEffectTools(input: {
       current = await read();
       const authorizedRevision = current.revision;
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
-        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : []);
+        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      if(call.name==="record_negotiation"){
+        const quote=a.sourceQuote,source=input.negotiationSource;
+        if(!current.cart||!current.negotiation||!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
+          typeof quote!=="string"||!quote.trim()||Buffer.byteLength(quote)>512||!source||!source.includes(quote)||
+          source.indexOf(quote)!==source.lastIndexOf(quote))return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
+      }
       if (call.name === "add_to_cart" && (typeof a.offerType !== "string" || !a.offerType.trim())) {
         return { status: "REJECTED", reason: "OFFER_REQUIRED" };
       }
@@ -183,11 +191,11 @@ export async function createCommerceEffectTools(input: {
       const effect = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMATION" : current.cart ? "CART_MUTATION" : "CART_OPEN";
       if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
       const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
-        sourceMessageId: input.scope.sourceMessageId, tool: call.name, args: a });
-      const effectName = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
+        sourceMessageId: input.scope.sourceMessageId, tool: call.name, ...(call.name==="record_negotiation"?{}:{args:a}) });
+      const effectName = call.name==="record_negotiation"?"NEGOTIATION_UPDATED":call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
       if (current.processedCommandIds.includes(operationId)) {
         const recovered = receipt?.operationId === operationId ? receipt : await input.readReceipt?.(operationId);
-        const allowed = call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
+        const allowed = call.name==="record_negotiation"?["NEGOTIATION_UPDATED"]:call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
         if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
         await refreshSelections();
         return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems() } };
@@ -226,6 +234,8 @@ export async function createCommerceEffectTools(input: {
         mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
       else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
         intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
+      else if(call.name==="record_negotiation")command={kind:"NEGOTIATION_EVENT",commandId:operationId,expectedNegotiationVersion:current.negotiation!.stateVersion,
+        sourceMessageId:input.scope.sourceMessageId,intent:a.intent as "PRICE_OBJECTION"|"PURCHASE_READY",reasonCode:a.intent==="PRICE_OBJECTION"?"PRICE_OBJECTION":null};
       const ports: SalesCycleTrustedPortsV1 = {
         resolveCartDraft: r => draft && r.contentHash === computeBusinessContentHash(draft) ? draft : null,
         resolveCartMutation: r => mutation && r.contentHash === computeBusinessContentHash({ mutation }) ? { mutation } : null,

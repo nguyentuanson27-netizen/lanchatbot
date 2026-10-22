@@ -98,6 +98,7 @@ export interface RealtimeSalesCycleInput {
     readonly cartIdentity?: import("@lana/business-tools").CanonicalCartIdentityV2; readonly cartExpiresAt?: string; readonly cartLineId?: string };
   /** Only the code-authorized native adapter supplies this; the legacy text path remains unchanged. */
   readonly nativeMutation?: { readonly command: Extract<SalesCycleCommand, { kind: "CART_MUTATED" }>; readonly mutation: CanonicalCartMutationPayloadV1 };
+  readonly nativeNegotiation?: Extract<SalesCycleCommand,{kind:"NEGOTIATION_EVENT"}>;
   readonly pageId: string;
   readonly conversationId: string;
   readonly customerHash: string;
@@ -1406,6 +1407,13 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  if(input.nativeNegotiation){
+    const command=input.nativeNegotiation;
+    if(command.sourceMessageId!==input.messageId)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
+    const result=apply(command);
+    if(result.status!=="APPLIED")return failedOutput(result.status==="REJECTED"?result.reasonCode:"NATIVE_NEGOTIATION_REJECTED");
+    return {handled:true,messages:[],plan:plan(),transferToHuman:false,desiredTag:null,reasonCode:null};
+  }
   if (input.nativeMutation) {
     const { command, mutation } = input.nativeMutation;
     if (!state.cart || !state.negotiation || !input.canonicalBuyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") ||

@@ -67,7 +67,7 @@ export function createPersistedCommerceReceiptReader(input: {
   return async operationId => {
     const event = await input.store.readCommittedSalesCycleEvent(input.scope.pageId, input.scope.conversationId, operationId);
     const current = await input.repository.read(input.conversationKey);
-    const effect = event?.commandKind === "CART_OPENED" ? "CART_OPENED" : event?.commandKind === "CART_MUTATED" ? "CART_MUTATED"
+    const effect = event?.commandKind === "NEGOTIATION_EVENT"?"NEGOTIATION_UPDATED":event?.commandKind === "CART_OPENED" ? "CART_OPENED" : event?.commandKind === "CART_MUTATED" ? "CART_MUTATED"
       : event?.commandKind === "CONFIRM_PURCHASE" ? "PURCHASE_CONFIRMED" : null;
     if (!event || !effect || !current?.cart || current.revision !== event.stateRevisionAfter || current.cart.value.cartId !== event.cartId) return null;
     return { ref: `receipt:${operationId}`, operationId, subjectRef: event.cartId, effect, status: "SUCCESS",
@@ -88,7 +88,7 @@ export async function prepareNativeCommerceTransition(input: {
   const requestedAction = mutation?.kind === "SET_QUANTITY" ? "SET_QUANTITY" : mutation?.kind === "ADD_LINE" ? "ADD_TO_CART" : null;
   const quantity = mutation?.kind === "SET_QUANTITY" ? mutation.quantity : mutation?.kind === "ADD_LINE" ? mutation.line.quantity : null;
   const draft = command.kind === "CART_OPENED" ? trustedPorts.resolveCartDraft(command.cartDraftRef) : null;
-  const suffix = command.kind === "CART_OPENED" ? "cart-open" : command.kind === "CONFIRM_PURCHASE" ? "confirm"
+  const suffix = command.kind === "NEGOTIATION_EVENT"?"negotiation":command.kind === "CART_OPENED" ? "cart-open" : command.kind === "CONFIRM_PURCHASE" ? "confirm"
     : mutation?.kind === "ADD_LINE" ? "add-line" : mutation?.kind === "REMOVE_LINE" ? "remove-line" : "set-quantity";
   const legacyIntent = buildCanonicalDecisionEvidenceV1({ text: source.text, sourceMessageId: source.messageId,
     productId: source.productId, evaluatedAt: source.now, modelBuyingIntent: requestedAction
@@ -106,7 +106,8 @@ export async function prepareNativeCommerceTransition(input: {
     primaryCommandId: command.commandId, primarySuffix: suffix,
     ...(draft ? { cartIdentity: draft.identity, ...(draft.lines[0] ? { cartLineId: draft.lines[0].lineId } : {}) } : {}),
     ...(command.kind === "CART_OPENED" ? { cartExpiresAt: command.expiresAt } : {}),
-  }, ...(mutation && command.kind === "CART_MUTATED" ? { nativeMutation: { command, mutation } } : {}) });
+  }, ...(command.kind==="NEGOTIATION_EVENT"?{nativeNegotiation:command}:{}),
+    ...(mutation && command.kind === "CART_MUTATED" ? { nativeMutation: { command, mutation } } : {}) });
 }
 
 /** Reuse the existing inbox/revision/authority transaction; this adapter never writes SQL or sends. */
