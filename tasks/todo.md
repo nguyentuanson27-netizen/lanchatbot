@@ -5,7 +5,7 @@
 - [x] Review code/spec/test: lịch sử text đã nối; DB sort đúng, query8 trước privacy filtering gây underfill; có write currentProductId nhưng đường seed/read focus chưa được chứng minh đầy đủ.
 - [x] Lập thứ tự theo phụ thuộc và self-review privacy/media/authority/anti-bloat; tách chức năng, độ phủ, hạn chế và activation.
 - [x] Sửa theo review độc lập: giữ negotiation tier/ledger khi reprice; tách N3b chưa giải terminal-focus trong2tool rounds; clarify active single-field checkout và public history projection; bỏ dependency giả, thêm batch-attachment linkage test design.
-- [x] Viết12journeys/44inbound slots với lời khách cụ thể, không gold bot replies; tách runtime/evaluator, source/setup prerequisites và dependent-turn rules.4private-fixture slots chưa materialize; media fixtures chưa cấp bytes/source hash.
+- [x] Chỉnh12journeys từ44xuống32inbound slots: bỏ chọn lại, correction/mutation dày; giữ kiểm kỹ thuật riêng, không gold bot replies; tách runtime/evaluator, source/setup prerequisites và dependent-turn rules.4private-fixture slots chưa materialize; media fixtures chưa cấp bytes/source hash.
 - [x] Thêm offline corpus/projection checks; command gồm sales-journeys/protocol/gemini-inference tests:68PASS,0generation. Không nhận đây là runtime RED→GREEN hoặc model-run evidence.
 - [ ] N1: Checkout theo field đang chờ trước public model/history; partial/correction/cancel tests; không PII leakage hoặc ghi nhầm câu hỏi thành tên.
 - [ ] N2: Đọc bounded30 candidate rows, lọc rồi giữ tối đa8 public messages/4.096 byte; kiểm accepted-history/longer conversations, không summary/memory mới.

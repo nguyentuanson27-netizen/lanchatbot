@@ -87,7 +87,7 @@ The isolated integration script is the only child allowed the PostgreSQL admin r
 
 ## Candidate normal-sales journeys — 2026-10-22
 
-[Candidate corpus and prerequisites](SALES_JOURNEYS_CANDIDATE.md):12journeys/44inbound slots, actual accepted history, separate evaluator setup/scoring and private/media fixtures. These are authored inputs, **not registered provider runs**. Keep the fixed24B1/fixed8stateful baseline; the current runners do not directly execute the new format. Extend the existing harness only after the relevant capability/source/privacy prerequisites work, and freeze selected turns/request budget before dispatch. Offline checks: `node --test apps/worker/evals/single-agent-commerce-read-only/sales-journeys.test.mjs` from repository root; this makes no provider requests.
+[Candidate corpus and prerequisites](SALES_JOURNEYS_CANDIDATE.md):12journeys/32inbound slots after the dialogue-flow review, actual accepted history, separate evaluator setup/scoring and private/media fixtures. Dense correction/cart-action sequences remain technical regression coverage rather than being forced into normal sales chats. These are authored inputs, **not registered provider runs**. Keep the fixed24B1/fixed8stateful baseline; the current runners do not directly execute the new format. Extend the existing harness only after the relevant capability/source/privacy prerequisites work, and freeze selected turns/request budget before dispatch. Offline checks: `node --test apps/worker/evals/single-agent-commerce-read-only/sales-journeys.test.mjs` from repository root; this makes no provider requests.
 
 ## Verification
 

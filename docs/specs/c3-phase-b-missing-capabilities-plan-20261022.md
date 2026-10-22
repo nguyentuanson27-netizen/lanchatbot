@@ -176,20 +176,20 @@ Giữ 24 B1 và 8 mốc stateful cũ làm baseline. Tách rõ deterministic test
 
 | ID | Hành trình | Bằng chứng cần thấy |
 |---|---|---|
-| J01 | Vào từ quảng cáo, hỏi giá rồi quay lại “bộ lúc nãy” sau khi xem mẫu khác | Đúng subject, focus/history và facts mới; không tự sửa giỏ. |
-| J02 | Tìm đồ theo dịp/ngân sách, so hai mẫu, hỏi chất liệu/chăm sóc | Có lựa chọn hữu ích; không ép khách nói mã và không bịa lợi ích kiểm chứng được. |
-| J03 | Xin ảnh màu/mặt sau/chi tiết, mẫu hoặc màu hết hàng | Asset đúng yêu cầu; thiếu ảnh nói rõ; tìm món thay có căn cứ. |
-| J04 | Gửi ảnh để tìm mẫu, có chữ kèm ảnh hoặc ảnh không rõ | Intake không nuốt tin; xác định khi đủ nguồn, hỏi lại/handoff khi chưa đủ; privacy đúng. |
-| J05 | Chọn size từ cao/nặng hoặc số đo, thiếu dữ liệu rồi sửa | Hỏi phần engine cần, không tư vấn size khi chưa đủ; không đọc lại toàn bộ số đo. |
-| J06 | Hai món, set khác size thành phần, đổi màu/số lượng rồi bỏ một món | Đúng line/component/ref và tổng; không ghi nhận effect chưa commit. |
-| J07 | Phản đối giá, hỏi ưu đãi rồi đồng ý mua | Owner hiểu đúng; transition/quote theo policy; không cấp giảm ngoài nguồn. |
-| J08 | Hỏi ship và hạn nhận hàng, đổi địa chỉ/vùng | Dùng ETA dự kiến đúng nguồn; miền Nam chung transit; không hứa ngày chắc chắn. |
+| J01 | Giá từ quảng cáo → nhờ chọn giữa hai bộ đi cưới → hỏi tồn be M của bộ đó | Đúng subject/focus/history và facts mới; không tự sửa giỏ. |
+| J02 | Bộ đi làm → phối áo với quần jeans có sẵn → hỏi giặt | Lựa chọn hữu ích từ đầu, thông tin mới ở follow-up; không bắt chọn lại hoặc bịa care. |
+| J03 | Ảnh tổng thể → xem gần phần thêu → hỏi tồn | Asset đúng loại; thiếu ảnh nói rõ. Góc khác/stock-out giữ ở regression, không cố exercise mọi nhánh trong một chat. |
+| J04 | Gửi ảnh kèm hỏi mẫu → mua riêng áo vì đã có váy | Đúng source mẫu/offer và privacy; không nối ảnh mờ vô cớ hoặc mua cả bộ trái ý khách. |
+| J05 | Cao/nặng và thích rộng → hỏi màu của size được chọn | Đủ dữ liệu thì tư vấn bằng engine, thiếu thì hỏi đúng. Correction kiểm riêng, không tự nhồi ba vòng. |
+| J06 | Mua set → thêm một áo riêng → tổng hai món | Đúng line/ref/tổng. Mixed-size/quantity/remove giữ regression riêng, chưa claim model coverage cho chúng. |
+| J07 | Xin bớt → đổi size kèm hỏi giá → đồng ý lấy | Transition/reprice đúng policy, giữ tier/ledger; không buộc phải có ưu đãi để chạy. |
+| J08 | Cần sáng thứ Sáu ở Cần Thơ → cân nhắc nhận tại chỗ làm TP.HCM | Có lý do đổi nơi nhận; ETA miền Nam chung transit, không bảo đảm sáng từ lịch giao dự kiến. |
 | J09 | COD, cung cấp thông tin từng tin rồi sửa tên/địa chỉ trước xác nhận | Private flow, không leak/hỏi lại; preview/confirmation đúng. |
 | J10 | Chuyển khoản, nhận QR rồi gửi ảnh biên lai | Đúng QR/payment context; ảnh không tự chứng minh trả tiền; handoff có linkage. |
 | J11 | Báo lỗi hàng kèm ảnh hoặc đã dùng rồi muốn đổi | Trả lời đúng tình huống/policy hiện hành; đủ điều kiện thì nói cách xử lý, không đọc điều kiện thừa; staff thực hiện nghiệp vụ. |
 | J12 | Hỏi vận đơn hoặc muốn sửa/hủy đơn đã chốt | Đúng handoff reason/context; không nhầm sửa giỏ với sửa đơn POS. |
 
-Kiểm lịch sử vượt 8 tin, pause/thanks, đổi ý, stale source và HUMAN ownership bằng deterministic multi-turn/DB tests trước; chỉ thêm provider journey khi cần kiểm khả năng hiểu. Không kéo dài mọi hội thoại chỉ để đủ từ khóa.
+Sau review ngôn ngữ/mạch chat, candidate còn12journeys/32inbound slots thay vì44; chưa đăng ký generation. Trước follow-up phải xét actual accepted reply, không cố hỏi điều bot đã trả đúng/đủ. Dùng disposition evaluator hiện có để ghi vì sao chưa dispatch, không thêm model classifier hoặc keyword router. Việc hỏi thiếu đầu vào engine hợp lý không tự là lỗi; ghi đúng phần completion chưa chứng minh. Giữ các action/correction dày ở regression hiện hữu/companion, không nhận chúng đã được model kiểm hết qua bộ ordinary journeys. Kiểm lịch sử vượt8tin, pause/thanks, đổi ý, stale source và HUMAN ownership bằng deterministic multi-turn/DB tests trước; chỉ thêm provider probe khi có owning risk cụ thể. Không kéo dài hội thoại để đủ từ khóa.
 
 **Hoàn thành khi:**
 
