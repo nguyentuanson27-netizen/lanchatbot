@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { createSalesCycleRuntimeState, type RuntimePolicyResolution, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1 } from "@lana/chat-runtime";
+import { createSalesCycleRuntimeState, type RuntimePolicyResolution, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1, type VerifiedInboundMessageV1 } from "@lana/chat-runtime";
 import { applySilentHandoff } from "@lana/conversation-engine";
 import type { PostgresRealtimeRuntimeStore, RealtimeCommitInput, RealtimeInboxBatchGuard } from "@lana/database";
 import { buildCanonicalDecisionEvidenceV1, evaluateDeterministicEffectReadinessV1 } from "@lana/business-tools";
@@ -24,6 +24,7 @@ export function createPersistedCommerceExecutor(input: {
   deliveryRecipient?: string;
   productNames?: RealtimeSalesCycleInput["productNames"];
   attachmentIds?: readonly string[];
+  paymentReceiptInbound?: VerifiedInboundMessageV1;
   handoffSource?: () => {eventKey:string;messagePk:string;attachmentCount:number} | undefined;
 }) {
   const { scope } = input;
@@ -41,7 +42,8 @@ export function createPersistedCommerceExecutor(input: {
     pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash, state, stateRevision: state.revision,
     checkoutCollection: "SINGLE_FIELD" as const,
     conversationRevision: authority.stateVersion, text: input.latest, messageId: scope.sourceMessageId, eventKey: scope.sourceMessageId,
-    senderId: scope.customerHash, occurredAt: scope.sourceObservedAt!, attachmentIds: input.attachmentIds ?? [], productId: state.cart?.value.lines[0]?.parentProductId ?? null,
+    senderId: scope.customerHash, occurredAt: scope.sourceObservedAt!, attachmentIds: input.attachmentIds ?? [],
+    ...(input.paymentReceiptInbound ? {paymentReceiptInbound: input.paymentReceiptInbound} : {}), productId: state.cart?.value.lines[0]?.parentProductId ?? null,
     offerType: null, size: null, color: null, shopAlias: scope.shopAlias, policyResolution, facts: input.facts, ...(input.productNames ? { productNames: input.productNames } : {}), now: input.clock(), effectNow: input.clock,
   });
   const matches = (a: HandoffAuthority) => a.pageId === scope.pageId && a.customerHash === scope.customerHash && a.conversationId === scope.conversationId &&

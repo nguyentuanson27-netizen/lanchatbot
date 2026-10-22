@@ -533,12 +533,15 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
   )
     .filter((type) => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type) &&
       !(input.effect === "PROTECTED_OUTBOUND" && type === "PRODUCT_MEDIA"));
-  let missing = false;
+  const catalogMedia = input.effect === "PROTECTED_OUTBOUND";
+  let missing = catalogMedia && (input.protectedClaimTypes?.includes("PRODUCT_MEDIA") ?? false) &&
+    !input.claims.some(claim => claim.type === "PRODUCT_MEDIA");
   let mismatch = input.claims.some((claim) => {
     if (input.effect === "PROTECTED_OUTBOUND" && claim.type === "PRODUCT_MEDIA" && claim.scope.kind === "PRODUCT") {
       const scope = claim.scope;
-      return !input.lines.some(line => line.parentProductId === scope.productId &&
-        (scope.variantId === null || line.offerId === scope.variantId));
+      // Parent catalog photos have their own outbound product/source binding.
+      // A variant-specific assertion must still match an exact cart offer.
+      return scope.variantId !== null && !input.lines.some(line => line.parentProductId === scope.productId && line.offerId === scope.variantId);
     }
     if (claim.scope.kind !== "PRODUCT" || !requiredTypes.includes(claim.type)) {
       return false;
@@ -594,8 +597,8 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     cartVersion: input.cartVersion ?? null,
     ...(input.protectedClaimTypes === undefined
       ? {}
-      : { protectedClaimTypes: input.protectedClaimTypes }),
-    claims: input.claims,
+      : { protectedClaimTypes: catalogMedia ? input.protectedClaimTypes.filter(type => type !== "PRODUCT_MEDIA") : input.protectedClaimTypes }),
+    claims: catalogMedia ? input.claims.filter(claim => claim.type !== "PRODUCT_MEDIA") : input.claims,
   });
   return { missing: missing || base.missing, conflict: base.conflict, mismatch };
 }

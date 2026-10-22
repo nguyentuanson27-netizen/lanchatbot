@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRuntimeState } from "@lana/chat-runtime";
-import type { RealtimeCommitInput } from "@lana/database";
+import { LocalEnvelopeCipher, PostgresRealtimeRuntimeStore, type RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
 import { runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine } from "./single-agent-commerce.test-support.js";
@@ -13,11 +13,13 @@ function fixture(productIds = ["SM613"]) {
   let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null;
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
   let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+  let checkCommit = async (_prepared: RealtimeCommitInput<unknown>) => {};
   const profileWrite = vi.fn(async (_page: string, _customer: string, expected: number, next: ReturnType<typeof fixtureProfile>) => {
     if (expected !== profile.profile.revision) return false;
     profile = { profile: next.profile, fieldEvidence: next.fieldEvidence }; return true;
   });
   const commit = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => {
+    await checkCommit(prepared);
     conversation=prepared.state as typeof conversation;revision=conversation.revision;
     if(prepared.salesCyclePlan)cycle=prepared.salesCyclePlan.state as typeof cycle;
     return {stateCommitted:true,metaOutboxCreated:prepared.metaPlan?.messages.length??0,inboxBatchStatus:"COMMITTED",
@@ -26,6 +28,8 @@ function fixture(productIds = ["SM613"]) {
   const store = { loadOrCreate: async () => ({ conversationId: scope.conversationId, stateVersion: revision, state: { ...conversation, revision } }),
     loadOrCreateSalesCycle: async () => ({ state: cycle, stateRevision: cycle.revision }),
     loadOrCreateCustomerProfile: async () => ({ ...profile, pageId: scope.pageId, customerHash: scope.customerHash, revision: profile.profile.revision }),
+    readCommittedSalesCycleEvent: async (_page:string,_conversation:string,commandId:string) =>
+      commit.mock.calls.flatMap(c=>c[1].salesCyclePlan?.events??[]).find(e=>e.commandId===commandId)??null,
     compareAndSwapCustomerProfile: profileWrite, commitWithinTransaction: commit };
   const id = "current-message", message = { schemaVersion: 1, traceId: "00000000-0000-4000-8000-000000000001", eventKey: id, messageId: id,
     pageId: scope.pageId, senderId: "synthetic-customer", conversationId: "meta-conversation", occurredAt: commerceNow.toISOString(),
@@ -34,7 +38,7 @@ function fixture(productIds = ["SM613"]) {
     evaluationGroupId: "turn", leaseToken: "lease", inboxIds: ["inbox"], items: [{ envelope: { message } }] };
   const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
   const select = vi.fn(async (): Promise<CartSelectionResult> => ({ status: "INVALID", reasonCode: "FIXTURE_SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] }));
-  const inbox = { isBatchCurrent: async () => generation === 1, readGeneration: async () => generation, completeBatch: async () => {} };
+  const inbox = { isBatchCurrent: async () => generation === batch.generation, readGeneration: async () => generation, completeBatch: async () => {} };
   const policy = vi.fn(() => fixturePolicy());
   const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
@@ -47,13 +51,82 @@ function fixture(productIds = ["SM613"]) {
     resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
-    setCycle: (state: typeof cycle) => { cycle = state; },
+    setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
+    newGeneration: () => { batch.generation = generation; },
+    checkCommit: (check: typeof checkCommit) => { checkCommit = check; },
     setFocus: (currentProductId: string | null) => { conversation = {...conversation,currentProductId}; },
     appendMessage:(next:typeof message)=>{batch.items.push({envelope:{message:next}});},
     enableHandoff:()=>{tagId="staff-tag";}, transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+async function seedCart(f: ReturnType<typeof fixture>) {
+  const scope=commerceScope(), resolution=await fixturePolicy(), policy=resolution.bundle!.policy;
+  f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});
+  let state=createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
+  for(const kind of ["FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED"] as const)
+    state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now:commerceNow}).state;
+  const line=fixtureCartLine(),draft={identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+    lines:[line],shopId:scope.shopId,policyRef:{id:policy.policyBundleId,version:policy.policyVersion,contentHash:computeBusinessContentHash(policy)}};
+  state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
+    expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
+    trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
+  f.setCycle(state);
+  f.select.mockResolvedValue({status:"READY",line,shopId:scope.shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,
+    sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
+}
+
+it("does not count the same objection again when a superseded batch gains a new tail",async()=>{
+  const f=fixture(); await seedCart(f);
+  f.message.messageId="objection-A";f.message.eventKey="objection-A";f.message.text="Giá hơi cao";
+  f.appendMessage({...f.message,messageId:"tail-B",eventKey:"tail-B",text:"Chị đang cân nhắc"});
+  const objection={kind:"TOOLS" as const,calls:[{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}}],
+    content:{role:"model" as const,parts:[{functionCall:{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}}}]}};
+  let calls=0;
+  await f.run(async()=>{if(++calls===1)return objection;f.supersede();throw new Error("NEW_INBOUND");});
+  expect(f.cycle().negotiation!.consumedObjectionEvidenceIds).toEqual(["inbound:objection-A"]);
+  const total=f.cycle().cart!.value.grandTotalVnd;
+  f.newGeneration();f.appendMessage({...f.message,messageId:"tail-C",eventKey:"tail-C",text:"Cho chị xem lại tổng"});
+  calls=0;
+  const replay=await f.run(async()=>++calls===1?objection:{kind:"FINAL",text:"Dạ chị."});
+  expect(replay.terminal.disposition,JSON.stringify(replay.terminal)).toBe("SEND_ELIGIBLE");
+  expect(f.cycle().negotiation!.customerState).toBe("HESITANT");
+  expect(f.cycle().negotiation!.consumedObjectionEvidenceIds).toEqual(["inbound:objection-A"]);
+  expect(f.cycle().cart!.value.grandTotalVnd).toBe(total);
+  expect(f.commit.mock.calls.flatMap(c=>c[1].salesCyclePlan?.events??[]).filter(e=>e.commandKind==="NEGOTIATION_EVENT")).toHaveLength(1);
+});
+
+it.each([false,true])("keeps receipt evidence private and passes the actual batch source guard (textAfter=%s)",async textAfter=>{
+  const f=fixture();await seedCart(f);f.enableHandoff();
+  const state=f.cycle();
+  f.setCycle({...state,stage:"PURCHASE_CONFIRMED",confirmation:{schemaVersion:1,confirmationId:"70000000-0000-4000-8000-000000000001",idempotencyKey:"fixture-confirmed",cartId:state.cart!.value.cartId,
+    cartVersion:state.cart!.value.revision,previewId:"80000000-0000-4000-8000-000000000001",previewHash:"a".repeat(64),status:"PURCHASE_CONFIRMED",posOrderId:null,
+    desiredPancakeTag:"DA_CHOT_DON",confirmedAt:commerceNow.toISOString(),sourceMessageId:"earlier-confirmation"}});
+  f.message.messageId="receipt-image";f.message.eventKey="receipt-image";f.message.text=null as never;
+  f.message.attachments=[{type:"image",url:"https://content.pancake.vn/private-receipt.jpg",providerId:"receipt"}] as never;
+  if(textAfter){f.appendMessage({...f.message,messageId:"following-text",eventKey:"following-text",text:"Chị gửi rồi nhé",attachments:[]});f.batch.inboxIds.push("inbox2");}
+  const actual=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",new LocalEnvelopeCipher("00".repeat(32),"test"));
+  let passed=0;
+  const client={query:async(sql:string)=>{
+    if(sql.includes("SELECT routing_owner"))return {rowCount:1,rows:[{routing_owner:"APP",app_send_enabled:true,kill_switch:false,transaction_now:commerceNow}]};
+    if(sql.includes("SELECT generation"))return {rowCount:1,rows:[{generation:"1"}]};
+    if(sql.includes("AS source_message_id"))return {rowCount:f.batch.items.length,rows:f.batch.items.map(i=>({source_message_id:i.envelope.message.messageId})).reverse()};
+    if(sql.includes("SELECT conversation_owner"))return {rowCount:1,rows:[{conversation_owner:"BOT"}]};
+    if(sql.includes("SELECT state_revision")){passed++;throw new Error("SOURCE_GUARD_PASSED");}
+    throw new Error("UNEXPECTED_QUERY");
+  }};
+  f.checkCommit(async prepared=>{try{await actual.commitWithinTransaction(client as never,prepared,commerceNow);}catch(e){if(!(e instanceof Error)||e.message!=="SOURCE_GUARD_PASSED")throw e;}});
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>{throw new Error("PRIVATE_INPUT");});
+  try{
+    expect((await f.run(owner)).terminal.reason).toBe("PRIVATE_CHECKOUT_COMMITTED");
+    expect(passed).toBe(1);expect(f.cycle().stage).toBe("HANDED_OFF");
+    expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+    const event=f.commit.mock.calls[0]![1].handoffEventPlan!;
+    expect(event.triggerEventKey).toBe("receipt-image");expect(event.reasonDetailSafe).toMatchObject({attachmentCount:1});
+    expect(JSON.stringify(event)).not.toContain("private-receipt");
+  }finally{await actual.close();}
+});
 
 it("hands unknown customer media to staff with the first media message linkage and no provider exposure",async()=>{
   const f=fixture();f.enableHandoff();
@@ -83,8 +156,8 @@ it("does not fetch or expose hostile attachment URLs and preserves human ownersh
   expect(fetch).not.toHaveBeenCalled();expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();expect(f.commit).not.toHaveBeenCalled();
 });
 
-it.each([false,true])("enqueues approved media and exact final text in one protected response group (cart=%s)",async withCart=>{
-  const f=fixture(),p=f.products[0]!.product;
+it.each([{withCart:false,mediaProduct:"SM613"},{withCart:true,mediaProduct:"SM613"},{withCart:true,mediaProduct:"OTHER1"}])("enqueues approved media and exact final text in one protected response group ($withCart/$mediaProduct)",async ({withCart,mediaProduct})=>{
+  const f=fixture(["SM613","OTHER1"]),p=f.products.find(p=>p.product.productId===mediaProduct)!.product;
   p.images=[{url:"https://content.pancake.vn/back.jpg",role:"PRIMARY",angle:"BACK",imageType:"PRODUCT_ONLY",intents:[],sortOrder:0,qualityScore:null,feedback:false,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString()}];
   if(withCart){
@@ -111,6 +184,13 @@ it.each([false,true])("enqueues approved media and exact final text in one prote
   expect(meta.messages).toEqual([{kind:"TEXT",text:"Ảnh mặt sau đây chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
   expect(meta.protectedClaimTypes).toContain("PRODUCT_MEDIA");
   expect(meta.effectReadiness?.outcome).toBe("READY");
+  if(withCart){
+    const prepared=f.commit.mock.calls.at(-1)![1],parent=prepared.salesCyclePlan!.effectReadiness![0]!;
+    expect(parent.productIds).toEqual(["SM613"]);
+    expect(meta.effectReadiness!.productIds).toEqual([...new Set(["SM613",mediaProduct])].sort());
+    expect(meta.effectReadiness!.binding.cart).toEqual(parent.binding.cart);
+    expect(f.cycle().cart!.value.lines.map(l=>l.parentProductId)).toEqual(["SM613"]);
+  }
   expect(f.verifier).toHaveBeenCalledTimes(1);
 });
 

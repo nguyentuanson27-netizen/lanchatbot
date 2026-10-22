@@ -466,7 +466,11 @@ describe("DF06 deterministic readiness contract", () => {
     expect(validateCartEffectClaimSemanticsV1(input)).toEqual({missing:false,conflict:false,mismatch:false});
     expect(validateCartEffectClaimSemanticsV1({...input,claims:[]}).missing).toBe(true);
     expect(validateCartEffectClaimSemanticsV1({...input,claims:[{...media,scope:{kind:"PRODUCT",productId:"P-001",variantId:"WRONG"}}]}).mismatch).toBe(true);
-    expect(validateCartEffectClaimSemanticsV1({...input,claims:[{...media,scope:{kind:"PRODUCT",productId:"OTHER",variantId:null}}]}).missing).toBe(true);
+    const otherMedia={...media,scope:{kind:"PRODUCT" as const,productId:"OTHER",variantId:null}};
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[otherMedia]})).toEqual({missing:false,conflict:false,mismatch:false});
+    // Overall outbound scope still owns catalog identity; cart semantics must not substitute for it.
+    expect(validateEffectClaimSemanticsV1({effect:"PROTECTED_OUTBOUND",productIds:["P-001"],cartId:null,cartVersion:null,
+      protectedClaimTypes:["PRODUCT_MEDIA"],claims:[otherMedia]}).missing).toBe(true);
   });
 
   it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {

@@ -190,10 +190,15 @@ export function evaluateDeterministicEffectReadinessV1(
   }
   const offerProductIds = [...new Set(offerBindings.map(({ productId }) => productId))]
     .sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
+  const productScopeMatchesCart = offerProductIds.length === productIds.length &&
+    offerProductIds.every((productId, index) => productId === productIds[index]);
+  const catalogMediaAlongsideCart = input.effect === "PROTECTED_OUTBOUND" &&
+    offerProductIds.every(productId => productIds.includes(productId)) &&
+    productIds.every(productId => offerProductIds.includes(productId) || input.claims.some(claim =>
+      claim.type === "PRODUCT_MEDIA" && claim.scope.kind === "PRODUCT" && claim.scope.variantId === null && claim.scope.productId === productId));
   const canBindCart = input.cartId !== null && input.cartVersion !== null &&
     input.cartStateHash !== null && offerBindings.length > 0 &&
-    offerProductIds.length === productIds.length &&
-    offerProductIds.every((productId, index) => productId === productIds[index]);
+    (productScopeMatchesCart || catalogMediaAlongsideCart);
   if (input.cartId !== null && offerBindings.length > 0 && !canBindCart) {
     reasons.add("OFFER_BINDING_MISMATCH");
   }

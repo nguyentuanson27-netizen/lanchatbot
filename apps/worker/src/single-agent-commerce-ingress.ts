@@ -81,11 +81,12 @@ export async function runPersistedCommerceIngress(input: {
   const record = await input.store.loadOrCreate<ConversationState>(batch.pageId, batch.conversationHash, "APP",
     id => createConversationState({ conversationId: id, routingOwner: "APP", now: input.clock() }), input.clock());
   if (record.conversationId !== input.scope.conversationId) return noSend("CONVERSATION_SCOPE");
-  const mediaMessage=messages.find(m=>m.attachments.length>0),sourceMessage=mediaMessage??last;
+  const mediaMessage=messages.find(m=>m.attachments.length>0);
   const attachmentCount=messages.reduce((n,m)=>n+m.attachments.length,0);
   let mediaLink:{eventKey:string;messagePk:string;attachmentCount:number}|undefined;
-  const latest = messages.map(m => m.text ?? "").join("\n"), sourceId = sourceMessage.messageId ?? sourceMessage.eventKey;
-  const scope = { ...input.scope, sourceMessageId: sourceId, sourceObservedAt: sourceMessage.occurredAt, requestId: batch.evaluationGroupId,
+  const sourceMessages=messages.map(m=>({text:m.text??"",sourceMessageId:m.messageId??m.eventKey,observedAt:m.occurredAt}));
+  const latest = messages.map(m => m.text ?? "").join("\n"), sourceId = last.messageId ?? last.eventKey;
+  const scope = { ...input.scope, sourceMessageId: sourceId, sourceObservedAt: last.occurredAt, requestId: batch.evaluationGroupId,
     recipient: textHash(last.senderId), bindingVersion: `commerce:${batch.generation}:${textHash(last.senderId)}`, revision: record.stateVersion,
     conversationOwner: record.state.conversationOwner, permission: record.state.conversationOwner === "BOT", privacyAllowed: true };
   const guard = { generation: batch.generation, leaseToken: batch.leaseToken, inboxIds: batch.inboxIds };
@@ -101,7 +102,10 @@ export async function runPersistedCommerceIngress(input: {
   };
   const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
     store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
-    attachmentIds:mediaMessage?.attachments.map((_,i)=>`${sourceId}:attachment:${i}`)??[],handoffSource:()=>mediaLink,
+    ...(mediaMessage ? {paymentReceiptInbound:{messageId:mediaMessage.messageId??mediaMessage.eventKey,pageId:scope.pageId,conversationId:scope.conversationId,
+      senderType:"CUSTOMER" as const,observedAt:mediaMessage.occurredAt,
+      attachments:mediaMessage.attachments.map((a,i)=>({attachmentId:`${mediaMessage.messageId??mediaMessage.eventKey}:attachment:${i}`,kind:a.type==="image"?"IMAGE" as const:a.type==="file"?"FILE" as const:"OTHER" as const}))}} : {}),
+    handoffSource:()=>mediaLink,
     productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })) });
   const pendingCheckout = await executor.privateCheckoutPending();
   const privateInput = !!mediaMessage || pendingCheckout || isPrivateCommerceText(latest);
@@ -156,14 +160,14 @@ export async function runPersistedCommerceIngress(input: {
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId });
   const tools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock }, state: { store: profilePort,
-    sourceMessages: messages.map(m => ({ text: m.text ?? "", sourceMessageId: m.messageId ?? m.eventKey, observedAt: m.occurredAt })),
+    sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false), target = sizeChartTarget(product);
       return { target, charts: evaluateSizeChartEligibility({ policy: await input.policy(), productId: ref, target }).charts }; },
     quoteInput: async () => { const state = (await executor.repository.read(scope.conversationId))!, policy = await policyBundle();
       const lines = state.cart && canonicalCartPolicyLinesV2(state.cart.value.lines, scope.shopId); if (!lines || !state.negotiation) throw new Error("CART_REQUIRED");
       const tier = state.negotiation.customerState;
       return { policy: policy.policy, lines, closingEvidence: { previousState: tier, purchaseReady: tier === "READY", priceObjectionCount: tier === "READY" ? 0 : tier === "HESITANT" ? 1 : 2, secondConcessionAlreadyApplied: tier === "CAUTIOUS" }, now: input.clock() }; } },
-    effects: { ...executor, negotiationSource:latest, conversationKey: scope.conversationId, identity: { cartId: commerceUuid(commerceHash([scope.conversationId, "cart"])),
+    effects: { ...executor, negotiationSources:sourceMessages, conversationKey: scope.conversationId, identity: { cartId: commerceUuid(commerceHash([scope.conversationId, "cart"])),
       salesEpisodeId: commerceUuid(commerceHash([scope.conversationId, "episode"])), customerProfileId: profile.profile.profileId },
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
@@ -223,7 +227,9 @@ export async function runPersistedCommerceIngress(input: {
       effectReadiness: [parent], effectClaimSets: [{ effect: "CART_READY", claims: cartClaims }] };
   }
   const claimTypes = [...new Set(claims.map(c => c.type))], payloadHash = commerceHash(messagesOut);
-  const readiness = evaluateDeterministicEffectReadinessV1({ ...common, effect: "PROTECTED_OUTBOUND", claims, protectedClaimTypes: claimTypes,
+  // Catalog media may depict another product without changing or joining the cart.
+  const outboundProductIds=[...new Set([...productIds,...claims.flatMap(c=>c.type==="PRODUCT_MEDIA"&&c.scope.kind==="PRODUCT"?[c.scope.productId]:[])])].sort();
+  const readiness = evaluateDeterministicEffectReadinessV1({ ...common, productIds:outboundProductIds, effect: "PROTECTED_OUTBOUND", claims, protectedClaimTypes: claimTypes,
     deterministicEvidenceHash: payloadHash, payloadHash, ...(parent ? { parentReadinessHash: parent.readinessHash } : {}) });
   if (messagesOut.length && (readiness.outcome !== "READY" || parent?.outcome === "BLOCKED")) return { ...result, ...await closeWithoutSend("EGRESS_READINESS") };
   const committed = await input.transaction(client => input.store.commitWithinTransaction(client, { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,

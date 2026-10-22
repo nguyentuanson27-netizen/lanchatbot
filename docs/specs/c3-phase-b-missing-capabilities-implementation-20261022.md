@@ -108,3 +108,50 @@ Actual image preflight found existing ffmpeg canonical args used `-autorotate 1`
 ## Kết quả chốt
 
 [Checkpoint và findings](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/CHECKPOINT_B.md), [7lượt thực tế](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/CONVERSATIONS.md), [exact commands](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/COMMANDS.md). Final451worker tests/77Node PASS; contracts60/business selector-readiness71/protected-reply21/negotiation9PASS; typecheck/build/lint/direct final compile PASS. COD18/BANK32checks PASS, tất cả DBs dropped.7customer outcomes/20requests,4eligible/2fallback/1silent handoff; API sanity2public images/1request PASS riêng, không gửi khách.0retry,0HTTPerrors/timeouts,1owner tool-mode violation; no evaluator labels in20captured customer requests. Không nhận toàn plan/B đã hoàn tất hoặc tư vấn tự nhiên đã cải thiện.
+
+## Sửa ba finding sau review độc lập
+
+Fix base: `e9c301e1fb9024a603b8f40d21e70428ae1dea8a`. Đây là sửa code sau cohort trên; không model generation mới, không gán kết quả provider cũ cho source mới.
+
+- **N7:** quote phải nằm duy nhất trong một message public thuộc current batch; không ghép qua hai message. Operation ID và negotiation evidence dùng message chứa quote, giữ original timestamp qua type `VerifiedInboundMessageV1` hiện có. Source hash cấp quyền transaction vẫn là message cuối batch. Reuse processed commands/receipt ledger: reclaim có thêm tail không cấp giảm lần hai; phản đối ở message khác vẫn dùng được.
+- **N5:** receipt evidence giữ ID/timestamp/attachment metadata của message chứa ảnh, riêng với last-message commit authority; handoff trigger vẫn đúng ảnh đầu batch. Không gán ảnh cho message chữ cuối hoặc đưa URL/bytes vào model. Database transaction guard không đổi.
+- **N4:** `CART_READY` bind exact cart như cũ; outbound có thể thêm product catalog với parent-scope `PRODUCT_MEDIA` đã xác minh. Existing binding vốn cho phép product scope chứa cart subset; readiness producer được sửa cho khớp, chỉ cho extra subjects có parent-media claim. Cart semantics không bắt ảnh catalog thuộc giỏ. Variant media, giá/tồn/quantity, freshness, cart hash, parent readiness và payload vẫn kiểm; xin ảnh món khác không thêm món vào cart.
+
+Observed RED trước sửa: ingress **3failed/27passed**, contracts **1failed/59passed**, business readiness **1failed/33passed**. Sau sửa GREEN; controls bao gồm quote lặp trong/multiple messages, quote ghép qua hai message, thiếu source, phản đối thực ở message khác, extra product không có claim, ảnh stale và cart effects không được mở rộng scope.
+
+Commands thực sự chạy:
+
+```powershell
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts
+# RED3/30 -> GREEN30/30. Sau bổ sung replay outcome, fixture generation cố định gây fail;
+# sửa fixture theo batch.generation + ledger readback, final30/30 PASS.
+pnpm --filter @lana/contracts exec vitest run src/v2/canonical-evidence-readiness.test.ts
+# RED1/60 -> GREEN60/60.
+pnpm --filter @lana/business-tools exec vitest run src/effect-readiness.test.ts
+# RED1/34 -> GREEN34/34.
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-session.test.ts
+# Intermediate117/117 PASS, trước5quote controls mới.
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts src/realtime-sales-cycle.test.ts src/meta-outbox-dispatcher.test.ts src/media-recognition-v2-image-pipeline.test.ts
+# 460/460 PASS,19files,0skip; sau bổ sung fixture replay đã chạy lại ingress30/30.
+pnpm --filter @lana/contracts exec vitest run src/v2/canonical-evidence-readiness.test.ts src/v2/canonical-commerce-bindings.test.ts
+# 78/78 PASS.
+pnpm --filter @lana/business-tools exec vitest run src/effect-readiness.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts
+# 55/55 PASS.
+pnpm --filter @lana/database exec vitest run src/realtime-runtime.test.ts
+# 40/40 PASS.
+node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/sales-journeys.test.mjs apps/worker/evals/single-agent-commerce-read-only/sales-journeys-registration.test.mjs apps/worker/evals/single-agent-commerce-read-only/handoff-matrix.test.mjs
+# 77/77 PASS.
+pnpm --filter @lana/contracts build
+pnpm --filter @lana/business-tools build
+pnpm --filter @lana/worker typecheck
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+git diff --check
+# All PASS. Worker prebuild/pretypecheck rebuild dependencies.
+```
+
+Intermediate direct `pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit` failed do test gán readonly state và optional property truyền undefined; đã sửa immutable fixture/conditional property rồi worker typecheck/build/lint PASS. Không nhận lệnh thất bại là PASS.
+
+Receipt regression chạy actual `PostgresRealtimeRuntimeStore.commitWithinTransaction` với query doubles đến sau current-source guard, không PostgreSQL connection/SQL mutation. Negotiation regression dùng actual ingress/planner/domain với store fixture: giữ original evidence ID, HESITANT và tổng tiền sau supersession, đọc receipt rồi SEND_ELIGIBLE ở lần xử lý lại. Đây là deterministic regression evidence; chưa chạy lại COD18/BANK32 hoặc full provider B1/B2/B3 trên source mới.
+
+Self-review đối chiếu từng finding với regression/controls. Complexity: sửa adapter và existing readiness scope; không gate/role/router/parser/prompt example/durable state/table/migration mới. Prompts/models/corpora, production entrypoints và database transaction guard không đổi. N3b/staff-image/N6b/28slots và chất lượng tư vấn vẫn pending. **CHƯA B GO**.

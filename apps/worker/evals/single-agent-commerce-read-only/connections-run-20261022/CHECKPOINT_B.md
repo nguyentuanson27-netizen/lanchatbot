@@ -4,6 +4,8 @@ Ngày22/10/2026. **PARTIAL_IMPLEMENTED — CHƯA B GO**. Đã nối các slice �
 
 ## Nguồn và provenance
 
+**Cập nhật sau report:** review ở head `e9c301e1` tái hiện3lỗi source/scope, đã sửa bằng deterministic RED→GREEN; [chi tiết và commands](../../../../../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md#sửa-ba-finding-sau-review-độc-lập). Provider/real-DB cohorts dưới đây vẫn thuộc source cũ, không qualification cho source sau fix. Chưa B GO.
+
 - Implementation base của task Phase B này: `1aa3a1d377c3b22952c033e90d4cbd4086591c3c`. Historical manifest implementationBaseSha vẫn `296cdcfbf5759f5bf9cbb24acf3dc63005589361`, không sửa lịch sử A.
 - [Plan N1–N8](../../../../../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md); plan blob tại task base `0ba1c1a942124e4ff6dedbc23bf2f30bc52881d7`.
 - Architecture spec blob `7e0265e3b6b3d556d8fb0f3c7267abccef5de86a`; semantic boundary amendment blob `4a09b55d2f3a972a65697738876cc5eab21e7a2b`, cùng tại task base.

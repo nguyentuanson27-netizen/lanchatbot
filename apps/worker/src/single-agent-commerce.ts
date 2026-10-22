@@ -27,7 +27,7 @@ export async function createCommerceTools(input: {
   if (input.effects) {
     tools = await createCommerceEffectTools({ ...input.effects, base: tools, scope, clock });
     availableTools.push("add_to_cart", "change_cart_item", "confirm_purchase");
-    if(input.effects.negotiationSource)availableTools.push("record_negotiation");
+    if(input.effects.negotiationSources?.length)availableTools.push("record_negotiation");
   }
   if (input.handoff) {
     tools = createCommerceHandoffTools({ ...input.handoff, base: tools, scope, clock });

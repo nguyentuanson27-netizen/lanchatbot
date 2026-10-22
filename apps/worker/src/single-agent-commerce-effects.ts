@@ -25,8 +25,8 @@ export async function createCommerceEffectTools(input: {
   authorize: (effect: "CART_OPEN" | "CART_MUTATION" | "PURCHASE_CONFIRMATION", current: SalesCycleRuntimeState) => Promise<boolean>;
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
-  /** Current bounded public inbound text, supplied by code rather than tool arguments. */
-  negotiationSource?: string;
+  /** Current public batch messages; code resolves the exact quote's evidence identity. */
+  negotiationSources?: readonly { text: string; sourceMessageId: string; observedAt: string }[];
   trustedPorts?: SalesCycleTrustedPortsV1;
   resolveBankTransferPolicy?: Parameters<typeof executePersistedSalesCycleCommand>[0]["resolveBankTransferPolicy"];
   /** A real composition supplies the existing guarded runtime transaction; isolated tests may use the domain CAS. */
@@ -165,11 +165,15 @@ export async function createCommerceEffectTools(input: {
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
         call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+      let negotiationSource: NonNullable<typeof input.negotiationSources>[number] | undefined;
       if(call.name==="record_negotiation"){
-        const quote=a.sourceQuote,source=input.negotiationSource;
+        const quote=a.sourceQuote;
         if(!current.cart||!current.negotiation||!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
-          typeof quote!=="string"||!quote.trim()||Buffer.byteLength(quote)>512||!source||!source.includes(quote)||
-          source.indexOf(quote)!==source.lastIndexOf(quote))return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
+          typeof quote!=="string"||!quote.trim()||Buffer.byteLength(quote)>512)return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
+        const matches=input.negotiationSources?.filter(source=>source.text.includes(quote))??[];
+        negotiationSource=matches[0];
+        if(matches.length!==1||!negotiationSource?.sourceMessageId||
+          negotiationSource.text.indexOf(quote)!==negotiationSource.text.lastIndexOf(quote))return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
       }
       if (call.name === "add_to_cart" && (typeof a.offerType !== "string" || !a.offerType.trim())) {
         return { status: "REJECTED", reason: "OFFER_REQUIRED" };
@@ -191,7 +195,7 @@ export async function createCommerceEffectTools(input: {
       const effect = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMATION" : current.cart ? "CART_MUTATION" : "CART_OPEN";
       if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
       const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
-        sourceMessageId: input.scope.sourceMessageId, tool: call.name, ...(call.name==="record_negotiation"?{}:{args:a}) });
+        sourceMessageId: negotiationSource?.sourceMessageId ?? input.scope.sourceMessageId, tool: call.name, ...(call.name==="record_negotiation"?{}:{args:a}) });
       const effectName = call.name==="record_negotiation"?"NEGOTIATION_UPDATED":call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
       if (current.processedCommandIds.includes(operationId)) {
         const recovered = receipt?.operationId === operationId ? receipt : await input.readReceipt?.(operationId);
@@ -235,12 +239,14 @@ export async function createCommerceEffectTools(input: {
       else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
         intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
       else if(call.name==="record_negotiation")command={kind:"NEGOTIATION_EVENT",commandId:operationId,expectedNegotiationVersion:current.negotiation!.stateVersion,
-        sourceMessageId:input.scope.sourceMessageId,intent:a.intent as "PRICE_OBJECTION"|"PURCHASE_READY",reasonCode:a.intent==="PRICE_OBJECTION"?"PRICE_OBJECTION":null};
+        sourceMessageId:negotiationSource!.sourceMessageId,intent:a.intent as "PRICE_OBJECTION"|"PURCHASE_READY",reasonCode:a.intent==="PRICE_OBJECTION"?"PRICE_OBJECTION":null};
       const ports: SalesCycleTrustedPortsV1 = {
         resolveCartDraft: r => draft && r.contentHash === computeBusinessContentHash(draft) ? draft : null,
         resolveCartMutation: r => mutation && r.contentHash === computeBusinessContentHash({ mutation }) ? { mutation } : null,
         resolveShopPolicy: r => policy && r.contentHash === computeBusinessContentHash(policy.policy) ? policy.policy : null,
-        resolveInboundMessage: id => input.trustedPorts?.resolveInboundMessage(id) ?? null,
+        resolveInboundMessage: id => negotiationSource?.sourceMessageId === id ? { messageId:id,pageId:input.scope.pageId,
+          conversationId:input.scope.conversationId,senderType:"CUSTOMER",observedAt:negotiationSource.observedAt,attachments:[] }
+          : input.trustedPorts?.resolveInboundMessage(id) ?? null,
         revalidateCheckout: q => input.trustedPorts?.revalidateCheckout(q) ?? null,
       };
       let result, reconciledRevision: number | undefined;

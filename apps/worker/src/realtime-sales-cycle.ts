@@ -99,6 +99,9 @@ export interface RealtimeSalesCycleInput {
   /** Only the code-authorized native adapter supplies this; the legacy text path remains unchanged. */
   readonly nativeMutation?: { readonly command: Extract<SalesCycleCommand, { kind: "CART_MUTATED" }>; readonly mutation: CanonicalCartMutationPayloadV1 };
   readonly nativeNegotiation?: Extract<SalesCycleCommand,{kind:"NEGOTIATION_EVENT"}>;
+  /** Exact message resolved by the native adapter, independent of the batch's commit source. */
+  readonly nativeNegotiationInbound?: VerifiedInboundMessageV1 | null;
+  readonly paymentReceiptInbound?: VerifiedInboundMessageV1;
   readonly pageId: string;
   readonly conversationId: string;
   readonly customerHash: string;
@@ -925,7 +928,9 @@ export async function evaluateRealtimeSalesCycle(
       (references.get(canonicalJson(reference)) as ResolvedCartMutationV1 | undefined) ?? null,
     resolveShopPolicy: (reference) =>
       (references.get(canonicalJson(reference)) as ReturnType<SalesCycleTrustedPortsV1["resolveShopPolicy"]> | undefined) ?? null,
-    resolveInboundMessage: (sourceMessageId) => sourceMessageId === input.messageId ? inbound : null,
+    resolveInboundMessage: (sourceMessageId) => input.nativeNegotiation?.sourceMessageId === sourceMessageId &&
+      input.nativeNegotiationInbound?.messageId === sourceMessageId ? input.nativeNegotiationInbound
+      : input.paymentReceiptInbound?.messageId === sourceMessageId ? input.paymentReceiptInbound : sourceMessageId === input.messageId ? inbound : null,
     revalidateCheckout: () => checkoutValidation,
   };
   const bankResolver: BankTransferPolicyResolver = (reference) =>
@@ -967,7 +972,7 @@ export async function evaluateRealtimeSalesCycle(
                 : null,
               intent: command.intent,
               reasonCode: command.intent === "PRICE_OBJECTION" ? command.reasonCode : null,
-              observedAt: input.occurredAt,
+              observedAt: ports.resolveInboundMessage(command.sourceMessageId)!.observedAt,
               evidenceHash: "0".repeat(64),
             };
             return NegotiationTransitionEvidenceV1Schema.parse({
@@ -1409,7 +1414,7 @@ export async function evaluateRealtimeSalesCycle(
 
   if(input.nativeNegotiation){
     const command=input.nativeNegotiation;
-    if(command.sourceMessageId!==input.messageId||!state.cart||!state.negotiation)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
+    if(!ports.resolveInboundMessage(command.sourceMessageId)||!state.cart||!state.negotiation)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
     const selections=await currentSelections(input,state.cart.value,state.checkoutDraft?.address??"",effectNow());
     const ready=selections.filter((s):s is ReadyCartSelection=>s.status==="READY");
     if(!selectionsMatchCartLines(state.cart.value.lines,ready))return failedOutput("NATIVE_NEGOTIATION_SNAPSHOT_CHANGED");
@@ -1509,15 +1514,16 @@ export async function evaluateRealtimeSalesCycle(
       transferToHuman:false,desiredTag:null,reasonCode:"CHECKOUT_PAUSED",telemetry:{clarificationCase:true}};
   }
 
+  const receiptInbound = input.paymentReceiptInbound ?? inbound;
   if (
     state.stage === "PURCHASE_CONFIRMED" &&
-    input.attachmentIds.length > 0
+    receiptInbound.attachments.length > 0
   ) {
     const result = apply({
       kind: "PAYMENT_RECEIPT_RECEIVED",
       commandId: commandId("payment-receipt"),
-      sourceMessageId: input.messageId,
-      attachmentId: input.attachmentIds[0]!,
+      sourceMessageId: receiptInbound.messageId,
+      attachmentId: receiptInbound.attachments[0]!.attachmentId,
     });
     return result.status === "HANDOFF"
       ? failedOutput(result.reasonCode, plan())

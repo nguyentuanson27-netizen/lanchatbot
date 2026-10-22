@@ -19,7 +19,7 @@ function fixtureSelection(snapshot: ReturnType<typeof fixtureProduct>["snapshot"
   return { ...result, shopId: commerceScope().shopId, line: { ...result.line,
     priceAuthority: { ...result.line.priceAuthority!, shopId: commerceScope().shopId } } };
 }
-async function setup(clock = () => commerceNow) {
+async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"]) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   // Existing domain precondition, representing earlier verified size advice; never fake it in the effect tool.
@@ -45,7 +45,7 @@ async function setup(clock = () => commerceNow) {
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
   const readPolicy = vi.fn(async () => policy);
   const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
-    policy: readPolicy,negotiationSource:"Giá hơi cao, bớt cho chị được không?",
+    policy: readPolicy,negotiationSources:negotiationTexts.map((text,i)=>({text,sourceMessageId:i===0?scope.sourceMessageId:`other-message-${i}`,observedAt:commerceNow.toISOString()})),
     resolveBankTransferPolicy: () => bankPolicy,
     trustedPorts: {
       resolveCartDraft: () => null, resolveCartMutation: () => null, resolveShopPolicy: () => null,
@@ -61,6 +61,23 @@ async function setup(clock = () => commerceNow) {
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it.each([
+    {texts:["Giá hơi cao","Giá hơi cao"],quote:"Giá hơi cao"},
+    {texts:["Giá hơi cao, Giá hơi cao"],quote:"Giá hơi cao"},
+    {texts:["Giá hơi","cao"],quote:"Giá hơi\ncao"},
+    {texts:[],quote:"Giá hơi cao"},
+  ])("rejects ambiguous, cross-message or absent negotiation quotes ($texts)",async ({texts,quote})=>{
+    const s=await setup(()=>commerceNow,texts);await s.tools.invoke(s.add);
+    expect(await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:quote}})).toMatchObject({status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"});
+    expect(s.current().negotiation!.consumedObjectionEvidenceIds).toEqual([]);expect(s.commits).toHaveLength(1);
+  });
+  it("allows a genuinely different message objection while keeping each evidence identity",async()=>{
+    const s=await setup(()=>commerceNow,["Giá hơi cao","Bớt thêm cho chị nhé"]);await s.tools.invoke(s.add);
+    for(const quote of ["Giá hơi cao","Bớt thêm cho chị nhé"])
+      expect((await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:quote}})).status).toBe("OK");
+    expect(s.current().negotiation!.consumedObjectionEvidenceIds).toEqual([`inbound:${s.scope.sourceMessageId}`,"inbound:other-message-1"]);
+    expect(s.current().negotiation!.customerState).toBe("CAUTIOUS");
+  });
   it("applies one source-bound objection and keeps its tier and evidence ledger when the cart reprices",async()=>{
     const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");
     const call={name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}};

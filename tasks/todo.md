@@ -2,6 +2,9 @@
 
 **PARTIAL_IMPLEMENTED — CHƯA B GO**. [Acceptance/verification](../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md), [savepoints/evidence](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md). Giữ riêng kết quả code, DB/capture, provider và giới hạn chưa hoàn thành.
 
+- [x] Sửa3finding review sau `e9c301e1`: negotiation original-message/operation/evidence chống giảm2lần khi supersession; receipt evidence riêng với last-message commit authority; ảnh catalog khác cart qua exact Outbox group. RED→GREEN và self-review; worker460/contracts78/business55/database40/Node77PASS, worker typecheck/build/lintPASS. [Commands/giới hạn](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md#sửa-ba-finding-sau-review-độc-lập).
+- [ ] Provider/real-DB campaign trên source sau review fix chưa chạy; không dùng cohort cũ để chứng minh whole-candidate quality/stability.
+
 - [x] Review code/spec/test: lịch sử text đã nối; DB sort đúng, query8 trước privacy filtering gây underfill; có write currentProductId nhưng đường seed/read focus chưa được chứng minh đầy đủ.
 - [x] Lập thứ tự theo phụ thuộc và self-review privacy/media/authority/anti-bloat; tách chức năng, độ phủ, hạn chế và activation.
 - [x] Sửa theo review độc lập: giữ negotiation tier/ledger khi reprice; tách N3b chưa giải terminal-focus trong2tool rounds; clarify active single-field checkout và public history projection; bỏ dependency giả, thêm batch-attachment linkage test design.

@@ -106,7 +106,7 @@ export async function prepareNativeCommerceTransition(input: {
     primaryCommandId: command.commandId, primarySuffix: suffix,
     ...(draft ? { cartIdentity: draft.identity, ...(draft.lines[0] ? { cartLineId: draft.lines[0].lineId } : {}) } : {}),
     ...(command.kind === "CART_OPENED" ? { cartExpiresAt: command.expiresAt } : {}),
-  }, ...(command.kind==="NEGOTIATION_EVENT"?{nativeNegotiation:command}:{}),
+  }, ...(command.kind==="NEGOTIATION_EVENT"?{nativeNegotiation:command,nativeNegotiationInbound:trustedPorts.resolveInboundMessage(command.sourceMessageId)}:{}),
     ...(mutation && command.kind === "CART_MUTATED" ? { nativeMutation: { command, mutation } } : {}) });
 }
 
