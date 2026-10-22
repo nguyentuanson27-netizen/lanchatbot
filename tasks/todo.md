@@ -1,17 +1,22 @@
 ## Kế hoạch nối tác vụ còn thiếu của Phase B — 2026-10-22
 
-**PLAN_ONLY**. [Chi tiết và acceptance/verification từng task](../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md).
+**PLAN_REVISED_AND_CANDIDATE_CORPUS_ADDED**. [Acceptance/verification](../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md), [corpus/harness status](../apps/worker/evals/single-agent-commerce-read-only/SALES_JOURNEYS_CANDIDATE.md).
 
 - [x] Review code/spec/test: lịch sử text đã nối; DB sort đúng, query8 trước privacy filtering gây underfill; có write currentProductId nhưng đường seed/read focus chưa được chứng minh đầy đủ.
 - [x] Lập thứ tự theo phụ thuộc và self-review privacy/media/authority/anti-bloat; tách chức năng, độ phủ, hạn chế và activation.
+- [x] Sửa theo review độc lập: giữ negotiation tier/ledger khi reprice; tách N3b chưa giải terminal-focus trong2tool rounds; clarify active single-field checkout và public history projection; bỏ dependency giả, thêm batch-attachment linkage test design.
+- [x] Viết12journeys/44inbound slots với lời khách cụ thể, không gold bot replies; tách runtime/evaluator, source/setup prerequisites và dependent-turn rules.4private-fixture slots chưa materialize; media fixtures chưa cấp bytes/source hash.
+- [x] Thêm offline corpus/projection checks; command gồm sales-journeys/protocol/gemini-inference tests:68PASS,0generation. Không nhận đây là runtime RED→GREEN hoặc model-run evidence.
 - [ ] N1: Checkout theo field đang chờ trước public model/history; partial/correction/cancel tests; không PII leakage hoặc ghi nhầm câu hỏi thành tên.
 - [ ] N2: Đọc bounded30 candidate rows, lọc rồi giữ tối đa8 public messages/4.096 byte; kiểm accepted-history/longer conversations, không summary/memory mới.
-- [ ] N3: Readback focus qua lượt/caller và adsContext→verified catalog refs; nhiều mẫu/chuyển mẫu không bind nhầm hoặc sửa giỏ ngầm.
+- [ ] N3a: Readback focus qua lượt/caller và adsContext→verified catalog refs; nhiều mẫu/chuyển mẫu không bind nhầm hoặc sửa giỏ ngầm.
+- [ ] N3b: RED search→read→final choice→next-turn; chốt contract terminal-focus trong2tool rounds mà không semantic object/generation mới. Chưa thiết kế xong thì không thêm select_product_context hoặc chặn các slice độc lập.
 - [ ] N4: Native bounded asset selection và TEXT+IMAGE Outbox qua gate hiện hữu; đúng product/component/source, thiếu ảnh không thay bừa, BANK QR regression.
 - [ ] N5: Media intake thay blanket NO_SEND, reuse safety bounds; receipt/defect/private/unknown media có handoff/context thật, không tự xác nhận thanh toán.
 - [ ] N6: Native ảnh catalog công khai cho owner; audit privacy của ảnh khách trước recognition, reuse retrieval không nhập generative reranker/third role; ghi rõ prerequisite nếu chưa đáp ứng.
-- [ ] N7: Owner đề xuất PRICE_OBJECTION/PURCHASE_READY, code cấp evidence và chạy negotiation transition/quote; false-trigger/replay/cart/policy controls.
-- [ ] N8: Reuse corpus/harness, thiết kế12purpose journeys tự nhiên và loại trùng; chốt actual turn/request budget trước generation, giữ old24B1+8stateful controls.
+- [ ] N7: Owner đề xuất PRICE_OBJECTION/PURCHASE_READY, code cấp evidence và chạy negotiation transition/quote; false-trigger/replay/cart/policy controls. Cart reprice giữ tier/objection/event ledger theo canonical engine.
+- [ ] N8 adapter: Extend harness hiện có để chạy selected candidate journeys thay vì giả fixed24/fixed8 đã hỗ trợ; materialize asset/private fixtures, dùng actual accepted outputs và kiểm prerequisite trước dispatch.
+- [ ] N8 run: Chốt actual selected turn/request budget trước generation, giữ old24B1+8stateful controls; report NOT_READY/NOT_APPLICABLE/dependent-not-executed đúng thời điểm, không bỏ attempt lỗi khỏi denominator.
 - [ ] RED→GREEN cho changed boundaries, focused source/adapter/domain tests; real isolated DB/capture COD/BANK và worker/shared checks tương ứng.
 - [ ] Freeze source/config/inputs rồi mới provider-run theo coverage cần thiết; report actual terminal toàn hội thoại, denominators/latency/errors/quality và limitations. Chưa đăng ký/chạy run trong lượt plan.
 

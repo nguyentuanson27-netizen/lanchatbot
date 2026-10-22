@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "status": "CANDIDATE_NOT_REGISTERED",
+  "sendEnabled": false,
+  "repetitions": 1,
+  "generationRetry": 0,
+  "historyMode": "ACTUAL_ACCEPTED_OUTPUTS_AND_CANONICAL_STATE",
+  "journeys": [
+    {
+      "caseId": "sales-ad-focus",
+      "purposeId": "J01",
+      "title": "Từ quảng cáo sang so sánh rồi hỏi tiếp mẫu đã chọn",
+      "evaluator": {
+        "prerequisites": ["N3a", "N3b"],
+        "setup": {"initialProductCodes": [], "sourceRequirements": ["SV2447 và set Khánh Trang được tìm và bind từ catalog hiện hành; không seed kín hai mẫu vào owner."]},
+        "success": "Đúng mẫu từ quảng cáo; chọn một phương án theo hoàn cảnh khách, lượt sau hỏi màu đúng phương án vừa chọn. Đọc để so sánh không tự đổi giỏ/focus.",
+        "safety": "adTitle là untrusted search hint. Không dùng giá quảng cáo làm giá thật hoặc tăng tool budget để lưu focus."
+      },
+      "turns": [
+        {"turnId": "ad-price", "runtime": {"messages": [{"text": "Bộ này bao nhiêu em?", "attachments": [], "adsContext": {"source": "ADS", "adTitle": "Set Thạch Thảo SV2447", "postId": null, "adId": null, "ref": null}}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Bind SV2447 từ hint đã kiểm catalog và trả giá đúng phần bán đang hỏi."}},
+        {"turnId": "second-product", "runtime": {"messages": [{"text": "Cho chị xem thêm set Khánh Trang nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Mẫu thứ nhất đã xác định; Khánh Trang có source match.", "expected": "Tìm mẫu thứ hai thật, không nhầm với quảng cáo cũ."}},
+        {"turnId": "compare", "runtime": {"messages": [{"text": "Hai bộ này, bộ nào hợp đi đám cưới ban ngày hơn? Em chọn giúp chị nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Hai mẫu có refs rõ và không có handoff trước đó.", "expected": "Chọn một mẫu với lý do sát dịp mặc; không chỉ kể đặc điểm hai mẫu rồi giao khách chọn lại."}},
+        {"turnId": "chosen-colors", "runtime": {"messages": [{"text": "Bộ em vừa chọn có những màu nào?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Reply thực tế trước đó có lựa chọn duy nhất. Nếu không, ghi dependent turn chưa chạy; không chèn câu bot mẫu.", "expected": "Đọc màu của đúng mẫu vừa đề xuất, không tự lấy mẫu đọc cuối làm focus."}}
+      ]
+    },
+    {
+      "caseId": "sales-discovery-advice",
+      "purposeId": "J02",
+      "title": "Tìm bộ đi làm từ nhu cầu, ngân sách và cách mặc",
+      "evaluator": {
+        "prerequisites": ["EXISTING_SEARCH_READ_POLICY"],
+        "setup": {"initialProductCodes": [], "sourceRequirements": ["Catalog search có ít nhất một bộ áo quần trong ngân sách; nếu không, phản hồi thiếu lựa chọn được chấm theo nguồn thật, không inject món để PASS."]},
+        "success": "Giúp khách chọn một bộ phù hợp, dùng thông tin đã trao đổi và trả lời chăm sóc có nguồn; không biến lời tư vấn thành liệt kê facts.",
+        "safety": "Không tự tạo kiểm nghiệm cả ngày, độ co giãn hoặc hướng dẫn giặt. Care không có nguồn được nói rõ ngắn; không suy từ tên vải."
+      },
+      "turns": [
+        {"turnId": "need", "runtime": {"messages": [{"text": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng ôm bụng quá.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Tìm từ nhu cầu, không bắt khách biết sẵn mã hàng."}},
+        {"turnId": "choose", "runtime": {"messages": [{"text": "Chị ngồi làm cả ngày, em chọn giúp chị một bộ thôi.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Đã có ít nhất một ứng viên từ nguồn.", "expected": "Đề xuất rõ, tự tin trong phạm vi dữ liệu, không khẳng định ngồi cả ngày không cấn khi thiếu căn cứ."}},
+        {"turnId": "mix", "runtime": {"messages": [{"text": "Áo với quần có tách ra phối đồ khác được không em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Mẫu đang nói thực sự là bộ áo quần.", "expected": "Trả lời cách dùng liên quan đến việc mua, không đọc lại ngân sách và toàn bộ nhu cầu."}},
+        {"turnId": "care", "runtime": {"messages": [{"text": "Bộ này giặt máy được không hay phải giặt tay?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Đọc chỉ dẫn chăm sóc nếu có; không tự suy phép giặt từ chất liệu hoặc hứa kiểm tra rồi liên hệ lại nếu chưa có tác vụ đó."}}
+      ]
+    },
+    {
+      "caseId": "sales-product-gallery",
+      "purposeId": "J03",
+      "title": "Xin ảnh theo màu, góc và chi tiết rồi hỏi tồn",
+      "evaluator": {
+        "prerequisites": ["N4"],
+        "setup": {"initialProductCodes": ["SV2447"], "sourceRequirements": ["Registry hiện hành được readback, gồm asset hash/product/component/type/color khi có. Không bịa ảnh mặt sau nếu source chỉ có mặt trước."]},
+        "success": "Khách thực sự nhận đúng ảnh qua capture transport; biết thiếu loại ảnh nào; tồn được đọc đúng màu/size.",
+        "safety": "Không dùng ảnh khác màu/góc rồi mô tả là đúng yêu cầu. Nếu chưa gửi ảnh, không nói đã gửi. Stock-out chỉ được tính coverage khi source đã freeze thực sự hết biến thể."
+      },
+      "turns": [
+        {"turnId": "overview", "runtime": {"messages": [{"text": "Cho chị xem ảnh set Thạch Thảo màu be nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Chọn đúng source ảnh hoặc báo chưa có ảnh đúng màu; không lấy QR thanh toán."}},
+        {"turnId": "back", "runtime": {"messages": [{"text": "Áo nhìn từ phía sau thế nào em, có ảnh không?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Ảnh mặt sau của áo đúng set, hoặc báo thiếu ảnh mà không thay bằng mặt trước."}},
+        {"turnId": "detail", "runtime": {"messages": [{"text": "Chị muốn xem sát phần vải với đường thêu nữa.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Đúng ảnh chi tiết; chữ tư vấn không biến nhìn ảnh thành chứng nhận chất lượng/độ bền."}},
+        {"turnId": "stock", "runtime": {"messages": [{"text": "Màu be size M còn không? Hết thì chị xem màu khác.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Đọc POS cho biến thể hỏi; chỉ đề xuất màu thay khi có nguồn. Không tự inject hết hàng để ép nhánh."}}
+      ]
+    },
+    {
+      "caseId": "sales-incoming-product-photo",
+      "purposeId": "J04",
+      "title": "Khách gửi ảnh để tìm mẫu, rồi kiểm thêm ảnh không rõ",
+      "evaluator": {
+        "prerequisites": ["N5", "N6b"],
+        "setup": {"initialProductCodes": [], "sourceRequirements": ["Materialize public-product-photo từ approved catalog bytes, ghi hash/source; materialize unclear-product-photo từ fixture ảnh không rõ có provenance. Không gửi fixtureRef cho model."]},
+        "success": "Không bỏ tin chỉ vì có ảnh; tìm đúng mẫu khi đủ nguồn và privacy cho phép. Ảnh không rõ thì hỏi/làm rõ hoặc handoff đúng.",
+        "safety": "Không có asset/privacy/retrieval prerequisite thì NOT_READY trước generation. Handoff đúng không được tính là đã chứng minh image recognition."
+      },
+      "turns": [
+        {"turnId": "image-only", "runtime": {"messages": [{"text": null, "attachments": [{"fixtureRef": "public-product-photo"}]}]}, "evaluator": {"route": "MEDIA_PRIVACY_FIRST", "expected": "Nhận asset và hỏi mục đích nếu chưa rõ, không blanket NO_SEND hoặc bịa đã nhận ra mẫu."}},
+        {"turnId": "find", "runtime": {"messages": [{"text": "Mẫu trong ảnh shop có không em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Media trước đã lưu/bind được đúng source; BOT vẫn có quyền.", "expected": "Dùng context ảnh thật đã được phép, không seed mã đáp án vào owner."}},
+        {"turnId": "unclear", "runtime": {"messages": [{"text": "Ảnh này hơi mờ, em xem giúp chị có phải cùng mẫu không.", "attachments": [{"fixtureRef": "unclear-product-photo"}]}]}, "evaluator": {"route": "MEDIA_PRIVACY_FIRST", "expected": "Không lấy similarity gần nhất làm danh tính chắc chắn; giữ text độc lập nếu ảnh lỗi."}}
+      ]
+    },
+    {
+      "caseId": "sales-size-correction",
+      "purposeId": "J05",
+      "title": "Chọn size từ cao nặng, bổ sung và sửa số đo",
+      "evaluator": {
+        "prerequisites": ["EXISTING_PROFILE_SIZE", "N2"],
+        "setup": {"initialProductCodes": ["SV2447"], "sourceRequirements": ["Bảng size/version có eligibility đúng target. Nếu chart thiếu, giữ actual outcome và giới hạn coverage, không hardcode size M."]},
+        "success": "Dùng Size Engine và hồ sơ đã commit; hỏi đúng phần còn thiếu; correction thắng số cũ trước tool phụ thuộc.",
+        "safety": "Không ép xin đủ ba vòng nếu chart nhận cao/nặng; không đoán size khi engine báo thiếu. Không trích lại cả bộ số đo chỉ để chứng minh đã đọc."
+      },
+      "turns": [
+        {"turnId": "height-weight", "runtime": {"messages": [{"text": "Set Thạch Thảo chị cao 1m58, nặng 52kg thì mặc size nào?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Commit số mới rồi gọi engine; nếu thiếu thì xin đầu vào engine cần."}},
+        {"turnId": "measurements", "runtime": {"messages": [{"text": "Chị đo lại rồi, ngực 92, eo 74, mông 96 nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "BOT còn quyền; khách bổ sung tự nguyện, không giả định bot đã hỏi cả ba vòng.", "expected": "Dùng thông tin mới; không bắt hỏi lại số đã có."}},
+        {"turnId": "correction", "runtime": {"messages": [{"text": "Eo chị là 76 nhé, lúc nãy chị đọc nhầm.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Sửa eo, giữ các field khác; kết quả dựa eo74 cũ không được dùng tiếp nếu bị ảnh hưởng."}},
+        {"turnId": "fit", "runtime": {"messages": [{"text": "Chị muốn mặc rộng một chút, em chọn giúp chị nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Dùng preference và chart, không tự mua/đổi giỏ hoặc khẳng định size vừa khi engine chưa có kết quả."}}
+      ]
+    },
+    {
+      "caseId": "sales-cart-components",
+      "purposeId": "J06",
+      "title": "Set khác size thành phần, thêm áo riêng rồi bỏ món",
+      "evaluator": {
+        "prerequisites": ["EXISTING_CART_MUTATIONS"],
+        "setup": {"initialProductCodes": ["SV2447"], "sourceRequirements": ["POS xác nhận set và áo riêng, màu be, size/component variants trong từng yêu cầu; không sửa source để hợp lời thoại."]},
+        "success": "Đúng component và đúng dòng giỏ; tổng cuối chỉ còn bộ khách giữ. Reuse native actions hiện có trong budget.",
+        "safety": "Mẫu set có áo/váy, không gọi nhầm quần. Không báo commit thành công khi mới thực hiện một phần yêu cầu."
+      },
+      "turns": [
+        {"turnId": "mixed-sizes", "runtime": {"messages": [{"text": "Chị lấy set Thạch Thảo màu be, áo M, váy L nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Đúng hai component; nếu native action chưa làm được cả lựa chọn, ghi capability failure thay vì tự đổi thành cả bộ M."}},
+        {"turnId": "extra-top", "runtime": {"messages": [{"text": "Thêm cho chị một áo Thạch Thảo màu be size M nữa.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Set đã vào giỏ đúng yêu cầu và BOT còn quyền.", "expected": "Tạo dòng áo riêng, không tăng quantity cả set."}},
+        {"turnId": "top-quantity", "runtime": {"messages": [{"text": "Áo mua thêm chị lấy hai chiếc nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Có hai dòng rõ ràng.", "expected": "Đổi quantity dòng áo riêng, giữ component size của set."}},
+        {"turnId": "remove-top", "runtime": {"messages": [{"text": "Thôi bỏ áo mua thêm, chị lấy mỗi bộ.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Bỏ đúng dòng áo; không bỏ cả set hoặc giới thiệu thêm món trái quyết định vừa nói."}},
+        {"turnId": "total", "runtime": {"messages": [{"text": "Cả tiền ship là bao nhiêu em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Quote current cart từ code, không cộng nhẩm giá các dòng đã xóa."}}
+      ]
+    },
+    {
+      "caseId": "sales-negotiation-reprice",
+      "purposeId": "J07",
+      "title": "Hỏi giá, xin bớt rồi đổi size và chốt",
+      "evaluator": {
+        "prerequisites": ["N7"],
+        "setup": {"initialProductCodes": ["SV2447"], "cartFixture": "CURRENT_SOURCE_VERIFIED_SET_CART", "sourceRequirements": ["Seed synthetic isolated cart với source-authorized selection/price/version; không fake ưu đãi hoặc receipt."]},
+        "success": "Phản đối giá được engine xử lý; đổi size chỉ reprice, giữ tier và objection ledger. Hỏi giá đơn thuần không tự cấp ưu đãi.",
+        "safety": "Một message không được tính nhiều objection do tool calls/replay. Readback tổng phải khớp cart/version/policy hiện hành."
+      },
+      "turns": [
+        {"turnId": "price-control", "runtime": {"messages": [{"text": "Bộ này bao nhiêu em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Trả giá; không phát PRICE_OBJECTION chỉ vì hỏi bao nhiêu."}},
+        {"turnId": "objection", "runtime": {"messages": [{"text": "Bớt cho chị chút được không?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Code xét event/policy; lời chat dùng quote đã được cấp, không tự hứa mức giảm."}},
+        {"turnId": "size-change", "runtime": {"messages": [{"text": "Chị đổi áo sang L nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Đổi TOP component trong cart, reprice đúng engine; không reset tier hoặc consumed objection IDs."}},
+        {"turnId": "concession", "runtime": {"messages": [{"text": "Đổi size thì ưu đãi lúc nãy còn không?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Đã có ưu đãi được code cấp. Nếu không có, step này NOT_APPLICABLE, không tạo ưu đãi để chạy.", "expected": "Giải thích current authorized quote, không cấp lần nhượng bộ mới từ cùng objection."}},
+        {"turnId": "ready", "runtime": {"messages": [{"text": "Ừ, chị lấy bộ này. Cả ship là bao nhiêu?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Dùng current quote/authorized transition, không coi lời đồng ý là đơn POS đã tạo."}}
+      ]
+    },
+    {
+      "caseId": "sales-southern-delivery",
+      "purposeId": "J08",
+      "title": "Hạn nhận hàng và hai địa điểm cùng miền Nam",
+      "evaluator": {
+        "prerequisites": ["EXISTING_ETA_QUOTE"],
+        "setup": {"initialProductCodes": ["SV2447"], "sourceRequirements": ["Freeze clock và ETA hiện hành trước chạy; thứ Sáu được hiểu theo ngày run đã freeze, không đổi clock sau kết quả."]},
+        "success": "Giúp khách quyết định với deadline, dùng cùng transit miền Nam, không nói chắc chắn kịp từ ETA dự kiến.",
+        "safety": "Không tự gán TP.HCM nhanh hơn Cần Thơ. Ship fee theo policy, không suy từ việc chung transit."
+      },
+      "turns": [
+        {"turnId": "deadline", "runtime": {"messages": [{"text": "Chị ở Cần Thơ, đặt hôm nay thì thứ Sáu có tới không em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Đọc ETA hiện hành và nêu khả năng kịp đúng mức chắc chắn nguồn cho phép."}},
+        {"turnId": "morning", "runtime": {"messages": [{"text": "Chị cần mặc sáng thứ Sáu, em xem kịp thì chị lấy.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Không biến mốc giao cả ngày thành bảo đảm sáng. Không bắt khách tự chuẩn bị đồ khác."}},
+        {"turnId": "same-region", "runtime": {"messages": [{"text": "Chị nhận ở TP.HCM thì có nhanh hơn không?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Cùng transit miền Nam, không bịa chênh lệch theo thành phố."}},
+        {"turnId": "shipping", "runtime": {"messages": [{"text": "Phí ship bên nào cũng như nhau hả em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Phí theo nguồn/quote hợp lệ; câu hỏi vùng chung không bị coi là địa chỉ checkout riêng tư."}}
+      ]
+    },
+    {
+      "caseId": "sales-private-cod",
+      "purposeId": "J09",
+      "title": "COD từng field và sửa địa chỉ trước xác nhận",
+      "evaluator": {
+        "prerequisites": ["N1", "N2"],
+        "setup": {"initialProductCodes": ["SV2447"], "cartFixture": "CURRENT_SOURCE_VERIFIED_SET_CART", "sourceRequirements": ["Private fixtures sinh synthetic name/phone/address tại harness, không chứa dữ liệu khách thật; không ghi raw PII vào public evidence."]},
+        "success": "Hỏi một field cụ thể rồi nhận câu không nhãn đúng field; đủ dữ liệu tạo preview, sửa địa chỉ buộc preview hiện hành trước xác nhận.",
+        "safety": "Không dựa riêng checkoutDraft!=null để route. Private turns zero model generations; confirmation chỉ khi preview đúng phiên bản."
+      },
+      "turns": [
+        {"turnId": "request", "runtime": {"messages": [{"text": "Chị lấy bộ này, gửi COD cho chị nhé.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Code mời checkout theo field còn thiếu, nhận COD từ lời khách nếu contract cho phép; chưa báo đã tạo đơn POS."}},
+        {"turnId": "name", "runtime": {"privateFixture": "RECIPIENT_NAME_UNLABELED"}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Tin hỏi FULL_NAME thực tế đã được chấp nhận; không chỉ thấy field thiếu trong draft.", "expected": "Nhận tên không nhãn vào đúng field, không đưa input vào owner/verifier/history công khai."}},
+        {"turnId": "phone", "runtime": {"privateFixture": "RECIPIENT_PHONE_UNLABELED"}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Code vừa hỏi PHONE.", "expected": "Giữ tên đã nhận, chỉ thu số điện thoại."}},
+        {"turnId": "address", "runtime": {"privateFixture": "RECIPIENT_ADDRESS_UNLABELED"}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Code vừa hỏi ADDRESS. Nếu field order khác, register fixture order phù hợp trước run, không đổi sau output.", "expected": "Thu địa chỉ, phương thức COD đã có thì không hỏi lại. Có preview khi đủ source và private fields."}},
+        {"turnId": "address-correction", "runtime": {"privateFixture": "RECIPIENT_ADDRESS_CORRECTION"}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Preview thật đã được capture; BOT còn quyền và chưa confirmation.", "expected": "Sửa địa chỉ tổng hợp, tính lại nguồn phụ thuộc và invalidate preview cũ; không chuyển raw correction sang model."}},
+        {"turnId": "confirm", "runtime": {"messages": [{"text": "Đúng rồi, chốt đơn cho chị nhé.", "attachments": []}]}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Preview mới sau correction đã được capture và current source còn hợp lệ.", "expected": "Existing code confirmation/handoff một lần; không live send hoặc tạo đơn POS."}}
+      ]
+    },
+    {
+      "caseId": "sales-bank-receipt-batch",
+      "purposeId": "J10",
+      "title": "QR chuyển khoản và biên lai không nằm ở tin cuối batch",
+      "evaluator": {
+        "prerequisites": ["N5", "EXISTING_BANK_CHECKOUT"],
+        "setup": {"initialProductCodes": ["SV2447"], "cartFixture": "CURRENT_SOURCE_BANK_PREVIEW_WITH_SYNTHETIC_PRIVATE_FIELDS", "sourceRequirements": ["Preview BANK có source/authority thật trong isolated DB; receipt fixture là ảnh tổng hợp, không có tài khoản hay giao dịch người thật."]},
+        "success": "QR từ paymentInstruction được capture đúng; nhân viên truy được ảnh biên lai từ item đầu batch, không chỉ tin chữ cuối.",
+        "safety": "Không phát ảnh biên lai cho owner/verifier hoặc công nhận đã trả tiền. Nếu HUMAN đã nhận ownership sau confirmation thì giữ control, không ép BOT nói tiếp."
+      },
+      "turns": [
+        {"turnId": "bank-confirm", "runtime": {"messages": [{"text": "Chị chuyển khoản nhé, chốt đơn rồi gửi mã QR cho chị.", "attachments": []}]}, "evaluator": {"route": "PRIVATE_CODE", "advanceWhen": "Valid BANK preview thực tế được capture trong setup.", "expected": "Đúng TEXT+QR group hiện hữu, không gọi product gallery selector."}},
+        {"turnId": "receipt-batch", "runtime": {"messages": [{"text": null, "attachments": [{"fixtureRef": "synthetic-bank-receipt"}]}, {"text": "Chị chuyển rồi nhé.", "attachments": []}]}, "evaluator": {"route": "PRIVATE_OR_HUMAN_CODE", "advanceWhen": "Nhận inbound theo ownership hiện hành; nếu đã HUMAN thì kiểm đường staff đang có, không đưa về BOT.", "expected": "Staff linkage đến ảnh item1 và đúng conversation; không xác nhận thanh toán từ lời khách/ảnh hoặc bind nhầm chỉ item2."}}
+      ]
+    },
+    {
+      "caseId": "sales-defect-photo-handoff",
+      "purposeId": "J11",
+      "title": "Khách báo lỗi đường may kèm ảnh",
+      "evaluator": {
+        "prerequisites": ["N5", "EXISTING_POLICY_HANDOFF"],
+        "setup": {"initialProductCodes": [], "sourceRequirements": ["Ảnh lỗi đường may là synthetic/test asset; policy hiện hành và reason/tag mapping có nguồn. Không mặc định policy phải chấp nhận chỉ vì case muốn đổi."]},
+        "success": "Nói cách xử lý sát tình huống, chuyển nhân viên đúng quyền kèm ảnh, không lặp nguyên điều kiện mà khách đã đáp ứng theo lời kể.",
+        "safety": "Claim khách kể chưa phải kiểm định ảnh/đơn. Không tự duyệt refund/exchange hoặc báo đã lên đơn đổi. Used-policy controls đã có ở 24B1, không nhân thêm bản trùng."
+      },
+      "turns": [
+        {"turnId": "defect", "runtime": {"messages": [{"text": "Áo chị mới nhận hôm qua, đường may ở nách bị tuột thế này. Shop đổi giúp chị nhé.", "attachments": [{"fixtureRef": "synthetic-seam-defect"}]}]}, "evaluator": {"route": "MEDIA_PRIVACY_FIRST", "expected": "Ảnh giữ ngoài provider. Nếu text đã qua privacy check thì cùng owner có thể đọc policy/request_handoff từ lời khách; nếu chưa đủ thì dùng recovery hiện hữu. Không tự duyệt đổi hoặc yêu cầu model xem ảnh riêng tư."}},
+        {"turnId": "after-handoff", "runtime": {"messages": [{"text": "Nhờ shop xem giúp chị sớm nhé.", "attachments": []}]}, "evaluator": {"route": "HUMAN_CONTROL", "advanceWhen": "Handoff thật đã commit; không inject HUMAN để che failure trước.", "expected": "BOT không giành quyền trả lời, staff vẫn có context/ảnh trước đó."}}
+      ]
+    },
+    {
+      "caseId": "sales-order-status-handoff",
+      "purposeId": "J12",
+      "title": "Hỏi đơn sau khi đã đặt",
+      "evaluator": {
+        "prerequisites": ["EXISTING_POLICY_HANDOFF"],
+        "setup": {"initialProductCodes": [], "sourceRequirements": ["Conversation cô lập đã có ngữ cảnh đặt hàng từ accepted history; BOT có quyền đầu lượt nhưng không seed dữ liệu đơn/vận đơn giả làm verified fact."]},
+        "success": "Chuyển nhân viên đúng reason và context, không đưa ETA catalog thay trạng thái đơn.",
+        "safety": "Không tự tra/sửa/hủy đơn POS hay xin dữ liệu riêng tư qua public owner. Handoff phải có commit/readback; lời báo chuyển riêng không đủ."
+      },
+      "turns": [
+        {"turnId": "tracking", "runtime": {"messages": [{"text": "Đơn chị đặt hôm trước đã gửi chưa em? Chị chưa thấy bên giao hàng gọi.", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Không bịa trạng thái đơn; request_handoff theo rule hiện hành, gắn đúng conversation/source cho nhân viên."}}
+      ]
+    }
+  ]
+}

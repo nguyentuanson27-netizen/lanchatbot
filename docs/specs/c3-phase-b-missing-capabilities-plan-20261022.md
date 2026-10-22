@@ -1,6 +1,6 @@
 # Phase B — kế hoạch nối các tác vụ còn thiếu
 
-Ngày 22/10/2026. **PLAN_ONLY**. Review base: `da54b16cb1e8825e48b6c76344baba1bd2629b5e`, branch `feat/c3-phase-b-commerce-20261014`. Chưa sửa runtime/prompt, chạy provider, bật ingress production hoặc gửi khách.
+Ngày 22/10/2026. **PLAN_REVISED_AND_CANDIDATE_CORPUS_ADDED** sau review độc lập HEAD `2aa9df44`. Review base code: `da54b16cb1e8825e48b6c76344baba1bd2629b5e`, branch `feat/c3-phase-b-commerce-20261014`. Chưa sửa runtime/prompt, chạy provider, bật ingress production hoặc gửi khách. Bộ ca mới là candidate, chưa được đăng ký vào provider run.
 
 ## Mục tiêu và kết luận review
 
@@ -31,7 +31,20 @@ Review xác nhận:
 
 ## Thứ tự triển khai
 
-`N1 checkout riêng tư → N2 history → N3 focus/quảng cáo → N4 ảnh ra → N5 media intake → N6 ảnh cho owner/tìm mẫu → N7 negotiation → N8 hành trình tổng hợp`.
+Ưu tiên làm N1 checkout riêng tư, sau đó N2 history; thứ tự còn lại theo phụ thuộc thực tế dưới đây, không bắt mọi task chờ toàn bộ chuỗi.
+
+| Slice | Phụ thuộc bắt buộc | Không cần đợi |
+|---|---|---|
+| N1 checkout | Existing clarification/private checkout | Media, focus, negotiation |
+| N2 history | N1 để loại trừ private turns mới đúng cách | Media hoặc focus action mới |
+| N3a đọc focus/quảng cáo | Existing conversation + catalog/refs; dùng N2 cho continuity tests | N3b terminal-focus design |
+| N3b lưu lựa chọn focus sau so sánh | Contract thể hiện lựa chọn trong budget 2 tool rounds, cần chốt riêng | Không được chặn N3a/N4/N5/N7 |
+| N4 ảnh sản phẩm ra | Verified subject/catalog ref và Outbox/group gate hiện có | N3b; có thể bắt đầu từ mã sản phẩm rõ |
+| N5 ảnh khách vào/handoff | N1 privacy routing + existing inbound/handoff stores | N4 ảnh ra |
+| N6a ảnh catalog cho owner | Approved catalog asset + existing provider/context binding | N5 ảnh khách |
+| N6b tìm mẫu từ ảnh khách | N5 + privacy/retrieval prerequisite thực sự đáp ứng | Không chặn N6a hoặc nhận ảnh để handoff |
+| N7 negotiation | Existing current cart/quote/transition/policy | N3 focus hoặc media |
+| N8 journeys | Capability cụ thể của từng journey; giữ baseline controls | Không mở tất cả pending cases chỉ vì một task đã xong |
 
 Mỗi task: test cho rủi ro đang sửa phải RED trước, sửa nhỏ nhất rồi GREEN; giữ các test liên quan của baseline. Các bước kiểm dưới đây là verification thông thường, không thêm operator/gate/state bền mới. Chỉ chạy provider sau khi đường deterministic tương ứng hoạt động.
 
@@ -39,7 +52,9 @@ Mỗi task: test cho rủi ro đang sửa phải RED trước, sửa nhỏ nhấ
 
 **Phụ thuộc:** Không. **Scope dự kiến:** 3–5 file: ingress, session, parser hiện hữu nếu cần, tests tương ứng.
 
-Đọc `clarification`/`checkoutDraft` bằng port hiện có trước public-model path và trước ghi history. Khi đang thu checkout, xử lý input trong private code path; không đợi regex nhận ra tên/địa chỉ. Dùng parser hiện hữu cho field có nhãn/số điện thoại/phương thức; dùng field shop đang hỏi để nhận giá trị đơn giản. Hỏi từng field khi cần phân biệt câu trả lời, thay vì đoán một chuỗi bất kỳ là tên.
+Đọc `clarification`/`checkoutDraft` bằng port hiện có trước public-model path và trước ghi history. `checkoutDraft != null` không đủ chứng minh đang thu PII: draft còn có thể tồn tại sau preview/handoff. Chỉ xác định pending intake từ active clarification/stage hiện hành. Khi đang thu checkout, xử lý input trong private code path; không đợi regex nhận ra tên/địa chỉ.
+
+Contract hiện tại `clarification.missingFields` là một danh sách và tin mời đầu hỏi nhiều field. Vì vậy phải sửa câu hỏi deterministic để hỏi **một field xác định** trước khi map câu không nhãn. Reuse clarification hiện hữu để ghi field vừa hỏi; phần còn thiếu tính từ draft, không thêm pending-field store. Dùng parser hiện hữu cho field có nhãn/số điện thoại/phương thức và giá trị đơn giản ứng với câu hỏi vừa gửi; không đoán chuỗi bất kỳ là tên. Chỉ tiếp nhận bare answer sau khi lời hỏi tương ứng thực sự eligible/được chấp nhận theo path hiện hữu, không dựa vào draft bot bị chặn.
 
 Không hứa hỗ trợ mọi tin trộn tên, sửa giỏ và đổi địa chỉ bằng parser hiện tại. Tin không xác định được field phải hỏi rõ ngắn trong private flow hoặc handoff theo quy định; không đẩy raw input sang owner để extract. Phải kiểm cả việc khách đổi ý/dừng checkout; không để routing theo pending field làm khách mắc kẹt hoặc tự ghi câu hỏi sản phẩm thành tên.
 
@@ -53,11 +68,11 @@ Không hứa hỗ trợ mọi tin trộn tên, sửa giỏ và đổi địa ch�
 
 ### N2. Nạp lịch sử hữu ích, đúng thứ tự và giới hạn
 
-**Phụ thuộc:** N1 để xác định loại trừ private turns ngay lúc intake. **Scope:** ingress + tests và DB/capture assertion, khoảng 3 file.
+**Phụ thuộc:** N1 để xác định loại trừ private turns mới ngay lúc intake. **Scope:** ingress + tests và DB/capture assertion, khoảng 3 file.
 
 Giữ model bound **8 tin/4.096 byte**. Dùng một lần đọc tối đa **30 dòng ứng viên** qua `listConversationHistory` hiện có, trước timestamp của batch mới; lọc riêng tư rồi lấy 8 tin công khai mới nhất và bỏ tin cũ nhất khi vượt byte bound. Đây là tăng giới hạn đọc DB có chặn, không tăng context gửi model hay thêm semantic retrieval. Nếu cả 30 dòng đều riêng tư thì history có thể rỗng; không đọc vô hạn để cố đủ 8.
 
-Không cần sửa query sort: DB đang `DESC` rồi `reverse()` trước trả kết quả. Không đưa draft bị chặn vào history. Không coi provider acceptance là khách đã đọc hoặc human conversation đã hoàn tất.
+Không cần sửa query sort: DB đang `DESC` rồi `reverse()` trước trả kết quả. 30 là bounded tuning (DB port đã có default30/cap150), không phải ngưỡng chứng minh continuity và không cần gate riêng. Public history là projection đã redact và có giới hạn cắt 2.000 ký tự trong mirror hiện hữu; không gọi nó là full-message retention và không mở rộng lưu trữ để sửa tên gọi. Không đưa draft bị chặn vào history. Không coi provider acceptance là khách đã đọc hoặc human conversation đã hoàn tất.
 
 **Hoàn thành khi:**
 
@@ -69,25 +84,27 @@ Không cần sửa query sort: DB đang `DESC` rồi `reverse()` trước trả 
 
 ### N3. Nối focus sản phẩm và context quảng cáo
 
-**Phụ thuộc:** N2. **Scope:** ingress, read-tools/context hiện có, tests; chỉ thêm adapter nhỏ khi caller chưa cấp được nguồn.
+**Phụ thuộc:** Existing conversation/catalog/refs; N2 phục vụ continuity tests. **Scope:** N3a ingress/read-tools bridge + tests; N3b tách riêng, chưa implement action mới khi chưa giải quyết budget.
 
 Đọc lại `currentProductId` của conversation để seed **catalog ref đã xác minh**, đọc facts mới trước trả lời; phân biệt focus đang xem với món đã có trong giỏ. Reuse phần kiểm source/fence/revision của `resolveVerifiedProductContext` khi khớp contract; không kéo theo regex reset/semantic parsing của runner cũ.
 
 `adsContext` chỉ là gợi ý tìm mã/nguồn quảng cáo, không phải fact hay lệnh. Reuse `extractAdProductCodes`/catalog lookup cho mã rõ; nếu chưa có mapping adId/postId→product đáng tin thì tìm/đề nghị khách làm rõ, không bịa mapping. Khách gọi rõ mẫu mới phải được ưu tiên hơn quảng cáo cũ. Khi có nhiều mẫu, owner hiểu “cái trước/cái này” từ lịch sử và chọn ref code cấp; code không tự đoán bằng vị trí trong array.
 
-Không lấy lần `read_product` cuối cùng làm quyết định đổi focus: so sánh hai mẫu cũng cần đọc cả hai. Viết RED cho tình huống này trước. Nếu native contract hiện có chưa biểu đạt được chọn focus, thêm đúng một action `select_product_context(subjectRef|null)` của cùng owner: chỉ nhận PRODUCT refs đã bind hoặc clear, kiểm nguồn hiện hành rồi ghi vào **field currentProductId có sẵn** qua commit/CAS hiện hữu. Không tạo bảng memory, profile field mới hoặc cart effect; chọn một món để xem chưa phải đồng ý mua. Tách action/adapter thành savepoint nhỏ nếu vượt scope N3. Đây là phần state thiếu cần chứng minh bằng RED, không thêm tool chỉ để giữ mọi kết quả tìm kiếm.
+**N3a:** đọc/seed lại focus đã có và bind mã quảng cáo/catalog rõ, không tự thay focus chỉ vì owner đọc một sản phẩm. Không lấy lần `read_product` cuối cùng làm quyết định đổi focus: so sánh hai mẫu cũng cần đọc cả hai.
+
+**N3b — design còn thiếu, chưa cho triển khai tool mới:** RED phải có round1 tìm hai mẫu → round2 đọc cả hai → generation cuối mới chọn được mẫu → lượt sau nhắc mẫu đã chọn. Runtime giới hạn 3 owner generations/2 tool rounds/6 calls; không thêm `select_product_context` sau đó vì sẽ cần round3. Trước implement phải chứng minh contract hiện hữu có thể mang quyết định ref đến terminal commit mà không thêm generation, đổi exact-final-text ownership hoặc ghi trước khi model đủ dữ kiện. Đồng thời kiểm bound subject, current revision/CAS và readback; không cần gate mới. Nếu chưa chứng minh được, giữ N3b là hạn chế riêng và chỉ hoàn thành N3a. Không tự tăng budget, thêm semantic output object hoặc chọn focus từ thứ tự reads. Field đích vẫn là currentProductId hiện có, không tạo memory/profile field hoặc cart effect.
 
 **Hoàn thành khi:**
 
 1. Khách vào từ quảng cáo chỉ hỏi giá vẫn tới đúng sản phẩm nếu nguồn xác định duy nhất; nhiều mã/không tìm được/mã ngoài shop xử lý rõ, không bind nhầm.
-2. Qua lượt mới/restart tool instance, mẫu đang xem được đọc lại trước khi có giỏ; chuyển mẫu không sửa giỏ ngoài yêu cầu. Focus cũ không lấn explicit new product.
+2. N3a: qua lượt mới/restart tool instance, focus đã xác nhận được đọc lại trước khi có giỏ; explicit new product thắng quảng cáo cũ, không sửa giỏ. N3b chỉ được ghi hoàn thành khi có test search→read→select→next-turn trong budget hiện hành và current revision/readback đúng.
 3. Hai mẫu cùng lượt, history cũ, source hết hạn và HUMAN owner không sinh giá/ảnh/mutation cho sai subject; có readback đúng existing revision/fence.
 
 **Kiểm:** read-only-tools + ingress focused tests, verified-product-context regression nếu reuse; DB journey hai mẫu trước/sau cart.
 
 ### N4. Gửi ảnh sản phẩm qua Outbox hiện có
 
-**Phụ thuộc:** N3. **Scope:** tách hai savepoint nếu cần: (a) native media selection + schema/tests; (b) ingress egress + grouped-delivery tests. Mỗi savepoint khoảng 3–5 file.
+**Phụ thuộc:** Verified subject/catalog ref + existing Outbox/group gate; không phải đợi N3b. **Scope:** tách hai savepoint nếu cần: (a) native media selection + schema/tests; (b) ingress egress + grouped-delivery tests. Mỗi savepoint khoảng 3–5 file.
 
 Thêm một native operation chuẩn bị ảnh theo `subjectRef`, component và mục đích từ enum hiện hữu. Owner chọn nhu cầu xem ảnh, code reuse selector/registry để trả bounded asset refs và metadata; không nhận URL tùy ý từ model. Chọn selector theo source type thực tế: không bắt catalog `ProductImage` đi qua schema `ProductFactsV2` nếu không có source mapping hợp lệ.
 
@@ -103,7 +120,7 @@ Tool này **chưa gửi**. Sau exact final reply/verifier, commit TEXT+IMAGE qua
 
 ### N5. Nhận media an toàn và chuyển nhân viên khi cần
 
-**Phụ thuộc:** N1 và N4. **Scope:** ingress + media resolver/adapters + tests, chia riêng capture harness nếu vượt 5 file.
+**Phụ thuộc:** N1 privacy routing và existing inbound/handoff integration, không phụ thuộc N4 ảnh ra. **Scope:** ingress + media resolver/adapters + tests, chia riêng capture harness nếu vượt 5 file.
 
 Thay blanket `attachments.length → NO_SEND` bằng xử lý theo khả năng hỗ trợ. Reuse downloader/URL allowlist, byte/MIME/time bounds hiện có; kiểm redirect trước request tiếp theo. Không tải URL model đề xuất. Attachment ngoài phạm vi vẫn có outcome rõ; lỗi một ảnh không tự xóa phần text độc lập đã đủ nguồn và được phép trả lời.
 
@@ -112,14 +129,14 @@ Biên lai, ảnh lỗi hàng và ảnh có nguy cơ chứa thông tin riêng tư
 **Hoàn thành khi:**
 
 1. Tin chỉ có ảnh và tin chữ+kèm ảnh không còn bị bỏ toàn bộ vì một điều kiện chung; ảnh không tải được/không hỗ trợ nhận terminal phù hợp, không giả vờ đã xem.
-2. Defect/receipt đi đến handoff thật với source-message/attachment linkage cho nhân viên có quyền. Kiểm readback linkage đã tồn tại; nếu chưa có, ghi prerequisite adapter cụ thể, không gọi một text “đã chuyển” là hoàn thành.
+2. Defect/receipt đi đến handoff thật với source-message/attachment linkage cho nhân viên có quyền. Hiện session truyền attachmentIds=[]; persistence lưu triggerMessagePk=null và scope lấy từ item cuối, còn encrypted Inbox giữ envelope gốc. Đây chưa chứng minh staff nhìn thấy ảnh. Bắt buộc RED batch item1=biên lai/ảnh lỗi, item2=“Chị gửi rồi nhé”, kiểm nhân viên truy được đúng item1 bằng integration hiện hữu. Nếu chưa có adapter/readback, ghi prerequisite cụ thể; không gọi một text “đã chuyển” là hoàn thành và không mặc định cần durable store mới.
 3. SSRF/redirect/MIME/oversize/cross-conversation/replay/private bytes không lọt vào provider requests hoặc raw logs; HUMAN ownership và no-send tiếp tục đúng.
 
 **Kiểm:** existing media safety/partial-resolution tests, ingress tests và DB/capture handoff với synthetic attachments.
 
 ### N6. Cho owner dùng ảnh công khai và tìm mẫu từ ảnh
 
-**Phụ thuộc:** N3–N5. **Scope:** tách (a) provider image input/binding/tests, (b) image-search adapter/composition/tests nếu cần. Không viết lại pipeline recognition.
+**Phụ thuộc:** N6a ảnh catalog chỉ cần approved public asset + provider/context binding; N6b ảnh khách mới cần N5 và privacy/retrieval prerequisite. Không để N6b chặn N6a. **Scope:** tách (a) provider image input/binding/tests, (b) image-search adapter/composition/tests nếu cần. Không viết lại pipeline recognition.
 
 Trước hết cấp ảnh sản phẩm công khai đúng nguồn cho cùng conversational owner; native text/tool history vẫn giữ nguyên. Sau đó nối tìm ứng viên bằng image-search/vector path hiện hữu nếu dùng được độc lập với generative reranker; image embedding là retrieval, không được âm thầm gọi thêm model tư vấn/rerank. Owner hiện tại có thể xem và so sánh ứng viên; code chỉ cho bind refs đã truy xuất/xác minh. Similarity không tự chứng minh đúng mẫu.
 
@@ -135,11 +152,11 @@ Trước hết cấp ảnh sản phẩm công khai đúng nguồn cho cùng conv
 
 ### N7. Nối sự kiện trả giá vào engine hiện hữu
 
-**Phụ thuộc:** N3 và baseline cart/quote. **Scope:** state/effects bridge, native declaration adapter và focused tests; không sửa policy arithmetic nếu contract hiện có đủ.
+**Phụ thuộc:** Baseline current cart/quote/negotiation transition/policy, không phụ thuộc N3 focus. **Scope:** state/effects bridge, native declaration adapter và focused tests; không sửa policy arithmetic nếu contract hiện có đủ.
 
 Thêm native operation cho owner báo ý nghĩa của tin hiện tại: `PRICE_OBJECTION`/`PURCHASE_READY`, kèm source quote/ref phù hợp. Runtime cấp source identity, evidence IDs/timestamp, kiểm quote thuộc tin hiện tại rồi gọi transition/NEGOTIATION_EVENT hiện có; code xác định tier, ưu đãi và tổng. Quote match chỉ chứng minh nguồn trích, không chứng minh model hiểu đúng nghĩa; phải kiểm false trigger bằng hội thoại thực tế.
 
-Reuse idempotency/fingerprint/CAS và reset khi cart thay đổi. Không lấy số lần gọi tool làm số lần khách phản đối, không áp hai ưu đãi khi replay hoặc owner gọi lại. Không quảng cáo “shop giảm thêm” trước quote/receipt được code chấp nhận.
+Reuse idempotency/fingerprint/CAS. Khi cart đổi: invalidate/reprice quote, preview và refs phụ thuộc cart; **giữ customerState cùng consumedObjectionEvidenceIds/processedEvents theo canonical cart-reprice engine**. Không reset tier/objection ledger để cho cùng phản đối được tính lại, không sửa policy arithmetic. Không lấy số lần gọi tool làm số lần khách phản đối, không áp hai ưu đãi khi replay hoặc owner gọi lại. Không quảng cáo “shop giảm thêm” trước quote/receipt được code chấp nhận.
 
 **Hoàn thành khi:**
 
@@ -155,7 +172,7 @@ Reuse idempotency/fingerprint/CAS và reset khi cart thay đổi. Không lấy s
 
 Giữ 24 B1 và 8 mốc stateful cũ làm baseline. Tách rõ deterministic tests, provider outcome, lượt customer và số generation requests; không dùng số test kỹ thuật để nói số hội thoại đã chạy. Những ca từng PASS trùng mục đích không tự nhân bản thêm.
 
-Danh mục dưới là **12 mục đích hành trình đề xuất**, chưa phải corpus/run registration hay tổng lượt đã duyệt. Thiết kế câu thoại tự nhiên rồi mới chốt số lượt; một hành trình nhiều tin không được báo là một generation. Reuse case có sẵn nếu đã kiểm đúng mục đích.
+Đã bổ sung lời khách cụ thể trong [sales-journeys.candidate.json](../../apps/worker/evals/single-agent-commerce-read-only/sales-journeys.candidate.json), với [hướng dẫn/ma trận ca và prerequisite](../../apps/worker/evals/single-agent-commerce-read-only/SALES_JOURNEYS_CANDIDATE.md). Đây là **candidate corpus, chưa phải provider registration**; chưa sửa runner fixed24B1/fixed8stateful hoặc gọi generation. Các bước private/media/control không được ép thành public model turns. Asset/private fixture phải được materialize/kiểm đúng nguồn trong harness trước khi chạy; thiếu thì ghi NOT_READY, không giả lập provider result. Reuse case cũ nơi đã kiểm đúng mục đích; không cộng 12 journey thành 12 generation.
 
 | ID | Hành trình | Bằng chứng cần thấy |
 |---|---|---|
@@ -180,7 +197,7 @@ Kiểm lịch sử vượt 8 tin, pause/thanks, đổi ý, stale source và HUMA
 2. Chấm exact actual terminal outcome trên **toàn hội thoại**: hiểu khách, lựa chọn, lý do liên quan, tiến triển mua hàng, giọng tự nhiên và safety. Không chấm đủ keyword; tư vấn an toàn nhưng vô ích vẫn cần sửa. Verifier không trở thành người chấm giọng.
 3. Freeze selected case/turn counts, model config, prompt/schema hashes, source SHA và max request budget trước provider. Chạy changed-risk cases trước; chỉ chạy full B1/B2/B3 khi readiness tương ứng đạt. Mỗi ca một lần cho vòng coverage đầu, không best-of/retry; kiểm ổn định chỉ nhân các ca cần đo và ghi variance riêng. Không claim các giới hạn corpus cũ tự động bao phủ media/negotiation mới.
 
-Giữ runtime projection tách evaluator projection: caseId, split, expected behavior, rubric và nhãn quality không được đi vào owner/verifier, kể cả filename/metadata của ảnh. Extend captured-request contamination test cho các field mới. Cập nhật bảng capability trong README/harness theo toolset thực sự; đoạn README cũ nói component-variant chưa hỗ trợ đã lạc hậu so với code/test hiện tại, không dùng nó làm nguồn chuẩn để bỏ tác vụ này.
+Giữ runtime projection tách evaluator projection: caseId, split, expected behavior, rubric và nhãn quality không được đi vào owner/verifier, kể cả filename/metadata của ảnh. Extend captured-request contamination test cho các field mới. README đã được sửa trong lượt bổ sung corpus: component-variant có native support, không đồng nghĩa đã model-test mọi cấu hình nhiều thành phần. Tiếp tục cập nhật bảng capability/harness theo code và evidence thực tế.
 
 ## Lệnh verification dự kiến — chưa chạy trong lượt lập kế hoạch
 
@@ -218,10 +235,10 @@ Real DB/capture reuse `source-session.py` + `isolated-integration.mjs <new-exter
 - Tool sourceQuote không chứng minh model hiểu đúng ý trả giá; phải kiểm false activation. Không mở thêm quyền vì tool schema đã hợp lệ.
 - Existing user-facing handoff chỉ được nói đã chuyển sau commit/readback. Staff cần xem được source/context qua integration hiện hữu; không thêm durable handoff store nếu đường đang có đáp ứng.
 - External order lookup/mutation, refund execution, OCR xác minh thanh toán, video recognition và production activation **không được coi là đã có** sau kế hoạch này. Candidate phải chuyển người đúng việc và ghi phần chưa hỗ trợ.
-- Complexity delta dự kiến: adapter/consumer glue, bounded media fields, native media preparation và negotiation event; chỉ thêm focus-selection action nếu RED chứng minh contract hiện tại không truyền được quyết định đó. Không thêm semantic role, storage subsystem, operator hoặc verification layer. Mọi schema mới chỉ bảo vệ asset identity/privacy, focus selection hoặc event authority đang thiếu, reuse final/group gate.
+- Complexity delta dự kiến: adapter/consumer glue, bounded media fields, native media preparation và negotiation event. N3b focus action chưa thuộc scope implement cho đến khi choreography phù hợp budget được chứng minh; không tự thêm round hoặc semantic output object. Không thêm semantic role, storage subsystem, operator hoặc verification layer. Mọi schema mới chỉ bảo vệ asset identity/privacy hoặc event authority đang thiếu, reuse final/group gate.
 
 ## Trạng thái và điểm bàn giao
 
-Trong lượt này chỉ code/spec/test review và lưu kế hoạch; **0 provider generations, 0 runtime changes, không chạy suite/build mới**. Không dùng kết quả các vòng trước để claim verification cho N1–N8.
+Lượt lập kế hoạch ban đầu chỉ code/spec/test review. Lượt sửa sau review bổ sung candidate corpus và kiểm offline theo report trong SALES_JOURNEYS_CANDIDATE.md; **0 provider generations, 0 runtime/prompt changes**. Không dùng kết quả các vòng trước hoặc static corpus checks để claim N1–N8 đã chạy/đạt. N3b và customer-image recognition còn prerequisite riêng; các slice độc lập vẫn có thể triển khai.
 
 Sau mỗi task ghi file/command/result và hạn chế vào todo. Kết thúc implementation bằng report phân biệt: đã nối, đã deterministic/DB test, đã model-run và còn hạn chế. Tiêu chí B hoàn thiện là hành trình đi được và tác vụ đúng quyền, không chỉ giảm fallback. A vẫn OWNER_BYPASS; không tự chuyển thành A PASS/B GO, merge/deploy hay live send.
