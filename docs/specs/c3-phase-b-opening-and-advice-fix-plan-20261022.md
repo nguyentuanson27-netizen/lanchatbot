@@ -1,5 +1,7 @@
 # Phase B — sửa luồng mở đầu và cách dùng dữ liệu để bán hàng
 
+Trạng thái mới: đã [implementation + self-review](c3-phase-b-opening-and-advice-implementation-20261022.md) theo [review độc lập APPROVE](c3-phase-b-opening-and-advice-independent-review-20261022.md). Model diagnostic/native chưa chạy; source gaps giữ mở. Nội dung dưới lưu kế hoạch gốc trước triển khai.
+
 Ngày 22/10/2026. **PROPOSED — chưa implementation hoặc provider run.** Plan base `f93777c4a3a4b6610e70e4757dc7f8ddbeff51e4`, branch `feat/c3-phase-b-commerce-20261014`. Nguồn: [review đủ39 ca](c3-phase-b-full39-conversation-review-20261022.md), [review19target+4prerequisite](../../apps/worker/evals/single-agent-commerce-read-only/fallback19-rerun-20261022/REVIEW.md), [kế hoạch sửa contract trước](c3-phase-b-contract-and-advice-fix-plan-20261022.md) và [implementation/reviews](c3-phase-b-contract-and-advice-implementation-20261022.md).
 
 ## Mục tiêu và nguyên tắc giữ nguyên

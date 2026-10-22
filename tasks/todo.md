@@ -1,14 +1,17 @@
 ## Đề xuất sửa sau full39 — 2026-10-22
 
-[Plan chi tiết](../docs/specs/c3-phase-b-opening-and-advice-fix-plan-20261022.md). **PROPOSED, không implementation/modelrun.**
+[Plan chi tiết](../docs/specs/c3-phase-b-opening-and-advice-fix-plan-20261022.md), [implementation/self-review](../docs/specs/c3-phase-b-opening-and-advice-implementation-20261022.md). **IMPLEMENTED_AND_SELF_REVIEWED — MODEL_RUN_PENDING.** Source gaps không được coi đã đóng.
 
 - [x] Review độc lập fresh context: [APPROVE kế hoạch](../docs/specs/c3-phase-b-opening-and-advice-independent-review-20261022.md), không required P1/P2. Giữ hai lưu ý candidate handoff phải được journey dùng thật và diagnostic không mang treatment override cũ; chưa implementation/provider.
 - [x] Đối chiếu finding/full39/rerun và sửa trước; đọc code size/media/handoff/time/quote, lập plan và self-review chống promptbloat/gates/parser/hidden retry.
-- [ ] T0: audit nguồn/chartscope/assetbinding/currentmatrix/ETAanchor/attributes; giữunknown nếu nguồn thật không đủ.
-- [ ] T1–T4: mapping size, ảnh đúng scope, firsthandoff holding theo candidate policy, immutable turn-time metadata không làm snapshot tự đổi; RED→GREEN đúng risk, không sửa live.
-- [ ] T5: quote hiện tại trong effect result khớp trusted.state; formatter recovery đúng tên offer/tiền/receipt, không thêm authority hoặc modelrewrite.
-- [ ] T6: nối source field nếu xác nhận mất mapping; một owner delta phạmvi hiểu khách/giọng, giữ policy/state và verifier, khôngfewshot/blacklist/cắtbyte.
-- [ ] T7: deterministic checks → seal/preflight → diagnostic4 riêng và native39 theo18+21, N1, budget và disposition rõ; review whole-turn, khôngautorun/fixvòng2 hoặc nhậnBGO.
+- [x] T0/T1: audit nguồn thật0generation/write;7chart publish không scope-match4products đã kiểm, không alias SQ2447→SV2447 hoặc nới scope. NO_VERIFIED_CHART giữ source gap.
+- [x] T2–T4: phân biệt ảnh chung/đúng màu, giữ binding/group gate; candidate handoff version/hash qua isolatedDB/resolver, immutable turn-time ngoài snapshot cấp owner/verifier và capturedAt replay; observed RED→GREEN. Không live policy write.
+- [x] T5: dùng chung quote projection trong effect result/snapshot; giữ history từngversion, failed effect không quote success; recovery đúng component title nếu có nguồn và ưu đãi/tổng trước giỏ, giữ receipt/authority.
+- [x] T6: xác nhận source không attributes, giữ pass-through đang đúng; một owner delta hiểu/giọng và contractquote/time,33→32bullets,+258bytes. Verifier/models/bounds/policy giữ nguyên, chưa cóqualityevidence.
+- [x] Self-review → sửa expectationSILENTcũ, bảo toàn otherrules/tags, LF inputhash và captured replay clock. Worker1956/focused262/protected21PASS; Node558PASS/2SKIP, typecheck/build/lintPASS. DB composed20/COD34/BANK34PASS,4DBdropped gồmRED;0provider generation/live send.
+- [x] Chuẩn bị đúng4diagnostic từ captures cũ, không per-row treatment override; offline wire/label/hash4PASS, chưa provider dispatch.
+- [ ] T7 provider: seal/clean→runtimeSHA/preflight→diagnostic4 riêng, sau đạt mới native39 theo18+21,N1. Max160requests, khôngautorun/fixvòng2 hoặc nhậnBGO. Chưa thực hiện trong lượt fix/self-review.
+- [ ] Source gaps còn mở: chart đúng parent, asset-color binding, structured attributes, ETAanchor/day convention. Không sửa bằng prompt hoặc tựbơmfacts.
 
 ## Review full39 gốc — 2026-10-22
 
