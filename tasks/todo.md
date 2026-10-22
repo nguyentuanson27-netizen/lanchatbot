@@ -1,3 +1,15 @@
+## Implementation hợp đồng công cụ và thử ảnh — 2026-10-22
+
+[Savepoints/review/commands](../docs/specs/c3-phase-b-contract-and-advice-implementation-20261022.md). **IMPLEMENTED_AND_INDEPENDENT_REVIEWED — MODEL_RUN_PENDING**; không dùng unit tests làm provider-quality evidence.
+
+- [x] T0 chuẩn whole-turn; T1–T4 deterministic fixes, observed RED→GREEN và self-review.
+- [x] Independent reviewer lượt1 REVISE → sửa3findings và các clarification → cùng reviewer lượt2 APPROVE dc311422.
+- [x] T5 executable/corpus6/slots12/both-arms media/pin/once-only prep; baseline24 giữ nguyên; read-only prerequisite0generation PASS.
+- [x] Worker1954/Node107/protected21PASS; worker typecheck/build/lintPASS; không shared/runtime entrypoint/live changes.
+- [ ] Disposable COD/BANK checks/readback/drop; freeze clean source/input; provider preflight.
+- [ ] Full39N1 + actual whole-turn review; conditional12comparison riêngSHA và denominator.
+- [ ] Report attribution/counts/latency/usage/limits, cập nhật PR391; không tự nhận B GO/tiếp tục campaign.
+
 ## Đề xuất fix sau review xuyên suốt — 2026-10-22
 
 [Kế hoạch/acceptance/commands](../docs/specs/c3-phase-b-contract-and-advice-fix-plan-20261022.md). PLAN_APPROVED_AFTER_INDEPENDENT_RE_REVIEW; reviewer vòng trước đã duyệt kế hoạch sửa, chưa sửa runtime/prompt/chạy model.

@@ -54,3 +54,14 @@ Hai lưu ý triển khai, không phải blocker hoặc gate mới:
 2. T1 fault test phải thực sự ghi store trước readback throw/khác, rồi thử tác vụ phụ thuộc và patch tiếp cùng turn. CAS giả trả true nhưng không ghi chưa chứng minh invariant này.
 
 Parent đã bổ sung rõ hai lưu ý vào mục test T1/T5 và cập nhật trạng thái plan/todo. Đây là làm rõ yêu cầu kiểm thử đã duyệt, không thay thiết kế. Reviewer không review runtime mới, chạy tests/provider hoặc tác động live. Giọng correction/source wording, nóng/nhăn, N3b, staff-image readback và các slot chưa đăng ký vẫn là finding/giới hạn mở.
+
+
+## Implementation review lượt1 → fix → lượt2 — 22/10/2026
+
+Cùng reviewer `/root/review_contract_advice_plan`, read-only, không chạy tests/provider hoặc edit source.
+
+Lượt1 **REVISE** phạm vi T1–T4: owner operation clause cũ phủ định unknown-commit semantics; numeric/preferences domain error chưa field-specific và store read outage bị gán invalid input; snapshot diagnosis overwrite claim cùng type/scope. Parent sửa đúng clause/hash, field feedback/source error và giữ array toàn bộ projected claims. Bổ sung current-message fit quote presence và ETA priority checks theo lưu ý. Không voice rewrite/semantic parser/gate mới.
+
+Lượt2 **APPROVE T1–T5 tại `dc3114229d2e126937a15d611dd0883e1490a777`**, worktree sạch. Ba finding đã đóng; không còn required fix. Reviewer xác nhận unknown-commit latch/receipt/cache scope, shared ETA resolver, receipt-bound negotiation recovery và T5 corpus6/slots12/cap48, both-arms media, once-only preparation/pinned metadata/readback/final gate. Baseline24 giữ nguyên; lỗi ở comparison vẫn trong denominator, không retry hoặc thay mẫu.
+
+Verdict chỉ review source/tests đã viết; không xác nhận provider quality, stability hoặc B GO. Các commit tài liệu/evidence sau source trên không được mô tả là reviewer đã kiểm provider outputs.

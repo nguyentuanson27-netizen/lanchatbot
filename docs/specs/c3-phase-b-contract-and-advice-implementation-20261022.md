@@ -43,3 +43,22 @@ Campaign39 trước, B1attempt7: captured verifier trusted và final currentPubl
 ## Pending
 
 Review lượt2/fix; final focused checks + worker build/typecheck/lint; disposable COD/BANK; commit clean executable/config; provider preflight;39integrationN1 rồi conditional12comparison với SHA riêng. Giữ mọi outcome, không retry hoặc sửa giữa run. Chưa có provider kết quả mới tại thời điểm ghi phần này.
+
+
+## Final code review và verification trước provider
+
+T1–T4 savepoint `afc989e0`; T5 savepoint `dc311422`. Cùng independent reviewer review lượt2: **APPROVE** exact `dc3114229d2e126937a15d611dd0883e1490a777`, không required finding còn lại. Sau verdict không sửa executable.
+
+Commands thực sự chạy (22/10):
+
+- `pnpm --filter @lana/worker exec vitest run src` →133files/1954tests PASS.
+- `node --test --test-concurrency=1 "apps/worker/evals/single-agent-commerce-read-only/*.test.mjs"` →107PASS.
+- `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts` →21PASS.
+- `pnpm --filter @lana/worker typecheck` →PASS.
+- `pnpm --filter @lana/worker build` →PASS.
+- `pnpm --filter @lana/worker lint` →PASS.
+- `git diff --check` và staged diff check tại savepoints →PASS.
+
+Worker focused9files đã chạy279PASS trước bổ sung state/region tests; final133files gồm toàn bộ focused suites ở revision cuối. Không cần chạy lại cùng coverage chỉ đổi tên count. Node image-comparison4tests gồm actual composed runner/request preservation, dispatcher/registration bounds và label firewall. Logs được giữ ngoài source trước seal; raw source/run evidence sẽ lưu ở campaign report.
+
+Model/provider chưa chạy tại section này. COD disposable đang chạy, BANK control sẽ nằm trong full39 campaign operations (không tính thêm customer outcome).
