@@ -10,7 +10,7 @@ import {execFileSync} from 'node:child_process';
 import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,PostgresChatHistoryStore,LocalEnvelopeCipher,withTransaction,redactAnalyticsMessage} from '@lana/database';
 import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
-import {runPersistedCommerceIngress} from '../../dist/single-agent-commerce-ingress.js';
+import {runPersistedCommerceIngress,commerceHistory} from '../../dist/single-agent-commerce-ingress.js';
 import {createSalesCycleRuntimeState,applySalesCycleCommand,executePersistedSalesCycleCommand,RuntimePolicyResolver,buildPurchaseConfirmedTagCommand} from '@lana/chat-runtime';
 import {createConversationState} from '@lana/conversation-engine';
 import {buildCanonicalDecisionEvidenceV1} from '@lana/business-tools';
@@ -335,7 +335,7 @@ try{
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
  if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,media=false,initialProductCodes=['SV2447']}={}){
   assert(!live||dependencyHoldingReply===null,'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
   const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
@@ -355,15 +355,18 @@ try{
    // Controlled domain input only: never publish/replace the real shop policy.
    return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:{schemaVersion:1,kind:'HANDOFF_MATRIX',
     sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE',customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF',holdingReply:dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
-  const read=live?await providerPorts.read(bound,policyStore,policy):{policy,catalog:{readProduct:async()=>product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
-  const capture=[],gateCalls=[],dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
-   const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash)capture.push(b.message.text??'[CODE_IMAGE]');return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
+  if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
+   reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
+  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes):{policy,catalog:{readProduct:async()=>product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  const capture=[],capturePayloads=[],gateCalls=[],dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
+   const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash){capture.push(b.message.text??'[CODE_IMAGE]');capturePayloads.push(b.message);}return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
    new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},{workerId:'c3-b-capture'},undefined,historyStore);
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
-  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{}}={}){
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null}={}){
    const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
-   await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:id,providerMessageId:id,conversationHash:customerHash,occurredAt:now,receivedAt:now,signatureKeyVersion:'synthetic',envelope});
+   const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
+   for(const message of inboundMessages)await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:message.eventKey,providerMessageId:message.messageId,conversationHash:customerHash,occurredAt:now,receivedAt:now,signatureKeyVersion:'synthetic',envelope:{...envelope,message}});
    await pool.query('UPDATE conversation_ingress_heads SET quiet_until=now() WHERE page_id=$1 AND conversation_hash=$2',[pageId,customerHash]);
    // Earlier supersession tests intentionally leave synthetic pending sources. Retire those test-only batches.
    let batch;
@@ -376,12 +379,54 @@ try{
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
     verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
-   return {result,owners,verifiers,batch,toolResponses};
+   return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;}};
+  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
+  const j=await statefulFixture();
+  await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+  const invitation=await j.turn('Chốt đơn cho chị nhé',[native([{name:'confirm_purchase',args:{}}])]);
+  assert.equal(invitation.result.enqueued,1,JSON.stringify(invitation.result));assert.deepEqual((await j.state()).clarification.missingFields,['FULL_NAME']);await j.drain();
+  for(const [text,next] of [['Nguyễn Thị Lan','PHONE'],['0900000001','ADDRESS'],['12 Đường thử nghiệm, Quận 1, TP Hồ Chí Minh','PAYMENT_METHOD'],['COD',null]]){
+   const r=await j.turn(text,[]);assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert(r.result.enqueued>0,JSON.stringify(r.result));
+   const state=await j.state();if(next)assert.deepEqual(state.clarification.missingFields,[next]);else assert.equal(state.stage,'ORDER_PREVIEW');await j.drain();
+  }
+  const history=await historyStore.listConversationHistory(j.bound.conversationId,{limit:30});
+  // Accepted private preview is retained by the existing authorized history store; public model projection must drop it whole.
+  const publicHistory=commerceHistory(history),inbound=history.filter(m=>m.direction==='INBOUND');
+  for(const rows of [publicHistory,inbound]){assert(!JSON.stringify(rows).includes('Nguyễn Thị Lan'));assert(!JSON.stringify(rows).includes('0900000001'));assert(!JSON.stringify(rows).includes('12 Đường thử nghiệm'));}
+ });
+ await check('B composed N4 sends exact text and selected image in one response group without replay duplicates',async()=>{
+  const j=await statefulFixture({media:true});
+  const r=await j.turn('Cho chị xem mặt sau SM613 nhé',[native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}}]),say('Ảnh mặt sau đây chị nhé.')]);
+  assert.equal(r.result.enqueued,2,JSON.stringify(r.result));await j.drain();await j.drain();
+  assert.deepEqual(j.capture,['Ảnh mặt sau đây chị nhé.','[CODE_IMAGE]']);
+  assert.equal(new Set(j.gateCalls).size,1);assert(j.capturePayloads[1].attachment.payload.url.endsWith('c3-synthetic-product-back.jpg'));
+ });
+ await check('B composed N5 image-first text-last handoff links the attachment history and retains encrypted source',async()=>{
+  const j=await statefulFixture(),r=await j.turn(null,[],{messages:[{text:null,attachments:[{type:'image',url:'https://content.pancake.vn/c3-private-receipt.jpg',providerId:'synthetic-receipt'}]},
+   {text:'Chị gửi rồi nhé',attachments:[]}]});
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
+  const h=(await pool.query(`SELECT h.trigger_message_pk,m.attachment_count,m.text_redacted FROM handoff_events h JOIN messages m ON m.message_pk=h.trigger_message_pk WHERE h.conversation_id=$1`,[j.bound.conversationId])).rows;
+  assert.equal(h.length,1);assert.equal(h[0].attachment_count,1);assert(!h[0].text_redacted?.includes('private-receipt'));
+  assert.equal(r.batch.items[0].envelope.message.attachments[0].providerId,'synthetic-receipt');
+  assert.equal(await inbox.isBatchCurrent(r.batch),false);
+ });
+ await check('B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence',async()=>{
+  const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+  const r=await j.turn('Giá hơi cao, bớt cho chị được không?',[native([{name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'Giá hơi cao'}},
+   {name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'bớt cho chị được không?'}}]),say('Dạ chị.')]);
+  assert.equal(r.result.enqueued,1,JSON.stringify(r.result));const before=await j.state();assert.equal(before.negotiation.customerState,'HESITANT');
+  assert.equal(before.negotiation.consumedObjectionEvidenceIds.length,1);
+  assert.equal((await pool.query("SELECT count(*)::int n FROM sales_cycle_events WHERE conversation_id=$1 AND command_kind='NEGOTIATION_EVENT'",[j.bound.conversationId])).rows[0].n,1);
+  await j.drain();const line=before.cart.value.lines[0];
+  const changed=await j.turn('Cho chị hai chiếc nhé',[native([{name:'change_cart_item',args:{subjectRef:line.lineId,action:'SET_QUANTITY',quantity:2}}]),say('Dạ chị.')]);
+  assert.equal(changed.result.enqueued,1,JSON.stringify(changed.result));const after=await j.state();assert.equal(after.negotiation.customerState,before.negotiation.customerState);
+  assert.deepEqual(after.negotiation.consumedObjectionEvidenceIds,before.negotiation.consumedObjectionEvidenceIds);
+ });
  await check('B composed generation failure preserves the committed total through cart readiness and captures recovery once',async()=>{
   const j=await statefulFixture(),r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}}])]);
   assert.equal(r.result.terminal.reason,'RECEIPT_BACKED_CART_SUMMARY',JSON.stringify(r.result));
@@ -487,13 +532,13 @@ try{
   const selectedCases=process.argv.includes('--opening-only')?providerFreeze.cases.slice(0,1):providerFreeze.cases;
   for(const [index,c] of selectedCases.entries()){
    providerPorts.setSlot(c.caseId);const beforeCounts={...providerPorts.counters};
-   const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true});journeys.set(c.journeyId,j);}
+   const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true,initialProductCodes:c.runtime.initialProductCodes});journeys.set(c.journeyId,j);}
    const capturedBefore=j.capture.length;
    const latest=c.runtime.privateCheckoutFixture?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':c.runtime.latest;
    let attempt;
    try{
     if((c.runtime.privateCheckoutFixture||c.caseId==='stateful-confirm')&&!invitationSucceeded)attempt={result:{terminal:{disposition:'NO_SEND',reason:'CHECKOUT_INVITATION_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
-    else {attempt=await j.turn(latest,[]);await j.drain();}
+    else {attempt=await j.turn(latest,[],c.runtime.messages?{messages:c.runtime.messages}:{});await j.drain();}
     if(c.caseId==='stateful-request-checkout')invitationSucceeded=j.capture.length>capturedBefore&&(await j.state()).clarification?.reasonCode==='CHECKOUT_DETAILS_MISSING';
    }
    catch(error){attempt={result:{terminal:{disposition:'NO_SEND',reason:'ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},sendEnabled:false},errorCode:/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name};}

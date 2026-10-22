@@ -41,7 +41,7 @@ async function handoffFixture(options: {
 }
 
 describe("existing transaction owner for candidate commerce", () => {
-  it.each(["open", "variant"])("prepares native %s with fresh facts and exact replay evidence, independent of text classifiers", async mode => {
+  it.each(["open", "variant", "negotiation"])("prepares native %s with fresh facts and exact replay evidence, independent of text classifiers", async mode => {
     const scope = commerceScope(), fixture = await fixturePolicy();
     const resolution = { ...fixture, mayAffectOutbound: true, audit: { ...fixture.audit, channel: "PUBLISHED" as const, pinScopeType: "SALES_EPISODE" as const, pinScopeId: "key", bundleHash: fixture.bundle!.bundleHash }, bundle: { ...fixture.bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const } }, policy = resolution.bundle.policy;
     let state = createSalesCycleRuntimeState("key", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
@@ -52,19 +52,22 @@ describe("existing transaction owner for candidate commerce", () => {
     const ports = { resolveCartDraft: () => draft, resolveCartMutation: () => ({ mutation }), resolveShopPolicy: () => policy, resolveInboundMessage: () => null, revalidateCheckout: () => null };
     state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "CART_OPENED", commandId: "open", cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1_800_000).toISOString() }, now: commerceNow, trustedPorts: ports }).state;
     if (mode === "open") state = createSalesCycleRuntimeState("key", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
-    const selection = { status: "READY" as const, line: mode === "open" ? draft.lines[0]! : { ...draft.lines[0]!, components: [{ ...draft.lines[0]!.components[0]!, size: "L", componentSku: mutation.componentSku }] }, shopId: scope.shopId,
+    const selection = { status: "READY" as const, line: mode !== "variant" ? draft.lines[0]! : { ...draft.lines[0]!, components: [{ ...draft.lines[0]!.components[0]!, size: "L", componentSku: mutation.componentSku }] }, shopId: scope.shopId,
       versions: { price: "pos:SM613", inventory: "stock-v1", size: "size-v1", eta: null }, eta: null, etaExpiresAt: null, sourceAuthority: "POS_SNAPSHOT" as const,
       stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4, sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() };
-    const output = await prepareNativeCommerceTransition({ command: mode === "open" ? { kind: "CART_OPENED", commandId: "open", cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1_800_000).toISOString() } : { kind: "CART_MUTATED", commandId: "change-L", expectedCartVersion: state.cart!.value.revision,
+    const output = await prepareNativeCommerceTransition({ command: mode === "negotiation" ? {kind:"NEGOTIATION_EVENT",commandId:"objection",expectedNegotiationVersion:state.negotiation!.stateVersion,sourceMessageId:scope.sourceMessageId,intent:"PRICE_OBJECTION",reasonCode:"PRICE_OBJECTION"} : mode === "open" ? { kind: "CART_OPENED", commandId: "open", cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1_800_000).toISOString() } : { kind: "CART_MUTATED", commandId: "change-L", expectedCartVersion: state.cart!.value.revision,
       mutationRef: { id: "change", version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: "VARIANT_CHANGED" }, trustedPorts: ports,
       source: { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash, state, stateRevision: state.revision, conversationRevision: scope.revision,
         text: "À thôi cho chị đổi sang L nhé", messageId: scope.sourceMessageId, eventKey: scope.sourceMessageId, senderId: "synthetic", occurredAt: commerceNow.toISOString(), attachmentIds: [],
         productId: "SM613", offerType: "DIRECT", size: "M", color: "navy", shopAlias: "LANA", policyResolution: resolution,
         facts: { resolveCartSelection: async () => selection } as never, now: commerceNow } });
     expect(output.plan, JSON.stringify(output)).not.toBeNull();
-    expect(output.plan?.state.cart?.value.lines[0]?.components[0]?.size).toBe(mode === "open" ? "M" : "L");
+    expect(output.plan?.state.cart?.value.lines[0]?.components[0]?.size).toBe(mode !== "variant" ? "M" : "L");
     if (mode === "variant") expect(output.plan?.cartMutationBatchEvidence?.receipts[0]).toMatchObject({ mutation, mutationReasonCode: "VARIANT_CHANGED", authority: { authorityKind: "NATIVE_TOOL_PERMISSION" } });
-    expect(output.plan?.canonicalBuyingIntent?.contributors).toContain("NATIVE_TOOL_PERMISSION");
+    if(mode==="negotiation"){
+      expect(output.plan?.effectReadiness).toEqual(expect.arrayContaining([expect.objectContaining({effect:"CART_READY",outcome:"READY"})]));
+      expect(output.plan?.cartReplayContext?.customerState).toBe("HESITANT");
+    }else expect(output.plan?.canonicalBuyingIntent?.contributors).toContain("NATIVE_TOOL_PERMISSION");
   });
   it("commits ownership, handoff event and tag intent together and rolls back incomplete intents", async () => {
     const scope = commerceScope(), decision = selectCommerceHandoff((await fixturePolicy()).bundle!, scope, "EXCHANGE", commerceNow);

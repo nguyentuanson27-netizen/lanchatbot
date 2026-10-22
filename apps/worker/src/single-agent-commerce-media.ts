@@ -102,7 +102,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       return output;
     },async readback(){
       const base=await input.base.readback();
-      for(const [key,s]of selections){const assets=await select(s.query);if(!assets.length)throw new Error("MEDIA_SOURCE_CHANGED");selections.set(key,{query:s.query,assets});}
+      for(const [key,s]of selections){const assets=(await select(s.query)).slice(0,4);if(!assets.length)throw new Error("MEDIA_SOURCE_CHANGED");selections.set(key,{query:s.query,assets});}
       for(const s of viewed.values()){const assets=(await select(s.query)).slice(0,COMMERCE_VISION_BOUNDS.count);if(commerceHash(assets)!==commerceHash(s.assets))throw new Error("VIEWED_MEDIA_SOURCE_CHANGED");}
       return overlay(base);
     }};

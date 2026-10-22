@@ -1409,9 +1409,15 @@ export async function evaluateRealtimeSalesCycle(
 
   if(input.nativeNegotiation){
     const command=input.nativeNegotiation;
-    if(command.sourceMessageId!==input.messageId)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
+    if(command.sourceMessageId!==input.messageId||!state.cart||!state.negotiation)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
+    const selections=await currentSelections(input,state.cart.value,state.checkoutDraft?.address??"",effectNow());
+    const ready=selections.filter((s):s is ReadyCartSelection=>s.status==="READY");
+    if(!selectionsMatchCartLines(state.cart.value.lines,ready))return failedOutput("NATIVE_NEGOTIATION_SNAPSHOT_CHANGED");
     const result=apply(command);
     if(result.status!=="APPLIED")return failedOutput(result.status==="REJECTED"?result.reasonCode:"NATIVE_NEGOTIATION_REJECTED");
+    setCartReplayContext(state.negotiation.customerState);
+    const readiness=freshReadiness("CART_READY",ready,state.cart.value);
+    if(!acceptReadiness(readiness))return failedOutput(readiness.reasonCodes[0]??"EFFECT_READINESS_BLOCKED");
     return {handled:true,messages:[],plan:plan(),transferToHuman:false,desiredTag:null,reasonCode:null};
   }
   if (input.nativeMutation) {

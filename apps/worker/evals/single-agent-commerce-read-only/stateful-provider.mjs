@@ -10,6 +10,7 @@ import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclara
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
+import {registerJourneyOpenings} from './sales-journeys-registration.mjs';
 
 export function statefulPreflight(root){
  assert.notEqual(process.env.C3_TEST_CODEX_TRANSPORT,'1','TEST_TRANSPORT_FORBIDDEN_IN_PROVIDER_RUN');
@@ -18,14 +19,18 @@ export function statefulPreflight(root){
  assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=all','--',...paths],{cwd:root,encoding:'utf8'}).trim(),'','DIRTY_EXECUTABLE_OR_CONFIG');
  const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)))),configBytes=readFileSync(new URL('./source-config.b1.json',import.meta.url)),config=JSON.parse(configBytes);
  assert.deepEqual(requiredSourceConfig(config),[],'SOURCE_CONFIG_UNAVAILABLE');
- const casesBytes=readFileSync(new URL('./stateful-cases.json',import.meta.url)),cases=JSON.parse(casesBytes);
- assert.equal(cases.length,8);assert.equal(cases.filter(c=>c.runtime.latest).length,7);assert.equal(new Set(cases.map(c=>c.caseId)).size,cases.length);
+ const journeyOpenings=process.argv.includes('--journey-openings');
+ const casesBytes=readFileSync(new URL(journeyOpenings?'./sales-journeys.candidate.json':'./stateful-cases.json',import.meta.url));
+ const selection=journeyOpenings?registerJourneyOpenings(JSON.parse(casesBytes),['J02','J03','J05','J08']):null,cases=selection?.samples??JSON.parse(casesBytes);
+ if(!journeyOpenings){assert.equal(cases.length,8);assert.equal(cases.filter(c=>c.runtime.latest).length,7);}
+ assert.equal(new Set(cases.map(c=>c.caseId)).size,cases.length);
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
   catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
   catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,sourceHashRequired:true},
-  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:1,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
+  selection:journeyOpenings?{mode:'FOUR_OPENINGS_ONLY',registered:cases.map(c=>c.caseId),deferred:selection.deferred,day:new Date().toISOString().slice(0,10)}:{mode:'BASELINE_EIGHT_STATEFUL'},
+  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:journeyOpenings?0:1,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
 }
 
 export async function createStatefulProvider(input){
@@ -50,9 +55,9 @@ export async function createStatefulProvider(input){
  const verify=createCommerceVerifier(m,undefined,(id,v)=>audit(id,v.phase,v.provider));
  const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
  return {counters,ownerPrompt,verifierPrompt,facts,setSlot:id=>{activeSlot=id;},
-  async read(bound,policyStore,policy){const product=await catalog.findByExactCode('SV2447');assert(product,'INITIAL_SOURCE_UNAVAILABLE');
-   const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:[product],search,catalog,policyStore,facts});
-   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds};},
+  async read(bound,policyStore,policy,initialProductCodes=['SV2447']){const products=await Promise.all(initialProductCodes.map(code=>catalog.findByExactCode(code)));assert(products.every(Boolean),'INITIAL_SOURCE_UNAVAILABLE');
+   const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog,policyStore,facts});
+   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds};},
   async owner(request){assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
    let completedTelemetry;
    try{const wire=buildGeminiCommerceRequest(request);assert(!/"(?:caseId|evaluator|purposeId|requiredBehaviors|expectedSafe|qualityScore)"/.test(JSON.stringify(wire)),'EVALUATOR_LABEL_LEAK');

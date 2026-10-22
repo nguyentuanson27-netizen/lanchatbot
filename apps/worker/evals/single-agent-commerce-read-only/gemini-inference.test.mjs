@@ -581,7 +581,7 @@ test('state/effect capabilities are explicit and the accepted quote reaches the 
  const r=request();r.context.state.cartQuote={grandTotalVnd:524000};
  const built=buildGeminiCommerceRequest(r,[...stateDeclarations,...effectDeclarations]);
  const names=built.tools[0].functionDeclarations.map(d=>d.name);
- assert.deepEqual(names,['apply_customer_state','recommend_size','quote_cart','add_to_cart','change_cart_item','confirm_purchase']);
+ assert.deepEqual(names,['apply_customer_state','recommend_size','quote_cart','record_negotiation','add_to_cart','change_cart_item','confirm_purchase']);
  const fields=stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties;
  assert.ok(fields.field.enum.includes('WAIST_CM'));
  assert.ok(!fields.field.enum.includes('permission'));
@@ -641,7 +641,15 @@ test('tool product identities are restricted to bound products, not offer eviden
  assert.deepEqual(decls.find(d=>d.name==='change_cart_item').parameters.properties.subjectRef.enum,['line-1']);
  assert.equal(subjects.find(s=>s.kind==='VARIANT').subjectRef,undefined);
  assert.equal(subjects.find(s=>s.kind==='VARIANT').evidenceRef,'offer:P1:AO');
- assert.equal(effectDeclarations[0].parameters.properties.subjectRef.enum,undefined);
+ assert.equal(effectDeclarations.find(d=>d.name==='add_to_cart').parameters.properties.subjectRef.enum,undefined);
+});
+
+test('negotiation exposes intent and current source quote without model-selected money, tier or policy',()=>{
+ const r=request();r.availableTools=['record_negotiation'];
+ const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.deepEqual(Object.keys(d.parameters.properties),['intent','sourceQuote']);
+ assert.deepEqual(d.parameters.required,['intent','sourceQuote']);
+ assert.deepEqual(d.parameters.properties.intent.enum,['PRICE_OBJECTION','PURCHASE_READY']);
 });
 
 test('read results do not advertise an output-only field as an alternative input parameter',()=>{
