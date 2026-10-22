@@ -1,3 +1,14 @@
+## Đề xuất sửa sau full39 — 2026-10-22
+
+[Plan chi tiết](../docs/specs/c3-phase-b-opening-and-advice-fix-plan-20261022.md). **PROPOSED, không implementation/modelrun.**
+
+- [x] Đối chiếu finding/full39/rerun và sửa trước; đọc code size/media/handoff/time/quote, lập plan và self-review chống promptbloat/gates/parser/hidden retry.
+- [ ] T0: audit nguồn/chartscope/assetbinding/currentmatrix/ETAanchor/attributes; giữunknown nếu nguồn thật không đủ.
+- [ ] T1–T4: mapping size, ảnh đúng scope, firsthandoff holding theo candidate policy, immutable turn-time metadata không làm snapshot tự đổi; RED→GREEN đúng risk, không sửa live.
+- [ ] T5: quote hiện tại trong effect result khớp trusted.state; formatter recovery đúng tên offer/tiền/receipt, không thêm authority hoặc modelrewrite.
+- [ ] T6: nối source field nếu xác nhận mất mapping; một owner delta phạmvi hiểu khách/giọng, giữ policy/state và verifier, khôngfewshot/blacklist/cắtbyte.
+- [ ] T7: deterministic checks → seal/preflight → diagnostic4 riêng và native39 theo18+21, N1, budget và disposition rõ; review whole-turn, khôngautorun/fixvòng2 hoặc nhậnBGO.
+
 ## Review full39 gốc — 2026-10-22
 
 - [x] Đọc đủ39actual + history/state/tool/provider requests và các unsent draft, đối chiếu23lượt rerun; [per-case findings/root cause](../docs/specs/c3-phase-b-full39-conversation-review-20261022.md).
