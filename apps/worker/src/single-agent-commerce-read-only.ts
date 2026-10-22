@@ -12,6 +12,7 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
   prepare?(): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;

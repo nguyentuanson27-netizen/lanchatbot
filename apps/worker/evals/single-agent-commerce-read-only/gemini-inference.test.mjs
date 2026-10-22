@@ -43,6 +43,16 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('media selection has one native bounded subject and no model URL or send argument',()=>{
+ const r=request();r.availableTools=['select_product_media'];r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Mẫu'}];
+ const declaration=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.equal(declaration.name,'select_product_media');
+ assert.deepEqual(declaration.parameters.properties.subjectRef.enum,['P1']);
+ assert.deepEqual(declaration.parameters.required,['subjectRef','intent']);
+ assert(!Object.hasOwn(declaration.parameters.properties,'url'));
+ assert(!Object.hasOwn(declaration.parameters.properties,'send'));
+});
+
 test('both captured model requests keep the same policy meaning without deciding eligibility or leaking evaluator labels',async()=>{
  const r=request(),policy={customerCare:{inspection:{tryOnMode:'HOLD_UP_ONLY',
   tryOnModeDescription:'Chỉ ướm bên ngoài, không mặc vào người. Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns.'},

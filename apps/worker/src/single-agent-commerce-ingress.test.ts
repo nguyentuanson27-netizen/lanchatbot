@@ -17,7 +17,7 @@ function fixture(productIds = ["SM613"]) {
     if (expected !== profile.profile.revision) return false;
     profile = { profile: next.profile, fieldEvidence: next.fieldEvidence }; return true;
   });
-  const commit = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => ({ stateCommitted: true, metaOutboxCreated: prepared.metaPlan ? 1 : 0, inboxBatchStatus: "COMMITTED" }));
+  const commit = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => ({ stateCommitted: true, metaOutboxCreated: prepared.metaPlan?.messages.length ?? 0, inboxBatchStatus: "COMMITTED" }));
   const store = { loadOrCreate: async () => ({ conversationId: scope.conversationId, stateVersion: revision, state: { ...conversation, revision } }),
     loadOrCreateSalesCycle: async () => ({ state: cycle, stateRevision: cycle.revision }),
     loadOrCreateCustomerProfile: async () => ({ ...profile, pageId: scope.pageId, customerHash: scope.customerHash, revision: profile.profile.revision }),
@@ -48,6 +48,37 @@ function fixture(productIds = ["SM613"]) {
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+it.each([false,true])("enqueues approved media and exact final text in one protected response group (cart=%s)",async withCart=>{
+  const f=fixture(),p=f.products[0]!.product;
+  p.images=[{url:"https://content.pancake.vn/back.jpg",role:"PRIMARY",angle:"BACK",imageType:"PRODUCT_ONLY",intents:[],sortOrder:0,qualityScore:null,feedback:false,
+    reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString()}];
+  if(withCart){
+    const scope=commerceScope(),policy=(await fixturePolicy()).bundle!.policy;
+    let state=createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
+    for(const kind of ["FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED"] as const)
+      state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now:commerceNow}).state;
+    const line=fixtureCartLine(),draft={identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+      lines:[line],shopId:scope.shopId,policyRef:{id:policy.policyBundleId,version:policy.policyVersion,contentHash:computeBusinessContentHash(policy)}};
+    state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
+      expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
+      trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
+    f.setCycle(state);
+    f.select.mockResolvedValue({status:"READY",line,shopId:scope.shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,
+      sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
+  }
+  let generated=0;
+  const result=await f.run(async()=>++generated===1
+    ? {kind:"TOOLS",calls:[{name:"select_product_media",args:{subjectRef:p.productId,intent:"BACK"}}],content:{role:"model",parts:[{functionCall:{name:"select_product_media",args:{subjectRef:p.productId,intent:"BACK"}}}]}}
+    : {kind:"FINAL",text:"Ảnh mặt sau đây chị nhé."});
+  expect(result.terminal.disposition,JSON.stringify(result.terminal)).toBe("SEND_ELIGIBLE");
+  expect(result.enqueued).toBe(2);
+  const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
+  expect(meta.messages).toEqual([{kind:"TEXT",text:"Ảnh mặt sau đây chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+  expect(meta.protectedClaimTypes).toContain("PRODUCT_MEDIA");
+  expect(meta.effectReadiness?.outcome).toBe("READY");
+  expect(f.verifier).toHaveBeenCalledTimes(1);
+});
 
 it.each([
   {previous:"SM613",text:"Mẫu này chất gì em?",ad:null,expected:"SM613"},

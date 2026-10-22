@@ -41,3 +41,22 @@ pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.tes
 ```
 
 N3a mới có focused evidence, chưa real-DB/provider journey; không nhận N3b đã hoàn thành. J10 candidate đã bổ sung điều kiện chỉ gửi biên lai sau actual QR/payment instructions đúng payment context; giữ incomplete/failure bước trước khi chưa cấp được QR.
+
+## Savepoint N4 — outbound catalog media
+
+Native select_product_media chỉ nhận subjectRef/intent/component/color, không nhận URL hay send. Selector reuse metadata APPROVED + verified + source hash + observedAt/expiry và HTTPS allowlist; tối đa4asset. Metadata/ref nằm trong exact trusted snapshot, URL ở code-only Outbox; source đổi sau PASS làm binding đổi. TEXT+IMAGE cùng existing protected response group; media của draft bị từ chối không được giữ. Không suy màu từ filename; source thiếu per-asset color nên yêu cầu màu chỉ đáp ứng khi product có đúng một màu xác minh.
+
+RED observed:7media tests, native declaration và ingress TEXT+IMAGE fail; thêm cart case phát hiện parent PRODUCT_MEDIA bị đối xử như offer PRICE/STOCK ở hai guard. Sửa hẹp parent media contract; PRICE/STOCK variant checks giữ nguyên. GREEN103worker tests (ingress24/media8/boundary53/protected18),60contracts,71business-tools selector/readiness,9dispatcher,69Node adapter/protocol/corpus tests. Contracts build PASS. Direct worker tsc từng fail do assertion test đọc optional recovery; đã bỏ assertion không cần thiết và sẽ chạy lại.
+
+Commands bổ sung thực sự chạy:
+
+```powershell
+pnpm --filter @lana/contracts exec vitest run src/v2/canonical-evidence-readiness.test.ts
+pnpm --filter @lana/contracts build
+pnpm --filter @lana/worker exec vitest run src/track-b-protected-claim-boundary.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-semantic-verifier-boundary.test.ts
+pnpm --filter @lana/worker exec vitest run src/meta-outbox-dispatcher.test.ts
+pnpm --filter @lana/business-tools exec vitest run src/effect-readiness.test.ts src/image-selection.test.ts src/media-selector-v2.test.ts
+node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/sales-journeys.test.mjs
+```
+
+Chưa real DB/media delivery hoặc provider run. Hash metadata được bind; N4 chưa download/verify actual image bytes (N6a). Source thiếu timestamp không được bịa mới. Complexity: one bounded selector wrapper + native declaration + reuse2existing guards, không role/store/gate mới.

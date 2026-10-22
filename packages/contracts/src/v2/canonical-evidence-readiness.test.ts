@@ -457,6 +457,18 @@ describe("DF06 deterministic readiness contract", () => {
     }).mismatch).toBe(true);
   });
 
+  it("checks parent catalog media once for outbound without requiring it per cart offer", () => {
+    const media = ProtectedClaimV1Schema.parse({...productClaim("PRICE", "P-001"), type:"PRODUCT_MEDIA",
+      provenance:{...productClaim("PRICE", "P-001").provenance,authority:"MEDIA_SELECTOR_V2"},
+      value:{assetId:"asset-1",assetSha256:HASH}});
+    const input={effect:"PROTECTED_OUTBOUND" as const,lines:[{parentProductId:"P-001",offerId:"SET",quantity:1,posUnitPriceVnd:699000,priceFactRef:null}],
+      protectedClaimTypes:["PRODUCT_MEDIA"] as const,claims:[media]};
+    expect(validateCartEffectClaimSemanticsV1(input)).toEqual({missing:false,conflict:false,mismatch:false});
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[]}).missing).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[{...media,scope:{kind:"PRODUCT",productId:"P-001",variantId:"WRONG"}}]}).mismatch).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[{...media,scope:{kind:"PRODUCT",productId:"OTHER",variantId:null}}]}).missing).toBe(true);
+  });
+
   it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {
     const evidence = DeterministicConfirmationEvidenceV1Schema.parse({
       schemaVersion: 1,

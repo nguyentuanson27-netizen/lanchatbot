@@ -37,15 +37,18 @@ export const effectDeclarations=[
 export const handoffDeclarations=[
  {name:'request_handoff',description:'Đề nghị chuyển người khi khách yêu cầu gặp nhân viên, cần xử lý hậu mãi hoặc công việc ngoài khả năng hiện có. Hỏi quy định trước mua thì đọc policy và trả lời. Code quyết định rule, tag và tin báo; tool chỉ thành công sau commit và đọc lại kết quả. Không hứa đã chuyển trước kết quả.',parameters:{type:'OBJECT',properties:{reason:{type:'STRING',enum:HandoffReasonV2Schema.options.filter(r=>r!=='ADMIN_REQUEST')}},required:['reason']}},
 ];
+export const mediaDeclarations=[
+ {name:'select_product_media',description:'Chọn ảnh từ nguồn shop cho PRODUCT subjectRef. intent là loại ảnh khách muốn, componentRole nếu chỉ hỏi áo/váy/quần. Có màu thì truyền đúng màu khách hỏi; code chỉ chọn khi nguồn xác nhận được, không thay ảnh khác màu/loại. Tool chỉ chuẩn bị ảnh; delivery còn chờ exact reply và final gate. Không truyền URL hoặc tự nói đã gửi khi tool không trả asset.',parameters:{type:'OBJECT',properties:{subjectRef:string,intent:{type:'STRING',enum:['GENERIC','BACK','DETAIL','SIZE_GUIDE','PRODUCT_ONLY','FEEDBACK']},color:string,componentRole:{type:'STRING',enum:['TOP','SKIRT','PANTS']}},required:['subjectRef','intent']}},
+];
 export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarations){
  if(request.availableTools){
-  const known=[...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations];
+  const known=[...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations];
   declarations=request.availableTools.map(name=>{const d=known.find(d=>d.name===name);requireThat(d,'CAPABILITY_UNAVAILABLE');return d;});
  }
  const c=request.context;
  declarations=structuredClone(declarations);
  for(const declaration of declarations){
-  const kind=['read_product','recommend_size','add_to_cart'].includes(declaration.name)?'PRODUCT':declaration.name==='change_cart_item'?'CART_LINE':null;
+  const kind=['read_product','recommend_size','add_to_cart','select_product_media'].includes(declaration.name)?'PRODUCT':declaration.name==='change_cart_item'?'CART_LINE':null;
   const refs=c.boundSubjects.filter(s=>s.kind===kind).map(s=>s.ref);
   if(refs.length)declaration.parameters.properties.subjectRef={type:'STRING',enum:[...new Set(refs)]};
  }

@@ -69,6 +69,7 @@ export async function runPersistedCommerceIngress(input: {
   policy: Parameters<typeof createPersistedCommerceExecutor>[0]["policy"];
   resolveTagId: Parameters<typeof createPersistedCommerceExecutor>[0]["resolveTagId"];
   clock: () => Date; ownerPrompt: string; verifierPrompt: string;
+  media?: Parameters<typeof createCommerceTools>[0]["media"];
   owner: Parameters<typeof runCommerceTurn>[0]["owner"]; verifier: Parameters<typeof runCommerceTurn>[0]["verifier"];
 }) {
   const { batch } = input;
@@ -154,7 +155,8 @@ export async function runPersistedCommerceIngress(input: {
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
-    handoff: { ...handoff, policy: policyBundle } });
+    handoff: { ...handoff, policy: policyBundle },
+    media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
   const history = commerceHistory(rows);
   const result = await runCommerceTurn({ scope, tools, latest, history, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
@@ -168,11 +170,12 @@ export async function runPersistedCommerceIngress(input: {
     commerceHash(accepted) !== commerceHash(makeBinding(scope.requestId, result.terminal.text ?? "", world)) || current.bindingVersion !== scope.bindingVersion) return { ...result, ...await closeWithoutSend("EGRESS_WORLD_CHANGED") };
   if (!await input.inbox.isBatchCurrent(batch)) return { ...result, enqueued: executor.outboxCount() }; // A confirmation already committed its atomic terminal intents.
   const state = (await executor.repository.read(scope.conversationId))!, cart = state.cart?.value;
+  const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
   const allowedText = ["SEND_ELIGIBLE", "FALLBACK", "HANDOFF"].includes(result.terminal.disposition) ? result.terminal.text : null;
-  const messagesOut = allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : [];
+  const messagesOut = [...(allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : []),
+    ...(generatedPass ? tools.mediaSelection?.().map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) ?? [] : [])];
   if (allowedText && allowedText.length > 2000) return { ...result, ...await closeWithoutSend("DELIVERY_TEXT_BOUND") };
   const sourceHash = textHash(scope.sourceMessageId);
-  const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
   const cartSummary = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "RECEIPT_BACKED_CART_SUMMARY";
   // Recovery totals use the same cart/fact readiness as generated cart replies.
   // A receipt-only ACK still makes no current catalog or price assertion.
@@ -202,7 +205,7 @@ export async function runPersistedCommerceIngress(input: {
       priceVersion: s.versions.price, inventoryVersion: s.versions.inventory, etaVersion: s.versions.eta, eta: s.eta, etaExpiresAt: s.etaExpiresAt,
       sourceAuthority: s.sourceAuthority, stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     parent = evaluateDeterministicEffectReadinessV1({ ...common, effect: "CART_READY", claims: cartClaims });
-    claims = [...cartClaims, ...buildProtectedCartPolicyClaimsV1({ cart, policySourceVersion: state.commerceContext!.policyRef.version, policyEvidenceRef: state.commerceContext!.policyRef.contentHash, expiresAt: state.cart!.expiresAt })];
+    claims = [...claims.filter(c=>c.type==="PRODUCT_MEDIA"),...cartClaims, ...buildProtectedCartPolicyClaimsV1({ cart, policySourceVersion: state.commerceContext!.policyRef.version, policyEvidenceRef: state.commerceContext!.policyRef.contentHash, expiresAt: state.cart!.expiresAt })];
     salesPlan = { ...salesPlan!,
       effectReadiness: [parent], effectClaimSets: [{ effect: "CART_READY", claims: cartClaims }] };
   }

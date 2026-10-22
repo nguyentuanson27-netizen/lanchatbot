@@ -531,9 +531,15 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     input.effect,
     input.protectedClaimTypes,
   )
-    .filter((type) => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type));
+    .filter((type) => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type) &&
+      !(input.effect === "PROTECTED_OUTBOUND" && type === "PRODUCT_MEDIA"));
   let missing = false;
   let mismatch = input.claims.some((claim) => {
+    if (input.effect === "PROTECTED_OUTBOUND" && claim.type === "PRODUCT_MEDIA" && claim.scope.kind === "PRODUCT") {
+      const scope = claim.scope;
+      return !input.lines.some(line => line.parentProductId === scope.productId &&
+        (scope.variantId === null || line.offerId === scope.variantId));
+    }
     if (claim.scope.kind !== "PRODUCT" || !requiredTypes.includes(claim.type)) {
       return false;
     }
