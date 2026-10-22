@@ -1,3 +1,9 @@
+## Review full39 gốc — 2026-10-22
+
+- [x] Đọc đủ39actual + history/state/tool/provider requests và các unsent draft, đối chiếu23lượt rerun; [per-case findings/root cause](../docs/specs/c3-phase-b-full39-conversation-review-20261022.md).
+- [x] Đính chính ca32 bị giải thích nhầm là alreadyHUMAN: journey riêng, owner1/toolrequest/handoffCOMMITTED/enqueued0; review hiện tại SILENT_HANDOFF. Raw/primary cũ giữ nguyên.
+- [x] Tách gap chart/assetbinding, thiếu contextcalendar/ETAanchor cầnkiểm, owner bỏquote đã có và lỗi giọng/chọnmón. Không coi17quota là17lỗiowner; không ghép campaign hoặc tựfix/rerun. Còn9kịchbản cófindingmở trên39.
+
 ## Rerun 19 fallback — 2026-10-22
 
 - [x] Owner yêu cầu chạy lại đúng 19 target, N1; giữ prompt/model/config. Quota read-only cho phép dùng lại verifier, không generation để dò quota.
