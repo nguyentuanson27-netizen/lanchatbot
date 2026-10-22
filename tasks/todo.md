@@ -1,3 +1,7 @@
+## Full39 sau sửa opening/advice — 2026-10-23
+
+**FULL39_COMPLETE — CHƯA B GO.** [Kết quả và phân tích](../apps/worker/evals/single-agent-commerce-read-only/opening-advice-run-20261023/CHECKPOINT_B.md), [39 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/opening-advice-run-20261023/CONVERSATIONS.md). Source540b8129, N1, đủ24B1+8stateful+4openings+3negotiation;4diagnostic riêng. Native30eligible/4fallback/3handoff/2code-checkout; manual32dùngđược/3cầnsửa/4fallback.106native+8diagnostic requests,0retry/labelleak/quotaerror,2ownererrors,3DBdropped. First handoff và ảnhchung cải thiện; owner vẫn bỏqua quoteưuđãi đã có và phân tán lựa chọn concern-v2; gallery còn giọnghệthống.4fallback=2Geminierrors+2verifierFAIL; không gọi tấtcả là lỗi tư vấn. Diagnostic2cầnsửa vẫn được giữ, full39 chạy theo yêu cầu owner mới nhất, không thay treatment. Không chạy thêm hoặc deploy; A OWNER_BYPASS. Các mục dưới giữ lịch sử theo thời điểm.
+
 ## Đề xuất sửa sau full39 — 2026-10-22
 
 [Plan chi tiết](../docs/specs/c3-phase-b-opening-and-advice-fix-plan-20261022.md), [implementation/self-review](../docs/specs/c3-phase-b-opening-and-advice-implementation-20261022.md). **IMPLEMENTED_AND_SELF_REVIEWED — MODEL_RUN_PENDING.** Source gaps không được coi đã đóng.
