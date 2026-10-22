@@ -33,6 +33,7 @@ export function statefulPreflight(root){
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
   catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
+  candidateHandoffFileHash:process.argv.includes('--candidate-handoff')?sha256(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))):null,
   catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,maxSourceBytes:2097152,maxSourceDimension:12000,maxSourcePixels:50000000,
    sourceHashRequired:true,hashContract:'APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256',resize:'EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG'},
   selection:journeyOpenings?{mode:'FOUR_OPENINGS_ONLY',registered:cases.map(c=>c.caseId),deferred:selection.deferred,day:new Date().toISOString().slice(0,10)}:negotiationProbe?{mode:'THREE_NEGOTIATION_COMPANION',registered:cases.map(c=>c.caseId),prerequisite:'Actual cart from setup, never synthetic provider completion.'}:{mode:'BASELINE_EIGHT_STATEFUL'},

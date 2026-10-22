@@ -22,6 +22,7 @@ import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-to
 import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
+import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
@@ -105,7 +106,9 @@ try{
  await runtime.loadOrCreateSalesCycle(pageId,key,()=>createSalesCycleRuntimeState(key,{pageId,conversationId:key},now),now);
  livePolicyStore=new PostgresRuntimePolicyStore(process.env.RUNTIME_POLICY_DATABASE_URL);
  const records=await livePolicyStore.loadActivePointers({pageId,channel:'PUBLISHED'});
- for(const r of records){const v=r.version,p=r.pointer;
+ const handoffCandidate=process.argv.includes('--candidate-handoff')?isolatedHandoffRecords(records,{pageId,
+  candidate:JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url)))}):null;
+ for(const r of handoffCandidate?.records??records){const v=r.version,p=r.pointer;
   await pool.query('INSERT INTO admin_artifact_versions (version_id,artifact_key,artifact_kind,version_number,lifecycle,revision,content_hash,content,created_by_subject,updated_by_subject,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9,$10,$11)',
    [v.versionId,v.artifactKey,v.artifactKind,v.versionNumber,v.lifecycle,v.revision,v.contentHash,v.content,v.createdBy,v.createdAt,v.updatedAt]);
   await pool.query('INSERT INTO admin_active_pointers (pointer_id,artifact_key,artifact_kind,page_id,channel,version_id,revision,updated_by_subject,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)',
@@ -115,6 +118,11 @@ try{
  const resolver=new RuntimePolicyResolver(policyStore,{enabled:true,publishedEnabled:true},policyStore);
  const policyResolution=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:key},now});
  assert(policyResolution.bundle,'CAPTURED_POLICY_UNAVAILABLE');scope.shopId=policyResolution.bundle.policy.shopId;
+ if(handoffCandidate){
+  assert.equal(handoffContentHash(policyResolution.bundle.artifacts.handoffMatrix),handoffCandidate.candidateHash,'ISOLATED_CANDIDATE_NOT_RESOLVED');
+  report.candidateHandoff={upstreamHash:handoffCandidate.upstreamHash,candidateHash:handoffCandidate.candidateHash,versionId:handoffCandidate.versionId,
+   versionReferences:policyResolution.bundle.versionReferences.filter(r=>r.artifactKind==='HANDOFF_MATRIX')};
+ }
  report.policyBundleHash=policyResolution.bundle.bundleHash;
  report.policyVersionReferences=policyResolution.bundle.versionReferences;
  let activePrepared;
@@ -385,6 +393,16 @@ try{
   return {bound,turn,state,capture,capturePayloads,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
+ await check('B composed candidate first '+reason+' acknowledges once after real atomic commit',async()=>{
+  const matrix=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))),holding=matrix.rules.find(r=>r.reason===reason).holdingReply;
+  const j=await statefulFixture(),r=await j.turn('Cho chị gặp nhân viên nhé',[native([{name:'request_handoff',args:{reason}}])]);
+  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,1);assert.equal(r.verifiers,0);
+  await j.drain();await j.drain();assert.deepEqual(j.capture,[holding]);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+  const replay=await j.turn('Em ơi',[]);assert.equal(replay.owners,0);assert.equal(replay.verifiers,0);assert.equal(replay.result.enqueued,0);
+  await j.drain();assert.deepEqual(j.capture,[holding]);
+ });
  await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
   const j=await statefulFixture();
   await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();

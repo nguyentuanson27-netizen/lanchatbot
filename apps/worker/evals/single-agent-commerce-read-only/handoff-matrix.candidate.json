@@ -82,8 +82,8 @@
     },
     {
       "reason": "CUSTOMER_REQUESTED_HUMAN",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em chuyển nhân viên hỗ trợ chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -100,8 +100,8 @@
     },
     {
       "reason": "SIZE_RULE_UNAVAILABLE",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em chuyển nhân viên chọn size cho chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -179,8 +179,8 @@
   ],
   "sourceMetadata": {
     "source": "ADMIN",
-    "sourceReference": "repo:c3-phase-b-candidate-handoff-20261020",
-    "sourceVersion": "c3-phase-b-candidate-handoff-20261020-v1",
-    "observedAt": "2026-10-20T00:00:00.000Z"
+    "sourceReference": "repo:c3-phase-b-opening-and-advice-fix-plan-20261022",
+    "sourceVersion": "c3-phase-b-candidate-handoff-20261022-v2",
+    "observedAt": "2026-10-22T00:00:00.000Z"
   }
 }
