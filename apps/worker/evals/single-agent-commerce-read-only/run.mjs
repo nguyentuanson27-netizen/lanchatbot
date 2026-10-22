@@ -4,14 +4,19 @@ import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange,
- REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt} from './protocol.mjs';
-import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations} from './gemini-inference.mjs';
+ REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt,readImageComparisonCases,readImageComparisonRegistration,imageComparisonSlots,prepareImageComparison} from './protocol.mjs';
+import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,mediaDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {publicSnapshotDiff} from './snapshot-diagnosis.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'}}});
-const dispatch=dispatchRange(args.range);
+const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'},'image-registration':{type:'string'}}});
+const comparison=!!args['image-registration'];
+if(comparison&&args.range)throw new Error('IMAGE_COMPARISON_FULL_DISPATCH_ONLY');
+const dispatch=comparison?{first:1,last:12}:dispatchRange(args.range);
+const registered=comparison?12:REGISTERED_CASE_COUNT,maximumGenerations=comparison?48:MAXIMUM_GENERATION_REQUESTS;
+const effectiveDeclarations=comparison?[...readOnlyDeclarations,...mediaDeclarations]:readOnlyDeclarations;
 const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8')));
 const selectedOwner=readB1OwnerPrompt(args['owner-registration']);
 const configBytes=args.config?readFileSync(resolve(args.config)):null;
@@ -19,13 +24,16 @@ const config=configBytes?JSON.parse(configBytes):{};
 const missing=requiredSourceConfig(config);
 if(!args.cases)missing.push(`--cases (${REGISTERED_CASE_COUNT} approved runtime cases with separate evaluator fields)`);
 if(missing.length){console.log(JSON.stringify({status:'BLOCKED',stage:'SOURCE_PREFLIGHT',missing,providerGenerations:0,sendEnabled:false}));process.exit(2);}
-const {samples,inputs,hash:inputHash}=readRegisteredCases(resolve(args.cases));
+const corpus=comparison?readImageComparisonCases(resolve(args.cases)):readRegisteredCases(resolve(args.cases));
+const {samples,inputs,hash:inputHash}=corpus;
+const imageRegistration=comparison?readImageComparisonRegistration(resolve(args['image-registration']),corpus):null;
+const imageSlots=comparison?imageComparisonSlots():null;
 if(!['CANARY_SHADOW','CANARY_LIVE','PUBLISHED'].includes(config.channel)||config.scope.pageId!=='1198992073286645'||
  !['shopId','shopAlias','conversationId','customerHash','recipient','bindingVersion','revision'].every(k=>config.scope[k]!==undefined)||
  !/^[a-f0-9]{64}$/.test(config.scope.customerHash)||!/^[a-f0-9]{64}$/.test(config.scope.recipient)||
  !Number.isSafeInteger(config.vertex.embeddingDimension)||config.vertex.embeddingDimension<1)throw new Error('SOURCE_CONFIG');
 const codex=inspectCodex();
-if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:REGISTERED_CASE_COUNT,requestBounds:m.requestBounds,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
+if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:registered,requestBounds:m.requestBounds,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
 if(!args.out)throw new Error('NEW_OUTPUT_DIRECTORY_REQUIRED');
 const sourcePaths=['apps/worker/src','apps/worker/package.json','apps/worker/tsconfig.json','tsconfig.base.json','pnpm-lock.yaml',
  'apps/worker/evals/single-agent-commerce-read-only','apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs','packages'];
@@ -41,8 +49,9 @@ const verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.met
 const out=resolve(args.out);mkdirSync(out); // Existing evidence is never overwritten.
 const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.stringify({id,phase,value})+'\n');
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
- promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify(readOnlyDeclarations)),
- inputHash,caseIds:samples.map(c=>c.caseId),registered:REGISTERED_CASE_COUNT,repetitions:1,maximumGenerationRequests:MAXIMUM_GENERATION_REQUESTS,
+ promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify(effectiveDeclarations)),
+ inputHash,caseIds:samples.map(c=>c.caseId),registered,repetitions:1,maximumGenerationRequests:maximumGenerations,
+ ...(comparison?{mode:"IMAGE_PRELOAD_VS_ON_DEMAND",imageRegistrationHash:imageRegistration.hash,slots:imageSlots}:{}),
  dispatch,effectiveOwnerPromptHash:selectedOwner.sha256,ownerRegistrationHash:selectedOwner.registrationHash,
  dispatchedCases:dispatch.last-dispatch.first+1,dispatchedMaximumGenerationRequests:(dispatch.last-dispatch.first+1)*4,
  catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
@@ -92,31 +101,35 @@ const verifier=createCommerceVerifier(m,undefined,(id,value)=>audit(id,value.pha
 const clock=()=>new Date();
 try{
  for(let i=dispatch.first-1;i<dispatch.last;i++){
-  const sample=inputs[i],started=performance.now(),requestId=sha256(bRunSourceSha+':'+i+':'+sha256(JSON.stringify(sample)));
+  const sampleIndex=comparison?imageSlots[i].caseIndex:i,arm=comparison?imageSlots[i].arm:null;
+  const sample=inputs[sampleIndex],started=performance.now(),requestId=sha256(bRunSourceSha+':'+i+':'+sha256(JSON.stringify(sample)));
   const scope={...config.scope,requestId,sourceMessageId:requestId,sourceObservedAt:clock().toISOString(),conversationOwner:'BOT',permission:true,privacyAllowed:true};
-  let result;
+  let result;const preparation={};
   try{
    const initialProducts=[];
    for(const code of sample.initialProductCodes){counters.catalogReads++;const p=await catalog.findByExactCode(code);if(!p)throw new Error('INITIAL_SOURCE_UNAVAILABLE');initialProducts.push(p);}
    const sources=createCommerceReadSources({scope,channel:config.channel,clock,initialProducts,search,
     catalog:{findByExactCode:async code=>{counters.catalogReads++;return catalog.findByExactCode(code);}},
     policyStore:{loadActivePointers:async q=>{counters.policyReads++;return database.loadActivePointers(q);}},
-    facts:{readCatalogSnapshot:async(alias,id)=>{counters.posReads++;return samples[i].sourceMode==='POS_UNAVAILABLE'?null:redis.readCatalogSnapshot(alias,id);}}});
-   const rawTools=await createCommerceTools({read:{scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds}});
-   const tools={...rawTools,invokeBatch:async calls=>{
+    facts:{readCatalogSnapshot:async(alias,id)=>{counters.posReads++;return samples[sampleIndex].sourceMode==='POS_UNAVAILABLE'?null:redis.readCatalogSnapshot(alias,id);}}});
+   const rawTools=await createCommerceTools({read:{scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds},...(comparison?{media:{allowedHostSuffixes:["lanadesign.vn","content.pancake.vn","fbcdn.net","fbsbx.com"]}}:{})});
+   const preparedTools=comparison?prepareImageComparison(rawTools,{arm,subjectRef:initialProducts[0].productId,pinned:imageRegistration.registration.cases[sampleIndex].images},preparation):rawTools;
+   const tools={...preparedTools,invokeBatch:async calls=>{
     const results=await rawTools.invokeBatch(calls);audit(requestId,'TOOL_RESULTS',{calls,results});return results;
    }};
    const owner=async request=>{audit(request.generationId,'PUBLIC_CONTEXT_CAPTURE',{generationId:request.generationId,toolsAllowed:request.toolsAllowed,capturedAt:clock().toISOString(),context:request.context});audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
     const generated=await ownerInference(request);audit(request.generationId,'OWNER_RESULT',generated);return generated;};
+   let before=null;const checkedVerifier=async request=>{before=request.trusted;return verifier(request);};
    result=await runCommerceTurn({scope,clock,tools,latest:sample.latest,history:sample.history,
-    ownerPrompt,verifierPrompt,owner,verifier});
+    ownerPrompt,verifierPrompt,owner,verifier:checkedVerifier});
+   if(result.currentPublicContext)result.snapshotDiagnosis=publicSnapshotDiff(before,result.currentPublicContext);
   }catch(error){result={terminal:{disposition:'NO_SEND',reason:'SOURCE_OR_ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},errorType:error.name,
    errorCode:typeof error.message==='string'&&/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:null,sendEnabled:false};}
-  writeFileSync(join(out,`attempt-${i+1}.json`),JSON.stringify({caseId:samples[i].caseId,sourceMode:samples[i].sourceMode??'LIVE',elapsedMs:performance.now()-started,runtime:sample,result,counters:{...counters}},null,2),{flag:'wx'});
-  console.log(JSON.stringify({slot:i+1,recorded:i-dispatch.first+2,registered:REGISTERED_CASE_COUNT,terminal:result.terminal.disposition}));
+  writeFileSync(join(out,`attempt-${i+1}.json`),JSON.stringify({caseId:samples[sampleIndex].caseId,...(comparison?{arm,preparation}:{}),sourceMode:samples[sampleIndex].sourceMode??'LIVE',elapsedMs:performance.now()-started,runtime:sample,result,counters:{...counters}},null,2),{flag:'wx'});
+  console.log(JSON.stringify({slot:i+1,recorded:i-dispatch.first+2,registered,terminal:result.terminal.disposition}));
  }
  const recorded=dispatch.last-dispatch.first+1;
- const status=head()===bRunSourceSha&&!dirty()?(recorded===REGISTERED_CASE_COUNT?'AWAITING_WHOLE_REPLY_REVIEW':'DISPATCH_RANGE_COMPLETE_REVIEW_PENDING'):'INVALID_SOURCE_IDENTITY';
- writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered:REGISTERED_CASE_COUNT,recorded,dispatch,counters,sendEnabled:false},null,2),{flag:'wx'});
- console.log(JSON.stringify({status,registered:REGISTERED_CASE_COUNT,recorded,out,sendEnabled:false}));
+ const status=head()===bRunSourceSha&&!dirty()?(recorded===registered?'AWAITING_WHOLE_REPLY_REVIEW':'DISPATCH_RANGE_COMPLETE_REVIEW_PENDING'):'INVALID_SOURCE_IDENTITY';
+ writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered,recorded,dispatch,counters,sendEnabled:false},null,2),{flag:'wx'});
+ console.log(JSON.stringify({status,registered,recorded,out,sendEnabled:false}));
 }finally{await Promise.allSettled([database.close(),redis.close()]);}

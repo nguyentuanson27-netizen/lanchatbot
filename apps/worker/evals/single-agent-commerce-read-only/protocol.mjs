@@ -93,3 +93,43 @@ export function requiredSourceConfig(config,env=process.env){
  if(!Number.isSafeInteger(config.maxFactAgeSeconds)||config.maxFactAgeSeconds<60||config.maxFactAgeSeconds>86400)missing.push('config.maxFactAgeSeconds');
  return missing;
 }
+
+// Small evaluation-only branch. Baseline 24 cases and runtime projection remain unchanged.
+export function readImageComparisonCases(path){
+ const source=readFileSync(path),samples=JSON.parse(source);
+ check(Array.isArray(samples)&&samples.length===6&&new Set(samples.map(s=>s.caseId)).size===6,'EXACT_SIX_IMAGE_CASES_REQUIRED');
+ check(samples.every(s=>typeof s.caseId==='string'&&s.caseId.length<=128&&(s.sourceMode??'LIVE')==='LIVE'&&s.runtime?.initialProductCodes?.length===1),'IMAGE_CASE_SCOPE');
+ return {samples,inputs:samples.map(runtimeCase),hash:sha256(source)};
+}
+export function imageComparisonSlots(){
+ return Array.from({length:6},(_,caseIndex)=>(caseIndex%2?['PRELOAD','CONTROL']:['CONTROL','PRELOAD']).map(arm=>({caseIndex,arm}))).flat();
+}
+export function prepareImageComparison(tools,{arm,subjectRef,pinned},telemetry){
+ check(['CONTROL','PRELOAD'].includes(arm),'IMAGE_ARM');let prepared=false;
+ return {...tools,async prepare(){
+  if(prepared)return 0;prepared=true;
+  const started=performance.now();telemetry.preloadCalls=0;
+  try {
+  const count=await tools.prepare?.()??0;
+  if(arm==='PRELOAD'){
+   check(tools.snapshot().boundSubjects.some(s=>s.kind==='PRODUCT'&&s.ref===subjectRef),'IMAGE_SUBJECT_BINDING');
+   telemetry.preloadCalls++;
+   const result=await tools.invoke({name:'view_product_media',args:{subjectRef,intent:'GENERIC'}});
+   check(result.status==='OK','IMAGE_PRELOAD_UNAVAILABLE');
+   const images=tools.catalogImages();check(images.length>0&&images.every(i=>i.subjectRef===subjectRef),'IMAGE_SUBJECT_BINDING');
+   const metadata=images.map(({data,...identity})=>identity);
+   check(sha256(JSON.stringify(metadata))===sha256(JSON.stringify(pinned)),'IMAGE_PIN_CHANGED');
+   telemetry.images=metadata;telemetry.preparedBytes=images.reduce((n,i)=>n+Buffer.from(i.data,'base64').length,0);
+  }
+  telemetry.status='OK';return count;
+  }catch(error){telemetry.status='ERROR';telemetry.reason=/^[A-Z0-9_]{1,80}$/.test(error.message)?error.message:'PREPARATION_UNAVAILABLE';throw error;}
+  finally{telemetry.preparationLatencyMs=performance.now()-started;}
+ }};
+}
+export function readImageComparisonRegistration(path,corpus){
+ const bytes=readFileSync(path),r=JSON.parse(bytes);
+ check(r.kind==='IMAGE_PRELOAD_VS_ON_DEMAND'&&r.corpusHash===corpus.hash&&r.registered===12&&r.repetitions===1&&r.maximumGenerationRequests===48&&r.retry===0,'IMAGE_REGISTRATION');
+ check(JSON.stringify(r.slots)===JSON.stringify(imageComparisonSlots()),'IMAGE_SLOTS');
+ check(Array.isArray(r.cases)&&r.cases.length===6&&r.cases.every((c,i)=>c.caseId===corpus.samples[i].caseId&&c.productCode===corpus.inputs[i].initialProductCodes[0]&&Array.isArray(c.images)&&c.images.length>0&&c.images.length<=2&&c.images.every(a=>a.subjectRef===c.productCode&&['sha256','downloadSha256','registrySha256'].every(k=>/^[a-f0-9]{64}$/.test(a[k])))),'IMAGE_REGISTRATION_BINDING');
+ return {registration:r,hash:sha256(bytes)};
+}
