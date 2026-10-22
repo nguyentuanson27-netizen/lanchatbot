@@ -34,7 +34,7 @@ export async function createCommerceTools(input: {
   }
   if(input.media){
     tools=createCommerceMediaTools({...input.media,base:tools,catalog:input.read.catalog,clock});
-    availableTools.push("select_product_media");
+    availableTools.push("select_product_media","view_product_media");
   }
   const composed = tools;
   return { ...composed, prepare: () => readTools.prepare(), availableTools, invoke: call => availableTools.includes(call.name) ? composed.invoke(call)

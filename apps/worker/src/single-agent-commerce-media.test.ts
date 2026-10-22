@@ -1,8 +1,9 @@
-import {describe,it,expect} from "vitest";
+import {describe,it,expect,vi} from "vitest";
 import {createCommerceTools} from "./single-agent-commerce.js";
 import {runCommerceTurn} from "./single-agent-commerce-read-only.js";
 import {commerceNow,commerceScope,fixtureProduct,fixturePolicy} from "./single-agent-commerce.test-support.js";
 import type {ProductImage} from "@lana/business-tools";
+import {createHash} from "node:crypto";
 
 const setup = async () => {
   const f=fixtureProduct(),scope=commerceScope();
@@ -16,6 +17,31 @@ const setup = async () => {
   return {f,scope,tools,call,image};
 };
 describe("candidate product media",()=>{
+  it("lets the same owner inspect verified public bytes without selecting an outbound image",async()=>{
+    const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");
+    const fetch=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(png,{headers:{"content-type":"image/png"}}));
+    try{
+      const s=await setup();s.f.product.images[0]!.sourceContentSha256=createHash("sha256").update(png).digest("hex");
+      expect(await s.tools.invoke({...s.call,name:"view_product_media"})).toMatchObject({status:"OK"});
+      expect(s.tools.mediaSelection!()).toEqual([]);
+      const images=s.tools.catalogImages!();expect(images).toHaveLength(1);
+      expect(images[0]).toMatchObject({subjectRef:s.f.product.productId,sha256:s.f.product.images[0]!.sourceContentSha256,mimeType:"image/png"});
+      expect(Buffer.from(images[0]!.data,"base64")).toEqual(png);
+      expect(JSON.stringify(s.tools.snapshot())).not.toContain(images[0]!.data);
+      expect(JSON.stringify(s.tools.snapshot())).toContain(images[0]!.sha256);
+      const captured:unknown[]=[];
+      const result=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Phối áo này với quần jeans được không em?",history:[],clock:()=>commerceNow,
+        ownerPrompt:"Tư vấn.",verifierPrompt:"Kiểm nghĩa.",owner:async request=>{expect(request.catalogImages).toHaveLength(1);return {kind:"FINAL",text:"Chị phối với quần jeans nhé."};},
+        verifier:async request=>{captured.push(request);return {result:{verdict:"PASS",violations:[]}};}});
+      expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+      expect(JSON.stringify(captured)).not.toContain(images[0]!.data);
+    }finally{fetch.mockRestore();}
+  });
+  it("never passes bytes with a source hash mismatch to the owner",async()=>{
+    const fetch=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(new Uint8Array([1,2,3]),{headers:{"content-type":"image/png"}}));
+    try{const s=await setup();expect(await s.tools.invoke({...s.call,name:"view_product_media"})).toMatchObject({status:"UNAVAILABLE"});expect(s.tools.catalogImages!()).toEqual([]);expect(fetch).toHaveBeenCalledTimes(1);}
+    finally{fetch.mockRestore();}
+  });
   it("prepares bounded approved assets without sending and exposes their evidence to the verifier",async()=>{
     const s=await setup();expect(await s.tools.invoke(s.call)).toMatchObject({status:"OK"});
     expect(s.tools.mediaSelection!()).toMatchObject([{productId:s.f.product.productId,url:s.image.url}]);

@@ -7,11 +7,13 @@ export interface NativeContent { role: "user" | "model"; parts: Record<string, u
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
+  catalogImages?: readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   toolBudget: { roundsRemaining: number; callsRemaining: number }; availableTools?: readonly string[]; signal: AbortSignal }
 export interface VerifierRequest { generationId: string; instructions: string; finalDraft: string; trusted: TrustedContext;
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
   prepare?(): Promise<number>;
   availableTools?: readonly string[];
@@ -93,6 +95,7 @@ export async function runCommerceTurn(input: {
     }
     const id = `${input.scope.requestId}:owner:${index + 1}`;
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context,
+      ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
     // The native transport owns its serialized wire bound after projection.

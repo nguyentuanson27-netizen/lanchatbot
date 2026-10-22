@@ -72,3 +72,11 @@ pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.tes
 # RED1
 pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-handoff.test.ts
 ```
+
+## Savepoint N6a — public catalog bytes to the same owner
+
+Official API docs checked before image wire change: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/Content (inlineData mimeType/data); https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/inference ; generation configuration MediaResolution enum https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.tuningJobs#MediaResolution . Native view_product_media reuses N4 approved selector but does not select outbound images. Existing secure downloader validates hosts/redirects/MIME/stream bounds; actual bytes must match sourceContentSha256. Header dimensions ≤1024, JPEG/PNG/WebP, ≤512KiB/image, ≤2images/turn,8s/download. Unsupported/bad source stays UNAVAILABLE, no fabricated hash or observedAt.
+
+Owner gets code-only catalogImages input; adapter explicitly copies subjectRef/assetRef/hash + inlineData, no filename/evaluator labels. Each image must be bound in current vision policy literal. Verifier sees source metadata/hash and final prose, never raw image bytes. Existing text envelope limit65536bytes unchanged; media adds separate bounded envelope1507328bytes, MEDIUM resolution (documented256tokens/image; actual usage recorded by provider, no estimate claimed as observed). Existing maxOutput8192/2tool-rounds/6calls unchanged. Registration now records image bounds. Image text cannot authorize instructions, shop facts or test results.
+
+Observed RED2worker +1adapter → GREEN10media and56native-adapter tests.65worker media/secure-pipeline/ingress tests PASS; direct worker tsc PASS. Runtime capture test proves same owner receives image and verifier does not. API/provider sanity not run yet; source metadata availability not proven for actual shop assets. Customer images remain excluded (N6b privacy prerequisite). Correction N5 result: actual command passed60/60, not46/46.

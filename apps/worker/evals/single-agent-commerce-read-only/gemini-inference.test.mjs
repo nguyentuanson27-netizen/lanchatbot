@@ -43,6 +43,18 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('only bound catalog image bytes reach native inlineData; evaluator fields and arbitrary media do not',()=>{
+ const r=request(),data=Buffer.from('synthetic-public-catalog-bytes').toString('base64'),sha256=createHash('sha256').update(Buffer.from(data,'base64')).digest('hex');
+ r.availableTools=['view_product_media'];r.context.boundSubjects=[{kind:'PRODUCT',ref:'P1',label:'Mẫu'}];
+ r.catalogImages=[{subjectRef:'P1',assetRef:'asset:1',sha256,mimeType:'image/png',data,caseId:'IMAGE_CASE_CANARY'}];
+ r.context.policyLiterals=[{ref:'vision:1',text:JSON.stringify({subjectRef:'P1',assets:[{assetRef:'asset:1',sha256,mimeType:'image/png'}]})}];
+ const b=buildGeminiCommerceRequest(r),image=b.contents.flatMap(c=>c.parts).find(p=>p.inlineData);
+ assert.deepEqual(image.inlineData,{mimeType:'image/png',data});
+ assert.doesNotMatch(JSON.stringify(b),/IMAGE_CASE_CANARY|caseId/);
+ r.catalogImages[0].data=Buffer.from('different').toString('base64');assert.throws(()=>buildGeminiCommerceRequest(r),/OWNER_IMAGE_BINDING/);
+ r.catalogImages[0].data=data;r.context.policyLiterals=[];assert.throws(()=>buildGeminiCommerceRequest(r),/OWNER_IMAGE_BINDING/);
+});
+
 test('media selection has one native bounded subject and no model URL or send argument',()=>{
  const r=request();r.availableTools=['select_product_media'];r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Mẫu'}];
  const declaration=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
