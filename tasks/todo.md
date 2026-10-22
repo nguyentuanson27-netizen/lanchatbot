@@ -2,6 +2,7 @@
 
 [Plan chi tiết](../docs/specs/c3-phase-b-opening-and-advice-fix-plan-20261022.md). **PROPOSED, không implementation/modelrun.**
 
+- [x] Review độc lập fresh context: [APPROVE kế hoạch](../docs/specs/c3-phase-b-opening-and-advice-independent-review-20261022.md), không required P1/P2. Giữ hai lưu ý candidate handoff phải được journey dùng thật và diagnostic không mang treatment override cũ; chưa implementation/provider.
 - [x] Đối chiếu finding/full39/rerun và sửa trước; đọc code size/media/handoff/time/quote, lập plan và self-review chống promptbloat/gates/parser/hidden retry.
 - [ ] T0: audit nguồn/chartscope/assetbinding/currentmatrix/ETAanchor/attributes; giữunknown nếu nguồn thật không đủ.
 - [ ] T1–T4: mapping size, ảnh đúng scope, firsthandoff holding theo candidate policy, immutable turn-time metadata không làm snapshot tự đổi; RED→GREEN đúng risk, không sửa live.
