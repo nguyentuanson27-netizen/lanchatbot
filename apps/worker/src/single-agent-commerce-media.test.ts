@@ -19,7 +19,7 @@ const setup = async () => {
 describe("candidate product media",()=>{
   it("lets the same owner inspect verified public bytes without selecting an outbound image",async()=>{
     const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");
-    const fetch=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(png,{headers:{"content-type":"image/png"}}));
+    const fetch=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>new Response(png,{headers:{"content-type":"image/png"}}));
     try{
       const s=await setup();s.f.product.images[0]!.sourceContentSha256=createHash("sha256").update(png).digest("hex");
       expect(await s.tools.invoke({...s.call,name:"view_product_media"})).toMatchObject({status:"OK"});
@@ -37,10 +37,24 @@ describe("candidate product media",()=>{
       expect(JSON.stringify(captured)).not.toContain(images[0]!.data);
     }finally{fetch.mockRestore();}
   });
-  it("never passes bytes with a source hash mismatch to the owner",async()=>{
+  it("never passes invalid image bytes to the owner",async()=>{
     const fetch=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(new Uint8Array([1,2,3]),{headers:{"content-type":"image/png"}}));
     try{const s=await setup();expect(await s.tools.invoke({...s.call,name:"view_product_media"})).toMatchObject({status:"UNAVAILABLE"});expect(s.tools.catalogImages!()).toEqual([]);expect(fetch).toHaveBeenCalledTimes(1);}
     finally{fetch.mockRestore();}
+  });
+  it("keeps the registry reconciliation hash separate from the exact downloaded bytes",async()=>{
+    const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64"),
+      fetch=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>new Response(png,{headers:{"content-type":"image/png"}}));
+    try{
+      const s=await setup();expect(await s.tools.invoke({...s.call,name:"view_product_media"})).toMatchObject({status:"OK"});
+      const image=s.tools.catalogImages!()[0]!;
+      expect(image.sha256).toBe(createHash("sha256").update(png).digest("hex"));
+      const vision=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("vision:"))!.text);
+      expect(vision.assets[0]).toMatchObject({registrySha256:"a".repeat(64),downloadSha256:image.sha256});
+      await expect(s.tools.readback()).resolves.toBeDefined();
+      fetch.mockImplementation(async()=>new Response(Buffer.concat([png,Buffer.from([0])]),{headers:{"content-type":"image/png"}}));
+      await expect(s.tools.readback()).rejects.toThrow("VIEWED_MEDIA_BYTES_CHANGED");
+    }finally{fetch.mockRestore();}
   });
   it("prepares bounded approved assets without sending and exposes their evidence to the verifier",async()=>{
     const s=await setup();expect(await s.tools.invoke(s.call)).toMatchObject({status:"OK"});

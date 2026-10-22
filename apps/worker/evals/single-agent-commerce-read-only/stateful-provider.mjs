@@ -30,7 +30,8 @@ export function statefulPreflight(root){
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
   catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
-  catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,sourceHashRequired:true},
+  catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,maxSourceBytes:2097152,maxSourceDimension:12000,maxSourcePixels:50000000,
+   sourceHashRequired:true,hashContract:'APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256',resize:'EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG'},
   selection:journeyOpenings?{mode:'FOUR_OPENINGS_ONLY',registered:cases.map(c=>c.caseId),deferred:selection.deferred,day:new Date().toISOString().slice(0,10)}:negotiationProbe?{mode:'THREE_NEGOTIATION_COMPANION',registered:cases.map(c=>c.caseId),prerequisite:'Actual cart from setup, never synthetic provider completion.'}:{mode:'BASELINE_EIGHT_STATEFUL'},
   selectionHash:sha256(JSON.stringify(cases)),
   corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:journeyOpenings||negotiationProbe?0:1,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
