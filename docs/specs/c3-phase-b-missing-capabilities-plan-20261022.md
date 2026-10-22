@@ -1,5 +1,7 @@
 # Phase B — kế hoạch nối các tác vụ còn thiếu
 
+**Đã triển khai các slice độc lập; chưa hoàn tất toàn plan/B GO.** Trạng thái code, commands, DB/capture, provider và prerequisites được ghi riêng tại [implementation evidence](c3-phase-b-missing-capabilities-implementation-20261022.md). Các mô tả “chưa sửa/chưa chạy” dưới đây là snapshot của lượt lập kế hoạch, không thay báo cáo thực thi. Không tự chuyển A OWNER_BYPASS thành PASS hoặc bật production.
+
 Ngày 22/10/2026. **PLAN_REVISED_AND_CANDIDATE_CORPUS_ADDED** sau review độc lập HEAD `2aa9df44`. Review base code: `da54b16cb1e8825e48b6c76344baba1bd2629b5e`, branch `feat/c3-phase-b-commerce-20261014`. Chưa sửa runtime/prompt, chạy provider, bật ingress production hoặc gửi khách. Bộ ca mới là candidate, chưa được đăng ký vào provider run.
 
 ## Mục tiêu và kết luận review

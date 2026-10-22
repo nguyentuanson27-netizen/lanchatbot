@@ -1,6 +1,6 @@
 # Phase B — evidence nối tác vụ còn thiếu
 
-Ngày22/10/2026. **IMPLEMENTATION_IN_PROGRESS** theo [kế hoạch](c3-phase-b-missing-capabilities-plan-20261022.md), implementation base `1aa3a1d3`. Candidate vẫn cô lập; không production wiring, live send hoặc migration vào dữ liệu thật.
+Ngày22/10/2026. **PARTIAL_IMPLEMENTED — CHƯA B GO** theo [kế hoạch](c3-phase-b-missing-capabilities-plan-20261022.md), implementation base `1aa3a1d3`. Candidate vẫn cô lập; không production wiring, live send hoặc migration vào dữ liệu thật.
 
 ## Savepoint N1/N2
 
@@ -27,7 +27,7 @@ pnpm --filter @lana/worker typecheck
 
 ## Còn phải thực hiện
 
-N3a focus/ad bridge; N4 ảnh ra; N5 media intake/staff linkage; N6a public image input; N7 negotiation event; N8 harness và real-DB/capture/model coverage theo prerequisites. N3b terminal-focus và N6b customer-image privacy/recognition vẫn cần chốt contract, không tăng model/tool budget hoặc bypass privacy. Worker build/lint và focused regressions tương ứng phải chạy sau các thay đổi cuối.
+Current status và phần đã kiểm được chốt tại [checkpoint](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/CHECKPOINT_B.md). Còn staff-image readback, customer-image privacy/recognition và customer-quality/full-journey coverage theo prerequisites. N3b terminal-focus và N6b customer-image privacy/recognition vẫn cần chốt contract, không tăng model/tool budget hoặc bypass privacy. Worker build/lint và focused regressions tương ứng phải chạy sau các thay đổi cuối.
 
 ## Savepoint N3a
 
@@ -104,3 +104,7 @@ Observed RED cho tách registry/download identity. Sửa trong wrapper: retain r
 Compile correction: lượt compile trước savepoint4ad3e99a đã FAIL ở Buffer generic/MIME literal inference, không phải PASS như dòng trước ghi. Đã khai báo kiểu cụ thể; pnpm --filter @lana/worker exec tsc -p tsconfig.json PASS sau sửa. One-shot public-image API probe reuse actual wrapper/inference, không gửi/ghi state; registration tối đa1generation, không verifier/customer qualification.
 
 Actual image preflight found existing ffmpeg canonical args used `-autorotate 1`; installed ffmpeg interprets `1` as output URL and exits before decode. Reproduced RED with real PNG/installed ffmpeg; official https://ffmpeg.org/ffmpeg.html documents boolean `-autorotate` without argument. Minimal shared helper correction removes `1`; geometry/no-crop/no-upscale unchanged.41media/pipeline tests PASS (real ffmpeg available,0skip), final direct worker compile PASS. Earlier 450worker tests passed before this flag correction; focused real-binary test owns this new compatibility risk. First image preflight had0provider requests and was not a generated attempt.
+
+## Kết quả chốt
+
+[Checkpoint và findings](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/CHECKPOINT_B.md), [7lượt thực tế](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/CONVERSATIONS.md), [exact commands](../../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/COMMANDS.md). Final451worker tests/77Node PASS; contracts60/business selector-readiness71/protected-reply21/negotiation9PASS; typecheck/build/lint/direct final compile PASS. COD18/BANK32checks PASS, tất cả DBs dropped.7customer outcomes/20requests,4eligible/2fallback/1silent handoff; API sanity2public images/1request PASS riêng, không gửi khách.0retry,0HTTPerrors/timeouts,1owner tool-mode violation; no evaluator labels in20captured customer requests. Không nhận toàn plan/B đã hoàn tất hoặc tư vấn tự nhiên đã cải thiện.

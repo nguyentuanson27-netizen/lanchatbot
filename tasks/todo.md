@@ -1,24 +1,26 @@
 ## Kế hoạch nối tác vụ còn thiếu của Phase B — 2026-10-22
 
-**PLAN_REVISED_AND_CANDIDATE_CORPUS_ADDED**. [Acceptance/verification](../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md), [corpus/harness status](../apps/worker/evals/single-agent-commerce-read-only/SALES_JOURNEYS_CANDIDATE.md).
+**PARTIAL_IMPLEMENTED — CHƯA B GO**. [Acceptance/verification](../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md), [savepoints/evidence](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md). Giữ riêng kết quả code, DB/capture, provider và giới hạn chưa hoàn thành.
 
 - [x] Review code/spec/test: lịch sử text đã nối; DB sort đúng, query8 trước privacy filtering gây underfill; có write currentProductId nhưng đường seed/read focus chưa được chứng minh đầy đủ.
 - [x] Lập thứ tự theo phụ thuộc và self-review privacy/media/authority/anti-bloat; tách chức năng, độ phủ, hạn chế và activation.
 - [x] Sửa theo review độc lập: giữ negotiation tier/ledger khi reprice; tách N3b chưa giải terminal-focus trong2tool rounds; clarify active single-field checkout và public history projection; bỏ dependency giả, thêm batch-attachment linkage test design.
 - [x] Chỉnh12journeys từ44xuống32inbound slots: bỏ chọn lại, correction/mutation dày; giữ kiểm kỹ thuật riêng, không gold bot replies; tách runtime/evaluator, source/setup prerequisites và dependent-turn rules.4private-fixture slots chưa materialize; media fixtures chưa cấp bytes/source hash.
 - [x] Thêm offline corpus/projection checks; command gồm sales-journeys/protocol/gemini-inference tests:68PASS,0generation. Không nhận đây là runtime RED→GREEN hoặc model-run evidence.
-- [ ] N1: IMPLEMENTED_FOCUSED_PASS — private pending intake/single-field, partial/question/pause/resume, captured zero model calls/null history; real-DB acceptance còn pending. [Evidence](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md).
-- [ ] N2: IMPLEMENTED_FOCUSED_PASS — bounded30→filter8/4.096byte, captured history/latest identity; longer DB journeys còn pending.106focused tests/typecheck PASS cho N1/N2, không model run.
-- [ ] N3a: IMPLEMENTED_FOCUSED_PASS — readback focus qua lượt/caller và adsContext→verified catalog refs; nhiều mẫu/chuyển mẫu không bind nhầm hoặc sửa giỏ ngầm.
+- [x] N1: private pending intake/single-field, partial/question/pause/resume; focused và real DB checkout PASS, zero model calls cho private answers/public projection không PII. Syntax tên/địa chỉ vẫn hẹp, không claim mọi câu tự do. [Evidence](../docs/specs/c3-phase-b-missing-capabilities-implementation-20261022.md).
+- [x] N2: bounded30→filter8/4.096byte, captured history/latest identity và DB public projection PASS. Authorized private preview vẫn ở store có quyền; không forward cho model.
+- [x] N3a: IMPLEMENTED_FOCUSED_PASS — readback focus qua lượt/caller và adsContext→verified catalog refs; nhiều mẫu/chuyển mẫu không bind nhầm hoặc sửa giỏ ngầm.
 - [ ] N3b: RED search→read→final choice→next-turn; chốt contract terminal-focus trong2tool rounds mà không semantic object/generation mới. Chưa thiết kế xong thì không thêm select_product_context hoặc chặn các slice độc lập.
-- [ ] N4: IMPLEMENTED_FOCUSED_PASS — native bounded asset selection và TEXT+IMAGE Outbox qua gate hiện hữu; đúng product/component/source, thiếu ảnh không thay bừa, BANK QR regression.
-- [ ] N5: Media intake thay blanket NO_SEND, reuse safety bounds; receipt/defect/private/unknown media có handoff/context thật, không tự xác nhận thanh toán.
-- [ ] N6: Native ảnh catalog công khai cho owner; audit privacy của ảnh khách trước recognition, reuse retrieval không nhập generative reranker/third role; ghi rõ prerequisite nếu chưa đáp ứng.
-- [ ] N7: Owner đề xuất PRICE_OBJECTION/PURCHASE_READY, code cấp evidence và chạy negotiation transition/quote; false-trigger/replay/cart/policy controls. Cart reprice giữ tier/objection/event ledger theo canonical engine.
-- [ ] N8 adapter: Extend harness hiện có để chạy selected candidate journeys thay vì giả fixed24/fixed8 đã hỗ trợ; materialize asset/private fixtures, dùng actual accepted outputs và kiểm prerequisite trước dispatch.
-- [ ] N8 run: Chốt actual selected turn/request budget trước generation, giữ old24B1+8stateful controls; report NOT_READY/NOT_APPLICABLE/dependent-not-executed đúng thời điểm, không bỏ attempt lỗi khỏi denominator.
-- [ ] RED→GREEN cho changed boundaries, focused source/adapter/domain tests; real isolated DB/capture COD/BANK và worker/shared checks tương ứng.
-- [ ] Freeze source/config/inputs rồi mới provider-run theo coverage cần thiết; report actual terminal toàn hội thoại, denominators/latency/errors/quality và limitations. Chưa đăng ký/chạy run trong lượt plan.
+- [x] N4: IMPLEMENTED_FOCUSED_DB_PASS — native bounded asset selection và TEXT+IMAGE Outbox qua gate hiện hữu; đúng product/component/source, thiếu ảnh không thay bừa, BANK QR regression.
+- [ ] N5: PARTIAL — private intake/source message linkage có focused và DB PASS; chưa có staff-image bytes readback có quyền trong admin. Unknown media chuyển staff, không đưa ảnh khách vào model; chưa claim trả phần text độc lập trong cùng media handoff.
+- [x] N6a: view_product_media cấp2actual public catalog images qua current owner API,1request sanity/no-send PASS; registry/download/prepared hashes tách đúng source contract, readback đổi bytes bị chặn. Không claim customer-advice quality từ ảnh đã đạt.
+- [ ] N6b: customer-image privacy/recognition prerequisite; không reranker/third role.
+- [x] N7: source-bound native intent → existing engine/CART_READY/replay evidence; duplicate/reprice giữ tier/ledger DB PASS. Provider3lượt: objection ghi1evidence, hỏi tổng giữ nguyên. Reply giải thích hỗ trợ còn yếu; không coi1control là stability proof.
+- [x] N8 selected adapter: existing harness có4opening turns +3stateful companion, exact registration/budget và prerequisite; unresolved fixtures bị reject. Giữ fixed24/fixed8.
+- [ ] N8 full journeys:28candidate slots chưa registered, private/media fixtures đầy đủ và dependent turns chưa chạy; staff/private-image/focus prerequisites còn thiếu.
+- [x] N8 selected run:4+3customer outcomes/20generation requests;4eligible/2fallback/1handoff. Image API sanity1request riêng. Mỗi lượt1lần,0retry; không bỏ failure khỏi denominator. [Checkpoint](../apps/worker/evals/single-agent-commerce-read-only/connections-run-20261022/CHECKPOINT_B.md).
+- [x] Observed RED→GREEN; final worker451/Node77/contracts60/business selectors-readiness71/protected-reply21/negotiation9PASS, typecheck/build/lint/compile PASS. COD18/BANK32checks PASS, tất cả DBs dropped; failures và wrong-runner invocation giữ trong commands.
+- [x] Sources bce8538b/67c78b2a/22b6bea8 sealed trước providers; raw commits trước report, exact hashes/config/accounting và toàn7customer turns được review. Chưa B GO, chưa full provider24B1/8stateful hoặc12journeys.
 
 ## Audit hành trình bán hàng thường ngày — 2026-10-22
 

@@ -1,5 +1,7 @@
 # Candidate corpus — các tác vụ còn thiếu của Phase B
 
+**Implementation update:** đã chạy selected4opening turns, không phải toàn12journeys.3lượt negotiation companion giữ riêng, không tự tính là J07 hoàn tất. [Checkpoint/7actual customer turns/commands](connections-run-20261022/CHECKPOINT_B.md). Candidate JSON giữ nguyên;28slots còn NOT_REGISTERED. Các đoạn0generation bên dưới là lịch sử authoring corpus.
+
 Ngày 22/10/2026. **CORPUS_AUTHORED_NOT_REGISTERED**. [Input JSON](sales-journeys.candidate.json), [kế hoạch đã sửa sau review](../../../../docs/specs/c3-phase-b-missing-capabilities-plan-20261022.md).
 
 Đã chỉnh mạch lời khách thành **12 hành trình, 32 mốc inbound**, mỗi hành trình dự kiến một lần, không retry; bản trước ở commit `6f23a3d3` có44mốc. Đây không phải32lượt model đã chạy hoặc32ca độc lập. Hai mốc có batch ảnh trước/chữ sau; bốn mốc private được sinh bằng fixture trong harness. Có30message literals trong JSON và4private-fixture slots, tức34message slots khi materialize đầy đủ. Chưa có provider registration/request budget và **0 generation** trong lượt sửa này.
