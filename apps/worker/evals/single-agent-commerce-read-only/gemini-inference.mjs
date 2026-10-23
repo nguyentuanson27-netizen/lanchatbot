@@ -118,6 +118,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  for(const message of contents)for(const part of message.parts??[]){
   const response=part.functionResponse;
   const data=response?.response?.data;if(!data)continue;
+  if(response.name==='select_product_media'&&Array.isArray(data.assets))
+   data.assets=data.assets.map(({assetRef:_internal,...visible})=>visible);
   if(response.name==='search_products'){
    if(data.subjects)data.subjects=data.subjects.map(subject);
    if(data.products)data.products=data.products.map(p=>product(p));
@@ -175,7 +177,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    content:p.content?Object.fromEntries(Object.entries(p.content).filter(([k])=>k!=='metadata')):null,
    presentation:p.presentation?Object.fromEntries(Object.entries(p.presentation).filter(([k])=>!['schemaVersion','productId','provenance'].includes(k))):null,
    sizeCharts:p.sizeCharts??[]})),facts,
-   policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)&&!preparationRefs.has(p.ref)).map(p=>({ref:p.ref,text:p.text})),receipts:c.effectReceipts,
+   policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)&&!preparationRefs.has(p.ref)).map(p=>{
+    if(!p.ref.startsWith('media:'))return {ref:p.ref,text:p.text};
+    const value=JSON.parse(p.text);
+    if(Array.isArray(value.assets))value.assets=value.assets.map(({assetRef:_internal,...visible})=>visible);
+    return {ref:p.ref,text:JSON.stringify(value)};
+   }),receipts:c.effectReceipts,
    state};
  // Configured capabilities remain visible after this generation's call budget ends.
  // Native toolConfig and runtime checks still enforce whether tools can be called.

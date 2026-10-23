@@ -138,6 +138,13 @@ export async function runCommerceTurn(input: {
       continue;
     }
     if (output.kind !== "FINAL" || typeof output.text !== "string") return finish(fallback("MALFORMED"));
+    // Reserved transport namespace, never customer prose. Reject, never rewrite a draft.
+    if (output.text.toLowerCase().includes("asset:")) {
+      const current = input.tools.snapshot();
+      if (!current.state.permission || !current.state.privacyAllowed || current.state.conversationOwner !== "BOT")
+        return finish({disposition:"NO_SEND",reason:"PERMISSION_OR_PRIVACY",text:null,fallbackId:null});
+      return finish(fallback("OWNER_OUTPUT_ARTIFACT"));
+    }
     const trusted = input.tools.snapshot(), binding = makeBinding(input.scope.requestId, output.text, trusted);
     const problem = hardPrecheck(trusted, output.text, input.clock());
     if (problem) return finish(finalGate({ expected: binding, response: { kind: "PROVIDER_ERROR" }, current: trusted,

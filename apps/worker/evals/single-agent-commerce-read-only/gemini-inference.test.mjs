@@ -14,6 +14,17 @@ import {readFileSync} from 'node:fs';
 import {createCommerceVerifier} from './protocol.mjs';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
 
+test('owner media metadata omits transport identities without mutating binding evidence',()=>{
+ const r=request(),asset={assetRef:'asset:opaque',angle:'FRONT',imageType:'MODEL',feedback:false,partsVisible:['AO']};
+ r.context.policyLiterals.push({ref:'media:selection',text:JSON.stringify({subjectRef:'P1',assets:[asset]})});
+ r.contents.push({role:'user',parts:[{functionResponse:{name:'select_product_media',response:{status:'OK',data:{subjectRef:'P1',assets:[asset]}}}}]});
+ const original=structuredClone(r),wire=buildGeminiCommerceRequest(r);
+ assert(!JSON.stringify(wire).includes('asset:opaque'));
+ assert(JSON.stringify(wire).includes('FRONT'));
+ assert.deepEqual(r.context,original.context);
+ assert.deepEqual(r.contents,original.contents);
+});
+
 test('product reads require an explicit source offer or null while unknown offers remain discoverable',()=>{
  const r=request();r.availableTools=['read_product'];
  r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Mẫu'}];

@@ -16,6 +16,28 @@ const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TO
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
 describe("one conversational owner, tools and exact egress", () => {
+  it.each(["[asset:declared]", "asset:unknown", "[asset:", "Chị xem ảnh asset:from-history nhé"])("rejects transport artifacts before verification: %s", async text => {
+    const s = setup();
+    const result = await runCommerceTurn({ ...s, history: [{role:"shop",text:"asset:from-history"}], owner:async()=>final(text) });
+    expect(result.terminal.disposition).toBe("FALLBACK");
+    expect(result.terminal.reason).toBe("OWNER_OUTPUT_ARTIFACT");
+    expect(s.verifier).not.toHaveBeenCalled();
+    expect(result.ownerGenerations).toBe(1);
+  });
+  it("keeps customer prose and product codes byte exact", async () => {
+    const s=setup(),text="Áo SV2447 màu be: 499.000đ (mua riêng).";
+    const result=await runCommerceTurn({...s,owner:async()=>final(text)});
+    expect(result.terminal.text).toBe(text);
+    expect(s.verifier).toHaveBeenCalledOnce();
+    expect(s.verifier.mock.calls[0]![0].finalDraft).toBe(text);
+  });
+  it("does not use the artifact fallback after permission is revoked",async()=>{
+    const s=setup();let permission=true;
+    const tools={...s.tools,snapshot:()=>{const c=s.tools.snapshot();return {...c,state:{...c.state,permission}};}};
+    const result=await runCommerceTurn({...s,tools,owner:async()=>{permission=false;return final('asset:unknown');}});
+    expect(result.terminal.disposition).toBe('NO_SEND');
+    expect(s.verifier).not.toHaveBeenCalled();
+  });
   it("shares a single processing clock with every owner generation and verifier, outside the world snapshot", async () => {
     const s = setup(), anchors: unknown[] = [], before = s.tools.snapshot();
     let now = new Date(commerceNow);
