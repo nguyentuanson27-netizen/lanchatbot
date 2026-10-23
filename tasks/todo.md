@@ -2,7 +2,7 @@
 
 - [x] Independent exact-head review bb4e284d: REVISE 1P2 actual customer capture gate.
 - [x] Observed RED → GREEN; mọi persisted job ghi attachments/accepted Outbox rows, review bind customerOutcomeHash, structural checks trước job kế tiếp. Focused17 PASS.
-- [ ] Cùng reviewer re-review correction; fix material findings nếu có.
+- [x] Cùng reviewer re-review APPROVE exact fb178f22; P2 đóng, focused17PASS, không P1/P2 còn lại.
 - [ ] Freeze archived verifier candidate; clean seal + fresh source/preflights; controls17 → visual4 → native21+25 theo gate, không hidden retry hoặc tự vòng2.
 - [ ] Review toàn outcomes thực, preserve denominator/accounting/commands và cập nhật report. B chưa GO, không live/deploy.
 

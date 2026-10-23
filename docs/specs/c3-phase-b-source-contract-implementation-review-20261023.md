@@ -14,4 +14,10 @@ Không áp capture==terminal.text cho code checkout, receipt ACK hoặc handoff 
 
 Test persisted eligible/enqueued nhưng capture rỗng đã FAIL bằng `Missing expected exception` trước sửa. Sau correction, focused controls/native-gate/delivery-capture: **17 PASS**. Có coverage ordinary text/gallery, missing capture/attachment/count mismatch/duplicate image/pending row, changed customer outcome hash, code checkout/receipt ACK/handoff/silent handoff hợp lệ.
 
-Thay đổi chỉ eval collector/gates/tests; không owner/verifier prompt hoặc runtime semantics. **Đang chờ cùng reviewer re-review correction trước seal/run.**
+Thay đổi chỉ eval collector/gates/tests; không owner/verifier prompt hoặc runtime semantics.
+
+## Re-review cùng reviewer
+
+**APPROVE correction** tại clean exact HEAD `fb178f222998b67ec930b42bd8515402c31970ea`. P2 đã đóng, không P1/P2 còn lại trong boundary đã review. Reviewer kiểm attachments/turn-specific Outbox rows, counts/accepted statuses/duplicates, customerOutcomeHash và immediate persisted-job check; code checkout/receipt ACK không bị ép thành terminal prose. SQL dùng đúng cột hiện hữu, không đổi runtime/send authority. Focused **17/17 PASS**, zero-provider, worktree clean.
+
+Approval là implementation review, chưa provider evidence hoặc B GO. Có thể freeze archived candidate → fresh preflight →17controls; chỉ PASS mới visual/native theo gates.

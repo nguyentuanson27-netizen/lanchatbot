@@ -65,7 +65,7 @@
   },
   "promptHashes": {
     "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
-    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+    "verifier": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800"
   },
   "verdictSchema": {
     "type": "object",
