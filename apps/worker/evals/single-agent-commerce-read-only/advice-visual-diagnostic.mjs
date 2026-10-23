@@ -53,7 +53,7 @@ try{
    prepared.push({pair,arm,caseId:row.caseId,now:now.toISOString(),latest:row.runtime.latest,history:row.runtime.history,trusted,request,wireHash:sha256(JSON.stringify(wire)),imageHashes:arm==='visual'?images.map(i=>i.sha256):[]});
   }
  }
- assert.equal(prepared.length,4);writeFileSync(resolve(out,'preflight.json'),JSON.stringify({status:'PASS',outcomes:prepared.map(({request,...x})=>x)},null,2));
+ assert.equal(prepared.length,4);if(process.env.C3_VISUAL_PREFLIGHT){const frozen=JSON.parse(readFileSync(process.env.C3_VISUAL_PREFLIGHT));assert.deepEqual(prepared.map(p=>({pair:p.pair,arm:p.arm,wireHash:p.wireHash,imageHashes:p.imageHashes})),frozen.outcomes.map(p=>({pair:p.pair,arm:p.arm,wireHash:p.wireHash,imageHashes:p.imageHashes})),'FROZEN_BUNDLE_CHANGED');}writeFileSync(resolve(out,'preflight.json'),JSON.stringify({status:'PASS',outcomes:prepared.map(({request,...x})=>x)},null,2));
 }catch(e){writeFileSync(resolve(out,'summary.json'),JSON.stringify({status:'BLOCKED',stage:'ZERO_GENERATION_PREFLIGHT',reason:e.code??e.message,providerRequests:0}));throw e;}
 if(process.argv.includes('--preflight')){writeFileSync(resolve(out,'summary.json'),JSON.stringify({status:'PREFLIGHT_PASS',providerRequests:0}));process.exit(0);}
 const config=JSON.parse(readFileSync(resolve(b,'source-config.b1.json')));
