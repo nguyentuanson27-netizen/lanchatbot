@@ -1,3 +1,18 @@
+## Implementation tư vấn/media — 2026-10-23
+
+[Bản sửa và verification](../docs/specs/c3-phase-b-sales-media-implementation-20261023.md). B chưa GO, chưa provider campaign mới.
+
+- [x] Sửa plan theo reviewer: capability từng population, advice/media độc lập, review giọng riêng.
+- [x] Audit nguồn đã lưu và77wire thực; ghi giới hạn snapshot22/10, feedback unknown, không alias/chế thêm facts.
+- [x] GENERIC chọn ảnh chính+góc bổ sung bằng helper có sẵn; observed RED→GREEN, chặn legacy URLs chưa duyệt.
+- [x] Tool guidance về chủ động dùng ảnh/sàng description/đọc đúng offer; giữ schema/bounds.
+- [x] Bốn lời khách media độc lập, registrar/--media-probe dùng ingress thật; test projection/wire không labels.
+- [x] Advice candidate và8paired inputs cùng dữ liệu ngoài instructions; offline wirePASS, chưa promote.
+- [x] Worker1959/fullsrc, focused122, shared41, Node84, build/typecheck/lint, syntax/diffPASS; self-review.
+- [ ] Refresh nguồn trước campaign: xác nhận đúng loại feedback/detail và media capability/budget trên wire thực.
+- [ ] Paired advice/provider media evaluation theo scope khi owner yêu cầu; chưa kết luận giọng/thuyết phục tốt hơn.
+- [ ] Deadline semantic controls/quote experiment theo plan riêng; không gọi tool-mode adapter lỗi khi đã truyềnNONE đúng.
+
 ## Tư vấn bán hàng và media — 2026-10-23
 
 [Kế hoạch đề xuất](../docs/specs/c3-phase-b-sales-and-media-plan-20261023.md), chưa sửa runtime/prompt hoặc chạy provider.

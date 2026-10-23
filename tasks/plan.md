@@ -1,3 +1,7 @@
+## Implementation tư vấn/media — 2026-10-23
+
+**MEDIA_IMPLEMENTED_AND_SELF_REVIEWED; ADVICE_CANDIDATE_PREPARED; PROVIDER_NOT_RUN.** [Bản sửa và evidence](../docs/specs/c3-phase-b-sales-media-implementation-20261023.md). Plan đã tiếp thu P2 capability/P3 independent branches/voice report. GENERIC reuse main+complementary helper sau authority filter, disable legacy URL fallback; tools hướng dẫn chủ động dùng ảnh/sàng discovery. Bốn media turns qua ingress --media-probe; advice8 paired inputs cùng chữ/clock, candidate riêng chưa promote. Worker1959, focused122, shared41, Node84, build/typecheck/lintPASS. Audit là captured source22/10, feedback hiện chưa xác nhận; không live refresh/DB/provider run. Deadline/quote hypothesis còn mở, active owner/verifier giữ nguyên. B chưa GO.
+
 ## Hướng sửa hiệu quả bán hàng và media — 2026-10-23
 
 **PROPOSED, chưa implementation/provider.** [Kế hoạch chi tiết](../docs/specs/c3-phase-b-sales-and-media-plan-20261023.md): audit nguồn/request → đối chiếu một thay đổi advice → nối cách dùng media hiện hữu để hỗ trợ lựa chọn → kiểm riêng các lỗi contract → regression. Không nhắc lại chỉ dẫn vốn đã có hoặc coi 34/39 usable là conversion. Tool framing chỉ là giả thuyết; chưa chứng minh đủ cận chất/feedback trên nguồn thật. Dự kiến advice 8 outcomes/16 requests; native39 + 4 media bổ sung tối đa43 lượt/168 requests khi có yêu cầu chạy, không tự cộng quote/ETA diagnostics hoặc cap cũ. Kế hoạch root cause trước vẫn giữ các việc discovery/deadline/provider còn mở. A OWNER_BYPASS, B chưa GO.
