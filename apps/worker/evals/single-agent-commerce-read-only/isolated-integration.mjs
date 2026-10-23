@@ -407,7 +407,7 @@ try{
  await check('B composed no-chart after two rounds recovers through one real atomic handoff without draft or images',async()=>{
   const j=await statefulFixture({media:true});
   const r=await j.turn('Chọn size và gửi ảnh chị nhé',[
-   native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
+   native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}])]);
   assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
   assert.equal(r.result.terminal.reason,'SIZE_RULE_UNAVAILABLE');await j.drain();
