@@ -95,6 +95,7 @@ export async function createCustomerStateTools(input: {
   const invalidateCommit = () => { commitUnconfirmed = true; blockedDependencies = true; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; quoteRead = false; };
   const pendingFields = new Set<string>();
   const blocked = () => blockedDependencies || pendingFields.size > 0;
+  let sizeOutcome: { status: string } | null = null;
   const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string }>();
   let cartQuote: unknown;
   let quoteRead = false;
@@ -208,7 +209,7 @@ export async function createCustomerStateTools(input: {
     effective = readback; blockedDependencies = false;
     if (!changed) return { status: "OK", data: { revision: effective.profile.revision, applied: false,
       measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
-    sizes.clear(); cartQuote = undefined; quoteRead = false;
+    sizeOutcome = null; sizes.clear(); cartQuote = undefined; quoteRead = false;
     const operationId = commerceHash({ profileId: effective.profile.profileId, revision: effective.profile.revision, source: evidence.sourceEventHash, ops: a.ops });
     committedUpdate = { hash: commerceHash(effective), receipt: { ref: `profile-receipt:${operationId}`, operationId, effect: "CUSTOMER_STATE_UPDATED", status: "SUCCESS",
       subjectRef: effective.profile.profileId, stateRevision: input.base.snapshot().state.revision, recipient: input.scope.recipient,
@@ -236,6 +237,7 @@ export async function createCustomerStateTools(input: {
         const source = await input.sizeInput(a.subjectRef);
         if (source.target.parentProductId !== a.subjectRef) return { status: "REJECTED", reason: "SIZE_SUBJECT" };
         const decision = recommendSize({ ...source, profile: effective.profile, generatedAt: input.clock().toISOString() });
+        sizeOutcome = { status: decision.recommendation.status };
         const claim = createVerifiedSizeRecommendationClaim({ decision, profile: effective.profile, productId: a.subjectRef });
         sizes.set(a.subjectRef, { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef }).claims,
           fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash: commerceHash({ target: source.target, charts: source.charts }) });
@@ -253,7 +255,7 @@ export async function createCustomerStateTools(input: {
       return await input.base.invoke(call);
     } catch { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
   }
-  return { invoke, snapshot, async invokeBatch(calls) {
+  return { invoke, snapshot, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
     const updates = calls.filter(c => c.name === "apply_customer_state");
     if (updates.length > 1) {
       blockedDependencies = true;

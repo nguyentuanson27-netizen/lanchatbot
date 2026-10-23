@@ -254,3 +254,9 @@ it("retains explicit feedback provenance for the verifier and media fallback aft
  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Ảnh đây chị"}),verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
  expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_NEXT_STEP_V1");
 });
+
+it("keeps repeated readbacks unchanged for a no-match component lookup after all offers",async()=>{
+ const s=await setup();await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId}});
+ await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"DETAIL",componentRole:"SKIRT"}});
+ const original=s.tools.snapshot();expect(await s.tools.readback()).toEqual(original);expect(await s.tools.readback()).toEqual(original);
+});

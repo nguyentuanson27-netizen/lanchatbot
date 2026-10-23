@@ -184,7 +184,11 @@ export async function runPersistedCommerceIngress(input: {
   const current = await readAuthority();
   const verifiedRevision = world.state.conversationRevision;
   if (typeof verifiedRevision !== "number" || current.stateVersion !== verifiedRevision ||
-    commerceHash(accepted) !== commerceHash(makeBinding(scope.requestId, result.terminal.text ?? "", world)) || current.bindingVersion !== scope.bindingVersion) return { ...result, ...await closeWithoutSend("EGRESS_WORLD_CHANGED") };
+    commerceHash(accepted) !== commerceHash(makeBinding(scope.requestId, result.terminal.text ?? "", world)) || current.bindingVersion !== scope.bindingVersion) return { ...result, ...await closeWithoutSend("EGRESS_WORLD_CHANGED"),
+      egressDiagnostic: { kind: typeof verifiedRevision !== "number" || current.stateVersion !== verifiedRevision ? "CONVERSATION_REVISION" : current.bindingVersion !== scope.bindingVersion ? "AUTHORITY_BINDING" : "TRUSTED_SNAPSHOT",
+        acceptedHash: commerceHash(accepted), currentHash: commerceHash(makeBinding(scope.requestId,result.terminal.text??"",world)),
+        expectedRevision: typeof verifiedRevision === "number" ? verifiedRevision : null, currentRevision: current.stateVersion,
+        changedBindingFields: (Object.keys(accepted) as (keyof typeof accepted)[]).filter(k=>accepted[k]!==makeBinding(scope.requestId,result.terminal.text??"",world)[k]) } };
   if (!await input.inbox.isBatchCurrent(batch)) return { ...result, enqueued: executor.outboxCount() }; // A confirmation already committed its atomic terminal intents.
   const state = (await executor.repository.read(scope.conversationId))!, cart = state.cart?.value;
   const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";

@@ -159,3 +159,16 @@ describe("Phase B handoff follows current code policy and committed ownership", 
     expect(s.commit).toHaveBeenCalledTimes(1); expect(s.current().state.conversationOwner).toBe("HUMAN");
   });
 });
+
+it.each(["success","denied","unknown","changed"])("no-chart recovery reuses atomic handoff at most once (%s)",async mode=>{
+ const s=await setup();const sizeBase={...s.base,sizeOutcome:()=>({status:"NO_VERIFIED_CHART"})};
+ let attempts=0;
+ const tools=createCommerceHandoffTools({base:sizeBase,scope:s.scope,clock:()=>commerceNow,policy:async()=>s.policy,read:s.read,
+ commit:async({next})=>{attempts++;if(mode==="unknown")throw Error("COMMIT_UNKNOWN");if(mode==="denied")return false;await s.commit(next);if(mode==="changed")s.change({bindingVersion:"changed"});return true;}});
+ let owners=0;
+ const r=await runCommerceTurn({scope:s.scope,tools,latest:"Chọn size chị nhé",history:[],clock:()=>commerceNow,ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
+ owner:async()=>{owners++;const c={name:"recommend_size",args:{subjectRef:"QU714"}};return {kind:"TOOLS",calls:[c],content:{role:"model",parts:[{functionCall:c}]}};},verifier:async()=>{throw Error("UNEXPECTED_VERIFY");}});
+ expect(owners).toBe(1);expect(r.verifierGenerations).toBe(0);expect(attempts).toBe(1);
+ expect(r.terminal.disposition).toBe(mode==="success"?"HANDOFF":mode==="denied"?"FALLBACK":"NO_SEND");
+ await tools.recover!(r.terminal);expect(attempts).toBe(1);
+});

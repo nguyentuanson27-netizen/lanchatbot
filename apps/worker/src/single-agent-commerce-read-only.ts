@@ -19,6 +19,7 @@ export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
   /** Code-owned exact static fallback identity after a tool outcome. */
   fallbackId?(): string;
+  sizeOutcome?(): { status: string } | null;
   catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
   prepare?(): Promise<number>;
@@ -42,7 +43,7 @@ export async function runCommerceTurn(input: {
   owner: (request: OwnerRequest) => Promise<OwnerGeneration>;
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
 }) {
-  const selectedFallback = () => terminalFallback(input.tools.fallbackId?.() ?? "C3_A_NONPROTECTED_V2");
+  const selectedFallback = () => terminalFallback(input.tools.sizeOutcome?.() ? "C3_A_NONPROTECTED_V2" : input.tools.fallbackId?.() ?? "C3_A_NONPROTECTED_V2");
   const fallback = (reason:string):TerminalOutcome => ({...selectedFallback(),reason});
   const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
@@ -128,6 +129,7 @@ export async function runCommerceTurn(input: {
       toolLatencyMs += performance.now()-toolStarted;
       const actual = await effectTerminal();
       if (actual) return finish(actual);
+      if (input.tools.sizeOutcome?.()?.status === "NO_VERIFIED_CHART") return finish(fallback("SIZE_RULE_UNAVAILABLE"));
       if (results.length !== output.calls.length || bytes(results) > 8192) return finish(fallback("TOOL_RESULT_BOUND"));
       contents.push(structuredClone(output.content), { role: "user", parts: results.map((result, i) => ({
         functionResponse: { name: output.calls[i]!.name, response: result,

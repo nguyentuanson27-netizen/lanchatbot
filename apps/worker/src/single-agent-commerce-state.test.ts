@@ -314,3 +314,10 @@ describe("accepted effective state before dependent tools", () => {
     }
   });
 });
+
+ it("terminates no-chart after the last tool round without generating a fit draft",async()=>{
+ const s=await setup();s.sizeInput.mockResolvedValue({...fixtureSizeInput(),charts:[]});let calls=0;
+ const r=await runCommerceTurn({scope:commerceScope(),tools:s.tools,latest:"Tư vấn size chị nhé",history:[],clock:()=>commerceNow,
+ ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner:async()=>{calls++;const c={name:calls===1?"read_product":"recommend_size",args:{subjectRef:"QU714"}};return {kind:"TOOLS",calls:[c],content:{role:"model",parts:[{functionCall:c}]}};},verifier:async()=>{throw Error("NO_DRAFT_EXPECTED");}});
+ expect(calls).toBe(2);expect(r.verifierGenerations).toBe(0);expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"SIZE_RULE_UNAVAILABLE",fallbackId:"C3_A_NONPROTECTED_V2"});
+ });

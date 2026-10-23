@@ -45,6 +45,7 @@ export function createCommerceHandoffTools(input: {
 }): CommerceTools {
   let committed: { next: HandoffAuthority; decision: HandoffDecisionV2; policyHash: string } | undefined;
   let uncertain = false;
+  let dependencyRecoveryAttempted = false;
   let authority: HandoffAuthority | undefined;
   let turnFence: number | undefined;
   const read = async () => { authority = await input.read(); turnFence ??= authority.fence; return authority; };
@@ -117,6 +118,18 @@ export function createCommerceHandoffTools(input: {
   }, async recover(outcome) {
     if (outcome.disposition === "NO_SEND") return outcome;
     const actual = await terminalOutcome(); if (actual) return actual;
+    if (outcome.reason === "SIZE_RULE_UNAVAILABLE") {
+      if (dependencyRecoveryAttempted) return outcome;
+      dependencyRecoveryAttempted = true;
+      try {
+        const result = await request("SIZE_RULE_UNAVAILABLE");
+        if (result.status === "OK" || uncertain || committed) return await terminalOutcome() ?? outcome;
+        return await terminalOutcome() ?? outcome;
+      } catch {
+        try { return await terminalOutcome() ?? outcome; }
+        catch { return {disposition:"NO_SEND",reason:"HANDOFF_AUTHORITY_UNAVAILABLE",text:null,fallbackId:null}; }
+      }
+    }
     const recovered = await input.base.recover?.(outcome) ?? outcome;
     if (recovered.disposition !== "HANDOFF") return recovered;
     try { await request("DEPENDENCY_FAILURE"); return await terminalOutcome() ?? recovered; }

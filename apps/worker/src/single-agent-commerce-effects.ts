@@ -311,7 +311,7 @@ export async function createCommerceEffectTools(input: {
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot, terminalOutcome, async invokeBatch(calls) {
+  return { invoke, snapshot, ...(input.base.sizeOutcome ? {sizeOutcome: input.base.sizeOutcome} : {}), terminalOutcome, async invokeBatch(calls) {
     const independent = calls.filter(c => !names.has(c.name) && c.name !== "quote_cart");
     const results = new Map<CommerceToolCall, CommerceToolResult>();
     const readResults = await input.base.invokeBatch(independent); independent.forEach((c, i) => results.set(c, readResults[i]!));

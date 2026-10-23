@@ -471,3 +471,12 @@ describe("persisted ingress source and final revision", () => {
     expect(f.commit.mock.calls[0]![1].metaPlan!.effectReadiness!.binding.conversationRevision).toBe(1);
   });
 });
+
+it("reports exact binding mismatch without sending when egress readback changes",async()=>{
+ const f=fixture();const create=composition.createCommerceTools;
+ vi.spyOn(composition,"createCommerceTools").mockImplementation(async input=>{
+  const tools=await create(input);let reads=0;return {...tools,async readback(){const world=await tools.readback();if(++reads===2)world.state.factSnapshotVersion="changed-at-egress";return world;}};
+ });
+ const result=await f.run();expect(result).toMatchObject({terminal:{disposition:"NO_SEND",reason:"EGRESS_WORLD_CHANGED"},egressDiagnostic:{kind:"TRUSTED_SNAPSHOT",changedBindingFields:expect.arrayContaining(["trustedSnapshotId","factSnapshotVersion"])}});
+ expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});

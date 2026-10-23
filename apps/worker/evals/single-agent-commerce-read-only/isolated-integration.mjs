@@ -404,6 +404,17 @@ try{
   const replay=await j.turn('Em ơi',[]);assert.equal(replay.owners,0);assert.equal(replay.verifiers,0);assert.equal(replay.result.enqueued,0);
   await j.drain();assert.deepEqual(j.capture,[holding]);
  });
+ await check('B no-chart after two rounds recovers through one real atomic handoff without draft or images',async()=>{
+  const j=await statefulFixture({media:true});
+  const r=await j.turn('Chọn size và gửi ảnh chị nhé',[
+   native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
+   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}])]);
+  assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
+  assert.equal(r.result.terminal.reason,'SIZE_RULE_UNAVAILABLE');await j.drain();
+  assert(!j.capture.includes('[CODE_IMAGE]'));
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+ });
  await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
   const j=await statefulFixture();
   await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
