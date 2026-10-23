@@ -43,6 +43,13 @@ const side = image("https://cdn.example/side.jpg", { angle: "SIDE", sortOrder: 4
 const back = image("https://cdn.example/back.jpg", { angle: "BACK", sortOrder: 5 });
 
 describe("báo giá", () => {
+  it.each(["SIDE", "BACK"] as const)("ưu tiên góc khác khi ảnh chính là %s", angle => {
+    const primary=image("https://cdn.example/primary.jpg",{role:"PRIMARY",angle});
+    const duplicate=image("https://cdn.example/same-angle.jpg",{angle,sortOrder:1});
+    const complement=image("https://cdn.example/complement.jpg",{angle:angle==="SIDE"?"BACK":"FRONT",sortOrder:2});
+    expect(selectPriceCardImages(product([primary,duplicate,complement])).images.map(i=>i.url)).toEqual([primary.url,complement.url]);
+    expect(selectPriceCardImages(product([primary,duplicate])).images.map(i=>i.url)).toEqual([primary.url,duplicate.url]);
+  });
   it("gửi đúng ảnh chính rồi ảnh nghiêng", () => {
     const selection = selectPriceCardImages(product([back, side, main]));
     expect(selection.images.map((item) => item.url)).toEqual([main.url, side.url]);

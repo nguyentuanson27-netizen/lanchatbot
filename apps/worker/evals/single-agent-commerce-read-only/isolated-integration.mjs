@@ -23,6 +23,7 @@ import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
+import {publicCapturedAttachments} from './delivery-capture.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
@@ -552,6 +553,7 @@ try{
    providerPorts.setSlot(c.caseId);const beforeCounts={...providerPorts.counters};
    const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true,initialProductCodes:c.runtime.initialProductCodes});journeys.set(c.journeyId,j);}
    const capturedBefore=j.capture.length;
+   const attachmentsBefore=j.capturePayloads.length;
    const latest=c.runtime.privateCheckoutFixture?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':c.runtime.latest;
    let attempt;
    try{
@@ -565,6 +567,8 @@ try{
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
    const result={caseId:c.caseId,journeyId:c.journeyId,elapsedMs:performance.now()-started,...attempt,
     actualCapturedMessages:j.capture.slice(capturedBefore).map(t=>redactAnalyticsMessage(t).text),
+    ...(providerFreeze.registration.selection.mode==='FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS'
+      ?{actualCapturedAttachments:publicCapturedAttachments(j.capturePayloads,attachmentsBefore)}:{}),
     committedPublicState:{stage:stored.state.stage,revision:stored.state.revision,cart:stored.state.cart?.value??null,measurements:profile.profile.measurements,customerProfileRevision:profile.profile.revision,
      negotiation:stored.state.negotiation?{tier:stored.state.negotiation.customerState,version:stored.state.negotiation.stateVersion,objectionEvidenceCount:stored.state.negotiation.consumedObjectionEvidenceIds.length}:null},
     counts:{...providerPorts.counters}};
