@@ -5,6 +5,7 @@ import {pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import assert from 'node:assert/strict';
+import {ASSUMPTION,assumedFeedback} from './assumed-feedback.mjs';
 import {validateProtocol,createCommerceVerifier,buildVerifierRequest,sha256} from './protocol.mjs';
 const base=resolve('apps/worker/evals/single-agent-commerce-read-only');
 const {createCommerceMediaTools}=await import(pathToFileURL(resolve('apps/worker/dist/single-agent-commerce-media.js')));
@@ -45,7 +46,7 @@ let controlsPass=true;
 for(const [index,row] of definitions.entries()){
  const trusted=structuredClone(capture.trusted);
  const tools=createCommerceMediaTools({base:{snapshot:()=>structuredClone(trusted),readback:async()=>structuredClone(trusted)},
-  catalog:{readProduct:async()=>{if(row.kind==='ERROR')throw Error('DIAGNOSTIC_READ_FAULT');const copy=structuredClone(product);if(row.kind==='FEEDBACK_TRUE'){const image=copy.images.find(i=>i.reviewStatus==='APPROVED'&&i.metadataVerified);assert(image);image.feedback=true;}return {product:copy};}},clock:()=>now,allowedHostSuffixes:['content.pancake.vn']});
+  catalog:{readProduct:async()=>{if(row.kind==='ERROR')throw Error('DIAGNOSTIC_READ_FAULT');const copy=structuredClone(product);if(row.kind==='FEEDBACK_TRUE'){const assumed=assumedFeedback(copy);const asset=assumed.images.find(i=>i.url===ASSUMPTION.url);assert(asset?.imageType==='MODEL','FEEDBACK_FIXTURE_TYPE');return {product:assumed};}return {product:copy};}},clock:()=>now,allowedHostSuffixes:['content.pancake.vn']});
  const args={subjectRef:product.productId,intent:row.kind==='COLOR'||row.kind==='MODEL'?'GENERIC':row.kind==='TOP'||row.kind==='COMPONENT_MISSING'?'DETAIL':'FEEDBACK',...(row.kind==='COLOR'?{color:'be'}:row.kind==='TOP'?{componentRole:'TOP'}:row.kind==='COMPONENT_MISSING'?{componentRole:'SKIRT'}:{})};
  const toolResult=await tools.invoke({name:'select_product_media',args});assert.equal(toolResult.status,['FEEDBACK_TRUE','MODEL','TOP'].includes(row.kind)?'OK':'UNAVAILABLE');
  const context=tools.snapshot(),id=randomUUID(),binding=makeBinding(id,row.draft,context);
