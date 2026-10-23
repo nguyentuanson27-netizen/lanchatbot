@@ -58,6 +58,8 @@ export interface PostEffectRecoveryCompatibility { receiptRef: string; effectRep
 const FALLBACK_ID = "C3_A_NONPROTECTED_V1";
 const FALLBACK_TEXT = "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.";
 const FALLBACK_V2_ID = "C3_A_NONPROTECTED_V2";
+const MEDIA_FALLBACK_ID = "C3_B_MEDIA_NEXT_STEP_V1";
+const MEDIA_FALLBACK_TEXT = "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?";
 const FALLBACK_V2_TEXT = "Phần này em chưa trả lời được, chị nhé.";
 const hash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "CONTRADICTION_OR_NEGATION",
@@ -66,8 +68,8 @@ const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "C
 const terminal = (disposition: TerminalOutcome["disposition"], reason: string): TerminalOutcome =>
   ({ disposition, reason, text: null, fallbackId: null });
 
-export function terminalFallback(id = FALLBACK_ID, text = id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
-  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT)
+export function terminalFallback(id = FALLBACK_ID, text = id === MEDIA_FALLBACK_ID ? MEDIA_FALLBACK_TEXT : id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
+  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT) || (id === MEDIA_FALLBACK_ID && text === MEDIA_FALLBACK_TEXT)
     ? { disposition: "FALLBACK", reason: "FAIL", text, fallbackId: id }
     : terminal("NO_SEND", "UNVERIFIED_FALLBACK");
 }

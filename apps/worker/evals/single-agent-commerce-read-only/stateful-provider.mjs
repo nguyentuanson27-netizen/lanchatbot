@@ -9,6 +9,7 @@ import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-o
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,stateDeclarations,effectDeclarations,handoffDeclarations,mediaDeclarations,OWNER_IMAGE_BOUNDS} from './gemini-inference.mjs';
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {ASSUMPTION,assumedFeedback} from './assumed-feedback.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
 import {registerJourneyOpenings,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe} from './sales-journeys-registration.mjs';
 
@@ -20,6 +21,8 @@ export function statefulPreflight(root){
  const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)))),configBytes=readFileSync(new URL('./source-config.b1.json',import.meta.url)),config=JSON.parse(configBytes);
  assert.deepEqual(requiredSourceConfig(config),[],'SOURCE_CONFIG_UNAVAILABLE');
  const journeyOpenings=process.argv.includes('--journey-openings'),negotiationProbe=process.argv.includes('--negotiation-probe'),mediaProbe=process.argv.includes('--media-probe');
+ const assumeFeedback=process.argv.includes('--assume-feedback');
+ assert(!assumeFeedback||mediaProbe,'ASSUMED_FEEDBACK_MEDIA_ONLY');
  assert([journeyOpenings,negotiationProbe,mediaProbe].filter(Boolean).length<=1,'ONE_SELECTED_COHORT');
  const casesBytes=readFileSync(new URL(mediaProbe?'./sales-media-cases.json':journeyOpenings||negotiationProbe?'./sales-journeys.candidate.json':'./stateful-cases.json',import.meta.url));
  const selection=journeyOpenings?registerJourneyOpenings(JSON.parse(casesBytes),['J02','J03','J05','J08']):null;
@@ -32,7 +35,9 @@ export function statefulPreflight(root){
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
-  catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
+  assumedFeedback:assumeFeedback?{...ASSUMPTION,sourceHash:sha256(readFileSync(new URL('./assumed-feedback.mjs',import.meta.url)))}:null,
+  fallbackCatalog:{default:m.fallback,mediaUnavailable:{id:'C3_B_MEDIA_NEXT_STEP_V1',text:'Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?',sha256:sha256('Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?')}},
+  catalogInputMode:assumeFeedback?'LIVE_PUBLIC_WITH_ISOLATED_ASSUMED_FEEDBACK':config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
   candidateHandoffFileHash:process.argv.includes('--candidate-handoff')?sha256(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))):null,
   catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,maxSourceBytes:2097152,maxSourceDimension:12000,maxSourcePixels:50000000,
    sourceHashRequired:true,hashContract:'APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256',resize:'EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG'},
@@ -58,7 +63,7 @@ export async function createStatefulProvider(input){
  facts.readCatalogSnapshot=async(...args)=>{counters.posReads++;return rawRead(...args);};
  facts.resolveCartSelection=async(...args)=>{counters.selectorCalls++;return rawSelect(...args);};
  const sourceSearch=new ProductSearchService(sourceCatalog,config.searchThresholds);
- const catalog={findByExactCode:async code=>{counters.catalogReads++;return candidateDescription(await sourceCatalog.findByExactCode(code),config.candidateDescriptions);}};
+ const catalog={findByExactCode:async code=>{counters.catalogReads++;const product=candidateDescription(await sourceCatalog.findByExactCode(code),config.candidateDescriptions);return registration.assumedFeedback?assumedFeedback(product):product;}};
  const search={searchText:async query=>candidateSearchResult(await sourceSearch.searchText(query),config.candidateDescriptions)};
  const infer=createGeminiCommerceInference({model:m.models.conversation.model,effort:'high',location:'global',projectId:config.vertex.projectId});
  const verify=createCommerceVerifier(m,undefined,(id,v)=>audit(id,v.phase,v.provider));

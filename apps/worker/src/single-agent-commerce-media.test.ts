@@ -201,3 +201,11 @@ describe("media observation final gate",()=>{
     expect(result.terminal.disposition).not.toBe("SEND_ELIGIBLE");
   });
 });
+
+it("uses an actionable static media question after a rejected media reply",async()=>{
+ const s=await setup();await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Có ảnh khách mặc không em?",history:[],clock:()=>commerceNow,
+ ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Shop không có ảnh."}),
+ verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
+ expect(r.terminal).toMatchObject({disposition:"FALLBACK",fallbackId:"C3_B_MEDIA_NEXT_STEP_V1",text:"Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"});
+});

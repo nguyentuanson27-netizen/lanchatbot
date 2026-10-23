@@ -226,3 +226,10 @@ describe("isolated deterministic verifier boundary", () => {
     expect(compatibility.effectReplayAllowed).toBe(false);
   });
 });
+
+it("accepts exact media next-step fallback without accepting protected additions",()=>{
+ expect(terminalFallback("C3_B_MEDIA_NEXT_STEP_V1").disposition).toBe("FALLBACK");
+ expect(terminalFallback("C3_B_MEDIA_NEXT_STEP_V1","Em đã gửi ảnh khách mặc cho chị.").disposition).toBe("NO_SEND");
+ const fallback={id:"C3_B_MEDIA_NEXT_STEP_V1",text:terminalFallback("C3_B_MEDIA_NEXT_STEP_V1").text!};
+ expect(finalGate({expected:binding,current:{...trusted,state:{...trusted.state,recipient:"changed"}},response:pass(),finalDraft:draft,now,fallback}).disposition).toBe("NO_SEND");
+});

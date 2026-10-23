@@ -17,6 +17,8 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  /** Code-owned exact static fallback identity after a tool outcome. */
+  fallbackId?(): string;
   catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
   prepare?(): Promise<number>;
@@ -30,7 +32,7 @@ export interface CommerceTools {
   terminalOutcome?(): Promise<TerminalOutcome | null>;
 }
 const bytes = (v: unknown) => Buffer.byteLength(typeof v === "string" ? v : JSON.stringify(v));
-const fallback = (reason: string): TerminalOutcome => ({ ...terminalFallback("C3_A_NONPROTECTED_V2"), reason });
+
 
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
 export async function runCommerceTurn(input: {
@@ -40,6 +42,9 @@ export async function runCommerceTurn(input: {
   owner: (request: OwnerRequest) => Promise<OwnerGeneration>;
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
 }) {
+  const selectedFallback = () => terminalFallback(input.tools.fallbackId?.() ?? "C3_A_NONPROTECTED_V2");
+  const fallback = (reason:string):TerminalOutcome => ({...selectedFallback(),reason});
+  const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
   let toolLatencyMs = 0, verificationStarted: number | undefined;
@@ -134,7 +139,7 @@ export async function runCommerceTurn(input: {
     const trusted = input.tools.snapshot(), binding = makeBinding(input.scope.requestId, output.text, trusted);
     const problem = hardPrecheck(trusted, output.text, input.clock());
     if (problem) return finish(finalGate({ expected: binding, response: { kind: "PROVIDER_ERROR" }, current: trusted,
-      finalDraft: output.text, now: input.clock(), includeDiagnostic: true, fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }));
+      finalDraft: output.text, now: input.clock(), includeDiagnostic: true, fallback: gateFallback() }));
     const verifyId = `${input.scope.requestId}:verifier:1`;
     verificationStarted = performance.now();
     verifierGenerations++;
@@ -149,7 +154,7 @@ export async function runCommerceTurn(input: {
     try { current = await input.tools.readback(); }
     catch { return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
     const terminal = finalGate({ expected: binding, response, current, finalDraft: output.text, now: input.clock(), includeDiagnostic: true,
-      fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } });
+      fallback: gateFallback() });
     return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}) };
   }
   return finish(fallback("BUDGET"));

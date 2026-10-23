@@ -143,7 +143,8 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,assets:assets.map(({assetRef,angle,imageType,partsVisible})=>({assetRef,angle,imageType,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
     }catch(error){return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
-  return {...input.base,mediaSelection,catalogImages,snapshot:()=>overlay(input.base.snapshot()),
+  return {...input.base,mediaSelection,catalogImages,
+    fallbackId:()=>observations.size>0?"C3_B_MEDIA_NEXT_STEP_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),
     async invokeBatch(calls){
       const other=calls.filter(c=>!mediaTool(c.name)),results=await input.base.invokeBatch(other);
