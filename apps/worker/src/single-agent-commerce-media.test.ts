@@ -5,16 +5,17 @@ import {commerceNow,commerceScope,fixtureProduct,fixturePolicy} from "./single-a
 import type {ProductImage} from "@lana/business-tools";
 import {createHash} from "node:crypto";
 
-const setup = async () => {
+const setup = async (clock:()=>Date=()=>commerceNow) => {
   const f=fixtureProduct(),scope=commerceScope();
   const image:ProductImage={url:"https://content.pancake.vn/product-back.jpg",role:"PRIMARY",angle:"BACK",imageType:"PRODUCT_ONLY",intents:[],sortOrder:0,qualityScore:null,feedback:false,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]};
   f.product.images=[image];f.product.imageUrls=[image.url];
-  const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],
-    catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
+  const readProduct=vi.fn(async()=>structuredClone(f));
+  const tools=await createCommerceTools({read:{scope,clock,policy:fixturePolicy,initialProducts:[f.product],
+    catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
     media:{allowedHostSuffixes:["content.pancake.vn"]}});
   const call={name:"select_product_media",args:{subjectRef:f.product.productId,intent:"BACK"}};
-  return {f,scope,tools,call,image};
+  return {f,scope,tools,call,image,readProduct};
 };
 describe("candidate product media",()=>{
   it("pairs the overview with a complementary approved angle instead of a second front image",async()=>{
@@ -134,6 +135,69 @@ describe("candidate product media",()=>{
       ownerPrompt:"Tư vấn.",verifierPrompt:"Kiểm nghĩa.",owner:async()=>({kind:"FINAL",text:"Ảnh mặt sau đây chị nhé."}),
       verifier:async()=>{s.f.product.images[0]!.url="https://content.pancake.vn/replaced.jpg";return {result:{verdict:"PASS",violations:[]}};}});
     expect(result.verifierGenerations).toBe(1);
+    expect(result.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+  });
+});
+
+describe("media lookup observations",()=>{
+  it("binds no-match evidence and rejects a later feedback asset",async()=>{
+    const s=await setup();
+    await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
+    const before=s.tools.snapshot();
+    expect(before.policyLiterals.some(p=>p.ref.startsWith("media-lookup:"))).toBe(true);
+    expect(JSON.stringify(before)).toContain("NO_VERIFIED_MATCHING_MEDIA");
+    expect(await s.tools.readback()).toEqual(before);
+    s.f.product.images[0]!.feedback=true;
+    await expect(s.tools.readback()).rejects.toThrow("MEDIA_LOOKUP_SOURCE_CHANGED");
+  });
+  it("binds color uncertainty to the inspected source",async()=>{
+    const s=await setup();s.f.product.colors=["navy","be"];
+    await s.tools.invoke({...s.call,args:{...s.call.args,color:"be"}});
+    expect(JSON.stringify(s.tools.snapshot())).toContain("MEDIA_COLOR_BINDING_UNVERIFIED");
+    s.f.product.colors=["be"];
+    await expect(s.tools.readback()).rejects.toThrow("MEDIA_LOOKUP_SOURCE_CHANGED");
+  });
+  it("keeps selected images when view decoding fails and exposes only operation evidence",async()=>{
+    const fetch=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(new Uint8Array([1,2,3])));
+    try{
+      const s=await setup();await s.tools.invoke(s.call);
+      await s.tools.invoke({...s.call,name:"view_product_media"});
+      expect(s.tools.mediaSelection!()).toHaveLength(1);
+      const text=JSON.stringify(s.tools.snapshot());
+      expect(text).toContain("IMAGE_FETCH_OR_PREPARE");
+      expect(text).toContain("OPERATION_EVENT_ONLY");
+      expect(text).not.toContain("MEDIA_DIMENSION_BOUND");
+      await s.tools.readback();expect(fetch).toHaveBeenCalledTimes(1);
+      const t=await setup();expect(JSON.stringify(t.tools.snapshot())).not.toContain("media-lookup:");
+    }finally{fetch.mockRestore();}
+  });
+});
+
+describe("media observation final gate",()=>{
+  it("keeps timestamps fixed and expires without renewing the observation",async()=>{
+    let now=commerceNow;const s=await setup(()=>now);
+    await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
+    const before=s.tools.snapshot();now=new Date(now.getTime()+1000);
+    expect(await s.tools.readback()).toEqual(before);
+    now=new Date(before.policyLiterals.find(p=>p.ref.startsWith("media-lookup:"))!.expiresAt!);
+    await expect(s.tools.readback()).rejects.toThrow("MEDIA_LOOKUP_EXPIRED");
+  });
+  it("records a catalog error as an operation event without retrying or leaking its error",async()=>{
+    const s=await setup();s.readProduct.mockRejectedValue(new Error("SECRET_RAW_ERROR"));
+    await s.tools.invoke(s.call);const before=s.tools.snapshot();
+    expect(JSON.stringify(before)).toContain("OPERATION_EVENT_ONLY");
+    expect(JSON.stringify(before)).not.toContain("SECRET_RAW_ERROR");
+    const calls=s.readProduct.mock.calls.length;
+    expect(await s.tools.readback()).toEqual(before);
+    expect(s.readProduct).toHaveBeenCalledTimes(calls);
+  });
+  it("passes identical scoped evidence to both models and blocks a changed source after PASS",async()=>{
+    const s=await setup();await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
+    const contexts:unknown[]=[];
+    const result=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Có ảnh khách mặc không em?",history:[],clock:()=>commerceNow,
+      ownerPrompt:"Tư vấn.",verifierPrompt:"Kiểm nghĩa.",owner:async r=>{contexts.push(r.context);return {kind:"FINAL",text:"Ảnh khách mặc mẫu này em chưa có để gửi chị."};},
+      verifier:async r=>{contexts.push(r.trusted);s.f.product.images[0]!.feedback=true;return {result:{verdict:"PASS",violations:[]}};}});
+    expect(contexts).toHaveLength(2);expect(contexts[0]).toEqual(contexts[1]);
     expect(result.terminal.disposition).not.toBe("SEND_ELIGIBLE");
   });
 });
