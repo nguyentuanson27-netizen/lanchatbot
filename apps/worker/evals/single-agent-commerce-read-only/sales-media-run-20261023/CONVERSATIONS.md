@@ -68,7 +68,7 @@ Terminal: **SEND_ELIGIBLE / PASS**
 
 Actual capture:
 ```text
-Dạ, nếu chị lo phần chân váy ren nhìn hơi nhiều cho tiệc cưới buổi trưa, mình có thể chọn mua riêng chiếc áo tơ Hàn thêu (giá 499.000đ) để phối với chân váy trơn hoặc quần sẵn có nha chị. Áo có thiết kế form nhẹ, chất tơ mềm thoáng và độ bay tự nhiên, mặc đi tiệc ban ngày rất nhã nhặn và sang trọng ạ. 
+Dạ, nếu chị lo phần chân váy ren nhìn hơi nhiều cho tiệc cưới buổi trưa, mình có thể chọn mua riêng chiếc áo tơ Hàn thêu (giá 499.000đ) để phối với chân váy trơn hoặc quần sẵn có nha chị. Áo có thiết kế form nhẹ, chất tơ mềm thoáng và độ bay tự nhiên, mặc đi tiệc ban ngày rất nhã nhặn và sang trọng ạ.
 
 Còn nếu chị muốn mặc nguyên set (799.000đ), chất ren của chân váy là ren tơ Hàn mềm với độ rũ tự nhiên nên trông rất mềm mại, thanh thoát chứ không bị cứng hay quá lộng lẫy đâu ạ.
 [CODE_IMAGE]
@@ -89,7 +89,7 @@ Terminal: **SEND_ELIGIBLE / PASS**
 
 Exact diagnostic terminal (không live send eligibility):
 ```text
-Dạ, nguyên set váy Thạch Thảo có giá 799.000đ nên rất vừa vặn với ngân sách 900.000đ của chị ạ. 
+Dạ, nguyên set váy Thạch Thảo có giá 799.000đ nên rất vừa vặn với ngân sách 900.000đ của chị ạ.
 
 Chân váy dùng chất liệu ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu họa tiết nổi có độ bay bổng vừa phải, mang lại nét thanh thoát và nhã nhặn nên mặc đi tiệc ban ngày rất sang trọng, không bị rườm rà đâu chị nhé.
 ```
@@ -179,7 +179,7 @@ Terminal: **SEND_ELIGIBLE / PASS**
 
 Exact diagnostic terminal (không live send eligibility):
 ```text
-Đi ăn cưới ban ngày thì Set Thạch Thảo rất hợp lý vì chất tơ Hàn và ren mềm có độ rũ và bay tự nhiên, mang lại nét thanh lịch, nhã nhặn mà không bị nặng nề. 
+Đi ăn cưới ban ngày thì Set Thạch Thảo rất hợp lý vì chất tơ Hàn và ren mềm có độ rũ và bay tự nhiên, mang lại nét thanh lịch, nhã nhặn mà không bị nặng nề.
 
 Set này có điểm nhấn là họa tiết thêu nổi trên áo và chân váy ren nhưng form dáng nhẹ nhàng, không phồng cứng hay rườm rà. Vì chị quen mặc đồ trơn, chi tiết thêu và ren tinh tế này sẽ giúp tổng thể tươi tắn, mềm mại hơn cho tiệc cưới mà vẫn giữ được sự sang trọng, không bị quá điệu đà đâu ạ. Chị hoàn toàn có thể yên tâm chọn bộ này nhé!
 ```
@@ -198,7 +198,7 @@ Terminal: **SEND_ELIGIBLE / PASS**
 
 Exact diagnostic terminal (không live send eligibility):
 ```text
-Đi ăn cưới ban ngày thì diện nguyên set này rất hợp lý chị ạ, chất tơ và ren mềm có độ rũ tự nhiên nên lên form rất nhã nhặn, không bị điệu quá đà đâu ạ. 
+Đi ăn cưới ban ngày thì diện nguyên set này rất hợp lý chị ạ, chất tơ và ren mềm có độ rũ tự nhiên nên lên form rất nhã nhặn, không bị điệu quá đà đâu ạ.
 
 Còn nếu chị vẫn quen mặc đồ trơn và sợ nguyên cây hơi nhiều chi tiết, mình có thể chọn riêng áo thêu (499.000đ) để phối cùng chân váy hoặc quần trơn sẵn có ở nhà, vừa giữ được nét đơn giản quen thuộc vừa đủ điểm nhấn thanh lịch để đi tiệc.
 ```
@@ -222,7 +222,7 @@ Terminal: **SEND_ELIGIBLE / PASS**
 
 Exact diagnostic terminal (không live send eligibility):
 ```text
-Chị lấy cả bộ Thạch Thảo (799.000đ) là hợp nhất ạ, vừa vặn trong ngân sách 850 nghìn của mình. 
+Chị lấy cả bộ Thạch Thảo (799.000đ) là hợp nhất ạ, vừa vặn trong ngân sách 850 nghìn của mình.
 
 Mua cả bộ sẽ giúp chị linh hoạt hơn: ngoài việc diện nguyên set ren tơ đồng bộ, chị có thể tách áo thêu phối cùng chân váy đen dáng suông sẵn có để thay đổi phong cách đi làm hay đi chơi, đúng tiêu chí mặc lại nhiều lần.
 ```
@@ -246,7 +246,7 @@ Terminal: **SEND_ELIGIBLE / PASS**
 
 Exact diagnostic terminal (không live send eligibility):
 ```text
-Chị lấy cả bộ (799 nghìn) nha chị, vừa vặn trong ngân sách 850 nghìn của mình ạ. 
+Chị lấy cả bộ (799 nghìn) nha chị, vừa vặn trong ngân sách 850 nghìn của mình ạ.
 
 Mua cả bộ sẽ giúp chị linh hoạt mặc lại nhiều lần với nhiều cách phối hơn: vừa có set áo thêu và chân váy ren đồng bộ diện đi làm hay đi tiệc, lại vừa có thể tách chiếc áo tơ thêu ra phối cùng chân váy đen sẵn có ở nhà của chị.
 ```
@@ -259,4 +259,3 @@ Review: **USABLE**; giọng **POLISH**. Cũng chọn cảbộ799k và lợi ích
 ```text
 Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!
 ```
-

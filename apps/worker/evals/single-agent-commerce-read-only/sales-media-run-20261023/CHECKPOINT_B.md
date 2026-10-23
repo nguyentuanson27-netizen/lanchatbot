@@ -6,7 +6,7 @@
 
 - `selectPriceCardImages` ưu tiên góc đã biết khác ảnh chính trước, sau đó giữ thứ tự/fallback cũ nếu không có góc bổ sung. Thêm regressions main SIDE/main BACK, không suy góc từ pixel. Approval/host/freshness/part filtering của commerce media vẫn chạy trước helper; legacy URL fallback vẫn bị tắt trong seam này.
 - Provider media loop lưu attachment thực capture theo attempt: type, exact public URL, sequence. Dùng capturePayloads sẵn có, ghi riêng media cohort; không ghi recipient/token hoặc lẫn ảnh lượt trước. Helper eval11dòng, không delivery/gate/state mới. Tests giữ hai URL khác nhau và ranh giới lượt.
-- Hai lỗi đều observed RED trước GREEN. Không sửa thêm prompt/verifier sau khi thấy provider outcome. Source commit sạch trước freeze, HEAD và executable/config giữ nguyên suốt dispatch. Raw bytes giữ bằng evidence-local `* -text`; không thay config chạy model.
+- Hai lỗi đều observed RED trước GREEN. Không sửa thêm prompt/verifier sau khi thấy provider outcome. Source commit sạch trước freeze, HEAD và executable/config giữ nguyên suốt dispatch. Raw provider bytes giữ bằng evidence-local `* -text` và CR-at-EOL whitespace handling. Rendered CONVERSATIONS bỏ trailing spaces cuối dòng để đọc; exact finalDraft/terminal text vẫn nguyên trong raw JSON; không thay config chạy model.
 
 ## Population và kết quả
 

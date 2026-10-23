@@ -38,5 +38,5 @@ lines+=['# Draft feedback bị chặn — không phải lời đã giao','']
 events=[json.loads(l) for l in (root/'media/provider-requests.jsonl').read_text().splitlines()]
 for e in events:
  if e.get('caseId')=='media-feedback' and e['phase']=='OWNER_RESULT' and e['value'].get('kind')=='FINAL':lines+=['```text',e['value']['text'],'```','']
-(root/'CONVERSATIONS.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+(root/'CONVERSATIONS.md').write_text('\n'.join(line.rstrip() for line in lines)+'\n',encoding='utf-8')
 print('Reviewed12 outcomes,4pairs; candidate not promoted.')

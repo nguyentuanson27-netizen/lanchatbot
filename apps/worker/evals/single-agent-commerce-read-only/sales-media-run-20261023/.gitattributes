@@ -1,1 +1,2 @@
-* -text
+* -text whitespace=cr-at-eol
+worker-tests.txt whitespace=cr-at-eol,-blank-at-eof
