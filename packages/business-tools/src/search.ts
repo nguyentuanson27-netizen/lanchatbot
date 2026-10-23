@@ -57,7 +57,8 @@ const ScoredStableProductSchema = z
   .object({ document: StableProductDocumentSchema, score: z.number().min(0).max(1) })
   .strict();
 
-function validateDocument(value: StableProductDocument): StableProductDocument {
+/** Canonical catalog boundary, also used by isolated replay capture. */
+export function validateStableProductDocument(value: unknown): StableProductDocument {
   return StableProductDocumentSchema.parse(value);
 }
 
@@ -84,14 +85,14 @@ export class ProductSearchService {
     if (codeLike) {
       const exact = await this.port.findByExactCode(normalized);
       if (exact !== null) {
-        return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateDocument(exact), score: 1, gap: null };
+        return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateStableProductDocument(exact), score: 1, gap: null };
       }
     }
 
     // Historical aliases also contain broad search keywords. For a non-code
     // query, only the full source title identifies a product without narrowing
     // an ordinary shopping need to one keyword-tagged item.
-    const aliases = (await this.port.findByAlias(normalized)).map(validateDocument)
+    const aliases = (await this.port.findByAlias(normalized)).map(validateStableProductDocument)
       .filter(document => codeLike || normalizeProductCode(document.title) === normalized);
     if (aliases.length === 1 && aliases[0] !== undefined) {
       return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
