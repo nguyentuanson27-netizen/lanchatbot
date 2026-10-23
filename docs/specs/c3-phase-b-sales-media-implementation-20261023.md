@@ -11,7 +11,7 @@ Ngày 23/10/2026. Base `88589b180379eea5c5d0efbf2c06feed903909b2`. **MEDIA_IMPLE
 5. `sales-media-cases.json`: bốn lời khách độc lập về cận thêu, feedback, mặt sau, phân vân về ren. `isolated-integration.mjs --provider-run --media-probe` dùng cohort mới qua stateful provider/ingress hiện hữu; N1, tối đa16requests. Các cohort flag loại trừ nhau, runtime projection bỏ evaluator. B1 không bị cấp thêm media hoặc đổi population.
 6. Một advice candidate riêng thay đúng hai bullet tư vấn, tập trung vào điều cản khách mua và điểm quyết định; không thêm câu mẫu của bộ kiểm. Active owner prompt giữ baseline. Candidate14.413bytes so baseline14.248 (+165bytes); authority/policy/giọng/giao dịch không đổi. Tám paired inputs chuẩn bị bằng override có sẵn trong advice runner, thứ tự hai arm đảo theo index đã freeze; mỗi cặp cùng context/clock, toolsOFF. Không promote khi chưa có kết quả.
 
-Evidence chuẩn bị: [thư mục](../../apps/worker/evals/single-agent-commerce-read-only/sales-media-preparation-20261023/), gồm candidate/hash, SOURCE_AUDIT, advice-paired-inputs và PAIRED_REQUEST_CHECK, WIRE_SIZE_CHECK, worker-tests.log.
+Evidence chuẩn bị: [thư mục](../../apps/worker/evals/single-agent-commerce-read-only/sales-media-preparation-20261023/), gồm candidate/hash, SOURCE_AUDIT, advice-paired-inputs và PAIRED_REQUEST_CHECK, WIRE_SIZE_CHECK, worker-tests.txt.
 
 ## Audit và điều chưa được chứng minh
 
@@ -34,7 +34,7 @@ Deadline và quote-order vẫn theo plan cũ: chưa đổi verifier/ETA semantic
 | `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-media.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts` | PASS122 tests/4 matching files. Hai tên protected/reply không có trong worker; kiểm đúng package ở dòng dưới |
 | `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/image-selection.test.ts` | PASS41/3files |
 | `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/advice-diagnostic.test.mjs apps/worker/evals/single-agent-commerce-read-only/sales-journeys-registration.test.mjs` | PASS84,0skip |
-| `pnpm --filter @lana/worker exec vitest run src` (redirect worker-tests.log) | PASS1959/133files |
+| `pnpm --filter @lana/worker exec vitest run src` (redirect worker-tests.txt) | PASS1959/133files |
 | `pnpm --filter @lana/worker build` | PASS, gồm dependency builds |
 | `pnpm --filter @lana/worker typecheck` | PASS |
 | `pnpm --filter @lana/worker lint` | PASS |
