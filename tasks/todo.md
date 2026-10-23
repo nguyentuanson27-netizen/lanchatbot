@@ -1,3 +1,16 @@
+## Sửa hai P2 và chạy12outcomes sales/media — 2026-10-23
+
+[Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/sales-media-run-20261023/CHECKPOINT_B.md). Source6cd998c0, B chưa GO.
+
+- [x] Khác góc mainSIDE/mainBACK trước fallback: RED2→GREEN22, shared359PASS.
+- [x] Persist exact public attachment URL/type/order theoattempt từ existing capture; test2URL/khônglẫnlượt/khôngrecipient-token RED→GREEN.
+- [x] Worker1959/fullsrc, Node85, sharedtypecheck/workerbuild/workerlint, syntax/diffPASS.
+- [x] Live public media audit, source seal/clean/preflight rồi4media+8pairedadvice N1; đủ12outcomes,29generationrequests,0retry/error/timeout/labelleak,DBdropped.
+- [x] Review actual12 và ảnh thực giao; tách giọng. Không promote advicecandidate vì chưa hơn rõ và có regression.
+- [ ] Feedback unavailable evidence cần được truyền đúng scope cho verifier; chưa xác định exact clause bị chặn từ verdictref.
+- [ ] Tư vấn chọn hướng/giọng còn yếu; chưa chứng minh cải thiện, không tự thêm prompt/rerun.
+- [ ] Chưa coverage feedback dương tính, vision advice/providerGENERIC/full39/43; không gọi qualified hoặc B GO.
+
 ## Independent review implementation tư vấn/media — 2026-10-23
 
 - [x] Một reviewer độc lập: [REVISE, hai P2](../docs/specs/c3-phase-b-sales-media-implementation-review-20261023.md), không provider/live hoặc sửa code.

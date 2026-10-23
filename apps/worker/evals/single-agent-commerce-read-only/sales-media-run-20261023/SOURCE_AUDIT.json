@@ -1,0 +1,438 @@
+{
+  "readAt": "2026-10-23T02:33:13.063Z",
+  "mode": "LIVE_PUBLIC_QDRANT_READ_ONLY",
+  "providerGenerations": 0,
+  "sourceWrites": 0,
+  "products": [
+    {
+      "code": "SV2447",
+      "productId": "SV2447",
+      "title": "Set váy Thạch Thảo",
+      "catalogVersion": "catalog-v2",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "colors": [],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+          "angle": "UNKNOWN",
+          "imageType": "SIZE_GUIDE",
+          "feedback": false,
+          "partsVisible": [
+            "UNKNOWN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 10,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/d9/a1/e3/e9/02be5da5317318f897bfb1d9832209119f6bd9ce6375c86e1732fdf1-w:3689-h:4356-l:748803-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 9,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "SIZE_GUIDE",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 8,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/42/0c/f9/40/34c6621718647ef30d581165b0f1f640e7ca636b9bdcaa159081513d-w:5783-h:3855-l:1697298-t:image/jpeg.jpeg",
+          "angle": "CLOSEUP",
+          "imageType": "DETAIL",
+          "feedback": false,
+          "partsVisible": [
+            "UNKNOWN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 6,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+          "angle": "CLOSEUP",
+          "imageType": "DETAIL",
+          "feedback": false,
+          "partsVisible": [
+            "AO"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 4,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/33/8b/6b/7b/525c1b16d31d503968a755c5ad8e3b1bcc85755422b037b28381446e-w:3816-h:5724-l:1368979-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 5,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/03/b8/b3/49/e18d1ca313e0a94d9e5c586b6bddd7d1bece7ad48e67ff95935da1a5-w:3739-h:5705-l:1249262-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 1,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg",
+          "angle": "BACK",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 3,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "role": "PRIMARY",
+          "sortOrder": 2,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/af/4d/2e/c4/4bf9c44dee7e5d96280b0260373a562d3db98b2072b5975812f70879-w:4000-h:6000-l:804536-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 8,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "PRODUCT_ONLY",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 7,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+          "observedAt": null
+        }
+      ]
+    },
+    {
+      "code": "SQ748",
+      "productId": "SQ748",
+      "title": "SET QUẦN UYỂN HOA",
+      "catalogVersion": "catalog-v2",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "colors": [
+        "KEM",
+        "HỒNG"
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/web-media-263/s3000x3000/02/50/cb/b5/84cc866b83389012486c383686f2aba8536a6e586b1a22893b6d2334-w:1023-h:1537-l:247985-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET",
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 2,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "d9daf7e454fdadb0917b382d16f8f2679a0d04de3f7491f3da885e824268b3c1",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-263/s3000x3000/92/2c/d8/0d/66f4e98971d2542f6ce91e210be5280c4cfb84e5d85bb18bdacf6927-w:1024-h:1536-l:219736-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET",
+            "AO",
+            "QUAN",
+            "PHU_KIEN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 5,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "4a28150ed16ae32f971abb46699e58f0964888af54a77abef846280d755870c9",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+          "angle": "UNKNOWN",
+          "imageType": "SIZE_GUIDE",
+          "feedback": false,
+          "partsVisible": [
+            "UNKNOWN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 1,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "5efcc3b01aaedfcb2ae7f42d1ac790aec1917ca0981eda9a4ea631eba1979f2f",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-263/s3000x3000/c5/58/d9/40/8a11be13402f7cf5e4fef1338ce6ea5e41277875ef79e07b111bfd15-w:3870-h:5160-l:2384564-t:image/jpeg.jpeg",
+          "angle": "CLOSEUP",
+          "imageType": "DETAIL",
+          "feedback": false,
+          "partsVisible": [
+            "AO"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 7,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "fd53fe46c184f6ad5bdd73eed039c7428566aba947ef49151fe899ceeb906e42",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-263/s3000x3000/b2/ec/01/b9/47bc0ad77768563e24d010e68edc3d87d0d1b2a62d53e985f5101f1e-w:1023-h:1537-l:209259-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET"
+          ],
+          "role": "PRIMARY",
+          "sortOrder": 6,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "571d0d1ffb48ae06af635d97e225dbcd9fb2edb69d0eb2f81dc43ded7aad8279",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-263/s3000x3000/56/cb/87/94/b11ed60095210120364eee75639bca0d9e498058200ab6533f437563-w:1290-h:1896-l:249696-t:image/jpeg.jpeg",
+          "angle": "BACK",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 3,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "8594d47d09158a323caa92b881a038f1290756be9cae58b6b2844502f03c087e",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-263/s3000x3000/7a/b8/5b/80/78f1e022d30a9588ce5f91b9a6c1d458787d004eadee6de532e37df3-w:3870-h:5160-l:1606398-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "PRODUCT_ONLY",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET",
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 4,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "ea867c5ee474283d617b84706d71d89531b6d05f3dc1bb55768ef8339c9b0f6b",
+          "observedAt": null
+        }
+      ]
+    },
+    {
+      "code": "SQ634",
+      "productId": "SQ634",
+      "title": "SET QUẦN SQ634",
+      "catalogVersion": "catalog-v2",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "colors": [
+        "VÀNG"
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/d3/28/e5/12/e037cb8274cbee04b7c02af24d67bd4c0a3cae71e975a216ba829d36-w:4543-h:6815-l:1482403-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 5,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "9147d9cbcc31d2e2554ea898a9666f7d3dbd8f3ae15dfeb1da4f61e958804012",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/b2/35/19/bc/561a4115607ae0ef49918eebdbcade4e13477db914258bb4eb75012a-w:4542-h:6814-l:1511990-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 4,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "9a5e37726dce5ec89986cd9ae4942802ee9a8a832cf46626a3536883bb68c88c",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/f7/d4/b3/34/c85ab4c84f4a8918e034f74d2797c6e94176374d34af02b2783b457b-w:3034-h:4551-l:726724-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 7,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "7577d87b73dc25e21a7c588dd963fe95003d75413fff571e3cbeec8e9e8352fe",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/4a/ce/61/98/e2314a1a720bf39fb33cb5b1c6737756fb72d02084d1404b17250dad-w:4543-h:6815-l:2184567-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET"
+          ],
+          "role": "PRIMARY",
+          "sortOrder": 2,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "cdd9c438454d50f8f0e505961c2a399c19d94126a0a3e4f4aee90b7c11044d92",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/3a/c0/69/25/004cfe09292e91849a21f33c2870e0cf87dc1390ebc3ca3ea399be22-w:4543-h:6815-l:1722609-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 1,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "ec155e7cad03ab75701d45d224fd27f430dd6b0a6f707765688f0ba24aa69e4b",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/e3/c3/a8/ea/df62d8a7a62686bcf084ea32ef052a23f971d1ea221014b5f2983a90-w:4542-h:6814-l:1288341-t:image/jpeg.jpeg",
+          "angle": "SIDE",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET",
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 6,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "05b88671b8920d72212a7e0db9fd046f1e7b8da5d75c0f624748203fb142eea4",
+          "observedAt": null
+        },
+        {
+          "url": "https://content.pancake.vn/web-media-262/s3000x3000/66/df/55/4f/c712db344154845f047a604bd907175bd926b399c5db34ed88cd696d-w:4543-h:6815-l:1810291-t:image/jpeg.jpeg",
+          "angle": "FRONT",
+          "imageType": "MODEL",
+          "feedback": false,
+          "partsVisible": [
+            "FULL_SET",
+            "AO",
+            "QUAN"
+          ],
+          "role": "ADDITIONAL",
+          "sortOrder": 3,
+          "reviewStatus": "APPROVED",
+          "metadataVerified": true,
+          "sourceContentSha256": "0844eb7025668887fb62babfdb9e96920877eed7364d6e0498e7d55428957482",
+          "observedAt": null
+        }
+      ]
+    }
+  ]
+}

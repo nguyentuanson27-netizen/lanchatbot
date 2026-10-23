@@ -1,3 +1,7 @@
+## Sửa hai P2 và chạy12outcomes sales/media — 2026-10-23
+
+**COMPLETE; KEEP_BASELINE_ADVICE; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/sales-media-run-20261023/CHECKPOINT_B.md), [12hội thoại](../apps/worker/evals/single-agent-commerce-read-only/sales-media-run-20261023/CONVERSATIONS.md). Run source6cd998c0 clean: selector ưu tiên khác góc, attachment actual URL/type/order từngattempt; RED→GREEN, shared359/worker1959/Node85/build/sharedtypecheck/workerlintPASS.4native media=3eligible/1UNCERTAINfallback, manual2dùngđược/1cầnsửa/1fallback;8textpaired đềuPASS nhưng candidate1regression/1tươngđương/2rõhơnmộtphần nên khôngpromote, giọng chưa cải thiện rõ.29requests=17owner+12verifier,0retry/providererror/timeout/labelleak,1DBdropped. Source0feedback; verifier không nhận media-unavailable result, gapđãxácnhận nhưng verdict khôngspan. Không tựnới/fix/rerun, khôngfull39 hoặc GO.
+
 ## Independent review implementation tư vấn/media — 2026-10-23
 
 **REVISE — hai P2 required trước media provider run.** [Review head f21097ec](../docs/specs/c3-phase-b-sales-media-implementation-review-20261023.md): main SIDE có thể chọn thêm SIDE dù có BACK; provider evidence chỉ lưu [CODE_IMAGE], chưa giữ exact attachment URL/order theo attempt. Cần sửa selector tối thiểu và reuse capturePayloads để persist public attachments không recipient/token. Chưa implementation fix hoặc provider run trong lượt review; B chưa GO.
