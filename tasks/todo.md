@@ -1,3 +1,7 @@
+## Current — sửa execution/media/deadline, 2026-10-24
+
+IMPLEMENTED_AND_SELF_REVIEWED, chưa chạy provider. [Chi tiết bản sửa, commands và residuals](../docs/specs/c3-phase-b-execution-media-deadline-fix-20261024.md). Final-only phase/callableTools; color-free nextSelection chưa thực hiện; owner/verifier phân biệt từ chối nhận hẹn với dự đoán arrival; deadline fixture dùng sáng mai. Context tư vấn chuẩn bị riêng 4 cặp/8 outcomes, không promote native. Observed RED→GREEN; worker210/shared64/Node102/typecheck/build/lint PASS. Chart authority và generic protected partial recovery vẫn residual; B chưa GO. Kết quả campaign cũ dưới đây giữ lịch sử, không qualify prompt/source mới.
+
 ## Current: independent review → fix → model rerun — 2026-10-23
 
 - [x] Independent exact-head review bb4e284d: REVISE 1P2 actual customer capture gate.

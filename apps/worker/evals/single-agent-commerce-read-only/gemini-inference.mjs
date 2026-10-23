@@ -189,6 +189,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(request.toolBudget)for(const [field,max] of [['roundsRemaining',2],['callsRemaining',6]])
   requireThat(Number.isInteger(request.toolBudget[field])&&request.toolBudget[field]>=0&&request.toolBudget[field]<=max,'OWNER_EXECUTION_BOUND');
  ownerView.execution={availableTools:declarations.map(d=>d.name),toolsAllowed:request.toolsAllowed!==false,
+  callableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),
+  phase:request.toolsAllowed===false?'FINAL_REPLY':'TOOL_OR_REPLY',
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining}:null};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView})}]},...contents],

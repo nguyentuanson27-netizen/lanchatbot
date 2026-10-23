@@ -64,8 +64,8 @@
     }
   },
   "promptHashes": {
-    "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
-    "verifier": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800"
+    "owner": "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "verifier": "50401b2704724bebd604e0da3b2155ebeade8629145a723153c24b5630fd1a2f"
   },
   "verdictSchema": {
     "type": "object",

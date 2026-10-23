@@ -768,7 +768,7 @@ test('current fit comparison fields and configured tool capabilities reach the o
  assert.equal(trusted.state.customerProfileRevision,4);assert.equal(trusted.state.customerProfileId,'profile-1');
  assert.equal(trusted.state.measurementFingerprint,'current-fingerprint');assert.deepEqual(trusted.state.sizeMeasurementFingerprints,{SM613:'size-fingerprint'});
  assert.deepEqual(built.systemInstruction,{parts:[{text:r.instructions}]});
- assert.deepEqual(trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:true,toolBudget:{roundsRemaining:1,callsRemaining:4}});
+ assert.deepEqual(trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:true,callableTools:['search_products','read_product','read_policy'],phase:'TOOL_OR_REPLY',toolBudget:{roundsRemaining:1,callsRemaining:4}});
  assert.doesNotMatch(JSON.stringify(trusted),/PRIVATE_RECIPIENT|"permission"/);
  r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:4};
  const finalRequest=buildGeminiCommerceRequest(r),last=JSON.parse(finalRequest.contents[0].parts[0].text).trusted.execution;
@@ -787,7 +787,7 @@ test('rollback keeps bounded execution data and native dialogue outside system i
  assert.doesNotMatch(system,/DATA_ONLY_CANARY|PRODUCT_DATA_CANARY|EVALUATOR_ONLY_CANARY/);
  assert.doesNotMatch(JSON.stringify(built),/EVALUATOR_ONLY_CANARY/);
  assert.deepEqual(built.systemInstruction,{parts:[{text:r.instructions}]});
- assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:3}});
+ assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:false,callableTools:[],phase:'FINAL_REPLY',toolBudget:{roundsRemaining:0,callsRemaining:3}});
 });
 
 test('execution budget accepts only bounded code-owned numbers before provider dispatch',async()=>{
@@ -888,4 +888,19 @@ test('state operation schema binds each field to its domain and separates CLEAR'
  assert.ok(!clear.required.includes('value'));assert.equal(clear.additionalProperties,false);
  assert.ok(!clear.properties.value);
  assert.doesNotMatch(stateDeclarations[0].description,/Bị từ chối thì cả batch chưa ghi/);
+});
+
+
+test('final-only generation exposes no callable tools and explicitly ends tool planning without altering signed history',()=>{
+ const r=request();r.toolsAllowed=false;r.availableTools=['search_products','read_product'];r.toolBudget={roundsRemaining:0,callsRemaining:2};
+ r.contents.push({role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:'P1',offerType:null}},thoughtSignature:'signed'}]},
+  {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{subjectRef:'P1'}}}}]});
+ const original=structuredClone(r.contents),b=buildGeminiCommerceRequest(r),e=JSON.parse(b.contents[0].parts[0].text).trusted.execution;
+ assert.deepEqual(e.callableTools,[]);assert.equal(e.phase,'FINAL_REPLY');
+ assert.deepEqual(e.availableTools,r.availableTools);assert.equal(b.toolConfig.functionCallingConfig.mode,'NONE');assert.deepEqual(b.tools,[]);
+ assert.deepEqual(b.systemInstruction,{parts:[{text:r.instructions}]});
+ assert.deepEqual(b.contents.at(-2),original.at(-2));assert.deepEqual(r.contents,original);
+ r.toolsAllowed=true;r.toolBudget={roundsRemaining:1,callsRemaining:2};
+ const active=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.execution;
+ assert.equal(active.phase,'TOOL_OR_REPLY');assert.deepEqual(active.callableTools,r.availableTools);
 });

@@ -106,7 +106,14 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         expiresAt:recordSource?.expiresAt??new Date(Date.parse(observedAt)+MEDIA_FRESH_FOR_SECONDS*1000).toISOString(),
         sourceVersion:recordSource?.sourceVersion??commerceHash({event:evidence,observedAt}),text:JSON.stringify(evidence)};
       observations.set(observationKey,{query,operation:call.name,stage,outcome:reason,source:recordSource,literal});
-      return {status:"UNAVAILABLE",reason,data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY",availableAlternatives:alternatives,observation:evidence}};
+      return {status:"UNAVAILABLE",reason,data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY",availableAlternatives:alternatives,observation:evidence,
+        // This is a possible new query, never a selected/available attachment.
+        ...(reason==="MEDIA_COLOR_BINDING_UNVERIFIED"&&call.name==="select_product_media"?{
+          preparedAttachmentCount:0,
+          nextSelection:{name:"select_product_media",args:{subjectRef:query.subjectRef,intent:query.intent,
+            ...(query.componentRole?{componentRole:query.componentRole}:{})}},
+          nextSelectionMeaning:"Optional color-free lookup, not yet executed. Keep the requested image type/component; availability is unknown until selection succeeds. These would be general product images, not confirmed requested-color images.",
+        }:{} )}};
     };
     try{
       const view=call.name==="view_product_media",assets=(await select(query,value=>{source=value;},value=>{availableAlternatives=value;})).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);

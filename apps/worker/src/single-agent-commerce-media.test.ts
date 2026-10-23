@@ -260,3 +260,17 @@ it("keeps repeated readbacks unchanged for a no-match component lookup after all
  await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"DETAIL",componentRole:"SKIRT"}});
  const original=s.tools.snapshot();expect(await s.tools.readback()).toEqual(original);expect(await s.tools.readback()).toEqual(original);
 });
+
+
+it("offers an explicit unselected color-free query, preserving intent/component and requiring a real second selection",async()=>{
+ const s=await setup();s.f.product.colors=[];
+ const result=await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"BACK",color:"be",componentRole:"TOP"}});
+ expect(result).toMatchObject({status:"UNAVAILABLE",reason:"MEDIA_COLOR_BINDING_UNVERIFIED",data:{preparedAttachmentCount:0,
+  nextSelection:{name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"BACK",componentRole:"TOP"}}}});
+ expect(s.tools.mediaSelection!()).toEqual([]);expect(s.readProduct).toHaveBeenCalledTimes(1);
+ const next=(result.data as {nextSelection:{name:string;args:Record<string,unknown>}}).nextSelection;
+ expect(await s.tools.invoke(next)).toMatchObject({status:"OK"});expect(s.tools.mediaSelection!()).toHaveLength(1);
+ const failed=await setup();failed.readProduct.mockRejectedValue(new Error("source unavailable"));
+ const error=await failed.tools.invoke(failed.call);
+ expect(error).toMatchObject({reason:"MEDIA_SOURCE_UNAVAILABLE"});expect(error.data).not.toHaveProperty("nextSelection");
+});

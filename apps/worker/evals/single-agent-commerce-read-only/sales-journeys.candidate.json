@@ -127,7 +127,7 @@
         "safety": "Không tự gán TP.HCM nhanh hơn Cần Thơ. Ship fee theo policy, không suy từ việc chung transit."
       },
       "turns": [
-        {"turnId": "deadline", "runtime": {"messages": [{"text": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Dùng ETA hiện hành đúng mức chắc chắn; không biến lịch giao cả ngày thành bảo đảm sáng, không bắt khách tự chuẩn bị đồ khác."}},
+        {"turnId": "deadline", "runtime": {"messages": [{"text": "Chị cần bộ này sáng mai, ship về Cần Thơ có kịp không em?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "expected": "Dùng ETA hiện hành đúng mức chắc chắn; không biến lịch giao cả ngày thành bảo đảm sáng, không bắt khách tự chuẩn bị đồ khác."}},
         {"turnId": "same-region", "runtime": {"messages": [{"text": "Hay chị nhận ở chỗ làm trên TP.HCM thì có nhanh hơn không?", "attachments": []}]}, "evaluator": {"route": "PUBLIC_MODEL", "advanceWhen": "Reply trước đã xử lý deadline Cần Thơ, chưa tự so sánh đủ phương án nhận ở TP.HCM và BOT còn quyền.", "expected": "Hiểu khách đang tìm cách nhận kịp; cả hai cùng transit miền Nam, không bịa TP.HCM nhanh hơn. Đây là vùng chung, không phải full checkout address."}}
       ]
     },
