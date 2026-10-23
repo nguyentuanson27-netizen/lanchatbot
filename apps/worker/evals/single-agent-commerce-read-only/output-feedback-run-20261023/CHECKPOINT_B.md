@@ -55,3 +55,5 @@ Kiểm lại controls #1/#8 của campaign `evidence-fix-run-20261023` cũng cho
 [Visual NOT_RUN](VISUAL_NOT_RUN.json):4outcomes/0requests. [Native NOT_RUN](NATIVE_NOT_RUN.json):46lượt theo kế hoạch chưa mở campaign/0requests. Không quality score, không kết luận sửa giọng thành công hoặc thất bại từ campaign này. Giữ residual protected partial fallback, ảnh+handoff, chart authority/scope và egress incident cũ UNKNOWN.
 
 Recommendation **STOP tại readiness/model controls chưa hợp lệ**. Giữ output code fix đã qua deterministic checks; verifier candidate không promote. Không publish, deploy hoặc live send. Hướng sửa tiếp là contract của dữ liệu kiểm và preflight toàn bộ operation, trước khi lại chỉnh ngôn ngữ verifier.
+
+[Review toàn bộ sau run](POST_RUN_REVIEW.md) bổ sung: projection báo cáo không phải canonical document; guard hiện tại chưa tự buộc dispatch dùng prepared corpus đã kiểm hết; native runner mới chưa đủ bằng chứng gate; counterfactual offline tách cả brand và category/component mismatch của chart. Không provider run mới hoặc sửa raw/outcome cũ.
