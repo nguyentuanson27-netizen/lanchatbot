@@ -404,7 +404,7 @@ try{
   const replay=await j.turn('Em ơi',[]);assert.equal(replay.owners,0);assert.equal(replay.verifiers,0);assert.equal(replay.result.enqueued,0);
   await j.drain();assert.deepEqual(j.capture,[holding]);
  });
- await check('B no-chart after two rounds recovers through one real atomic handoff without draft or images',async()=>{
+ await check('B composed no-chart after two rounds recovers through one real atomic handoff without draft or images',async()=>{
   const j=await statefulFixture({media:true});
   const r=await j.turn('Chọn size và gửi ảnh chị nhé',[
    native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
