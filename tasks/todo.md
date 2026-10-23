@@ -2148,9 +2148,9 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 ## Source contract fix — 2026-10-23
 
 - [x] Review độc lập APPROVE phương án, cập nhật plan với whole-world capture và config-bound readiness.
-- [ ] Reuse canonical validator; canonical capture mới không model, không ghép clock/trusted cũ.
-- [ ] Prepare toàn17 trước dispatch; invalid slot cuối/tamper/label leak ⇒0 requests.
-- [ ] Native readiness và actual prefix review đúng source/config, giữ population46 không trùng.
-- [ ] Chart authority trace; thiếu nguồn giữ no-chart/handoff, không block feedback.
-- [ ] Focused/shared/worker verification, self-review và báo cáo; chưa chạy model.
+- [x] Reuse canonical validator; canonical whole-world capture mới PASS, không model/embedding hoặc ghép clock/trusted cũ.
+- [x] Prepare toàn17 trước dispatch; invalid slot cuối/tamper/label leak ⇒0 requests; actual NO_MATCH preflight đúng cả5slots trước bị lỗi.
+- [x] Native readiness/prefix gates đúng source/config, giữ46 không trùng; deterministic coverage PASS, provider prefix mới chưa chạy.
+- [x] Chart authority trace: chưa có mapping được xác nhận; giữ no-chart/handoff và gap, không block feedback.
+- [x] Worker209/shared64/Node94/DB21 PASS, DB dropped; builds/typechecks/lint PASS; self-review và [report](../docs/specs/c3-phase-b-source-contract-fix-implementation-20261023.md). Controls17/visual4 preflight PASS, chưa chạy model; B chưa GO.
 

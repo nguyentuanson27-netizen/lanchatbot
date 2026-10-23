@@ -2,6 +2,8 @@
 
 ## Bổ sung được review — source contract, 2026-10-23
 
+Implementation đã hoàn tất và self-review: [changes/checks/evidence](c3-phase-b-source-contract-fix-implementation-20261023.md), executable78d0a3cf. Canonical capture mới + controls17/visual4 preflight PASS, 0 model requests; chart authority vẫn gap/handoff. Nội dung dưới giữ plan đã được thực hiện, không phải provider PASS.
+
 **IMPLEMENTATION_AUTHORIZED; provider chưa chạy.** [Review độc lập APPROVE phương án](c3-phase-b-source-contract-fix-independent-review-20261023.md), base `ff18421c`. Phần bổ sung này cập nhật các bước S2/S3/native của kế hoạch lịch sử bên dưới; không đổi evidence campaign đã đóng.
 
 1. Export/reuse validator domain hiện hữu, không duplicate schema hoặc thêm defaults mới. Controls không đọc SOURCE_AUDIT làm catalog. Historical capture chưa đầy đủ ⇒ tạo whole-world capture mới bằng code/adapter, zero model/embedding requests, canonical product + trusted context + clock + readback/source hashes cùng lần đọc. Không ghép catalog mới với clock/trusted cũ. Giữ 17 drafts/mục đích và historical probe; intended operation không tái hiện được ⇒ BLOCKED trước generation.
