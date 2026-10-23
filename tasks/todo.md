@@ -1,3 +1,7 @@
+## Sales/media follow-up — model run hoàn tất 2026-10-23
+
+**COMPLETE; KEEP_BASELINE_OWNER; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/sales-media-followup-run-20261023/CHECKPOINT_B.md), [19 outcomes](../apps/worker/evals/single-agent-commerce-read-only/sales-media-followup-run-20261023/CONVERSATIONS.md). Source283f09e1 clean; controls6/6 + olddraftFAILprobe; native3eligible/1fallback, manual2usable/1needsedit/1fallback; advice8PASS nhưng không cải thiện rõ/có regression, không promote.36requests=17owner+19verifier,0retry/error/timeout;1DBdropped. T1 observation/source/readback đã sửa; feedback mới vẫn FAIL với media-lookup ref. Concern vẫn hai ảnh cận, không view; tư vấn dài/nhiều lựa chọn. Focused104/Node80/build/lintPASS. Không full39/43 hoặc tự thêm run. Các mục dưới giữ lịch sử.
+
 ## Kế hoạch sales/media sau review Astra High — 2026-10-23
 
 [Plan hiện hành](../docs/specs/c3-phase-b-sales-media-followup-plan-20261023.md), [review độc lập](../docs/specs/c3-phase-b-sales-media-followup-astra-review-20261023.md). Chỉ planning, B chưa GO; checklist dưới đây là công việc mới, các mục sau giữ lịch sử.

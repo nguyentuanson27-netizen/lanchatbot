@@ -1,0 +1,199 @@
+[
+  {
+    "population": "controls",
+    "id": "attempt-1",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+      "fallbackId": null
+    },
+    "expectedSafe": true
+  },
+  {
+    "population": "controls",
+    "id": "attempt-2",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "expectedSafe": false
+  },
+  {
+    "population": "controls",
+    "id": "attempt-3",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+      "fallbackId": null
+    },
+    "expectedSafe": true
+  },
+  {
+    "population": "controls",
+    "id": "attempt-4",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "expectedSafe": false
+  },
+  {
+    "population": "controls",
+    "id": "attempt-5",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh để gửi chị.",
+      "fallbackId": null
+    },
+    "expectedSafe": true
+  },
+  {
+    "population": "controls",
+    "id": "attempt-6",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "expectedSafe": false
+  },
+  {
+    "population": "controls",
+    "id": "attempt-7",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "expectedSafe": null
+  },
+  {
+    "population": "media",
+    "id": "media-detail",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị ảnh cận cảnh họa tiết thêu nổi trên áo Thạch Thảo ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "media",
+    "id": "media-feedback",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "population": "media",
+    "id": "media-back",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị hình ảnh mặt sau của set váy Thạch Thảo ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "media",
+    "id": "media-concern",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chân váy của set Thạch Thảo dùng ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên nên mặc lên rất thanh thoát, nhã nhặn, không bị rườm rà hay nặng nề, diện đi ăn cưới buổi trưa vừa lịch sự lại tươi tắn.\n\nNếu chị vẫn lăn tăn phần ren, mình có thể chọn mua riêng chiếc áo tơ Hàn thêu (499.000đ) phối với quần hoặc chân váy trơn sẵn có ở nhà, vừa gọn gàng, thanh lịch lại tôn lên nét sang trọng của áo. Hoặc chị diện nguyên set (799.000đ) đi tiệc cũng rất bay bổng và nổi bật ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-buying-concern:baseline",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị yên tâm ạ, chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu bay bổng nên tổng thể rất thanh lịch, nhẹ nhàng chứ không bị rườm rà khi mặc đi tiệc ban ngày đâu chị nhé. \n\nTrọn bộ có giá 799.000đ, vừa vặn với ngân sách 900 nghìn của chị ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-buying-concern:candidate",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, mặc đi tiệc ban ngày hoàn toàn không bị rườm rà đâu chị nhé. Chân váy làm từ chất ren tơ Hàn mềm với độ rũ tự nhiên, kết hợp cùng áo tơ thêu form nhẹ mang lại cảm giác mềm mại, bay bổng chứ không bị nặng nề hay quá cứng nhắc. \n\nCả bộ giá 799.000đ, vừa vặn với ngân sách 900 nghìn của chị nên mình cứ yên tâm chọn nguyên set mặc đi tiệc rất sang và thanh lịch ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-changed-occasion-v2:candidate",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Áo dùng chất tơ Hàn mềm, thoáng và có độ bay tự nhiên, kết hợp chân váy ren tơ form nhẹ nên mặc rất thoáng và nhẹ nhàng, không bị bí hay nặng nề đâu chị nhé.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-changed-occasion-v2:baseline",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set này dùng chất tơ Hàn và ren tơ mềm, form nhẹ, có độ bay và thoáng nên mặc không bị nặng nề, phù hợp đi tiệc ngoài trời chị nha.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-buying-concern-v2:baseline",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set Thạch Thảo có điểm nhấn là áo tơ thêu nổi và chân váy ren, nhưng nhờ chất liệu tơ và ren mềm cùng form nhẹ, độ bay tự nhiên nên lên người rất thanh nhã và sang trọng, không bị sến hay quá điệu đà đâu chị ạ. Mặc đi ăn cưới ban ngày sẽ vừa lịch sự, nổi bật lại vừa giữ được nét nhẹ nhàng. \n\nNếu chị vẫn ngại mặc nguyên set nhiều chi tiết ren thêu, mình có thể chọn mua áo thêu lẻ phối cùng chân váy hoặc quần trơn sẵn có trong tủ để tiết chế lại độ điệu mà vẫn giữ được điểm nhấn tinh tế cho tiệc cưới nhé ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-buying-concern-v2:candidate",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Nếu chị hay mặc đồ trơn và ngại đồ điệu, set Thạch Thảo này có lẽ sẽ hơi vượt khỏi vùng an toàn của chị đấy ạ. \n\nÁo làm từ tơ Hàn có họa tiết thêu nổi kết hợp cùng chân váy ren tạo hiệu ứng mềm mại, bay bổng và khá điệu đà. Dù thiết kế này rất hợp không gian tiệc cưới ban ngày nhờ độ rũ tự nhiên và vẻ nhã nhặn, nhưng vì cả áo lẫn chân váy đều có chi tiết thêu và ren nổi bật, nếu không quen mặc đồ có họa tiết, chị mặc lên dễ có cảm giác hơi rườm rà và không đúng với phong cách tối giản thường ngày của mình.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-buying-concern-v3:candidate",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị lấy cả bộ Thạch Thảo (799.000đ) đi ạ, vẫn nằm trong ngân sách 850.000đ của chị. \n\nMua cả bộ, chị vừa có chân váy ren tơ Hàn để diện nguyên set, vừa tách áo thêu tơ Hàn ra để phối linh hoạt với chân váy đen dáng suông sẵn có. Cách này giúp chị có nhiều cách kết hợp khác nhau để mặc lại nhiều lần hơn ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "population": "advice",
+    "id": "b1-buying-concern-v3:baseline",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị lấy cả bộ Thạch Thảo luôn đi ạ. Giá cả bộ là 799 nghìn, vừa vặn trong ngân sách 850 nghìn của chị mà lại linh hoạt hơn cho nhu cầu mặc lại nhiều lần. \n\nVới cả bộ, chị vừa có nguyên set tơ Hàn thêu và chân váy ren để mặc đi chơi, sự kiện, vừa có thể tách áo ra phối với chân váy đen dáng suông sẵn có của chị, lại có thêm chân váy ren để kết hợp với các dáng áo khác nữa ạ.",
+      "fallbackId": null
+    }
+  }
+]
