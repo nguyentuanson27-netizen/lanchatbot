@@ -1,6 +1,6 @@
 # Phase B — review các vòng gần đây và phương án tránh lặp
 
-**REVISED_FOR_REVIEW, chưa implementation/provider mới.** Đối chiếu hai full39 opening-advice/repeat39, campaign sales-media12, followup19 (controls/native/advice riêng), giả định feedback initial8/confirmation2 ở hai source, và media-continuation7. Đọc các report, transcript tư vấn, review độc lập Astra và source liên quan. Không gọi đây là đọc lại mọi raw request của toàn bộ lịch sử C3.
+**PLAN_APPROVED ở re-review độc lập HEAD a72176ab; chưa implementation/provider mới.** Đối chiếu hai full39 opening-advice/repeat39, campaign sales-media12, followup19 (controls/native/advice riêng), giả định feedback initial8/confirmation2 ở hai source, và media-continuation7. Đọc các report, transcript tư vấn, review độc lập Astra và source liên quan. Không gọi đây là đọc lại mọi raw request của toàn bộ lịch sử C3.
 
 ## Kết quả nào có ý nghĩa
 
@@ -122,4 +122,4 @@ Thêm focused tests cho visual wrapper mới và existing isolated integration k
 
 Egress unchanged-source ổn định/chặn changed-source; size không bịa fit và xử lý đúng capability; feedback diễn đạt thông thường được sử dụng nhưng không mở rộng absence hay tráo feedback; fallback không giả hoàn thành nhu cầu khác; visual treatment chỉ giữ nếu giúp quyết định mà không regression. Không đủ thì báo đúng phần chưa đạt và dừng can thiệp đó. Không tuyên bố toàn Phase B GO từ một media diagnostic.
 
-Bản kế hoạch đã tiếp thu ba P2 và P3 của [review độc lập](c3-phase-b-recent-runs-improvement-independent-review-20261023.md). Lượt này chỉ sửa plan và gọi cùng reviewer kiểm lại, không implementation/runtime/prompt changes hoặc evaluation provider. Không cần chạy test suite cho tài liệu. Self-review giữ rõ mixed-intent residual, no-publish handoff, budgets25 và visual replay không phải native qualification.
+Bản kế hoạch đã tiếp thu ba P2 và P3 và được cùng reviewer APPROVE tại a72176ab; xem [review độc lập](c3-phase-b-recent-runs-improvement-independent-review-20261023.md). Lượt này chỉ sửa plan và gọi cùng reviewer kiểm lại, không implementation/runtime/prompt changes hoặc evaluation provider. Không cần chạy test suite cho tài liệu. Self-review giữ rõ mixed-intent residual, no-publish handoff, budgets25 và visual replay không phải native qualification.

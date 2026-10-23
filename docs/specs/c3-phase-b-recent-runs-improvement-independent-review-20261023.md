@@ -1,3 +1,19 @@
+# Re-review — APPROVE kế hoạch đã sửa
+
+Cùng reviewer `/root/review_recent_runs_improvement`, read-only tại clean HEAD `a72176ab0c3c4a716c927f3614d897a0c8366268`. **Ba P2 và P3 trước đã xử lý đủ; không còn required change của plan.** Không sửa file hoặc gọi provider. Đây là approval kế hoạch, không phải implementation/testing evidence.
+
+- Size/recovery (plan37–54): typed business terminal ngay sau batch, không đợi owner round; reuse authority/commit/readback, bảng capability/denied/unknown commit, model budget không đổi, recovery một lần ghi riêng. Mixed-intent residual không được gọi đã đóng.
+- Feedback (66–70): giữ6controls+probe, thêm10;16labeled phải đạt ở source mới, không thay bằng kết quả cũ.
+- Visual (79–87): wrapper4outcomes có catalogImages+vision literal, inlineData/hash/bounds/common-fields preflight; captured replay khác native eligibility, không thêm role/épview.
+- Whole-turn (89–91): không loại chỉ vì dài; N1 không qualification.
+- Scope (103–106): controls trước visual, trần25requests; không auto native/full39 và chưa B GO.
+
+Lưu ý implementation (không blocker plan): kiểm dependency terminal ngay sau batch để không sinh draft rồi bỏ; phân biệt committed handoff với authority thay đổi từ tác nhân khác; không bypass selectCommerceHandoff/rule/tag và không gửi ảnh trước terminal handoff; preflight kiểm wire cuối sau adapter, không chỉ object wrapper.
+
+Bản review đầu dưới đây giữ lịch sử. Plan chỉ cập nhật nhãn trạng thái/link approval sau review, không thay nội dung triển khai đã duyệt.
+
+---
+
 # Independent review — phương án cải thiện sau các vòng gần đây
 
 **REVISE — ba P2 required, một P3 tùy chọn.** Reviewer `/root/review_recent_runs_improvement`, context độc lập, HEAD `62a6bd9befebd290b029f6532e25615414c061a6`. Parent ghi lại kết luận reviewer. Read-only, đã đối chiếu proposal, reports/transcripts được dẫn chiếu và source egress/size/handoff/media/advice runner. Không sửa plan/runtime, không gọi provider. Lượt khởi động đầu lỗi model capacity; cùng reviewer thử lại và hoàn tất, không thay model hoặc tạo reviewer thứ hai.

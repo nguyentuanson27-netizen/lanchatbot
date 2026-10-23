@@ -1,6 +1,6 @@
 ## Sửa phương án sau independent review — 2026-10-23
 
-**PLAN_REVISED; RE-REVIEW_PENDING; chưa implementation/provider.** [Plan](../docs/specs/c3-phase-b-recent-runs-improvement-proposal-20261023.md). Chốt size terminal/recovery/budget/permission/receipt map; giữ rõ mixed-intent residual khi handoff unavailable. Visual wrapper4outcomes phải có inlineData+vision binding/preflight common-field diff. Giữ6controls cũ+1probe, thêm10controls, tổng17verifier; visual4 tối đa8requests, chungcap25 khi được yêu cầu chạy. Không fullB/publish/handoff authority mới hoặc promote từN1. Đánh giá whole-turn thay độ dài. Gọi lại cùng reviewer độc lập trước implementation; các mục dưới giữ evidence lịch sử.
+**PLAN_REVISED_AND_APPROVED; chưa implementation/provider.** [Plan](../docs/specs/c3-phase-b-recent-runs-improvement-proposal-20261023.md). Chốt size terminal/recovery/budget/permission/receipt map; giữ rõ mixed-intent residual khi handoff unavailable. Visual wrapper4outcomes phải có inlineData+vision binding/preflight common-field diff. Giữ6controls cũ+1probe, thêm10controls, tổng17verifier; visual4 tối đa8requests, chungcap25 khi được yêu cầu chạy. Không fullB/publish/handoff authority mới hoặc promote từN1. Đánh giá whole-turn thay độ dài. Cùng reviewer re-review APPROVE ở clean a72176ab, không required changes còn lại; giữ bốn lưu ý khi implementation trong review; các mục dưới giữ evidence lịch sử.
 
 ## Bảy lượt media tiếp nối — 2026-10-23
 
