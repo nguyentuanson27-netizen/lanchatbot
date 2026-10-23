@@ -81,5 +81,6 @@
   "integration/integration.json": "24932e4b59ad3afbef0a8df10515643c2eb44cc21e11159113596762d19b786b",
   "visual-preflight/preflight.json": "3f3747c8f451eef7ea55620ff637b866d9da702974a101ff9f5288a8cfeddeb1",
   "visual-preflight/registration.json": "3dbf4993c3a265cce1679430a3a913fa0aeae30e663a71c0586a13421e6aca3a",
-  "visual-preflight/summary.json": "cc8a3d028ea59a907968fbbdcc6932aa00a2d0defa3af20cfdbab2df3d23411d"
+  "visual-preflight/summary.json": "cc8a3d028ea59a907968fbbdcc6932aa00a2d0defa3af20cfdbab2df3d23411d",
+  "FOLLOWUP_GUARD_CHECK.json": "f5b15befd060e27bb63e11a004276e1bdcaba42b7ad5268a965c4e9ac08f60d3"
 }

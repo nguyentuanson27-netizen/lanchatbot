@@ -46,7 +46,7 @@ Kiểm lại controls #1/#8 của campaign `evidence-fix-run-20261023` cũng cho
 - `pnpm --filter @lana/worker build`:PASS; sau thêm permission guard, `pnpm --filter @lana/worker exec tsc -p tsconfig.json`:PASS cập nhật dist. `pnpm --filter @lana/worker typecheck`, `pnpm --filter @lana/worker lint`:PASS.
 - [PostgreSQL integration](integration/integration.json):21checksPASS, testDatabaseDropped=true; capture transport, không Meta send/POS order. [Preflights](commands.json): controls và visual wire PASS zero-generation. Không gọi preflight PASS là kết quả model PASS.
 - Một pre-seal controls command bị DIRTY_SOURCE từ chối; lần start readiness kế tiếp bị generated Python cache làm dirty tree, dừng trước I/O. Đã xóa đúng cache do mình tạo, không hạ guard; 0generation ở các lần bị từ chối. Không hidden generation retry.
-- `git diff --check`:PASS. Post-run baseline restore/protocol và exact-outcome guard validation báo riêng trong follow-up note, không gán chúng cho source95cbaf55.
+- `git diff --check`:PASS. Sau restore baseline, protocol11/11PASS. [Follow-up guard check](FOLLOWUP_GUARD_CHECK.json) tại source895baecc xác nhận preflight từ chối fixture sai với FIXTURE_OPERATION_OUTCOME, 0provider requests. Không gán checks sau restore cho source95cbaf55 hoặc coi preflight bị từ chối là controls PASS.
 
 ## Vận hành và giới hạn
 
