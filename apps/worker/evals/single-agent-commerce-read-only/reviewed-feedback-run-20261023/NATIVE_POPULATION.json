@@ -1,0 +1,590 @@
+[
+  {
+    "caseId": "b1-changed-occasion",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+        },
+        {
+          "role": "shop",
+          "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-current-policy",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-partial-source",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-price",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-component-stock",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-search-read",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-policy-used",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+        },
+        {
+          "role": "shop",
+          "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-current-policy-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Lần trước chị nhớ phí đổi là 25 nghìn."
+        }
+      ],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-partial-source-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-price-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Cho chị xin giá cả bộ với em.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem bộ Thạch Thảo bên mình."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-component-stock-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị chỉ muốn lấy chân váy của set Thạch Thảo."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-search-read-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-policy-used-v2",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+        },
+        {
+          "role": "shop",
+          "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-current-policy-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-partial-source-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-price-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-component-stock-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-search-read-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị có sẵn chân váy đen dáng suông rồi."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-policy-used-v3",
+    "journeyId": null,
+    "runtime": {
+      "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "sales-discovery-advice:need",
+    "journeyId": "sales-discovery-advice",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "sales-product-gallery:overview",
+    "journeyId": "sales-product-gallery",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Cho chị xem ảnh set Thạch Thảo màu be nhé.",
+          "attachments": []
+        }
+      ],
+      "latest": "Cho chị xem ảnh set Thạch Thảo màu be nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "sales-size-advice:height-weight",
+    "journeyId": "sales-size-advice",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "sales-southern-delivery:deadline",
+    "journeyId": "sales-southern-delivery",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-overview-next:ask",
+    "journeyId": "media-overview-next",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Em có ảnh khách mặc bộ Thạch Thảo không?",
+          "attachments": []
+        }
+      ],
+      "latest": "Em có ảnh khách mặc bộ Thạch Thảo không?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-overview-next:continue",
+    "journeyId": "media-overview-next",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Gửi chị ảnh cả bộ nhé.",
+          "attachments": []
+        }
+      ],
+      "latest": "Gửi chị ảnh cả bộ nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-detail-next:ask",
+    "journeyId": "media-detail-next",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Bộ Thạch Thảo có ảnh khách mặc chưa em?",
+          "attachments": []
+        }
+      ],
+      "latest": "Bộ Thạch Thảo có ảnh khách mặc chưa em?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-detail-next:continue",
+    "journeyId": "media-detail-next",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Cho chị xem cận phần thêu ở áo nhé.",
+          "attachments": []
+        }
+      ],
+      "latest": "Cho chị xem cận phần thêu ở áo nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-and-price:ask",
+    "journeyId": "media-and-price",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Em gửi chị ảnh khách mặc bộ Thạch Thảo với. Lấy riêng áo thì bao nhiêu?",
+          "attachments": []
+        }
+      ],
+      "latest": "Em gửi chị ảnh khách mặc bộ Thạch Thảo với. Lấy riêng áo thì bao nhiêu?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-and-size:ask",
+    "journeyId": "media-and-size",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?",
+          "attachments": []
+        }
+      ],
+      "latest": "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "media-decision:ask",
+    "journeyId": "media-decision",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi.",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-open",
+    "journeyId": "sales",
+    "runtime": {
+      "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-variant-quantity",
+    "journeyId": "sales",
+    "runtime": {
+      "latest": "Đổi áo sang L cho chị, lấy hai chiếc nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-quote",
+    "journeyId": "sales",
+    "runtime": {
+      "latest": "Hai áo cả phí ship là bao nhiêu em?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-correction",
+    "journeyId": "sales",
+    "runtime": {
+      "latest": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-request-checkout",
+    "journeyId": "sales",
+    "runtime": {
+      "latest": "Chị đặt hai áo này nhé, lên đơn cho chị.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-private-checkout",
+    "journeyId": "sales",
+    "runtime": {
+      "privateCheckoutFixture": "EXISTING_SYNTHETIC_COD_FORM"
+    }
+  },
+  {
+    "caseId": "stateful-confirm",
+    "journeyId": "sales",
+    "runtime": {
+      "latest": "Chốt đơn cho chị nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "stateful-human-request",
+    "journeyId": "handoff",
+    "runtime": {
+      "latest": "Cho chị gặp nhân viên shop nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "negotiation-cart-setup",
+    "journeyId": "negotiation-companion",
+    "runtime": {
+      "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "negotiation-price-objection",
+    "journeyId": "negotiation-companion",
+    "runtime": {
+      "latest": "Bớt cho chị chút được không?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "negotiation-total-control",
+    "journeyId": "negotiation-companion",
+    "runtime": {
+      "latest": "Thế một áo cả ship là bao nhiêu em?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  }
+]

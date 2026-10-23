@@ -1,0 +1,230 @@
+[
+  {
+    "caseId": "b1-partial-source-v2",
+    "path": "native/b1-11-11/attempt-11.json",
+    "artifactHash": "bcf338170ffb5711a45270956f2c0fe32d212398bc6070d999b0dd67fe1d8265",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm từ chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên ạ. Dạ hiện tại em chưa có sẵn thông tin giá và tồn kho khi mua riêng chân váy nên chưa báo chính xác cho chị được nhé ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v2",
+    "path": "native/b1-15-15/attempt-15.json",
+    "artifactHash": "76923a1f54b44933275961c6f94ba56201752679b3dfe8c1961aaa6ef442da16",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, chị hoàn toàn có thể yên tâm lấy set Thạch Thảo này để đi ăn cưới ban ngày ạ. Áo tơ thêu nổi và chân váy ren có form nhẹ, độ bay và rũ tự nhiên nên lên người rất thanh thoát, sang trọng mà không hề bị bồng bềnh hay sến sẩm. \n\nVì chị quen mặc đồ trơn, chất liệu tơ ren nhã nhặn của set sẽ vừa đủ tạo điểm nhấn tinh tế cho ngày tiệc mà vẫn giữ được nét thanh lịch quen thuộc. Set có giá 799.000đ ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v3",
+    "path": "native/b1-17-17/attempt-17.json",
+    "artifactHash": "b9a4723ce9fbf7556b8d0e6ab555e886e015aaee77d5898e0cdc1e352983375c",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, đi gặp khách hàng mà chị muốn nhìn gọn gàng và sắc sảo hơn thì mình lấy áo lẻ thôi chị ạ. Áo có form nhẹ cùng họa tiết thêu nổi, khi kết hợp với quần âu hoặc chân váy ôm sẵn có sẽ rất lịch sự và chuyên nghiệp. \n\nCòn chân váy ren trong set có độ rũ và độ bay tự nhiên, hợp với không gian tiệc tối mềm mại hơn. Áo lẻ giá 499.000đ chị nhé.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v3",
+    "path": "native/b1-23-23/attempt-23.json",
+    "artifactHash": "0166e1a8617eefff60a4c34cfa5bbaafc971608cbf89442c6e2d86f75bd57129",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị lấy cả bộ Thạch Thảo giá 799.000đ nhé, vừa vặn trong ngân sách 850 nghìn của chị. \n\nMua cả bộ sẽ tiết kiệm hơn đáng kể so với mua lẻ từng món (áo 499k và chân váy 449k), đồng thời giúp chị có nhiều cách phối đồ để mặc lại nhiều lần: chị có thể diện nguyên set ren tơ đi làm hay đi chơi, hoặc tách áo thêu tơ Hàn phối với chân váy đen suông sẵn có, và dùng chân váy ren phối với các áo khác trong tủ đồ. Nhờ vậy chị vừa tối ưu được ngân sách vừa biến hóa được nhiều phong cách khác nhau ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-partial-source",
+    "path": "native/b1-3-3/attempt-3.json",
+    "artifactHash": "f408499edb39fc1ba61a43752b2ee650b722b748d0b96b1e65a44ebe0f3debd6",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có phần áo may bằng tơ Hàn thêu với họa tiết thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; chân váy làm từ ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên chị nhé. \n\nHiện tại hệ thống chưa hiển thị sẵn giá và tình trạng tồn kho cụ thể cho size M, nên em chưa tra được thông tin này ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-price",
+    "path": "native/b1-4-4/attempt-4.json",
+    "artifactHash": "6278499e9dbc6cb92059eb114d8f2bc495697df08f2da5938e2d26a6bcfae6a7",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set váy Thạch Thảo có giá 799.000đ chị nhé. Ngoài ra, shop có bán lẻ áo giá 499.000đ và chân váy giá 449.000đ ạ. Các sản phẩm này hiện đều có sẵn hàng.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-component-stock",
+    "path": "native/b1-5-5/attempt-5.json",
+    "artifactHash": "b09f870201bd1fa4d4097767de4bfe47e44b95a4bf1db6ae4ac62f6b707050ff",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, áo lẻ Thạch Thảo size M bên em còn hàng chị nhé, giá áo là 499.000đ ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "path": "native/b1-7-7/attempt-7.json",
+    "artifactHash": "63d8e6a0c71cb7479f4784c98c386ef2855691722a58d0dad39a02a593916718",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set này mặc đi tiệc ban ngày rất thanh nhã và sang trọng ạ, chất tơ Hàn và ren mềm có độ bay và độ rũ tự nhiên nên không bị rườm rà đâu chị nhé. \n\nNgân sách 900 nghìn của chị hoàn toàn thoải mái vì nguyên set váy Thạch Thảo hiện có giá 799.000đ ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-policy-used",
+    "path": "native/b1-8-8/attempt-8.json",
+    "artifactHash": "69606fca1f1157faf17be24c3cc0dbf1d4f0132a3489b8af494245777e9cea24",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm chưa qua sử dụng và chưa mặc ra ngoài. Do chị đã mặc đi làm nên sản phẩm không đủ điều kiện đổi hàng ạ. \n\nTrường hợp đổi hàng hợp lệ, tổng phí vận chuyển hai chiều là 30.000đ do chị chi trả ạ.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v2",
+    "path": "native/b1-9-9/attempt-9.json",
+    "artifactHash": "3647b7152ce083fa588cc19ae695663f99ad6034da8cd46bbb0bf2da2747334a",
+    "customerOutcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo dùng chất liệu áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, thoáng, có độ bay tự nhiên nên mặc nhẹ nhàng, không bị hầm nặng. Tuy nhiên, vì chị ở ngoài trời khá lâu và dễ nóng, nếu cần ưu tiên độ thấm hút mồ hôi, set quần Uyển Hoa với vải thô đũi thoáng khí sẽ mang lại cảm giác mát mẻ và thoải mái hơn cho không gian sân vườn.",
+        "fallbackId": null
+      }
+    }
+  },
+  {
+    "caseId": "sales-discovery-advice:need",
+    "path": "native/openings/provider-attempt-1.json",
+    "artifactHash": "baa278ecc26cdb27729fbab5c4622b685f4128450bda255b85fbd050ae264dae",
+    "customerOutcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "be0c5bfc-bd38-44ac-832f-c02a2fdba952",
+          "group": "c2691541-a927-404b-8a55-b77a66735a55",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    }
+  },
+  {
+    "caseId": "sales-product-gallery:overview",
+    "path": "native/openings/provider-attempt-2.json",
+    "artifactHash": "b37edc576fff7392b930c38299551937dc8cd042260f95a5aacc10f58bb68333",
+    "customerOutcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "da3cfc2e-01ac-43cb-814c-24343d1552e8",
+          "group": "e4589b3a-1c2a-465e-a26d-95789b62bfdf",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    }
+  },
+  {
+    "caseId": "sales-size-advice:height-weight",
+    "path": "native/openings/provider-attempt-3.json",
+    "artifactHash": "63cf08f0474c1bca50f3ac13212afc267bed3ec3cdaf6941d4b7d352750d85ea",
+    "customerOutcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Em chuyển nhân viên chọn size cho chị nhé."
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "96ba76e7-7401-468f-b7e0-77cfcb0c1b37",
+          "group": "0d23f3a0-2749-4fb4-b761-a0cf59401ff8",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    }
+  },
+  {
+    "caseId": "sales-southern-delivery:deadline",
+    "path": "native/openings/provider-attempt-4.json",
+    "artifactHash": "132444f45b573c65481f49ab78ba3601f0ba88e8fd38d193a3e2b5a6088a281d",
+    "customerOutcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "5a578bda-d34f-4ac8-ac17-5eac839c94d4",
+          "group": "e4309705-fb36-4167-a41d-884fa2022a3e",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    }
+  }
+]

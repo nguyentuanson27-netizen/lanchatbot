@@ -3,8 +3,9 @@
 - [x] Independent exact-head review bb4e284d: REVISE 1P2 actual customer capture gate.
 - [x] Observed RED → GREEN; mọi persisted job ghi attachments/accepted Outbox rows, review bind customerOutcomeHash, structural checks trước job kế tiếp. Focused17 PASS.
 - [x] Cùng reviewer re-review APPROVE exact fb178f22; P2 đóng, focused17PASS, không P1/P2 còn lại.
-- [ ] Freeze archived verifier candidate; clean seal + fresh source/preflights; controls17 → visual4 → native21+25 theo gate, không hidden retry hoặc tự vòng2.
-- [ ] Review toàn outcomes thực, preserve denominator/accounting/commands và cập nhật report. B chưa GO, không live/deploy.
+- [x] Freeze archived verifier candidate ở clean362876e8; fresh source/preflights PASS; controls17 PASS (8SAFE eligible/8UNSAFE blocked/probePASS), visual4 complete/NOT_PROMOTED.
+- [x] Native dừng đúng gate sau14/46 (10eligible,3fallback,1handoff) vì OWNER_TOOL_MODE;32NOT_RUN, không retry/auto vòng2.4persisted captures/Outbox khớp, DB dropped.
+- [x] Review đủ35outcomes (17controls+4visual+14native), preserve66requests/0HTTPerror/1generationcontracterror/0retry và66wirelabelchecks PASS. [Report và toàn hội thoại](../apps/worker/evals/single-agent-commerce-read-only/reviewed-feedback-run-20261023/CHECKPOINT_B.md). STOP/B chưa GO, không live/deploy.
 
 Các mục dưới là lịch sử, không thay current status này.
 
