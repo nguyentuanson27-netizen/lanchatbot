@@ -1,3 +1,15 @@
+## Kế hoạch sales/media sau review Astra High — 2026-10-23
+
+[Plan hiện hành](../docs/specs/c3-phase-b-sales-media-followup-plan-20261023.md), [review độc lập](../docs/specs/c3-phase-b-sales-media-followup-astra-review-20261023.md). Chỉ planning, B chưa GO; checklist dưới đây là công việc mới, các mục sau giữ lịch sử.
+
+- [x] Tiếp thu hai P2 và một P3; phân biệt confirmed gap với causal hypothesis, self-review scope/budgets.
+- [ ] T1: observed RED → GREEN cho bounded observation theo operation/stage/query, source identity/freshness/readback và owner/verifier cùng scope; preserve selected khi view lỗi, không retry/PII/lẫn lượt.
+- [ ] T2: freeze diff thay đoạn phân loại media; không thêm lại quyền view/select hoặc ép GENERIC cho concern.
+- [ ] T3: candidate riêng thay một câu cảm giác mặc; giữ baseline active, verifier/config/context và bốn paired inputs.
+- [ ] Focused tests/build/lint theo risk, clean commit/source seal, preflight trước provider.
+- [ ] Khi được yêu cầu: 6 controls + 1 old-draft probe + 4 native media + 8 advice outcomes, cap39requests; controls chặn native phụ thuộc nếu không đạt, advice độc lập. Không đặt old draft PASS làm tiêu chí.
+- [ ] Review whole-turn/attachments/giọng; chỉ promote treatment có lợi, regression B1/B2/B3 đăng ký riêng sau đó. Không tự full43 hoặc mở model comparison.
+
 ## Sửa hai P2 và chạy12outcomes sales/media — 2026-10-23
 
 [Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/sales-media-run-20261023/CHECKPOINT_B.md). Source6cd998c0, B chưa GO.

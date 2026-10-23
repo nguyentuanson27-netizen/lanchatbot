@@ -1,5 +1,7 @@
 # Phase B — tư vấn giúp khách mua và dùng ảnh đúng mục đích
 
+**Kế hoạch hiện hành sau run12 và review GPT-6 Astra High:** [bản sửa follow-up](c3-phase-b-sales-media-followup-plan-20261023.md). Bản mới thay phần triển khai/campaign chưa thực hiện bên dưới; không thực hiện lại các bước đã có evidence. Nội dung dưới giữ nguyên như kế hoạch trước run để đối chiếu lịch sử, không mô tả trạng thái hiện tại.
+
 Ngày 23/10/2026. **PLAN_REVISED_AFTER_REVIEW — implementation được owner yêu cầu; chưa có provider result mới.** Base quan sát: `88589b180379eea5c5d0efbf2c06feed903909b2`. Review độc lập `/root/review_sales_media_plan_20261023`: REVISE, một P2 về capability bộ kiểm và hai P3 đã tiếp thu bên dưới; chưa gọi bản đã sửa là được reviewer APPROVE.
 
 Nguồn: [39 hội thoại](../../apps/worker/evals/single-agent-commerce-read-only/repeat39-run-20261023/CONVERSATIONS.md), [kế hoạch root cause đã review](c3-phase-b-full39-rootcause-fix-plan-20261023.md). Bản này cụ thể hóa hướng tư vấn/media, không hủy các việc discovery, deadline, tool-mode và lỗi provider còn mở. Không tự dispatch campaign trong lượt planning.
