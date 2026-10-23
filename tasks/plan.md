@@ -1,3 +1,7 @@
+## Bảy lượt media tiếp nối — 2026-10-23
+
+**COMPLETE 7/7; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/media-continuation-run-20261023/CHECKPOINT_B.md), [hội thoại](../apps/worker/evals/single-agent-commerce-read-only/media-continuation-run-20261023/CONVERSATIONS.md). Clean source4564b7fb + preflightPASS, nguồn hiện tại, N1. 3eligible/3fallback/1no-send;25requests=18owner+7verifier,0error/timeout/retry,DBdropped. Hai lượt nối fallback gửi ảnh đúng metadata; ảnh+giá trả AO499k. Hai câu thiếu feedback vẫn verifierFAIL; sizeNO_VERIFIED_CHART bị owner suy fit nên chặn; concern verifierPASS nhưng EGRESS_WORLD_CHANGED, exact mismatch chưa rõ. Draft concern vẫn dài/tính từ. Không tựfix/rerun/fullB hoặc claim cải thiện ổn định. Các phần dưới giữ evidence lịch sử.
+
 ## Tiếp nối media và yêu cầu mua hàng — 2026-10-23
 
 **IMPLEMENTED_AND_SELF_REVIEWED; chưa chạy provider.** [Bản sửa và giới hạn](../docs/specs/c3-phase-b-media-continuation-fix-20261023.md). Feedback vẫn cùng nguồn ảnh, chờ bổ sung dữ liệu thật. Tool cấp loại ảnh thay thế từ cùng snapshot/scope; kiểm history/fallback và ảnh+giá; thay đoạn hướng dẫn tool, giữ owner/verifier baseline. Chuẩn bị 5 hành trình / 7 lượt `--media-followup`, tối đa 28 requests, không tự tăng population full39. Không salvage draft bị chặn. Focused 137/137, Node 81/81, build/lint/syntax/diff PASS; build lỗi type test lần đầu đã sửa. B chưa GO; các mục sau giữ evidence lịch sử.
