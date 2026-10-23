@@ -1,3 +1,16 @@
+## Tư vấn bán hàng và media — 2026-10-23
+
+[Kế hoạch đề xuất](../docs/specs/c3-phase-b-sales-and-media-plan-20261023.md), chưa sửa runtime/prompt hoặc chạy provider.
+
+- [x] Review actual39, prompt, media tools và selector đang được gọi; phân biệt dùng được với thuyết phục/chuyển đổi.
+- [x] Viết hướng sửa và self-review chống lặp prompt, bloat, giả source coverage, gộp biến thí nghiệm.
+- [ ] Audit nguồn ảnh và captured request; xác định nguồn thiếu / tool chưa lấy / model dùng chưa tốt.
+- [ ] Chọn candidate advice có exact diff và giả thuyết; kiểm bốn cặp cùng đầu vào khi được yêu cầu chạy.
+- [ ] Sửa tool guidance media; kiểm selector khác góc chỉ khi audit chứng minh cần, giữ authority hiện hữu.
+- [ ] Chuẩn bị bốn lượt media tự nhiên; freeze nguồn, điều kiện nối lượt và whole-turn review trước kết quả.
+- [ ] Xử lý discovery/deadline/tool-mode theo nguyên nhân đã xác minh; quote experiment độc lập.
+- [ ] Focused tests theo thay đổi, source seal, accounting và regression khi được yêu cầu; chưa B GO.
+
 ## Chạy lại full39 prompt hiện hành — 2026-10-23
 
 **FULL39_REPEAT_COMPLETE — CHƯA B GO.** [Kết quả/so sánh](../apps/worker/evals/single-agent-commerce-read-only/repeat39-run-20261023/CHECKPOINT_B.md), [39hội thoại](../apps/worker/evals/single-agent-commerce-read-only/repeat39-run-20261023/CONVERSATIONS.md). Source01e689b4;17frozenfilehashes giống lượt trước, chỉplan đổi.39/39N1,0diagnostic:31eligible/3fallback/3handoff/2codecheckout; manual34dùngđược/2cầnsửa/3fallback.109requests=77owner+32verifier,0retry/labelleak/quotaerror;2ownererrors,1verifierFAIL,1snapshotSTALE được code receipt recovery;3DBdropped. Concern-v2/gallery vẫn cần sửa; thương lượng lần này dùngquoteđúng nhưng không phải treatment improvement. Chưa triển khai kế hoạch rootcause mới hoặc chạy paired experiments, không tự sửa/rerun/deploy. A OWNER_BYPASS. Các đoạn dưới giữ lịch sử.
