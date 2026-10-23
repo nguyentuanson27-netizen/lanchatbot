@@ -1,3 +1,10 @@
+## Independent review implementation tư vấn/media — 2026-10-23
+
+- [x] Một reviewer độc lập: [REVISE, hai P2](../docs/specs/c3-phase-b-sales-media-implementation-review-20261023.md), không provider/live hoặc sửa code.
+- [ ] Ưu tiên góc khác ảnh chính khi có; regression main SIDE/main BACK, giữ fallback/authority.
+- [ ] Persist attachment public URL/type/order theo attempt từ capturePayloads; kiểm không lẫn lượt hoặc recipient/token.
+- [ ] Focused verification sau sửa trước media campaign; chưa B GO hoặc bằng chứng giọng/thuyết phục tốt hơn.
+
 ## Implementation tư vấn/media — 2026-10-23
 
 [Bản sửa và verification](../docs/specs/c3-phase-b-sales-media-implementation-20261023.md). B chưa GO, chưa provider campaign mới.

@@ -1,3 +1,7 @@
+## Independent review implementation tư vấn/media — 2026-10-23
+
+**REVISE — hai P2 required trước media provider run.** [Review head f21097ec](../docs/specs/c3-phase-b-sales-media-implementation-review-20261023.md): main SIDE có thể chọn thêm SIDE dù có BACK; provider evidence chỉ lưu [CODE_IMAGE], chưa giữ exact attachment URL/order theo attempt. Cần sửa selector tối thiểu và reuse capturePayloads để persist public attachments không recipient/token. Chưa implementation fix hoặc provider run trong lượt review; B chưa GO.
+
 ## Implementation tư vấn/media — 2026-10-23
 
 **MEDIA_IMPLEMENTED_AND_SELF_REVIEWED; ADVICE_CANDIDATE_PREPARED; PROVIDER_NOT_RUN.** [Bản sửa và evidence](../docs/specs/c3-phase-b-sales-media-implementation-20261023.md). Plan đã tiếp thu P2 capability/P3 independent branches/voice report. GENERIC reuse main+complementary helper sau authority filter, disable legacy URL fallback; tools hướng dẫn chủ động dùng ảnh/sàng discovery. Bốn media turns qua ingress --media-probe; advice8 paired inputs cùng chữ/clock, candidate riêng chưa promote. Worker1959, focused122, shared41, Node84, build/typecheck/lintPASS. Audit là captured source22/10, feedback hiện chưa xác nhận; không live refresh/DB/provider run. Deadline/quote hypothesis còn mở, active owner/verifier giữ nguyên. B chưa GO.
