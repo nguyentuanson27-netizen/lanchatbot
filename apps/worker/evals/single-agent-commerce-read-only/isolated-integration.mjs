@@ -565,6 +565,7 @@ try{
    const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true,initialProductCodes:c.runtime.initialProductCodes});journeys.set(c.journeyId,j);}
    const capturedBefore=j.capture.length;
    const attachmentsBefore=j.capturePayloads.length;
+   const outboxBefore=new Set((await pool.query('SELECT outbox_id FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows.map(r=>r.outbox_id));
    const latest=c.runtime.privateCheckoutFixture?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':c.runtime.latest;
    let attempt;
    try{
@@ -578,8 +579,9 @@ try{
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
    const result={caseId:c.caseId,journeyId:c.journeyId,elapsedMs:performance.now()-started,...attempt,
     actualCapturedMessages:j.capture.slice(capturedBefore).map(t=>redactAnalyticsMessage(t).text),
-    ...(['FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS','FIVE_MEDIA_JOURNEYS_SEVEN_TURNS'].includes(providerFreeze.registration.selection.mode)
-      ?{actualCapturedAttachments:publicCapturedAttachments(j.capturePayloads,attachmentsBefore)}:{}),
+    actualCapturedAttachments:publicCapturedAttachments(j.capturePayloads,attachmentsBefore),
+    deliveryEvidence:{outboxRows:(await pool.query('SELECT outbox_id,response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY created_at,sequence_no',[j.bound.conversationId])).rows
+      .filter(r=>!outboxBefore.has(r.outbox_id)).map(r=>({id:r.outbox_id,group:r.response_group_id,sequence:r.sequence_no,status:r.status}))},
     committedPublicState:{stage:stored.state.stage,revision:stored.state.revision,cart:stored.state.cart?.value??null,measurements:profile.profile.measurements,customerProfileRevision:profile.profile.revision,
      negotiation:stored.state.negotiation?{tier:stored.state.negotiation.customerState,version:stored.state.negotiation.stateVersion,objectionEvidenceCount:stored.state.negotiation.consumedObjectionEvidenceIds.length}:null},
     counts:{...providerPorts.counters}};

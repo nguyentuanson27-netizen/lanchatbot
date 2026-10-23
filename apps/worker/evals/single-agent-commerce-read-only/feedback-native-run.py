@@ -49,4 +49,5 @@ for name,args in jobs:
     a=json.loads(file.read_text());result=a['result']
     assert not a.get('errorCode') and not result.get('errorCode') and not result.get('errorType') and a.get('status')!='BLOCKED','ATTEMPT_ERROR'
     assert all(g['status']=='OK' for g in result.get('generations',[])),'PROVIDER_ERROR_NO_RETRY'
-   if not name.startswith('b1-'): assert json.loads((dest/'integration.json').read_text())['testDatabaseDropped'] is True
+   if not name.startswith('b1-'):
+    subprocess.run(['node',str(gate),'--job',str(dest)],check=True)

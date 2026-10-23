@@ -8,6 +8,7 @@ import {validateControlBundle} from './feedback-control-inputs.mjs';
 import {finalGate} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {readFeedbackRunIdentity,assertCleanFeedbackSource} from './feedback-run-identity.mjs';
 import {registerJourneyOpenings,registerMediaFollowup} from './sales-journeys-registration.mjs';
+import {customerOutcome} from './delivery-capture.mjs';
 export const NATIVE_FIRST_INDICES=[3,4,5,7,8,9,11,15,17,23];
 export function validateControlsEvidence({identity,summary,bundle,attempts,requests,manifest,instructions}){
  assert.deepEqual(summary.identity,identity,'CONTROLS_IDENTITY_CHANGED');
@@ -38,6 +39,8 @@ export function validateNativePrefix({identity,expected,actual,review}){
   assert(!(a.result.generations??[]).some(g=>g.status!=='OK'),'PREFIX_PROVIDER_ERROR');
   const e=review.entries.find(e=>e.caseId===a.caseId);assert(e,'PREFIX_REVIEW_MISSING');
   assert.equal(e.artifactHash,a.hash,'PREFIX_ARTIFACT_CHANGED');assert.deepEqual(e.terminal,a.terminal,'PREFIX_REVIEW_TERMINAL_CHANGED');
+  const actualOutcome=customerOutcome(a,a.evidenceMode);
+  assert.equal(e.customerOutcomeHash,sha256(JSON.stringify(actualOutcome)),'PREFIX_CUSTOMER_OUTCOME_CHANGED');
   assert.equal(e.safety,'PASS','PREFIX_UNSAFE');assert.equal(e.regression,false,'PREFIX_REGRESSION');
   assert(typeof e.reason==='string'&&e.reason.trim().length>0,'PREFIX_WHOLE_TURN_REASON_REQUIRED');
  }
@@ -70,12 +73,20 @@ function collectPrefix(out,identity){
   }
   for(const name of readdirSync(dir).filter(n=>/^(provider-)?attempt-\d+\.json$/.test(n))){
    const bytes=readFileSync(resolve(dir,name)),a=JSON.parse(bytes);
-   actual.push({...a,hash:sha256(bytes),terminal:a.result?.terminal});
+   actual.push({...a,hash:sha256(bytes),terminal:a.result?.terminal,evidenceMode:job.startsWith('b1-')?'SEND_ELIGIBILITY_ONLY':'CAPTURE_TRANSPORT'});
   }
  }
  return {identity,expected,actual,review:json(resolve(out,'PREFIX_REVIEW.json'))};
 }
+export function validateCapturedJob(dir){
+ const integration=json(resolve(dir,'integration.json')),reg=json(resolve(dir,'registration.json'));
+ assert.equal(integration.testDatabaseDropped,true,'JOB_DATABASE_CLEANUP');
+ const files=readdirSync(dir).filter(n=>/^provider-attempt-\d+\.json$/.test(n));
+ assert.equal(files.length,reg.registeredOutcomes,'JOB_INCOMPLETE');assert.equal(integration.completedOutcomes,files.length,'JOB_INCOMPLETE');
+ for(const file of files)customerOutcome(json(resolve(dir,file)),'CAPTURE_TRANSPORT');
+}
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
+ if(process.argv[2]==='--job'){validateCapturedJob(process.argv[3]);console.log('CAPTURE_JOB_PASS');process.exit(0);}
  const [controls,out,phase]=process.argv.slice(2);assert(controls&&out&&['first','rest'].includes(phase),'GATE_ARGUMENTS');
  const identity=readFeedbackRunIdentity();assertCleanFeedbackSource(identity);const controlsHash=requirePassingControls(controls,identity);
  const reg=json(resolve(out,'REGISTRATION.json'));assert.deepEqual(reg.identity,identity,'NATIVE_REGISTRATION_CHANGED');assert.equal(reg.controlsHash,controlsHash,'CONTROLS_READINESS_CHANGED');

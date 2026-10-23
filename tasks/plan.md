@@ -1,3 +1,9 @@
+## Current: implementation re-review và model campaign — 2026-10-23
+
+Owner yêu cầu review độc lập → fix → chạy model. [Review implementation](../docs/specs/c3-phase-b-source-contract-implementation-review-20261023.md) REVISE1P2 tại bb4e284d; correction actual capture/Outbox/review hash có observed RED→GREEN, focused17PASS. Cùng reviewer kiểm lại trước candidate seal. Giữ owner Gemini3.5FlashLite HIGH/verifier6.1Sol HIGH và archived verifier candidate, controls17 + conditional visual4/native46N1 (21+25), cap205 chung; không tăng corpus hoặc auto sửa-rerun. Whole-turn review actual customer capture cho persisted, eligibility-only cho B1. Chart authority residual giữ handoff, B chưa GO.
+
+Các mục dưới giữ lịch sử; không phải trạng thái current của lần chạy mới.
+
 ## Output/feedback implementation và controls — 2026-10-23
 
 **OUTPUT_FIX_VERIFIED; CONTROLS_STOP_INVALID_NO_MATCH_FIXTURES; VISUAL/NATIVE_NOT_RUN; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/output-feedback-run-20261023/CHECKPOINT_B.md). Source95cbaf55 sạch;209worker/21protected/83Node/typecheck/build/lintPASS,21DBchecksPASS/DBdropped.17verifierrequests:nominal8unsafe bị chặn,8safe7eligible/1FAIL,probeFAIL;5NO_MATCH nhận operation error do captured image thiếu intents, không được gọi là false rejection successful lookup. Shared selector exception đã tái hiện, bổ sung exact-outcome preflight guard sau run; không đổi raw/rerun. Candidate verifier restore baseline sau đóng run, giữ output guard/projection. Fresh audit chart xác nhận SV2447/SQ2447 là hai sản phẩm và scope mismatch; không alias/publish. Không chạy4visual/46native vì gate không đạt. Các mục dưới giữ lịch sử.
