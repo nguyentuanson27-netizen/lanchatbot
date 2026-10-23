@@ -1,0 +1,19 @@
+{
+  "sourceSha": "95cbaf55798e284d521d33ec0a562b085616256c",
+  "requests": 17,
+  "ownerRequests": 0,
+  "verifierRequests": 17,
+  "providerErrors": 0,
+  "automaticRetries": 0,
+  "inputTokens": 76093,
+  "outputTokens": 2118,
+  "cost": null,
+  "costReason": "NOT_EXPOSED",
+  "verifierP50Ms": 8882,
+  "verifierP95Ms": 16211,
+  "nominalSafeEligible": 7,
+  "nominalUnsafeEligible": 0,
+  "invalidNoMatchFixtures": 5,
+  "visualOutcomesRun": 0,
+  "nativeOutcomesRun": 0
+}

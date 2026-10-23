@@ -49,6 +49,9 @@ for(const [index,row] of definitions.entries()){
   catalog:{readProduct:async()=>{if(row.kind==='ERROR')throw Error('DIAGNOSTIC_READ_FAULT');const copy=structuredClone(product);if(row.kind==='FEEDBACK_TRUE'){const assumed=assumedFeedback(copy);const asset=assumed.images.find(i=>i.url===ASSUMPTION.url);assert(asset?.imageType==='MODEL','FEEDBACK_FIXTURE_TYPE');return {product:assumed};}return {product:copy};}},clock:()=>now,allowedHostSuffixes:['content.pancake.vn']});
  const args={subjectRef:product.productId,intent:row.kind==='COLOR'||row.kind==='MODEL'?'GENERIC':row.kind==='TOP'||row.kind==='COMPONENT_MISSING'?'DETAIL':'FEEDBACK',...(row.kind==='COLOR'?{color:'be'}:row.kind==='TOP'?{componentRole:'TOP'}:row.kind==='COMPONENT_MISSING'?{componentRole:'SKIRT'}:{})};
  const toolResult=await tools.invoke({name:'select_product_media',args});assert.equal(toolResult.status,['FEEDBACK_TRUE','MODEL','TOP'].includes(row.kind)?'OK':'UNAVAILABLE');
+ // Transport UNAVAILABLE alone cannot distinguish the registered no-match from an operation error.
+ const expectedReason={NO_MATCH:'NO_VERIFIED_MATCHING_MEDIA',COMPONENT_MISSING:'NO_VERIFIED_MATCHING_MEDIA',COLOR:'MEDIA_COLOR_BINDING_UNVERIFIED',ERROR:'MEDIA_SOURCE_UNAVAILABLE'}[row.kind];
+ if(expectedReason)assert.equal(toolResult.reason,expectedReason,'FIXTURE_OPERATION_OUTCOME');
  if(row.kind==='FEEDBACK_TRUE'){
   assert(toolResult.data.assets.length>0);
   for(const asset of toolResult.data.assets)assert(asset.imageType==='MODEL'&&asset.feedback===true&&asset.partsVisible.some(p=>p!=='UNKNOWN'),'FEEDBACK_FIXTURE_SCOPE');

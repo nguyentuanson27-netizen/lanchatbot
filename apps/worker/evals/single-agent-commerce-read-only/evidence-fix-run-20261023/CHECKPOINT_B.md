@@ -1,5 +1,7 @@
 # Phase B — size dependency recovery và verifier/visual readiness
 
+**Erratum sau audit run mới:** raw controls #1/#8 ở campaign này có actual `MEDIA_SOURCE_UNAVAILABLE`, không phải successful no-match. [Root cause đã tái hiện và giới hạn đánh giá](../output-feedback-run-20261023/CHECKPOINT_B.md): captured image thiếu `intents` làm selector alternatives throw. Giữ mọi raw/nhãn/mẫu số bên dưới; không dùng hai controls này riêng để kết luận verifier chặn oan một lookup thành công hoặc đánh giá hiệu quả prompt.
+
 **IMPLEMENTED; PROVIDER CONTROLS FAIL; VISUAL NOT_RUN; B chưa GO.** Không chạy thêm vòng. Owner yêu cầu fix + chạy theo kế hoạch đã re-review APPROVE.
 
 ## Source và kết quả thực

@@ -1,3 +1,16 @@
+## Output/feedback implementation và controls — 2026-10-23
+
+[Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/output-feedback-run-20261023/CHECKPOINT_B.md). STOP, B chưa GO.
+
+- [x] Observed RED4→GREEN29; final guard30/30, focused209/21protected/83Node, worker build/directtsc/typecheck/lintPASS.
+- [x] Projection giữ binding nội bộ; chặn reserved artifact trước verifier, không strip/rewrite hoặc tăng generation.
+- [x] Fresh read-only chart audit: hai sản phẩm riêng, SIZE_CHART_SCOPE_MISMATCH; không đổi nguồn/alias.
+- [x] Seal95cbaf55, DB21PASS/drop, wire preflights,17verifierattempts đủ denominator/no retry.
+- [x] Tái hiện captured image thiếu intents làm lookup alternatives throw,5NO_MATCH thành operation error; kiểm campaign trước cũng có lỗi đó.
+- [x] Giữ raw/candidate; restore baseline verifier sau run, bổ sung exact-reason guard cho source tương lai, không provider rerun.
+- [ ] Reconstruct canonical control product metadata từ nguồn/evidence đúng contract; preflight phải assert đúng reason/outcome của toàn17fixtures trước generation đầu tiên.
+- [ ] Visual4/native46 chưa chạy vì gate chưa đạt; không chấm draft như actual hoặc nhận quality improvement.
+
 ## Kế hoạch sửa sau review hai lượt native — 2026-10-23
 
 [Kế hoạch mới](../docs/specs/c3-phase-b-next-step-plan-20261023.md), [review độc lập REVISE](../docs/specs/c3-phase-b-next-step-plan-independent-review-20261023.md). B chưa GO; chỉ planning trong lượt này, các mục dưới là việc chưa thực hiện.
