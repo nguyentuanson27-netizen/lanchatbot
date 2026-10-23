@@ -10,7 +10,7 @@ import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclara
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
-import {registerJourneyOpenings,registerNegotiationProbe,selectStatefulThrough} from './sales-journeys-registration.mjs';
+import {registerJourneyOpenings,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe} from './sales-journeys-registration.mjs';
 
 export function statefulPreflight(root){
  assert.notEqual(process.env.C3_TEST_CODEX_TRANSPORT,'1','TEST_TRANSPORT_FORBIDDEN_IN_PROVIDER_RUN');
@@ -19,12 +19,12 @@ export function statefulPreflight(root){
  assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=all','--',...paths],{cwd:root,encoding:'utf8'}).trim(),'','DIRTY_EXECUTABLE_OR_CONFIG');
  const m=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)))),configBytes=readFileSync(new URL('./source-config.b1.json',import.meta.url)),config=JSON.parse(configBytes);
  assert.deepEqual(requiredSourceConfig(config),[],'SOURCE_CONFIG_UNAVAILABLE');
- const journeyOpenings=process.argv.includes('--journey-openings'),negotiationProbe=process.argv.includes('--negotiation-probe');
- assert(!(journeyOpenings&&negotiationProbe),'ONE_SELECTED_COHORT');
- const casesBytes=readFileSync(new URL(journeyOpenings||negotiationProbe?'./sales-journeys.candidate.json':'./stateful-cases.json',import.meta.url));
+ const journeyOpenings=process.argv.includes('--journey-openings'),negotiationProbe=process.argv.includes('--negotiation-probe'),mediaProbe=process.argv.includes('--media-probe');
+ assert([journeyOpenings,negotiationProbe,mediaProbe].filter(Boolean).length<=1,'ONE_SELECTED_COHORT');
+ const casesBytes=readFileSync(new URL(mediaProbe?'./sales-media-cases.json':journeyOpenings||negotiationProbe?'./sales-journeys.candidate.json':'./stateful-cases.json',import.meta.url));
  const selection=journeyOpenings?registerJourneyOpenings(JSON.parse(casesBytes),['J02','J03','J05','J08']):null;
- const registeredCases=selection?.samples??(negotiationProbe?registerNegotiationProbe(JSON.parse(casesBytes),JSON.parse(readFileSync(new URL('./stateful-cases.json',import.meta.url)))):JSON.parse(casesBytes));
- if(!journeyOpenings&&!negotiationProbe){assert.equal(registeredCases.length,8);assert.equal(registeredCases.filter(c=>c.runtime.latest).length,7);}
+ const registeredCases=mediaProbe?registerMediaProbe(JSON.parse(casesBytes)):selection?.samples??(negotiationProbe?registerNegotiationProbe(JSON.parse(casesBytes),JSON.parse(readFileSync(new URL('./stateful-cases.json',import.meta.url)))):JSON.parse(casesBytes));
+ if(!journeyOpenings&&!negotiationProbe&&!mediaProbe){assert.equal(registeredCases.length,8);assert.equal(registeredCases.filter(c=>c.runtime.latest).length,7);}
  const throughIndex=process.argv.indexOf('--through-case');
  assert(throughIndex<0||(!process.argv.includes('--opening-only')&&!!process.argv[throughIndex+1]),'THROUGH_CASE_ARGUMENT');
  const through=throughIndex<0?undefined:process.argv[throughIndex+1],cases=selectStatefulThrough(registeredCases,through);
@@ -36,7 +36,7 @@ export function statefulPreflight(root){
   candidateHandoffFileHash:process.argv.includes('--candidate-handoff')?sha256(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))):null,
   catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,maxSourceBytes:2097152,maxSourceDimension:12000,maxSourcePixels:50000000,
    sourceHashRequired:true,hashContract:'APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256',resize:'EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG'},
-  selection:journeyOpenings?{mode:'FOUR_OPENINGS_ONLY',registered:cases.map(c=>c.caseId),deferred:selection.deferred,day:new Date().toISOString().slice(0,10)}:negotiationProbe?{mode:'THREE_NEGOTIATION_COMPANION',registered:cases.map(c=>c.caseId),prerequisite:'Actual cart from setup, never synthetic provider completion.'}:{mode:'BASELINE_EIGHT_STATEFUL'},
+  selection:mediaProbe?{mode:'FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS',registered:cases.map(c=>c.caseId)}:journeyOpenings?{mode:'FOUR_OPENINGS_ONLY',registered:cases.map(c=>c.caseId),deferred:selection.deferred,day:new Date().toISOString().slice(0,10)}:negotiationProbe?{mode:'THREE_NEGOTIATION_COMPANION',registered:cases.map(c=>c.caseId),prerequisite:'Actual cart from setup, never synthetic provider completion.'}:{mode:'BASELINE_EIGHT_STATEFUL'},
   ...(through?{throughCase:through,deferredCaseIds:registeredCases.slice(cases.length).map(c=>c.caseId)}:{}),
   selectionHash:sha256(JSON.stringify(cases)),
   corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:process.argv.includes('--opening-only')?0:cases.filter(c=>c.runtime.privateCheckoutFixture).length,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:inspectCodex(),sendEnabled:false}};

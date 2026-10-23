@@ -6,6 +6,18 @@ export function selectStatefulThrough(cases,through){
  assert(index>=0,'UNKNOWN_THROUGH_CASE');
  return cases.slice(0,index+1);
 }
+export function registerMediaProbe(rows){
+ assert(Array.isArray(rows)&&rows.length===4,'FOUR_MEDIA_CASES');
+ assert.equal(new Set(rows.map(c=>c.caseId)).size,4,'DUPLICATE_MEDIA_CASE');
+ return rows.map(c=>{
+  assert(typeof c.caseId==='string'&&c.caseId.trim(),'MEDIA_CASE_ID');
+  assert(c.runtime.initialProductCodes.length===1&&typeof c.runtime.initialProductCodes[0]==='string','MEDIA_PRODUCT_SETUP');
+  const messages=journeyMessages(c);
+  assert(messages.length===1&&typeof messages[0].text==='string'&&messages[0].text.trim(),'MEDIA_ONE_TURN');
+  return {caseId:c.caseId,journeyId:c.caseId,runtime:{messages,latest:messages[0].text,history:[],initialProductCodes:[...c.runtime.initialProductCodes]},
+   evaluator:structuredClone(c.evaluator)};
+ });
+}
 export function journeyMessages(turn){
  assert(!turn.runtime.privateFixture,'PRIVATE_FIXTURE_NOT_MATERIALIZED');
  assert(Array.isArray(turn.runtime.messages)&&turn.runtime.messages.length,'JOURNEY_MESSAGES');

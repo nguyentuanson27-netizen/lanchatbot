@@ -43,6 +43,21 @@ const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo d�
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1,currentProductId:null}},signal:new AbortController().signal});
 const body=parts=>({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:4,thoughtsTokenCount:2}});
 
+test('media probe provider wires expose view/select capability but never evaluation labels',async()=>{
+ const {registerMediaProbe}=await import('./sales-journeys-registration.mjs');
+ const rows=JSON.parse(readFileSync(new URL('./sales-media-cases.json',import.meta.url)));
+ rows.forEach(c=>{c.evaluator.expected='SCORING_CANARY';});
+ for(const c of registerMediaProbe(rows)){
+  const r=request();r.contents=[{role:'user',parts:[{text:c.runtime.latest}]}];
+  r.availableTools=['select_product_media','view_product_media'];
+  r.context.boundSubjects=[{ref:'SV2447',kind:'PRODUCT',label:'Thạch Thảo'}];
+  const b=buildGeminiCommerceRequest(r),wire=JSON.stringify(b);
+  assert.deepEqual(b.tools[0].functionDeclarations.map(d=>d.name),r.availableTools);
+  assert.doesNotMatch(wire,/SCORING_CANARY|caseId|evaluator|expected|purpose/);
+  assert(!b.contents.flatMap(c=>c.parts).some(p=>p.inlineData));
+ }
+});
+
 test('owner wire includes bounded turn metadata, not private fields or mutable fact identity',()=>{
  const r=request();r.turnTime={processingAt:'2026-10-22T17:05:00.000Z',timeZone:'Asia/Ho_Chi_Minh',private:'NEVER_FORWARD'};
  const text=buildGeminiCommerceRequest(r).contents[0].parts[0].text;

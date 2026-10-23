@@ -17,6 +17,47 @@ const setup = async () => {
   return {f,scope,tools,call,image};
 };
 describe("candidate product media",()=>{
+  it("pairs the overview with a complementary approved angle instead of a second front image",async()=>{
+    const s=await setup();
+    s.f.product.images=[
+      {...s.image,url:"https://content.pancake.vn/front.jpg",angle:"FRONT",role:"PRIMARY",sortOrder:0},
+      {...s.image,url:"https://content.pancake.vn/front-2.jpg",angle:"FRONT",role:"ADDITIONAL",sortOrder:1},
+      {...s.image,url:"https://content.pancake.vn/back.jpg",angle:"BACK",role:"ADDITIONAL",sortOrder:2},
+      {...s.image,url:"https://content.pancake.vn/unapproved-side.jpg",angle:"SIDE",role:"ADDITIONAL",sortOrder:0,metadataVerified:false},
+    ];
+    const call={...s.call,args:{subjectRef:s.f.product.productId,intent:"GENERIC"}};
+    expect(await s.tools.invoke(call)).toMatchObject({status:"OK"});
+    expect(s.tools.mediaSelection!().map(a=>a.url)).toEqual([
+      "https://content.pancake.vn/front.jpg","https://content.pancake.vn/back.jpg",
+    ]);
+    await expect(s.tools.readback()).resolves.toBeDefined();
+    s.f.product.images[2]!.url="https://content.pancake.vn/replaced-back.jpg";
+    const result=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Cho chị xem mẫu này nhé.",history:[],clock:()=>commerceNow,
+      ownerPrompt:"Tư vấn.",verifierPrompt:"Kiểm nghĩa.",owner:async()=>({kind:"FINAL",text:"Em gửi ảnh mẫu này chị nhé."}),
+      verifier:async()=>{s.f.product.images[2]!.url="https://content.pancake.vn/changed-again.jpg";return {result:{verdict:"PASS",violations:[]}};}});
+    expect(result.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+  });
+  it("keeps detail and verified feedback distinct without substituting catalog images",async()=>{
+    const s=await setup();
+    s.f.product.images=[s.image,
+      {...s.image,url:"https://content.pancake.vn/detail.jpg",angle:"CLOSEUP",imageType:"DETAIL",role:"ADDITIONAL"},
+      {...s.image,url:"https://content.pancake.vn/feedback.jpg",feedback:true,role:"ADDITIONAL"},
+    ];
+    for(const [intent,url] of [["DETAIL","detail.jpg"],["FEEDBACK","feedback.jpg"]]){
+      const t=await setup();t.f.product.images=structuredClone(s.f.product.images);
+      expect(await t.tools.invoke({...t.call,args:{subjectRef:t.f.product.productId,intent}})).toMatchObject({status:"OK"});
+      expect(t.tools.mediaSelection!().map(a=>a.url)).toEqual([`https://content.pancake.vn/${url}`]);
+    }
+    s.f.product.images=s.f.product.images.filter(i=>!i.feedback);
+    expect(await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}})).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"});
+    expect(s.tools.mediaSelection!()).toEqual([]);
+  });
+  it("never uses legacy imageUrls when no approved overview remains",async()=>{
+    const s=await setup();s.f.product.images[0]!.metadataVerified=false;
+    expect(s.f.product.imageUrls).toHaveLength(1);
+    expect(await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"GENERIC"}})).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"});
+    expect(s.tools.mediaSelection!()).toEqual([]);
+  });
   it("distinguishes an unverified color binding from an unavailable source or missing approved image",async()=>{
     const s=await setup();s.f.product.colors=["navy","be"];
     expect(await s.tools.invoke({...s.call,args:{...s.call.args,color:"be"}})).toMatchObject({status:"UNAVAILABLE",reason:"MEDIA_COLOR_BINDING_UNVERIFIED",data:{subjectRef:s.f.product.productId,requested:{intent:"BACK",color:"be"},scope:"MEDIA_ONLY"}});

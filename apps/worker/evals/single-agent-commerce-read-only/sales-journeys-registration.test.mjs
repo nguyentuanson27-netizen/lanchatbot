@@ -1,8 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough} from './sales-journeys-registration.mjs';
+import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe} from './sales-journeys-registration.mjs';
 const corpus=JSON.parse(readFileSync(new URL('./sales-journeys.candidate.json',import.meta.url)));
+
+test('four independent media turns use actual ingress input, not evaluator labels or imagined accepted history',()=>{
+ const rows=JSON.parse(readFileSync(new URL('./sales-media-cases.json',import.meta.url)));
+ const samples=registerMediaProbe(rows);
+ assert.equal(samples.length,4);assert.equal(new Set(samples.map(c=>c.journeyId)).size,4);
+ assert(samples.every(c=>c.runtime.history.length===0&&c.runtime.initialProductCodes.length===1));
+ assert.doesNotMatch(JSON.stringify(samples.map(c=>c.runtime)),/caseId|evaluator|required|FEEDBACK|DETAIL|expected/);
+ assert.deepEqual(samples.map(c=>c.runtime.latest),rows.map(c=>c.runtime.messages[0].text));
+ assert.throws(()=>registerMediaProbe(rows.slice(1)),/FOUR_MEDIA_CASES/);
+ const bad=structuredClone(rows);bad[0].runtime.messages[0].attachments=[{fixtureRef:'NOT_READY'}];
+ assert.throws(()=>registerMediaProbe(bad),/MEDIA_FIXTURE/);
+});
 
 test('targeted stateful rerun retains actual prerequisite turns and stops before unrelated checkout',()=>{
  const baseline=JSON.parse(readFileSync(new URL('./stateful-cases.json',import.meta.url)));

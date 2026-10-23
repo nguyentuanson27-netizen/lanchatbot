@@ -1,4 +1,4 @@
-import {buildProtectedMediaClaimsV1,selectRequestedImages,normalizeCatalogToken,type CustomerImageIntent} from "@lana/business-tools";
+import {buildProtectedMediaClaimsV1,selectRequestedImages,selectPriceCardImages,normalizeCatalogToken,type CustomerImageIntent} from "@lana/business-tools";
 import {MEDIA_FRESH_FOR_SECONDS} from "@lana/contracts";
 import {buildReadOnlyContext,commerceHash} from "./single-agent-commerce-read-only-context.js";
 import {toolArgs,type ReadOnlyCatalog,type CommerceToolCall,type CommerceToolResult} from "./single-agent-commerce-read-only-tools.js";
@@ -55,7 +55,11 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       if(query.componentRole){const parts=image.partsVisible??[];if(parts.length!==1||normalizeCatalogToken(parts[0]!)!==componentParts[query.componentRole])return false;}
       return true;
     });
-    return selectRequestedImages({...product,images},query.intent).images.map(image=>{
+    // Reuse the existing main + complementary-angle rule on approved assets only.
+    // Disable its legacy URL fallback: a raw URL has not passed the media authority checks.
+    const approvedProduct={...product,images,imageUrls:[]};
+    const selected=query.intent==="GENERIC"?selectPriceCardImages(approvedProduct):selectRequestedImages(approvedProduct,query.intent);
+    return selected.images.map(image=>{
       const observedAt=image.observedAt??product.observedAt!;
       const sourceVersion=commerceHash({productId:product.productId,catalogVersion:product.catalogVersion,image});
       return {assetRef:`asset:${commerceHash(image.url)}`,productId:product.productId,url:image.url,sourceContentSha256:image.sourceContentSha256!,
