@@ -44,7 +44,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         text:JSON.stringify({subjectRef:s.query.subjectRef,intent:s.query.intent,componentRole:s.query.componentRole??null,color:s.query.color??null,
           assets:s.assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible}))})}))]});
   };
-  async function select(query:MediaQuery,onSource?:(source:SourceCheck)=>void):Promise<CommerceMediaAsset[]> {
+  async function select(query:MediaQuery,onSource?:(source:SourceCheck)=>void,onAlternatives?:(intents:CustomerImageIntent[])=>void):Promise<CommerceMediaAsset[]> {
     const {product}=await input.catalog.readProduct(query.subjectRef,false);
     if(product.productId!==query.subjectRef) throw new Error("MEDIA_SOURCE_UNAVAILABLE");
     const at=input.clock().getTime();
@@ -70,6 +70,10 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     // Disable its legacy URL fallback: a raw URL has not passed the media authority checks.
     const approvedProduct={...product,images,imageUrls:[]};
     const selected=query.intent==="GENERIC"?selectPriceCardImages(approvedProduct):selectRequestedImages(approvedProduct,query.intent);
+    // Reuse this filtered snapshot, never another fetch or an automatic substitute.
+    // These are lookup options under the same color/component scope, not prepared attachments.
+    if(!selected.images.length&&onAlternatives)onAlternatives([...intents].filter(intent=>intent!==query.intent&&
+      (intent==="GENERIC"?selectPriceCardImages(approvedProduct):selectRequestedImages(approvedProduct,intent)).images.length>0));
     return selected.images.map(image=>{
       const observedAt=image.observedAt??product.observedAt!;
       const sourceVersion=commerceHash({productId:product.productId,catalogVersion:product.catalogVersion,image});
@@ -87,11 +91,12 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     const query=a as unknown as MediaQuery,key=commerceHash(query);
     const observationKey=commerceHash({operation:call.name,query});
     if(!observations.has(observationKey)&&observations.size>=6)return {status:"REJECTED",reason:"MEDIA_OBSERVATION_BOUND"};
-    let source:SourceCheck|null=null,stage="CATALOG_SELECTION";
+    let source:SourceCheck|null=null,stage="CATALOG_SELECTION",availableAlternatives:CustomerImageIntent[]|null=null;
     const unavailable=(reason:string):CommerceToolResult=>{
       const observedAt=input.clock().toISOString();
       const eventOnly=reason==="MEDIA_SOURCE_UNAVAILABLE";
-      const evidence={subjectRef:query.subjectRef,requested:query,operation:call.name,stage,outcome:reason,scope:"MEDIA_ONLY",
+      const alternatives=reason==="NO_VERIFIED_MATCHING_MEDIA"?availableAlternatives:null;
+      const evidence={subjectRef:query.subjectRef,requested:query,operation:call.name,stage,outcome:reason,scope:"MEDIA_ONLY",availableAlternatives:alternatives,
         authority:eventOnly?"OPERATION_EVENT_ONLY":"SCOPED_CATALOG_LOOKUP",
         meaning:eventOnly?"This operation failed; no conclusion about availability or stock.":
           reason==="MEDIA_COLOR_BINDING_UNVERIFIED"?"Requested image color is unverified; no conclusion about colors for sale.":
@@ -101,10 +106,10 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         expiresAt:recordSource?.expiresAt??new Date(Date.parse(observedAt)+MEDIA_FRESH_FOR_SECONDS*1000).toISOString(),
         sourceVersion:recordSource?.sourceVersion??commerceHash({event:evidence,observedAt}),text:JSON.stringify(evidence)};
       observations.set(observationKey,{query,operation:call.name,stage,outcome:reason,source:recordSource,literal});
-      return {status:"UNAVAILABLE",reason,data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY",observation:evidence}};
+      return {status:"UNAVAILABLE",reason,data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY",availableAlternatives:alternatives,observation:evidence}};
     };
     try{
-      const view=call.name==="view_product_media",assets=(await select(query,value=>{source=value;})).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
+      const view=call.name==="view_product_media",assets=(await select(query,value=>{source=value;},value=>{availableAlternatives=value;})).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
       if(!assets.length)return unavailable("NO_VERIFIED_MATCHING_MEDIA");
       if(view){
         if(catalogImages().length-(viewed.get(key)?.images.length??0)+assets.length>COMMERCE_VISION_BOUNDS.count)return {status:"REJECTED",reason:"VISION_BOUND"};

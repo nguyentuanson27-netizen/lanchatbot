@@ -58,6 +58,23 @@ test('media probe provider wires expose view/select capability but never evaluat
  }
 });
 
+test('media continuation wires carry runtime inputs and scoped alternatives without evaluation labels',async()=>{
+ const {registerMediaFollowup}=await import('./sales-journeys-registration.mjs');
+ const rows=JSON.parse(readFileSync(new URL('./sales-media-followup-cases.json',import.meta.url)));
+ for(const j of rows)for(const t of j.turns)t.evaluator.expected='SCORING_CANARY';
+ for(const c of registerMediaFollowup(rows)){
+  const r=request();r.contents=[{role:'user',parts:[{text:c.runtime.latest}]}];
+  r.availableTools=['select_product_media','view_product_media','read_product'];
+  r.context.boundSubjects=[{ref:'SV2447',kind:'PRODUCT',label:'Thạch Thảo'}];
+  r.context.policyLiterals=[{ref:'media-lookup:test',sourceVersion:'source',observedAt:'2026-10-23T00:00:00Z',expiresAt:'2026-10-23T01:00:00Z',
+   text:JSON.stringify({subjectRef:'SV2447',requested:{intent:'FEEDBACK'},scope:'MEDIA_ONLY',availableAlternatives:['GENERIC','DETAIL']})}];
+  const wire=JSON.stringify(buildGeminiCommerceRequest(r));
+  assert.doesNotMatch(wire,/SCORING_CANARY|caseId|evaluator|expected|purpose|journeyId/);
+  assert.match(wire,/availableAlternatives/);
+  assert(wire.includes(c.runtime.latest));
+ }
+});
+
 test('owner wire includes bounded turn metadata, not private fields or mutable fact identity',()=>{
  const r=request();r.turnTime={processingAt:'2026-10-22T17:05:00.000Z',timeZone:'Asia/Ho_Chi_Minh',private:'NEVER_FORWARD'};
  const text=buildGeminiCommerceRequest(r).contents[0].parts[0].text;

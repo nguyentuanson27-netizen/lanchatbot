@@ -1,3 +1,7 @@
+## Tiếp nối media và yêu cầu mua hàng — 2026-10-23
+
+**IMPLEMENTED_AND_SELF_REVIEWED; chưa chạy provider.** [Bản sửa và giới hạn](../docs/specs/c3-phase-b-media-continuation-fix-20261023.md). Feedback vẫn cùng nguồn ảnh, chờ bổ sung dữ liệu thật. Tool cấp loại ảnh thay thế từ cùng snapshot/scope; kiểm history/fallback và ảnh+giá; thay đoạn hướng dẫn tool, giữ owner/verifier baseline. Chuẩn bị 5 hành trình / 7 lượt `--media-followup`, tối đa 28 requests, không tự tăng population full39. Không salvage draft bị chặn. Focused 137/137, Node 81/81, build/lint/syntax/diff PASS; build lỗi type test lần đầu đã sửa. B chưa GO; các mục sau giữ evidence lịch sử.
+
 ## Giả định feedback + media fallback — 2026-10-23
 
 **COMPLETE; B chưa GO.** [Report và10lượt](../apps/worker/evals/single-agent-commerce-read-only/assumed-feedback-run-20261023/CHECKPOINT_B.md). Initial8 sourceeea5ec72:6eligible/2fallback; phát hiện thiếu feedback flag và MarkdownassetRef. Fix source70d52342, confirmation2/2eligible đúng ảnh giả định; không thay evidence initial. Fallback media mới đã capture ở nguồn thiếu feedback. Giả định chỉ eval clone, không publish nguồn; active owner baseline. Final focused131/Node62/tsc/lintPASS; không fullB hoặc claim stability. Các mục dưới giữ lịch sử.

@@ -567,7 +567,7 @@ try{
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
    const result={caseId:c.caseId,journeyId:c.journeyId,elapsedMs:performance.now()-started,...attempt,
     actualCapturedMessages:j.capture.slice(capturedBefore).map(t=>redactAnalyticsMessage(t).text),
-    ...(providerFreeze.registration.selection.mode==='FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS'
+    ...(['FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS','FIVE_MEDIA_JOURNEYS_SEVEN_TURNS'].includes(providerFreeze.registration.selection.mode)
       ?{actualCapturedAttachments:publicCapturedAttachments(j.capturePayloads,attachmentsBefore)}:{}),
     committedPublicState:{stage:stored.state.stage,revision:stored.state.revision,cart:stored.state.cart?.value??null,measurements:profile.profile.measurements,customerProfileRevision:profile.profile.revision,
      negotiation:stored.state.negotiation?{tier:stored.state.negotiation.customerState,version:stored.state.negotiation.stateVersion,objectionEvidenceCount:stored.state.negotiation.consumedObjectionEvidenceIds.length}:null},

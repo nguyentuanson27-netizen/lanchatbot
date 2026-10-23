@@ -1,8 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe} from './sales-journeys-registration.mjs';
+import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe,registerMediaFollowup} from './sales-journeys-registration.mjs';
 const corpus=JSON.parse(readFileSync(new URL('./sales-journeys.candidate.json',import.meta.url)));
+
+test('media followups retain actual prerequisites and never manufacture a shop reply',()=>{
+ const rows=JSON.parse(readFileSync(new URL('./sales-media-followup-cases.json',import.meta.url)));
+ const samples=registerMediaFollowup(rows);
+ assert.equal(samples.length,7);assert.equal(new Set(samples.map(c=>c.journeyId)).size,5);
+ assert.equal(samples[0].journeyId,samples[1].journeyId);
+ assert.equal(samples[2].journeyId,samples[3].journeyId);
+ assert.notEqual(samples[0].journeyId,samples[2].journeyId);
+ assert(samples.every(c=>!Object.hasOwn(c.runtime,'history')));
+ assert.doesNotMatch(JSON.stringify(samples.map(c=>c.runtime)),/evaluator|purpose|expected|caseId|turnId/);
+ assert.deepEqual(selectStatefulThrough(samples,samples[1].caseId),samples.slice(0,2));
+ const bad=structuredClone(rows);bad[0].turns[1].turnId='ask';
+ assert.throws(()=>registerMediaFollowup(bad),/DUPLICATE_MEDIA_TURN/);
+});
 
 test('four independent media turns use actual ingress input, not evaluator labels or imagined accepted history',()=>{
  const rows=JSON.parse(readFileSync(new URL('./sales-media-cases.json',import.meta.url)));

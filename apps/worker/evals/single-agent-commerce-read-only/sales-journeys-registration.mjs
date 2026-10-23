@@ -6,6 +6,25 @@ export function selectStatefulThrough(cases,through){
  assert(index>=0,'UNKNOWN_THROUGH_CASE');
  return cases.slice(0,index+1);
 }
+export function registerMediaFollowup(rows){
+ assert(Array.isArray(rows)&&rows.length===5,'FIVE_MEDIA_JOURNEYS');
+ assert.equal(new Set(rows.map(j=>j.caseId)).size,rows.length,'DUPLICATE_MEDIA_JOURNEY');
+ const samples=rows.flatMap(j=>{
+  assert(Array.isArray(j.initialProductCodes)&&j.initialProductCodes.length===1&&typeof j.initialProductCodes[0]==='string','MEDIA_PRODUCT_SETUP');
+  assert(Array.isArray(j.turns)&&j.turns.length>=1&&j.turns.length<=2,'MEDIA_TURN_BOUND');
+  return j.turns.map(t=>{
+   assert(typeof t.turnId==='string'&&t.turnId.trim(),'MEDIA_TURN_ID');
+   const messages=journeyMessages(t);
+   assert(messages.length===1&&typeof messages[0].text==='string'&&messages[0].text.trim(),'MEDIA_ONE_TURN');
+   // No synthetic shop history. The existing runner reuses the actual journey/capture.
+   return {caseId:j.caseId+':'+t.turnId,journeyId:j.caseId,runtime:{messages,latest:messages[0].text,
+    initialProductCodes:[...j.initialProductCodes]},evaluator:structuredClone(t.evaluator)};
+  });
+ });
+ assert.equal(samples.length,7,'SEVEN_MEDIA_TURNS');
+ assert.equal(new Set(samples.map(c=>c.caseId)).size,samples.length,'DUPLICATE_MEDIA_TURN');
+ return samples;
+}
 export function registerMediaProbe(rows){
  assert(Array.isArray(rows)&&rows.length===4,'FOUR_MEDIA_CASES');
  assert.equal(new Set(rows.map(c=>c.caseId)).size,4,'DUPLICATE_MEDIA_CASE');

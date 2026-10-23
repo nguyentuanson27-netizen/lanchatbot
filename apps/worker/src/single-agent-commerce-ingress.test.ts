@@ -61,6 +61,58 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it.each(["GENERIC","DETAIL"])("continues after the actual media fallback with history and persisted product (%s)",async intent=>{
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
+  p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
+    reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  const tool=(intent:string):OwnerGeneration=>({kind:"TOOLS",calls:[{name:"select_product_media",args:{subjectRef:p.productId,intent}}],
+    content:{role:"model",parts:[{functionCall:{name:"select_product_media",args:{subjectRef:p.productId,intent}}}]}});
+  f.message.text="Shop có ảnh khách mặc mẫu này không em?";
+  f.verifier.mockResolvedValueOnce({result:{verdict:"UNCERTAIN",violations:[]}});
+  let calls=0;
+  const first=await f.run(async()=>++calls===1?tool("FEEDBACK"):{kind:"FINAL",text:"Ảnh khách mặc em chưa có để gửi chị."});
+  expect(first.terminal.fallbackId).toBe("C3_B_MEDIA_NEXT_STEP_V1");
+  const sent=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
+  expect(sent).toEqual([{kind:"TEXT",text:first.terminal.text}]);
+  // Delivery history must contain the terminal text, never the rejected owner draft.
+  f.history.listConversationHistory.mockResolvedValue([
+    {senderType:"CUSTOMER",text:f.message.text},{senderType:"BOT",text:first.terminal.text}]);
+  f.message.text=intent==="GENERIC"?"Ảnh tổng thể em.":"Cận phần thêu nhé.";
+  f.message.messageId="next-media-message";f.message.eventKey="next-media-message";
+  calls=0;
+  const second=await f.run(async request=>{
+    expect(request.context.state.currentProductId).toBe(p.productId);
+    expect(request.contents[1]!.parts[0]!.text).toBe(first.terminal.text);
+    expect(JSON.stringify(request.contents)).not.toContain("Ảnh khách mặc em chưa có để gửi chị.");
+    return ++calls===1?tool(intent):{kind:"FINAL",text:"Em gửi ảnh chị nhé."};
+  });
+  expect(second.terminal.disposition).toBe("SEND_ELIGIBLE");
+  expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages).toEqual([
+    {kind:"TEXT",text:"Em gửi ảnh chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+  expect(f.verifier).toHaveBeenCalledTimes(2);
+});
+
+it.each(["PASS","UNCERTAIN"])("keeps a mixed price/media reply only after whole-draft verification (%s)",async verdict=>{
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
+  f.message.text="Cho chị xem ảnh khách mặc, áo này bao nhiêu em?";
+  f.verifier.mockResolvedValue({result:{verdict,violations:[]}});
+  const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}},
+    {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}];
+  let generations=0;
+  const draft="Áo 499k chị nhé. Ảnh khách mặc em chưa có để gửi chị.";
+  const result=await f.run(async request=>{
+    if(++generations===1)return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}};
+    expect(request.context.protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"})]));
+    expect(request.context.policyLiterals.some(p=>p.ref.startsWith("media-lookup:"))).toBe(true);
+    return {kind:"FINAL",text:draft};
+  });
+  expect(f.verifier).toHaveBeenCalledTimes(1);
+  const delivered=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
+  expect(delivered).toEqual([{kind:"TEXT",text:result.terminal.text}]);
+  if(verdict==="PASS")expect(result.terminal.text).toBe(draft);
+  else {expect(result.terminal.disposition).toBe("FALLBACK");expect(JSON.stringify(delivered)).not.toContain("499");}
+});
+
 async function seedCart(f: ReturnType<typeof fixture>) {
   const scope=commerceScope(), resolution=await fixturePolicy(), policy=resolution.bundle!.policy;
   f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});

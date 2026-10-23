@@ -140,6 +140,41 @@ describe("candidate product media",()=>{
 });
 
 describe("media lookup observations",()=>{
+  it("offers only eligible alternatives from the same lookup, visible to both models",async()=>{
+    const s=await setup();s.f.product.images=[...s.f.product.images,
+      {...s.image,url:"https://content.pancake.vn/detail.jpg",imageType:"DETAIL",angle:"CLOSEUP"},
+      {...s.image,url:"https://content.pancake.vn/feedback.jpg",feedback:true,metadataVerified:false}];
+    const before=s.readProduct.mock.calls.length;
+    const result=await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK",componentRole:"TOP"}});
+    const alternatives=(result.data as {availableAlternatives:unknown}).availableAlternatives;
+    expect(alternatives).toEqual(["GENERIC","BACK","DETAIL","PRODUCT_ONLY"]);
+    expect(s.readProduct).toHaveBeenCalledTimes(before+1);
+    expect(s.tools.mediaSelection!()).toEqual([]); // Availability is not a selection or a send.
+    const observation=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media-lookup:"))!.text);
+    expect(observation.availableAlternatives).toEqual(alternatives);
+    expect(observation.requested.componentRole).toBe("TOP");
+    await expect(s.tools.readback()).resolves.toEqual(s.tools.snapshot());
+    const captured:unknown[]=[];
+    const turn=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Có ảnh khách mặc không em?",history:[],clock:()=>commerceNow,
+      ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async r=>{captured.push(r.context);return {kind:"FINAL",text:"Chị xem ảnh cận phần áo nhé?"};},
+      verifier:async r=>{captured.push(r.trusted);return {result:{verdict:"PASS",violations:[]}};}});
+    expect(turn.terminal.disposition).toBe("SEND_ELIGIBLE");
+    expect(captured).toHaveLength(2);expect(captured[0]).toEqual(captured[1]);
+    expect(JSON.stringify(captured[1])).toContain('availableAlternatives');
+    s.f.product.images[1]!.metadataVerified=false;
+    await expect(s.tools.readback()).rejects.toThrow("MEDIA_LOOKUP_SOURCE_CHANGED");
+  });
+  it("does not offer another component, unknown color or a failed source as an alternative",async()=>{
+    const s=await setup();
+    const missing=await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK",componentRole:"SKIRT"}});
+    expect(missing.data).toMatchObject({availableAlternatives:[]});
+    s.f.product.colors=["navy","be"];
+    const color=await s.tools.invoke({...s.call,args:{...s.call.args,color:"be"}});
+    expect(color.data).toMatchObject({availableAlternatives:null});
+    s.readProduct.mockRejectedValue(new Error("SOURCE_ERROR"));
+    const unavailable=await s.tools.invoke(s.call);
+    expect(unavailable.data).toMatchObject({availableAlternatives:null});
+  });
   it("binds no-match evidence and rejects a later feedback asset",async()=>{
     const s=await setup();
     await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
