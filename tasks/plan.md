@@ -1,3 +1,7 @@
+## Sửa phương án sau independent review — 2026-10-23
+
+**PLAN_REVISED; RE-REVIEW_PENDING; chưa implementation/provider.** [Plan](../docs/specs/c3-phase-b-recent-runs-improvement-proposal-20261023.md). Chốt size terminal/recovery/budget/permission/receipt map; giữ rõ mixed-intent residual khi handoff unavailable. Visual wrapper4outcomes phải có inlineData+vision binding/preflight common-field diff. Giữ6controls cũ+1probe, thêm10controls, tổng17verifier; visual4 tối đa8requests, chungcap25 khi được yêu cầu chạy. Không fullB/publish/handoff authority mới hoặc promote từN1. Đánh giá whole-turn thay độ dài. Gọi lại cùng reviewer độc lập trước implementation; các mục dưới giữ evidence lịch sử.
+
 ## Bảy lượt media tiếp nối — 2026-10-23
 
 **COMPLETE 7/7; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/media-continuation-run-20261023/CHECKPOINT_B.md), [hội thoại](../apps/worker/evals/single-agent-commerce-read-only/media-continuation-run-20261023/CONVERSATIONS.md). Clean source4564b7fb + preflightPASS, nguồn hiện tại, N1. 3eligible/3fallback/1no-send;25requests=18owner+7verifier,0error/timeout/retry,DBdropped. Hai lượt nối fallback gửi ảnh đúng metadata; ảnh+giá trả AO499k. Hai câu thiếu feedback vẫn verifierFAIL; sizeNO_VERIFIED_CHART bị owner suy fit nên chặn; concern verifierPASS nhưng EGRESS_WORLD_CHANGED, exact mismatch chưa rõ. Draft concern vẫn dài/tính từ. Không tựfix/rerun/fullB hoặc claim cải thiện ổn định. Các phần dưới giữ evidence lịch sử.
