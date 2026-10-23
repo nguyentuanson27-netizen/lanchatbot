@@ -1,3 +1,16 @@
+## Kế hoạch sửa sau review hai lượt native — 2026-10-23
+
+[Kế hoạch mới](../docs/specs/c3-phase-b-next-step-plan-20261023.md), [review độc lập REVISE](../docs/specs/c3-phase-b-next-step-plan-independent-review-20261023.md). B chưa GO; chỉ planning trong lượt này, các mục dưới là việc chưa thực hiện.
+
+- [x] Tiếp thu 2 P1 + 3 P2 và self-review kế hoạch; hoãn protected partial fallback/ảnh+handoff, không mở quyền gửi.
+- [ ] S1: observed RED→GREEN cho owner projection + final artifact precheck, giữ exact text/hash và response-group authority, không strip/rewrite hoặc thêm verifier round.
+- [ ] S2: candidate verifier chỉ giải nghĩa scoped media lookup, owner giữ baseline; preflight17controls với đúng positive MODEL fixture, không đổi evidence cũ.
+- [ ] S3: read-only chart audit pointer/scope/target/eligibility SQ2447/SV2447; chưa kết luận thiếu chart hoặc tự map alias.
+- [ ] Readiness focused/Node/DB/typecheck/build/lint, source/config/image freeze và clean commit trước provider.
+- [ ] Khi được yêu cầu chạy: controls17 trước visual4, tối đa25requests; controls FAIL/unsafe⇒STOP, không sửa-rerun để cứu cùng đăng ký.
+- [ ] Native khi được yêu cầu: một population46 N1, first21 chứa14findings và7positive/continuation rồi rest25 có stateful/negotiation; không duplicate lượt, cap180 riêng, giữ NOT_RUN nếu gate không đạt.
+- [ ] Review actual terminal/ảnh/whole-turn usefulness, giọng và operational evidence riêng; còn residual phải giữ rõ, không tuyên bố B GO từ ít fallback hoặc một visual diagnostic.
+
 ## Full Phase B sau sửa size — 2026-10-23
 
 **COMPLETE core39/39 + media7/7; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/full-phase-b-run-20261023/CHECKPOINT_B.md), [46hội thoại](../apps/worker/evals/single-agent-commerce-read-only/full-phase-b-run-20261023/CONVERSATIONS.md). Source e1a81192 sạch, baseline owner/verifier, N1. Core33eligible/1fallback/3handoff/2codecheckout cótin; media3eligible/3fallback/1handoff, silence0.132requests=92owner+40verifier,0error/retry/timeout/labelleak,4DBdropped. Hai no-chart provider cases có code handoff thay fitbịa. Còn negativefeedback/ảnh+giáfallback, concern/giọng, gallerylộopaque assetRefs. Không cóegressmismatch mới nhưng rootcũUNKNOWN. Không4visualdiagnostic/controls/fullA/publish/deploy hoặc tựvòng2. Các mục dưới giữ evidence lịch sử.

@@ -1,5 +1,7 @@
 # Phase B — review các vòng gần đây và phương án tránh lặp
 
+**Historical plan:** triển khai/runtime và controls của kế hoạch này đã được báo cáo trong [evidence-fix run](../../apps/worker/evals/single-agent-commerce-read-only/evidence-fix-run-20261023/CHECKPOINT_B.md); controls FAIL, visual NOT_RUN. Hướng sửa tiếp sau hai native runs và review độc lập được ghi riêng tại [kế hoạch mới](c3-phase-b-next-step-plan-20261023.md). Phần dưới giữ nguyên snapshot kế hoạch từng được APPROVE, không phải trạng thái chưa triển khai hiện tại hoặc approval cho vòng mới.
+
 **PLAN_APPROVED ở re-review độc lập HEAD a72176ab; chưa implementation/provider mới.** Đối chiếu hai full39 opening-advice/repeat39, campaign sales-media12, followup19 (controls/native/advice riêng), giả định feedback initial8/confirmation2 ở hai source, và media-continuation7. Đọc các report, transcript tư vấn, review độc lập Astra và source liên quan. Không gọi đây là đọc lại mọi raw request của toàn bộ lịch sử C3.
 
 ## Kết quả nào có ý nghĩa
