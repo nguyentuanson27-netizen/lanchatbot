@@ -49,11 +49,18 @@ for(const [index,row] of definitions.entries()){
   catalog:{readProduct:async()=>{if(row.kind==='ERROR')throw Error('DIAGNOSTIC_READ_FAULT');const copy=structuredClone(product);if(row.kind==='FEEDBACK_TRUE'){const assumed=assumedFeedback(copy);const asset=assumed.images.find(i=>i.url===ASSUMPTION.url);assert(asset?.imageType==='MODEL','FEEDBACK_FIXTURE_TYPE');return {product:assumed};}return {product:copy};}},clock:()=>now,allowedHostSuffixes:['content.pancake.vn']});
  const args={subjectRef:product.productId,intent:row.kind==='COLOR'||row.kind==='MODEL'?'GENERIC':row.kind==='TOP'||row.kind==='COMPONENT_MISSING'?'DETAIL':'FEEDBACK',...(row.kind==='COLOR'?{color:'be'}:row.kind==='TOP'?{componentRole:'TOP'}:row.kind==='COMPONENT_MISSING'?{componentRole:'SKIRT'}:{})};
  const toolResult=await tools.invoke({name:'select_product_media',args});assert.equal(toolResult.status,['FEEDBACK_TRUE','MODEL','TOP'].includes(row.kind)?'OK':'UNAVAILABLE');
+ if(row.kind==='FEEDBACK_TRUE'){
+  assert(toolResult.data.assets.length>0);
+  for(const asset of toolResult.data.assets)assert(asset.imageType==='MODEL'&&asset.feedback===true&&asset.partsVisible.some(p=>p!=='UNKNOWN'),'FEEDBACK_FIXTURE_SCOPE');
+ }
  const context=tools.snapshot(),id=randomUUID(),binding=makeBinding(id,row.draft,context);
  assert.equal(hardPrecheck(context,row.draft,now),null,'HARD_PRECHECK');
  const request={generationId:id+':verifier:1',instructions:readFileSync(resolve(base,'prompts/verifier.vi.txt'),'utf8'),finalDraft:row.draft,trusted:context,
   latest:row.kind==='COLOR'?'Có ảnh màu be không em?':capture.untrusted.latestCustomerMessage,history:capture.untrusted.recentAcceptedDialogue,binding,turnTime:capture.turnTime,signal:new AbortController().signal};
  const requestWire=buildVerifierRequest(m,request);assert(!JSON.stringify(requestWire).includes('"safe"'),'EVALUATOR_LEAK');
+ const forbidden=new Set(['caseId','split','safe','expectedSafe','requiredBehaviors','forbiddenBehaviors','qualityScore','evaluator','rubric']);
+ const scan=x=>{if(Array.isArray(x))x.forEach(scan);else if(x&&typeof x==='object')for(const[k,v]of Object.entries(x)){assert(!forbidden.has(k),'EVALUATOR_LEAK');scan(v);}else if(typeof x==='string'&&x.trim().startsWith('{')){let value;try{value=JSON.parse(x);}catch{}if(value)scan(value);}};
+ scan(requestWire);
  appendFileSync(resolve(out,'requests.jsonl'),JSON.stringify({id,wire:requestWire})+'\n');
  if(process.argv.includes('--preflight')){writeFileSync(resolve(out,`input-${index+1}.json`),JSON.stringify({toolResult,wire:requestWire},null,2));continue;}
  let response={kind:'PROVIDER_ERROR'},provider=null,error=null;
