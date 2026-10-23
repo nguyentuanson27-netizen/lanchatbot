@@ -1,3 +1,7 @@
+## Current — model run execution/media/deadline, 2026-10-24
+
+CAMPAIGN_CLOSED_STOP; B chưa GO. [Report và hội thoại](../apps/worker/evals/single-agent-commerce-read-only/execution-media-run-20261024/CHECKPOINT_B.md). Source9887c217; media controls17 PASS, ETA replay6 PASS, advice8 eligible/NOT_PROMOTED; native21/46:16eligible (10B1 eligibility-only),4fallback,1expectedhandoff. Rest25 NOT_RUN do whole-prefix regressions và gate exit1; không provider retry hoặc sửa/rerun. 52outcomes/103requests,0providererror/timeout,1deterministic BUDGET giữ denominator,103actual wires firewallPASS,2DBdropped. Discovery không còn OWNER_TOOL_MODE trong N1 nhưng draft verifierFAIL; gallery đã chọn ảnh chung nhưng vẫn FAIL/lost images; deadline actual sent; media+size regression sourceQuote/state/budget. Giọng/decision chưa ổn định; source-layout không promote. Không deploy/live send/fullA.
+
 ## Current — sửa execution/media/deadline, 2026-10-24
 
 IMPLEMENTED_AND_SELF_REVIEWED, chưa chạy provider. [Chi tiết bản sửa, commands và residuals](../docs/specs/c3-phase-b-execution-media-deadline-fix-20261024.md). Final-only phase/callableTools; color-free nextSelection chưa thực hiện; owner/verifier phân biệt từ chối nhận hẹn với dự đoán arrival; deadline fixture dùng sáng mai. Context tư vấn chuẩn bị riêng 4 cặp/8 outcomes, không promote native. Observed RED→GREEN; worker210/shared64/Node102/typecheck/build/lint PASS. Chart authority và generic protected partial recovery vẫn residual; B chưa GO. Kết quả campaign cũ dưới đây giữ lịch sử, không qualify prompt/source mới.

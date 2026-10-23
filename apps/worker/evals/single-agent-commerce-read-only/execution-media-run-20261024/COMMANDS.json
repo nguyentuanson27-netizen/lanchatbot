@@ -1,0 +1,47 @@
+[
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\source",
+    "exitCode": 0,
+    "providerRequests": 0
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\preflight --capture C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\source\\capture.json --preflight",
+    "exitCode": 0,
+    "providerRequests": 0
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\controls --capture C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\source\\capture.json --prepared C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\preflight\\prepared.json",
+    "exitCode": 0,
+    "providerRequests": 17
+  },
+  {
+    "command": "node C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\eta-run.mjs C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024 apps/worker/evals/single-agent-commerce-read-only",
+    "exitCode": 0,
+    "providerRequests": 6
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/advice-diagnostic.mjs apps/worker/evals/single-agent-commerce-read-only/advice-source-layout-20261024.candidate.json C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\advice",
+    "exitCode": 0
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/feedback-native-run.py C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native first C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\controls",
+    "exitCode": 0,
+    "childCommands": "native/first-commands.json"
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\controls C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native rest",
+    "exitCode": 1,
+    "status": "EXPECTED_PREFIX_NOT_APPROVED",
+    "providerRequests": 0
+  },
+  {
+    "command": "node C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\review-prefix.mjs C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024",
+    "exitCode": 0,
+    "providerRequests": 0
+  },
+  {
+    "command": "python C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\collect.py",
+    "exitCode": 0,
+    "providerRequests": 0
+  }
+]
