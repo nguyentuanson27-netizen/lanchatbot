@@ -1,0 +1,70 @@
+{
+  "sourceSha": "d3a646216edb265321baf4dc9d5b99efc1c89067",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "hashes": {
+    "feedback-controls-20261023.mjs": "bbb6f71a92a2d507db75c956800e8ed2cbce843db0a7ee25d97c180eab2d0cf7",
+    "advice-visual-diagnostic.mjs": "c8e229227a1dfba4992e4f51070ddb34a31161aa7eec917932b26b50bf4e9a64",
+    "manifest.json": "5ae679bac4d8d0cf3cb2ac94faae285af0ec10840a2c4327989a569c3c64ee87",
+    "prompts/owner.vi.txt": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "prompts/verifier.vi.txt": "39c6efccca33a0d02dc396fbe948521b08715801990836850651bf66b9971d04",
+    "isolated-integration.mjs": "865be306221b8f7c2a4a96a9c823bfd991fd5c3d40e48536d49dbbe40da68748",
+    "gemini-inference.mjs": "64c2c3abe6f5ddc076f86c6ddde704f9a79a7f276640c8c5a4c8979a853ae739"
+  },
+  "registeredControls": 17,
+  "labeledControls": 16,
+  "probe": 1,
+  "registeredVisualOutcomes": 4,
+  "maximumGenerationRequests": 25,
+  "retry": 0,
+  "sendEnabled": false
+}
