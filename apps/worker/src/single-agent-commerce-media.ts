@@ -10,7 +10,7 @@ import {createHash} from "node:crypto";
 
 export interface CommerceMediaAsset {
   assetRef:string; productId:string; url:string; sourceContentSha256:string; observedAt:string; expiresAt:string;
-  sourceVersion:string; angle:string; imageType:string; partsVisible:readonly string[];
+  sourceVersion:string; angle:string; imageType:string; feedback?:boolean; partsVisible:readonly string[];
 }
 export interface CommerceCatalogImage {subjectRef:string;assetRef:string;sha256:string;downloadSha256:string;registrySha256:string;mimeType:"image/png"|"image/jpeg"|"image/webp";data:string}
 export const COMMERCE_VISION_BOUNDS={count:2,maxBytes:512*1024,maxSourceBytes:2*1024*1024,maxDimension:1024,maxSourceDimension:12000,maxSourcePixels:50000000,timeoutMs:8000} as const;
@@ -42,7 +42,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         ...[...selections].map(([ref,s])=>({ref:`media:${ref}`,sourceVersion:commerceHash(s),
         observedAt:s.assets.map(a=>a.observedAt).sort().at(-1)!,expiresAt:s.assets.map(a=>a.expiresAt).sort()[0]!,
         text:JSON.stringify({subjectRef:s.query.subjectRef,intent:s.query.intent,componentRole:s.query.componentRole??null,color:s.query.color??null,
-          assets:s.assets.map(({assetRef,angle,imageType,partsVisible})=>({assetRef,angle,imageType,partsVisible}))})}))]});
+          assets:s.assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible}))})}))]});
   };
   async function select(query:MediaQuery,onSource?:(source:SourceCheck)=>void):Promise<CommerceMediaAsset[]> {
     const {product}=await input.catalog.readProduct(query.subjectRef,false);
@@ -75,7 +75,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       const sourceVersion=commerceHash({productId:product.productId,catalogVersion:product.catalogVersion,image});
       return {assetRef:`asset:${commerceHash(image.url)}`,productId:product.productId,url:image.url,sourceContentSha256:image.sourceContentSha256!,
         observedAt,expiresAt:new Date(Date.parse(observedAt)+MEDIA_FRESH_FOR_SECONDS*1000).toISOString(),sourceVersion,
-        angle:image.angle,imageType:image.imageType,partsVisible:image.partsVisible??[]};
+        angle:image.angle,imageType:image.imageType,feedback:image.feedback===true,partsVisible:image.partsVisible??[]};
     });
   }
   async function invokeMedia(call:CommerceToolCall):Promise<CommerceToolResult> {
@@ -140,11 +140,11 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       if(mediaSelection().length-(selections.get(key)?.assets.length??0)+assets.length>4)return {status:"REJECTED",reason:"MEDIA_BOUND"};
       observations.delete(observationKey);
       selections.set(key,{query,assets});
-      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,assets:assets.map(({assetRef,angle,imageType,partsVisible})=>({assetRef,angle,imageType,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
+      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
     }catch(error){return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
-    fallbackId:()=>observations.size>0?"C3_B_MEDIA_NEXT_STEP_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
+    fallbackId:()=>observations.size>0||selections.size>0||viewed.size>0?"C3_B_MEDIA_NEXT_STEP_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),
     async invokeBatch(calls){
       const other=calls.filter(c=>!mediaTool(c.name)),results=await input.base.invokeBatch(other);

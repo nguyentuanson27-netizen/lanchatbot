@@ -209,3 +209,13 @@ it("uses an actionable static media question after a rejected media reply",async
  verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
  expect(r.terminal).toMatchObject({disposition:"FALLBACK",fallbackId:"C3_B_MEDIA_NEXT_STEP_V1",text:"Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"});
 });
+
+it("retains explicit feedback provenance for the verifier and media fallback after selection",async()=>{
+ const s=await setup();s.f.product.images[0]!.feedback=true;
+ await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
+ const media=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media:"))!;
+ expect(JSON.parse(media.text).assets[0].feedback).toBe(true);
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Ảnh khách mặc nhé",history:[],clock:()=>commerceNow,
+ ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Ảnh đây chị"}),verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
+ expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_NEXT_STEP_V1");
+});
