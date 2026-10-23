@@ -1,0 +1,186 @@
+{
+  "b1-changed-occasion": {
+    "assessment": "USABLE",
+    "reason": "Chọn mẫu thay và lý do phù hợp hành trình; còn dài, diễn đạt giữ form/ít nhăn cần đối chiếu nguồn, không mặc định đếm tính từ làm FAIL."
+  },
+  "b1-current-policy": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng phần thời hạn/phí khách hỏi theo nguồn hiện hành; đoạn xác nhận cuối hơi lặp, chưa phải lỗi bỏ điều kiện chỉ vì không đọc toàn policy."
+  },
+  "b1-partial-source": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Giữ phần chất liệu khi POS thiếu đúng, nhưng nói hệ thống chưa cập nhật là suy nguyên nhân và giọng nội bộ; nên chỉ báo phần chưa tra được."
+  },
+  "b1-price": {
+    "assessment": "USABLE",
+    "reason": "Giá cả bộ và các món lẻ rõ, trả đúng nhu cầu; không có đoạn quảng cáo thừa."
+  },
+  "b1-component-stock": {
+    "assessment": "USABLE",
+    "reason": "Đúng áo lẻ/size/giá, ngắn và đủ."
+  },
+  "b1-search-read": {
+    "assessment": "USABLE",
+    "reason": "Tra đúng mã và phân biệt giá áo lẻ/cả bộ."
+  },
+  "stateful-open": {
+    "assessment": "USABLE",
+    "reason": "Receipt-backed thêm đúng áo/be/M và báo pre-order; không giả đã lên đơn POS."
+  },
+  "stateful-variant-quantity": {
+    "assessment": "USABLE",
+    "reason": "Đổi đúng L/2chiếc, giữ màu, ACK theo mutation thực."
+  },
+  "stateful-quote": {
+    "assessment": "USABLE",
+    "reason": "Tổng978100/phí30000/giảm49900 đúng quote. Có polish: dùng format Việt và gọi ưu đãi thay vì mã giảm khi không có coupon."
+  },
+  "stateful-correction": {
+    "assessment": "USABLE",
+    "reason": "Giữ lựa chọn L/2áo, không nhắc lại toàn bộ số đo; câu ghi nhận vẫn hơi hành chính nhưng nội dung dùng được."
+  },
+  "stateful-request-checkout": {
+    "assessment": "CODE_CHECKOUT",
+    "reason": "Code tiếp nhận thông tin riêng tư, có capture; NO_SEND ở model không phải khách không nhận tin."
+  },
+  "stateful-private-checkout": {
+    "assessment": "CODE_CHECKOUT",
+    "reason": "Preview code có đủ giá/ưu đãi/ship/preorder/ETA và xác nhận; riêng tư redacted, không gửi PII vào model."
+  },
+  "stateful-confirm": {
+    "assessment": "HANDOFF",
+    "reason": "Xác nhận mua và chuyển nhân viên theo transaction/holding policy, không tự tạo POS order."
+  },
+  "b1-buying-concern": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Hiểu phân vân nhưng mở giá/ngân sách rồi gom nhiều tính từ/material description; chưa giải thích nét tổng thể giúp khách tự tin chọn. Cùng lỗi tư vấn cũ, không chấm fail chỉ vì dài."
+  },
+  "b1-policy-used": {
+    "assessment": "USABLE",
+    "reason": "Từ chối đúng đã mặc đi làm; không đọc phí/điều kiện cho việc vốn không được hỗ trợ. Giọng còn trang trọng nhưng rõ."
+  },
+  "b1-changed-occasion-v2": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Nhận thay đổi hoàn cảnh nhưng chỉ mô tả và dự báo oi; không đưa hướng mua/điều chỉnh có ích dù đây là băn khoăn quyết định mua. Không phải lỗi safety vì dùng nhận xét cảm giác định tính."
+  },
+  "b1-current-policy-v2": {
+    "assessment": "USABLE",
+    "reason": "Đúng phạm vi thời hạn/phí, ngắn, không giả duyệt toàn bộ hồ sơ."
+  },
+  "b1-partial-source-v2": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Trả phần váy đã có đúng, nhưng giải thích bằng trạng thái hệ thống và mô tả dài; chỉ cần nói phần chưa tra được, không bịa nguyên nhân."
+  },
+  "b1-price-v2": {
+    "assessment": "USABLE",
+    "reason": "Giá cả bộ đúng và ngắn."
+  },
+  "b1-component-stock-v2": {
+    "assessment": "USABLE",
+    "reason": "Đúng tồn/giá của riêng chân váy sizeM."
+  },
+  "b1-search-read-v2": {
+    "assessment": "USABLE",
+    "reason": "Đúng mẫu/giá và các lựa chọn bán; đủ để mua tiếp."
+  },
+  "b1-buying-concern-v2": {
+    "assessment": "FALLBACK",
+    "reason": "Actual generic fallback, chưa giúp khách quyết định; kiểm draft/verdict riêng để xác định nguyên nhân, không chấm draft như đã gửi."
+  },
+  "stateful-human-request": {
+    "assessment": "HANDOFF",
+    "reason": "Chuyển người theo yêu cầu, có actual holding reply, không tiếp tục tự tư vấn."
+  },
+  "sales-discovery-advice:need": {
+    "assessment": "USABLE",
+    "reason": "Chọn được mẫu dưới1tr có cạp chun, báo giá vàpreorder, hỏi cảm nhận đúng bước. Giọng còn nhiều tính từ/Markdown, cần polish nhưng có hướng mua cụ thể."
+  },
+  "sales-product-gallery:overview": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Ảnh chung gửi được, nhưng exact final lộ hai opaque asset refs và giọng xác thực dữ liệu; gatePASS không bảo đảm output surface hữu ích cho khách."
+  },
+  "b1-policy-used-v2": {
+    "assessment": "USABLE",
+    "reason": "Từ chối đúng mặc thử khác ướm; câu dài/ngoặc thừa nhưng không chấm theo số điều kiện."
+  },
+  "b1-changed-occasion-v3": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Chọn áo lẻ cho gặp khách đúng, nhưng lại mở mua cả bộ cho buổi tối thay vì tập trung lịch mới và quyết định khách nhờ chọn; nhánh thêm chưa có đánh đổi cần thiết."
+  },
+  "b1-current-policy-v3": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng thời hạn/phí đang áp dụng, không đọc toàn bộ policy."
+  },
+  "b1-partial-source-v3": {
+    "assessment": "USABLE",
+    "reason": "Trả phần chất liệu đã biết, nói gọn phần giá/tồn chưa có; không đổ lỗi hệ thống."
+  },
+  "b1-price-v3": {
+    "assessment": "USABLE",
+    "reason": "Đúng giá nguyên set và ngắn."
+  },
+  "b1-component-stock-v3": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng bán riêng/tồnM/giá áo."
+  },
+  "b1-search-read-v3": {
+    "assessment": "USABLE",
+    "reason": "Tra đúng mã và phân biệt giá bán bộ/món lẻ; danh sách có mục đích so giá, không phải liệt kê fact vô cớ."
+  },
+  "b1-buying-concern-v3": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Chọn cả bộ và nêu lợi ích thêm chân váy hợp lệ, nhưng nhiều lời quảng cáo chung và lặp ngân sách; chưa giải thích ngắn vì sao đáng trả thêm so áo lẻ với mục tiêu mặc lại."
+  },
+  "b1-policy-used-v3": {
+    "assessment": "USABLE",
+    "reason": "Từ chối đúng cắt tem/giặt, giải thích gọn lý do quyết định."
+  },
+  "sales-size-advice:height-weight": {
+    "assessment": "HANDOFF",
+    "reason": "NO_VERIFIED_CHART đã chuyển nhân viên bằng code/policy thay vì bịa fit; vẫn còn source gap chọn size tự động."
+  },
+  "sales-southern-delivery:deadline": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Giữ ETA dự kiến/không hứa kịp đúng, nhưng kể hệ thống thiếu mốc giờ rồi bảo khách cân nhắc giúp shop; giọng nội bộ và thiếu quyết định nhận hẹn rõ."
+  },
+  "negotiation-cart-setup": {
+    "assessment": "USABLE",
+    "reason": "Thêm đúng áo/be/M và báo preorder, có receipt."
+  },
+  "negotiation-price-objection": {
+    "assessment": "USABLE",
+    "reason": "Nêu được hỗ trợ ship30k và tổng499k từ quote hiện tại. Lời tốt nhất/chốt giúp em còn quảng cáo và cần polish, không gọi đó là lỗi tính ưu đãi."
+  },
+  "negotiation-total-control": {
+    "assessment": "USABLE",
+    "reason": "Tổng499k giữ đúng quote sau ưu đãi, không tăng tier khi chỉ hỏi tổng; phần ngoặc tính tiền hơi dài nhưng có mục đích giải thích."
+  },
+  "media-overview-next:ask": {
+    "assessment": "FALLBACK",
+    "reason": "Verifier chặn lời báo thiếu feedback; actual câu hỏi ảnh không trả thẳng yêu cầu feedback."
+  },
+  "media-overview-next:continue": {
+    "assessment": "USABLE",
+    "reason": "Tiếp nối actualfallback, chọn đúng2ảnh FRONT/BACK của cảbộ, lời dẫn phù hợp."
+  },
+  "media-detail-next:ask": {
+    "assessment": "FALLBACK",
+    "reason": "Cùng ranh giới negativefeedback, không còn do thiếu observation; không tự gọi chính xác clause nào vì verdict chỉ ref."
+  },
+  "media-detail-next:continue": {
+    "assessment": "USABLE",
+    "reason": "Gửi đúng ảnh DETAIL/AO theo yêu cầu, không hỏi lại hoặc đọc hồ sơ."
+  },
+  "media-and-price:ask": {
+    "assessment": "FALLBACK",
+    "reason": "Draft có giá đúng499k nhưng lời thiếu feedback bị FAIL, actual bỏ cả phần giá. Mixed-intent residual vẫn tồn tại."
+  },
+  "media-and-size:ask": {
+    "assessment": "HANDOFF",
+    "reason": "No-chart kết thúc bằng code-backed handoff, không có draft bịa fit và không gửi ảnh chọn trước handoff; vẫn thiếu chart để tự chọn size."
+  },
+  "media-decision:ask": {
+    "assessment": "USABLE",
+    "reason": "Chọn áo lẻ để giảm phần ren, ảnh DETAIL/AO liên quan món định bán; tốt hơn việc mở hai hướng không chọn. Còn polish tính từ và tránh ngầm giả định đồ khách có ở nhà; N1 không chứng minh giọng đã ổn định."
+  }
+}
