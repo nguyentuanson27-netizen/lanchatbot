@@ -1,5 +1,17 @@
 # Phase B — kế hoạch sửa output, feedback và kiểm riêng tư vấn
 
+## Bổ sung được review — source contract, 2026-10-23
+
+**IMPLEMENTATION_AUTHORIZED; provider chưa chạy.** [Review độc lập APPROVE phương án](c3-phase-b-source-contract-fix-independent-review-20261023.md), base `ff18421c`. Phần bổ sung này cập nhật các bước S2/S3/native của kế hoạch lịch sử bên dưới; không đổi evidence campaign đã đóng.
+
+1. Export/reuse validator domain hiện hữu, không duplicate schema hoặc thêm defaults mới. Controls không đọc SOURCE_AUDIT làm catalog. Historical capture chưa đầy đủ ⇒ tạo whole-world capture mới bằng code/adapter, zero model/embedding requests, canonical product + trusted context + clock + readback/source hashes cùng lần đọc. Không ghép catalog mới với clock/trusted cũ. Giữ 17 drafts/mục đích và historical probe; intended operation không tái hiện được ⇒ BLOCKED trước generation.
+2. Prepare và validate toàn 17 controls, operation/reason/scope/type, exact bindings, freshness và label firewall trước dispatch. Freeze bundle và identity, dispatch chính frozen wire; source/config/prompt/corpus/capture/bundle thay đổi ⇒ reject. Test fixture cuối sai ⇒ 0 provider calls. Không automatic generation retry.
+3. Native-first nhận passing controls readiness đúng executable source + owner/verifier prompt + models/config/schema/corpora. Restore baseline không thừa hưởng kết quả candidate. Native-rest kiểm đủ 21 actual artifacts duy nhất, terminal và whole-turn review gắn hash/source/config; exit 0/allowRest đơn lẻ không đủ. Expected handoff/no-send xét theo case. Giữ 46 = 21 + 25 N1 và cap 180.
+4. Chart chỉ sửa target nếu tìm được canonical brand và product/component/offer authority trong producer/consumer. Không lấy brand từ chart, đoán alias, thêm title rule hoặc ép SET/OTHER. Chưa có authority ⇒ giữ no-chart/handoff và ghi gap; không chặn nhánh feedback độc lập.
+5. Giữ output guard/projection, owner/verifier baseline active; archived verifier candidate chỉ được kích hoạt/freeze ở run sau. Focused protocol/boundary/media/state/handoff/ingress/chart/protected tests, shared tests/typecheck/build nếu chạm, worker typecheck/build/lint trước source seal. Không chạy model trong lượt implementation này.
+
+Sau implementation: 17 controls trước visual 4 (tối đa 25 requests diagnostic); native 46 chỉ khi candidate đáng giữ và gates đạt. Không thêm lượt xác nhận, đổi population hoặc sửa-rerun cùng registration. Source gap/BLOCKED phải ghi riêng, không dùng làm bằng chứng verifier sai. B chưa GO.
+
 Ngày: 2026-10-23. **PLAN_REVISED_AND_SELF_REVIEWED; chưa implementation hoặc provider run.** Planning base: `da99967b88ef9dff0a32b9bae1c448d9eb6d1f32`. A giữ OWNER_BYPASS, B chưa GO.
 
 Kế hoạch này thay phương án trong hội thoại sau [review toàn bộ 53 lượt](../../apps/worker/evals/single-agent-commerce-read-only/full-phase-b-run-20261023/TWO_RUN_REVIEW.md), tiếp thu [review độc lập REVISE](c3-phase-b-next-step-plan-independent-review-20261023.md). Không sửa lại plan/result của campaign đã đóng và không dùng APPROVE của kế hoạch cũ cho bản mới.

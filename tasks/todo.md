@@ -2145,3 +2145,12 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [x] Clean source695f126d/preflight0generation (policyReads2); two cases ×3/owner,12/12 outcomes and24requests, max1/retry0, allHTTP200,0errors/timeouts. Equal owner text hashes per case, no evaluator labels.
 - [x] Raw23beeb81→primaryeeaa1b01→diagnostics/report. Sol6/6eligible/functional; Gemini2/6eligible,4fallback,1unsafe eligible. Primary subjective/nohuman acceptance; Sol still verbose, GPT native tools/full B1 controls not qualified. STOP; [report](../apps/worker/evals/single-agent-commerce-read-only/owner-comparison-20261015/CHECKPOINT_B.md).
 - [x] Draft PR391 updated/pushed; report head e046e97b and exact body/branch/base/draft/clean-tree readback PASS (bodySHA2566409bf084e337eb19f7ac9d84e2dbba5412aa1f55d0326a7be06ee5800e8f958). Remote checks empty at delivery snapshot, not CI PASS. This documentation savepoint follows; no additional generation/promotion.
+## Source contract fix — 2026-10-23
+
+- [x] Review độc lập APPROVE phương án, cập nhật plan với whole-world capture và config-bound readiness.
+- [ ] Reuse canonical validator; canonical capture mới không model, không ghép clock/trusted cũ.
+- [ ] Prepare toàn17 trước dispatch; invalid slot cuối/tamper/label leak ⇒0 requests.
+- [ ] Native readiness và actual prefix review đúng source/config, giữ population46 không trùng.
+- [ ] Chart authority trace; thiếu nguồn giữ no-chart/handoff, không block feedback.
+- [ ] Focused/shared/worker verification, self-review và báo cáo; chưa chạy model.
+
