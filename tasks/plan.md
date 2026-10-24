@@ -2484,3 +2484,7 @@ Flash Lite comparison completed: sourceaae7cf78/raw27b540c6;5/5outcomes,3eligibl
 Owner requests implementation then one independent review. Implement ingress-only exact-code resolution, shared resolver-derived positive-stock size evidence/readback, explicit offer/default projection and replacement opening prompt section (20bytes shorter). RED7→GREEN;379unique focusedPASS, workerbuild/lint/typecheckPASS. [Scope/evidence/limits](../docs/specs/c3-phase-b-opening-source-size-fix-20261024.md). No provider/live run; independent review follows exact source commit; BnotGO.
 
 Independent review APPROVE exact0383a4e8; reviewer205PASS, no blocking findings. No source changes after review, only documentation closure; provider quality remains unverified. See report independent-review section.
+
+## Post-fix opening model run — 2026-10-24
+
+Owner-authorized source56884a58 (reviewed executable0383a4e8),raw d4d4fcf7; all5/5SEND_ELIGIBLE,0fallback/errors/timeouts,9owner+5verifier=14requests/retry0. Ads binding and stock-size shared evidence observed working; full runtime/finalcleanliness PASS,DBdropped. Residuals: repeated images/size, organic still null offer and unsolicited component prices, generic CTA. [Whole-turn report](../apps/worker/evals/single-agent-commerce-read-only/opening-fixed-flashlite-20261024/CHECKPOINT_B.md). No fullB qualification or automatic further run/deploy.

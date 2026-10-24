@@ -30,3 +30,7 @@ Không cài semantic router/parser, third role, repair/reverify/retry, productio
 Reviewer riêng `/root/review_opening_source_size`: **APPROVE** exact implementation head `0383a4e8c5444aa27b34b239eb015764e4a4e1e1` so với base trên. Không finding blocking mới trong diff. Không sửa source, không provider/live/commit. Reviewer tự chạy worker source/ingress/tools125PASS và Node protocol/Gemini80PASS (205tests, là xác minh lại, không cộng vào unique379).
 
 Review xác nhận exact catalog resolution trước bind, guard unbound/identity swap còn; size đúng positive stock/offer/color/requestedSize; owner/verifier cùng evidence, expiry/source/readback invalidate size-only changes; multi-offer projection giữ option evidence; prompt không thêm benchmark examples. Chưa xác nhận model chọn đúng offer, tự nhiên/gọn, hoặc hết tool-mode/timeout. Docs/todo follow-up sau review không đổi implementation đã được duyệt. Chưa chạy model trên bản sửa; B chưa GO.
+
+## Provider evidence sau review
+
+Một run owner-authorized đã hoàn tất trên source56884a58/executable0383a4e8:5/5eligible,0fallback/timeout/error; binding ads và size evidence đi qua owner/verifier thật. Chất lượng còn lặp ảnh, chọn null offer và mở giá phụ; không claim fullB/stabilityPASS. [Exact histories và báo cáo](../../apps/worker/evals/single-agent-commerce-read-only/opening-fixed-flashlite-20261024/CHECKPOINT_B.md).

@@ -2211,3 +2211,9 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Ingress/real source adapter compose with seed[], code resolution and unbound guard retained; shared confirmed-stock-size evidence, scope/freshness/readback; replace opening prompt, no case examples.
 - [x] Observed7RED then GREEN;379unique focusedPASS, build/lint/typecheckPASS, self-review. [Report](../docs/specs/c3-phase-b-opening-source-size-fix-20261024.md).
 - [x] One independent review APPROVE exact0383a4e8, reviewer independently205PASS; no blocking finding. Provider quality remains unverified/BnotGO. Record in report.
+
+## Post-fix opening model run — 2026-10-24
+
+- [x] Clean source56884a58/preflight0generation; all5/5outcomes SEND_ELIGIBLE,0fallback/timeout/error,14actualgenerationrequests/retry0,14wirefirewallPASS,rawhashesverified,DBdropped.
+- [x] Review all5 actual terminals and compare previous run; binding/size defects not observed again. [Report](../apps/worker/evals/single-agent-commerce-read-only/opening-fixed-flashlite-20261024/CHECKPOINT_B.md).
+- [ ] Sales quality/stability: repeated images, extra component-price menu, null offer despite explicit set, generic CTA; fullBnotGO.
