@@ -130,6 +130,17 @@ export function prepareImageComparison(tools,{arm,subjectRef,pinned},telemetry){
   finally{telemetry.preparationLatencyMs=performance.now()-started;}
  }};
 }
+export async function verifyImageComparisonPins(corpus,registration,buildTools){
+ const checked=[];
+ for(let i=0;i<corpus.samples.length;i++){
+  const entry=registration.cases[i],telemetry={};
+  check(entry.caseId===corpus.samples[i].caseId&&entry.productCode===corpus.inputs[i].initialProductCodes[0],'IMAGE_REGISTRATION_BINDING');
+  const tools=await buildTools(i);
+  await prepareImageComparison(tools,{arm:'PRELOAD',subjectRef:entry.productCode,pinned:entry.images},telemetry).prepare();
+  checked.push({caseId:entry.caseId,productCode:entry.productCode,images:telemetry.images,preparedBytes:telemetry.preparedBytes});
+ }
+ return checked;
+}
 export function readImageComparisonRegistration(path,corpus){
  const bytes=readFileSync(path),r=JSON.parse(bytes);
  check(r.kind==='IMAGE_PRELOAD_VS_ON_DEMAND'&&r.corpusHash===corpus.hash&&r.registered===12&&r.repetitions===1&&r.maximumGenerationRequests===48&&r.retry===0,'IMAGE_REGISTRATION');

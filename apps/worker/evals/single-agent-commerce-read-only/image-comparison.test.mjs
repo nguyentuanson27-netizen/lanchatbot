@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {imageComparisonSlots,prepareImageComparison,readImageComparisonCases,readImageComparisonRegistration,sha256} from './protocol.mjs';
+import {imageComparisonSlots,prepareImageComparison,readImageComparisonCases,readImageComparisonRegistration,verifyImageComparisonPins,sha256} from './protocol.mjs';
 import {readFileSync} from 'node:fs';
 import {buildGeminiCommerceRequest,readOnlyDeclarations,mediaDeclarations} from './gemini-inference.mjs';
 test('comparison has six cases, twelve alternating registered slots and preserves fixed B1',()=>{
@@ -19,6 +19,19 @@ test('preload prepares once, keeps owner accounting and passes pinned bytes thro
  const control=prepareImageComparison(tools,{arm:'CONTROL',subjectRef:'P1',pinned},{});await control.prepare();assert.equal(views,1);
  const bad=prepareImageComparison(tools,{arm:'PRELOAD',subjectRef:'P1',pinned:[{...pinned[0],sha256:'wrong'}]},{});
  await assert.rejects(bad.prepare(),/IMAGE_PIN_CHANGED/);
+});
+
+test('source preflight rejects drifted image pins before any model generation',async()=>{
+ const corpus=readImageComparisonCases(new URL('./cases.image-comparison.json',import.meta.url));
+ const registration=JSON.parse(readFileSync(new URL('./contract-advice-run-20261022/image-registration.json',import.meta.url)));
+ let views=0;
+ const buildTools=async i=>({prepare:async()=>0,snapshot:()=>({boundSubjects:[{kind:'PRODUCT',ref:registration.cases[i].productCode}]}),
+  invoke:async()=>{views++;return {status:'OK'};},catalogImages:()=>registration.cases[i].images.map(a=>({...a,data:'YQ=='}))});
+ const ready=await verifyImageComparisonPins(corpus,registration,buildTools);
+ assert.equal(ready.length,6);assert.equal(views,6);
+ const changed=structuredClone(registration);changed.cases[4].images[0].sha256='0'.repeat(64);
+ await assert.rejects(verifyImageComparisonPins(corpus,changed,buildTools),/IMAGE_PIN_CHANGED/);
+ assert.equal(views,11);
 });
 
 test('actual composed request preserves business/history and effective tools across image treatment',async()=>{

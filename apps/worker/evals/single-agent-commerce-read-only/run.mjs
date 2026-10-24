@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange,
- REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt,readImageComparisonCases,readImageComparisonRegistration,imageComparisonSlots,prepareImageComparison} from './protocol.mjs';
+ REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt,readImageComparisonCases,readImageComparisonRegistration,imageComparisonSlots,prepareImageComparison,verifyImageComparisonPins} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,mediaDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {publicSnapshotDiff} from './snapshot-diagnosis.mjs';
@@ -89,6 +89,12 @@ if(args['source-check']){
   result.precheck=hardPrecheck(tools.snapshot(),'Dạ chị.',new Date());if(result.precheck)throw new Error('SOURCE_PRECHECK_'+result.precheck);
   result.before=makeBinding('source-check','Dạ chị.',tools.snapshot());result.after=makeBinding('source-check','Dạ chị.',await tools.readback());
   if(JSON.stringify(result.before)!==JSON.stringify(result.after))throw new Error('SOURCE_CHANGED_DURING_READBACK');
+  if(comparison)result.imagePins=await verifyImageComparisonPins(corpus,imageRegistration.registration,async i=>{
+   const product=products.find(p=>p.productId===imageRegistration.registration.cases[i].productCode);
+   if(!product)throw new Error('IMAGE_SUBJECT_UNAVAILABLE');
+   const imageSources=createCommerceReadSources({scope,channel:config.channel,clock:()=>new Date(),initialProducts:[product],search,catalog,policyStore:database,facts:redis});
+   return createCommerceTools({read:{scope,clock:()=>new Date(),...imageSources,initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds,productGroups:config.productGroups},media:{allowedHostSuffixes:['lanadesign.vn','content.pancake.vn','fbcdn.net','fbsbx.com']}});
+  });
   if(config.sourceSearchProbe)result.search=await search.searchText(config.sourceSearchProbe);
   result.counters=counters;result.status='PASS';writeFileSync(join(out,'source-readback.json'),JSON.stringify(result,null,2));
   console.log(JSON.stringify({status:'SOURCE_ADAPTERS_READ_BACK',products:codes,providerGenerations:0,out,sendEnabled:false}));
