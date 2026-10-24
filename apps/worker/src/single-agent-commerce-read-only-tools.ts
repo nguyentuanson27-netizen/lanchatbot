@@ -7,7 +7,7 @@ import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral }
 import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
-import { commerceProductGroup, commerceSizeSource, type CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
+import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
@@ -57,8 +57,6 @@ export function createReadOnlyTools(input: {
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
     products: [...products.values()], claims: [...claims.values()].flat(), policies: [...(input.entry ? [{ref:"conversation-entry",text:JSON.stringify(input.entry),sourceVersion:scope.bindingVersion,observedAt:scope.sourceObservedAt,expiresAt:null}] : []),
-      ...(input.productGroups?.length ? [{ ref: "owner-approved-size-sharing", text: JSON.stringify({ groups: input.productGroups, scope: "SIZE_CHART_ONLY" }),
-        sourceVersion: commerceHash(input.productGroups), observedAt: scope.sourceObservedAt, expiresAt: null }] : []),
       ...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values(), ...preparationContexts.values()] });
   const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
     if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
@@ -206,9 +204,7 @@ export function createReadOnlyTools(input: {
     const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
     const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
     if (presentation) evidence.presentation = presentation;
-    const charts = policy && commerceProductGroup(id, p.title, input.productGroups ?? [])
-      ? commerceSizeSource(p, policy, input.productGroups).charts.map(c => c.chart)
-      : Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
+    const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
     if (charts.length) evidence.sizeCharts = charts;

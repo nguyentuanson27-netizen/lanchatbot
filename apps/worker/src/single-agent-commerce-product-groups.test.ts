@@ -58,7 +58,7 @@ it("requires a unique explicit ID and exact registered source title", () => {
   expect(commerceProductGroup("OTHER", "Set váy Thanh Mai", [group])).toBeUndefined();
   expect(commerceProductGroup("MEMBER", "Set váy Thanh Mai", [group, group])).toBeUndefined();
 });
-it("exposes the applicable source chart, binds fit to the requested member and revokes changed chart evidence", async () => {
+it("keeps delegation inside code, binds fit to the requested member and revokes changed chart evidence", async () => {
   const { product, policy: chartPolicy, artifact } = fixture(), policy = await fixturePolicy();
   Object.assign(policy.bundle!, { channel: "PUBLISHED", versionReferences: [
     ...policy.bundle!.versionReferences.map(r => ({ ...r, lifecycle: "PUBLISHED" })), ...chartPolicy.bundle!.versionReferences] });
@@ -68,7 +68,8 @@ it("exposes the applicable source chart, binds fit to the requested member and r
     catalog: { readProduct: async () => ({ product, snapshot }), searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
   await base.invoke({ name: "read_policy", args: {} });
   expect((await base.invoke({ name: "read_product", args: { subjectRef: "MEMBER" } })).status).toBe("OK");
-  expect(base.snapshot().runtimeProducts![0]!.sizeCharts).toEqual([artifact.chart]);
+  expect(base.snapshot().runtimeProducts![0]!.sizeCharts).toBeUndefined();
+  expect(base.snapshot().policyLiterals.some(p => p.ref === "owner-approved-size-sharing")).toBe(false);
   const tools = await createCustomerStateTools({ base, scope, clock: () => commerceNow,
     store: { read: async () => fixtureProfile(), compareAndSwap: async () => false },
     sizeInput: async () => commerceSizeSource(product, policy, [group]), sourceMessages: [] });
