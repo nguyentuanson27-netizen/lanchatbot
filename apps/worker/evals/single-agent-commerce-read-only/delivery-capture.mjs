@@ -1,5 +1,11 @@
 // Evaluation-only projection of the existing capture transport. No delivery or identity authority.
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+export function publicCapturedTextHashes(payloads,first){
+ assert(Number.isSafeInteger(first)&&first>=0&&first<=payloads.length,'CAPTURE_BOUNDARY');
+ return payloads.slice(first).flatMap((message,sequence)=>typeof message.text==='string'
+  ?[{sequence,sha256:createHash('sha256').update(message.text,'utf8').digest('hex')}]:[]);
+}
 export function publicCapturedAttachments(payloads,first){
  assert(Number.isSafeInteger(first)&&first>=0&&first<=payloads.length,'CAPTURE_BOUNDARY');
  return payloads.slice(first).flatMap((message,sequence)=>{

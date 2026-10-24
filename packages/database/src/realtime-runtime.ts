@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+import { CommerceMediaDeliveryBindingV1Schema } from "@lana/contracts";
 import {
   canonicalBuyingIntentAuthorizesCartOpenV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
@@ -2754,6 +2755,42 @@ export class PostgresRealtimeRuntimeStore {
       ...(commerceMediaBinding === undefined ? {} : { mediaBinding: commerceMediaBinding }),
       ...(commerceHandoffBinding === undefined ? {} : { handoffBinding: commerceHandoffBinding }),
     };
+  }
+
+  /** Bounded read-only delivery memory. Reloadable from durable accepted Outbox,
+   * including when the best-effort chat history write failed after acceptance.
+   * No URL, recipient, payload or private binding crosses this projection. */
+  async readAcceptedCommerceMedia(input: { pageId: string; conversationId: string; customerHash: string;
+    recipientHash: string; before: Date }): Promise<{ productId: string; assetRef: string; status: string; occurredAt: string }[]> {
+    const result = await this.pool.query<MetaOutboxRow & { status: string; accepted_at: Date }>(
+      `SELECT o.* FROM meta_outbox o JOIN conversations c ON c.conversation_id=o.conversation_id AND c.page_id=o.page_id
+       WHERE o.page_id=$1 AND o.conversation_id=$2 AND c.customer_hash=$3
+         AND o.status IN ('SENT_ACCEPTED','DELIVERED','READ') AND o.meta_message_id IS NOT NULL
+         AND o.accepted_at IS NOT NULL AND o.accepted_at<$4 AND o.payload_expires_at>now()
+       ORDER BY o.accepted_at DESC,o.sequence_no DESC,o.outbox_id DESC LIMIT 30`,
+      [input.pageId, input.conversationId, input.customerHash, input.before]);
+    const media: { productId: string; assetRef: string; status: string; occurredAt: string }[] = [];
+    for (const row of result.rows) {
+      if (media.length >= 6) break;
+      try {
+        if (!["SENT_ACCEPTED", "DELIVERED", "READ"].includes(row.status) || row.page_id !== input.pageId ||
+          row.conversation_id !== input.conversationId || !row.accepted_at || row.accepted_at >= input.before) continue;
+        const { commerceMediaBinding, commerceHandoffBinding: _handoff, ...message } = this.cipher.decryptJson<
+          RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown; commerceHandoffBinding?: unknown }>(
+          this.bundleFromMetaRow(row), this.metaPayloadAad(row.page_id, row.outbox_id));
+        const parsed = CommerceMediaDeliveryBindingV1Schema.safeParse(commerceMediaBinding);
+        if (!parsed.success || message.kind !== "IMAGE") continue;
+        const b = parsed.data, hash = (value: unknown) => createHash("sha256").update(canonicalJsonV1(value)).digest("hex");
+        if (b.pageId !== input.pageId || b.conversationId !== input.conversationId || b.customerHash !== input.customerHash ||
+          b.recipientHash !== input.recipientHash || b.responseGroupId !== row.response_group_id ||
+          b.messageHashes[row.sequence_no] !== hash(message)) continue;
+        const image = b.images.filter(i => i.url === message.imageUrl);
+        if (image.length !== 1) continue;
+        media.push({ productId: image[0]!.productId, assetRef: `asset:${hash(message.imageUrl)}`,
+          status: row.status, occurredAt: row.accepted_at.toISOString() });
+      } catch { /* Expired/unreadable or legacy payloads supply no inferred history. */ }
+    }
+    return media.reverse();
   }
 
   /** Proof of this exact acknowledgement intent, not a provider tag receipt. */

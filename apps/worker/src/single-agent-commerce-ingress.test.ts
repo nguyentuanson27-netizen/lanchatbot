@@ -3,7 +3,7 @@ import { createConversationState } from "@lana/conversation-engine";
 import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRuntimeState } from "@lana/chat-runtime";
 import { LocalEnvelopeCipher, PostgresRealtimeRuntimeStore, type RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
-import { runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
+import { commerceHistory, runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine, fixturePolicyPointers } from "./single-agent-commerce.test-support.js";
 import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
 import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read-only.js";
@@ -64,6 +64,26 @@ function fixture(productIds = ["SM613"]) {
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+it("preserves a benign caption through the shared history redactor", async () => {
+  const { redactAnalyticsMessage } = await import("@lana/database");
+  const caption = "Em gửi chị ảnh cận để xem đường nét thêu nhé.";
+  expect(commerceHistory([{ senderType: "BOT", text: redactAnalyticsMessage(caption).text }]))
+    .toEqual([{ role: "shop", text: caption }]);
+});
+
+it("adds bounded actual image history without evicting customer corrections or exceeding eight entries", () => {
+  const rows = Array.from({ length: 8 }, (_, i) => ({ senderType: i%2 ? "BOT" as const : "CUSTOMER" as const, text: `Lượt ${i}` }));
+  const images = Array.from({ length: 6 }, (_, i) => ({ productId: "SM613", assetRef: `asset:${String(i).repeat(64)}`,
+    status: "SENT_ACCEPTED", occurredAt: commerceNow.toISOString() }));
+  const history = commerceHistory(rows, images);
+  expect(history).toHaveLength(8);
+  rows.forEach(r => expect(history.some(m => m.text.includes(r.text))).toBe(true));
+  const joined = history.map(m => m.text).join("\n");
+  expect(joined).toContain("RECENT_SHOP_IMAGES_ACCEPTED");
+  expect(joined).toContain('"customerViewed":"UNKNOWN"');
+  expect(Buffer.byteLength(joined)).toBeLessThanOrEqual(4096);
+});
 
 it.each(["code", "source-title", "approved-group"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
   const f = fixture(), product = fixtureProduct();

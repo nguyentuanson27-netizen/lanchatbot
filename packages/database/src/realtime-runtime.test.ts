@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import {
+  canonicalJsonV1,
   canonicalCartOfferBindingsV1,
   canonicalCheckoutDraftHashPreimageV1,
   canonicalCartStateHashPreimageV1,
@@ -39,6 +40,32 @@ import {
 } from "./realtime-runtime.js";
 
 describe("committed sales effect readback", () => {
+  it.each(["SENT_ACCEPTED", "DELIVERED", "READ", "RETRYABLE", "AMBIGUOUS", "wrong-recipient", "wrong-product"])
+    ("projects only exact accepted media receipts after restart (%s)", async mode => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), page = "page", id = "image";
+    const recipientHash = createHash("sha256").update("recipient").digest("hex"), h = "a".repeat(64);
+    const message = { kind: "IMAGE", imageUrl: "https://content.pancake.vn/detail.jpg" };
+    const hash = (v: unknown) => createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    // Canonical keys below already match JSON lexical order for the message.
+    const binding = { kind: "C3_MEDIA_GROUP_V1", pageId: page, shopId: "shop", conversationId: "conversation",
+      customerHash: h, recipientHash: mode === "wrong-recipient" ? "b".repeat(64) : recipientHash,
+      responseGroupId: "group", generation: 1, revision: 1, stateHash: h, policyHash: h,
+      messageHashes: [h, hash(message)], images: [{ productId: "P101", url: mode === "wrong-product" ? "https://content.pancake.vn/other.jpg" : message.imageUrl,
+        sourceVersion: h, observedAt: new Date().toISOString(), expiresAt: new Date(Date.now()+60_000).toISOString() }] };
+    const payload = cipher.encryptJson({ ...message, commerceMediaBinding: binding },
+      `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now()+60_000));
+    const query = vi.fn(async (_sql: string, _args?: unknown[]) => ({ rows: [{ outbox_id: id, page_id: page, conversation_id: "conversation", response_group_id: "group",
+      sequence_no: 1, status: mode.startsWith("wrong-") ? "SENT_ACCEPTED" : mode, accepted_at: new Date(), payload_ciphertext: payload.ciphertext, payload_nonce: payload.nonce,
+      payload_auth_tag: payload.authTag, payload_encrypted_dek: payload.encryptedDek, payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] }));
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
+    (store as unknown as { pool: unknown }).pool = { query };
+    const media = await store.readAcceptedCommerceMedia({ pageId: page, conversationId: "conversation", customerHash: h,
+      recipientHash, before: new Date(Date.now()+1000) });
+    expect(media).toHaveLength(["SENT_ACCEPTED", "DELIVERED", "READ"].includes(mode) ? 1 : 0);
+    if (media.length) expect(media[0]).toMatchObject({ productId: "P101", assetRef: `asset:${hash(message.imageUrl)}`, status: mode });
+    expect(JSON.stringify(media)).not.toContain("https:");
+    expect(query.mock.calls[0]?.[0]).toContain("JOIN conversations");
+  });
   it.each([true, false])("requires the exact committed handoff event and delivery binding (proven=%s)", async proven => {
     const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), query = vi.fn(async () => ({ rows: [{ proven }] }));
     const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);

@@ -26,7 +26,7 @@ import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
-import {publicCapturedAttachments} from './delivery-capture.mjs';
+import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
@@ -526,6 +526,17 @@ try{
   assert.equal(r.result.enqueued,2,JSON.stringify(r.result));await j.drain();await j.drain();
   assert.deepEqual(j.capture,['Ảnh mặt sau đây chị nhé.','[CODE_IMAGE]']);
   assert.equal(new Set(j.gateCalls).size,1);assert(j.capturePayloads[1].attachment.payload.url.endsWith('c3-synthetic-product-back.jpg'));
+  const delivered=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:j.bound.customerHash,
+    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
+  assert.equal(delivered.length,1);assert.equal(delivered[0].productId,'SM613');
+  assert.equal(delivered[0].assetRef,'asset:'+hash(JSON.stringify(j.capturePayloads[1].attachment.payload.url)));
+  assert(!JSON.stringify(delivered).includes('https:'));
+  const other=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:hash('other'),
+    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
+  assert.equal(other.length,0);
+  let seenHistory;
+  await j.turn('Cả bộ bao nhiêu em?', [request=>{seenHistory=request.contents;return say('Dạ chị.');}]);
+  assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'));
  });
  await check('B composed N5 image-first text-last handoff links the attachment history and retains encrypted source',async()=>{
   const j=await statefulFixture(),r=await j.turn(null,[],{messages:[{text:null,attachments:[{type:'image',url:'https://content.pancake.vn/c3-private-receipt.jpg',providerId:'synthetic-receipt'}]},
@@ -673,6 +684,7 @@ try{
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
    const result={caseId:c.caseId,journeyId:c.journeyId,elapsedMs:performance.now()-started,...attempt,
     actualCapturedMessages:j.capture.slice(capturedBefore).map(t=>redactAnalyticsMessage(t).text),
+    actualCapturedTextHashes:publicCapturedTextHashes(j.capturePayloads,attachmentsBefore),
     actualCapturedAttachments:publicCapturedAttachments(j.capturePayloads,attachmentsBefore),
     deliveryEvidence:{outboxRows:(await pool.query('SELECT outbox_id,response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY created_at,sequence_no',[j.bound.conversationId])).rows
       .filter(r=>!outboxBefore.has(r.outbox_id)).map(r=>({id:r.outbox_id,group:r.response_group_id,sequence:r.sequence_no,status:r.status}))},

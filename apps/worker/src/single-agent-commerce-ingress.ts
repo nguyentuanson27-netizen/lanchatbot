@@ -45,10 +45,28 @@ export function isPrivateCommerceText(text: string): boolean {
     privateMarkers.filter(marker => marker !== "[NAME]").some(marker => redacted.includes(marker));
 }
 /** Drop the whole private message: a redacted phone must not leave its adjacent recipient name in model context. */
-export function commerceHistory(rows: readonly Pick<ChatHistoryItem, "text" | "senderType">[]) {
+export function commerceHistory(rows: readonly Pick<ChatHistoryItem, "text" | "senderType">[],
+  media: readonly { productId: string; assetRef: string; status: string; occurredAt: string }[] = []) {
   const history = rows.filter(r => r.text && ["CUSTOMER", "BOT", "HUMAN"].includes(r.senderType) && !isPrivateCommerceText(r.text))
     .map(r => ({ role: r.senderType === "CUSTOMER" ? "customer" as const : "shop" as const, text: r.text })).slice(-8);
   while (history.reduce((n, m) => n+Buffer.byteLength(m.text), 0) > 4096) history.shift();
+  // Preserve recent customer text/corrections first. Delivery memory has its own
+  // 1KB/6-image bound inside the same 4KB context and never evicts text.
+  const retained = media.slice(-6).map(({ productId, assetRef, status, occurredAt }) => ({ productId, assetRef, status, occurredAt }));
+  while (retained.length) {
+    const summary = { role: "shop" as const, text: JSON.stringify({ event: "RECENT_SHOP_IMAGES_ACCEPTED", completeHistory: false,
+      customerViewed: "UNKNOWN", images: retained }) };
+    const bytes = Buffer.byteLength(summary.text);
+    if (bytes <= 1024 && bytes + (history.length === 8 ? 1 : 0) + history.reduce((n, m) => n+Buffer.byteLength(m.text), 0) <= 4096) {
+      if (history.length < 8) history.unshift(summary);
+      else {
+        const shop = history.find(m => m.role === "shop");
+        if (shop) shop.text += "\n" + summary.text;
+      }
+      break;
+    }
+    retained.shift();
+  }
   return history;
 }
 
@@ -182,7 +200,11 @@ export async function runPersistedCommerceIngress(input: {
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
-  const history = commerceHistory(rows);
+  const recentMedia = input.store.readAcceptedCommerceMedia ? await input.store.readAcceptedCommerceMedia({
+    pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
+    recipientHash: scope.recipient, before: new Date(messages[0]!.occurredAt),
+  }).catch(() => []) : [];
+  const history = commerceHistory(rows, recentMedia);
   const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: rows.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,

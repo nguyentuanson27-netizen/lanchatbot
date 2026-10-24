@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {publicCapturedAttachments,customerOutcome} from './delivery-capture.mjs';
+import {publicCapturedAttachments,publicCapturedTextHashes,customerOutcome} from './delivery-capture.mjs';
+import {createHash} from 'node:crypto';
+
+test('capture hashes exact transport text before redaction without retaining recipient or plaintext',()=>{
+ const text='Em gửi chị xem đường nét thêu nhé.',payloads=[{text,recipient:'PRIVATE'},{attachment:{type:'image',payload:{url:'https://example.com/a.jpg'}}}];
+ assert.deepEqual(publicCapturedTextHashes(payloads,0),[{sequence:0,sha256:createHash('sha256').update(text).digest('hex')}]);
+ assert.deepEqual(publicCapturedTextHashes(payloads,2),[]);
+ assert.doesNotMatch(JSON.stringify(publicCapturedTextHashes(payloads,0)),/PRIVATE|đường|recipient/);
+});
 test('media evidence retains each delivered URL and turn order without recipient or token',()=>{
  const payloads=[{text:'Em gửi ảnh chị nhé.'},
   {attachment:{type:'image',payload:{url:'https://content.pancake.vn/a.jpg',token:'SECRET'}},recipient:'PRIVATE'},
