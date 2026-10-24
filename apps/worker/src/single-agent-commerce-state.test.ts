@@ -18,6 +18,34 @@ async function setup(sourceText = "Eo 74. Eo 85, mông 105.") {
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("commits inline size inputs before calculation without a second tool call", async () => {
+    const s = await setup("Eo 74, mông 96.");
+    const result = await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[
+      {op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"},
+      {op:"SET",field:"measurements.HIPS_CM",value:96,sourceQuote:"96"},
+    ]}});
+    expect(result).toMatchObject({status:"OK",data:{status:"RECOMMENDED"}});
+    expect(s.store.compareAndSwap).toHaveBeenCalledTimes(1);
+    expect(s.sizeInput).toHaveBeenCalledTimes(1);
+    expect(s.tools.snapshot().effectReceipts).toHaveLength(1);
+  });
+  it("rejects inline input evidence before size calculation and permits one corrected bounded call", async () => {
+    const s = await setup("Eo 74, mông 96.");
+    const ops=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"Eo 74, mông 96"}];
+    expect(await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:ops}}))
+      .toMatchObject({status:"REJECTED",reason:"MEASUREMENT_SOURCE_INVALID",data:{applied:false}});
+    expect(s.sizeInput).not.toHaveBeenCalled(); expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[{...ops[0],sourceQuote:"74"}]}})).status).toBe("OK");
+  });
+  it("does not write inline inputs for an unbound size subject or two concurrent writers", async () => {
+    const s=await setup("Eo 74.");
+    const ops=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}];
+    expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"UNKNOWN",customerStateOps:ops}})).status).toBe("REJECTED");
+    const results=await s.tools.invokeBatch([{name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:ops}},
+      {name:"apply_customer_state",args:{ops}}]);
+    expect(results.every(r=>r.reason==="MULTIPLE_STATE_UPDATES")).toBe(true);
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled(); expect(s.sizeInput).not.toHaveBeenCalled();
+  });
   it("returns the domain enum on a fit error without partially writing numeric fields", async () => {
     const s = await setup("Eo 74, mông 96. Chị thích rộng một chút.");
     const result = await s.tools.invoke({name:"apply_customer_state",args:{ops:[

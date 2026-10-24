@@ -16,6 +16,23 @@ const gate = (response = pass(), current = structuredClone(trusted), currentDraf
   finalGate({ expected: binding, response, current, finalDraft: currentDraft, now: at, includeDiagnostic });
 
 describe("Phase B source evidence and absence", () => {
+  it("retains a bounded exact excerpt and source mismatch from a rejected verdict for review only", () => {
+    const violation={kind:"UNSUPPORTED_PROTECTED_ASSERTION",protectedRef:trusted.boundSubjects[0]!.ref,
+      excerpt:draft.slice(0,30),basis:"Nguồn không xác nhận kết luận này."};
+    const result=finalGate({expected:binding,current:trusted,finalDraft:draft,now,includeDiagnostic:true,
+      response:{kind:"VERDICT",binding,result:{verdict:"FAIL",violations:[violation]}}});
+    expect(result.reason).toBe("FAIL");
+    expect(result).toHaveProperty("semanticDiagnostic",[violation]);
+    expect(result.text).not.toContain(violation.excerpt);
+  });
+  it("rejects invented diagnostic excerpts and PASS with any diagnostic violation", () => {
+    for(const verdict of ["PASS","FAIL"]){
+      const result=finalGate({expected:binding,current:trusted,finalDraft:draft,now,includeDiagnostic:true,
+        response:{kind:"VERDICT",binding,result:{verdict,violations:[{kind:"UNSUPPORTED_PROTECTED_ASSERTION",protectedRef:null,
+          excerpt:"NOT_IN_THE_FINAL_DRAFT",basis:"Nguồn không xác nhận."}]}}});
+      expect(result.reason).toBe("MALFORMED");expect(result).not.toHaveProperty("semanticDiagnostic");
+    }
+  });
   it("allows a policy-only turn without inventing a product", () => {
     const t = { ...structuredClone(trusted), boundSubjects: [], protectedClaims: [],
       state: { ...trusted.state, currentProductId: null } };

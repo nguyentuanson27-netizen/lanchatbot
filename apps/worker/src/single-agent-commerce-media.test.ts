@@ -18,6 +18,14 @@ const setup = async (clock:()=>Date=()=>commerceNow) => {
   return {f,scope,tools,call,image,readProduct};
 };
 describe("candidate product media",()=>{
+  it("describes only confirmed parts of selected assets, never catalog fabric or requested color",async()=>{
+    const s=await setup();s.f.product.images[0]!.partsVisible=["UNKNOWN"];
+    const selected=await s.tools.invoke(s.call);
+    expect(selected).toMatchObject({status:"OK",data:{descriptionEvidence:{color:null,
+      assets:[{confirmedParts:[],componentKnown:false}]}}});
+    const literal=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media:"))!;
+    expect(JSON.parse(literal.text).descriptionEvidence).toEqual((selected.data as Record<string,unknown>).descriptionEvidence);
+  });
   it("pairs the overview with a complementary approved angle instead of a second front image",async()=>{
     const s=await setup();
     s.f.product.images=[
@@ -252,7 +260,7 @@ it("retains explicit feedback provenance for the verifier and media fallback aft
  expect(JSON.parse(media.text).assets[0].feedback).toBe(true);
  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Ảnh khách mặc nhé",history:[],clock:()=>commerceNow,
  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Ảnh đây chị"}),verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
- expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_NEXT_STEP_V1");
+ expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_UNAVAILABLE_V1");
 });
 
 it("keeps repeated readbacks unchanged for a no-match component lookup after all offers",async()=>{

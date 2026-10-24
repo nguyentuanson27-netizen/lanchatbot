@@ -2173,3 +2173,8 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [x] Chart authority trace: chưa có mapping được xác nhận; giữ no-chart/handoff và gap, không block feedback.
 - [x] Worker209/shared64/Node94/DB21 PASS, DB dropped; builds/typechecks/lint PASS; self-review và [report](../docs/specs/c3-phase-b-source-contract-fix-implementation-20261023.md). Controls17/visual4 preflight PASS, chưa chạy model; B chưa GO.
 
+
+## Composed size input / media recovery — 2026-10-24
+
+- [x] Implement và self-review inline state+size, scoped image description, gated media recovery và verifier diagnostics.
+- [ ] Provider qualification mới; generic giá/tồn recovery và ảnh sau handoff còn residual. [Chi tiết, checks và giới hạn](../docs/specs/c3-phase-b-composed-input-media-recovery-20261024.md). B chưa GO; không tự chạy model/deploy.

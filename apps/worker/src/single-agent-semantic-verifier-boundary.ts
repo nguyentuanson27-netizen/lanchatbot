@@ -47,9 +47,11 @@ export interface VerifierBinding {
 }
 export type VerifierResponse = { kind: "VERDICT"; binding: VerifierBinding; result: unknown }
   | { kind: "TIMEOUT" | "PROVIDER_ERROR" };
+interface SemanticViolation { kind:string; protectedRef:string|null; excerpt?:string; basis?:string }
 export interface TerminalOutcome {
   disposition: "SEND_ELIGIBLE" | "FALLBACK" | "HANDOFF" | "NO_SEND";
   reason: string; text: string | null; fallbackId: string | null;
+  semanticDiagnostic?: SemanticViolation[];
   diagnostic?: { check: "HARD_PRECHECK" | "CURRENT_SNAPSHOT" | "RESPONSE_BINDING";
     checkedAtMs: number | null; expectedSnapshotId: string; currentSnapshotId: string;
     expectedRevision: number; currentRevision: number | null; reasonCodes: string[] };
@@ -61,6 +63,10 @@ const FALLBACK_V2_ID = "C3_A_NONPROTECTED_V2";
 const MEDIA_FALLBACK_ID = "C3_B_MEDIA_NEXT_STEP_V1";
 const MEDIA_FALLBACK_TEXT = "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?";
 const FALLBACK_V2_TEXT = "Phần này em chưa trả lời được, chị nhé.";
+const MEDIA_RECOVERY_ID = "C3_B_VERIFIED_MEDIA_V1";
+const MEDIA_RECOVERY_TEXT = "Em gửi chị ảnh của mẫu để mình xem trước nhé.";
+const MEDIA_UNAVAILABLE_ID = "C3_B_MEDIA_UNAVAILABLE_V1";
+const MEDIA_UNAVAILABLE_TEXT = "Lúc này em chưa gửi được ảnh chị cần.";
 const hash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "CONTRADICTION_OR_NEGATION",
   "MATERIAL_CONDITION_LOSS", "POLICY_OR_BENEFIT_STRENGTHENING", "EFFECT_WITHOUT_RECEIPT",
@@ -68,8 +74,8 @@ const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "C
 const terminal = (disposition: TerminalOutcome["disposition"], reason: string): TerminalOutcome =>
   ({ disposition, reason, text: null, fallbackId: null });
 
-export function terminalFallback(id = FALLBACK_ID, text = id === MEDIA_FALLBACK_ID ? MEDIA_FALLBACK_TEXT : id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
-  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT) || (id === MEDIA_FALLBACK_ID && text === MEDIA_FALLBACK_TEXT)
+export function terminalFallback(id = FALLBACK_ID, text = id === MEDIA_UNAVAILABLE_ID ? MEDIA_UNAVAILABLE_TEXT : id === MEDIA_RECOVERY_ID ? MEDIA_RECOVERY_TEXT : id === MEDIA_FALLBACK_ID ? MEDIA_FALLBACK_TEXT : id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
+  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT) || (id === MEDIA_FALLBACK_ID && text === MEDIA_FALLBACK_TEXT) || (id === MEDIA_RECOVERY_ID && text === MEDIA_RECOVERY_TEXT) || (id === MEDIA_UNAVAILABLE_ID && text === MEDIA_UNAVAILABLE_TEXT)
     ? { disposition: "FALLBACK", reason: "FAIL", text, fallbackId: id }
     : terminal("NO_SEND", "UNVERIFIED_FALLBACK");
 }
@@ -164,7 +170,7 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date, 
   return null;
 }
 
-function parseVerdict(result: unknown, trusted: TrustedContext): "PASS" | "FAIL" | "UNCERTAIN" | null {
+function parseVerdict(result: unknown, trusted: TrustedContext, draft:string): {verdict:"PASS"|"FAIL"|"UNCERTAIN"; violations:SemanticViolation[]} | null {
   try {
     const text = typeof result === "string" ? result : JSON.stringify(result);
     if (typeof text !== "string" || Buffer.byteLength(text) > 4096) return null;
@@ -177,11 +183,13 @@ function parseVerdict(result: unknown, trusted: TrustedContext): "PASS" | "FAIL"
       ...(trusted.runtimeProducts ?? []).map(v => v.ref)]);
     for (const violation of v.violations) {
       if (!violation || typeof violation !== "object" || Array.isArray(violation) ||
-        Object.keys(violation).sort().join(",") !== "kind,protectedRef" || !kinds.has(violation.kind) ||
+        !["kind,protectedRef","basis,excerpt,kind,protectedRef"].includes(Object.keys(violation).sort().join(",")) || !kinds.has(violation.kind) ||
         (violation.protectedRef !== null && !refs.has(violation.protectedRef))) return null;
+      if (Object.hasOwn(violation,"excerpt") && (!boundedText(violation.excerpt,256) || !draft.includes(violation.excerpt) ||
+        !boundedText(violation.basis,320) || hasResidualPii(violation.excerpt) || hasResidualPii(violation.basis))) return null;
     }
     if (v.verdict === "PASS" && v.violations.length > 0) return null;
-    return v.verdict as "PASS" | "FAIL" | "UNCERTAIN";
+    return {verdict:v.verdict as "PASS"|"FAIL"|"UNCERTAIN",violations:v.violations as SemanticViolation[]};
   } catch { return null; }
 }
 
@@ -210,7 +218,8 @@ export function finalGate(input: { expected: VerifierBinding; response: Verifier
   for (const key of ["requestId", "finalDraftHash", "trustedSnapshotId", "stateRevision", "factSnapshotVersion", "recipient"] as const) {
     if (response.binding[key] !== expected[key] || currentBinding[key] !== expected[key]) return stale("RESPONSE_BINDING");
   }
-  const verdict = parseVerdict(response.result, current);
-  if (verdict !== "PASS") return { ...terminalFallback(input.fallback?.id, input.fallback?.text), reason: verdict ?? "MALFORMED" };
+  const parsed = parseVerdict(response.result, current, finalDraft);
+  if (parsed?.verdict !== "PASS") return { ...terminalFallback(input.fallback?.id, input.fallback?.text), reason: parsed?.verdict ?? "MALFORMED",
+    ...(input.includeDiagnostic && parsed?.violations.some(v=>v.excerpt) ? {semanticDiagnostic:parsed.violations} : {}) };
   return { disposition: "SEND_ELIGIBLE", reason: "PASS", text: finalDraft, fallbackId: null };
 }

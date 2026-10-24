@@ -15,7 +15,7 @@ import { createCommerceHandoffTools } from "./single-agent-commerce-handoff.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn } from "./single-agent-commerce-read-only.js";
 import { commerceHash, commerceUuid } from "./single-agent-commerce-read-only-context.js";
-import { makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
+import { hardPrecheck, terminalFallback, makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
 import { extractAdProductCodes } from "./media-resolution.js";
 import { sizeChartTarget } from "./size-chart-target.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
@@ -191,16 +191,31 @@ export async function runPersistedCommerceIngress(input: {
         changedBindingFields: (Object.keys(accepted) as (keyof typeof accepted)[]).filter(k=>accepted[k]!==makeBinding(scope.requestId,result.terminal.text??"",world)[k]) } };
   if (!await input.inbox.isBatchCurrent(batch)) return { ...result, enqueued: executor.outboxCount() }; // A confirmation already committed its atomic terminal intents.
   const state = (await executor.repository.read(scope.conversationId))!, cart = state.cart?.value;
+  // The model draft remains rejected. A separate code-owned image response is
+  // eligible only after the unchanged world above and full current authority check.
+  // Never recover across stale state, privacy failure, handoff or an unknown commit.
+  const selectedMedia = tools.mediaSelection?.() ?? [];
+  const mediaFallback = terminalFallback("C3_B_VERIFIED_MEDIA_V1");
+  const mediaClaims = (world.protectedClaims as ProtectedClaimV1[]).filter(c=>c.type==="PRODUCT_MEDIA");
+  const recoveredMedia = result.terminal.disposition === "FALLBACK" && selectedMedia.length > 0 &&
+    ["FAIL","UNCERTAIN","MALFORMED","TIMEOUT","PROVIDER_ERROR","BUDGET","OWNER_TOOL_MODE","OWNER_OUTPUT_ARTIFACT"].includes(result.terminal.reason) &&
+    current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
+    hardPrecheck(world, mediaFallback.text!, input.clock()) === null &&
+    selectedMedia.every(a=>a.productId===world.state.currentProductId && mediaClaims.some(c=>c.type==="PRODUCT_MEDIA" &&
+      c.scope.kind==="PRODUCT" && c.scope.productId===a.productId && c.value.assetSha256===commerceHash(a.url) &&
+      c.provenance.sourceVersion===a.sourceVersion));
+  if (recoveredMedia) result.terminal = { ...result.terminal, ...mediaFallback, reason: result.terminal.reason };
   const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
   const allowedText = ["SEND_ELIGIBLE", "FALLBACK", "HANDOFF"].includes(result.terminal.disposition) ? result.terminal.text : null;
   const messagesOut = [...(allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : []),
-    ...(generatedPass ? tools.mediaSelection?.().map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) ?? [] : [])];
+    ...(generatedPass || recoveredMedia ? selectedMedia.map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) : [])];
   if (allowedText && allowedText.length > 2000) return { ...result, ...await closeWithoutSend("DELIVERY_TEXT_BOUND") };
   const sourceHash = textHash(scope.sourceMessageId);
   const cartSummary = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "RECEIPT_BACKED_CART_SUMMARY";
   // Recovery totals use the same cart/fact readiness as generated cart replies.
   // A receipt-only ACK still makes no current catalog or price assertion.
-  let claims = generatedPass ? world.protectedClaims as ProtectedClaimV1[] : [];
+  let claims = generatedPass ? world.protectedClaims as ProtectedClaimV1[] : recoveredMedia
+    ? mediaClaims : [];
   const bindCart = (generatedPass || cartSummary) && cart !== undefined;
   const productIds = bindCart ? [...new Set(cart!.lines.map(l => l.parentProductId))].sort() :
     [...new Set(claims.flatMap(c => c.scope.kind === "PRODUCT" ? [c.scope.productId] : []))].sort();

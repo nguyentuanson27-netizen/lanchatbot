@@ -17,6 +17,14 @@ export const COMMERCE_VISION_BOUNDS={count:2,maxBytes:512*1024,maxSourceBytes:2*
 const intents=new Set<CustomerImageIntent>(["GENERIC","BACK","DETAIL","SIZE_GUIDE","PRODUCT_ONLY","FEEDBACK"]);
 interface MediaQuery {subjectRef:string;intent:CustomerImageIntent;color?:string;componentRole?:"TOP"|"SKIRT"|"PANTS"}
 const componentParts={TOP:"AO",SKIRT:"CHAN_VAY",PANTS:"QUAN"};
+// Projection of approved asset metadata, not inferred garment/material properties.
+function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset[]) {
+  return { color:query.color??null, assets:assets.map((a,imageIndex)=>{
+    const confirmedParts=a.partsVisible.filter(p=>Object.values(componentParts).includes(p));
+    return {imageIndex,angle:a.angle,imageType:a.imageType,feedback:a.feedback===true,
+      confirmedParts,componentKnown:confirmedParts.length>0&&confirmedParts.length===a.partsVisible.length};
+  }), limits:"Describe only the confirmed contents of each selected image. Product fabric does not prove which fabric an image shows. A null color is unverified, not absent." };
+}
 
 /** Selection only. Existing exact snapshot and group gate own authorization and delivery. */
 export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadOnlyCatalog;clock:()=>Date;allowedHostSuffixes:readonly string[]}):CommerceTools {
@@ -42,6 +50,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         ...[...selections].map(([ref,s])=>({ref:`media:${ref}`,sourceVersion:commerceHash(s),
         observedAt:s.assets.map(a=>a.observedAt).sort().at(-1)!,expiresAt:s.assets.map(a=>a.expiresAt).sort()[0]!,
         text:JSON.stringify({subjectRef:s.query.subjectRef,intent:s.query.intent,componentRole:s.query.componentRole??null,color:s.query.color??null,
+          descriptionEvidence:descriptionEvidence(s.query,s.assets),
           assets:s.assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible}))})}))]});
   };
   async function select(query:MediaQuery,onSource?:(source:SourceCheck)=>void,onAlternatives?:(intents:CustomerImageIntent[])=>void):Promise<CommerceMediaAsset[]> {
@@ -99,7 +108,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       const evidence={subjectRef:query.subjectRef,requested:query,operation:call.name,stage,outcome:reason,scope:"MEDIA_ONLY",availableAlternatives:alternatives,
         authority:eventOnly?"OPERATION_EVENT_ONLY":"SCOPED_CATALOG_LOOKUP",
         meaning:eventOnly?"This operation failed; no conclusion about availability or stock.":
-          reason==="MEDIA_COLOR_BINDING_UNVERIFIED"?"Requested image color is unverified; no conclusion about colors for sale.":
+          reason==="MEDIA_COLOR_BINDING_UNVERIFIED"?"Requested image color is unverified; neither image absence nor colors for sale are established.":
           "No currently eligible matching asset in the inspected source and query; not shop-wide absence."};
       const recordSource=eventOnly?null:source;
       const literal={ref:`media-lookup:${observationKey}`,observedAt,
@@ -152,11 +161,12 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       if(mediaSelection().length-(selections.get(key)?.assets.length??0)+assets.length>4)return {status:"REJECTED",reason:"MEDIA_BOUND"};
       observations.delete(observationKey);
       selections.set(key,{query,assets});
-      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
+      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
     }catch(error){return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
-    fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2":observations.size>0||selections.size>0||viewed.size>0?"C3_B_MEDIA_NEXT_STEP_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
+    fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2":selections.size>0||viewed.size>0||[...observations.values()].some(o=>o.query.intent!=="FEEDBACK")
+      ?"C3_B_MEDIA_UNAVAILABLE_V1":observations.size>0?"C3_B_MEDIA_NEXT_STEP_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),
     async invokeBatch(calls){
       const other=calls.filter(c=>!mediaTool(c.name)),results=await input.base.invokeBatch(other);

@@ -5,6 +5,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {runtimeCase,readRegisteredCases,buildVerifierRequest,createCommerceVerifier,validateProtocol,requiredSourceConfig,sha256,dispatchRange} from './protocol.mjs';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
+test('recovery text is code-owned even if a changed manifest recomputes its hash',()=>{
+ const bad=structuredClone(manifest);bad.recoveryFallbacks[0].text='Size M vừa chị nhé.';
+ bad.recoveryFallbacks[0].sha256=sha256(bad.recoveryFallbacks[0].text);
+ assert.throws(()=>validateProtocol(bad),/RECOVERY_FALLBACK_IDENTITY/);
+});
 const request=()=>({generationId:'turn:verifier:1',instructions:'Kiểm reply.',finalDraft:'Dạ chị.',
  trusted:{boundSubjects:[],protectedClaims:[],policyLiterals:[],effectReceipts:[],runtimeProducts:[],state:{}},
  latest:'Em ơi',history:[],binding:{requestId:'turn'},signal:new AbortController().signal});

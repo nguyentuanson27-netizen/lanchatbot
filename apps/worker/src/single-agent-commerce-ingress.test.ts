@@ -61,6 +61,64 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it.each([false,true])("preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=%s)",async withCart=>{
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
+  if(withCart)await seedCart(f);
+  p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
+    reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  f.message.text="Cho chị xem cận áo nhé.";
+  f.verifier.mockResolvedValue({result:{verdict:"UNCERTAIN",violations:[]}});
+  let n=0;const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"DETAIL"}}];
+  const result=await f.run(async()=>++n===1?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}}:
+    {kind:"FINAL",text:"DRAFT_MUST_NOT_BE_SENT"});
+  expect(result.terminal).toMatchObject({disposition:"FALLBACK",reason:"UNCERTAIN",fallbackId:"C3_B_VERIFIED_MEDIA_V1"});
+  const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
+  expect(meta.messages).toEqual([{kind:"TEXT",text:result.terminal.text},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+  expect(meta.protectedClaims?.some(c=>c.type==="PRODUCT_MEDIA")).toBe(true);
+  expect(JSON.stringify(meta)).not.toContain("DRAFT_MUST_NOT_BE_SENT");
+  expect(f.verifier).toHaveBeenCalledTimes(1);
+});
+
+it.each(["source","human","revision","pending-state","other-product"])("does not recover images across a %s failure",async fault=>{
+  const f=fixture(["SM613","OTHER1"]),p=f.products[fault==="other-product"?1:0]!.product;f.setFocus("SM613");
+  p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
+    reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  f.message.text="Cho chị xem cận áo nhé.";
+  f.verifier.mockImplementation(async()=>{
+    if(fault==="source")p.images[0]!.metadataVerified=false;
+    if(fault==="human")f.transferToHuman();
+    if(fault==="revision")f.changeRevision();
+    return {result:{verdict:"UNCERTAIN",violations:[]}};
+  });
+  const calls: {name:string;args:Record<string,unknown>}[]=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"DETAIL"}}];
+  if(fault==="pending-state")calls.push({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:80,sourceQuote:"NOT_IN_MESSAGE"}]}});
+  let n=0;const result=await f.run(async()=>++n===1?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}}:
+    {kind:"FINAL",text:"DRAFT_MUST_NOT_BE_SENT"});
+  expect(result.terminal.fallbackId).not.toBe("C3_B_VERIFIED_MEDIA_V1");
+  expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]).filter(m=>m.kind==="IMAGE")).toEqual([]);
+});
+
+it("finishes mixed media and size intake after a corrected inline call within the unchanged budget",async()=>{
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);f.enableHandoff();
+  f.message.text="Cho chị xem cận áo. Chị cao 1m58, nặng 52kg.";
+  p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
+    reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  let n=0;
+  const result=await f.run(async()=>{
+    n++; const ops=[{op:"SET",field:"measurements.HEIGHT_CM",value:158,sourceQuote:n===1?f.message.text:"1m58"},
+      {op:"SET",field:"measurements.WEIGHT_KG",value:52,sourceQuote:n===1?f.message.text:"52kg"}];
+    const calls=[{name:"recommend_size",args:{subjectRef:p.productId,customerStateOps:ops}},
+      ...(n===1?[{name:"select_product_media",args:{subjectRef:p.productId,intent:"DETAIL"}},
+        {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}]:[])];
+    return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}};
+  });
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"SIZE_RULE_UNAVAILABLE"});
+  if (!("toolCalls" in result)) throw new Error("MODEL_TURN_REQUIRED");
+  expect(result.toolCalls).toBeLessThanOrEqual(6);expect(n).toBe(2);
+  expect(f.profileWrite).toHaveBeenCalledTimes(1);expect(f.verifier).not.toHaveBeenCalled();
+  expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]).filter(m=>m.kind==="IMAGE")).toEqual([]);
+});
+
 it.each(["GENERIC","DETAIL"])("continues after the actual media fallback with history and persisted product (%s)",async intent=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
   p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,

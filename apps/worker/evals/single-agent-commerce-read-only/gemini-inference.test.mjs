@@ -1,4 +1,14 @@
 import test from 'node:test';
+test('inline size inputs preserve signed history and map only execution fields',()=>{
+ const b=body([{functionCall:{name:'recommend_size',args:{subjectRef:'P1',customerStateOps:[{op:'SET',field:'HEIGHT_CM',value:158,sourceQuote:'1m58'}]}},thoughtSignature:'signed'}]);
+ const p=parseGeminiGeneration(b);
+ assert.equal(p.calls[0].args.customerStateOps[0].field,'measurements.HEIGHT_CM');
+ assert.equal(p.content.parts[0].functionCall.args.customerStateOps[0].field,'HEIGHT_CM');
+ const r=request();r.availableTools=['recommend_size'];r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Mẫu',bindingVersion:'v1'}];
+ const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.equal(d.parametersJsonSchema.properties.customerStateOps.maxItems,8);
+ assert.deepEqual(d.parametersJsonSchema.properties.subjectRef.enum,['P1']);
+});
 test('native field contract maps domain paths without rewriting the signed transcript',()=>{
  const b=body([{functionCall:{id:'m1',name:'apply_customer_state',args:{ops:[{op:'SET',field:'WAIST_CM',value:74,sourceQuote:'74'}]}},thoughtSignature:'signed'}]);
  const parsed=parseGeminiGeneration(b);
@@ -700,7 +710,7 @@ test('tool product identities are restricted to bound products, not offer eviden
   {ref:'offer:P1:AO',kind:'VARIANT',productId:'P1',label:'Áo lẻ'},{ref:'line-1',kind:'CART_LINE',label:'Áo trong giỏ'}];
  r.availableTools=['read_product','recommend_size','add_to_cart','change_cart_item'];
  const b=buildGeminiCommerceRequest(r),decls=b.tools[0].functionDeclarations,subjects=JSON.parse(b.contents[0].parts[0].text).trusted.subjects;
- for(const name of ['read_product','recommend_size','add_to_cart'])assert.deepEqual(decls.find(d=>d.name===name).parameters.properties.subjectRef.enum,['P1']);
+ for(const name of ['read_product','recommend_size','add_to_cart'])assert.deepEqual((decls.find(d=>d.name===name).parametersJsonSchema??decls.find(d=>d.name===name).parameters).properties.subjectRef.enum,['P1']);
  assert.deepEqual(decls.find(d=>d.name==='change_cart_item').parameters.properties.subjectRef.enum,['line-1']);
  assert.equal(subjects.find(s=>s.kind==='VARIANT').subjectRef,undefined);
  assert.equal(subjects.find(s=>s.kind==='VARIANT').evidenceRef,'offer:P1:AO');

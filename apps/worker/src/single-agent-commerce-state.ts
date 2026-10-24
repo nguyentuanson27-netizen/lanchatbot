@@ -232,8 +232,15 @@ export async function createCustomerStateTools(input: {
         return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
       }
       if (call.name === "recommend_size") {
-        const a = toolArgs(call.args, ["subjectRef"]);
-        if (blocked() || !a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        const a = toolArgs(call.args, ["subjectRef", "customerStateOps"]);
+        if (!a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        // A single explicit size request may carry new customer inputs. Reuse the
+        // exact writer (validation, CAS, readback, receipt), never calculate on a rejected patch.
+        if (a.customerStateOps !== undefined) {
+          const updated = await invoke({ name: "apply_customer_state", args: { ops: a.customerStateOps } });
+          if (updated.status !== "OK") return updated;
+        }
+        if (blocked()) return { status: "REJECTED", reason: "STATE_OR_REF" };
         const source = await input.sizeInput(a.subjectRef);
         if (source.target.parentProductId !== a.subjectRef) return { status: "REJECTED", reason: "SIZE_SUBJECT" };
         const decision = recommendSize({ ...source, profile: effective.profile, generatedAt: input.clock().toISOString() });
@@ -256,17 +263,20 @@ export async function createCustomerStateTools(input: {
     } catch { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
   }
   return { invoke, snapshot, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
-    const updates = calls.filter(c => c.name === "apply_customer_state");
+    const writesState = (c: CommerceToolCall) => c.name === "apply_customer_state" ||
+      (c.name === "recommend_size" && !!c.args && typeof c.args === "object" && Object.hasOwn(c.args, "customerStateOps"));
+    const updates = calls.filter(writesState);
     if (updates.length > 1) {
       blockedDependencies = true;
       for (const call of updates) {
-        const args = toolArgs(call.args, ["ops"]);
+        const args = call.name === "recommend_size"
+          ? { ops: (call.args as Record<string,unknown>).customerStateOps } : toolArgs(call.args, ["ops"]);
         for (const op of args && Array.isArray(args.ops) ? args.ops : [{}]) pendingFields.add(
           op && typeof op === "object" && typeof op.field === "string" ? op.field : "*");
       }
     }
     const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(invoke));
-    return Promise.all(calls.map(c => c.name === "apply_customer_state" ? updateResults[updates.indexOf(c)]! : invoke(c)));
+    return Promise.all(calls.map(c => writesState(c) ? updateResults[updates.indexOf(c)]! : invoke(c)));
   }, async readback() {
     await input.base.readback();
     const current = await input.store.read();

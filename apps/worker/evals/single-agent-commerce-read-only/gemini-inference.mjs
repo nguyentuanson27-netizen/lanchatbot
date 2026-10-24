@@ -47,6 +47,12 @@ export const stateDeclarations=[
  {name:'recommend_size',description:'Chọn size bằng hồ sơ khách đã được code nhận và bảng size của đúng sản phẩm. Thiếu đầu vào thì hỏi phần tool yêu cầu, chưa gợi size.',parameters:{type:'OBJECT',properties:{subjectRef:string},required:['subjectRef']}},
  {name:'quote_cart',description:'Tính tổng khi chưa có cartQuote cho lựa chọn hiện tại. add_to_cart/change_cart_item đã cấp cartQuote trong trusted.state thì dùng luôn, không gọi lại chỉ để đọc tổng. Giá, phí và ưu đãi do code cấp; không truyền tổng tiền hoặc tự chọn ưu đãi.',parameters:{type:'OBJECT',properties:{}}},
 ];
+// Reuse the same input contract for an explicit update-and-recommend operation.
+const sizeDeclaration=stateDeclarations.find(d=>d.name==='recommend_size');
+sizeDeclaration.description='Chọn size bằng hồ sơ và bảng size đúng sản phẩm. Khách vừa cho/sửa thông tin thì truyền customerStateOps theo cùng schema ghi hồ sơ; code kiểm chứng, ghi và đọc lại trước khi chọn size. Không gọi apply_customer_state riêng cho cùng thông tin trong batch này. Không có thông tin mới thì bỏ customerStateOps. Kết quả lỗi không cấp size; thiếu đầu vào thì hỏi đúng phần tool yêu cầu.';
+delete sizeDeclaration.parameters;
+sizeDeclaration.parametersJsonSchema={type:'object',additionalProperties:false,required:['subjectRef'],properties:{
+ subjectRef:{type:'string'},customerStateOps:structuredClone(stateDeclarations[0].parametersJsonSchema.properties.ops)}};
 export const effectDeclarations=[
  {name:'record_negotiation',description:'Khách phản đối giá hoặc nói sẵn sàng mua giỏ hiện tại thì báo ý nghĩa tin đó bằng PRICE_OBJECTION/PURCHASE_READY. sourceQuote trích nguyên văn từ tin hiện tại; không lấy history. Hỏi giá/tổng tiền thông thường hoặc chê kiểu dáng không phải phản đối giá. Code kiểm nguồn, tự quyết ưu đãi và trả current cartQuote. Không truyền tiền, tier hay policy; không hứa giảm trước kết quả.',parameters:{type:'OBJECT',properties:{intent:{type:'STRING',enum:['PRICE_OBJECTION','PURCHASE_READY']},sourceQuote:{type:'STRING',maxLength:512}},required:['intent','sourceQuote']}},
  {name:'add_to_cart',description:'Thêm món khách yêu cầu mua bằng PRODUCT subjectRef. Bắt buộc truyền offerType đúng lựa chọn bán từ nguồn; chưa biết thì đọc bằng tool hiện có, không đoán. Lấy size, color, quantity từ lựa chọn hiện tại của khách; phần không đổi giữ theo hội thoại/giỏ đã có. color chỉ là null khi khách thực sự chưa chọn màu, không bỏ màu đã nói hoặc tự chọn thay. Đã biết offer và khách tự chọn size thì gọi trực tiếp, không cần recommend_size hay đọc lại sản phẩm; code tự kiểm cấu hình, giá và tồn. Kết quả OK xác nhận thao tác, cartItems cho biết lựa chọn hiện tại và trạng thái hàng.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:{type:'STRING',nullable:true},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','offerType','color']}},
@@ -70,7 +76,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  for(const declaration of declarations){
   const kind=['read_product','recommend_size','add_to_cart','select_product_media','view_product_media'].includes(declaration.name)?'PRODUCT':declaration.name==='change_cart_item'?'CART_LINE':null;
   const refs=c.boundSubjects.filter(s=>s.kind===kind).map(s=>s.ref);
-  if(refs.length)declaration.parameters.properties.subjectRef={type:'STRING',enum:[...new Set(refs)]};
+  if(refs.length){
+   const schema=declaration.parametersJsonSchema??declaration.parameters;
+   schema.properties.subjectRef={type:declaration.parametersJsonSchema?'string':'STRING',enum:[...new Set(refs)]};
+  }
  }
  const subject=s=>({...(['PRODUCT','CART_LINE'].includes(s.kind)?{subjectRef:s.ref}:{evidenceRef:s.ref}),kind:s.kind,label:s.label,...(s.productId?{productId:s.productId}:{})});
  const measurement=m=>({field:publicField('measurements.'+m.kind),value:m.value});
@@ -134,7 +143,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    const differences=priceDifferences(data);
    if(differences.length)response.response.data.priceDifferences=differences;
   }
-  if(response.name==='apply_customer_state'){
+  if(['apply_customer_state','recommend_size'].includes(response.name)){
    if(data.measurements)data.measurements=data.measurements.map(measurement);
    if(data.fieldErrors)data.fieldErrors=data.fieldErrors.map(e=>({...e,field:publicField(e.field)}));
    if(data.unresolvedFields)data.unresolvedFields=data.unresolvedFields.map(publicField);
@@ -235,9 +244,10 @@ export function parseGeminiGeneration(body){
     if(c.args.offerType===null){const args={...c.args};delete args.offerType;return {...c,args};}
     return c;
    }
-   if(c.name!=='apply_customer_state')return c;
-   requireThat(Array.isArray(c.args.ops)&&c.args.ops.every(op=>Object.hasOwn(stateFieldPaths,op.field)),'OWNER_TOOL_OUTPUT');
-   return {...c,args:{...c.args,ops:c.args.ops.map(op=>({...op,field:stateFieldPaths[op.field]}))}};
+   const opsKey=c.name==='apply_customer_state'?'ops':c.name==='recommend_size'&&Object.hasOwn(c.args,'customerStateOps')?'customerStateOps':null;
+   if(!opsKey)return c;
+   requireThat(Array.isArray(c.args[opsKey])&&c.args[opsKey].every(op=>op&&Object.hasOwn(stateFieldPaths,op.field)),'OWNER_TOOL_OUTPUT');
+   return {...c,args:{...c.args,[opsKey]:c.args[opsKey].map(op=>({...op,field:stateFieldPaths[op.field]}))}};
   });
   return {kind:'TOOLS',calls:domainCalls,content:structuredClone(content)};}
  const text=content.parts.filter(p=>p.thought!==true&&typeof p.text==='string').map(p=>p.text).join('');

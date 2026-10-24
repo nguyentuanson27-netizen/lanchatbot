@@ -2450,3 +2450,7 @@ Outcome: source695f126d;12/12outcomes/24requests with unchanged prompt/verifier.
 
 Owner đã yêu cầu implementation theo [bổ sung plan](../docs/specs/c3-phase-b-next-step-plan-20261023.md) và [review APPROVE](../docs/specs/c3-phase-b-source-contract-fix-independent-review-20261023.md). Thực hiện canonical whole-world capture/validator, prepare-all frozen controls, native readiness/prefix gates; chart chỉ nối khi có authority, thiếu giữ handoff. Không đổi owner prompt hoặc chạy provider trong lượt này. Giữ 17 controls, 46 native N1; B chưa GO.
 
+
+## Composed size input / media recovery — 2026-10-24
+
+Owner yêu cầu implementation sau review campaign 20261024. Thực hiện inline state+size qua writer hiện hữu, metadata ảnh scoped, code-owned fallback ảnh qua current gate, bounded verifier diagnostics; không thêm lời nhắc giọng. [Chi tiết, checks và giới hạn](../docs/specs/c3-phase-b-composed-input-media-recovery-20261024.md). B chưa GO; không tự chạy model/deploy.
