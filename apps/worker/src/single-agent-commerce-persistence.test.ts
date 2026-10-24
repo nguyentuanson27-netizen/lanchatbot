@@ -157,13 +157,15 @@ describe("existing transaction owner for candidate commerce", () => {
     expect(f.commitWithinTransaction.mock.calls[0]![1].metaPlan).toBeUndefined();
     expect(f.port.outboxCount()).toBe(0);
   });
-  it("leaves configured holding replies to public final egress when the handoff retains its source", async () => {
+  it("owns the holding reply atomically even when the public caller otherwise retains its source", async () => {
     const holdingReply = "Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.", f = await handoffFixture({ holdingReply, completeInboxBatch: false });
     expect(f.decision.customerMessages).toEqual([holdingReply]);
     expect(await f.port.commit(f)).toBe(true);
     const prepared = f.commitWithinTransaction.mock.calls[0]![1];
-    expect(prepared.completeInboxBatch).toBe(false); expect(prepared.metaPlan).toBeUndefined();
-    expect(f.port.outboxCount()).toBe(0);
+    expect(prepared.completeInboxBatch).not.toBe(false);
+    expect(prepared.metaPlan?.messages).toEqual([{ kind: "TEXT", text: holdingReply }]);
+    expect(prepared.metaPlan?.handoffBinding).toMatchObject({ kind: "C3_HANDOFF_GROUP_V1" });
+    expect(f.port.outboxCount()).toBe(1);
   });
   it("requires the exact prepared transition and current source lease before commit", async () => {
     const state = createSalesCycleRuntimeState("key", { pageId: "1198992073286645", conversationId: "conversation" }, new Date());

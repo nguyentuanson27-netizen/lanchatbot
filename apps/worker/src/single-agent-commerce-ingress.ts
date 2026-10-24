@@ -220,8 +220,8 @@ export async function runPersistedCommerceIngress(input: {
     } },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
   const result = await runCommerceTurn({ scope, tools, latest, history, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
-  // Mixed no-chart media and the handoff were committed as one protected group,
-  // with Inbox completion. Never enqueue a second BOT reply after that transfer.
+  // Holding replies (with or without independent media) belong to the atomic
+  // handoff group with Inbox completion. Do not enqueue another BOT reply.
   if (handoff.outboxCount()) return { ...result, enqueued: handoff.outboxCount() };
   // Reuse the bounded current readback before creating Outbox eligibility; no second model or reply rewrite.
   const accepted = makeBinding(scope.requestId, result.terminal.text ?? "", tools.snapshot());

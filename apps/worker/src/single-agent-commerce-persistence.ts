@@ -38,7 +38,7 @@ export function createPersistedCommerceHandoffPort(input: {
     const messages = media ? [{ kind: "TEXT" as const, text: terminalFallback("C3_B_VERIFIED_MEDIA_V1").text! },
       ...media.images.map(image => ({ kind: "IMAGE" as const, imageUrl: image.url })),
       ...decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }))]
-      : input.completeInboxBatch === false ? [] : decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }));
+      : decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }));
     if (messages.length && !input.deliveryRecipient) throw new Error("HANDOFF_DELIVERY_ROUTE_REQUIRED");
     const sourceMessageIdHash = createHash("sha256").update(input.scope.sourceMessageId, "utf8").digest("hex");
     const payloadHash = commerceHash(messages);
@@ -58,7 +58,7 @@ export function createPersistedCommerceHandoffPort(input: {
       const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
         customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
         expectedStateVersion: before.stateVersion, state: next.state, inboxBatchGuard: input.inboxBatchGuard,
-        ...(input.completeInboxBatch === false && !media ? { completeInboxBatch: false } : {}),
+        ...(input.completeInboxBatch === false && !messages.length ? { completeInboxBatch: false } : {}),
         pancakeTagPlan: { desiredTag: decision.tag, tagId, handoffGeneration: next.stateVersion },
         handoffEventPlan: { source: decision.category === "AFTER_SALES" ? "POST_SALE" : decision.reason === "CUSTOMER_REQUESTED_HUMAN" ? "CUSTOMER_REQUEST" : "BOT_POLICY",
           reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion,
