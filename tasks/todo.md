@@ -1,4 +1,17 @@
-## Current — hoàn tất acceptance media/size, 2026-10-24
+## Current — kế hoạch hoàn thành lượt và tư vấn, 2026-10-24
+
+[Kế hoạch chi tiết](../docs/specs/c3-phase-b-turn-completion-plan-20261024.md). PLAN_REVISED_AFTER_REVIEW; SELF_REVIEWED. Chưa implementation/provider, chưa reviewer approval cho bản sửa. Không thay kết quả acceptance ảnh/size trước.
+
+- [x] Sửa plan theo 1 P1 + 3 P2: delivery binding, caller coverage, intervention status T2, opening controls trước gate; self-review consistency.
+- [ ] T0: đối chiếu chính hai ca lỗi qua các run trước; hai controls tên/mã chỉ bổ trợ; chỉ ra defect hoặc giới hạn model/budget.
+- [ ] T1: candidate dependency holding reply; policy/receipt/authority checks ở commit và delivery/restart, actual capture/dedup, private-input caller coverage RED→GREEN.
+- [ ] T2: sửa contract defect nếu có; freeze IMPLEMENTED/NO_INTERVENTION trước run; N1 observed completion không tự đóng root cause.
+- [ ] T3: thay rule mở đầu ép giới thiệu/ảnh khi khách đang hỏi việc khác; giữ owner/verifier identity và ranh giới đã duyệt.
+- [ ] T4: self-review, focused worker/Node/DB checks, typecheck/build/lint, freeze/clean source seal.
+- [ ] T5: 17 scoped controls → 31 native prefix (có deadline và cả năm opening controls) → 20 còn lại nếu gate đạt; N1/retry0, không dispatch trong lượt planning.
+- [ ] T6: review toàn actual outcomes, giữ lỗi/NOT_RUN và báo riêng task completion, sales quality, voice, authority.
+
+## Historical — hoàn tất acceptance media/size, 2026-10-24
 
 - [x] Owner duyệt dùng chart chung cho sản phẩm cùng tên; explicit SV2447/SQ2447 mapping và source provenance trong [decision](../docs/specs/c3-phase-b-same-name-size-sharing-20261024.md).
 - [x] Implement encrypted Outbox binding, restart/source/state/policy/recipient/generation revalidation và fail-closed legacy gate. Same-name source chart giữ nguyên; requested product vẫn là fit/price/stock/media subject.
