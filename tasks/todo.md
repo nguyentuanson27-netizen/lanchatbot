@@ -2185,3 +2185,5 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 - [ ] Fresh source seal/capture/preflight, controls17, gated native46, raw evidence and whole-turn report.
 
 Gemini3.8 run closed: controls17PASS; native2/46 (1eligible,1ownerTIMEOUT),44NOT_RUN. 21requests/0retry; first-runner stopped PROVIDER_ERROR_NO_RETRY. BLOCKED, no model quality conclusion. [Evidence](../apps/worker/evals/single-agent-commerce-read-only/gemini38-run-20261024/CHECKPOINT_B.md).
+
+Owner-authorized retry of Gemini3.8 b1-price completed: sourcef8026148, 1eligible,3HTTP200generation requests,0automaticRetry,elapsed37.375s. PriorTIMEOUT retained; remaining44nativeNOT_RUN/BnotGO. [Retry evidence](../apps/worker/evals/single-agent-commerce-read-only/gemini38-retry-20261024/CHECKPOINT_B.md).
