@@ -2468,3 +2468,7 @@ Owner-authorized retry of Gemini3.8 b1-price completed: sourcef8026148, 1eligibl
 Implemented/self-reviewed existing price-card builder into first-contact read_product; actual ingress entry metadata; owner instructions; separate5-turn opening-quote cohort. Deterministic159+86+43PASS, compile/lint PASS. Provider not run, BnotGO; oneTEXT plus images, no post-verifier rewrite or production wiring. [Report](../docs/specs/c3-phase-b-opening-quote-integration-20261024.md).
 
 Owner-authorized correction after independent review: replace search attributes with verified evidence in openingQuote and remove offer-count inference of whole-product scope; regression RED→GREEN plus ingress/media/adapter checks. No prompt/semantic gate changes or provider generation. Detail and evidence in report correction section.
+
+## Opening quote provider run — 2026-10-24
+
+Owner-authorized run source598226ed; full5/5 turns completed, raw37d595ac. Three SEND_ELIGIBLE/twofallback, 12actual generation requests (9owner3verifier), one pre-dispatch bound failure/one owner timeout/retry0. Ads exact-code binding fails through real source adapter; organic prices/images work but not opening card/next-step target. Final runner cleanliness check FAIL because output was placed under eval source, tracked executable/config unchanged; diagnostic evidence only, not qualification. DB dropped, sendEnabled=false. [Report and next direction](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-run-20261024/CHECKPOINT_B.md). STOP/BnotGO; no automatic retry/fix/run/deploy.

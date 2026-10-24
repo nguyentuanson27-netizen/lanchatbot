@@ -2193,3 +2193,9 @@ Owner-authorized retry of Gemini3.8 b1-price completed: sourcef8026148, 1eligibl
 Implemented/self-reviewed existing price-card builder into first-contact read_product; actual ingress entry metadata; owner instructions; separate5-turn opening-quote cohort. Deterministic159+86+43PASS, compile/lint PASS. Provider not run, BnotGO; oneTEXT plus images, no post-verifier rewrite or production wiring. [Report](../docs/specs/c3-phase-b-opening-quote-integration-20261024.md).
 
 - [x] Fix two independent-review P2: opening card uses verified attributes; sole component cannot inherit parent attributes. Observed five RED then GREEN; worker164/Node86/shared43 PASS, lint/typecheck PASS. Self-review complete; provider not run. See report correction section.
+
+## Opening quote provider run — 2026-10-24
+
+- [x] Source598226ed clean/preflight PASS0generation; five registered turns dispatched once and all actual terminals preserved, raw37d595ac.
+- [x] Review all5; 3eligible/2fallback,9owner+3verifier actual generation requests/retry0; firewall12wires PASS, raw hashes verified, DB dropped.
+- [ ] Opening quote qualification: ads source-binding contract missing; repeated search request-bound error; organic offer/card/usefulness gaps; multipart timeout. Final runner integrity check failed on output files under source (tracked source unchanged). [Diagnostic report](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-run-20261024/CHECKPOINT_B.md). STOP/BnotGO.
