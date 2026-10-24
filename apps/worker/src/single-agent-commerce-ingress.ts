@@ -200,13 +200,14 @@ export async function runPersistedCommerceIngress(input: {
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
+  let mediaHistoryUnavailable = false;
   const recentMedia = input.store.readAcceptedCommerceMedia ? await input.store.readAcceptedCommerceMedia({
     pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
     recipientHash: scope.recipient, before: new Date(messages[0]!.occurredAt),
-  }).catch(() => []) : [];
+  }).catch(() => { mediaHistoryUnavailable = true; return []; }) : [];
   const history = commerceHistory(rows, recentMedia);
   const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
-    entry: {firstContact: rows.length === 0 && recentMedia.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
+    entry: {firstContact: rows.length > 0 || recentMedia.length > 0 ? false : mediaHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },

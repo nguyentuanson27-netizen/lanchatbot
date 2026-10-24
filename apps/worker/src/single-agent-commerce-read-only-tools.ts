@@ -32,7 +32,7 @@ export function createReadOnlyTools(input: {
   scope: CommerceScope; clock: () => Date; policy: () => Promise<RuntimePolicyResolution>; catalog: ReadOnlyCatalog;
   initialProducts?: StableProductDocument[]; state?: () => TrustedContext["state"];
   maxFactAgeSeconds?: number;
-  entry?: { firstContact: boolean; fromAd: boolean };
+  entry?: { firstContact: boolean | null; fromAd: boolean };
   productGroups?: readonly CommerceProductGroup[];
 }) {
   const { scope } = input;

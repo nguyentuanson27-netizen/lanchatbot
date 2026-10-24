@@ -99,6 +99,17 @@ it("keeps an accepted-image conversation returning when the text history write w
   expect(JSON.stringify(contents)).toContain("RECENT_SHOP_IMAGES_ACCEPTED");
 });
 
+it("does not call an unavailable delivery history an empty first contact", async () => {
+  const f = fixture();
+  Object.assign(f.store, { readAcceptedCommerceMedia: vi.fn(async () => { throw Error("UNAVAILABLE"); }) });
+  let entry: unknown;
+  await f.run(async request => {
+    entry = JSON.parse(request.context.policyLiterals.find(p => p.ref === "conversation-entry")!.text);
+    return { kind: "FINAL", text: "Dạ chị." };
+  });
+  expect(entry).toEqual({ firstContact: null, fromAd: false });
+});
+
 it.each(["code", "source-title", "approved-group"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
   const f = fixture(), product = fixtureProduct();
   product.product.title = "Áo Thanh Mai";

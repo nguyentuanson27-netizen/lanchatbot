@@ -18,6 +18,8 @@ Observed RED: chưa có phương thức đọc durable accepted media. Đã thê
 
 Không migration hoặc ghi bảng mới. Reader lấy từ durable Outbox nên không phụ thuộc chat-history write best-effort. Giới hạn 30 accepted rows được đọc, 6 images được trả; model summary tối đa 1024 bytes nằm trong 4096-byte/8-entry history. Giữ text/correction trước, cắt metadata trước; nếu hết slot thì nối summary vào shop entry có sẵn, không tạo lời khách giả. Summary nêu history không đầy đủ và chưa biết khách đã xem hay chưa. Không có rule cấm resend; không coi selected/enqueued/failed là sent.
 
+Self-review bổ sung hai lỗi: accepted ảnh nhưng history write mất phải giữ returning entry; lỗi đọc delivery memory không được thành empty-history/first-contact. Nhánh lỗi thứ hai có observed RED (firstContact=true), sửa thành firstContact=null khi cả text lẫn delivery history chưa chứng minh được; không dựng receipt hoặc xác nhận đã gửi. Metadata nullable chỉ cho trạng thái chưa biết, không thêm state/mutation. Normal known first/returning cases giữ boolean cũ.
+
 Capture giữ SHA256 của exact transport text trước redaction theo sequence, không thêm plaintext. Hash là evidence egress, không sửa history và không chứng minh nội dung khi không có preimage hợp lệ. Isolated PostgreSQL N4 đã bổ sung kiểm actual accepted image, cross-customer isolation và request lượt kế tiếp; chưa nhận PASS trước khi chạy.
 
 ## T3: privacy redaction

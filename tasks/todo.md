@@ -1,15 +1,15 @@
 ## Current — sửa đọc sản phẩm và lịch sử, 2026-10-25
 
-[Kế hoạch hiện hành](../docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md). **PLAN_REVISED_AND_SELF_REVIEWED; chưa implementation/provider; B chưa GO.**
+[Kế hoạch](../docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md), [implementation](../docs/specs/c3-phase-b-tool-history-implementation-20261025.md). **IMPLEMENTED_AND_SELF_REVIEWED; final verification đang chạy; chưa provider; B chưa GO.**
 
 - [x] Sửa phương án theo self-review: không thêm offer selector mới mặc định; phân biệt media accepted với selected/viewed; sửa redaction tại nguồn, tách hash capture khỏi history; chấm tư vấn riêng.
 - [x] Đính chính T0 cũ: có SUBJECT_BOUND trong discovery; chưa tái hiện exact slot count từ snapshot SQ748. Giữ raw/report cũ nguyên vẹn.
 - [ ] Review độc lập kế hoạch mới: reviewer đã lỗi workspace credits, chưa có kết quả; không nhận review cũ áp dụng cho plan mới.
-- [ ] T0: observed RED cho offer bound, mất ảnh trong history, caption che nhầm; audit input của ba ca tư vấn.
-- [ ] T1: sửa metadata/offer read nhỏ nhất, giữ scope/budgets, compare/component controls và source-read accounting.
-- [ ] T2: bounded image history từ actual accepted receipt + asset/product binding, resend/failure/restart/privacy controls.
-- [ ] T3: redaction chung và history/capture regression, giữ PII protection; không whitelist câu benchmark.
-- [ ] T4: ghi evidence input/instruction và quyết định can thiệp tư vấn hoặc ADVICE_NO_INTERVENTION.
+- [x] T0: observed RED cho offer metadata, missing receipt reader, caption che nhầm, history-read failure; audit ba actual outcomes. Offer-bound replay là structural fixture, thiếu exact historical POS snapshot.
+- [x] T1: metadata nguồn qua offerType hiện có, giữ scope/budgets/compare/component và source-read accounting; không tự bung facts hoặc tăng cap.
+- [x] T2: bounded image history từ actual accepted receipt + binding; returning/unknown entry; shared failure/isolation/unit controls và capture hash. PostgreSQL N4 actual-history/cross-customer đã PASS ở cả hai route, broader regressions còn chạy.
+- [x] T3: shared redaction và history/capture tests, giữ PII protection; không whitelist câu benchmark.
+- [x] T4: ADVICE_NO_INTERVENTION có rationale/actual outcomes, giữ prompt baseline và sales-quality residual.
 - [ ] Self-review, focused tests, shared/worker checks, isolated persistence/delivery verification theo scope.
 - [ ] Khi được yêu cầu chạy: freeze registration/source/config mới, controls rồi prefix và phần còn lại theo gate; không mở 20 NOT_RUN của campaign cũ.
 
