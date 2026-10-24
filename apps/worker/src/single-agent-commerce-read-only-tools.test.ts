@@ -5,7 +5,7 @@ import { canonicalJsonV1, CustomerCarePolicyAdminContentV1Schema } from "@lana/c
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { commerceNow, commerceScope, fixturePolicy, fixturePolicyPointers, fixtureProduct } from "./single-agent-commerce.test-support.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
-import { hardPrecheck, makeBinding } from "./single-agent-semantic-verifier-boundary.js";
+import { hardPrecheck, makeBinding, finalGate } from "./single-agent-semantic-verifier-boundary.js";
 
 const setup = (options: { fee?: number } = {}) => {
   const product = fixtureProduct();
@@ -683,5 +683,49 @@ it.each(["AO", "CV", "QUAN"])("does not assign parent attributes to the only rem
     expect(card.text).toContain("Size: M");
     expect(card.text).not.toContain("Chất liệu:");
     expect(card.text).not.toContain("Form dáng:");
+  }
+});
+
+it("shares scoped positive-stock sizes with owner and verifier and invalidates a size-only source change", async () => {
+  const f = fixtureProduct(), row = f.snapshot.offers.DIRECT!.rows[0]!;
+  f.snapshot.offers.DIRECT!.rows.push({ ...row, size: "L", stock_quantity: 0 },
+    { ...row, size: "XL", color: "white", stock_quantity: 2 });
+  const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy,
+    entry: { firstContact: true, fromAd: true }, initialProducts: [f.product],
+    catalog: { readProduct: async () => f, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+  const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT", color: "navy" } });
+  const data = result.data as { sizeAvailability: unknown; openingQuote: { text: string } };
+  expect(data.sizeAvailability).toMatchObject({ offerType: "DIRECT", color: "navy", confirmedInStockSizes: ["M"] });
+  expect(data.openingQuote.text).toContain("Size: M");
+  const trusted = tools.snapshot();
+  const literal = trusted.policyLiterals.find(p => JSON.parse(p.text).sizeAvailability);
+  expect(JSON.parse(literal!.text).sizeAvailability).toEqual(data.sizeAvailability);
+  const draft = "Size M còn chị nhé.", binding = makeBinding("turn", draft, trusted);
+  // Total quantity and source timestamps stay unchanged; only size identities change.
+  f.snapshot.offers.DIRECT!.rows[0]!.size = "S";
+  const current = await tools.readback();
+  expect(makeBinding("turn", draft, current)).not.toEqual(binding);
+  expect(finalGate({ expected: binding, response: { kind: "VERDICT", binding, result: { verdict: "PASS", violations: [] } },
+    current, finalDraft: draft, now: commerceNow, fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }).disposition).not.toBe("SEND_ELIGIBLE");
+});
+
+it.each(["empty", "unknown", "size-filter", "stale"])("does not expand confirmed in-stock sizes from %s evidence", async mode => {
+  const f = fixtureProduct();
+  if (mode === "empty") f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity = 0;
+  if (mode === "unknown") f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity = null;
+  if (mode === "size-filter") f.snapshot.offers.DIRECT!.rows.push({ ...f.snapshot.offers.DIRECT!.rows[0]!, size: "L" });
+  if (mode === "stale") f.snapshot.synced_at = "2020-01-01T00:00:00.000Z";
+  const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy,
+    entry: { firstContact: true, fromAd: true }, initialProducts: [f.product],
+    catalog: { readProduct: async () => f, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+  const result = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", ...(mode === "size-filter" ? { size: "M" } : {}) } });
+  const data = result.data as { sizeAvailability: { confirmedInStockSizes: string[]; unlistedSizeMeaning: string } | null; openingQuote?: { text: string } };
+  if (mode === "stale") {
+    expect(data.sizeAvailability).toBeNull();
+    expect(data.openingQuote).toBeUndefined();
+    expect(tools.snapshot().policyLiterals.some(p => JSON.parse(p.text).sizeAvailability)).toBe(false);
+  } else {
+    expect(data.sizeAvailability).toMatchObject({ confirmedInStockSizes: mode === "size-filter" ? ["M"] : [], unlistedSizeMeaning: "NOT_CONFIRMED" });
+    if (mode !== "size-filter") expect(data.openingQuote?.text).not.toContain("Size:");
   }
 });

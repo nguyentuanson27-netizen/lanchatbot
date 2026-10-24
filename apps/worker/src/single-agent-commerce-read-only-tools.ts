@@ -15,6 +15,8 @@ export interface CommerceScope {
 }
 export interface ReadOnlyCatalog {
   searchText(query: string): Promise<ProductSearchResult>;
+  /** Ingress-only resolution of a code supplied by the customer/ad; never a callable model tool. */
+  resolveProductCode?(code: string): Promise<StableProductDocument | null>;
   readProduct(productId: string, readPos?: boolean): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
 }
 export interface CommerceToolCall { name: string; args: unknown; id?: string }
@@ -167,7 +169,13 @@ export function createReadOnlyTools(input: {
       const etaClaim = optionClaims.find(c => c.type === "ETA"), stockClaim = optionClaims.find(c => c.type === "STOCK"),
         priceClaim = optionClaims.find(c => c.type === "PRICE");
       const filteredClaim = etaClaim ?? ((q.size || q.color) ? stockClaim ?? priceClaim : undefined);
+      const sizeAvailability = stock?.status === "OK" && stock.facts ? {
+        productId: id, offerType: offer, color: q.color, requestedSize: q.size,
+        confirmedInStockSizes: stock.facts.sizes.filter(size => !q.size || normalizeCatalogToken(size) === normalizeCatalogToken(q.size)),
+        unlistedSizeMeaning: "NOT_CONFIRMED" as const,
+      } : null;
       return { priceEnvelope: price, offerType: offer ?? (offerType ? normalizeCatalogToken(offerType) : null), offer, variant, variantId, claims: optionClaims,
+        sizeAvailability,
         filter: filteredClaim ? { productId: id, variantId, offerType: offer, size: q.size, color: q.color,
           priceClaimId: priceClaim?.claimId ?? null, stockClaimId: stockClaim?.claimId ?? null,
           ...(etaClaim ? { deliveryRegion: Object.keys(raw!.shipping_eta).find(r =>
@@ -210,10 +218,11 @@ export function createReadOnlyTools(input: {
       label: `${p.title} ${o.offer ?? ""} ${o.variant?.selectedColorLabel ?? ""} ${o.variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
     // Preserve filters whose meaning is lost in an offer-only fact scope, including regional ETA.
     deliveryContexts.delete(readKey);
-    const filtered = retained.filter(o => o.filter !== null);
+    const filtered = retained.filter(o => o.filter !== null || o.sizeAvailability !== null);
     if (filtered.length && raw) deliveryContexts.set(readKey, { ref: `read:${readKey}`, sourceVersion: raw.release_id,
-      observedAt: raw.synced_at, expiresAt: new Date(Math.min(...filtered.map(o => Date.parse(o.filterExpiry!)))).toISOString(),
-      text: JSON.stringify(summarizeAll ? { productId: id, sellingOptions: filtered.map(o => o.filter) } : filtered[0]!.filter) });
+      observedAt: raw.synced_at, expiresAt: new Date(Math.min(expires, ...filtered.flatMap(o => o.filterExpiry ? [Date.parse(o.filterExpiry)] : []))).toISOString(),
+      text: JSON.stringify(summarizeAll ? { productId: id, sellingOptions: filtered.map(o => ({ ...o.filter, sizeAvailability: o.sizeAvailability })) }
+        : { productId: id, ...filtered[0]!.filter, sizeAvailability: filtered[0]!.sizeAvailability }) });
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
     preparationContexts.delete(id);
@@ -225,16 +234,17 @@ export function createReadOnlyTools(input: {
       ...(input.entry?.firstContact && selected.priceEnvelope?.status === "OK" &&
         (query.offerType !== null || availableOffers?.length === 1) && nextClaims.some(c=>c.type==="PRICE") ? {
         openingQuote: {subjectRef:id,offerType:selected.offer,
-          text:buildVerifiedFactBlocks(selected.priceEnvelope,"PRICE",{...p,
+          text:buildVerifiedFactBlocks({...selected.priceEnvelope,facts:{...selected.priceEnvelope.facts!,sizes:selected.sizeAvailability?.confirmedInStockSizes ?? []}},"PRICE",{...p,
             ...(componentLabel ? {title:componentLabel} : {}),
             materials:wholeProduct ? evidence.attributes?.materials ?? [] : [],
             silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
+      sizeAvailability: selected.sizeAvailability,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
         sourceVersion: raw!.release_id, observedAt: raw!.synced_at,
         expiresAt: new Date(Math.min(expires, ...o.claims.map(c => Date.parse(c.provenance.expiresAt)))).toISOString(),
-        facts: publicFacts(o.claims), availability: o.availability })),
+        facts: publicFacts(o.claims), availability: o.availability, sizeAvailability: o.sizeAvailability })),
       attributes: evidence.attributes ?? null, sizeCharts: charts,
       content: evidence.content ?? null,
       facts: publicFacts(selected.claims),

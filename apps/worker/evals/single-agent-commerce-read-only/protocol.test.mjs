@@ -20,6 +20,27 @@ test('verifier receives the same bounded turn time outside trusted facts',()=>{
  assert.deepEqual(projected.turnTime,{processingAt:r.turnTime.processingAt,timeZone:r.turnTime.timeZone});
  assert.deepEqual(projected.trusted,r.trusted);assert.doesNotMatch(JSON.stringify(projected),/NEVER_FORWARD/);
 });
+
+test('actual product-read size evidence reaches both model wires without evaluator labels',async()=>{
+ const {createReadOnlyTools}=await import('../../dist/single-agent-commerce-read-only-tools.js');
+ const {commerceScope,commerceNow,fixtureProduct,fixturePolicy}=await import('../../dist/single-agent-commerce.test-support.js');
+ const {buildGeminiCommerceRequest}=await import('./gemini-inference.mjs');
+ const f=fixtureProduct(),tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,
+  entry:{firstContact:true,fromAd:true},initialProducts:[f.product],catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});
+ const result=await tools.invoke({name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}});
+ const trusted=tools.snapshot(),v=request();v.trusted=trusted;v.caseId='EVALUATOR_NEVER_SEND';v.finalDraft='Size M còn chị nhé.';
+ const verifier=JSON.parse(buildVerifierRequest(manifest,v).input[0].content[0].text);
+ const owner=buildGeminiCommerceRequest({generationId:'turn:owner:1',instructions:'Tư vấn.',context:trusted,
+  contents:[{role:'user',parts:[{functionResponse:{name:'read_product',response:result}}]}],caseId:'EVALUATOR_NEVER_SEND'});
+ const ownerContext=JSON.parse(owner.contents[0].parts[0].text).trusted;
+ const evidence=JSON.parse(trusted.policyLiterals.find(p=>JSON.parse(p.text).sizeAvailability).text).sizeAvailability;
+ assert.deepEqual(evidence.confirmedInStockSizes,['M']);
+ for(const policies of [verifier.trusted.policyLiterals,ownerContext.policy])
+  assert.deepEqual(JSON.parse(policies.find(p=>JSON.parse(p.text).sizeAvailability).text).sizeAvailability,evidence);
+ assert.deepEqual(owner.contents.at(-1).parts[0].functionResponse.response.data.sizeAvailability,evidence);
+ assert.doesNotMatch(JSON.stringify([owner,verifier]),/EVALUATOR_NEVER_SEND/);
+ assert.doesNotMatch(JSON.stringify(owner.tools),/resolveProductCode/);
+});
 test('explicit dispatch ranges partition the twenty-four registered slots without retries or hidden selection',()=>{
  assert.deepEqual(dispatchRange(),{first:1,last:24});
  assert.deepEqual(dispatchRange('1:8'),{first:1,last:8});

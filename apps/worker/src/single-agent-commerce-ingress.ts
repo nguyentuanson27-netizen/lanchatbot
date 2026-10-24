@@ -137,8 +137,9 @@ export async function runPersistedCommerceIngress(input: {
   // Hints select only source-verified identities, never prices or effects. A new unresolved ad must not fall back to an old product.
   const lookup = async (ids: readonly string[]) => {
     const products = await Promise.all([...new Set(ids)].slice(0,MAX_RUNTIME_PRODUCTS).map(async id => {
-      try { const source = await input.read.catalog.readProduct(id,false);
-        return source?.product && normalizeProductCode(source.product.productId) === id ? source.product : null;
+      try { const product = input.read.catalog.resolveProductCode ? await input.read.catalog.resolveProductCode(id)
+          : (await input.read.catalog.readProduct(id,false))?.product;
+        return product && normalizeProductCode(product.productId) === id ? product : null;
       } catch { return null; }
     }));
     return products.filter(p => p !== null);

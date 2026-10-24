@@ -42,6 +42,23 @@ describe("scoped read-only source composition", () => {
     await expect(s.sources.catalog.readProduct("SM613")).rejects.toThrow();
     expect(s.facts.readCatalogSnapshot).not.toHaveBeenCalled();
   });
+  it("resolves an ingress code before binding it, without granting arbitrary product reads", async () => {
+    const s = await setup();
+    await expect(s.sources.catalog.readProduct("SM613", false)).rejects.toThrow("UNBOUND_PRODUCT");
+    expect(await s.sources.catalog.resolveProductCode!("SM613")).toEqual(s.f.product);
+    expect(s.facts.readCatalogSnapshot).not.toHaveBeenCalled();
+    expect((await s.sources.catalog.readProduct("SM613")).product.productId).toBe("SM613");
+    await expect(s.sources.catalog.readProduct("OTHER", false)).rejects.toThrow("UNBOUND_PRODUCT");
+  });
+  it.each(["wrong-id", "wrong-code", "missing"])("does not bind an invalid exact-code resolution: %s", async mode => {
+    const s = await setup();
+    if (mode === "wrong-id") s.catalog.findByExactCode.mockResolvedValue(fixtureProduct("OTHER").product);
+    if (mode === "wrong-code") s.f.product.canonicalCode = "OTHER";
+    if (mode === "missing") s.catalog.findByExactCode.mockResolvedValue(null as never);
+    expect(await s.sources.catalog.resolveProductCode!("SM613")).toBeNull();
+    await expect(s.sources.catalog.readProduct("SM613", false)).rejects.toThrow("UNBOUND_PRODUCT");
+    expect(s.facts.readCatalogSnapshot).not.toHaveBeenCalled();
+  });
   it("supplies only active-pointer reads to the resolver, with no pin or audit writes", async () => {
     const s = await setup();
     await s.sources.policy();

@@ -4,7 +4,8 @@ import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRun
 import { LocalEnvelopeCipher, PostgresRealtimeRuntimeStore, type RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
 import { runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
-import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine } from "./single-agent-commerce.test-support.js";
+import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine, fixturePolicyPointers } from "./single-agent-commerce.test-support.js";
+import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
 import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionResult } from "./realtime-sales-catalog.js";
 
@@ -42,15 +43,16 @@ function fixture(productIds = ["SM613"]) {
   const policy = vi.fn(() => fixturePolicy());
   const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
+  let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
-    read: { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
+    read: readOverride ?? { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
     newGeneration: () => { batch.generation = generation; },
     checkCommit: (check: typeof checkCommit) => { checkCommit = check; },
@@ -564,4 +566,40 @@ it("passes the opening card and chosen images through the existing verifier and 
  expect(draft).toContain("499.000đ");expect(result.terminal.text).toBe(draft);
  expect(f.verifier).toHaveBeenCalledTimes(1);
  expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+});
+
+it.each(["ad", "explicit", "missing-ad"])("composes ingress with the real scoped source adapter and no product seed: %s", async mode => {
+  const f = fixture(), product = fixtureProduct();
+  const exact = vi.fn(async (code: string) => code === product.product.canonicalCode ? product.product : null);
+  const searchText = vi.fn(async () => ({ status: "NOT_FOUND" as const, reasonCode: "NO_CANDIDATES" as const }));
+  const readCatalogSnapshot = vi.fn(async () => product.snapshot);
+  const read = createCommerceReadSources({ scope: commerceScope(), channel: "PUBLISHED", clock: () => commerceNow,
+    catalog: { findByExactCode: exact }, search: { searchText }, facts: { readCatalogSnapshot },
+    policyStore: { loadActivePointers: async () => fixturePolicyPointers() } });
+  f.setRead({ ...read, initialProducts: [] });
+  f.message.text = mode === "explicit" ? "SM613 bao nhiêu em?" : "Mẫu này bao nhiêu em?";
+  if (mode !== "explicit") Object.assign(f.message, { adsContext: { source: "ADS", adTitle: mode === "ad" ? "SM613" : "UNKNOWN999", postId: null, adId: null, ref: null } });
+  let request: OwnerRequest | undefined, draft = "";
+  const result = await f.run(async r => {
+    request = r;
+    if (mode === "missing-ad") return { kind: "FINAL", text: "Chị gửi em ảnh mẫu nhé." };
+    const response = r.contents.flatMap(c => c.parts).find(p => p.functionResponse)?.functionResponse;
+    if (!response) {
+      const calls = [{ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } }];
+      return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } };
+    }
+    draft = (response as { response: { data: { openingQuote: { text: string } } } }).response.data.openingQuote.text;
+    return { kind: "FINAL", text: draft };
+  });
+  expect(searchText).not.toHaveBeenCalled();
+  if (mode === "missing-ad") {
+    expect(request!.context.state.currentProductId).toBeNull();
+    expect(request!.context.boundSubjects).toEqual([]);
+    expect(readCatalogSnapshot).not.toHaveBeenCalled();
+  } else {
+    expect(request!.context.state.currentProductId).toBe("SM613");
+    expect(draft).toContain("499.000đ");
+    expect(result.terminal.text).toBe(draft);
+    expect(f.verifier).toHaveBeenCalledTimes(1);
+  }
 });

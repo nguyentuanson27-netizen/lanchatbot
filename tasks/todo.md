@@ -2205,3 +2205,9 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Exact owner3.5FlashLite HIGH freeze/sourceaae7cf78;86NodePASS; preflight/dispatch/finalcleanliness exit0,5/5outcomes,DBdropped.
 - [x] Raw27b540c6 before review;15generation requests/0retry/0timeout,15wirefirewallPASS and hashesverified;review5histories and compare3.8.
 - [ ] B qualification:3eligible/2fallback,adbinding unresolved;toolmode failure and card/stock-size evidence mismatch. [Report](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-flashlite-20261024/CHECKPOINT_B.md). STOP/BnotGO.
+
+## Opening source/size correction — 2026-10-24
+
+- [x] Ingress/real source adapter compose with seed[], code resolution and unbound guard retained; shared confirmed-stock-size evidence, scope/freshness/readback; replace opening prompt, no case examples.
+- [x] Observed7RED then GREEN;379unique focusedPASS, build/lint/typecheckPASS, self-review. [Report](../docs/specs/c3-phase-b-opening-source-size-fix-20261024.md).
+- [ ] One independent review on implementation commit; provider quality remains unverified/BnotGO.

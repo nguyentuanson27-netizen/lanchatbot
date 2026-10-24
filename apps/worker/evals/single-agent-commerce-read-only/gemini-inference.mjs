@@ -137,7 +137,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    const partial=['price','stock'].some(field=>data.availability?.[field]&&data.availability[field].status!=='OK');
    response.response.data=product(data,partial);
    // Compare only raw evidence in this response, before availability reasons are sanitized.
-   if(!partial&&defaultInOptions(data))for(const key of ['offerType','variantId','facts','availability'])delete response.response.data[key];
+   if(!partial&&defaultInOptions(data))for(const key of ['offerType','variantId','facts','availability','sizeAvailability'])delete response.response.data[key];
    if(response.response.data.availability)response.response.data.availability=availability(data.availability);
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
    const differences=priceDifferences(data);
