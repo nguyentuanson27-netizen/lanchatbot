@@ -2191,3 +2191,5 @@ Owner-authorized retry of Gemini3.8 b1-price completed: sourcef8026148, 1eligibl
 ## Phase B opening quote — 2026-10-24
 
 Implemented/self-reviewed existing price-card builder into first-contact read_product; actual ingress entry metadata; owner instructions; separate5-turn opening-quote cohort. Deterministic159+86+43PASS, compile/lint PASS. Provider not run, BnotGO; oneTEXT plus images, no post-verifier rewrite or production wiring. [Report](../docs/specs/c3-phase-b-opening-quote-integration-20261024.md).
+
+- [x] Fix two independent-review P2: opening card uses verified attributes; sole component cannot inherit parent attributes. Observed five RED then GREEN; worker164/Node86/shared43 PASS, lint/typecheck PASS. Self-review complete; provider not run. See report correction section.

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { RuntimePolicyResolver } from "@lana/chat-runtime";
+import { buildProductAttributesV1 } from "@lana/business-tools";
 import { canonicalJsonV1, CustomerCarePolicyAdminContentV1Schema } from "@lana/contracts";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { commerceNow, commerceScope, fixturePolicy, fixturePolicyPointers, fixtureProduct } from "./single-agent-commerce.test-support.js";
@@ -639,4 +640,48 @@ it("keeps a component opening quote separate from the set price and set attribut
  const r=await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,offerType:"AO"}});
  const c=(r.data as {openingQuote:{text:string}}).openingQuote;
  expect(c.text).toContain("Áo lẻ");expect(c.text).toContain("300.000đ");expect(c.text).not.toContain("700.000đ");expect(c.text).not.toContain("Chất liệu:");
+});
+
+it.each([false, true])("uses verified opening-quote attributes even when search fields disagree (empty=%s)", async empty => {
+  const f = fixtureProduct();
+  f.product.materials = ["lụa"];
+  f.product.silhouettes = ["ôm"];
+  if (empty) {
+    const { schemaVersion: _schemaVersion, productId, metadata, ...data } = f.product.attributes!;
+    f.product.attributes = buildProductAttributesV1({ productId, observedAt: metadata.observedAt,
+      data: { ...data, materials: [], silhouettes: [] } });
+  }
+  const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy,
+    entry: { firstContact: true, fromAd: true }, initialProducts: [f.product],
+    catalog: { readProduct: async () => f, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+  const result = await tools.invoke({ name: "read_product", args: { subjectRef: f.product.productId } });
+  const card = (result.data as { openingQuote: { text: string } }).openingQuote.text;
+  expect(card).toContain("499.000đ");
+  expect(card).toContain("Size: M");
+  expect(card).not.toContain("lụa");
+  expect(card).not.toContain("ôm");
+  if (empty) {
+    expect(card).not.toContain("Chất liệu:");
+    expect(card).not.toContain("Form dáng:");
+  } else {
+    expect(card).toContain("Chất liệu: cotton");
+    expect(card).toContain("Form dáng: suông");
+  }
+});
+
+it.each(["AO", "CV", "QUAN"])("does not assign parent attributes to the only remaining %s offer", async offerType => {
+  const { f } = sellingFixture({ [offerType]: 300000 });
+  const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy,
+    entry: { firstContact: true, fromAd: true }, initialProducts: [f.product],
+    catalog: { readProduct: async () => f, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+  // Both inferred and explicitly requested sole components must keep the same scope.
+  for (const args of [{ subjectRef: f.product.productId }, { subjectRef: f.product.productId, offerType }]) {
+    const result = await tools.invoke({ name: "read_product", args });
+    const card = (result.data as { openingQuote: { text: string; offerType: string } }).openingQuote;
+    expect(card.offerType).toBe(offerType);
+    expect(card.text).toContain("300.000đ");
+    expect(card.text).toContain("Size: M");
+    expect(card.text).not.toContain("Chất liệu:");
+    expect(card.text).not.toContain("Form dáng:");
+  }
 });

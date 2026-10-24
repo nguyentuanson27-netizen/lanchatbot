@@ -41,3 +41,13 @@ Observed RED: test card first-contact thiếu openingQuote, 1FAIL/48PASS. GREEN 
 - `node --check` run.mjs/stateful-provider.mjs và `git diff --check` PASS.
 
 Self-review phát hiện và sửa fixture sai wrapper (`sellingFixture.f`) và variable B1 (`sample`, không phải runtime). Không có provider/CI/real-DB qualification mới. Giá trị kiểm chứng là wiring/card/gate/firewall và hồi quy deterministic; chất lượng hội thoại chờ run.
+
+## Correction sau review độc lập
+
+Review exact head `353e5ed152270ec57686bdb0110e9749abbdedae`: REQUEST_CHANGES với hai P2. Card dùng search materials/silhouettes dù chỉ kiểm verified attributes tồn tại; card cũng coi một offer còn lại là toàn bộ sản phẩm, khiến component nhận thuộc tính parent. Đây là lỗi dữ liệu cấp cho owner; chưa quan sát verifier false PASS hoặc live send từ hai lỗi này.
+
+Đã sửa card lấy trực tiếp `evidence.attributes.materials/silhouettes`. Verified field rỗng giữ rỗng, không lấp bằng search field. Phạm vi thuộc tính dùng explicit offer `DIRECT/SET/SET_VAY/SET_QUAN`, bỏ suy luận từ số offer. Component hoặc offer chưa được xác định là toàn bộ sản phẩm chỉ giữ giá/size hiện có; không tự gán thuộc tính parent. Không sửa shared formatter, prompt, verifier, corpus hoặc gate.
+
+Observed RED: 5 regression mới FAIL/53 existing PASS trước sửa. Sau sửa: 164 worker tests PASS (cùng bốn file ở trên), 86 Node tests PASS (cùng ba file ở trên), 43 shared tests PASS (cùng ba file ở trên). Năm regression bao phủ search khác verified, verified field rỗng, sole AO/CV/QUAN cả explicit và inferred offer; giữ giá/size. Worker lint/typecheck (`pnpm --filter @lana/worker lint`) và full build (`pnpm --filter @lana/worker build`, gồm dependency builds) PASS. `git diff --check` PASS.
+
+Self-review: thuộc tính trong card và trusted snapshot cùng lấy từ evidence đã verify; điều kiện freshness/giá/firstContact giữ nguyên. Chưa chạy model trên correction; chưa kết luận model tuân mẫu hoặc B GO.

@@ -218,7 +218,8 @@ export function createReadOnlyTools(input: {
     reads.set(readKey, structuredClone(args));
     preparationContexts.delete(id);
     const componentLabel = ({AO:"Áo lẻ",CV:"Chân váy lẻ",QUAN:"Quần lẻ"} as Record<string,string>)[selected.offer ?? ""];
-    const wholeProduct = availableOffers?.length === 1 || ["SET","SET_VAY","SET_QUAN"].includes(selected.offer ?? "");
+    // Offer count cannot bind parent attributes to a component, even when it is the only offer left.
+    const wholeProduct = ["DIRECT","SET","SET_VAY","SET_QUAN"].includes(selected.offer ?? "");
     const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
       ...(input.entry?.firstContact && selected.priceEnvelope?.status === "OK" &&
@@ -226,8 +227,8 @@ export function createReadOnlyTools(input: {
         openingQuote: {subjectRef:id,offerType:selected.offer,
           text:buildVerifiedFactBlocks(selected.priceEnvelope,"PRICE",{...p,
             ...(componentLabel ? {title:componentLabel} : {}),
-            materials:evidence.attributes && wholeProduct ? p.materials : [],
-            silhouettes:evidence.attributes && wholeProduct ? p.silhouettes : []}).blocks.map(b=>b.text).join("\n")}
+            materials:wholeProduct ? evidence.attributes?.materials ?? [] : [],
+            silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,

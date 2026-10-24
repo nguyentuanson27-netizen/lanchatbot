@@ -2466,3 +2466,5 @@ Owner-authorized retry of Gemini3.8 b1-price completed: sourcef8026148, 1eligibl
 ## Phase B opening quote — 2026-10-24
 
 Implemented/self-reviewed existing price-card builder into first-contact read_product; actual ingress entry metadata; owner instructions; separate5-turn opening-quote cohort. Deterministic159+86+43PASS, compile/lint PASS. Provider not run, BnotGO; oneTEXT plus images, no post-verifier rewrite or production wiring. [Report](../docs/specs/c3-phase-b-opening-quote-integration-20261024.md).
+
+Owner-authorized correction after independent review: replace search attributes with verified evidence in openingQuote and remove offer-count inference of whole-product scope; regression RED→GREEN plus ingress/media/adapter checks. No prompt/semantic gate changes or provider generation. Detail and evidence in report correction section.
