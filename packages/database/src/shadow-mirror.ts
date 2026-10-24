@@ -80,6 +80,16 @@ const STREET_ADDRESS = new RegExp(
   `${STREET_TOKEN}\\s+\\p{Lu}[\\p{L}\\p{M}]*\\s+\\p{Lu}|` +
   `(?:(?:nhà|nha)\\s+(?:chị|em|tôi|mình)\\s+)?(?:ở|tới|tại|giao|gui|gửi|o|toi|tai)\\s+${STREET_TOKEN}\\s+\\p{L})`, "u",
 );
+// A short standalone street value is ambiguous even when all lowercase. Keep
+// it private instead of relying on capitalization or a construction-word list.
+// This deliberately also hides ambiguous short fragments starting with a street
+// token; complete product sentences remain eligible for the ordinary filter.
+const BARE_STREET_ADDRESS = new RegExp(
+  `^\\s*${STREET_TOKEN}(?:\\s+|(?<=\\.))[\\p{L}\\p{M}\\p{N}]+(?:[\\s/-]+[\\p{L}\\p{M}\\p{N}]+){0,5}[.!?…]?\\s*$`, "iu",
+);
+const STREET_LOCATION_FRAME = new RegExp(
+  `(?:${bounded("ở|tới|tại|giao|gửi|o|toi|tai|gui")}\\s+${STREET_TOKEN}\\s+\\p{L}|^\\s*${STREET_TOKEN}[^\\n]{1,180}[,\\d])`, "iu",
+);
 
 /**
  * The word "địa chỉ" alone is not an address: a customer asking where the shop
@@ -163,7 +173,8 @@ export function redactAnalyticsText(value: string): string {
     .split(/\r?\n/u)
     .map((line) => {
       const addressCandidate = line.replace(ADDRESS_TOKEN_QUESTION, " ");
-      if (ADDRESS_LINE_TOKEN.test(addressCandidate) || STREET_ADDRESS.test(addressCandidate)) {
+      if (ADDRESS_LINE_TOKEN.test(addressCandidate) || STREET_ADDRESS.test(addressCandidate) ||
+        BARE_STREET_ADDRESS.test(addressCandidate) || STREET_LOCATION_FRAME.test(addressCandidate)) {
         return "[ADDRESS]";
       }
       if (/^\s*\p{Lu}[\p{L}'-]+(?:\s+\p{Lu}[\p{L}'-]+){1,4}\s*$/u.test(line)) {

@@ -6,6 +6,12 @@ import {
 } from "./shadow-mirror.js";
 
 describe("shadow mirror privacy helpers", () => {
+  it("protects standalone street values independently of casing or house numbers", () => {
+    for (const text of ["đường nguyễn trãi", "đường nguyễn trãi?", "ĐƯỜNG NGUYỄN TRÃI", "đ. lê lợi", "Đ.Lê Lợi",
+      "Ở đường nguyễn trãi gần công viên", "đường nguyễn trãi, p. 5", "duong le loi"]) {
+      expect(redactAnalyticsMessage(text).text).toBe("[ADDRESS]");
+    }
+  });
   it("keeps ordinary product construction language while protecting actual street addresses", () => {
     for (const text of [
       "Em gửi chị xem ảnh cận cảnh họa tiết thêu nổi trên áo để mình dễ dàng quan sát từng đường nét thêu nhé ạ.",

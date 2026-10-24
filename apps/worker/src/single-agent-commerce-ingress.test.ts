@@ -70,6 +70,8 @@ it("preserves a benign caption through the shared history redactor", async () =>
   const caption = "Em gửi chị ảnh cận để xem đường nét thêu nhé.";
   expect(commerceHistory([{ senderType: "BOT", text: redactAnalyticsMessage(caption).text }]))
     .toEqual([{ role: "shop", text: caption }]);
+  for (const street of ["đường nguyễn trãi", "đ. lê lợi"])
+    expect(commerceHistory([{ senderType: "CUSTOMER", text: redactAnalyticsMessage(street).text }])).toEqual([]);
 });
 
 it("adds bounded actual image history without evicting customer corrections or exceeding eight entries", () => {
