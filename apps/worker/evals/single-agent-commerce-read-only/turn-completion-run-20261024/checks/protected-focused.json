@@ -1,0 +1,14 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/business-tools",
+    "exec",
+    "vitest",
+    "run",
+    "src/protected-claims.test.ts",
+    "src/reply-assembler.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 5.79407262802124
+}

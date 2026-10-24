@@ -1,0 +1,44 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/single-agent-commerce-media-delivery.test.ts (13 tests) 961ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (56 tests) 1810ms
+ ✓ src/single-agent-commerce-handoff-delivery.test.ts (16 tests) 1181ms
+   ✓ revalidates text-only handoff after restart (unchanged)  365ms
+ ✓ src/single-agent-commerce-handoff.test.ts (18 tests) 2038ms
+   ✓ Phase B handoff follows current code policy and committed ownership > uses the configured terminal after a partial POS-unavailable read without pretending to send the known product details  431ms
+ ✓ src/single-agent-commerce-product-groups.test.ts (14 tests) 1733ms
+   ✓ keeps delegation inside code, binds fit to the requested member and revokes changed chart evidence  1010ms
+ ✓ src/single-agent-commerce-state.test.ts (35 tests) 4493ms
+   ✓ accepted effective state before dependent tools > commits inline size inputs before calculation without a second tool call  416ms
+   ✓ accepted effective state before dependent tools > keeps an unknown commit blocked after a real store write (read-throw)  345ms
+   ✓ accepted effective state before dependent tools > lets the owner fix numeric arguments within the existing two rounds before size and final verification  603ms
+   ✓ accepted effective state before dependent tools > quotes through existing policy arithmetic and invalidates an equal total with changed price provenance  386ms
+   ✓ accepted effective state before dependent tools > carries accepted state through two turns and applies the later correction without resetting profile  340ms
+   ✓ terminates no-chart after the last tool round without generating a fit draft  352ms
+ ✓ src/single-agent-commerce-read-only.test.ts (30 tests) 5730ms
+   ✓ one conversational owner, tools and exact egress > shares a single processing clock with every owner generation and verifier, outside the world snapshot  504ms
+   ✓ one conversational owner, tools and exact egress > finishes search -> one option-summary read -> final in budget, changed source=false  485ms
+   ✓ one conversational owner, tools and exact egress > keeps the 8KB bound on the entire batch of product reads, not each result separately  508ms
+   ✓ one conversational owner, tools and exact egress > lets the transport bound the exact provider projection instead of rejecting duplicated internal context  1636ms
+   ✓ one conversational owner, tools and exact egress > exposes the remaining existing tool budget to each native continuation without granting extra rounds  395ms
+ ✓ src/single-agent-commerce-persistence.test.ts (16 tests) 3295ms
+   ✓ existing transaction owner for candidate commerce > prepares native open with fresh facts and exact replay evidence, independent of text classifiers  1607ms
+   ✓ existing transaction owner for candidate commerce > prepares native variant with fresh facts and exact replay evidence, independent of text classifiers  801ms
+ ✓ src/single-agent-commerce-media.test.ts (28 tests) 1730ms
+   ✓ candidate product media > pairs the overview with a complementary approved angle instead of a second front image  413ms
+   ✓ candidate product media > lets the same owner inspect verified public bytes without selecting an outbound image  319ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (63 tests) 7180ms
+   ✓ read-only domain tools > uses checkout region priority for southern addresses and binds the resolved source key  1315ms
+   ✓ read-only domain tools > keeps repeated reads stable but binds a new POS observation even when business values match  485ms
+   ✓ read-only domain tools > binds each option's filters and ETA even when two offers share a source SKU  425ms
+   ✓ read-only domain tools > preserves the existing claim bound across independently filtered multi-option reads  1433ms
+ ✓ src/meta-outbox-dispatcher.test.ts (13 tests) 89ms
+ ✓ src/single-agent-commerce-ingress.test.ts (67 tests) 5844ms
+   ✓ recovers first-contact images with a verified turn product and no persisted focus (code)  490ms
+
+ Test Files  12 passed (12)
+      Tests  369 passed (369)
+   Start at  22:11:39
+   Duration  35.15s (transform 37.73s, setup 0ms, collect 168.28s, tests 36.09s, environment 36ms, prepare 40.08s)
+

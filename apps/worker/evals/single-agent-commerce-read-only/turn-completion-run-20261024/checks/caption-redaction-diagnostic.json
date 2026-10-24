@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import {redactAnalyticsMessage} from './packages/database/dist/index.js'; const text='Em g\u1eedi ch\u1ecb xem \u1ea3nh c\u1eadn c\u1ea3nh h\u1ecda ti\u1ebft th\u00eau n\u1ed5i tr\u00ean \u00e1o \u0111\u1ec3 m\u00ecnh d\u1ec5 d\u00e0ng quan s\u00e1t t\u1eebng \u0111\u01b0\u1eddng n\u00e9t th\u00eau nh\u00e9 \u1ea1.'; const result=redactAnalyticsMessage(text); if(result.text!=='[ADDRESS]')throw Error('EXPECTED_REDACTION_NOT_REPRODUCED'); console.log(JSON.stringify({status:'REPRODUCED',redacted:result.text,rawPlaintextHashRetained:false}));"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 0.6951665878295898
+}

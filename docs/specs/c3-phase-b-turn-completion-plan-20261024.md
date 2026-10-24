@@ -1,3 +1,5 @@
+> Execution update25/10/2026: IMPLEMENTED_AND_EXECUTED, STOP_AT_PREFIX tại source235d570a.17controlsPASS +31/51native,20NOT_RUN theo gate. [Report](../../apps/worker/evals/single-agent-commerce-read-only/turn-completion-run-20261024/CHECKPOINT_B.md). Nội dung đăng ký trước run bên dưới giữ làm lịch sử; frozen pre-run bytes trong artifact/frozen-inputs. Không có independent implementation re-review mới; B chưa GO.
+
 # Phase B — hoàn thành lượt và tư vấn đúng việc khách cần
 
 Trạng thái: **PLAN_REVISED_AFTER_REVIEW; SELF_REVIEWED**. Đã tiếp thu [review độc lập: 1 P1 + 3 P2](c3-phase-b-turn-completion-plan-review-20261024.md) theo yêu cầu owner sửa plan; bảng đối chiếu ở mục 9. Reviewer chưa review lại bản đã sửa. Chưa sửa runtime/prompt, chưa chạy test hoặc provider theo kế hoạch này. Base kiểm tra: `8115516e33b43c68260cb9c2662073cfbd46540d`, working tree sạch trước khi viết bản kế hoạch đầu tiên. A vẫn OWNER_BYPASS; B chưa GO.

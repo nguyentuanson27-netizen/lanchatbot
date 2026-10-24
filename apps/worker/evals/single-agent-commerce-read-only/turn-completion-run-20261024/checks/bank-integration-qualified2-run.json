@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "C:/Users/nguye/Documents/S\u1ea3n ph\u1ea9m AI/c3-turn-completion-checks-20261024/bank-integration-qualified2",
+    "BANK_TRANSFER",
+    "--candidate-handoff",
+    "--handoff-delivery-only"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 439.7769627571106
+}

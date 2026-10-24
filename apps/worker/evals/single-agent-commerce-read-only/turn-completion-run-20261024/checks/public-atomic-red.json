@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/worker",
+    "exec",
+    "vitest",
+    "run",
+    "src/single-agent-commerce-persistence.test.ts"
+  ],
+  "exitCode": 1,
+  "elapsedSeconds": 4.631552696228027
+}

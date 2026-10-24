@@ -1,0 +1,151 @@
+{
+  "sourceSha": "235d570a90f792a096e37d4094e6feaf3c7eee95",
+  "jobs": {
+    "b1-1-1": {
+      "attempts": 1,
+      "terminals": {
+        "HANDOFF": 1
+      },
+      "databaseDropped": null
+    },
+    "b1-15-15": {
+      "attempts": 1,
+      "terminals": {
+        "SEND_ELIGIBLE": 1
+      },
+      "databaseDropped": null
+    },
+    "b1-23-23": {
+      "attempts": 1,
+      "terminals": {
+        "SEND_ELIGIBLE": 1
+      },
+      "databaseDropped": null
+    },
+    "b1-9-9": {
+      "attempts": 1,
+      "terminals": {
+        "SEND_ELIGIBLE": 1
+      },
+      "databaseDropped": null
+    },
+    "journey-openings": {
+      "attempts": 4,
+      "terminals": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 3
+      },
+      "databaseDropped": true
+    },
+    "media-followup": {
+      "attempts": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 7
+      },
+      "databaseDropped": true
+    },
+    "negotiation": {
+      "attempts": 3,
+      "terminals": {
+        "SEND_ELIGIBLE": 3
+      },
+      "databaseDropped": true
+    },
+    "opening-quotes": {
+      "attempts": 5,
+      "terminals": {
+        "SEND_ELIGIBLE": 5
+      },
+      "databaseDropped": true
+    },
+    "stateful": {
+      "attempts": 8,
+      "terminals": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "databaseDropped": true
+    }
+  },
+  "native": {
+    "registered": 51,
+    "attempted": 31,
+    "notRun": 20,
+    "sendEligibilityOnly": 4,
+    "captureTransport": 27,
+    "terminals": {
+      "HANDOFF": 3,
+      "SEND_ELIGIBLE": 25,
+      "FALLBACK": 1,
+      "NO_SEND": 2
+    },
+    "reasons": {
+      "STALE": 1,
+      "PASS": 24,
+      "OWNER_TOOL_MODE": 1,
+      "RECEIPT_BACKED_CART_SUMMARY": 1,
+      "CHECKOUT_DETAILS_MISSING": 1,
+      "PRIVATE_CHECKOUT_COMMITTED": 1,
+      "PURCHASE_CONFIRMED": 1,
+      "CUSTOMER_REQUESTED_HUMAN": 1
+    },
+    "actualSilentCapturedTurns": 0
+  },
+  "controls": {
+    "registered": 17,
+    "attempts": 17,
+    "safe": 8,
+    "unsafe": 8,
+    "probe": 1,
+    "unsafeSendEligibleFalsePass": 0,
+    "safeRejected": 0
+  },
+  "operations": {
+    "generationAttempts": 103,
+    "actualGenerationRequests": 103,
+    "ownerRequests": 60,
+    "verifierRequests": 43,
+    "automaticGenerationRetries": 0,
+    "maximumProviderRequestsPerGeneration": 1,
+    "knownInputTokens": 697872,
+    "knownOutputTokens": 49230,
+    "requestsWithUnknownUsage": 0,
+    "cost": "NOT_EXPOSED",
+    "providerErrors": [],
+    "providerErrorCount": 0,
+    "providerTimeoutCount": 0,
+    "generationContractErrors": [
+      {
+        "caseId": "sales-discovery-advice:need",
+        "role": "owner",
+        "kind": "UNEXPECTED_TOOL_CALL_IN_FINAL_ONLY"
+      }
+    ],
+    "verifierLatency": {
+      "n": 43,
+      "p50Ms": 8213,
+      "p95Ms": 14796,
+      "policy": "nearest-rank"
+    },
+    "verificationStageLatency": {
+      "n": 26,
+      "p50Ms": 12354.92330000001,
+      "p95Ms": 18513.067299999995,
+      "policy": "nearest-rank"
+    },
+    "readOnlyAttemptLatency": {
+      "n": 4,
+      "p50Ms": 18969.195599999992,
+      "p95Ms": 33573.768500000006,
+      "policy": "nearest-rank"
+    },
+    "captureAttemptLatency": {
+      "n": 27,
+      "p50Ms": 42429.150100000006,
+      "p95Ms": 58792.88360000003,
+      "policy": "nearest-rank"
+    },
+    "measurementLimit": "Isolated DB/SSH/fake Meta transport; not production latency, first-token, controlled added-E2E latency, or conversion."
+  }
+}

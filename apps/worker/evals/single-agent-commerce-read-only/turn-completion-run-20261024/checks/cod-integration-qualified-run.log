@@ -1,0 +1,37 @@
+node:events:487
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+Emitted 'error' event on Client instance at:
+    at Client._handleErrorEvent (C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\node_modules\.pnpm\pg@8.22.0\node_modules\pg\lib\client.js:417:10)
+    at Connection.emit (node:events:509:28)
+    at Socket.reportStreamError (C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\node_modules\.pnpm\pg@8.22.0\node_modules\pg\lib\connection.js:58:12)
+    at Socket.emit (node:events:509:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+
+Node.js v24.19.0
+B composed snapshot invalidation source-refresh discards draft and captures only committed holding reply: PASS
+B composed snapshot invalidation stock-change discards draft and captures only committed holding reply: PASS
+B composed snapshot invalidation expired discards draft and captures only committed holding reply: PASS
+B composed dependency holding delivery unchanged uses committed policy and actual capture: PASS
+B composed dependency holding delivery before-commit uses committed policy and actual capture: PASS
+B composed dependency holding delivery after-commit uses committed policy and actual capture: PASS
+B composed dependency holding delivery restart uses committed policy and actual capture: PASS
+B composed dependency holding delivery cached-allowed uses committed policy and actual capture: PASS
+B composed dependency holding delivery receipt-unavailable uses committed policy and actual capture: PASS
+B composed dependency holding delivery lost-commit-reply uses committed policy and actual capture: PASS
+B composed candidate first CUSTOMER_REQUESTED_HUMAN acknowledges once after real atomic commit: PASS
+B composed candidate first SIZE_RULE_UNAVAILABLE acknowledges once after real atomic commit: PASS
+B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it: PASS
+B composed mixed media handoff source never leaves partial intents: PASS
+B composed mixed media handoff rollback never leaves partial intents: PASS
+B composed mixed media delivery restart revalidates unchanged before any message: PASS
+B composed mixed media delivery restart revalidates source before any message: PASS

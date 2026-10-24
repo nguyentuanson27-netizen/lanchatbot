@@ -1,0 +1,13 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+    "apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs",
+    "apps/worker/evals/single-agent-commerce-read-only/candidate-handoff.test.mjs",
+    "apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 2.4089014530181885
+}

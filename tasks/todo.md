@@ -1,15 +1,15 @@
-## Current — kế hoạch hoàn thành lượt và tư vấn, 2026-10-24
+## Current — turn-completion campaign, 24–25/10/2026
 
-[Kế hoạch chi tiết](../docs/specs/c3-phase-b-turn-completion-plan-20261024.md). PLAN_REVISED_AFTER_REVIEW; SELF_REVIEWED. Chưa implementation/provider, chưa reviewer approval cho bản sửa. Không thay kết quả acceptance ảnh/size trước.
+[Plan](../docs/specs/c3-phase-b-turn-completion-plan-20261024.md), [report/evidence](../apps/worker/evals/single-agent-commerce-read-only/turn-completion-run-20261024/CHECKPOINT_B.md). **STOP_AT_PREFIX; B chưa GO.**
 
-- [x] Sửa plan theo 1 P1 + 3 P2: delivery binding, caller coverage, intervention status T2, opening controls trước gate; self-review consistency.
-- [ ] T0: đối chiếu chính hai ca lỗi qua các run trước; hai controls tên/mã chỉ bổ trợ; chỉ ra defect hoặc giới hạn model/budget.
-- [ ] T1: candidate dependency holding reply; policy/receipt/authority checks ở commit và delivery/restart, actual capture/dedup, private-input caller coverage RED→GREEN.
-- [ ] T2: sửa contract defect nếu có; freeze IMPLEMENTED/NO_INTERVENTION trước run; N1 observed completion không tự đóng root cause.
-- [ ] T3: thay rule mở đầu ép giới thiệu/ảnh khi khách đang hỏi việc khác; giữ owner/verifier identity và ranh giới đã duyệt.
-- [ ] T4: self-review, focused worker/Node/DB checks, typecheck/build/lint, freeze/clean source seal.
-- [ ] T5: 17 scoped controls → 31 native prefix (có deadline và cả năm opening controls) → 20 còn lại nếu gate đạt; N1/retry0, không dispatch trong lượt planning.
-- [ ] T6: review toàn actual outcomes, giữ lỗi/NOT_RUN và báo riêng task completion, sales quality, voice, authority.
+- [x] T0: audit cùng hai ca qua lịch sử; descriptions đã đến provider, không có defect projection chứng minh; freeze T2_NO_INTERVENTION trước provider.
+- [x] T1: candidate DEPENDENCY_FAILURE holding, durable encrypted policy/receipt/authority/group binding; public ingress holding atomic RED→GREEN; private input/receipt/mixed group/restart coverage.
+- [x] T2 decision recorded; không claim đã sửa model/tool completeness hoặc nới snapshot gate.
+- [x] T3: thay2dòng opening để xử lý việc khách hiện hỏi; không đổi verifier/corpus/model/threshold.
+- [x] T4: self-review; final143affectedworker/94Node/shared2/DB46/protected21, worker typecheck/build/lint; exactsource COD21/BANK21/dropPASS.369worker là trước final public fix, giữ nhãn.
+- [x] T5: sealed235d570a, fresh capture/preflight;17controlsPASS;31native đủN1/retry0 rồiSTOP.20remainingNOT_RUN vì discovery chưa complete và openingrepeat regression.
+- [x] T6: primary review đủ31actual outcomes trước diagnostic; preserve103requests/zeroerrors/1contracterror/firewallPASS.5nativeDBdropped;12deterministicDBdropped gồm2verifiedorphancleanup. Capturegate4PASS/1FAIL do redaction, không đổi raw để cho qua.
+- [ ] B promotion: chưa đạt discovery completion, repeatimage control và sales quality; chưa có stability/live evidence. Không mở tiếp20remaining hoặc campaign mới từ checklist này.
 
 ## Historical — hoàn tất acceptance media/size, 2026-10-24
 
