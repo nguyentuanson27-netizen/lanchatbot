@@ -455,7 +455,7 @@ try{
   const rows=(await pool.query('SELECT response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
   assert.equal(new Set(rows.map(row=>row.response_group_id)).size,1);
   if(fault==='unchanged'){assert.equal(j.capture.length,3);assert.equal(j.capture.filter(s=>s==='[CODE_IMAGE]').length,1);assert.equal(new Set(j.gateCalls).size,1);}
-  else {assert.equal(j.capture.length,0);assert(!rows.some(row=>['SENT_ACCEPTED','DELIVERED','READ'].includes(row.status)));}
+  else {assert.equal(j.capture.length,0);assert(rows.every(row=>row.status==='MANUAL_REVIEW'));}
   report.mediaDeliveryChecks??=[];report.mediaDeliveryChecks.push({fault,captured:j.capture,rows});save();
  });
  await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
