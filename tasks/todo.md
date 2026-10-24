@@ -2305,3 +2305,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] 43eligible/2fallback/4handoff/2codecheckout;163generationrequestsHTTP200/retry0/errors0/timeouts0;5DBsdropped/capturevalidated,163wirefirewallPASS/rawhashesverified.
 - [x] Raw80550985/logsa664ee3d→primarycb05de23; reviewedall51wholeterminals; [report](../apps/worker/evals/single-agent-commerce-read-only/full-phase-b-20261024/CHECKPOINT_B.md).
 - [ ] BGO: salesdecision/voice,2fallback,sizechartauthorityandmedia+sizehandoffremain. No further automaticrun/fix/deploy.
+
+## Paired product-image diagnosis — 2026-10-25
+
+- [x] Observed stale media pins in the first 12-slot dispatch: 6/6 PRELOAD rejected before owner generation. Add RED→GREEN image pin source preflight and read-only registration utility; focused tests 5/5, worker typecheck/build/lint PASS.
+- [x] Clean source `969c9d70`, refreshed registration, source-check PASS/0 generations; 12/12 paired slots completed, 6/6 PRELOAD with 2 images actually attached, 35 provider requests/0 error/0 retry, 23 owner + 12 verifier request firewall checks PASS.
+- [x] Whole-reply review of all six pairs: images alone did not correct the two repeated lace/ornateness sales errors; one PRELOAD reply fell back after a valid verifier FAIL and received a mismatched image-unavailable fallback. [Evidence and limits](../docs/specs/c3-phase-b-paired-image-comparison-20261025.md).
+- [ ] B GO: compare real alternative products and improve decision support without case prompt patches; correct fallback selection by actual failure reason, then requalify. No full 51-case acceptance run or deployment from this diagnostic.
