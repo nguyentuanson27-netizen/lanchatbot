@@ -282,3 +282,30 @@ it("offers an explicit unselected color-free query, preserving intent/component 
  const error=await failed.tools.invoke(failed.call);
  expect(error).toMatchObject({reason:"MEDIA_SOURCE_UNAVAILABLE"});expect(error.data).not.toHaveProperty("nextSelection");
 });
+
+it("treats null optional media color as a generic lookup without claiming the requested color",async()=>{
+ const s=await setup();s.f.product.colors=["navy","be"];
+ expect(await s.tools.invoke({...s.call,args:{...s.call.args,color:"be"}})).toMatchObject({status:"UNAVAILABLE",reason:"MEDIA_COLOR_BINDING_UNVERIFIED"});
+ const selected=await s.tools.invoke({...s.call,args:{...s.call.args,color:null,componentRole:"TOP"}});
+ expect(selected).toMatchObject({status:"OK",data:{scope:"GENERIC_PRODUCT",colorMatched:false,descriptionEvidence:{color:null}}});
+ expect(s.tools.mediaSelection!()).toHaveLength(1);
+ const literal=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media:"))!;
+ expect(JSON.parse(literal.text)).toMatchObject({color:null,componentRole:"TOP",descriptionEvidence:{color:null}});
+ expect(await s.tools.invoke({...s.call,args:{...s.call.args,color:0}})).toMatchObject({status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"});
+
+ const missing=await setup();missing.f.product.images=[];
+ expect(await missing.tools.invoke({...missing.call,args:{...missing.call.args,color:null}})).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"});
+ expect(missing.tools.mediaSelection!()).toEqual([]);
+});
+
+it("accepts null color for viewing only verified generic image bytes",async()=>{
+ const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");
+ const fetch=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>new Response(png,{headers:{"content-type":"image/png"}}));
+ try{
+  const s=await setup();s.f.product.colors=["navy","be"];
+  s.f.product.images[0]!.sourceContentSha256=createHash("sha256").update(png).digest("hex");
+  expect(await s.tools.invoke({...s.call,name:"view_product_media",args:{...s.call.args,color:null,componentRole:"TOP"}})).toMatchObject({status:"OK",data:{subjectRef:s.f.product.productId,use:"APPEARANCE_ONLY"}});
+  expect(s.tools.catalogImages!()).toHaveLength(1);
+  expect(s.tools.mediaSelection!()).toEqual([]);
+ }finally{fetch.mockRestore();}
+});

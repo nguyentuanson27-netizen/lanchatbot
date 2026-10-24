@@ -92,7 +92,11 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     });
   }
   async function invokeMedia(call:CommerceToolCall):Promise<CommerceToolResult> {
-    const a=toolArgs(call.args,["subjectRef","intent","color","componentRole"]),base=input.base.snapshot();
+    let a=toolArgs(call.args,["subjectRef","intent","color","componentRole"]);
+    // Provider tool calls may encode an omitted optional color as null. Normalize
+    // before binding the query so null and omission select the same generic media.
+    if(a?.color===null){a={...a};delete a.color;}
+    const base=input.base.snapshot();
     if(!base.state.permission||base.state.conversationOwner!=="BOT"||!base.state.privacyAllowed) return {status:"REJECTED",reason:"MEDIA_PERMISSION"};
     if(!a||typeof a.subjectRef!=="string"||!base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef)||
       !intents.has(a.intent as CustomerImageIntent)||(a.color!==undefined&&(typeof a.color!=="string"||!a.color.trim()||a.color.length>64))||

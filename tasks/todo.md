@@ -1,4 +1,12 @@
-## Current — chạy nốt 30 ca còn lại, 2026-10-25
+## Current — review độc lập và fix sau 51 ca, 2026-10-25
+
+[Finding, phạm vi sửa và bằng chứng](../docs/specs/c3-phase-b-51-case-independent-review-fix-20261025.md). **B chưa GO.**
+
+- [x] Review độc lập hội thoại/raw/prompt/boundary: xác nhận lỗi `color:null` ở media, và prompt tư vấn đã có lệnh chọn nhưng vẫn bỏ qua băn khoăn về gu; nêu rủi ro claim ít nhăn sau khi ngồi xe.
+- [x] Media optional color null RED→GREEN, giữ ảnh chung không gắn màu; thay nguyên tắc quyết định trong prompt, cập nhật hash protocol. Focused media30, media+read-only60, Node protocol/adapter83, worker typecheck/build/lint và diff check PASS.
+- [ ] Provider canary cùng source cho ca lỗi và đối chứng, kiểm actual terminal/ảnh và verifier claim cụ thể; chưa có run mới, chưa kết luận cải thiện sales quality hay B GO.
+
+## Previous — chạy nốt 30 ca còn lại, 2026-10-25
 
 [Report + toàn bộ evidence](../apps/worker/evals/single-agent-commerce-read-only/tool-history-continuation-20261025/CHECKPOINT_B.md), [35 hội thoại mới](../apps/worker/evals/single-agent-commerce-read-only/tool-history-continuation-20261025/CONVERSATIONS.md). **30/30 hoàn tất; B chưa GO.**
 
