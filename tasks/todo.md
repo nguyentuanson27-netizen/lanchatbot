@@ -2199,3 +2199,9 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Source598226ed clean/preflight PASS0generation; five registered turns dispatched once and all actual terminals preserved, raw37d595ac.
 - [x] Review all5; 3eligible/2fallback,9owner+3verifier actual generation requests/retry0; firewall12wires PASS, raw hashes verified, DB dropped.
 - [ ] Opening quote qualification: ads source-binding contract missing; repeated search request-bound error; organic offer/card/usefulness gaps; multipart timeout. Final runner integrity check failed on output files under source (tracked source unchanged). [Diagnostic report](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-run-20261024/CHECKPOINT_B.md). STOP/BnotGO.
+
+## Flash Lite opening comparison — 2026-10-24
+
+- [x] Exact owner3.5FlashLite HIGH freeze/sourceaae7cf78;86NodePASS; preflight/dispatch/finalcleanliness exit0,5/5outcomes,DBdropped.
+- [x] Raw27b540c6 before review;15generation requests/0retry/0timeout,15wirefirewallPASS and hashesverified;review5histories and compare3.8.
+- [ ] B qualification:3eligible/2fallback,adbinding unresolved;toolmode failure and card/stock-size evidence mismatch. [Report](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-flashlite-20261024/CHECKPOINT_B.md). STOP/BnotGO.

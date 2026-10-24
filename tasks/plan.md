@@ -2476,3 +2476,5 @@ Owner-authorized run source598226ed; full5/5 turns completed, raw37d595ac. Three
 ## Owner-authorized Gemini 3.5 Flash Lite comparison — 2026-10-24
 
 Run same opening-quotes five turns once with gemini-3.5-flash-lite HIGH/global, candidateCount1; unchanged prompts/verifier/corpus/runtime and90000ms timeout/retry0. Node adapter/protocol/registration86PASS. Seal commit, require clean source, preflight, dispatch output outside repo source tree, archive raw before whole-terminal review. Retain known ads binding gap and every fallback/error; no fix between comparison runs, no live send/deploy or model substitution.
+
+Flash Lite comparison completed: sourceaae7cf78/raw27b540c6;5/5outcomes,3eligible/2fallback,15actual generation requests/retry0/timeout0. Finalcleanliness PASS and DBdropped. p50wholeattempt29.38s vs3.8's60.52s, different tool paths/live requests, not paired benchmark. Ads binding still missing; organic card supplied S–XL but verifier rejects current-stock implication from total-only trusted claim. [Report](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-flashlite-20261024/CHECKPOINT_B.md). STOP/BnotGO, no auto further run.
