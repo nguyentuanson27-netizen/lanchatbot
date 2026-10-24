@@ -391,7 +391,7 @@ try{
    }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;}),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
-  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null}={}){
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false}={}){
    const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
    const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
@@ -402,7 +402,7 @@ try{
    for(let n=0;n<20;n++){batch=await inbox.claimNextBatch('c3-b-stateful',300000);if(!batch||batch.conversationHash===customerHash)break;await inbox.completeBatch(batch);}
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0;const toolResponses=[];
-   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{return await withTransaction(pool,fn);}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
+   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,fn);if(loseCommitReply)throw Error('CONTROLLED_COMMIT_REPLY_LOST');return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
     read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
@@ -424,20 +424,27 @@ try{
   j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[text]);
   const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.verifiers,0);await j.drain();assert.deepEqual(j.capture,[text]);
  });
- for(const mode of ['unchanged','before-commit','after-commit','restart'])await check('B composed dependency holding delivery '+mode+' uses committed policy and actual capture',async()=>{
+ for(const mode of ['unchanged','before-commit','after-commit','restart','cached-allowed','missing-receipt','lost-commit-reply'])await check('B composed dependency holding delivery '+mode+' uses committed policy and actual capture',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
   const r=await j.turn('Em kiểm tra lại giúp chị nhé',[native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}])],
-   {beforeCommit:async()=>{if(mode==='before-commit')j.changeHandoffPolicy();}});
+   {beforeCommit:async()=>{if(mode==='before-commit')j.changeHandoffPolicy();},loseCommitReply:mode==='lost-commit-reply'});
   if(mode==='before-commit'){
    assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
    assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
   }else{
-   assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,1);
-   if(mode!=='unchanged')j.changeHandoffPolicy();
-   if(mode==='restart')j.restartDelivery();
+   assert.equal(r.result.terminal.disposition,mode==='lost-commit-reply'?'NO_SEND':'HANDOFF');
+   if(mode!=='lost-commit-reply')assert.equal(r.result.enqueued,1);
+   if(mode==='cached-allowed'){
+    const row=(await pool.query('SELECT response_group_id,reply_plan_id FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0];
+    await runtime.recordMetaResponseGroupGate({responseGroupId:row.response_group_id,replyPlanId:row.reply_plan_id,conversationId:j.bound.conversationId,pageId,
+     observation:{status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()}});
+   }
+   if(['after-commit','restart','cached-allowed'].includes(mode))j.changeHandoffPolicy();
+   if(mode==='missing-receipt')await pool.query("UPDATE handoff_events SET reason_detail_safe=reason_detail_safe - 'deliveryBindingHash' WHERE conversation_id=$1",[j.bound.conversationId]);
+   if(['restart','cached-allowed','lost-commit-reply'].includes(mode))j.restartDelivery();
   }
-  await j.drain();await j.drain();assert.deepEqual(j.capture,mode==='unchanged'?[text]:[]);
-  if(['after-commit','restart'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
+  await j.drain();await j.drain();assert.deepEqual(j.capture,['unchanged','lost-commit-reply'].includes(mode)?[text]:[]);
+  if(['after-commit','restart','cached-allowed','missing-receipt'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
  });
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
  await check('B composed candidate first '+reason+' acknowledges once after real atomic commit',async()=>{
@@ -520,6 +527,9 @@ try{
   assert.equal(h.length,1);assert.equal(h[0].attachment_count,1);assert(!h[0].text_redacted?.includes('private-receipt'));
   assert.equal(r.batch.items[0].envelope.message.attachments[0].providerId,'synthetic-receipt');
   assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  await j.drain();await j.drain();
+  if(process.argv.includes('--candidate-handoff'))assert.deepEqual(j.capture,[JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))).rules.find(r=>r.reason==='DEPENDENCY_FAILURE').holdingReply]);
+  assert(!JSON.stringify(j.capturePayloads).includes('c3-private-receipt'));
  });
  await check('B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence',async()=>{
   const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
