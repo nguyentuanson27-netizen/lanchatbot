@@ -2458,3 +2458,5 @@ Owner yêu cầu implementation sau review campaign 20261024. Thực hiện inli
 ## Owner-authorized Gemini 3.8 Flash run — 2026-10-24
 
 User requests model run with gemini-3.8-flash owner. Keep HIGH/global and existing verifier Sol 6.1 High, current prompts/corpora, one attempt/case, retry0. Official Google guide confirms exact model/endpoint and requires omission of candidateCount. Adapter compatibility observed RED then GREEN83. Seal source; fresh capture and frozen controls17; native46 under existing first21/rest25 gate. No advice context candidate promotion, live send/deploy or automatic repeat. Retain every error and unexecuted slot.
+
+Gemini3.8 run closed: controls17PASS; native2/46 (1eligible,1ownerTIMEOUT),44NOT_RUN. 21requests/0retry; first-runner stopped PROVIDER_ERROR_NO_RETRY. BLOCKED, no model quality conclusion. [Evidence](../apps/worker/evals/single-agent-commerce-read-only/gemini38-run-20261024/CHECKPOINT_B.md).
