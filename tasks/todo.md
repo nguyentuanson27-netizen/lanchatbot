@@ -1,4 +1,16 @@
-## Current — sửa đọc sản phẩm và lịch sử, 2026-10-25
+## Current — chạy nốt 30 ca còn lại, 2026-10-25
+
+[Report + toàn bộ evidence](../apps/worker/evals/single-agent-commerce-read-only/tool-history-continuation-20261025/CHECKPOINT_B.md), [35 hội thoại mới](../apps/worker/evals/single-agent-commerce-read-only/tool-history-continuation-20261025/CONVERSATIONS.md). **30/30 hoàn tất; B chưa GO.**
+
+- [x] Owner yêu cầu tiếp tục30 ca; giữ nguyên old21/source9e352f38/report STOP, không trộn qualification. Newsourcee51db388 có correction94cb6b08, prompt/model giữ nguyên Gemini3.5FlashLiteHIGH/verifier6.1SolHIGH.
+- [x] Freeze external driver/hash/registration trước dispatch, worktree sạch và HEAD không đổi; chạy24B1+3đàm phán+3stateful còn thiếu. Do database cũ đã dọn, đăng ký thêm5lượt tiền đề mới trong database mới, không mô phỏng/chép PASS cũ.
+- [x] Đủ35actualoutcomes =30targets+5setup;97requests(66owner/31verifier), max1upstream/generation, retry/error/timeout0;97wirefirewallPASS,2testDBsdropped.8preflight+8runexit0.
+- [x]30targets:27SEND_ELIGIBLE/PASS,1privatecheckout do code xử lý có preview capture,2HANDOFF có capture; fallback0,NOT_RUN0. Stateful giữ2L/profile74/96/tổng978100, PURCHASE_CONFIRMED và handoff. B1 chỉ send eligibility, không live delivery.
+- [x] Review whole-turn khóa trước diagnostic:30targets có8dùng tốt/18cần gọt giọng/4cần sửa tư vấn.4ca:changed-occasion,buying-concern,buying-concern-v2,buying-concern-v3. Không chấm keyword; verifierPASS không đồng nghĩa tư vấn đạt.
+- [x] Archive86rawfiles nguyên byte, prompt/config/source hashes, actual commands, source labeling, checkout public-text hash proof. Không sửa runtime/prompt; không chạy lại controls/fullA2/CI/typecheck/lint, không claim stability hoặc conversion.
+- [ ] B GO: vẫn còn discovery fallback và gallery task failure ở21ca cũ,4ca tư vấn mới cần sửa; inventory51 đã đủ nhưng hai source. Không tự fix/run thêm, merge/deploy/live send.
+
+## Historical — sửa đọc sản phẩm và lịch sử, 2026-10-25
 
 [Kế hoạch](../docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md), [implementation](../docs/specs/c3-phase-b-tool-history-implementation-20261025.md), [report/evidence](../apps/worker/evals/single-agent-commerce-read-only/tool-history-run-20261025/CHECKPOINT_B.md). **CAMPAIGN_CLOSED_STOP; B chưa GO.**
 

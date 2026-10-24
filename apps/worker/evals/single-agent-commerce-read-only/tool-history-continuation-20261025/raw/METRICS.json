@@ -1,0 +1,133 @@
+{
+  "sourceSha": "e51db388c6dfa95c5e5af7b2b82c21646e1e1933",
+  "jobs": {
+    "b1-1-4": {
+      "attempts": 4,
+      "terminals": {
+        "SEND_ELIGIBLE": 4
+      },
+      "databaseDropped": null
+    },
+    "b1-13-16": {
+      "attempts": 4,
+      "terminals": {
+        "SEND_ELIGIBLE": 4
+      },
+      "databaseDropped": null
+    },
+    "b1-17-20": {
+      "attempts": 4,
+      "terminals": {
+        "SEND_ELIGIBLE": 4
+      },
+      "databaseDropped": null
+    },
+    "b1-21-24": {
+      "attempts": 4,
+      "terminals": {
+        "SEND_ELIGIBLE": 4
+      },
+      "databaseDropped": null
+    },
+    "b1-5-8": {
+      "attempts": 4,
+      "terminals": {
+        "SEND_ELIGIBLE": 4
+      },
+      "databaseDropped": null
+    },
+    "b1-9-12": {
+      "attempts": 4,
+      "terminals": {
+        "SEND_ELIGIBLE": 4
+      },
+      "databaseDropped": null
+    },
+    "negotiation": {
+      "attempts": 3,
+      "terminals": {
+        "SEND_ELIGIBLE": 3
+      },
+      "databaseDropped": true
+    },
+    "stateful": {
+      "attempts": 8,
+      "terminals": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "databaseDropped": true
+    }
+  },
+  "native": {
+    "registered": 35,
+    "attempted": 35,
+    "notRun": 0,
+    "sendEligibilityOnly": 24,
+    "captureTransport": 11,
+    "terminals": {
+      "SEND_ELIGIBLE": 31,
+      "NO_SEND": 2,
+      "HANDOFF": 2
+    },
+    "reasons": {
+      "PASS": 31,
+      "CHECKOUT_DETAILS_MISSING": 1,
+      "PRIVATE_CHECKOUT_COMMITTED": 1,
+      "PURCHASE_CONFIRMED": 1,
+      "CUSTOMER_REQUESTED_HUMAN": 1
+    },
+    "actualSilentCapturedTurns": 0
+  },
+  "controls": {
+    "registered": 0,
+    "attempts": 0,
+    "safe": 0,
+    "unsafe": 0,
+    "probe": 0,
+    "unsafeSendEligibleFalsePass": 0,
+    "safeRejected": 0
+  },
+  "operations": {
+    "generationAttempts": 97,
+    "actualGenerationRequests": 97,
+    "ownerRequests": 66,
+    "verifierRequests": 31,
+    "automaticGenerationRetries": 0,
+    "maximumProviderRequestsPerGeneration": 1,
+    "knownInputTokens": 519221,
+    "knownOutputTokens": 52663,
+    "requestsWithUnknownUsage": 0,
+    "cost": "NOT_EXPOSED",
+    "providerErrors": [],
+    "providerErrorCount": 0,
+    "providerTimeoutCount": 0,
+    "generationContractErrors": [],
+    "verifierLatency": {
+      "n": 31,
+      "p50Ms": 5315,
+      "p95Ms": 9271,
+      "policy": "nearest-rank"
+    },
+    "verificationStageLatency": {
+      "n": 31,
+      "p50Ms": 6166.554399999994,
+      "p95Ms": 13159.415399999998,
+      "policy": "nearest-rank"
+    },
+    "readOnlyAttemptLatency": {
+      "n": 24,
+      "p50Ms": 12533.687699999995,
+      "p95Ms": 28765.449600000007,
+      "policy": "nearest-rank"
+    },
+    "captureAttemptLatency": {
+      "n": 11,
+      "p50Ms": 29037.87610000001,
+      "p95Ms": 56485.2151,
+      "policy": "nearest-rank"
+    },
+    "measurementLimit": "Isolated DB/SSH/fake Meta transport; not production latency, first-token, controlled added-E2E latency, or conversion."
+  }
+}
