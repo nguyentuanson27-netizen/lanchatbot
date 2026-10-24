@@ -1,0 +1,94 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/database
+
+ ❯ src/realtime-runtime.test.ts (53 tests | 7 failed | 46 skipped) 24ms
+   × committed sales effect readback > projects only exact accepted media receipts after restart (SENT_ACCEPTED) 16ms
+     → store.readAcceptedCommerceMedia is not a function
+   × committed sales effect readback > projects only exact accepted media receipts after restart (DELIVERED) 1ms
+     → store.readAcceptedCommerceMedia is not a function
+   × committed sales effect readback > projects only exact accepted media receipts after restart (READ) 1ms
+     → store.readAcceptedCommerceMedia is not a function
+   × committed sales effect readback > projects only exact accepted media receipts after restart (RETRYABLE) 1ms
+     → store.readAcceptedCommerceMedia is not a function
+   × committed sales effect readback > projects only exact accepted media receipts after restart (AMBIGUOUS) 1ms
+     → store.readAcceptedCommerceMedia is not a function
+   × committed sales effect readback > projects only exact accepted media receipts after restart (wrong-recipient) 1ms
+     → store.readAcceptedCommerceMedia is not a function
+   × committed sales effect readback > projects only exact accepted media receipts after restart (wrong-product) 1ms
+     → store.readAcceptedCommerceMedia is not a function
+   ↓ committed sales effect readback > requires the exact committed handoff event and delivery binding (proven=true)
+   ↓ committed sales effect readback > requires the exact committed handoff event and delivery binding (proven=false)
+   ↓ committed sales effect readback > keeps private bindings out of the customer message after Outbox decryption (none)
+   ↓ committed sales effect readback > keeps private bindings out of the customer message after Outbox decryption (media)
+   ↓ committed sales effect readback > keeps private bindings out of the customer message after Outbox decryption (handoff)
+   ↓ committed sales effect readback > keeps private bindings out of the customer message after Outbox decryption (both)
+   ↓ committed sales effect readback > locks an unchanged sales readback for final Outbox authorization without inventing a new sales transition
+   ↓ committed sales effect readback > retains a current Inbox lease across intermediate commits and completes it only at turn end
+   ↓ committed sales effect readback > reads the existing scoped ledger using the keyed operation fingerprint
+   ↓ DF06 locked sales-state envelope > accepts only the canonical identity/idempotency envelope derived from the locked state
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled schemaVersion
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled conversationKey
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled routing
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled revision
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled stage
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled processedCommandIds
+   ↓ DF06 locked sales-state envelope > rejects a caller-controlled updatedAt
+   ↓ DF06 locked sales-state envelope > appends applied command IDs in order and preserves the 100-entry cap
+   ↓ DF06 locked sales-state envelope > replays a legitimate HANDOFF as a state-advancing transition
+   ↓ DF06 locked sales-state envelope > rejects undeclared top-level state fields instead of silently persisting them
+   ↓ PostgresRealtimeRuntimeStore handoff commit > persists idempotent PII-free decision events in the state transaction
+   ↓ PostgresRealtimeRuntimeStore handoff commit > rolls back a required Context V2 capture instead of committing a partial fresh-process turn
+   ↓ PostgresRealtimeRuntimeStore handoff commit > schedules text immediately and delays image rows in the same ordered plan
+   ↓ PostgresRealtimeRuntimeStore handoff commit > commits a price-only protected reply when its typed claim set matches exactly
+   ↓ PostgresRealtimeRuntimeStore handoff commit > drops a stale decision before state or outbox commit when a newer inbound advanced the generation
+   ↓ PostgresRealtimeRuntimeStore handoff commit > returns SUPERSEDED when a current-generation inbox row loses its processing lease before commit
+   ↓ PostgresRealtimeRuntimeStore handoff commit > commits the owner CAS, Pancake outbox, immutable event and queue case atomically
+   ↓ PostgresRealtimeRuntimeStore handoff commit > uses a deterministic conflict target and does not create a second queue case
+   ↓ PostgresRealtimeRuntimeStore handoff commit > acknowledges an active queue case for a real HUMAN echo without creating another transfer
+   ↓ PostgresRealtimeRuntimeStore handoff commit > rejects protected sales-cycle events that omit the DF06 readiness contract
+   ↓ PostgresRealtimeRuntimeStore handoff commit > rejects an unversioned plan before it can bypass the sales-state envelope
+   ↓ PostgresRealtimeRuntimeStore handoff commit > rejects a stale readiness binding inside the sales commit transaction
+   ↓ PostgresRealtimeRuntimeStore handoff commit > requires effect readiness for a versioned NEGOTIATION_EVENT event
+   ↓ PostgresRealtimeRuntimeStore handoff commit > requires effect readiness for a versioned CART_READY event
+   ↓ PostgresRealtimeRuntimeStore handoff commit > enforces exact cart-mutation authority, claims, payload and locked-state binding
+   ↓ PostgresRealtimeRuntimeStore handoff commit > records a terminal initial-reply failure in the same transaction
+   ↓ PostgresRealtimeRuntimeStore response-group gate > persists a durable decision and prevents terminal snapshots from being overwritten
+   ↓ PostgresRealtimeRuntimeStore outbox compatibility ordering and health > claims preserved handoff output after owner transition and delays its tag dependency
+   ↓ PostgresRealtimeRuntimeStore outbox compatibility ordering and health > holds every descendant when a predecessor enters manual review
+   ↓ PostgresRealtimeRuntimeStore outbox compatibility ordering and health > quarantines expired sending leases once and holds descendants
+   ↓ PostgresRealtimeRuntimeStore outbox compatibility ordering and health > returns a PII-free aggregate queue snapshot
+   ↓ PostgresRealtimeRuntimeStore manual-review operator action > supports audited cancel-only resolution and never requeues
+   ↓ PostgresRealtimeRuntimeStore markMetaAccepted > clears a prior attempt error atomically with accepted status
+   ↓ PostgresRealtimeRuntimeStore markMetaAccepted > keeps an already-null error null and rejects an acceptance replay
+   ↓ PostgresRealtimeRuntimeStore markMetaAccepted > preserves errors for retryable and rejected acceptance paths
+   ↓ PostgresRealtimeRuntimeStore markMetaAccepted > does not clear errors when acceptance is attempted for any non-success state
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (SENT_ACCEPTED)
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (DELIVERED)
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (READ)
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (RETRYABLE)
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (AMBIGUOUS)
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (wrong-recipient)
+ FAIL  src/realtime-runtime.test.ts > committed sales effect readback > projects only exact accepted media receipts after restart (wrong-product)
+TypeError: store.readAcceptedCommerceMedia is not a function
+ ❯ src/realtime-runtime.test.ts:61:31
+     59|     const store = new PostgresRealtimeRuntimeStore("postgresql://unuse…
+     60|     (store as unknown as { pool: unknown }).pool = { query };
+     61|     const media = await store.readAcceptedCommerceMedia({ pageId: page…
+       |                               ^
+     62|       recipientHash, before: new Date(Date.now()+1000) });
+     63|     expect(media).toHaveLength(["SENT_ACCEPTED", "DELIVERED", "READ"].…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 46 skipped (53)
+   Start at  02:13:04
+   Duration  2.98s (transform 857ms, setup 0ms, collect 1.35s, tests 24ms, environment 0ms, prepare 501ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\database:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/realtime-runtime.test.ts -t projects only exact accepted media

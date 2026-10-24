@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/single-agent-commerce-ingress.test.ts (70 tests) 6043ms
+   ✓ does not grant first-contact image recovery from not-requested  324ms
+
+ Test Files  1 passed (1)
+      Tests  70 passed (70)
+   Start at  02:24:02
+   Duration  18.46s (transform 5.89s, setup 0ms, collect 9.21s, tests 6.04s, environment 1ms, prepare 1.13s)
+

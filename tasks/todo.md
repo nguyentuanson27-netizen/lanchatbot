@@ -1,6 +1,6 @@
 ## Current — sửa đọc sản phẩm và lịch sử, 2026-10-25
 
-[Kế hoạch](../docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md), [implementation](../docs/specs/c3-phase-b-tool-history-implementation-20261025.md). **IMPLEMENTED_AND_SELF_REVIEWED; final verification đang chạy; chưa provider; B chưa GO.**
+[Kế hoạch](../docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md), [implementation](../docs/specs/c3-phase-b-tool-history-implementation-20261025.md), [report/evidence](../apps/worker/evals/single-agent-commerce-read-only/tool-history-run-20261025/CHECKPOINT_B.md). **CAMPAIGN_CLOSED_STOP; B chưa GO.**
 
 - [x] Sửa phương án theo self-review: không thêm offer selector mới mặc định; phân biệt media accepted với selected/viewed; sửa redaction tại nguồn, tách hash capture khỏi history; chấm tư vấn riêng.
 - [x] Đính chính T0 cũ: có SUBJECT_BOUND trong discovery; chưa tái hiện exact slot count từ snapshot SQ748. Giữ raw/report cũ nguyên vẹn.
@@ -10,8 +10,11 @@
 - [x] T2: bounded image history từ actual accepted receipt + binding; returning/unknown entry; shared failure/isolation/unit controls và capture hash. PostgreSQL N4 actual-history/cross-customer đã PASS ở cả hai route, broader regressions còn chạy.
 - [x] T3: shared redaction và history/capture tests, giữ PII protection; không whitelist câu benchmark.
 - [x] T4: ADVICE_NO_INTERVENTION có rationale/actual outcomes, giữ prompt baseline và sales-quality residual.
-- [ ] Self-review, focused tests, shared/worker checks, isolated persistence/delivery verification theo scope.
-- [ ] Khi được yêu cầu chạy: freeze registration/source/config mới, controls rồi prefix và phần còn lại theo gate; không mở 20 NOT_RUN của campaign cũ.
+- [x] Self-review/RED→GREEN/focused checks: final privacy correctionDB71/worker291/build/lint PASS; protected21/Node95, COD36/BANK36 và qualified N4 one each retained đúng source labels. Không claim PostgreSQL/model qualify correction94cb6b08.
+- [x] Freeze/run source9e352f38:17controls PASS rồi21native actual outcomes;81requests/firewallPASS, APIerrors/timeouts/retry0. Actual task/voice review locked, diagnostic-order exception discovery ghi rõ.
+- [x] STOP vì offline privacy regression; không tiếp tục prefix/full hoặc sửa-rerun dưới identity cũ. Dừng Node ở completed attempt5, exact orphan test DB verified/dropped; tổng8testDB cleaned.
+- [x] Correction94cb6b08 bảo vệ lowercase/abbreviated street values và vẫn giữ full product caption; tests/privacy-through-history PASS.
+- [ ] Model qualification trên correction94cb6b08: NOT_RUN;30native còn lại không được coi đã hoàn tất. Không tự chạy campaign thứ hai hoặc B promotion.
 
 ## Historical — turn-completion campaign, 24–25/10/2026
 

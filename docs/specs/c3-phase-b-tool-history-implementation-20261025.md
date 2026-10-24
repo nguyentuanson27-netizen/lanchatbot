@@ -1,6 +1,6 @@
 # Phase B — implementation đọc sản phẩm và lịch sử, 2026-10-25
 
-Trạng thái: **IMPLEMENTED_AND_SELF_REVIEWED; verification cuối đang chạy; provider chưa chạy**.
+Trạng thái: **IMPLEMENTED_AND_EXECUTED; CAMPAIGN_CLOSED_STOP; B chưa GO.** [Run report](../../apps/worker/evals/single-agent-commerce-read-only/tool-history-run-20261025/CHECKPOINT_B.md). Source9e352f38 chạy17controls +21native,30native NOT_RUN. Privacy regression phát hiện offline làm dừng dispatch ở persisted attempt boundary; bản sửa94cb6b08 có71DB/291worker/build/lint PASS, chưa chạy model. Phần mô tả savepoint ban đầu dưới đây giữ chronology; không đọc các nhãn pending cũ thành trạng thái hiện hành.
 
 Implementation base `00ffd3ee9075774ed7be13605a07d505886010cd`; worktree ban đầu chỉ có ba file kế hoạch do lượt trước tạo. Plan savepoint `f35e94a9`, T1 `1eadac90`, T2 `9985e93a`, T3 `e788f2c3`. [Kế hoạch](c3-phase-b-tool-history-fix-plan-20261025.md). Campaign cũ vẫn đóng; không sửa raw hoặc 20 NOT_RUN cũ. Owner đã yêu cầu implementation và một run mới ngày 25/10.
 
@@ -19,6 +19,8 @@ Observed RED: chưa có phương thức đọc durable accepted media. Đã thê
 Không migration hoặc ghi bảng mới. Reader lấy từ durable Outbox nên không phụ thuộc chat-history write best-effort. Giới hạn 30 accepted rows được đọc, 6 images được trả; model summary tối đa 1024 bytes nằm trong 4096-byte/8-entry history. Giữ text/correction trước, cắt metadata trước; nếu hết slot thì nối summary vào shop entry có sẵn, không tạo lời khách giả. Summary nêu history không đầy đủ và chưa biết khách đã xem hay chưa. Không có rule cấm resend; không coi selected/enqueued/failed là sent.
 
 Self-review bổ sung hai lỗi: accepted ảnh nhưng history write mất phải giữ returning entry; lỗi đọc delivery memory không được thành empty-history/first-contact. Nhánh lỗi thứ hai có observed RED (firstContact=true), sửa thành firstContact=null khi cả text lẫn delivery history chưa chứng minh được; không dựng receipt hoặc xác nhận đã gửi. Metadata nullable chỉ cho trạng thái chưa biết, không thêm state/mutation. Normal known first/returning cases giữ boolean cũ.
+
+Post-run self-review phát hiện street guard bỏ lọt standalone lowercase/abbreviated values. Đã dừng source9e352f38, giữ toàn bộ81requests và21actual outcomes; scoped17controls PASS không bao phủ lỗi DLP này. Correction94cb6b08 thêm conservative standalone/location frames không phụ thuộc casing, có RED→GREEN và through-history test. Cụm ngắn mơ hồ mở đầu bằng street token vẫn có thể bị che; không nhận parser hoàn hảo hoặc khôi phục history cũ. Model results không qualify correction này.
 
 Capture giữ SHA256 của exact transport text trước redaction theo sequence, không thêm plaintext. Hash là evidence egress, không sửa history và không chứng minh nội dung khi không có preimage hợp lệ. Isolated PostgreSQL N4 đã bổ sung kiểm actual accepted image, cross-customer isolation và request lượt kế tiếp; chưa nhận PASS trước khi chạy.
 

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "caseId": "stateful-request-checkout",
+  "text": "Chị cho em tên người nhận nhé.",
+  "transportSha256": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125",
+  "source": "apps/worker/src/realtime-sales-cycle.ts CHECKOUT_FIELD_LABELS.FULL_NAME + SINGLE_FIELD builder",
+  "note": "Public code-owned prompt only; raw redacted capture remains unchanged. Does not reconstruct private customer values."
+}

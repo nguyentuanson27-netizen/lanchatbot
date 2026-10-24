@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "../c3-tool-history-checks-20261025/bank-integration",
+    "BANK_TRANSFER",
+    "--candidate-handoff",
+    "--composed-only"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 1337.7115321159363
+}

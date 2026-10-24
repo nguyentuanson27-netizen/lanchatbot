@@ -1,0 +1,11 @@
+
+> @lana/worker@0.1.0 lint C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> tsc -p tsconfig.json --noEmit
+
+src/single-agent-commerce-ingress.test.ts(79,35): error TS2345: Argument of type '{ senderType: string; text: string; }[]' is not assignable to parameter of type 'readonly Pick<ChatHistoryItem, "text" | "senderType">[]'.
+  Type '{ senderType: string; text: string; }' is not assignable to type 'Pick<ChatHistoryItem, "text" | "senderType">'.
+    Types of property 'senderType' are incompatible.
+      Type 'string' is not assignable to type '"BOT" | "CUSTOMER" | "HUMAN" | "SYSTEM"'.
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @lana/worker@0.1.0 lint: `tsc -p tsconfig.json --noEmit`
+Exit status 1

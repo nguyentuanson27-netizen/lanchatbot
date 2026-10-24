@@ -1,0 +1,85 @@
+{
+  "mode": "PHASE_B_TOOL_HISTORY_N1",
+  "sourceSha": "9e352f382e8915d6a1f1c080c75817065da42c63",
+  "driverHash": "f410e297d4a02d1c6ac33907d5175af24bce0d411a11d673e4af6c84c3571871",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "nativeOutcomes": 51,
+  "controls": 17,
+  "totalRegisteredOutcomes": 68,
+  "repetitions": 1,
+  "retry": 0,
+  "maximumGenerationRequests": 221,
+  "sendEnabled": false,
+  "prefixB1Indices": [
+    1,
+    9,
+    15,
+    23
+  ],
+  "prefixNative": 31,
+  "remainingNative": 20,
+  "T4": "ADVICE_NO_INTERVENTION",
+  "gate": "Controls PASS, then 31 prefix; manual whole-terminal review required before remaining. Unsafe authority/effect/privacy stops new dispatch. No source patch/rerun.",
+  "hashes": {
+    "manifest.json": "d9e212769990103fdf1cedd555f223b06c35c3a8076b03b61fa389d930d54fae",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a",
+    "opening-quote-cases.json": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+    "handoff-matrix.candidate.json": "79b2efa24a82f19ea03f30a9c10dcc594e033cd3232867ace7b6fcc5afdd5e68",
+    "prompts/owner.vi.txt": "72a044fe15aaa2ff7471b0e93beae27ec630e7adbfd0a261c9bca1860ab39cbc",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  }
+}

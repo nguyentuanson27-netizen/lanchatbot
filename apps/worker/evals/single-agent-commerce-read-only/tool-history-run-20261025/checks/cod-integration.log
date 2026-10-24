@@ -1,0 +1,36 @@
+B composed existing clarification migration rolls back exactly before new events: PASS
+B composed snapshot invalidation source-refresh discards draft and captures only committed holding reply: PASS
+B composed snapshot invalidation stock-change discards draft and captures only committed holding reply: PASS
+B composed snapshot invalidation expired discards draft and captures only committed holding reply: PASS
+B composed dependency holding delivery unchanged uses committed policy and actual capture: PASS
+B composed dependency holding delivery before-commit uses committed policy and actual capture: PASS
+B composed dependency holding delivery after-commit uses committed policy and actual capture: PASS
+B composed dependency holding delivery restart uses committed policy and actual capture: PASS
+B composed dependency holding delivery cached-allowed uses committed policy and actual capture: PASS
+B composed dependency holding delivery receipt-unavailable uses committed policy and actual capture: PASS
+B composed dependency holding delivery lost-commit-reply uses committed policy and actual capture: PASS
+B composed candidate first CUSTOMER_REQUESTED_HUMAN acknowledges once after real atomic commit: PASS
+B composed candidate first SIZE_RULE_UNAVAILABLE acknowledges once after real atomic commit: PASS
+B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it: PASS
+B composed mixed media handoff source never leaves partial intents: PASS
+B composed mixed media handoff rollback never leaves partial intents: PASS
+B composed mixed media delivery restart revalidates unchanged before any message: PASS
+B composed mixed media delivery restart revalidates source before any message: PASS
+B composed mixed media delivery restart revalidates revision before any message: PASS
+B composed N1 single-field private checkout keeps bare answers out of both models and public history: PASS
+B composed N4 sends exact text and selected image in one response group without replay duplicates: PASS
+B composed N5 image-first text-last handoff links the attachment history and retains encrypted source: PASS
+B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence: PASS
+B composed generation failure preserves the committed total through cart readiness and captures recovery once: PASS
+B composed ingress commits an open cart, authorizes the exact reply and captures delivery once: PASS
+B composed two native mutations retain one source and next owner receives accepted history and current cart: PASS
+B composed committed profile correction carries its receipt through the effect bridge and final readback: PASS
+B composed private checkout bypasses both models and persists the existing guarded preview: PASS
+B composed confirmation uses existing revalidation and commits checkout handoff once: PASS
+B composed later failed mutation hands off the partial committed result, without replay: PASS
+B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source: PASS
+B composed newer inbound between final readback and commit cancels eligibility without an Outbox: PASS
+B composed configured private dependency holding reply commits and is captured exactly once with the handoff: PASS
+B composed superseded source cannot persist customer measurements during generation: PASS
+B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged: PASS
+B composed clarification rollback refuses to destroy existing append-only events: PASS

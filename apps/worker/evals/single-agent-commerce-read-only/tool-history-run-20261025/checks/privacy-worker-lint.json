@@ -1,0 +1,13 @@
+{
+  "command": [
+    "cmd",
+    "/d",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@lana/worker",
+    "lint"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 10.418420314788818
+}

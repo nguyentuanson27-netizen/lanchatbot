@@ -1,0 +1,201 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-read-only-tools.test.ts (64 tests | 1 failed | 63 skipped) 71ms
+   × read-only domain tools > makes source offer codes available after discovery before reading protected facts 67ms
+     → expected [] to deep equally contain { productId: 'A101', …(1) }
+   ↓ read-only domain tools > uses checkout region priority for southern addresses and binds the resolved source key
+   ↓ read-only domain tools > keeps repeated reads stable but binds a new POS observation even when business values match
+   ↓ read-only domain tools > rejects search overflow before exposing or binding unretained product evidence
+   ↓ read-only domain tools > keeps concurrent searches within the same product budget without partial admission
+   ↓ read-only domain tools > does not leave bound subjects behind when a search candidate fails source validation
+   ↓ read-only domain tools > rejects a fifth product read without dropping earlier source or claims
+   ↓ read-only domain tools > uses the supplied product code for lookup even when a garment query accompanies it
+   ↓ read-only domain tools > does not overflow on readback when a previously empty search source gains content
+   ↓ read-only domain tools > does not bind a similar product as the requested code, or treat an empty code as discovery
+   ↓ read-only domain tools > withdraws attributes missing from the current preparation readback instead of retaining old evidence
+   ↓ read-only domain tools > prepares offers and content without price/stock variants or full-read dependencies
+   ↓ read-only domain tools > retains content and an explicit missing-offer status when POS is unavailable
+   ↓ read-only domain tools > reads all selling-option prices from one snapshot while keeping the top-level default price scoped
+   ↓ read-only domain tools > keeps an explicitly requested option isolated from another option with an unavailable price
+   ↓ read-only domain tools > retains a usable component and product content when the default offer cannot supply facts
+   ↓ read-only domain tools > binds each option's filters and ETA even when two offers share a source SKU
+   ↓ read-only domain tools > rejects option expansion beyond the existing subject bound without a partial list or partial context write
+   ↓ read-only domain tools > distinguishes confirmed empty selling options from absent or stale POS
+   ↓ read-only domain tools > preserves the existing claim bound across independently filtered multi-option reads
+   ↓ read-only domain tools > binds available selling options to the same current verifier snapshot and invalidates changed options
+   ↓ read-only domain tools > never represents unavailable or stale selling options as verified absence
+   ↓ read-only domain tools > keeps size-filtered stock attached to the code-read size when only an offer identity resolves
+   ↓ read-only domain tools > invalidates verified selling options when a fresh snapshot cannot resolve the product
+   ↓ read-only domain tools > keeps independent offer mappings when fulfillment policy or price is missing
+   ↓ read-only domain tools > binds delivery ETA to the requested region and invalidates a changed delivery source
+   ↓ read-only domain tools > search supplies source-bound static evidence without hidden POS reads and revalidates it before eligibility
+   ↓ read-only domain tools > policy lookup never represents a checked or approved individual exchange
+   ↓ read-only domain tools > exposes the source-approved payment methods without private payment or checkout data
+   ↓ read-only domain tools > search and the trusted verifier snapshot use the same existing product evidence after a full read
+   ↓ read-only domain tools > identifies the resolver's default selling offer and canonical aliases without losing price scope
+   ↓ read-only domain tools > distinguishes absent POS, stale POS and unavailable offer without deleting independent product content
+   ↓ read-only domain tools > uses the explicitly supplied source freshness bound and preserves content without POS
+   ↓ read-only domain tools > reads source policy, keeps missing customerCare explicit and never exposes negotiation internals
+   ↓ read-only domain tools > explains inspection and exchange together without changing source rules (15 days / 30000 VND / unused=true)
+   ↓ read-only domain tools > explains inspection and exchange together without changing source rules (7 days / 25000 VND / unused=true)
+   ↓ read-only domain tools > explains inspection and exchange together without changing source rules (15 days / 30000 VND / unused=false)
+   ↓ read-only domain tools > policy source changes invalidate old snapshots without changing prompt
+   ↓ read-only domain tools > does not treat last-known-good policy as a successful current-pointer readback
+   ↓ read-only domain tools > rejects invented refs and privileged arguments before I/O
+   ↓ read-only domain tools > turns a verified search match into an allowlisted ref, then reads price/stock
+   ↓ read-only domain tools > retains independent verified facts when another reader fails
+   ↓ read-only domain tools > does not erase a verified price because attributes are invalid
+   ↓ read-only domain tools > returns product evidence when POS is unavailable and marks price/stock missing
+   ↓ read-only domain tools > rejects cross-shop catalog data and loses old price eligibility on stale readback
+   ↓ read-only domain tools > keeps both allowed variant claims when comparing sizes of one product
+   ↓ read-only domain tools > retains current POS facts without inventing missing catalog timestamps or attributes
+   ↓ read-only domain tools > selects the requested selling offer and keeps its claims distinct from another offer
+   ↓ offers the existing price card only for first contact (true)
+   ↓ offers the existing price card only for first contact (false)
+   ↓ does not supply an opening price card for missing-price
+   ↓ does not supply an opening price card for stale
+   ↓ does not supply an opening price card for ambiguous-offer
+   ↓ keeps a component opening quote separate from the set price and set attributes
+   ↓ uses verified opening-quote attributes even when search fields disagree (empty=false)
+   ↓ uses verified opening-quote attributes even when search fields disagree (empty=true)
+   ↓ does not assign parent attributes to the only remaining AO offer
+   ↓ does not assign parent attributes to the only remaining CV offer
+   ↓ does not assign parent attributes to the only remaining QUAN offer
+   ↓ shares scoped positive-stock sizes with owner and verifier and invalidates a size-only source change
+   ↓ does not expand confirmed in-stock sizes from empty evidence
+   ↓ does not expand confirmed in-stock sizes from unknown evidence
+   ↓ does not expand confirmed in-stock sizes from size-filter evidence
+   ↓ does not expand confirmed in-stock sizes from stale evidence
+ ❯ src/single-agent-commerce-ingress.test.ts (68 tests | 1 failed | 67 skipped) 36ms
+   × preserves a benign caption through the shared history redactor 33ms
+     → expected [] to deeply equal [ { role: 'shop', …(1) } ]
+   ↓ recovers first-contact images with a verified turn product and no persisted focus (code)
+   ↓ recovers first-contact images with a verified turn product and no persisted focus (source-title)
+   ↓ recovers first-contact images with a verified turn product and no persisted focus (approved-group)
+   ↓ does not grant first-contact image recovery from not-requested
+   ↓ does not grant first-contact image recovery from two-titles
+   ↓ does not grant first-contact image recovery from unresolved-ad
+   ↓ does not grant first-contact image recovery from unresolved-code
+   ↓ does not grant first-contact image recovery from shortened-title
+   ↓ does not grant first-contact image recovery from ambiguous-group
+   ↓ preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=false)
+   ↓ preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=true)
+   ↓ does not recover images across a source failure
+   ↓ does not recover images across a human failure
+   ↓ does not recover images across a revision failure
+   ↓ does not recover images across a pending-state failure
+   ↓ does not recover images across a other-product failure
+   ↓ finishes mixed media and size intake after a corrected inline call within the unchanged budget
+   ↓ does not enqueue a partial mixed handoff group after source changes
+   ↓ does not enqueue a partial mixed handoff group after human changes
+   ↓ does not enqueue a partial mixed handoff group after revision changes
+   ↓ does not enqueue a partial mixed handoff group after inbox changes
+   ↓ does not enqueue a partial mixed handoff group after policy changes
+   ↓ does not enqueue a partial mixed handoff group after unknown-transaction changes
+   ↓ keeps customer-requested handoff free of images even when media was selected in an earlier round
+   ↓ continues after the actual media fallback with history and persisted product (GENERIC)
+   ↓ continues after the actual media fallback with history and persisted product (DETAIL)
+   ↓ keeps a mixed price/media reply only after whole-draft verification (PASS)
+   ↓ keeps a mixed price/media reply only after whole-draft verification (UNCERTAIN)
+   ↓ does not count the same objection again when a superseded batch gains a new tail
+   ↓ keeps receipt evidence private and passes the actual batch source guard (textAfter=false)
+   ↓ keeps receipt evidence private and passes the actual batch source guard (textAfter=true)
+   ↓ hands unknown customer media to staff with the first media message linkage and no provider exposure
+   ↓ does not fetch or expose hostile attachment URLs and preserves human ownership
+   ↓ enqueues approved media and exact final text in one protected response group (false/'SM613')
+   ↓ enqueues approved media and exact final text in one protected response group (true/'SM613')
+   ↓ enqueues approved media and exact final text in one protected response group (true/'OTHER1')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads ('SM613')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads ('OTHER1')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads ('SM613')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads (null)
+   ↓ fills the public history window after private rows without duplicating the latest batch
+   ↓ keeps pending checkout input private before history or either model (Nguyễn Thị Lan)
+   ↓ keeps pending checkout input private before history or either model (Khoan, áo này giặt máy được không em?)
+   ↓ starts the independent generation read while current authority is being loaded
+   ↓ persisted ingress source and final revision > uses available scoped names in the actual private preview without model or extra catalog reads (named=true)
+   ↓ persisted ingress source and final revision > uses available scoped names in the actual private preview without model or extra catalog reads (named=false)
+   ↓ persisted ingress source and final revision > binds a code-owned cart summary to current cart/fact readiness before enqueue (READY)
+   ↓ persisted ingress source and final revision > binds a code-owned cart summary to current cart/fact readiness before enqueue (PRICE_CHANGED)
+   ↓ persisted ingress source and final revision > binds a code-owned cart summary to current cart/fact readiness before enqueue (UNAVAILABLE)
+   ↓ persisted ingress source and final revision > enqueues a code-owned fallback without unrelated product coverage ([])
+   ↓ persisted ingress source and final revision > enqueues a code-owned fallback without unrelated product coverage ([ 'SM613', 'OTHER1', 'OTHER2' ])
+   ↓ persisted ingress source and final revision > enqueues a policy-only generated reply without a product and still verifies it
+   ↓ persisted ingress source and final revision > binds only products with actual verified claims after other candidates were loaded
+   ↓ persisted ingress source and final revision > enqueues a static fallback when an existing cart cannot be refreshed
+   ↓ persisted ingress source and final revision > does not write customer state after a newer Inbox generation arrives during owner generation
+   ↓ persisted ingress source and final revision > does not rebase a verified reply onto a conversation revision changed after final tools readback
+   ↓ persisted ingress source and final revision > does not write customer state after authority transfers to a human during generation
+   ↓ persisted ingress source and final revision > enqueues an unchanged verified world with precisely its conversation revision
+   ↓ reports exact binding mismatch without sending when egress readback changes
+   ↓ provides opening context from actual ingress history: ad
+   ↓ provides opening context from actual ingress history: organic
+   ↓ provides opening context from actual ingress history: returning
+   ↓ provides opening context from actual ingress history: private-history
+   ↓ passes the opening card and chosen images through the existing verifier and egress group
+   ↓ composes ingress with the real scoped source adapter and no product seed: ad
+   ↓ composes ingress with the real scoped source adapter and no product seed: explicit
+   ↓ composes ingress with the real scoped source adapter and no product seed: missing-ad
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-ingress.test.ts > preserves a benign caption through the shared history redactor
+AssertionError: expected [] to deeply equal [ { role: 'shop', …(1) } ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "role": "shop",
+-     "text": "Em gửi chị ảnh cận để xem đường nét thêu nhé.",
+-   },
+- ]
++ []
+
+ ❯ src/single-agent-commerce-ingress.test.ts:72:6
+     70|   const caption = "Em gửi chị ảnh cận để xem đường nét thêu nhé.";
+     71|   expect(commerceHistory([{ senderType: "BOT", text: redactAnalyticsMe…
+     72|     .toEqual([{ role: "shop", text: caption }]);
+       |      ^
+     73| });
+     74| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/single-agent-commerce-read-only-tools.test.ts > read-only domain tools > makes source offer codes available after discovery before reading protected facts
+AssertionError: expected [] to deep equally contain { productId: 'A101', …(1) }
+
+- Expected: 
+{
+  "availableOffers": [
+    "AO",
+    "QUAN",
+    "SET_QUAN",
+  ],
+  "productId": "A101",
+}
+
++ Received: 
+[]
+
+ ❯ src/single-agent-commerce-read-only-tools.test.ts:49:8
+     47|     expect(discovered.protectedClaims).toHaveLength(0);
+     48|     for (const f of records) expect(discovered.policyLiterals.map(p =>…
+     49|       .toContainEqual({ productId: f.product.productId, availableOffer…
+       |        ^
+     50|     expect(readProduct).toHaveBeenCalledTimes(3);
+     51|     const reads = await tools.invokeBatch(records.slice(0, 2).map(f =>…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 130 skipped (132)
+   Start at  02:11:03
+   Duration  7.84s (transform 4.61s, setup 0ms, collect 8.58s, tests 106ms, environment 1ms, prepare 2.96s)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-ingress.test.ts -t makes source offer codes|preserves a benign caption

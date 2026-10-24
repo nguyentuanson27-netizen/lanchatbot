@@ -1,12 +1,12 @@
 # Phase B — sửa đọc sản phẩm và lịch sử tư vấn
 
-Ngày: 2026-10-25. Trạng thái: **PLAN_REVISED_AND_SELF_REVIEWED; chưa implementation/provider**.
+Ngày: 2026-10-25. Kế hoạch dưới đây đã triển khai. **Campaign CLOSED / STOP sau17controls +21native;30native NOT_RUN.** [Kết quả/evidence](../../apps/worker/evals/single-agent-commerce-read-only/tool-history-run-20261025/CHECKPOINT_B.md). Run source9e352f38; privacy regression phát hiện offline đã sửa tại94cb6b08 sau khi dừng, chưa chạy model trên bản sửa đó. Frozen plan trước run được giữ cùng evidence; không mở lại identity cũ. B chưa GO.
 
 Planning base: `00ffd3ee9075774ed7be13605a07d505886010cd`, branch `feat/c3-phase-b-commerce-20261014`, PR391. Khi bắt đầu implementation phải ghi lại HEAD và worktree thực tế.
 
 Kế hoạch này thay phương án tiếp tục sau [turn-completion plan](c3-phase-b-turn-completion-plan-20261024.md). Campaign [turn-completion-run-20261024](../../apps/worker/evals/single-agent-commerce-read-only/turn-completion-run-20261024/CHECKPOINT_B.md) vẫn CLOSED / STOP_AT_PREFIX, 31/51 native, 20 NOT_RUN. Không sửa raw, nhãn, primary review hoặc mở lại phần còn thiếu dưới identity cũ. B chưa GO; A vẫn OWNER_BYPASS.
 
-Reviewer độc lập `/root/review_next_rootcause_plan` không hoàn thành vì workspace hết credits. Những điều chỉnh dưới đây là self-review và đối chiếu code; không ghi APPROVED hoặc coi review của kế hoạch trước là review cho bản này. Yêu cầu hiện tại chỉ sửa kế hoạch, không chạy provider.
+Reviewer độc lập `/root/review_next_rootcause_plan` không hoàn thành vì workspace hết credits. Những điều chỉnh dưới đây là self-review và đối chiếu code; không ghi APPROVED hoặc coi review của kế hoạch trước là review cho bản này. Owner sau đó đã yêu cầu implementation và một campaign mới; kết quả STOP ở link trên, không tự chạy vòng thứ hai.
 
 ## 1. Mục tiêu và giới hạn
 
