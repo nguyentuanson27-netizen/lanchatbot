@@ -433,7 +433,8 @@ try{
    // under the newly current SILENT policy, without any acknowledgement group.
    const events=(await pool.query('SELECT reason_detail_safe FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows;
    assert(events.length<=1);assert(events.every(e=>!e.reason_detail_safe.deliveryBindingHash));
-   assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+   report.policyBeforeCommitDiagnostic={terminal:r.result.terminal,enqueued:r.result.enqueued,events};save();
+   assert.notEqual(r.result.terminal.text,text,'OLD_HOLDING_DECISION_MUST_NOT_SURVIVE');
   }else{
    assert.equal(r.result.terminal.disposition,mode==='lost-commit-reply'?'NO_SEND':'HANDOFF');
    if(mode!=='lost-commit-reply')assert.equal(r.result.enqueued,1);
@@ -446,7 +447,9 @@ try{
    if(mode==='missing-receipt')await pool.query("UPDATE handoff_events SET reason_detail_safe=reason_detail_safe - 'deliveryBindingHash' WHERE conversation_id=$1",[j.bound.conversationId]);
    if(['restart','cached-allowed','lost-commit-reply'].includes(mode))j.restartDelivery();
   }
-  await j.drain();await j.drain();assert.deepEqual(j.capture,['unchanged','lost-commit-reply'].includes(mode)?[text]:[]);
+  await j.drain();await j.drain();
+  const expected=mode==='before-commit'&&r.result.terminal.disposition==='FALLBACK'?[r.result.terminal.text]:['unchanged','lost-commit-reply'].includes(mode)?[text]:[];
+  assert.deepEqual(j.capture,expected);if(mode==='before-commit')assert(!j.capture.includes(text));
   if(['after-commit','restart','cached-allowed','missing-receipt'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
  });
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])

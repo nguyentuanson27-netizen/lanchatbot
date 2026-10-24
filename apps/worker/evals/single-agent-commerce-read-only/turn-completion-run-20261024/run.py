@@ -26,7 +26,10 @@ remaining_indices=[i for i in range(1,25) if i not in prefix_indices]
 if stage=='prefix':
  out.mkdir()
  for payment in ['cod','bank']:
-  result=json.loads((checks/(payment+'-integration-final')/'integration.json').read_text())
+  candidates=[json.loads(p.read_text()) for p in checks.glob(payment+'-integration*/integration.json')]
+  matching=[r for r in candidates if r.get('status')=='PASS' and r.get('sourceSha')==source]
+  assert len(matching)==1,'EXACT_SOURCE_DETERMINISTIC_REPORT_REQUIRED'
+  result=matching[0]
   assert result['status']=='PASS' and result['testDatabaseDropped'] and result['providerGenerations']==0
   assert result['sourceSha']==source and not result['sourceDirty']
   assert all(c['status']=='PASS' for c in result['cases'])
