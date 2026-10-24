@@ -1,4 +1,19 @@
-## Current — turn-completion campaign, 24–25/10/2026
+## Current — sửa đọc sản phẩm và lịch sử, 2026-10-25
+
+[Kế hoạch hiện hành](../docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md). **PLAN_REVISED_AND_SELF_REVIEWED; chưa implementation/provider; B chưa GO.**
+
+- [x] Sửa phương án theo self-review: không thêm offer selector mới mặc định; phân biệt media accepted với selected/viewed; sửa redaction tại nguồn, tách hash capture khỏi history; chấm tư vấn riêng.
+- [x] Đính chính T0 cũ: có SUBJECT_BOUND trong discovery; chưa tái hiện exact slot count từ snapshot SQ748. Giữ raw/report cũ nguyên vẹn.
+- [ ] Review độc lập kế hoạch mới: reviewer đã lỗi workspace credits, chưa có kết quả; không nhận review cũ áp dụng cho plan mới.
+- [ ] T0: observed RED cho offer bound, mất ảnh trong history, caption che nhầm; audit input của ba ca tư vấn.
+- [ ] T1: sửa metadata/offer read nhỏ nhất, giữ scope/budgets, compare/component controls và source-read accounting.
+- [ ] T2: bounded image history từ actual accepted receipt + asset/product binding, resend/failure/restart/privacy controls.
+- [ ] T3: redaction chung và history/capture regression, giữ PII protection; không whitelist câu benchmark.
+- [ ] T4: ghi evidence input/instruction và quyết định can thiệp tư vấn hoặc ADVICE_NO_INTERVENTION.
+- [ ] Self-review, focused tests, shared/worker checks, isolated persistence/delivery verification theo scope.
+- [ ] Khi được yêu cầu chạy: freeze registration/source/config mới, controls rồi prefix và phần còn lại theo gate; không mở 20 NOT_RUN của campaign cũ.
+
+## Historical — turn-completion campaign, 24–25/10/2026
 
 [Plan](../docs/specs/c3-phase-b-turn-completion-plan-20261024.md), [report/evidence](../apps/worker/evals/single-agent-commerce-read-only/turn-completion-run-20261024/CHECKPOINT_B.md). **STOP_AT_PREFIX; B chưa GO.**
 
