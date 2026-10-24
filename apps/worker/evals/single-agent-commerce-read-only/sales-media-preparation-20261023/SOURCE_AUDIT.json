@@ -1,0 +1,76 @@
+{
+  "status": "CAPTURED_SOURCE_AND_REQUEST_AUDIT_NOT_LIVE_REFRESH",
+  "sourceAuditPath": "../opening-advice-preparation-20261022/SOURCE_AUDIT.json",
+  "sourceReadAt": "2026-10-22T16:44:59.087Z",
+  "sourceHash": "ffa1f90a291624da8d9a86674ab0346bbed469a3102a8e7387cde11a2b42014c",
+  "providerGenerations": 0,
+  "sourceWrites": 0,
+  "products": [
+    {
+      "code": "SV2447",
+      "images": 11,
+      "angles": {
+        "UNKNOWN": 1,
+        "FRONT": 7,
+        "CLOSEUP": 2,
+        "BACK": 1
+      },
+      "approvedVerifiedHasHash": 11,
+      "assetColorBinding": false,
+      "feedbackCoverage": "UNKNOWN: saved audit did not project feedback/imageType; must read current registry before claiming availability",
+      "attributesPresent": false
+    },
+    {
+      "code": "SQ748",
+      "images": 7,
+      "angles": {
+        "FRONT": 4,
+        "UNKNOWN": 1,
+        "CLOSEUP": 1,
+        "BACK": 1
+      },
+      "approvedVerifiedHasHash": 7,
+      "assetColorBinding": false,
+      "feedbackCoverage": "UNKNOWN: saved audit did not project feedback/imageType; must read current registry before claiming availability",
+      "attributesPresent": false
+    },
+    {
+      "code": "SQ675",
+      "images": 5,
+      "angles": {
+        "FRONT": 5
+      },
+      "approvedVerifiedHasHash": 5,
+      "assetColorBinding": false,
+      "feedbackCoverage": "UNKNOWN: saved audit did not project feedback/imageType; must read current registry before claiming availability",
+      "attributesPresent": false
+    },
+    {
+      "code": "SQ634",
+      "images": 7,
+      "angles": {
+        "FRONT": 6,
+        "SIDE": 1
+      },
+      "approvedVerifiedHasHash": 7,
+      "assetColorBinding": false,
+      "feedbackCoverage": "UNKNOWN: saved audit did not project feedback/imageType; must read current registry before claiming availability",
+      "attributesPresent": false
+    }
+  ],
+  "wireFindings": [
+    {
+      "case": "sales-product-gallery:overview",
+      "finding": "Initial OWNER_REQUEST contains SV2447 product content/availableOffers and media tools, no inlineData. Same-turn tool selection delivered two generic images; no per-asset color binding."
+    },
+    {
+      "case": "sales-discovery-advice:need",
+      "finding": "Captured reads include SQ748 description with shorts/elastic waistband. Unsupported assertion verdict has ref only: no claim span; do not call this missing fabric data or confirmed false reject."
+    },
+    {
+      "case": "b1-changed-occasion",
+      "finding": "Final captured request has toolsAllowed=false and functionCallingConfig.mode=NONE, owner still functionCall. Authority correctly blocked; no evidence adapter failed to set mode."
+    }
+  ],
+  "selectorDecision": "Reuse existing selectPriceCardImages only inside candidate GENERIC media after approval filtering; imageUrls=[] disables legacy unverified URL fallback. Shared package unchanged."
+}

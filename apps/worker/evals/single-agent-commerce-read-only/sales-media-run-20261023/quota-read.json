@@ -1,0 +1,15 @@
+{
+  "ordinaryUsageAllowed": true,
+  "rateLimits": {
+    "primary": {
+      "usedPercent": 23,
+      "windowDurationMins": 300
+    },
+    "secondary": {
+      "usedPercent": 4,
+      "windowDurationMins": 10080
+    },
+    "credits": {}
+  },
+  "providerGenerations": 0
+}

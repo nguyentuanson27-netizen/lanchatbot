@@ -1,0 +1,162 @@
+{
+  "caseId": "media-and-size:ask",
+  "journeyId": "media-and-size",
+  "elapsedMs": 23605.738100000017,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "text": "Em chuyển nhân viên chọn size cho chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 5,
+    "generations": [
+      {
+        "id": "991af39d-9339-4b18-989d-c5e5949ae240:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5050.025200000004,
+        "telemetry": {
+          "generationId": "991af39d-9339-4b18-989d-c5e5949ae240:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5594,
+          "outputTokens": 1365,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30235,
+          "requestHash": "6130232b1e8570039c25686f99b3c5f0d3c981ee9c44ada2c41d1746bec89218",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1202,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 3931.2704000000085,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 1,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "4f356dd21415b79fd8185150f8cd9290d1733367f2100d75537982b2a9420562",
+    "generation": 6,
+    "leaseToken": "08370e15-47b4-4e3c-9916-88162a087be4",
+    "inboxIds": [
+      "002a77f6-0d3d-4af4-b3c0-183e37ff0709"
+    ],
+    "evaluationGroupId": "991af39d-9339-4b18-989d-c5e5949ae240",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 6,
+    "lastReceiveSequence": 6,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "002a77f6-0d3d-4af4-b3c0-183e37ff0709",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-ec473fbb-3dab-49f2-8bff-7c767f49d021:0",
+        "conversationHash": "4f356dd21415b79fd8185150f8cd9290d1733367f2100d75537982b2a9420562",
+        "occurredAt": "2026-10-23T08:49:39.945Z",
+        "receivedAt": "2026-10-23T08:49:39.945Z",
+        "receiveSequence": 6,
+        "attemptCount": 1,
+        "leaseToken": "08370e15-47b4-4e3c-9916-88162a087be4",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "8b46a5e3-6cd0-47af-8439-56a6c1d878b3",
+            "eventKey": "stateful-ec473fbb-3dab-49f2-8bff-7c767f49d021:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-ec473fbb-3dab-49f2-8bff-7c767f49d021:0",
+            "senderId": "synthetic-recipient-4f356dd21415b79fd8185150f8cd9290d1733367f2100d75537982b2a9420562",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-23T08:49:39.945Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "8b46a5e3-6cd0-47af-8439-56a6c1d878b3",
+      "eventKey": "stateful-ec473fbb-3dab-49f2-8bff-7c767f49d021:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-ec473fbb-3dab-49f2-8bff-7c767f49d021:0",
+      "senderId": "synthetic-recipient-4f356dd21415b79fd8185150f8cd9290d1733367f2100d75537982b2a9420562",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-23T08:49:39.945Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [
+    "Em chuyển nhân viên chọn size cho chị nhé."
+  ],
+  "actualCapturedAttachments": [],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [
+      {
+        "kind": "HEIGHT_CM",
+        "value": 158,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-23T08:49:39.945Z",
+          "sourceEventHash": "714026abb334e674b92cdf10c2a70ac6c7c4582896f5cc58dda8d021e0c46471"
+        }
+      },
+      {
+        "kind": "WEIGHT_KG",
+        "value": 52,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-23T08:49:39.945Z",
+          "sourceEventHash": "714026abb334e674b92cdf10c2a70ac6c7c4582896f5cc58dda8d021e0c46471"
+        }
+      }
+    ],
+    "customerProfileRevision": 2,
+    "negotiation": null
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 13,
+    "verifier": 5,
+    "catalogReads": 48,
+    "posReads": 19,
+    "selectorCalls": 0,
+    "readPolicyCalls": 0
+  }
+}

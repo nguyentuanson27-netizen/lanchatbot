@@ -1,0 +1,15 @@
+{
+  "owner": "gemini-3.8-flash",
+  "effort": "HIGH",
+  "location": "global",
+  "verifier": "gpt-6.1-sol HIGH",
+  "sourceSha": "3a37a7844c4f64a5aaceead1f7fa995e9a9e4d02",
+  "controls": 17,
+  "native": 46,
+  "first": 21,
+  "rest": 25,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false,
+  "apiDocs": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-flash"
+}

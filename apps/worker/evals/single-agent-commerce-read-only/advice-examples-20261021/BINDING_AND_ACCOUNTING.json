@@ -1,0 +1,178 @@
+{
+  "status": "PASS",
+  "bindings": 12,
+  "eligibleExactTexts": 12,
+  "verifierLabelLeaks": 0,
+  "unchangedFrozenFiles": 13,
+  "rawGitBlobs": 65,
+  "records": [
+    {
+      "id": "s01",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s02",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s03",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s04",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s05",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s06",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s07",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s08",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s09",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s10",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s11",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "id": "s12",
+      "terminal": "SEND_ELIGIBLE",
+      "requests": 3,
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "violations": []
+        }
+      ],
+      "ownerModels": [
+        "gemini-3.5-flash-lite"
+      ]
+    }
+  ]
+}

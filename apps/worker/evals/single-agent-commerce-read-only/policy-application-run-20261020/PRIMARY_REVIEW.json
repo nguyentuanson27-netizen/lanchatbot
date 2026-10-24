@@ -1,0 +1,83 @@
+{
+  "reviewMode": "AGENT_WHOLE_ACTUAL_OUTCOME_BEFORE_DRAFT_VERIFIER_DIAGNOSIS",
+  "humanAdjudication": false,
+  "runSourceSha": "2b16a79a832f8b938a28272d245d596468268d7b",
+  "counts": {
+    "USABLE": 3,
+    "UNUSABLE": 5
+  },
+  "rows": [
+    {
+      "slot": 1,
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Phần này em chưa trả lời được, chị nhé.",
+      "disposition": "FALLBACK",
+      "rating": "UNUSABLE",
+      "reason": "Khách chỉ nhận fallback, chưa được trả lời việc đang hỏi."
+    },
+    {
+      "slot": 2,
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Phần này em chưa trả lời được, chị nhé.",
+      "disposition": "FALLBACK",
+      "rating": "UNUSABLE",
+      "reason": "Khách chỉ nhận fallback, chưa được trả lời việc đang hỏi."
+    },
+    {
+      "slot": 3,
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "actual": "Phần này em chưa trả lời được, chị nhé.",
+      "disposition": "FALLBACK",
+      "rating": "UNUSABLE",
+      "reason": "Khách chỉ nhận fallback, chưa được trả lời việc đang hỏi."
+    },
+    {
+      "slot": 4,
+      "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+      "history": [],
+      "actual": "Dạ được chị nhé, shop hỗ trợ mình đổi sang size L ạ. Sản phẩm còn nguyên tem mác, chưa qua sử dụng hay giặt và trong vòng 15 ngày kể từ khi nhận hàng là được chị nha, phí vận chuyển 2 chiều là 30.000đ ạ.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Khách nói chỉ ướm, reply giới thiệu đổi size có điều kiện theo nguồn, không báo đã hoàn tất thao tác. Không suy thêm khách làm bẩn/hỏng để chấm thiếu keyword."
+    },
+    {
+      "slot": 5,
+      "latest": "Chị thử bộ này rồi, giờ muốn đổi size thì được không?",
+      "history": [],
+      "actual": "Phần này em chưa trả lời được, chị nhé.",
+      "disposition": "FALLBACK",
+      "rating": "UNUSABLE",
+      "reason": "Khách chỉ nhận fallback, chưa được trả lời việc đang hỏi."
+    },
+    {
+      "slot": 6,
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "actual": "Dạ, shop hỗ trợ đổi size trong vòng 15 ngày kể từ khi nhận hàng chị nha. Phí đổi (vận chuyển 2 chiều) là 30.000đ ạ.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Trả đúng 15 ngày từ khi nhận và phí hai chiều 30k, đúng phạm vi câu hỏi."
+    },
+    {
+      "slot": 7,
+      "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+      "history": [],
+      "actual": "Phần này em chưa trả lời được, chị nhé.",
+      "disposition": "FALLBACK",
+      "rating": "UNUSABLE",
+      "reason": "Khách chỉ nhận fallback, chưa được trả lời việc đang hỏi."
+    },
+    {
+      "slot": 8,
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "actual": "Dạ, bên em hỗ trợ đổi size trong vòng 7 ngày kể từ lúc nhận hàng, phí vận chuyển 2 chiều là 25.000đ chị nha.",
+      "disposition": "SEND_ELIGIBLE",
+      "rating": "USABLE",
+      "reason": "Trả đúng snapshot đối chứng 7 ngày/25k, không lặp số từ policy live."
+    }
+  ]
+}

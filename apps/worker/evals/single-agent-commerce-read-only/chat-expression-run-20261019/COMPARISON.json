@@ -1,0 +1,139 @@
+{
+  "comparison": "Same six input bytes/captures/config/models, owner prompt changed; three samples per fixed context. Descriptive comparison, not general stability or causal proof. Historical labels untouched.",
+  "rows": [
+    {
+      "caseId": "b1-changed-occasion:rep-1",
+      "previous": {
+        "actual": [
+          "Dạ, set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ nên khi ngồi ô tô gần 3 tiếng di chuyển sẽ dễ để lại nếp gấp nhẹ ạ. \n\nNếu chị muốn tìm mẫu ít nhăn và giữ form tốt hơn khi đi xe đường dài, em gợi ý **set Diễm Hoa** nhé; mẫu này dùng chất liệu ren lưới đính hoa 3D kết hợp chân váy tơ mềm 3 tầng, đứng form và ít lộ nếp nhăn hơn khi ngồi lâu, mặc đi đám cưới vừa sang trọng lại nổi bật ạ. \n\nChị đổi sang set Diễm Hoa này nha?"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Chọn Diễm Hoa làm phương án ưu tiên cho yêu cầu đi xe, giải thích bằng thiết kế ren lưới/3tầng có trong nguồn và so sánh định tính. Không hứa tới nơi chắc chắn phẳng hoặc tự hồi nếp.",
+        "voiceFindings": [
+          "Ba đoạn khá dài; câu mời đổi thêm là có ích nhưng có thể gọn."
+        ]
+      },
+      "current": {
+        "actual": [
+          "Set Thạch Thảo dùng chất tơ và ren mềm nên ngồi ô tô 3 tiếng có thể hằn nếp gấp nhẹ chị ạ. \n\nEm gợi ý hai phương án ít nhăn hơn để chị dễ chọn:\n- **Set Diễm Hoa**: Ren lưới đính hoa 3D và chân váy tơ mềm, form bay bổng và ít lộ nếp gấp khi ngồi xe.\n- **Set Thanh Vũ**: Áo ren cotton phối chân váy tơ crep đứng dáng, giữ form rất tốt khi di chuyển lâu.\n\nChị thích kiểu bồng bềnh nổi bật hay thanh lịch, gọn gàng hơn ạ?"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "So sánh hai hướng khác nhau về phong cách và hỏi preference phân biệt; không chỉ đưa tên món để khách chọn lại. Đây là quyền đưa hai hướng có lý do đã giữ trong rubric. Lời so sánh định tính được phép.",
+        "voiceFindings": [
+          "Reply vẫn dài, giống danh sách catalog; lý do về độ nhăn chưa phân biệt rõ bằng lời chọn ưu tiên. Không trừ điểm chỉ vì có “em gợi ý” hoặc danh sách."
+        ]
+      }
+    },
+    {
+      "caseId": "b1-changed-occasion:rep-2",
+      "previous": {
+        "actual": [
+          "Dạ, set Thạch Thảo chất tơ Hàn và ren tơ mềm bay nên đi ô tô gần 3 tiếng ngồi lâu sẽ dễ bị hằn nếp nhăn ạ. \n\nNếu đi đường dài, chị chuyển sang **set váy Diễm Hoa** giúp em nhé. Mẫu này dùng chất ren lưới đính hoa 3D có cấu trúc lưới đứng dáng và ít bị nhăn hơn khi ngồi lâu, mặc lên sang trọng và nổi bật rất hợp đi đám cưới ạ!"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Đưa lựa chọn ưu tiên rõ thay vì trả danh sách, dựa thiết kế ren lưới đúng nguồn và tư vấn định tính về nhăn/đứng dáng trong phạm vi đã duyệt.",
+        "voiceFindings": [
+          "“chị chuyển sang…giúp em” vẫn gượng; có thể tự nhiên hơn."
+        ]
+      },
+      "current": {
+        "actual": [
+          "Phần này em chưa trả lời được, chị nhé."
+        ],
+        "primaryVerdict": "UNUSABLE",
+        "reason": "Actual chỉ fallback nên khách không nhận được lời chọn đồ cho chuyến xe. Không chấm credit từ rejected draft chưa gửi.",
+        "voiceFindings": []
+      }
+    },
+    {
+      "caseId": "b1-changed-occasion:rep-3",
+      "previous": {
+        "actual": [
+          "Phần này em chưa trả lời được, chị nhé."
+        ],
+        "primaryVerdict": "UNUSABLE",
+        "reason": "Khách nhờ chọn đồ ít nhăn hơn cho chuyến xe; actual chỉ nhận fallback nên việc mua chưa được giải quyết. Không chấm draft chưa gửi.",
+        "voiceFindings": []
+      },
+      "current": {
+        "actual": [
+          "Set Thạch Thảo dùng chất tơ và ren mềm nên ngồi xe 3 tiếng sẽ dễ bị hằn nếp nhăn chị ạ. \n\nEm chọn set Thanh Vũ cho chị nhé. Áo ren dệt cotton kết hợp chân váy tơ crep đứng dáng và ít nhăn hơn, giúp chị giữ form gọn gàng suốt chuyến đi."
+        ],
+        "primaryVerdict": "NEEDS_EDIT",
+        "reason": "Đã chọn Thanh Vũ rõ và nói gọn hơn, nhưng gắn lời khuyên với “giữ form gọn gàng suốt chuyến đi”. Trong ngữ cảnh khách cần ít nhăn khi đi xe3giờ, đây là hiệu quả duy trì form trọn chuyến chưa có nguồn; cần bỏ phạm vi cam kết đó trước gửi theo ranh giới đã dùng ở run trước. Nhận xét định tính về tơ crep/độ gọn gàng thông thường vẫn được phép.",
+        "voiceFindings": [
+          "Câu đầu vẫn nhắc lại3giờ của khách, nhưng không tự là lỗi. Vấn đề bắt buộc sửa là phạm vi “suốt chuyến đi”, không phải từ “gọn gàng” hoặc câu ngắn."
+        ]
+      }
+    },
+    {
+      "caseId": "b1-buying-concern:rep-1",
+      "previous": {
+        "actual": [
+          "Dạ mặc đi tiệc ban ngày không bị rườm rà đâu chị ạ. Chân váy dùng chất ren tơ Hàn mềm với form nhẹ và có độ rũ tự nhiên, kết hợp cùng áo tơ thêu nổi form nhẹ nhàng nên tổng thể rất thanh thoát và nhã nhặn. Nguyên bộ có giá 799.000đ, vừa vặn trong ngân sách 900 nghìn của mình luôn chị nhé."
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Trả thẳng lo rườm rà bằng nhận xét tổng thể nhẹ/thanh thoát và báo giá bộ799k đúng nguồn. Tư vấn thẩm mỹ được phép dù mức thuyết phục còn mỏng.",
+        "voiceFindings": [
+          "Lý do vẫn thiên về mềm/nhẹ/rũ để trả lo trang trí, nhắc ngân sách như khuôn; chưa chứng minh cải thiện."
+        ]
+      },
+      "current": {
+        "actual": [
+          "Chị yên tâm nha, chân váy dùng chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, không bị rườm rà đâu ạ. \n\nNgân sách 900 nghìn của chị thoải mái chọn nguyên set vì giá là 799.000đ. Hoặc nếu chị muốn tiết chế bớt ren, mình có thể lấy áo lẻ (499.000đ) chất tơ thêu nổi để phối linh hoạt hơn nha. Chị thấy phương án nào hợp ý mình hơn ạ?"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Giải đáp băn khoăn về ren và báo giá bộ799k; đưa áo lẻ499k như lựa chọn giảm ren có cơ sở offer. Không buộc tách bộ hay đòi một CTA cố định.",
+        "voiceFindings": [
+          "Vẫn nêu lại ngân sách, mô tả/khen dài; áo lẻ “phối linh hoạt” chưa chỉ rõ cách phối giảm rườm rà. “Nếu” ở đây đưa một lựa chọn thực sự khác, không chấm lỗi chỉ do từ nối."
+        ]
+      }
+    },
+    {
+      "caseId": "b1-buying-concern:rep-2",
+      "previous": {
+        "actual": [
+          "Chất liệu chân váy là ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên kết hợp cùng áo tơ thêu bay bổng nên tổng thể rất thanh thoát, nhã nhặn, mặc đi tiệc ban ngày vừa sang lại không bị rườm rà đâu chị ạ. \n\nTrọn set này có giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900k của mình đấy ạ. Chị có muốn chốt luôn trọn bộ này không để em chuẩn bị gửi hàng cho mình nhé?"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Trả lo về tiệc ban ngày, giá799k và mời mua có điều kiện; không nói đã tạo đơn/đã gửi hàng. Không ép khách chọn rẻ hơn hay tách bộ.",
+        "voiceFindings": [
+          "Câu mời chốt dài/gượng và nhảy sang chuẩn bị gửi hàng trước bước size/checkout; nên dẫn bước mua sát khả năng hiện có hơn. Lý do vẫn kiểu catalog."
+        ]
+      },
+      "current": {
+        "actual": [
+          "Dạ ren của set này là ren tơ Hàn mềm, kết hợp cùng áo tơ thêu form nhẹ có độ bay tự nhiên nên mặc đi tiệc ban ngày rất sang và thanh thoát, không bị rườm rà hay nặng nề đâu chị nhé. \n\nCả bộ có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của chị ạ."
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Nhận xét thẩm mỹ đúng phạm vi được duyệt và giá799k, không cần ép thêm câu chốt.",
+        "voiceFindings": [
+          "Vẫn xâu chuỗi mềm/nhẹ/bay/sang/thanh thoát và lặp ngân sách; sức thuyết phục chưa cải thiện rõ."
+        ]
+      }
+    },
+    {
+      "caseId": "b1-buying-concern:rep-3",
+      "previous": {
+        "actual": [
+          "Dạ không đâu chị nha, chân váy dùng ren tơ Hàn mềm kết hợp cùng áo tơ thêu form nhẹ, có độ bay và rũ tự nhiên nên lên dáng rất thanh thoát, diện tiệc ban ngày sang trọng mà không hề bị rườm rà đâu ạ. \n\nNguyên set giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900.000đ của mình luôn chị nhé. Chị có muốn em tư vấn size phù hợp cho mình không ạ?"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Đưa nhận xét thẩm mỹ/giá đúng và mời tư vấn size như bước tiếp theo bot làm được; không tự đề xuất size khi chưa có dữ kiện.",
+        "voiceFindings": [
+          "Nhiều tính từ, nhắc lại ngân sách và chốt câu theo khuôn."
+        ]
+      },
+      "current": {
+        "actual": [
+          "Dạ chị yên tâm nhé, chân váy dùng ren tơ Hàn mềm có độ rũ tự nhiên kết hợp áo tơ thêu form nhẹ nên mặc đi tiệc ban ngày rất nhã nhặn, không bị rườm rà đâu ạ. \n\nNguyên set váy có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của chị. Chị lấy set này để em chuẩn bị size cho mình nhé ạ?"
+        ],
+        "primaryVerdict": "USABLE",
+        "reason": "Trả lo rườm rà, giá799k và mời bước size/mua; không tự kết luận fit hay nhận đã thêm giỏ/tạo đơn.",
+        "voiceFindings": [
+          "Lý do mềm/nhẹ/rũ lặp các mẫu trước; “chuẩn bị size” là lời mời hơi khuôn, chưa hỏi dữ kiện cụ thể nhưng chưa báo đã tư vấn size."
+        ]
+      }
+    }
+  ]
+}

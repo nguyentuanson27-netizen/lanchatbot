@@ -1,0 +1,69 @@
+{
+  "outcomes": {
+    "media": 4,
+    "advice": 8
+  },
+  "terminals": {
+    "media": {
+      "SEND_ELIGIBLE": 3,
+      "FALLBACK": 1
+    },
+    "advice": {
+      "SEND_ELIGIBLE": 8
+    }
+  },
+  "usage": {
+    "owner": {
+      "requests": 17,
+      "inputTokens": 82810,
+      "outputTokens": 18723,
+      "thinkingOrReasoningTokens": 17505,
+      "errors": 0
+    },
+    "verifier": {
+      "requests": 12,
+      "inputTokens": 58285,
+      "outputTokens": 2024,
+      "thinkingOrReasoningTokens": 1715,
+      "errors": 0
+    }
+  },
+  "verdicts": {
+    "PASS": 11,
+    "UNCERTAIN": 1
+  },
+  "verifierLatencyMs": {
+    "n": 12,
+    "p50": 7192.0,
+    "p95NearestRank": 35286
+  },
+  "verificationStageMs": {
+    "media": {
+      "n": 4,
+      "p50": 12769.083799999995,
+      "p95NearestRank": 38997.36290000001
+    },
+    "advice": {
+      "n": 8,
+      "p50": 6868.364150000001,
+      "p95NearestRank": 12265.854099999999
+    }
+  },
+  "caseElapsedMs": {
+    "media": {
+      "n": 4,
+      "p50": 34471.53445000001,
+      "p95NearestRank": 56002.6637
+    },
+    "advice": {
+      "n": 8,
+      "p50": 12385.087750000002,
+      "p95NearestRank": 17820.7655
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "retries": 0,
+  "timeouts": 0,
+  "actualImages": 3,
+  "databaseDropped": true
+}

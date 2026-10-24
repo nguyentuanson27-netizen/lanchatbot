@@ -1,0 +1,437 @@
+{
+  "status": "PASS",
+  "promptCaptures": 16,
+  "evaluatorLabelLeaks": 0,
+  "slots": [
+    {
+      "id": "s01",
+      "arm": "control",
+      "caseSlot": 7,
+      "ownerPromptHash": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "id": "s02",
+      "arm": "candidate",
+      "caseSlot": 7,
+      "ownerPromptHash": "0e0b07fd83695417735b8bfb5189f7b3a6e4967f454248bfca9005f543dd5325",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "id": "s03",
+      "arm": "candidate",
+      "caseSlot": 15,
+      "ownerPromptHash": "0e0b07fd83695417735b8bfb5189f7b3a6e4967f454248bfca9005f543dd5325",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "id": "s04",
+      "arm": "control",
+      "caseSlot": 15,
+      "ownerPromptHash": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "id": "s05",
+      "arm": "control",
+      "caseSlot": 23,
+      "ownerPromptHash": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "id": "s06",
+      "arm": "candidate",
+      "caseSlot": 23,
+      "ownerPromptHash": "0e0b07fd83695417735b8bfb5189f7b3a6e4967f454248bfca9005f543dd5325",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "id": "s07",
+      "arm": "candidate",
+      "caseSlot": 17,
+      "ownerPromptHash": "0e0b07fd83695417735b8bfb5189f7b3a6e4967f454248bfca9005f543dd5325",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "FALLBACK"
+    },
+    {
+      "id": "s08",
+      "arm": "control",
+      "caseSlot": 17,
+      "ownerPromptHash": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+      "ownerRequests": 2,
+      "functionCallingModes": [
+        "AUTO",
+        "AUTO"
+      ],
+      "nativeFunctionResponses": 1,
+      "providerRequests": 3,
+      "terminal": "SEND_ELIGIBLE"
+    }
+  ],
+  "pairs": [
+    {
+      "caseSlot": 7,
+      "ids": [
+        "s01",
+        "s02"
+      ],
+      "initialEvidenceEqualIgnoringObservationTimes": true,
+      "finalSourceVersions": {
+        "s01": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ],
+        "s02": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ]
+      },
+      "finalSourceVersionsEqual": true
+    },
+    {
+      "caseSlot": 15,
+      "ids": [
+        "s03",
+        "s04"
+      ],
+      "initialEvidenceEqualIgnoringObservationTimes": true,
+      "finalSourceVersions": {
+        "s03": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ],
+        "s04": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ]
+      },
+      "finalSourceVersionsEqual": true
+    },
+    {
+      "caseSlot": 23,
+      "ids": [
+        "s05",
+        "s06"
+      ],
+      "initialEvidenceEqualIgnoringObservationTimes": true,
+      "finalSourceVersions": {
+        "s05": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ],
+        "s06": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ]
+      },
+      "finalSourceVersionsEqual": true
+    },
+    {
+      "caseSlot": 17,
+      "ids": [
+        "s07",
+        "s08"
+      ],
+      "initialEvidenceEqualIgnoringObservationTimes": true,
+      "finalSourceVersions": {
+        "s07": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ],
+        "s08": [
+          {
+            "path": "/policyLiterals/0",
+            "sourceVersion": "226a9a8b267b56e55731cf9fd1debfa1190cb46d0c848f922e5e07f2113dffe7"
+          },
+          {
+            "path": "/protectedClaims/0/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/1/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/2/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/3/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/4/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/protectedClaims/5/provenance",
+            "sourceVersion": "POS_SNAPSHOT:2026-10-21T02:04:19.198Z"
+          },
+          {
+            "path": "/runtimeProducts/0/content/metadata",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          }
+        ]
+      },
+      "finalSourceVersionsEqual": true
+    }
+  ]
+}

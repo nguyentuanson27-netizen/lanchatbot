@@ -1,0 +1,36 @@
+{
+  "runSourceSha": "79bda1692667846e0a543a404812ab1daead35c7",
+  "humanAdjudication": false,
+  "families": {
+    "b1-1": {
+      "outcomes": 24,
+      "primary": {
+        "USABLE": 18,
+        "NEEDS_EDIT": 6
+      },
+      "terminal": {
+        "SEND_ELIGIBLE": 24
+      }
+    },
+    "stateful-1": {
+      "outcomes": 8,
+      "primary": {
+        "USABLE": 6,
+        "NEEDS_EDIT": 1,
+        "OWNERSHIP_CONTROL": 1
+      },
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      }
+    }
+  },
+  "providerRequests": 89,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "fallbacks": 0,
+  "verifierPass": 28,
+  "agentNeedsEdit": 7
+}

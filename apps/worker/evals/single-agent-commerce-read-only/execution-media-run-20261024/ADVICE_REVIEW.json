@@ -1,0 +1,32 @@
+{
+  "decision": "NOT_PROMOTED",
+  "nPerArmPerCase": 1,
+  "allEightSendEligible": true,
+  "pairs": [
+    {
+      "case": "b1-buying-concern",
+      "decision": "NO_CLEAR_GAIN",
+      "reason": "Cả hai dùng mô tả độ bay/rũ và nhiều lời khen để trấn an chuyện rườm rà. Candidate không giải thích cụ thể hơn vì sao bộ này hợp gu khách; giá 799k và budget đúng."
+    },
+    {
+      "case": "b1-changed-occasion-v3",
+      "decision": "PARTIAL_GAIN_WITH_STYLE_LIMIT",
+      "reason": "Cả hai chọn áo lẻ đúng yêu cầu mới. Candidate gọn hơn và giữ một lựa chọn, nhưng sắc nét/gọn người vẫn gượng; không đủ để kết luận giọng tốt hơn ổn định."
+    },
+    {
+      "case": "b1-buying-concern-v3",
+      "decision": "NO_CLEAR_GAIN",
+      "reason": "Baseline chọn áo lẻ tận dụng chân váy đen; candidate upsell cả bộ trong budget và nêu mặc tách. Cả hai hướng mua có thể hợp lý, không chấm upsell là lỗi. Candidate vẫn nhiều lời quảng cáo và chưa làm rõ phần mua thêm 300k mang lại gì."
+    },
+    {
+      "case": "b1-buying-concern-v2",
+      "decision": "UNRESOLVED",
+      "reason": "Hai bản đều tránh chọn rõ một hướng, đưa nhiều phương án dự phòng và dùng lời khen/material để xử lý khách thích đồ trơn. Candidate ngắn hơn nhưng chưa gỡ đúng phân vân; cả hai tự nói đồ trơn sẵn có khi khách chỉ nói gu mặc."
+    }
+  ],
+  "limits": [
+    "Captured-clock replay, không phải delivery hay live freshness.",
+    "Verifier PASS không phải sales-quality PASS.",
+    "Không sửa prompt/context rồi chạy tiếp trong cùng registration."
+  ]
+}

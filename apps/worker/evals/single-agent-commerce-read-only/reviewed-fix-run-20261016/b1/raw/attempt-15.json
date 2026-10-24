@@ -1,0 +1,83 @@
+{
+  "caseId": "b1-buying-concern-v2",
+  "sourceMode": "LIVE",
+  "elapsedMs": 6685.796500000026,
+  "runtime": {
+    "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "8768d0782f1043fe0e162b337afe107e5a4be308c31629d04a59b38cb76b90dd:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1416.6717000000062,
+        "telemetry": {
+          "generationId": "8768d0782f1043fe0e162b337afe107e5a4be308c31629d04a59b38cb76b90dd:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2415,
+          "outputTokens": 279,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 12563,
+          "requestHash": "c2081d86d9672e6a74db142500654ba3173523899f9ee849a58a8e5b6d545e31",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 258,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "8768d0782f1043fe0e162b337afe107e5a4be308c31629d04a59b38cb76b90dd:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 4731.700199999992,
+        "telemetry": {
+          "generationId": "8768d0782f1043fe0e162b337afe107e5a4be308c31629d04a59b38cb76b90dd:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3333,
+          "outputTokens": 1261,
+          "cost": null,
+          "finishReason": "UNKNOWN",
+          "requestBytes": 16779,
+          "requestHash": "f1da1b17cc42ac6353aefb43bc663741e0c7ebfe89aad7c49758e984bf23a405",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1261,
+          "failureStage": "COMPLETION",
+          "failureCode": "OWNER_COMPLETION"
+        }
+      }
+    ],
+    "toolLatencyMs": 293.99810000002617,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 6,
+    "catalogReads": 35,
+    "posReads": 25
+  }
+}

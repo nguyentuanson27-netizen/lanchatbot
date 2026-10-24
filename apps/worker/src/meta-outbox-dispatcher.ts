@@ -69,6 +69,7 @@ export interface MetaPageTokenRegistry {
 }
 
 export interface MetaPreSendGate {
+  readonly supportsCommerceMediaBinding?: true;
   authorize(
     claim: ClaimedMetaOutbox,
   ): Promise<MetaResponseGroupGateObservation>;
@@ -171,7 +172,11 @@ export async function resolveMetaResponseGroupGate(
   >,
   gate: MetaPreSendGate,
   now: Date = new Date(),
-): Promise<MetaResponseGroupGateSnapshot> {
+): Promise<MetaResponseGroupGateSnapshot | (Omit<MetaResponseGroupGateSnapshot, "source"> & { source: "C3_COMMERCE" })> {
+  if (claim.mediaBinding !== undefined && gate.supportsCommerceMediaBinding !== true) return {
+    responseGroupId: claim.responseGroupId, source: "C3_COMMERCE", status: "BLOCKED", reasonCode: "C3_MEDIA_GATE_REQUIRED",
+    blockingTag: null, observedAt: now, attemptCount: 0, expiresAt: new Date(now.getTime() + 30_000),
+  };
   const existing = await store.readMetaResponseGroupGate(
     claim.responseGroupId,
   );
@@ -184,9 +189,23 @@ export async function resolveMetaResponseGroupGate(
         blockingTag: null,
       };
     }
+    // Sequence zero has not been accepted yet. A retry/restart cannot reuse an
+    // old media/world check to start sending after source or authority changed.
+    if (claim.mediaBinding !== undefined && claim.sequenceNo === 0 && existing.status === "ALLOWED") {
+      const current = await gate.authorize(claim);
+      if (current.status !== "ALLOWED") return { ...existing, ...current,
+        ...(current.status === "BLOCKED" && current.blockingTag === null ? { source: "C3_COMMERCE" as const } : {}) };
+    }
     return existing;
   }
   const observation = await gate.authorize(claim);
+  // This is a code refusal, not a Pancake tag observation. The dispatcher
+  // durably marks the entire unsent group MANUAL_REVIEW in the existing Outbox.
+  // Do not invent a tag or insert a row violating Pancake's gate contract.
+  if (claim.mediaBinding !== undefined && observation.status === "BLOCKED" && observation.blockingTag === null) return {
+    responseGroupId: claim.responseGroupId, source: "C3_COMMERCE", ...observation,
+    attemptCount: 0, expiresAt: new Date(now.getTime() + 30_000),
+  };
   return store.recordMetaResponseGroupGate({
     responseGroupId: claim.responseGroupId,
     replyPlanId: claim.replyPlanId,

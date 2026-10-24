@@ -1,0 +1,2923 @@
+{
+  "reviewType": "WHOLE_ACTUAL_CUSTOMER_OUTCOME_WITH_DOCUMENTED_POST_PRIMARY_POLICY_CORRECTION",
+  "runSourceSha": "d894eb1afe0c3e1aca3d6599334b734decafc825",
+  "rawSavepoint": "bab60f7ccf294c1996967be717d61213bdbc0629",
+  "independent": false,
+  "humanAcceptance": null,
+  "currentRejectedDraftsUsedForScore": false,
+  "currentVerdictDetailsUsedForScore": false,
+  "dimensions": [
+    "understanding",
+    "explicitNeedCompleteness",
+    "contextCorrectionUse",
+    "usefulness",
+    "decisionSupport",
+    "partialAnswerBehavior",
+    "nextStep",
+    "coherence",
+    "naturalness",
+    "factualActionSafety"
+  ],
+  "scoreMeaning": "Supporting0/1/2 only, no sum/keyword/ideal-answer matching. Scores describe actual terminal utility, not hidden model understanding; silence-control naturalness is not measured.",
+  "registered": 31,
+  "recorded": 31,
+  "reviewed": 31,
+  "repetitions": 1,
+  "counts": {
+    "NEEDS_EDIT": 7,
+    "USABLE": 13,
+    "FALLBACK_OR_NO_SEND": 11
+  },
+  "populationCounts": {
+    "B1": {
+      "FALLBACK_OR_NO_SEND": 9,
+      "USABLE": 10,
+      "NEEDS_EDIT": 5
+    },
+    "B2_B3": {
+      "NEEDS_EDIT": 2,
+      "USABLE": 3,
+      "FALLBACK_OR_NO_SEND": 2
+    }
+  },
+  "salesJourneyCompleted": false,
+  "rows": [
+    {
+      "population": "B2_B3",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "journeyId": "sales",
+      "runtime": {
+        "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+        "history": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ."
+      ],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 4,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "salesEpisodeId": "78e9caad-519a-57d0-825a-0cd992e48c32",
+          "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+          "revision": 1,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "b100f8a3-8566-5178-89e0-9fcb761cbef2",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 1,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "M",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-17T14:34:05.426Z",
+                  "expiresAt": "2026-10-19T14:34:05.426Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 499000
+            }
+          ],
+          "adjustments": [],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 499000,
+          "discountTotalVnd": 0,
+          "grandTotalVnd": 529000,
+          "createdAt": "2026-10-17T14:42:30.725Z",
+          "updatedAt": "2026-10-17T14:42:30.725Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 76,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:42:05.908Z",
+              "sourceEventHash": "dcec886ad1a7d6634011a3c25b1f0b2d15074c76f1c0417434801431adcc50ea"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 98,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:42:05.908Z",
+              "sourceEventHash": "dcec886ad1a7d6634011a3c25b1f0b2d15074c76f1c0417434801431adcc50ea"
+            }
+          }
+        ],
+        "customerProfileRevision": 2
+      },
+      "publicContextId": "904b5176309f04e46723039dadc8556c56964fd72ca96989651abb06c9c5b86c",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Đã thêm đúng áo be M và lưu đúng eo 76/mông 98; câu ACK gọn, đúng effect. Nhưng đúng biến thể đó là PRE_ORDER/0 hàng sẵn trong context, khách chưa được báo phải đặt trước. Đây là thiếu thông tin mua hàng, không phải claim đã lên đơn hoặc tự có hàng sẵn.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "journeyId": "sales",
+      "runtime": {
+        "latest": "Đổi áo sang L cho chị, lấy hai chiếc nhé.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ."
+          }
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em đã đổi áo Thạch Thảo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Dạ, em đã đổi áo Thạch Thảo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ."
+      ],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 6,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "salesEpisodeId": "78e9caad-519a-57d0-825a-0cd992e48c32",
+          "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+          "revision": 3,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "b100f8a3-8566-5178-89e0-9fcb761cbef2",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-17T14:34:05.426Z",
+                  "expiresAt": "2026-10-19T14:34:05.426Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "74e0eb7c-f302-5522-ae4f-71908712db2c",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "b4d1e96f-8626-5436-9fd2-800a04d9cf45",
+                "authorizedAt": "2026-10-17T14:43:14.715Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-17T14:42:30.725Z",
+          "updatedAt": "2026-10-17T14:43:14.715Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 76,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:42:05.908Z",
+              "sourceEventHash": "dcec886ad1a7d6634011a3c25b1f0b2d15074c76f1c0417434801431adcc50ea"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 98,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:42:05.908Z",
+              "sourceEventHash": "dcec886ad1a7d6634011a3c25b1f0b2d15074c76f1c0417434801431adcc50ea"
+            }
+          }
+        ],
+        "customerProfileRevision": 2
+      },
+      "publicContextId": "ac43b321acd4ab78d67d5d4eaa05ea222d89e842094add32d4fabf26c2026e65",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Đã đổi đúng sang L, hai chiếc, giữ màu be và giá theo giỏ. Lời xác nhận tự nhiên; hành trình vẫn chưa cho khách biết hai áo là hàng đặt trước dù selected stock đã hiện. Cùng một vấn đề disclosure còn kéo dài, không phải hai lỗi mutation khác nhau.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "journeyId": "sales",
+      "runtime": {
+        "latest": "Hai áo cả phí ship là bao nhiêu em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo Thạch Thảo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ."
+          }
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, tổng 2 áo tính cả phí ship của mình là 978.100đ ạ (phí ship 30.000đ, đã áp ưu đãi giảm 49.900đ).",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Dạ, tổng 2 áo tính cả phí ship của mình là 978.100đ ạ (phí ship 30.000đ, đã áp ưu đãi giảm 49.900đ)."
+      ],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 6,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "salesEpisodeId": "78e9caad-519a-57d0-825a-0cd992e48c32",
+          "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+          "revision": 3,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "b100f8a3-8566-5178-89e0-9fcb761cbef2",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-17T14:34:05.426Z",
+                  "expiresAt": "2026-10-19T14:34:05.426Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "74e0eb7c-f302-5522-ae4f-71908712db2c",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "b4d1e96f-8626-5436-9fd2-800a04d9cf45",
+                "authorizedAt": "2026-10-17T14:43:14.715Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-17T14:42:30.725Z",
+          "updatedAt": "2026-10-17T14:43:14.715Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 76,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:42:05.908Z",
+              "sourceEventHash": "dcec886ad1a7d6634011a3c25b1f0b2d15074c76f1c0417434801431adcc50ea"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 98,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:42:05.908Z",
+              "sourceEventHash": "dcec886ad1a7d6634011a3c25b1f0b2d15074c76f1c0417434801431adcc50ea"
+            }
+          }
+        ],
+        "customerProfileRevision": 2
+      },
+      "publicContextId": "9da380ae88e7faaec6c49c147baf9c708a70c9f49aae7e2f144c0a4a1bf8376e",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả đúng tổng 978.100đ cho hai áo, gồm ship 30.000đ và giảm 49.900đ; không tự tính sai hoặc thay số lượng. Câu hỏi hiện tại được giải quyết gọn. Thiếu disclosure đặt trước của lượt mở giỏ vẫn là hạn chế của cả hành trình.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "journeyId": "sales",
+      "runtime": {
+        "latest": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo Thạch Thảo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, tổng 2 áo tính cả phí ship của mình là 978.100đ ạ (phí ship 30.000đ, đã áp ưu đãi giảm 49.900đ)."
+          }
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vâng ạ, chị vẫn lấy 2 áo size L nha chị.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Dạ vâng ạ, chị vẫn lấy 2 áo size L nha chị."
+      ],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 6,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "salesEpisodeId": "78e9caad-519a-57d0-825a-0cd992e48c32",
+          "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+          "revision": 3,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "b100f8a3-8566-5178-89e0-9fcb761cbef2",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-17T14:34:05.426Z",
+                  "expiresAt": "2026-10-19T14:34:05.426Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "74e0eb7c-f302-5522-ae4f-71908712db2c",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "b4d1e96f-8626-5436-9fd2-800a04d9cf45",
+                "authorizedAt": "2026-10-17T14:43:14.715Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-17T14:42:30.725Z",
+          "updatedAt": "2026-10-17T14:43:14.715Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 74,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:44:05.112Z",
+              "sourceEventHash": "1cab144cbfce2685b873052aad1193b69e3a2680ada6c252eb809bcafeb0cd94"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 96,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:44:05.112Z",
+              "sourceEventHash": "1cab144cbfce2685b873052aad1193b69e3a2680ada6c252eb809bcafeb0cd94"
+            }
+          }
+        ],
+        "customerProfileRevision": 3
+      },
+      "publicContextId": "2207a2f05197857a869f61609d372f4934af83ec25cf92700c13e8089d27f567",
+      "holistic": "USABLE",
+      "wholeTurnReason": "State cuối lượt đã sửa đúng eo 74/mông 96, giữ đúng hai áo L khách yêu cầu. ACK ngắn không đọc lại cả bộ số đo; không cần biến lời ghi nhận hội thoại thành claim kỹ thuật về database.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "journeyId": "sales",
+      "runtime": {
+        "latest": "[Private synthetic checkout through code; no PII passed to a model]",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo Thạch Thảo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, tổng 2 áo tính cả phí ship của mình là 978.100đ ạ (phí ship 30.000đ, đã áp ưu đãi giảm 49.900đ)."
+          },
+          {
+            "role": "customer",
+            "text": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ vâng ạ, chị vẫn lấy 2 áo size L nha chị."
+          }
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 6,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "salesEpisodeId": "78e9caad-519a-57d0-825a-0cd992e48c32",
+          "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+          "revision": 3,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "b100f8a3-8566-5178-89e0-9fcb761cbef2",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-17T14:34:05.426Z",
+                  "expiresAt": "2026-10-19T14:34:05.426Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "74e0eb7c-f302-5522-ae4f-71908712db2c",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "b4d1e96f-8626-5436-9fd2-800a04d9cf45",
+                "authorizedAt": "2026-10-17T14:43:14.715Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-17T14:42:30.725Z",
+          "updatedAt": "2026-10-17T14:43:14.715Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 74,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:44:05.112Z",
+              "sourceEventHash": "1cab144cbfce2685b873052aad1193b69e3a2680ada6c252eb809bcafeb0cd94"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 96,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:44:05.112Z",
+              "sourceEventHash": "1cab144cbfce2685b873052aad1193b69e3a2680ada6c252eb809bcafeb0cd94"
+            }
+          }
+        ],
+        "customerProfileRevision": 3
+      },
+      "publicContextId": null,
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Không có tin được capture và không có checkout preview; state vẫn CART_OPEN. Không có kết quả mua hàng cho khách ở lượt này; giữ nguyên denominator. Chưa dùng chi tiết trace để gán nguyên nhân dependency.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 0,
+        "naturalness": 0,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "journeyId": "sales",
+      "runtime": {
+        "latest": "Chốt đơn cho chị nhé.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, em đã đổi áo Thạch Thảo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ."
+          },
+          {
+            "role": "customer",
+            "text": "Hai áo cả phí ship là bao nhiêu em?"
+          },
+          {
+            "role": "shop",
+            "text": "Dạ, tổng 2 áo tính cả phí ship của mình là 978.100đ ạ (phí ship 30.000đ, đã áp ưu đãi giảm 49.900đ)."
+          },
+          {
+            "role": "customer",
+            "text": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L."
+          },
+          {
+            "role": "shop",
+            "text": "Dạ vâng ạ, chị vẫn lấy 2 áo size L nha chị."
+          },
+          {
+            "role": "customer",
+            "text": "[Private synthetic checkout through code; no PII passed to a model]"
+          }
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "committedPublicState": {
+        "stage": "CART_OPEN",
+        "revision": 6,
+        "cart": {
+          "schemaVersion": 1,
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "salesEpisodeId": "78e9caad-519a-57d0-825a-0cd992e48c32",
+          "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+          "revision": 3,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "b100f8a3-8566-5178-89e0-9fcb761cbef2",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "BE",
+                  "size": "L",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "p2-default",
+                  "observedAt": "2026-10-17T14:34:05.426Z",
+                  "expiresAt": "2026-10-19T14:34:05.426Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "74e0eb7c-f302-5522-ae4f-71908712db2c",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "b4d1e96f-8626-5436-9fd2-800a04d9cf45",
+                "authorizedAt": "2026-10-17T14:43:14.715Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-10-17T14:42:30.725Z",
+          "updatedAt": "2026-10-17T14:43:14.715Z"
+        },
+        "measurements": [
+          {
+            "kind": "WAIST_CM",
+            "value": 74,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:44:05.112Z",
+              "sourceEventHash": "1cab144cbfce2685b873052aad1193b69e3a2680ada6c252eb809bcafeb0cd94"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 96,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-10-17T14:44:05.112Z",
+              "sourceEventHash": "1cab144cbfce2685b873052aad1193b69e3a2680ada6c252eb809bcafeb0cd94"
+            }
+          }
+        ],
+        "customerProfileRevision": 3
+      },
+      "publicContextId": null,
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách yêu cầu chốt nhưng không nhận reply/capture, giỏ vẫn mở. Không xem việc chặn an toàn là đã hoàn thành bán hàng, cũng không xem đây là một đơn được tạo.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 0,
+        "naturalness": 0,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "journeyId": "handoff",
+      "runtime": {
+        "latest": "Cho chị gặp nhân viên shop nhé.",
+        "history": []
+      },
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "committedPublicState": {
+        "stage": "DISCOVERY",
+        "revision": 0,
+        "cart": null,
+        "measurements": [],
+        "customerProfileRevision": 1
+      },
+      "publicContextId": "ee3ef234b9c352a96b9a74f3cbbfdf3e21a24e282417561854f6a58241c5bfca",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Đúng control khách yêu cầu nhân viên: bot nhường quyền và không tự tiếp tục bán hàng. Chỉ đo ownership; không chứng minh đã có nhân viên tiếp nhận hoặc có chất lượng hội thoại bán hàng. Naturalness không được đo ở control im lặng này.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": null,
+        "factualActionSafety": 2
+      },
+      "notMeasuredDimensions": [
+        "naturalness"
+      ],
+      "reviewScope": "OWNERSHIP_ONLY_NOT_SALES_OR_EMPLOYEE_SERVICE"
+    },
+    {
+      "population": "B1",
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang tính lấy set Thạch Thảo để mặc đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Dịp đó mặc set này hợp chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách hỏi độ kín khi đổi sang sân khấu nhưng actual outcome chỉ là câu không trả lời được; không có tư vấn hay phương án giúp ra quyết định. Chưa xét nháp bị chặn hoặc lý do verdict ở primary.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 2,
+      "caseId": "b1-search-read",
+      "runtime": {
+        "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, mẫu áo dài SD375 bên em có 2 lựa chọn:\n\n- Mua riêng áo: 929.000đ ạ.\n- Mua cả set: 1.065.000đ ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "029d31d9a6aa2f84814304b719b22f1c6f1eb8503255bc013fa322f642ed27e5",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Tìm đúng SD375 và báo đúng áo lẻ 929.000đ/cả set 1.065.000đ. Hai lựa chọn giá ngắn, cần thiết cho câu hỏi; không phạt hình thức gạch đầu dòng.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 3,
+      "caseId": "b1-buying-concern",
+      "runtime": {
+        "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Mặc đi tiệc ban ngày hoàn toàn không bị rườm rà đâu chị ạ. Chân váy dùng chất ren tơ Hàn mềm mại với độ rũ và bay tự nhiên, kết hợp cùng áo tơ thêu thanh thoát nên tổng thể rất nhẹ nhàng, bay bổng và nhã nhặn, hợp để diện ban ngày mà vẫn giữ được nét sang trọng. \n\nCả set này có giá 799.000đ, nằm trọn trong ngân sách 900 nghìn của chị. Chị lấy nguyên set này luôn nhé?",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Đã tư vấn lấy cả set, trả đúng 799.000đ và giải thích theo ren/tơ. Nhưng cả đoạn đầu gần như lời giới thiệu catalog với nhiều tính từ nối tiếp, chưa phải nhịp chat gọn giải quyết nỗi lo rườm rà. Không chặn chỉ vì lời nhận xét thẩm mỹ tự tin hoặc nhắc ngân sách một lần.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 4,
+      "caseId": "b1-changed-occasion-v2",
+      "runtime": {
+        "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+          },
+          {
+            "role": "shop",
+            "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chất tơ Hàn thêu và ren tơ Hàn của set này rất nhẹ, mềm và thoáng, nên ngồi ngoài trời lâu chị vẫn cảm thấy dễ chịu, không bị hầm bí đâu ạ. \n\nTuy nhiên, vì là chất vải tơ ren mỏng nhẹ bay bổng, nếu đứng dưới nắng gắt lâu chị có thể lưu ý mặc thêm lớp lót bên trong hoặc chuẩn bị thêm ô che nắng để thoải mái nhất nhé ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Nguồn có mềm/nhẹ/thoáng; lời trấn an về cảm giác ngoài trời nằm trong ranh giới owner đã duyệt ở spec 2026-10-16, không đủ để kết luận verifier false PASS. Reply vẫn cần sửa vì khuyên thêm lớp lót khi khách dễ nóng và đưa ô che nắng thay cho quyết định chọn đồ; giọng dài, chưa giải quyết tốt lo ngại hiện tại.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "runtime": {
+        "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm từ ren tơ Hàn mềm mại, form nhẹ nhàng với độ rũ tự nhiên giúp tôn dáng và tạo chuyển động uyển chuyển chị nha. \n\nHiện tại hệ thống chưa hiển thị tùy chọn mua riêng chân váy cũng như giá và tồn kho size M, nên em chưa kiểm tra được phần này ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "dbfa5573168cd955646ad6df944e66d38cff9982b256407adebe4ec433030f03",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Đã trả đúng phần vải/dáng và không bịa giá hay tồn khi thiếu nguồn. Phần còn lại nói theo giọng màn hình hệ thống và kết thúc ở không kiểm tra được, chưa giúp khách biết phải làm gì tiếp trong khả năng có thật. Không đòi bot bịa giá hoặc hứa nhân viên đang xử lý.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 6,
+      "caseId": "b1-buying-concern-v2",
+      "runtime": {
+        "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Đi tiệc cưới ban ngày rất hợp với nét thanh lịch và bay bổng của set Thạch Thảo chị nhé. \n\nDù có chi tiết thêu và ren, set được thiết kế với form dáng nhẹ nhàng, thanh thoát và độ rũ tự nhiên nên lên người rất sang trọng, nhã nhặn chứ không bị quá điệu hay sến. \n\nNếu chị quen mặc đồ trơn và sợ hơi cầu kỳ, mặc nguyên set vẫn rất vừa vặn, lịch sự cho không gian tiệc ban ngày. Hoặc nếu muốn tiết chế hơn, chị có thể chọn chân váy ren phối cùng một chiếc áo trơn sẵn có ở nhà để cân bằng lại phong cách tối giản quen thuộc của mình.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Có khuyên lấy set cho tiệc ban ngày và đưa cách tiết chế bằng áo trơn sẵn có. Nhưng ba đoạn nhiều mỹ từ, lặp lại lý do thanh thoát/nhẹ nhàng từ catalog, làm lời tư vấn kém gần gũi và lựa chọn cuối bị loãng. Không xem upsell hoặc tự tin về phong cách là vi phạm an toàn.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 7,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ đơn nhận 10 hôm vẫn còn trong thời hạn 15 ngày đổi hàng nên chị đổi màu thoải mái ạ. Phí vận chuyển 2 chiều là 30.000đ chị nhé.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Dùng policy hiện hành 15 ngày thay ký ức 7 ngày, trả đúng phí đổi hai chiều 30.000đ. Khách đã nói chỉ cầm ngắm, còn tem; không bắt lặp đủ mọi điều kiện trong một câu hỏi về thời hạn/phí.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 8,
+      "caseId": "b1-partial-source",
+      "runtime": {
+        "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có áo làm từ tơ Hàn thêu cao cấp và chân váy bằng ren tơ Hàn mềm mại, mặc rất nhẹ nhàng, bay bổng và thoải mái ạ. Hiện tại hệ thống bên em chưa kiểm tra được chính xác giá và tình trạng tồn kho size M, chị thông cảm giúp em nhé.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "dbfa5573168cd955646ad6df944e66d38cff9982b256407adebe4ec433030f03",
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Biết tách phần chất liệu có dữ liệu khỏi giá/tồn chưa lấy được, không tự bịa. Nhưng xin thông cảm vì hệ thống không kiểm tra được là giọng vận hành và không mở đường giải quyết câu hỏi mua M. Nguồn thiếu là giới hạn thật, lỗi văn phong/tiến triển không giải quyết bằng thêm fact giả.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 9,
+      "caseId": "b1-price",
+      "runtime": {
+        "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, set váy Thạch Thảo (SV2447) có các lựa chọn giá như sau ạ:\n- Mua cả set: 799.000đ\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 449.000đ",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Đưa đúng giá cả set 799.000đ trước, bổ sung áo/váy lẻ đúng 499.000đ/449.000đ. Không cần ép hỏi size hay chốt đơn khi khách chỉ xin giá.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 10,
+      "caseId": "b1-component-stock",
+      "runtime": {
+        "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo Thạch Thảo size M bên em còn hàng chị nhé, áo bán riêng có giá 499.000đ ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "77b8a250e2943657ec4599846f88b484685ae6cf58be6c90360661575485c7be",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả gọn đúng áo lẻ size M còn, giá 499.000đ từ dữ liệu cùng lựa chọn M; không lấy tổng tồn cả set thay cho áo.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 11,
+      "caseId": "b1-policy-used",
+      "runtime": {
+        "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ quy định đổi hàng của shop yêu cầu sản phẩm phải chưa qua sử dụng và chưa giặt ạ. Do chị đã mặc đi làm rồi nên shop rất tiếc không hỗ trợ đổi sang màu khác được. \n\n(Nếu sản phẩm đủ điều kiện đổi, tổng phí vận chuyển 2 chiều là 30.000đ ạ).",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hiểu đã mặc đi làm là đã sử dụng và từ chối đổi ngay, không mở đầu cấp quyền rồi phủ định. Phí 30.000đ chỉ nêu ở tình huống đủ điều kiện, không hứa đổi ca này. Ngoặc và giọng quy định hơi cứng nhưng khách vẫn nhận câu trả lời rõ, dùng được.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 12,
+      "caseId": "b1-current-policy-v2",
+      "runtime": {
+        "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Lần trước chị nhớ phí đổi là 25 nghìn."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vẫn kịp chị nhé, thời gian đổi là trong vòng 15 ngày kể từ khi nhận hàng. Phí ship đổi 2 chiều là 30.000đ ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả đúng còn thời hạn 15 ngày và phí hiện hành 30.000đ thay ký ức 25 nghìn. Không biến câu hỏi còn kịp về mặt thời gian thành cam kết miễn mọi điều kiện khác.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 13,
+      "caseId": "b1-price-v2",
+      "runtime": {
+        "latest": "Cho chị xin giá cả bộ với em.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem bộ Thạch Thảo bên mình."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hiểu cả bộ trong lịch sử là Thạch Thảo và trả đúng 799.000đ, gọn và tự nhiên.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 14,
+      "caseId": "b1-component-stock-v2",
+      "runtime": {
+        "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị chỉ muốn lấy chân váy của set Thạch Thảo."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy Thạch Thảo size M bên em hiện còn hàng chị nhé, giá mua riêng là 449.000đ ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "77b8a250e2943657ec4599846f88b484685ae6cf58be6c90360661575485c7be",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Đúng chân váy riêng size M còn và giá 449.000đ; không nhầm với áo hoặc cả set.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 15,
+      "caseId": "b1-search-read-v2",
+      "runtime": {
+        "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "f5330e654df2e449205015ac7582a38c35a1ba36f15eeb2f5ef54dc328b53c54",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là không trả lời được nên chưa giải quyết câu hỏi tìm Khánh Trang/giá. Không dùng nháp bị chặn để chấm tốt hơn, cũng chưa kết luận shop không có mẫu từ kết quả tìm kiếm hiện tại.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 16,
+      "caseId": "b1-policy-used-v2",
+      "runtime": {
+        "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, quy định của shop là sản phẩm chỉ hỗ trợ ướm bên ngoài chứ không mặc vào, nên trường hợp chị đã mặc thử thì shop chưa hỗ trợ đổi size được ạ.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Phân biệt mặc vào người với chỉ ướm bên ngoài theo policy hiện hành, từ chối đổi trường hợp đã mặc thử dù ở trong phòng và còn tem. Đọc toàn tình huống, không đòi bổ sung checklist vô ích.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "runtime": {
+        "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+          },
+          {
+            "role": "shop",
+            "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Gặp khách hàng cần vẻ ngoài sắc sảo và gọn gàng, chị lấy áo thêu phối cùng quần âu hoặc chân váy ôm sẽ hợp hơn ạ. Áo form nhẹ nhàng tôn dáng thanh thoát, còn chân váy ren trong bộ có độ rũ bay bổng, thiên về nét mềm mại, nữ tính hơn.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hoàn cảnh đổi từ tiệc tối sang gặp khách, bot đổi sang khuyên mua áo riêng, phối quần âu/chân váy ôm và giải thích vì sao hợp hơn váy ren. Đây là lời khuyên thời trang chủ quan có giá trị bán hàng, không cần chứng minh bằng phép thử riêng.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 18,
+      "caseId": "b1-current-policy-v3",
+      "runtime": {
+        "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết thời hạn đổi sau 9 ngày. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "runtime": {
+        "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "dbfa5573168cd955646ad6df944e66d38cff9982b256407adebe4ec433030f03",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết chất liệu, giá và tồn của set. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 20,
+      "caseId": "b1-price-v3",
+      "runtime": {
+        "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết giá nguyên set. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "runtime": {
+        "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "77b8a250e2943657ec4599846f88b484685ae6cf58be6c90360661575485c7be",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết áo riêng M, giá và tồn. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 22,
+      "caseId": "b1-search-read-v3",
+      "runtime": {
+        "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "63e6f1e9a652c213003af967784a0501b9471f28b3a2ee9ed44821e460d62ff9",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết mã SQ223, giá và còn hàng. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "runtime": {
+        "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị có sẵn chân váy đen dáng suông rồi."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết mua áo hay cả set với chân váy đen đang có. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 24,
+      "caseId": "b1-policy-used-v3",
+      "runtime": {
+        "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": null,
+      "committedPublicState": null,
+      "publicContextId": "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246",
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Actual chỉ là fallback không trả lời được, chưa giải quyết đổi sau khi cắt tem và giặt. Lượt vẫn nằm trong denominator; chưa dùng trace để quy lỗi cho owner hoặc verifier, không chấm nháp thay kết quả khách nhận.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    }
+  ],
+  "publicContexts": {
+    "904b5176309f04e46723039dadc8556c56964fd72ca96989651abb06c9c5b86c": {
+      "products": [
+        {
+          "subjectRef": "SV2447",
+          "attributes": null,
+          "content": {
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        }
+      ],
+      "facts": [
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:CV"
+          },
+          "value": {
+            "availableQuantity": 64,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "availableQuantity": 0,
+            "status": "PRE_ORDER"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:CV"
+          },
+          "value": {
+            "amountVnd": 449000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "availableQuantity": 52,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "amountVnd": 499000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "amountVnd": 799000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "policy": [
+        {
+          "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+          "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+        }
+      ],
+      "state": {
+        "currentProductId": null,
+        "salesStage": "CART_OPEN",
+        "customerMeasurements": [
+          {
+            "field": "measurements.WAIST_CM",
+            "value": 76
+          },
+          {
+            "field": "measurements.HIPS_CM",
+            "value": 98
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "materials": [],
+          "styles": []
+        },
+        "cartQuote": {
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "cartVersion": 1,
+          "discountTotalVnd": 0,
+          "grandTotalVnd": 529000,
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 499000
+        },
+        "cartItems": [
+          {
+            "components": [
+              {
+                "color": "BE",
+                "componentRole": "TOP",
+                "size": "M"
+              }
+            ],
+            "offerType": "AO",
+            "productRef": "SV2447",
+            "quantity": 1,
+            "stockAvailableQuantity": 0,
+            "stockStatus": "PRE_ORDER",
+            "subjectRef": "b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          }
+        ],
+        "checkoutStatus": {
+          "missingFields": [
+            "FULL_NAME",
+            "PHONE",
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ],
+          "previewAvailable": false,
+          "purchaseConfirmed": false
+        },
+        "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+        "customerProfileRevision": 2,
+        "sizeMeasurementFingerprints": {}
+      }
+    },
+    "ac43b321acd4ab78d67d5d4eaa05ea222d89e842094add32d4fabf26c2026e65": {
+      "products": [],
+      "facts": [
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "availableQuantity": 0,
+            "status": "PRE_ORDER"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "amountVnd": 499000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "policy": [
+        {
+          "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+          "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+        }
+      ],
+      "state": {
+        "currentProductId": null,
+        "salesStage": "CART_OPEN",
+        "customerMeasurements": [
+          {
+            "field": "measurements.WAIST_CM",
+            "value": 76
+          },
+          {
+            "field": "measurements.HIPS_CM",
+            "value": 98
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "materials": [],
+          "styles": []
+        },
+        "cartQuote": {
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "cartVersion": 3,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000
+        },
+        "cartItems": [
+          {
+            "components": [
+              {
+                "color": "BE",
+                "componentRole": "TOP",
+                "size": "L"
+              }
+            ],
+            "offerType": "AO",
+            "productRef": "SV2447",
+            "quantity": 2,
+            "stockAvailableQuantity": 0,
+            "stockStatus": "PRE_ORDER",
+            "subjectRef": "b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          }
+        ],
+        "checkoutStatus": {
+          "missingFields": [
+            "FULL_NAME",
+            "PHONE",
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ],
+          "previewAvailable": false,
+          "purchaseConfirmed": false
+        },
+        "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+        "customerProfileRevision": 2,
+        "sizeMeasurementFingerprints": {}
+      }
+    },
+    "9da380ae88e7faaec6c49c147baf9c708a70c9f49aae7e2f144c0a4a1bf8376e": {
+      "products": [],
+      "facts": [
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "availableQuantity": 0,
+            "status": "PRE_ORDER"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "amountVnd": 499000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "policy": [],
+      "state": {
+        "currentProductId": null,
+        "salesStage": "CART_OPEN",
+        "customerMeasurements": [
+          {
+            "field": "measurements.WAIST_CM",
+            "value": 76
+          },
+          {
+            "field": "measurements.HIPS_CM",
+            "value": 98
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "materials": [],
+          "styles": []
+        },
+        "cartQuote": {
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "cartVersion": 3,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000
+        },
+        "cartItems": [
+          {
+            "components": [
+              {
+                "color": "BE",
+                "componentRole": "TOP",
+                "size": "L"
+              }
+            ],
+            "offerType": "AO",
+            "productRef": "SV2447",
+            "quantity": 2,
+            "stockAvailableQuantity": 0,
+            "stockStatus": "PRE_ORDER",
+            "subjectRef": "b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          }
+        ],
+        "checkoutStatus": {
+          "missingFields": [
+            "FULL_NAME",
+            "PHONE",
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ],
+          "previewAvailable": false,
+          "purchaseConfirmed": false
+        },
+        "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+        "customerProfileRevision": 2,
+        "sizeMeasurementFingerprints": {}
+      }
+    },
+    "2207a2f05197857a869f61609d372f4934af83ec25cf92700c13e8089d27f567": {
+      "products": [],
+      "facts": [
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "availableQuantity": 0,
+            "status": "PRE_ORDER"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cart-variant:b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          },
+          "value": {
+            "amountVnd": 499000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "policy": [],
+      "state": {
+        "currentProductId": null,
+        "salesStage": "CART_OPEN",
+        "customerMeasurements": [
+          {
+            "field": "measurements.WAIST_CM",
+            "value": 74
+          },
+          {
+            "field": "measurements.HIPS_CM",
+            "value": 96
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "materials": [],
+          "styles": []
+        },
+        "cartQuote": {
+          "cartId": "d8841ea3-43f9-5b1e-8b01-9c5a291b12f7",
+          "cartVersion": 3,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000
+        },
+        "cartItems": [
+          {
+            "components": [
+              {
+                "color": "BE",
+                "componentRole": "TOP",
+                "size": "L"
+              }
+            ],
+            "offerType": "AO",
+            "productRef": "SV2447",
+            "quantity": 2,
+            "stockAvailableQuantity": 0,
+            "stockStatus": "PRE_ORDER",
+            "subjectRef": "b100f8a3-8566-5178-89e0-9fcb761cbef2"
+          }
+        ],
+        "checkoutStatus": {
+          "missingFields": [
+            "FULL_NAME",
+            "PHONE",
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ],
+          "previewAvailable": false,
+          "purchaseConfirmed": false
+        },
+        "customerProfileId": "d582d701-2b2a-40a5-9404-a1313040afa7",
+        "customerProfileRevision": 3,
+        "sizeMeasurementFingerprints": {}
+      }
+    },
+    "ee3ef234b9c352a96b9a74f3cbbfdf3e21a24e282417561854f6a58241c5bfca": {
+      "products": [],
+      "facts": [],
+      "policy": [],
+      "state": {
+        "currentProductId": null,
+        "salesStage": "DISCOVERY",
+        "customerMeasurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "materials": [],
+          "styles": []
+        },
+        "cartItems": [],
+        "checkoutStatus": {
+          "missingFields": [
+            "FULL_NAME",
+            "PHONE",
+            "ADDRESS",
+            "PAYMENT_METHOD"
+          ],
+          "previewAvailable": false,
+          "purchaseConfirmed": false
+        },
+        "customerProfileId": "939402cc-3ead-4b0f-817f-12260f9ef50d",
+        "customerProfileRevision": 1,
+        "sizeMeasurementFingerprints": {}
+      }
+    },
+    "147b02bf5f98f4433ee2492002ddf32dfac9f394103805c81b3fa270dc32c72d": {
+      "products": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "attributes": null,
+          "content": {
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        }
+      ],
+      "facts": [
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:CV"
+          },
+          "value": {
+            "availableQuantity": 64,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:CV"
+          },
+          "value": {
+            "amountVnd": 449000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:AO"
+          },
+          "value": {
+            "amountVnd": 499000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "availableQuantity": 52,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:AO"
+          },
+          "value": {
+            "availableQuantity": 112,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "amountVnd": 799000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "policy": [],
+      "state": {
+        "currentProductId": null
+      }
+    },
+    "029d31d9a6aa2f84814304b719b22f1c6f1eb8503255bc013fa322f642ed27e5": {
+      "products": [
+        {
+          "subjectRef": "SD375",
+          "availableOffers": [
+            "AO",
+            "COMPOSITE"
+          ],
+          "attributes": null,
+          "content": null,
+          "presentation": null,
+          "sizeCharts": []
+        }
+      ],
+      "facts": [
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SD375",
+            "variantId": "offer:SD375:COMPOSITE"
+          },
+          "value": {
+            "availableQuantity": 36,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SD375",
+            "variantId": "offer:SD375:COMPOSITE"
+          },
+          "value": {
+            "amountVnd": 1065000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SD375",
+            "variantId": "offer:SD375:AO"
+          },
+          "value": {
+            "availableQuantity": 37,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SD375",
+            "variantId": "offer:SD375:AO"
+          },
+          "value": {
+            "amountVnd": 929000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "policy": [],
+      "state": {
+        "currentProductId": null
+      }
+    },
+    "dbfa5573168cd955646ad6df944e66d38cff9982b256407adebe4ec433030f03": {
+      "products": [
+        {
+          "subjectRef": "SV2447",
+          "attributes": null,
+          "content": {
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        }
+      ],
+      "facts": [],
+      "policy": [],
+      "state": {
+        "currentProductId": null
+      }
+    },
+    "d558f20c4655deb382cb9faaaa69319498848e0a52436b937b7c52f5e39c4246": {
+      "products": [],
+      "facts": [],
+      "policy": [
+        {
+          "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+          "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+        }
+      ],
+      "state": {
+        "currentProductId": null
+      }
+    },
+    "77b8a250e2943657ec4599846f88b484685ae6cf58be6c90360661575485c7be": {
+      "products": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "attributes": null,
+          "content": {
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        }
+      ],
+      "facts": [
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:CV"
+          },
+          "value": {
+            "amountVnd": 449000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:AO"
+          },
+          "value": {
+            "amountVnd": 499000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:AO"
+          },
+          "value": {
+            "availableQuantity": 24,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:CV"
+          },
+          "value": {
+            "availableQuantity": 14,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "amountVnd": 799000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "availableQuantity": 12,
+            "status": "IN_STOCK"
+          }
+        }
+      ],
+      "policy": [
+        {
+          "ref": "read:6294a8f5205aa656a2625f5684619a70d46a42a49e99db6c74a5a013c60d23ec",
+          "text": "{\"productId\":\"SV2447\",\"sellingOptions\":[{\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\",\"offerType\":\"AO\",\"size\":\"M\",\"color\":null,\"priceClaimId\":\"27afc128-8b07-5602-81bc-d22096126ba1\",\"stockClaimId\":\"92368684-3c7f-52f1-8a54-e622747d0e4e\"},{\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\",\"offerType\":\"CV\",\"size\":\"M\",\"color\":null,\"priceClaimId\":\"24711735-84bd-5588-80a5-0ee395427f49\",\"stockClaimId\":\"973d92b6-6c67-53ab-8a26-ce3b5112cbec\"},{\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:SET_VAY\",\"offerType\":\"SET_VAY\",\"size\":\"M\",\"color\":null,\"priceClaimId\":\"c9890f52-f9f0-5a02-8042-ffcc271bd4eb\",\"stockClaimId\":\"f969b057-dce0-52b2-897e-643b4274ffe0\"}]}"
+        }
+      ],
+      "state": {
+        "currentProductId": null
+      }
+    },
+    "f5330e654df2e449205015ac7582a38c35a1ba36f15eeb2f5ef54dc328b53c54": {
+      "products": [
+        {
+          "subjectRef": "SQ675",
+          "attributes": null,
+          "content": {
+            "description": "Màu sắc: Be dịu dàng và thanh lịch, mang đến vẻ đẹp nhẹ nhàng, tinh khôi nhưng vẫn đủ nổi bật nhờ những điểm nhấn nâu đất ấm áp. Thiết kế: Set gồm áo dáng suông tay lửng phối ren hoa laze nổi bật ở thân trước và tay áo, kết hợp dây buộc cổ mềm mại tạo nét nữ tính và duyên dáng. Quần dài ống rộng cạp chun nhún bèo nhẹ giúp tôn dáng tự nhiên, mang lại sự thoải mái và thanh thoát trong từng chuyển động. Chất liệu: Thô hoa laze phối thô ướt cao cấp, bề mặt mềm mại, thoáng mát và có độ rủ nhẹ tự nhiên. Lót habutai kem ngà bên trong giúp trang phục lên form đẹp, dễ chịu và kín đáo khi mặc. Điểm nhấn: Chi tiết ren thang kem được phối tinh tế tạo hiệu ứng thủ công nhẹ nhàng, kết hợp dây tua đính hạt ngọc loang tông nâu nhạt và nâu đậm mang đến nét mộc mạc nhưng sang trọng. Thiết kế phù hợp cho những chuyến du lịch, dạo phố, café cuối tuần hoặc những dịp cần sự thanh lịch và thoải mái.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "SET QUẦN SQ675",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        },
+        {
+          "subjectRef": "SQ748",
+          "attributes": null,
+          "content": {
+            "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "SET QUẦN UYỂN HOA",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        },
+        {
+          "subjectRef": "V406",
+          "attributes": null,
+          "content": {
+            "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-05T10:07:31.041Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "Váy Ngọc Trâm",
+            "productUrl": null
+          },
+          "presentation": null,
+          "sizeCharts": []
+        }
+      ],
+      "facts": [],
+      "policy": [],
+      "state": {
+        "currentProductId": null
+      }
+    },
+    "63e6f1e9a652c213003af967784a0501b9471f28b3a2ee9ed44821e460d62ff9": {
+      "products": [
+        {
+          "subjectRef": "SQ223",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "attributes": null,
+          "content": {
+            "description": "Thiết kế trẻ trung và nữ tính với chất liệu vải thô đục lỗ in họa tiết hoa, mang lại cảm giác thoáng mát, nhẹ và đứng form đẹp khi mặc. Bề mặt vải được phối dây ren tinh tế, tạo điểm nhấn mềm mại và giúp tổng thể trang phục trở nên nổi bật hơn. Áo được thiết kế 1 lớp form gọn gàng, chất liệu đứng form giúp tôn dáng và mang lại vẻ ngoài thanh lịch nhưng vẫn trẻ trung. Họa tiết hoa kết hợp chi tiết ren tạo nên phong cách nhẹ nhàng và nữ tính. Phối cùng quần 2 lớp cạp chun, thiết kế thoải mái và dễ mặc, phù hợp với nhiều dáng người. Form quần gọn gàng giúp tổng thể set đồ trở nên năng động nhưng vẫn giữ được nét tinh tế.",
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "sourceVersion": "catalog-v2"
+            },
+            "productName": "Set quần Xuân Thảo",
+            "productUrl": null
+          },
+          "presentation": {
+            "displayName": "Set quần Xuân Thảo",
+            "productId": "SQ223",
+            "provenance": {
+              "content": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "contentHash": "18b4eaedb7eb856e3f3deef06a68b45c5c85b5bb6296d9920d1d4393599f53af",
+              "freshnessState": "FRESH",
+              "identity": {
+                "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "inventory": {
+                "authority": "PANCAKE_POS",
+                "expiresAt": "2026-10-19T14:34:05.426Z",
+                "freshForSeconds": 172800,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-10-17T14:34:05.426Z",
+                "sourceVersion": "p2-default"
+              }
+            },
+            "schemaVersion": 1,
+            "variants": [
+              {
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "variantId": "f47d37548ca3d7127ec625ed425d7b68"
+              },
+              {
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "variantId": "c1fe4db2ec4a6400eb7ac5c4cdb2072a"
+              },
+              {
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "variantId": "7d8cfdf21651579f40b7913d26790c18"
+              },
+              {
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "variantId": "d652d4edd22361442a2d93e1b9f82d55"
+              }
+            ]
+          },
+          "sizeCharts": []
+        }
+      ],
+      "facts": [
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SQ223",
+            "variantId": "offer:SQ223:SET_QUAN"
+          },
+          "value": {
+            "amountVnd": 699000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SQ223",
+            "variantId": "offer:SQ223:AO"
+          },
+          "value": {
+            "amountVnd": 429000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SQ223",
+            "variantId": "offer:SQ223:SET_QUAN"
+          },
+          "value": {
+            "availableQuantity": 46,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SQ223",
+            "variantId": "offer:SQ223:QUAN"
+          },
+          "value": {
+            "amountVnd": 429000,
+            "currency": "VND"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SQ223",
+            "variantId": "offer:SQ223:QUAN"
+          },
+          "value": {
+            "availableQuantity": 54,
+            "status": "IN_STOCK"
+          }
+        },
+        {
+          "type": "STOCK",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SQ223",
+            "variantId": "offer:SQ223:AO"
+          },
+          "value": {
+            "availableQuantity": 50,
+            "status": "IN_STOCK"
+          }
+        }
+      ],
+      "policy": [],
+      "state": {
+        "currentProductId": null
+      }
+    }
+  },
+  "initialPrimaryCounts": {
+    "NEEDS_EDIT": 6,
+    "USABLE": 13,
+    "FALLBACK_OR_NO_SEND": 11,
+    "UNUSABLE": 1
+  },
+  "postPrimaryCorrections": [
+    {
+      "population": "B1",
+      "slot": 4,
+      "initialPrimarySavepoint": "cf52f3033d7bd03664c14f18cee5e45e71d8efb2",
+      "phase": "AFTER_TRACE_DIAGNOSIS_BEGAN",
+      "basis": "Existing frozen owner-approved advisory boundary; not a new rubric or provider rerun",
+      "source": "docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md",
+      "sourceBlob": "5a531cfeb03fcc20e178517a47f5be5a234e1593",
+      "rejectedDraftUsedForCorrection": false,
+      "verdictUsedToSetScore": false,
+      "before": {
+        "holistic": "UNUSABLE",
+        "wholeTurnReason": "Khách dễ nóng, phải ở ngoài trời lâu; reply bảo chắc không hầm bí và vẫn dễ chịu chỉ từ mô tả mềm/thoáng của chất liệu. Nguồn chưa xác nhận khả năng chịu nóng trong hoàn cảnh đó; gợi mặc thêm lớp lót còn lệch nỗi lo. Đây là kết quả sử dụng cụ thể vượt căn cứ, khác lời nhận xét nhẹ nhàng/sang trọng.",
+        "dimensions": {
+          "understanding": 2,
+          "explicitNeedCompleteness": 1,
+          "contextCorrectionUse": 2,
+          "usefulness": 0,
+          "decisionSupport": 1,
+          "partialAnswerBehavior": 1,
+          "nextStep": 1,
+          "coherence": 1,
+          "naturalness": 1,
+          "factualActionSafety": 0
+        }
+      },
+      "after": {
+        "holistic": "NEEDS_EDIT",
+        "wholeTurnReason": "Nguồn có mềm/nhẹ/thoáng; lời trấn an về cảm giác ngoài trời nằm trong ranh giới owner đã duyệt ở spec 2026-10-16, không đủ để kết luận verifier false PASS. Reply vẫn cần sửa vì khuyên thêm lớp lót khi khách dễ nóng và đưa ô che nắng thay cho quyết định chọn đồ; giọng dài, chưa giải quyết tốt lo ngại hiện tại.",
+        "dimensions": {
+          "understanding": 2,
+          "explicitNeedCompleteness": 1,
+          "contextCorrectionUse": 2,
+          "usefulness": 1,
+          "decisionSupport": 1,
+          "partialAnswerBehavior": 1,
+          "nextStep": 1,
+          "coherence": 1,
+          "naturalness": 1,
+          "factualActionSafety": 2
+        }
+      }
+    }
+  ]
+}

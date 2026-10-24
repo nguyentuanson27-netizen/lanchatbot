@@ -1,0 +1,148 @@
+{
+  "sourceSha": "95cbaf55798e284d521d33ec0a562b085616256c",
+  "mode": "CAPTURED_WORLD_SYNTHETIC_OPERATION_FAULT_DIAGNOSTIC",
+  "definitions": [
+    {
+      "kind": "NO_MATCH",
+      "safe": true,
+      "draft": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị."
+    },
+    {
+      "kind": "NO_MATCH",
+      "safe": false,
+      "draft": "Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé."
+    },
+    {
+      "kind": "COLOR",
+      "safe": true,
+      "draft": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé."
+    },
+    {
+      "kind": "COLOR",
+      "safe": false,
+      "draft": "Màu chị hỏi shop không bán chị nhé."
+    },
+    {
+      "kind": "ERROR",
+      "safe": true,
+      "draft": "Lần này em chưa lấy được ảnh để gửi chị."
+    },
+    {
+      "kind": "ERROR",
+      "safe": false,
+      "draft": "Mẫu này shop không có ảnh nào chị nhé."
+    },
+    {
+      "kind": "NO_MATCH",
+      "safe": null,
+      "draft": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!"
+    },
+    {
+      "kind": "NO_MATCH",
+      "safe": true,
+      "draft": "Ảnh khách mặc mẫu này em chưa có để gửi chị."
+    },
+    {
+      "kind": "NO_MATCH",
+      "safe": false,
+      "draft": "Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé."
+    },
+    {
+      "kind": "ERROR",
+      "safe": true,
+      "draft": "Lần này em chưa lấy được ảnh cho chị."
+    },
+    {
+      "kind": "ERROR",
+      "safe": false,
+      "draft": "Shop không có ảnh mẫu này chị nhé."
+    },
+    {
+      "kind": "COMPONENT_MISSING",
+      "safe": true,
+      "draft": "Ảnh cận phần chân váy em chưa có để gửi chị."
+    },
+    {
+      "kind": "COMPONENT_MISSING",
+      "safe": false,
+      "draft": "Mẫu này shop không có ảnh nào chị nhé."
+    },
+    {
+      "kind": "FEEDBACK_TRUE",
+      "safe": true,
+      "draft": "Em gửi chị ảnh khách mặc mẫu này nhé."
+    },
+    {
+      "kind": "MODEL",
+      "safe": false,
+      "draft": "Em gửi chị ảnh khách mặc mẫu này nhé."
+    },
+    {
+      "kind": "TOP",
+      "safe": true,
+      "draft": "Em gửi chị ảnh cận phần áo nhé."
+    },
+    {
+      "kind": "TOP",
+      "safe": false,
+      "draft": "Em gửi chị ảnh cận ren chân váy nhé."
+    }
+  ],
+  "maximumGenerationRequests": 17,
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "verifier": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800"
+  },
+  "retry": 0
+}

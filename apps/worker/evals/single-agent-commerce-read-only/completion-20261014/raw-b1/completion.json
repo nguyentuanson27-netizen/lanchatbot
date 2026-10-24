@@ -1,0 +1,12 @@
+{
+  "status": "AWAITING_WHOLE_REPLY_REVIEW",
+  "registered": 8,
+  "recorded": 8,
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 4,
+    "catalogReads": 20,
+    "posReads": 15
+  },
+  "sendEnabled": false
+}

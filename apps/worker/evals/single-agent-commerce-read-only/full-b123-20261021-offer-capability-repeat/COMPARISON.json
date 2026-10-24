@@ -1,0 +1,295 @@
+{
+  "previousSource": "76d821bb3dce1ee335d2210203e9ff8750762755",
+  "currentSource": "89c6965c6a76ceab52380a5c8167c0b946bc06dd",
+  "limitation": "N1 per case; implementation, prompt, model/config and corpus unchanged; stochastic generations and live source reads can differ. Source reads are live. Descriptive comparison, not causal or stability proof. Historical primary unchanged.",
+  "rows": [
+    {
+      "run": "stateful-1",
+      "slot": 1,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Thêm đúng áo beM×1, báo pre-order; không khẳng định fit từ số đo."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 2,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Đổi đúng2áoL và xác nhận ngắn, committed cart đúng."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 3,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Trả tổng978.100đ gồm ship30k/đã giảm đúng quote. Ngoặc phục vụ tổng tiền, không tự fail."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 4,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Xác nhận giữ2áoL, không đọc lại số đo hoặc báo lưu hệ thống; state phải giữ eo74/mông96 theo committed profile."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 5,
+      "previous": "UNUSABLE",
+      "current": "USABLE",
+      "previousDisposition": "NO_SEND",
+      "currentDisposition": "NO_SEND",
+      "reason": "Model terminalNO_SEND nhưng actual có code-owned invitation xin checkout, hành trình tiếp tục. Không gộp NO_SEND model thành khách không nhận tin; public copy [NAME] là redaction, không phải template literal."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 6,
+      "previous": "BLOCKED_DEPENDENCY",
+      "current": "USABLE",
+      "previousDisposition": "NO_SEND",
+      "currentDisposition": "NO_SEND",
+      "reason": "Private code intake tạo ORDER_PREVIEW, đúng2áobeL/tổng978.100/COD/pre-order/ETA8–14; actual gửi preview. Dữ liệu riêng tư xử lý trong code."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 7,
+      "previous": "BLOCKED_DEPENDENCY",
+      "current": "USABLE",
+      "previousDisposition": "NO_SEND",
+      "currentDisposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED và actual chuyển nhân viên kiểm tra/lên đơn, không tự báo tạo POS order thành công."
+    },
+    {
+      "run": "stateful-1",
+      "slot": 8,
+      "previous": "OWNERSHIP_CONTROL",
+      "current": "OWNERSHIP_CONTROL",
+      "previousDisposition": "HANDOFF",
+      "currentDisposition": "HANDOFF",
+      "reason": "Yêu cầu nhân viên trong journey riêng chuyển ownershipHUMAN và im lặng đúng control; không tính là fallback."
+    },
+    {
+      "run": "b1-1",
+      "slot": 1,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Chọn V168 làm phương án chính khi khách ngại nhăn lúc đi xe, có lý do về form/chất liệu; thêm V406 chưa giải thích tradeoff nên không cần thiết. Phần ít hằn nếp hơn hẳn/giữ form suốt chuyến đi là diễn đạt mạnh cần đối chiếu căn cứ, không tự gọi là kết quả thử nghiệm."
+    },
+    {
+      "run": "b1-1",
+      "slot": 2,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng policy15ngày thay thông tin7ngày cũ, đủ còn kịp/phí30k hai chiều. Không bắt đọc lại toàn bộ điều kiện."
+    },
+    {
+      "run": "b1-1",
+      "slot": 3,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Đủ chất liệu áo/váy và nói rõ chưa tra được giá/tồnM trong fault-mode, không bịa dữ kiện. Gọn hơn văn phong hệ thống/tham khảo giúp em của vòng trước."
+    },
+    {
+      "run": "b1-1",
+      "slot": 4,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Trả799k nguyên bộ trước, không hỏi lại lựa chọn. Giá lẻ thêm chưa cần nhưng không làm mất câu trả lời chính."
+    },
+    {
+      "run": "b1-1",
+      "slot": 5,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng áoM còn499k, một câu gọn."
+    },
+    {
+      "run": "b1-1",
+      "slot": 6,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Tìm đúng SD375 và phân biệt929k áo lẻ/1065k cả bộ; không hỏi lại để mở thêm tư vấn không cần thiết."
+    },
+    {
+      "run": "b1-1",
+      "slot": 7,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Trả lo rườm rà bằng nhận xét form/độ rũ, giá799k trong ngân sách. Dùng được theo inference thẩm mỹ đã chấp nhận, không tự gọi chữ vừa vặn trong cụm đánh giá diện tiệc là kết quả SIZE_FIT."
+    },
+    {
+      "run": "b1-1",
+      "slot": 8,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Hiểu đã mặc đi làm là không đổi được, từ chối đúng; tách phí cho trường hợp hợp lệ, không cấp quyền đổi cho khách này."
+    },
+    {
+      "run": "b1-1",
+      "slot": 9,
+      "previous": "NEEDS_EDIT",
+      "current": "NEEDS_EDIT",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Dùng mềm/thoáng/nhẹ để khẳng định đứng ngoài trời lâu cũng dễ chịu, không bí người, trong khi khách dễ nóng và cần quyết định mua. Chưa giải quyết trang phục theo hoàn cảnh mới, lại biến inference chất liệu thành bảo đảm cảm giác sử dụng cụ thể. Cần đối chiếu trusted source sau primary để đánh giá protected-language gap."
+    },
+    {
+      "run": "b1-1",
+      "slot": 10,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng15ngày và30k hai chiều, trả câu hỏi còn kịp/phí thay25k cũ."
+    },
+    {
+      "run": "b1-1",
+      "slot": 11,
+      "previous": "USABLE",
+      "current": "UNUSABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "FALLBACK",
+      "reason": "Actual chỉ nhận fallback Phần này em chưa trả lời được; không có phần chất liệu/dáng váy mà khách cần. PROVIDER_ERROR cần diagnosis sau primary; không quy cho thiếu nguồn có chủ đích hoặc prompt."
+    },
+    {
+      "run": "b1-1",
+      "slot": 12,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Trả799k cả bộ đúng phạm vi; lời mời tư vấn size phù hợp chức năng đọc, chưa hứa thêm giỏ."
+    },
+    {
+      "run": "b1-1",
+      "slot": 13,
+      "previous": "USABLE",
+      "current": "UNUSABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "FALLBACK",
+      "reason": "Actual fallback thay câu trả tồn/giá chân váyM; chưa có ích để mua. PROVIDER_ERROR chưa xác định role/stage trước diagnosis."
+    },
+    {
+      "run": "b1-1",
+      "slot": 14,
+      "previous": "USABLE",
+      "current": "UNUSABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "FALLBACK",
+      "reason": "Actual fallback, khách không biết shop có Khánh Trang/giá. Giữ lỗi trong denominator; xem provider role sau primary."
+    },
+    {
+      "run": "b1-1",
+      "slot": 15,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Chọn cả bộ799k, thừa nhận khách có thể thấy hơi điệu rồi đưa cách tách phối ngày thường; vẫn có một đề xuất mua và lý do mặc lại. Không ép áo lẻ hoặc coi upsell là lỗi."
+    },
+    {
+      "run": "b1-1",
+      "slot": 16,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Hiểu mặc thử vào người khác ướm bên ngoài, từ chối đổi theo policy hiện hành, không cấp quyền do còn tem/chưa ra ngoài."
+    },
+    {
+      "run": "b1-1",
+      "slot": 17,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Chọn áo499k phối quần âu/váy cơ bản cho gặp khách, so với cả bộ đi tiệc; đáp đúng thay đổi lịch và nhu cầu gọn hơn."
+    },
+    {
+      "run": "b1-1",
+      "slot": 18,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Mốc15ngày đúng cho9ngày mới mở xem/cất; trả được câu hỏi còn đổi được không. Câu hỏi size tiếp nối chưa báo đã đổi hoặc hứa thao tác hoàn tất."
+    },
+    {
+      "run": "b1-1",
+      "slot": 19,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Trả đúng chất liệu hai phần và giữ giá/tồn unknown trong fault-mode. Không quy thiếu POS cố ý là model bịa."
+    },
+    {
+      "run": "b1-1",
+      "slot": 20,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "799k nguyên set, ngắn và đúng trọng tâm."
+    },
+    {
+      "run": "b1-1",
+      "slot": 21,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Bán lẻ/cònM/499k rồi dừng, không mời giỏ ngoài khả năng B1, lặp lại biểu hiện tốt của vòng trước."
+    },
+    {
+      "run": "b1-1",
+      "slot": 22,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Tìm đúng SQ223 và trả đủ tồn/giá từng offer429k/699k. Nhiều giá không sai khi tên mẫu còn có các cách mua."
+    },
+    {
+      "run": "b1-1",
+      "slot": 23,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Chọn bộ799k trong850k với lý do có thêm cách mặc tiệc, vẫn dùng áo phối váy đen sẵn có để đi làm. Upsell có lý do, không tự fail do khách đã có váy."
+    },
+    {
+      "run": "b1-1",
+      "slot": 24,
+      "previous": "USABLE",
+      "current": "USABLE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "currentDisposition": "SEND_ELIGIBLE",
+      "reason": "Từ chối đổi đúng vì đã cắt tem/giặt, không đọc thừa điều kiện không liên quan."
+    }
+  ]
+}

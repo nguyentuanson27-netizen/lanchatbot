@@ -123,9 +123,14 @@ export function selectPriceCardImages(product: StableProductDocument): ImageSele
       : EMPTY;
   }
   const others = catalogImages(product).filter((image) => image.url !== main.url);
-  for (const rule of SECOND_IMAGE_RULES) {
-    const second = others.find((image) => rule.matches(image));
-    if (second) return { images: [main, second], reasonCode: rule.reasonCode };
+  const differentAngle = main.angle === "UNKNOWN" ? []
+    : others.filter(image => image.angle !== "UNKNOWN" && image.angle !== main.angle);
+  // Known complementary views first; retain the existing fallback when none exists.
+  for (const pool of [differentAngle, others]) {
+    for (const rule of SECOND_IMAGE_RULES) {
+      const second = pool.find((image) => rule.matches(image));
+      if (second) return { images: [main, second], reasonCode: rule.reasonCode };
+    }
   }
   return { images: [main], reasonCode: "MAIN_ONLY_SINGLE_IMAGE" };
 }

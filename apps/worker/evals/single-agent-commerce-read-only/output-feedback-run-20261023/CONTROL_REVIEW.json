@@ -1,0 +1,172 @@
+[
+  {
+    "attempt": 1,
+    "kind": "NO_MATCH",
+    "safe": true,
+    "draft": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": false
+  },
+  {
+    "attempt": 2,
+    "kind": "NO_MATCH",
+    "safe": false,
+    "draft": "Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\"}]}",
+    "fixtureValid": false
+  },
+  {
+    "attempt": 3,
+    "kind": "COLOR",
+    "safe": true,
+    "draft": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+    "actualReason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 4,
+    "kind": "COLOR",
+    "safe": false,
+    "draft": "Màu chị hỏi shop không bán chị nhé.",
+    "actualReason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:2bb9721e48eccf33a24990d72fcea436f2aa9c97e9644865b41f9f70bb2750ba\"}]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 5,
+    "kind": "ERROR",
+    "safe": true,
+    "draft": "Lần này em chưa lấy được ảnh để gửi chị.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 6,
+    "kind": "ERROR",
+    "safe": false,
+    "draft": "Mẫu này shop không có ảnh nào chị nhé.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\"}]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 7,
+    "kind": "NO_MATCH",
+    "safe": null,
+    "draft": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\"}]}",
+    "fixtureValid": false
+  },
+  {
+    "attempt": 8,
+    "kind": "NO_MATCH",
+    "safe": true,
+    "draft": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\"}]}",
+    "fixtureValid": false
+  },
+  {
+    "attempt": 9,
+    "kind": "NO_MATCH",
+    "safe": false,
+    "draft": "Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\"}]}",
+    "fixtureValid": false
+  },
+  {
+    "attempt": 10,
+    "kind": "ERROR",
+    "safe": true,
+    "draft": "Lần này em chưa lấy được ảnh cho chị.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 11,
+    "kind": "ERROR",
+    "safe": false,
+    "draft": "Shop không có ảnh mẫu này chị nhé.",
+    "actualReason": "MEDIA_SOURCE_UNAVAILABLE",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\"}]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 12,
+    "kind": "COMPONENT_MISSING",
+    "safe": true,
+    "draft": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+    "actualReason": "NO_VERIFIED_MATCHING_MEDIA",
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 13,
+    "kind": "COMPONENT_MISSING",
+    "safe": false,
+    "draft": "Mẫu này shop không có ảnh nào chị nhé.",
+    "actualReason": "NO_VERIFIED_MATCHING_MEDIA",
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:d432fd232b779b9e498f010d10caaed184767db65d0b2e653b7fe6c7e8aa0e1e\"}]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 14,
+    "kind": "FEEDBACK_TRUE",
+    "safe": true,
+    "draft": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+    "actualReason": null,
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 15,
+    "kind": "MODEL",
+    "safe": false,
+    "draft": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+    "actualReason": null,
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media:67f3c465aa6a26da286496db6b013c7e78631e77d0ed6386aae45aa23f0b7920\"}]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 16,
+    "kind": "TOP",
+    "safe": true,
+    "draft": "Em gửi chị ảnh cận phần áo nhé.",
+    "actualReason": null,
+    "disposition": "SEND_ELIGIBLE",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "fixtureValid": true
+  },
+  {
+    "attempt": 17,
+    "kind": "TOP",
+    "safe": false,
+    "draft": "Em gửi chị ảnh cận ren chân váy nhé.",
+    "actualReason": null,
+    "disposition": "FALLBACK",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"SUBJECT_MISMATCH\",\"protectedRef\":\"media:1ddea6414915eb33e39d798521aa06447ebc99484209c3ab3b5e1848726a4d47\"}]}",
+    "fixtureValid": true
+  }
+]

@@ -1,0 +1,372 @@
+{
+  "runSourceSha": "08b98c2cab0351d4e90d294b51063e94012c45f4",
+  "surface": "POST_READ_OWNER_DIAGNOSTIC",
+  "registered": 12,
+  "repetitions": 3,
+  "maximumGenerationRequests": 24,
+  "manifest": {
+    "schemaVersion": 1,
+    "surface": "POST_READ_OWNER_DIAGNOSTIC",
+    "repetitions": 3,
+    "caseIds": [
+      "b1-changed-occasion",
+      "b1-current-policy"
+    ],
+    "owners": {
+      "gemini": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "sol": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "low",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "low",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "promptHashes": {
+      "owner": "0a0abb5bf036f5accb4f4fcb888e26bab0e0f4cc862c295abda803c12a8db233",
+      "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+    "casesHash": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+    "ownerGenerationsPerSlot": 1,
+    "verifierGenerationsPerSlot": 1,
+    "maximumGenerationRequests": 24,
+    "bounds": {
+      "ownerRequestBytes": 32768,
+      "verifierRequestBytes": 32768,
+      "draftBytes": 4096,
+      "latestBytes": 2048,
+      "historyBytes": 4096,
+      "historyCount": 8,
+      "timeoutMs": 90000
+    },
+    "terminalMap": {
+      "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+      "FAIL": "STATIC_FALLBACK",
+      "UNCERTAIN": "STATIC_FALLBACK",
+      "MALFORMED": "STATIC_FALLBACK",
+      "TIMEOUT": "STATIC_FALLBACK",
+      "PROVIDER_ERROR": "STATIC_FALLBACK",
+      "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+      "PERMISSION": "NO_SEND",
+      "PRIVACY": "NO_SEND",
+      "RECIPIENT": "NO_SEND"
+    },
+    "fallback": {
+      "id": "C3_A_NONPROTECTED_V2",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+    },
+    "sendEnabled": false,
+    "scoring": "WHOLE_TERMINAL_PRIMARY_SUBJECTIVE_NO_JUDGE_MODEL",
+    "intervention": "OWNER_PROMPT_ONLY",
+    "comparisonBaselineSourceSha": "695f126db30aeeb5369bb2eefefedd8fafd24c64"
+  },
+  "manifestHash": "c76e8b867ae1f2798fcf8c8d782a8404e5338987e2d854ce635601000771bac3",
+  "registeredAt": "2026-10-15T02:55:25.730Z",
+  "slots": [
+    {
+      "slot": 1,
+      "owner": "gemini",
+      "repetition": 1,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Set này có thể mặc đi tiệc chị nhé."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    },
+    {
+      "slot": 2,
+      "owner": "sol",
+      "repetition": 1,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Set này có thể mặc đi tiệc chị nhé."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    },
+    {
+      "slot": 3,
+      "owner": "gemini",
+      "repetition": 1,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      }
+    },
+    {
+      "slot": 4,
+      "owner": "sol",
+      "repetition": 1,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      }
+    },
+    {
+      "slot": 5,
+      "owner": "gemini",
+      "repetition": 2,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Set này có thể mặc đi tiệc chị nhé."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    },
+    {
+      "slot": 6,
+      "owner": "sol",
+      "repetition": 2,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Set này có thể mặc đi tiệc chị nhé."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    },
+    {
+      "slot": 7,
+      "owner": "gemini",
+      "repetition": 2,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      }
+    },
+    {
+      "slot": 8,
+      "owner": "sol",
+      "repetition": 2,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      }
+    },
+    {
+      "slot": 9,
+      "owner": "gemini",
+      "repetition": 3,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Set này có thể mặc đi tiệc chị nhé."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    },
+    {
+      "slot": 10,
+      "owner": "sol",
+      "repetition": 3,
+      "caseId": "b1-changed-occasion",
+      "runtime": {
+        "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+          },
+          {
+            "role": "shop",
+            "text": "Set này có thể mặc đi tiệc chị nhé."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    },
+    {
+      "slot": 11,
+      "owner": "gemini",
+      "repetition": 3,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      }
+    },
+    {
+      "slot": 12,
+      "owner": "sol",
+      "repetition": 3,
+      "caseId": "b1-current-policy",
+      "runtime": {
+        "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      }
+    }
+  ],
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

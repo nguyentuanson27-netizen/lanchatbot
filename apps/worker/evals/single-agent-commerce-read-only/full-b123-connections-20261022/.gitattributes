@@ -1,0 +1,12 @@
+# Keep captured run inputs, command logs and provider evidence byte-identical.
+REGISTRATION.json -text -whitespace
+FROZEN_CASES.json -text -whitespace
+commands.json -text -whitespace
+run.py -text -whitespace
+*.log -text -whitespace
+b1/** -text -whitespace
+stateful/** -text -whitespace
+openings/** -text -whitespace
+negotiation/** -text -whitespace
+bank-control/** -text -whitespace
+source-check/** -text -whitespace

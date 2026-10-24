@@ -1,0 +1,90 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "sourceSha": "CAPTURE_CLEAN_HEAD_AT_RUNTIME_DO_NOT_WRITE_BACK",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "ce091f2cdd6baeb28dd7eaa5164e33d5ae0f1220b07d8b176967ffbdda7a47fd",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "registeredSlots": 6,
+  "maximumGenerationRequests": 12,
+  "retry": 0,
+  "inputSha256": "898d5930cc5a712fa0f14b167e8b6bae7bf01584044c07514a0566ed4b5be3b2",
+  "captureSource": "apps/worker/evals/single-agent-commerce-read-only/wording-stability-2-20261019/raw/advice-input-1.json",
+  "captureSourceSha256": "859ef3a51985b838d45f811ebf417c3066c5420677f64634913ec59c60e1598a",
+  "slotOrder": [
+    "b1-changed-occasion:rep-1",
+    "b1-changed-occasion:rep-2",
+    "b1-changed-occasion:rep-3",
+    "b1-buying-concern:rep-1",
+    "b1-buying-concern:rep-2",
+    "b1-buying-concern:rep-3"
+  ],
+  "mode": "SAME_CAPTURE_REPLAY_CLOCK_TOOLS_DISABLED_NO_FULL_TOOL_HISTORY_NOT_INDEPENDENT_LIVE_JOURNEYS",
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "reviewProtocol": "Read whole customer turn, history, actual customer outcome and public state. Judge whether advice helps choose and buy shop goods, resolves the stated hesitation, and offers a usable next step when useful. USABLE/NEEDS_EDIT/UNUSABLE/OWNERSHIP_CONTROL before verifier diagnosis. Ordinary aesthetic/material advice accepted; no keyword/fact-count scoring, forced CTA, forced alternative or lowest-price preference. NEEDS_EDIT must identify content that needs rewriting before sending; minor voice polish alone does not overturn an otherwise useful answer. Missing source deliberately injected by a fixture is reported separately from model errors. Preserve historical labels and counts; supplemental comparison is descriptive.",
+  "continuation": "Preserve all6 actual outcomes. If protected-claim failure/fallback/substantively unresolved choice/provider or missing-capture error, do not dispatch conditional16. Mild polish does not block. Count every generation; no retries/repair/best-of-N. Primary whole-turn review before rejected-draft diagnosis. Deterministic code checks completed regardless of screen. Report targeted and integrated separately.",
+  "sendEnabled": false,
+  "totalCeiling": {
+    "targetedSlots": 6,
+    "conditionalIntegratedSlots": 16,
+    "generationRequests": 64
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "freezeCorrection": "Pre-provider staged byte check detected Windows newline normalization. Input normalized to LF and hash corrected before any generation."
+}

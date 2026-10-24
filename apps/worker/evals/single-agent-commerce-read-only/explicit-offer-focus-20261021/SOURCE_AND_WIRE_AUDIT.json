@@ -1,0 +1,20 @@
+{
+  "runSourceSha": "219d77371936511419c3978afe424316bed91be1",
+  "primaryReviewLockSha": "2a1756d",
+  "childSourceAndPromptRegistrationsMatched": 18,
+  "verifierBindingsRecomputed": 18,
+  "ownerExactPromptCaptures": 37,
+  "wireBodiesChecked": 55,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 18,
+  "publishedArtifactHashesMatched": 95,
+  "databaseMutation": false,
+  "sendEnabled": false,
+  "frozenFilesMatched": 14,
+  "publishedGitBlobHashesMatched": 95,
+  "primaryReviewHashMatched": true,
+  "nativeReadCalls": 13,
+  "nativeReadsWithExplicitOffer": 6,
+  "nativeReadsWithExplicitNull": 7,
+  "nativeReadsMissingOfferType": 0
+}

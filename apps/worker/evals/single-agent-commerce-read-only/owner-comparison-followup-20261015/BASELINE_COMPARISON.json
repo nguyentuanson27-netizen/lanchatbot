@@ -1,0 +1,94 @@
+{
+  "contextExactlyEqualAcrossRuns": true,
+  "runs": {
+    "owner-comparison-20261015": {
+      "contextHashes": {
+        "b1-changed-occasion": [
+          "876a37bdd87c3c2882b3b7e681ebe6512d497755aa65d9c2c337a6af50395da6"
+        ],
+        "b1-current-policy": [
+          "07cce39251e42a9fa2ef36a63bb6808efae208d15f020d8eaf90ac3067e3a608"
+        ]
+      },
+      "draftLengthCharacters": {
+        "gemini/b1-changed-occasion": {
+          "all": [
+            319,
+            402,
+            231
+          ],
+          "median": 319
+        },
+        "sol/b1-changed-occasion": {
+          "all": [
+            395,
+            401,
+            352
+          ],
+          "median": 395
+        },
+        "gemini/b1-current-policy": {
+          "all": [
+            330,
+            319,
+            262
+          ],
+          "median": 319
+        },
+        "sol/b1-current-policy": {
+          "all": [
+            407,
+            405,
+            442
+          ],
+          "median": 407
+        }
+      }
+    },
+    "owner-comparison-followup-20261015": {
+      "contextHashes": {
+        "b1-changed-occasion": [
+          "876a37bdd87c3c2882b3b7e681ebe6512d497755aa65d9c2c337a6af50395da6"
+        ],
+        "b1-current-policy": [
+          "07cce39251e42a9fa2ef36a63bb6808efae208d15f020d8eaf90ac3067e3a608"
+        ]
+      },
+      "draftLengthCharacters": {
+        "gemini/b1-changed-occasion": {
+          "all": [
+            287,
+            202,
+            250
+          ],
+          "median": 250
+        },
+        "sol/b1-changed-occasion": {
+          "all": [
+            255,
+            243,
+            236
+          ],
+          "median": 243
+        },
+        "gemini/b1-current-policy": {
+          "all": [
+            240,
+            196,
+            217
+          ],
+          "median": 217
+        },
+        "sol/b1-current-policy": {
+          "all": [
+            393,
+            343,
+            374
+          ],
+          "median": 374
+        }
+      }
+    }
+  },
+  "note": "Character counts describe length only; not a naturalness score. All actual drafts, including rejected ones; terminal outcomes graded separately."
+}

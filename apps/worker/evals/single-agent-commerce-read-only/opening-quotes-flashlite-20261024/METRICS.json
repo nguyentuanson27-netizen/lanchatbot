@@ -1,0 +1,37 @@
+{
+  "flashLite": {
+    "outcomes": 5,
+    "eligible": 3,
+    "fallback": 2,
+    "actualGenerationRequests": 15,
+    "ownerInvocations": 11,
+    "verifierInvocations": 4,
+    "attemptLatencyP50Ms": 29382.030700000003,
+    "ownerSuccessfulGenerationLatencyP50Ms": 3199.5620000000054,
+    "ownerSuccessfulSamples": 10,
+    "verifierLatencyP50Ms": 6221.084350000005,
+    "verifierLatencyP95NearestRankMs": 7564.624100000001,
+    "verifierSamples": 4,
+    "inputTokensKnown": 102176,
+    "outputTokensKnown": 9899,
+    "cost": null
+  },
+  "flash38": {
+    "outcomes": 5,
+    "eligible": 3,
+    "fallback": 2,
+    "actualGenerationRequests": 12,
+    "ownerInvocations": 10,
+    "verifierInvocations": 3,
+    "attemptLatencyP50Ms": 60517.84350000002,
+    "ownerSuccessfulGenerationLatencyP50Ms": 18587.426999999996,
+    "ownerSuccessfulSamples": 8,
+    "verifierLatencyP50Ms": 4811.993000000002,
+    "verifierLatencyP95NearestRankMs": 5933.358600000007,
+    "verifierSamples": 3,
+    "inputTokensKnown": 70023,
+    "outputTokensKnown": 16578,
+    "cost": null
+  },
+  "comparisonCaveat": "N1 per case; different actual conversation and tool sequences; live source reads, not byte-identical model inputs. p50 is elapsed whole generation/attempt, not first-token latency."
+}

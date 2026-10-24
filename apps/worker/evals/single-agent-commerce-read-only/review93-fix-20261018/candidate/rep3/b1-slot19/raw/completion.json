@@ -1,0 +1,16 @@
+{
+  "status": "DISPATCH_RANGE_COMPLETE_REVIEW_PENDING",
+  "registered": 24,
+  "recorded": 1,
+  "dispatch": {
+    "first": 19,
+    "last": 19
+  },
+  "counters": {
+    "embeddingCalls": 0,
+    "policyReads": 0,
+    "catalogReads": 3,
+    "posReads": 2
+  },
+  "sendEnabled": false
+}

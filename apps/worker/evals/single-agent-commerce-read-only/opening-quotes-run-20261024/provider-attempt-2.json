@@ -1,0 +1,248 @@
+{
+  "caseId": "opening-ad-repeat",
+  "journeyId": "opening-ad",
+  "elapsedMs": 66428.5182,
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "e19af37a-d137-4ece-9f7a-bdcbf4225ed5:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 50706.5039,
+        "telemetry": {
+          "generationId": "e19af37a-d137-4ece-9f7a-bdcbf4225ed5:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.8-flash",
+          "inputTokens": 6045,
+          "outputTokens": 7878,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 34428,
+          "requestHash": "38ebe99b91f04100efd3b221af63d75e923e66789b83e46e52eb149fac07bd3c",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 7861,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "e19af37a-d137-4ece-9f7a-bdcbf4225ed5:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 3.109500000005937,
+        "telemetry": {
+          "generationId": "e19af37a-d137-4ece-9f7a-bdcbf4225ed5:owner:2",
+          "providerRequests": 0,
+          "httpStatus": null,
+          "stage": "BEFORE_PROVIDER_DISPATCH",
+          "requestBytes": 80634
+        }
+      }
+    ],
+    "toolLatencyMs": 3699.969199999985,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 2,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "fd69dac8510eb8969a55648f82856d6a4ea010a5b30913656a8c36c552021323",
+    "generation": 2,
+    "leaseToken": "8a3f0792-54ca-481e-b755-deec5bdb0cc2",
+    "inboxIds": [
+      "22ab35ab-a878-4b98-8521-f720f6b8e24e"
+    ],
+    "evaluationGroupId": "e19af37a-d137-4ece-9f7a-bdcbf4225ed5",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 2,
+    "lastReceiveSequence": 2,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "22ab35ab-a878-4b98-8521-f720f6b8e24e",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-978df48e-e6cc-48c3-be04-7bc205694343:0",
+        "conversationHash": "fd69dac8510eb8969a55648f82856d6a4ea010a5b30913656a8c36c552021323",
+        "occurredAt": "2026-10-24T05:16:04.767Z",
+        "receivedAt": "2026-10-24T05:16:04.767Z",
+        "receiveSequence": 2,
+        "attemptCount": 1,
+        "leaseToken": "8a3f0792-54ca-481e-b755-deec5bdb0cc2",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "b353dc8a-b82b-4da6-8a2d-feb3530043ea",
+            "eventKey": "stateful-978df48e-e6cc-48c3-be04-7bc205694343:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-978df48e-e6cc-48c3-be04-7bc205694343:0",
+            "senderId": "synthetic-recipient-fd69dac8510eb8969a55648f82856d6a4ea010a5b30913656a8c36c552021323",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-24T05:16:04.767Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chị hỏi lại chút, cả bộ bao nhiêu nhỉ?",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "search_products",
+      "response": {
+        "status": "OK",
+        "data": {
+          "status": "AMBIGUOUS",
+          "subjects": [
+            {
+              "ref": "SQ748",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN UYỂN HOA",
+              "bindingVersion": "commerce:2:c2bf6fb83e8532c949434bd519b91555c59f065cc624799e15bc47726b15bd75"
+            },
+            {
+              "ref": "SQ629",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN SQ629",
+              "bindingVersion": "commerce:2:c2bf6fb83e8532c949434bd519b91555c59f065cc624799e15bc47726b15bd75"
+            },
+            {
+              "ref": "SQ675",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN SQ675",
+              "bindingVersion": "commerce:2:c2bf6fb83e8532c949434bd519b91555c59f065cc624799e15bc47726b15bd75"
+            }
+          ],
+          "products": [
+            {
+              "ref": "product:SQ748",
+              "subjectRef": "SQ748",
+              "content": {
+                "productName": "SET QUẦN UYỂN HOA",
+                "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            },
+            {
+              "ref": "product:SQ629",
+              "subjectRef": "SQ629",
+              "content": {
+                "productName": "SET QUẦN SQ629",
+                "description": "Màu sắc: Kem sáng nhẹ nhàng, thanh lịch và dễ mặc, mang tinh thần nữ tính tinh khôi của mùa hè. Thiết kế: Set gồm áo tay cánh dơi dáng rộng nhẹ phối ren dệt lỗ 3D tạo hiệu ứng thoáng và mềm mại. Phần eo bo chun nhẹ giúp tôn dáng tự nhiên, đi kèm áo quây rời 2 lớp kín đáo và tiện dụng. Quần short cạp chun co giãn thoải mái, form suông nhẹ kết hợp ren dệt nổi tạo tổng thể đồng điệu và tinh tế. Chất liệu: Ren dệt sợi cotton lỗ mềm phối thô boy đục lỗ laze, bề mặt có độ thoáng nhẹ và mềm mịn khi mặc. Lót habutai bên trong giúp đứng form, thoải mái và không gây bí nóng. Điểm nhấn: Họa tiết ren đục khắc lỗ 3D cùng chi tiết tua dây cổ mang cảm giác boho nữ tính, nhẹ nhàng nhưng vẫn nổi bật. Set đồ phù hợp diện đi biển, café cuối tuần, resort hoặc những buổi dạo phố mùa hè cần sự thoải mái và thanh lịch.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            },
+            {
+              "ref": "product:SQ675",
+              "subjectRef": "SQ675",
+              "content": {
+                "productName": "SET QUẦN SQ675",
+                "description": "Màu sắc: Be dịu dàng và thanh lịch, mang đến vẻ đẹp nhẹ nhàng, tinh khôi nhưng vẫn đủ nổi bật nhờ những điểm nhấn nâu đất ấm áp. Thiết kế: Set gồm áo dáng suông tay lửng phối ren hoa laze nổi bật ở thân trước và tay áo, kết hợp dây buộc cổ mềm mại tạo nét nữ tính và duyên dáng. Quần dài ống rộng cạp chun nhún bèo nhẹ giúp tôn dáng tự nhiên, mang lại sự thoải mái và thanh thoát trong từng chuyển động. Chất liệu: Thô hoa laze phối thô ướt cao cấp, bề mặt mềm mại, thoáng mát và có độ rủ nhẹ tự nhiên. Lót habutai kem ngà bên trong giúp trang phục lên form đẹp, dễ chịu và kín đáo khi mặc. Điểm nhấn: Chi tiết ren thang kem được phối tinh tế tạo hiệu ứng thủ công nhẹ nhàng, kết hợp dây tua đính hạt ngọc loang tông nâu nhạt và nâu đậm mang đến nét mộc mạc nhưng sang trọng. Thiết kế phù hợp cho những chuyến du lịch, dạo phố, café cuối tuần hoặc những dịp cần sự thanh lịch và thoải mái.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "id": "call_944974"
+    }
+  ],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "b353dc8a-b82b-4da6-8a2d-feb3530043ea",
+      "eventKey": "stateful-978df48e-e6cc-48c3-be04-7bc205694343:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-978df48e-e6cc-48c3-be04-7bc205694343:0",
+      "senderId": "synthetic-recipient-fd69dac8510eb8969a55648f82856d6a4ea010a5b30913656a8c36c552021323",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-24T05:16:04.767Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Chị hỏi lại chút, cả bộ bao nhiêu nhỉ?",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [
+    "Phần này em chưa trả lời được, chị nhé."
+  ],
+  "actualCapturedAttachments": [],
+  "deliveryEvidence": {
+    "outboxRows": [
+      {
+        "id": "6e9fa0a7-6fec-437e-8002-7f3a09a6b16a",
+        "group": "fa4bfd11-5738-424f-9218-647cf1a4b037",
+        "sequence": 0,
+        "status": "SENT_ACCEPTED"
+      }
+    ]
+  },
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1,
+    "negotiation": null
+  },
+  "counts": {
+    "embedding": 2,
+    "owner": 4,
+    "verifier": 1,
+    "catalogReads": 9,
+    "posReads": 0,
+    "selectorCalls": 0,
+    "readPolicyCalls": 0
+  }
+}

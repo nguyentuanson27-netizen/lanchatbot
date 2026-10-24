@@ -1,0 +1,10 @@
+{
+  "originalAudit": "c3-post-review-replay-audit.mjs",
+  "originalSha256": "ffcf2fd521c136a2e0f25f0ad53a866d77bcc4b12bb290cd9f3395905b457394",
+  "amendedAudit": "c3-post-review-replay-audit-redaction.mjs",
+  "amendedSha256": "fe7ee698dd061eeaca21c41286129b52373452356226c51fa0def4167d66a704",
+  "phase": "POST_RUN_READ_ONLY_ANALYSIS",
+  "reason": "Frozen audit assumed captures were byte-identical to terminal; existing runner always uses redactAnalyticsMessage. Rep2 opening requests address and triggers artifact redaction. Reuse same redactor only for capture comparison; exact draft/provider binding checks retained. Original frozen helper/raw/source/config/criteria unchanged; no provider request/retry.",
+  "initialResult": "ASSERTION_FAILED_CAPTURE_VS_TERMINAL",
+  "sourceIdentityInvalidated": false
+}

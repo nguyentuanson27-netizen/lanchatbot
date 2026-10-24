@@ -1,0 +1,117 @@
+{
+  "reviewer": "PRIMARY_CODING_AGENT_NONBLIND_NOT_HUMAN_ACCEPTANCE",
+  "rawCommit": "58ca01e43036d6635ae55c493aae5944635ebd65",
+  "runSourceSha": "d9d96e4b2f035941f8ac0afa2ac25d5536da8f1c",
+  "basis": "Whole customer turns, exact terminal/captured output and committed public state, before rejected draft/verdict/tool diagnostics; no keyword score or post-hoc numeric acceptance threshold.",
+  "salesJourneyCompleted": false,
+  "usableSalesReplies": 0,
+  "salesRepliesReviewed": 4,
+  "entries": [
+    {
+      "caseId": "stateful-open",
+      "ordinal": 1,
+      "label": "UNUSABLE",
+      "reasonVi": "Khách đã chọn rõ áo, màu và size, nhưng chỉ nhận câu không trả lời được. Số đo được lưu, giỏ chưa tạo; không giúp khách tiếp tục mua.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "ordinal": 2,
+      "label": "UNUSABLE",
+      "reasonVi": "Khách yêu cầu đổi L và lấy hai chiếc, vẫn nhận cùng fallback. Không có giỏ hoặc hai chiếc được ghi nhận; bước mua bị đứt tiếp.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "ordinal": 3,
+      "label": "UNUSABLE",
+      "reasonVi": "Không trả được số tiền cả ship cho hai áo; câu fallback không đưa thông tin hay bước mua dùng được.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "ordinal": 4,
+      "label": "UNUSABLE_DESPITE_STATE_COMMIT",
+      "reasonVi": "Đã lưu đúng74/96 nhưng khách vẫn nhận fallback cho việc sửa thông tin. Không có phản hồi tự nhiên hoặc tiến triển mua hàng.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "ordinal": 5,
+      "label": "FUNCTIONAL_RECOVERY_JOURNEY_INCOMPLETE",
+      "reasonVi": "Đường checkout riêng tư chuyển sang handoff và không phát sinh câu tư vấn. Đây là khôi phục kiểm soát, chưa phải preview hoặc checkout thành công; giỏ vẫn chưa tồn tại.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-confirm",
+      "ordinal": 6,
+      "label": "FUNCTIONAL_STOP_CONTROL",
+      "reasonVi": "Không tạo xác nhận mua sau handoff trước đó; không gửi là đúng kiểm soát quyền, nhưng hành trình mua vẫn chưa hoàn tất.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-human-request",
+      "ordinal": 7,
+      "label": "FUNCTIONAL_HANDOFF_CONTROL",
+      "reasonVi": "Đã trả terminal handoff theo yêu cầu gặp nhân viên, không có câu gửi khách hoặc bằng chứng nhân viên đã phản hồi. Chỉ tính là kiểm soát nội bộ, không phải chất lượng tư vấn đạt.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    }
+  ]
+}

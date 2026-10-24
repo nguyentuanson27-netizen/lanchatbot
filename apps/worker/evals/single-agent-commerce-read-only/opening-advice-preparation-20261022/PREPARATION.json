@@ -1,0 +1,45 @@
+{
+  "status": "PREPARATION_ONLY_NOT_A_MODEL_RUN",
+  "diagnosticCount": 4,
+  "maximumDiagnosticGenerationRequests": 8,
+  "nativeCount": 39,
+  "maximumNativeGenerationRequests": 152,
+  "sourceCampaignSha": "6e38c54104010c7e137481a560b99da21e961e73",
+  "sourceRequestsSha256": "928a93ca77f5f3ca42839b2fe0219a9857638f5ef863bc6c9321e88cfc6c008f",
+  "inputSha256": "13c3ba24b8e8acba56a592b65ed520bfc5ef0605d7c972575e8ec328c674bf34",
+  "sourceAuditSha256": "ffa1f90a291624da8d9a86674ab0346bbed469a3102a8e7387cde11a2b42014c",
+  "sources": [
+    {
+      "caseId": "b1-buying-concern",
+      "sourceSlot": 7,
+      "attemptSha256": "26d6910aae44116d9230963401e1cbe2ba023e6130e3a99e8157848e22d7e95a"
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "sourceSlot": 9,
+      "attemptSha256": "82dfbdb506a594419e63248ee7f57ea5b0b30236e6e6bdfa8635c791854e07a0"
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "sourceSlot": 15,
+      "attemptSha256": "22872c4c9d090b003305394850adf8f5f96091b033fcabfb35ee4717b7e17b88"
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "sourceSlot": 23,
+      "attemptSha256": "2b426a3b233f33f1133a5fde8cc1d6ecc9d66e22f4054de87b7e466c78c39446"
+    }
+  ],
+  "perRowTreatmentOverrides": false,
+  "promptStats": {
+    "beforeBytes": 13990,
+    "afterBytes": 14248,
+    "beforeBullets": 33,
+    "afterBullets": 32,
+    "ownerBeforeSha256": "a7beafb9cf4ad14b0a76fe4213f46cece0bca1b3dff83ab0041eda5c316e89a6",
+    "ownerAfterSha256": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "verifierSha256": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "providerGenerations": 0,
+  "sendEnabled": false
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "run": "stateful-1",
+    "id": "46f5a541-6c9a-4a4f-8187-c300cd6d4065:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "1e8d2fd8-482b-4c49-a054-9765a3151f70:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "bc8522b7-bfdd-4acd-957a-22253a70fd5d:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "aeebe096-e5d7-43c5-8afe-75d5e43aedbb:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "0cb3161a3c5b63ff02c15e580a2c54ca12aed3536a47c0b331fd6adecf66123a:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "31354fd98beeeff922e32f96f77a18acf973046a77097e330efe181b611b525c:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "92cfaf789baf7d4600a77284e87f2b31c7ea59b366eb836ee07d5ab617374368:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "1e3f6811adc0ed3961d75f1d6f94e866e11dbe48c956191cf60023ad61b11443:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "3c17010b-cc99-4c60-8972-dd2222eb2f82:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "6d921c67-3fab-414c-8072-56b28da24239:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "7e568d36-8edb-4cce-937c-746d2d386b49:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "bf83ebcd-ac28-4477-9153-744b6f7b422f:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

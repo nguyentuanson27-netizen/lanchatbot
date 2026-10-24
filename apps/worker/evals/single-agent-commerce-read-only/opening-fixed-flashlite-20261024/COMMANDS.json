@@ -1,0 +1,12 @@
+[
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-fixed-flashlite-20261024 COD --provider-preflight --candidate-handoff --opening-quotes",
+    "exitCode": 0,
+    "providerGenerations": 0
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-fixed-flashlite-20261024 COD --provider-run --candidate-handoff --opening-quotes",
+    "exitCode": 0,
+    "outcomes": 5
+  }
+]

@@ -1,0 +1,118 @@
+{
+  "comparisonType": "DESCRIPTIVE_NOT_CAUSAL; whole-turn rubric clarification preregistered; old raw and labels unchanged",
+  "previousRun": "current-prompt-rerun-20261019",
+  "rows": [
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": true
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": false
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-quote",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": false
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-correction",
+      "previous": "NEEDS_EDIT",
+      "current": "NEEDS_EDIT",
+      "sameRuntime": false
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-request-checkout",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": false
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-private-checkout",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": false
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-confirm",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": false
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-human-request",
+      "previous": "OWNERSHIP_CONTROL",
+      "current": "OWNERSHIP_CONTROL",
+      "sameRuntime": true
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "previous": "UNUSABLE",
+      "current": "USABLE",
+      "sameRuntime": true
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "previous": "NEEDS_EDIT",
+      "current": "NEEDS_EDIT",
+      "sameRuntime": true
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "previous": "NEEDS_EDIT",
+      "current": "USABLE",
+      "sameRuntime": true
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "previous": "USABLE",
+      "current": "USABLE",
+      "sameRuntime": true
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-changed-occasion",
+      "previous": "UNUSABLE",
+      "current": "USABLE",
+      "sameRuntime": true
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-partial-source-v2",
+      "previous": "UNUSABLE",
+      "current": "NEEDS_EDIT",
+      "sameRuntime": true
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-buying-concern",
+      "previous": "NEEDS_EDIT",
+      "current": "USABLE",
+      "sameRuntime": true
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-search-read",
+      "previous": "NEEDS_EDIT",
+      "current": "USABLE",
+      "sameRuntime": true
+    }
+  ]
+}

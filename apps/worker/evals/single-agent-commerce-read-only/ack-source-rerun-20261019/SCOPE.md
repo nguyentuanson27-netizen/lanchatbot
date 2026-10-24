@@ -1,0 +1,9 @@
+# ACK/source wording rerun — 2026-10-19
+
+Owner yêu cầu chạy lại sau vòng lỗi nguồn/kết nối. Vòng mới giữ nguyên toàn bộ executable runtime, owner/verifier prompts/models/config/cases và rubric của ack-source-run-20261019; chỉ source registration identity và thư mục output mới. Gemini 3.5 Flash Lite HIGH tư vấn; GPT-6.1 Sol high verifier. Prompt 9435 bytes/hash81e187d3. Copy exact bytes runner/cases để đọc sibling registration mới; không sửa runner/API hoặc tăng cơ chế vận hành.
+
+16 registered slots N1: 8 stateful (gồm private checkout và human control), 4 integrated B1, 4 advice từ capture mới của chính run. Max52 generation requests, retry0. Clean commit → runtime HEAD capture → provider preflight và source-check trước generation. Source/config giữ nguyên trong vòng. Không lấy kết quả vòng cũ làm lượt mới, không thay mẫu lỗi hoặc tự retry. Nếu tiếp tục lỗi thì giữ errors/BLOCKED trong denominator; không lặp tự động.
+
+Review cả lịch sử, actual outcome và public state trước diagnosis. Giữ supplemental review rule đã freeze: nhắc số đo vừa sửa có mục đích không tự là fact dumping; lời xác nhận chỉ còn chút hành chính là polish. POS bị ngắt theo fixture là giới hạn nguồn, khác với source/network failure. Không yêu cầu giá/tồn hoặc quyền bán lẻ bịa; chấm cách nói phần thiếu riêng. Không keyword scoring, ép CTA, ép mua ít nhất hoặc chép câu mẫu. Quality label chỉ cho actual outcome; thiếu capture giữ BLOCKED không có model quality label. Giữ raw/primary/counts lịch sử. So sánh descriptive, không nhận như kiểm soát mọi biến live source/sampling; advice phụ thuộc integrated capture.
+
+Delivery capture only/send disabled; private PII không vào model, DB test phải drop. Không live POS order/deploy/send, không full A2/A3. Đọc đủ kết quả rồi báo findings/STOP hoặc BLOCKED, không tự fix/rerun tiếp. A OWNER_BYPASS, B chưa live GO.

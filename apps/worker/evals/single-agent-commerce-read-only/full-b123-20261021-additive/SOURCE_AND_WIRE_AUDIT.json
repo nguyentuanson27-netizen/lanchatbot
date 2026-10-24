@@ -1,0 +1,19 @@
+{
+  "runSourceSha": "a3c0411781bd9ee11d424b7ec019d2bccb02c279",
+  "primaryReviewLockSha": "7882b47fe5216f55636032a072de3682cbf505ca",
+  "childSourceAndPromptRegistrationsMatched": 2,
+  "verifierBindingsRecomputed": 28,
+  "ownerExactPromptCaptures": 60,
+  "wireBodiesChecked": 92,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 26,
+  "captureHashesMatched": 0,
+  "publishedArtifactHashesMatched": 49,
+  "testDatabaseDropped": true,
+  "sendEnabled": false,
+  "unchangedFrozenFileCount": 15,
+  "publishedRawGitBlobHashesMatched": 49,
+  "secretPrivatePhoneScan": "PASS",
+  "sourceInputsPreservedThroughPrimary": true,
+  "primaryHashMatchedLock": true
+}

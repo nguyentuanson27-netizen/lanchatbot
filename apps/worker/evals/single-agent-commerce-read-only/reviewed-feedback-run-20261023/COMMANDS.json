@@ -1,0 +1,96 @@
+[
+  {
+    "command": "pnpm --filter @lana/worker build",
+    "exitCode": 0
+  },
+  {
+    "command": "pnpm --filter @lana/worker typecheck",
+    "exitCode": 0
+  },
+  {
+    "command": "pnpm --filter @lana/worker lint",
+    "exitCode": 0
+  },
+  {
+    "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-media.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-handoff.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/size-chart-eligibility.test.ts",
+    "exitCode": 0,
+    "testsPass": 209
+  },
+  {
+    "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/image-selection.test.ts src/qdrant-image-channel.test.ts src/size-engine.test.ts",
+    "exitCode": 0,
+    "testsPass": 64
+  },
+  {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/advice-diagnostic.test.mjs apps/worker/evals/single-agent-commerce-read-only/advice-visual-diagnostic.test.mjs apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.test.mjs apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs",
+    "exitCode": 0,
+    "testsPass": 100
+  },
+  {
+    "command": "node --test --test-name-pattern=\"persisted eligible\" apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.test.mjs",
+    "exitCode": 1,
+    "status": "OBSERVED_RED_missing_expected_exception_before_fix"
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/source'",
+    "exitCode": 0,
+    "providerRequests": 0
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/preflight' --capture 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/source/capture.json' --preflight",
+    "exitCode": 0,
+    "providerRequests": 0
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/advice-visual-diagnostic.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/visual-preflight' --preflight",
+    "environment": {
+      "C3_FEEDBACK_CAPTURE": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-reviewed-feedback-run-20261023\\source\\capture.json"
+    },
+    "exitCode": 0,
+    "providerRequests": 0
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/controls' --capture 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/source/capture.json' --prepared 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/preflight/prepared.json'",
+    "exitCode": 0,
+    "providerRequests": 17
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/advice-visual-diagnostic.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/visual'",
+    "environment": {
+      "C3_FEEDBACK_CAPTURE": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-reviewed-feedback-run-20261023\\source\\capture.json",
+      "C3_CONTROLS_READINESS": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-reviewed-feedback-run-20261023\\controls",
+      "C3_VISUAL_PREFLIGHT": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-reviewed-feedback-run-20261023\\visual-preflight\\preflight.json"
+    },
+    "exitCode": 0,
+    "providerRequests": 8
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/feedback-native-run.py 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/native' first 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/controls'",
+    "exitCode": 1,
+    "status": "STOP_PROVIDER_ERROR_NO_RETRY",
+    "providerRequests": 41,
+    "childCommands": "native/first-commands.json"
+  },
+  {
+    "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-reviewed-feedback-run-20261023/native/openings'",
+    "exitCode": 0,
+    "status": "CAPTURE_JOB_PASS",
+    "providerRequests": 0
+  },
+  {
+    "command": "node --check apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python",
+      "-"
+    ],
+    "stdin": "import ast\nfrom pathlib import Path\nast.parse(Path(\"apps/worker/evals/single-agent-commerce-read-only/feedback-native-run.py\").read_text())\n",
+    "exitCode": 0
+  },
+  {
+    "command": "git diff --check",
+    "exitCode": 0
+  }
+]

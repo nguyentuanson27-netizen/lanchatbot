@@ -1,0 +1,31 @@
+{
+  "outcomes": 7,
+  "requests": 25,
+  "owner": 18,
+  "verifier": 7,
+  "errors": 0,
+  "inputTokens": 149715,
+  "outputTokens": 12245,
+  "latency": [
+    10183.2059,
+    9909.095500000003,
+    6482.178199999995,
+    5905.6582999999955,
+    10026.9375,
+    9078.01370000001,
+    7927.259499999986
+  ],
+  "verifierP50Ms": 9078.01370000001,
+  "verifierP95Ms": 10183.2059,
+  "evaluatorLabelLeakCount": 0,
+  "automaticRetries": 0,
+  "testDatabaseDropped": true,
+  "verificationAddedP50Ms": 13040.280200000001,
+  "verificationAddedP95Ms": 14511.772600000004,
+  "cost": "NOT_EXPOSED",
+  "verifierPass": 4,
+  "verifierFail": 3,
+  "eligible": 3,
+  "fallback": 3,
+  "noSend": 1
+}

@@ -1,0 +1,15 @@
+{
+  "status": "COMPLETE_REVIEW_PENDING",
+  "registered": 12,
+  "recorded": 12,
+  "counters": {
+    "catalogReads": 18,
+    "posReads": 12,
+    "policyReads": 12
+  },
+  "ownerViewHashes": {
+    "b1-changed-occasion": "20f513e25acea2a7a47802a04892448fb6c4216085150584dae122137cba7d48",
+    "b1-current-policy": "ec40a0781debdc85b739ec830a398749f52a7cd1c4fbc388a4e55fdcee095165"
+  },
+  "sendEnabled": false
+}

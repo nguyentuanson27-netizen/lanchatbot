@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "kind": "PRE_PROVIDER_FULL_RUN_FROZEN_INPUTS",
+  "intakeHead": "65b5e9b6bed49bc1b94dd559c7f8790af77b348e",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "32be6de2d2e2f2dea333486b125284375a9a3cafa35156780d98cb902ee49726",
+    "verifier": "2e2594eac4ca8f9cb688feda8f9f32cd34acfcfc6bb77d1d4231b272edc81f26"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "verdictSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "verdict",
+      "violations"
+    ],
+    "properties": {
+      "verdict": {
+        "type": "string",
+        "enum": [
+          "PASS",
+          "FAIL",
+          "UNCERTAIN"
+        ]
+      },
+      "violations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "protectedRef"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "UNSUPPORTED_PROTECTED_ASSERTION",
+                "SUBJECT_MISMATCH",
+                "CONTRADICTION_OR_NEGATION",
+                "MATERIAL_CONDITION_LOSS",
+                "POLICY_OR_BENEFIT_STRENGTHENING",
+                "EFFECT_WITHOUT_RECEIPT",
+                "STALE_OR_SUPERSEDED_MEANING",
+                "OTHER_PROTECTED_SEMANTIC_RISK"
+              ]
+            },
+            "protectedRef": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "terminalMap": {
+    "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+    "FAIL": "STATIC_FALLBACK",
+    "UNCERTAIN": "STATIC_FALLBACK",
+    "MALFORMED": "STATIC_FALLBACK",
+    "TIMEOUT": "STATIC_FALLBACK",
+    "PROVIDER_ERROR": "STATIC_FALLBACK",
+    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "PERMISSION": "NO_SEND",
+    "PRIVACY": "NO_SEND",
+    "RECIPIENT": "NO_SEND"
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "nativeToolSchemaHashes": {
+    "b1": "23867cc18d8d7c1fb37d789960f4807b8129b20cd607551b09021292ed0b40f8",
+    "stateful": "486f4134f7015c3281e335e425d62c62bd5a63dfd376fd277a866c917a3c859b"
+  },
+  "population": {
+    "b1": 24,
+    "stateful": 7,
+    "statefulPublicTurns": 6,
+    "privateCodeTurns": 1,
+    "repetitions": 1,
+    "maximumGenerationInvocations": 120,
+    "b1Range": [
+      1,
+      24
+    ]
+  },
+  "retry": 0,
+  "sendEnabled": false,
+  "humanAcceptance": null,
+  "stopAfterFirstSix": false,
+  "files": {
+    "manifest.json": {
+      "sha256": "461a7c55bdf04b3fe5099edfa01fa8c3e29308ec29671fda35d34d660eaf6f18",
+      "bytes": 4359
+    },
+    "source-config.b1.json": {
+      "sha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+      "bytes": 901
+    },
+    "cases.b1.json": {
+      "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+      "bytes": 16225
+    },
+    "context-fix-20261016/cases.priority.json": {
+      "sha256": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+      "bytes": 16825
+    },
+    "stateful-cases.json": {
+      "sha256": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+      "bytes": 2075
+    },
+    "prompts/owner.vi.txt": {
+      "sha256": "32be6de2d2e2f2dea333486b125284375a9a3cafa35156780d98cb902ee49726",
+      "bytes": 11024
+    },
+    "prompts/verifier.vi.txt": {
+      "sha256": "2e2594eac4ca8f9cb688feda8f9f32cd34acfcfc6bb77d1d4231b272edc81f26",
+      "bytes": 11260
+    },
+    "run.mjs": {
+      "sha256": "94571585c78d6bfafc0dff6559ae6224ab14018a7c3a96d41d6b31eac909a46f",
+      "bytes": 11792
+    },
+    "stateful-provider.mjs": {
+      "sha256": "e0f6a2a1d7fa17170ae9215d3e7b5318f50fc1ce3bbab9c7460d739fdb0979dd",
+      "bytes": 6300
+    },
+    "isolated-integration.mjs": {
+      "sha256": "2c72847739d6a17536ddb67d6abedcb3ada6e086c4848e816fc1d0d616c13d7b",
+      "bytes": 50413
+    },
+    "gemini-inference.mjs": {
+      "sha256": "9a9bf58772110a5c9de36276b73218a61bcbfd41f77745aa8eb5157ff1ed5f82",
+      "bytes": 16849
+    },
+    "protocol.mjs": {
+      "sha256": "d40a6315a8b1dcadbd7f225ad036d8c104af41a7c2f7fd4e3aa188a9df2270c9",
+      "bytes": 6209
+    },
+    "source-session.py": {
+      "sha256": "abb7f898d2c087ce93f697f3b115561c12c303171f0e6af9a5aa066cd5b6dc7f",
+      "bytes": 4453
+    }
+  },
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "a452326d77e4493b88b02c0072cef808fecad2d8",
+    "docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md": "5a531cfeb03fcc20e178517a47f5be5a234e1593",
+    "tasks/plan.md": "5d76e74c0b48ca268836b0efddd46f16b2ab486f",
+    "tasks/todo.md": "bcfd5254050302a2bc418275cb38c8090b4dc7d5"
+  },
+  "credentialLauncher": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/c3-offer-replay-session-20261016.py",
+    "sha256": "875724a9b92ecc677a0549a41b701edbd49d3831fe9be69506bc12ffd6c5e218"
+  },
+  "scopeSha256": "f0f118e52f4852b3b3630de73aaa4f5b42e65ceb81cd004712f3e648946289ff",
+  "verificationSourceSha": "65b5e9b6bed49bc1b94dd559c7f8790af77b348e",
+  "generationResults": null
+}

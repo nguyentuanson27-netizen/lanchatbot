@@ -1,0 +1,564 @@
+{
+  "rawSourceDirectory": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-model-code-division-20261019",
+  "files": [
+    {
+      "path": "advice-1/attempt-1.json",
+      "originalHash": "ac22ca837202f20aa94293c132531f4b0a8635d4f525ea7556ed046031ca4291",
+      "publishedHash": "ac22ca837202f20aa94293c132531f4b0a8635d4f525ea7556ed046031ca4291",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-1/attempt-2.json",
+      "originalHash": "5f365f6f127e3df9955da22fa02ed44fd5606afe920386aa094a723a8f347422",
+      "publishedHash": "5f365f6f127e3df9955da22fa02ed44fd5606afe920386aa094a723a8f347422",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-1/attempt-3.json",
+      "originalHash": "ca24372af4df116576d8e7775a928944b7f09487deb807d2fdb41acbac3ccb23",
+      "publishedHash": "ca24372af4df116576d8e7775a928944b7f09487deb807d2fdb41acbac3ccb23",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-1/attempt-4.json",
+      "originalHash": "485f171c0273c4bca9edb29ee05c803e782924f21591014de9b26216630d0717",
+      "publishedHash": "485f171c0273c4bca9edb29ee05c803e782924f21591014de9b26216630d0717",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-1/registration.json",
+      "originalHash": "bf9f9fa1078147c90ea800b712cb48ef3624bb9bee638f9e8770783446a3de23",
+      "publishedHash": "bf9f9fa1078147c90ea800b712cb48ef3624bb9bee638f9e8770783446a3de23",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-1/requests.jsonl",
+      "originalHash": "338730581dde56f91c77548cae85db2b3a103966afdd745e2c3270254f2a50ea",
+      "publishedHash": "338730581dde56f91c77548cae85db2b3a103966afdd745e2c3270254f2a50ea",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-2/attempt-1.json",
+      "originalHash": "1757f247c1c36e9b0ff5c6419cd726a8d2b3dd8ec7d0dc5f0716c64b9dc7da56",
+      "publishedHash": "1757f247c1c36e9b0ff5c6419cd726a8d2b3dd8ec7d0dc5f0716c64b9dc7da56",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-2/attempt-2.json",
+      "originalHash": "e37d3e4f84a74863f72be91b89c3e482fb0c65d999f4da2906889883e79e89c4",
+      "publishedHash": "e37d3e4f84a74863f72be91b89c3e482fb0c65d999f4da2906889883e79e89c4",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-2/attempt-3.json",
+      "originalHash": "4008825bac5ed9823fbe2c09ec79b1e12866e71cb87634de9ee949b732d88e48",
+      "publishedHash": "4008825bac5ed9823fbe2c09ec79b1e12866e71cb87634de9ee949b732d88e48",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-2/attempt-4.json",
+      "originalHash": "ca48b5776f875445ac41568398ebf47b1b308d5648b1a83dec1210214030ed55",
+      "publishedHash": "ca48b5776f875445ac41568398ebf47b1b308d5648b1a83dec1210214030ed55",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-2/registration.json",
+      "originalHash": "ca4b35c3fc3e0914af17a79212f2cc1c4b494709cc505d0d8ba349a79ab93aff",
+      "publishedHash": "ca4b35c3fc3e0914af17a79212f2cc1c4b494709cc505d0d8ba349a79ab93aff",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-2/requests.jsonl",
+      "originalHash": "e4e186b0085bb647ff6d2eafaafb4d78d5896fd8591673efd473eefba6a4db3c",
+      "publishedHash": "e4e186b0085bb647ff6d2eafaafb4d78d5896fd8591673efd473eefba6a4db3c",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-3/attempt-1.json",
+      "originalHash": "8526a94908b231927529345979943dfd85b2d049366694ac36fd80a7af620d17",
+      "publishedHash": "8526a94908b231927529345979943dfd85b2d049366694ac36fd80a7af620d17",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-3/attempt-2.json",
+      "originalHash": "98f25f1dbfe8b0d8f9fa4bb1a557f0b825dede8e35a5eceafb9ad00f1a20fd84",
+      "publishedHash": "98f25f1dbfe8b0d8f9fa4bb1a557f0b825dede8e35a5eceafb9ad00f1a20fd84",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-3/attempt-3.json",
+      "originalHash": "afdba629a273963a7279344c655286e1071f1b44879c6d411ca53ffa553c89a4",
+      "publishedHash": "afdba629a273963a7279344c655286e1071f1b44879c6d411ca53ffa553c89a4",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-3/attempt-4.json",
+      "originalHash": "f9f8e58ae58da1b21984d249b5a38624e703e2e8ace1ff6cf843bad0fd0eb7b5",
+      "publishedHash": "f9f8e58ae58da1b21984d249b5a38624e703e2e8ace1ff6cf843bad0fd0eb7b5",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-3/registration.json",
+      "originalHash": "a9b6f3e52e75ffe464362388294289b5b14139381a544fa9018a076c3df54e29",
+      "publishedHash": "a9b6f3e52e75ffe464362388294289b5b14139381a544fa9018a076c3df54e29",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-3/requests.jsonl",
+      "originalHash": "bc453ecf695f5e64267165b8f0863fec9710c59d2238af8c9bc78fbb0e24f558",
+      "publishedHash": "bc453ecf695f5e64267165b8f0863fec9710c59d2238af8c9bc78fbb0e24f558",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-input-1.json",
+      "originalHash": "00fa1df6cdaf9c142635971261c69190f2e2f4bec259995f2ea2375661f981be",
+      "publishedHash": "00fa1df6cdaf9c142635971261c69190f2e2f4bec259995f2ea2375661f981be",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-input-2.json",
+      "originalHash": "5d0f60a9244e108cd05aec3956af3ebe30172ae21a001b0878e8d9c1332ad118",
+      "publishedHash": "5d0f60a9244e108cd05aec3956af3ebe30172ae21a001b0878e8d9c1332ad118",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "advice-input-3.json",
+      "originalHash": "e637bce1e693f20f3cd2e4b57390fa72c2e0c2565d609a6d78ffc418dbf6881d",
+      "publishedHash": "e637bce1e693f20f3cd2e4b57390fa72c2e0c2565d609a6d78ffc418dbf6881d",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-1.json",
+      "originalHash": "f76630ac1cffa1e155485317007be6ec84137c624c696ffb2a49ed604d6ee230",
+      "publishedHash": "f76630ac1cffa1e155485317007be6ec84137c624c696ffb2a49ed604d6ee230",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-2.json",
+      "originalHash": "ac8ef5029404511bc85e907e6ca7aa265072ffdebb511dee87a602ec226825d6",
+      "publishedHash": "ac8ef5029404511bc85e907e6ca7aa265072ffdebb511dee87a602ec226825d6",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-3.json",
+      "originalHash": "d1de44a382b1cec08730e5b6631d58bd02c5b0e187d711960c0022d433a410fd",
+      "publishedHash": "d1de44a382b1cec08730e5b6631d58bd02c5b0e187d711960c0022d433a410fd",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-4.json",
+      "originalHash": "e0aed3c3b1afcda34b1443493d99e7843531f1fcfeba6f826d5255bc7aecfc75",
+      "publishedHash": "e0aed3c3b1afcda34b1443493d99e7843531f1fcfeba6f826d5255bc7aecfc75",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/completion.json",
+      "originalHash": "45289be08f77e0f8ed3c05887072bef85835218bb67782e7b0120e3da92a633e",
+      "publishedHash": "45289be08f77e0f8ed3c05887072bef85835218bb67782e7b0120e3da92a633e",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/registration.json",
+      "originalHash": "214438a761e438a98c0ce155a55d75f08dee1d98a9444a1eb6f4d078a645f8b1",
+      "publishedHash": "214438a761e438a98c0ce155a55d75f08dee1d98a9444a1eb6f4d078a645f8b1",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/requests.jsonl",
+      "originalHash": "2b7f03e95b2c321266ad52206da48685405880d0e6e881e251c61a804bc93d7c",
+      "publishedHash": "2b7f03e95b2c321266ad52206da48685405880d0e6e881e251c61a804bc93d7c",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/attempt-1.json",
+      "originalHash": "8b558b4cf3539b57f8b3c2887f7cb2c9d60d3342ace155dc9daf3eb7faa89d80",
+      "publishedHash": "8b558b4cf3539b57f8b3c2887f7cb2c9d60d3342ace155dc9daf3eb7faa89d80",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/attempt-2.json",
+      "originalHash": "067dcabdba567773d81a2d6fe52cbd08591677f56ce42c31cb2dceb0cbec0d54",
+      "publishedHash": "067dcabdba567773d81a2d6fe52cbd08591677f56ce42c31cb2dceb0cbec0d54",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/attempt-3.json",
+      "originalHash": "2389e08cb06a4b52141bf7c803be74af434ff24f519863e4dbfaf811294168b4",
+      "publishedHash": "2389e08cb06a4b52141bf7c803be74af434ff24f519863e4dbfaf811294168b4",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/attempt-4.json",
+      "originalHash": "b59a7bf4c40950d8aaaaefbcd5e3778c5ffa01b180298d76205ecfb419e25395",
+      "publishedHash": "b59a7bf4c40950d8aaaaefbcd5e3778c5ffa01b180298d76205ecfb419e25395",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/completion.json",
+      "originalHash": "45289be08f77e0f8ed3c05887072bef85835218bb67782e7b0120e3da92a633e",
+      "publishedHash": "45289be08f77e0f8ed3c05887072bef85835218bb67782e7b0120e3da92a633e",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/registration.json",
+      "originalHash": "c3d401dfa2fd7567398c5c07b672f3218d4202fe9c6cc1d58c01ceae3de273c5",
+      "publishedHash": "c3d401dfa2fd7567398c5c07b672f3218d4202fe9c6cc1d58c01ceae3de273c5",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-2/requests.jsonl",
+      "originalHash": "5fbf6e4b348d34762192d62ad495c8ac94e6252bf49045aaad5b737139c36cc8",
+      "publishedHash": "5fbf6e4b348d34762192d62ad495c8ac94e6252bf49045aaad5b737139c36cc8",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/attempt-1.json",
+      "originalHash": "a642ee9c13bc12cbac100b506d627dc0ec8cff74475ee3b6d2af06ea863eee95",
+      "publishedHash": "a642ee9c13bc12cbac100b506d627dc0ec8cff74475ee3b6d2af06ea863eee95",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/attempt-2.json",
+      "originalHash": "e775129cbedf7f081ccbf7820436d53770ff2a463137a555975638ce6d2a8566",
+      "publishedHash": "e775129cbedf7f081ccbf7820436d53770ff2a463137a555975638ce6d2a8566",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/attempt-3.json",
+      "originalHash": "42e00887e90700f23cc38c30e4fa360e0e1dfe0d0246d67b4e3b98e7450adc80",
+      "publishedHash": "42e00887e90700f23cc38c30e4fa360e0e1dfe0d0246d67b4e3b98e7450adc80",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/attempt-4.json",
+      "originalHash": "c32105b6e3e6f17ec7a0608dba2cc921af5edaaf4716ec00b2052bcdbea8269b",
+      "publishedHash": "c32105b6e3e6f17ec7a0608dba2cc921af5edaaf4716ec00b2052bcdbea8269b",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/completion.json",
+      "originalHash": "64ef83f5d2f7acef229a872b979a77f6b946cc82c1037101a4c14acd60ac8a7a",
+      "publishedHash": "64ef83f5d2f7acef229a872b979a77f6b946cc82c1037101a4c14acd60ac8a7a",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/registration.json",
+      "originalHash": "277d10d8785c2fb50c9e22d9cfc25108604ab6b882014d1ecb7d3abc18ade61d",
+      "publishedHash": "277d10d8785c2fb50c9e22d9cfc25108604ab6b882014d1ecb7d3abc18ade61d",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-3/requests.jsonl",
+      "originalHash": "ef649afbc540686aa7f6c85296fb69306a163d50c3f952b91a1b662fcaa59654",
+      "publishedHash": "ef649afbc540686aa7f6c85296fb69306a163d50c3f952b91a1b662fcaa59654",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-1/integration.json",
+      "originalHash": "24afbf2657cbaa3060f3c435d22477e7d026c301b33c5ce0dba4117eed218148",
+      "publishedHash": "24afbf2657cbaa3060f3c435d22477e7d026c301b33c5ce0dba4117eed218148",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-1/provider-attempt-1.json",
+      "originalHash": "cba721aaff3a49e5b24a97ccddce89773b024b10f811215c84b9a23ccfa9b5cf",
+      "publishedHash": "3d9c10b99b2a1c496eaad72873818c451886ea4276215bfb0ccd78bd0cbb831f",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "baseline-1/provider-requests.jsonl",
+      "originalHash": "bb9cb596705a3b90f90c10a3a06744b5c6b2251b1143210002004d22e970dea1",
+      "publishedHash": "bb9cb596705a3b90f90c10a3a06744b5c6b2251b1143210002004d22e970dea1",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-1/registration.json",
+      "originalHash": "dc47dcf390fd57dbf3a7a985e84612115fc27b2768ac4a78e24586826c17b7f9",
+      "publishedHash": "dc47dcf390fd57dbf3a7a985e84612115fc27b2768ac4a78e24586826c17b7f9",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-2/integration.json",
+      "originalHash": "332ac20ee0fed92f74f0efc7874b8565346096da714b877ee0879250b2475894",
+      "publishedHash": "332ac20ee0fed92f74f0efc7874b8565346096da714b877ee0879250b2475894",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-2/provider-attempt-1.json",
+      "originalHash": "5d74bb1e8c6b1d1c2fa133eefe63803e3d2633bfb563528b360fd2362cb83240",
+      "publishedHash": "29587b88d7c68d2faef7573a3a4cda45f784737b5b5a2b9442017d75960ff862",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "baseline-2/provider-requests.jsonl",
+      "originalHash": "2a0fa8748e433b59d8c87661e6e82d66f953d66f39b9fa339db731f2283797e3",
+      "publishedHash": "2a0fa8748e433b59d8c87661e6e82d66f953d66f39b9fa339db731f2283797e3",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-2/registration.json",
+      "originalHash": "dc47dcf390fd57dbf3a7a985e84612115fc27b2768ac4a78e24586826c17b7f9",
+      "publishedHash": "dc47dcf390fd57dbf3a7a985e84612115fc27b2768ac4a78e24586826c17b7f9",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-3/integration.json",
+      "originalHash": "bd9c815f9c3d54b55e8be1a3d99babc6d08ccc599e19bbb9ae12238cd54f8a13",
+      "publishedHash": "bd9c815f9c3d54b55e8be1a3d99babc6d08ccc599e19bbb9ae12238cd54f8a13",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-3/provider-attempt-1.json",
+      "originalHash": "1a72fa12b9edb6f9558be6a3ce1f9fe8ea49574d292bb3daa2ea10a9c3b2fe39",
+      "publishedHash": "cb59083c2cb8a0fc30a237a4e49e2ab090e22c6d02abb33be0a0a6b086c1cf5a",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "baseline-3/provider-requests.jsonl",
+      "originalHash": "19bd32cfca3151b4d2c3007c0a08e5b010aa1f5779129a0146d127dead2ec3e3",
+      "publishedHash": "19bd32cfca3151b4d2c3007c0a08e5b010aa1f5779129a0146d127dead2ec3e3",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "baseline-3/registration.json",
+      "originalHash": "dc47dcf390fd57dbf3a7a985e84612115fc27b2768ac4a78e24586826c17b7f9",
+      "publishedHash": "dc47dcf390fd57dbf3a7a985e84612115fc27b2768ac4a78e24586826c17b7f9",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "CAPTURE_INPUT_HASHES.json",
+      "originalHash": "3e0d3ded6e89bf540ab8693c3ebc0ddeaf6459a91a15682dd7a8653d743a1ffa",
+      "publishedHash": "3e0d3ded6e89bf540ab8693c3ebc0ddeaf6459a91a15682dd7a8653d743a1ffa",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "commands.json",
+      "originalHash": "c26dddf022cd745ae4c37ed2fbbdacb14ca741e5b3f6422674d893e609ec8046",
+      "publishedHash": "c26dddf022cd745ae4c37ed2fbbdacb14ca741e5b3f6422674d893e609ec8046",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "RUN_SOURCE.json",
+      "originalHash": "3d91d3bdf1a3b7944dd26d1894e68d2fce1ddc166074143d46006c55b882d57a",
+      "publishedHash": "3d91d3bdf1a3b7944dd26d1894e68d2fce1ddc166074143d46006c55b882d57a",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1/integration.json",
+      "originalHash": "975a1f3827ca2b65a612f5fceb27425c176ed37344df70cf4f75614c50e96367",
+      "publishedHash": "975a1f3827ca2b65a612f5fceb27425c176ed37344df70cf4f75614c50e96367",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1/provider-attempt-1.json",
+      "originalHash": "ec06291869ec3057014cc859d42b5ae9b154ac996d1b90550b6800cc3041a270",
+      "publishedHash": "21567420c29be50120b2a38aac1e882471f801ae43514b2124e37d2391aae153",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-2.json",
+      "originalHash": "be7ddd024b0b74ef4a3626ef4f07d75aaf00f9f4af12bf7833971c15f510c677",
+      "publishedHash": "5cddec535c77599c71fa20ad4e66d4ae9214dd3064272ac872752dea6ead9a83",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-3.json",
+      "originalHash": "7b8ccb85e6ef0c4897547ca298777dec0f2be4bea4542648f7de01be289ad21a",
+      "publishedHash": "b64f6f73d900523476a36037994d479a37d0954357e84a9e81d1d8f9e3681ed0",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-4.json",
+      "originalHash": "5f5247696411193602154569396c5b74908df75a95bc0ea2a1a441d492172b42",
+      "publishedHash": "4b855c359e2bd37b8459fe2c121f75602d9bb1b5b5faac1a18c47e61bacc829d",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-5.json",
+      "originalHash": "88690c9e902a03f6012cbd5dfdecc531be8e2a43a3ee29c4e92e6286150f48d6",
+      "publishedHash": "5e843da2d6f341272c810f6e2cea745fe4c467826d1ea47d8a1b60d655ea8036",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-6.json",
+      "originalHash": "3b2c337d5b133f021b9b01e820eadb76f4e4b41210e71ee90ddd8bf150bfc632",
+      "publishedHash": "4a8ec63db69b1427243d96bbc5761c7a55c4b67098445bdfbfa3138954550814",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-7.json",
+      "originalHash": "e81d6463fa9637e908d933836575ae8a42adb7d02a09a2cce6b32990620b3c54",
+      "publishedHash": "997d58ddec57ebe1d14013d0976e6b2e44fc5f3227d13096baee45945745003e",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-attempt-8.json",
+      "originalHash": "fe3702cb66997e1e82c4d1a9dc737d7dcdb577215363604e2bc76e153e66959d",
+      "publishedHash": "f368c4dd4d3d3b2def1fd6234d9670c63c7da1640ff00c23a5389012b030e5c1",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-1/provider-requests.jsonl",
+      "originalHash": "775704519da40b5c8411050439ec778655624d2b8ffedb34ec912731a98b5a4a",
+      "publishedHash": "775704519da40b5c8411050439ec778655624d2b8ffedb34ec912731a98b5a4a",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1/registration.json",
+      "originalHash": "e23fb26623a0477ae5718c3c83ac88fce22263c92860b3c15815e7ca4643d19b",
+      "publishedHash": "e23fb26623a0477ae5718c3c83ac88fce22263c92860b3c15815e7ca4643d19b",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-2/integration.json",
+      "originalHash": "ad56eff5aba8adb3f778c5ce4d00fa7482556831ad906d14a26b2bbd9176ae59",
+      "publishedHash": "ad56eff5aba8adb3f778c5ce4d00fa7482556831ad906d14a26b2bbd9176ae59",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-2/provider-attempt-1.json",
+      "originalHash": "6b82542c9264033eac7b24f05add6076fb4142252306d7e0cbd1f7368998620d",
+      "publishedHash": "1818ef489da793c2d095f72a0614c5ae2b3773b3d8056b68213d50488f031513",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-2.json",
+      "originalHash": "006fb9d2fd6d122d7d8068c36b82ea16cbfef79264a5bab9668c3b6659aaa0c2",
+      "publishedHash": "585f499b6e025690b921f0af27ffafd91185a689e68eee300a3c67e0811e56c2",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-3.json",
+      "originalHash": "1dd8a475610580e918c9a4de5d45b55f6e8e806a19a7dc63e892d9a6e674d846",
+      "publishedHash": "5c73b4bdbea3bbf0436d78b1e8b4e86d140a11a3c88b0c9c18ec0eccb4e3ef2a",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-4.json",
+      "originalHash": "b708c117074b4b8b56b30d6c7dd818c7a14e7e6563ebb66cc699fba5556979b7",
+      "publishedHash": "6f28ac568984419208d2c21a5074c4ad27ee8b566080195681f6838eb60886c5",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-5.json",
+      "originalHash": "b890e9432d38e3a72c61a788662f7fbd8f2203f617b3d01fb879ed24a3c38a24",
+      "publishedHash": "82a7914dad68fcef28f6e6e5a615801bee1695147ddf3a7152f809bd71407443",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-6.json",
+      "originalHash": "bd8dbbb46f3cc93c81857f5d867ca9350a30c187d8eebd1da7f8fb27a8bf925f",
+      "publishedHash": "22dae696ff84c577ba512ee262f9ed6014c9f5aa1244b18e284a787fb4619ef3",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-7.json",
+      "originalHash": "701049053a972b50b9b6d263fbe114b248f4c526f31358baa8fbd3d02a252976",
+      "publishedHash": "9d182706ec26f2657947c3f6297ee649e00fe79fb02f1f787f0bac5b1229be87",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-attempt-8.json",
+      "originalHash": "df16c4cbde475542e0bb2e7421faf2d101e44ba737da4106cfee65f89525a277",
+      "publishedHash": "dcf6d2e443d887ba2f6b7012706c8bfe2b4c4c8d45a35a0ca68a389f030b549e",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-2/provider-requests.jsonl",
+      "originalHash": "6622897fa6ef97aa980be10adeaedfaeb57cb3210ef14f9df649c6da8680f702",
+      "publishedHash": "6622897fa6ef97aa980be10adeaedfaeb57cb3210ef14f9df649c6da8680f702",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-2/registration.json",
+      "originalHash": "e23fb26623a0477ae5718c3c83ac88fce22263c92860b3c15815e7ca4643d19b",
+      "publishedHash": "e23fb26623a0477ae5718c3c83ac88fce22263c92860b3c15815e7ca4643d19b",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-3/integration.json",
+      "originalHash": "32c107cc8a19e17b10132457b9a5d73ffef6aacbd771b8312599cd3694dc19c2",
+      "publishedHash": "32c107cc8a19e17b10132457b9a5d73ffef6aacbd771b8312599cd3694dc19c2",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-3/provider-attempt-1.json",
+      "originalHash": "b4b8c5bae19347b2ab96a5a3b9dce61ebe2548ebdde89cf22cfeaacd43dc4fc2",
+      "publishedHash": "4efa7c9dd11cef3373816ee1b094770373122fd850bfea696f332dc71b416cb4",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-2.json",
+      "originalHash": "2c16133f8143831238cf1a19217d46e460b99ca97e239b4aab596f0f28197546",
+      "publishedHash": "49a3833dec239ed47d20e33087b7651b9dfbda521bc282ce1dde020e0545b723",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-3.json",
+      "originalHash": "908f933a9c7b840e78cb50c76ab3e2e1dbb6e072f0cd83bc4672800c3517c068",
+      "publishedHash": "f63c2c73a4772bd9964e3da8d898757c4ab681bc149826e1c54408edbfa2be18",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-4.json",
+      "originalHash": "496864e0c2e018a8bf26a4e77953b1573933e3f8a24ca8ad28a6ed5b68f08f75",
+      "publishedHash": "530fd411d248ad0e9bb8c59470675cb119b23602ebcd28cf6d325cdb7241678a",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-5.json",
+      "originalHash": "c8bcd514f851aae3669cd201b7a043db03693ad2b4a0db10abf0c3aad94de266",
+      "publishedHash": "404f5b14fb83f1c846f66dd189a52e35d8e98d909ad199d3922863755446edc1",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-6.json",
+      "originalHash": "4e8f5a1ce8d9ac6aa3648e4c60d4c33d6ee5cfe779f6f15436e0d6b061e65edd",
+      "publishedHash": "f122d9da16031c294ef3e8b24444bee2d057c1cc54c551c3f9cf1f07b1697cba",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-7.json",
+      "originalHash": "3a14fc42eaebbfdf7d42de6ecd18aafa94615dda1be7e3e766e15a0735163817",
+      "publishedHash": "7bb64932d43eaefd2d7c72da107fae9c620c31714d961f8f49d21e98a8337338",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-attempt-8.json",
+      "originalHash": "d001cde6eddf1acc3ce14046cb2e16853eb40c7f733fba4697840ec74f7d76ca",
+      "publishedHash": "ed83f52762ba3220bc05126ce3dc73a65bdd0859f7ea400b87daf2239ed30ef2",
+      "projection": "OMIT_SYNTHETIC_INGRESS_BATCH"
+    },
+    {
+      "path": "stateful-3/provider-requests.jsonl",
+      "originalHash": "24bc9a70c9da187aa81ec47e87b90ba660866acedb8d4f8a9a421a208289974a",
+      "publishedHash": "24bc9a70c9da187aa81ec47e87b90ba660866acedb8d4f8a9a421a208289974a",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-3/registration.json",
+      "originalHash": "e23fb26623a0477ae5718c3c83ac88fce22263c92860b3c15815e7ca4643d19b",
+      "publishedHash": "e23fb26623a0477ae5718c3c83ac88fce22263c92860b3c15815e7ca4643d19b",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "preflight.json",
+      "originalHash": "bda92e1c9d49d5733e7fc5e2a829483be94e8a4e4ef5a91374c88ff70c884f5f",
+      "publishedHash": "bda92e1c9d49d5733e7fc5e2a829483be94e8a4e4ef5a91374c88ff70c884f5f",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "source-readback.json",
+      "originalHash": "fb513dde811257a81e7695597a9d1e25d0846105b8508ead5f1e27e01aa049e8",
+      "publishedHash": "fb513dde811257a81e7695597a9d1e25d0846105b8508ead5f1e27e01aa049e8",
+      "projection": "EXACT_BYTES"
+    },
+    {
+      "path": "credential-launcher.py",
+      "originalHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+      "publishedHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+      "projection": "EXACT_BYTES"
+    }
+  ],
+  "privateProjection": "Synthetic private ingress batches omitted from public copies; originals retained in source directory, original/published hashes separate. Provider wire bodies unchanged."
+}

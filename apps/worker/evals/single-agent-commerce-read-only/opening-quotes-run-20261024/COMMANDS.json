@@ -1,0 +1,12 @@
+[
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs apps/worker/evals/single-agent-commerce-read-only/opening-quotes-run-20261024 COD --provider-preflight --candidate-handoff --opening-quotes",
+    "exitCode": 0,
+    "providerGenerations": 0
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs apps/worker/evals/single-agent-commerce-read-only/opening-quotes-run-20261024 COD --provider-run --candidate-handoff --opening-quotes",
+    "exitCode": 1,
+    "reason": "Final cleanliness guard includes newly generated evidence under eval source directory; all five outcomes retained."
+  }
+]

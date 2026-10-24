@@ -1,0 +1,109 @@
+{
+  "runSourceSha": "79bda1692667846e0a543a404812ab1daead35c7",
+  "registeredSlots": 32,
+  "recordedSlots": 32,
+  "generationRequests": 89,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "PASS": 4,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 14,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 6339.1474499999895,
+        "p95": 7148.6415650000035
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 9853.544749999994,
+        "p95": 11462.088844999995
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 24
+      },
+      "reasons": {
+        "PASS": 24
+      },
+      "providerRequests": 75,
+      "verifierLatencyMs": {
+        "n": 24,
+        "p50": 5333.337850000011,
+        "p95": 6547.649239999996
+      },
+      "addedVerificationLatencyMs": {
+        "n": 24,
+        "p50": 5953.665999999997,
+        "p95": 8151.680264999992
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 61,
+      "inputTokens": 232356,
+      "outputTokens": 39326,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "latencyMs": {
+        "n": 61,
+        "p50": 2257.6295999999857,
+        "p95": 6234.8562999999995
+      }
+    },
+    "verifier": {
+      "requests": 28,
+      "inputTokens": 126536,
+      "outputTokens": 1863,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "latencyMs": {
+        "n": 28,
+        "p50": 5466.123949999979,
+        "p95": 7036.863860000002
+      }
+    }
+  },
+  "verdictCounts": {
+    "PASS": 28
+  },
+  "wireCapturesChecked": 121,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 89
+  },
+  "sourceEmbeddingCalls": {
+    "sourceCheck": 1,
+    "b1": 1,
+    "stateful": 0,
+    "notCountedAsOwnerVerifierGenerationRequests": true
+  }
+}

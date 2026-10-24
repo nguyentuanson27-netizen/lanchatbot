@@ -1,0 +1,69 @@
+{
+  "kind": "PRE_PROVIDER_TARGETED_VERIFIER_RECHECK",
+  "sourceSha": "CAPTURE_AT_RUNTIME_AFTER_CLEAN_SEAL",
+  "previousRunSourceSha": "93db1d47c49618a119a446ba4b0c86015672ae39",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "f0683d2ebd21dabb7424e96d7bf826155d97c59f06af9539e8192f91d5fac116",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "inputHash": "2d6cbaec39dee0d23ebf894243641124d28b8cad21e7b19f67f3d8744e463bb0",
+  "registeredAttempts": 8,
+  "ownerGenerations": 0,
+  "maximumGenerationRequests": 8,
+  "retry": 0,
+  "mode": "VERIFIER_SEMANTICS_ON_CAPTURED_CONTEXT_NOT_LIVE_SEND_ELIGIBILITY",
+  "sendEnabled": false,
+  "redEvidence": "Six exact original stage verdicts FAIL. Two explicit negative controls cover unsupported fit recommendation and fabricated construction/testing. Expected labels stay evaluator-only."
+}

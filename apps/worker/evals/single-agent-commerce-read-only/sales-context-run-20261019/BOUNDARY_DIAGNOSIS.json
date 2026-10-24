@@ -1,0 +1,84 @@
+{
+  "latencyMs": {
+    "verifier": {
+      "recorded": 12,
+      "requests": 12,
+      "p50": 5331.5072,
+      "p95": 8740.772574999999
+    },
+    "addedVerification": {
+      "recorded": 12,
+      "p50": 6694.102600000006,
+      "p95": 10061.21729
+    },
+    "ownerGenerationLatency": "NOT_POPULATED_IN_GENERATION_RECORDS"
+  },
+  "capturedProductBounds": [
+    {
+      "caseId": "b1-changed-occasion",
+      "runtimeProductCounts": [
+        1,
+        4,
+        4
+      ],
+      "maximum": 4
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "runtimeProductCounts": [
+        1,
+        1
+      ],
+      "maximum": 1
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "runtimeProductCounts": [
+        1,
+        1
+      ],
+      "maximum": 1
+    },
+    {
+      "caseId": "b1-search-read",
+      "runtimeProductCounts": [
+        0,
+        0,
+        0
+      ],
+      "maximum": 0
+    }
+  ],
+  "searchCalls": [
+    {
+      "name": "search_products",
+      "args": {
+        "query": "set váy đi tiệc đám cưới ít nhăn"
+      },
+      "id": "call_1458880"
+    },
+    {
+      "name": "search_products",
+      "args": {
+        "productCode": "SD375"
+      },
+      "id": "call_1573235"
+    }
+  ],
+  "searchResponses": [
+    {
+      "id": "call_1458880",
+      "status": "OK",
+      "reason": null,
+      "searchStatus": "AMBIGUOUS"
+    },
+    {
+      "id": "call_1573235",
+      "status": "OK",
+      "reason": null,
+      "searchStatus": "MATCHED"
+    }
+  ],
+  "fallbackCount": 0,
+  "note": "Owner per-generation latency unavailable in this record shape; no requests removed from the complete denominator."
+}

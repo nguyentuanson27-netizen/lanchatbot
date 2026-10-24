@@ -1,0 +1,355 @@
+{
+  "runSourceSha": "c6476301539988f134f0843a0e3f2a31fff0560e",
+  "primaryReviewSavepoint": "bece64521d1801f61362065c2e9b1db0e353c6e9",
+  "newProviderGenerations": 0,
+  "confirmed": [
+    "Default read followed by complete AO/be/M add fits the existing two tool rounds in this run.",
+    "Both change actions complete L/BE and quantity2 in the same turn; later quote is not a rescue.",
+    "Current-source profile correction retains cart L/BE×2.",
+    "One final-only NONE request returns FINAL, zero late calls in this population.",
+    "Private checkout reaches PLANNER/CART_ETA_REGION_UNRESOLVED; subsequent confirmation is fenced after handoff."
+  ],
+  "hypothesis": [
+    "Restored per-offer fact locality may help avoid the second read; this live-source N1 is not a controlled causal comparison."
+  ],
+  "unknown": [
+    "Underlying cause of prior NONE function-call violations.",
+    "Stability across repeat runs and B1 advisory performance.",
+    "Authoritative address-to-region mapping."
+  ],
+  "sourceCommunicationCaveat": "Current PRE_ORDER stock status reaches owner trusted facts and all four verifier packets, but the actual four ACK/quote replies do not disclose preorder. No in-stock assertion or completed purchase occurred; disclosure before real purchase still needs coverage.",
+  "outcomes": [
+    {
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em đã thêm áo Thạch Thảo màu be size M vào giỏ cho mình rồi ạ!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "ownerOutputs": [
+        {
+          "id": "0b18a7d1-7d27-4efd-b4f3-fd03da17020b:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "value": 76,
+                    "op": "SET",
+                    "field": "measurements.WAIST_CM"
+                  },
+                  {
+                    "field": "measurements.HIPS_CM",
+                    "value": 98,
+                    "op": "SET"
+                  }
+                ]
+              },
+              "id": "call_74547"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_74548"
+            }
+          ],
+          "mode": "AUTO",
+          "requestBytes": 19002
+        },
+        {
+          "id": "0b18a7d1-7d27-4efd-b4f3-fd03da17020b:owner:2",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "size": "M",
+                "offerType": "AO",
+                "color": "be",
+                "subjectRef": "SV2447",
+                "quantity": 1
+              },
+              "id": "call_223792"
+            }
+          ],
+          "mode": "AUTO",
+          "requestBytes": 30491
+        },
+        {
+          "id": "0b18a7d1-7d27-4efd-b4f3-fd03da17020b:owner:3",
+          "kind": "FINAL",
+          "calls": [],
+          "mode": "NONE",
+          "requestBytes": 31698
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        },
+        {
+          "name": "add_to_cart",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        }
+      ],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    },
+    {
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em đã đổi áo sang size L và lấy 2 chiếc cho chị rồi ạ!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 1,
+      "executedToolCalls": 2,
+      "ownerOutputs": [
+        {
+          "id": "77e5de97-b682-42c4-b1d9-04155bfaf7ee:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "change_cart_item",
+              "args": {
+                "color": "BE",
+                "componentRole": "TOP",
+                "action": "SET_COMPONENT_VARIANT",
+                "size": "L",
+                "subjectRef": "bfdffd00-e32b-5020-8501-a55a38b3c99f"
+              },
+              "id": "call_206919"
+            },
+            {
+              "name": "change_cart_item",
+              "args": {
+                "subjectRef": "bfdffd00-e32b-5020-8501-a55a38b3c99f",
+                "quantity": 2,
+                "action": "SET_QUANTITY"
+              },
+              "id": "call_206920"
+            }
+          ],
+          "mode": "AUTO",
+          "requestBytes": 20519
+        },
+        {
+          "id": "77e5de97-b682-42c4-b1d9-04155bfaf7ee:owner:2",
+          "kind": "FINAL",
+          "calls": [],
+          "mode": "AUTO",
+          "requestBytes": 31877
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "change_cart_item",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        },
+        {
+          "name": "change_cart_item",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        }
+      ],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    },
+    {
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ hai chiếc áo Thạch Thảo size L của mình sau khi áp ưu đãi và cộng 30.000đ phí ship thì tổng thanh toán là 978.100đ ạ!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "ownerOutputs": [
+        {
+          "id": "2b3c7805-dbfd-48da-9c4a-cd0add45b746:owner:1",
+          "kind": "FINAL",
+          "calls": [],
+          "mode": "AUTO",
+          "requestBytes": 20717
+        }
+      ],
+      "toolResults": [],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    },
+    {
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em đã cập nhật lại số đo cho chị rồi ạ. Áo Thạch Thảo size L chị đang chọn vẫn được giữ nguyên trong giỏ nhé ạ!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 1,
+      "executedToolCalls": 1,
+      "ownerOutputs": [
+        {
+          "id": "b6cb73bc-f25a-4f58-ace6-9a8645765e57:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "op": "SET",
+                    "value": 74,
+                    "field": "measurements.WAIST_CM"
+                  },
+                  {
+                    "value": 96,
+                    "field": "measurements.HIPS_CM",
+                    "op": "SET"
+                  }
+                ]
+              },
+              "id": "call_14479"
+            }
+          ],
+          "mode": "AUTO",
+          "requestBytes": 21030
+        },
+        {
+          "id": "b6cb73bc-f25a-4f58-ace6-9a8645765e57:owner:2",
+          "kind": "FINAL",
+          "calls": [],
+          "mode": "AUTO",
+          "requestBytes": 24384
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null
+        }
+      ],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    },
+    {
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "privateCheckoutFailure": {
+        "stage": "PLANNER",
+        "reasonCode": "CART_ETA_REGION_UNRESOLVED",
+        "readinessReasons": []
+      },
+      "ownerOutputs": [],
+      "toolResults": [],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    },
+    {
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "NO_SEND",
+        "originalReason": "CURRENT_AUTHORITY_CHANGED"
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "ownerOutputs": [],
+      "toolResults": [],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    },
+    {
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 1,
+      "executedToolCalls": 1,
+      "ownerOutputs": [
+        {
+          "id": "c0d5c172-6e6f-48dc-97de-258d85f37508:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_4188588"
+            }
+          ],
+          "mode": "AUTO",
+          "requestBytes": 18958
+        }
+      ],
+      "toolResults": [],
+      "note": "Bridge bookkeeping duplicates some independent results; do not count this list as executed tool or network requests."
+    }
+  ]
+}

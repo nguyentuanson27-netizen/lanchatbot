@@ -476,6 +476,16 @@ describe("deterministic effect readiness", () => {
     expect(result.outcome).toBe("BLOCKED");
     expect(result.reasonCodes).toContain("CLAIM_MISSING");
   });
+  it("allows a productless exact payload without weakening product or cart requirements", () => {
+    const input = { ...baseWithoutCartLines, effect: "PROTECTED_OUTBOUND" as const, buyingIntent: null,
+      productIds: [], cartId: null, cartVersion: null, cartStateHash: null, claims: [], protectedClaimTypes: [],
+      deterministicEvidenceHash: hash("a"), payloadHash: hash("a") };
+    expect(evaluateDeterministicEffectReadinessV1(input)).toMatchObject({ outcome: "READY", productIds: [], claimSetHash: null });
+    for (const invalid of [{ protectedClaimTypes: ["PRICE"] as const }, { payloadHash: null }, { productIds: [""] }]) {
+      expect(evaluateDeterministicEffectReadinessV1({ ...input, ...invalid }).outcome).toBe("BLOCKED");
+    }
+    expect(evaluateDeterministicEffectReadinessV1({ ...input, effect: "CART_READY" }).outcome).toBe("BLOCKED");
+  });
 
   it("accepts cart-scoped shipping claims once instead of requiring them per product", () => {
     const shipping = ProtectedClaimV1Schema.parse({
@@ -506,6 +516,18 @@ describe("deterministic effect readiness", () => {
       protectedClaimTypes: ["PRICE", "SHIPPING_FEE"],
     });
     expect(result.outcome).toBe("READY");
+  });
+
+  it("binds another product's catalog media alongside an unchanged cart without accepting arbitrary extra subjects", () => {
+    const media=ProtectedClaimV1Schema.parse({...claims[0],claimId:"33333333-3333-5333-8333-333333333333",type:"PRODUCT_MEDIA",
+      scope:{kind:"PRODUCT",productId:"product-2",variantId:null},provenance:{...claims[0]!.provenance,authority:"MEDIA_SELECTOR_V2"},value:{assetId:"catalog-2",assetSha256:hash("a")}});
+    const input={...base,effect:"PROTECTED_OUTBOUND" as const,buyingIntent:null,productIds:["product-1","product-2"],claims:[...claims,media],
+      protectedClaimTypes:["PRICE","STOCK","PRODUCT_MEDIA"] as const,parentReadinessHash:hash("e"),payloadHash:hash("b"),deterministicEvidenceHash:hash("b")};
+    expect(evaluateDeterministicEffectReadinessV1(input).outcome).toBe("READY");
+    expect(evaluateDeterministicEffectReadinessV1({...input,productIds:["product-1"]}).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({...input,productIds:[...input.productIds,"product-3"]}).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({...input,effect:"CART_READY"}).outcome).toBe("BLOCKED");
+    expect(evaluateDeterministicEffectReadinessV1({...input,claims:[...claims,{...media,provenance:{...media.provenance,expiresAt:now.toISOString()}}]}).outcome).toBe("BLOCKED");
   });
 
   it("requires cart and preview bindings for purchase confirmation", () => {

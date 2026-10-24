@@ -1,0 +1,114 @@
+{
+  "arms": {
+    "control": {
+      "slots": 6,
+      "primary": {
+        "UNUSABLE": 2,
+        "USABLE": 3,
+        "NEEDS_EDIT": 1
+      },
+      "terminal": {
+        "FALLBACK": 2,
+        "SEND_ELIGIBLE": 4
+      },
+      "families": {
+        "b1-changed-occasion": {
+          "slots": 2,
+          "primary": {
+            "UNUSABLE": 2
+          },
+          "terminal": {
+            "FALLBACK": 2
+          }
+        },
+        "b1-buying-concern": {
+          "slots": 2,
+          "primary": {
+            "USABLE": 1,
+            "NEEDS_EDIT": 1
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 2
+          }
+        },
+        "b1-partial-source-v2": {
+          "slots": 1,
+          "primary": {
+            "USABLE": 1
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 1
+          }
+        },
+        "b1-proactive-context": {
+          "slots": 1,
+          "primary": {
+            "USABLE": 1
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 1
+          }
+        }
+      }
+    },
+    "candidate": {
+      "slots": 6,
+      "primary": {
+        "USABLE": 4,
+        "UNUSABLE": 1,
+        "NEEDS_EDIT": 1
+      },
+      "terminal": {
+        "SEND_ELIGIBLE": 5,
+        "FALLBACK": 1
+      },
+      "families": {
+        "b1-changed-occasion": {
+          "slots": 2,
+          "primary": {
+            "USABLE": 1,
+            "UNUSABLE": 1
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 1,
+            "FALLBACK": 1
+          }
+        },
+        "b1-buying-concern": {
+          "slots": 2,
+          "primary": {
+            "USABLE": 2
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 2
+          }
+        },
+        "b1-partial-source-v2": {
+          "slots": 1,
+          "primary": {
+            "NEEDS_EDIT": 1
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 1
+          }
+        },
+        "b1-proactive-context": {
+          "slots": 1,
+          "primary": {
+            "USABLE": 1
+          },
+          "terminal": {
+            "SEND_ELIGIBLE": 1
+          }
+        }
+      }
+    }
+  },
+  "conditionalIntegrated16": "NOT_DISPATCHED_CONDITION_NOT_MET",
+  "integratedRunSourceSha": null,
+  "recommendation": "STOP",
+  "conclusion": "No demonstrated improvement in focus/voice. Candidate still contains repetitive praise, internal data-report language and one unsupported performance assurance. One useful proactive single-choice reply observed, insufficient to establish consistency. Fewer fallback events than control on this small mixed-case population is descriptive, not causal proof or stable safety/quality improvement.",
+  "rolesAdded": 0,
+  "runtimeLayersAdded": 0,
+  "productionWiring": false
+}

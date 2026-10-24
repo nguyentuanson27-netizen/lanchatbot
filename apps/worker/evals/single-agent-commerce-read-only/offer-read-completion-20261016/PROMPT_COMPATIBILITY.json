@@ -1,0 +1,14 @@
+{
+  "kind": "OFFLINE_INSTRUCTION_SWAP_OVER_CAPTURED_BODIES",
+  "providerGenerations": 0,
+  "counts": {
+    "owner": 51,
+    "verifier": 19
+  },
+  "maximumBytes": {
+    "owner": 29683,
+    "verifier": 23502
+  },
+  "limitBytes": 32768,
+  "doesNotProveSemanticsOrAllPossibleContexts": true
+}

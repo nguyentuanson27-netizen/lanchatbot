@@ -1,0 +1,105 @@
+{
+  "caseId": "b1-partial-source-v2",
+  "sourceMode": "POS_UNAVAILABLE",
+  "elapsedMs": 9532.423999999999,
+  "runtime": {
+    "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1675.930800000002,
+        "telemetry": {
+          "generationId": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2608,
+          "outputTokens": 358,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 13485,
+          "requestHash": "7afb729fb3aa6ef1b454e12fe20624aa28575d0540ab60e858019eacd733d010",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 331,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1442.5446000000084,
+        "telemetry": {
+          "generationId": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3344,
+          "outputTokens": 276,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17113,
+          "requestHash": "22dbdc52e3850612fbbf16fbe1bc208b195e030fca4ac0fe2cc7793774d04654",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 254,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2596.743199999997,
+        "telemetry": {
+          "generationId": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4221,
+          "outputTokens": 613,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 21061,
+          "requestHash": "e64367c2bf4b7018afb9de87e31df99de1bc42157380cd7a358f3a7ee60e9737",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 603,
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "toolLatencyMs": 3578.12000000001,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 13,
+    "posReads": 9
+  }
+}

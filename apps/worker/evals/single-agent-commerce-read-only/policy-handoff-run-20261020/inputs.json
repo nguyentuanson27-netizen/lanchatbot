@@ -1,0 +1,57 @@
+[
+  {
+    "caseId": "policy-handoff-1",
+    "evaluator": {
+      "purpose": "worn-original"
+    },
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "policy-handoff-2",
+    "evaluator": {
+      "purpose": "held-up-only"
+    },
+    "runtime": {
+      "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "policy-handoff-3",
+    "evaluator": {
+      "purpose": "ambiguous-try"
+    },
+    "runtime": {
+      "latest": "Chị thử bộ này rồi, giờ muốn đổi size thì được không?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "policy-handoff-4",
+    "evaluator": {
+      "purpose": "window-fee"
+    },
+    "runtime": {
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  },
+  {
+    "caseId": "policy-handoff-5",
+    "evaluator": {
+      "purpose": "manufacturing-defect"
+    },
+    "runtime": {
+      "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+      "history": [],
+      "initialProductCodes": []
+    }
+  }
+]

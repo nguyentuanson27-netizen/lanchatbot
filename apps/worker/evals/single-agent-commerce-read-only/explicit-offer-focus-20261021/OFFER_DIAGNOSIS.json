@@ -1,0 +1,193 @@
+[
+  {
+    "attempt": "r1-case02",
+    "nativeReadCalls": []
+  },
+  {
+    "attempt": "r1-case04",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "subjectRef": "SV2447",
+          "offerType": null
+        },
+        "id": "call_1107541"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case15",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "subjectRef": "SV2447",
+          "offerType": "SET_VAY"
+        },
+        "id": "call_1323881"
+      }
+    ]
+  },
+  {
+    "attempt": "r2-case02",
+    "nativeReadCalls": []
+  },
+  {
+    "attempt": "r2-case04",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "subjectRef": "SV2447",
+          "offerType": null
+        },
+        "id": "call_865919"
+      }
+    ]
+  },
+  {
+    "attempt": "r2-case15",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "subjectRef": "SV2447",
+          "offerType": "SET_VAY"
+        },
+        "id": "call_606950"
+      }
+    ]
+  },
+  {
+    "attempt": "r3-case02",
+    "nativeReadCalls": []
+  },
+  {
+    "attempt": "r3-case04",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "subjectRef": "SV2447",
+          "offerType": "SET_VAY"
+        },
+        "id": "call_1227402"
+      }
+    ]
+  },
+  {
+    "attempt": "r3-case15",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": "SET_VAY",
+          "subjectRef": "SV2447"
+        },
+        "id": "call_1356580"
+      },
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": null,
+          "subjectRef": "SV2447"
+        },
+        "id": "call_646185"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case09",
+    "nativeReadCalls": []
+  },
+  {
+    "attempt": "r1-case17",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": null,
+          "subjectRef": "SV2447"
+        },
+        "id": "call_1310537"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case23",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": null,
+          "subjectRef": "SV2447"
+        },
+        "id": "call_742675"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case03",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "size": "M",
+          "offerType": null,
+          "subjectRef": "SV2447"
+        },
+        "id": "call_1614512"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case05",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": "AO",
+          "subjectRef": "SV2447",
+          "size": "M"
+        },
+        "id": "call_1824414"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case06",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": null,
+          "subjectRef": "SD375"
+        },
+        "id": "call_1180885"
+      }
+    ]
+  },
+  {
+    "attempt": "r1-case08",
+    "nativeReadCalls": []
+  },
+  {
+    "attempt": "r1-case16",
+    "nativeReadCalls": []
+  },
+  {
+    "attempt": "r1-case21",
+    "nativeReadCalls": [
+      {
+        "name": "read_product",
+        "args": {
+          "offerType": "AO",
+          "subjectRef": "SV2447",
+          "size": "M"
+        },
+        "id": "call_672296"
+      }
+    ]
+  }
+]

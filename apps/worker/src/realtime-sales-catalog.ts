@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { southernDestination } from "./southern-delivery-region.js";
 import {
   CartLineV1Schema,
   type CartLineV1,
@@ -169,14 +170,20 @@ function resolveOffer(snapshot: CatalogSnapshotV3, requested: string | null) {
   return null;
 }
 
-function resolveRegion(snapshot: CatalogSnapshotV3, address: string) {
+export function resolveCatalogDeliveryRegion(snapshot: CatalogSnapshotV3, address: string) {
   const normalized = normalizeCatalogToken(address);
   const entries = Object.entries(snapshot.shipping_eta);
+  const southern = southernDestination(address);
+  if (southern === "CONFLICT") return null;
   const exact = entries
     .filter(([region]) => normalized.includes(normalizeCatalogToken(region)))
     .sort((left, right) => normalizeCatalogToken(right[0]).length - normalizeCatalogToken(left[0]).length)
     .at(0);
   if (exact) return exact;
+  if (southern === "MATCH") {
+    const shared = entries.find(([region]) => normalizeCatalogToken(region) === "MIEN_NAM");
+    if (shared) return shared;
+  }
   return entries.find(([region]) =>
     ["TOAN_QUOC", "DEFAULT", "OTHER", "VIET_NAM"].includes(normalizeCatalogToken(region))
   ) ?? null;
@@ -444,7 +451,8 @@ export function cartSelectionFromSnapshot(
   let etaVersion: string | null = null;
   let etaExpiresAt: string | null = null;
   if (query.deliveryAddress) {
-    const region = resolveRegion(snapshot, query.deliveryAddress);
+    const region = resolveCatalogDeliveryRegion(snapshot, query.deliveryAddress);
+    if (!region) return failed("ETA_UNAVAILABLE", "CART_ETA_REGION_UNRESOLVED", matching);
     const zeroStock = stockQuantity === 0 && policy?.can_order_when_zero === true;
     const prepMin = zeroStock ? policy?.zero_stock_prep_min_days : policy?.prep_min_days;
     const prepMax = zeroStock ? policy?.zero_stock_prep_max_days : policy?.prep_max_days;

@@ -1,0 +1,115 @@
+{
+  "runSourceSha": "89c6965c6a76ceab52380a5c8167c0b946bc06dd",
+  "registeredSlots": 32,
+  "recordedSlots": 32,
+  "generationRequests": 85,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "PASS": 4,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 14,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 8783.786100000005,
+        "p95": 27134.043544999993
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 13757.826799999995,
+        "p95": 32110.06033499998
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 21,
+        "FALLBACK": 3
+      },
+      "reasons": {
+        "PASS": 21,
+        "PROVIDER_ERROR": 3
+      },
+      "providerRequests": 71,
+      "verifierLatencyMs": {
+        "n": 23,
+        "p50": 6734.0304999999935,
+        "p95": 14141.034339999987
+      },
+      "addedVerificationLatencyMs": {
+        "n": 23,
+        "p50": 7440.5386999999755,
+        "p95": 14862.469940000008
+      },
+      "providerErrors": 3
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 58,
+      "inputTokens": 237226,
+      "outputTokens": 37555,
+      "missingUsage": 1,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "latencyMs": {
+        "n": 58,
+        "p50": 2551.6732999999876,
+        "p95": 5700.752399999991
+      }
+    },
+    "verifier": {
+      "requests": 27,
+      "inputTokens": 109971,
+      "outputTokens": 2068,
+      "missingUsage": 2,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "latencyMs": {
+        "n": 27,
+        "p50": 7486.368300000002,
+        "p95": 16788.847669999996
+      }
+    }
+  },
+  "verdictCounts": {
+    "PASS": 25
+  },
+  "wireCapturesChecked": 116,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 85
+  },
+  "providerErrors": 3,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.03529411764705882,
+  "fallbackRateAllSlots": 0.09375,
+  "sourceEmbeddingCalls": {
+    "sourceCheck": 1,
+    "stateful": 0,
+    "b1": 1
+  },
+  "embeddingAccounting": "B1 attempt counters are cumulative; use final attempt once."
+}

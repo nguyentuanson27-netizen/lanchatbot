@@ -1,0 +1,49 @@
+{
+  "primaryLockSha": "7882b47fe5216f55636032a072de3682cbf505ca",
+  "failures": [
+    {
+      "slot": 5,
+      "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+      "actual": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "rejectedOrUnverifiedDraft": "Áo Thạch Thảo size M nhà em còn hàng chị nhé, áo bán lẻ giá 499.000đ ạ.",
+      "providerErrors": [
+        {
+          "status": "PROVIDER_ERROR",
+          "error": "PROVIDER_STREAM_ERROR",
+          "errorStage": "GENERATION_STREAM",
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0
+        }
+      ],
+      "verdicts": [
+        null
+      ],
+      "diagnosis": "Verifier upstream stream error, HTTP200 is not completed generation; no semantic verdict, no retry or quota inference."
+    },
+    {
+      "slot": 17,
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "actual": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "rejectedOrUnverifiedDraft": "Em vẫn nghiêng về việc chị lấy cả bộ ạ. \n\nSet váy có form nhẹ và độ rũ tự nhiên, mặc lên rất thanh lịch và nhã nhặn, gặp khách hàng buổi sáng vừa chỉn chu, lịch sự lại vừa mềm mại. Thêm nữa, mua cả bộ (799k) sẽ tiết kiệm hơn nhiều so với mua lẻ áo (499k), lại đồng bộ sẵn nên mình không mất công phối đồ ạ.",
+      "providerErrors": [],
+      "verdicts": [
+        "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"CONTRADICTION_OR_NEGATION\",\"protectedRef\":\"c6653612-e0b1-5cc8-81ff-72e029269beb\"}]}"
+      ],
+      "diagnosis": "Explicit comparator set799k vs onlyshirt499k; CONTRADICTION_OR_NEGATION block correct. Owner reasoning/arithmetic failure, do not relax verifier."
+    }
+  ],
+  "otherFindings": "Reply B1–1 offers relevant alternative but specific wrinkle/comfort assurances need owner review within allowed material/form inference. B1–9 strong outdoor breathability reassurance is tracked, not automatically adjudicated unsafe. B1–4/15/21 and stateful4 need reply edits. No current production regex/phrase patch or verifier change.",
+  "observedExampleDataLeak": "No fictional product/example prices/receipt presented as actual shop facts in the32customer outcomes."
+}

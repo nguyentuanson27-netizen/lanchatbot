@@ -1,0 +1,13 @@
+AssertionError [ERR_ASSERTION]: {"terminal":{"disposition":"FALLBACK","reason":"BUDGET","text":"Phần này em chưa trả lời được, chị nhé.","fallbackId":"C3_A_NONPROTECTED_V2"},"recovery":{"originalDisposition":"FALLBACK","originalReason":"BUDGET"},"sendEnabled":false,"ownerGenerations":2,"verifierGenerations":0,"toolRounds":1,"toolCalls":4,"generations":[{"id":"0ea1cef7-65e5-408e-971e-fe8ea853ec77:owner:1","role":"owner","status":"OK","latencyMs":0.052400000000488944},{"id":"0ea1cef7-65e5-408e-971e-fe8ea853ec77:owner:2","role":"owner","status":"OK","latencyMs":0.12320000000181608}],"toolLatencyMs":19.240600000004633,"verificationLatencyMs":null,"enqueued":1,"commitStatus":"COMMITTED"}
++ actual - expected
+
++ 'FALLBACK'
+- 'HANDOFF'
+
+    at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs:412:63
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async check (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs:40:6)
+    at async file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs:407:2
+B composed existing clarification migration rolls back exactly before new events: PASS
+B composed candidate first CUSTOMER_REQUESTED_HUMAN acknowledges once after real atomic commit: PASS
+B composed candidate first SIZE_RULE_UNAVAILABLE acknowledges once after real atomic commit: PASS

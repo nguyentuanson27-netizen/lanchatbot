@@ -1,0 +1,76 @@
+[
+  {
+    "name": "stateful-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "unused",
+      "COD",
+      "--provider-preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "source-check",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\gemini-prompt-once-20261019\\cases.prioritized.json",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-gemini-prompt-once-20261019\\source-check",
+      "--source-check"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "stateful-1",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-gemini-prompt-once-20261019\\stateful-1",
+      "COD",
+      "--provider-run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "b1-1",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\gemini-prompt-once-20261019\\cases.prioritized.json",
+      "--range",
+      "1:4",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-gemini-prompt-once-20261019\\b1-1",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "advice-1",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps\\worker\\evals\\single-agent-commerce-read-only\\advice-diagnostic.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-gemini-prompt-once-20261019\\advice-input-1.json",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-gemini-prompt-once-20261019\\advice-1"
+    ],
+    "exitCode": 0
+  }
+]

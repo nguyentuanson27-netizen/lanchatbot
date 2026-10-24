@@ -1,0 +1,140 @@
+{
+  "caseId": "stateful-human-request",
+  "journeyId": "handoff",
+  "elapsedMs": 17524.28170000002,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "text": "Em chuyển nhân viên hỗ trợ chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "de9c3a2f-a222-4f96-a213-6c666c38d02b:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1509.7522999999928,
+        "telemetry": {
+          "generationId": "de9c3a2f-a222-4f96-a213-6c666c38d02b:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5564,
+          "outputTokens": 193,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30166,
+          "requestHash": "534ddc37a5c0bf715fbe35e410724867a0903cb3727c72ca80c485392a6d5d40",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 170,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 2900.9461999999767,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 1,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "cc1074ee1f9e20ec4376a7b9b24eba513f1d80b2a57ae0ddce5cb95eba0198e6",
+    "generation": 8,
+    "leaseToken": "35ec37c6-4fc5-47f2-b80f-36fe9812890f",
+    "inboxIds": [
+      "d46ff079-01fc-47ba-8c8a-7605cb7a9bca"
+    ],
+    "evaluationGroupId": "de9c3a2f-a222-4f96-a213-6c666c38d02b",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 8,
+    "lastReceiveSequence": 8,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "d46ff079-01fc-47ba-8c8a-7605cb7a9bca",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-8449c149-cc7e-4cac-906b-f4e0670ebe6f:0",
+        "conversationHash": "cc1074ee1f9e20ec4376a7b9b24eba513f1d80b2a57ae0ddce5cb95eba0198e6",
+        "occurredAt": "2026-10-23T08:41:45.895Z",
+        "receivedAt": "2026-10-23T08:41:45.895Z",
+        "receiveSequence": 8,
+        "attemptCount": 1,
+        "leaseToken": "35ec37c6-4fc5-47f2-b80f-36fe9812890f",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "33e90c8b-9c48-4c5a-a646-b727b40fedb7",
+            "eventKey": "stateful-8449c149-cc7e-4cac-906b-f4e0670ebe6f:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-8449c149-cc7e-4cac-906b-f4e0670ebe6f:0",
+            "senderId": "synthetic-recipient-cc1074ee1f9e20ec4376a7b9b24eba513f1d80b2a57ae0ddce5cb95eba0198e6",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-23T08:41:45.895Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Cho chị gặp nhân viên shop nhé.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "33e90c8b-9c48-4c5a-a646-b727b40fedb7",
+      "eventKey": "stateful-8449c149-cc7e-4cac-906b-f4e0670ebe6f:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-8449c149-cc7e-4cac-906b-f4e0670ebe6f:0",
+      "senderId": "synthetic-recipient-cc1074ee1f9e20ec4376a7b9b24eba513f1d80b2a57ae0ddce5cb95eba0198e6",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-23T08:41:45.895Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Cho chị gặp nhân viên shop nhé.",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [
+    "Em chuyển nhân viên hỗ trợ chị nhé."
+  ],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1,
+    "negotiation": null
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 10,
+    "verifier": 4,
+    "catalogReads": 20,
+    "posReads": 18,
+    "selectorCalls": 30,
+    "readPolicyCalls": 0
+  }
+}

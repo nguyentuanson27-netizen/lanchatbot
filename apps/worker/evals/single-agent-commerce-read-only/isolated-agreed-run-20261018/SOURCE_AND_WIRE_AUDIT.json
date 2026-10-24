@@ -1,0 +1,29 @@
+{
+  "frozenSourceBlobsVerified": 40,
+  "helpersVerified": 3,
+  "executedB1CorpusBytesMatchFrozenHash": true,
+  "executedB1CorpusPath": "metadata/dispatched-cases.json",
+  "executedB1CorpusHash": "901c0d41c122599502840b4a05dac5edaba1932a42c39f0e8317f04d734c996f",
+  "committedCasesJsonStructurallyEqual": true,
+  "auditCorrection": "Initial byte comparison of cases.b1.json failed because its Git-normalized line endings differ from the registered temp dispatch file. Original executed file matches frozen SHA and identical records; preserved without text normalization. No run replacement or changed model input.",
+  "committedRawHashesVerified": 109,
+  "emptyToolListModeNoneViolations": [
+    {
+      "arm": "checkout-no-checklist",
+      "rep": 1,
+      "slot": 1,
+      "tools": [],
+      "mode": "NONE",
+      "id": "c92b1a00-cbc4-45d4-bc7f-0848e40ca327:owner:3"
+    },
+    {
+      "arm": "search-discovery",
+      "rep": 2,
+      "slot": 1,
+      "tools": [],
+      "mode": "NONE",
+      "id": "9e881a9058d7197e096506f66a155428e149c341e46804992cd53af2e61f830e:owner:3"
+    }
+  ],
+  "analyticalLimit": "Current snapshot body not captured for STALE; source of changed field remains unknown."
+}

@@ -92,6 +92,17 @@ describe("HandoffDecisionV2", () => {
     ).toBe(false);
   });
 
+  it("accepts a bounded non-after-sales holding reply only from an explicit admin matrix", () => {
+    const decision = { schemaVersion: 2, decisionId: "56c33819-5c44-4d90-a592-d8fd0901571d", category: "SYSTEM_FAILURE", reason: "DEPENDENCY_FAILURE",
+      customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF", customerMessages: ["Nhân viên sẽ kiểm tra thông tin nhận hàng của chị."], tag: "NHAN_VIEN",
+      provenance: { ...provenance, decisionSource: "ADMIN_CONTROL", rulesetVersion: "matrix:"+"a".repeat(64) }, decidedAt: "2026-07-22T04:00:00.000Z" };
+    expect(HandoffDecisionV2Schema.safeParse(decision).success).toBe(true);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, customerMessages: [] }).success).toBe(false);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, tag: "VAN_DON" }).success).toBe(false);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, provenance: { ...decision.provenance, decisionSource: "DETERMINISTIC_RULE_ENGINE" } }).success).toBe(false);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, provenance: { ...decision.provenance, rulesetVersion: "not-a-matrix" } }).success).toBe(false);
+  });
+
   it("is strict and rejects fields that could bypass the policy", () => {
     expect(
       HandoffDecisionV2Schema.safeParse({

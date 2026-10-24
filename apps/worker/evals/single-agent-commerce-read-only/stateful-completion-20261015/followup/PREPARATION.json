@@ -1,0 +1,76 @@
+{
+  "sourceSha": "0ad4b29d2ba5f5d7209f49c941d8c72689bbc607",
+  "sourceDocumentBlobShas": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "tasks/plan.md": "4e3695eb1c7c421c7c0e4e660e5721e0c5c837b9",
+    "tasks/todo.md": "e75ab8fa90f3c25086d9cf32e3bf26a4bb78f3cd",
+    "apps/worker/evals/single-agent-commerce-read-only/stateful-completion-20261015/followup/SCOPE.md": "11caa0551e5665953f171a8d3de19ec887613692"
+  },
+  "logs": [
+    {
+      "log": "c3-b-finish-worker-binding-final.log",
+      "sha256": "e9c21b6375a155dbcddececf46a708727e7549c2892fb43ab0f2399d3ccd1d46",
+      "tail": [
+        " ✓ src/redis-business-facts.test.ts (2 tests) 7ms",
+        " ✓ src/redis-chat-history.test.ts (2 tests) 7ms",
+        "",
+        " Test Files  129 passed (129)",
+        "      Tests  1750 passed (1750)",
+        "   Start at  20:41:55",
+        "   Duration  37.71s (transform 23.77s, setup 0ms, collect 175.71s, tests 56.68s, environment 86ms, prepare 70.39s)",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-evals-binding-fix.log",
+      "sha256": "bcd7e0de5d92237a642c4d496e0161053aa8849d6b471931c3ad3d966abe2652",
+      "tail": [
+        "ℹ tests 479",
+        "ℹ suites 0",
+        "ℹ pass 479",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 260041.0814"
+      ]
+    },
+    {
+      "log": "c3-b-finish-worker-build-binding-fix.log",
+      "sha256": "bb788f85c334a301242328fe3cabbe967b46173f061f1b8bcbd70cc68664fdbc",
+      "tail": [
+        "",
+        "src/single-agent-commerce-ingress.ts(44,3): error TS2375: Type '{ ready: () => Promise<boolean>; resolve: (query: { productId: string; offerType: string | null; size: string | null; intent: \"PRICE\" | \"STOCK\" | \"ETA\" | \"SIZE\" | \"INFO\"; color: string | null; shopAlias: string; deliveryRegion: string | null; }, now?: Date | undefined) => Promise<...>; close: () => Promise<...>; res...' is not assignable to type 'BusinessFactsReader' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.",
+        "  Types of property 'resolveVerifiedVariant' are incompatible.",
+        "    Type '((query: VerifiedVariantQuery, now?: Date | undefined) => Promise<VerifiedVariantResult>) | undefined' is not assignable to type '(query: VerifiedVariantQuery, now?: Date | undefined) => Promise<VerifiedVariantResult>'.",
+        "      Type 'undefined' is not assignable to type '(query: VerifiedVariantQuery, now?: Date | undefined) => Promise<VerifiedVariantResult>'.",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker:",
+        " ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @lana/worker@0.1.0 build: `tsc -p tsconfig.json`",
+        "Exit status 2"
+      ]
+    }
+  ],
+  "finalCompilerCommands": [
+    {
+      "command": "pnpm exec tsc -p tsconfig.json",
+      "cwd": "apps/worker",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm exec tsc -p tsconfig.json --noEmit",
+      "cwd": "apps/worker",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "cwd": "apps/worker",
+      "exitCode": 0
+    }
+  ],
+  "canonicalBuildBeforeOptionalFieldFix": {
+    "exitCode": 2,
+    "reason": "exactOptionalPropertyTypes; absent optional methods subsequently omitted"
+  }
+}

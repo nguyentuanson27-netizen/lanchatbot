@@ -55,7 +55,29 @@ function store(row: ClaimedMetaOutbox): MetaOutboxDispatchStore {
   };
 }
 
+it("does not send a bound media group through a legacy gate or stale cached sequence-zero approval", async () => {
+  const row = { ...claim(), mediaBinding: { kind: "C3_MEDIA_GROUP_V1" } }, saved = store(row);
+  const legacy = { authorize: vi.fn(async () => ({ status: "ALLOWED" as const, reasonCode: null, blockingTag: null, observedAt: new Date() })) };
+  expect((await resolveMetaResponseGroupGate(row, saved, legacy)).status).toBe("BLOCKED");
+  const capable = { ...legacy, supportsCommerceMediaBinding: true as const };
+  expect((await resolveMetaResponseGroupGate(row, saved, capable)).status).toBe("ALLOWED");
+  capable.authorize.mockResolvedValueOnce({ status: "BLOCKED" as never, reasonCode: "SOURCE_CHANGED" as never, blockingTag: null, observedAt: new Date() });
+  expect((await resolveMetaResponseGroupGate(row, saved, capable)).status).toBe("BLOCKED");
+});
+
 describe("MetaOutboxDispatcher", () => {
+  it("persists a deterministic media refusal in Outbox without fabricating a Pancake blocking tag", async () => {
+    const row = { ...claim(), mediaBinding: { kind: "C3_MEDIA_GROUP_V1" } }, repository = store(row);
+    vi.mocked(repository.recordMetaResponseGroupGate).mockImplementation(async () => { throw new Error("meta_response_group_gate_state_ck"); });
+    const delivery = { send: vi.fn() };
+    const dispatcher = new MetaOutboxDispatcher(repository, delivery, { get: () => "page-token" },
+      { supportsCommerceMediaBinding: true, authorize: async () => ({ status: "BLOCKED", reasonCode: "C3_MEDIA_DELIVERY_BINDING_CHANGED", blockingTag: null, observedAt: new Date() }) },
+      { workerId: "sender" });
+    expect(await dispatcher.processOne()).toBe(true);
+    expect(repository.recordMetaResponseGroupGate).not.toHaveBeenCalled();
+    expect(repository.markMetaManualReview).toHaveBeenCalled();
+    expect(delivery.send).not.toHaveBeenCalled();
+  });
   it("marks accepted only after Meta returns provider evidence", async () => {
     const repository = store(claim());
     const delivery: MetaDeliveryPort = {

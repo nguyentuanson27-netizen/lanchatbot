@@ -1,0 +1,129 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "runSourceSha": "CAPTURE_CLEAN_HEAD_AT_RUNTIME_DO_NOT_WRITE_BACK",
+  "preparationBaseSha": "e14c10d135e17552e4fd07ec72d37e7dcc1de7d2",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "inputHash": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+  "statefulCorpusHash": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+  "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "registeredSlots": 32,
+  "repetitions": 1,
+  "maximumGenerationRequests": 124,
+  "retry": 0,
+  "selectedB1CaseIds": [
+    "b1-changed-occasion",
+    "b1-current-policy",
+    "b1-partial-source",
+    "b1-price",
+    "b1-component-stock",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-policy-used",
+    "b1-changed-occasion-v2",
+    "b1-current-policy-v2",
+    "b1-partial-source-v2",
+    "b1-price-v2",
+    "b1-component-stock-v2",
+    "b1-search-read-v2",
+    "b1-buying-concern-v2",
+    "b1-policy-used-v2",
+    "b1-changed-occasion-v3",
+    "b1-current-policy-v3",
+    "b1-partial-source-v3",
+    "b1-price-v3",
+    "b1-component-stock-v3",
+    "b1-search-read-v3",
+    "b1-buying-concern-v3",
+    "b1-policy-used-v3"
+  ],
+  "selectedStatefulCaseIds": [
+    "stateful-open",
+    "stateful-variant-quantity",
+    "stateful-quote",
+    "stateful-correction",
+    "stateful-request-checkout",
+    "stateful-private-checkout",
+    "stateful-confirm",
+    "stateful-human-request"
+  ],
+  "dispatch": "1:24",
+  "runOrder": [
+    "provider-preflight (0 generations)",
+    "source-check (0 generations)",
+    "deterministic B2/B3 COD (0 generations)",
+    "deterministic B2/B3 BANK_TRANSFER (0 generations)",
+    "stateful provider8x1",
+    "B1 all24x1"
+  ],
+  "rubric": "Read whole customer turn, history, actual customer outcome and public state. Judge whether advice helps choose and buy shop goods, resolves the stated hesitation, and offers a usable next step when useful. USABLE/NEEDS_EDIT/UNUSABLE/OWNERSHIP_CONTROL before verifier diagnosis. Ordinary aesthetic/material advice accepted; no keyword/fact-count scoring, forced CTA, forced alternative or lowest-price preference. NEEDS_EDIT must identify content that needs rewriting before sending; minor voice polish alone does not overturn an otherwise useful answer. Missing source deliberately injected by a fixture is reported separately from model errors. Preserve historical labels and counts; supplemental comparison is descriptive.",
+  "acceptance": "One sample per case is descriptive only. Preserve all errors/fallbacks/downstream blocks; no retries, replacement samples or automatic next round. Report observed protected false PASS separately; no certification or live GO.",
+  "sourceMode": "LIVE_PUBLIC_READERS_WITH_EXISTING_ISOLATED_REGISTRY_DESCRIPTION_AND_CURRENT_CAPTURED_POLICY; STATEFUL_REAL_ISOLATED_POSTGRES_CAPTURE_DELIVERY",
+  "sendEnabled": false,
+  "change": "No prompt/runtime/source/model changes. Owner explicitly requested full B1/B2/B3 run after advice diagnostic STOP; new registration, no gate bypass, no replay/advice extra population.",
+  "failurePolicy": "No retry or replacement. Keep all generation errors and downstream blocks; complete independent jobs where available. Infrastructure/config preflight failure blocks dependent provider calls. Record actual jobs and missing slots.",
+  "privateData": "Code-only synthetic checkout intake omitted from public provider-attempt copies using existing publisher; actual model requests never contain checkout PII.",
+  "wrapperHash": "b62d26ec5333382b392022e2847413e63672e9addfe99ea2ae4c1edacb056d53",
+  "continuePolicy": "ALL_REGISTERED_POPULATIONS_ONCE_NO_QUALITY_EARLY_STOP_KEEP_ERRORS_AND_BLOCKED_DEPENDENTS",
+  "candidateMatrixScope": "Provider entrypoints use current source/default rules; existing deterministic checks additionally exercise isolated EXCHANGE/DEFECT candidate capture. No new provider capability or source override."
+}

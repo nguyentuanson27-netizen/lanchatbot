@@ -1,0 +1,466 @@
+{
+  "kind": "OFFLINE_HISTORICAL_REQUEST_SIZE_COMPATIBILITY_ONLY",
+  "providerGenerations": 0,
+  "ownerRequests": 63,
+  "verifierRequests": 27,
+  "maximumBytes": 31081,
+  "boundBytes": 32768,
+  "allWithinBound": true,
+  "changedFields": [
+    "owner.systemInstruction",
+    "verifier.instructions"
+  ],
+  "semanticOrNaturalnessProof": false,
+  "rows": [
+    {
+      "id": "0ddfaf5849381b229065b7ae416cd741ed4230f7c92c080737d2996427208127:owner:1",
+      "role": "owner",
+      "projectedBytes": 14442
+    },
+    {
+      "id": "0ddfaf5849381b229065b7ae416cd741ed4230f7c92c080737d2996427208127:owner:2",
+      "role": "owner",
+      "projectedBytes": 21372
+    },
+    {
+      "id": "0ddfaf5849381b229065b7ae416cd741ed4230f7c92c080737d2996427208127:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20658
+    },
+    {
+      "id": "2d6b13003a3a65bffd1408772195d9e9b92912b886962b881f443229fe506774:owner:1",
+      "role": "owner",
+      "projectedBytes": 14047
+    },
+    {
+      "id": "2d6b13003a3a65bffd1408772195d9e9b92912b886962b881f443229fe506774:owner:2",
+      "role": "owner",
+      "projectedBytes": 15015
+    },
+    {
+      "id": "2d6b13003a3a65bffd1408772195d9e9b92912b886962b881f443229fe506774:owner:3",
+      "role": "owner",
+      "projectedBytes": 16923
+    },
+    {
+      "id": "2d6b13003a3a65bffd1408772195d9e9b92912b886962b881f443229fe506774:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 17217
+    },
+    {
+      "id": "b24620916a283f4ebb3d20864471cc2fe86298d6452f9241062af6576528dfb5:owner:1",
+      "role": "owner",
+      "projectedBytes": 14258
+    },
+    {
+      "id": "b24620916a283f4ebb3d20864471cc2fe86298d6452f9241062af6576528dfb5:owner:2",
+      "role": "owner",
+      "projectedBytes": 21060
+    },
+    {
+      "id": "b24620916a283f4ebb3d20864471cc2fe86298d6452f9241062af6576528dfb5:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20657
+    },
+    {
+      "id": "bec3013046fc95f109ff60bcbf97e17f837c0fe44de467fa96259364dad74ad4:owner:1",
+      "role": "owner",
+      "projectedBytes": 14416
+    },
+    {
+      "id": "bec3013046fc95f109ff60bcbf97e17f837c0fe44de467fa96259364dad74ad4:owner:2",
+      "role": "owner",
+      "projectedBytes": 21066
+    },
+    {
+      "id": "bec3013046fc95f109ff60bcbf97e17f837c0fe44de467fa96259364dad74ad4:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20522
+    },
+    {
+      "id": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:1",
+      "role": "owner",
+      "projectedBytes": 14218
+    },
+    {
+      "id": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:2",
+      "role": "owner",
+      "projectedBytes": 17846
+    },
+    {
+      "id": "7dc302168feda28ee734df34609f25bab4697b650ada157f13a60f4a9d9b5f1f:owner:3",
+      "role": "owner",
+      "projectedBytes": 21794
+    },
+    {
+      "id": "f184f71ff1632d643338da1eee027edee7a7005938dfc0f715932668a96be154:owner:1",
+      "role": "owner",
+      "projectedBytes": 14324
+    },
+    {
+      "id": "f184f71ff1632d643338da1eee027edee7a7005938dfc0f715932668a96be154:owner:2",
+      "role": "owner",
+      "projectedBytes": 21044
+    },
+    {
+      "id": "f184f71ff1632d643338da1eee027edee7a7005938dfc0f715932668a96be154:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 21208
+    },
+    {
+      "id": "167b14d3671e2da8db69241d22905cb4cc38d8d4d7159f6b2decf21686651edc:owner:1",
+      "role": "owner",
+      "projectedBytes": 14271
+    },
+    {
+      "id": "167b14d3671e2da8db69241d22905cb4cc38d8d4d7159f6b2decf21686651edc:owner:2",
+      "role": "owner",
+      "projectedBytes": 18859
+    },
+    {
+      "id": "167b14d3671e2da8db69241d22905cb4cc38d8d4d7159f6b2decf21686651edc:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 16097
+    },
+    {
+      "id": "a8c075008967bb90710724fe0f48a12766e90ba53dff4f7ca18258e7a3ea14ec:owner:1",
+      "role": "owner",
+      "projectedBytes": 14231
+    },
+    {
+      "id": "a8c075008967bb90710724fe0f48a12766e90ba53dff4f7ca18258e7a3ea14ec:owner:2",
+      "role": "owner",
+      "projectedBytes": 17227
+    },
+    {
+      "id": "a8c075008967bb90710724fe0f48a12766e90ba53dff4f7ca18258e7a3ea14ec:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15623
+    },
+    {
+      "id": "5fac9aa85ec380e0dec1642a2fb48efde0fc1e7c493780de49601fff2d6932a4:owner:1",
+      "role": "owner",
+      "projectedBytes": 14147
+    },
+    {
+      "id": "5fac9aa85ec380e0dec1642a2fb48efde0fc1e7c493780de49601fff2d6932a4:owner:2",
+      "role": "owner",
+      "projectedBytes": 20489
+    },
+    {
+      "id": "5fac9aa85ec380e0dec1642a2fb48efde0fc1e7c493780de49601fff2d6932a4:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20169
+    },
+    {
+      "id": "0d5acf3e32c440279f126fbbebefa2fceb05d5deab61f62ae320b2d40787a3bc:owner:1",
+      "role": "owner",
+      "projectedBytes": 14172
+    },
+    {
+      "id": "0d5acf3e32c440279f126fbbebefa2fceb05d5deab61f62ae320b2d40787a3bc:owner:2",
+      "role": "owner",
+      "projectedBytes": 22668
+    },
+    {
+      "id": "0d5acf3e32c440279f126fbbebefa2fceb05d5deab61f62ae320b2d40787a3bc:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 21278
+    },
+    {
+      "id": "9367454caa5b7b79ed0d20e8f74debf2c450cab48a4c985e48bfb49931bdb426:owner:1",
+      "role": "owner",
+      "projectedBytes": 14169
+    },
+    {
+      "id": "9367454caa5b7b79ed0d20e8f74debf2c450cab48a4c985e48bfb49931bdb426:owner:2",
+      "role": "owner",
+      "projectedBytes": 18957
+    },
+    {
+      "id": "9367454caa5b7b79ed0d20e8f74debf2c450cab48a4c985e48bfb49931bdb426:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15999
+    },
+    {
+      "id": "c5ecf7f2a1286041bda5f0ad8c68bee6cf55dcfaf37bda06c7dd598379f1d74b:owner:1",
+      "role": "owner",
+      "projectedBytes": 14204
+    },
+    {
+      "id": "c5ecf7f2a1286041bda5f0ad8c68bee6cf55dcfaf37bda06c7dd598379f1d74b:owner:2",
+      "role": "owner",
+      "projectedBytes": 18540
+    },
+    {
+      "id": "c5ecf7f2a1286041bda5f0ad8c68bee6cf55dcfaf37bda06c7dd598379f1d74b:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15976
+    },
+    {
+      "id": "f7c89410e5283400f63fde548b5b6d152163442a4e62f31ef27bbea7f4354382:owner:1",
+      "role": "owner",
+      "projectedBytes": 14215
+    },
+    {
+      "id": "f7c89410e5283400f63fde548b5b6d152163442a4e62f31ef27bbea7f4354382:owner:2",
+      "role": "owner",
+      "projectedBytes": 20877
+    },
+    {
+      "id": "f7c89410e5283400f63fde548b5b6d152163442a4e62f31ef27bbea7f4354382:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20174
+    },
+    {
+      "id": "1f87cb2a0dbe8c745b73b0f115bd607ed69405d22e7bbe267dd1f999de33988f:owner:1",
+      "role": "owner",
+      "projectedBytes": 14251
+    },
+    {
+      "id": "1f87cb2a0dbe8c745b73b0f115bd607ed69405d22e7bbe267dd1f999de33988f:owner:2",
+      "role": "owner",
+      "projectedBytes": 23107
+    },
+    {
+      "id": "1f87cb2a0dbe8c745b73b0f115bd607ed69405d22e7bbe267dd1f999de33988f:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 21365
+    },
+    {
+      "id": "4b23185ba65e488ceff391165bf47422f2761423e33b5c503b7c96fee886bf26:owner:1",
+      "role": "owner",
+      "projectedBytes": 14082
+    },
+    {
+      "id": "4b23185ba65e488ceff391165bf47422f2761423e33b5c503b7c96fee886bf26:owner:2",
+      "role": "owner",
+      "projectedBytes": 16623
+    },
+    {
+      "id": "4b23185ba65e488ceff391165bf47422f2761423e33b5c503b7c96fee886bf26:owner:3",
+      "role": "owner",
+      "projectedBytes": 20790
+    },
+    {
+      "id": "4b23185ba65e488ceff391165bf47422f2761423e33b5c503b7c96fee886bf26:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 21282
+    },
+    {
+      "id": "f86574d7393efd7df9399760d1bcde7a6bf4f44553dbb94b807556bb1901fec3:owner:1",
+      "role": "owner",
+      "projectedBytes": 14164
+    },
+    {
+      "id": "f86574d7393efd7df9399760d1bcde7a6bf4f44553dbb94b807556bb1901fec3:owner:2",
+      "role": "owner",
+      "projectedBytes": 18260
+    },
+    {
+      "id": "f86574d7393efd7df9399760d1bcde7a6bf4f44553dbb94b807556bb1901fec3:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15926
+    },
+    {
+      "id": "4cf807d534ac09aa91ccfa127314870f7dad04985f4d220e330986d29d128f19:owner:1",
+      "role": "owner",
+      "projectedBytes": 14433
+    },
+    {
+      "id": "4cf807d534ac09aa91ccfa127314870f7dad04985f4d220e330986d29d128f19:owner:2",
+      "role": "owner",
+      "projectedBytes": 21279
+    },
+    {
+      "id": "4cf807d534ac09aa91ccfa127314870f7dad04985f4d220e330986d29d128f19:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20789
+    },
+    {
+      "id": "4eb7974d4e66242add2f8233a9b28faf6005da1232af02277fd34c8d239543ee:owner:1",
+      "role": "owner",
+      "projectedBytes": 14228
+    },
+    {
+      "id": "4eb7974d4e66242add2f8233a9b28faf6005da1232af02277fd34c8d239543ee:owner:2",
+      "role": "owner",
+      "projectedBytes": 18676
+    },
+    {
+      "id": "4eb7974d4e66242add2f8233a9b28faf6005da1232af02277fd34c8d239543ee:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15984
+    },
+    {
+      "id": "ba13c4a1b68e99727fb4da86aa23b4bc8225ef358bba959a6e023172f57b40ac:owner:1",
+      "role": "owner",
+      "projectedBytes": 14165
+    },
+    {
+      "id": "ba13c4a1b68e99727fb4da86aa23b4bc8225ef358bba959a6e023172f57b40ac:owner:2",
+      "role": "owner",
+      "projectedBytes": 17426
+    },
+    {
+      "id": "ba13c4a1b68e99727fb4da86aa23b4bc8225ef358bba959a6e023172f57b40ac:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15539
+    },
+    {
+      "id": "db1c59cefbfac2dc573d1dea172d0be08c69bafe23de16ed0976beb16aec0529:owner:1",
+      "role": "owner",
+      "projectedBytes": 14140
+    },
+    {
+      "id": "db1c59cefbfac2dc573d1dea172d0be08c69bafe23de16ed0976beb16aec0529:owner:2",
+      "role": "owner",
+      "projectedBytes": 20610
+    },
+    {
+      "id": "db1c59cefbfac2dc573d1dea172d0be08c69bafe23de16ed0976beb16aec0529:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20102
+    },
+    {
+      "id": "40b93f066f1d20c0bd973b6a792b4bfeb9226530d3dce0f5e0ace7b421c2ca76:owner:1",
+      "role": "owner",
+      "projectedBytes": 14195
+    },
+    {
+      "id": "40b93f066f1d20c0bd973b6a792b4bfeb9226530d3dce0f5e0ace7b421c2ca76:owner:2",
+      "role": "owner",
+      "projectedBytes": 22187
+    },
+    {
+      "id": "40b93f066f1d20c0bd973b6a792b4bfeb9226530d3dce0f5e0ace7b421c2ca76:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 21320
+    },
+    {
+      "id": "76d556ca4f5ecb482e43efc56ad5e616ed9f492322e06034d738e13e78aaa295:owner:1",
+      "role": "owner",
+      "projectedBytes": 14122
+    },
+    {
+      "id": "76d556ca4f5ecb482e43efc56ad5e616ed9f492322e06034d738e13e78aaa295:owner:2",
+      "role": "owner",
+      "projectedBytes": 16674
+    },
+    {
+      "id": "76d556ca4f5ecb482e43efc56ad5e616ed9f492322e06034d738e13e78aaa295:owner:3",
+      "role": "owner",
+      "projectedBytes": 20764
+    },
+    {
+      "id": "76d556ca4f5ecb482e43efc56ad5e616ed9f492322e06034d738e13e78aaa295:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 21317
+    },
+    {
+      "id": "0a2b737c3598637fdeac92e04078ceb76524bf8a33a805510cb97bac3e95c472:owner:1",
+      "role": "owner",
+      "projectedBytes": 14315
+    },
+    {
+      "id": "0a2b737c3598637fdeac92e04078ceb76524bf8a33a805510cb97bac3e95c472:owner:2",
+      "role": "owner",
+      "projectedBytes": 20795
+    },
+    {
+      "id": "0a2b737c3598637fdeac92e04078ceb76524bf8a33a805510cb97bac3e95c472:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 20679
+    },
+    {
+      "id": "34e96efddf3a2c177cf518a51629c31a18c12fdd7c122dabd0fd628cc2aac525:owner:1",
+      "role": "owner",
+      "projectedBytes": 14140
+    },
+    {
+      "id": "34e96efddf3a2c177cf518a51629c31a18c12fdd7c122dabd0fd628cc2aac525:owner:2",
+      "role": "owner",
+      "projectedBytes": 18808
+    },
+    {
+      "id": "34e96efddf3a2c177cf518a51629c31a18c12fdd7c122dabd0fd628cc2aac525:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 15996
+    },
+    {
+      "id": "4f75328a-9e9a-42a9-833c-9ef89fbd86c9:owner:1",
+      "role": "owner",
+      "projectedBytes": 18882
+    },
+    {
+      "id": "4f75328a-9e9a-42a9-833c-9ef89fbd86c9:owner:2",
+      "role": "owner",
+      "projectedBytes": 30555
+    },
+    {
+      "id": "4f75328a-9e9a-42a9-833c-9ef89fbd86c9:owner:3",
+      "role": "owner",
+      "projectedBytes": 30604
+    },
+    {
+      "id": "4f75328a-9e9a-42a9-833c-9ef89fbd86c9:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 25001
+    },
+    {
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:1",
+      "role": "owner",
+      "projectedBytes": 20401
+    },
+    {
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:2",
+      "role": "owner",
+      "projectedBytes": 31081
+    },
+    {
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:3",
+      "role": "owner",
+      "projectedBytes": 28336
+    },
+    {
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 19755
+    },
+    {
+      "id": "f125a57c-0ad1-4ebd-ab25-ad57ec2b5772:owner:1",
+      "role": "owner",
+      "projectedBytes": 20619
+    },
+    {
+      "id": "f125a57c-0ad1-4ebd-ab25-ad57ec2b5772:owner:2",
+      "role": "owner",
+      "projectedBytes": 25905
+    },
+    {
+      "id": "f125a57c-0ad1-4ebd-ab25-ad57ec2b5772:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 17599
+    },
+    {
+      "id": "b26b6291-9312-46e6-886e-aa086ca55cb5:owner:1",
+      "role": "owner",
+      "projectedBytes": 20878
+    },
+    {
+      "id": "b26b6291-9312-46e6-886e-aa086ca55cb5:owner:2",
+      "role": "owner",
+      "projectedBytes": 25800
+    },
+    {
+      "id": "b26b6291-9312-46e6-886e-aa086ca55cb5:verifier:1",
+      "role": "verifier",
+      "projectedBytes": 18614
+    },
+    {
+      "id": "d5ebffb1-9cde-4423-94f0-38409e053f8e:owner:1",
+      "role": "owner",
+      "projectedBytes": 18838
+    }
+  ]
+}

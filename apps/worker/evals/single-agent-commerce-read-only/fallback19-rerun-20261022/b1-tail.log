@@ -1,0 +1,15 @@
+{"slot":11,"recorded":1,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":12,"recorded":2,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":13,"recorded":3,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":14,"recorded":4,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":15,"recorded":5,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":16,"recorded":6,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":17,"recorded":7,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":18,"recorded":8,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":19,"recorded":9,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":20,"recorded":10,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":21,"recorded":11,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":22,"recorded":12,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":23,"recorded":13,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":24,"recorded":14,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"status":"DISPATCH_RANGE_COMPLETE_REVIEW_PENDING","registered":24,"recorded":14,"out":"C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-fallback19-rerun-20261022\\b1-tail","sendEnabled":false}

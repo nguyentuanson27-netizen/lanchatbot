@@ -1,0 +1,12 @@
+{
+  "baselineBytes": 12135,
+  "candidateBytes": 13386,
+  "changedSections": [
+    "Hiểu khách và tư vấn",
+    "Giọng chat"
+  ],
+  "added": "Five owner-approved illustrative dialogues; exact replies retained. Added explicit image-capability and successful-receipt premises to prevent examples from authorizing live capabilities/effects.",
+  "authorityToolPolicySectionsUnchanged": true,
+  "examplesAreRuntimeFacts": false,
+  "treatment": "Combined replacement of repetitive advice/voice instructions with approved examples; does not isolate examples from instruction reduction."
+}

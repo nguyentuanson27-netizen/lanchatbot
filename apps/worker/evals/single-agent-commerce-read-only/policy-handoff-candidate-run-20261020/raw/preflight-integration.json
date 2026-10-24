@@ -1,0 +1,13 @@
+{
+  "sourceSha": "05be90e8ef73cb09aa82c8f6e3a6e627b0933e81",
+  "registeredSlots": 5,
+  "maximumGenerationRequests": 20,
+  "mode": "REAL_POSTGRES_TEMP_DATABASE_ISOLATED_CANDIDATE_HANDOFF_CAPTURE_TRANSPORT",
+  "sendEnabled": false,
+  "providerGenerations": 0,
+  "completedSlots": 0,
+  "testDatabaseCreated": false,
+  "testDatabaseDropped": false,
+  "outcomes": [],
+  "status": "PREFLIGHT_PASS"
+}

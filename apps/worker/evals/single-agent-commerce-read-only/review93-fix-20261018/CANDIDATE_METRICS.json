@@ -1,0 +1,63 @@
+{
+  "source": "bfb82f7fa48a968df59234084d975047515bf94f",
+  "attempts": 45,
+  "terminals": {
+    "FALLBACK": 13,
+    "SEND_ELIGIBLE": 23,
+    "NO_SEND": 3,
+    "HANDOFF": 6
+  },
+  "generationInvocations": 117,
+  "generationHttpRequests": 117,
+  "unknownRequestAccounting": 0,
+  "roles": {
+    "owner": 87,
+    "verifier": 30
+  },
+  "httpStatuses": {
+    "200": 110,
+    "429": 5,
+    "UNKNOWN": 2
+  },
+  "verdicts": {
+    "PASS": 22,
+    "ERROR": 5,
+    "FAIL": 3
+  },
+  "verifierLatency": {
+    "n": 30,
+    "p50Ms": 4860.923300000002,
+    "p95Ms": 8163.002099999998
+  },
+  "addedVerificationLatency": {
+    "n": 30,
+    "p50Ms": 5658.975899999998,
+    "p95Ms": 9826.419600000001
+  },
+  "ownerLatency": {
+    "n": 87,
+    "p50Ms": 2153.9219999999987,
+    "p95Ms": 4235.615300000005
+  },
+  "wholeTurnLatency": {
+    "n": 45,
+    "p50Ms": 13817.984199999999,
+    "p95Ms": 43896.498600000006
+  },
+  "errors": 7,
+  "timeouts": 0,
+  "verifierErrors": 5,
+  "inputTokens": 465281,
+  "outputTokens": 46962,
+  "usageCoverage": 110,
+  "cost": "NOT_EXPOSED",
+  "automaticRetries": 0,
+  "generatedFinals": 30,
+  "exactVerifierBindings": 30,
+  "eligibleExactDraftMatches": 22,
+  "evaluatorOrPrivateFixtureLeaksObserved": 0,
+  "rawHashesVerified": 132,
+  "sendEnabled": false,
+  "threeTestDatabasesDropped": true,
+  "privateCheckoutModelRequests": 0
+}

@@ -1,0 +1,84 @@
+{
+  "caseId": "b1-search-read-v3",
+  "sourceMode": "LIVE",
+  "elapsedMs": 3655.454800000007,
+  "runtime": {
+    "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "fc9389afe75a4aec73729c50c42b10fcf04a43b7a5949c0fae3d939d7a29aeff:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1092.8314000000246,
+        "telemetry": {
+          "generationId": "fc9389afe75a4aec73729c50c42b10fcf04a43b7a5949c0fae3d939d7a29aeff:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2419,
+          "outputTokens": 104,
+          "cost": null,
+          "thinkingTokens": 85
+        }
+      },
+      {
+        "id": "fc9389afe75a4aec73729c50c42b10fcf04a43b7a5949c0fae3d939d7a29aeff:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1341.927800000005,
+        "telemetry": {
+          "generationId": "fc9389afe75a4aec73729c50c42b10fcf04a43b7a5949c0fae3d939d7a29aeff:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3104,
+          "outputTokens": 203,
+          "cost": null,
+          "thinkingTokens": 181
+        }
+      },
+      {
+        "id": "fc9389afe75a4aec73729c50c42b10fcf04a43b7a5949c0fae3d939d7a29aeff:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 995.9853000000003,
+        "telemetry": {
+          "generationId": "fc9389afe75a4aec73729c50c42b10fcf04a43b7a5949c0fae3d939d7a29aeff:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3092,
+          "outputTokens": 68,
+          "cost": null,
+          "thinkingTokens": 48
+        }
+      }
+    ],
+    "toolLatencyMs": 223.1365999999689,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 4,
+    "policyReads": 10,
+    "catalogReads": 61,
+    "posReads": 36
+  }
+}

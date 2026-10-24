@@ -1,0 +1,15 @@
+{
+  "caseId": "b1-buying-concern",
+  "runtime": {
+    "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "status": "BLOCKED",
+    "terminal": null
+  },
+  "sendEnabled": false
+}

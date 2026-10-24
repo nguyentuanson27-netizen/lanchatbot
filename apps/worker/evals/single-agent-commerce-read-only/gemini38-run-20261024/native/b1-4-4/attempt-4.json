@@ -1,0 +1,59 @@
+{
+  "caseId": "b1-price",
+  "sourceMode": "LIVE",
+  "elapsedMs": 91333.53310000002,
+  "runtime": {
+    "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "TIMEOUT",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 0,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "63b76e8fc02352a5321064b28dd63af22c8d6f6265e9ea9610ab5cd2cb9b478b:owner:1",
+        "role": "owner",
+        "status": "TIMEOUT",
+        "latencyMs": 90016.23439999999,
+        "telemetry": {
+          "generationId": "63b76e8fc02352a5321064b28dd63af22c8d6f6265e9ea9610ab5cd2cb9b478b:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": null,
+          "modelVersion": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "cost": null,
+          "finishReason": null,
+          "requestBytes": 18782,
+          "requestHash": "30281e2f7289b49f8d8542c0c70ff8098c35a7269832f5258af2a568a9e13e11",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "failureStage": "GENERATION",
+          "failureCode": "TIMEOUT"
+        }
+      }
+    ],
+    "toolLatencyMs": 437.3764999999985,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 0,
+    "policyReads": 0,
+    "catalogReads": 2,
+    "posReads": 1
+  }
+}

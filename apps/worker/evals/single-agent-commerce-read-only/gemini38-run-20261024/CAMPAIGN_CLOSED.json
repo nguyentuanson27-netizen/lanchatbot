@@ -1,0 +1,12 @@
+{
+  "status": "BLOCKED_PROVIDER_TIMEOUT",
+  "sourceSha": "3a37a7844c4f64a5aaceead1f7fa995e9a9e4d02",
+  "controls": 17,
+  "nativeExecuted": 2,
+  "nativeNotRun": 44,
+  "failedAttempt": "b1-price",
+  "reason": "OWNER_GENERATION_TIMEOUT_90000MS",
+  "providerRequests": 21,
+  "retry": 0,
+  "nextDispatch": false
+}

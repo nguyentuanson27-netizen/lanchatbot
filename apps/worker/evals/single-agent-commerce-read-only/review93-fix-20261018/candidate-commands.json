@@ -1,0 +1,215 @@
+[
+  {
+    "population": "stateful",
+    "rep": 1,
+    "slot": null,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-stateful",
+      "COD",
+      "--provider-run"
+    ]
+  },
+  {
+    "population": "stateful",
+    "rep": 2,
+    "slot": null,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep2-stateful",
+      "COD",
+      "--provider-run"
+    ]
+  },
+  {
+    "population": "stateful",
+    "rep": 3,
+    "slot": null,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep3-stateful",
+      "COD",
+      "--provider-run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 1,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "1:1",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot1",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 3,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "3:3",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot3",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 5,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "5:5",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot5",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 6,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "6:6",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot6",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 8,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "8:8",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot8",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 17,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "17:17",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot17",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 19,
+    "exitCode": 0,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "19:19",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot19",
+      "--run"
+    ]
+  },
+  {
+    "population": "b1",
+    "rep": 1,
+    "slot": 23,
+    "exitCode": 1,
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/context-fix-20261016/cases.priority.json",
+      "--range",
+      "23:23",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-review93-candidate-rep1-b1-slot23",
+      "--run"
+    ]
+  }
+]

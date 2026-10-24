@@ -1,0 +1,48 @@
+{
+  "registered": 12,
+  "recorded": 12,
+  "requests": 36,
+  "errors": 0,
+  "automaticRetries": 0,
+  "sourceEmbeddingCalls": {
+    "preflightSourceCheck": 1,
+    "attempts": 0
+  },
+  "cost": "NOT_EXPOSED",
+  "roles": {
+    "owner": {
+      "generations": 24,
+      "requests": 24,
+      "inputTokens": 91032,
+      "outputTokens": 17273,
+      "missingUsage": 0,
+      "latencyMsP50": 2784.2638000000043,
+      "latencyMsP95": 5608.205550000002
+    },
+    "verifier": {
+      "generations": 12,
+      "requests": 12,
+      "inputTokens": 57381,
+      "outputTokens": 1011,
+      "missingUsage": 0,
+      "latencyMsP50": 5332.079800000003,
+      "latencyMsP95": 9856.18663999999
+    }
+  },
+  "dispositions": {
+    "SEND_ELIGIBLE": 12,
+    "FALLBACK": 0,
+    "HANDOFF": 0,
+    "NO_SEND": 0
+  },
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.0,
+  "addedVerificationLatencyMs": {
+    "p50": 6168.380000000001,
+    "p95": 10768.486344999994
+  },
+  "notes": [
+    "Latency excludes per-child credential/source launcher setup; owner per-generation vs verifier role is not a model speed comparison.",
+    "Output tokens may include reasoning. No provider cost exposed."
+  ]
+}
