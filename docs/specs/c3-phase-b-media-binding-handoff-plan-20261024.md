@@ -1,8 +1,8 @@
 # Phase B — kế hoạch sửa binding ảnh và ảnh kèm handoff sau review độc lập
 
-Trạng thái: **PLAN_REVISED; chưa implementation, chưa chạy model**. Base đã kiểm: `5ef25004fecf58e98adbfbf1bf5934879a6e87e1`. Owner yêu cầu sửa phương án sau independent review `/root/review_next_plan_loops`, verdict REVISE. A vẫn OWNER_BYPASS; B chưa GO.
+Trạng thái: **IMPLEMENTED_WITH_RESIDUALS; chưa chạy model**. [Bản sửa/checks/giới hạn](c3-phase-b-media-binding-handoff-implementation-20261024.md), executable871ba419. T1 giữ gap tên rút gọn; T2 atomic tại commit nhưng chưa đóng revalidation catalog sau commit–trước delivery; không đánh dấu toàn bộ acceptance đạt. Base plan đã kiểm: `5ef25004fecf58e98adbfbf1bf5934879a6e87e1`. Owner yêu cầu sửa phương án sau independent review `/root/review_next_plan_loops`, verdict REVISE. A vẫn OWNER_BYPASS; B chưa GO.
 
-Tài liệu này thay phương án trao đổi sau full run 24/10 cho vòng sửa tiếp theo. Không thay raw evidence, nhãn hoặc kết luận các vòng cũ. Các mục “Current” cũ trong tasks là lịch sử; pointer đầu tasks dẫn tới kế hoạch này. Lượt hiện tại chỉ sửa kế hoạch; các commands/checks/run dưới đây là công việc dự kiến, không phải bằng chứng đã chạy.
+Tài liệu này thay phương án trao đổi sau full run 24/10. Không thay raw evidence, nhãn hoặc kết luận các vòng cũ. Các mục “Current” cũ trong tasks là lịch sử; pointer đầu tasks dẫn tới trạng thái mới. Nội dung plan bên dưới giữ làm yêu cầu; bằng chứng thực chạy và phần chưa đạt chỉ lấy từ implementation report, không suy từ danh sách commands dự kiến.
 
 ## 1. Evidence và những hướng không làm lại
 

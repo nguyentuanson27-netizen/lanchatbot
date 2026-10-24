@@ -1,0 +1,30 @@
+{
+  "raw/bank.json": {
+    "sha256": "69b2d2db75f8d5c75d11e29fd628767e15063e511e4e4e01079811996da643ad",
+    "bytes": 10782
+  },
+  "raw/cod-final.json": {
+    "sha256": "4d8ac7ab199ac4ecccf8da85c6d1978d49dfa18ceaea8cd7c4edff4b4f9fecdc",
+    "bytes": 10772
+  },
+  "raw/cod.json": {
+    "sha256": "cd5cbc4ffdf1a9fb7a67c17b8dde6e0310df7140f5cb8e0e0c74ef0a9a8600ee",
+    "bytes": 12785
+  },
+  "raw/final-bank.json": {
+    "sha256": "d877f8b20fcee272513a3f34ee1f23d07aa38382ace88524ebc36bdb84522e20",
+    "bytes": 8068
+  },
+  "raw/final-bank.log": {
+    "sha256": "8fd2d6106bffff7bbae286286982f12d87ed4c7adea34236fa731214d6341f23",
+    "bytes": 472
+  },
+  "raw/final-cod.json": {
+    "sha256": "36105f316acdf33aff9fe5833cb93c1d4a621b41853a7007556c700e40d282bc",
+    "bytes": 8058
+  },
+  "raw/final-cod.log": {
+    "sha256": "8fd2d6106bffff7bbae286286982f12d87ed4c7adea34236fa731214d6341f23",
+    "bytes": 472
+  }
+}

@@ -1,4 +1,13 @@
-## Current — kế hoạch sửa sau review độc lập, 2026-10-24
+## Current — implementation media binding / mixed handoff, 2026-10-24
+
+- [x] Observed RED→GREEN first-contact code/full-title recovery và atomic ảnh+no-chart handoff; self-review sửa unknown-code/focus, policy race, dedup và fixture/type errors.
+- [x] Final247worker/92NodePASS; worker lint/typecheck/buildPASS. Exact-source871ba419 COD5/BANK5 PostgreSQL checksPASS, cả5testDBsdropped; intermediate37/23/23 reports giữ riêng. [Report/evidence](../docs/specs/c3-phase-b-media-binding-handoff-implementation-20261024.md).
+- [ ] T1 original shortened title: chưa có authoritative alias, không claim gallery raw cũ hết fallback.
+- [ ] T2 acceptance sau commit–trước delivery: current catalog revalidator chưa nối qua durable delivery path; chỉ precommit validation + existing group gate được kiểm. Không claim đầy đủ freshness sau commit.
+- [ ] Chart brand/parent/component authority vẫn gap theo audit23/10.
+- [ ] T4 provider51native/17controls chưa chạy; cần freeze/preflight và ghi residual trước run. B chưa GO.
+
+## Historical — kế hoạch sửa sau review độc lập, 2026-10-24
 
 - [x] Sửa [phương án hiện hành](../docs/specs/c3-phase-b-media-binding-handoff-plan-20261024.md) theo REVISE; self-review tránh lặp thử nghiệm tư vấn/context và sửa chẩn đoán gallery.
 - [ ] T1: RED→GREEN recovery ảnh với binding sản phẩm của lượt; negative controls sai món/ambiguous/stale/HUMAN.

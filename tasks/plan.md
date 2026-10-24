@@ -1,4 +1,8 @@
-## Current — kế hoạch sau full Phase B và independent review, 2026-10-24
+## Current — implementation media binding / mixed handoff, 2026-10-24
+
+**IMPLEMENTED_WITH_RESIDUALS; MODEL_NOT_RUN; B chưa GO.** [Implementation và evidence](../docs/specs/c3-phase-b-media-binding-handoff-implementation-20261024.md). Base db4f2dbb; executable871ba419. First-contact recovery dùng đúng code/full source title, không inherit unknown code từ focus cũ; automatic no-chart có ảnh đã xác minh + policy holding trong một transaction/group, không thêm model/generation. Self-review sửa policy check tại commit và dedup ảnh. Final247worker/92NodePASS, lint/typecheck/worker buildPASS; PostgreSQL exact-source COD5/BANK5PASS/DBdropped, trước đó37/23/23intermediatePASS giữ nhãn. T1 shortened title chưa bind; T2 post-commit catalog revalidation trước delivery chưa nối, không claim hoàn tất mọi acceptance. T4 chưa dispatch. Prompt/models/corpus/fallback giữ nguyên; không live send/deploy/merge.
+
+## Historical — kế hoạch sau full Phase B và independent review, 2026-10-24
 
 **PLAN_REVISED; chưa implementation/run mới.** [Kế hoạch hiện hành](../docs/specs/c3-phase-b-media-binding-handoff-plan-20261024.md). Base5ef25004; reviewer `/root/review_next_plan_loops` REVISE đã được tiếp thu. Sửa recovery ảnh với binding sản phẩm của lượt khi persisted focus null; thiết kế một group ảnh đã xác minh + handoff thiếu chart. Kế thừa audit chart23/10, không alias/publish giả. Giữ prompt/context/model; bỏ thử lại tools-off và biên tập descriptions chưa có giả thuyết mới. RED→GREEN/atomic capture checks trước provider; dự kiến cùng51native+17controls, prefix nằm trong51, N1/retry0, stop khi delta chưa đạt. User hiện yêu cầu sửa phương án; chưa dispatch. Các mục Current bên dưới giữ làm lịch sử, không thay trạng thái mới này. B chưa GO.
 
