@@ -1,4 +1,8 @@
-## Current — model run execution/media/deadline, 2026-10-24
+## Current — kế hoạch sau full Phase B và independent review, 2026-10-24
+
+**PLAN_REVISED; chưa implementation/run mới.** [Kế hoạch hiện hành](../docs/specs/c3-phase-b-media-binding-handoff-plan-20261024.md). Base5ef25004; reviewer `/root/review_next_plan_loops` REVISE đã được tiếp thu. Sửa recovery ảnh với binding sản phẩm của lượt khi persisted focus null; thiết kế một group ảnh đã xác minh + handoff thiếu chart. Kế thừa audit chart23/10, không alias/publish giả. Giữ prompt/context/model; bỏ thử lại tools-off và biên tập descriptions chưa có giả thuyết mới. RED→GREEN/atomic capture checks trước provider; dự kiến cùng51native+17controls, prefix nằm trong51, N1/retry0, stop khi delta chưa đạt. User hiện yêu cầu sửa phương án; chưa dispatch. Các mục Current bên dưới giữ làm lịch sử, không thay trạng thái mới này. B chưa GO.
+
+## Historical — model run execution/media/deadline, 2026-10-24
 
 CAMPAIGN_CLOSED_STOP; B chưa GO. [Report và hội thoại](../apps/worker/evals/single-agent-commerce-read-only/execution-media-run-20261024/CHECKPOINT_B.md). Source9887c217; media controls17 PASS, ETA replay6 PASS, advice8 eligible/NOT_PROMOTED; native21/46:16eligible (10B1 eligibility-only),4fallback,1expectedhandoff. Rest25 NOT_RUN do whole-prefix regressions và gate exit1; không provider retry hoặc sửa/rerun. 52outcomes/103requests,0providererror/timeout,1deterministic BUDGET giữ denominator,103actual wires firewallPASS,2DBdropped. Discovery không còn OWNER_TOOL_MODE trong N1 nhưng draft verifierFAIL; gallery đã chọn ảnh chung nhưng vẫn FAIL/lost images; deadline actual sent; media+size regression sourceQuote/state/budget. Giọng/decision chưa ổn định; source-layout không promote. Không deploy/live send/fullA.
 
