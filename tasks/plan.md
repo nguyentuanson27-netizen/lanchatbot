@@ -2488,3 +2488,7 @@ Independent review APPROVE exact0383a4e8; reviewer205PASS, no blocking findings.
 ## Post-fix opening model run — 2026-10-24
 
 Owner-authorized source56884a58 (reviewed executable0383a4e8),raw d4d4fcf7; all5/5SEND_ELIGIBLE,0fallback/errors/timeouts,9owner+5verifier=14requests/retry0. Ads binding and stock-size shared evidence observed working; full runtime/finalcleanliness PASS,DBdropped. Residuals: repeated images/size, organic still null offer and unsolicited component prices, generic CTA. [Whole-turn report](../apps/worker/evals/single-agent-commerce-read-only/opening-fixed-flashlite-20261024/CHECKPOINT_B.md). No fullB qualification or automatic further run/deploy.
+
+## Full Phase B provider run — 2026-10-24
+
+Owner requests all cases: source1ab3ff35;17controlsPASS then51native (existing46+opening5),N1/retry0,full diagnostic no prefix quality qualification. All dispatched;43eligible/2fallback/4handoff/2codecheckout.163generationrequests,allHTTP200/exactmodels,0timeout/error;5testDBsdropped;163wirefirewallPASS/rawhashesverified. Raw80550985+logsa664ee3d before primarycb05de23. [Report/histories](../apps/worker/evals/single-agent-commerce-read-only/full-phase-b-20261024/CHECKPOINT_B.md). Quality/sizechart/mediahandoffresiduals remain; BnotGO, no auto fix/run/deploy.

@@ -2217,3 +2217,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Clean source56884a58/preflight0generation; all5/5outcomes SEND_ELIGIBLE,0fallback/timeout/error,14actualgenerationrequests/retry0,14wirefirewallPASS,rawhashesverified,DBdropped.
 - [x] Review all5 actual terminals and compare previous run; binding/size defects not observed again. [Report](../apps/worker/evals/single-agent-commerce-read-only/opening-fixed-flashlite-20261024/CHECKPOINT_B.md).
 - [ ] Sales quality/stability: repeated images, extra component-price menu, null offer despite explicit set, generic CTA; fullBnotGO.
+
+## Full Phase B provider run — 2026-10-24
+
+- [x] Clean source1ab3ff35;17controlsPASS; all51nativecasesonce:24B1+8stateful+4openings+7media+3negotiation+5openingquotes.
+- [x] 43eligible/2fallback/4handoff/2codecheckout;163generationrequestsHTTP200/retry0/errors0/timeouts0;5DBsdropped/capturevalidated,163wirefirewallPASS/rawhashesverified.
+- [x] Raw80550985/logsa664ee3d→primarycb05de23; reviewedall51wholeterminals; [report](../apps/worker/evals/single-agent-commerce-read-only/full-phase-b-20261024/CHECKPOINT_B.md).
+- [ ] BGO: salesdecision/voice,2fallback,sizechartauthorityandmedia+sizehandoffremain. No further automaticrun/fix/deploy.
