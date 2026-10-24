@@ -2482,3 +2482,5 @@ Flash Lite comparison completed: sourceaae7cf78/raw27b540c6;5/5outcomes,3eligibl
 ## Opening source/size correction — 2026-10-24
 
 Owner requests implementation then one independent review. Implement ingress-only exact-code resolution, shared resolver-derived positive-stock size evidence/readback, explicit offer/default projection and replacement opening prompt section (20bytes shorter). RED7→GREEN;379unique focusedPASS, workerbuild/lint/typecheckPASS. [Scope/evidence/limits](../docs/specs/c3-phase-b-opening-source-size-fix-20261024.md). No provider/live run; independent review follows exact source commit; BnotGO.
+
+Independent review APPROVE exact0383a4e8; reviewer205PASS, no blocking findings. No source changes after review, only documentation closure; provider quality remains unverified. See report independent-review section.

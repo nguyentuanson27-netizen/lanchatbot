@@ -25,4 +25,8 @@ Composed test dùng ingress + createCommerceReadSources thật với seed[], kh�
 
 Không cài semantic router/parser, third role, repair/reverify/retry, production wiring hoặc live send. Prompt làm rõ lựa chọn offer và giọng không bảo đảm model luôn làm đúng; OWNER_TOOL_MODE/timeout/bounds còn có thể xảy ra, giữ fail-closed. Không tăng request bounds hoặc cắt native history. Cần run riêng sau review để đánh giá actual replies; không dùng unit tests làm model quality PASS.
 
-Independent exact-head review được yêu cầu sau implementation/self-review; kết quả ghi tiếp khi reviewer hoàn tất.
+## Independent review
+
+Reviewer riêng `/root/review_opening_source_size`: **APPROVE** exact implementation head `0383a4e8c5444aa27b34b239eb015764e4a4e1e1` so với base trên. Không finding blocking mới trong diff. Không sửa source, không provider/live/commit. Reviewer tự chạy worker source/ingress/tools125PASS và Node protocol/Gemini80PASS (205tests, là xác minh lại, không cộng vào unique379).
+
+Review xác nhận exact catalog resolution trước bind, guard unbound/identity swap còn; size đúng positive stock/offer/color/requestedSize; owner/verifier cùng evidence, expiry/source/readback invalidate size-only changes; multi-offer projection giữ option evidence; prompt không thêm benchmark examples. Chưa xác nhận model chọn đúng offer, tự nhiên/gọn, hoặc hết tool-mode/timeout. Docs/todo follow-up sau review không đổi implementation đã được duyệt. Chưa chạy model trên bản sửa; B chưa GO.
