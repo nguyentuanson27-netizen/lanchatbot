@@ -6,6 +6,17 @@ import {
 } from "./shadow-mirror.js";
 
 describe("shadow mirror privacy helpers", () => {
+  it("keeps ordinary product construction language while protecting actual street addresses", () => {
+    for (const text of [
+      "Em gửi chị xem ảnh cận cảnh họa tiết thêu nổi trên áo để mình dễ dàng quan sát từng đường nét thêu nhé ạ.",
+      "Phần cổ có đường viền nhỏ, tay áo may đường đôi.",
+      "Đường cắt ở vai nhìn gọn hơn chị nhé.",
+    ]) expect(redactAnalyticsMessage(text).text).toBe(text);
+    for (const text of ["Giao chị 12 đường Lê Lợi, Q. 1", "Nhà chị ở đường Lê Lợi nhé", "đường nguyễn trãi, phường 5",
+      "Áo có đường viền nhỏ, gửi tới 25 Đ. Lê Duẩn", "12/3 duong le loi, p. 5"]) {
+      expect(redactAnalyticsMessage(text).text).toBe("[ADDRESS]");
+    }
+  });
   it("redacts direct identifiers before analytical persistence", () => {
     const redacted = redactAnalyticsText(
       "Họ tên: Nguyễn Văn A\nSĐT 0984997797 email lana@example.com\nĐịa chỉ: 12 Nguyễn Trãi, Tây Ninh\nCCCD: 012345678901",
