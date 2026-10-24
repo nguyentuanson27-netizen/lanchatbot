@@ -33,12 +33,12 @@ const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringif
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
  check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===32768,'REQUEST_BOUNDS');
- check(m.models.conversation.provider==='VERTEX_AI'&&m.models.conversation.model==='gemini-3.5-flash-lite'&&m.models.conversation.effort==='high'&&
+ check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&
   m.models.verifier.provider==='OPENAI'&&m.models.verifier.model==='gpt-6.1-sol'&&m.models.verifier.effort==='high'&&
   m.models.verifier.generationConfig.reasoningEffort==='high'&&m.models.verifier.generationConfig.retry===0,'MODEL_IDENTITY');
  const owner=m.models.conversation.generationConfig,v=m.models.verifier.generationConfig;
  check(m.models.conversation.version===m.models.conversation.model&&m.models.conversation.location==='global'&&
-  owner.candidateCount===1&&owner.responseMimeType==='text/plain'&&owner.maxOutputTokens===8192&&owner.thinkingConfig.thinkingLevel==='HIGH'&&
+  (m.models.conversation.model==='gemini-3.8-flash'?!Object.hasOwn(owner,'candidateCount'):owner.candidateCount===1)&&owner.responseMimeType==='text/plain'&&owner.maxOutputTokens===8192&&owner.thinkingConfig.thinkingLevel==='HIGH'&&
   owner.thinkingConfig.includeThoughts===false&&owner.retry===0&&owner.timeoutMs===90000&&
   m.models.verifier.version===m.models.verifier.model&&v.timeoutMs===90000&&v.maxResponseBytes===1048576&&
   v.relayUpstreamRequestsPerAttempt===1&&v.endpoint==='https://chatgpt.com/backend-api/codex/responses'&&v.cliVersion==='0.159.2','GENERATION_CONFIG');

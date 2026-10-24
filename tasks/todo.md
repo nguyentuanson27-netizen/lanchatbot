@@ -2178,3 +2178,8 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 
 - [x] Implement và self-review inline state+size, scoped image description, gated media recovery và verifier diagnostics.
 - [ ] Provider qualification mới; generic giá/tồn recovery và ảnh sau handoff còn residual. [Chi tiết, checks và giới hạn](../docs/specs/c3-phase-b-composed-input-media-recovery-20261024.md). B chưa GO; không tự chạy model/deploy.
+
+## Gemini 3.8 Flash owner — 2026-10-24
+
+- [x] Exact model/config compatibility, RED then GREEN83; unchanged prompt/corpus/verifier.
+- [ ] Fresh source seal/capture/preflight, controls17, gated native46, raw evidence and whole-turn report.

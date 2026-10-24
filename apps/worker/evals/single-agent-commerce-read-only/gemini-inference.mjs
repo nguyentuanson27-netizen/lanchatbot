@@ -260,7 +260,7 @@ async function boundedJson(response,max){
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));}finally{reader.releaseLock();}
 }
 export function createGeminiCommerceInference(config,dependencies={}){
- requireThat(config.model==='gemini-3.5-flash-lite'&&config.effort==='high'&&config.location==='global','OWNER_MODEL_IDENTITY');
+ requireThat(['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(config.model)&&config.effort==='high'&&config.location==='global','OWNER_MODEL_IDENTITY');
  const fetchImpl=dependencies.fetchImpl??fetch;let token=null;
  return async request=>{
   const telemetry={generationId:request.generationId,providerRequests:0,authRequests:0,httpStatus:null,modelVersion:null,
@@ -269,6 +269,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
   const signal=AbortSignal.any([request.signal,AbortSignal.timeout(config.timeoutMs??90000)]);
   try{
    const body=buildGeminiCommerceRequest(request,config.declarations??readOnlyDeclarations);
+   if(config.model==='gemini-3.8-flash')delete body.generationConfig.candidateCount;
    const wire=JSON.stringify(body);
    telemetry.requestBytes=Buffer.byteLength(wire);telemetry.requestHash=createHash('sha256').update(wire).digest('hex');
    telemetry.functionCallingMode=body.toolConfig.functionCallingConfig.mode;

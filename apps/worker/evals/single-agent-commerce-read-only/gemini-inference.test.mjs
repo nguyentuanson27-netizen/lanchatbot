@@ -1,4 +1,15 @@
 import test from 'node:test';
+test('Gemini 3.8 Flash uses its exact endpoint without unsupported candidateCount',async()=>{
+ let url,wire;
+ const cfg={...config,model:'gemini-3.8-flash'};
+ const r=await createGeminiCommerceInference(cfg,{getToken:async()=>'test-token',fetchImpl:async(u,init)=>{
+  url=u;wire=JSON.parse(init.body);return new Response(JSON.stringify({...body([{text:'Dạ chị.'}]),modelVersion:cfg.model}));
+ }})(request());
+ assert.match(url,/gemini-3\.8-flash:generateContent$/);
+ assert.equal(Object.hasOwn(wire.generationConfig,'candidateCount'),false);
+ assert.equal(wire.generationConfig.thinkingConfig.thinkingLevel,'HIGH');
+ assert.equal(r.telemetry.providerRequests,1);assert.equal(r.telemetry.modelVersion,cfg.model);
+});
 test('inline size inputs preserve signed history and map only execution fields',()=>{
  const b=body([{functionCall:{name:'recommend_size',args:{subjectRef:'P1',customerStateOps:[{op:'SET',field:'HEIGHT_CM',value:158,sourceQuote:'1m58'}]}},thoughtSignature:'signed'}]);
  const p=parseGeminiGeneration(b);

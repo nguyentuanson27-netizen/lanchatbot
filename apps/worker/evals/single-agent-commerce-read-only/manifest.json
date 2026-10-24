@@ -15,13 +15,12 @@
   "models": {
     "conversation": {
       "provider": "VERTEX_AI",
-      "model": "gemini-3.5-flash-lite",
-      "version": "gemini-3.5-flash-lite",
+      "model": "gemini-3.8-flash",
+      "version": "gemini-3.8-flash",
       "effort": "high",
       "location": "global",
       "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
       "generationConfig": {
-        "candidateCount": 1,
         "responseMimeType": "text/plain",
         "maxOutputTokens": 8192,
         "thinkingConfig": {

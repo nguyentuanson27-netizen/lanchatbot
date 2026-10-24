@@ -2454,3 +2454,7 @@ Owner đã yêu cầu implementation theo [bổ sung plan](../docs/specs/c3-phas
 ## Composed size input / media recovery — 2026-10-24
 
 Owner yêu cầu implementation sau review campaign 20261024. Thực hiện inline state+size qua writer hiện hữu, metadata ảnh scoped, code-owned fallback ảnh qua current gate, bounded verifier diagnostics; không thêm lời nhắc giọng. [Chi tiết, checks và giới hạn](../docs/specs/c3-phase-b-composed-input-media-recovery-20261024.md). B chưa GO; không tự chạy model/deploy.
+
+## Owner-authorized Gemini 3.8 Flash run — 2026-10-24
+
+User requests model run with gemini-3.8-flash owner. Keep HIGH/global and existing verifier Sol 6.1 High, current prompts/corpora, one attempt/case, retry0. Official Google guide confirms exact model/endpoint and requires omission of candidateCount. Adapter compatibility observed RED then GREEN83. Seal source; fresh capture and frozen controls17; native46 under existing first21/rest25 gate. No advice context candidate promotion, live send/deploy or automatic repeat. Retain every error and unexecuted slot.
