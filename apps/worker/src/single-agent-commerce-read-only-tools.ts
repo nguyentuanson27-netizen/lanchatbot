@@ -50,6 +50,18 @@ export function createReadOnlyTools(input: {
   const searchReads = new Set<string>();
   const prepared = new Set<string>();
   const preparationContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  // Offer identities are source metadata, not price/stock facts or variant bindings.
+  const offerLiteral = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) => {
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), now = input.clock().getTime();
+    if (source.product.productId !== id || !parsed.success || parsed.data.product_id !== id ||
+      parsed.data.shop_alias !== scope.shopAlias) return null;
+    const raw = parsed.data, observed = Date.parse(raw.synced_at), expires = observed + maxAge * 1000;
+    const availableOffers = Object.keys(raw.offers).sort();
+    if (!["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
+      observed > now || expires <= now || availableOffers.length > 8) return null;
+    return { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
+      observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers }) };
+  };
   const bind = (p: StableProductDocument) => {
     if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
   };
@@ -278,7 +290,22 @@ export function createReadOnlyTools(input: {
         const evidence = candidates.map(p => staticEvidence(p, input.clock()));
         if (new Set([...products.keys(), ...evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)]).size > MAX_RUNTIME_PRODUCTS)
           return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+        // Bounded catalog reads (one per returned candidate), accounted by the catalog port.
+        // No facts are resolved and no selling option is selected on the customer's behalf.
+        const metadata = await Promise.all(candidates.map(async p => {
+          try { return offerLiteral(p.productId, await input.catalog.readProduct(p.productId)); }
+          catch { return null; }
+        }));
+        // Other independent searches may have completed while source reads were in flight.
+        if (new Set([...subjects.keys(), ...candidates.map(p => p.productId)]).size > 8)
+          return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+        if (new Set([...products.keys(), ...evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)]).size > MAX_RUNTIME_PRODUCTS)
+          return { status: "REJECTED", reason: "PRODUCT_BOUND" };
         candidates.forEach(bind);
+        candidates.forEach((p, i) => {
+          if (metadata[i]) offerContexts.set(p.productId, metadata[i]!);
+          else offerContexts.delete(p.productId);
+        });
         for (const p of evidence) {
           searchReads.add(p.subjectRef);
           // Search must not replace a fuller, already verified product read.
@@ -302,7 +329,7 @@ export function createReadOnlyTools(input: {
     const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
     for (const id of prepared) if (!fullReads.has(id)) await prepareProduct(id);
     for (const id of searchReads) if (!fullReads.has(id)) {
-      const {product} = await input.catalog.readProduct(id, false);
+      const source = await input.catalog.readProduct(id), {product} = source;
       if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");
       const evidence = staticEvidence(product, input.clock());
       if (!products.has(id) && (evidence.attributes || evidence.content) && products.size >= MAX_RUNTIME_PRODUCTS)
@@ -310,6 +337,8 @@ export function createReadOnlyTools(input: {
       products.delete(id);
       if (evidence.attributes || evidence.content) products.set(id, evidence);
       subjects.set(id, {...subjects.get(id)!, label:product.title});
+      const metadata = offerLiteral(id, source);
+      if (metadata) offerContexts.set(id, metadata); else offerContexts.delete(id);
     }
     for (const [ref, subject] of subjects) if (subject.kind === "VARIANT") subjects.delete(ref);
     for (const a of reads.values()) if ((await readProduct(a)).status !== "OK") throw new Error("PRODUCT_READBACK_UNAVAILABLE");

@@ -29,6 +29,42 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("makes source offer codes available after discovery before reading protected facts", async () => {
+    const records = ["A101", "B202", "C303"].map(id => {
+      const f = fixtureProduct(id), template = f.snapshot.offers.DIRECT!;
+      f.snapshot.offers = Object.fromEntries(["AO", "QUAN", "SET_QUAN"].map(offer => [offer, {
+        ...structuredClone(template), rows: template.rows.map(r => ({ ...r, offer_type: offer })),
+      }]));
+      return f;
+    });
+    const readProduct = vi.fn(async (id: string) => structuredClone(records.find(f => f.product.productId === id)!));
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      catalog: { readProduct, searchText: async () => ({ status: "AMBIGUOUS", reasonCode: "TOP_GAP_TOO_SMALL",
+        candidates: records.map(f => ({ document: f.product, score: 0.8 })) }) } });
+    // Structural reproduction, not the missing historical POS snapshot: three
+    // parents plus two groups of three offers exceed eight retained subjects.
+    const comparison = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
+      initialProducts: records.map(f => f.product), catalog: { readProduct,
+        searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+    expect((await comparison.invoke({ name: "read_product", args: { subjectRef: "A101" } })).status).toBe("OK");
+    const beforeRejected = comparison.snapshot();
+    expect(await comparison.invoke({ name: "read_product", args: { subjectRef: "B202" } }))
+      .toEqual({ status: "REJECTED", reason: "SUBJECT_BOUND" });
+    expect(comparison.snapshot()).toEqual(beforeRejected);
+    readProduct.mockClear();
+    await tools.invoke({ name: "search_products", args: { query: "bộ đi làm" } });
+    const discovered = tools.snapshot();
+    expect(discovered.boundSubjects).toHaveLength(3);
+    expect(discovered.protectedClaims).toHaveLength(0);
+    for (const f of records) expect(discovered.policyLiterals.map(p => JSON.parse(p.text)))
+      .toContainEqual({ productId: f.product.productId, availableOffers: ["AO", "QUAN", "SET_QUAN"] });
+    expect(readProduct).toHaveBeenCalledTimes(3);
+    const reads = await tools.invokeBatch(records.slice(0, 2).map(f => ({ name: "read_product",
+      args: { subjectRef: f.product.productId, offerType: "SET_QUAN" } })));
+    expect(reads.map(r => r.status)).toEqual(["OK", "OK"]);
+    expect(tools.snapshot().boundSubjects).toHaveLength(5);
+    expect(await tools.readback()).toEqual(tools.snapshot());
+  });
   it("uses checkout region priority for southern addresses and binds the resolved source key",async()=>{
     const {f,tools}=sellingFixture({DIRECT:499000});
     f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:false,prep_min_days:1,prep_max_days:2,zero_stock_policy:"",zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:" "};
@@ -344,7 +380,7 @@ describe("read-only domain tools", () => {
     expect(missing).toMatchObject({ status: "OK", data: { availability: { price: { status: "OK" }, stock: { status: "OK" },
       eta: { status: "NOT_FOUND" } } } });
   });
-  it("search supplies source-bound static evidence without hidden POS reads and revalidates it before eligibility", async () => {
+  it("search accounts one source metadata read without binding POS facts and revalidates before eligibility", async () => {
     const f = fixtureProduct(); f.product.descriptionXml = "Áo cotton dáng suông.";
     const readProduct = vi.fn(async () => structuredClone(f));
     const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
@@ -352,7 +388,7 @@ describe("read-only domain tools", () => {
     const found = await tools.invoke({name:"search_products",args:{query:"áo cotton"}});
     expect(found.data).toMatchObject({products:[{subjectRef:"SM613",attributes:{materials:["cotton"]},
       content:{description:"Áo cotton dáng suông."}}]});
-    expect(readProduct).not.toHaveBeenCalled();
+    expect(readProduct).toHaveBeenCalledTimes(1);
     expect(tools.snapshot().protectedClaims).toEqual([]);
     expect(tools.snapshot().runtimeProducts![0]!.content!.description).toBe("Áo cotton dáng suông.");
     const before = makeBinding("turn","Áo cotton dáng suông.",tools.snapshot());
