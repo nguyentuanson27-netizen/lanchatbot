@@ -85,6 +85,20 @@ it("adds bounded actual image history without evicting customer corrections or e
   expect(Buffer.byteLength(joined)).toBeLessThanOrEqual(4096);
 });
 
+it("keeps an accepted-image conversation returning when the text history write was lost", async () => {
+  const f = fixture();
+  Object.assign(f.store, { readAcceptedCommerceMedia: vi.fn(async () => [{ productId: "SM613",
+    assetRef: `asset:${"a".repeat(64)}`, status: "SENT_ACCEPTED", occurredAt: commerceNow.toISOString() }]) });
+  let entry: unknown, contents: unknown;
+  await f.run(async request => {
+    entry = JSON.parse(request.context.policyLiterals.find(p => p.ref === "conversation-entry")!.text);
+    contents = request.contents;
+    return { kind: "FINAL", text: "Dạ chị." };
+  });
+  expect(entry).toEqual({ firstContact: false, fromAd: false });
+  expect(JSON.stringify(contents)).toContain("RECENT_SHOP_IMAGES_ACCEPTED");
+});
+
 it.each(["code", "source-title", "approved-group"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
   const f = fixture(), product = fixtureProduct();
   product.product.title = "Áo Thanh Mai";

@@ -206,7 +206,7 @@ export async function runPersistedCommerceIngress(input: {
   }).catch(() => []) : [];
   const history = commerceHistory(rows, recentMedia);
   const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
-    entry: {firstContact: rows.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
+    entry: {firstContact: rows.length === 0 && recentMedia.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
