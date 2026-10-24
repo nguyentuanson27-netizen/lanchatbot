@@ -30,6 +30,8 @@ import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-cap
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
+const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
+assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
 const providerFreeze=providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
 const {Pool}=createRequire(new URL('../../../../packages/database/package.json',import.meta.url))('pg');
@@ -39,7 +41,7 @@ const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encodi
  sourceDirty:!!execFileSync('git',['status','--porcelain','--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'],{cwd:root,encoding:'utf8'}).trim(),
  mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
-const check=async(name,fn)=>{if(providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
+const check=async(name,fn)=>{if((checkPrefix&&!name.startsWith(checkPrefix))||providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
  (process.argv.includes('--handoff-delivery-only')&&!['B composed snapshot invalidation ','B composed dependency holding delivery ','B composed candidate first ',
   'B composed no-chart preserves','B composed mixed media','B composed N5 ','B composed missing private checkout','B composed configured private dependency'].some(prefix=>name.startsWith(prefix))) ||
  (process.argv.includes('--media-handoff-only')&&!name.startsWith('B composed candidate first')&&!name.startsWith('B composed no-chart preserves')&&!name.startsWith('B composed mixed media')))return;
@@ -700,6 +702,7 @@ try{
   assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),providerFreeze.registration.sourceSha,'RUN_SOURCE_CHANGED');
   const finalFreeze=statefulPreflight(root);assert.equal(finalFreeze.registration.sourceConfigHash,providerFreeze.registration.sourceConfigHash,'RUN_CONFIG_CHANGED');
  }
+ if(checkPrefix){assert(report.cases.length>0,'CHECK_PREFIX_MATCHED_NOTHING');report.checkPrefix=checkPrefix;}
  report.status=providerRun?'COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW':'PASS';save();
 }catch(error){report.status='FAIL';report.errorType=error.name;report.error=error.message;save();console.error(error.stack);process.exitCode=1;}
 finally{
