@@ -40,6 +40,8 @@ const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encodi
  mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
 const check=async(name,fn)=>{if(providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
+ (process.argv.includes('--handoff-delivery-only')&&!['B composed snapshot invalidation ','B composed dependency holding delivery ','B composed candidate first ',
+  'B composed no-chart preserves','B composed mixed media','B composed N5 ','B composed missing private checkout','B composed configured private dependency'].some(prefix=>name.startsWith(prefix))) ||
  (process.argv.includes('--media-handoff-only')&&!name.startsWith('B composed candidate first')&&!name.startsWith('B composed no-chart preserves')&&!name.startsWith('B composed mixed media')))return;
  try{await fn();report.cases.push({name,status:'PASS'});save();console.log(name+': PASS');}
  catch(error){report.cases.push({name,status:'FAIL',error:error.message});save();throw error;}};
@@ -48,10 +50,10 @@ const databaseName='c3_b_test_'+randomBytes(8).toString('hex');
 assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));
 const admin=new Pool({connectionString:adminUrl,max:1}),testUrl=new URL(adminUrl);testUrl.pathname='/'+databaseName;
 let pool,runtime,inbox,policyStore,livePolicyStore,historyStore,providerPorts,created=false;
-function handoffGate(base,policy){return createCommerceHandoffPreSendGate({base,clock:()=>new Date(),policy,
+function handoffGate(base,policy,receiptAvailable=()=>true){return createCommerceHandoffPreSendGate({base,clock:()=>new Date(),policy,
  readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
   assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
- hasCommittedHandoff:b=>runtime.hasCommittedHandoffDelivery({...b,bindingHash:commerceHash(b)})});}
+ hasCommittedHandoff:b=>{if(!receiptAvailable())throw Error('CONTROLLED_RECEIPT_READ_UNAVAILABLE');return runtime.hasCommittedHandoffDelivery({...b,bindingHash:commerceHash(b)});}});}
 try{
  await admin.query('CREATE DATABASE '+databaseName);created=true;
  pool=new Pool({connectionString:testUrl.toString(),max:4});
@@ -369,7 +371,7 @@ try{
     eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
     sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
   const facts=live?providerPorts.facts:{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
-  let policyChanged=false;
+  let policyChanged=false,receiptAvailable=true;
   const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
    if(!dependencyHoldingReply&&!policyChanged)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
@@ -388,7 +390,7 @@ try{
      assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
     policy:async()=>{const r=await policy();assert(r.bundle);return r.bundle;},
     readProduct:async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;},
-   }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;}),{workerId:'c3-b-capture'},undefined,historyStore);
+   }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
   async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false}={}){
@@ -411,7 +413,7 @@ try{
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},
+  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
@@ -424,7 +426,7 @@ try{
   j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[text]);
   const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.verifiers,0);await j.drain();assert.deepEqual(j.capture,[text]);
  });
- for(const mode of ['unchanged','before-commit','after-commit','restart','cached-allowed','missing-receipt','lost-commit-reply'])await check('B composed dependency holding delivery '+mode+' uses committed policy and actual capture',async()=>{
+ for(const mode of ['unchanged','before-commit','after-commit','restart','cached-allowed','receipt-unavailable','lost-commit-reply'])await check('B composed dependency holding delivery '+mode+' uses committed policy and actual capture',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
   const r=await j.turn('Em kiểm tra lại giúp chị nhé',[native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}])],
    {beforeCommit:async()=>{if(mode==='before-commit')j.changeHandoffPolicy();},loseCommitReply:mode==='lost-commit-reply'});
@@ -444,13 +446,13 @@ try{
      observation:{status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()}});
    }
    if(['after-commit','restart','cached-allowed'].includes(mode))j.changeHandoffPolicy();
-   if(mode==='missing-receipt')await pool.query("UPDATE handoff_events SET reason_detail_safe=reason_detail_safe - 'deliveryBindingHash' WHERE conversation_id=$1",[j.bound.conversationId]);
+   if(mode==='receipt-unavailable')j.disableReceiptRead();
    if(['restart','cached-allowed','lost-commit-reply'].includes(mode))j.restartDelivery();
   }
   await j.drain();await j.drain();
   const expected=mode==='before-commit'&&r.result.terminal.disposition==='FALLBACK'?[r.result.terminal.text]:['unchanged','lost-commit-reply'].includes(mode)?[text]:[];
   assert.deepEqual(j.capture,expected);if(mode==='before-commit')assert(!j.capture.includes(text));
-  if(['after-commit','restart','cached-allowed','missing-receipt'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
+  if(['after-commit','restart','cached-allowed','receipt-unavailable'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
  });
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
  await check('B composed candidate first '+reason+' acknowledges once after real atomic commit',async()=>{
