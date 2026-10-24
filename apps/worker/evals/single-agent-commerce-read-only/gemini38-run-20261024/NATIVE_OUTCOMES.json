@@ -1,0 +1,26 @@
+[
+  {
+    "file": "native\\b1-3-3\\attempt-3.json",
+    "caseId": "b1-partial-source",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set Thạch Thảo có áo may bằng vải tơ Hàn thêu mềm, thoáng và có độ bay tự nhiên; chân váy may bằng vải ren tơ Hàn mềm, dáng có độ rũ tự nhiên chị nhé. \n\nHiện tại em chưa tra được thông tin giá và tình trạng còn hàng size M của set này ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-4-4\\attempt-4.json",
+    "caseId": "b1-price",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "TIMEOUT",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  }
+]
