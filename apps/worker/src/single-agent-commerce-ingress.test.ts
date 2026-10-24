@@ -99,14 +99,16 @@ it.each(["code", "source-title"])("recovers first-contact images with a verified
   expect(f.verifier).toHaveBeenCalledTimes(1);
 });
 
-it.each(["not-requested", "two-titles", "unresolved-ad", "shortened-title"])("does not grant first-contact image recovery from %s", async mode => {
+it.each(["not-requested", "two-titles", "unresolved-ad", "unresolved-code", "shortened-title"])("does not grant first-contact image recovery from %s", async mode => {
   const f = fixture(["SM613", "OTHER1"]), p = f.products[0]!.product;
   p.title = "Áo Thanh Mai"; f.products[1]!.product.title = "Áo Thu Hà";
   p.images = [{ url: "https://content.pancake.vn/requested.jpg", role: "PRIMARY", angle: "FRONT", imageType: "MODEL",
     intents: [], sortOrder: 0, qualityScore: null, feedback: false, reviewStatus: "APPROVED", metadataVerified: true,
     sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: [] }];
   f.message.text = mode === "two-titles" ? "Cho chị xem Áo Thanh Mai và Áo Thu Hà."
-    : mode === "shortened-title" ? "Cho chị xem Thanh Mai." : mode === "unresolved-ad" ? "Cho chị xem Áo Thanh Mai." : "Chọn giúp chị một áo.";
+    : mode === "shortened-title" ? "Cho chị xem Thanh Mai." : mode === "unresolved-ad" ? "Cho chị xem Áo Thanh Mai."
+      : mode === "unresolved-code" ? "Cho chị xem ZZ999." : "Chọn giúp chị một áo.";
+  if (mode === "unresolved-code") f.setFocus("SM613");
   if (mode === "unresolved-ad") Object.assign(f.message, { adsContext: { source: "ADS", adTitle: "UNKNOWN999", postId: null, adId: null, ref: null } });
   f.verifier.mockResolvedValue({ result: { verdict: "UNCERTAIN", violations: [] } });
   let n = 0;
@@ -173,6 +175,7 @@ it("finishes mixed media and size intake after a corrected inline call within th
       {op:"SET",field:"measurements.WEIGHT_KG",value:52,sourceQuote:n===1?f.message.text:"52kg"}];
     const calls=[{name:"recommend_size",args:{subjectRef:p.productId,customerStateOps:ops}},
       ...(n===1?[{name:"select_product_media",args:{subjectRef:p.productId,intent:"DETAIL"}},
+        {name:"select_product_media",args:{subjectRef:p.productId,intent:"GENERIC"}},
         {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}]:[])];
     return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}};
   });
@@ -190,7 +193,7 @@ it("finishes mixed media and size intake after a corrected inline call within th
   expect(result.enqueued).toBe(3);
 });
 
-it.each(["source", "human", "revision", "inbox", "unknown-transaction"])("does not enqueue a partial mixed handoff group after %s changes", async fault => {
+it.each(["source", "human", "revision", "inbox", "policy", "unknown-transaction"])("does not enqueue a partial mixed handoff group after %s changes", async fault => {
   const f = fixture(), p = f.products[0]!.product; f.setFocus(p.productId); f.enableHandoff();
   const resolution = await fixturePolicy();
   Object.assign(resolution.bundle!.artifacts, { handoffMatrix: { schemaVersion: 1, kind: "HANDOFF_MATRIX",
@@ -209,6 +212,7 @@ it.each(["source", "human", "revision", "inbox", "unknown-transaction"])("does n
     if (fault === "human") f.transferToHuman();
     if (fault === "revision") f.changeRevision();
     if (fault === "inbox") f.supersede();
+    if (fault === "policy") resolution.bundle!.artifacts.handoffMatrix!.rules[0]!.holdingReply = "Nhân viên hỗ trợ chị nhé.";
     if (fault === "unknown-transaction") throw new Error("UNKNOWN_TRANSACTION");
   });
   const calls = [{ name: "select_product_media", args: { subjectRef: p.productId, intent: "DETAIL" } },

@@ -36,7 +36,8 @@ const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encodi
  sourceDirty:!!execFileSync('git',['status','--porcelain','--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'],{cwd:root,encoding:'utf8'}).trim(),
  mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
-const check=async(name,fn)=>{if(providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')))return;
+const check=async(name,fn)=>{if(providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
+ (process.argv.includes('--media-handoff-only')&&!name.startsWith('B composed candidate first')&&!name.startsWith('B composed no-chart preserves')&&!name.startsWith('B composed mixed media')))return;
  try{await fn();report.cases.push({name,status:'PASS'});save();console.log(name+': PASS');}
  catch(error){report.cases.push({name,status:'FAIL',error:error.message});save();throw error;}};
 const adminUrl=process.env.C3_B_TEST_ADMIN_DATABASE_URL;assert(adminUrl,'C3_B_TEST_ADMIN_DATABASE_URL');

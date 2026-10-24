@@ -24,8 +24,8 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const noSend = (reason: string) => ({ terminal: { disposition: "NO_SEND", reason, text: null, fallbackId: null } as TerminalOutcome, sendEnabled: false as const, enqueued: 0 });
-function mediaRequestProduct(latest: string, world: TrustedContext, hintedProductId: string | null, hasAds: boolean) {
-  if (extractAdProductCodes(latest).length || hasAds) return hintedProductId;
+function mediaRequestProduct(latest: string, world: TrustedContext, hintedProductId: string | null, hasInputHint: boolean) {
+  if (hasInputHint) return hintedProductId;
   // Exact full source title only. No shortened-name inference or keyword alias;
   // a recommendation/selected asset alone never supplies request authority.
   const customerText = `_${normalizeCatalogToken(latest)}_`;
@@ -153,9 +153,16 @@ export async function runPersistedCommerceIngress(input: {
     }));
     return products.filter(p => p !== null);
   };
-  const explicit = await lookup(extractAdProductCodes(latest));
+  const explicitCodes = extractAdProductCodes(latest);
+  const explicit = await lookup(explicitCodes);
   const ads = messages.flatMap(m => m.adsContext ? [m.adsContext] : []);
   const hinted = explicit.length ? explicit : ads.length ? await lookup(ads.flatMap(ad => extractAdProductCodes(ad.adTitle ?? ""))) : [];
+  // The existing ad extractor also finds fragments inside height/weight text.
+  // Only a literal whole code token or a successfully resolved code is a hint;
+  // do not add a measurement parser or let an unknown code inherit old focus.
+  const literalCodes = explicitCodes.filter(code => `_${normalizeCatalogToken(latest)}_`.includes(`_${code}_`));
+  const recoveryHasHint = explicit.length > 0 || literalCodes.length > 0 || ads.length > 0;
+  const recoveryHintId = literalCodes.length > 1 ? null : hinted.length === 1 ? hinted[0]!.productId : null;
   const focused = hinted.length || ads.length ? hinted : record.state.currentProductId ? await lookup([normalizeProductCode(record.state.currentProductId)]) : [];
   const currentProductId = focused.length === 1 ? focused[0]!.productId : null;
   const initialProducts = [...new Map([...(ads.length && !hinted.length ? [] : [...focused,...(input.read.initialProducts ?? [])])]
@@ -192,7 +199,7 @@ export async function runPersistedCommerceIngress(input: {
       if (commerceHash(prepared) !== commerceHash(world) || world.state.conversationRevision !== before.stateVersion ||
         !before.permission || !before.privacyAllowed || before.bindingVersion !== scope.bindingVersion ||
         !await input.inbox.isBatchCurrent(batch) || hardPrecheck(world, terminalFallback("C3_B_VERIFIED_MEDIA_V1").text!, input.clock())) return undefined;
-      const productId = mediaRequestProduct(latest, world, currentProductId, ads.length > 0);
+      const productId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint);
       const claims = (world.protectedClaims as ProtectedClaimV1[]).filter(c => c.type === "PRODUCT_MEDIA");
       if (!images.every(a => a.productId === productId && claims.some(c => c.type === "PRODUCT_MEDIA" &&
         c.scope.kind === "PRODUCT" && c.scope.productId === a.productId && c.value.assetSha256 === commerceHash(a.url) &&
@@ -228,10 +235,10 @@ export async function runPersistedCommerceIngress(input: {
   // The model draft remains rejected. A separate code-owned image response is
   // eligible only after the unchanged world above and full current authority check.
   // Never recover across stale state, privacy failure, handoff or an unknown commit.
-  const selectedMedia = tools.mediaSelection?.() ?? [];
+  const selectedMedia = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
   const mediaFallback = terminalFallback("C3_B_VERIFIED_MEDIA_V1");
   const mediaClaims = (world.protectedClaims as ProtectedClaimV1[]).filter(c=>c.type==="PRODUCT_MEDIA");
-  const recoveryProductId = mediaRequestProduct(latest, world, currentProductId, ads.length > 0);
+  const recoveryProductId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint);
   const recoveredMedia = result.terminal.disposition === "FALLBACK" && selectedMedia.length > 0 &&
     ["FAIL","UNCERTAIN","MALFORMED","TIMEOUT","PROVIDER_ERROR","BUDGET","OWNER_TOOL_MODE","OWNER_OUTPUT_ARTIFACT"].includes(result.terminal.reason) &&
     current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&

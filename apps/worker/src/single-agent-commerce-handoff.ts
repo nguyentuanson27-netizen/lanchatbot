@@ -97,6 +97,15 @@ export function createCommerceHandoffTools(input: {
     if (independentSizeMedia && decision.customerMessages.length && input.prepareSizeHandoffMedia) {
       try { media = await input.prepareSizeHandoffMedia(before); } catch { media = undefined; }
     }
+    if (media) {
+      const prepared = media, expectedPolicyHash = policyIdentity(policy);
+      media = { ...prepared, validate: async () => {
+        const current = await read();
+        return scopeMatches(current) && current.permission && current.state.conversationOwner === "BOT" &&
+          current.stateVersion === before.stateVersion && commerceHash(current.state) === commerceHash(before.state) &&
+          policyIdentity(await input.policy()) === expectedPolicyHash && await prepared.validate();
+      } };
+    }
     const engineReason = decision.category === "AFTER_SALES" ? reason === "AFTER_SALES_REQUEST" ? "POST_SALE" : reason
       : reason === "CUSTOMER_REQUESTED_HUMAN" ? reason : "AGENT_REQUEST";
     const transitioned = applySilentHandoff(before.state, engineReason as Parameters<typeof applySilentHandoff>[1],
