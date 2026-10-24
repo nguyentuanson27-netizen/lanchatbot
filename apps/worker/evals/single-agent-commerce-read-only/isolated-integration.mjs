@@ -429,7 +429,10 @@ try{
   const r=await j.turn('Em kiểm tra lại giúp chị nhé',[native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}])],
    {beforeCommit:async()=>{if(mode==='before-commit')j.changeHandoffPolicy();},loseCommitReply:mode==='lost-commit-reply'});
   if(mode==='before-commit'){
-   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+   // The old HOLDING decision must not commit. A later recovery may hand off
+   // under the newly current SILENT policy, without any acknowledgement group.
+   const events=(await pool.query('SELECT reason_detail_safe FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows;
+   assert(events.length<=1);assert(events.every(e=>!e.reason_detail_safe.deliveryBindingHash));
    assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
   }else{
    assert.equal(r.result.terminal.disposition,mode==='lost-commit-reply'?'NO_SEND':'HANDOFF');

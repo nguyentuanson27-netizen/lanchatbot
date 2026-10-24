@@ -6,7 +6,7 @@ repo=Path(__file__).resolve().parents[5]
 base=repo/'apps/worker/evals/single-agent-commerce-read-only'
 out=repo.parent/'c3-turn-completion-model-20261024'
 checks=repo.parent/'c3-turn-completion-checks-20261024'
-capture=repo.parent/'c3-turn-completion-source-20261024/capture.json'
+capture=repo.parent/'c3-turn-completion-source-final-20261024/capture.json'
 launcher=base/'model-code-division-run-20261019/raw/credential-launcher.py'
 stage=sys.argv[1]
 assert stage in ['prefix','remaining']
@@ -26,7 +26,7 @@ remaining_indices=[i for i in range(1,25) if i not in prefix_indices]
 if stage=='prefix':
  out.mkdir()
  for payment in ['cod','bank']:
-  result=json.loads((checks/(payment+'-integration')/'integration.json').read_text())
+  result=json.loads((checks/(payment+'-integration-final')/'integration.json').read_text())
   assert result['status']=='PASS' and result['testDatabaseDropped'] and result['providerGenerations']==0
   assert result['sourceSha']==source and not result['sourceDirty']
   assert all(c['status']=='PASS' for c in result['cases'])
