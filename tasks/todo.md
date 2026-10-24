@@ -5,7 +5,8 @@
 - [x] Review độc lập hội thoại/raw/prompt/boundary: xác nhận lỗi `color:null` ở media, và prompt tư vấn đã có lệnh chọn nhưng vẫn bỏ qua băn khoăn về gu; nêu rủi ro claim ít nhăn sau khi ngồi xe.
 - [x] Media optional color null RED→GREEN, giữ ảnh chung không gắn màu; thay nguyên tắc quyết định trong prompt, cập nhật hash protocol. Focused media30, media+read-only60, Node protocol/adapter83, worker typecheck/build/lint và diff check PASS.
 - [x] Canary source927f1859 slot changed-occasion: source-check0generation PASS; owner còn suy diễn nhăn, actual FALLBACK/PROVIDER_ERROR do verifier wire khoảng35.068B vượt bound32.768B trước provider. Review độc lập xác nhận root cause; tăng riêng verifier wire lên65.536B, runtime trusted bound giữ nguyên, RED→GREEN test và protocol15PASS. Đây là source mới.
-- [ ] Provider canary trên source mới cho ca lỗi và đối chứng, kiểm actual terminal/ảnh và verifier claim cụ thể; chưa kết luận cải thiện sales quality hay B GO.
+- [x] Canary source6a1f38ab cùng prompt thử nghiệm:4slot B1,1OWNER_TOOL_MODE fallback,3SEND_ELIGIBLE/PASS nhưng3/3 vẫn cần sửa tư vấn. Rollback prompt/hash thử nghiệm; giữ media+bound fix. Không chạy full51 hoặc chọn lại attempt đẹp.
+- [ ] Sales decision vẫn chưa đạt: cần thí nghiệm nguồn/ảnh và khả năng chọn theo gu khách; media gallery/provider canary và verifier adversarial claim nhăn/fit còn chưa chạy trên source sau rollback. B chưa GO.
 
 ## Previous — chạy nốt 30 ca còn lại, 2026-10-25
 
