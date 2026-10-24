@@ -32,7 +32,7 @@ export function dispatchRange(value=undefined){
 const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
- check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===32768,'REQUEST_BOUNDS');
+ check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===65536,'REQUEST_BOUNDS');
  check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&
   m.models.verifier.provider==='OPENAI'&&m.models.verifier.model==='gpt-6.1-sol'&&m.models.verifier.effort==='high'&&
   m.models.verifier.generationConfig.reasoningEffort==='high'&&m.models.verifier.generationConfig.retry===0,'MODEL_IDENTITY');
@@ -75,7 +75,7 @@ export function buildVerifierRequest(m,r){
     untrusted:{latestCustomerMessage:r.latest,recentAcceptedDialogue:r.history,finalDraft:r.finalDraft}})}]}],
   tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,
   text:{format:{type:'json_schema',name:'semantic_egress_verdict',strict:true,schema:m.verdictSchema}}};
- check(bytes(request)<=32768,'VERIFIER_INPUT_BOUND');return request;
+ check(bytes(request)<=65536,'VERIFIER_INPUT_BOUND');return request;
 }
 export function createCommerceVerifier(m,runModel=runCodexModel,onCheckpoint){
  validateProtocol(m);

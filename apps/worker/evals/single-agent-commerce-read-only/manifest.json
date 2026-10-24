@@ -8,7 +8,7 @@
   "verifierGenerations": 1,
   "requestBounds": {
     "ownerWireBytes": 65536,
-    "verifierWireBytes": 32768
+    "verifierWireBytes": 65536
   },
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
