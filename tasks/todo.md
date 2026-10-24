@@ -1,4 +1,10 @@
-## Current — implementation media binding / mixed handoff, 2026-10-24
+## Current — hoàn tất acceptance media/size, 2026-10-24
+
+- [x] Owner duyệt dùng chart chung cho sản phẩm cùng tên; explicit SV2447/SQ2447 mapping và source provenance trong [decision](../docs/specs/c3-phase-b-same-name-size-sharing-20261024.md).
+- [x] Implement encrypted Outbox binding, restart/source/state/policy/recipient/generation revalidation và fail-closed legacy gate. Same-name source chart giữ nguyên; requested product vẫn là fit/price/stock/media subject.
+- [ ] Final deterministic PostgreSQL COD/BANK checks và source-sealed provider controls/prefix/full theo [plan amended](../docs/specs/c3-phase-b-media-binding-handoff-plan-20261024.md). Chưa claim acceptance hoàn tất hoặc B GO.
+
+## Historical — implementation media binding / mixed handoff, 2026-10-24
 
 - [x] Observed RED→GREEN first-contact code/full-title recovery và atomic ảnh+no-chart handoff; self-review sửa unknown-code/focus, policy race, dedup và fixture/type errors.
 - [x] Final247worker/92NodePASS; worker lint/typecheck/buildPASS. Exact-source871ba419 COD5/BANK5 PostgreSQL checksPASS, cả5testDBsdropped; intermediate37/23/23 reports giữ riêng. [Report/evidence](../docs/specs/c3-phase-b-media-binding-handoff-implementation-20261024.md).

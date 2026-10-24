@@ -55,6 +55,16 @@ function store(row: ClaimedMetaOutbox): MetaOutboxDispatchStore {
   };
 }
 
+it("does not send a bound media group through a legacy gate or stale cached sequence-zero approval", async () => {
+  const row = { ...claim(), mediaBinding: { kind: "C3_MEDIA_GROUP_V1" } }, saved = store(row);
+  const legacy = { authorize: vi.fn(async () => ({ status: "ALLOWED" as const, reasonCode: null, blockingTag: null, observedAt: new Date() })) };
+  expect((await resolveMetaResponseGroupGate(row, saved, legacy)).status).toBe("BLOCKED");
+  const capable = { ...legacy, supportsCommerceMediaBinding: true as const };
+  expect((await resolveMetaResponseGroupGate(row, saved, capable)).status).toBe("ALLOWED");
+  capable.authorize.mockResolvedValueOnce({ status: "BLOCKED" as never, reasonCode: "SOURCE_CHANGED" as never, blockingTag: null, observedAt: new Date() });
+  expect((await resolveMetaResponseGroupGate(row, saved, capable)).status).toBe("BLOCKED");
+});
+
 describe("MetaOutboxDispatcher", () => {
   it("marks accepted only after Meta returns provider evidence", async () => {
     const repository = store(claim());

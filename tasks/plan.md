@@ -1,4 +1,8 @@
-## Current — implementation media binding / mixed handoff, 2026-10-24
+## Current — acceptance media/size, 2026-10-24
+
+Theo owner “hoàn tất toàn bộ acceptance” và quyết định “dùng chung nếu có cùng tên”: thực hiện [plan amended](../docs/specs/c3-phase-b-media-binding-handoff-plan-20261024.md) và [chart delegation](../docs/specs/c3-phase-b-same-name-size-sharing-20261024.md). Durable binding trong encrypted Outbox, fresh gate trước sequence0, explicit same-name source mapping; prompts/model/generation budgets giữ nguyên. Deterministic checks → clean seal →17controls →11native affected prefix →40remaining nếu prefix đạt. Không claim full acceptance trước evidence, không post-B/deploy/live send. Các plan dưới là lịch sử.
+
+## Historical — implementation media binding / mixed handoff, 2026-10-24
 
 **IMPLEMENTED_WITH_RESIDUALS; MODEL_NOT_RUN; B chưa GO.** [Implementation và evidence](../docs/specs/c3-phase-b-media-binding-handoff-implementation-20261024.md). Base db4f2dbb; executable871ba419. First-contact recovery dùng đúng code/full source title, không inherit unknown code từ focus cũ; automatic no-chart có ảnh đã xác minh + policy holding trong một transaction/group, không thêm model/generation. Self-review sửa policy check tại commit và dedup ảnh. Final247worker/92NodePASS, lint/typecheck/worker buildPASS; PostgreSQL exact-source COD5/BANK5PASS/DBdropped, trước đó37/23/23intermediatePASS giữ nhãn. T1 shortened title chưa bind; T2 post-commit catalog revalidation trước delivery chưa nối, không claim hoàn tất mọi acceptance. T4 chưa dispatch. Prompt/models/corpus/fallback giữ nguyên; không live send/deploy/merge.
 

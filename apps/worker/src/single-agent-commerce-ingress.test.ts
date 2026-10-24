@@ -65,7 +65,7 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
-it.each(["code", "source-title"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
+it.each(["code", "source-title", "approved-group"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
   const f = fixture(), product = fixtureProduct();
   product.product.title = "Áo Thanh Mai";
   product.product.images = ["FRONT", "BACK"].map((angle, index) => ({
@@ -79,13 +79,15 @@ it.each(["code", "source-title"])("recovers first-contact images with a verified
     search: { searchText: async () => ({ status: "MATCHED", matchKind: "ALIAS", product: product.product, score: 1, gap: null }) },
     facts: { readCatalogSnapshot: async () => product.snapshot },
     policyStore: { loadActivePointers: async () => fixturePolicyPointers() } });
-  f.setRead({ ...read, initialProducts: [] });
-  f.message.text = `Cho chị xem ảnh ${mode === "code" ? "SM613" : "Áo Thanh Mai"} màu be nhé.`;
+  f.setRead({ ...read, initialProducts: [], ...(mode === "approved-group" ? { productGroups: [{ name: "Thanh Mai", customerNames: ["Thanh Mai"],
+    productTitles: { SM613: product.product.title }, approvalRef: "owner-decision", sharedSize: { artifactKey: "unused", sourceProductId: "SM613",
+      brand: "LANA", category: "TOP", componentRole: "TOP" as const } }] } : {}) });
+  f.message.text = `Cho chị xem ảnh ${mode === "code" ? "SM613" : mode === "approved-group" ? "Thanh Mai" : "Áo Thanh Mai"} màu be nhé.`;
   f.verifier.mockResolvedValue({ result: { verdict: "UNCERTAIN", violations: [] } });
   let n = 0;
   const result = await f.run(async () => {
     n++;
-    const calls = mode === "source-title" && n === 1
+    const calls = mode !== "code" && n === 1
       ? [{ name: "search_products", args: { query: product.product.title } }]
       : [{ name: "select_product_media", args: { subjectRef: product.product.productId, intent: "GENERIC" } }];
     if (n === (mode === "code" ? 2 : 3)) return { kind: "FINAL", text: "DRAFT_MUST_NOT_BE_SENT" };
@@ -99,13 +101,18 @@ it.each(["code", "source-title"])("recovers first-contact images with a verified
   expect(f.verifier).toHaveBeenCalledTimes(1);
 });
 
-it.each(["not-requested", "two-titles", "unresolved-ad", "unresolved-code", "shortened-title"])("does not grant first-contact image recovery from %s", async mode => {
+it.each(["not-requested", "two-titles", "unresolved-ad", "unresolved-code", "shortened-title", "ambiguous-group"])("does not grant first-contact image recovery from %s", async mode => {
   const f = fixture(["SM613", "OTHER1"]), p = f.products[0]!.product;
   p.title = "Áo Thanh Mai"; f.products[1]!.product.title = "Áo Thu Hà";
   p.images = [{ url: "https://content.pancake.vn/requested.jpg", role: "PRIMARY", angle: "FRONT", imageType: "MODEL",
     intents: [], sortOrder: 0, qualityScore: null, feedback: false, reviewStatus: "APPROVED", metadataVerified: true,
     sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: [] }];
-  f.message.text = mode === "two-titles" ? "Cho chị xem Áo Thanh Mai và Áo Thu Hà."
+  if (mode === "ambiguous-group") f.setRead({ policy: () => fixturePolicy(), initialProducts: f.products.map(p => p.product),
+    catalog: { readProduct: async id => f.products.find(p => p.product.productId === id)!, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) },
+    productGroups: [{ name: "Thanh Mai", customerNames: ["set Thanh Mai"], productTitles: { SM613: p.title, OTHER1: f.products[1]!.product.title },
+      approvalRef: "owner-decision", sharedSize: { artifactKey: "unused", sourceProductId: "SM613", brand: "LANA", category: "TOP", componentRole: "TOP" } }] });
+  f.message.text = mode === "ambiguous-group" ? "Cho chị xem set Thanh Mai."
+    : mode === "two-titles" ? "Cho chị xem Áo Thanh Mai và Áo Thu Hà."
     : mode === "shortened-title" ? "Cho chị xem Thanh Mai." : mode === "unresolved-ad" ? "Cho chị xem Áo Thanh Mai."
       : mode === "unresolved-code" ? "Cho chị xem ZZ999." : "Chọn giúp chị một áo.";
   if (mode === "unresolved-code") f.setFocus("SM613");

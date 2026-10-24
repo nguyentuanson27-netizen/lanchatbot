@@ -11,6 +11,7 @@ import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimeP
 import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
 import {runPersistedCommerceIngress,commerceHistory} from '../../dist/single-agent-commerce-ingress.js';
+import {createCommerceMediaPreSendGate} from '../../dist/single-agent-commerce-media-delivery.js';
 import {createSalesCycleRuntimeState,applySalesCycleCommand,executePersistedSalesCycleCommand,RuntimePolicyResolver,buildPurchaseConfirmedTagCommand} from '@lana/chat-runtime';
 import {createConversationState} from '@lana/conversation-engine';
 import {buildCanonicalDecisionEvidenceV1} from '@lana/business-tools';
@@ -369,9 +370,18 @@ try{
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
-  const capture=[],capturePayloads=[],gateCalls=[],dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
+  const capture=[],capturePayloads=[],gateCalls=[];
+  const makeDispatcher=()=>new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
    const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash){capture.push(b.message.text??'[CODE_IMAGE]');capturePayloads.push(b.message);}return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
-   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},{workerId:'c3-b-capture'},undefined,historyStore);
+   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),createCommerceMediaPreSendGate({
+    base:{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},
+    clock:()=>new Date(),allowedHostSuffixes:['content.pancake.vn','lanadesign.vn','fbcdn.net','fbsbx.com'],
+    readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
+     assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
+    policy:async()=>{const r=await policy();assert(r.bundle);return r.bundle;},
+    readProduct:async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;},
+   }),{workerId:'c3-b-capture'},undefined,historyStore);
+  let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
   async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null}={}){
    const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
@@ -393,7 +403,7 @@ try{
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;}};
+  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
@@ -432,6 +442,21 @@ try{
   assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();assert(!j.capture.includes('[CODE_IMAGE]'));
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'BOT');
+ });
+ for(const fault of ['unchanged','source','revision'])await check('B composed mixed media delivery restart revalidates '+fault+' before any message',async()=>{
+  if(!process.argv.includes('--candidate-handoff'))return;
+  const j=await statefulFixture({media:true});
+  const r=await j.turn('Cho chị xem ảnh SM613 và chọn size nhé',[
+   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}}])]);
+  assert.equal(r.result.enqueued,3,JSON.stringify(r.result));assert.equal(j.capture.length,0);
+  if(fault==='source')j.changeMediaSource();
+  if(fault==='revision')await pool.query("UPDATE conversations SET state_version=state_version+1,state_snapshot=jsonb_set(state_snapshot,'{revision}',to_jsonb(state_version+1)) WHERE conversation_id=$1",[j.bound.conversationId]);
+  j.restartDelivery();await j.drain();await j.drain();
+  const rows=(await pool.query('SELECT response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
+  assert.equal(new Set(rows.map(row=>row.response_group_id)).size,1);
+  if(fault==='unchanged'){assert.equal(j.capture.length,3);assert.equal(j.capture.filter(s=>s==='[CODE_IMAGE]').length,1);assert.equal(new Set(j.gateCalls).size,1);}
+  else {assert.equal(j.capture.length,0);assert(!rows.some(row=>['SENT_ACCEPTED','DELIVERED','READ'].includes(row.status)));}
+  report.mediaDeliveryChecks??=[];report.mediaDeliveryChecks.push({fault,captured:j.capture,rows});save();
  });
  await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
   const j=await statefulFixture();

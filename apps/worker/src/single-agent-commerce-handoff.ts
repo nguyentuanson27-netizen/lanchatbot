@@ -6,6 +6,7 @@ import { buildReadOnlyContext, commerceHash, publicPolicyLiteral } from "./singl
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
+import type { MediaDeliveryImage } from "./single-agent-commerce-media-delivery.js";
 
 export interface HandoffAuthority extends Pick<CommerceScope, "pageId" | "conversationId" | "customerHash" | "recipient" |
   "bindingVersion" | "permission" | "privacyAllowed"> {
@@ -19,7 +20,7 @@ export interface CommerceHandoffCommit {
   next: HandoffAuthority;
   decision: HandoffDecisionV2;
   /** Code-prepared independent media, never a model draft or a general HUMAN send exception. */
-  media?: { images: readonly { productId: string; url: string }[]; claims: ProtectedClaimV1[];
+  media?: { images: readonly MediaDeliveryImage[]; claims: ProtectedClaimV1[]; policy: RuntimePolicyBundle;
     validate: () => Promise<boolean> };
 }
 

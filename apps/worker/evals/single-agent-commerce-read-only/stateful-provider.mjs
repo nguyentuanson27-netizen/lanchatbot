@@ -72,7 +72,8 @@ export async function createStatefulProvider(input){
  return {counters,ownerPrompt,verifierPrompt,facts,setSlot:id=>{activeSlot=id;},
   async read(bound,policyStore,policy,initialProductCodes=['SV2447']){const products=await Promise.all(initialProductCodes.map(code=>catalog.findByExactCode(code)));assert(products.every(Boolean),'INITIAL_SOURCE_UNAVAILABLE');
    const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog,policyStore,facts});
-   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds};},
+   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds,
+    ...(config.productGroups?{productGroups:config.productGroups}:{})};},
   async owner(request){assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
    let completedTelemetry;
    try{const wire=buildGeminiCommerceRequest(request);assert(!/"(?:caseId|evaluator|purposeId|requiredBehaviors|expectedSafe|qualityScore)"/.test(JSON.stringify(wire)),'EVALUATOR_LABEL_LEAK');

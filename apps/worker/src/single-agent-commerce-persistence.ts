@@ -9,6 +9,7 @@ import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
 import { terminalFallback, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import type { CommerceHandoffCommit, HandoffAuthority } from "./single-agent-commerce-handoff.js";
+import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
 
 /** Reuse the current inbox/CAS transaction. A tag intent is not a Pancake delivery receipt. */
 export function createPersistedCommerceHandoffPort(input: {
@@ -40,6 +41,9 @@ export function createPersistedCommerceHandoffPort(input: {
     if (messages.length && !input.deliveryRecipient) throw new Error("HANDOFF_DELIVERY_ROUTE_REQUIRED");
     const sourceMessageIdHash = createHash("sha256").update(input.scope.sourceMessageId, "utf8").digest("hex");
     const payloadHash = commerceHash(messages);
+    const responseGroupId = randomUUID();
+    const mediaBinding = media ? makeCommerceMediaDeliveryBinding({ scope: input.scope, generation: input.inboxBatchGuard.generation,
+      responseGroupId, nextState: next.state, messages, images: media.images, policy: media.policy, now }) : undefined;
     const readiness = messages.length ? evaluateDeterministicEffectReadinessV1({ effect: "PROTECTED_OUTBOUND",
       pageId: input.scope.pageId, conversationId: input.scope.conversationId, sourceMessageIdHash,
       conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [...new Set(media?.images.map(image => image.productId) ?? [])], cartId: null, cartVersion: null,
@@ -58,7 +62,8 @@ export function createPersistedCommerceHandoffPort(input: {
           productId: before.state.currentProductId, factsStatus: null, factsReasonCode: null,
           desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.triggerSource?.eventKey ?? input.scope.sourceMessageId,
           triggerMessagePk: input.triggerSource?.messagePk ?? null, occurredAt: now },
-        ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: input.deliveryRecipient!, messages,
+        ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId, recipientId: input.deliveryRecipient!, messages,
+          ...(mediaBinding ? { mediaBinding } : {}),
           sourceMessageIdHash, protectedClaims: claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
       if (!result.stateCommitted) return false;
       if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated ||

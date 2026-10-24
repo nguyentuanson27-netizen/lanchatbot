@@ -39,6 +39,23 @@ import {
 } from "./realtime-runtime.js";
 
 describe("committed sales effect readback", () => {
+  it.each([false, true])("keeps private media binding out of the customer message after Outbox decryption (bound=%s)", async bound => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"), page = "page", id = "outbox";
+    const message = { kind: "TEXT", text: "Ảnh mẫu chị nhé." }, binding = { kind: "C3_MEDIA_GROUP_V1", customerHash: "a".repeat(64) };
+    const payload = cipher.encryptJson(bound ? { ...message, commerceMediaBinding: binding } : message,
+      `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now() + 60_000));
+    const recipient = cipher.encryptValue("synthetic-recipient", `lana:meta-recipient:v2:${page}:${id}`);
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
+    (store as unknown as { pool: unknown }).pool = { query: async () => ({ rows: [{ outbox_id: id, page_id: page,
+      conversation_id: "conversation", reply_plan_id: "reply", response_group_id: "group", sequence_no: 0, attempt_count: 1, lease_token: "lease",
+      recipient_ciphertext: recipient.ciphertext, recipient_nonce: recipient.nonce, recipient_auth_tag: recipient.authTag,
+      payload_ciphertext: payload.ciphertext, payload_nonce: payload.nonce, payload_auth_tag: payload.authTag,
+      payload_encrypted_dek: payload.encryptedDek, payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] }) };
+    const claimed = await store.claimMetaOutbox("worker", 30_000);
+    expect(claimed?.message).toEqual(message);
+    expect(claimed?.mediaBinding).toEqual(bound ? binding : undefined);
+    expect(JSON.stringify(claimed?.message)).not.toContain("customerHash");
+  });
   it("locks an unchanged sales readback for final Outbox authorization without inventing a new sales transition", async () => {
     const now = new Date("2026-10-15T08:00:00Z"), cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), expiry = new Date(now.getTime()+60000);
     const state = { schemaVersion: 2, conversationKey: "conversation", routing: { pageId: "page", conversationId: "conversation" }, revision: 0,

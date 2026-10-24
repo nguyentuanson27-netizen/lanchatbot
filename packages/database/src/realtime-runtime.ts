@@ -135,6 +135,8 @@ export interface RealtimeMetaPlan {
   readonly sourceMessageIdHash?: string;
   readonly effectReadiness?: DeterministicEffectReadinessV1;
   readonly protectedClaims?: readonly import("@lana/contracts").ProtectedClaimV1[];
+  /** Candidate-specific immutable gate input, encrypted with each Outbox unit. */
+  readonly mediaBinding?: unknown;
 }
 
 export interface RealtimePancakeTagPlan {
@@ -1833,6 +1835,7 @@ export interface ClaimedMetaOutbox {
   readonly pancakeConversationId: string | null;
   readonly message: RealtimeMetaMessageUnit;
   readonly attemptCount: number;
+  readonly mediaBinding?: unknown;
 }
 
 export interface ClaimedPancakeTagOutbox {
@@ -2713,7 +2716,7 @@ export class PostgresRealtimeRuntimeStore {
       },
       this.metaRecipientAad(row.page_id, row.outbox_id),
     );
-    const payload = this.cipher.decryptJson<RealtimeMetaMessageUnit>(
+    const { commerceMediaBinding, ...payload } = this.cipher.decryptJson<RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown }>(
       this.bundleFromMetaRow(row),
       this.metaPayloadAad(row.page_id, row.outbox_id),
     );
@@ -2746,6 +2749,7 @@ export class PostgresRealtimeRuntimeStore {
       pancakeConversationId,
       message: payload,
       attemptCount: row.attempt_count,
+      ...(commerceMediaBinding === undefined ? {} : { mediaBinding: commerceMediaBinding }),
     };
   }
 
@@ -3538,7 +3542,7 @@ export class PostgresRealtimeRuntimeStore {
         this.metaRecipientAad(input.pageId, outboxId),
       );
       const payload = this.cipher.encryptJson(
-        message,
+        plan.mediaBinding === undefined ? message : { ...message, commerceMediaBinding: plan.mediaBinding },
         this.metaPayloadAad(input.pageId, outboxId),
         new Date(now.getTime() + 20 * 86_400_000),
       );

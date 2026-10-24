@@ -112,7 +112,7 @@ try{
     catalog:{findByExactCode:async code=>{counters.catalogReads++;return catalog.findByExactCode(code);}},
     policyStore:{loadActivePointers:async q=>{counters.policyReads++;return database.loadActivePointers(q);}},
     facts:{readCatalogSnapshot:async(alias,id)=>{counters.posReads++;return samples[sampleIndex].sourceMode==='POS_UNAVAILABLE'?null:redis.readCatalogSnapshot(alias,id);}}});
-   const rawTools=await createCommerceTools({read:{scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds,entry:{firstContact:sample.history.length===0,fromAd:false}},...(comparison?{media:{allowedHostSuffixes:["lanadesign.vn","content.pancake.vn","fbcdn.net","fbsbx.com"]}}:{})});
+   const rawTools=await createCommerceTools({read:{scope,clock,...sources,initialProducts,maxFactAgeSeconds:config.maxFactAgeSeconds,productGroups:config.productGroups,entry:{firstContact:sample.history.length===0,fromAd:false}},...(comparison?{media:{allowedHostSuffixes:["lanadesign.vn","content.pancake.vn","fbcdn.net","fbsbx.com"]}}:{})});
    const preparedTools=comparison?prepareImageComparison(rawTools,{arm,subjectRef:initialProducts[0].productId,pinned:imageRegistration.registration.cases[sampleIndex].images},preparation):rawTools;
    const tools={...preparedTools,invokeBatch:async calls=>{
     const results=await rawTools.invokeBatch(calls);audit(requestId,'TOOL_RESULTS',{calls,results});return results;

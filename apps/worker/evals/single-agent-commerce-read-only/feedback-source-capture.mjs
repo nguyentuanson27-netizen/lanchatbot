@@ -25,7 +25,7 @@ try{
  const scope={...config.scope,requestId:'feedback-capture-'+sourceSha,sourceMessageId:'feedback-capture',sourceObservedAt:at.toISOString(),conversationOwner:'BOT',permission:true,privacyAllowed:true};
  const sources=createCommerceReadSources({scope,channel:config.channel,clock,initialProducts:[product],catalog:index,
   search:{searchText:async()=>{throw Error('CAPTURE_NO_SEARCH');}},policyStore:store,facts});
- const tools=await createCommerceTools({read:{scope,clock,...sources,initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds}});
+ const tools=await createCommerceTools({read:{scope,clock,...sources,initialProducts:[product],maxFactAgeSeconds:config.maxFactAgeSeconds,productGroups:config.productGroups}});
  assert.equal((await tools.invoke({name:'read_policy',args:{}})).status,'OK','CAPTURE_POLICY');
  assert.equal((await tools.invoke({name:'read_product',args:{subjectRef:product.productId}})).status,'OK','CAPTURE_PRODUCT');
  const trusted=tools.snapshot(),current=await tools.readback();assert.deepEqual(current,trusted,'CAPTURE_WORLD_CHANGED');

@@ -10,6 +10,13 @@
     "revision": 1
   },
   "channel": "PUBLISHED",
+  "productGroups": [{
+    "name": "Thạch Thảo",
+    "customerNames": ["set Thạch Thảo"],
+    "productTitles": {"SV2447": "Set váy Thạch Thảo", "SQ2447": "Set quần Thạch Thảo"},
+    "approvalRef": "owner-same-name-size-sharing-20261024",
+    "sharedSize": {"artifactKey": "size-chart:SQ2447", "sourceProductId": "SQ2447", "brand": "La.na Design", "category": "SET", "componentRole": "OTHER"}
+  }],
   "qdrantCollection": "lana_multimodal_data_v2",
   "maxFactAgeSeconds": 7200,
   "sourceSearchProbe": "set váy ren tơ Hàn",

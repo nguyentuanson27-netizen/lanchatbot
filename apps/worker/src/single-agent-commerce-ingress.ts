@@ -17,21 +17,26 @@ import { runCommerceTurn, type CommerceTools } from "./single-agent-commerce-rea
 import { commerceHash, commerceUuid } from "./single-agent-commerce-read-only-context.js";
 import { hardPrecheck, terminalFallback, makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { extractAdProductCodes } from "./media-resolution.js";
-import { sizeChartTarget } from "./size-chart-target.js";
-import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
+import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
+import { commerceProductGroup, commerceSizeSource, type CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const noSend = (reason: string) => ({ terminal: { disposition: "NO_SEND", reason, text: null, fallbackId: null } as TerminalOutcome, sendEnabled: false as const, enqueued: 0 });
-function mediaRequestProduct(latest: string, world: TrustedContext, hintedProductId: string | null, hasInputHint: boolean) {
+function mediaRequestProduct(latest: string, world: TrustedContext, hintedProductId: string | null, hasInputHint: boolean, groups: readonly CommerceProductGroup[] = []) {
   if (hasInputHint) return hintedProductId;
-  // Exact full source title only. No shortened-name inference or keyword alias;
-  // a recommendation/selected asset alone never supplies request authority.
+  // Exact full source title, then explicit owner-approved group names. Neither
+  // a recommendation nor a selected asset supplies request authority.
   const customerText = `_${normalizeCatalogToken(latest)}_`;
   const named = (world.runtimeProducts ?? []).filter(p => p.content?.productName &&
     customerText.includes(`_${normalizeCatalogToken(p.content.productName)}_`)).map(p => p.subjectRef);
-  return named.length === 1 ? named[0]! : named.length > 1 ? null : world.state.currentProductId;
+  if (named.length) return named.length === 1 ? named[0]! : null;
+  const grouped = (world.runtimeProducts ?? []).filter(p => {
+    const group = commerceProductGroup(p.subjectRef, p.content?.productName ?? "", groups);
+    return group?.customerNames.some(name => customerText.includes(`_${normalizeCatalogToken(name)}_`));
+  }).map(p => p.subjectRef);
+  return grouped.length === 1 ? grouped[0]! : grouped.length > 1 ? null : world.state.currentProductId;
 }
 const privateMarkers = ["[PHONE]", "[ADDRESS]", "[NAME]", "[EMAIL]", "[ID]", "[PII_REDACTED_MESSAGE]"];
 export function isPrivateCommerceText(text: string): boolean {
@@ -181,8 +186,8 @@ export async function runPersistedCommerceIngress(input: {
   const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: rows.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
-    sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false), target = sizeChartTarget(product);
-      return { target, charts: evaluateSizeChartEligibility({ policy: await input.policy(), productId: ref, target }).charts }; },
+    sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
+      return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
     quoteInput: async () => { const state = (await executor.repository.read(scope.conversationId))!, policy = await policyBundle();
       const lines = state.cart && canonicalCartPolicyLinesV2(state.cart.value.lines, scope.shopId); if (!lines || !state.negotiation) throw new Error("CART_REQUIRED");
       const tier = state.negotiation.customerState;
@@ -199,12 +204,12 @@ export async function runPersistedCommerceIngress(input: {
       if (commerceHash(prepared) !== commerceHash(world) || world.state.conversationRevision !== before.stateVersion ||
         !before.permission || !before.privacyAllowed || before.bindingVersion !== scope.bindingVersion ||
         !await input.inbox.isBatchCurrent(batch) || hardPrecheck(world, terminalFallback("C3_B_VERIFIED_MEDIA_V1").text!, input.clock())) return undefined;
-      const productId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint);
+      const productId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint, input.read.productGroups);
       const claims = (world.protectedClaims as ProtectedClaimV1[]).filter(c => c.type === "PRODUCT_MEDIA");
       if (!images.every(a => a.productId === productId && claims.some(c => c.type === "PRODUCT_MEDIA" &&
         c.scope.kind === "PRODUCT" && c.scope.productId === a.productId && c.value.assetSha256 === commerceHash(a.url) &&
         c.provenance.sourceVersion === a.sourceVersion))) return undefined;
-      return { images, claims, validate: async () => {
+      return { images, claims, policy: await policyBundle(), validate: async () => {
         try {
           const authority = await readAuthority();
           return authority.permission && authority.privacyAllowed && authority.stateVersion === before.stateVersion &&
@@ -238,7 +243,7 @@ export async function runPersistedCommerceIngress(input: {
   const selectedMedia = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
   const mediaFallback = terminalFallback("C3_B_VERIFIED_MEDIA_V1");
   const mediaClaims = (world.protectedClaims as ProtectedClaimV1[]).filter(c=>c.type==="PRODUCT_MEDIA");
-  const recoveryProductId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint);
+  const recoveryProductId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint, input.read.productGroups);
   const recoveredMedia = result.terminal.disposition === "FALLBACK" && selectedMedia.length > 0 &&
     ["FAIL","UNCERTAIN","MALFORMED","TIMEOUT","PROVIDER_ERROR","BUDGET","OWNER_TOOL_MODE","OWNER_OUTPUT_ARTIFACT"].includes(result.terminal.reason) &&
     current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
@@ -293,9 +298,14 @@ export async function runPersistedCommerceIngress(input: {
   const readiness = evaluateDeterministicEffectReadinessV1({ ...common, productIds:outboundProductIds, effect: "PROTECTED_OUTBOUND", claims, protectedClaimTypes: claimTypes,
     deterministicEvidenceHash: payloadHash, payloadHash, ...(parent ? { parentReadinessHash: parent.readinessHash } : {}) });
   if (messagesOut.length && (readiness.outcome !== "READY" || parent?.outcome === "BLOCKED")) return { ...result, ...await closeWithoutSend("EGRESS_READINESS") };
+  const nextState = { ...current.state, revision: verifiedRevision+1, currentProductId: world.state.currentProductId, salesStage: state.stage };
+  const responseGroupId = randomUUID();
+  const mediaBinding = (generatedPass || recoveredMedia) && selectedMedia.length ? makeCommerceMediaDeliveryBinding({ scope, generation: batch.generation, responseGroupId,
+    nextState, messages: messagesOut, policy: await policyBundle(), images: selectedMedia, now }) : undefined;
   const committed = await input.transaction(client => input.store.commitWithinTransaction(client, { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
-    expectedStateVersion: verifiedRevision, state: { ...current.state, revision: verifiedRevision+1, currentProductId: world.state.currentProductId, salesStage: state.stage }, inboxBatchGuard: guard,
-    ...(messagesOut.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: last.senderId, messages: messagesOut, sourceMessageIdHash: sourceHash,
+    expectedStateVersion: verifiedRevision, state: nextState, inboxBatchGuard: guard,
+    ...(messagesOut.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId, recipientId: last.senderId, messages: messagesOut, sourceMessageIdHash: sourceHash,
+      ...(mediaBinding ? { mediaBinding } : {}),
       protectedClaims: claims, protectedClaimTypes: claimTypes, effectReadiness: readiness, sendAfterOwnerHandoff: result.terminal.disposition === "HANDOFF" } } : {}),
     ...(salesPlan ? { salesCyclePlan: salesPlan } : {}) }, now));
   if (!committed.stateCommitted || (messagesOut.length && committed.metaOutboxCreated !== messagesOut.length)) return {

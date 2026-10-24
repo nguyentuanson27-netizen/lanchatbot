@@ -12,7 +12,7 @@ async function handoffFixture(options: {
   holdingReply?: string; reason?: "DEPENDENCY_FAILURE" | "CUSTOMER_REQUESTED_HUMAN" | "SIZE_RULE_UNAVAILABLE";
   completeInboxBatch?: boolean; outboxResult?: "TRUNCATED" | "ABSENT";
 } = {}) {
-  const scope = commerceScope(), policy = { ...(await fixturePolicy()).bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const };
+  const scope = { ...commerceScope(), recipient: "b".repeat(64) }, policy = { ...(await fixturePolicy()).bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const };
   const reason = options.reason ?? "DEPENDENCY_FAILURE";
   if (options.holdingReply) Object.assign(policy.artifacts, { handoffMatrix: {
     schemaVersion: 1, kind: "HANDOFF_MATRIX", sourceMetadata: policy.artifacts.shopPolicy.sourceMetadata,
@@ -113,11 +113,12 @@ describe("existing transaction owner for candidate commerce", () => {
   it.each(["ready", "stale", "truncated", "wrong-asset"])("keeps mixed media and ownership in one checked transaction (%s)", async mode => {
     const f = await handoffFixture({ holdingReply: "Em chuyển nhân viên chọn size cho chị nhé.", reason: "SIZE_RULE_UNAVAILABLE",
       completeInboxBatch: false, ...(mode === "truncated" ? { outboxResult: "TRUNCATED" as const } : {}) });
-    const images = [{ productId: "SM613", url: "https://content.pancake.vn/detail.jpg" }];
+    const images = [{ productId: "SM613", url: "https://content.pancake.vn/detail.jpg", sourceVersion: "a".repeat(64),
+      observedAt: commerceNow.toISOString(), expiresAt: new Date(commerceNow.getTime() + 60_000).toISOString() }];
     const claims = buildProtectedMediaClaimsV1({ productId: "SM613", imageUrls: [mode === "wrong-asset" ? "https://content.pancake.vn/wrong.jpg" : images[0]!.url],
       sourceVersion: "media-v1", observedAt: commerceNow.toISOString(), expiresAt: new Date(commerceNow.getTime() + 60_000).toISOString() });
     const validate = vi.fn(async () => mode !== "stale");
-    const attempt = f.port.commit({ ...f, media: { images, claims: [...claims], validate } });
+    const attempt = f.port.commit({ ...f, media: { images, claims: [...claims], validate, policy: (await fixturePolicy()).bundle! } });
     if (mode === "wrong-asset") { await expect(attempt).rejects.toThrow("HANDOFF_MEDIA_CLAIMS"); expect(f.commitWithinTransaction).not.toHaveBeenCalled(); }
     else if (mode === "truncated") { await expect(attempt).rejects.toThrow("ATOMIC_HANDOFF_INTENTS"); expect(f.rollback).toHaveBeenCalledOnce(); }
     else if (mode === "stale") { expect(await attempt).toBe(false); expect(f.commitWithinTransaction).not.toHaveBeenCalled(); }
