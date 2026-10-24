@@ -1,0 +1,38 @@
+[
+  {
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-gemini38-retry-20261024\\preflight",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-gemini38-retry-20261024\\run",
+      "--run"
+    ],
+    "exitCode": 0
+  }
+]
