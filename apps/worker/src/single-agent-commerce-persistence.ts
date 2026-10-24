@@ -10,6 +10,7 @@ import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
 import { terminalFallback, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import type { CommerceHandoffCommit, HandoffAuthority } from "./single-agent-commerce-handoff.js";
 import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
+import { makeCommerceHandoffDeliveryBinding } from "./single-agent-commerce-handoff-delivery.js";
 
 /** Reuse the current inbox/CAS transaction. A tag intent is not a Pancake delivery receipt. */
 export function createPersistedCommerceHandoffPort(input: {
@@ -24,7 +25,7 @@ export function createPersistedCommerceHandoffPort(input: {
   resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
 }) {
   let outboxMessages = 0;
-  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision, media }: CommerceHandoffCommit): Promise<boolean> {
+  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision, policy, validate, media }: CommerceHandoffCommit): Promise<boolean> {
     const tagId = input.resolveTagId(decision.tag);
     if (!tagId || !input.inboxBatchGuard.inboxIds.length) throw new Error("HANDOFF_TAG_OR_SOURCE_UNAVAILABLE");
     const now = input.clock();
@@ -44,12 +45,15 @@ export function createPersistedCommerceHandoffPort(input: {
     const responseGroupId = randomUUID();
     const mediaBinding = media ? makeCommerceMediaDeliveryBinding({ scope: input.scope, generation: input.inboxBatchGuard.generation,
       responseGroupId, nextState: next.state, messages, images: media.images, policy: media.policy, now }) : undefined;
+    const handoffBinding = messages.length ? makeCommerceHandoffDeliveryBinding({ scope: input.scope, generation: input.inboxBatchGuard.generation,
+      responseGroupId, nextState: next.state, messages, decision, policy, now }) : undefined;
     const readiness = messages.length ? evaluateDeterministicEffectReadinessV1({ effect: "PROTECTED_OUTBOUND",
       pageId: input.scope.pageId, conversationId: input.scope.conversationId, sourceMessageIdHash,
       conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [...new Set(media?.images.map(image => image.productId) ?? [])], cartId: null, cartVersion: null,
       cartStateHash: null, orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [],
       deterministicEvidenceHash: payloadHash, payloadHash, checkedAt: now }) : null;
     const applied = await input.transaction(async client => {
+      if (!await validate()) return false;
       if (media && (readiness?.outcome !== "READY" || !await media.validate())) return false;
       const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
         customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
@@ -58,12 +62,14 @@ export function createPersistedCommerceHandoffPort(input: {
         pancakeTagPlan: { desiredTag: decision.tag, tagId, handoffGeneration: next.stateVersion },
         handoffEventPlan: { source: decision.category === "AFTER_SALES" ? "POST_SALE" : decision.reason === "CUSTOMER_REQUESTED_HUMAN" ? "CUSTOMER_REQUEST" : "BOT_POLICY",
           reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion,
+            ...(handoffBinding ? { responseGroupId, deliveryBindingHash: commerceHash(handoffBinding) } : {}),
             ...(input.triggerSource ? {attachmentCount:input.triggerSource.attachmentCount} : {}) },
           productId: before.state.currentProductId, factsStatus: null, factsReasonCode: null,
           desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.triggerSource?.eventKey ?? input.scope.sourceMessageId,
           triggerMessagePk: input.triggerSource?.messagePk ?? null, occurredAt: now },
         ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId, recipientId: input.deliveryRecipient!, messages,
           ...(mediaBinding ? { mediaBinding } : {}),
+          ...(handoffBinding ? { handoffBinding } : {}),
           sourceMessageIdHash, protectedClaims: claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
       if (!result.stateCommitted) return false;
       if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated ||

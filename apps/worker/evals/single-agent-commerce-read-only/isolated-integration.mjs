@@ -12,6 +12,8 @@ import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
 import {runPersistedCommerceIngress,commerceHistory} from '../../dist/single-agent-commerce-ingress.js';
 import {createCommerceMediaPreSendGate} from '../../dist/single-agent-commerce-media-delivery.js';
+import {createCommerceHandoffPreSendGate} from '../../dist/single-agent-commerce-handoff-delivery.js';
+import {commerceHash} from '../../dist/single-agent-commerce-read-only-context.js';
 import {createSalesCycleRuntimeState,applySalesCycleCommand,executePersistedSalesCycleCommand,RuntimePolicyResolver,buildPurchaseConfirmedTagCommand} from '@lana/chat-runtime';
 import {createConversationState} from '@lana/conversation-engine';
 import {buildCanonicalDecisionEvidenceV1} from '@lana/business-tools';
@@ -46,6 +48,10 @@ const databaseName='c3_b_test_'+randomBytes(8).toString('hex');
 assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));
 const admin=new Pool({connectionString:adminUrl,max:1}),testUrl=new URL(adminUrl);testUrl.pathname='/'+databaseName;
 let pool,runtime,inbox,policyStore,livePolicyStore,historyStore,providerPorts,created=false;
+function handoffGate(base,policy){return createCommerceHandoffPreSendGate({base,clock:()=>new Date(),policy,
+ readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
+  assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
+ hasCommittedHandoff:b=>runtime.hasCommittedHandoffDelivery({...b,bindingHash:commerceHash(b)})});}
 try{
  await admin.query('CREATE DATABASE '+databaseName);created=true;
  pool=new Pool({connectionString:testUrl.toString(),max:4});
@@ -283,6 +289,7 @@ try{
   const read=async()=>{const r=await runtime.loadOrCreate(pageId,h.customerHash,'APP',()=>{throw new Error('EXISTING_REQUIRED');});
    return {...h,stateVersion:r.stateVersion,state:r.state,permission:r.state.conversationOwner==='BOT'};};
   const deliveryRecipient='synthetic-handoff-'+h.customerHash;
+  h.recipient=hash(deliveryRecipient);
   const port=createPersistedCommerceHandoffPort({scope:h,clock:()=>new Date(),read,store:runtime,transaction:async fn=>{
    try{return await withTransaction(pool,fn);}catch(error){report.directHandoffCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}
   },deliveryRecipient,
@@ -296,7 +303,7 @@ try{
     catalog:{readProduct:async()=>{throw new Error('UNUSED');},searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}},
    handoff:{...port,policy:async()=>hp}});
   const counts=async()=>(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags, (SELECT count(*)::int FROM meta_outbox WHERE conversation_id=$1) AS messages',[h.conversationId])).rows[0];
-  return {h,tools,read,counts,deliveryRecipient,batch};
+  return {h,tools,read,counts,deliveryRecipient,batch,policy:hp};
  }
  await check('B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate',async()=>{
   const h=await handoffFixture(),r=await h.tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}});assert.equal(r.status,'OK',JSON.stringify(r));
@@ -334,7 +341,7 @@ try{
    const body=JSON.parse(r.body);if(body.recipient.id===h.deliveryRecipient)captured.push(body.message.text);
    return {status:200,headers:{},body:{recipient_id:body.recipient.id,message_id:'captured-'+randomUUID()}};
   }},{sendEnabled:true}),new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),
-  {authorize:async()=>({status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()})},{workerId:'handoff-candidate-capture'});
+  handoffGate({authorize:async()=>({status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()})},async()=>h.policy),{workerId:'handoff-candidate-capture'});
   for(let n=0;n<20&&await dispatcher.processOne();n++);
   assert.deepEqual(captured,[expected]);
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
@@ -362,25 +369,26 @@ try{
     eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
     sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
   const facts=live?providerPorts.facts:{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
+  let policyChanged=false;
   const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
-   if(!dependencyHoldingReply)return resolved;
+   if(!dependencyHoldingReply&&!policyChanged)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
    return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:{schemaVersion:1,kind:'HANDOFF_MATRIX',
-    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE',customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF',holdingReply:dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
+    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged?null:dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const capture=[],capturePayloads=[],gateCalls=[];
   const makeDispatcher=()=>new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
    const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash){capture.push(b.message.text??'[CODE_IMAGE]');capturePayloads.push(b.message);}return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
-   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),createCommerceMediaPreSendGate({
+   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),handoffGate(createCommerceMediaPreSendGate({
     base:{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},
     clock:()=>new Date(),allowedHostSuffixes:['content.pancake.vn','lanadesign.vn','fbcdn.net','fbsbx.com'],
     readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
      assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
     policy:async()=>{const r=await policy();assert(r.bundle);return r.bundle;},
     readProduct:async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;},
-   }),{workerId:'c3-b-capture'},undefined,historyStore);
+   }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;}),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
   async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null}={}){
@@ -403,9 +411,34 @@ try{
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;}};
+  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},
+   refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
+    if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ for(const mode of ['source-refresh','stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and captures only committed holding reply',async()=>{
+  const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
+  const r=await j.turn('Áo SM613 bao nhiêu em?',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),say('Áo 499.000đ chị nhé.')],
+   {afterVerify:async()=>j.refreshPosSource(mode)});
+  assert.equal(r.verifiers,1);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
+  j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[text]);
+  const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.verifiers,0);await j.drain();assert.deepEqual(j.capture,[text]);
+ });
+ for(const mode of ['unchanged','before-commit','after-commit','restart'])await check('B composed dependency holding delivery '+mode+' uses committed policy and actual capture',async()=>{
+  const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
+  const r=await j.turn('Em kiểm tra lại giúp chị nhé',[native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}])],
+   {beforeCommit:async()=>{if(mode==='before-commit')j.changeHandoffPolicy();}});
+  if(mode==='before-commit'){
+   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+   assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+  }else{
+   assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,1);
+   if(mode!=='unchanged')j.changeHandoffPolicy();
+   if(mode==='restart')j.restartDelivery();
+  }
+  await j.drain();await j.drain();assert.deepEqual(j.capture,mode==='unchanged'?[text]:[]);
+  if(['after-commit','restart'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
+ });
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
  await check('B composed candidate first '+reason+' acknowledges once after real atomic commit',async()=>{
   const matrix=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))),holding=matrix.rules.find(r=>r.reason===reason).holdingReply;

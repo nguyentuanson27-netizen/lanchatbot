@@ -716,3 +716,4 @@ export * from "./v3/index.js";
 export * from "./v4/index.js";
 export * from "./v5/index.js";
 export * from "./commerce-media-delivery.js";
+export * from "./commerce-handoff-delivery.js";

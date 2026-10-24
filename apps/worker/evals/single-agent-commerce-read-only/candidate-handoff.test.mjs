@@ -12,13 +12,13 @@ test('isolated candidate creates a versioned, hashed matrix without modifying up
  assert.equal(version.content.kind,'HANDOFF_MATRIX');assert.equal(pointer.versionId,version.versionId);
  assert.match(version.contentHash,/^sha256:[a-f0-9]{64}$/);
  assert.equal(pointer.pageId,config.pageId);assert.equal(pointer.channel,'PUBLISHED');
- for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE']){
+ for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE','DEPENDENCY_FAILURE']){
   const rule=version.content.rules.find(r=>r.reason===reason);
   assert.equal(rule.customerMessagePolicy,'HOLDING_REPLY_THEN_HANDOFF');assert.ok(rule.holdingReply);
  }
 });
 
-test('custom upstream rules and tags survive; only two message policies change, under new identity',()=>{
+test('custom upstream rules and tags survive; only three message policies change, under new identity',()=>{
  const content=structuredClone(candidate);content.rules.find(r=>r.reason==='EXCHANGE').holdingReply='Custom reply';
  content.rules.find(r=>r.reason==='CUSTOMER_REQUESTED_HUMAN').tag='VAN_DON';
  const original={version:{versionId:'old',artifactKey:'matrix:custom',artifactKind:'HANDOFF_MATRIX',versionNumber:7,revision:3,content},
@@ -28,6 +28,7 @@ test('custom upstream rules and tags survive; only two message policies change, 
  assert.equal(r.version.versionNumber,8);assert.equal(r.pointer.revision,9);
  assert.equal(r.version.content.rules.find(r=>r.reason==='EXCHANGE').holdingReply,'Custom reply');
  assert.equal(r.version.content.rules.find(r=>r.reason==='CUSTOMER_REQUESTED_HUMAN').tag,'VAN_DON');
- for(const rule of content.rules.filter(r=>!['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'].includes(r.reason)))
+ assert.equal(r.version.content.rules.find(r=>r.reason==='DEPENDENCY_FAILURE').customerMessagePolicy,'HOLDING_REPLY_THEN_HANDOFF');
+ for(const rule of content.rules.filter(r=>!['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE','DEPENDENCY_FAILURE'].includes(r.reason)))
   assert.deepEqual(r.version.content.rules.find(r=>r.reason===rule.reason),rule);
 });

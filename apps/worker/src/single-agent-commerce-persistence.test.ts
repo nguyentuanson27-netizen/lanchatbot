@@ -38,7 +38,7 @@ async function handoffFixture(options: {
   const port = createPersistedCommerceHandoffPort({ scope, clock: () => commerceNow, read: async () => before,
     inboxBatchGuard, ...(options.completeInboxBatch === undefined ? {} : { completeInboxBatch: options.completeInboxBatch }), deliveryRecipient, resolveTagId: () => "existing-tag-id",
     store: { commitWithinTransaction } as never, transaction });
-  return { scope, before, next, decision, port, deliveryRecipient, inboxBatchGuard, client, commitWithinTransaction, completed, rollback };
+  return { scope, before, next, decision, policy, validate: vi.fn(async () => true), port, deliveryRecipient, inboxBatchGuard, client, commitWithinTransaction, completed, rollback };
 }
 
 describe("existing transaction owner for candidate commerce", () => {
@@ -71,7 +71,7 @@ describe("existing transaction owner for candidate commerce", () => {
     }else expect(output.plan?.canonicalBuyingIntent?.contributors).toContain("NATIVE_TOOL_PERMISSION");
   });
   it("commits ownership, handoff event and tag intent together and rolls back incomplete intents", async () => {
-    const scope = commerceScope(), decision = selectCommerceHandoff((await fixturePolicy()).bundle!, scope, "EXCHANGE", commerceNow);
+    const scope = { ...commerceScope(), recipient: "b".repeat(64) }, policy = (await fixturePolicy()).bundle!, decision = selectCommerceHandoff(policy, scope, "EXCHANGE", commerceNow);
     const state = { ...createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow }), revision: 1 };
     const before = { ...scope, state, stateVersion: 1, fence: 1 };
     const next = { ...before, stateVersion: 2, state: applySilentHandoff(state, "EXCHANGE", 1, 1, commerceNow).state };
@@ -80,13 +80,14 @@ describe("existing transaction owner for candidate commerce", () => {
       inboxBatchGuard: { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] }, resolveTagId: () => "existing-tag-id",
       deliveryRecipient: "synthetic-recipient",
       store: { commitWithinTransaction } as never, transaction: work => work({} as never) });
-    await expect(port.commit({ before, next, decision })).rejects.toThrow("ATOMIC_HANDOFF_INTENTS");
+    const change = { before, next, decision, policy, validate: async () => true };
+    await expect(port.commit(change)).rejects.toThrow("ATOMIC_HANDOFF_INTENTS");
     expect(commitWithinTransaction).toHaveBeenCalledWith({}, expect.objectContaining({ expectedStateVersion: 1,
       state: expect.objectContaining({ conversationOwner: "HUMAN" }), inboxBatchGuard: expect.any(Object),
       pancakeTagPlan: { desiredTag: "VAN_DON", tagId: "existing-tag-id", handoffGeneration: 2 },
       handoffEventPlan: expect.objectContaining({ source: "POST_SALE", reasonCode: "EXCHANGE", desiredTag: "VAN_DON" }) }), commerceNow);
     commitWithinTransaction.mockResolvedValue({ stateCommitted: true, handoffEventCreated: true, pancakeTagOutboxCreated: true, metaOutboxCreated: 1 });
-    expect(await port.commit({ before, next, decision })).toBe(true);
+    expect(await port.commit(change)).toBe(true);
   });
   it("atomically enqueues the configured dependency holding reply when handoff completes the source", async () => {
     const holdingReply = "Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.", f = await handoffFixture({ holdingReply });
@@ -106,6 +107,8 @@ describe("existing transaction owner for candidate commerce", () => {
       sourceMessageIdHash: meta.sourceMessageIdHash, deterministicEvidenceHash: commerceHash(meta.messages),
       binding: expect.objectContaining({ payloadHash: commerceHash(meta.messages) }) });
     expect(meta.sourceMessageIdHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(meta.handoffBinding).toMatchObject({ kind: "C3_HANDOFF_GROUP_V1", reason: "DEPENDENCY_FAILURE", revision: f.next.stateVersion });
+    expect(prepared.handoffEventPlan?.reasonDetailSafe).toMatchObject({ responseGroupId: meta.responseGroupId, deliveryBindingHash: commerceHash(meta.handoffBinding) });
     expect(JSON.stringify({ scope: f.scope, decision: f.decision, state: prepared.state, readiness: meta.effectReadiness })).not.toContain(f.deliveryRecipient);
     expect(f.completed).toHaveBeenCalledOnce(); expect(f.rollback).not.toHaveBeenCalled();
     expect(f.port.outboxCount()).toBe(1);
@@ -140,6 +143,12 @@ describe("existing transaction owner for candidate commerce", () => {
     expect(f.commitWithinTransaction).toHaveBeenCalledOnce();
     expect(f.rollback).toHaveBeenCalledOnce(); expect(f.completed).not.toHaveBeenCalled();
     expect(f.port.outboxCount()).toBe(0);
+  });
+  it("does not enqueue a stale policy/authority decision when validation fails inside the transaction", async () => {
+    const f = await handoffFixture({ holdingReply: "Em chuyển nhân viên hỗ trợ tiếp cho chị nhé." });
+    f.validate.mockResolvedValue(false);
+    expect(await f.port.commit(f)).toBe(false);
+    expect(f.validate).toHaveBeenCalledOnce(); expect(f.commitWithinTransaction).not.toHaveBeenCalled(); expect(f.port.outboxCount()).toBe(0);
   });
   it.each(["DEPENDENCY_FAILURE", "CUSTOMER_REQUESTED_HUMAN"] as const)("keeps the default %s handoff silent without a published holding rule", async reason => {
     const f = await handoffFixture({ reason });

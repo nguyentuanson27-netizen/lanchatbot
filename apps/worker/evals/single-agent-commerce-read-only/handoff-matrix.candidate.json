@@ -136,8 +136,8 @@
     },
     {
       "reason": "DEPENDENCY_FAILURE",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {

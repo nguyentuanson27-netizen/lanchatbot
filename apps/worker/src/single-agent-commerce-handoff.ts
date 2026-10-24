@@ -19,6 +19,8 @@ export interface CommerceHandoffCommit {
   before: HandoffAuthority;
   next: HandoffAuthority;
   decision: HandoffDecisionV2;
+  policy: RuntimePolicyBundle;
+  validate: () => Promise<boolean>;
   /** Code-prepared independent media, never a model draft or a general HUMAN send exception. */
   media?: { images: readonly MediaDeliveryImage[]; claims: ProtectedClaimV1[]; policy: RuntimePolicyBundle;
     validate: () => Promise<boolean> };
@@ -113,9 +115,16 @@ export function createCommerceHandoffTools(input: {
       before.state.revision, before.fence, input.clock());
     const next = { ...before, state: transitioned.state, stateVersion: transitioned.state.revision };
     // No automatic retry after an ambiguous transaction; a later reader may reconcile via the existing event ledger.
-    try { if (!await input.commit({ before, next, decision, ...(media ? { media } : {}) })) return { status: "REJECTED", reason: "HANDOFF_CONFLICT" }; }
+    const expectedPolicyHash = policyIdentity(policy);
+    const validate = async () => {
+      const current = await read();
+      return scopeMatches(current) && current.permission && current.state.conversationOwner === "BOT" && current.state.routingOwner === "APP" &&
+        current.stateVersion === before.stateVersion && commerceHash(current.state) === commerceHash(before.state) &&
+        policyIdentity(await input.policy()) === expectedPolicyHash;
+    };
+    try { if (!await input.commit({ before, next, decision, policy, validate, ...(media ? { media } : {}) })) return { status: "REJECTED", reason: "HANDOFF_CONFLICT" }; }
     catch { uncertain = true; return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" }; }
-    committed = { next, decision, policyHash: policyIdentity(policy) };
+    committed = { next, decision, policyHash: expectedPolicyHash };
     const outcome = await terminalOutcome();
     return outcome?.disposition === "HANDOFF" ? { status: "OK", data: { handoffAccepted: true } }
       : { status: "UNAVAILABLE", reason: "HANDOFF_SCOPE_CHANGED" };

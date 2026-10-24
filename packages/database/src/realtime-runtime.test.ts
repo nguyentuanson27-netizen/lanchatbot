@@ -39,10 +39,20 @@ import {
 } from "./realtime-runtime.js";
 
 describe("committed sales effect readback", () => {
-  it.each([false, true])("keeps private media binding out of the customer message after Outbox decryption (bound=%s)", async bound => {
+  it.each([true, false])("requires the exact committed handoff event and delivery binding (proven=%s)", async proven => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), query = vi.fn(async () => ({ rows: [{ proven }] }));
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
+    (store as unknown as { pool: unknown }).pool = { query };
+    const input = { pageId: "page", conversationId: "conversation", revision: 2, reason: "DEPENDENCY_FAILURE", responseGroupId: "group", bindingHash: "a".repeat(64) };
+    expect(await store.hasCommittedHandoffDelivery(input)).toBe(proven);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining("owner_before='BOT' AND owner_after='HUMAN'"),
+      ["page", "conversation", 2, "DEPENDENCY_FAILURE", JSON.stringify({ responseGroupId: "group", deliveryBindingHash: input.bindingHash })]);
+  });
+  it.each(["none", "media", "handoff", "both"])("keeps private bindings out of the customer message after Outbox decryption (%s)", async bound => {
     const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"), page = "page", id = "outbox";
     const message = { kind: "TEXT", text: "Ảnh mẫu chị nhé." }, binding = { kind: "C3_MEDIA_GROUP_V1", customerHash: "a".repeat(64) };
-    const payload = cipher.encryptJson(bound ? { ...message, commerceMediaBinding: binding } : message,
+    const payload = cipher.encryptJson({ ...message, ...(["media", "both"].includes(bound) ? { commerceMediaBinding: binding } : {}),
+      ...(["handoff", "both"].includes(bound) ? { commerceHandoffBinding: binding } : {}) },
       `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now() + 60_000));
     const recipient = cipher.encryptValue("synthetic-recipient", `lana:meta-recipient:v2:${page}:${id}`);
     const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
@@ -53,7 +63,8 @@ describe("committed sales effect readback", () => {
       payload_encrypted_dek: payload.encryptedDek, payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] }) };
     const claimed = await store.claimMetaOutbox("worker", 30_000);
     expect(claimed?.message).toEqual(message);
-    expect(claimed?.mediaBinding).toEqual(bound ? binding : undefined);
+    expect(claimed?.mediaBinding).toEqual(["media", "both"].includes(bound) ? binding : undefined);
+    expect(claimed?.handoffBinding).toEqual(["handoff", "both"].includes(bound) ? binding : undefined);
     expect(JSON.stringify(claimed?.message)).not.toContain("customerHash");
   });
   it("locks an unchanged sales readback for final Outbox authorization without inventing a new sales transition", async () => {

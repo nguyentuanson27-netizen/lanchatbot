@@ -137,6 +137,7 @@ export interface RealtimeMetaPlan {
   readonly protectedClaims?: readonly import("@lana/contracts").ProtectedClaimV1[];
   /** Candidate-specific immutable gate input, encrypted with each Outbox unit. */
   readonly mediaBinding?: unknown;
+  readonly handoffBinding?: unknown;
 }
 
 export interface RealtimePancakeTagPlan {
@@ -1836,6 +1837,7 @@ export interface ClaimedMetaOutbox {
   readonly message: RealtimeMetaMessageUnit;
   readonly attemptCount: number;
   readonly mediaBinding?: unknown;
+  readonly handoffBinding?: unknown;
 }
 
 export interface ClaimedPancakeTagOutbox {
@@ -2716,7 +2718,7 @@ export class PostgresRealtimeRuntimeStore {
       },
       this.metaRecipientAad(row.page_id, row.outbox_id),
     );
-    const { commerceMediaBinding, ...payload } = this.cipher.decryptJson<RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown }>(
+    const { commerceMediaBinding, commerceHandoffBinding, ...payload } = this.cipher.decryptJson<RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown; commerceHandoffBinding?: unknown }>(
       this.bundleFromMetaRow(row),
       this.metaPayloadAad(row.page_id, row.outbox_id),
     );
@@ -2750,7 +2752,20 @@ export class PostgresRealtimeRuntimeStore {
       message: payload,
       attemptCount: row.attempt_count,
       ...(commerceMediaBinding === undefined ? {} : { mediaBinding: commerceMediaBinding }),
+      ...(commerceHandoffBinding === undefined ? {} : { handoffBinding: commerceHandoffBinding }),
     };
+  }
+
+  /** Proof of this exact acknowledgement intent, not a provider tag receipt. */
+  async hasCommittedHandoffDelivery(input: { pageId: string; conversationId: string; revision: number; reason: string;
+    responseGroupId: string; bindingHash: string }): Promise<boolean> {
+    const result = await this.pool.query<{ proven: boolean }>(`SELECT EXISTS (
+      SELECT 1 FROM handoff_events WHERE page_id=$1 AND conversation_id=$2
+      AND direction='BOT_TO_HUMAN' AND owner_before='BOT' AND owner_after='HUMAN'
+      AND handoff_generation=$3 AND reason_code=$4
+      AND reason_detail_safe @> $5::jsonb) AS proven`, [input.pageId, input.conversationId, input.revision, input.reason,
+      JSON.stringify({ responseGroupId: input.responseGroupId, deliveryBindingHash: input.bindingHash })]);
+    return result.rows[0]?.proven === true;
   }
 
   async readMetaResponseGroupGate(
@@ -3542,7 +3557,8 @@ export class PostgresRealtimeRuntimeStore {
         this.metaRecipientAad(input.pageId, outboxId),
       );
       const payload = this.cipher.encryptJson(
-        plan.mediaBinding === undefined ? message : { ...message, commerceMediaBinding: plan.mediaBinding },
+        { ...message, ...(plan.mediaBinding === undefined ? {} : { commerceMediaBinding: plan.mediaBinding }),
+          ...(plan.handoffBinding === undefined ? {} : { commerceHandoffBinding: plan.handoffBinding }) },
         this.metaPayloadAad(input.pageId, outboxId),
         new Date(now.getTime() + 20 * 86_400_000),
       );

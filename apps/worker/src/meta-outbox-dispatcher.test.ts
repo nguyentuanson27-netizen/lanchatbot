@@ -255,6 +255,22 @@ describe("PancakeMetaPreSendGate", () => {
 });
 
 describe("resolveMetaResponseGroupGate", () => {
+  it("refuses a handoff binding when the delivery gate does not support it", async () => {
+    const c = { ...claim(), handoffBinding: { kind: "C3_HANDOFF_GROUP_V1" } }, repository = store(c);
+    const gate: MetaPreSendGate = { authorize: vi.fn() };
+    expect(await resolveMetaResponseGroupGate(c, repository, gate)).toMatchObject({ status: "BLOCKED", source: "C3_COMMERCE" });
+    expect(gate.authorize).not.toHaveBeenCalled(); expect(repository.recordMetaResponseGroupGate).not.toHaveBeenCalled();
+  });
+  it("revalidates an allowed handoff before sequence zero after retry, and reuses it for descendants", async () => {
+    const c = { ...claim(), handoffBinding: { kind: "C3_HANDOFF_GROUP_V1" } }, repository = store(c);
+    const gate: MetaPreSendGate = { supportsCommerceHandoffBinding: true, authorize: vi.fn(async () => ({ status: "ALLOWED" as const, reasonCode: null, blockingTag: null, observedAt: new Date() })) };
+    await resolveMetaResponseGroupGate(c, repository, gate);
+    await resolveMetaResponseGroupGate(c, repository, gate);
+    await resolveMetaResponseGroupGate({ ...c, sequenceNo: 1 }, repository, gate);
+    expect(gate.authorize).toHaveBeenCalledTimes(2);
+    vi.mocked(gate.authorize).mockResolvedValue({ status: "BLOCKED", reasonCode: "POLICY_CHANGED", blockingTag: null, observedAt: new Date() });
+    expect(await resolveMetaResponseGroupGate(c, repository, gate)).toMatchObject({ status: "BLOCKED", source: "C3_COMMERCE" });
+  });
   it("retries an unverified sequence 0 and reuses one durable allowed snapshot for descendants", async () => {
     const repository = store(claim());
     const gate: MetaPreSendGate = {
