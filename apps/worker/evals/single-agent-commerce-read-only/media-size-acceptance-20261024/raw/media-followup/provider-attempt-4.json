@@ -1,0 +1,105 @@
+{
+  "caseId": "media-detail-next:continue",
+  "journeyId": "media-detail-next",
+  "elapsedMs": 5611.751699999993,
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "enqueued": 0
+  },
+  "owners": 0,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "70a7895525a7cfe02032f8f3457126f703c9ddc2280fe6c167f0337b918dbb78",
+    "generation": 4,
+    "leaseToken": "5d448ede-bebe-4c75-96aa-3a97eb167f85",
+    "inboxIds": [
+      "714bb76c-ff89-48cb-9dac-92e493ef1e3b"
+    ],
+    "evaluationGroupId": "7526f47f-322e-4f38-bc81-2e8d11e41a8c",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 4,
+    "lastReceiveSequence": 4,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "714bb76c-ff89-48cb-9dac-92e493ef1e3b",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-97821093-ffcf-40aa-8827-cb7ad4776dbc:0",
+        "conversationHash": "70a7895525a7cfe02032f8f3457126f703c9ddc2280fe6c167f0337b918dbb78",
+        "occurredAt": "2026-10-24T11:35:21.344Z",
+        "receivedAt": "2026-10-24T11:35:21.344Z",
+        "receiveSequence": 4,
+        "attemptCount": 1,
+        "leaseToken": "5d448ede-bebe-4c75-96aa-3a97eb167f85",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "ef4cb4b5-fc2e-40b4-8715-f1cafb858491",
+            "eventKey": "stateful-97821093-ffcf-40aa-8827-cb7ad4776dbc:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-97821093-ffcf-40aa-8827-cb7ad4776dbc:0",
+            "senderId": "synthetic-recipient-70a7895525a7cfe02032f8f3457126f703c9ddc2280fe6c167f0337b918dbb78",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-24T11:35:21.344Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Cho chị xem cận phần thêu ở áo nhé.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "ef4cb4b5-fc2e-40b4-8715-f1cafb858491",
+      "eventKey": "stateful-97821093-ffcf-40aa-8827-cb7ad4776dbc:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-97821093-ffcf-40aa-8827-cb7ad4776dbc:0",
+      "senderId": "synthetic-recipient-70a7895525a7cfe02032f8f3457126f703c9ddc2280fe6c167f0337b918dbb78",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-24T11:35:21.344Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Cho chị xem cận phần thêu ở áo nhé.",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [],
+  "actualCapturedAttachments": [],
+  "deliveryEvidence": {
+    "outboxRows": []
+  },
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1,
+    "negotiation": null
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 8,
+    "verifier": 3,
+    "catalogReads": 31,
+    "posReads": 10,
+    "selectorCalls": 0,
+    "readPolicyCalls": 0
+  }
+}

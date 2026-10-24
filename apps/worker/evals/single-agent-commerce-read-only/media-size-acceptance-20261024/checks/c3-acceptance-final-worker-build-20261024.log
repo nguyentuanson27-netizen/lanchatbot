@@ -1,0 +1,66 @@
+
+> @lana/worker@0.1.0 prebuild C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> pnpm -r --filter "@lana/worker^..." build
+
+Scope: 12 of 21 workspace projects
+../../packages/contracts build$ tsc -p tsconfig.json
+../../packages/contracts build: Done
+../../packages/commerce-kernel build$ tsc -p tsconfig.json
+../../packages/conversation-engine build$ tsc -p tsconfig.json
+../../packages/durable-messaging build$ tsc -p tsconfig.json
+../../packages/meta-delivery build$ tsc -p tsconfig.json
+../../packages/commerce-kernel build: Done
+../../packages/meta-webhook build$ tsc -p tsconfig.json
+../../packages/meta-delivery build: Done
+../../packages/pancake-handoff build$ tsc -p tsconfig.json
+../../packages/durable-messaging build: Done
+../../packages/conversation-engine build: Done
+../../packages/meta-webhook build: Done
+../../packages/pancake-handoff build: Done
+../../packages/database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build
+../../packages/business-tools build$ tsc -p tsconfig.json
+../../packages/database prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/database prebuild: > tsc -p tsconfig.json
+../../packages/business-tools build: Done
+../../packages/database prebuild: > @lana/commerce-kernel@0.1.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\commerce-kernel
+../../packages/database prebuild: > tsc -p tsconfig.json
+../../packages/database prebuild: Done
+../../packages/database build$ tsc -p tsconfig.json
+../../packages/database build: Done
+../../packages/chat-runtime build$ tsc -p tsconfig.json
+../../packages/dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build
+../../packages/dataset-review prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/chat-runtime build: Done
+../../packages/dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\business-tools
+../../packages/dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/dataset-review prebuild: Done
+../../packages/dataset-review build$ tsc -p tsconfig.json
+../../packages/dataset-review build: Done
+../../packages/dataset-store prebuild$ pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build
+../../packages/dataset-store prebuild: Scope: 3 of 21 workspace projects
+../../packages/dataset-store prebuild: ../contracts build$ tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../contracts build: Done
+../../packages/dataset-store prebuild: ../database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build
+../../packages/dataset-store prebuild: ../dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build
+../../packages/dataset-store prebuild: ../database prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\commerce-kernel
+../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\business-tools
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../database prebuild: Done
+../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../dataset-review prebuild: Done
+../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../database build: Done
+../../packages/dataset-store prebuild: ../dataset-review build: Done
+../../packages/dataset-store prebuild: Done
+../../packages/dataset-store build$ tsc -p tsconfig.json
+../../packages/dataset-store build: Done
+
+> @lana/worker@0.1.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> tsc -p tsconfig.json
+

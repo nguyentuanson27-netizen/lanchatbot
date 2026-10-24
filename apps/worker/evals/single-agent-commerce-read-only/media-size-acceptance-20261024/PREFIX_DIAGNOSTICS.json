@@ -1,0 +1,199 @@
+{
+  "fitClaim": {
+    "authorization": "NONE",
+    "claimId": "85111aaa-2953-471c-a416-bf844b156e38",
+    "provenance": {
+      "authority": "VERIFIED_SIZE_ENGINE_V1",
+      "contentHash": "b503c3dbe9243b902d685a20b15a3fd95750f59dc91692d59f47c9cb141d4a8a",
+      "evidenceRef": "size-engine:v1:85111aaa-2953-471c-a416-bf844b156e38:image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447:d1abeca0-5fdb-4600-8171-f21d3b75926e:2:measurements:f39aa60db33a7d7eef441fad925ad8201c6e302d896b1f63a9c457cfa21f75be",
+      "expiresAt": "2026-10-24T11:41:30.619Z",
+      "observedAt": "2026-10-24T11:36:30.619Z",
+      "sourceVersion": "VERIFIED_SIZE_ENGINE_V1:2026-10-24T11:36:30.619Z"
+    },
+    "schemaVersion": 1,
+    "scope": {
+      "kind": "PRODUCT",
+      "productId": "SV2447",
+      "variantId": null
+    },
+    "type": "SIZE_FIT",
+    "value": {
+      "alternativeSizes": [],
+      "customerProfileId": "d1abeca0-5fdb-4600-8171-f21d3b75926e",
+      "customerProfileRevision": 2,
+      "evidenceBasis": "MEASUREMENTS",
+      "measurementFingerprint": "f39aa60db33a7d7eef441fad925ad8201c6e302d896b1f63a9c457cfa21f75be",
+      "recommendedSizes": [
+        "M"
+      ]
+    }
+  },
+  "items": [
+    {
+      "caseId": "sales-discovery-advice:need",
+      "reason": "OWNER_TOOL_MODE",
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "OWNER_TOOL_MODE"
+      },
+      "tools": [
+        {
+          "name": "search_products",
+          "status": "OK",
+          "reason": null,
+          "recommendation": null
+        },
+        {
+          "name": "search_products",
+          "status": "OK",
+          "reason": null,
+          "recommendation": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "recommendation": null
+        },
+        {
+          "name": "read_product",
+          "status": "REJECTED",
+          "reason": "SUBJECT_BOUND",
+          "recommendation": null
+        }
+      ],
+      "generationStatus": [
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "owner",
+          "status": "PROVIDER_ERROR"
+        }
+      ]
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "reason": "DEPENDENCY_FAILURE",
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "STALE",
+        "originalDiagnostic": {
+          "check": "CURRENT_SNAPSHOT",
+          "checkedAtMs": 1792841704792,
+          "expectedSnapshotId": "d3b348ca1a30cea5ec43f92edca2246197a65bee7b5613d2b5b5ca87a5bbc4b7",
+          "currentSnapshotId": "d460b885b1cbc633625a55c271dc5d908e73aa19803b1ea6e0d5ba4f771d3813",
+          "expectedRevision": 0,
+          "currentRevision": 0,
+          "reasonCodes": []
+        }
+      },
+      "tools": [
+        {
+          "name": "recommend_size",
+          "status": "OK",
+          "reason": null,
+          "recommendation": {
+            "status": "RECOMMENDED",
+            "action": "REPLY",
+            "missingInputs": [],
+            "recommendedSizes": [
+              {
+                "componentProductId": "SV2447",
+                "componentRole": "OTHER",
+                "size": "M"
+              }
+            ]
+          }
+        }
+      ],
+      "generationStatus": [
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "verifier",
+          "status": "OK"
+        }
+      ]
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "reason": "DEPENDENCY_FAILURE",
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "STALE",
+        "originalDiagnostic": {
+          "check": "CURRENT_SNAPSHOT",
+          "checkedAtMs": 1792841709983,
+          "expectedSnapshotId": "2743b96c4ca9fa789e08d26269b0e3810c49cd619c87cdb36a33db822f633787",
+          "currentSnapshotId": "43b9f16ee6d0fcb51c9dc8970c02cdebf3d3fdb6fd8aa055a4189923b77e24fe",
+          "expectedRevision": 0,
+          "currentRevision": 0,
+          "reasonCodes": []
+        }
+      },
+      "tools": [
+        {
+          "name": "select_product_media",
+          "status": "UNAVAILABLE",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA",
+          "recommendation": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "recommendation": null
+        },
+        {
+          "name": "select_product_media",
+          "status": "UNAVAILABLE",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA",
+          "recommendation": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "recommendation": null
+        },
+        {
+          "name": "select_product_media",
+          "status": "OK",
+          "reason": null,
+          "recommendation": null
+        }
+      ],
+      "generationStatus": [
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "owner",
+          "status": "OK"
+        },
+        {
+          "role": "verifier",
+          "status": "OK"
+        }
+      ]
+    }
+  ],
+  "snapshotInterpretation": "CURRENT_SNAPSHOT mismatch is confirmed. POS observedAt changed from 11:04:33 to 11:34:33 across retained tool results during the prefix; consistent with source refresh, but full final trusted snapshot is not retained so the exact changed field is not proven."
+}

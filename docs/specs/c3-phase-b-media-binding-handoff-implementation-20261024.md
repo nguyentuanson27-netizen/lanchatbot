@@ -1,5 +1,7 @@
 # Phase B — implementation binding ảnh và handoff thiếu chart
 
+Lịch sử source871ba419 bên dưới. **Acceptance tiếp theo đã hoàn tất trên af482367:** T1/T2 PASS, đủ51native +17controls; B chưa GO vì các residual ngoài hai target. [Báo cáo hiện hành](../../apps/worker/evals/single-agent-commerce-read-only/media-size-acceptance-20261024/CHECKPOINT_B.md). Không dùng các dòng “chưa chạy model” bên dưới làm trạng thái source mới.
+
 **IMPLEMENTED_WITH_RESIDUALS; chưa chạy model, B chưa GO.** Owner yêu cầu triển khai [kế hoạch sau independent review](c3-phase-b-media-binding-handoff-plan-20261024.md). Implementation base `db4f2dbb`; savepoints `59861c86` (binding), `6bad1143` (atomic mixed group), `871ba419769ece9bd17b089959ac0409355c7a31` (self-review corrections). Không có independent implementation review trong lượt này; không dùng review kế hoạch làm approval cho code.
 
 ## Thay đổi

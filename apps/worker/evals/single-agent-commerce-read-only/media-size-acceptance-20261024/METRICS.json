@@ -1,0 +1,182 @@
+{
+  "jobs": {
+    "b1": {
+      "attempts": 24,
+      "terminals": {
+        "FALLBACK": 2,
+        "SEND_ELIGIBLE": 22
+      },
+      "generationRequests": 72,
+      "databaseDropped": null
+    },
+    "stateful": {
+      "attempts": 8,
+      "terminals": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "generationRequests": 15,
+      "databaseDropped": true
+    },
+    "journey-openings": {
+      "attempts": 4,
+      "terminals": {
+        "FALLBACK": 2,
+        "HANDOFF": 1,
+        "SEND_ELIGIBLE": 1
+      },
+      "generationRequests": 13,
+      "databaseDropped": true
+    },
+    "media-followup": {
+      "attempts": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 5,
+        "HANDOFF": 1,
+        "NO_SEND": 1
+      },
+      "generationRequests": 21,
+      "databaseDropped": true
+    },
+    "negotiation": {
+      "attempts": 3,
+      "terminals": {
+        "SEND_ELIGIBLE": 3
+      },
+      "generationRequests": 8,
+      "databaseDropped": true
+    },
+    "opening-quotes": {
+      "attempts": 5,
+      "terminals": {
+        "SEND_ELIGIBLE": 5
+      },
+      "generationRequests": 14,
+      "databaseDropped": true
+    }
+  },
+  "native": {
+    "attempts": 51,
+    "sendEligibilityOnly": 24,
+    "captureTransport": 27,
+    "terminals": {
+      "FALLBACK": 4,
+      "SEND_ELIGIBLE": 40,
+      "NO_SEND": 3,
+      "HANDOFF": 4
+    },
+    "reasons": {
+      "OWNER_TOOL_MODE": 2,
+      "PASS": 40,
+      "PROVIDER_ERROR": 1,
+      "CHECKOUT_DETAILS_MISSING": 1,
+      "PRIVATE_CHECKOUT_COMMITTED": 1,
+      "PURCHASE_CONFIRMED": 1,
+      "CUSTOMER_REQUESTED_HUMAN": 1,
+      "FAIL": 1,
+      "DEPENDENCY_FAILURE": 2,
+      "HUMAN_OWNS_CONVERSATION": 1
+    },
+    "actualSilentCapturedTurns": 3,
+    "codeCheckoutOutcomes": 2
+  },
+  "controls": {
+    "attempts": 17,
+    "safe": 8,
+    "unsafe": 8,
+    "probe": 1,
+    "unsafeSendEligibleFalsePass": 0,
+    "safeRejected": 0
+  },
+  "operations": {
+    "generationSlots": 160,
+    "actualGenerationRequests": 160,
+    "ownerRequests": 100,
+    "verifierRequests": 60,
+    "requestsPerDispatchedGenerationMax": 1,
+    "automaticGenerationRetries": 0,
+    "knownInputTokens": 950556,
+    "knownOutputTokens": 76341,
+    "requestsWithUnknownUsage": 1,
+    "cost": "NOT_EXPOSED",
+    "providerErrors": [
+      {
+        "caseId": "b1-buying-concern",
+        "role": "owner",
+        "generationStatus": "PROVIDER_ERROR",
+        "telemetryStatus": null,
+        "httpStatus": null,
+        "providerErrorCode": null,
+        "terminalEvent": null,
+        "incompleteReason": null,
+        "failureStage": "GENERATION",
+        "failureCode": "TRANSPORT_ERROR"
+      }
+    ],
+    "providerErrorCount": 1,
+    "providerTimeoutCount": 0,
+    "generationContractErrors": [
+      {
+        "caseId": "b1-changed-occasion",
+        "role": "owner",
+        "kind": "UNEXPECTED_TOOL_CALL_IN_FINAL_ONLY"
+      },
+      {
+        "caseId": "sales-discovery-advice:need",
+        "role": "owner",
+        "kind": "UNEXPECTED_TOOL_CALL_IN_FINAL_ONLY"
+      }
+    ],
+    "returnedModelVersions": {
+      "gemini-3.5-flash-lite": 99,
+      "gpt-6.1-sol": 60,
+      "UNAVAILABLE": 1
+    },
+    "providerVerifierLatency": {
+      "n": 60,
+      "p50Ms": 8128,
+      "p95Ms": 17187,
+      "policy": "nearest-rank"
+    },
+    "nativeVerifierStageLatency": {
+      "n": 43,
+      "p50Ms": 11189.865099999995,
+      "p95Ms": 25755.92790000001,
+      "policy": "nearest-rank"
+    },
+    "nativeWholeAttemptLatency": {
+      "n": 51,
+      "p50Ms": 22593.15340000001,
+      "p95Ms": 54126.755400000024,
+      "policy": "nearest-rank"
+    },
+    "readOnlyAttemptLatency": {
+      "n": 24,
+      "p50Ms": 14669.333000000042,
+      "p95Ms": 22358.31839999999,
+      "policy": "nearest-rank"
+    },
+    "capturedCustomerOutcomeLatency": {
+      "n": 27,
+      "p50Ms": 41824.32209999999,
+      "p95Ms": 54126.755400000024,
+      "policy": "nearest-rank"
+    },
+    "measurementLimit": "Provider verifier latency is bounded-relay wall time. Native verification stage includes code wrapper/readback; not a controlled counterfactual added-E2E comparison. Overall attempt summary mixes24eligibility/27capture, with separate summaries below. Isolated SSH/database/capture excludes real Meta delivery latency; not a production speed estimate. Build/preflight/setup excluded."
+  },
+  "errorDetails": [
+    {
+      "caseId": "b1-buying-concern",
+      "role": "owner",
+      "generationStatus": "PROVIDER_ERROR",
+      "telemetryStatus": null,
+      "httpStatus": null,
+      "providerErrorCode": null,
+      "terminalEvent": null,
+      "incompleteReason": null,
+      "failureStage": "GENERATION",
+      "failureCode": "TRANSPORT_ERROR"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "caseId": "b1-buying-concern",
+  "sourceMode": "LIVE",
+  "elapsedMs": 10724.847500000033,
+  "runtime": {
+    "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 0,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "6e3ab26c58ab1c2e652e0cd7614b8e76a8c7664497c2e6951bb6fce00151b0cc:owner:1",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 10107.410000000033,
+        "telemetry": {
+          "generationId": "6e3ab26c58ab1c2e652e0cd7614b8e76a8c7664497c2e6951bb6fce00151b0cc:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": null,
+          "modelVersion": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "cost": null,
+          "finishReason": null,
+          "requestBytes": 20538,
+          "requestHash": "78cb3b9ba82aae96847762dc4742743b1ef47a2f63fc69a717ec2533603d9fa4",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "failureStage": "GENERATION",
+          "failureCode": "TRANSPORT_ERROR"
+        }
+      }
+    ],
+    "toolLatencyMs": 385.58869999996386,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 2,
+    "policyReads": 2,
+    "catalogReads": 18,
+    "posReads": 13
+  }
+}

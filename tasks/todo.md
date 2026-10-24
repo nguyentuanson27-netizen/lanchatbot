@@ -2,7 +2,10 @@
 
 - [x] Owner duyệt dùng chart chung cho sản phẩm cùng tên; explicit SV2447/SQ2447 mapping và source provenance trong [decision](../docs/specs/c3-phase-b-same-name-size-sharing-20261024.md).
 - [x] Implement encrypted Outbox binding, restart/source/state/policy/recipient/generation revalidation và fail-closed legacy gate. Same-name source chart giữ nguyên; requested product vẫn là fit/price/stock/media subject.
-- [ ] Final deterministic PostgreSQL COD/BANK checks và source-sealed provider controls/prefix/full theo [plan amended](../docs/specs/c3-phase-b-media-binding-handoff-plan-20261024.md). Chưa claim acceptance hoàn tất hoặc B GO.
+- [x] Final source `af482367`: worker376/Node92, typecheck/build/lint, PostgreSQL COD8/BANK8 PASS. Đã xử lý SQL gate contract và zero-generation input-bound failure, giữ nguyên evidence lỗi.
+- [x] Seal/preflight →17controls PASS →11affected prefix đạt T1/T2 →40remaining, đủ51native/160requests, N1/retry0;160wire firewall PASS,11test DBs dropped. [Báo cáo và toàn bộ hội thoại](../apps/worker/evals/single-agent-commerce-read-only/media-size-acceptance-20261024/CHECKPOINT_B.md).
+- [x] T1/T2 acceptance đóng: gallery có hai ảnh chung/giữ original FAIL; ảnh+size có ảnh cận và code-backed M từ chart chung. Không claim ảnh đúng màu be hoặc quality toàn B đạt.
+- [ ] B GO: còn2owner tool-mode failures,1transport failure,2stale-snapshot silent handoffs +1dependent no-send; giọng/quyết định vẫn có finding. STOP promotion, không tự sửa/run thêm hoặc deploy. A vẫn OWNER_BYPASS.
 
 ## Historical — implementation media binding / mixed handoff, 2026-10-24
 

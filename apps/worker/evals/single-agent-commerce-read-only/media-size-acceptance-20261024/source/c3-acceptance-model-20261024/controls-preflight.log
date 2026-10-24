@@ -1,0 +1,11 @@
+file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/protocol.mjs:7
+const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
+                                       ^
+
+Error: VERIFIER_INPUT_BOUND
+    at check (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/protocol.mjs:7:40)
+    at buildVerifierRequest (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/protocol.mjs:78:2)
+    at prepareControls (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/feedback-control-inputs.mjs:90:14)
+    at async file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs:19:9
+
+Node.js v24.19.0
