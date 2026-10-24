@@ -1,6 +1,6 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { ProductContentV1Schema } from "@lana/contracts";
-import { buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
+import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
   resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken, normalizeProductCode,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
@@ -29,6 +29,7 @@ export function createReadOnlyTools(input: {
   scope: CommerceScope; clock: () => Date; policy: () => Promise<RuntimePolicyResolution>; catalog: ReadOnlyCatalog;
   initialProducts?: StableProductDocument[]; state?: () => TrustedContext["state"];
   maxFactAgeSeconds?: number;
+  entry?: { firstContact: boolean; fromAd: boolean };
 }) {
   const { scope } = input;
   const maxAge = input.maxFactAgeSeconds ?? 1200;
@@ -51,7 +52,7 @@ export function createReadOnlyTools(input: {
   for (const p of input.initialProducts ?? []) bind(p);
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
-    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values(), ...preparationContexts.values()] });
+    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...(input.entry ? [{ref:"conversation-entry",text:JSON.stringify(input.entry),sourceVersion:scope.bindingVersion,observedAt:scope.sourceObservedAt,expiresAt:null}] : []), ...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values(), ...preparationContexts.values()] });
   const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
     if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
       throw new Error("PRODUCT_SOURCE_FRESHNESS");
@@ -166,7 +167,7 @@ export function createReadOnlyTools(input: {
       const etaClaim = optionClaims.find(c => c.type === "ETA"), stockClaim = optionClaims.find(c => c.type === "STOCK"),
         priceClaim = optionClaims.find(c => c.type === "PRICE");
       const filteredClaim = etaClaim ?? ((q.size || q.color) ? stockClaim ?? priceClaim : undefined);
-      return { offerType: offer ?? (offerType ? normalizeCatalogToken(offerType) : null), offer, variant, variantId, claims: optionClaims,
+      return { priceEnvelope: price, offerType: offer ?? (offerType ? normalizeCatalogToken(offerType) : null), offer, variant, variantId, claims: optionClaims,
         filter: filteredClaim ? { productId: id, variantId, offerType: offer, size: q.size, color: q.color,
           priceClaimId: priceClaim?.claimId ?? null, stockClaimId: stockClaim?.claimId ?? null,
           ...(etaClaim ? { deliveryRegion: Object.keys(raw!.shipping_eta).find(r =>
@@ -216,8 +217,18 @@ export function createReadOnlyTools(input: {
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
     preparationContexts.delete(id);
+    const componentLabel = ({AO:"Áo lẻ",CV:"Chân váy lẻ",QUAN:"Quần lẻ"} as Record<string,string>)[selected.offer ?? ""];
+    const wholeProduct = availableOffers?.length === 1 || ["SET","SET_VAY","SET_QUAN"].includes(selected.offer ?? "");
     const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
+      ...(input.entry?.firstContact && selected.priceEnvelope?.status === "OK" &&
+        (query.offerType !== null || availableOffers?.length === 1) && nextClaims.some(c=>c.type==="PRICE") ? {
+        openingQuote: {subjectRef:id,offerType:selected.offer,
+          text:buildVerifiedFactBlocks(selected.priceEnvelope,"PRICE",{...p,
+            ...(componentLabel ? {title:componentLabel} : {}),
+            materials:evidence.attributes && wholeProduct ? p.materials : [],
+            silhouettes:evidence.attributes && wholeProduct ? p.silhouettes : []}).blocks.map(b=>b.text).join("\n")}
+      } : {}),
       availableOffers,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
         sourceVersion: raw!.release_id, observedAt: raw!.synced_at,

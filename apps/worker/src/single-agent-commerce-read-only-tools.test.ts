@@ -614,3 +614,29 @@ describe("read-only domain tools", () => {
     expect(makeBinding("turn", "Giá theo lựa chọn chị nhé.", await tools.readback())).toEqual(binding);
   });
 });
+
+ it.each([true,false])("offers the existing price card only for first contact (%s)",async firstContact=>{
+ const f=fixtureProduct();const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,
+ entry:{firstContact,fromAd:true},initialProducts:[f.product],catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ const r=await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId}});
+ const card=(r.data as {openingQuote?:{text:string}}).openingQuote;
+ if(firstContact){expect(card?.text).toContain("499.000đ");expect(card?.text).toContain("Chất liệu: cotton");expect(card?.text).toContain("Form dáng: suông");expect(card?.text).toContain("Size: M");}
+ else expect(card).toBeUndefined();
+ });
+
+it.each(["missing-price","stale","ambiguous-offer"])("does not supply an opening price card for %s",async fault=>{
+ const f=fault==="ambiguous-offer"?sellingFixture({AO:300000,SET:700000}).f:fixtureProduct();
+ if(fault==="stale")f.snapshot.synced_at="2020-01-01T00:00:00.000Z";
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,entry:{firstContact:true,fromAd:false},initialProducts:[f.product],
+ catalog:{readProduct:async()=>({...f,snapshot:fault==="missing-price"?null:f.snapshot}),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ const r=await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId}});
+ expect((r.data as {openingQuote?:unknown})?.openingQuote).toBeUndefined();
+});
+
+it("keeps a component opening quote separate from the set price and set attributes",async()=>{
+ const {f}=sellingFixture({AO:300000,SET:700000});
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,entry:{firstContact:true,fromAd:true},initialProducts:[f.product],catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ const r=await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,offerType:"AO"}});
+ const c=(r.data as {openingQuote:{text:string}}).openingQuote;
+ expect(c.text).toContain("Áo lẻ");expect(c.text).toContain("300.000đ");expect(c.text).not.toContain("700.000đ");expect(c.text).not.toContain("Chất liệu:");
+});

@@ -925,3 +925,15 @@ test('final-only generation exposes no callable tools and explicitly ends tool p
  const active=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.execution;
  assert.equal(active.phase,'TOOL_OR_REPLY');assert.deepEqual(active.callableTools,r.availableTools);
 });
+
+test('opening quote and first-contact context reach the owner without evaluator fields',async()=>{
+ const r=request();r.context.policyLiterals.push({ref:'conversation-entry',text:JSON.stringify({firstContact:true,fromAd:true})});
+ r.contents.push({role:'model',parts:[{functionCall:{id:'p1',name:'read_product',args:{subjectRef:'P1',offerType:null}},thoughtSignature:'signed'}]},
+ {role:'user',parts:[{functionResponse:{id:'p1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',openingQuote:{subjectRef:'P1',offerType:'DIRECT',text:'Áo P1 hiện có giá 499.000đ.'}}}}}]});
+ r.caseId='EVALUATOR_OPENING';r.evaluator={expected:'EVALUATOR_EXPECTED'};
+ let wire;await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_u,init)=>{
+ wire=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));
+ }})(r);
+ assert.equal(wire.contents.at(-1).parts[0].functionResponse.response.data.openingQuote.text,'Áo P1 hiện có giá 499.000đ.');
+ assert.match(JSON.stringify(wire),/firstContact/);assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_OPENING|EVALUATOR_EXPECTED/);
+});

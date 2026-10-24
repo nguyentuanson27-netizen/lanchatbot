@@ -538,3 +538,30 @@ it("reports exact binding mismatch without sending when egress readback changes"
  const result=await f.run();expect(result).toMatchObject({terminal:{disposition:"NO_SEND",reason:"EGRESS_WORLD_CHANGED"},egressDiagnostic:{kind:"TRUSTED_SNAPSHOT",changedBindingFields:expect.arrayContaining(["trustedSnapshotId","factSnapshotVersion"])}});
  expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
 });
+
+it.each(["ad","organic","returning","private-history"])("provides opening context from actual ingress history: %s",async mode=>{
+ const f=fixture();f.message.text="SM613 bao nhiêu em?";
+ if(mode==="ad")Object.assign(f.message,{adsContext:{source:"ADS",adTitle:"SM613",postId:null,adId:null,ref:null}});
+ if(mode==="returning"||mode==="private-history")f.history.listConversationHistory.mockResolvedValue([{senderType:"CUSTOMER",text:mode==="private-history"?"[PII_REDACTED_MESSAGE]":"Hôm qua chị xem mẫu này."}]);
+ let request:OwnerRequest|undefined;
+ await f.run(async r=>{request=r;return {kind:"FINAL",text:"Dạ chị."};});
+ const entry=JSON.parse(request!.context.policyLiterals.find(p=>p.ref==="conversation-entry")!.text);
+ expect(entry).toEqual({firstContact:mode==="ad"||mode==="organic",fromAd:mode==="ad"});
+});
+
+it("passes the opening card and chosen images through the existing verifier and egress group",async()=>{
+ const f=fixture(),p=f.products[0]!.product;f.message.text="Bộ này bao nhiêu em?";
+ Object.assign(f.message,{adsContext:{source:"ADS",adTitle:p.productId,postId:null,adId:null,ref:null}});
+ p.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+ let draft="",n=0;
+ const calls=[{name:"read_product",args:{subjectRef:p.productId}},{name:"select_product_media",args:{subjectRef:p.productId,intent:"GENERIC"}}];
+ const result=await f.run(async r=>{
+ if(++n===1)return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}};
+ const reply=r.contents.at(-1)!.parts[0] as {functionResponse:{response:{data:{openingQuote:{text:string}}}}};
+ draft=reply.functionResponse.response.data.openingQuote.text;
+ return {kind:"FINAL",text:draft};
+ });
+ expect(draft).toContain("499.000đ");expect(result.terminal.text).toBe(draft);
+ expect(f.verifier).toHaveBeenCalledTimes(1);
+ expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+});

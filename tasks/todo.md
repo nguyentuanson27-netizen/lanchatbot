@@ -2187,3 +2187,7 @@ Owner requests root-cause fixes, self-review, then exactly one Checkpoint A roun
 Gemini3.8 run closed: controls17PASS; native2/46 (1eligible,1ownerTIMEOUT),44NOT_RUN. 21requests/0retry; first-runner stopped PROVIDER_ERROR_NO_RETRY. BLOCKED, no model quality conclusion. [Evidence](../apps/worker/evals/single-agent-commerce-read-only/gemini38-run-20261024/CHECKPOINT_B.md).
 
 Owner-authorized retry of Gemini3.8 b1-price completed: sourcef8026148, 1eligible,3HTTP200generation requests,0automaticRetry,elapsed37.375s. PriorTIMEOUT retained; remaining44nativeNOT_RUN/BnotGO. [Retry evidence](../apps/worker/evals/single-agent-commerce-read-only/gemini38-retry-20261024/CHECKPOINT_B.md).
+
+## Phase B opening quote — 2026-10-24
+
+Implemented/self-reviewed existing price-card builder into first-contact read_product; actual ingress entry metadata; owner instructions; separate5-turn opening-quote cohort. Deterministic159+86+43PASS, compile/lint PASS. Provider not run, BnotGO; oneTEXT plus images, no post-verifier rewrite or production wiring. [Report](../docs/specs/c3-phase-b-opening-quote-integration-20261024.md).

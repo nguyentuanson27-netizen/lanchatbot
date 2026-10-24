@@ -70,3 +70,17 @@ export function registerNegotiationProbe(corpus,baseline){
   {caseId:'negotiation-price-objection',journeyId,runtime:{latest:journeyMessages(objection).map(m=>m.text??'').join('\n'),initialProductCodes:['SV2447']},evaluator:{requiresCurrentCart:true,purpose:'One source-bound PRICE_OBJECTION; only current code quote is authorized.'}},
   {caseId:'negotiation-total-control',journeyId,runtime:{latest:'Thế một áo cả ship là bao nhiêu em?',initialProductCodes:['SV2447']},evaluator:{requiresCurrentCart:true,purpose:'Ordinary total question must not add objection evidence or a concession.'}}];
 }
+
+export function registerOpeningQuotes(rows){
+ assert(Array.isArray(rows)&&rows.length===5,'FIVE_OPENING_QUOTE_TURNS');
+ assert.equal(new Set(rows.map(r=>r.caseId)).size,5,'DUPLICATE_OPENING_QUOTE');
+ assert.equal(rows[0].journeyId,rows[1].journeyId,'REPEAT_USES_ACTUAL_HISTORY');
+ assert.equal(new Set(rows.map(r=>r.journeyId)).size,4,'FOUR_OPENING_JOURNEYS');
+ return rows.map(r=>{
+  assert(!Object.hasOwn(r.runtime,'history'),'NO_SYNTHETIC_SHOP_HISTORY');
+  const messages=journeyMessages(r);assert.equal(messages.length,1);
+  assert.equal(messages[0].text,r.runtime.latest,'LATEST_MATCHES_MESSAGE');
+  assert(Array.isArray(r.runtime.initialProductCodes)&&r.runtime.initialProductCodes.length<=3);
+  return {caseId:r.caseId,journeyId:r.journeyId,runtime:{messages,latest:messages[0].text,initialProductCodes:[...r.runtime.initialProductCodes]},evaluator:structuredClone(r.evaluator)};
+ });
+}

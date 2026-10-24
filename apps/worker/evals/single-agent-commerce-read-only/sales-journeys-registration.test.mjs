@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe,registerMediaFollowup} from './sales-journeys-registration.mjs';
+import {registerOpeningQuotes,registerJourneyOpenings,journeyMessages,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe,registerMediaFollowup} from './sales-journeys-registration.mjs';
 const corpus=JSON.parse(readFileSync(new URL('./sales-journeys.candidate.json',import.meta.url)));
 
 test('media followups retain actual prerequisites and never manufacture a shop reply',()=>{
@@ -61,4 +61,15 @@ test('negotiation companion uses an actual model cart setup then one objection a
  assert(r.slice(1).every(c=>c.evaluator.requiresCurrentCart));
  assert.equal(r[1].runtime.latest,corpus.journeys.find(j=>j.purposeId==='J07').turns[0].runtime.messages[0].text);
  assert.equal(r[2].runtime.latest,'Thế một áo cả ship là bao nhiêu em?');
+});
+
+test('opening quotes use real repeated journey history and keep evaluation separate',()=>{
+ const rows=JSON.parse(readFileSync(new URL('./opening-quote-cases.json',import.meta.url)));
+ const registered=registerOpeningQuotes(rows);assert.equal(registered.length,5);
+ assert.equal(registered[0].journeyId,registered[1].journeyId);
+ assert.equal(registered[0].runtime.messages[0].adsContext.adTitle,'Set Thạch Thảo SV2447');
+ assert.deepEqual(registered[0].runtime.initialProductCodes,[]);
+ assert(!JSON.stringify(registered.map(r=>r.runtime)).includes('expected'));
+ const invalid=structuredClone(rows);invalid[1].runtime.history=[{role:'shop',text:'Invented successful quote'}];
+ assert.throws(()=>registerOpeningQuotes(invalid),/NO_SYNTHETIC_SHOP_HISTORY/);
 });

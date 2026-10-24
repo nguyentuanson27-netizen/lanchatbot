@@ -159,7 +159,10 @@ export async function runPersistedCommerceIngress(input: {
   const profile = await profilePort.read();
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
     read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId });
-  const tools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock }, state: { store: profilePort,
+  const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
+  const history = commerceHistory(rows);
+  const tools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
+    entry: {firstContact: rows.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false), target = sizeChartTarget(product);
       return { target, charts: evaluateSizeChartEligibility({ policy: await input.policy(), productId: ref, target }).charts }; },
@@ -174,8 +177,6 @@ export async function runPersistedCommerceIngress(input: {
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
     handoff: { ...handoff, policy: policyBundle },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
-  const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
-  const history = commerceHistory(rows);
   const result = await runCommerceTurn({ scope, tools, latest, history, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
   // Reuse the bounded current readback before creating Outbox eligibility; no second model or reply rewrite.
   const accepted = makeBinding(scope.requestId, result.terminal.text ?? "", tools.snapshot());
