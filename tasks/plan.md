@@ -2472,3 +2472,7 @@ Owner-authorized correction after independent review: replace search attributes 
 ## Opening quote provider run — 2026-10-24
 
 Owner-authorized run source598226ed; full5/5 turns completed, raw37d595ac. Three SEND_ELIGIBLE/twofallback, 12actual generation requests (9owner3verifier), one pre-dispatch bound failure/one owner timeout/retry0. Ads exact-code binding fails through real source adapter; organic prices/images work but not opening card/next-step target. Final runner cleanliness check FAIL because output was placed under eval source, tracked executable/config unchanged; diagnostic evidence only, not qualification. DB dropped, sendEnabled=false. [Report and next direction](../apps/worker/evals/single-agent-commerce-read-only/opening-quotes-run-20261024/CHECKPOINT_B.md). STOP/BnotGO; no automatic retry/fix/run/deploy.
+
+## Owner-authorized Gemini 3.5 Flash Lite comparison — 2026-10-24
+
+Run same opening-quotes five turns once with gemini-3.5-flash-lite HIGH/global, candidateCount1; unchanged prompts/verifier/corpus/runtime and90000ms timeout/retry0. Node adapter/protocol/registration86PASS. Seal commit, require clean source, preflight, dispatch output outside repo source tree, archive raw before whole-terminal review. Retain known ads binding gap and every fallback/error; no fix between comparison runs, no live send/deploy or model substitution.
