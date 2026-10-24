@@ -63,6 +63,60 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it.each(["code", "source-title"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
+  const f = fixture(), product = fixtureProduct();
+  product.product.title = "Áo Thanh Mai";
+  product.product.images = ["FRONT", "BACK"].map((angle, index) => ({
+    url: `https://content.pancake.vn/first-${index}.jpg`, role: "PRIMARY" as const,
+    angle: angle as "FRONT" | "BACK", imageType: "MODEL" as const, intents: [], sortOrder: index,
+    qualityScore: null, feedback: false, reviewStatus: "APPROVED" as const, metadataVerified: true,
+    sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: [],
+  }));
+  const read = createCommerceReadSources({ scope: commerceScope(), channel: "PUBLISHED", clock: () => commerceNow,
+    catalog: { findByExactCode: async code => code === product.product.canonicalCode ? product.product : null },
+    search: { searchText: async () => ({ status: "MATCHED", matchKind: "ALIAS", product: product.product, score: 1, gap: null }) },
+    facts: { readCatalogSnapshot: async () => product.snapshot },
+    policyStore: { loadActivePointers: async () => fixturePolicyPointers() } });
+  f.setRead({ ...read, initialProducts: [] });
+  f.message.text = `Cho chị xem ảnh ${mode === "code" ? "SM613" : "Áo Thanh Mai"} màu be nhé.`;
+  f.verifier.mockResolvedValue({ result: { verdict: "UNCERTAIN", violations: [] } });
+  let n = 0;
+  const result = await f.run(async () => {
+    n++;
+    const calls = mode === "source-title" && n === 1
+      ? [{ name: "search_products", args: { query: product.product.title } }]
+      : [{ name: "select_product_media", args: { subjectRef: product.product.productId, intent: "GENERIC" } }];
+    if (n === (mode === "code" ? 2 : 3)) return { kind: "FINAL", text: "DRAFT_MUST_NOT_BE_SENT" };
+    return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } };
+  });
+  expect(result.terminal).toMatchObject({ disposition: "FALLBACK", reason: "UNCERTAIN", fallbackId: "C3_B_VERIFIED_MEDIA_V1" });
+  const meta = f.commit.mock.calls.at(-1)![1].metaPlan!;
+  expect(meta.messages).toEqual([{ kind: "TEXT", text: result.terminal.text },
+    ...product.product.images.map(image => ({ kind: "IMAGE", imageUrl: image.url }))]);
+  expect(JSON.stringify(meta)).not.toContain("DRAFT_MUST_NOT_BE_SENT");
+  expect(f.verifier).toHaveBeenCalledTimes(1);
+});
+
+it.each(["not-requested", "two-titles", "unresolved-ad", "shortened-title"])("does not grant first-contact image recovery from %s", async mode => {
+  const f = fixture(["SM613", "OTHER1"]), p = f.products[0]!.product;
+  p.title = "Áo Thanh Mai"; f.products[1]!.product.title = "Áo Thu Hà";
+  p.images = [{ url: "https://content.pancake.vn/requested.jpg", role: "PRIMARY", angle: "FRONT", imageType: "MODEL",
+    intents: [], sortOrder: 0, qualityScore: null, feedback: false, reviewStatus: "APPROVED", metadataVerified: true,
+    sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: [] }];
+  f.message.text = mode === "two-titles" ? "Cho chị xem Áo Thanh Mai và Áo Thu Hà."
+    : mode === "shortened-title" ? "Cho chị xem Thanh Mai." : mode === "unresolved-ad" ? "Cho chị xem Áo Thanh Mai." : "Chọn giúp chị một áo.";
+  if (mode === "unresolved-ad") Object.assign(f.message, { adsContext: { source: "ADS", adTitle: "UNKNOWN999" } });
+  f.verifier.mockResolvedValue({ result: { verdict: "UNCERTAIN", violations: [] } });
+  let n = 0;
+  await f.run(async () => {
+    const calls = [{ name: "read_product", args: { subjectRef: f.products[1]!.product.productId } },
+      { name: "select_product_media", args: { subjectRef: p.productId, intent: "GENERIC" } }];
+    return ++n === 1 ? { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } }
+      : { kind: "FINAL", text: "Dạ chị." };
+  });
+  expect(f.commit.mock.calls.flatMap(c => c[1].metaPlan?.messages ?? []).filter(m => m.kind === "IMAGE")).toEqual([]);
+});
+
 it.each([false,true])("preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=%s)",async withCart=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
   if(withCart)await seedCart(f);

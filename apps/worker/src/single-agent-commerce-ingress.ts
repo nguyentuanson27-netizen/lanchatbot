@@ -199,11 +199,20 @@ export async function runPersistedCommerceIngress(input: {
   const selectedMedia = tools.mediaSelection?.() ?? [];
   const mediaFallback = terminalFallback("C3_B_VERIFIED_MEDIA_V1");
   const mediaClaims = (world.protectedClaims as ProtectedClaimV1[]).filter(c=>c.type==="PRODUCT_MEDIA");
+  // A literal full source title can bind a first-contact request without writing
+  // persistent focus. No shortened-name inference or alias keywords: a loaded
+  // recommendation/selected asset alone never supplies this authority.
+  const customerText = `_${normalizeCatalogToken(latest)}_`;
+  const namedProducts = (world.runtimeProducts ?? []).filter(p => p.content?.productName &&
+    customerText.includes(`_${normalizeCatalogToken(p.content.productName)}_`)).map(p => p.subjectRef);
+  const recoveryProductId = extractAdProductCodes(latest).length || ads.length
+    ? currentProductId : namedProducts.length === 1 ? namedProducts[0]!
+      : namedProducts.length > 1 ? null : world.state.currentProductId;
   const recoveredMedia = result.terminal.disposition === "FALLBACK" && selectedMedia.length > 0 &&
     ["FAIL","UNCERTAIN","MALFORMED","TIMEOUT","PROVIDER_ERROR","BUDGET","OWNER_TOOL_MODE","OWNER_OUTPUT_ARTIFACT"].includes(result.terminal.reason) &&
     current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
     hardPrecheck(world, mediaFallback.text!, input.clock()) === null &&
-    selectedMedia.every(a=>a.productId===world.state.currentProductId && mediaClaims.some(c=>c.type==="PRODUCT_MEDIA" &&
+    selectedMedia.every(a=>a.productId===recoveryProductId && mediaClaims.some(c=>c.type==="PRODUCT_MEDIA" &&
       c.scope.kind==="PRODUCT" && c.scope.productId===a.productId && c.value.assetSha256===commerceHash(a.url) &&
       c.provenance.sourceVersion===a.sourceVersion));
   if (recoveredMedia) result.terminal = { ...result.terminal, ...mediaFallback, reason: result.terminal.reason };
