@@ -13,9 +13,9 @@ import { createPersistedCommerceExecutor } from "./single-agent-commerce-session
 import { createPersistedCommerceHandoffPort } from "./single-agent-commerce-persistence.js";
 import { createCommerceHandoffTools } from "./single-agent-commerce-handoff.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
-import { runCommerceTurn } from "./single-agent-commerce-read-only.js";
+import { runCommerceTurn, type CommerceTools } from "./single-agent-commerce-read-only.js";
 import { commerceHash, commerceUuid } from "./single-agent-commerce-read-only-context.js";
-import { hardPrecheck, terminalFallback, makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
+import { hardPrecheck, terminalFallback, makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { extractAdProductCodes } from "./media-resolution.js";
 import { sizeChartTarget } from "./size-chart-target.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
@@ -24,6 +24,15 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const noSend = (reason: string) => ({ terminal: { disposition: "NO_SEND", reason, text: null, fallbackId: null } as TerminalOutcome, sendEnabled: false as const, enqueued: 0 });
+function mediaRequestProduct(latest: string, world: TrustedContext, hintedProductId: string | null, hasAds: boolean) {
+  if (extractAdProductCodes(latest).length || hasAds) return hintedProductId;
+  // Exact full source title only. No shortened-name inference or keyword alias;
+  // a recommendation/selected asset alone never supplies request authority.
+  const customerText = `_${normalizeCatalogToken(latest)}_`;
+  const named = (world.runtimeProducts ?? []).filter(p => p.content?.productName &&
+    customerText.includes(`_${normalizeCatalogToken(p.content.productName)}_`)).map(p => p.subjectRef);
+  return named.length === 1 ? named[0]! : named.length > 1 ? null : world.state.currentProductId;
+}
 const privateMarkers = ["[PHONE]", "[ADDRESS]", "[NAME]", "[EMAIL]", "[ID]", "[PII_REDACTED_MESSAGE]"];
 export function isPrivateCommerceText(text: string): boolean {
   const redacted = redactAnalyticsMessage(text).text, details = checkoutDetails(text, undefined);
@@ -159,10 +168,10 @@ export async function runPersistedCommerceIngress(input: {
   }, input.clock, { read: readAuthority, inboxBatchGuard: guard });
   const profile = await profilePort.read();
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
-    read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId });
+    read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
   const history = commerceHistory(rows);
-  const tools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
+  const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: rows.length === 0, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false), target = sizeChartTarget(product);
@@ -176,9 +185,32 @@ export async function runPersistedCommerceIngress(input: {
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
-    handoff: { ...handoff, policy: policyBundle },
+    handoff: { ...handoff, policy: policyBundle, prepareSizeHandoffMedia: async before => {
+      const images = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
+      if (!images.length) return undefined;
+      const prepared = tools.snapshot(), world = await tools.readback();
+      if (commerceHash(prepared) !== commerceHash(world) || world.state.conversationRevision !== before.stateVersion ||
+        !before.permission || !before.privacyAllowed || before.bindingVersion !== scope.bindingVersion ||
+        !await input.inbox.isBatchCurrent(batch) || hardPrecheck(world, terminalFallback("C3_B_VERIFIED_MEDIA_V1").text!, input.clock())) return undefined;
+      const productId = mediaRequestProduct(latest, world, currentProductId, ads.length > 0);
+      const claims = (world.protectedClaims as ProtectedClaimV1[]).filter(c => c.type === "PRODUCT_MEDIA");
+      if (!images.every(a => a.productId === productId && claims.some(c => c.type === "PRODUCT_MEDIA" &&
+        c.scope.kind === "PRODUCT" && c.scope.productId === a.productId && c.value.assetSha256 === commerceHash(a.url) &&
+        c.provenance.sourceVersion === a.sourceVersion))) return undefined;
+      return { images, claims, validate: async () => {
+        try {
+          const authority = await readAuthority();
+          return authority.permission && authority.privacyAllowed && authority.stateVersion === before.stateVersion &&
+            authority.bindingVersion === before.bindingVersion && authority.recipient === before.recipient &&
+            await input.inbox.isBatchCurrent(batch) && commerceHash(await tools.readback()) === commerceHash(world);
+        } catch { return false; }
+      } };
+    } },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
   const result = await runCommerceTurn({ scope, tools, latest, history, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
+  // Mixed no-chart media and the handoff were committed as one protected group,
+  // with Inbox completion. Never enqueue a second BOT reply after that transfer.
+  if (handoff.outboxCount()) return { ...result, enqueued: handoff.outboxCount() };
   // Reuse the bounded current readback before creating Outbox eligibility; no second model or reply rewrite.
   const accepted = makeBinding(scope.requestId, result.terminal.text ?? "", tools.snapshot());
   let world;
@@ -199,15 +231,7 @@ export async function runPersistedCommerceIngress(input: {
   const selectedMedia = tools.mediaSelection?.() ?? [];
   const mediaFallback = terminalFallback("C3_B_VERIFIED_MEDIA_V1");
   const mediaClaims = (world.protectedClaims as ProtectedClaimV1[]).filter(c=>c.type==="PRODUCT_MEDIA");
-  // A literal full source title can bind a first-contact request without writing
-  // persistent focus. No shortened-name inference or alias keywords: a loaded
-  // recommendation/selected asset alone never supplies this authority.
-  const customerText = `_${normalizeCatalogToken(latest)}_`;
-  const namedProducts = (world.runtimeProducts ?? []).filter(p => p.content?.productName &&
-    customerText.includes(`_${normalizeCatalogToken(p.content.productName)}_`)).map(p => p.subjectRef);
-  const recoveryProductId = extractAdProductCodes(latest).length || ads.length
-    ? currentProductId : namedProducts.length === 1 ? namedProducts[0]!
-      : namedProducts.length > 1 ? null : world.state.currentProductId;
+  const recoveryProductId = mediaRequestProduct(latest, world, currentProductId, ads.length > 0);
   const recoveredMedia = result.terminal.disposition === "FALLBACK" && selectedMedia.length > 0 &&
     ["FAIL","UNCERTAIN","MALFORMED","TIMEOUT","PROVIDER_ERROR","BUDGET","OWNER_TOOL_MODE","OWNER_OUTPUT_ARTIFACT"].includes(result.terminal.reason) &&
     current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&

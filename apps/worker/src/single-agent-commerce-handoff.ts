@@ -1,5 +1,5 @@
 import { HandoffDecisionV2Schema, HandoffReasonV2Schema, HandoffMatrixAdminContentV1Schema,
-  type HandoffDecisionV2, type HandoffReasonV2 } from "@lana/contracts";
+  type HandoffDecisionV2, type HandoffReasonV2, type ProtectedClaimV1 } from "@lana/contracts";
 import { applySilentHandoff, decideHandoffFallbackV2, type ConversationState } from "@lana/conversation-engine";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
 import { buildReadOnlyContext, commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
@@ -18,6 +18,9 @@ export interface CommerceHandoffCommit {
   before: HandoffAuthority;
   next: HandoffAuthority;
   decision: HandoffDecisionV2;
+  /** Code-prepared independent media, never a model draft or a general HUMAN send exception. */
+  media?: { images: readonly { productId: string; url: string }[]; claims: ProtectedClaimV1[];
+    validate: () => Promise<boolean> };
 }
 
 /** A proposed reason grants no tag/message authority. Existing code rules remain the default when no matrix is published. */
@@ -42,6 +45,7 @@ export function createCommerceHandoffTools(input: {
   read: () => Promise<HandoffAuthority>;
   /** Must atomically persist ownership, event and tag intent using the current inbox/revision transaction. */
   commit: (change: CommerceHandoffCommit) => Promise<boolean>;
+  prepareSizeHandoffMedia?: (before: HandoffAuthority) => Promise<CommerceHandoffCommit["media"]>;
 }): CommerceTools {
   let committed: { next: HandoffAuthority; decision: HandoffDecisionV2; policyHash: string } | undefined;
   let uncertain = false;
@@ -79,7 +83,7 @@ export function createCommerceHandoffTools(input: {
     return { disposition: "HANDOFF", reason: committed.decision.reason,
       text: committed.decision.customerMessages[0] ?? null, fallbackId: null };
   }
-  async function request(reason: HandoffReasonV2): Promise<CommerceToolResult> {
+  async function request(reason: HandoffReasonV2, independentSizeMedia = false): Promise<CommerceToolResult> {
     if (uncertain) return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" };
     if (committed) return { status: "REJECTED", reason: "ALREADY_HANDED_OFF" };
     const before = await read();
@@ -87,13 +91,19 @@ export function createCommerceHandoffTools(input: {
       before.stateVersion !== (input.base.snapshot().state.conversationRevision ?? input.scope.revision) ||
       before.state.revision !== before.stateVersion) return { status: "REJECTED", reason: "HANDOFF_AUTHORITY" };
     const policy = await input.policy(), decision = selectCommerceHandoff(policy, input.scope, reason, input.clock());
+    let media: CommerceHandoffCommit["media"];
+    // Only automatic no-chart recovery can preserve independent media. An
+    // explicit customer/model handoff and a silent policy keep their contract.
+    if (independentSizeMedia && decision.customerMessages.length && input.prepareSizeHandoffMedia) {
+      try { media = await input.prepareSizeHandoffMedia(before); } catch { media = undefined; }
+    }
     const engineReason = decision.category === "AFTER_SALES" ? reason === "AFTER_SALES_REQUEST" ? "POST_SALE" : reason
       : reason === "CUSTOMER_REQUESTED_HUMAN" ? reason : "AGENT_REQUEST";
     const transitioned = applySilentHandoff(before.state, engineReason as Parameters<typeof applySilentHandoff>[1],
       before.state.revision, before.fence, input.clock());
     const next = { ...before, state: transitioned.state, stateVersion: transitioned.state.revision };
     // No automatic retry after an ambiguous transaction; a later reader may reconcile via the existing event ledger.
-    try { if (!await input.commit({ before, next, decision })) return { status: "REJECTED", reason: "HANDOFF_CONFLICT" }; }
+    try { if (!await input.commit({ before, next, decision, ...(media ? { media } : {}) })) return { status: "REJECTED", reason: "HANDOFF_CONFLICT" }; }
     catch { uncertain = true; return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" }; }
     committed = { next, decision, policyHash: policyIdentity(policy) };
     const outcome = await terminalOutcome();
@@ -122,7 +132,7 @@ export function createCommerceHandoffTools(input: {
       if (dependencyRecoveryAttempted) return outcome;
       dependencyRecoveryAttempted = true;
       try {
-        const result = await request("SIZE_RULE_UNAVAILABLE");
+        const result = await request("SIZE_RULE_UNAVAILABLE", true);
         if (result.status === "OK" || uncertain || committed) return await terminalOutcome() ?? outcome;
         return await terminalOutcome() ?? outcome;
       } catch {

@@ -3,11 +3,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { createSalesCycleRuntimeState, type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1 } from "@lana/chat-runtime";
 import { buildCanonicalDecisionEvidenceV1, evaluateDeterministicEffectReadinessV1 } from "@lana/business-tools";
-import { CanonicalBuyingIntentV1Schema } from "@lana/contracts";
+import { CanonicalBuyingIntentV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleInput } from "./realtime-sales-cycle.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
-import type { TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import { terminalFallback, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import type { CommerceHandoffCommit, HandoffAuthority } from "./single-agent-commerce-handoff.js";
 
 /** Reuse the current inbox/CAS transaction. A tag intent is not a Pancake delivery receipt. */
@@ -23,24 +23,34 @@ export function createPersistedCommerceHandoffPort(input: {
   resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
 }) {
   let outboxMessages = 0;
-  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision }: CommerceHandoffCommit): Promise<boolean> {
+  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision, media }: CommerceHandoffCommit): Promise<boolean> {
     const tagId = input.resolveTagId(decision.tag);
     if (!tagId || !input.inboxBatchGuard.inboxIds.length) throw new Error("HANDOFF_TAG_OR_SOURCE_UNAVAILABLE");
     const now = input.clock();
-    const messages = input.completeInboxBatch === false ? [] : decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }));
+    if (media && (decision.reason !== "SIZE_RULE_UNAVAILABLE" || !decision.customerMessages.length ||
+      !media.images.length || media.images.length > 4 || new Set(media.images.map(image => image.url)).size !== media.images.length)) throw new Error("HANDOFF_MEDIA_SCOPE");
+    const claims: ProtectedClaimV1[] = media?.claims ?? [];
+    if (media && (claims.some(c => c.type !== "PRODUCT_MEDIA") || media.images.some(image =>
+      !claims.some(c => c.type === "PRODUCT_MEDIA" && c.scope.kind === "PRODUCT" && c.scope.productId === image.productId &&
+        c.value.assetSha256 === commerceHash(image.url))))) throw new Error("HANDOFF_MEDIA_CLAIMS");
+    const messages = media ? [{ kind: "TEXT" as const, text: terminalFallback("C3_B_VERIFIED_MEDIA_V1").text! },
+      ...media.images.map(image => ({ kind: "IMAGE" as const, imageUrl: image.url })),
+      ...decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }))]
+      : input.completeInboxBatch === false ? [] : decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }));
     if (messages.length && !input.deliveryRecipient) throw new Error("HANDOFF_DELIVERY_ROUTE_REQUIRED");
     const sourceMessageIdHash = createHash("sha256").update(input.scope.sourceMessageId, "utf8").digest("hex");
     const payloadHash = commerceHash(messages);
     const readiness = messages.length ? evaluateDeterministicEffectReadinessV1({ effect: "PROTECTED_OUTBOUND",
       pageId: input.scope.pageId, conversationId: input.scope.conversationId, sourceMessageIdHash,
-      conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [], cartId: null, cartVersion: null,
-      cartStateHash: null, orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims: [], protectedClaimTypes: [],
+      conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [...new Set(media?.images.map(image => image.productId) ?? [])], cartId: null, cartVersion: null,
+      cartStateHash: null, orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [],
       deterministicEvidenceHash: payloadHash, payloadHash, checkedAt: now }) : null;
     const applied = await input.transaction(async client => {
+      if (media && (readiness?.outcome !== "READY" || !await media.validate())) return false;
       const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
         customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
         expectedStateVersion: before.stateVersion, state: next.state, inboxBatchGuard: input.inboxBatchGuard,
-        ...(input.completeInboxBatch === false ? { completeInboxBatch: false } : {}),
+        ...(input.completeInboxBatch === false && !media ? { completeInboxBatch: false } : {}),
         pancakeTagPlan: { desiredTag: decision.tag, tagId, handoffGeneration: next.stateVersion },
         handoffEventPlan: { source: decision.category === "AFTER_SALES" ? "POST_SALE" : decision.reason === "CUSTOMER_REQUESTED_HUMAN" ? "CUSTOMER_REQUEST" : "BOT_POLICY",
           reasonCode: decision.reason, reasonDetailSafe: { rulesetVersion: decision.provenance.rulesetVersion,
@@ -49,7 +59,7 @@ export function createPersistedCommerceHandoffPort(input: {
           desiredTag: decision.tag, handoffGeneration: next.stateVersion, triggerEventKey: input.triggerSource?.eventKey ?? input.scope.sourceMessageId,
           triggerMessagePk: input.triggerSource?.messagePk ?? null, occurredAt: now },
         ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: input.deliveryRecipient!, messages,
-          sourceMessageIdHash, protectedClaims: [], protectedClaimTypes: [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
+          sourceMessageIdHash, protectedClaims: claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
       if (!result.stateCommitted) return false;
       if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated ||
         (messages.length && result.metaOutboxCreated !== messages.length)) throw new Error("ATOMIC_HANDOFF_INTENTS");

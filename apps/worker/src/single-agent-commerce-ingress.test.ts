@@ -15,6 +15,7 @@ function fixture(productIds = ["SM613"]) {
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
   let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   let checkCommit = async (_prepared: RealtimeCommitInput<unknown>) => {};
+  let beforeTransaction = async () => {};
   const profileWrite = vi.fn(async (_page: string, _customer: string, expected: number, next: ReturnType<typeof fixtureProfile>) => {
     if (expected !== profile.profile.revision) return false;
     profile = { profile: next.profile, fieldEvidence: next.fieldEvidence }; return true;
@@ -46,7 +47,7 @@ function fixture(productIds = ["SM613"]) {
   let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
-    history, transaction: async (work: (client: never) => Promise<unknown>) => work({} as never),
+    history, transaction: async (work: (client: never) => Promise<unknown>) => { await beforeTransaction(); return work({} as never); },
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: readOverride ?? { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
@@ -56,6 +57,7 @@ function fixture(productIds = ["SM613"]) {
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
     newGeneration: () => { batch.generation = generation; },
     checkCommit: (check: typeof checkCommit) => { checkCommit = check; },
+    beforeTransaction: (check: typeof beforeTransaction) => { beforeTransaction = check; },
     setFocus: (currentProductId: string | null) => { conversation = {...conversation,currentProductId}; },
     appendMessage:(next:typeof message)=>{batch.items.push({envelope:{message:next}});},
     enableHandoff:()=>{tagId="staff-tag";}, transferToHuman: () => { conversation = { ...conversation, conversationOwner: "HUMAN" }; revision++; } };
@@ -105,7 +107,7 @@ it.each(["not-requested", "two-titles", "unresolved-ad", "shortened-title"])("do
     sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: [] }];
   f.message.text = mode === "two-titles" ? "Cho chị xem Áo Thanh Mai và Áo Thu Hà."
     : mode === "shortened-title" ? "Cho chị xem Thanh Mai." : mode === "unresolved-ad" ? "Cho chị xem Áo Thanh Mai." : "Chọn giúp chị một áo.";
-  if (mode === "unresolved-ad") Object.assign(f.message, { adsContext: { source: "ADS", adTitle: "UNKNOWN999" } });
+  if (mode === "unresolved-ad") Object.assign(f.message, { adsContext: { source: "ADS", adTitle: "UNKNOWN999", postId: null, adId: null, ref: null } });
   f.verifier.mockResolvedValue({ result: { verdict: "UNCERTAIN", violations: [] } });
   let n = 0;
   await f.run(async () => {
@@ -156,6 +158,12 @@ it.each(["source","human","revision","pending-state","other-product"])("does not
 
 it("finishes mixed media and size intake after a corrected inline call within the unchanged budget",async()=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);f.enableHandoff();
+  const resolution = await fixturePolicy();
+  Object.assign(resolution.bundle!.artifacts, { handoffMatrix: { schemaVersion: 1, kind: "HANDOFF_MATRIX",
+    sourceMetadata: resolution.bundle!.artifacts.shopPolicy.sourceMetadata,
+    rules: [{ reason: "SIZE_RULE_UNAVAILABLE", customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF",
+      holdingReply: "Em chuyển nhân viên chọn size cho chị nhé.", tag: "NHAN_VIEN" }] } });
+  f.policy.mockImplementation(async () => resolution);
   f.message.text="Cho chị xem cận áo. Chị cao 1m58, nặng 52kg.";
   p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
@@ -172,7 +180,59 @@ it("finishes mixed media and size intake after a corrected inline call within th
   if (!("toolCalls" in result)) throw new Error("MODEL_TURN_REQUIRED");
   expect(result.toolCalls).toBeLessThanOrEqual(6);expect(n).toBe(2);
   expect(f.profileWrite).toHaveBeenCalledTimes(1);expect(f.verifier).not.toHaveBeenCalled();
-  expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]).filter(m=>m.kind==="IMAGE")).toEqual([]);
+  const handoffCommit = f.commit.mock.calls.find(c => c[1].handoffEventPlan)![1];
+  expect(handoffCommit.metaPlan?.messages).toEqual([{kind:"TEXT",text:"Em gửi chị ảnh của mẫu để mình xem trước nhé."},
+    {kind:"IMAGE",imageUrl:p.images[0]!.url}, {kind:"TEXT",text:result.terminal.text}]);
+  expect(handoffCommit.metaPlan?.sendAfterOwnerHandoff).toBe(true);
+  expect(handoffCommit.metaPlan?.protectedClaims?.some(c => c.type === "PRODUCT_MEDIA")).toBe(true);
+  expect(f.commit.mock.calls.filter(c => c[1].metaPlan)).toHaveLength(1);
+  expect(handoffCommit.completeInboxBatch).not.toBe(false);
+  expect(result.enqueued).toBe(3);
+});
+
+it.each(["source", "human", "revision", "inbox", "unknown-transaction"])("does not enqueue a partial mixed handoff group after %s changes", async fault => {
+  const f = fixture(), p = f.products[0]!.product; f.setFocus(p.productId); f.enableHandoff();
+  const resolution = await fixturePolicy();
+  Object.assign(resolution.bundle!.artifacts, { handoffMatrix: { schemaVersion: 1, kind: "HANDOFF_MATRIX",
+    sourceMetadata: resolution.bundle!.artifacts.shopPolicy.sourceMetadata,
+    rules: [{ reason: "SIZE_RULE_UNAVAILABLE", customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF",
+      holdingReply: "Em chuyển nhân viên chọn size cho chị nhé.", tag: "NHAN_VIEN" }] } });
+  f.policy.mockImplementation(async () => resolution);
+  p.images = [{ url: "https://content.pancake.vn/detail.jpg", role: "PRIMARY", angle: "CLOSEUP", imageType: "DETAIL",
+    intents: [], sortOrder: 0, qualityScore: null, feedback: false, reviewStatus: "APPROVED", metadataVerified: true,
+    sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: ["AO"] }];
+  f.message.text = "Cho chị xem ảnh áo và chọn size nhé.";
+  let transactions = 0;
+  f.beforeTransaction(async () => {
+    if (++transactions !== 1) return;
+    if (fault === "source") p.images[0]!.metadataVerified = false;
+    if (fault === "human") f.transferToHuman();
+    if (fault === "revision") f.changeRevision();
+    if (fault === "inbox") f.supersede();
+    if (fault === "unknown-transaction") throw new Error("UNKNOWN_TRANSACTION");
+  });
+  const calls = [{ name: "select_product_media", args: { subjectRef: p.productId, intent: "DETAIL" } },
+    { name: "recommend_size", args: { subjectRef: p.productId } }];
+  const result = await f.run(async () => ({ kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } }));
+  expect(f.commit.mock.calls.flatMap(c => c[1].metaPlan?.messages ?? []).filter(m => m.kind === "IMAGE")).toEqual([]);
+  expect(f.commit.mock.calls.filter(c => c[1].handoffEventPlan)).toHaveLength(0);
+  expect(f.verifier).not.toHaveBeenCalled();
+  expect(result.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+});
+
+it("keeps customer-requested handoff free of images even when media was selected in an earlier round", async () => {
+  const f = fixture(), p = f.products[0]!.product; f.setFocus(p.productId); f.enableHandoff();
+  p.images = [{ url: "https://content.pancake.vn/detail.jpg", role: "PRIMARY", angle: "FRONT", imageType: "MODEL",
+    intents: [], sortOrder: 0, qualityScore: null, feedback: false, reviewStatus: "APPROVED", metadataVerified: true,
+    sourceContentSha256: "a".repeat(64), observedAt: commerceNow.toISOString(), partsVisible: [] }];
+  let n = 0;
+  await f.run(async () => {
+    const calls = ++n === 1 ? [{ name: "select_product_media", args: { subjectRef: p.productId, intent: "GENERIC" } }]
+      : [{ name: "request_handoff", args: { reason: "CUSTOMER_REQUESTED_HUMAN" } }];
+    return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } };
+  });
+  expect(f.commit.mock.calls.flatMap(c => c[1].metaPlan?.messages ?? []).filter(m => m.kind === "IMAGE")).toEqual([]);
+  expect(f.verifier).not.toHaveBeenCalled();
 });
 
 it.each(["GENERIC","DETAIL"])("continues after the actual media fallback with history and persisted product (%s)",async intent=>{

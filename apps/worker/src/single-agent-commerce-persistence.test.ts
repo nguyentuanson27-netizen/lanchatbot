@@ -5,10 +5,11 @@ import { createConversationState, applySilentHandoff } from "@lana/conversation-
 import type { RealtimeCommitInput } from "@lana/database";
 import { selectCommerceHandoff } from "./single-agent-commerce-handoff.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
+import { buildProtectedMediaClaimsV1 } from "@lana/business-tools";
 import { commerceNow, commerceScope, fixturePolicy, fixtureCartLine, fixtureProfile } from "./single-agent-commerce.test-support.js";
 
 async function handoffFixture(options: {
-  holdingReply?: string; reason?: "DEPENDENCY_FAILURE" | "CUSTOMER_REQUESTED_HUMAN";
+  holdingReply?: string; reason?: "DEPENDENCY_FAILURE" | "CUSTOMER_REQUESTED_HUMAN" | "SIZE_RULE_UNAVAILABLE";
   completeInboxBatch?: boolean; outboxResult?: "TRUNCATED" | "ABSENT";
 } = {}) {
   const scope = commerceScope(), policy = { ...(await fixturePolicy()).bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const };
@@ -108,6 +109,29 @@ describe("existing transaction owner for candidate commerce", () => {
     expect(JSON.stringify({ scope: f.scope, decision: f.decision, state: prepared.state, readiness: meta.effectReadiness })).not.toContain(f.deliveryRecipient);
     expect(f.completed).toHaveBeenCalledOnce(); expect(f.rollback).not.toHaveBeenCalled();
     expect(f.port.outboxCount()).toBe(1);
+  });
+  it.each(["ready", "stale", "truncated", "wrong-asset"])("keeps mixed media and ownership in one checked transaction (%s)", async mode => {
+    const f = await handoffFixture({ holdingReply: "Em chuyển nhân viên chọn size cho chị nhé.", reason: "SIZE_RULE_UNAVAILABLE",
+      completeInboxBatch: false, ...(mode === "truncated" ? { outboxResult: "TRUNCATED" as const } : {}) });
+    const images = [{ productId: "SM613", url: "https://content.pancake.vn/detail.jpg" }];
+    const claims = buildProtectedMediaClaimsV1({ productId: "SM613", imageUrls: [mode === "wrong-asset" ? "https://content.pancake.vn/wrong.jpg" : images[0]!.url],
+      sourceVersion: "media-v1", observedAt: commerceNow.toISOString(), expiresAt: new Date(commerceNow.getTime() + 60_000).toISOString() });
+    const validate = vi.fn(async () => mode !== "stale");
+    const attempt = f.port.commit({ ...f, media: { images, claims: [...claims], validate } });
+    if (mode === "wrong-asset") { await expect(attempt).rejects.toThrow("HANDOFF_MEDIA_CLAIMS"); expect(f.commitWithinTransaction).not.toHaveBeenCalled(); }
+    else if (mode === "truncated") { await expect(attempt).rejects.toThrow("ATOMIC_HANDOFF_INTENTS"); expect(f.rollback).toHaveBeenCalledOnce(); }
+    else if (mode === "stale") { expect(await attempt).toBe(false); expect(f.commitWithinTransaction).not.toHaveBeenCalled(); }
+    else {
+      expect(await attempt).toBe(true); expect(validate).toHaveBeenCalledOnce();
+      const prepared = f.commitWithinTransaction.mock.calls[0]![1];
+      expect(prepared.completeInboxBatch).not.toBe(false);
+      expect(prepared.metaPlan?.messages).toEqual([{ kind: "TEXT", text: "Em gửi chị ảnh của mẫu để mình xem trước nhé." },
+        { kind: "IMAGE", imageUrl: images[0]!.url }, { kind: "TEXT", text: f.decision.customerMessages[0] }]);
+      expect(prepared.metaPlan?.protectedClaims).toEqual(claims);
+      expect(prepared.metaPlan?.effectReadiness).toMatchObject({ outcome: "READY", productIds: ["SM613"] });
+      expect(f.port.outboxCount()).toBe(3);
+    }
+    if (mode !== "ready") expect(f.port.outboxCount()).toBe(0);
   });
   it.each(["TRUNCATED", "ABSENT"] as const)("rolls back handoff when its holding reply outbox intent is %s", async outboxResult => {
     const f = await handoffFixture({ holdingReply: "Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.", outboxResult });

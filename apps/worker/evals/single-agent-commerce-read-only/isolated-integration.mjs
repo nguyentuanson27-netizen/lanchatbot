@@ -350,7 +350,8 @@ try{
   const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
   let sourceVariantChanged=false;
-  const product=fixtureProduct('SM613',at),selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
+  const product=fixtureProduct('SM613',at);let mediaChanged=false;
+  const selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
    const s=fixtureCartLine();s.lineId=q.lineId;s.quantity=q.quantity;s.lineTotalVnd=s.posUnitPriceVnd*s.quantity;
    s.priceAuthority={...s.priceAuthority,shopId:'LANA',priceFactRef:'synthetic-pos-v1',metadata:{...s.priceAuthority.metadata,sourceVersion:'synthetic-pos-v1',observedAt:at.toISOString(),expiresAt:new Date(at.getTime()+172800000).toISOString()}};
    s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
@@ -366,7 +367,7 @@ try{
     sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE',customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF',holdingReply:dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
-  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes):{policy,catalog:{readProduct:async()=>product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const capture=[],capturePayloads=[],gateCalls=[],dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
    const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash){capture.push(b.message.text??'[CODE_IMAGE]');capturePayloads.push(b.message);}return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
    new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},{workerId:'c3-b-capture'},undefined,historyStore);
@@ -391,7 +392,7 @@ try{
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;}};
+  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
@@ -404,16 +405,32 @@ try{
   const replay=await j.turn('Em ơi',[]);assert.equal(replay.owners,0);assert.equal(replay.verifiers,0);assert.equal(replay.result.enqueued,0);
   await j.drain();assert.deepEqual(j.capture,[holding]);
  });
- await check('B composed no-chart after two rounds recovers through one real atomic handoff without draft or images',async()=>{
+ await check('B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it',async()=>{
   const j=await statefulFixture({media:true});
-  const r=await j.turn('Chọn size và gửi ảnh chị nhé',[
+  const r=await j.turn('Chọn size SM613 và gửi ảnh chị nhé',[
    native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}])]);
   assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
   assert.equal(r.result.terminal.reason,'SIZE_RULE_UNAVAILABLE');await j.drain();
-  assert(!j.capture.includes('[CODE_IMAGE]'));
+  if(process.argv.includes('--candidate-handoff')){
+   assert.equal(r.result.enqueued,3,JSON.stringify(r.result));
+   const holding=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))).rules.find(r=>r.reason==='SIZE_RULE_UNAVAILABLE').holdingReply;
+   assert.deepEqual(j.capture,['Em gửi chị ảnh của mẫu để mình xem trước nhé.','[CODE_IMAGE]',holding]);
+   assert.equal(new Set(j.gateCalls).size,1);
+   await j.drain();assert.equal(j.capture.length,3);
+  }else assert(!j.capture.includes('[CODE_IMAGE]'));
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+ });
+ for(const fault of ['source','rollback'])await check('B composed mixed media handoff '+fault+' never leaves partial intents',async()=>{
+  if(!process.argv.includes('--candidate-handoff'))return;
+  const j=await statefulFixture({media:true});let commits=0;
+  const r=await j.turn('Cho chị xem ảnh SM613 và chọn size nhé',[
+   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}}])],
+   {beforeCommit:async()=>{if(++commits===1){if(fault==='source')j.changeMediaSource();else await pool.query("DELETE FROM provider_conversation_links WHERE conversation_id=$1 AND provider='PANCAKE'",[j.bound.conversationId]);}}});
+  assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();assert(!j.capture.includes('[CODE_IMAGE]'));
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'BOT');
  });
  await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
   const j=await statefulFixture();
