@@ -5,6 +5,14 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {runtimeCase,readRegisteredCases,buildVerifierRequest,createCommerceVerifier,validateProtocol,requiredSourceConfig,sha256,dispatchRange} from './protocol.mjs';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
+
+test('registration freezes tool accounting and the final-only request contract',()=>{
+ for(const key of ['ownerFinalRequest','toolResultAccounting']){
+  const changed=structuredClone(manifest);delete changed[key];
+  assert.throws(()=>validateProtocol(changed),/OWNER_EXECUTION_CONTRACT/);
+ }
+ assert.equal(validateProtocol(manifest),manifest);
+});
 test('recovery text is code-owned even if a changed manifest recomputes its hash',()=>{
  const bad=structuredClone(manifest);bad.recoveryFallbacks[0].text='Size M vừa chị nhé.';
  bad.recoveryFallbacks[0].sha256=sha256(bad.recoveryFallbacks[0].text);

@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
+import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
@@ -113,10 +114,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const product=(p,keepLocalEvidence=false)=>{
   const value={...p};delete value.ref;delete value.requestedOfferType;delete value.missing;
   const current=c.runtimeProducts?.find(x=>x.subjectRef===p.subjectRef);
-  for(const key of ['content','attributes','presentation','sizeCharts']){
-   if(!keepLocalEvidence&&value[key]!==undefined&&current?.[key]!==undefined&&canonicalJsonV1(value[key])===canonicalJsonV1(current[key]))delete value[key];
-  }
-  return value;
+  return keepLocalEvidence?value:omitCurrentProductDuplicates(value,current);
  };
  const defaultInOptions=p=>{
   if(p.requestedOfferType!==null||!Array.isArray(p.sellingOptions)||p.sellingOptions.length<2||
@@ -207,9 +205,22 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   callableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),
   phase:request.toolsAllowed===false?'FINAL_REPLY':'TOOL_OR_REPLY',
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining}:null};
+ // At the existing final generation, start a text-only request with the completed
+ // tool trace as data. Do not continue an opaque native tool plan with no call budget.
+ // AUTO continuations and the original captured transcript remain byte-for-byte intact.
+ let replyContents=contents;
+ if(request.toolsAllowed===false&&!contents.some(m=>m.parts.some(p=>p.codexOutput))){
+  const start=contents.findIndex(m=>m.parts.some(p=>p.functionCall||p.functionResponse));
+  if(start>=0){
+   const completedToolTurns=contents.slice(start).map(m=>({role:m.role,parts:m.parts
+    .filter(p=>!p.thought&&(p.text!==undefined||p.functionCall||p.functionResponse))
+    .map(p=>Object.fromEntries(['text','functionCall','functionResponse'].filter(k=>Object.hasOwn(p,k)).map(k=>[k,p[k]])))}));
+   replyContents=[...contents.slice(0,start),{role:'user',parts:[{text:JSON.stringify({completedToolTurns})}]}];
+  }
+ }
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView,
-    ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...contents],
+    ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...replyContents],
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  const requestBytes=bytes(body);

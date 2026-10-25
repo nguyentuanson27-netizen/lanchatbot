@@ -3,6 +3,7 @@ import { CommerceHistoryMetadataV1Schema } from "@lana/contracts";
 import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TerminalOutcome,
   type TrustedContext, type VerifierBinding } from "./single-agent-semantic-verifier-boundary.js";
 import type { CommerceScope, CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
+import { omitCurrentProductDuplicates } from "./single-agent-commerce-read-only-context.js";
 
 export interface NativeContent { role: "user" | "model"; parts: Record<string, unknown>[] }
 /** Request metadata, never part of the mutable world/fact snapshot. */
@@ -37,6 +38,26 @@ export interface CommerceTools {
   terminalOutcome?(): Promise<TerminalOutcome | null>;
 }
 const bytes = (v: unknown) => Buffer.byteLength(typeof v === "string" ? v : JSON.stringify(v));
+
+// Charge the 8KB tool batch for evidence not already in the snapshot. Raw results stay
+// in the transcript so a later change can still expose the old/different evidence.
+function resultBudgetView(calls: CommerceToolCall[], results: CommerceToolResult[], context: TrustedContext) {
+  const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+  const product = (v: unknown) => record(v)
+    ? omitCurrentProductDuplicates(v, context.runtimeProducts?.find(p => p.subjectRef === v.subjectRef)) : v;
+  return results.map((result, i) => {
+    if (result.status !== "OK" || !record(result.data)) return result;
+    const data = result.data;
+    if (calls[i]?.name === "search_products" && Array.isArray(data.products))
+      return {...result, data:{...data, products:data.products.map(product)}};
+    if (calls[i]?.name === "read_product") {
+      const availability = record(data.availability) ? data.availability : {};
+      if (["price", "stock"].some(k => record(availability[k]) && availability[k].status !== "OK")) return result;
+      return {...result, data:product(data)};
+    }
+    return result;
+  });
+}
 
 
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
@@ -142,7 +163,8 @@ export async function runCommerceTurn(input: {
       const actual = await effectTerminal();
       if (actual) return finish(actual);
       if (input.tools.sizeOutcome?.()?.status === "NO_VERIFIED_CHART") return finish(fallback("SIZE_RULE_UNAVAILABLE"));
-      if (results.length !== output.calls.length || bytes(results) > 8192) return finish(fallback("TOOL_RESULT_BOUND"));
+      if (results.length !== output.calls.length || bytes(resultBudgetView(output.calls, results, input.tools.snapshot())) > 8192)
+        return finish(fallback("TOOL_RESULT_BOUND"));
       contents.push(structuredClone(output.content), { role: "user", parts: results.map((result, i) => ({
         functionResponse: { name: output.calls[i]!.name, response: result,
           ...(output.calls[i]!.id ? { id: output.calls[i]!.id } : {}) },

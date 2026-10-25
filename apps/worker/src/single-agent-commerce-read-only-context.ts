@@ -7,6 +7,17 @@ export const commerceHash = (value: unknown): string =>
   createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
 export const commerceUuid = (hash: string): string =>
   `${hash.slice(0,8)}-${hash.slice(8,12)}-5${hash.slice(13,16)}-8${hash.slice(17,20)}-${hash.slice(20,32)}`;
+
+/** Remove only exact product-field duplicates already supplied in the current snapshot.
+ * Used for response-budget accounting and owner wire projection; never mutate stored results. */
+export function omitCurrentProductDuplicates(value: Record<string, unknown>, current: RuntimeProductEvidence | undefined) {
+  const projected = {...value};
+  for (const key of ["content", "attributes", "presentation", "sizeCharts"] as const) {
+    if (projected[key] !== undefined && current?.[key] !== undefined &&
+      canonicalJsonV1(projected[key]) === canonicalJsonV1(current[key])) delete projected[key];
+  }
+  return projected;
+}
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",
   "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint",
   "customerMeasurements", "fitPreference", "preferences", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "conversationRevision", "customerStateUpdatePending"];

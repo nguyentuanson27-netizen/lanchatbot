@@ -656,7 +656,7 @@ it("starts the independent generation read while current authority is being load
 });
 
 describe("persisted ingress source and final revision", () => {
-  it.each([true, false])("uses available scoped names in the actual private preview without model or extra catalog reads (named=%s)", async named => {
+  it.each([{named:true,split:false},{named:false,split:false},{named:true,split:true}])("reaches the actual private preview without model or extra catalog reads (named=$named, separate fields=$split)", async ({named,split}) => {
     const f = fixture(named ? ["SM613"] : ["OTHER42"]), scope = commerceScope();
     if (named) f.products[0]!.product.title = "Set váy thử nghiệm";
     const resolution = await fixturePolicy(), policy = resolution.bundle!.policy;
@@ -671,6 +671,8 @@ describe("persisted ingress source and final revision", () => {
     state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "CART_OPENED", commandId: "open",
       cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1800000).toISOString() }, now: commerceNow,
       trustedPorts: { resolveCartDraft: () => draft, resolveShopPolicy: () => policy, resolveCartMutation: () => null, resolveInboundMessage: () => null, revalidateCheckout: () => null } }).state;
+    if (split) state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"ask-name",
+      reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],productId:"SM613",questionFingerprint:"f".repeat(64),maxAttempts:3},now:commerceNow}).state;
     f.setCycle(state);
     f.select.mockResolvedValue({ status: "READY", line, shopId: scope.shopId, versions: { price: line.priceAuthority!.priceFactRef, inventory: "i1", size: "s1", eta: "e1" },
       eta: { minDays: 8, maxDays: 14 }, etaExpiresAt: new Date(commerceNow.getTime()+1200000).toISOString(),
@@ -678,9 +680,27 @@ describe("persisted ingress source and final revision", () => {
       sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1200000).toISOString() });
     f.message.text = "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD";
     const owner = vi.fn(async (): Promise<OwnerGeneration> => { throw new Error("PRIVATE_TURN_MUST_NOT_GENERATE"); });
+    if (split) {
+      const answers = [
+        {text:"Khách Thử Nghiệm",next:"PHONE",draft:{fullName:"Khách Thử Nghiệm"}},
+        {text:"0900000000",next:"ADDRESS",draft:{phone:"0900000000"}},
+        {text:"12 Đường Số 3, Quận 7, TP.HCM",next:"PAYMENT_METHOD",draft:{address:"12 Đường Số 3, Quận 7, TP.HCM"}},
+      ];
+      for (const [i,answer] of answers.entries()) {
+        f.message.text=answer.text;f.message.eventKey=f.message.messageId=`private-field-${i}`;
+        f.batch.evaluationGroupId=`private-field-${i}`; f.supersede();f.newGeneration();
+        expect(await f.run(owner)).toMatchObject({mode:"PRIVATE_CODE_PATH",enqueued:1});
+        expect(f.cycle().checkoutDraft).toMatchObject(answer.draft);
+        expect(f.cycle().clarification?.missingFields).toEqual([answer.next]);
+        expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages).toHaveLength(1);
+      }
+      f.message.text="COD";f.message.eventKey=f.message.messageId="private-payment";
+      f.batch.evaluationGroupId="private-payment";f.supersede();f.newGeneration();
+    }
     const result = await f.run(owner);
     expect(result, JSON.stringify(result)).toMatchObject({ mode: "PRIVATE_CODE_PATH", enqueued: 1 });
     expect(owner).not.toHaveBeenCalled(); expect(f.verifier).not.toHaveBeenCalled(); expect(f.catalogRead).not.toHaveBeenCalled();
+    expect(f.history.recordInboundCustomerMessage.mock.calls.every(([input])=>(input as {text:unknown}).text===null)).toBe(true);
     const meta = f.commit.mock.calls.at(-1)![1].metaPlan!;
     const text = meta.messages.map(m => m.kind === "TEXT" ? m.text : "").join("\n");
     expect(text).toContain(named ? "1 áo (mẫu “Set váy thử nghiệm”) màu navy, size M" : "1 áo SM613 màu navy, size M");

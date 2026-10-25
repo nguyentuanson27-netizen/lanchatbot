@@ -742,7 +742,8 @@ test('the actual final-only HTTP body has no declarations and its hash and tool-
  }});
  const result=await infer(r),sent=JSON.parse(wire);
  assert.deepEqual(sent.tools,[]);assert.equal(sent.toolConfig.functionCallingConfig.mode,'NONE');
- assert.equal(sent.contents[2].parts[0].thoughtSignature,'opaque');assert.equal(sent.contents[3].parts[0].functionResponse.id,'f1');
+ assert(!wire.includes('opaque'));
+ assert.equal(JSON.parse(sent.contents[2].parts[0].text).completedToolTurns[1].parts[0].functionResponse.id,'f1');
  assert.equal(result.telemetry.requestHash,createHash('sha256').update(wire).digest('hex'));
  assert.equal(result.telemetry.requestBytes,Buffer.byteLength(wire));assert.equal(result.telemetry.functionCallingMode,'NONE');
  assert.equal(result.telemetry.declaredToolCount,0);assert.equal(result.telemetry.unexpectedToolCall,true);
@@ -900,7 +901,7 @@ test('state operation schema binds each field to its domain and separates CLEAR'
 });
 
 
-test('final-only generation exposes no callable tools and explicitly ends tool planning without altering signed history',()=>{
+test('final-only generation presents completed tool turns as data; AUTO preserves the signed native chain',()=>{
  const r=request();r.toolsAllowed=false;r.availableTools=['search_products','read_product'];r.toolBudget={roundsRemaining:0,callsRemaining:2};
  r.contents.push({role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:'P1',offerType:null}},thoughtSignature:'signed'}]},
   {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{subjectRef:'P1'}}}}]});
@@ -908,10 +909,40 @@ test('final-only generation exposes no callable tools and explicitly ends tool p
  assert.deepEqual(e.callableTools,[]);assert.equal(e.phase,'FINAL_REPLY');
  assert.deepEqual(e.availableTools,r.availableTools);assert.equal(b.toolConfig.functionCallingConfig.mode,'NONE');assert.deepEqual(b.tools,[]);
  assert.deepEqual(b.systemInstruction,{parts:[{text:r.instructions}]});
- assert.deepEqual(b.contents.at(-2),original.at(-2));assert.deepEqual(r.contents,original);
+ assert(b.contents.every(c=>c.parts.every(p=>!p.functionCall&&!p.functionResponse&&!p.thoughtSignature)));
+ const completed=JSON.parse(b.contents.at(-1).parts[0].text).completedToolTurns;
+ assert.equal(completed[0].parts[0].functionCall.name,'read_product');
+ assert.equal(completed[1].parts[0].functionResponse.response.status,'OK');
+ assert(!JSON.stringify(b).includes('signed'));assert.deepEqual(r.contents,original);
+ assert.deepEqual(b.contents[1],original[0]);
  r.toolsAllowed=true;r.toolBudget={roundsRemaining:1,callsRemaining:2};
  const active=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.execution;
  assert.equal(active.phase,'TOOL_OR_REPLY');assert.deepEqual(active.callableTools,r.availableTools);
+ assert.deepEqual(buildGeminiCommerceRequest(r).contents.at(-2),original.at(-2));
+});
+
+test('final reply data retains partial writes, errors, earlier evidence and receipts without leaking evaluator labels',async()=>{
+ const r=request();r.toolsAllowed=false;r.toolBudget={roundsRemaining:0,callsRemaining:1};
+ r.caseId='EVALUATOR_ONLY_CASE';r.expected='EVALUATOR_ONLY_LABEL';
+ const turns=[
+  {role:'model',parts:[{functionCall:{id:'s1',name:'apply_customer_state',args:{ops:[]}},thoughtSignature:'opaque'},{text:'Đang xử lý.'}]},
+  {role:'user',parts:[{functionResponse:{id:'s1',name:'apply_customer_state',response:{status:'UNAVAILABLE',reason:'STATE_COMMIT_UNCONFIRMED',data:{applied:true,unresolvedFields:['measurements.HIPS_CM']}}}}]},
+  {role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:'opaque'}]},
+  {role:'user',parts:[{functionResponse:{id:'r1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',content:{description:'Earlier description'},availability:{price:{status:'UNAVAILABLE',reason:'PRICE_NOT_FOUND'}}}}}}]},
+ ];
+ r.contents.push(...turns);r.context.effectReceipts=[{ref:'receipt:committed',status:'COMMITTED'}];
+ const saved=structuredClone(r);let wire;
+ await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_u,init)=>{
+  wire=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));
+ }})(r);
+ const trace=JSON.parse(wire.contents.at(-1).parts[0].text).completedToolTurns;
+ assert.equal(trace.length,4);assert.equal(trace[1].parts[0].functionResponse.response.reason,'STATE_COMMIT_UNCONFIRMED');
+ assert.equal(trace[1].parts[0].functionResponse.response.data.applied,true);
+ assert.equal(trace[3].parts[0].functionResponse.response.data.content.description,'Earlier description');
+ assert.equal(trace[3].parts[0].functionResponse.response.data.availability.price.status,'UNAVAILABLE');
+ assert.equal(JSON.parse(wire.contents[0].parts[0].text).trusted.receipts[0].ref,'receipt:committed');
+ assert(!JSON.stringify(wire).includes('EVALUATOR_ONLY'));assert(!JSON.stringify(wire).includes('opaque'));
+ assert.deepEqual(r.contents,saved.contents);assert.deepEqual(r.context,saved.context);
 });
 
 test('opening quote and first-contact context reach the owner without evaluator fields',async()=>{

@@ -121,7 +121,7 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(result.terminal.reason).toBe(changed ? "STALE" : "PASS");
     expect(result.sendEnabled).toBe(false);
   });
-  it("keeps the 8KB bound on the entire batch of product reads, not each result separately", async () => {
+  it("does not reject a read batch solely because product evidence is duplicated in the trusted snapshot", async () => {
     const s = setup(), products = [fixtureProduct("SM613"), fixtureProduct("SM614")];
     for (const p of products) p.product.descriptionXml = "cotton ".repeat(400);
     const tools = createReadOnlyTools({ scope: s.scope, clock: s.clock, policy: () => fixturePolicy(),
@@ -133,12 +133,55 @@ describe("one conversational owner, tools and exact egress", () => {
     const results = await tools.invokeBatch(calls);
     expect(results.every(r => Buffer.byteLength(JSON.stringify(r)) <= 8192)).toBe(true);
     expect(Buffer.byteLength(JSON.stringify(results))).toBeGreaterThan(8192);
-    const owner = vi.fn(async (): Promise<OwnerGeneration> => ({ kind: "TOOLS", calls,
-      content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } }));
+    let step = 0, lastRequest: OwnerRequest | undefined;
+    const owner = vi.fn(async (request: OwnerRequest): Promise<OwnerGeneration> => {
+      if (step++ === 0) return { kind: "TOOLS", calls,
+        content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } };
+      // Raw results remain intact: later source changes must not erase earlier evidence.
+      lastRequest = request;
+      return final();
+    });
     const result = await runCommerceTurn({ ...s, tools, owner });
+    expect(lastRequest!.contents.at(-1)!.parts).toHaveLength(2);
+    expect(JSON.stringify(lastRequest!.contents.at(-1))).toContain("cotton ".repeat(399));
+    expect(lastRequest!.context.runtimeProducts).toHaveLength(2);
+    expect(result.terminal.reason).toBe("PASS");
+    expect(owner).toHaveBeenCalledTimes(2);
+    expect(s.verifier).toHaveBeenCalledOnce();
+  });
+  it.each(["different-evidence", "unknown-product", "error", "partial", "other-tool"])("keeps the batch bound for nonredundant results: %s", async kind => {
+    const s = setup();
+    await s.tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
+    const context = s.tools.snapshot(), product = structuredClone(context.runtimeProducts![0]!);
+    product.content = {...product.content!, description:"cotton ".repeat(1400)};
+    const data = { ...structuredClone(product),
+      ...(kind === "different-evidence" ? {content:{description:"linen ".repeat(1600)}} : {}),
+      ...(kind === "unknown-product" ? {subjectRef:"UNKNOWN"} : {}),
+      ...(kind === "partial" ? {availability:{price:{status:"UNAVAILABLE"}}} : {}) };
+    const owner = vi.fn(async () => tool(kind === "other-tool" ? "read_policy" : "read_product", {subjectRef:"SM613"}));
+    const result = await runCommerceTurn({...s, owner, tools:{...s.tools, prepare:async()=>0, snapshot:()=>({...context,runtimeProducts:[product]}),
+      invokeBatch:async()=>[{status:kind === "error" ? "UNAVAILABLE" as const : "OK" as const, data}]}});
     expect(result.terminal.reason).toBe("TOOL_RESULT_BOUND");
-    expect(owner).toHaveBeenCalledOnce();
-    expect(s.verifier).not.toHaveBeenCalled();
+    expect(owner).toHaveBeenCalledOnce(); expect(s.verifier).not.toHaveBeenCalled();
+  });
+  it("keeps every discovery candidate and unknown price when duplicate search descriptions exceed 8KB", async () => {
+    const s=setup(), products=["SM613","SM614","SM615"].map(id=>fixtureProduct(id));
+    for(const p of products)p.product.descriptionXml="Vải cotton, dáng suông. ".repeat(120);
+    const tools=createReadOnlyTools({scope:s.scope,clock:s.clock,policy:fixturePolicy,catalog:{
+      readProduct:async id=>products.find(p=>p.product.productId===id)!,
+      searchText:async()=>({status:"AMBIGUOUS",reasonCode:"TOP_GAP_TOO_SMALL",
+        candidates:products.map(p=>({document:p.product,score:0.8})),topScore:0.8,gap:0}),
+    }});
+    let request:OwnerRequest|undefined,step=0;
+    const result=await runCommerceTurn({...s,tools,owner:async r=>{
+      if(step++===0)return tool("search_products",{query:"bộ đi làm"});
+      request=r;return final("Chị thích áo quần hay váy ạ?");
+    }});
+    expect(result.terminal.reason).toBe("PASS");
+    expect(Buffer.byteLength(JSON.stringify(request!.contents.at(-1)))).toBeGreaterThan(8192);
+    expect(request!.context.runtimeProducts).toHaveLength(3);
+    expect(request!.context.protectedClaims).toEqual([]); // Search does not invent a current quote.
+    expect(s.verifier).toHaveBeenCalledOnce();
   });
   it("lets the transport bound the exact provider projection instead of rejecting duplicated internal context", async () => {
     const adapterUrl = new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs", import.meta.url);

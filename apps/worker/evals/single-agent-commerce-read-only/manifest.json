@@ -6,6 +6,8 @@
   "toolRounds": 2,
   "toolCalls": 6,
   "verifierGenerations": 1,
+  "ownerFinalRequest": "TEXT_WITH_COMPLETED_TOOL_DATA",
+  "toolResultAccounting": "BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES",
   "requestBounds": {
     "ownerWireBytes": 65536,
     "verifierWireBytes": 65536

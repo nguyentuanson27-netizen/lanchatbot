@@ -71,7 +71,7 @@ test('both owners receive identical trusted text and native dialogue; evaluator 
  assert.equal(gemini.toolConfig.functionCallingConfig.mode,'NONE');
  assert.deepEqual(gemini.tools,[]);
  assert.deepEqual(JSON.parse(gemini.contents[0].parts[0].text).trusted.execution,
-  {availableTools:[],toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:0}});
+  {availableTools:[],toolsAllowed:false,callableTools:[],phase:'FINAL_REPLY',toolBudget:{roundsRemaining:0,callsRemaining:0}});
  for(const wire of [gemini,sol])assert.doesNotMatch(JSON.stringify(wire),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY|caseId|expectedSafe|requiredBehaviors/);
 });
 
@@ -130,7 +130,7 @@ test('native read-only comparison exposes the same bounded tools to both owners,
  assert.deepEqual(sol.input.map(m=>m.content),gemini.contents.map(m=>m.parts[0].text));
  assert.equal(sol.instructions,gemini.systemInstruction.parts.map(p=>p.text).join('\n'));
  assert.deepEqual(JSON.parse(gemini.contents[0].parts[0].text).trusted.execution,
-  {availableTools:['search_products','read_product','read_policy'],toolsAllowed:true,toolBudget:r.toolBudget});
+  {availableTools:['search_products','read_product','read_policy'],toolsAllowed:true,callableTools:['search_products','read_product','read_policy'],phase:'TOOL_OR_REPLY',toolBudget:r.toolBudget});
  for(const body of [gemini,sol])assert.doesNotMatch(JSON.stringify(body),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY|caseId|expectedSafe|requiredBehaviors/);
  for(const owner of ['gemini','sol']){
   const body=comparisonOwnerRequest(owner,c,{...r,toolsAllowed:false,toolBudget:{roundsRemaining:0,callsRemaining:0}});
@@ -151,7 +151,7 @@ test('native comparison freezes the existing B1 budgets and the exact Sol read-o
  }
 });
 
-test('Sol native continuation preserves ordered reasoning/call/output and delegates tool execution to the existing loop',async()=>{
+for(const toolsAllowed of [true,false])test(`Sol native continuation retains reasoning/call/output with toolsAllowed=${toolsAllowed}`,async()=>{
  const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON'},captured=[];
  const outputItems=[{type:'reasoning',id:'rs_test',summary:[],encrypted_content:'opaque-test'},
   {type:'function_call',id:'fc_test',call_id:'call_test',name:'read_product',arguments:'{"subjectRef":"product:TEST"}'}];
@@ -163,11 +163,12 @@ test('Sol native continuation preserves ordered reasoning/call/output and delega
  const r=request(),first=await owner(r);
  assert.equal(first.kind,'TOOLS');assert.deepEqual(first.calls,[{name:'read_product',id:'call_test',args:{subjectRef:'product:TEST'}}]);
  const response={status:'OK',data:{price:799000}};
- const second=await owner({...r,contents:[...r.contents,first.content,{role:'user',parts:[
+ const second=await owner({...r,toolsAllowed,toolBudget:{roundsRemaining:toolsAllowed?1:0,callsRemaining:2},contents:[...r.contents,first.content,{role:'user',parts:[
   {functionResponse:{name:'read_product',id:'call_test',response}}]}]});
  assert.equal(second.kind,'FINAL');assert.equal(second.text,'Mẫu này 799k chị nhé.');
  assert.deepEqual(captured[1].input.slice(-3),[...outputItems,{type:'function_call_output',call_id:'call_test',output:JSON.stringify(response)}]);
  assert.equal(captured.length,2);assert.deepEqual(captured[1].reasoning,{effort:'low'});
+ assert.equal(captured[1].tool_choice,toolsAllowed?'auto':'none');
 });
 
 test('captured Gemini native requests preserve tool results and current rule scope without an automatic generation retry',async()=>{

@@ -1,4 +1,15 @@
-## Current — chạy lại 11 ca được owner chọn, 2026-10-25
+## Current — chỉ sửa lỗi nghiêm trọng ảnh hưởng trải nghiệm, 2026-10-25
+
+[Phạm vi/finding/self-review/commands](../docs/specs/c3-phase-b-critical-experience-fix-20261025.md). Base `dd6cdb84`; **PROVIDER_NOT_RUN, B chưa GO**.
+
+- [x] Loại dữ liệu sản phẩm trùng snapshot khỏi phép tính bound batch; giữ nguyên raw results, nguồn khác, partial/error và final gate. RED→GREEN.
+- [x] Gemini final-only dùng text + completed tool data; giữ native chain ở các lượt còn tool và đường Sol cũ. Không tăng budget/retry/role, không sửa prompt hay corpus. RED→GREEN + compatibility self-review.
+- [x] Checkout nhập riêng tên/điện thoại/địa chỉ/COD đều enqueue câu tiếp theo rồi preview, không gọi model. Đây là ingress regression với store mock, không ghi là DB/provider run.
+- [x] 553 worker tests, 160 Node tests, 21 protected/assembler tests, worker build/typecheck/lint và diff check PASS. Sửa assertion cũ theo hợp đồng hiện tại, không nới source gates.
+- [ ] Xác nhận bằng model thật trên source mới: discovery hết gián đoạn và correction→checkout không suy fit. Chưa chạy; N1 thành công trước không chứng minh ổn định.
+- [ ] Tạm giữ giọng chưa hay/câu dài/ảnh chung có nhãn đúng theo owner; không mở vòng tối ưu giọng văn mới. Sai giá/size/policy/receipt và mất phản hồi vẫn là lỗi nghiêm trọng.
+
+## Previous — chạy lại 11 ca được owner chọn, 2026-10-25
 
 [Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/input-context-targeted-rerun-20261025/CHECKPOINT_B.md), [14 lượt](../apps/worker/evals/single-agent-commerce-read-only/input-context-targeted-rerun-20261025/CONVERSATIONS.md). **Đủ 11 targets + 3 setup; B chưa GO.**
 
