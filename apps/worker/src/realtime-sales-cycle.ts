@@ -1761,7 +1761,7 @@ export async function evaluateRealtimeSalesCycle(
     const messages: RealtimeSalesCycleOutput["messages"] = [
       {
         kind: "TEXT",
-        text: "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé.",
+        text: "Dạ, shop đã nhận yêu cầu đặt hàng của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
       },
       ...(result.paymentInstruction
         ? [

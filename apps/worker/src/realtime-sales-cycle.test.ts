@@ -754,7 +754,7 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(confirmed.messages[0]).toEqual({
       kind: "TEXT",
-      text: "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé.",
+      text: "Dạ, shop đã nhận yêu cầu đặt hàng của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
     });
     const protectedReadiness = confirmed.protectedOutbound!.readiness;
     const salesParent = confirmed.plan!.effectReadiness!.find(
