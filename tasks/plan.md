@@ -1,3 +1,7 @@
+## Current — provider run sau sửa handoff thiếu dữ liệu, 2026-10-25
+
+**COMPLETE21native +17controls; STOP promotion / B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CHECKPOINT_B.md), [21 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CONVERSATIONS.md). Source2c4de47c sạch, runtime2fa14323; N1/retry0, model/config không đổi. Controls8unsafe blocked/8safe eligible/1probe eligible, PASS rồi mới native. Native15eligible (13modelPASS/2receipt recovery),4handoff,2codeNO_SEND cótin; fallback0/silence0.67requests/max1upstream,0provider/quota/timeout,0evaluator/private-marker leak trong67wires,4DB dropped. Hai handoff ảnh đúng yêu cầu, hai handoff nghiệp vụ; source timestamp refresh vẫn STALE ởstateful-open và owner sai100đ bịverifierchặn ởvariant-quantity, code gửi tổngđúng. Correction→checkout tớiPURCHASE_CONFIRMED. Whole-turn notes giữ minor và concern còn yếu; không suy eligible thành salesPASS. Chưa provider test cặp cố ý giáđủ/tồnUNKNOWN, full51/allreasons/stability/live delivery. Không sửa thêm/runtime hoặc tự vòng2. Các phần dưới giữ evidence lịch sử.
+
 ## Current — thiếu dữ liệu shop thì handoff, 2026-10-25
 
 **IMPLEMENTED; PROVIDER_ACCEPTANCE_NOT_RUN; B chưa GO.** Owner chốt: thiếu dữ liệu shop ảnh hưởng yêu cầu thì handoff; thiếu thông tin khách thì hỏi bổ sung. [Audit dữ liệu, implementation và verification](../docs/specs/c3-phase-b-missing-shop-information-handoff-20261025.md), base `21ae025be4721645042743824e983d38863717e5`.

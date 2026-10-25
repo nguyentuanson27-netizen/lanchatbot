@@ -1,3 +1,13 @@
+## Current — model run missing-information hoàn tất, 2026-10-25
+
+[Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CHECKPOINT_B.md), [21 hội thoại và review từng ca](../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CONVERSATIONS.md). **B chưa GO.**
+
+- [x] Commit preregistration/driver trước provider; capture runtimeHEAD2c4de47c ra external registration, source sạch/không đổi. N1/retry0, không đổi model/prompt/corpus hoặc feedback assumption.
+- [x] 17controls PASS rồi21persisted native; đủ38slots.15eligible/4handoff/2codeNO_SEND cótin, fallback0/silence0.67requests=35owner+32verifier,0providererrors/timeout/quota, max1upstream,0evaluator/private-marker matches.
+- [x] Feedback/màu ảnh thiếu→handoff; ảnh detail/back đủ→gửi. Thiếu mẫu từ khách→hỏi, height/weight→code chọnM, correction giữ2beL, privatecheckout vàPURCHASE_CONFIRMED cócapture.25Outbox rows SENT_ACCEPTED qua test capture,4testDBdropped.
+- [x] Giữ lỗi owner978.000 thay978.100 bịverifierFAIL và code recovery; stateful-open STALE do timestamp refresh có receipt summary. Đọc toàn bộ21actual outcomes, không chấm theo keyword hoặc coi finalfallback0 là draftkhônglỗi.
+- [ ] Cặp giáđủ/tồnUNKNOWN, missingPOS với model thật chưa nằm trong scoped run; chưa phủ mọihandoff reasons/full51/repetitions/real delivery/human acknowledgement. Source consistency vẫn còn, giọng/concern có minor giữ theoowner. Không tựfix/run thêm/promotion/deploy.
+
 ## Current — rule thiếu thông tin theo owner, 2026-10-25
 
 [Audit/implementation/commands/limitations](../docs/specs/c3-phase-b-missing-shop-information-handoff-20261025.md). **PROVIDER_ACCEPTANCE_NOT_RUN; B chưa GO.**

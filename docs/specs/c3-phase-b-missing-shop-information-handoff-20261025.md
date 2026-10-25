@@ -80,3 +80,9 @@ Base sửa `adbee7b0b08e42e5b0eb8db53b7a49e9460098d9`. Không đổi runtime sau
 - `git diff --check`:PASS.
 
 Không tăng role/layer/budget/generation/retry hoặc bỏ verifier/final gate. Không có provider, database hoặc live run mới; review không phải bằng chứng sales acceptance/stability/B GO.
+
+## Provider run tiếp theo theo owner
+
+Sau phần implementation/review ở trên, owner yêu cầu chạy model. [Run source2c4de47c](../../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CHECKPOINT_B.md) đã hoàn tất17controls PASS rồi21persisted native N1/retry0 trên cùng runtime2fa14323.15eligible (13modelPASS/2receipt recovery),4handoff,2codeNO_SEND cótin, finalfallback0/silence0.67requests,0providererrors/quota/timeout,4testDB dropped. [Đủ21hội thoại](../../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CONVERSATIONS.md) và actual captures được giữ; không thay trạng thái lịch sử PROVIDER_NOT_RUN của phần review trước.
+
+Đây là scoped provider evidence, không full51 hoặc acceptance mọi relevant gap. Cặp cố ý giáđủ/tồnUNKNOWN và missingPOS với owner thật chưa có trong population; không chuyển deterministic tests thành provider PASS. Source timestamp refresh vẫn xuất hiện, và owner sai100đ bịverifierchặn rồi code gửi tổngđúng. Không tự sửa tiếp hoặc chạy vònghai; B chưa GO.
