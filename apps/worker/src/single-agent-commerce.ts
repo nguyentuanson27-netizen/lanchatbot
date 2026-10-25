@@ -17,19 +17,12 @@ function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolR
   if (result.status === "UNAVAILABLE" || result.status === "STALE")
     return call.name === "read_policy" ? "POLICY_UNAVAILABLE" : "DEPENDENCY_FAILURE";
   if (call.name !== "read_product" || result.status !== "OK" || !result.data || typeof result.data !== "object") return null;
-  const data = result.data as { content?: unknown; attributes?: unknown; availability?: Record<string,{status:string;reason?:string}>;
-    facts?: {type:string;value:{status?:string}}[]; sellingOptions?: {availability?: Record<string,{status:string;reason?:string}>;facts?:{type:string;value:{status?:string}}[]}[] };
+  const data = result.data as { content?: unknown; attributes?: unknown };
   if (call.args && typeof call.args === "object" && "detailsOnly" in call.args && call.args.detailsOnly === true)
     return data.content == null && data.attributes == null ? "DEPENDENCY_FAILURE" : null;
-  for (const option of data.sellingOptions?.length ? data.sellingOptions : [data]) {
-    for (const [field,reason] of [["price","PRICE_UNAVAILABLE"],["stock","STOCK_UNAVAILABLE"],["eta","ETA_UNAVAILABLE"]] as const) {
-      const value=option.availability?.[field];
-      if (value?.reason === "VARIANT_NOT_FOUND") return "STOCK_UNAVAILABLE";
-      // A known unsupported size/offer or a missing customer region is not a missing shop fact.
-      if (value && value.status !== "OK" && !["SIZE_UNSUPPORTED","OFFER_NOT_FOUND","DELIVERY_REGION_REQUIRED"].includes(value.reason??"")) return reason;
-    }
-    if (option.facts?.some(f=>f.type==="STOCK"&&f.value.status==="UNKNOWN")) return "STOCK_UNAVAILABLE";
-  }
+  // A successful read includes companion price/stock/ETA and possibly multiple
+  // offers. Their presence does not bind them to the customer's current need.
+  // Preserve the partial result; the owner requests handoff for a relevant gap.
   return null;
 }
 

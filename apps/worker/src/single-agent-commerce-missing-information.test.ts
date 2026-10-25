@@ -23,17 +23,19 @@ async function setup(mode:"missing-pos"|"complete"|"policy-error"="missing-pos",
 const native=(name:string,args:unknown):OwnerGeneration=>({kind:"TOOLS",calls:[{name,args}],content:{role:"model",parts:[{functionCall:{name,args}}]}});
 
 describe("missing shop information uses real handoff; missing customer input stays conversational",()=>{
- it("hands off an explicitly requested quote with unavailable POS before another owner or verifier",async()=>{
-  const s=await setup(),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+ it("hands off a failed product source read before another owner or verifier",async()=>{
+  const s=await setup();s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
   const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
   const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần size M còn không, bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
-  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"PRICE_UNAVAILABLE",text:"Bên em sẽ kiểm tra lại rồi báo chị nhé."});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:"Bên em sẽ kiểm tra lại rồi báo chị nhé."});
   expect(s.current().state.conversationOwner).toBe("HUMAN");expect(s.commit).toHaveBeenCalledOnce();
   expect(owner).toHaveBeenCalledOnce();expect(verifier).not.toHaveBeenCalled();
   await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}]);expect(s.commit).toHaveBeenCalledOnce();
  });
  it.each(["denied","unknown"] as const)("does not claim a transfer or resume model advice after an unproved %s handoff",async mode=>{
-  const s=await setup("missing-pos",mode),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  const s=await setup("missing-pos",mode);s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
   const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
   const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
@@ -57,16 +59,33 @@ describe("missing shop information uses real handoff; missing customer input sta
   expect(await tools.invoke({name:"read_product",args:{subjectRef:"invented"}})).toMatchObject({status:"REJECTED"});
   expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
  });
- it("hands off unknown stock even when the price is available",async()=>{
+ it("lets the owner answer only the verified price when incidental stock is unknown",async()=>{
   const s=await setup("complete");s.product.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=null;
   const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
-  await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});
-  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"STOCK_UNAVAILABLE"});expect(s.commit).toHaveBeenCalledOnce();
+  let turns=0;
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>++turns===1?native("read_product",{subjectRef:"QU714",offerType:"DIRECT"}):{kind:"FINAL",text:"Quần 499.000đ chị nhé."});
+  const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần này bao nhiêu tiền em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"SEND_ELIGIBLE",text:"Quần 499.000đ chị nhé."});
+  expect(s.commit).not.toHaveBeenCalled();expect(owner).toHaveBeenCalledTimes(2);expect(verifier).toHaveBeenCalledOnce();
  });
- it("hands off a requested ETA whose shop fulfillment data is missing",async()=>{
+ it.each([
+  {reason:"STOCK_UNAVAILABLE",latest:"Quần này còn hàng không em?"},
+  {reason:"PRICE_UNAVAILABLE",latest:"Quần này bao nhiêu tiền em?"},
+  {reason:"ETA_UNAVAILABLE",latest:"Giao về miền Nam mất mấy ngày em?"},
+ ])("commits the owner's relevant $reason handoff after a partial read",async({reason,latest})=>{
+  const s=await setup(reason==="PRICE_UNAVAILABLE"?"missing-pos":"complete");
+  if(reason==="STOCK_UNAVAILABLE")s.product.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=null;
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});let turns=0;
+  const owner=vi.fn(async()=>++turns===1?native("read_product",{subjectRef:"QU714",offerType:"DIRECT",...(reason==="ETA_UNAVAILABLE"?{deliveryRegion:"MIEN-NAM"}:{})}):native("request_handoff",{reason})),verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest,history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason});expect(s.commit).toHaveBeenCalledOnce();
+  expect(owner).toHaveBeenCalledTimes(2);expect(verifier).not.toHaveBeenCalled();
+ });
+ it("retains a partial read with unknown ETA for the owner to assess against the request",async()=>{
   const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
   await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT",deliveryRegion:"MIEN-NAM"}});
-  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"ETA_UNAVAILABLE"});expect(s.commit).toHaveBeenCalledOnce();
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
  });
  it.each(["GENERIC","FEEDBACK"])("hands off a missing requested %s image instead of calling a different image a substitute",async intent=>{
   const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});

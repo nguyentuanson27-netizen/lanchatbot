@@ -75,7 +75,7 @@ async function enableRecoveryHandoff(f: ReturnType<typeof fixture>, mode: "holdi
   f.policy.mockResolvedValue({...resolved,bundle});
 }
 
-it("commits price-unavailable handoff and its customer message before another model generation",async()=>{
+it("commits the owner's relevant price-unavailable handoff and its customer message",async()=>{
   const f=fixture(),source=f.products[0]!;f.enableHandoff();
   const resolution=await fixturePolicy(),bundle=resolution.bundle!;
   Object.assign(bundle.artifacts,{handoffMatrix:{schemaVersion:1,kind:"HANDOFF_MATRIX",sourceMetadata:bundle.artifacts.shopPolicy.sourceMetadata,
@@ -84,10 +84,14 @@ it("commits price-unavailable handoff and its customer message before another mo
   f.setRead({policy:()=>fixturePolicy(),initialProducts:[source.product],catalog:{readProduct:async()=>({...source,snapshot:null}),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
   f.message.text="Áo này mua riêng bao nhiêu em?";
   const call={name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}};
-  const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}));
+  let turns=0;
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>{
+    const next=++turns===1?call:{name:"request_handoff",args:{reason:"PRICE_UNAVAILABLE"}};
+    return {kind:"TOOLS",calls:[next],content:{role:"model",parts:[{functionCall:next}]}};
+  });
   const result=await f.run(owner);
   expect(result).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",reason:"PRICE_UNAVAILABLE",text:"Bên em sẽ kiểm tra lại giá rồi báo chị nhé."}});
-  expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();
+  expect(owner).toHaveBeenCalledTimes(2);expect(f.verifier).not.toHaveBeenCalled();
   const handoff=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);
   expect(handoff).toHaveLength(1);expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
 });
