@@ -46,6 +46,7 @@ export function createReadOnlyTools(input: {
   let policyRead = false;
   const deliveryContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const offerContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  const offerPins = new Map<string, { identity: string; literal: TrustedContext["policyLiterals"][number] }>();
   const reads = new Map<string, Record<string, unknown>>();
   const searchReads = new Set<string>();
   const prepared = new Set<string>();
@@ -59,8 +60,16 @@ export function createReadOnlyTools(input: {
     const availableOffers = Object.keys(raw.offers).sort();
     if (!["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
       observed > now || expires <= now || availableOffers.length > 8) return null;
-    return { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
+    const identity = commerceHash({ shopAlias:raw.shop_alias, productId:id, releaseId:raw.release_id,
+      status:normalizeCatalogToken(raw.data_status), availableOffers });
+    const pinned = offerPins.get(id);
+    // Re-observing identical offer identity does not renew the verifier's evidence.
+    // Keep its original expiry; hardPrecheck still rejects it if it expires in this turn.
+    if (pinned?.identity === identity) return pinned.literal;
+    const literal = { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
       observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers }) };
+    offerPins.set(id,{identity,literal});
+    return literal;
   };
   const bind = (p: StableProductDocument) => {
     if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
@@ -122,9 +131,8 @@ export function createReadOnlyTools(input: {
     const status = raw ? normalizeCatalogToken(raw.data_status) : null;
     const offers = raw && ["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(status ?? "") &&
       observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
-    if (offers !== null && offers.length <= 8) offerContexts.set(id, { ref: `offers:${id}`,
-      sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers: offers }),
-      observedAt: raw!.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers: offers }) });
+    const metadata = offers !== null && offers.length <= 8 ? offerLiteral(id,source) : null;
+    if (metadata) offerContexts.set(id, metadata);
     else offerContexts.delete(id);
     const availability = { content: { status: content ? "OK" : "UNAVAILABLE", reason: content ? null : "SOURCE_UNAVAILABLE" },
       offers: { status: offers !== null && offers.length <= 8 ? "OK" : "UNAVAILABLE", reason: offers !== null && offers.length <= 8 ? null : "SOURCE_UNAVAILABLE" } };
@@ -222,10 +230,8 @@ export function createReadOnlyTools(input: {
     if (charts.length) evidence.sizeCharts = charts;
     if (!products.has(id) && products.size >= MAX_RUNTIME_PRODUCTS) return { status: "REJECTED", reason: "PRODUCT_BOUND" };
     offerContexts.delete(id);
-    if (availableOffers !== null) offerContexts.set(id, { ref: `offers:${id}`,
-      sourceVersion: commerceHash({ releaseId: raw!.release_id, observed, availableOffers }),
-      observedAt: raw!.synced_at, expiresAt: new Date(expires).toISOString(),
-      text: JSON.stringify({ productId: id, availableOffers }) });
+    const offerEvidence = availableOffers !== null ? offerLiteral(id,source) : null;
+    if (offerEvidence) offerContexts.set(id,offerEvidence);
     products.delete(id);
     if (evidence.attributes || evidence.presentation || evidence.content || evidence.sizeCharts?.length) products.set(id, evidence);
     subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });

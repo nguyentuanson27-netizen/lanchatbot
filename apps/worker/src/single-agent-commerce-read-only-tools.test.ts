@@ -29,6 +29,35 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it.each(["prepare", "search"])("pins offer-only evidence across a metadata refresh after %s without renewing expiry", async path => {
+    const f = fixtureProduct();
+    let now = new Date(commerceNow);
+    f.snapshot.synced_at = new Date(now.getTime() - 60_000).toISOString();
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => now, policy: () => fixturePolicy(),
+      initialProducts: path === "prepare" ? [f.product] : [], catalog: {
+        readProduct: async () => structuredClone(f), searchText: async () => ({status:"MATCHED",matchKind:"EXACT_CODE",product:f.product,score:1,gap:null}) } });
+    if (path === "prepare") await tools.prepare();
+    else await tools.invoke({ name:"search_products",args:{productCode:f.product.productId} });
+    const before = tools.snapshot(), draft = "Em gửi chị ảnh mẫu này nhé.";
+    const binding = makeBinding("refresh", draft, before);
+    f.snapshot.synced_at = now.toISOString();
+    expect(makeBinding("refresh", draft, await tools.readback())).toEqual(binding);
+    const expires = before.policyLiterals.find(p=>p.ref===`offers:${f.product.productId}`)!.expiresAt!;
+    now = new Date(expires);
+    f.snapshot.synced_at = now.toISOString();
+    expect(hardPrecheck(await tools.readback(),draft,now)).toBe("STALE");
+  });
+  it.each(["offer", "release", "unavailable"])("invalidates pinned offer evidence on actual %s change", async kind => {
+    const f=fixtureProduct();
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:()=>fixturePolicy(),initialProducts:[f.product],
+      catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+    await tools.prepare();
+    const before=makeBinding("change","Dạ chị.",tools.snapshot());
+    if(kind==="offer") f.snapshot.offers.AO=structuredClone(f.snapshot.offers.DIRECT!);
+    if(kind==="release") f.snapshot.release_id="new-release";
+    if(kind==="unavailable") f.snapshot.synced_at=new Date(commerceNow.getTime()+1).toISOString();
+    expect(makeBinding("change","Dạ chị.",await tools.readback()).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+  });
   it("makes source offer codes available after discovery before reading protected facts", async () => {
     const records = ["A101", "B202", "C303"].map(id => {
       const f = fixtureProduct(id), template = f.snapshot.offers.DIRECT!;
