@@ -2341,6 +2341,15 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] A purchase confirmation still named an internal role. A separate post-run RED→GREEN copy fix at `3629ca84` uses shop-facing acknowledgement; focused realtime/ingress tests 146/146, worker lint/build PASS. This change was not part of the 51-case provider source.
 - [ ] Requalify after resolving retrieval/choice, protected fit and comparative-wear claims, and actual customer-facing sales quality. No promotion or deployment from this diagnostic.
 
+## Current — Phase B input/context revision 2, 2026-10-25
+
+- [x] Audit 103 owner /45 verifier wires và51 outcomes; xác định public recovery bị lọc khỏi history, receipt/current quote gap, FULL_SET projection và null offer expansion vượt cap.
+- [x] Independent review REVISE hoàn tất; sửa [plan revision 2](../docs/specs/c3-phase-b-input-context-improvement-plan-20261025.md) theo R1–R3, self-review phạm vi/contract/bounds; chưa independent re-approval.
+- [ ] P0: durable provenance và bounded accepted public-summary event; current quote độc lập; privacy/history/overflow/duplicate/correction RED→GREEN. Không thêm historical effect receipts vào gate.
+- [ ] P1: whole-look/parts/detail metadata thống nhất; giữ referent scope và unknown đúng nghĩa.
+- [ ] P2: explicit read scope, call graph hai rounds, staged batch theo input order và regression compare/component/caps; không tự chọn offer hoặc late tool.
+- [ ] Focused verification/self-review/source seal rồi provider chỉ khi owner yêu cầu;51native+17controls N1/retry0, safety breach dừng dispatch. P3/P4 deferred; B chưa GO.
+
 ## Phase B recovery priority — 2026-10-25
 
 - [x] Review all 51 actual outcomes and inspect raw source/tool/verifier evidence; identify metadata-only offer refresh causing media handoff and null product focus preventing existing image recovery. Qualify earlier fit/wrinkle concerns against the approved inference boundary.
