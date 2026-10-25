@@ -30,6 +30,7 @@ describe("Phase B capability composition", () => {
     const repository: SalesCycleStateRepositoryV1 = { read:async()=>structuredClone(cycle),compareAndSwap:async update=>{
       if(update.expectedRevision!==cycle.revision)return false;cycle=structuredClone(update.nextState);return true;
     } };
+    const ledger=new Map<string,import("./single-agent-semantic-verifier-boundary.js").TrustedContext["effectReceipts"][number]>();
     const compose = () => createCommerceTools({ read: {scope,clock:()=>commerceNow,initialProducts:[f.product],policy:()=>fixturePolicy(),
       catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
       state:{store, sourceMessages:[{text:"Eo 85, mông 105.",sourceMessageId:scope.sourceMessageId,observedAt:scope.sourceObservedAt!}],sizeInput:async()=>fixtureSizeInput()},
@@ -40,9 +41,13 @@ describe("Phase B capability composition", () => {
           return {status:"READY",shopId:scope.shopId,line:{...line,lineId:query.lineId},versions:{price:"p1",inventory:"i1",size:"s1",eta:null},
             eta:null,etaExpiresAt:null,sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,
             sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()};},
-        readAuthority:async()=>({...scope,revision:scope.revision}),readReceipt:async()=>null,
-        executeCommand:({command,trustedPorts})=>executePersistedSalesCycleCommand({repository,conversationKey:scope.conversationId,
-          command,now:commerceNow,trustedPorts})}
+        readAuthority:async()=>({...scope,revision:scope.revision}),readReceipt:async id=>ledger.get(id)??null,
+        executeCommand:async({command,trustedPorts})=>{const result=await executePersistedSalesCycleCommand({repository,conversationKey:scope.conversationId,
+          command,now:commerceNow,trustedPorts});
+          if(result.status==="APPLIED"&&result.state.cart)ledger.set(command.commandId,{ref:`receipt:${command.commandId}`,operationId:command.commandId,
+            subjectRef:result.state.cart.value.cartId,effect:"CART_OPENED",status:"SUCCESS",stateRevision:result.state.revision,recipient:scope.recipient,
+            observedAt:commerceNow.toISOString(),expiresAt:new Date(commerceNow.getTime()+300000).toISOString()});
+          return result;}}
     });
     const tools=await compose(), outputs=[native([
       {name:"add_to_cart",args:{subjectRef:"QU714",offerType:"DIRECT",size:"M",color:"navy"}},
@@ -55,6 +60,7 @@ describe("Phase B capability composition", () => {
         expect(request.trusted.effectReceipts).toEqual(expect.arrayContaining([expect.objectContaining({ effect:"CUSTOMER_STATE_UPDATED",subjectRef:profile.profile.profileId,stateRevision:request.trusted.state.revision })]));
         return {result:{verdict:"PASS",violations:[]}}; }});
     expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(result.sendEnabled).toBe(false);
+    expect(tools.handoffSources?.()?.map(s=>s.kind)).toEqual(expect.arrayContaining(["SALES_STATE","RECEIPT"]));
     expect(cycle.cart).not.toBeNull();expect(profile.profile.revision).toBe(2);
     expect(tools.snapshot().policyLiterals.some(p=>p.ref==="offers:QU714")).toBe(true);
     const second=await compose();
