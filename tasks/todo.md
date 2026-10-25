@@ -1,4 +1,14 @@
-## Current — full model input/context revision 2, 2026-10-25
+## Current — chạy lại 11 ca được owner chọn, 2026-10-25
+
+[Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/input-context-targeted-rerun-20261025/CHECKPOINT_B.md), [14 lượt](../apps/worker/evals/single-agent-commerce-read-only/input-context-targeted-rerun-20261025/CONVERSATIONS.md). **Đủ 11 targets + 3 setup; B chưa GO.**
+
+- [x] Rerun mỗi ca một lần, không sửa model/prompt/runtime; source d4c81871 sạch, external driver/input hashes đóng băng trước dispatch. Giữ full run cũ riêng.
+- [x] Bốn lỗi provider trước không tái hiện; gallery gửi hai ảnh chung. Discovery còn OWNER_TOOL_MODE, actual holding/handoff, không gọi thêm generation cứu kết quả.
+- [x] Correction ACK không suy fit; request-checkout gửi hỏi tên, private checkout gửi preview tổng978.100đ, confirm tới PURCHASE_CONFIRMED. Cả8stateful slots có accepted Outbox captures; hai NO_SEND là code đã gửi message.
+- [x] Target6eligible/3handoff/2code NO_SEND, setup3eligible; 34requests/max1upstream/firewall0leak, 2testDB dropped. One generation status PROVIDER_ERROR là local OWNER_TOOL_MODE với HTTP200/STOP; không gọi nhầm transport/quota.
+- [ ] B GO/stability vẫn chưa verified. Không đổi rerun thành full51 qualification, không coi N1 thành lỗi đã fix; không tự chạy thêm hoặc deploy.
+
+## Previous — full model input/context revision 2, 2026-10-25
 
 [Report + evidence](../apps/worker/evals/single-agent-commerce-read-only/input-context-full-20261025/CHECKPOINT_B.md), [51 hội thoại/review](../apps/worker/evals/single-agent-commerce-read-only/input-context-full-20261025/CONVERSATIONS.md). **Đã chạy đủ; B chưa GO.**
 
