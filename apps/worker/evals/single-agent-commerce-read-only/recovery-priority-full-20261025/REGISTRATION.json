@@ -1,0 +1,28 @@
+{
+  "mode": "OWNER_REQUESTED_FULL_DIAGNOSTIC_NOT_QUALIFICATION",
+  "sourceSha": "33d83f685411f44dffd2a0d7c61c92a607c34d62",
+  "nativeOutcomes": 46,
+  "newOpeningOutcomes": 5,
+  "controls": 17,
+  "totalRegisteredOutcomes": 68,
+  "publicModelNativeTurns": 50,
+  "privateCodeOnlyTurns": 1,
+  "repetitions": 1,
+  "retry": 0,
+  "maximumGenerationRequests": 217,
+  "sendEnabled": false,
+  "execution": "Controls readiness first, then two independent process lanes; continue ordinary attempt failures, retain all outcomes. No old-prefix qualification or GO claimed.",
+  "driverHash": "5ccc7733baf4a77155fb7e70b9ff1fffe0413b19233225a51036cea078d671a9",
+  "hashes": {
+    "manifest.json": "9090ff86b19db917e687bdc31fff54af0fab01f8a3483948b91426fbfc660dd8",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a",
+    "opening-quote-cases.json": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "prompts/owner.vi.txt": "f70347894839e863d09a9daf16517768dc88a061cb1f5591a6f1c245bed385d0",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "handoff-matrix.candidate.json": "6c6a2836087cf778879ec4b3049a6d627155c34366560cb618bc182560fec24d"
+  }
+}

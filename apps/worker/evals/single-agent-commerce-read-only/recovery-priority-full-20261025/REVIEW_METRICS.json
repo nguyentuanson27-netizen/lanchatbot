@@ -1,0 +1,78 @@
+{
+  "sourceSha": "33d83f685411f44dffd2a0d7c61c92a607c34d62",
+  "nativeCompleted": 51,
+  "controlsCompleted": 17,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 42,
+    "NO_SEND": 2,
+    "HANDOFF": 7
+  },
+  "generationStatuses": {
+    "owner:OK": 101,
+    "verifier:OK": 45,
+    "owner:PROVIDER_ERROR": 2
+  },
+  "nativeProviderRequests": {
+    "owner": 103,
+    "verifier": 45
+  },
+  "capturedWires": 165,
+  "labelLeakCount": 0,
+  "observedUsageTokens": {
+    "input": 889509,
+    "output": 77153
+  },
+  "verifierP50ms": 10894.278999999995,
+  "verifierP95ms": 19924.415000000008,
+  "errors": [
+    {
+      "id": "4dbcac82-8a4a-4124-8a42-e6ab0daf1631:owner:3",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 200,
+      "rawFinishReason": "STOP"
+    },
+    {
+      "id": "7c3b13c2-ec17-46ca-bcd8-88be9a167a2d:owner:2",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 200,
+      "rawFinishReason": "MALFORMED_RESPONSE"
+    }
+  ],
+  "groups": {
+    "B1": {
+      "SEND_ELIGIBLE": 24
+    },
+    "journey-openings": {
+      "HANDOFF": 2,
+      "SEND_ELIGIBLE": 2
+    },
+    "media-followup": {
+      "SEND_ELIGIBLE": 5,
+      "HANDOFF": 2
+    },
+    "negotiation": {
+      "SEND_ELIGIBLE": 2,
+      "HANDOFF": 1
+    },
+    "opening-quotes": {
+      "SEND_ELIGIBLE": 5
+    },
+    "stateful": {
+      "SEND_ELIGIBLE": 4,
+      "NO_SEND": 2,
+      "HANDOFF": 2
+    }
+  },
+  "nativeVerifierVerdicts": {
+    "PASS": 41,
+    "FAIL": 4
+  },
+  "broadEvaluatorLabelScanMatches": 0,
+  "maxProviderRequestsPerGeneration": 1,
+  "verificationPhaseP50ms": 13135.715400000001,
+  "verificationPhaseP95ms": 27877.630000000005,
+  "attemptP50ms": 26029.001699999964,
+  "attemptP95ms": 62676.846100000024
+}
