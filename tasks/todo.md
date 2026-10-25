@@ -2340,3 +2340,13 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] 164 captured provider requests, zero evaluator-only label matches; three owner generation failures, one verifier-rejected media claim, no verifier provider error or timeout. Review found sales-choice, fit/wrinkle-claim and voice concerns despite PASS verdicts. B remains STOP, not GO; one attempt per case is not a stability qualification.
 - [x] A purchase confirmation still named an internal role. A separate post-run RED→GREEN copy fix at `3629ca84` uses shop-facing acknowledgement; focused realtime/ingress tests 146/146, worker lint/build PASS. This change was not part of the 51-case provider source.
 - [ ] Requalify after resolving retrieval/choice, protected fit and comparative-wear claims, and actual customer-facing sales quality. No promotion or deployment from this diagnostic.
+
+## Phase B recovery priority — 2026-10-25
+
+- [x] Review all 51 actual outcomes and inspect raw source/tool/verifier evidence; identify metadata-only offer refresh causing media handoff and null product focus preventing existing image recovery. Qualify earlier fit/wrinkle concerns against the approved inference boundary.
+- [x] Write and self-review [recovery-first plan](../docs/specs/c3-phase-b-recovery-priority-plan-20261025.md); freeze advice/verifier prompts and avoid another voice-tuning cycle.
+- [x] Independent review REQUEST_CHANGES; revise plan v2 for partial media recovery, scoped focus provenance, closed handoff reason mapping and atomic state/event/tag/Outbox commit. Self-review v2 complete; independent re-review not performed.
+- [ ] P0 RED→GREEN: unchanged offer content across metadata refresh preserves eligible reply; genuine changes/expiry still block.
+- [ ] P1a prove focus provenance with positive/negative cases; P1b connect only proven scope. If current capabilities cannot prove referent, retain unresolved/handoff rather than add a parser or invent authority.
+- [ ] P2 RED→GREEN: apply the plan's failure allowlist only without eligible media recovery; proposed RESPONSE_UNAVAILABLE contract/matrix/consumers consistent; atomic state/event/tag/Outbox commit and verified terminal. Preserve size-media exception, silent/permission/privacy/receipt contracts and B1 read-only limits; no generic mixed-intent handoff.
+- [ ] Focused deterministic checks/self-review, then separately authorized sealed provider run. No claim of implementation or model improvement from this plan.
