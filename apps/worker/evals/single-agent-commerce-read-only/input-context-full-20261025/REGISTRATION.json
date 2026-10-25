@@ -1,0 +1,29 @@
+{
+  "mode": "OWNER_REQUESTED_FULL_DIAGNOSTIC_NOT_QUALIFICATION",
+  "sourceSha": "9ecbbe5cd12e6a910c2b81f8271921846d55640a",
+  "nativeOutcomes": 46,
+  "newOpeningOutcomes": 5,
+  "controls": 17,
+  "totalRegisteredOutcomes": 68,
+  "publicModelNativeTurns": 50,
+  "privateCodeOnlyTurns": 1,
+  "repetitions": 1,
+  "retry": 0,
+  "maximumGenerationRequests": 217,
+  "sendEnabled": false,
+  "implementationBaseSha": "0eeb5dce2d40f99250ec16efd2f5ee51a9d6ea62",
+  "execution": "Controls first; negotiation/media/discovery priority cohorts then B1 plus remaining persisted cohorts in independent process lanes; N1, no generation retry, no promotion.",
+  "driverHash": "c32b550c78035ad3f55c0da548199f3f9d4ea4d56c2d65705c1a4e27af863ec0",
+  "hashes": {
+    "manifest.json": "cfc3b991e35bfa7775f7e78220a871966ab2d8015213dd4964ab05a590dc0630",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a",
+    "opening-quote-cases.json": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "prompts/owner.vi.txt": "323b9c3c2ae272b03c26d4d41eeebbcb4842102e23ab63a9bf8cd4001d506e1a",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "handoff-matrix.candidate.json": "6c6a2836087cf778879ec4b3049a6d627155c34366560cb618bc182560fec24d"
+  }
+}

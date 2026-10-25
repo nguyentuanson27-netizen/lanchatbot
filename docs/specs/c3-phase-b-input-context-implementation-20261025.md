@@ -67,4 +67,8 @@ Final focused worker command gồm13files ở trên + `src/track-b-protected-cla
 
 Lưu ý giới hạn telemetry: dropped counters mô tả record đã tới history projection; encrypted rows thiếu provenance bị reader loại trước đó không có counter riêng theo từng nguyên nhân. Không suy count=0 nghĩa mọi source rows đều hợp lệ. Dữ liệu cũ thiếu marker không được phục hồi.
 
-Chưa chạy provider, actual PostgreSQL integration mới, remote CI, full worker suite, sales scoring hoặc stability qualification. P3/P4/search enrichment deferred. B vẫn chưa GO; zero-fallback của vòng cũ không qualify code mới. Các findings độc lập đã đóng ở follow-up file hashes trong report; chưa có provider outcome mới để kết luận tư vấn tốt hơn.
+Tại thời điểm chốt implementation: chưa chạy provider, actual PostgreSQL integration mới, remote CI, full worker suite, sales scoring hoặc stability qualification. P3/P4/search enrichment deferred. Các findings độc lập đã đóng ở follow-up file hashes trong report; zero-fallback của vòng cũ không qualify code mới.
+
+## Provider follow-up — 25/10/2026
+
+Owner yêu cầu chạy model: [full diagnostic](../../apps/worker/evals/single-agent-commerce-read-only/input-context-full-20261025/CHECKPOINT_B.md) đã hoàn tất ở sealed source `9ecbbe5cd12e6a910c2b81f8271921846d55640a`: 17 scoped controls PASS rồi 51 native slots, N1/retry0. 40 eligible / 6 fallback / 2 handoff / 3 no-send; 158 requests, 4 provider errors, 5 isolated databases dropped. Không có generation nào kích hoạt acceptedCommunicationHistory mới, nên deterministic writer/history evidence vẫn chưa thành live-provider acceptance. Discovery tiếp tục vượt tool-result bound; correction gây handoff và chặn checkout. Chưa có bằng chứng cải thiện ổn định hoặc đủ chất lượng bán hàng. **B NOT GO**, không đổi implementation trong run, không tự campaign tiếp.

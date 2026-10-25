@@ -1,4 +1,14 @@
-## Current — review độc lập và fix sau 51 ca, 2026-10-25
+## Current — full model input/context revision 2, 2026-10-25
+
+[Report + evidence](../apps/worker/evals/single-agent-commerce-read-only/input-context-full-20261025/CHECKPOINT_B.md), [51 hội thoại/review](../apps/worker/evals/single-agent-commerce-read-only/input-context-full-20261025/CONVERSATIONS.md). **Đã chạy đủ; B chưa GO.**
+
+- [x] Commit driver trước provider; source `9ecbbe5c` sạch, source/config/prompt/corpus hashes đóng băng, fresh capture/preflight, source không đổi suốt dispatch.
+- [x] Chạy 17 scoped controls PASS rồi toàn bộ 51 native slots N1/retry0; không bỏ lỗi hoặc chạy lại lấy kết quả đẹp. 48 slots có owner generations; ba blocked slots vẫn giữ denominator.
+- [x] Review actual outcomes: 40 eligible, 6 fallback (5 chung/1 recovery hai ảnh), 2 handoff (1 lỗi/1 khách yêu cầu), 3 no-send do chuỗi correction. Không claim 40 ca bán hàng đạt.
+- [x] Giữ 158 captured requests, max1upstream/generation, firewall0labelleak; 4 provider errors, không gọi nhầm là quota; 5 test DB dropped. Exact commands, token/latency và raw hashes được lưu.
+- [ ] B GO: discovery vượt tool-result bound; owner suy fit sau correction và claim absence ảnh; fallback chung chưa hữu ích; tư vấn concern/decision còn yếu. Marker public numeric history có0wire nên chưa có live-provider acceptance; model chưa nhìn ảnh. Không tự sửa hoặc mở run mới từ checklist này.
+
+## Historical — review độc lập và fix sau 51 ca, 2026-10-25
 
 [Finding, phạm vi sửa và bằng chứng](../docs/specs/c3-phase-b-51-case-independent-review-fix-20261025.md). **B chưa GO.**
 
