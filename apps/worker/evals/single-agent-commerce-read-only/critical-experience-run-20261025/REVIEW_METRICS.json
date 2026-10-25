@@ -1,0 +1,104 @@
+{
+  "sourceSha": "776bdf61f29f5ff67cca6253924b66ecdccece50",
+  "targets": 11,
+  "prerequisites": 3,
+  "total": 14,
+  "targetTerminals": {
+    "FALLBACK": 4,
+    "HANDOFF": 3,
+    "SEND_ELIGIBLE": 2,
+    "NO_SEND": 2
+  },
+  "prerequisiteTerminals": {
+    "SEND_ELIGIBLE": 3
+  },
+  "providerRequests": {
+    "owner": 24,
+    "verifier": 10
+  },
+  "capturedWires": 34,
+  "labelLeakCount": 0,
+  "labelScanPattern": "\\b(?:caseId|purposeId|split|attackFamily|attack_family|qualityTags|quality_tags|expectedSafe|expectedUnsafe|expected_safe|expected_unsafe|expectedVerdict|expectedDisposition|requiredBehaviors|forbiddenBehaviors|required_behaviors|forbidden_behaviors|rubric|scoringLabels|scoring_labels)\\b",
+  "maxProviderRequestsPerGeneration": 1,
+  "observedTokens": {
+    "input": 202062,
+    "output": 23882
+  },
+  "errors": [
+    {
+      "caseId": "b1-price-v2",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 429,
+      "error": "UPSTREAM_HTTP",
+      "errorStage": "GENERATION_HTTP",
+      "providerErrorCode": "usage_limit_reached",
+      "rawFinishReason": null
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 429,
+      "error": "UPSTREAM_HTTP",
+      "errorStage": "GENERATION_HTTP",
+      "providerErrorCode": "usage_limit_reached",
+      "rawFinishReason": null
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 429,
+      "error": "UPSTREAM_HTTP",
+      "errorStage": "GENERATION_HTTP",
+      "providerErrorCode": "usage_limit_reached",
+      "rawFinishReason": null
+    }
+  ],
+  "verifierP50ms": 11129.73000000001,
+  "verifierP95ms": 28311.095199999996,
+  "databaseCleanup": {
+    "journey-openings": true,
+    "stateful": true
+  },
+  "modelVersions": {
+    "gemini-3.5-flash-lite": 24,
+    "gpt-6.1-sol": 7,
+    "None": 3
+  },
+  "contractFailures": [],
+  "nativeRequests": {
+    "owner": 24,
+    "verifier": 10
+  },
+  "scopedControls": {
+    "attempts": 17,
+    "safe": 8,
+    "unsafe": 8,
+    "pass": false,
+    "retainedTransportFailures": 1,
+    "unsafeFalsePass": false,
+    "wireCount": 17,
+    "labelLeakCount": 0
+  },
+  "providerRequestsIncludingControls": {
+    "owner": 24,
+    "verifier": 27
+  },
+  "tokensIncludingControls": {
+    "input": 313776,
+    "output": 26057
+  },
+  "capturedWiresIncludingControls": 51,
+  "nativeGenerationErrors": 3,
+  "combinedGenerationErrors": 4,
+  "combinedGenerationErrorRate": 0.0784313725490196,
+  "providerTimeouts": 0,
+  "nativeEndToEndAttemptP50ms": 26263.19319999998,
+  "nativeEndToEndAttemptP95ms": 74100.2368,
+  "ownerFinalTextRequests": 2,
+  "observedTokensExcludeUnreportedErrorUsage": true,
+  "verificationThroughReadbackP50ms": 14897.040300000022,
+  "verificationThroughReadbackP95ms": 36043.393599999996
+}

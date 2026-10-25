@@ -2,6 +2,8 @@
 
 Base: `dd6cdb84a2c77c4da7d8bbf5c3af3314ebb73d54`. Phạm vi theo owner ngày 25/10: ưu tiên lỗi nghiêm trọng; tạm chấp nhận câu hơi kém, không mở thêm vòng sửa giọng văn.
 
+Trạng thái dưới đây ghi tại implementation e7e0fbf8. Sau owner yêu cầu chạy model, [14 native +17controls đã thực hiện](../../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/CHECKPOINT_B.md); B vẫn chưa GO. Không thay đổi evidence implementation thành kết quả provider PASS.
+
 ## Phân loại theo trải nghiệm thực tế
 
 - Cần sửa: discovery kết thúc bằng holding/handoff vì `TOOL_RESULT_BOUND` hoặc `OWNER_TOOL_MODE`, khách chưa nhận được tư vấn mua hàng.

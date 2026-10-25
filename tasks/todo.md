@@ -1,4 +1,16 @@
-## Current — chỉ sửa lỗi nghiêm trọng ảnh hưởng trải nghiệm, 2026-10-25
+## Current — model run kiểm tra lỗi nghiêm trọng, 2026-10-25
+
+[Report/commands/accounting](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/CHECKPOINT_B.md), [14 actual outcomes](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/CONVERSATIONS.md). **Đủ14native +17controls; B NOT GO.**
+
+- [x] Source sạch/hash frozen trước provider; runtime e7e0fbf8, controls3a3d2b0c/native776bdf61 chỉ khác driver/report đăng ký, không patch runtime theo kết quả.
+- [x] 17controls FAIL do1safe transport HTTPnull;8unsafe blocked/7safe eligible/1probe eligible. Native campaign ban đầu NOT_RUN. Đăng ký native diagnostic riêng trước kết quả, không retry/launder controlFAIL; tổng31slots không tăng repetition.
+- [x] Native14:5eligible/4fallback/3handoff/2codeNO_SEND; checkout8stateful có accepted capture và tớiPURCHASE_CONFIRMED. Gallery2ảnh chung đúng nhãn. Hai request final-only text thật; không quan sát tool-mode/bound failures.
+- [x] Giữ discovery STALE/handoff do POS version/timestamp refresh, aligned business meaning giữ nguyên; stateful-open STALE có receipt-summary recovery. Partial-source suy chỉ bán nguyên set bị verifier chặn đúng. Ba fallback verifier429 usage_limit_reached giữ denominator.
+- [x] 51requests=24owner+27verifier, max1upstream,0labelleak,0timeout,4providererrors gồm1transport+3quota. Hai DB test dropped,82raw-file hashes. Không live send/deploy/full51/fullA2/A3/CI hoặc rerun unit suite trong reporting.
+- [ ] Source consistency và phân biệt source-unavailable với không bán là lỗi nghiêm trọng còn lại; không sửa bằng style prompt hoặc bỏ freshness gate. Chưa có source fix tiếp theo hoặc chạy vòng hai.
+- [ ] Giọng hơi dài/ngoặc/giúp em và ảnh chung đúng nhãn tạm chấp nhận theo owner. Không suy N1 thành ổn định hoặc B GO.
+
+## Previous — chỉ sửa lỗi nghiêm trọng ảnh hưởng trải nghiệm, 2026-10-25
 
 [Phạm vi/finding/self-review/commands](../docs/specs/c3-phase-b-critical-experience-fix-20261025.md). Base `dd6cdb84`; **PROVIDER_NOT_RUN, B chưa GO**.
 
