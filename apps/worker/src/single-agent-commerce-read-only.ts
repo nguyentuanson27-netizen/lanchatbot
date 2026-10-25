@@ -23,6 +23,10 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  handoffSources?(): import("@lana/contracts").CommerceHandoffSourceCheckV1[] | null;
+  boundedPrice?(): { text: string; claims: import("@lana/contracts").ProtectedClaimV1[] } | null;
+  sealHandoffReply?(text: string, trusted: TrustedContext, images: readonly import("./single-agent-commerce-media-delivery.js").MediaDeliveryImage[]): string;
+  completeHandoff?(outcome: TerminalOutcome, readback: () => Promise<TrustedContext>): Promise<TerminalOutcome>;
   handoffStatus?(): { attempts: number; status: "PREPARED" | "COMMITTED" | "BLOCKED" | "UNKNOWN"; reason: string } | null;
   publicCartSummary?(): unknown;
   /** Code-owned exact static fallback identity after a tool outcome. */
@@ -85,6 +89,10 @@ export async function runCommerceTurn(input: {
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
   const finish = async (terminal: TerminalOutcome) => {
+    if (input.tools.completeHandoff && input.tools.handoffStatus?.()?.status === "PREPARED") {
+      try { terminal = await input.tools.completeHandoff(terminal, () => input.tools.readback()); }
+      catch { terminal = {disposition:"NO_SEND",reason:"HANDOFF_FINALIZE_UNAVAILABLE",text:null,fallbackId:null}; }
+    }
     let recovery: { originalDisposition: TerminalOutcome["disposition"]; originalReason: string;
       originalDiagnostic?: TerminalOutcome["diagnostic"] } | null = null;
     if (terminal.disposition !== "SEND_ELIGIBLE" && input.tools.recover) {
@@ -160,6 +168,7 @@ export async function runCommerceTurn(input: {
     catch { return finish(fallback(generations.at(-1)!.status)); }
     if (!output || typeof output !== "object") return finish(fallback("MALFORMED"));
     if (output.kind === "TOOLS") {
+      if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));
       proposedToolCalls += output.calls.length;
       const handoffCalls = output.calls.filter(c => c.name === "request_handoff");
       const terminalCall = handoffCalls.length === 1 && output.calls.length === 1;
@@ -180,6 +189,7 @@ export async function runCommerceTurn(input: {
       if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += output.calls.length;}
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
+      rejectedToolCalls += results.filter(result=>result.status==="REJECTED").length;
       toolLatencyMs += performance.now()-toolStarted;
       const actual = await effectTerminal();
       if (actual) return finish(actual);
@@ -200,17 +210,21 @@ export async function runCommerceTurn(input: {
         return finish({disposition:"NO_SEND",reason:"PERMISSION_OR_PRIVACY",text:null,fallbackId:null});
       return finish(fallback("OWNER_OUTPUT_ARTIFACT"));
     }
-    const trusted = input.tools.snapshot(), binding = makeBinding(input.scope.requestId, output.text, trusted);
-    const problem = hardPrecheck(trusted, output.text, input.clock());
+    const trusted = input.tools.snapshot();
+    let draft:string;
+    try { draft = input.tools.sealHandoffReply?.(output.text, trusted,input.tools.mediaSelection?.()??[]) ?? output.text; }
+    catch { return finish(fallback("HANDOFF_REPLY_BOUND")); }
+    const binding = makeBinding(input.scope.requestId, draft, trusted);
+    const problem = hardPrecheck(trusted, draft, input.clock());
     if (problem) return finish(finalGate({ expected: binding, response: { kind: "PROVIDER_ERROR" }, current: trusted,
-      finalDraft: output.text, now: input.clock(), includeDiagnostic: true, fallback: gateFallback() }));
+      finalDraft: draft, now: input.clock(), includeDiagnostic: true, fallback: gateFallback() }));
     const verifyId = `${input.scope.requestId}:verifier:1`;
     verificationStarted = performance.now();
     verifierGenerations++;
     let response;
     try {
       const result = await generate("verifier", verifyId, signal => input.verifier({ generationId: verifyId,
-        instructions: input.verifierPrompt, finalDraft: output.text, trusted, latest: input.latest,
+        instructions: input.verifierPrompt, finalDraft: draft, trusted, latest: input.latest,
         history: structuredClone(input.history), binding, turnTime, signal,
         ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}) }));
       response = { kind: "VERDICT" as const, binding, result: result.result };
@@ -218,7 +232,7 @@ export async function runCommerceTurn(input: {
     let current: TrustedContext;
     try { current = await input.tools.readback(); }
     catch { return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
-    const terminal = finalGate({ expected: binding, response, current, finalDraft: output.text, now: input.clock(), includeDiagnostic: true,
+    const terminal = finalGate({ expected: binding, response, current, finalDraft: draft, now: input.clock(), includeDiagnostic: true,
       fallback: gateFallback() });
     return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}) };
   }

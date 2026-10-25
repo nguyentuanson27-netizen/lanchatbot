@@ -171,6 +171,14 @@ for(const toolsAllowed of [true,false])test(`Sol native continuation retains rea
  assert.equal(captured[1].tool_choice,toolsAllowed?'auto':'none');
 });
 
+test('Sol terminal wire declares only handoff, never reopens read tools',()=>{
+ const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON'},r=request();
+ Object.assign(r,{availableTools:['read_product','request_handoff'],toolsAllowed:false,terminalHandoffAllowed:true,toolBudget:{roundsRemaining:0,callsRemaining:0}});
+ const wire=comparisonOwnerRequest('sol',c,r);
+ assert.deepEqual(wire.tools.map(t=>t.name),['request_handoff']);assert.equal(wire.tool_choice,'auto');
+ assert.doesNotMatch(JSON.stringify(wire),/EVAL_CASE_CANARY|EVAL_SPLIT_CANARY|EVAL_RUBRIC_CANARY/);
+});
+
 test('captured Gemini native requests preserve tool results and current rule scope without an automatic generation retry',async()=>{
  const c={...config(),surface:'NATIVE_READ_ONLY_OWNER_COMPARISON'},captured=[];
  const owner=createGeminiComparisonOwner(c,'test-project',{getToken:async()=> 'test-token',fetchImpl:async(_url,init)=>{

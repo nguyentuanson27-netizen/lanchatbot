@@ -65,8 +65,13 @@ export function comparisonOwnerRequest(owner,c,request){
    }else throw new Error('COMPARISON_TEXT_ONLY');
   }
  }
+ const tools=native?body.tools.flatMap(t=>t.functionDeclarations.map(d=>{
+  if(d.name==='request_handoff')return {type:'function',name:d.name,description:d.description,strict:false,
+   parameters:{type:'object',properties:{reason:{type:'string',enum:d.parameters.properties.reason.enum}},required:['reason'],additionalProperties:false}};
+  const known=solReadOnlyTools.find(t=>t.name===d.name);check(known,'COMPARISON_TOOL_SCOPE');return known;
+ })):[];
  const wire={model:c.owners.sol.model,reasoning:{effort:c.owners.sol.effort},instructions:body.systemInstruction.parts.map(p=>p.text).join('\n'),
-  input,tools:native&&request.toolsAllowed?solReadOnlyTools:[],tool_choice:native&&request.toolsAllowed?'auto':'none',
+  input,tools,tool_choice:tools.length?'auto':'none',
   parallel_tool_calls:false,store:false,stream:true,...(native?{include:['reasoning.encrypted_content']}:{})};
  check(Buffer.byteLength(JSON.stringify(wire))<=32768,'COMPARISON_INPUT_BOUND');return wire;
 }

@@ -45,13 +45,15 @@ function fixture(productIds = ["SM613"]) {
   const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
   let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
-  const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." })) => runPersistedCommerceIngress({
+  const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." }),
+    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"]) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => { await beforeTransaction(); return work({} as never); },
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: readOverride ?? { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
+    ...(handoffReply?{handoffReply}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
@@ -333,7 +335,7 @@ it("finishes mixed media and size intake after a corrected inline call within th
   });
   expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"SIZE_RULE_UNAVAILABLE"});
   if (!("toolCalls" in result)) throw new Error("MODEL_TURN_REQUIRED");
-  expect(result.toolCalls).toBeLessThanOrEqual(6);expect(n).toBe(2);
+  expect(result.normalToolCalls).toBeLessThanOrEqual(6);expect(result.terminalHandoffCalls).toBe(1);expect(result.toolCalls).toBeLessThanOrEqual(7);expect(n).toBe(2);
   expect(f.profileWrite).toHaveBeenCalledTimes(1);expect(f.verifier).not.toHaveBeenCalled();
   const handoffCommit = f.commit.mock.calls.find(c => c[1].handoffEventPlan)![1];
   expect(handoffCommit.metaPlan?.messages).toEqual([{kind:"TEXT",text:"Em gửi chị ảnh của mẫu để mình xem trước nhé."},
@@ -458,6 +460,23 @@ it("hands off missing requested feedback even when the price in the same batch i
   expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();
   const handoff=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);expect(handoff).toHaveLength(1);
   expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
+});
+
+it("keeps exact verified price and durable product/profile proofs through all adapters before atomic handoff",async()=>{
+ const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
+ f.message.text="Áo này bao nhiêu, cho chị xem ảnh khách mặc nhé.";
+ const {commerceHash}=await import("./single-agent-commerce-read-only-context.js");
+ const holding="Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.";
+ const calls=[{name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}},{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}}];
+ let owners=0;
+ const r=await f.run(async()=>++owners===1?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:
+  {kind:"FINAL",text:"Áo 499.000đ chị nhé."},{approvedHoldingHashes:[commerceHash(holding)]});
+ expect(r).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",text:`Áo 499.000đ chị nhé.\n\n${holding}`}});
+ expect(owners).toBe(2);expect(f.verifier).toHaveBeenCalledOnce();
+ const group=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1].metaPlan!;
+ expect(group.protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"})]));
+ const proof=(group.handoffBinding as {reply:{sources:{kind:string}[]}}).reply;
+ expect(proof.sources.map(s=>s.kind)).toEqual(expect.arrayContaining(["PRODUCT","PROFILE"]));
 });
 
 async function seedCart(f: ReturnType<typeof fixture>) {

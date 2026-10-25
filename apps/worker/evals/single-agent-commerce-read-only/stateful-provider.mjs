@@ -36,8 +36,10 @@ export function statefulPreflight(root){
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
+  toolBudget:{normalRounds:m.toolRounds,normalCalls:m.toolCalls,terminalHandoffAttempts:m.terminalHandoffAttempts,maximumExecutedToolInvocations:m.maximumExecutedToolInvocations},
+  handoffReply:{...m.handoffReply,rendererSourceSha256:sha256(readFileSync(new URL('../../src/single-agent-commerce-read-only-tools.ts',import.meta.url)))},
   assumedFeedback:assumeFeedback?{...ASSUMPTION,sourceHash:sha256(readFileSync(new URL('./assumed-feedback.mjs',import.meta.url)))}:null,
-  fallbackCatalog:{default:m.fallback,mediaUnavailable:{id:'C3_B_MEDIA_NEXT_STEP_V1',text:'Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?',sha256:sha256('Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?')}},
+  fallbackCatalog:{default:m.fallback,recovery:m.recoveryFallbacks,mediaUnavailable:m.recoveryFallbacks.find(f=>f.id==='C3_B_MEDIA_UNAVAILABLE_V1')},
   catalogInputMode:assumeFeedback?'LIVE_PUBLIC_WITH_ISOLATED_ASSUMED_FEEDBACK':config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
   candidateHandoffFileHash:process.argv.includes('--candidate-handoff')?sha256(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))):null,
   catalogImageInput:{...OWNER_IMAGE_BOUNDS,mediaResolution:'MEDIA_RESOLUTION_MEDIUM',maxDimension:1024,maxSourceBytes:2097152,maxSourceDimension:12000,maxSourcePixels:50000000,

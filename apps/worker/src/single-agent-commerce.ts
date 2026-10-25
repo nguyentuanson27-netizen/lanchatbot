@@ -6,6 +6,8 @@ import { createCommerceMediaTools } from "./single-agent-commerce-media.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { HandoffReasonV2 } from "@lana/contracts";
 import type { CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
+import { commerceHash } from "./single-agent-commerce-read-only-context.js";
+import { canonicalJsonV1, type CommerceHandoffSourceCheckV1 } from "@lana/contracts";
 
 /** Required shop reads only. Never parse prose or turn absent optional fields into blockers. */
 function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolResult): HandoffReasonV2 | null {
@@ -37,25 +39,48 @@ export async function createCommerceTools(input: {
 }): Promise<CommerceTools> {
   if (input.effects && !input.state) throw new Error("EFFECTS_REQUIRE_CUSTOMER_STATE");
   const { scope, clock } = input.read;
-  const readTools = createReadOnlyTools(input.read);
+  const evidence=new Map<string,CommerceHandoffSourceCheckV1>();
+  let evidenceComplete=true;
+  const observed=async<T>(kind:CommerceHandoffSourceCheckV1["kind"],query:unknown,work:()=>Promise<T>)=>{
+    const queryJson=canonicalJsonV1(query),key=`${kind}:${queryJson}`;
+    const result=await work();
+    if(Buffer.byteLength(queryJson)>4096||(!evidence.has(key)&&evidence.size>=16)){evidenceComplete=false;return result;}
+    evidence.set(key,{kind,queryJson,sourceHash:commerceHash(result)});return result;
+  };
+  const handoffSources=()=>evidenceComplete?structuredClone([...evidence.values()]):null;
+  const originalCatalog=input.read.catalog;
+  const catalog={searchText:(query:string)=>originalCatalog.searchText(query),
+    ...(originalCatalog.resolveProductCode?{resolveProductCode:(code:string)=>originalCatalog.resolveProductCode!(code)}:{}),
+    readProduct:(id:string,readPos=true)=>observed("PRODUCT",{productId:id,readPos},()=>originalCatalog.readProduct(id,readPos))};
+  const readTools = createReadOnlyTools({...input.read,catalog});
   let tools: CommerceTools = readTools;
+  tools={...tools,handoffSources};
   const availableTools = ["search_products", "read_product", "read_policy"];
   if (input.state) {
-    tools = await createCustomerStateTools({ ...input.state, base: tools, scope, clock });
+    const state=input.state;
+    tools = await createCustomerStateTools({ ...state,store:{
+      read:()=>observed("PROFILE",{},()=>state.store.read()),compareAndSwap:(revision,next)=>state.store.compareAndSwap(revision,next)},
+      sizeInput:ref=>observed("SIZE_SOURCE",{subjectRef:ref},()=>state.sizeInput(ref)),base: tools, scope, clock });
     availableTools.push("apply_customer_state", "recommend_size");
     if (input.state.quoteInput) availableTools.push("quote_cart");
   }
   if (input.effects) {
-    tools = await createCommerceEffectTools({ ...input.effects, base: tools, scope, clock });
+    const effects=input.effects;
+    tools = await createCommerceEffectTools({ ...effects,
+      select:q=>observed("CART_SELECTION",q,()=>effects.select(q)),
+      readReceipt:id=>observed("RECEIPT",{operationId:id},()=>effects.readReceipt(id)),base: tools, scope, clock });
     availableTools.push("add_to_cart", "change_cart_item", "confirm_purchase");
     if(input.effects.negotiationSources?.length)availableTools.push("record_negotiation");
   }
+  // State/effect adapters expose their own explicit surface. Attach these
+  // code-only proofs after composition so they cannot be lost between layers.
+  tools={...tools,handoffSources,boundedPrice:readTools.boundedPrice};
   if (input.handoff) {
     tools = createCommerceHandoffTools({ ...input.handoff, base: tools, scope, clock });
     availableTools.push("request_handoff");
   }
   if(input.media){
-    tools=createCommerceMediaTools({...input.media,base:tools,catalog:input.read.catalog,clock});
+    tools=createCommerceMediaTools({...input.media,base:tools,catalog,clock});
     availableTools.push("select_product_media","view_product_media");
   }
   const composed = tools;

@@ -103,6 +103,7 @@ export async function runPersistedCommerceIngress(input: {
   resolveTagId: Parameters<typeof createPersistedCommerceExecutor>[0]["resolveTagId"];
   clock: () => Date; ownerPrompt: string; verifierPrompt: string;
   media?: Parameters<typeof createCommerceTools>[0]["media"];
+  handoffReply?: { approvedHoldingHashes: readonly string[] };
   owner: Parameters<typeof runCommerceTurn>[0]["owner"]; verifier: Parameters<typeof runCommerceTurn>[0]["verifier"];
 }) {
   const { batch } = input;
@@ -227,7 +228,7 @@ export async function runPersistedCommerceIngress(input: {
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
-    handoff: { ...handoff, policy: policyBundle, prepareSizeHandoffMedia: async before => {
+    handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}), prepareSizeHandoffMedia: async before => {
       const images = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
       if (!images.length) return undefined;
       const prepared = tools.snapshot(), world = await tools.readback();

@@ -19,24 +19,25 @@ const expected={
  RESPONSE_UNAVAILABLE:'Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.',
 };
 for(const reason of Object.keys(expected))test('candidate '+reason+' uses its configured procedure only after committed handoff',async()=>{
- const scope=commerceScope(),policy=(await fixturePolicy()).bundle;
+ for(const accepted of [false,true]){
+ const scope={...commerceScope(),requestId:`${reason}-${accepted}`,sourceMessageId:`source-${reason}-${accepted}`},policy=(await fixturePolicy()).bundle;
  policy.artifacts.handoffMatrix=structuredClone(matrix);
  let current={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:'APP',now:commerceNow}),revision:scope.revision}};
- let accepted=false,commits=0;
+ let commits=0;
  const base=createReadOnlyTools({scope,clock,policy:async()=>({...await fixturePolicy(),bundle:policy}),catalog:{readProduct:async()=>{throw new Error('UNUSED');},searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});
  const tools=createCommerceHandoffTools({base,scope,clock,policy:async()=>policy,read:async()=>structuredClone(current),commit:async({next})=>{commits++;if(!accepted)return false;current=next;return true;}});
- assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
- assert.equal(await tools.terminalOutcome(),null);
- assert.equal(current.state.conversationOwner,'BOT');
- accepted=true;
- assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,'OK');
+ assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,accepted?'OK':'REJECTED');
+ if(!accepted){assert.equal(await tools.terminalOutcome(),null);assert.equal(current.state.conversationOwner,'BOT');}
+ else {
  assert.equal(current.state.conversationOwner,'HUMAN');
  const terminal=await tools.terminalOutcome();
  assert.equal(terminal.disposition,'HANDOFF');
  assert.deepEqual(terminal.text,expected[reason]);
  assert.doesNotMatch(terminal.text,/nhân viên|bot/i);
+ }
  assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
- assert.equal(commits,2);
+ assert.equal(commits,1);
+ }
 });
 test('candidate changes customer copy while keeping handoff policies and every tag',async()=>{
  assert.deepEqual(matrix.rules.map(r=>r.reason),[...HANDOFF_REASONS_V2]);

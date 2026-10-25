@@ -1,5 +1,5 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
-import { ProductContentV1Schema } from "@lana/contracts";
+import { ProductContentV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
   resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken, normalizeProductCode,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
@@ -49,6 +49,8 @@ export function createReadOnlyTools(input: {
   const offerPins = new Map<string, { identity: string; literal: TrustedContext["policyLiterals"][number] }>();
   const reads = new Map<string, Record<string, unknown>>();
   const searchReads = new Set<string>();
+  const priceReads = new Map<string,{readKey:string;label:string}>();
+  let ambiguousPriceRead=false;
   const prepared = new Set<string>();
   const preparationContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   // Offer identities are source metadata, not price/stock facts or variant bindings.
@@ -252,6 +254,10 @@ export function createReadOnlyTools(input: {
     const componentLabel = ({AO:"Áo lẻ",CV:"Chân váy lẻ",QUAN:"Quần lẻ"} as Record<string,string>)[selected.offer ?? ""];
     // Offer count cannot bind parent attributes to a component, even when it is the only offer left.
     const wholeProduct = ["DIRECT","SET","SET_VAY","SET_QUAN"].includes(selected.offer ?? "");
+    const pair=`${id}:${selected.offer}`,previousPriceRead=priceReads.get(pair);
+    if(typeof args.offerType!=="string"||summarizeAll||(!wholeProduct&&!componentLabel)||previousPriceRead&&previousPriceRead.readKey!==readKey)ambiguousPriceRead=true;
+    else priceReads.set(pair,{readKey,label:[componentLabel?`${componentLabel} — ${p.title}`:p.title,
+      selected.variant?.selectedColorLabel,selected.variant?.selectedSizeCode?`size ${selected.variant.selectedSizeCode}`:null].filter(Boolean).join(" ")});
     const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
       ...(input.entry?.firstContact && selected.priceEnvelope?.status === "OK" &&
@@ -350,7 +356,14 @@ export function createReadOnlyTools(input: {
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
     } catch { return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" }; }
   }
-  return { invoke, snapshot, prepare, async invokeBatch(calls:CommerceToolCall[]){
+  return { invoke, snapshot, prepare,
+    boundedPrice(){
+      if(ambiguousPriceRead||priceReads.size!==1)return null;
+      const entry=[...priceReads.values()][0]!,values=(claims.get(entry.readKey)??[]) as ProtectedClaimV1[];
+      const prices=values.filter((c):c is Extract<ProtectedClaimV1,{type:"PRICE"}>=>c.type==="PRICE");
+      if(prices.length!==1)return null;
+      return {text:`${entry.label}: ${prices[0]!.value.amountVnd.toLocaleString("vi-VN")}đ.`,claims:prices};
+    }, async invokeBatch(calls:CommerceToolCall[]){
     if(!permitted())return calls.map(()=>({status:"REJECTED" as const,reason:"PERMISSION"}));
     // Fetch one immutable source per product. Admission/commit follows request order,
     // never the network completion order. Effects are handled by outer ports.

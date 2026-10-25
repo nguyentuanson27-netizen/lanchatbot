@@ -10,9 +10,11 @@ import {execFileSync} from 'node:child_process';
 import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,PostgresChatHistoryStore,LocalEnvelopeCipher,withTransaction,redactAnalyticsMessage} from '@lana/database';
 import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
-import {runPersistedCommerceIngress,commerceHistory} from '../../dist/single-agent-commerce-ingress.js';
+import {runPersistedCommerceIngress,commerceHistory,bindCommerceFacts} from '../../dist/single-agent-commerce-ingress.js';
 import {createCommerceMediaPreSendGate} from '../../dist/single-agent-commerce-media-delivery.js';
 import {createCommerceHandoffPreSendGate} from '../../dist/single-agent-commerce-handoff-delivery.js';
+import {createCommerceHandoffSourceReader} from '../../dist/single-agent-commerce-handoff-sources.js';
+import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
 import {commerceHash} from '../../dist/single-agent-commerce-read-only-context.js';
 import {createSalesCycleRuntimeState,applySalesCycleCommand,executePersistedSalesCycleCommand,RuntimePolicyResolver,buildPurchaseConfirmedTagCommand} from '@lana/chat-runtime';
 import {createConversationState} from '@lana/conversation-engine';
@@ -52,10 +54,11 @@ const databaseName='c3_b_test_'+randomBytes(8).toString('hex');
 assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));
 const admin=new Pool({connectionString:adminUrl,max:1}),testUrl=new URL(adminUrl);testUrl.pathname='/'+databaseName;
 let pool,runtime,inbox,policyStore,livePolicyStore,historyStore,providerPorts,created=false;
-function handoffGate(base,policy,receiptAvailable=()=>true){return createCommerceHandoffPreSendGate({base,clock:()=>new Date(),policy,
+function handoffGate(base,policy,receiptAvailable=()=>true,readReplySource,observe){const gate=createCommerceHandoffPreSendGate({base,clock:()=>new Date(),policy,...(readReplySource?{readReplySource}:{}),
  readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
   assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
- hasCommittedHandoff:b=>{if(!receiptAvailable())throw Error('CONTROLLED_RECEIPT_READ_UNAVAILABLE');return runtime.hasCommittedHandoffDelivery({...b,bindingHash:commerceHash(b)});}});}
+ hasCommittedHandoff:b=>{if(!receiptAvailable())throw Error('CONTROLLED_RECEIPT_READ_UNAVAILABLE');return runtime.hasCommittedHandoffDelivery({...b,bindingHash:commerceHash(b)});}});
+ return {...gate,async authorize(claim){const result=await gate.authorize(claim);observe?.({status:result.status,reasonCode:result.reasonCode});return result;}};}
 try{
  await admin.query('CREATE DATABASE '+databaseName);created=true;
  pool=new Pool({connectionString:testUrl.toString(),max:4});
@@ -357,7 +360,7 @@ try{
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
  if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,media=false,initialProductCodes=['SV2447']}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,media=false,initialProductCodes=['SV2447'],deferredHandoff=false}={}){
   assert(!live||dependencyHoldingReply===null,'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
   const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
@@ -382,7 +385,16 @@ try{
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
-  const capture=[],capturePayloads=[],gateCalls=[];
+  const scopedSourceReader=createCommerceHandoffSourceReader({
+   product:(id,readPos)=>read.catalog.readProduct(id,readPos),
+   profile:async b=>{const r=await runtime.loadOrCreateCustomerProfile(b.pageId,b.customerHash,()=>{throw Error('EXISTING_PROFILE_REQUIRED');},new Date());return {profile:r.profile,fieldEvidence:r.fieldEvidence};},
+   size:async id=>commerceSizeSource((await read.catalog.readProduct(id,false)).product,await policy(),read.productGroups),
+   selection:q=>{assert.equal(q.shopAlias,bound.shopAlias,'SELECTION_SHOP_SCOPE');return bindCommerceFacts(facts,bound).resolveCartSelection(q,new Date());},
+   receipt:(id,b)=>createPersistedCommerceReceiptReader({store:runtime,scope:{...bound,recipient:b.recipientHash},conversationKey:bound.conversationId,
+    repository:{read:async()=>{const r=await runtime.loadOrCreateSalesCycle(bound.pageId,bound.conversationId,()=>{throw Error('EXISTING_SALES_CYCLE_REQUIRED');},new Date());return r.state;}}})(id),
+  });
+  const readReplySource=async(source,b)=>{assert.equal(b.pageId,bound.pageId);assert.equal(b.conversationId,bound.conversationId);assert.equal(b.customerHash,bound.customerHash);return scopedSourceReader(source,b);};
+  const capture=[],capturePayloads=[],gateCalls=[],deliveryObservations=[];
   const makeDispatcher=()=>new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
    const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash){capture.push(b.message.text??'[CODE_IMAGE]');capturePayloads.push(b.message);}return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
    new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),handoffGate(createCommerceMediaPreSendGate({
@@ -392,10 +404,10 @@ try{
      assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
     policy:async()=>{const r=await policy();assert(r.bundle);return r.bundle;},
     readProduct:async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;},
-   }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable),{workerId:'c3-b-capture'},undefined,historyStore);
+   }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable,readReplySource,r=>deliveryObservations.push(r)),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
-  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false}={}){
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false}={}){
    const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
    const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
@@ -406,8 +418,9 @@ try{
    for(let n=0;n<20;n++){batch=await inbox.claimNextBatch('c3-b-stateful',300000);if(!batch||batch.conversationHash===customerHash)break;await inbox.completeBatch(batch);}
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0;const toolResponses=[];
-   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,fn);if(loseCommitReply)throw Error('CONTROLLED_COMMIT_REPLY_LOST');return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
+   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply)throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');return applied;});if(loseCommitReply)throw Error('CONTROLLED_COMMIT_REPLY_LOST');return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
     read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
+    ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
@@ -415,11 +428,26 @@ try{
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,capturePayloads,gateCalls,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
+  return {bound,turn,state,capture,capturePayloads,gateCalls,deliveryObservations,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ for(const mode of ['verified','owner-error','source-changed-before-delivery','commit-response-lost','rollback-response-lost','cart-receipt','cart-source-changed'])await check('B composed prepared handoff partial '+mode,async()=>{
+  const holding='Bên em sẽ kiểm tra ảnh rồi báo chị nhé.',j=await statefulFixture({deferredHandoff:true,dependencyHoldingReply:holding});
+  const cart=mode.startsWith('cart-'),outputs=[native([cart?{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',color:'navy',size:'M',quantity:1}}:
+   {name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}},{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}])];
+  if(mode!=='owner-error')outputs.push(say(cart?'Em đã thêm áo navy size M vào giỏ chị nhé.':'Áo 499.000đ chị nhé.'));
+  const r=await j.turn(cart?'Chị lấy áo SM613 navy size M, cho chị xem thêm ảnh khách mặc nhé.':'Áo này bao nhiêu, cho chị xem ảnh khách mặc nhé.',outputs,
+   {loseCommitReply:mode==='commit-response-lost',rollbackCommitReply:mode==='rollback-response-lost'});
+  assert.equal(r.result.terminal.disposition,mode.includes('response-lost')?'NO_SEND':'HANDOFF',JSON.stringify(r.result));assert.equal(r.result.terminalHandoffCalls,1);
+  assert.equal(r.verifiers,mode==='owner-error'?0:1);assert.equal((await j.state()).stage,cart?'CART_OPEN':'DISCOVERY');
+  if(mode==='source-changed-before-delivery')j.refreshPosSource('stock-change');
+  if(mode==='cart-source-changed')j.changeVariantSource();
+  j.restartDelivery();await j.drain();await j.drain();
+  if(['source-changed-before-delivery','rollback-response-lost','cart-source-changed'].includes(mode))assert.deepEqual(j.capture,[]);
+  else {assert.equal(j.capture.length,1,JSON.stringify(j.deliveryObservations));assert.match(j.capture[0],cart?/navy size M/:/499\.000đ/);assert(j.capture[0].includes(holding));}
+ });
  for(const mode of ['source-refresh','stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and captures only committed holding reply',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
   const r=await j.turn('Áo SM613 bao nhiêu em?',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),say('Áo 499.000đ chị nhé.')],

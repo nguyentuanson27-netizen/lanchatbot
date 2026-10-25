@@ -3,7 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { createSalesCycleRuntimeState, type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1 } from "@lana/chat-runtime";
 import { buildCanonicalDecisionEvidenceV1, evaluateDeterministicEffectReadinessV1 } from "@lana/business-tools";
-import { CanonicalBuyingIntentV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
+import { CanonicalBuyingIntentV1Schema, CommerceHandoffReplyBindingV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleInput } from "./realtime-sales-cycle.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
@@ -25,36 +25,49 @@ export function createPersistedCommerceHandoffPort(input: {
   resolveTagId: (tag: "NHAN_VIEN" | "VAN_DON") => string | null;
 }) {
   let outboxMessages = 0;
-  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision, policy, validate, media }: CommerceHandoffCommit): Promise<boolean> {
+  return { read: input.read, outboxCount: () => outboxMessages, async commit({ before, next, decision, policy, validate, media, reply }: CommerceHandoffCommit): Promise<boolean> {
     const tagId = input.resolveTagId(decision.tag);
     if (!tagId || !input.inboxBatchGuard.inboxIds.length) throw new Error("HANDOFF_TAG_OR_SOURCE_UNAVAILABLE");
     const now = input.clock();
     if (media && (decision.reason !== "SIZE_RULE_UNAVAILABLE" || !decision.customerMessages.length ||
       !media.images.length || media.images.length > 4 || new Set(media.images.map(image => image.url)).size !== media.images.length)) throw new Error("HANDOFF_MEDIA_SCOPE");
-    const claims: ProtectedClaimV1[] = media?.claims ?? [];
+    const claims: ProtectedClaimV1[] = reply?.claims ?? media?.claims ?? [];
+    if(reply&&(media||decision.customerMessagePolicy!=="HOLDING_REPLY_THEN_HANDOFF"||decision.reason==="CUSTOMER_REQUESTED_HUMAN"))throw Error("HANDOFF_REPLY_SCOPE");
     if (media && (claims.some(c => c.type !== "PRODUCT_MEDIA") || media.images.some(image =>
       !claims.some(c => c.type === "PRODUCT_MEDIA" && c.scope.kind === "PRODUCT" && c.scope.productId === image.productId &&
         c.value.assetSha256 === commerceHash(image.url))))) throw new Error("HANDOFF_MEDIA_CLAIMS");
-    const messages = media ? [{ kind: "TEXT" as const, text: terminalFallback("C3_B_VERIFIED_MEDIA_V1").text! },
+    const images=reply?.images??media?.images??[];
+    const messages = reply ? [{kind:"TEXT" as const,text:reply.text},...images.map(image=>({kind:"IMAGE" as const,imageUrl:image.url}))] : media ? [{ kind: "TEXT" as const, text: terminalFallback("C3_B_VERIFIED_MEDIA_V1").text! },
       ...media.images.map(image => ({ kind: "IMAGE" as const, imageUrl: image.url })),
       ...decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }))]
       : decision.customerMessages.map(text => ({ kind: "TEXT" as const, text }));
+    if(reply){
+      const proof=CommerceHandoffReplyBindingV1Schema.parse(reply.binding);
+      const trusted=JSON.parse(proof.trustedJson) as TrustedContext;
+      if(proof.beforeRevision!==before.stateVersion||proof.beforeStateHash!==commerceHash(before.state)||
+        proof.requestId!==input.scope.requestId||proof.trustedHash!==commerceHash(trusted)||proof.groupHash!==commerceHash(messages)||
+        images.length>4||!reply.text||Buffer.byteLength(reply.text)>8192||
+        (trusted.state.conversationRevision??trusted.state.revision)!==before.stateVersion||
+        trusted.state.recipient!==before.recipient||trusted.state.bindingVersion!==before.bindingVersion||
+        claims.some(c=>!trusted.protectedClaims.some(t=>commerceHash(t)===commerceHash(c))))throw Error("HANDOFF_REPLY_BINDING");
+    }
     if (messages.length && !input.deliveryRecipient) throw new Error("HANDOFF_DELIVERY_ROUTE_REQUIRED");
     const sourceMessageIdHash = createHash("sha256").update(input.scope.sourceMessageId, "utf8").digest("hex");
     const payloadHash = commerceHash(messages);
     const responseGroupId = randomUUID();
-    const mediaBinding = media ? makeCommerceMediaDeliveryBinding({ scope: input.scope, generation: input.inboxBatchGuard.generation,
-      responseGroupId, nextState: next.state, messages, images: media.images, policy: media.policy, now }) : undefined;
+    const mediaBinding = images.length ? makeCommerceMediaDeliveryBinding({ scope: input.scope, generation: input.inboxBatchGuard.generation,
+      responseGroupId, nextState: next.state, messages, images, policy: media?.policy??policy, now }) : undefined;
     const handoffBinding = messages.length ? makeCommerceHandoffDeliveryBinding({ scope: input.scope, generation: input.inboxBatchGuard.generation,
-      responseGroupId, nextState: next.state, messages, decision, policy, now }) : undefined;
+      responseGroupId, nextState: next.state, messages, decision, policy, now,...(reply?{reply:reply.binding}:{}) }) : undefined;
+    const protectedTypes=[...new Set(claims.map(c=>c.type))];
     const readiness = messages.length ? evaluateDeterministicEffectReadinessV1({ effect: "PROTECTED_OUTBOUND",
       pageId: input.scope.pageId, conversationId: input.scope.conversationId, sourceMessageIdHash,
-      conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [...new Set(media?.images.map(image => image.productId) ?? [])], cartId: null, cartVersion: null,
-      cartStateHash: null, orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [],
+      conversationRevision: before.stateVersion, salesCycleRevision: null, productIds: [...new Set(claims.flatMap(c=>c.scope.kind==="PRODUCT"?[c.scope.productId]:[]))], cartId: null, cartVersion: null,
+      cartStateHash: null, orderPreviewId: null, orderPreviewHash: null, buyingIntent: null, claims, protectedClaimTypes: protectedTypes,
       deterministicEvidenceHash: payloadHash, payloadHash, checkedAt: now }) : null;
     const applied = await input.transaction(async client => {
       if (!await validate()) return false;
-      if (media && (readiness?.outcome !== "READY" || !await media.validate())) return false;
+      if (readiness?.outcome!==undefined&&readiness.outcome!=="READY"||media&&!await media.validate()) return false;
       const result = await input.store.commitWithinTransaction(client, { pageId: input.scope.pageId,
         customerHash: input.scope.customerHash, conversationId: input.scope.conversationId,
         expectedStateVersion: before.stateVersion, state: next.state, inboxBatchGuard: input.inboxBatchGuard,
@@ -70,7 +83,7 @@ export function createPersistedCommerceHandoffPort(input: {
         ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId, recipientId: input.deliveryRecipient!, messages,
           ...(mediaBinding ? { mediaBinding } : {}),
           ...(handoffBinding ? { handoffBinding } : {}),
-          sourceMessageIdHash, protectedClaims: claims, protectedClaimTypes: media ? ["PRODUCT_MEDIA"] : [], effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
+          sourceMessageIdHash, protectedClaims: claims, protectedClaimTypes: protectedTypes, effectReadiness: readiness!, sendAfterOwnerHandoff: true } } : {}) }, now);
       if (!result.stateCommitted) return false;
       if (!result.handoffEventCreated || !result.pancakeTagOutboxCreated ||
         (messages.length && result.metaOutboxCreated !== messages.length)) throw new Error("ATOMIC_HANDOFF_INTENTS");
