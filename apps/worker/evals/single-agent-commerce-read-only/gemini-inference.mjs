@@ -201,9 +201,14 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  // Native toolConfig and runtime checks still enforce whether tools can be called.
  if(request.toolBudget)for(const [field,max] of [['roundsRemaining',2],['callsRemaining',6]])
   requireThat(Number.isInteger(request.toolBudget[field])&&request.toolBudget[field]>=0&&request.toolBudget[field]<=max,'OWNER_EXECUTION_BOUND');
+ const callable=declarations.filter(d=>request.toolsAllowed!==false||d.name==='request_handoff'&&request.terminalHandoffAllowed===true);
+ if(request.pendingHandoff!==undefined){
+  requireThat(request.pendingHandoff&&Object.keys(request.pendingHandoff).length===1&&HandoffReasonV2Schema.options.includes(request.pendingHandoff.reason),'OWNER_EXECUTION_BOUND');
+  ownerView.pendingHandoff={reason:request.pendingHandoff.reason,status:'PREPARED_NOT_COMMITTED'};
+ }
  ownerView.execution={availableTools:declarations.map(d=>d.name),toolsAllowed:request.toolsAllowed!==false,
-  callableTools:request.toolsAllowed===false?[]:declarations.map(d=>d.name),
-  phase:request.toolsAllowed===false?'FINAL_REPLY':'TOOL_OR_REPLY',
+  callableTools:callable.map(d=>d.name),
+  phase:request.toolsAllowed===false?(callable.length?'TERMINAL_HANDOFF_OR_REPLY':'FINAL_REPLY'):'TOOL_OR_REPLY',
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining}:null};
  // At the existing final generation, start a text-only request with the completed
  // tool trace as data. Do not continue an opaque native tool plan with no call budget.
@@ -221,7 +226,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView,
     ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...replyContents],
-  tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
+  tools:callable.length?[{functionDeclarations:callable}]:[],toolConfig:{functionCallingConfig:{mode:callable.length?'AUTO':'NONE'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  const requestBytes=bytes(body);
  if(requestBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
@@ -332,7 +337,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    stage='COMPLETION';
    requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
    const parsed=parseGeminiGeneration(data);
-   telemetry.unexpectedToolCall=request.toolsAllowed===false&&parsed.kind==='TOOLS';
+   telemetry.unexpectedToolCall=parsed.kind==='TOOLS'&&parsed.calls.some(c=>!body.tools.some(t=>t.functionDeclarations.some(d=>d.name===c.name)));
    return {...parsed,telemetry};
   }catch(error){
    const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';

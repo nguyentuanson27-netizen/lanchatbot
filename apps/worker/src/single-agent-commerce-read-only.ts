@@ -11,6 +11,8 @@ export interface CommerceTurnTime { processingAt: string; timeZone: "Asia/Ho_Chi
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
+  terminalHandoffAllowed?: boolean;
+  pendingHandoff?: { reason: string };
   historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   turnTime?: CommerceTurnTime;
   catalogImages?: readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
@@ -21,6 +23,7 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  handoffStatus?(): { attempts: number; status: "PREPARED" | "COMMITTED" | "BLOCKED" | "UNKNOWN"; reason: string } | null;
   publicCartSummary?(): unknown;
   /** Code-owned exact static fallback identity after a tool outcome. */
   fallbackId?(): string;
@@ -78,6 +81,7 @@ export async function runCommerceTurn(input: {
   const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
+  let terminalHandoffCalls = 0, proposedToolCalls = 0, rejectedToolCalls = 0;
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
   const finish = async (terminal: TerminalOutcome) => {
@@ -89,7 +93,11 @@ export async function runCommerceTurn(input: {
       try { terminal = await input.tools.recover(terminal); }
       catch { terminal = { disposition: "NO_SEND", reason: "RECOVERY_UNAVAILABLE", text: null, fallbackId: null }; }
     }
-    return { terminal, recovery, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds, toolCalls, generations,
+    const handoff = input.tools.handoffStatus?.();
+    terminalHandoffCalls = Math.max(terminalHandoffCalls, handoff?.attempts ?? 0);
+    return { terminal, recovery, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds,
+      normalToolCalls: toolCalls, terminalHandoffCalls, toolCalls: toolCalls + terminalHandoffCalls,
+      proposedToolCalls, rejectedToolCalls, handoff: handoff ?? null, generations,
       toolLatencyMs, verificationLatencyMs: verificationStarted === undefined ? null : performance.now()-verificationStarted };
   };
   const effectTerminal = async () => {
@@ -137,11 +145,14 @@ export async function runCommerceTurn(input: {
       return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
     }
     const id = `${input.scope.requestId}:owner:${index + 1}`;
+    const handoff = input.tools.handoffStatus?.(), pendingHandoff = handoff?.status === "PREPARED" ? {reason:handoff.reason} : undefined;
+    const terminalHandoffAllowed = !handoff && terminalHandoffCalls === 0 && input.tools.availableTools?.includes("request_handoff") === true;
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, turnTime,
+      terminalHandoffAllowed, ...(pendingHandoff ? {pendingHandoff} : {}),
       ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}),
       ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
-      toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
+      toolsAllowed: !handoff && toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
     // The native transport owns its serialized wire bound after projection.
     let output: OwnerGeneration;
     ownerGenerations++;
@@ -149,14 +160,24 @@ export async function runCommerceTurn(input: {
     catch { return finish(fallback(generations.at(-1)!.status)); }
     if (!output || typeof output !== "object") return finish(fallback("MALFORMED"));
     if (output.kind === "TOOLS") {
-      if (!request.toolsAllowed) {
+      proposedToolCalls += output.calls.length;
+      const handoffCalls = output.calls.filter(c => c.name === "request_handoff");
+      const terminalCall = handoffCalls.length === 1 && output.calls.length === 1;
+      if (handoffCalls.length && (!terminalCall || (!terminalHandoffAllowed && (!request.toolsAllowed || input.tools.availableTools !== undefined)))) {
+        rejectedToolCalls += output.calls.length;
+        return finish(fallback("OWNER_TOOL_MODE"));
+      }
+      if (!request.toolsAllowed && !(terminalCall && terminalHandoffAllowed)) {
         // Retain output/telemetry, but do not count a final-only tool call as a
         // successful completion or execute it after the budget is exhausted.
         generations.at(-1)!.status = "PROVIDER_ERROR";
+        rejectedToolCalls += output.calls.length;
         return finish(fallback("OWNER_TOOL_MODE"));
       }
-      if (!output.calls.length || toolRounds >= 2 || toolCalls + output.calls.length > 6) return finish(fallback("BUDGET"));
-      toolRounds++; toolCalls += output.calls.length;
+      if (!output.calls.length || (!terminalCall && (toolRounds >= 2 || toolCalls + output.calls.length > 6))) {
+        rejectedToolCalls += output.calls.length;return finish(fallback("BUDGET"));
+      }
+      if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += output.calls.length;}
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       toolLatencyMs += performance.now()-toolStarted;

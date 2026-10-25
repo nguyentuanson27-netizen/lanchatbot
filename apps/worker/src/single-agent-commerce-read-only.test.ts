@@ -15,6 +15,32 @@ const final = (text = "Áo giá 499k chị nhé."): OwnerGeneration => ({ kind: 
 const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TOOLS", calls: [{ name, args }],
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
+it("allows one separately accounted terminal handoff after six normal calls without a fourth generation", async () => {
+  const s=setup();let committed=false,step=0;
+  const invokeBatch=vi.fn(async(calls: import("./single-agent-commerce-read-only-tools.js").CommerceToolCall[])=>{
+    if(calls[0]?.name==="request_handoff")committed=true;
+    return calls.map(()=>({status:"OK" as const}));
+  });
+  const tools={...s.tools,prepare:async()=>0,availableTools:["read_policy","request_handoff"],invokeBatch,
+    terminalOutcome:async()=>committed?{disposition:"HANDOFF" as const,reason:"STOCK_UNAVAILABLE",text:"Bên em kiểm tra rồi báo chị nhé.",fallbackId:null}:null};
+  const r=await runCommerceTurn({...s,tools,owner:async request=>{
+    if(++step===3){expect(request.toolsAllowed).toBe(false);expect(request).toMatchObject({terminalHandoffAllowed:true});return tool("request_handoff",{reason:"STOCK_UNAVAILABLE"});}
+    const calls=Array.from({length:3},()=>({name:"read_policy",args:{}}));
+    return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}};
+  }});
+  expect(r.terminal.disposition).toBe("HANDOFF");expect(r.ownerGenerations).toBe(3);
+  expect(r).toMatchObject({normalToolCalls:6,terminalHandoffCalls:1,toolCalls:7,proposedToolCalls:7,rejectedToolCalls:0});
+  expect(s.verifier).not.toHaveBeenCalled();expect(invokeBatch).toHaveBeenCalledTimes(3);
+});
+
+it("rejects a mixed handoff/read batch without executing either call",async()=>{
+  const s=setup(),invokeBatch=vi.fn(async()=>[]),calls=[{name:"request_handoff",args:{reason:"EXCHANGE"}},{name:"read_policy",args:{}}];
+  const r=await runCommerceTurn({...s,tools:{...s.tools,availableTools:["read_policy","request_handoff"],invokeBatch},
+    owner:async()=>({kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}})});
+  expect(invokeBatch).not.toHaveBeenCalled();expect(r.terminal.disposition).toBe("FALLBACK");
+  expect(r).toMatchObject({proposedToolCalls:2,rejectedToolCalls:2,terminalHandoffCalls:0});
+});
+
 describe("one conversational owner, tools and exact egress", () => {
   it.each(["[asset:declared]", "asset:unknown", "[asset:", "Chị xem ảnh asset:from-history nhé"])("rejects transport artifacts before verification: %s", async text => {
     const s = setup();

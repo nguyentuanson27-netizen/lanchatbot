@@ -800,6 +800,19 @@ test('rollback keeps bounded execution data and native dialogue outside system i
  assert.deepEqual(JSON.parse(built.contents[0].parts[0].text).trusted.execution,{availableTools:['search_products','read_product','read_policy'],toolsAllowed:false,callableTools:[],phase:'FINAL_REPLY',toolBudget:{roundsRemaining:0,callsRemaining:3}});
 });
 
+test('terminal phase exposes only handoff while retaining completed tool turns as data',()=>{
+ const r=request();r.availableTools=['search_products','read_product','request_handoff'];r.toolsAllowed=false;r.terminalHandoffAllowed=true;
+ r.toolBudget={roundsRemaining:0,callsRemaining:0};
+ r.contents.push({role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:'P1'}}}]},
+  {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK'}}}]});
+ const body=buildGeminiCommerceRequest(r),execution=JSON.parse(body.contents[0].parts[0].text).trusted.execution;
+ assert.deepEqual(execution.callableTools,['request_handoff']);assert.equal(execution.phase,'TERMINAL_HANDOFF_OR_REPLY');
+ assert.deepEqual(body.tools.flatMap(t=>t.functionDeclarations.map(d=>d.name)),['request_handoff']);
+ assert.equal(body.toolConfig.functionCallingConfig.mode,'AUTO');
+ assert.match(JSON.stringify(body.contents),/completedToolTurns/);
+ assert.equal(body.contents.some(c=>c.parts.some(p=>p.functionCall||p.functionResponse)),false);
+});
+
 test('execution budget accepts only bounded code-owned numbers before provider dispatch',async()=>{
  for(const budget of [{roundsRemaining:'INSTRUCTION_CANARY',callsRemaining:3},
   {roundsRemaining:3,callsRemaining:3},{roundsRemaining:1,callsRemaining:-1},{roundsRemaining:1,callsRemaining:7}]){

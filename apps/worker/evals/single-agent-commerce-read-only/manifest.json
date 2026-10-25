@@ -5,6 +5,8 @@
   "ownerGenerations": 3,
   "toolRounds": 2,
   "toolCalls": 6,
+  "terminalHandoffAttempts": 1,
+  "maximumExecutedToolInvocations": 7,
   "verifierGenerations": 1,
   "ownerFinalRequest": "TEXT_WITH_COMPLETED_TOOL_DATA",
   "toolResultAccounting": "BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES",

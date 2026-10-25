@@ -32,6 +32,7 @@ export function dispatchRange(value=undefined){
 const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
+ check(m.terminalHandoffAttempts===1&&m.maximumExecutedToolInvocations===7,'TERMINAL_HANDOFF_BUDGET');
  check(m.ownerFinalRequest==='TEXT_WITH_COMPLETED_TOOL_DATA'&&m.toolResultAccounting==='BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES','OWNER_EXECUTION_CONTRACT');
  check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===65536,'REQUEST_BOUNDS');
  check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&
