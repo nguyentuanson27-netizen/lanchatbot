@@ -29,6 +29,34 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("compares only the explicitly selected offers without adding unrelated variant subjects",async()=>{
+    const {tools}=sellingFixture({AO:499000,CV:449000,SET_VAY:799000});
+    const result=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerTypes:["AO","SET_VAY"]}});
+    expect(result).toMatchObject({status:"OK",data:{sellingOptions:[{offerType:"AO"},{offerType:"SET_VAY"}]}});
+    expect(tools.snapshot().boundSubjects.filter(s=>s.kind==="VARIANT")).toHaveLength(2);
+    const before=tools.snapshot();await expect(tools.readback()).resolves.toEqual(before);
+  });
+  it("admits bounded read calls by input order, independent of source completion order",async()=>{
+    const run=async(reverse:boolean)=>{
+      const records=["A101","B202","C303"].map(id=>{const f=fixtureProduct(id),template=f.snapshot.offers.DIRECT!;
+        f.snapshot.offers=Object.fromEntries(["AO","QUAN","SET_QUAN"].map(offer=>[offer,{...structuredClone(template),rows:template.rows.map(r=>({...r,offer_type:offer}))}]));return f;});
+      const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:()=>fixturePolicy(),initialProducts:records.map(f=>f.product),catalog:{
+        searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"}),readProduct:async id=>{
+          await new Promise(resolve=>setTimeout(resolve,id===(reverse?"A101":"B202")?10:1));return structuredClone(records.find(f=>f.product.productId===id)!);}}});
+      const results=await tools.invokeBatch(records.slice(0,2).map(f=>({name:"read_product",args:{subjectRef:f.product.productId}})));
+      return {results,world:tools.snapshot()};
+    };
+    const a=await run(false),b=await run(true);expect(a).toEqual(b);
+    expect(a.results.map(r=>r.status)).toEqual(["OK","REJECTED"]);
+    expect(a.world.boundSubjects).toHaveLength(6);
+    expect(a.world.protectedClaims.every(c=>(c as {scope:{productId:string}}).scope.productId==="A101")).toBe(true);
+  });
+  it("reads only content and offer metadata for DETAILS_ONLY without authorizing price/stock",async()=>{
+    const {tools}=sellingFixture({AO:499000,CV:449000,SET_VAY:799000});
+    const result=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",detailsOnly:true}});
+    expect(result).toMatchObject({status:"OK",data:{availableOffers:["AO","CV","SET_VAY"]}});
+    expect(tools.snapshot().protectedClaims).toEqual([]);
+  });
   it.each(["prepare", "search"])("pins offer-only evidence across a metadata refresh after %s without renewing expiry", async path => {
     const f = fixtureProduct();
     let now = new Date(commerceNow);

@@ -276,7 +276,11 @@ export async function createCustomerStateTools(input: {
       }
     }
     const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(invoke));
-    return Promise.all(calls.map(c => writesState(c) ? updateResults[updates.indexOf(c)]! : invoke(c)));
+    const local=calls.filter(c=>!writesState(c)&&["recommend_size","quote_cart"].includes(c.name));
+    const remote=calls.filter(c=>!writesState(c)&&!local.includes(c));
+    const remoteResults=await input.base.invokeBatch(remote);
+    const localResults=await Promise.all(local.map(invoke));
+    return calls.map(c=>writesState(c)?updateResults[updates.indexOf(c)]!:local.includes(c)?localResults[local.indexOf(c)]!:remoteResults[remote.indexOf(c)]!);
   }, async readback() {
     await input.base.readback();
     const current = await input.store.read();

@@ -154,3 +154,19 @@ test('the approved corpus registers three distinct dialogue variants for each of
  }
  assert.ok(cases.every(c=>!('requiredKeywords' in c.evaluator)&&!('forbiddenKeywords' in c.evaluator)));
 });
+
+test('accepted communication metadata reaches both models only as bounded numeric history',async()=>{
+ const {buildGeminiCommerceRequest}=await import('./gemini-inference.mjs');
+ const historyMetadata={completeHistory:false,publicCartEvents:[{type:'ACCEPTED_PUBLIC_CART_SUMMARY',eventId:'a'.repeat(64),messageHash:'b'.repeat(64),
+ acceptedAt:'2026-10-25T01:00:00Z',cartId:'50000000-0000-4000-8000-000000000001',cartVersion:2,grandTotalVnd:499000,discountTotalVnd:30000}]};
+ const r=request();r.historyMetadata=historyMetadata;r.caseId='EVALUATOR_CANARY';
+ const v=JSON.parse(buildVerifierRequest(manifest,r).input[0].content[0].text);
+ const ownerRequest={instructions:'Tư vấn.',context:r.trusted,contents:[],historyMetadata,caseId:'EVALUATOR_CANARY'};
+ const o=JSON.parse(buildGeminiCommerceRequest(ownerRequest).contents[0].parts[0].text);
+ assert.deepEqual(v.untrusted.acceptedCommunicationHistory,historyMetadata);assert.deepEqual(o.untrusted.acceptedCommunicationHistory,historyMetadata);
+ assert.equal(v.trusted.effectReceipts.length,0);assert.ok(!o.trusted.state.cartQuote);
+ assert.doesNotMatch(JSON.stringify([o,v]),/EVALUATOR_CANARY/);
+ const bad={...historyMetadata,private:'NEVER_FORWARD'};
+ assert.throws(()=>buildVerifierRequest(manifest,{...r,historyMetadata:bad}));
+ assert.throws(()=>buildGeminiCommerceRequest({...ownerRequest,historyMetadata:bad}));
+});

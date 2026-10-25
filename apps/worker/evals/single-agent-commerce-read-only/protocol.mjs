@@ -2,7 +2,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync,existsSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
-import {OWNER_REQUEST_MAX_BYTES,publicTurnTime} from './gemini-inference.mjs';
+import {OWNER_REQUEST_MAX_BYTES,publicTurnTime,publicCommunicationHistoryMetadata} from './gemini-inference.mjs';
 import {terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
@@ -72,7 +72,8 @@ export function buildVerifierRequest(m,r){
  check(typeof r.finalDraft==='string'&&bytes(r.finalDraft)<=4096,'DRAFT_BOUND');
  const request={model:m.models.verifier.model,reasoning:{effort:m.models.verifier.effort},instructions:r.instructions,
   input:[{type:'message',role:'user',content:[{type:'input_text',text:JSON.stringify({requestIdentity:r.binding,turnTime:publicTurnTime(r.turnTime),trusted:r.trusted,
-    untrusted:{latestCustomerMessage:r.latest,recentAcceptedDialogue:r.history,finalDraft:r.finalDraft}})}]}],
+    untrusted:{latestCustomerMessage:r.latest,recentAcceptedDialogue:r.history,finalDraft:r.finalDraft,
+      ...(r.historyMetadata?.publicCartEvents.length?{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(r.historyMetadata)}:{})}})}]}],
   tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,
   text:{format:{type:'json_schema',name:'semantic_egress_verdict',strict:true,schema:m.verdictSchema}}};
  check(bytes(request)<=65536,'VERIFIER_INPUT_BOUND');return request;

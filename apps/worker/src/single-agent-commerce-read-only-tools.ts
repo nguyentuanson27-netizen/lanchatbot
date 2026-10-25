@@ -104,10 +104,10 @@ export function createReadOnlyTools(input: {
     return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
       policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
   }
-  async function prepareProduct(id: string) {
+  async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) {
     const now = input.clock();
     let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null;
-    try { source = await input.catalog.readProduct(id); }
+    try { source = loaded ?? await input.catalog.readProduct(id); }
     catch {
       // A failed POS read must not erase independent catalog content.
       try { source = await input.catalog.readProduct(id, false); }
@@ -149,9 +149,9 @@ export function createReadOnlyTools(input: {
     await prepareProduct(id);
     return 1;
   }
-  async function readProduct(args: Record<string, unknown>): Promise<CommerceToolResult> {
+  async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
     const id = args.subjectRef as string, now = input.clock();
-    const source = await input.catalog.readProduct(id), p = source.product;
+    const source = loaded ?? await input.catalog.readProduct(id), p = source.product;
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
     if (p.productId !== id || (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) ||
       Date.parse(p.observedAt) > now.getTime())) || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
@@ -168,7 +168,9 @@ export function createReadOnlyTools(input: {
       deliveryRegion: raw && typeof args.deliveryRegion === "string" ? resolveCatalogDeliveryRegion(raw, args.deliveryRegion)?.[0] ?? args.deliveryRegion : (args.deliveryRegion as string | undefined) ?? null };
     // Do not expand an unbounded source record or silently truncate selling options.
     if (!query.offerType && availableOffers && availableOffers.length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-    const summarizeAll = !query.offerType && availableOffers !== null && availableOffers.length > 1;
+    const selectedOffers=args.offerTypes as string[]|undefined;
+    if(selectedOffers&&(!availableOffers||selectedOffers.some(o=>!availableOffers.includes(o))))return {status:"REJECTED",reason:"OFFER_NOT_AVAILABLE"};
+    const summarizeAll = !!selectedOffers || (!query.offerType && availableOffers !== null && availableOffers.length > 1);
     const resolveOption = (offerType: string | null) => {
       const q = { ...query, offerType };
       const price = raw ? resolveCatalogFacts(raw, { ...q, intent: "PRICE" }, now, maxAge) : null;
@@ -210,14 +212,14 @@ export function createReadOnlyTools(input: {
           ...(q.deliveryRegion ? { eta: { status: eta?.status ?? "UNAVAILABLE", reason: eta?.reasonCode ?? (eta ? null : "POS_SNAPSHOT_UNAVAILABLE") } } : {}),
         } };
     };
-    const selected = resolveOption(query.offerType);
+    const selected = resolveOption(selectedOffers?.[0] ?? query.offerType);
     const options = availableOffers === null ? [] : query.offerType ? [selected]
-      : availableOffers.map(offer => normalizeCatalogToken(offer) === selected.offer ? selected : resolveOption(offer));
+      : (selectedOffers ?? availableOffers).map(offer => normalizeCatalogToken(offer) === selected.offer ? selected : resolveOption(offer));
     const retained = summarizeAll ? options : [selected];
     const nextClaims = retained.flatMap(o => o.claims);
     const nextSubjects = new Set([...subjects.keys(), ...retained.flatMap(o => o.variantId ? [o.variantId] : [])]);
     if (nextSubjects.size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-    const readKey = commerceHash({ id, offerType: query.offerType, color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
+    const readKey = commerceHash({ id, offerType: query.offerType, ...(selectedOffers?{offerTypes:selectedOffers}:{}), color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
     const allClaims = [...claims.entries()].filter(([key]) => key !== readKey).flatMap(([, values]) => values).concat(nextClaims);
     if (new Set(allClaims.map(commerceHash)).size > 32) return { status: "REJECTED", reason: "CLAIM_BOUND" };
     const evidence = staticEvidence(p, now);
@@ -273,7 +275,7 @@ export function createReadOnlyTools(input: {
       missing: [...(selected.availability.price.status === "OK" ? [] : ["PRICE"]), ...(selected.availability.stock.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
   }
-  async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
+  async function invoke(call: CommerceToolCall, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
     if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
       if (call.name === "read_policy") {
@@ -325,16 +327,38 @@ export function createReadOnlyTools(input: {
             availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
       }
       if (call.name === "read_product") {
-        const a = toolArgs(call.args, ["subjectRef", "offerType", "color", "size", "deliveryRegion"]);
+        const a = toolArgs(call.args, ["subjectRef", "offerType", "offerTypes", "detailsOnly", "color", "size", "deliveryRegion"]);
         if (!a || !text(a.subjectRef, 128) || subjects.get(a.subjectRef)?.kind !== "PRODUCT" ||
           (a.offerType !== undefined && !text(a.offerType, 64)) || (a.color !== undefined && !text(a.color, 64)) ||
-          (a.size !== undefined && !text(a.size, 16)) || (a.deliveryRegion !== undefined && !text(a.deliveryRegion, 64))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
-        return await readProduct(a);
+          (a.size !== undefined && !text(a.size, 16)) || (a.deliveryRegion !== undefined && !text(a.deliveryRegion, 64)) ||
+          (a.offerTypes!==undefined&&(!Array.isArray(a.offerTypes)||a.offerTypes.length<2||a.offerTypes.length>3||!a.offerTypes.every(o=>text(o,64))||new Set(a.offerTypes).size!==a.offerTypes.length||a.offerType!==undefined))||
+          (a.detailsOnly!==undefined&&(a.detailsOnly!==true||a.offerType!==undefined||a.offerTypes!==undefined))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
+        if(a.detailsOnly===true){await prepareProduct(a.subjectRef,loaded);prepared.add(a.subjectRef);
+          return {status:"OK",data:{subjectRef:a.subjectRef,content:products.get(a.subjectRef)?.content??null,attributes:products.get(a.subjectRef)?.attributes??null,
+            availableOffers:offerContexts.has(a.subjectRef)?JSON.parse(offerContexts.get(a.subjectRef)!.text).availableOffers:null,
+            notRead:["PRICE","STOCK","ETA","SIZE_FIT"]}};}
+        return await readProduct(a, loaded);
       }
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
     } catch { return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" }; }
   }
-  return { invoke, snapshot, prepare, invokeBatch: (calls: CommerceToolCall[]) => Promise.all(calls.map(invoke)), async readback() {
+  return { invoke, snapshot, prepare, async invokeBatch(calls:CommerceToolCall[]){
+    // Fetch one immutable source per product. Admission/commit follows request order,
+    // never the network completion order. Effects are handled by outer ports.
+    const sources=new Map<string,Promise<Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null>>();
+    for(const c of calls)if(c.name==="read_product"&&c.args&&typeof c.args==="object"){
+      const id=(c.args as Record<string,unknown>).subjectRef;
+      if(typeof id==="string"&&subjects.get(id)?.kind==="PRODUCT"&&!sources.has(id))
+        sources.set(id,input.catalog.readProduct(id).then(s=>structuredClone(s)).catch(()=>null));
+    }
+    const results:CommerceToolResult[]=[];
+    for(const call of calls){
+      const id=call.args&&typeof call.args==="object"?(call.args as Record<string,unknown>).subjectRef:undefined;
+      const source=call.name==="read_product"&&typeof id==="string"&&sources.has(id)?await sources.get(id):undefined;
+      results.push(source===null?{status:"UNAVAILABLE",reason:"SOURCE_ERROR"}:await invoke(call,source));
+    }
+    return results;
+  }, async readback() {
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
     const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
     for (const id of prepared) if (!fullReads.has(id)) await prepareProduct(id);

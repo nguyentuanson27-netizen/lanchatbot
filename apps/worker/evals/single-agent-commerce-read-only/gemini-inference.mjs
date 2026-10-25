@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
-import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema} from '@lana/contracts';
+import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
@@ -11,6 +11,12 @@ export function publicTurnTime(value){
   Number.isFinite(Date.parse(value.processingAt))&&new Date(value.processingAt).toISOString()===value.processingAt&&
   value.timeZone==='Asia/Ho_Chi_Minh','TURN_TIME');
  return {processingAt:value.processingAt,timeZone:value.timeZone};
+}
+export function publicCommunicationHistoryMetadata(value){
+ if(value===undefined)return undefined;
+ const parsed=CommerceHistoryMetadataV1Schema.parse(value);
+ requireThat(bytes(parsed)<=1024&&bytes(parsed.publicCartEvents)<=768,'HISTORY_INPUT_BOUND');
+ return parsed;
 }
 export const OWNER_REQUEST_MAX_BYTES=65536;
 export const OWNER_IMAGE_BOUNDS={count:2,maxBytes:512*1024,maxRequestBytes:1507328};
@@ -27,7 +33,7 @@ const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'v�
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Khi tìm theo nhu cầu, dùng description để sàng ứng viên trước khi đọc giá/tồn; kết quả gần nghĩa chưa chứng minh phù hợp. Chỉ đọc tiếp món định tư vấn khi còn thiếu dữ liệu cần thiết, không mở mọi offers của mọi kết quả. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
- {name:'read_product',description:'Đọc thông tin sản phẩm bằng PRODUCT subjectRef. offerType bắt buộc: chọn mã từ availableOffers/offerLabels cho phần khách đang hỏi; truyền null khi cần so sánh các cách mua hoặc chưa biết mã. Mã cụ thể chỉ đọc lựa chọn đó; null đọc các sellingOptions riêng biệt và có thể tiêu nhiều subject slots, không chọn thay khách. Đã rõ phần khách muốn mua thì đọc đúng offer đó, không mở toàn bộ offers. Có size/màu thì truyền ngay; size chỉ xem tồn, không chứng minh mặc vừa. deliveryRegion tra ETA. availability cho biết dữ kiện nào đọc được; sellingOptions=null là chưa biết lựa chọn bán.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:{type:'STRING',nullable:true},color:string,size:string,deliveryRegion:string},required:['subjectRef','offerType']}},
+ {name:'read_product',description:'Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:['SINGLE','COMPARE','DETAILS_ONLY']},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
@@ -177,7 +183,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  // An enum is only an argument hint; the selector still validates the chosen product/offer.
  if(productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
   for(const d of declarations.filter(d=>['read_product','add_to_cart'].includes(d.name)))
-   d.parameters.properties.offerType={type:'STRING',...(d.name==='read_product'?{nullable:true}:{}),enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
+   d.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    availableOffers:offers.get(p.subjectRef)??null,
    offerLabels:offers.has(p.subjectRef)?Object.fromEntries(offers.get(p.subjectRef).map(code=>[code,Object.hasOwn(offerLabels,code)?offerLabels[code]:null])):null,
@@ -202,7 +208,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   phase:request.toolsAllowed===false?'FINAL_REPLY':'TOOL_OR_REPLY',
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining}:null};
  const body={systemInstruction:{parts:[{text:request.instructions}]},
-  contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView})}]},...contents],
+  contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView,
+    ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...contents],
   tools:request.toolsAllowed!==false&&declarations.length?[{functionDeclarations:declarations}]:[],toolConfig:{functionCallingConfig:{mode:request.toolsAllowed===false?'NONE':'AUTO'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  const requestBytes=bytes(body);
@@ -239,10 +246,18 @@ export function parseGeminiGeneration(body){
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
   const domainCalls=calls.map(c=>{
    if(c.name==='read_product'){
-    requireThat(Object.hasOwn(c.args,'offerType')&&(c.args.offerType===null||
-     typeof c.args.offerType==='string'&&c.args.offerType.trim().length>0&&bytes(c.args.offerType)<=64),'OWNER_TOOL_OUTPUT');
-    if(c.args.offerType===null){const args={...c.args};delete args.offerType;return {...c,args};}
-    return c;
+    const {selection,...args}=c.args;
+    requireThat(Object.keys(args).every(k=>['subjectRef','offerType','offerTypes','color','size','deliveryRegion'].includes(k)),'OWNER_TOOL_OUTPUT');
+    const validOffer=v=>typeof v==='string'&&v.trim().length>0&&bytes(v)<=64;
+    if(selection==='SINGLE'){
+     requireThat(validOffer(args.offerType)&&!Object.hasOwn(args,'offerTypes'),'OWNER_TOOL_OUTPUT');return {...c,args};
+    }
+    if(selection==='COMPARE'){
+     requireThat(!Object.hasOwn(args,'offerType')&&Array.isArray(args.offerTypes)&&args.offerTypes.length>=2&&args.offerTypes.length<=3&&
+      args.offerTypes.every(validOffer)&&new Set(args.offerTypes).size===args.offerTypes.length,'OWNER_TOOL_OUTPUT');return {...c,args};
+    }
+    requireThat(selection==='DETAILS_ONLY'&&!Object.hasOwn(args,'offerType')&&!Object.hasOwn(args,'offerTypes'),'OWNER_TOOL_OUTPUT');
+    return {...c,args:{...args,detailsOnly:true}};
    }
    const opsKey=c.name==='apply_customer_state'?'ops':c.name==='recommend_size'&&Object.hasOwn(c.args,'customerStateOps')?'customerStateOps':null;
    if(!opsKey)return c;
