@@ -1,6 +1,6 @@
 # Phase B — kế hoạch sửa terminal handoff và giữ quy tắc
 
-Ngày: 26/10/2026. Revision 2 — đã sửa theo lượt review lại revision 1 (REVISE 2P2), self-review và được cùng reviewer **APPROVE ở mức kế hoạch**. Base source `461e6e571ce60a18b3e231a4d5ce889afb151f6f`; tài liệu audit/review/tasks được lưu cùng savepoint kế hoạch. **PLAN_ONLY; chưa sửa runtime/prompt, chưa chạy test/provider theo kế hoạch này; B chưa GO.**
+Ngày: 26/10/2026. Revision 2 — đã sửa theo lượt review lại revision 1 (REVISE 2P2), self-review và được cùng reviewer **APPROVE ở mức kế hoạch**. Base source `461e6e571ce60a18b3e231a4d5ce889afb151f6f`; tài liệu audit/review/tasks được lưu cùng savepoint kế hoạch. **Implementation đã thực hiện theo revision 2; executable review APPROVE trên af0bc76b.** Trạng thái và commands thực chạy ở [implementation evidence](c3-phase-b-rule-retention-implementation-20261026.md). Provider acceptance chưa chạy; B chưa GO. Phần “dự kiến/CHƯA CHẠY” bên dưới là registration tại thời điểm chốt kế hoạch, không phải trạng thái hiện tại.
 
 Nguồn: [audit](c3-phase-b-rule-retention-audit-20261026.md), [review độc lập REVISE 1P1+3P2](c3-phase-b-rule-retention-plan-independent-review-20261026.md), [opening contract](c3-phase-b-opening-quote-integration-20261024.md), [turn completion](c3-phase-b-turn-completion-plan-20261024.md), [quy tắc thiếu dữ liệu](c3-phase-b-missing-shop-information-handoff-20261025.md) và [21 actual outcomes](../../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CONVERSATIONS.md).
 

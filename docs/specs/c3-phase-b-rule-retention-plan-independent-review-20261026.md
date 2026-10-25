@@ -66,3 +66,14 @@ Owner yêu cầu sửa kế hoạch → review → fix. Bản [kế hoạch sử
 Reviewer cũng yêu cầu giữ receipt predecessor nguyên gốc và phân biệt caller timeout với group thật sự đã commit. Revision 2 đã sửa renderer chỉ một explicit SINGLE pair/PRICE claim, loại COMPARE/sellingOptions/multi-pair; tách prepare/seal; giữ receipt gốc; bổ sung tests commit-before-timeout/rollback-before-timeout; làm rõ holding chứa effect confirmation không thuộc precommit verifier path.
 
 **Cùng reviewer kiểm lại revision 2: APPROVE ở mức kế hoạch, không còn finding bắt buộc trước implementation.** Không cần thêm model generation/role/framework hoặc sửa giọng. Đây là approval thiết kế; phải kiểm RED→GREEN và review executable diff trước run. Reviewer không sửa code, chạy test/provider ở bất kỳ lượt nào.
+
+## Executable review sau implementation
+
+Reviewer cũ kiểm diff `56538349..0e2f97bf`, verdict **REVISE 2P2**. Tái hiện explicit immediate handoff commit=false vẫn đi tiếp owner2/verifier PASS và SEND_ELIGIBLE; phát hiện thiếu sales-state proof cho existing cart không mutation. Reviewer chạy handoff/delivery tests46PASS nhưng các tests đó chưa bắt hai khoảng thiếu này. Không provider/DB request.
+
+Root thêm RED3 cho terminal failure và RED1 cho cartQuote thiếu proof; sửa attempted-but-blocked → NO_SEND, terminal rejection → dừng generation, thêm SALES_STATE proof qua scoped repository và reader sau restart. Không remap receipt, mở quyền HUMAN-send chung, thêm parser/model hoặc retry. Regression actual existing-cart không mutation và thay encrypted cart trong disposable DB được thêm vào deterministic cohort.
+
+Cùng reviewer kiểm lại exact executable `af0bc76b8668a4f62ec0cfe66b6d9670ee7223b0`: **APPROVE, không còn finding bắt buộc**. Độc lập chạy4files handoff/handoff-delivery/ingress/read-only **186PASS**. Review read-only, không sửa source/provider/DB. Approval executable không thay exact-head PostgreSQL/build hoặc provider acceptance; chưa kết luận opening quality/sales usefulness/B GO.
+
+
+PostgreSQL sau đó bắt receipt-success gap (không capture receipt proof sau mutation thành công). Reviewer kiểm diffaf0bc76b..1207cee9, verdict **APPROVE**, độc lập effects/delivery100PASS. Successful persisted path đọc ledger và acceptReceipt, unavailable giữ fail-closed; gate so exact receipt hash. Không sửa file/provider/DB. Sau review có test-only savepointc53a87f7: composition fixture cũ trả null receipt ở mọi lần dù mô phỏng persisted success; thay bằng ledger fixture ghi trên APPLIED rồi đọc theo operationId, thêm proof assertion. Không nới runtime để giữ mock null thành công.
