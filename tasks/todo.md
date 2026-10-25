@@ -1,3 +1,14 @@
+## Current — rule thiếu thông tin theo owner, 2026-10-25
+
+[Audit/implementation/commands/limitations](../docs/specs/c3-phase-b-missing-shop-information-handoff-20261025.md). **PROVIDER_ACCEPTANCE_NOT_RUN; B chưa GO.**
+
+- [x] Phân biệt thiếu shop data cần thiết → handoff, thiếu thông tin khách → hỏi bổ sung; dữ liệu chưa đọc/null tùy chọn không tự kết luận thiếu nguồn.
+- [x] Nối kết quả tool thiếu nguồn qua handoff port hiện có; giữ quyền, revision, recipient, privacy, transaction/readback. Handoff denied/unknown → no-send, không retry hoặc báo thành công.
+- [x] Phân biệt lỗi size source với missingInputs khách. Giữ DETAILS_ONLY khi mô tả đủ, checkout riêng trong code và B1 không có capability handoff.
+- [x] Cập nhật owner/tool instructions và hash, candidate holding cho PRICE/STOCK/ETA/POLICY; thiếu ảnh đúng yêu cầu không tự đổi sang ảnh chung. Bỏ bắt buộc lấy ảnh khi chỉ hỏi giá; không sửa giọng/verifier/model/corpus.
+- [x] 568 worker +161 Node +21 protected/assembler tests PASS, worker typecheck/build/lint và diff check PASS; observed RED→GREEN và các lệnh fail trước sửa được giữ trong doc.
+- [ ] Provider acceptance/persisted DB run trên source mới chưa chạy; không claim missing-data recognition đầy đủ hoặc B GO. Discovery source-version refresh chưa sửa. Không live send/deploy/publish upstream.
+
 ## Current — model run kiểm tra lỗi nghiêm trọng, 2026-10-25
 
 - [x] [Review toàn bộ](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/WHOLE_RUN_REVIEW.md): 14lượt +17controls, đối chiếu raw/nguồn/receipt/capture và rerun trước. Chưa thấy verifier overblock; chưa được quy tool improvement cho projection vì batching cũng đổi. Phân biệt4B1fallback với persisted ingress recovery; giữ minor voice. Public name question đã sửa display theo code/hash, raw/private không đổi. Không gọi provider/test mới hoặc sửa runtime.

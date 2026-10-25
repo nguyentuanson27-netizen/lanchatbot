@@ -1,3 +1,11 @@
+## Current — thiếu dữ liệu shop thì handoff, 2026-10-25
+
+**IMPLEMENTED; PROVIDER_ACCEPTANCE_NOT_RUN; B chưa GO.** Owner chốt: thiếu dữ liệu shop ảnh hưởng yêu cầu thì handoff; thiếu thông tin khách thì hỏi bổ sung. [Audit dữ liệu, implementation và verification](../docs/specs/c3-phase-b-missing-shop-information-handoff-20261025.md), base `21ae025be4721645042743824e983d38863717e5`.
+
+Reuse handoff hiện có sau các tool outcomes thiếu giá/tồn/ETA/policy/ảnh/nguồn size; transaction không được chứng minh thì no-send, không báo đã chuyển hoặc gọi model cứu kết quả. Không tự chuyển vì field tùy chọn null, chưa có số đo hoặc chưa nhập thông tin nhận hàng. DETAILS_ONLY vẫn dùng mô tả có sẵn khi offers chưa xác nhận. Owner xử lý những thiếu hụt cần hiểu câu hỏi; không thêm classifier/parser/model. Chỉ tìm ảnh khi phục vụ yêu cầu, bỏ lệnh bắt tìm ảnh lúc chỉ hỏi giá. Candidate holding copy không nhắc bot/nhân viên; không đổi policy upstream.
+
+568 worker +161 Node +21 protected/assembler tests PASS; worker typecheck/build/lint và diff check PASS. Không chạy provider/DB integration mới, không chuyển kết quả cũ sang source mới. Source-version refresh vẫn chưa sửa; B1 read-only không chứng minh persisted handoff. Các phần dưới giữ evidence lịch sử; gallery ảnh chung chỉ còn phù hợp khi khách hỏi ảnh chung/đã chấp nhận phạm vi đó.
+
 ## Current — critical experience model đã chạy, 2026-10-25
 
 [Whole-run review](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/WHOLE_RUN_REVIEW.md): đọc đủ14outcomes/17controls/raw wires và so rerun trước. Không có bằng chứng verifier chặn quá tay; ba draft quota khớp dữ liệu. Ưu tiên source consistency, unknown-offers semantics và recovery qua đúng ingress. Bốn fallback B1 chưa đo persisted handoff; không kết luận toànB gửi cùng fallback. Tool batching cũng đổi nên chưa quy hết zero tool failures cho projection. Latency harness35–74s ở các persisted public reads cần đo theo chặng; chưa phải productionSLA. Sửa lỗi hiển thị public name question theo code+accepted hash, không phục hồi private values. Không mở run hoặc sửa prompt/runtime trong review.

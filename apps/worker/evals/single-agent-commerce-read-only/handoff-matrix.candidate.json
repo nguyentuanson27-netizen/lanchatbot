@@ -88,14 +88,14 @@
     },
     {
       "reason": "PRICE_UNAVAILABLE",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Bên em sẽ kiểm tra lại giá rồi báo chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "STOCK_UNAVAILABLE",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Bên em sẽ kiểm tra lại hàng của mẫu này rồi báo chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -106,14 +106,14 @@
     },
     {
       "reason": "ETA_UNAVAILABLE",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Bên em sẽ kiểm tra lịch giao rồi báo chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "POLICY_UNAVAILABLE",
-      "customerMessagePolicy": "SILENT_HANDOFF",
-      "holdingReply": null,
+      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+      "holdingReply": "Bên em sẽ kiểm tra lại phần này rồi trả lời chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -185,8 +185,8 @@
   ],
   "sourceMetadata": {
     "source": "ADMIN",
-    "sourceReference": "repo:c3-phase-b-recovery-priority-plan-20261025",
-    "sourceVersion": "c3-phase-b-candidate-handoff-20261025-v4",
+    "sourceReference": "repo:c3-phase-b-missing-shop-information-handoff-20261025",
+    "sourceVersion": "c3-phase-b-candidate-handoff-20261025-v5",
     "observedAt": "2026-10-25T00:00:00.000Z"
   }
 }

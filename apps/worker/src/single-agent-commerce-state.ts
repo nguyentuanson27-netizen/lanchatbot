@@ -241,7 +241,9 @@ export async function createCustomerStateTools(input: {
           if (updated.status !== "OK") return updated;
         }
         if (blocked()) return { status: "REJECTED", reason: "STATE_OR_REF" };
-        const source = await input.sizeInput(a.subjectRef);
+        let source: Awaited<ReturnType<typeof input.sizeInput>>;
+        try { source = await input.sizeInput(a.subjectRef); }
+        catch { blockedDependencies=true;return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"}; }
         if (source.target.parentProductId !== a.subjectRef) return { status: "REJECTED", reason: "SIZE_SUBJECT" };
         const decision = recommendSize({ ...source, profile: effective.profile, generatedAt: input.clock().toISOString() });
         sizeOutcome = { status: decision.recommendation.status };

@@ -22,7 +22,7 @@ test('isolated candidate creates a versioned, hashed matrix without modifying up
  }
 });
 
-test('upstream policies and tags survive while all customer-facing holding copy comes from the candidate',()=>{
+test('upstream tags survive while owner-approved missing-information rules use candidate holding copy',()=>{
  const content=structuredClone(candidate);content.rules.find(r=>r.reason==='EXCHANGE').holdingReply='Custom reply';
  content.rules.find(r=>r.reason==='CUSTOMER_REQUESTED_HUMAN').tag='VAN_DON';
  const original={version:{versionId:'old',artifactKey:'matrix:custom',artifactKind:'HANDOFF_MATRIX',versionNumber:7,revision:3,content},
@@ -42,8 +42,20 @@ test('upstream policies and tags survive while all customer-facing holding copy 
  }
 });
 
+test('missing price, stock, ETA and policy activate holding handoff even when the old candidate was silent',()=>{
+ const content=structuredClone(candidate),reasons=['PRICE_UNAVAILABLE','STOCK_UNAVAILABLE','ETA_UNAVAILABLE','POLICY_UNAVAILABLE'];
+ for(const rule of content.rules.filter(r=>reasons.includes(r.reason))){rule.customerMessagePolicy='SILENT_HANDOFF';rule.holdingReply=null;}
+ const upstream={version:{versionId:'old',artifactKey:'matrix:custom',artifactKind:'HANDOFF_MATRIX',versionNumber:7,content},pointer:{pointerId:'pointer',versionId:'old',artifactKey:'matrix:custom',revision:8}};
+ const merged=isolatedHandoffRecords([upstream],config).records[0].version.content;
+ for(const reason of reasons){
+  const rule=merged.rules.find(r=>r.reason===reason);assert.equal(rule.customerMessagePolicy,'HOLDING_REPLY_THEN_HANDOFF');
+  assert.equal(rule.holdingReply,candidate.rules.find(r=>r.reason===reason).holdingReply);assert.equal(rule.tag,'NHAN_VIEN');
+  assert.doesNotMatch(rule.holdingReply,/nhân viên|bot/i);
+ }
+});
+
 test('candidate fails closed if an upstream holding policy has no approved customer copy',()=>{
- const content=structuredClone(candidate),rule=content.rules.find(r=>r.reason==='PRICE_UNAVAILABLE');
+ const content=structuredClone(candidate),rule=content.rules.find(r=>r.reason==='UNSUPPORTED_REQUEST');
  rule.customerMessagePolicy='HOLDING_REPLY_THEN_HANDOFF';rule.holdingReply='Custom upstream copy';
  const original={version:{versionId:'old',artifactKey:'matrix:custom',artifactKind:'HANDOFF_MATRIX',versionNumber:7,revision:3,content},
   pointer:{pointerId:'pointer',versionId:'old',artifactKey:'matrix:custom',artifactKind:'HANDOFF_MATRIX',revision:8}};

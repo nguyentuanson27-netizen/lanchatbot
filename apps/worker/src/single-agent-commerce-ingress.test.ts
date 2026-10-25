@@ -75,6 +75,23 @@ async function enableRecoveryHandoff(f: ReturnType<typeof fixture>, mode: "holdi
   f.policy.mockResolvedValue({...resolved,bundle});
 }
 
+it("commits price-unavailable handoff and its customer message before another model generation",async()=>{
+  const f=fixture(),source=f.products[0]!;f.enableHandoff();
+  const resolution=await fixturePolicy(),bundle=resolution.bundle!;
+  Object.assign(bundle.artifacts,{handoffMatrix:{schemaVersion:1,kind:"HANDOFF_MATRIX",sourceMetadata:bundle.artifacts.shopPolicy.sourceMetadata,
+    rules:[{reason:"PRICE_UNAVAILABLE",customerMessagePolicy:"HOLDING_REPLY_THEN_HANDOFF",holdingReply:"Bên em sẽ kiểm tra lại giá rồi báo chị nhé.",tag:"NHAN_VIEN"}]}});
+  f.policy.mockResolvedValue({...resolution,bundle});
+  f.setRead({policy:()=>fixturePolicy(),initialProducts:[source.product],catalog:{readProduct:async()=>({...source,snapshot:null}),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+  f.message.text="Áo này mua riêng bao nhiêu em?";
+  const call={name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}};
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}));
+  const result=await f.run(owner);
+  expect(result).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",reason:"PRICE_UNAVAILABLE",text:"Bên em sẽ kiểm tra lại giá rồi báo chị nhé."}});
+  expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();
+  const handoff=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);
+  expect(handoff).toHaveLength(1);expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
+});
+
 it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-verdict"])("atomically hands off unrecovered %s without another generation",async fault=>{
   const f=fixture(); await enableRecoveryHandoff(f);
   if(fault==="fail"||fault==="uncertain") f.verifier.mockResolvedValue({result:{verdict:fault==="fail"?"FAIL":"UNCERTAIN",violations:[]}});
@@ -370,32 +387,34 @@ it("keeps customer-requested handoff free of images even when media was selected
   expect(f.verifier).not.toHaveBeenCalled();
 });
 
-it.each(["GENERIC","DETAIL"])("continues after the actual media fallback with history and persisted product (%s)",async intent=>{
+it.each(["GENERIC","DETAIL"])("continues after a verified-media caption fallback with history and persisted product (%s)",async intent=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
   p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  p.images=[...p.images,{...p.images[0]!,url:"https://content.pancake.vn/feedback.jpg",role:"ADDITIONAL",feedback:true}];
   const tool=(intent:string):OwnerGeneration=>({kind:"TOOLS",calls:[{name:"select_product_media",args:{subjectRef:p.productId,intent}}],
     content:{role:"model",parts:[{functionCall:{name:"select_product_media",args:{subjectRef:p.productId,intent}}}]}});
   f.message.text="Shop có ảnh khách mặc mẫu này không em?";
   f.verifier.mockResolvedValueOnce({result:{verdict:"UNCERTAIN",violations:[]}});
   let calls=0;
   const first=await f.run(async()=>++calls===1?tool("FEEDBACK"):{kind:"FINAL",text:"Ảnh khách mặc em chưa có để gửi chị."});
-  expect(first.terminal.fallbackId).toBe("C3_B_MEDIA_NEXT_STEP_V1");
+  expect(first.terminal.fallbackId).toBe("C3_B_VERIFIED_MEDIA_V1");
   const sent=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
-  expect(sent).toEqual([{kind:"TEXT",text:first.terminal.text}]);
+  expect(sent).toEqual([{kind:"TEXT",text:first.terminal.text},{kind:"IMAGE",imageUrl:p.images[1]!.url}]);
   // Delivery history must contain the terminal text, never the rejected owner draft.
   f.history.listConversationHistory.mockResolvedValue([
     {senderType:"CUSTOMER",text:f.message.text},{senderType:"BOT",text:first.terminal.text}]);
   f.message.text=intent==="GENERIC"?"Ảnh tổng thể em.":"Cận phần thêu nhé.";
   f.message.messageId="next-media-message";f.message.eventKey="next-media-message";
-  calls=0;
+  calls=0;let observed:OwnerRequest|undefined;
   const second=await f.run(async request=>{
-    expect(request.context.state.currentProductId).toBe(p.productId);
-    expect(request.contents[1]!.parts[0]!.text).toBe(first.terminal.text);
-    expect(JSON.stringify(request.contents)).not.toContain("Ảnh khách mặc em chưa có để gửi chị.");
+    observed??=request;
     return ++calls===1?tool(intent):{kind:"FINAL",text:"Em gửi ảnh chị nhé."};
   });
-  expect(second.terminal.disposition).toBe("SEND_ELIGIBLE");
+  expect(observed!.context.state.currentProductId).toBe(p.productId);
+  expect(observed!.contents[1]!.parts[0]!.text).toBe(first.terminal.text);
+  expect(JSON.stringify(observed!.contents)).not.toContain("Ảnh khách mặc em chưa có để gửi chị.");
+  expect(second.terminal.disposition,JSON.stringify(second.terminal)).toBe("SEND_ELIGIBLE");
   expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages).toEqual([
     {kind:"TEXT",text:"Em gửi ảnh chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
   expect(f.verifier).toHaveBeenCalledTimes(2);
@@ -403,23 +422,38 @@ it.each(["GENERIC","DETAIL"])("continues after the actual media fallback with hi
 
 it.each(["PASS","UNCERTAIN"])("keeps a mixed price/media reply only after whole-draft verification (%s)",async verdict=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
+  p.images=[{url:"https://content.pancake.vn/feedback.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:true,
+    reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
   f.message.text="Cho chị xem ảnh khách mặc, áo này bao nhiêu em?";
   f.verifier.mockResolvedValue({result:{verdict,violations:[]}});
   const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}},
     {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}];
   let generations=0;
-  const draft="Áo 499k chị nhé. Ảnh khách mặc em chưa có để gửi chị.";
+  const draft="Áo 499k chị nhé. Em gửi chị ảnh khách mặc.";
   const result=await f.run(async request=>{
     if(++generations===1)return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}};
     expect(request.context.protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"})]));
-    expect(request.context.policyLiterals.some(p=>p.ref.startsWith("media-lookup:"))).toBe(true);
+    expect(request.context.policyLiterals.some(p=>p.ref.startsWith("media:"))).toBe(true);
     return {kind:"FINAL",text:draft};
   });
   expect(f.verifier).toHaveBeenCalledTimes(1);
   const delivered=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
-  expect(delivered).toEqual([{kind:"TEXT",text:result.terminal.text}]);
+  expect(delivered).toEqual([{kind:"TEXT",text:result.terminal.text},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
   if(verdict==="PASS")expect(result.terminal.text).toBe(draft);
   else {expect(result.terminal.disposition).toBe("FALLBACK");expect(JSON.stringify(delivered)).not.toContain("499");}
+});
+
+it("hands off missing requested feedback even when the price in the same batch is available",async()=>{
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
+  f.message.text="Cho chị xem ảnh khách mặc, áo này bao nhiêu em?";
+  const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}},
+    {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}];
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}}));
+  const result=await f.run(owner);
+  expect(result).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE"}});
+  expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();
+  const handoff=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);expect(handoff).toHaveLength(1);
+  expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
 });
 
 async function seedCart(f: ReturnType<typeof fixture>) {
