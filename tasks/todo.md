@@ -2327,3 +2327,9 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Actual terminal handoff tests 5 reasons after commit and no acknowledgement before commit; independent review caught upstream copy surviving the isolated merge, then importer RED→GREEN tests established replacement and fail-closed missing copy. Focused worker 121/121, protocol/prompt/matrix 28/28, worker build/lint, diff check PASS. [Report](../docs/specs/c3-phase-b-customer-facing-handoff-copy-20261025.md).
 - [x] Independent exact-source review `abc55dc6`: no new blocking implementation finding; reviewer independently reran four Node suites 28/28 PASS.
 - [ ] Run model qualification before claiming conversation style or Phase B readiness; generic semantic-failure fallback remains weak.
+
+## Phase B discovery/media follow-up — 2026-10-25
+
+- [x] Expose verified offer codes with each search candidate; RED→GREEN focused test, tool/media 95/95, protocol/prompt 18/18, worker build/lint PASS. Run source `5beb8554036e135d815569871b21b22d88ac745d` had clean preflight.
+- [x] Run four registered openings once on prompt-only source `b10f1e07` and final source `5beb8554`; preserve all eight outcomes and exact customer capture. [Evidence and review](../docs/specs/c3-phase-b-discovery-media-followup-20261025.md).
+- [ ] Discovery still falls back after final-only owner returned a tool call despite provider `mode=NONE`; inspect retrieval suitability and native final-only behavior before further prompt edits. Media verifier correctly rejected an unsupported beige-image absence claim; two verified general images were still captured through code-owned recovery. Full Phase B qualification and generic fallback usefulness remain open; B not GO.
