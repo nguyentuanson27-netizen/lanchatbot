@@ -40,6 +40,27 @@ import {
 } from "./realtime-runtime.js";
 
 describe("committed sales effect readback", () => {
+  it("recovers only numeric accepted cart outcome metadata, never the over-redacted customer text",async()=>{
+    const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),page="page",id="public-summary";
+    const message={kind:"TEXT",text:"Giỏ của chị: mẫu có tên riêng. Tổng 499.000đ."};
+    const hash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    const proof={kind:"C3_PUBLIC_CART_SUMMARY_V1",pageId:page,conversationId:"conversation",customerHash:"a".repeat(64),
+      recipientHash:"b".repeat(64),responseGroupId:"group",sequence:0,messageHash:hash(message),cartId:"50000000-0000-4000-8000-000000000001",cartVersion:2,
+      discountTotalVnd:30000,grandTotalVnd:499000};
+    const payload=cipher.encryptJson({...message,commercePublicCartSummary:proof},`lana:meta-payload:v2:${page}:${id}`,new Date(Date.now()+60000));
+    const row={outbox_id:id,page_id:page,conversation_id:"conversation",response_group_id:"group",sequence_no:0,status:"SENT_ACCEPTED",
+      meta_message_id:"accepted",accepted_at:new Date(),payload_ciphertext:payload.ciphertext,payload_nonce:payload.nonce,payload_auth_tag:payload.authTag,
+      payload_encrypted_dek:payload.encryptedDek,payload_key_ref:payload.keyRef,payload_expires_at:payload.expiresAt};
+    const query=vi.fn(async()=>({rows:[row]})),store=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",cipher);
+    (store as unknown as {pool:unknown}).pool={query};
+    const input={pageId:page,conversationId:"conversation",customerHash:"a".repeat(64),recipientHash:"b".repeat(64),before:new Date(Date.now()+1000)};
+    const events=await store.readAcceptedCommerceCartSummaries(input);
+    expect(events).toHaveLength(1);expect(events[0]).toMatchObject({type:"ACCEPTED_PUBLIC_CART_SUMMARY",cartVersion:2,grandTotalVnd:499000});
+    expect(JSON.stringify(events)).not.toContain("tên riêng");expect(JSON.stringify(events)).not.toContain("recipientHash");
+    expect(await store.readAcceptedCommerceCartSummaries({...input,recipientHash:"c".repeat(64)})).toEqual([]);
+    row.status="RETRYABLE";expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    expect(query.mock.calls.length).toBe(3);
+  });
   it.each(["SENT_ACCEPTED", "DELIVERED", "READ", "RETRYABLE", "AMBIGUOUS", "wrong-recipient", "wrong-product"])
     ("projects only exact accepted media receipts after restart (%s)", async mode => {
     const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), page = "page", id = "image";

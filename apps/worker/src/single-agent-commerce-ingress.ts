@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, type ProtectedClaimV1, type HandoffReasonV2 } from "@lana/contracts";
+import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1, type HandoffReasonV2 } from "@lana/contracts";
+import {projectCommerceHistoryMetadata} from "./single-agent-commerce-public-history.js";
 import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken, normalizeProductCode } from "@lana/business-tools";
 import { createConversationState, type ConversationState } from "@lana/conversation-engine";
 import type { ClaimedInboundBatch, PostgresChatHistoryStore, PostgresRealtimeInboxStore, PostgresRealtimeRuntimeStore, RealtimeSalesCyclePlan } from "@lana/database";
@@ -46,7 +47,7 @@ export function isPrivateCommerceText(text: string): boolean {
 }
 /** Drop the whole private message: a redacted phone must not leave its adjacent recipient name in model context. */
 export function commerceHistory(rows: readonly Pick<ChatHistoryItem, "text" | "senderType">[],
-  media: readonly { productId: string; assetRef: string; status: string; occurredAt: string }[] = []) {
+  media: readonly { productId: string; assetRef: string; status: string; occurredAt: string }[] = [],reservedBytes=0) {
   const history = rows.filter(r => r.text && ["CUSTOMER", "BOT", "HUMAN"].includes(r.senderType) && !isPrivateCommerceText(r.text))
     .map(r => ({ role: r.senderType === "CUSTOMER" ? "customer" as const : "shop" as const, text: r.text })).slice(-8);
   while (history.reduce((n, m) => n+Buffer.byteLength(m.text), 0) > 4096) history.shift();
@@ -57,7 +58,7 @@ export function commerceHistory(rows: readonly Pick<ChatHistoryItem, "text" | "s
     const summary = { role: "shop" as const, text: JSON.stringify({ event: "RECENT_SHOP_IMAGES_ACCEPTED", completeHistory: false,
       customerViewed: "UNKNOWN", images: retained }) };
     const bytes = Buffer.byteLength(summary.text);
-    if (bytes <= 1024 && bytes + (history.length === 8 ? 1 : 0) + history.reduce((n, m) => n+Buffer.byteLength(m.text), 0) <= 4096) {
+    if (bytes+reservedBytes <= 1024 && bytes+reservedBytes + (history.length === 8 ? 1 : 0) + history.reduce((n, m) => n+Buffer.byteLength(m.text), 0) <= 4096) {
       if (history.length < 8) history.unshift(summary);
       else {
         const shop = history.find(m => m.role === "shop");
@@ -205,9 +206,15 @@ export async function runPersistedCommerceIngress(input: {
     pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
     recipientHash: scope.recipient, before: new Date(messages[0]!.occurredAt),
   }).catch(() => { mediaHistoryUnavailable = true; return []; }) : [];
-  const history = commerceHistory(rows, recentMedia);
+  let publicHistoryUnavailable=false;
+  const recentCartEvents=input.store.readAcceptedCommerceCartSummaries ? await input.store.readAcceptedCommerceCartSummaries({pageId:scope.pageId,
+    conversationId:scope.conversationId,customerHash:scope.customerHash,recipientHash:scope.recipient,before:new Date(messages[0]!.occurredAt)})
+    .catch(()=>{publicHistoryUnavailable=true;return [];}) : [];
+  const projectedHistory=projectCommerceHistoryMetadata(commerceHistory(rows),recentCartEvents);
+  const historyMetadata=projectedHistory.metadata;
+  const history=commerceHistory(rows,recentMedia,historyMetadata.publicCartEvents.length?Buffer.byteLength(JSON.stringify(historyMetadata)):0);
   const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
-    entry: {firstContact: rows.length > 0 || recentMedia.length > 0 ? false : mediaHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
+    entry: {firstContact: rows.length > 0 || recentMedia.length > 0 || recentCartEvents.length > 0 ? false : mediaHistoryUnavailable || publicHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
@@ -242,7 +249,8 @@ export async function runPersistedCommerceIngress(input: {
       } };
     } },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
-  const result = await runCommerceTurn({ scope, tools, latest, history, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
+  const execution = await runCommerceTurn({ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
+  const result={...execution,publicHistoryProjection:{...projectedHistory.dropped,unavailable:publicHistoryUnavailable}};
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.
   if (handoff.outboxCount()) return { ...result, enqueued: handoff.outboxCount() };
@@ -349,12 +357,17 @@ export async function runPersistedCommerceIngress(input: {
   if (messagesOut.length && (readiness.outcome !== "READY" || parent?.outcome === "BLOCKED")) return { ...result, ...await closeWithoutSend("EGRESS_READINESS") };
   const nextState = { ...current.state, revision: verifiedRevision+1, currentProductId: world.state.currentProductId, salesStage: state.stage };
   const responseGroupId = randomUUID();
+  const publicAmounts=cartSummary?tools.publicCartSummary?.():undefined;
+  const publicCartSummary=publicAmounts ? CommercePublicCartSummaryV1Schema.parse({...publicAmounts as object,kind:"C3_PUBLIC_CART_SUMMARY_V1",
+    pageId:scope.pageId,conversationId:scope.conversationId,customerHash:scope.customerHash,recipientHash:scope.recipient,
+    responseGroupId,sequence:0,messageHash:commerceHash(messagesOut[0])}) : undefined;
   const mediaBinding = (generatedPass || recoveredMedia) && selectedMedia.length ? makeCommerceMediaDeliveryBinding({ scope, generation: batch.generation, responseGroupId,
     nextState, messages: messagesOut, policy: await policyBundle(), images: selectedMedia, now }) : undefined;
   const committed = await input.transaction(client => input.store.commitWithinTransaction(client, { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
     expectedStateVersion: verifiedRevision, state: nextState, inboxBatchGuard: guard,
     ...(messagesOut.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId, recipientId: last.senderId, messages: messagesOut, sourceMessageIdHash: sourceHash,
       ...(mediaBinding ? { mediaBinding } : {}),
+      ...(publicCartSummary ? {publicCartSummary} : {}),
       protectedClaims: claims, protectedClaimTypes: claimTypes, effectReadiness: readiness, sendAfterOwnerHandoff: result.terminal.disposition === "HANDOFF" } } : {}),
     ...(salesPlan ? { salesCyclePlan: salesPlan } : {}) }, now));
   if (!committed.stateCommitted || (messagesOut.length && committed.metaOutboxCreated !== messagesOut.length)) return {

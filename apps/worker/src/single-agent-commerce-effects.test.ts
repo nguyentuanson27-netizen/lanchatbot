@@ -626,6 +626,7 @@ describe("code-owned commerce effects and recovery", () => {
       }
       const result = await s.tools.recover!(terminalFallback());
       expect(result.text ?? "").not.toMatch(/524\.000|600\.000|đặt trước/);
+      expect(s.tools.publicCartSummary!()).toBeUndefined();
       expect(s.commits).toHaveLength(1);
     });
   it("acknowledges a committed cart change as a change, without claiming a new cart or order", async () => {

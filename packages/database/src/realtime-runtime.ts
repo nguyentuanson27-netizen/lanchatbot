@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
-import { CommerceMediaDeliveryBindingV1Schema } from "@lana/contracts";
+import { CommerceMediaDeliveryBindingV1Schema, CommercePublicCartSummaryV1Schema, type CommercePublicCartEventV1 } from "@lana/contracts";
 import {
   canonicalBuyingIntentAuthorizesCartOpenV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
@@ -139,6 +139,7 @@ export interface RealtimeMetaPlan {
   /** Candidate-specific immutable gate input, encrypted with each Outbox unit. */
   readonly mediaBinding?: unknown;
   readonly handoffBinding?: unknown;
+  readonly publicCartSummary?: unknown;
 }
 
 export interface RealtimePancakeTagPlan {
@@ -2719,7 +2720,7 @@ export class PostgresRealtimeRuntimeStore {
       },
       this.metaRecipientAad(row.page_id, row.outbox_id),
     );
-    const { commerceMediaBinding, commerceHandoffBinding, ...payload } = this.cipher.decryptJson<RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown; commerceHandoffBinding?: unknown }>(
+    const { commerceMediaBinding, commerceHandoffBinding, commercePublicCartSummary: _publicSummary, ...payload } = this.cipher.decryptJson<RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown; commerceHandoffBinding?: unknown; commercePublicCartSummary?: unknown }>(
       this.bundleFromMetaRow(row),
       this.metaPayloadAad(row.page_id, row.outbox_id),
     );
@@ -2755,6 +2756,38 @@ export class PostgresRealtimeRuntimeStore {
       ...(commerceMediaBinding === undefined ? {} : { mediaBinding: commerceMediaBinding }),
       ...(commerceHandoffBinding === undefined ? {} : { handoffBinding: commerceHandoffBinding }),
     };
+  }
+
+  /** Numeric communication history only. Never returns plaintext, effect authority or checkout fields. */
+  async readAcceptedCommerceCartSummaries(input:{pageId:string;conversationId:string;customerHash:string;recipientHash:string;before:Date}):Promise<CommercePublicCartEventV1[]> {
+    const result=await this.pool.query<MetaOutboxRow & {status:string;accepted_at:Date;meta_message_id:string}>(
+      `SELECT o.* FROM meta_outbox o JOIN conversations c ON c.conversation_id=o.conversation_id AND c.page_id=o.page_id
+       WHERE o.page_id=$1 AND o.conversation_id=$2 AND c.customer_hash=$3
+         AND o.status IN ('SENT_ACCEPTED','DELIVERED','READ') AND o.meta_message_id IS NOT NULL
+         AND o.accepted_at IS NOT NULL AND o.accepted_at<$4 AND o.payload_expires_at>now() AND o.sequence_no=0
+       ORDER BY o.accepted_at DESC,o.sequence_no DESC,o.outbox_id DESC LIMIT 30`,
+      [input.pageId,input.conversationId,input.customerHash,input.before]);
+    const events:CommercePublicCartEventV1[]=[];
+    const hash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    for(const row of result.rows){
+      if(events.length>=2)break;
+      try {
+        if(!["SENT_ACCEPTED","DELIVERED","READ"].includes(row.status)||!row.meta_message_id||row.page_id!==input.pageId||row.conversation_id!==input.conversationId||
+          !row.accepted_at||row.accepted_at>=input.before||row.payload_expires_at<=new Date())continue;
+        const {commercePublicCartSummary,commerceMediaBinding:_media,commerceHandoffBinding:_handoff,...message}=this.cipher.decryptJson<
+          RealtimeMetaMessageUnit & {commercePublicCartSummary?:unknown;commerceMediaBinding?:unknown;commerceHandoffBinding?:unknown}>(this.bundleFromMetaRow(row),this.metaPayloadAad(row.page_id,row.outbox_id));
+        const parsed=CommercePublicCartSummaryV1Schema.safeParse(commercePublicCartSummary);
+        if(!parsed.success||message.kind!=="TEXT")continue;
+        const b=parsed.data;
+        if(b.pageId!==input.pageId||b.conversationId!==input.conversationId||b.customerHash!==input.customerHash||b.recipientHash!==input.recipientHash||
+          b.responseGroupId!==row.response_group_id||b.sequence!==row.sequence_no||b.messageHash!==hash(message))continue;
+        const event={type:"ACCEPTED_PUBLIC_CART_SUMMARY" as const,eventId:hash([b.responseGroupId,b.sequence,b.messageHash]),messageHash:b.messageHash,
+          acceptedAt:row.accepted_at.toISOString(),cartId:b.cartId,cartVersion:b.cartVersion,
+          ...(b.discountTotalVnd===undefined?{}:{discountTotalVnd:b.discountTotalVnd}),grandTotalVnd:b.grandTotalVnd};
+        if(!events.some(e=>e.eventId===event.eventId))events.push(event);
+      }catch{/* Legacy/unreadable payloads supply no inferred public history. */}
+    }
+    return events.reverse();
   }
 
   /** Bounded read-only delivery memory. Reloadable from durable accepted Outbox,
@@ -3595,7 +3628,8 @@ export class PostgresRealtimeRuntimeStore {
       );
       const payload = this.cipher.encryptJson(
         { ...message, ...(plan.mediaBinding === undefined ? {} : { commerceMediaBinding: plan.mediaBinding }),
-          ...(plan.handoffBinding === undefined ? {} : { commerceHandoffBinding: plan.handoffBinding }) },
+          ...(plan.handoffBinding === undefined ? {} : { commerceHandoffBinding: plan.handoffBinding }),
+          ...(plan.publicCartSummary === undefined || sequence!==0 ? {} : { commercePublicCartSummary: CommercePublicCartSummaryV1Schema.parse(plan.publicCartSummary) }) },
         this.metaPayloadAad(input.pageId, outboxId),
         new Date(now.getTime() + 20 * 86_400_000),
       );

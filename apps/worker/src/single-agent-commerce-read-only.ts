@@ -1,4 +1,5 @@
 import { hasResidualPii } from "@lana/dataset-review";
+import { CommerceHistoryMetadataV1Schema } from "@lana/contracts";
 import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TerminalOutcome,
   type TrustedContext, type VerifierBinding } from "./single-agent-semantic-verifier-boundary.js";
 import type { CommerceScope, CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
@@ -9,14 +10,17 @@ export interface CommerceTurnTime { processingAt: string; timeZone: "Asia/Ho_Chi
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
+  historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   turnTime?: CommerceTurnTime;
   catalogImages?: readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   toolBudget: { roundsRemaining: number; callsRemaining: number }; availableTools?: readonly string[]; signal: AbortSignal }
 export interface VerifierRequest { generationId: string; instructions: string; finalDraft: string; trusted: TrustedContext;
+  historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   turnTime?: CommerceTurnTime;
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  publicCartSummary?(): unknown;
   /** Code-owned exact static fallback identity after a tool outcome. */
   fallbackId?(): string;
   sizeOutcome?(): { status: string } | null;
@@ -37,6 +41,7 @@ const bytes = (v: unknown) => Buffer.byteLength(typeof v === "string" ? v : JSON
 
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
 export async function runCommerceTurn(input: {
+  historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   scope: CommerceScope; latest: string; history: { role: "customer" | "shop"; text: string }[];
   ownerPrompt: string; verifierPrompt: string; tools: CommerceTools; clock: () => Date; timeoutMs?: number;
   /** The transport bounds its exact serialized provider body before dispatch. */
@@ -86,9 +91,11 @@ export async function runCommerceTurn(input: {
       throw error;
     } finally { if (timer) clearTimeout(timer); }
   }
+  const metadataValid=input.historyMetadata===undefined || CommerceHistoryMetadataV1Schema.safeParse(input.historyMetadata).success;
+  if (!metadataValid || (input.historyMetadata && (bytes(input.historyMetadata)>1024||bytes(input.historyMetadata.publicCartEvents)>768)))return finish(fallback("INPUT_BOUND"));
   if (!input.latest.trim() || bytes(input.latest) > 2048 || input.history.length > 8 ||
     input.history.some(m => !["customer", "shop"].includes(m.role) || typeof m.text !== "string") ||
-    input.history.reduce((n, m) => n + bytes(m.text), 0) > 4096) return finish(fallback("INPUT_BOUND"));
+    input.history.reduce((n, m) => n + bytes(m.text), 0) + (input.historyMetadata?.publicCartEvents.length ? bytes(input.historyMetadata) : 0) > 4096) return finish(fallback("INPUT_BOUND"));
   if (hasResidualPii(input.latest) || input.history.some(m => hasResidualPii(m.text))) {
     return finish({ disposition: "NO_SEND", reason: "PRIVACY", text: null, fallbackId: null });
   }
@@ -110,6 +117,7 @@ export async function runCommerceTurn(input: {
     }
     const id = `${input.scope.requestId}:owner:${index + 1}`;
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, turnTime,
+      ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}),
       ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
@@ -160,7 +168,8 @@ export async function runCommerceTurn(input: {
     try {
       const result = await generate("verifier", verifyId, signal => input.verifier({ generationId: verifyId,
         instructions: input.verifierPrompt, finalDraft: output.text, trusted, latest: input.latest,
-        history: structuredClone(input.history), binding, turnTime, signal }));
+        history: structuredClone(input.history), binding, turnTime, signal,
+        ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}) }));
       response = { kind: "VERDICT" as const, binding, result: result.result };
     } catch { response = { kind: generations.at(-1)!.status === "TIMEOUT" ? "TIMEOUT" as const : "PROVIDER_ERROR" as const }; }
     let current: TrustedContext;

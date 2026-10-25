@@ -49,6 +49,7 @@ export async function createCommerceEffectTools(input: {
   const turnRecipient = authority?.recipient ?? input.scope.recipient;
   const refreshAuthority = async () => { authority = await input.readAuthority?.(); };
   let receipt: TrustedContext["effectReceipts"][number] | undefined;
+  let publicSummary: unknown;
   let receiptConversationRevision: number | undefined;
   let receiptBindingVersion: string | undefined;
   let committedTerminal: { reason: string; revision: number; operationId: string; conversationRevision: number; disposition?: "NO_SEND" } | undefined;
@@ -323,7 +324,9 @@ export async function createCommerceEffectTools(input: {
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
     await refreshSelections();
     return snapshot(); },
+  publicCartSummary:()=>publicSummary,
   async recover(outcome: TerminalOutcome) {
+    publicSummary=undefined;
     if (outcome.disposition === "NO_SEND") return outcome;
     const handoff = await terminalOutcome(); if (handoff) return handoff;
     if (input.base.snapshot().state.customerStateUpdatePending === true) return outcome;
@@ -361,6 +364,8 @@ export async function createCommerceEffectTools(input: {
           (active.some(s => s.stockStatus === "PRE_ORDER") ? " Có món đặt trước, chị nhé." : "");
       } catch { /* No fresh policy means no current money or stock assertion. */ }
     }
+    if(summary && receipt.effect!=="PURCHASE_CONFIRMED")publicSummary={cartId:cart.cartId,cartVersion:cart.revision,
+      ...(receipt.effect==="NEGOTIATION_UPDATED"&&cart.discountTotalVnd!==null&&cart.discountTotalVnd>0?{discountTotalVnd:cart.discountTotalVnd}:{}),grandTotalVnd:cart.grandTotalVnd};
     return { disposition: "SEND_ELIGIBLE", reason: summary && receipt.effect !== "PURCHASE_CONFIRMED" ? "RECEIPT_BACKED_CART_SUMMARY" : "RECEIPT_BACKED_ACK", text: receipt.effect === "PURCHASE_CONFIRMED"
       ? "Shop đã nhận xác nhận mua hàng của chị." : receipt.effect === "CART_OPENED"
         ? "Em đã thêm món chị chọn vào giỏ." + summary : receipt.effect === "NEGOTIATION_UPDATED" && summary

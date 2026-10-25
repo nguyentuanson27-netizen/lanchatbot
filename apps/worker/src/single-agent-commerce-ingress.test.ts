@@ -438,6 +438,42 @@ async function seedCart(f: ReturnType<typeof fixture>) {
     sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
 }
 
+it("persists a real recovery public outcome and feeds only its accepted numeric history to both models next turn",async()=>{
+  const f=fixture();await seedCart(f);
+  f.message.text="Bớt cho chị chút";
+  let calls=0;
+  const first=await f.run(async()=>{
+    if(++calls===1)return {kind:"TOOLS",calls:[{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:f.message.text}}],
+      content:{role:"model",parts:[{functionCall:{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:f.message.text}}}]}};
+    throw new Error("OUTPUT_FAILURE");
+  });
+  expect(first.terminal.reason).toBe("RECEIPT_BACKED_CART_SUMMARY");
+  const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
+  expect(meta.publicCartSummary).toMatchObject({kind:"C3_PUBLIC_CART_SUMMARY_V1",cartId:f.cycle().cart!.value.cartId,
+    grandTotalVnd:f.cycle().cart!.value.grandTotalVnd});
+  const proof=meta.publicCartSummary as Record<string,unknown>;
+  const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),outboxId="accepted-summary";
+  const payload=cipher.encryptJson({...meta.messages[0],commercePublicCartSummary:proof},`lana:meta-payload:v2:${commerceScope().pageId}:${outboxId}`,new Date(Date.now()+60000));
+  const reader=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",cipher);
+  (reader as unknown as {pool:unknown}).pool={query:async()=>({rows:[{outbox_id:outboxId,page_id:commerceScope().pageId,conversation_id:commerceScope().conversationId,
+    response_group_id:meta.responseGroupId,sequence_no:0,status:"SENT_ACCEPTED",meta_message_id:"accepted",accepted_at:new Date(commerceNow.getTime()-1),
+    payload_ciphertext:payload.ciphertext,payload_nonce:payload.nonce,payload_auth_tag:payload.authTag,payload_encrypted_dek:payload.encryptedDek,payload_key_ref:payload.keyRef,payload_expires_at:payload.expiresAt}]})};
+  Object.assign(f.store,{readAcceptedCommerceCartSummaries:reader.readAcceptedCommerceCartSummaries.bind(reader)});
+  f.history.listConversationHistory.mockResolvedValue([{senderType:"BOT",text:"[ADDRESS]"},{senderType:"CUSTOMER",text:"Giữ size M nhé."}]);
+  f.message.messageId="total-next";f.message.eventKey="total-next";f.message.text="Cả ship bao nhiêu em?";
+  const owner=vi.fn(async()=>({kind:"FINAL" as const,text:"Dạ chị."}));
+  const second=await f.run(owner);
+  expect(second.terminal.disposition).toBe("SEND_ELIGIBLE");
+  expect(owner.mock.calls).toHaveLength(1);
+  const ownerRequest=(owner.mock.calls as unknown as [Parameters<typeof runPersistedCommerceIngress>[0]["owner"] extends (r:infer R)=>unknown?R:never][])[0]![0];
+  expect(ownerRequest.historyMetadata?.publicCartEvents).toHaveLength(1);
+  expect(ownerRequest.context.effectReceipts).toEqual([]);
+  expect(ownerRequest.context.state.cartQuote).toMatchObject({grandTotalVnd:f.cycle().cart!.value.grandTotalVnd});
+  const verify=(f.verifier.mock.calls as unknown as [{historyMetadata:unknown}][]).at(-1)![0];
+  expect(verify.historyMetadata).toEqual(ownerRequest.historyMetadata);
+  expect(JSON.stringify(ownerRequest.contents)).not.toContain("[ADDRESS]");
+});
+
 it("does not count the same objection again when a superseded batch gains a new tail",async()=>{
   const f=fixture(); await seedCart(f);
   f.message.messageId="objection-A";f.message.eventKey="objection-A";f.message.text="Giá hơi cao";
