@@ -50,3 +50,11 @@ Output ngoài repo, dưới `C:/Users/nguye/Documents/Sản phẩm AI/`:
 | c3-b-rule-retention-s2-cod5-20261026 | 3PASS: verified partial, owner-error bounded price, changed source before delivery chặn cả group | dropped |
 
 Tất cả diagnostic có sourceDirty=true, không phải exact-source qualification. Sau đó thêm regression unit ingress giữ PRODUCT/PROFILE proofs và mở deterministic cohort lên7 tình huống để kiểm commit/rollback timeout và cart receipt. Chưa dùng7ca này làm provider corpus hoặc đổi denominator51native cũ. Final exact-source COD/BANK, executable review, lint và Node rerun chưa hoàn tất ở savepoint này.
+
+## Executable review trên 0e2f97bf và bản sửa trước seal tiếp theo
+
+Reviewer độc lập REVISE 2P2: explicit handoff commit=false còn cho owner tiếp tục; existing cart chưa có exact sales-state proof tại sequence0. Đã tái hiện RED3 (lost CAS + REJECTED/UNAVAILABLE terminal call) và RED1 (cartQuote thiếu proof vẫn ALLOWED), rồi sửa terminal NO_SEND và code-only SALES_STATE qua existing scoped repository. Runner chặn cả terminal args/policy errors trước generation kế; inherited committed effects vẫn được ưu tiên. Thêm ba regression immediate/conflict/policy/args và giữ không retry.
+
+Cohort DB bổ sung existing-cart không mutation: có/không thay encrypted cart state trong disposable DB trước restart/sequence0. Hai full composed runs COD/BANK trên exact clean source0e2f97bf đều dừng sau4ca partial PASS tại rollback-response-lost vì harness tiêm lỗi vào mọi transaction, gồm finalize NO_SEND. Evidence giữ nguyên ở c3-b-rule-retention-sealed-cod-20261026 và c3-b-rule-retention-sealed-bank-20261026, mỗi run6cases gồm1FAIL, provider0, databaseDropped=true. Đã sửa fault injection one-shot; chưa gọi chúng PASS. Executable mới cần seal/review/DB run riêng.
+
+Sau bản sửa review: commerce+boundary574PASS, Node163PASS; direct worker tsc exit0; contracts3PASS/build exit0. Worker full build còn chạy khi ghi savepoint. Không model request, không đổi provider/config/ngưỡng hoặc chấm lại kết quả model cũ.

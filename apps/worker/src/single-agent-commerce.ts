@@ -67,6 +67,8 @@ export async function createCommerceTools(input: {
   if (input.effects) {
     const effects=input.effects;
     tools = await createCommerceEffectTools({ ...effects,
+      repository:{read:key=>observed("SALES_STATE",{},()=>effects.repository.read(key)),
+        compareAndSwap:update=>effects.repository.compareAndSwap(update)},
       select:q=>observed("CART_SELECTION",q,()=>effects.select(q)),
       readReceipt:id=>observed("RECEIPT",{operationId:id},()=>effects.readReceipt(id)),base: tools, scope, clock });
     availableTools.push("add_to_cart", "change_cart_item", "confirm_purchase");

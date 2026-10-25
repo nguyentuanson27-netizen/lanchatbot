@@ -188,6 +188,7 @@
       "PROFILE",
       "SIZE_SOURCE",
       "CART_SELECTION",
+      "SALES_STATE",
       "RECEIPT"
     ],
     "maximumSourceChecks": 16,

@@ -476,7 +476,7 @@ it("keeps exact verified price and durable product/profile proofs through all ad
  const group=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1].metaPlan!;
  expect(group.protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"})]));
  const proof=(group.handoffBinding as {reply:{sources:{kind:string}[]}}).reply;
- expect(proof.sources.map(s=>s.kind)).toEqual(expect.arrayContaining(["PRODUCT","PROFILE"]));
+ expect(proof.sources.map(s=>s.kind)).toEqual(expect.arrayContaining(["PRODUCT","PROFILE","SALES_STATE"]));
 });
 
 async function seedCart(f: ReturnType<typeof fixture>) {

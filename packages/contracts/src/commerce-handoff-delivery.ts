@@ -3,7 +3,7 @@ import { HandoffReasonV2Schema } from "./v2/handoff-sales-funnel.js";
 
 const hash = z.string().regex(/^[a-f0-9]{64}$/u);
 export const CommerceHandoffSourceCheckV1Schema = z.object({
-  kind: z.enum(["PRODUCT", "PROFILE", "SIZE_SOURCE", "CART_SELECTION", "RECEIPT"]),
+  kind: z.enum(["PRODUCT", "PROFILE", "SIZE_SOURCE", "CART_SELECTION", "SALES_STATE", "RECEIPT"]),
   queryJson: z.string().min(2).max(4096), sourceHash: hash,
 }).strict();
 export type CommerceHandoffSourceCheckV1 = z.infer<typeof CommerceHandoffSourceCheckV1Schema>;

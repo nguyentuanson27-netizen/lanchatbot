@@ -76,7 +76,7 @@ test('merged upstream copy is replaced in the actual terminal only after a commi
  const tools=createCommerceHandoffTools({base,scope,clock,policy:async()=>policy,read:async()=>structuredClone(current),
   commit:async({next})=>{if(!accepted)return false;current=next;return true;}});
  assert.equal((await tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}})).status,accepted?'OK':'REJECTED');
- if(!accepted){assert.equal(await tools.terminalOutcome(),null);assert.equal((await tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}})).status,'REJECTED');continue;}
+ if(!accepted){assert.equal((await tools.terminalOutcome()).disposition,'NO_SEND');assert.equal((await tools.invoke({name:'request_handoff',args:{reason:'EXCHANGE'}})).status,'REJECTED');continue;}
  const terminal=await tools.terminalOutcome();
  assert.equal(terminal.disposition,'HANDOFF');
  assert.equal(terminal.text,candidate.rules.find(r=>r.reason==='EXCHANGE').holdingReply);

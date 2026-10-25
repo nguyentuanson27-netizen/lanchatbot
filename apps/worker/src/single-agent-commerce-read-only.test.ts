@@ -33,6 +33,14 @@ it("allows one separately accounted terminal handoff after six normal calls with
   expect(s.verifier).not.toHaveBeenCalled();expect(invokeBatch).toHaveBeenCalledTimes(3);
 });
 
+it.each(["REJECTED","UNAVAILABLE"] as const)("ends a rejected terminal handoff without another generation (%s)",async status=>{
+  const s=setup(),invokeBatch=vi.fn(async()=>[{status,reason:"HANDOFF_CONFLICT"}]),owner=vi.fn(async()=>tool("request_handoff",{reason:"CUSTOMER_REQUESTED_HUMAN"}));
+  const r=await runCommerceTurn({...s,tools:{...s.tools,availableTools:["request_handoff"],invokeBatch},owner});
+  expect(r.terminal).toMatchObject({disposition:"NO_SEND",reason:"HANDOFF_REQUEST_REJECTED",text:null});
+  expect(owner).toHaveBeenCalledOnce();expect(s.verifier).not.toHaveBeenCalled();expect(invokeBatch).toHaveBeenCalledOnce();
+  expect(r.terminalHandoffCalls).toBe(1);
+});
+
 it("rejects a mixed handoff/read batch without executing either call",async()=>{
   const s=setup(),invokeBatch=vi.fn(async()=>[]),calls=[{name:"request_handoff",args:{reason:"EXCHANGE"}},{name:"read_policy",args:{}}];
   const r=await runCommerceTurn({...s,tools:{...s.tools,availableTools:["read_policy","request_handoff"],invokeBatch},

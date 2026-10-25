@@ -33,6 +33,7 @@ const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringif
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
  check(m.terminalHandoffAttempts===1&&m.maximumExecutedToolInvocations===7,'TERMINAL_HANDOFF_BUDGET');
+ check(JSON.stringify(m.handoffReply?.sourceCheckKinds)===JSON.stringify(['PRODUCT','PROFILE','SIZE_SOURCE','CART_SELECTION','SALES_STATE','RECEIPT']),'HANDOFF_SOURCE_KINDS');
  check(m.handoffReply?.rendererVersion==='C3_B_PRICE_FRAGMENT_V1'&&m.handoffReply.maximumSourceChecks===16&&m.handoffReply.maximumTrustedContextBytes===65536&&
   Array.isArray(m.handoffReply.approvedHoldingHashes)&&m.handoffReply.approvedHoldingHashes.length>0&&
   m.handoffReply.approvedHoldingHashes.every(h=>typeof h==='string'&&/^[a-f0-9]{64}$/.test(h)),'HANDOFF_REPLY_CONTRACT');

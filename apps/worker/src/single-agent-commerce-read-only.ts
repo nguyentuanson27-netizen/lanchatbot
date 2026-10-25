@@ -193,6 +193,8 @@ export async function runCommerceTurn(input: {
       toolLatencyMs += performance.now()-toolStarted;
       const actual = await effectTerminal();
       if (actual) return finish(actual);
+      if(terminalCall&&(results.length!==1||results[0]?.status!=="OK"))
+        return finish({disposition:"NO_SEND",reason:"HANDOFF_REQUEST_REJECTED",text:null,fallbackId:null});
       if (input.tools.sizeOutcome?.()?.status === "NO_VERIFIED_CHART") return finish(fallback("SIZE_RULE_UNAVAILABLE"));
       if (results.length !== output.calls.length || bytes(resultBudgetView(output.calls, results, input.tools.snapshot())) > 8192)
         return finish(fallback("TOOL_RESULT_BOUND"));

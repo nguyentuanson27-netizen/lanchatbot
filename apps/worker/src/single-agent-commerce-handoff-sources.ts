@@ -11,6 +11,7 @@ export function createCommerceHandoffSourceReader(input:{
   size:(id:string,binding:CommerceHandoffDeliveryBinding)=>Promise<unknown>;
   selection:(query:CartSelectionQuery,binding:CommerceHandoffDeliveryBinding)=>Promise<unknown>;
   receipt:(id:string,binding:CommerceHandoffDeliveryBinding)=>Promise<unknown>;
+  salesState:(binding:CommerceHandoffDeliveryBinding)=>Promise<unknown>;
 }){
   return async(source:CommerceHandoffSourceCheckV1,binding:CommerceHandoffDeliveryBinding)=>{
     const raw:unknown=JSON.parse(source.queryJson),id=(v:unknown):v is string=>typeof v==="string"&&v.length>0&&v.length<=128;
@@ -18,6 +19,7 @@ export function createCommerceHandoffSourceReader(input:{
     switch(source.kind){
       case "PRODUCT":{const q=toolArgs(raw,["productId","readPos"]);if(!q||!id(q.productId)||typeof q.readPos!=="boolean")throw Error("HANDOFF_SOURCE_QUERY");value=await input.product(q.productId,q.readPos,binding);break;}
       case "PROFILE":if(!toolArgs(raw,[]))throw Error("HANDOFF_SOURCE_QUERY");value=await input.profile(binding);break;
+      case "SALES_STATE":if(!toolArgs(raw,[]))throw Error("HANDOFF_SOURCE_QUERY");value=await input.salesState(binding);break;
       case "SIZE_SOURCE":{const q=toolArgs(raw,["subjectRef"]);if(!q||!id(q.subjectRef))throw Error("HANDOFF_SOURCE_QUERY");value=await input.size(q.subjectRef,binding);break;}
       case "RECEIPT":{const q=toolArgs(raw,["operationId"]);if(!q||!id(q.operationId))throw Error("HANDOFF_SOURCE_QUERY");value=await input.receipt(q.operationId,binding);break;}
       case "CART_SELECTION":{

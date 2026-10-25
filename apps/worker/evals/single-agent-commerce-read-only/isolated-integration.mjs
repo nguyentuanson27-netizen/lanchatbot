@@ -390,6 +390,7 @@ try{
    profile:async b=>{const r=await runtime.loadOrCreateCustomerProfile(b.pageId,b.customerHash,()=>{throw Error('EXISTING_PROFILE_REQUIRED');},new Date());return {profile:r.profile,fieldEvidence:r.fieldEvidence};},
    size:async id=>commerceSizeSource((await read.catalog.readProduct(id,false)).product,await policy(),read.productGroups),
    selection:q=>{assert.equal(q.shopAlias,bound.shopAlias,'SELECTION_SHOP_SCOPE');return bindCommerceFacts(facts,bound).resolveCartSelection(q,new Date());},
+   salesState:async b=>{const r=await runtime.loadOrCreateSalesCycle(b.pageId,b.conversationId,()=>{throw Error('EXISTING_SALES_CYCLE_REQUIRED');},new Date());return r.state;},
    receipt:(id,b)=>createPersistedCommerceReceiptReader({store:runtime,scope:{...bound,recipient:b.recipientHash},conversationKey:bound.conversationId,
     repository:{read:async()=>{const r=await runtime.loadOrCreateSalesCycle(bound.pageId,bound.conversationId,()=>{throw Error('EXISTING_SALES_CYCLE_REQUIRED');},new Date());return r.state;}}})(id),
   });
@@ -417,8 +418,8 @@ try{
    let batch;
    for(let n=0;n<20;n++){batch=await inbox.claimNextBatch('c3-b-stateful',300000);if(!batch||batch.conversationHash===customerHash)break;await inbox.completeBatch(batch);}
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
-   let owners=0,verifiers=0;const toolResponses=[];
-   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply)throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');return applied;});if(loseCommitReply)throw Error('CONTROLLED_COMMIT_REPLY_LOST');return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
+   let owners=0,verifiers=0,faultInjected=false;const toolResponses=[];
+   const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
     read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
@@ -428,7 +429,15 @@ try{
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
-  return {bound,turn,state,capture,capturePayloads,gateCalls,deliveryObservations,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
+  // Fault injection in the disposable database only: change cart without changing conversation authority.
+  const changeStoredCart=async()=>{
+   const record=await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw Error('STATE_REQUIRED');}),next=structuredClone(record.state);
+   assert(next.cart?.value.lines.length);next.revision++;next.cart.value.revision++;next.cart.value.lines[0].quantity++;
+   const encrypted=cipher.encryptJson(next,`lana:sales-cycle:v1:${pageId}:${bound.conversationId}`,record.expiresAt);
+   const changed=await pool.query('UPDATE sales_cycle_states SET state_revision=$3,state_ciphertext=$4,state_nonce=$5,state_auth_tag=$6,state_encrypted_dek=$7,state_key_ref=$8 WHERE page_id=$1 AND conversation_id=$2',
+    [pageId,bound.conversationId,next.revision,encrypted.ciphertext,encrypted.nonce,encrypted.authTag,encrypted.encryptedDek,encrypted.keyRef]);assert.equal(changed.rowCount,1);
+  };
+  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
@@ -447,6 +456,19 @@ try{
   j.restartDelivery();await j.drain();await j.drain();
   if(['source-changed-before-delivery','rollback-response-lost','cart-source-changed'].includes(mode))assert.deepEqual(j.capture,[]);
   else {assert.equal(j.capture.length,1,JSON.stringify(j.deliveryObservations));assert.match(j.capture[0],cart?/navy size M/:/499\.000đ/);assert(j.capture[0].includes(holding));}
+ });
+ for(const mode of ['unchanged','cart-changed'])await check('B composed prepared handoff existing cart '+mode,async()=>{
+  const holding='Bên em sẽ kiểm tra ảnh rồi báo chị nhé.',j=await statefulFixture({deferredHandoff:true,dependencyHoldingReply:holding});
+  await j.turn('Chị lấy áo SM613 navy size M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',color:'navy',size:'M',quantity:1}}]),say('Em đã thêm áo navy size M vào giỏ chị nhé.')]);
+  await j.drain();j.capture.length=0;
+  const r=await j.turn('Áo trong giỏ bao nhiêu, có ảnh khách mặc không em?',[
+   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}]),say('Áo navy size M trong giỏ 499.000đ chị nhé.')],
+   {inspect:request=>{assert.equal(request.context.effectReceipts.length,0,'NO_MUTATION_IN_THIS_TURN');assert(request.context.cartBinding);}});
+  assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal(r.verifiers,1);
+  if(mode==='cart-changed')await j.changeStoredCart();
+  j.restartDelivery();await j.drain();await j.drain();
+  if(mode==='cart-changed'){assert.deepEqual(j.capture,[]);assert(j.deliveryObservations.some(o=>o.reasonCode==='C3_HANDOFF_SOURCE_SALES_STATE_CHANGED'));}
+  else {assert.equal(j.capture.length,1,JSON.stringify(j.deliveryObservations));assert.match(j.capture[0],/499\.000đ/);assert(j.capture[0].includes(holding));}
  });
  for(const mode of ['source-refresh','stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and captures only committed holding reply',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});

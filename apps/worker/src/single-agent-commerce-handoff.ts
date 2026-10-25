@@ -82,6 +82,7 @@ export function createCommerceHandoffTools(input: {
     if (!committed) {
       const current = await read();
       const inherited = await input.base.terminalOutcome?.(); if (inherited) return inherited;
+      if(attempts&&status==="BLOCKED")return {disposition:"NO_SEND",reason:"HANDOFF_BLOCKED",text:null,fallbackId:null};
       if (pending && (commerceHash(current)!==commerceHash(pending.before)||policyIdentity(await input.policy())!==pending.policyHash)) {
         status="BLOCKED";return {disposition:"NO_SEND",reason:"HANDOFF_PREDECESSOR_CHANGED",text:null,fallbackId:null};
       }

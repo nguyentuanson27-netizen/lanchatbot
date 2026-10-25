@@ -84,7 +84,7 @@ describe("Phase B handoff follows current code policy and committed ownership", 
   it("does not acknowledge a lost CAS or an unproved commit", async () => {
     const s = await setup(); s.commit.mockResolvedValue(false);
     expect((await s.tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } })).status).toBe("REJECTED");
-    expect(await s.tools.terminalOutcome!()).toBeNull();
+    expect(await s.tools.terminalOutcome!()).toMatchObject({disposition:"NO_SEND",reason:"HANDOFF_BLOCKED"});
     expect((await s.tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } })).status).toBe("REJECTED");
     expect(s.commit).toHaveBeenCalledTimes(1);
     const unknown=await setup();unknown.commit.mockRejectedValue(new Error("ambiguous response"));
@@ -162,6 +162,17 @@ describe("Phase B handoff follows current code policy and committed ownership", 
   });
 });
 
+it.each(["conflict","policy-error","invalid-arguments"])("explicit handoff ends the turn on failure (%s)",async fault=>{
+ const s=await setup();s.commit.mockResolvedValue(false);
+ const tools=createCommerceHandoffTools({base:s.base,scope:s.scope,clock:()=>commerceNow,read:s.read,
+  policy:async()=>{if(fault==="policy-error")throw Error("POLICY_UNAVAILABLE");return s.policy;},commit:async({next})=>s.commit(next)});
+ const call={name:"request_handoff",args:{reason:fault==="invalid-arguments"?"ADMIN_REQUEST":"CUSTOMER_REQUESTED_HUMAN"}};
+ const owner=vi.fn(async()=>({kind:"TOOLS" as const,calls:[call],content:{role:"model" as const,parts:[{functionCall:call}]}})),verifier=vi.fn();
+ const r=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:()=>commerceNow,latest:"Cho chị gặp người bán.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+ expect(r.terminal).toMatchObject({disposition:"NO_SEND",text:null});expect(owner).toHaveBeenCalledOnce();expect(verifier).not.toHaveBeenCalled();
+ expect(s.commit.mock.calls.length).toBe(fault==="conflict"?1:0);expect(r.terminalHandoffCalls).toBe(1);
+});
+
 it.each(["success","denied","unknown","changed"])("no-chart recovery reuses atomic handoff at most once (%s)",async mode=>{
  const s=await setup();const sizeBase={...s.base,sizeOutcome:()=>({status:"NO_VERIFIED_CHART"})};
  let attempts=0;
@@ -171,7 +182,7 @@ it.each(["success","denied","unknown","changed"])("no-chart recovery reuses atom
  const r=await runCommerceTurn({scope:s.scope,tools,latest:"Chọn size chị nhé",history:[],clock:()=>commerceNow,ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
  owner:async()=>{owners++;const c={name:"recommend_size",args:{subjectRef:"QU714"}};return {kind:"TOOLS",calls:[c],content:{role:"model",parts:[{functionCall:c}]}};},verifier:async()=>{throw Error("UNEXPECTED_VERIFY");}});
  expect(owners).toBe(1);expect(r.verifierGenerations).toBe(0);expect(attempts).toBe(1);
- expect(r.terminal.disposition).toBe(mode==="success"?"HANDOFF":mode==="denied"?"FALLBACK":"NO_SEND");
+ expect(r.terminal.disposition).toBe(mode==="success"?"HANDOFF":"NO_SEND");
  await tools.recover!(r.terminal);expect(attempts).toBe(1);
 });
 

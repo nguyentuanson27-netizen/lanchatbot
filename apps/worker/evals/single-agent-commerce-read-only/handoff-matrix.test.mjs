@@ -27,7 +27,7 @@ for(const reason of Object.keys(expected))test('candidate '+reason+' uses its co
  const base=createReadOnlyTools({scope,clock,policy:async()=>({...await fixturePolicy(),bundle:policy}),catalog:{readProduct:async()=>{throw new Error('UNUSED');},searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});
  const tools=createCommerceHandoffTools({base,scope,clock,policy:async()=>policy,read:async()=>structuredClone(current),commit:async({next})=>{commits++;if(!accepted)return false;current=next;return true;}});
  assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,accepted?'OK':'REJECTED');
- if(!accepted){assert.equal(await tools.terminalOutcome(),null);assert.equal(current.state.conversationOwner,'BOT');}
+ if(!accepted){assert.equal((await tools.terminalOutcome()).disposition,'NO_SEND');assert.equal(current.state.conversationOwner,'BOT');}
  else {
  assert.equal(current.state.conversationOwner,'HUMAN');
  const terminal=await tools.terminalOutcome();

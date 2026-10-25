@@ -43,7 +43,7 @@ it.each(["unchanged", "policy", "silent", "recipient", "revision", "generation",
   else if (fault !== "base-blocked") expect(base.authorize).not.toHaveBeenCalled();
 });
 
-it.each(["unchanged","source-changed","source-unavailable","no-reader","expired","trusted-tampered"])("rechecks protected handoff evidence before sequence zero (%s)",async fault=>{
+it.each(["unchanged","source-changed","source-unavailable","no-reader","expired","trusted-tampered","cart-no-proof"])("rechecks protected handoff evidence before sequence zero (%s)",async fault=>{
  const recipientId="synthetic-recipient",scope={...commerceScope(),recipient:createHash("sha256").update(recipientId).digest("hex")};
  const policy=(await fixturePolicy()).bundle!,before={...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:1};
  const state=applySilentHandoff(before,"AGENT_REQUEST",1,1,commerceNow).state;
@@ -51,6 +51,7 @@ it.each(["unchanged","source-changed","source-unavailable","no-reader","expired"
  const product=fixtureProduct(),tools=createReadOnlyTools({scope,clock:()=>commerceNow,policy:async()=>fixturePolicy(),initialProducts:[product.product],catalog:{readProduct:async()=>product,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
  await tools.invoke({name:"read_product",args:{subjectRef:product.product.productId,offerType:"DIRECT"}});
  const trusted=tools.snapshot(),text="Áo 499.000đ. Bên em kiểm tra ảnh rồi báo chị nhé.",messages=[{kind:"TEXT" as const,text}];
+ if(fault==="cart-no-proof")trusted.state.cartQuote={total:499000};
  const reply={kind:"CODE_PRICE_V1" as const,requestId:scope.requestId,beforeRevision:1,beforeStateHash:commerceHash(before),
   trustedJson:JSON.stringify(trusted),trustedHash:commerceHash(trusted),groupHash:commerceHash(messages),
   sources:[{kind:"PRODUCT" as const,queryJson:JSON.stringify({productId:product.product.productId,readPos:true}),sourceHash:commerceHash(product)}]};
