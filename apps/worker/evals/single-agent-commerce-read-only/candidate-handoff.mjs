@@ -8,11 +8,21 @@ export function isolatedHandoffRecords(upstream,{pageId,candidate}){
  const matrices=records.filter(r=>r.version.artifactKind==='HANDOFF_MATRIX');
  assert(matrices.length<=1,'CANDIDATE_MATRIX_SCOPE_DUPLICATE');
  const prior=matrices[0],content=structuredClone(prior?.version.content??approved);
+ const approvedByReason=new Map(approved.rules.map(rule=>[rule.reason,rule]));
  for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE','DEPENDENCY_FAILURE']){
-  const delta=approved.rules.find(r=>r.reason===reason);assert(delta?.customerMessagePolicy==='HOLDING_REPLY_THEN_HANDOFF'&&delta.holdingReply,'CANDIDATE_HOLDING_REQUIRED');
+  const delta=approvedByReason.get(reason);assert(delta?.customerMessagePolicy==='HOLDING_REPLY_THEN_HANDOFF'&&delta.holdingReply,'CANDIDATE_HOLDING_REQUIRED');
   const rule=content.rules.find(r=>r.reason===reason);
-  if(rule)Object.assign(rule,{customerMessagePolicy:delta.customerMessagePolicy,holdingReply:delta.holdingReply});
+  if(rule)rule.customerMessagePolicy=delta.customerMessagePolicy;
   else content.rules.push(structuredClone(delta));
+ }
+ // The candidate owns customer copy for every retained holding rule, including
+ // rules inherited from the upstream matrix. Preserve upstream policy and tags.
+ for(const rule of content.rules){
+  if(rule.customerMessagePolicy==='HOLDING_REPLY_THEN_HANDOFF'){
+   const copy=approvedByReason.get(rule.reason)?.holdingReply;
+   assert(copy,'CANDIDATE_COPY_UNAVAILABLE');
+   rule.holdingReply=copy;
+  }else rule.holdingReply=null;
  }
  content.sourceMetadata=approved.sourceMetadata;
  HandoffMatrixAdminContentV1Schema.parse(content);

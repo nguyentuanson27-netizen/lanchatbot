@@ -2324,5 +2324,5 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 
 - [x] Follow up independent review of `5005c8d0`: remove internal-role wording from all candidate holding replies; preserve the committed-handoff boundary and avoid promising an exchange schedule before eligibility is known.
 - [x] Revise current full and B1 owner prompts to keep internal routing out of customer prose; update the full prompt hash and candidate matrix version.
-- [x] Actual terminal handoff tests 5 reasons after commit and no acknowledgement before commit; focused worker 121/121, protocol/prompt/matrix 26/26, worker build/lint, diff check PASS. [Report](../docs/specs/c3-phase-b-customer-facing-handoff-copy-20261025.md).
+- [x] Actual terminal handoff tests 5 reasons after commit and no acknowledgement before commit; independent review caught upstream copy surviving the isolated merge, then importer RED→GREEN tests established replacement and fail-closed missing copy. Focused worker 121/121, protocol/prompt/matrix 28/28, worker build/lint, diff check PASS. [Report](../docs/specs/c3-phase-b-customer-facing-handoff-copy-20261025.md).
 - [ ] Independent review exact new source and run model qualification before claiming conversation style or Phase B readiness; generic semantic-failure fallback remains weak.
