@@ -16,6 +16,7 @@ const expected={
  CUSTOMER_REQUESTED_HUMAN:'Dạ, em đã chuyển lời nhắn của chị rồi ạ.',
  SIZE_RULE_UNAVAILABLE:'Bên em sẽ kiểm tra lại size mẫu này rồi tư vấn chị nhé.',
  DEPENDENCY_FAILURE:'Em chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.',
+ RESPONSE_UNAVAILABLE:'Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.',
 };
 for(const reason of Object.keys(expected))test('candidate '+reason+' uses its configured procedure only after committed handoff',async()=>{
  const scope=commerceScope(),policy=(await fixturePolicy()).bundle;

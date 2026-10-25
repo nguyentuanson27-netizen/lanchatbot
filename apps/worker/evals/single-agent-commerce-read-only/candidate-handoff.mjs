@@ -9,7 +9,7 @@ export function isolatedHandoffRecords(upstream,{pageId,candidate}){
  assert(matrices.length<=1,'CANDIDATE_MATRIX_SCOPE_DUPLICATE');
  const prior=matrices[0],content=structuredClone(prior?.version.content??approved);
  const approvedByReason=new Map(approved.rules.map(rule=>[rule.reason,rule]));
- for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE','DEPENDENCY_FAILURE']){
+ for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE','DEPENDENCY_FAILURE','RESPONSE_UNAVAILABLE']){
   const delta=approvedByReason.get(reason);assert(delta?.customerMessagePolicy==='HOLDING_REPLY_THEN_HANDOFF'&&delta.holdingReply,'CANDIDATE_HOLDING_REQUIRED');
   const rule=content.rules.find(r=>r.reason===reason);
   if(rule)rule.customerMessagePolicy=delta.customerMessagePolicy;

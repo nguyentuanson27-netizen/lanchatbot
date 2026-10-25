@@ -131,7 +131,7 @@ export function createReadOnlyTools(input: {
     const status = raw ? normalizeCatalogToken(raw.data_status) : null;
     const offers = raw && ["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(status ?? "") &&
       observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
-    const metadata = offers !== null && offers.length <= 8 ? offerLiteral(id,source) : null;
+    const metadata = source && offers !== null && offers.length <= 8 ? offerLiteral(id,source) : null;
     if (metadata) offerContexts.set(id, metadata);
     else offerContexts.delete(id);
     const availability = { content: { status: content ? "OK" : "UNAVAILABLE", reason: content ? null : "SOURCE_UNAVAILABLE" },

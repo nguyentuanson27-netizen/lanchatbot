@@ -65,6 +65,83 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+async function enableRecoveryHandoff(f: ReturnType<typeof fixture>, mode: "holding" | "silent" = "holding") {
+  f.enableHandoff();
+  const resolved=await fixturePolicy();
+  const bundle=resolved.bundle!;
+  Object.assign(bundle.artifacts,{handoffMatrix:{schemaVersion:1,kind:"HANDOFF_MATRIX",sourceMetadata:bundle.artifacts.shopPolicy.sourceMetadata,
+    rules:["DEPENDENCY_FAILURE","RESPONSE_UNAVAILABLE"].map(reason=>({reason,customerMessagePolicy:mode==="holding"?"HOLDING_REPLY_THEN_HANDOFF":"SILENT_HANDOFF",
+      holdingReply:mode==="holding"?"Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.":null,tag:"NHAN_VIEN"}))}});
+  f.policy.mockResolvedValue({...resolved,bundle});
+}
+
+it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-verdict"])("atomically hands off unrecovered %s without another generation",async fault=>{
+  const f=fixture(); await enableRecoveryHandoff(f);
+  if(fault==="fail"||fault==="uncertain") f.verifier.mockResolvedValue({result:{verdict:fault==="fail"?"FAIL":"UNCERTAIN",violations:[]}});
+  if(fault==="malformed-verdict") f.verifier.mockResolvedValue({result:{verdict:"broken",violations:[]}});
+  const providerFault=["provider","malformed-finish","timeout"].includes(fault);
+  const owner=vi.fn(async()=>{if(providerFault)throw new Error(fault==="provider"?"HTTP_429":fault==="timeout"?"TIMEOUT":"OWNER_FINISH_REASON");
+    return {kind:"FINAL" as const,text:"Dạ chị."};});
+  const result=await f.run(owner);
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:providerFault?"DEPENDENCY_FAILURE":"RESPONSE_UNAVAILABLE"});
+  const handoffs=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);
+  expect(handoffs).toHaveLength(1);
+  expect(handoffs[0]![1]).toMatchObject({pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
+  expect(result.enqueued).toBe(1); expect(owner).toHaveBeenCalledTimes(1);
+  expect(f.verifier).toHaveBeenCalledTimes(providerFault?0:1);
+});
+
+it("fails closed if recovery commit readback becomes unavailable",async()=>{
+  const f=fixture();await enableRecoveryHandoff(f);
+  f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw new Error("READBACK_UNAVAILABLE");};});
+  const result=await f.run(async()=>{throw new Error("HTTP_429");});
+  expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
+  expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
+});
+
+it("keeps an automatic recovery handoff silent when current policy is silent",async()=>{
+  const f=fixture();await enableRecoveryHandoff(f,"silent");
+  const result=await f.run(async()=>{throw new Error("HTTP_429");});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",text:null});
+  expect(result.enqueued).toBe(0);
+  const c=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1];
+  expect(c.metaPlan).toBeUndefined();expect(c.completeInboxBatch).not.toBe(false);
+});
+
+it.each(["conflict","ambiguous","superseded","missing-rule"])("does not acknowledge an automatic handoff after %s",async fault=>{
+  const f=fixture();await enableRecoveryHandoff(f);
+  if(fault==="missing-rule")f.policy.mockImplementation(()=>fixturePolicy());
+  if(fault==="conflict")f.commit.mockResolvedValue({stateCommitted:false,metaOutboxCreated:0,inboxBatchStatus:"STALE",handoffEventCreated:false,pancakeTagOutboxCreated:false} as never);
+  if(fault==="ambiguous")f.commit.mockRejectedValue(new Error("COMMIT_UNKNOWN"));
+  const result=await f.run(async()=>{if(fault==="superseded")f.supersede();throw new Error("HTTP_429");});
+  expect(result.terminal.disposition).not.toBe("HANDOFF");
+  expect(result.terminal.text??"").not.toContain("Shop đã nhận");
+  expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan).length).toBeLessThanOrEqual(1);
+});
+
+it.each(["Không lấy Thạch Thảo nữa, gửi chị mẫu kia.","Chị đang so Thạch Thảo với Diệp An.","Cho chị xem bộ Thạch Thảo.","Mẫu kia cơ em."])("does not manufacture durable product focus from unbound prose: %s",async text=>{
+  const f=fixture();f.message.text=text;
+  await f.run(async()=>({kind:"FINAL",text:"Dạ chị."}));
+  expect((f.commit.mock.calls.at(-1)![1].state as {currentProductId:unknown}).currentProductId).toBeNull();
+});
+
+it.each(["metadata-refresh","rejected-caption"])("delivers independent closeup without a new handoff after %s",async mode=>{
+  const f=fixture(); await enableRecoveryHandoff(f);f.setFocus("SM613");f.message.text="Cho chị xem cận phần thêu nhé.";
+  const product=f.products[0]!;
+  product.snapshot.synced_at=new Date(commerceNow.getTime()-60_000).toISOString();
+  product.product.images=[{url:"https://content.pancake.vn/closeup.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,
+    feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  f.verifier.mockImplementation(async()=>{product.snapshot.synced_at=commerceNow.toISOString();return {result:{verdict:mode==="metadata-refresh"?"PASS":"UNCERTAIN",violations:[]}};});
+  let calls=0;
+  const tools=[{name:"select_product_media",args:{subjectRef:"SM613",intent:"DETAIL"}}];
+  const result=await f.run(async()=>++calls===1?{kind:"TOOLS",calls:tools,content:{role:"model",parts:tools.map(c=>({functionCall:c}))}}:
+    {kind:"FINAL",text:"Em gửi chị ảnh cận áo nhé."});
+  expect(result.enqueued).toBe(2);expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(0);
+  expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages[1]).toEqual({kind:"IMAGE",imageUrl:product.product.images[0]!.url});
+  expect(result.terminal.disposition).toBe(mode==="metadata-refresh"?"SEND_ELIGIBLE":"FALLBACK");
+  if(mode==="rejected-caption")expect(result.terminal.fallbackId).toBe("C3_B_VERIFIED_MEDIA_V1");
+});
+
 it("preserves a benign caption through the shared history redactor", async () => {
   const { redactAnalyticsMessage } = await import("@lana/database");
   const caption = "Em gửi chị ảnh cận để xem đường nét thêu nhé.";

@@ -46,6 +46,7 @@ export const HandoffReasonV2Schema = z.enum([
   "SAFETY_OR_COMPLIANCE",
   "DEPENDENCY_FAILURE",
   "ADMIN_REQUEST",
+  "RESPONSE_UNAVAILABLE",
 ]);
 export type HandoffReasonV2 = z.infer<typeof HandoffReasonV2Schema>;
 

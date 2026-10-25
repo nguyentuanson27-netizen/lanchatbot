@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, type ProtectedClaimV1 } from "@lana/contracts";
+import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, type ProtectedClaimV1, type HandoffReasonV2 } from "@lana/contracts";
 import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken, normalizeProductCode } from "@lana/business-tools";
 import { createConversationState, type ConversationState } from "@lana/conversation-engine";
 import type { ClaimedInboundBatch, PostgresChatHistoryStore, PostgresRealtimeInboxStore, PostgresRealtimeRuntimeStore, RealtimeSalesCyclePlan } from "@lana/database";
@@ -275,6 +275,32 @@ export async function runPersistedCommerceIngress(input: {
       c.scope.kind==="PRODUCT" && c.scope.productId===a.productId && c.value.assetSha256===commerceHash(a.url) &&
       c.provenance.sourceVersion===a.sourceVersion));
   if (recoveredMedia) result.terminal = { ...result.terminal, ...mediaFallback, reason: result.terminal.reason };
+  // Candidate recovery only, after independent media recovery has had its chance.
+  // A configured policy rule is required; existing consumers do not gain a new default.
+  const recoveryReasons: Record<string,HandoffReasonV2> = {
+    PROVIDER_ERROR:"DEPENDENCY_FAILURE",TIMEOUT:"DEPENDENCY_FAILURE",
+    FAIL:"RESPONSE_UNAVAILABLE",UNCERTAIN:"RESPONSE_UNAVAILABLE",MALFORMED:"RESPONSE_UNAVAILABLE",
+    BUDGET:"RESPONSE_UNAVAILABLE",OWNER_TOOL_MODE:"RESPONSE_UNAVAILABLE",OWNER_OUTPUT_ARTIFACT:"RESPONSE_UNAVAILABLE",
+  };
+  const recoveryReason = result.terminal.disposition === "FALLBACK" && !recoveredMedia ? recoveryReasons[result.terminal.reason] : undefined;
+  if (recoveryReason && current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
+    hardPrecheck(world,terminalFallback("C3_A_NONPROTECTED_V2").text!,input.clock())===null) {
+    const policy = await policyBundle();
+    if (policy.artifacts.handoffMatrix?.rules.some(rule=>rule.reason===recoveryReason)) {
+      const original=result.terminal;
+      const port=createPersistedCommerceHandoffPort({scope,clock:input.clock,store:input.store,transaction:input.transaction,
+        read:readAuthority,inboxBatchGuard:guard,resolveTagId:input.resolveTagId,deliveryRecipient:last.senderId});
+      const recovery=createCommerceHandoffTools({...port,base:tools,scope,clock:input.clock,policy:policyBundle});
+      let outcome: TerminalOutcome | null | undefined;
+      try {
+        await recovery.invoke({name:"request_handoff",args:{reason:recoveryReason}});
+        outcome=await recovery.terminalOutcome?.();
+      } catch { return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE")}; }
+      if (outcome?.disposition === "HANDOFF" || outcome?.disposition === "NO_SEND") return {...result,terminal:outcome,
+        recovery:{originalDisposition:original.disposition,originalReason:original.reason},enqueued:port.outboxCount()};
+      return {...result,...await closeWithoutSend("RECOVERY_HANDOFF_UNAVAILABLE")};
+    }
+  }
   const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
   const allowedText = ["SEND_ELIGIBLE", "FALLBACK", "HANDOFF"].includes(result.terminal.disposition) ? result.terminal.text : null;
   const messagesOut = [...(allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : []),
