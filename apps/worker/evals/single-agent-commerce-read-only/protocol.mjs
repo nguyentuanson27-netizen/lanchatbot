@@ -47,8 +47,8 @@ export function validateProtocol(m){
  for(const role of ['owner','verifier'])check(sha256(readFileSync(new URL('./prompts/'+role+'.vi.txt',import.meta.url)))===m.promptHashes[role],'PROMPT_HASH');
  check(sha256(JSON.stringify(m.verdictSchema))===m.schemaHash,'SCHEMA_HASH');
  check(m.fallback.id==='C3_A_NONPROTECTED_V2'&&m.fallback.text==='Phần này em chưa trả lời được, chị nhé.'&&sha256(m.fallback.text)===m.fallback.sha256,'FALLBACK_IDENTITY');
- check(Array.isArray(m.recoveryFallbacks)&&m.recoveryFallbacks.length===3&&
-  ['C3_B_VERIFIED_MEDIA_V1','C3_B_MEDIA_UNAVAILABLE_V1','C3_B_HANDOFF_OFFER_V1'].every(id=>m.recoveryFallbacks.filter(f=>f.id===id).length===1)&&
+ check(Array.isArray(m.recoveryFallbacks)&&m.recoveryFallbacks.length===2&&
+  ['C3_B_VERIFIED_MEDIA_V1','C3_B_MEDIA_UNAVAILABLE_V1'].every(id=>m.recoveryFallbacks.filter(f=>f.id===id).length===1)&&
   m.recoveryFallbacks.every(f=>terminalFallback(f.id,f.text).disposition==='FALLBACK'&&sha256(f.text)===f.sha256),'RECOVERY_FALLBACK_IDENTITY');
  return m;
 }

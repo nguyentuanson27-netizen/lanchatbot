@@ -67,8 +67,6 @@ const MEDIA_RECOVERY_ID = "C3_B_VERIFIED_MEDIA_V1";
 const MEDIA_RECOVERY_TEXT = "Em gửi chị ảnh của mẫu để mình xem trước nhé.";
 const MEDIA_UNAVAILABLE_ID = "C3_B_MEDIA_UNAVAILABLE_V1";
 const MEDIA_UNAVAILABLE_TEXT = "Lúc này em chưa gửi được ảnh chị cần.";
-const HANDOFF_OFFER_ID = "C3_B_HANDOFF_OFFER_V1";
-const HANDOFF_OFFER_TEXT = "Chị muốn nhân viên kiểm tra giúp phần này không ạ?";
 const hash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "CONTRADICTION_OR_NEGATION",
   "MATERIAL_CONDITION_LOSS", "POLICY_OR_BENEFIT_STRENGTHENING", "EFFECT_WITHOUT_RECEIPT",
@@ -76,8 +74,8 @@ const kinds = new Set(["UNSUPPORTED_PROTECTED_ASSERTION", "SUBJECT_MISMATCH", "C
 const terminal = (disposition: TerminalOutcome["disposition"], reason: string): TerminalOutcome =>
   ({ disposition, reason, text: null, fallbackId: null });
 
-export function terminalFallback(id = FALLBACK_ID, text = id === HANDOFF_OFFER_ID ? HANDOFF_OFFER_TEXT : id === MEDIA_UNAVAILABLE_ID ? MEDIA_UNAVAILABLE_TEXT : id === MEDIA_RECOVERY_ID ? MEDIA_RECOVERY_TEXT : id === MEDIA_FALLBACK_ID ? MEDIA_FALLBACK_TEXT : id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
-  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT) || (id === MEDIA_FALLBACK_ID && text === MEDIA_FALLBACK_TEXT) || (id === MEDIA_RECOVERY_ID && text === MEDIA_RECOVERY_TEXT) || (id === MEDIA_UNAVAILABLE_ID && text === MEDIA_UNAVAILABLE_TEXT) || (id === HANDOFF_OFFER_ID && text === HANDOFF_OFFER_TEXT)
+export function terminalFallback(id = FALLBACK_ID, text = id === MEDIA_UNAVAILABLE_ID ? MEDIA_UNAVAILABLE_TEXT : id === MEDIA_RECOVERY_ID ? MEDIA_RECOVERY_TEXT : id === MEDIA_FALLBACK_ID ? MEDIA_FALLBACK_TEXT : id === FALLBACK_V2_ID ? FALLBACK_V2_TEXT : FALLBACK_TEXT): TerminalOutcome {
+  return (id === FALLBACK_ID && text === FALLBACK_TEXT) || (id === FALLBACK_V2_ID && text === FALLBACK_V2_TEXT) || (id === MEDIA_FALLBACK_ID && text === MEDIA_FALLBACK_TEXT) || (id === MEDIA_RECOVERY_ID && text === MEDIA_RECOVERY_TEXT) || (id === MEDIA_UNAVAILABLE_ID && text === MEDIA_UNAVAILABLE_TEXT)
     ? { disposition: "FALLBACK", reason: "FAIL", text, fallbackId: id }
     : terminal("NO_SEND", "UNVERIFIED_FALLBACK");
 }

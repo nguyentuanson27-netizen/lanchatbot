@@ -163,11 +163,6 @@
       "id": "C3_B_MEDIA_UNAVAILABLE_V1",
       "text": "Lúc này em chưa gửi được ảnh chị cần.",
       "sha256": "b9e9160e4554f30c76ad4707c1f8ad54d82a17d19b08bc0a4399b8470c394c9a"
-    },
-    {
-      "id": "C3_B_HANDOFF_OFFER_V1",
-      "text": "Chị muốn nhân viên kiểm tra giúp phần này không ạ?",
-      "sha256": "e0db46bb5b1c971b65f3d8f263fbb7f6770fb24202a8b0a9c2ca622b505afb05"
     }
   ]
 }

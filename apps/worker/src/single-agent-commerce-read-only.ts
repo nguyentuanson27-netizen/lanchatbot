@@ -46,8 +46,7 @@ export async function runCommerceTurn(input: {
   const selectedFallback = () => {
     if (input.tools.sizeOutcome?.()) return terminalFallback("C3_A_NONPROTECTED_V2");
     const id = input.tools.fallbackId?.() ?? "C3_A_NONPROTECTED_V2";
-    return terminalFallback(id === "C3_A_NONPROTECTED_V2" && input.tools.availableTools?.includes("request_handoff")
-      ? "C3_B_HANDOFF_OFFER_V1" : id);
+    return terminalFallback(id);
   };
   const fallback = (reason:string):TerminalOutcome => ({...selectedFallback(),reason});
   const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};

@@ -259,13 +259,13 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(r.terminal.disposition).toBe("FALLBACK");
     expect(r.terminal.text).toBe("Phần này em chưa trả lời được, chị nhé.");
   });
-  it("offers a real next step when the handoff tool is available without claiming transfer",async()=>{
+  it("does not mention staff or the bot after a failed verdict just because handoff is available",async()=>{
     const s=setup();s.verifier.mockResolvedValue({result:{verdict:"FAIL",violations:[]}});
     const tools={...s.tools,availableTools:["request_handoff"],fallbackId:()=>"C3_A_NONPROTECTED_V2"};
     const r=await runCommerceTurn({...s,tools,owner:async()=>final()});
-    expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"FAIL",fallbackId:"C3_B_HANDOFF_OFFER_V1",
-      text:"Chị muốn nhân viên kiểm tra giúp phần này không ạ?"});
-    expect(r.terminal.text).not.toMatch(/đã chuyển|đã nhờ/);
+    expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"FAIL",fallbackId:"C3_A_NONPROTECTED_V2",
+      text:"Phần này em chưa trả lời được, chị nhé."});
+    expect(r.terminal.text).not.toMatch(/nhân viên|bot|đã chuyển|đã nhờ/i);
   });
   it("keeps a media-source failure specific even when handoff is available",async()=>{
     const s=setup();s.verifier.mockResolvedValue({result:{verdict:"FAIL",violations:[]}});
