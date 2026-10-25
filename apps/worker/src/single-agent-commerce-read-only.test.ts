@@ -259,6 +259,20 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(r.terminal.disposition).toBe("FALLBACK");
     expect(r.terminal.text).toBe("Phần này em chưa trả lời được, chị nhé.");
   });
+  it("offers a real next step when the handoff tool is available without claiming transfer",async()=>{
+    const s=setup();s.verifier.mockResolvedValue({result:{verdict:"FAIL",violations:[]}});
+    const tools={...s.tools,availableTools:["request_handoff"],fallbackId:()=>"C3_A_NONPROTECTED_V2"};
+    const r=await runCommerceTurn({...s,tools,owner:async()=>final()});
+    expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"FAIL",fallbackId:"C3_B_HANDOFF_OFFER_V1",
+      text:"Chị muốn nhân viên kiểm tra giúp phần này không ạ?"});
+    expect(r.terminal.text).not.toMatch(/đã chuyển|đã nhờ/);
+  });
+  it("keeps a media-source failure specific even when handoff is available",async()=>{
+    const s=setup();s.verifier.mockResolvedValue({result:{verdict:"FAIL",violations:[]}});
+    const tools={...s.tools,availableTools:["request_handoff"],fallbackId:()=>"C3_B_MEDIA_UNAVAILABLE_V1"};
+    const r=await runCommerceTurn({...s,tools,owner:async()=>final()});
+    expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_UNAVAILABLE_V1");
+  });
   it("invalidates PASS if permission changes during verification", async () => {
     const s = setup(), readback = s.tools.readback;
     s.tools.readback = async () => { const current = await readback(); current.state.permission = false; return current; };

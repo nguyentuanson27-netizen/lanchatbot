@@ -169,7 +169,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     }catch(error){return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
-    fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2":selections.size>0||viewed.size>0||[...observations.values()].some(o=>o.query.intent!=="FEEDBACK")
+    fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2": [...observations.values()].some(o=>o.outcome!=="OK"&&o.query.intent!=="FEEDBACK")
       ?"C3_B_MEDIA_UNAVAILABLE_V1":observations.size>0?"C3_B_MEDIA_NEXT_STEP_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),
     async invokeBatch(calls){

@@ -43,7 +43,12 @@ export async function runCommerceTurn(input: {
   owner: (request: OwnerRequest) => Promise<OwnerGeneration>;
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
 }) {
-  const selectedFallback = () => terminalFallback(input.tools.sizeOutcome?.() ? "C3_A_NONPROTECTED_V2" : input.tools.fallbackId?.() ?? "C3_A_NONPROTECTED_V2");
+  const selectedFallback = () => {
+    if (input.tools.sizeOutcome?.()) return terminalFallback("C3_A_NONPROTECTED_V2");
+    const id = input.tools.fallbackId?.() ?? "C3_A_NONPROTECTED_V2";
+    return terminalFallback(id === "C3_A_NONPROTECTED_V2" && input.tools.availableTools?.includes("request_handoff")
+      ? "C3_B_HANDOFF_OFFER_V1" : id);
+  };
   const fallback = (reason:string):TerminalOutcome => ({...selectedFallback(),reason});
   const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });

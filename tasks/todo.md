@@ -2312,3 +2312,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Clean source `969c9d70`, refreshed registration, source-check PASS/0 generations; 12/12 paired slots completed, 6/6 PRELOAD with 2 images actually attached, 35 provider requests/0 error/0 retry, 23 owner + 12 verifier request firewall checks PASS.
 - [x] Whole-reply review of all six pairs: images alone did not correct the two repeated lace/ornateness sales errors; one PRELOAD reply fell back after a valid verifier FAIL and received a mismatched image-unavailable fallback. [Evidence and limits](../docs/specs/c3-phase-b-paired-image-comparison-20261025.md).
 - [ ] B GO: compare real alternative products and improve decision support without case prompt patches; correct fallback selection by actual failure reason, then requalify. No full 51-case acceptance run or deployment from this diagnostic.
+
+## Phase B fallback next step — 2026-10-25
+
+- [x] Separate successful visual inspection from unavailable image lookup, so a product-claim verifier FAIL no longer reports that an image could not be sent.
+- [x] Add a code-owned handoff **offer** only when the handoff tool is available, without claiming transfer or committing state; retain specific media/size fallbacks. Auto-handoff on every FAIL was rejected by ingress RED and fully removed.
+- [x] Focused worker209/209 and protocol20/20 PASS, worker build/lint PASS. Full worker Vitest2129PASS/1FAIL (`single-agent-commerce-read-only-sources.test.ts`, `POS_UNAVAILABLE`), reproduced in isolation; do not claim all green. [Details](../docs/specs/c3-phase-b-fallback-next-step-fix-20261025.md).
+- [ ] Run provider qualification on a new sealed source; read-only B1 has no handoff capability and still needs a source-backed way to make rejected advice useful. No full Phase B GO.

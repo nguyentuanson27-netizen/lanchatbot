@@ -253,14 +253,28 @@ it("uses an actionable static media question after a rejected media reply",async
  expect(r.terminal).toMatchObject({disposition:"FALLBACK",fallbackId:"C3_B_MEDIA_NEXT_STEP_V1",text:"Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"});
 });
 
-it("retains explicit feedback provenance for the verifier and media fallback after selection",async()=>{
+it("retains feedback provenance but does not blame available media for a semantic rejection",async()=>{
  const s=await setup();s.f.product.images[0]!.feedback=true;
  await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
  const media=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media:"))!;
  expect(JSON.parse(media.text).assets[0].feedback).toBe(true);
  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Ảnh khách mặc nhé",history:[],clock:()=>commerceNow,
  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Ảnh đây chị"}),verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
- expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_UNAVAILABLE_V1");
+ expect(r.terminal.fallbackId).toBe("C3_A_NONPROTECTED_V2");
+});
+
+it("does not claim an image was unavailable after a successful visual read for sales advice",async()=>{
+ const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");
+ const fetched=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>new Response(png,{headers:{"content-type":"image/png"}}));
+ try{
+  const s=await setup();s.f.product.images[0]!.sourceContentSha256=createHash("sha256").update(png).digest("hex");
+  expect(await s.tools.invoke({...s.call,name:"view_product_media"})).toMatchObject({status:"OK"});
+  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Đi gặp khách thì lấy cả bộ hay áo thôi em?",history:[],clock:()=>commerceNow,
+   ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Chân váy này dài đến mắt cá."}),
+   verifier:async()=>({result:{verdict:"FAIL",violations:[{kind:"UNSUPPORTED_PROTECTED_ASSERTION",protectedRef:`product:${s.f.product.productId}`,excerpt:"dài đến mắt cá",basis:"Nguồn chưa xác nhận chiều dài."}]}})});
+  expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"FAIL",fallbackId:"C3_A_NONPROTECTED_V2"});
+  expect(r.terminal.text).not.toMatch(/ảnh/);
+ }finally{fetched.mockRestore();}
 });
 
 it("keeps repeated readbacks unchanged for a no-match component lookup after all offers",async()=>{

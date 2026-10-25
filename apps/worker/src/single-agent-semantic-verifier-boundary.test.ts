@@ -250,3 +250,9 @@ it("accepts exact media next-step fallback without accepting protected additions
  const fallback={id:"C3_B_MEDIA_NEXT_STEP_V1",text:terminalFallback("C3_B_MEDIA_NEXT_STEP_V1").text!};
  expect(finalGate({expected:binding,current:{...trusted,state:{...trusted.state,recipient:"changed"}},response:pass(),finalDraft:draft,now,fallback}).disposition).toBe("NO_SEND");
 });
+
+it("keeps the handoff offer exact and separate from a committed handoff",()=>{
+ expect(terminalFallback("C3_B_HANDOFF_OFFER_V1")).toEqual({disposition:"FALLBACK",reason:"FAIL",
+  text:"Chị muốn nhân viên kiểm tra giúp phần này không ạ?",fallbackId:"C3_B_HANDOFF_OFFER_V1"});
+ expect(terminalFallback("C3_B_HANDOFF_OFFER_V1","Em đã chuyển nhân viên cho chị.").disposition).toBe("NO_SEND");
+});
