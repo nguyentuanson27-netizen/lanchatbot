@@ -61,7 +61,7 @@ export function createCommerceHandoffPreSendGate(input: {
           for(const p of trusted.runtimeProducts??[])if(!proof.sources.some(s=>s.kind==="PRODUCT"&&JSON.parse(s.queryJson).productId===p.subjectRef))return blocked("C3_HANDOFF_PRODUCT_PROOF_REQUIRED");
           if(trusted.state.customerProfileId&&!proof.sources.some(s=>s.kind==="PROFILE"))return blocked("C3_HANDOFF_PROFILE_PROOF_REQUIRED");
           if((trusted.cartBinding||trusted.state.cartQuote)&&!proof.sources.some(s=>s.kind==="SALES_STATE"))return blocked("C3_HANDOFF_SALES_STATE_PROOF_REQUIRED");
-          for(const receipt of trusted.effectReceipts)if(receipt.effect!=="CUSTOMER_STATE_UPDATED"&&!proof.sources.some(s=>s.kind==="RECEIPT"&&JSON.parse(s.queryJson).operationId===receipt.operationId))return blocked("C3_HANDOFF_RECEIPT_PROOF_REQUIRED");
+          for(const receipt of trusted.effectReceipts)if(receipt.effect!=="CUSTOMER_STATE_UPDATED"&&!proof.sources.some(s=>s.kind==="RECEIPT"&&JSON.parse(s.queryJson).operationId===receipt.operationId&&s.sourceHash===commerceHash(receipt)))return blocked("C3_HANDOFF_RECEIPT_PROOF_REQUIRED");
           for(const source of proof.sources){
             try{if(await input.readReplySource(source,b)!==source.sourceHash)return blocked(`C3_HANDOFF_SOURCE_${source.kind}_CHANGED`);}
             catch{return blocked(`C3_HANDOFF_SOURCE_${source.kind}_UNAVAILABLE`);}

@@ -297,7 +297,11 @@ export async function createCommerceEffectTools(input: {
       if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
       current = await read();
       await refreshAuthority();
-      if (reconciledRevision !== undefined ? current.revision !== reconciledRevision : !recordReceipt(operationId, effectName, result?.status === "APPLIED" && input.executeCommand ? result.state.revision : authorizedRevision+1)) { uncertain = true; return { status: "UNAVAILABLE", reason: "RECEIPT_UNAVAILABLE" }; }
+      const expectedReceiptRevision=result?.status==="APPLIED"&&input.executeCommand?result.state.revision:authorizedRevision+1;
+      const proved=reconciledRevision!==undefined?current.revision===reconciledRevision:input.executeCommand
+        ? current.revision===expectedReceiptRevision&&acceptReceipt(await input.readReceipt?.(operationId),operationId,[effectName])
+        : recordReceipt(operationId,effectName,expectedReceiptRevision);
+      if(!proved){uncertain=true;return {status:"UNAVAILABLE",reason:"RECEIPT_UNAVAILABLE"};}
       await refreshSelections();
       if (result?.status === "APPLIED" && result.transferToHuman) committedTerminal = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };

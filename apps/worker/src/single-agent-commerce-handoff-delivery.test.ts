@@ -43,7 +43,7 @@ it.each(["unchanged", "policy", "silent", "recipient", "revision", "generation",
   else if (fault !== "base-blocked") expect(base.authorize).not.toHaveBeenCalled();
 });
 
-it.each(["unchanged","source-changed","source-unavailable","no-reader","expired","trusted-tampered","cart-no-proof"])("rechecks protected handoff evidence before sequence zero (%s)",async fault=>{
+it.each(["unchanged","source-changed","source-unavailable","no-reader","expired","trusted-tampered","cart-no-proof","receipt-matching","receipt-null-proof"])("rechecks protected handoff evidence before sequence zero (%s)",async fault=>{
  const recipientId="synthetic-recipient",scope={...commerceScope(),recipient:createHash("sha256").update(recipientId).digest("hex")};
  const policy=(await fixturePolicy()).bundle!,before={...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:1};
  const state=applySilentHandoff(before,"AGENT_REQUEST",1,1,commerceNow).state;
@@ -52,16 +52,21 @@ it.each(["unchanged","source-changed","source-unavailable","no-reader","expired"
  await tools.invoke({name:"read_product",args:{subjectRef:product.product.productId,offerType:"DIRECT"}});
  const trusted=tools.snapshot(),text="Áo 499.000đ. Bên em kiểm tra ảnh rồi báo chị nhé.",messages=[{kind:"TEXT" as const,text}];
  if(fault==="cart-no-proof")trusted.state.cartQuote={total:499000};
+ const receipt={ref:"receipt:operation",operationId:"operation",subjectRef:product.product.productId,effect:"CART_OPENED",status:"SUCCESS",stateRevision:trusted.state.revision,
+  recipient:scope.recipient,observedAt:commerceNow.toISOString(),expiresAt:new Date(commerceNow.getTime()+300000).toISOString()};
+ if(fault.startsWith("receipt-"))trusted.effectReceipts.push(receipt);
  const reply={kind:"CODE_PRICE_V1" as const,requestId:scope.requestId,beforeRevision:1,beforeStateHash:commerceHash(before),
   trustedJson:JSON.stringify(trusted),trustedHash:commerceHash(trusted),groupHash:commerceHash(messages),
-  sources:[{kind:"PRODUCT" as const,queryJson:JSON.stringify({productId:product.product.productId,readPos:true}),sourceHash:commerceHash(product)}]};
+  sources:[{kind:"PRODUCT" as const,queryJson:JSON.stringify({productId:product.product.productId,readPos:true}),sourceHash:commerceHash(product)},
+   ...(fault.startsWith("receipt-")?[{kind:"RECEIPT" as const,queryJson:JSON.stringify({operationId:"operation"}),sourceHash:commerceHash(fault==="receipt-null-proof"?null:receipt)}]:[])]};
  if(fault==="trusted-tampered")reply.trustedJson=JSON.stringify({...trusted,protectedClaims:[]});
  const binding=makeCommerceHandoffDeliveryBinding({scope,generation:1,responseGroupId:"group",nextState:state,decision:selectCommerceHandoff(policy,scope,"DEPENDENCY_FAILURE",commerceNow),policy,messages,now:commerceNow,reply});
  const base={authorize:vi.fn(async()=>({status:"ALLOWED" as const,reasonCode:null,blockingTag:null,observedAt:commerceNow}))};
  const gate=createCommerceHandoffPreSendGate({base,clock:()=>fault==="expired"?new Date(commerceNow.getTime()+86400000):commerceNow,
   readAuthority:async()=>({state,stateVersion:state.revision,routingOwner:"APP",appSendEnabled:true,killSwitch:false,generation:1}),policy:async()=>policy,hasCommittedHandoff:async()=>true,
-  ...(fault==="no-reader"?{}:{readReplySource:async()=>{if(fault==="source-unavailable")throw Error("SOURCE_ERROR");return fault==="source-changed"?"0".repeat(64):commerceHash(product);}})});
+  ...(fault==="no-reader"?{}:{readReplySource:async source=>{if(fault==="source-unavailable")throw Error("SOURCE_ERROR");return fault==="source-changed"?"0".repeat(64):source.kind==="RECEIPT"?commerceHash(fault==="receipt-null-proof"?null:receipt):commerceHash(product);}})});
  const claim={pageId:scope.pageId,conversationId:scope.conversationId,responseGroupId:"group",recipientId,sequenceNo:0,message:messages[0],handoffBinding:binding} as ClaimedMetaOutbox;
- expect((await gate.authorize(claim)).status).toBe(fault==="unchanged"?"ALLOWED":"BLOCKED");
- if(fault!=="unchanged")expect(base.authorize).not.toHaveBeenCalled();
+ const allowed=["unchanged","receipt-matching"].includes(fault);
+ expect((await gate.authorize(claim)).status).toBe(allowed?"ALLOWED":"BLOCKED");
+ if(!allowed)expect(base.authorize).not.toHaveBeenCalled();
 });

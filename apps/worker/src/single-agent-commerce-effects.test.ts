@@ -61,6 +61,18 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it.each([true,false])("uses ledger readback after a successful persisted mutation (receipt=%s)",async available=>{
+    const s=await setup();let operationId="";
+    const readReceipt=vi.fn(async()=>available?{ref:`receipt:${operationId}`,operationId,subjectRef:s.current().cart!.value.cartId,effect:"CART_OPENED",status:"SUCCESS",stateRevision:s.current().revision,
+      recipient:s.scope.recipient,observedAt:commerceNow.toISOString(),expiresAt:new Date(commerceNow.getTime()+300000).toISOString()}:null);
+    const tools=await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+      identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+      authorize:s.authorize,policy:async()=>s.policy,select:s.select,readReceipt,
+      executeCommand:async call=>{const state=applySalesCycleCommand({state:s.current(),expectedRevision:s.current().revision,command:call.command,trustedPorts:call.trustedPorts,now:commerceNow}).state;
+        s.setCurrent(state);operationId=call.command.commandId;return {status:"APPLIED",state,transferToHuman:false};}});
+    expect((await tools.invoke(s.add)).status).toBe(available?"OK":"UNAVAILABLE");expect(readReceipt).toHaveBeenCalledOnce();
+    if(available)expect(tools.snapshot().effectReceipts).toEqual([await readReceipt.mock.results[0]!.value]);else expect(tools.snapshot().effectReceipts).toEqual([]);
+  });
   it("returns the committed bounded quote in each effect response, including duplicates, without rewriting earlier versions", async () => {
     const s = await setup(), added = await s.tools.invoke(s.add);
     const quote = (r: typeof added) => (r.data as { cartQuote?: unknown }).cartQuote;
