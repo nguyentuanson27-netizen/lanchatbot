@@ -1,4 +1,32 @@
-## Current — model run missing-information hoàn tất, 2026-10-25
+## Current — kế hoạch revision 2 đã sửa/review/fix, 2026-10-26
+
+[Kế hoạch](../docs/specs/c3-phase-b-rule-retention-fix-plan-20261026.md), [review trail](../docs/specs/c3-phase-b-rule-retention-plan-independent-review-20261026.md). **Independent APPROVE ở mức kế hoạch; runtime/model chưa sửa hoặc chạy; B chưa GO.**
+
+- [x] Viết contract terminal 6 normal calls +1 handoff attempt riêng,3owner/1verifier; phân biệt pending/prepared/committed và wire callable allowlist.
+- [x] Cùng reviewer REVISE revision1 với2P2; sửa renderer chỉ SINGLE pair hợp lệ, prepare authority rồi seal group sau FINAL; thêm receipt/commit-ambiguity và holding precommit-safe constraints; reviewer APPROVE revision2.
+- [x] Ghi savepoints, RED→GREEN/actual group acceptance và exact focused commands dự kiến, future targeted→full với accounting/source seal. Chưa chạy các lệnh đó.
+- [ ] Implement S1/S2 rồi S3/S4, RED→GREEN/shared/persisted delivery checks và executable review theo plan. Chưa làm trong lượt sửa kế hoạch.
+- [ ] Provider qualification sau implementation và yêu cầu chạy, không coi plan APPROVE thành B GO.
+
+## Previous — review độc lập phương án giữ quy tắc, 2026-10-26
+
+[Review độc lập](../docs/specs/c3-phase-b-rule-retention-plan-independent-review-20261026.md): **REVISE, 1 P1 + 3 P2**. Chưa implementation/provider run mới; B chưa GO.
+
+- [x] Reviewer read-only đối chiếu audit/21 outcomes/code/adapter/persistence/delivery. Ghi rõ contract final handoff, budget accounting, partial reply trước atomic handoff và acceptance tại sequence 0.
+- [x] Làm rõ audit: guard tránh intro ngoài trọng tâm có cơ sở ở plan trước; cần ngoại lệ first-contact price quote, không bỏ guard hoặc handoff vì field trình bày tùy chọn.
+- [ ] Sửa kế hoạch chi tiết theo review trước khi implement. Không mặc định mọi đường giữ được model partial; không dùng PASS qua revision đổi, tăng generation hoặc nới HUMAN send gate.
+
+## Previous — audit giữ quy tắc nghiệp vụ, 2026-10-26
+
+[Audit và hướng xử lý](../docs/specs/c3-phase-b-rule-retention-audit-20261026.md), source `461e6e57`. **Audit xong; chưa sửa runtime/prompt hoặc chạy provider mới; B chưa GO.**
+
+- [x] Đối chiếu spec/code/prompt/21 actual outcomes. Form mở đầu gốc có ảnh; 3 ca mở đầu xác định mẫu không bảo đảm form/ảnh. Repeat/unresolved không phải ca phải lặp card.
+- [x] Xác định handoff chỉ giữ tin tĩnh nên có thể mất giá/quy trình đã biết; budget hai tool rounds chặn handoff khi owner mới biết gap ở lượt đọc cuối. Phân biệt recovery của persisted ingress với B1.
+- [x] Phát hiện NEXT_STEP media fallback còn reachable trong B1 nhưng không nằm trong manifest recovery catalog. Chưa quan sát câu cũ ở 21 persisted outcomes gần nhất.
+- [x] Focused 5 PASS/217 skipped; ba mock probes local exit 0. Không suy deterministic mock thành provider acceptance hoặc sửa artifacts cũ.
+- [ ] Sửa terminal handoff/budget và bảo toàn verified partial trước; khôi phục opening contract/data, đồng bộ fallback catalog; thêm acceptance actual response group. Các mục này mới là đề xuất, chưa implementation.
+
+## Previous — model run missing-information hoàn tất, 2026-10-25
 
 [Report/evidence](../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CHECKPOINT_B.md), [21 hội thoại và review từng ca](../apps/worker/evals/single-agent-commerce-read-only/missing-information-run-20261025/CONVERSATIONS.md). **B chưa GO.**
 
