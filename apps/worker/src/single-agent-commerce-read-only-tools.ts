@@ -312,7 +312,11 @@ export function createReadOnlyTools(input: {
           if (!products.has(p.subjectRef) && (p.attributes || p.content)) products.set(p.subjectRef, p);
         }
         return { status: "OK", data: { status: found.status, subjects: candidates.map(p => subjects.get(p.productId)),
-          products: evidence.map(p => products.get(p.subjectRef) ?? p) } };
+          products: evidence.map(p => products.get(p.subjectRef) ?? p),
+          // Search already read and bound this offer identity. Expose the codes beside
+          // each candidate so a targeted read need not expand every selling option.
+          availableOffersByProduct: candidates.map((p, i) => ({ productId: p.productId,
+            availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
       }
       if (call.name === "read_product") {
         const a = toolArgs(call.args, ["subjectRef", "offerType", "color", "size", "deliveryRegion"]);

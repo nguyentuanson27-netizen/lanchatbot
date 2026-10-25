@@ -52,7 +52,10 @@ describe("read-only domain tools", () => {
       .toEqual({ status: "REJECTED", reason: "SUBJECT_BOUND" });
     expect(comparison.snapshot()).toEqual(beforeRejected);
     readProduct.mockClear();
-    await tools.invoke({ name: "search_products", args: { query: "bộ đi làm" } });
+    const search = await tools.invoke({ name: "search_products", args: { query: "bộ đi làm" } });
+    expect(search.data).toMatchObject({ availableOffersByProduct: records.map(f => ({
+      productId: f.product.productId, availableOffers: ["AO", "QUAN", "SET_QUAN"],
+    })) });
     const discovered = tools.snapshot();
     expect(discovered.boundSubjects).toHaveLength(3);
     expect(discovered.protectedClaims).toHaveLength(0);
