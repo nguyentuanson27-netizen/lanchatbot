@@ -2319,3 +2319,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Remove the handoff-offer fallback after owner rejected its customer-facing wording. Tool availability alone no longer changes the terminal reply; retain specific media/size fallbacks. Auto-handoff on every FAIL was rejected by ingress RED and fully removed.
 - [x] After removing the offer: focused worker209/209 and protocol20/20 PASS, worker typecheck/build/lint PASS. Earlier full worker Vitest2129PASS/1FAIL (`single-agent-commerce-read-only-sources.test.ts`, `POS_UNAVAILABLE`), reproduced in isolation; do not claim all green. [Details](../docs/specs/c3-phase-b-fallback-next-step-fix-20261025.md).
 - [ ] Run provider qualification on a new sealed source; read-only B1 has no handoff capability and still needs a source-backed way to make rejected advice useful. No full Phase B GO.
+
+## Phase B customer-facing handoff copy — 2026-10-25
+
+- [x] Follow up independent review of `5005c8d0`: remove internal-role wording from all candidate holding replies; preserve the committed-handoff boundary and avoid promising an exchange schedule before eligibility is known.
+- [x] Revise current full and B1 owner prompts to keep internal routing out of customer prose; update the full prompt hash and candidate matrix version.
+- [x] Actual terminal handoff tests 5 reasons after commit and no acknowledgement before commit; focused worker 121/121, protocol/prompt/matrix 26/26, worker build/lint, diff check PASS. [Report](../docs/specs/c3-phase-b-customer-facing-handoff-copy-20261025.md).
+- [ ] Independent review exact new source and run model qualification before claiming conversation style or Phase B readiness; generic semantic-failure fallback remains weak.

@@ -11,10 +11,11 @@ import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-to
 const matrix=HandoffMatrixAdminContentV1Schema.parse(JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))));
 const clock=()=>new Date(matrix.sourceMetadata.observedAt);
 const expected={
- EXCHANGE:'Em đã chuyển nhân viên hỗ trợ đổi hàng cho chị. Nhân viên sẽ xác nhận món cần đổi và hẹn giao đổi với chị nhé.',
- DEFECT:'Em đã chuyển nhân viên hỗ trợ lỗi sản phẩm cho chị. Nhân viên sẽ kiểm tra và hướng dẫn chị đổi/trả nhé.',
- CUSTOMER_REQUESTED_HUMAN:'Em chuyển nhân viên hỗ trợ chị nhé.',
- SIZE_RULE_UNAVAILABLE:'Em chuyển nhân viên chọn size cho chị nhé.',
+ EXCHANGE:'Shop đã nhận yêu cầu đổi hàng của chị. Bên em sẽ kiểm tra và báo cách xử lý tiếp nhé.',
+ DEFECT:'Shop đã nhận thông tin chị báo lỗi sản phẩm. Bên em sẽ kiểm tra và hướng dẫn cách xử lý nhé.',
+ CUSTOMER_REQUESTED_HUMAN:'Dạ, em đã chuyển lời nhắn của chị rồi ạ.',
+ SIZE_RULE_UNAVAILABLE:'Bên em sẽ kiểm tra lại size mẫu này rồi tư vấn chị nhé.',
+ DEPENDENCY_FAILURE:'Em chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.',
 };
 for(const reason of Object.keys(expected))test('candidate '+reason+' uses its configured procedure only after committed handoff',async()=>{
  const scope=commerceScope(),policy=(await fixturePolicy()).bundle;
@@ -29,18 +30,23 @@ for(const reason of Object.keys(expected))test('candidate '+reason+' uses its co
  accepted=true;
  assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,'OK');
  assert.equal(current.state.conversationOwner,'HUMAN');
- assert.deepEqual((await tools.terminalOutcome()).text,expected[reason]);
+ const terminal=await tools.terminalOutcome();
+ assert.equal(terminal.disposition,'HANDOFF');
+ assert.deepEqual(terminal.text,expected[reason]);
+ assert.doesNotMatch(terminal.text,/nhân viên|bot/i);
  assert.equal((await tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
  assert.equal(commits,2);
 });
-test('candidate changes only approved first-handoff messages and keeps other policies and every tag',async()=>{
+test('candidate changes customer copy while keeping handoff policies and every tag',async()=>{
  assert.deepEqual(matrix.rules.map(r=>r.reason),[...HANDOFF_REASONS_V2]);
  const policy=(await fixturePolicy()).bundle,scope=commerceScope();
  for(const reason of HANDOFF_REASONS_V2.filter(r=>r!=='ADMIN_REQUEST')){
   const original=selectCommerceHandoff(policy,scope,reason,clock());
   const configured=selectCommerceHandoff({...policy,artifacts:{...policy.artifacts,handoffMatrix:matrix}},scope,reason,clock());
+  const rule=matrix.rules.find(r=>r.reason===reason);
   assert.equal(configured.tag,original.tag);
-  assert.equal(configured.customerMessagePolicy,['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'].includes(reason)?'HOLDING_REPLY_THEN_HANDOFF':original.customerMessagePolicy);
-  if(!expected[reason])assert.deepEqual(configured.customerMessages,original.customerMessages);
+  assert.equal(configured.customerMessagePolicy,rule.customerMessagePolicy);
+  for(const message of configured.customerMessages)assert.doesNotMatch(message,/nhân viên|bot/i);
+  assert.deepEqual(configured.customerMessages,rule.holdingReply===null?[]:[rule.holdingReply]);
  }
 });

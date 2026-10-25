@@ -5,85 +5,85 @@
     {
       "reason": "AFTER_SALES_REQUEST",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "ORDER_STATUS",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "DELIVERY_TRACKING",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "DELIVERY_DELAY",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "CHANGE_DELIVERY_INFO",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "CANCEL_ORDER",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "PAYMENT_AFTER_ORDER",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "EXCHANGE",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển nhân viên hỗ trợ đổi hàng cho chị. Nhân viên sẽ xác nhận món cần đổi và hẹn giao đổi với chị nhé.",
+      "holdingReply": "Shop đã nhận yêu cầu đổi hàng của chị. Bên em sẽ kiểm tra và báo cách xử lý tiếp nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "RETURN",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "REFUND",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "DEFECT",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển nhân viên hỗ trợ lỗi sản phẩm cho chị. Nhân viên sẽ kiểm tra và hướng dẫn chị đổi/trả nhé.",
+      "holdingReply": "Shop đã nhận thông tin chị báo lỗi sản phẩm. Bên em sẽ kiểm tra và hướng dẫn cách xử lý nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "WARRANTY",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "WRONG_OR_MISSING_ITEM",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
       "tag": "VAN_DON"
     },
     {
       "reason": "CUSTOMER_REQUESTED_HUMAN",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em chuyển nhân viên hỗ trợ chị nhé.",
+      "holdingReply": "Dạ, em đã chuyển lời nhắn của chị rồi ạ.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -101,7 +101,7 @@
     {
       "reason": "SIZE_RULE_UNAVAILABLE",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em chuyển nhân viên chọn size cho chị nhé.",
+      "holdingReply": "Bên em sẽ kiểm tra lại size mẫu này rồi tư vấn chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -137,7 +137,7 @@
     {
       "reason": "DEPENDENCY_FAILURE",
       "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.",
+      "holdingReply": "Em chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.",
       "tag": "NHAN_VIEN"
     },
     {
@@ -179,8 +179,8 @@
   ],
   "sourceMetadata": {
     "source": "ADMIN",
-    "sourceReference": "repo:c3-phase-b-opening-and-advice-fix-plan-20261022",
-    "sourceVersion": "c3-phase-b-candidate-handoff-20261022-v2",
-    "observedAt": "2026-10-22T00:00:00.000Z"
+    "sourceReference": "repo:c3-phase-b-customer-facing-handoff-copy-20261025",
+    "sourceVersion": "c3-phase-b-candidate-handoff-20261025-v3",
+    "observedAt": "2026-10-25T00:00:00.000Z"
   }
 }

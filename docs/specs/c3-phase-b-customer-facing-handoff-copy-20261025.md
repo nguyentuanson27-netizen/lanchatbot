@@ -1,0 +1,15 @@
+# Phase B — lời chuyển xử lý gửi khách, 2026-10-25
+
+Review độc lập trên `5005c8d0` chỉ ra việc gỡ `C3_B_HANDOFF_OFFER_V1` chưa đủ: policy candidate vẫn có câu gửi khách nhắc vai trò nội bộ; owner prompt còn gợi cách nói đó. Fallback chung vẫn an toàn nhưng chưa hữu ích cho tư vấn bán hàng.
+
+## Sửa trong candidate
+
+- Thay lời xác nhận ở `handoff-matrix.candidate.json` bằng câu nói trực tiếp việc shop đã nhận và bước xử lý tiếp. Giữ nguyên reason, customerMessagePolicy, tag, điều kiện commit và receipt. Câu về đổi hàng chỉ hứa kiểm tra rồi báo cách xử lý; không hẹn giao đổi trước khi biết đủ điều kiện.
+- Prompt owner đầy đủ và B1 vẫn hướng dẫn gọi `request_handoff` khi có khả năng, nhưng tin gửi khách chỉ xưng em/shop, không kể vai trò hoặc công cụ nội bộ. Không thêm bộ lọc từ khóa trên reply, không sửa verifier, không tạo đường gửi mới.
+- Cập nhật hash prompt đầy đủ trong manifest; đổi version của policy candidate. Mọi provider run sau thay đổi cần source SHA và đăng ký input mới. Không gán kết quả run cũ cho source mới.
+
+## Kiểm tra và giới hạn
+
+Test của matrix xác nhận năm loại lời báo đặc thù chỉ xuất hiện sau commit thành công; khi commit bị từ chối không có lời báo đã chuyển. Tất cả lời báo từ matrix không chứa hai cách gọi owner cấm, policy/tag được giữ. `pnpm exec vitest run src/single-agent-commerce-handoff.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-read-only.test.ts`: 121/121 PASS. `node --test evals/single-agent-commerce-read-only/protocol.test.mjs evals/single-agent-commerce-read-only/b1-owner-prompt.test.mjs evals/single-agent-commerce-read-only/handoff-matrix.test.mjs evals/single-agent-commerce-read-only/candidate-handoff.test.mjs`: 26/26 PASS sau khi sửa một assertion cũ vốn giả định copy không đổi. Worker build/lint và `git diff --check` PASS.
+
+Chưa chạy model trên prompt mới, nên chưa chứng minh mọi câu owner được PASS đều tuân giọng này. `C3_A_NONPROTECTED_V1` là fallback lịch sử mặc định của boundary và vẫn có lời nhắc vai trò; Phase B đi qua `runCommerceTurn` chọn V2. Fallback V2 hiện vẫn là câu chung không giúp chọn mua sau semantic FAIL. Chưa có cách ghép một lời tư vấn cụ thể từ draft bị từ chối mà không tạo và xác minh whole reply mới. Phase B chưa GO; không deploy hoặc gửi khách trong lượt này.
