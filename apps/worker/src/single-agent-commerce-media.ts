@@ -21,9 +21,10 @@ const componentParts={TOP:"AO",SKIRT:"CHAN_VAY",PANTS:"QUAN"};
 function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset[]) {
   return { color:query.color??null, assets:assets.map((a,imageIndex)=>{
     const confirmedParts=a.partsVisible.filter(p=>Object.values(componentParts).includes(p));
+    const wholeLook=a.partsVisible.some(p=>["FULL_SET","FULL_LOOK","FULL_BODY"].includes(normalizeCatalogToken(p)));
     return {imageIndex,angle:a.angle,imageType:a.imageType,feedback:a.feedback===true,
-      confirmedParts,componentKnown:confirmedParts.length>0&&confirmedParts.length===a.partsVisible.length};
-  }), limits:"Describe only the confirmed contents of each selected image. Product fabric does not prove which fabric an image shows. A null color is unverified, not absent." };
+      wholeLook,confirmedParts,componentKnown:confirmedParts.length>0&&confirmedParts.length===a.partsVisible.length};
+  }), limits:"wholeLook confirms an approved whole-look photo, not each component or detail. confirmedParts describes only individually confirmed parts; componentKnown=false does not negate wholeLook. Product fabric does not prove which fabric an image shows. A null color is unverified, not absent." };
 }
 
 /** Selection only. Existing exact snapshot and group gate own authorization and delivery. */

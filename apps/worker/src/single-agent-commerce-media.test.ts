@@ -18,6 +18,18 @@ const setup = async (clock:()=>Date=()=>commerceNow) => {
   return {f,scope,tools,call,image,readProduct};
 };
 describe("candidate product media",()=>{
+  it("preserves approved whole-look evidence without inventing component or material evidence",async()=>{
+    const s=await setup();s.f.product.images[0]!.partsVisible=["FULL_SET"];
+    const selected=await s.tools.invoke(s.call);
+    expect(selected).toMatchObject({status:"OK",data:{descriptionEvidence:{assets:[{
+      wholeLook:true,confirmedParts:[],componentKnown:false,
+    }]}}});
+    const literal=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media:"))!;
+    expect(JSON.parse(literal.text).descriptionEvidence).toEqual((selected.data as Record<string,unknown>).descriptionEvidence);
+    s.f.product.images[0]!.partsVisible=["UNKNOWN"];
+    const other=await setup();other.f.product.images[0]!.partsVisible=["UNKNOWN"];
+    expect(await other.tools.invoke(other.call)).toMatchObject({data:{descriptionEvidence:{assets:[{wholeLook:false}]}}});
+  });
   it("describes only confirmed parts of selected assets, never catalog fabric or requested color",async()=>{
     const s=await setup();s.f.product.images[0]!.partsVisible=["UNKNOWN"];
     const selected=await s.tools.invoke(s.call);
