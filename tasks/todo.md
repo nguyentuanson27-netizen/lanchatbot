@@ -1,5 +1,7 @@
 ## Current — model run kiểm tra lỗi nghiêm trọng, 2026-10-25
 
+- [x] [Review toàn bộ](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/WHOLE_RUN_REVIEW.md): 14lượt +17controls, đối chiếu raw/nguồn/receipt/capture và rerun trước. Chưa thấy verifier overblock; chưa được quy tool improvement cho projection vì batching cũng đổi. Phân biệt4B1fallback với persisted ingress recovery; giữ minor voice. Public name question đã sửa display theo code/hash, raw/private không đổi. Không gọi provider/test mới hoặc sửa runtime.
+
 [Report/commands/accounting](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/CHECKPOINT_B.md), [14 actual outcomes](../apps/worker/evals/single-agent-commerce-read-only/critical-experience-run-20261025/CONVERSATIONS.md). **Đủ14native +17controls; B NOT GO.**
 
 - [x] Source sạch/hash frozen trước provider; runtime e7e0fbf8, controls3a3d2b0c/native776bdf61 chỉ khác driver/report đăng ký, không patch runtime theo kết quả.

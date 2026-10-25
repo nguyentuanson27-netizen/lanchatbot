@@ -31,7 +31,7 @@ Campaign controls đã STOP theo preregistration: **8unsafe blocked, 7safe eligi
 
 ### Những phần hoạt động được
 
-- **Sửa số đo → checkout không bị đứt:** correction chỉ nói “2 áo size L của mình vẫn được giữ nguyên”, cập nhật profile74/96/revision3, cart hai áo be L nguyên trạng. Request-checkout có câu hỏi tên, private checkout có preview tổng978.100đ/ETA8–14ngày, confirm tới PURCHASE_CONFIRMED. Cả8stateful slots enqueued1 và có accepted capture. Hai terminal NO_SEND không phải không gửi tin. Public name question được phục hồi từ terminal chỉ khi khớp capture SHA256; private preview vẫn redacted.
+- **Sửa số đo → checkout không bị đứt:** correction chỉ nói “2 áo size L của mình vẫn được giữ nguyên”, cập nhật profile74/96/revision3, cart hai áo be L nguyên trạng. Request-checkout có câu hỏi tên, private checkout có preview tổng978.100đ/ETA8–14ngày, confirm tới PURCHASE_CONFIRMED. Cả8stateful slots enqueued1 và có accepted capture. Hai terminal NO_SEND không phải không gửi tin. Public name question được đối chiếu từ code-owned copy với accepted capture SHA256; raw terminal text=null vì code xử lý, không phải text từ terminal. Review đã sửa public display `[NAME]`; private preview vẫn redacted.
 - **Gallery:** gửi hai ảnh chung, nói rõ ảnh chung; chấp nhận theo phạm vi owner mới, không mở vòng sửa giọng/ảnh chung.
 - **Tool completion:** có2actual final-only requests mang completedToolTurns; không quan sát OWNER_TOOL_MODE/TOOL_RESULT_BOUND trong14native. Discovery dùng đủ3owner generations, tạo FINAL và verifierPASS. N1 chỉ là zero observed trên population/config này, chưa chứng minh ổn định.
 
@@ -57,4 +57,6 @@ stateful-open cũng STALE do thay metadata nhưng code recovery từ cart receip
 
 Driver/hash đăng ký trước dispatch. [Raw SHA256](RAW_SHA256.json) giữ cả hai output directories; raw nằm ngoài repo, không copy private inputs/credential. Reporting assertions kiểm đủ14native/17controls/51wires, no-label-leak, max1request, cleanup và capture. Không rerun unit/build/typecheck/lint hoặc remoteCI trong reporting-only lượt này; các kết quả553/160/21 và build/lint/typecheck thuộc implementation e7e0fbf8, không gắn thành verification mới.
 
-**STOP promotion / B NOT GO.** Bản sửa đã tránh được hai lỗi tool trong lần quan sát này và checkout đi hết, nhưng discovery vẫn handoff, partial-source vẫn tư vấn sai và verifier gặp quota. Ưu tiên tiếp theo là source version consistency và phân biệt source unavailable với unavailable selling option; giữ giọng văn minor theo quyết định owner. Không thêm repair/reverify loop hoặc tiếp tục post-B/live deployment.
+**STOP promotion / B NOT GO.** Không quan sát hai lỗi tool trong lần chạy này; owner đồng thời gom tool khác lần trước nên chưa thể quy hết cho projection mới và checkout đi hết, nhưng discovery vẫn handoff, partial-source vẫn tư vấn sai và verifier gặp quota. Ưu tiên tiếp theo là source version consistency và phân biệt source unavailable với unavailable selling option; giữ giọng văn minor theo quyết định owner. Không thêm repair/reverify loop hoặc tiếp tục post-B/live deployment.
+
+[Review toàn bộ14lượt +17controls, giới hạn và ưu tiên xử lý](WHOLE_RUN_REVIEW.md).

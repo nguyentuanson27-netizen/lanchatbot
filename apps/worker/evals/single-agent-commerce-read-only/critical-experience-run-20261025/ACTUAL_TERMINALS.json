@@ -268,7 +268,17 @@
       ],
       "semanticDiagnostics": null,
       "ownerGenerations": 1,
-      "verifierGenerations": 0
+      "verifierGenerations": 0,
+      "publicCapturedText": "Chị cho em tên người nhận nhé.",
+      "publicCapturedTextProof": {
+        "method": "CODE_OWNED_COPY_AND_ACCEPTED_CAPTURE_SHA256_MATCH",
+        "sha256": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125",
+        "sequence": 0,
+        "sourceFile": "apps/worker/src/realtime-sales-cycle.ts",
+        "sourceLine": 1473,
+        "maskedAnalyticsCaptureRetained": true,
+        "rawTerminalText": null
+      }
     },
     {
       "caseId": "stateful-private-checkout",

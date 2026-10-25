@@ -180,10 +180,12 @@ Khách: Chị đặt hai áo này nhé, lên đơn cho chị.
 Kết quả khách nhận / send-eligible B1:
 
 ```text
-Chị cho em [NAME]
+Chị cho em tên người nhận nhé.
 ```
 
 Recovery: `{"originalDisposition": "NO_SEND", "originalReason": "CHECKOUT_DETAILS_MISSING"}`
+
+Public text đối chiếu từ code-owned copy và accepted capture SHA256 d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125. Analytics đã che nhầm thành `[NAME]`; raw terminal text=null vì code xử lý. Private values không được phục hồi.
 
 ## stateful-private-checkout — TARGET
 
