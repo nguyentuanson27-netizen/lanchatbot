@@ -29,6 +29,32 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it.each(["permission","privacy","owner","arguments"])("does not prefetch catalog before rejecting batch %s",async mode=>{
+    const f=fixtureProduct(),scope=commerceScope(),readProduct=vi.fn(async()=>structuredClone(f));
+    if(mode==="permission")scope.permission=false;
+    if(mode==="privacy")scope.privacyAllowed=false;
+    if(mode==="owner")scope.conversationOwner="HUMAN";
+    const tools=createReadOnlyTools({scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{readProduct,
+      searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+    const result=await tools.invokeBatch([{name:"read_product",args:{subjectRef:f.product.productId,...(mode==="arguments"?{offerTypes:["AO","AO"]}:{offerType:"DIRECT"})}}]);
+    expect(result[0]?.status).toBe("REJECTED");expect(readProduct).not.toHaveBeenCalled();
+  });
+  it("compares a selected pair even when the catalog has more than eight offers",async()=>{
+    const {tools}=sellingFixture(Object.fromEntries(["AO","CV","SET_VAY","QUAN","SET_QUAN","DIRECT","SET","COMBO_3","OTHER"].map((o,i)=>[o,499000+i*1000])));
+    const result=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerTypes:["AO","CV"]}});
+    expect(result).toMatchObject({status:"OK",data:{sellingOptions:[{offerType:"AO"},{offerType:"CV"}]}});
+    expect(tools.snapshot().boundSubjects).toHaveLength(3);
+    expect(tools.snapshot().protectedClaims).toHaveLength(4);
+    expect(tools.snapshot().policyLiterals.some(p=>p.ref==="offers:SM613")).toBe(false);
+  });
+  it.each(["throw","missing"])("keeps one failed source read per product without hidden retry (%s)",async fault=>{
+    const f=fixtureProduct(),readProduct=vi.fn(async()=>{if(fault==="throw")throw new Error("SOURCE");return undefined as never;});
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{readProduct,
+      searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+    const calls=[{name:"read_product",args:{subjectRef:f.product.productId,offerType:"DIRECT"}},{name:"read_product",args:{subjectRef:f.product.productId,detailsOnly:true}}];
+    expect((await tools.invokeBatch(calls)).map(r=>r.status)).toEqual(["UNAVAILABLE","UNAVAILABLE"]);
+    expect(readProduct).toHaveBeenCalledTimes(1);expect(tools.snapshot().protectedClaims).toEqual([]);
+  });
   it("compares only the explicitly selected offers without adding unrelated variant subjects",async()=>{
     const {tools}=sellingFixture({AO:499000,CV:449000,SET_VAY:799000});
     const result=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerTypes:["AO","SET_VAY"]}});

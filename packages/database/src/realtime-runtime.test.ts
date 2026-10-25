@@ -40,6 +40,43 @@ import {
 } from "./realtime-runtime.js";
 
 describe("committed sales effect readback", () => {
+  it("writes public recovery metadata through the actual Outbox writer, strips it for transport, then reads accepted numeric history",async()=>{
+    const now=new Date(),page="page",conversation="33333333-3333-4333-8333-333333333333",customerHash="a".repeat(64),recipient="customer-1";
+    const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),hash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    const message={kind:"TEXT" as const,text:"Ưu đãi 30.000đ. Tổng 499.000đ, đã gồm phí giao hàng."},group="10000000-0000-4000-8000-000000000002";
+    const proof={kind:"C3_PUBLIC_CART_SUMMARY_V1",pageId:page,conversationId:conversation,customerHash,
+      recipientHash:createHash("sha256").update(recipient).digest("hex"),responseGroupId:group,sequence:0,messageHash:hash(message),
+      cartId:"50000000-0000-4000-8000-000000000001",cartVersion:2,discountTotalVnd:30000,grandTotalVnd:499000};
+    const inserts:readonly unknown[][]=[];
+    const client={query:async(sql:string,values:readonly unknown[]=[])=>{
+      if(sql.includes("SELECT routing_owner"))return {rowCount:1,rows:[{routing_owner:"APP",app_send_enabled:true,kill_switch:false,transaction_now:now}]};
+      if(sql.includes("SELECT conversation_owner"))return {rowCount:1,rows:[{conversation_owner:"BOT"}]};
+      if(sql.includes("INSERT INTO meta_outbox"))(inserts as unknown[][]).push([...values]);
+      return {rowCount:1,rows:[]};
+    },release(){}};
+    const store=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",cipher);
+    const pool={connect:async()=>client,query:vi.fn(async()=>({rows:[] as unknown[]}))};
+    (store as unknown as {pool:unknown}).pool=pool;
+    const result=await store.commit({pageId:page,conversationId:conversation,customerHash,expectedStateVersion:0,
+      state:{revision:1,routingOwner:"APP",conversationOwner:"BOT"},metaPlan:{replyPlanId:"10000000-0000-4000-8000-000000000001",responseGroupId:group,
+        recipientId:recipient,messages:[message],publicCartSummary:proof}},now);
+    expect(result.metaOutboxCreated).toBe(1);expect(inserts).toHaveLength(1);
+    const v=inserts[0]!,row={outbox_id:v[0],reply_plan_id:v[2],response_group_id:v[3],conversation_id:v[4],page_id:v[5],customer_hash:v[6],
+      recipient_ciphertext:v[7],recipient_nonce:v[8],recipient_auth_tag:v[9],payload_ciphertext:v[10],payload_nonce:v[11],payload_auth_tag:v[12],
+      payload_encrypted_dek:v[13],payload_key_ref:v[14],payload_expires_at:v[15],sequence_no:v[17],attempt_count:1,lease_token:"lease",
+      status:"PENDING",meta_message_id:null as string|null,accepted_at:null as Date|null};
+    pool.query.mockResolvedValue({rows:[row]});
+    const scope={pageId:page,conversationId:conversation,customerHash,recipientHash:proof.recipientHash,before:new Date(now.getTime()+1000)};
+    expect(await store.readAcceptedCommerceCartSummaries(scope)).toEqual([]);
+    const outbound=await store.claimMetaOutbox("worker",30000);
+    expect(outbound?.message).toEqual(message);
+    expect(JSON.stringify(outbound?.message)).not.toContain("commercePublicCartSummary");
+    row.status="SENT_ACCEPTED";row.meta_message_id="meta-accepted";row.accepted_at=now;
+    const accepted=await store.readAcceptedCommerceCartSummaries(scope);
+    expect(accepted).toHaveLength(1);expect(accepted[0]).toMatchObject({type:"ACCEPTED_PUBLIC_CART_SUMMARY",cartVersion:2,discountTotalVnd:30000,grandTotalVnd:499000});
+    expect(accepted[0]!.messageHash).toBe(hash(outbound!.message));
+    expect(JSON.stringify(accepted)).not.toContain(message.text);
+  });
   it("recovers only numeric accepted cart outcome metadata, never the over-redacted customer text",async()=>{
     const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),page="page",id="public-summary";
     const message={kind:"TEXT",text:"Giỏ của chị: mẫu có tên riêng. Tổng 499.000đ."};
@@ -59,7 +96,17 @@ describe("committed sales effect readback", () => {
     expect(JSON.stringify(events)).not.toContain("tên riêng");expect(JSON.stringify(events)).not.toContain("recipientHash");
     expect(await store.readAcceptedCommerceCartSummaries({...input,recipientHash:"c".repeat(64)})).toEqual([]);
     row.status="RETRYABLE";expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
-    expect(query.mock.calls.length).toBe(3);
+    row.status="SENT_ACCEPTED";
+    const encrypt=(value:unknown)=>{const p=cipher.encryptJson(value,`lana:meta-payload:v2:${page}:${id}`,new Date(Date.now()+60000));
+      Object.assign(row,{payload_ciphertext:p.ciphertext,payload_nonce:p.nonce,payload_auth_tag:p.authTag,payload_encrypted_dek:p.encryptedDek,payload_key_ref:p.keyRef,payload_expires_at:p.expiresAt});};
+    encrypt({...message,text:"Tổng 1đ.",commercePublicCartSummary:proof});
+    expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    encrypt({...message,commercePublicCartSummary:{...proof,phone:"PRIVATE"}});
+    expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    encrypt({...message});expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    encrypt({...message,commercePublicCartSummary:proof});row.payload_expires_at=new Date(Date.now()-1);
+    expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    expect(query.mock.calls.length).toBe(7);
   });
   it.each(["SENT_ACCEPTED", "DELIVERED", "READ", "RETRYABLE", "AMBIGUOUS", "wrong-recipient", "wrong-product"])
     ("projects only exact accepted media receipts after restart (%s)", async mode => {
@@ -96,11 +143,12 @@ describe("committed sales effect readback", () => {
     expect(query).toHaveBeenCalledWith(expect.stringContaining("owner_before='BOT' AND owner_after='HUMAN'"),
       ["page", "conversation", 2, "DEPENDENCY_FAILURE", JSON.stringify({ responseGroupId: "group", deliveryBindingHash: input.bindingHash })]);
   });
-  it.each(["none", "media", "handoff", "both"])("keeps private bindings out of the customer message after Outbox decryption (%s)", async bound => {
+  it.each(["none", "media", "handoff", "both", "public-summary"])("keeps private bindings out of the customer message after Outbox decryption (%s)", async bound => {
     const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"), page = "page", id = "outbox";
     const message = { kind: "TEXT", text: "Ảnh mẫu chị nhé." }, binding = { kind: "C3_MEDIA_GROUP_V1", customerHash: "a".repeat(64) };
     const payload = cipher.encryptJson({ ...message, ...(["media", "both"].includes(bound) ? { commerceMediaBinding: binding } : {}),
-      ...(["handoff", "both"].includes(bound) ? { commerceHandoffBinding: binding } : {}) },
+      ...(["handoff", "both"].includes(bound) ? { commerceHandoffBinding: binding } : {}),
+      ...(bound==="public-summary"?{commercePublicCartSummary:{kind:"C3_PUBLIC_CART_SUMMARY_V1",customerHash:"a".repeat(64)}}:{}) },
       `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now() + 60_000));
     const recipient = cipher.encryptValue("synthetic-recipient", `lana:meta-recipient:v2:${page}:${id}`);
     const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);

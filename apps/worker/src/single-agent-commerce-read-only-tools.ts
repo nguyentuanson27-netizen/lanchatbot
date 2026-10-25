@@ -167,8 +167,8 @@ export function createReadOnlyTools(input: {
       color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null,
       deliveryRegion: raw && typeof args.deliveryRegion === "string" ? resolveCatalogDeliveryRegion(raw, args.deliveryRegion)?.[0] ?? args.deliveryRegion : (args.deliveryRegion as string | undefined) ?? null };
     // Do not expand an unbounded source record or silently truncate selling options.
-    if (!query.offerType && availableOffers && availableOffers.length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
     const selectedOffers=args.offerTypes as string[]|undefined;
+    if (!query.offerType && !selectedOffers && availableOffers && availableOffers.length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
     if(selectedOffers&&(!availableOffers||selectedOffers.some(o=>!availableOffers.includes(o))))return {status:"REJECTED",reason:"OFFER_NOT_AVAILABLE"};
     const summarizeAll = !!selectedOffers || (!query.offerType && availableOffers !== null && availableOffers.length > 1);
     const resolveOption = (offerType: string | null) => {
@@ -275,6 +275,17 @@ export function createReadOnlyTools(input: {
       missing: [...(selected.availability.price.status === "OK" ? [] : ["PRICE"]), ...(selected.availability.stock.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
   }
+  const permitted=()=>scope.permission && scope.privacyAllowed && scope.conversationOwner === "BOT";
+  function readArgs(value:unknown):Record<string,unknown>|null {
+    const a=toolArgs(value,["subjectRef","offerType","offerTypes","detailsOnly","color","size","deliveryRegion"]);
+    if(!a||!text(a.subjectRef,128)||subjects.get(a.subjectRef)?.kind!=="PRODUCT"||
+      (a.offerType!==undefined&&!text(a.offerType,64))||(a.color!==undefined&&!text(a.color,64))||
+      (a.size!==undefined&&!text(a.size,16))||(a.deliveryRegion!==undefined&&!text(a.deliveryRegion,64))||
+      (a.offerTypes!==undefined&&(!Array.isArray(a.offerTypes)||a.offerTypes.length<2||a.offerTypes.length>3||!a.offerTypes.every(o=>text(o,64))||
+        new Set(a.offerTypes).size!==a.offerTypes.length||a.offerType!==undefined))||
+      (a.detailsOnly!==undefined&&(a.detailsOnly!==true||a.offerType!==undefined||a.offerTypes!==undefined)))return null;
+    return a;
+  }
   async function invoke(call: CommerceToolCall, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
     if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
@@ -327,15 +338,12 @@ export function createReadOnlyTools(input: {
             availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
       }
       if (call.name === "read_product") {
-        const a = toolArgs(call.args, ["subjectRef", "offerType", "offerTypes", "detailsOnly", "color", "size", "deliveryRegion"]);
-        if (!a || !text(a.subjectRef, 128) || subjects.get(a.subjectRef)?.kind !== "PRODUCT" ||
-          (a.offerType !== undefined && !text(a.offerType, 64)) || (a.color !== undefined && !text(a.color, 64)) ||
-          (a.size !== undefined && !text(a.size, 16)) || (a.deliveryRegion !== undefined && !text(a.deliveryRegion, 64)) ||
-          (a.offerTypes!==undefined&&(!Array.isArray(a.offerTypes)||a.offerTypes.length<2||a.offerTypes.length>3||!a.offerTypes.every(o=>text(o,64))||new Set(a.offerTypes).size!==a.offerTypes.length||a.offerType!==undefined))||
-          (a.detailsOnly!==undefined&&(a.detailsOnly!==true||a.offerType!==undefined||a.offerTypes!==undefined))) return { status: "REJECTED", reason: "TOOL_ARGUMENTS_OR_REF" };
-        if(a.detailsOnly===true){await prepareProduct(a.subjectRef,loaded);prepared.add(a.subjectRef);
-          return {status:"OK",data:{subjectRef:a.subjectRef,content:products.get(a.subjectRef)?.content??null,attributes:products.get(a.subjectRef)?.attributes??null,
-            availableOffers:offerContexts.has(a.subjectRef)?JSON.parse(offerContexts.get(a.subjectRef)!.text).availableOffers:null,
+        const a=readArgs(call.args);
+        if(!a)return {status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"};
+        const id=a.subjectRef as string;
+        if(a.detailsOnly===true){await prepareProduct(id,loaded);prepared.add(id);
+          return {status:"OK",data:{subjectRef:id,content:products.get(id)?.content??null,attributes:products.get(id)?.attributes??null,
+            availableOffers:offerContexts.has(id)?JSON.parse(offerContexts.get(id)!.text).availableOffers:null,
             notRead:["PRICE","STOCK","ETA","SIZE_FIT"]}};}
         return await readProduct(a, loaded);
       }
@@ -343,19 +351,23 @@ export function createReadOnlyTools(input: {
     } catch { return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" }; }
   }
   return { invoke, snapshot, prepare, async invokeBatch(calls:CommerceToolCall[]){
+    if(!permitted())return calls.map(()=>({status:"REJECTED" as const,reason:"PERMISSION"}));
     // Fetch one immutable source per product. Admission/commit follows request order,
     // never the network completion order. Effects are handled by outer ports.
     const sources=new Map<string,Promise<Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null>>();
-    for(const c of calls)if(c.name==="read_product"&&c.args&&typeof c.args==="object"){
-      const id=(c.args as Record<string,unknown>).subjectRef;
-      if(typeof id==="string"&&subjects.get(id)?.kind==="PRODUCT"&&!sources.has(id))
-        sources.set(id,input.catalog.readProduct(id).then(s=>structuredClone(s)).catch(()=>null));
+    for(const c of calls)if(c.name==="read_product"){
+      const args=readArgs(c.args),id=args?.subjectRef;
+      if(typeof id==="string"&&!sources.has(id))
+        sources.set(id,Promise.resolve().then(()=>permitted()?input.catalog.readProduct(id):null).then(s=>s?structuredClone(s):null).catch(()=>null));
     }
     const results:CommerceToolResult[]=[];
     for(const call of calls){
       const id=call.args&&typeof call.args==="object"?(call.args as Record<string,unknown>).subjectRef:undefined;
       const source=call.name==="read_product"&&typeof id==="string"&&sources.has(id)?await sources.get(id):undefined;
-      results.push(source===null?{status:"UNAVAILABLE",reason:"SOURCE_ERROR"}:await invoke(call,source));
+      // Revalidate before consuming staged sources; malformed calls never inherit
+      // a valid sibling's fetch, and revoked permission never authorizes a read.
+      results.push(!permitted()?{status:"REJECTED",reason:"PERMISSION"}:call.name==="read_product"&&!readArgs(call.args)?{status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"}:
+        source===null?{status:"UNAVAILABLE",reason:"SOURCE_ERROR"}:await invoke(call,source));
     }
     return results;
   }, async readback() {
