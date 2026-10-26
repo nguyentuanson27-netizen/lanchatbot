@@ -1,4 +1,8 @@
-## Current — rút gọn presentation overhead, 2026-10-26
+## Current — chọn đúng compact V2 cho lượt chạy sau, 2026-10-26
+
+[Plan](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md). Reviewtrướckhôngblocker; bổsungexplicitselection chứkhôngbịa lỗi: defaultV1 giữnguyên, `--compact-v2` driver→offline/preflight/run→registeredownerContextPresentation, V2slotIDs namespace riêng. MockHTTP kiểm đúngwire/cả2arms/mandatoryverifier, khôngthayrenderer/prompt/model/canonicalcontext. Taskchỉfix+independentreview,0provider/count/generation calls; chưaquality/native/BGO.
+
+## Previous — rút gọn presentation overhead, 2026-10-26
 
 [V2 plan](../docs/specs/c3-phase-b-compact-context-20261026.md), [implementation/measurement](../apps/worker/evals/single-agent-commerce-read-only/compact-context-20261026/REPORT.md). **COMPLETE reduction/measurement; provider conversation NOT RUN; B chưaGO.** Compactopt-in bỏ đườngdẫn/nhãn lặp/fence/indentation, giữ V1/default và toàn source values/history/openingQuote.205NodePASS/tsc/lint/diffexit0. Clean sealed sourced9161647:24countTokens HTTP200/0errors/retry0/0generation. Same-countAPI ORIGINAL42371/V150610/V242863; V2−15.3%vsV1, +1.2%vsORIGINAL. Bytes235886→200389. Khôngmix với generationusage cũ41827/50066 hoặcclaimquality/latency stable; futureconversationrunphảichọn/registerV2.
 

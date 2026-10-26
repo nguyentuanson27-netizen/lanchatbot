@@ -6,6 +6,10 @@ import sys
 
 repo = Path(__file__).resolve().parents[5]
 base = repo / 'apps/worker/evals/single-agent-commerce-read-only'
+assert len(sys.argv) in (2, 3), 'DRIVER_ARGUMENTS'
+assert len(sys.argv) == 2 or sys.argv[2] == '--compact-v2', 'DRIVER_PRESENTATION_ARGUMENT'
+presentation = 'VI_DATA_BLOCKS_COMPACT_V2' if len(sys.argv) == 3 else 'VI_DATA_BLOCKS_V1'
+presentation_flags = ['--presentation', presentation]
 out = Path(sys.argv[1]).resolve()
 assert not out.is_relative_to(repo), 'RAW_OUTPUT_OUTSIDE_SOURCE'
 
@@ -16,6 +20,7 @@ assert not git('status', '--porcelain'), 'DIRTY_SOURCE'
 source = git('rev-parse', 'HEAD')
 out.mkdir()
 registration = {'sourceSha': source, 'mode': 'CAPTURED_WORLD_FULL_CONTEXT_PRESENTATION_NOT_LIVE_ELIGIBILITY',
+                'ownerContextPresentation': presentation,
                 'controls': 17, 'diagnosticSlots': 16, 'totalRegisteredOutcomes': 33,
                 'maximumGenerationRequests': 49, 'repetitions': 1, 'retry': 0, 'sendEnabled': False}
 (out / 'REGISTRATION.json').write_text(json.dumps(registration, indent=2), encoding='utf-8')
@@ -44,17 +49,17 @@ def run(name, args):
 save()
 try:
     # All historical worlds and normalized paired wires must reconstruct before fresh provider controls.
-    offline = "import{readFileSync}from'node:fs';import{prepareFullPresentation}from'./apps/worker/evals/single-agent-commerce-read-only/full-context-presentation.mjs';import{hardPrecheck}from'./apps/worker/dist/single-agent-semantic-verifier-boundary.js';const f=JSON.parse(readFileSync(process.argv[1]));prepareFullPresentation(f,readFileSync(process.argv[2],'utf8'));for(const r of f.records)if(hardPrecheck(r.capture.context,'Dạ.',new Date(r.capture.capturedAt)))throw Error('CAPTURE_NOT_REPLAYABLE');console.log('OFFLINE_PASS_ZERO_PROVIDER');"
+    offline = "import{readFileSync}from'node:fs';import{prepareFullPresentation}from'./apps/worker/evals/single-agent-commerce-read-only/full-context-presentation.mjs';import{hardPrecheck}from'./apps/worker/dist/single-agent-semantic-verifier-boundary.js';const f=JSON.parse(readFileSync(process.argv[1]));prepareFullPresentation(f,readFileSync(process.argv[2],'utf8'),process.argv[3]);for(const r of f.records)if(hardPrecheck(r.capture.context,'Dạ.',new Date(r.capture.capturedAt)))throw Error('CAPTURE_NOT_REPLAYABLE');console.log('OFFLINE_PASS_ZERO_PROVIDER');"
     run('offline-preflight', ['node', '--input-type=module', '-e', offline,
-                             base / 'quote-presentation-run-20261026/frozen-inputs.json', base / 'prompts/owner.vi.txt'])
+                             base / 'quote-presentation-run-20261026/frozen-inputs.json', base / 'prompts/owner.vi.txt', presentation])
     run('source-capture', [sys.executable, base / 'source-session.py', 'node', base / 'feedback-source-capture.mjs', out / 'source'])
     run('controls-preflight', ['node', base / 'feedback-controls-20261023.mjs', out / 'controls-preflight', '--capture', out / 'source/capture.json', '--preflight'])
     run('controls', ['node', base / 'feedback-controls-20261023.mjs', out / 'controls', '--capture', out / 'source/capture.json', '--prepared', out / 'controls-preflight/prepared.json'])
     assert json.loads((out / 'controls/summary.json').read_text())['controlsPass'] is True
-    run('diagnostic-preflight', ['node', base / 'full-context-presentation.mjs', out / 'diagnostic-preflight', '--preflight', out / 'controls'])
+    run('diagnostic-preflight', ['node', base / 'full-context-presentation.mjs', out / 'diagnostic-preflight', '--preflight', out / 'controls', *presentation_flags])
     run('diagnostic', [sys.executable, base / 'model-code-division-run-20261019/raw/credential-launcher.py',
                        'node', base / 'full-context-presentation.mjs', out / 'diagnostic', '--run', out / 'controls',
-                       out / 'diagnostic-preflight/registration.json'])
+                       out / 'diagnostic-preflight/registration.json', *presentation_flags])
     status['status'] = 'COLLECTED_REQUIRES_BLIND_REVIEW'
 except Exception as error:
     status.update(status='STOPPED_RETAIN_EVIDENCE', error=str(error))

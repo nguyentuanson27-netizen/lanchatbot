@@ -1,4 +1,10 @@
-## Current — rút gọn presentation overhead, 2026-10-26
+## Current — chọn đúng compact V2 cho lượt chạy sau, 2026-10-26
+
+- [x] RED→GREEN explicitV2 CLI/registration/uniqueIDs/actualHTTP selection; defaultV1 unchanged. [Plan](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md).
+- [x]3newNode/208commerceevalPASS,2Python driverarg testsPASS (allchildrenstubbed), directtsc/lint/diffexit0. ArchivedV1bundlehash exact, V2IDs distinct/wireexact/mandatoryverifier.
+- [ ] Same independent exact-source reviewer→fix findings nếu có.0realprovider/count/model calls; chưaV2conversationquality/native/BGO.
+
+## Previous — rút gọn presentation overhead, 2026-10-26
 
 - [x] RED→GREEN compactV2 giữ đủ originalfield/trace/history/openingQuote, đườngdẫn chỉlocal;0prompt/model/verifier/default/V1changes. [Plan](../docs/specs/c3-phase-b-compact-context-20261026.md).
 - [x] 205NodePASS/directtsc/lint/diffexit0; sourced9161647clean→24countTokens-only calls HTTP200/0errors/retry0/0generation. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-20261026/REPORT.md):V150610→V242863(−15.3%);ORIGINAL42371, V2+1.2%. Bytes235886→200389.
