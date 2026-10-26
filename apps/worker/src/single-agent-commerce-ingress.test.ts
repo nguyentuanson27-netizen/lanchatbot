@@ -108,6 +108,7 @@ it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-v
   const result=await f.run(owner);
   expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:providerFault?"DEPENDENCY_FAILURE":"RESPONSE_UNAVAILABLE"});
   expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:"COMMITTED"}});
+  if(!("toolCalls" in result&&"normalToolCalls" in result))throw Error("NATIVE_ACCOUNTING_REQUIRED");
   expect(result.toolCalls).toBe(result.normalToolCalls+1);
   const handoffs=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);
   expect(handoffs).toHaveLength(1);
@@ -121,8 +122,10 @@ it("fails closed if recovery commit readback becomes unavailable",async()=>{
   f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw new Error("READBACK_UNAVAILABLE");};});
   const result=await f.run(async()=>{throw new Error("HTTP_429");});
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
+  expect(result.enqueued).toBe(1);
   expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
   expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:"COMMITTED"}});
+  if(!("toolCalls" in result&&"normalToolCalls" in result))throw Error("NATIVE_ACCOUNTING_REQUIRED");
   expect(result.toolCalls).toBe(result.normalToolCalls+1);
 });
 
@@ -144,9 +147,11 @@ it.each(["conflict","ambiguous","superseded","missing-rule"])("does not acknowle
   expect(result.terminal.disposition).not.toBe("HANDOFF");
   expect(result.terminal.text??"").not.toContain("Shop đã nhận");
   expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan).length).toBeLessThanOrEqual(1);
+  if(!("terminalHandoffCalls" in result))throw Error("NATIVE_ACCOUNTING_REQUIRED");
   if(fault==="conflict"||fault==="ambiguous"){
     expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:fault==="conflict"?"BLOCKED":"UNKNOWN"}});
-    expect(result.toolCalls).toBe(result.normalToolCalls+1);
+    if(!("toolCalls" in result&&"normalToolCalls" in result))throw Error("NATIVE_ACCOUNTING_REQUIRED");
+  expect(result.toolCalls).toBe(result.normalToolCalls+1);
   }else expect(result.terminalHandoffCalls).toBe(0);
 });
 

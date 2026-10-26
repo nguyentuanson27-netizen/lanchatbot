@@ -312,7 +312,7 @@ export async function runPersistedCommerceIngress(input: {
         result.toolCalls=result.normalToolCalls+result.terminalHandoffCalls;
         if(status)result.handoff=status;
       }
-      if(readbackFailed)return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE")};
+      if(readbackFailed)return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE"),enqueued:port.outboxCount()};
       if (outcome?.disposition === "HANDOFF" || outcome?.disposition === "NO_SEND") return {...result,terminal:outcome,
         recovery:{originalDisposition:original.disposition,originalReason:original.reason},enqueued:port.outboxCount()};
       return {...result,...await closeWithoutSend("RECOVERY_HANDOFF_UNAVAILABLE")};
