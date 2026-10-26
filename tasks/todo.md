@@ -1,3 +1,12 @@
+## Current — handoff im lặng và tư vấn cách mặc, 2026-10-26
+
+[Implementation/self-review/commands](../docs/specs/c3-phase-b-silent-handoff-sales-language-20261026.md). **PROVIDER_NOT_RUN; B chưa GO.**
+
+- [x] Theo owner mới, handoff không partial reply/holding/ảnh; candidate giữ tag và atomic quyền/event. Hậu mãi silent chỉ qua policy matrix có binding, không đổi deterministic default.
+- [x] Sửa hướng tư vấn bằng cách phối/điểm mạnh, câu trực tiếp; bỏ xung đột cũ với phối đồ và trả giá khi handoff. Không thêm ví dụ fit benchmark/regex/role hoặc sửa verifier.
+- [x] RED→GREEN và focused regression; contracts16/engine49/worker578/Node187PASS, persistence17PASS sau bổ sung; worker build và contracts typecheck/build PASS. Kết quả lint/protocol cuối ghi trong tài liệu.
+- [ ] Provider run identity mới để kiểm actual silent handoff và giọng; chưa chạy. Không dùng kết quả campaign cũ xác nhận prompt mới hoặc claim B1 có capability handoff.
+
 ## Current — rule retention model campaign, 2026-10-26
 
 **CONTROLS17PASS; TARGETED20_REVIEW_FAIL; STOP_REMAINING31; B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/CHECKPOINT_B.md), [đủ20hội thoại](../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/CONVERSATIONS.md). Source1ebd4dcc clean/unchanged,N1/retry0; Gemini3.5FlashLiteHIGH owner/GPT6.1SolHIGH verifier.20native=15eligible(8B1eligibility-only)+3handoff+2NO_SEND sau HUMAN,0fallback.72requests/max1upstream,0provider/quota/timeout,0eval-label leak;2DBdropped. Model đã gửi card+2ảnh và giữ giá499k khi missingfeedback handoff. Một lỗi workflow: B1POSunavailable vẫn hứa kiểm tra rồi báo khi không có handoff/callback; verifierPASS không thay capability/workflow review. Đọc đủ20, giữ minor giọng theo owner, không sửa prompt/rubric/retry sau result.31remaining của registered51 chưa chạy theo gate, không coi20làfull. Đã hoàn tất implementation+independent review và deterministic98checks tách source(45+45trướcaccounting,4+4final); không live send/merge/deploy hoặc GO.

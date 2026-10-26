@@ -4,116 +4,116 @@
   "rules": [
     {
       "reason": "AFTER_SALES_REQUEST",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "ORDER_STATUS",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "DELIVERY_TRACKING",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "DELIVERY_DELAY",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "CHANGE_DELIVERY_INFO",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "CANCEL_ORDER",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "PAYMENT_AFTER_ORDER",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "EXCHANGE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu đổi hàng của chị. Bên em sẽ kiểm tra và báo cách xử lý tiếp nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "RETURN",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "REFUND",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "DEFECT",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận thông tin chị báo lỗi sản phẩm. Bên em sẽ kiểm tra và hướng dẫn cách xử lý nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "WARRANTY",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "WRONG_OR_MISSING_ITEM",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra và phản hồi chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "VAN_DON"
     },
     {
       "reason": "CUSTOMER_REQUESTED_HUMAN",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Dạ, em đã chuyển lời nhắn của chị rồi ạ.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "PRICE_UNAVAILABLE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Bên em sẽ kiểm tra lại giá rồi báo chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "STOCK_UNAVAILABLE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Bên em sẽ kiểm tra lại hàng của mẫu này rồi báo chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "SIZE_RULE_UNAVAILABLE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Bên em sẽ kiểm tra lại size mẫu này rồi tư vấn chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "ETA_UNAVAILABLE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Bên em sẽ kiểm tra lịch giao rồi báo chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
       "reason": "POLICY_UNAVAILABLE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Bên em sẽ kiểm tra lại phần này rồi trả lời chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
@@ -136,8 +136,8 @@
     },
     {
       "reason": "DEPENDENCY_FAILURE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Em chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     },
     {
@@ -178,15 +178,15 @@
     },
     {
       "reason": "RESPONSE_UNAVAILABLE",
-      "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
-      "holdingReply": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
+      "customerMessagePolicy": "SILENT_HANDOFF",
+      "holdingReply": null,
       "tag": "NHAN_VIEN"
     }
   ],
   "sourceMetadata": {
     "source": "ADMIN",
-    "sourceReference": "repo:c3-phase-b-missing-shop-information-handoff-20261025",
-    "sourceVersion": "c3-phase-b-candidate-handoff-20261025-v5",
-    "observedAt": "2026-10-25T00:00:00.000Z"
+    "sourceReference": "repo:c3-phase-b-silent-handoff-sales-language-20261026",
+    "sourceVersion": "c3-phase-b-candidate-handoff-20261026-v6-silent",
+    "observedAt": "2026-10-26T00:00:00.000Z"
   }
 }

@@ -35,8 +35,8 @@ export function validateProtocol(m){
  check(m.terminalHandoffAttempts===1&&m.maximumExecutedToolInvocations===7,'TERMINAL_HANDOFF_BUDGET');
  check(JSON.stringify(m.handoffReply?.sourceCheckKinds)===JSON.stringify(['PRODUCT','PROFILE','SIZE_SOURCE','CART_SELECTION','SALES_STATE','RECEIPT']),'HANDOFF_SOURCE_KINDS');
  check(m.handoffReply?.rendererVersion==='C3_B_PRICE_FRAGMENT_V1'&&m.handoffReply.maximumSourceChecks===16&&m.handoffReply.maximumTrustedContextBytes===65536&&
-  Array.isArray(m.handoffReply.approvedHoldingHashes)&&m.handoffReply.approvedHoldingHashes.length>0&&
-  m.handoffReply.approvedHoldingHashes.every(h=>typeof h==='string'&&/^[a-f0-9]{64}$/.test(h)),'HANDOFF_REPLY_CONTRACT');
+  m.handoffReply.customerMessagePolicy==='SILENT_HANDOFF'&&Array.isArray(m.handoffReply.approvedHoldingHashes)&&
+  m.handoffReply.approvedHoldingHashes.length===0,'HANDOFF_REPLY_CONTRACT');
  check(m.ownerFinalRequest==='TEXT_WITH_COMPLETED_TOOL_DATA'&&m.toolResultAccounting==='BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES','OWNER_EXECUTION_CONTRACT');
  check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===65536,'REQUEST_BOUNDS');
  check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&

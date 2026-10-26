@@ -9,21 +9,15 @@ export function isolatedHandoffRecords(upstream,{pageId,candidate}){
  assert(matrices.length<=1,'CANDIDATE_MATRIX_SCOPE_DUPLICATE');
  const prior=matrices[0],content=structuredClone(prior?.version.content??approved);
  const approvedByReason=new Map(approved.rules.map(rule=>[rule.reason,rule]));
- for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE','DEPENDENCY_FAILURE','RESPONSE_UNAVAILABLE','PRICE_UNAVAILABLE','STOCK_UNAVAILABLE','ETA_UNAVAILABLE','POLICY_UNAVAILABLE']){
-  const delta=approvedByReason.get(reason);assert(delta?.customerMessagePolicy==='HOLDING_REPLY_THEN_HANDOFF'&&delta.holdingReply,'CANDIDATE_HOLDING_REQUIRED');
-  const rule=content.rules.find(r=>r.reason===reason);
-  if(rule)rule.customerMessagePolicy=delta.customerMessagePolicy;
+ for(const delta of approved.rules){
+  const rule=content.rules.find(r=>r.reason===delta.reason);
+  if(rule){rule.customerMessagePolicy=delta.customerMessagePolicy;rule.holdingReply=delta.holdingReply;}
   else content.rules.push(structuredClone(delta));
  }
- // The candidate owns customer copy for every retained holding rule, including
- // rules inherited from the upstream matrix. Preserve tags and every mode
- // outside the eight owner-approved holding reasons above.
+ // Owner-approved modes/copy apply only to the isolated candidate. Upstream
+ // tags and source-store records remain unchanged.
  for(const rule of content.rules){
-  if(rule.customerMessagePolicy==='HOLDING_REPLY_THEN_HANDOFF'){
-   const copy=approvedByReason.get(rule.reason)?.holdingReply;
-   assert(copy,'CANDIDATE_COPY_UNAVAILABLE');
-   rule.holdingReply=copy;
-  }else rule.holdingReply=null;
+  assert(approvedByReason.has(rule.reason),'CANDIDATE_REASON_UNAVAILABLE');
  }
  content.sourceMetadata=approved.sourceMetadata;
  HandoffMatrixAdminContentV1Schema.parse(content);

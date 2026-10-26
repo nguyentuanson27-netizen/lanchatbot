@@ -9,19 +9,20 @@ import { buildProtectedMediaClaimsV1 } from "@lana/business-tools";
 import { commerceNow, commerceScope, fixturePolicy, fixtureCartLine, fixtureProfile } from "./single-agent-commerce.test-support.js";
 
 async function handoffFixture(options: {
-  holdingReply?: string; reason?: "DEPENDENCY_FAILURE" | "CUSTOMER_REQUESTED_HUMAN" | "SIZE_RULE_UNAVAILABLE";
+  holdingReply?: string; silent?: boolean; reason?: "DEPENDENCY_FAILURE" | "CUSTOMER_REQUESTED_HUMAN" | "SIZE_RULE_UNAVAILABLE" | "EXCHANGE";
   completeInboxBatch?: boolean; outboxResult?: "TRUNCATED" | "ABSENT";
 } = {}) {
   const scope = { ...commerceScope(), recipient: "b".repeat(64) }, policy = { ...(await fixturePolicy()).bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const };
   const reason = options.reason ?? "DEPENDENCY_FAILURE";
-  if (options.holdingReply) Object.assign(policy.artifacts, { handoffMatrix: {
+  if (options.holdingReply || options.silent) Object.assign(policy.artifacts, { handoffMatrix: {
     schemaVersion: 1, kind: "HANDOFF_MATRIX", sourceMetadata: policy.artifacts.shopPolicy.sourceMetadata,
-    rules: [{ reason, customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF", holdingReply: options.holdingReply, tag: "NHAN_VIEN" }],
+    rules: [{ reason, customerMessagePolicy: options.silent ? "SILENT_HANDOFF" : "HOLDING_REPLY_THEN_HANDOFF",
+      holdingReply: options.silent ? null : options.holdingReply, tag: reason === "EXCHANGE" ? "VAN_DON" : "NHAN_VIEN" }],
   } });
   const decision = selectCommerceHandoff(policy, scope, reason, commerceNow);
   const state = { ...createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow }), revision: scope.revision };
   const before = { ...scope, state, stateVersion: scope.revision, fence: 1 };
-  const nextState = applySilentHandoff(state, reason === "CUSTOMER_REQUESTED_HUMAN" ? reason : "AGENT_REQUEST", scope.revision, 1, commerceNow).state;
+  const nextState = applySilentHandoff(state, reason === "CUSTOMER_REQUESTED_HUMAN" || reason === "EXCHANGE" ? reason : "AGENT_REQUEST", scope.revision, 1, commerceNow).state;
   const next = { ...before, state: nextState, stateVersion: nextState.revision };
   const completed = vi.fn(), rollback = vi.fn(), client = {};
   const commitWithinTransaction = vi.fn(async (_client: unknown, prepared: RealtimeCommitInput<unknown>) => {
@@ -42,6 +43,18 @@ async function handoffFixture(options: {
 }
 
 describe("existing transaction owner for candidate commerce", () => {
+  it("commits a policy-selected silent exchange with ownership/event/tag but no customer Outbox", async () => {
+    const f = await handoffFixture({ reason: "EXCHANGE", silent: true });
+    expect(await f.port.commit(f)).toBe(true);
+    const prepared = f.commitWithinTransaction.mock.calls[0]![1];
+    expect(prepared.state).toMatchObject({ conversationOwner: "HUMAN" });
+    expect(prepared.handoffEventPlan).toMatchObject({ source: "POST_SALE", reasonCode: "EXCHANGE", desiredTag: "VAN_DON" });
+    expect(prepared.pancakeTagPlan).toMatchObject({ desiredTag: "VAN_DON" });
+    expect(prepared.metaPlan).toBeUndefined();
+    expect(f.port.outboxCount()).toBe(0);
+    expect(f.completed).toHaveBeenCalledOnce();
+  });
+
   it.each(["open", "variant", "negotiation"])("prepares native %s with fresh facts and exact replay evidence, independent of text classifiers", async mode => {
     const scope = commerceScope(), fixture = await fixturePolicy();
     const resolution = { ...fixture, mayAffectOutbound: true, audit: { ...fixture.audit, channel: "PUBLISHED" as const, pinScopeType: "SALES_EPISODE" as const, pinScopeId: "key", bundleHash: fixture.bundle!.bundleHash }, bundle: { ...fixture.bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const } }, policy = resolution.bundle.policy;

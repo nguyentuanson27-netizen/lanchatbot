@@ -6,6 +6,15 @@ import {join} from 'node:path';
 import {runtimeCase,readRegisteredCases,buildVerifierRequest,createCommerceVerifier,validateProtocol,requiredSourceConfig,sha256,dispatchRange} from './protocol.mjs';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
 
+test('current registration cannot silently re-enable holding or protected partial replies on handoff',()=>{
+ assert.equal(manifest.handoffReply.customerMessagePolicy,'SILENT_HANDOFF');
+ assert.deepEqual(manifest.handoffReply.approvedHoldingHashes,[]);
+ for(const delta of [{customerMessagePolicy:'HOLDING_REPLY_THEN_HANDOFF'},{approvedHoldingHashes:['a'.repeat(64)]}]){
+  const changed=structuredClone(manifest);Object.assign(changed.handoffReply,delta);
+  assert.throws(()=>validateProtocol(changed),/HANDOFF_REPLY_CONTRACT/);
+ }
+});
+
 test('registration freezes tool accounting and the final-only request contract',()=>{
  for(const key of ['ownerFinalRequest','toolResultAccounting']){
   const changed=structuredClone(manifest);delete changed[key];

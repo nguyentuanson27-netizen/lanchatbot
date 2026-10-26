@@ -120,6 +120,9 @@ export const HandoffDecisionV2Schema = z
   .strict()
   .superRefine((value, context) => {
     const isAfterSales = value.category === "AFTER_SALES";
+    // Shape only: consumers must still resolve and bind the published matrix.
+    const adminMatrix = value.provenance.decisionSource === "ADMIN_CONTROL" &&
+      /^matrix:[a-f0-9]{64}$/.test(value.provenance.rulesetVersion);
 
     if (isAfterSales && !AfterSalesHandoffReasons.has(value.reason)) {
       context.addIssue({
@@ -137,18 +140,19 @@ export const HandoffDecisionV2Schema = z
     }
 
     if (isAfterSales) {
-      if (value.customerMessagePolicy !== "HOLDING_REPLY_THEN_HANDOFF") {
+      const adminSilent = adminMatrix && value.customerMessagePolicy === "SILENT_HANDOFF";
+      if (value.customerMessagePolicy !== "HOLDING_REPLY_THEN_HANDOFF" && !adminSilent) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["customerMessagePolicy"],
           message: "after-sales handoff must send one holding reply before handoff",
         });
       }
-      if (value.customerMessages.length !== 1) {
+      if (value.customerMessages.length !== (adminSilent ? 0 : 1)) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["customerMessages"],
-          message: "after-sales handoff requires exactly one holding reply",
+          message: "after-sales message count must match the resolved policy",
         });
       }
       if (value.tag !== "VAN_DON") {
@@ -163,8 +167,7 @@ export const HandoffDecisionV2Schema = z
 
     // Published admin matrices can override the default silence. This shape is
     // not authorization: the consumer must resolve and bind the actual policy.
-    const adminHolding = value.provenance.decisionSource === "ADMIN_CONTROL" &&
-      /^matrix:[a-f0-9]{64}$/.test(value.provenance.rulesetVersion) && value.customerMessagePolicy === "HOLDING_REPLY_THEN_HANDOFF";
+    const adminHolding = adminMatrix && value.customerMessagePolicy === "HOLDING_REPLY_THEN_HANDOFF";
     if (value.customerMessagePolicy !== "SILENT_HANDOFF" && !adminHolding) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

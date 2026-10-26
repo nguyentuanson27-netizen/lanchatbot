@@ -68,7 +68,7 @@
     }
   },
   "promptHashes": {
-    "owner": "786e4cd7338e8a21d17557e03c41314301f005b913d83b687377ac4efe106cb6",
+    "owner": "11e811f72b70b27d6e7a9a014f89aa360abdab403faed0324868f631f158f402",
     "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
   },
   "verdictSchema": {
@@ -171,18 +171,7 @@
   ],
   "handoffReply": {
     "rendererVersion": "C3_B_PRICE_FRAGMENT_V1",
-    "approvedHoldingHashes": [
-      "2f379f8c7fef6cc849c0cf58b644f199cbfa1077e55f7b9d570dec8d7deab0ad",
-      "365897fe8f0a3153d5e8ebe992ec7bc1539301a9f64b8b396cc882947382ee1e",
-      "3c4ecf6922990149705c4905eaf5fbdcfb19cc0a6b99fcc0a18d461317554dd2",
-      "5b2506bada25409088a6924692bb178b79ec55a76eca7052a29a3f795534165a",
-      "5e74b7810cfbed670ae054a1460d8ef099901b25c34e376054177d7d1d0fa728",
-      "8a1f4c3867bda3bdf4bbe3c4b3915fc7bf866ad47d9d8272e0f6db50ea02c58f",
-      "98952824a4fc5c89f8a7cc629c1aaf779988d0d8e2366517927d7736fbec7195",
-      "ac009a08b19016893e6d3e9bd10ba85543e599b6abe2f4c3f0c14286a6024d38",
-      "b4d758d2d5ecdda7321f964d1b7b1efb14f06e94a2f69c7211f96c18a850f9b8",
-      "e02ac0822b571b0d2d6f1a2509a624c5657beadf972ced1f4acf103c0a077bf5"
-    ],
+    "approvedHoldingHashes": [],
     "sourceCheckKinds": [
       "PRODUCT",
       "PROFILE",
@@ -192,6 +181,7 @@
       "RECEIPT"
     ],
     "maximumSourceChecks": 16,
-    "maximumTrustedContextBytes": 65536
+    "maximumTrustedContextBytes": 65536,
+    "customerMessagePolicy": "SILENT_HANDOFF"
   }
 }

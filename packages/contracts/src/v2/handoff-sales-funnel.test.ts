@@ -29,6 +29,19 @@ const provenance = {
 };
 
 describe("HandoffDecisionV2", () => {
+  it("allows silent after-sales only with a bound admin matrix, no customer text and the original routing tag", () => {
+    const decision = { schemaVersion: 2, decisionId: "56c33819-5c44-4d90-a592-d8fd0901571d", category: "AFTER_SALES", reason: "EXCHANGE",
+      customerMessagePolicy: "SILENT_HANDOFF", customerMessages: [], tag: "VAN_DON",
+      provenance: { ...provenance, decisionSource: "ADMIN_CONTROL", rulesetVersion: "matrix:"+"a".repeat(64) }, decidedAt: "2026-07-22T04:00:00.000Z" };
+    expect(HandoffDecisionV2Schema.safeParse(decision).success).toBe(true);
+    for (const changed of [
+      { ...decision, customerMessages: ["Shop sẽ kiểm tra rồi báo lại."] },
+      { ...decision, tag: "NHAN_VIEN" },
+      { ...decision, provenance: { ...decision.provenance, decisionSource: "DETERMINISTIC_RULE_ENGINE" } },
+      { ...decision, provenance: { ...decision.provenance, rulesetVersion: "not-a-matrix" } },
+    ]) expect(HandoffDecisionV2Schema.safeParse(changed).success).toBe(false);
+  });
+
   it("requires one holding reply and VAN_DON for after-sales", () => {
     expect(
       HandoffDecisionV2Schema.parse({
