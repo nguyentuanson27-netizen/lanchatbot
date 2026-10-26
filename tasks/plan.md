@@ -1,4 +1,8 @@
-## Current — diagnostic riêng form báo giá, 2026-10-26
+## Current — thử toàn bộ cách trình bày context, 2026-10-26
+
+Owner yêu cầu experiment mới sau no-positive form-only. [Plan](../docs/specs/c3-phase-b-full-context-presentation-experiment-20261026.md). Cùng8frozencases/canonicalworld/prompt/models; A normalizedcurrent, B chia toàn owner data thành khối tiếng Việt/JSON có chứng minh lossless, giữ openingQuote, đưa completedtrace trước exacthistory/latest.8pairs N1=16slots +17freshcontrols, max49requests,0retry. Không thêm suy luận sẵn, câu mẫu hoặc chỉ dẫn benchmark.200Node+75boundary+21protectedPASS/directtsc/lint exit0; đang review/pre-provider. Commitclean+preflight+controls trước16slots; historical diagnostic khôngnative/livequalification, positive khôngpromotion/BGO. No2/3concernwin hoặcregression/error thìdừng, không nối promptfix để cứu.
+
+## Previous — diagnostic riêng form báo giá, 2026-10-26
 
 [Plan đã được cùng reviewer APPROVE](../docs/specs/c3-phase-b-quote-presentation-diagnostic-plan-20261026.md), executable APPROVE clean `beac5ec91c76249994337f4beaabbc73bc52455f`. **COMPLETE23outcomes/29requests; STOP diagnostic, B NOT GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/quote-presentation-run-20261026/CHECKPOINT_B.md).17freshcontrols PASS→6paired slots đều historical eligible;0providererrors/max1request/retry0. Blind concern NEITHER, hai price TIE; saufreeze/unmask B bỏform không cải thiện quyết định tư vấn. Giữ openingQuote runtime/prompt/verifier nguyên, không tự full51 hoặc stylefix tiếp. Nămca unexposed offline unchanged; golden/wirehash/label proof PASS.638NodePASS+2SKIP,75boundary+21protectedPASS, build/directtsc/lint exit0. Historical replay không current-send/native qualification và eligible không đồng nghĩa salesqualityPASS. Evidence/full51 trước vẫn giữ nguyên.
 

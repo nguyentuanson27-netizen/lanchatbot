@@ -77,8 +77,9 @@ export function prepareQuoteDiagnostic(frozen,instructions){
  const slots=exposed.flatMap((caseId,i)=>(i===1?['B','A']:['A','B']).map(arm=>({id:sha256('quote-presentation-20261026:'+i+':'+arm),caseId,arm})));
  return {inputHash:hash,pairs,offlineControls,slots};
 }
-export async function recordQuoteSlot({row,arm,id,ownerPrompt,verifierPrompt,manifest,infer,verify,audit,gate,buildVerifierWire=buildVerifierRequest}){
+export async function recordQuoteSlot({row,arm,id,ownerPrompt,verifierPrompt,manifest,infer,verify,audit,gate,buildVerifierWire=buildVerifierRequest,contextPresentation}){
  const now=new Date(row.capture.capturedAt),trusted=structuredClone(row.capture.context),request=buildQuoteRequest(row,arm,id,ownerPrompt);
+ if(contextPresentation!==undefined)request.ownerContextPresentation=contextPresentation;
  const generations=[];let draft=null,verificationLatencyMs=null;const started=performance.now();
  try{
   const wire=buildGeminiCommerceRequest(request);audit(request.generationId,'OWNER_REQUEST',wire);

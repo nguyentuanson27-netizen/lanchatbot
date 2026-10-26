@@ -1,4 +1,10 @@
-## Current — diagnostic riêng form báo giá, 2026-10-26
+## Current — thử toàn bộ cách trình bày context, 2026-10-26
+
+- [x] Freeze [plan](../docs/specs/c3-phase-b-full-context-presentation-experiment-20261026.md):8pairs/16slots N1+17freshcontrols,49maxrequests. Owner request đổi presentation, không đổi facts/prompt/model/verifier.
+- [x] RED→GREEN lossless full owner data renderer; exact history/latest, giữ openingQuote, native/tool/authority không đổi.200Node/75boundary/21protectedPASS, directtsc/lint exit0, driverAST/diffPASS; [input preview](../apps/worker/evals/single-agent-commerce-read-only/full-context-presentation-run-20261026/INPUT_PREVIEW.md).
+- [ ] Review→seal clean source→preflight/17controls→16slots→blind whole-turn review beforeunmask/report. Khôngclaim stable/fullB/GO hoặc tựpromote.
+
+## Previous — diagnostic riêng form báo giá, 2026-10-26
 
 - [x] Same reviewer REVISE broad approach → REVISE8pairs → APPROVE3exposed pairs/6slots. [Plan](../docs/specs/c3-phase-b-quote-presentation-diagnostic-plan-20261026.md).
 - [x] Evaluation-only replay, frozen8captures, golden normalization, exact3treatments/5offline no-change, label firewall, terminal-only blind export; RED→GREEN6tests. Không đổi runtime/prompt/verifier/model.
