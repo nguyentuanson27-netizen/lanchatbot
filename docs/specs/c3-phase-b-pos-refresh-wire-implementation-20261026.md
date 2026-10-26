@@ -38,3 +38,11 @@ python apps/worker/evals/single-agent-commerce-read-only/source-session.py node 
 [Campaign](../../apps/worker/evals/single-agent-commerce-read-only/pos-refresh-run-20261026/PREREGISTRATION.md):17controls+51native, target22→full29, max217requests,N1/retry0. Same models/config/prompt, frozen cases và actual request labels firewall; seal clean source sau executable APPROVE. Chưa provider ở savepoint này. Raw source-change fixture là structural reproduction đủ entire parsed snapshot, không giả lấy được snapshot lịch sử của race cũ từ diagnostic bị giới hạn.
 
 Không pin media/cart selection/policy/static catalog/state/receipts, không nới freshness ở delivery hoặc dùng PASS cũ authorize changed world. Một field POS không liên quan thay đổi trong full read vẫn sẽ failclosed do conservative full equality; không tự giới hạn ở PRICE/STOCK để nâng pass rate. B chưa GO, giọng vẫn residual; rollback qua revert commit mới trên candidate, không runtime mutation.
+
+## Exact source closure và full model
+
+Reviewer APPROVE `468d85ea6577c428cf2f6f155c9774926537364b`, độc lập168worker+69wirePASS. Source sạch/không đổi; PostgreSQL49COD+49BANKPASS trênexactHEAD, cả2testDBdropped. Node190PASS được chạy lại exactHEAD. Sau đó mới dispatchprovider; không thay executable/config/prompt/corpus trong campaign.
+
+Đủ17controlsPASS+51native, target22 được parent/reviewer review trước mở29. Model37eligible/10newhandoffsilent/4NO_SEND,142requests/0errors/0labelprivateleak/6DBdrop; allnewHANDOFF đềuHUMAN/eventtag/0newOutboxcapture. Timestamp refreshonly đã chứng minh deterministic; modelcase449kM eligible không chứng minh live refresh đã xảy ra. Discoverydraftkhôngbóbụng vẫn bịverifierchặn đúng, galleryhandoff vìảnhđúngmàuchưađủbinding; checkoutquestionspreview/confirm hoạtđộng. Voiceconcern/correction vẫn yếu. ReviewerAPPROVEscopedevidence, toànBchưaGO. [Full report/evidence](../../apps/worker/evals/single-agent-commerce-read-only/pos-refresh-run-20261026/CHECKPOINT_B.md).
+
+Actual owner wire audit cũ87requests có44handoff/42media instructionconflicts; mới87 có0 cảhai. Chỉchứngminhcontradictionremoved, khôngclaimcausalvoiceimprovement. Historical fullrun count đínhchính11newevents(10silent+1ACK), vì humanrequest làjourneyriêng, khônginherited; raw/terminalcounts/STOPgiữnguyên. Không tựfixstyle/runvòngmới/deploy.

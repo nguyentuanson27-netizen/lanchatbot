@@ -1,4 +1,15 @@
-## Current — POS refresh và owner wire, 2026-10-26
+## Current — POS refresh và full model hoàn tất, 2026-10-26
+
+[Report](../apps/worker/evals/single-agent-commerce-read-only/pos-refresh-run-20261026/CHECKPOINT_B.md), [51 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/pos-refresh-run-20261026/CONVERSATIONS.md). **SCOPED APPROVE; B chưa GO.**
+
+- [x] Plan review REVISE→fix→APPROVE; executable review APPROVE exact468d85ea, độc lập168worker+69wirePASS. Timestamp chỉ fullread, direct sticky invalidation/TTL khôngrenew;2tool-wire conflicts sửa, không style rewrite.
+- [x] ExactsourcePostgreSQL49COD+49BANKPASS, cả2DBdrop. Parent636worker/190Node/21protectedPASS; build/directtsc/lintPASS.
+- [x] Chạy đủ17controls+51native, target22review rồi29remaining, clean/sourceunchanged/N1retry0.37eligible/10newHANDOFFsilent/4NO_SEND,142requests/0providererrors/0labelprivateleak,6DBdrop. ConfirmPURCHASE_CONFIRMED/HUMAN/eventtag/0Outboxcapture; hỏi/preview vẫn gửi.
+- [x] Review cả51 và reviewerAPPROVEevidence/scopedfix. Whole-turn notes/hashbindings đủ51; giọng vẫn yếu, discovery vôcăn cứkhôngbóbụng bịchặn đúng; gallerythiếucolorbinding handoff. Không coi eligible là salesqualityPASS hoặc N1làstable.
+- [x] Đính chính reportfullrun cũ thành11newhandoffs(10silent+1ACK), human-request journeyriêng; không thayraw/STOP. Chưa có prooflivePOSrefreshtrongrunmới, chỉclaimdeterministicraceverification.
+- [ ] Salesquality/voice, complete capability qualification, human acknowledgement/stability/live delivery còn hạn chế/chưa verified. Không mở thêm vòngstylefix hoặc tựGO/merge/deploy.
+
+## Previous savepoint — POS refresh và owner wire, 2026-10-26
 
 [Plan](../docs/specs/c3-phase-b-pos-refresh-wire-plan-20261026.md), [implementation/commands](../docs/specs/c3-phase-b-pos-refresh-wire-implementation-20261026.md). **PROVIDER_NOT_RUN/B chưa GO tại savepoint này.**
 

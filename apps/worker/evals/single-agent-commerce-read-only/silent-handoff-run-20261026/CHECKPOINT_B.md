@@ -4,7 +4,7 @@
 
 Target22 đã review trước mở29remaining; giọng ghi chưa đạt, không coi targetaccepted làBGO. Corpus24B1 phân21LIVEreadonly+3POScomposed, vẫn tổng51native. Old expected partial của3POS không áp dụng; rule mới silent đã prereg trước result. Không sửa rubric/source sau kết quả để cứu run.
 
-Native terminals35SEND_ELIGIBLE/12HANDOFF/4NO_SEND,0staticfallback. Phân biệt21read-only và30persisted:1HANDOFF/STALE trongB1 không có bàn giao thật; stateful-human-request kế thừa HUMAN từconfirm. Có10bàn giao mới trongDB,9silent đúng,1checkouttransfer còn gửiACK. HaiNO_SEND sauHUMAN không cótin;2NO_SEND của privatecheckout có câu hỏi/preview code-owned, không gọi là4lượt im lặng.
+Native terminals35SEND_ELIGIBLE/12HANDOFF/4NO_SEND,0staticfallback. Phân biệt21read-only và30persisted:1HANDOFF/STALE trongB1 không có bàn giao thật; stateful-human-request là journey handoff riêng, không kế thừa HUMAN từconfirm. Có11bàn giao mới trongDB,10silent đúng,1checkouttransfer còn gửiACK. HaiNO_SEND sauHUMAN không cótin;2NO_SEND của privatecheckout có câu hỏi/preview code-owned, không gọi là4lượt im lặng.
 
 BaPOS_UNAVAILABLE đều HUMAN/event1/tag1/0Outbox/0capture, không trả partial hay hứa callback. Ba missingfeedback cũngsilent; đúng owner mới dù đã biết giá. Formopening ad/organic có2ảnh, repeat đã ngắn hơn. Giỏ/variant/quote/correction/checkout đi tiếp được; private input vẫn code-only.
 
@@ -21,3 +21,5 @@ Commands thực chạy: DISPATCH_DRIVER.py <externalraw> controls, targeted, ful
 Recommendation STOP/B NOT GO. Sửa checkouttransfer tối thiểu và re-review, chỉ kiểm lại prefix cần thiết theo runidentity mới; không rerunfull51 hoặc giả followup là cùngsource. Chưa merge/deploy/live-send/source-store write hoặc human acknowledgement.
 
 Follow-up sau khi campaign này đã đóng: [bản sửa checkout và 7 lượt kiểm chứng riêng](../checkout-silent-run-20261026/CHECKPOINT_B.md) trên source mới đã được reviewer APPROVE. Không thay kết quả/evidence STOP ở đây. Số provider DB trong báo cáo được đính chính từ 4 thành 6 theo đủ 6 integration reports, đều testDatabaseDropped=true.
+
+Đính chính sau kiểm đủ journeyId: phép đếm cũ “10 bàn giao mới/9 silent” và nhận xét human-request kế thừa HUMAN là sai; đúng là 11 mới/10 silent/1 ACK. Terminal counts, raw artifacts và STOP giữ nguyên. Đối chiếu mới tại ../pos-refresh-run-20261026/CHECKPOINT_B.md.
