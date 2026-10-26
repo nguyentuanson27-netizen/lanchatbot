@@ -49,3 +49,12 @@ Reviewer cùng phiên kiểm7143b04d: REVISE1P2, policy45–46 bảo trả quy t
 Để không chỉ ghi giới hạn B1, thêm eval-only cohort --missing-pos: đúng3runtime POS_UNAVAILABLE từ corpus24 chạy qua persisted ingress và candidate handoff. Proxy chỉ làm POS snapshot unavailable và từ chối cart selection; không sửa catalog/policy nguồn. Actual owner/event/tag/capture được ghi riêng. Read-only --live-only chạy21LIVE còn lại; test chứng minh hợp24 không trùng/không đổi lời khách,3source cases không bị mất denominator. Không thay corpus/production routing.
 
 Đăng ký campaign mới trong silent-handoff-run-20261026/PREREGISTRATION.md:68slots=17controls+51native, targeted22→remaining29, N1/retry0 và cap217giữ nguyên. Chưa provider trước reviewerAPPROVE+clean executable seal. Lần sửa này Node189PASS; worker ingress/missing/persistence127PASS; worker lint exit0; syntax3JS+Python ASTPASS. Chưa có provider result cho bản mới.
+
+
+## Full model và checkout bypass phát hiện sau đó
+
+Full campaign trên8d4a0ab3 đủ17controls+51native,140requests; giữ evidence tại silent-handoff-run-20261026/CHECKPOINT_B.md. Reviewer bổ sungREVISE/P2: PURCHASE_CONFIRMED chuyểnHUMAN nhưng plannerACK đi thẳng session commit, không qua matrix. Không sửa source trongrun; fullrun kết thúc/sourceunchanged rồi mới sửa.
+
+Sửa candidate session commit dùng cùng resolved policy đã lậpplan. Chỉ complete published matrix toànSILENT mới suppress customer group khi transferToHuman; confirmation/state/paymentinstruction/event/tag giữ atomic. Legacy/mixed/partial/nontransfer giữ messages. advancePrivateCheckout dùng actualmetaOutboxCreated. Không sửa plannerrealtime chung, không rewrite modeldraft hoặc nới verifier.
+
+ObservedRED3(COD/BANK/conflict cóOutbox);GREEN7modes saufix (thêmlegacy/mixed/partial/nontransfer). Tests186worker/189NodePASS; workerbuild/directtsc/lintPASS sau sửa testfixture readonly/types (intermediatebuild/lint exit2 được giữ là lỗi đã sửa, không gọiPASS). Newcheckoutassertion yêu cầu candidate confirm0Outbox/capture. Focused followup mới prereg17controls+7prerequisites-to-confirm,cap41,N1/retry0; không rerunfull51, không thay evidence cũ. Chưa provider ở savepoint này; chờ reviewerAPPROVE exacthead.

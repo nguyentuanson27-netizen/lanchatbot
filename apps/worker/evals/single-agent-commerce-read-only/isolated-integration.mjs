@@ -661,10 +661,12 @@ try{
   assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal((await journey.state()).stage,'ORDER_PREVIEW');assert(r.result.enqueued>0,JSON.stringify(r));await journey.drain();
  });
  await check('B composed confirmation uses existing revalidation and commits checkout handoff once',async()=>{
+  const capturedBefore=journey.capture.length;
   const r=await journey.turn('Chốt đơn cho chị nhé',[native([{name:'confirm_purchase',args:{}}])],{inspect:request=>{
    assert(!JSON.stringify(request).includes('Khách thử nghiệm'),'PRIVATE_NAME_HISTORY_LEAK');assert(!JSON.stringify(request).includes('0900000000'),'PRIVATE_PHONE_HISTORY_LEAK');}});
   assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal((await journey.state()).stage,'PURCHASE_CONFIRMED');
   assert.equal((await runtime.loadOrCreate(pageId,journey.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+  if(process.argv.includes('--candidate-handoff')){assert.equal(r.result.enqueued,0);await journey.drain();assert.equal(journey.capture.length,capturedBefore);}
  });
  await check('B composed later failed mutation hands off the partial committed result, without replay',async()=>{
   const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')]);await j.drain();

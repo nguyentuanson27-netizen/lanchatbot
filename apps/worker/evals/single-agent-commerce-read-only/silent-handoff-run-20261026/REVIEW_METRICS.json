@@ -1,0 +1,63 @@
+{
+  "sourceSha": "8d4a0ab3ff8f65823a2f0bf112658d150a05b58a",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 35,
+    "HANDOFF": 12,
+    "NO_SEND": 4
+  },
+  "providerGenerationRequests": 140,
+  "requestsByRole": {
+    "owner": 87,
+    "verifier": 36,
+    "control-verifier": 17
+  },
+  "maximumUpstreamPerGeneration": 1,
+  "observedModelVersions": {
+    "gemini-3.5-flash-lite": 87,
+    "gpt-6.1-sol": 53
+  },
+  "generationErrors": [
+    {
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 200,
+      "errorCode": null
+    },
+    {
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 200,
+      "errorCode": null
+    }
+  ],
+  "inputTokens": 890204,
+  "outputTokens": 89647,
+  "geminiThinkingAlreadyIncludedInOutput": 79494,
+  "cost": null,
+  "verifierLatencySeconds": {
+    "n": 36,
+    "p50": 6.718,
+    "p95": 12.57
+  },
+  "verificationWithReadbackSeconds": {
+    "n": 36,
+    "p50": 7.443,
+    "p95": 16.337
+  },
+  "driverElapsedSeconds": {
+    "n": 51,
+    "p50": 18.83,
+    "p95": 44.52
+  },
+  "wireAudit": {
+    "capturedActualBodies": 140,
+    "ownerHashesChecked": 87,
+    "ownerHashMismatches": [],
+    "evaluatorKeyMatches": []
+  }
+}

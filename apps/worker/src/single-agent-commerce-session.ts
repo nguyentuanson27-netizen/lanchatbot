@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createSalesCycleRuntimeState, type RuntimePolicyResolution, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1, type VerifiedInboundMessageV1 } from "@lana/chat-runtime";
 import { applySilentHandoff } from "@lana/conversation-engine";
+import { HandoffMatrixAdminContentV1Schema, HandoffReasonV2Schema } from "@lana/contracts";
 import type { PostgresRealtimeRuntimeStore, RealtimeCommitInput, RealtimeInboxBatchGuard } from "@lana/database";
 import { buildCanonicalDecisionEvidenceV1, evaluateDeterministicEffectReadinessV1 } from "@lana/business-tools";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
@@ -49,12 +50,19 @@ export function createPersistedCommerceExecutor(input: {
   const matches = (a: HandoffAuthority) => a.pageId === scope.pageId && a.customerHash === scope.customerHash && a.conversationId === scope.conversationId &&
     a.state.conversationId === scope.conversationId && a.bindingVersion === scope.bindingVersion && a.recipient === scope.recipient &&
     a.permission && a.privacyAllowed && a.state.conversationOwner === "BOT" && a.state.routingOwner === "APP";
-  async function commit(output: RealtimeSalesCycleOutput, authority: HandoffAuthority, terminal: boolean) {
+  async function commit(output: RealtimeSalesCycleOutput, authority: HandoffAuthority, terminal: boolean, resolution: RuntimePolicyResolution) {
     if (!output.plan) return null;
     const now = input.clock(), transfer = output.transferToHuman;
     const next = transfer ? applySilentHandoff(authority.state, "AGENT_REQUEST", authority.stateVersion, authority.fence, now).state
       : { ...authority.state, revision: authority.stateVersion+1 };
-    const messages = terminal ? output.messages : [];
+    // Candidate policy covers code-owned checkout transfers as well as the
+    // request_handoff tool. A partial/default matrix keeps legacy behavior.
+    const matrix = resolution.bundle?.artifacts.handoffMatrix
+      ? HandoffMatrixAdminContentV1Schema.parse(resolution.bundle.artifacts.handoffMatrix) : null;
+    const silentTransfer = transfer && resolution.bundle?.channel === "PUBLISHED" &&
+      HandoffReasonV2Schema.options.every(reason => matrix?.rules.some(rule => rule.reason === reason &&
+        rule.customerMessagePolicy === "SILENT_HANDOFF" && rule.holdingReply === null));
+    const messages = terminal && !silentTransfer ? output.messages : [];
     const tag = transfer ? output.desiredTag ?? "NHAN_VIEN" : null, tagId = tag ? input.resolveTagId(tag) : null;
     if (tag && !tagId) throw new Error("HANDOFF_TAG_UNAVAILABLE");
     const clarification = ["CHECKOUT_DETAILS_MISSING", "CHECKOUT_PAUSED"].includes(output.reasonCode ?? "") && output.telemetry?.clarificationCase === true;
@@ -108,7 +116,7 @@ export function createPersistedCommerceExecutor(input: {
         source: { ...source(state, authority, resolution), ...(selected ? { productId: selected.parentProductId, offerType: selected.offerId, size: component?.size ?? null, color: component?.color ?? null } : {}) } });
       if (!output.plan) return { status: "REJECTED", reasonCode: output.reasonCode ?? "TRANSITION_UNAVAILABLE" };
       const terminal = call.command.kind === "CONFIRM_PURCHASE" || output.transferToHuman;
-      if (!(await commit(output, authority, terminal))?.stateCommitted) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
+      if (!(await commit(output, authority, terminal, resolution))?.stateCommitted) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
       const actual = (await repository.read(scope.conversationId))!;
       if (commerceHash(actual) !== commerceHash(output.plan.state)) throw new Error("COMMITTED_STATE_CHANGED");
       if (call.command.kind === "CONFIRM_PURCHASE" && output.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
@@ -125,8 +133,8 @@ export function createPersistedCommerceExecutor(input: {
         text: input.latest, sourceMessageId: scope.sourceMessageId, productId: null, modelBuyingIntent: null, evaluatedAt: input.clock() }).buyingIntent });
       if (!output.plan) return { committed: false, messages: 0, failure: { stage: "PLANNER" as const,
         reasonCode: output.reasonCode ?? "NO_TRANSITION_PLAN", readinessReasons: output.readinessAttempt?.reasonCodes ?? [] } };
-      const committed = await commit(output, authority, true);
-      return committed?.stateCommitted ? { committed: true, messages: output.messages.length } : { committed: false, messages: 0,
+      const committed = await commit(output, authority, true, resolution);
+      return committed?.stateCommitted ? { committed: true, messages: committed.metaOutboxCreated } : { committed: false, messages: 0,
         failure: { stage: "COMMIT" as const, reasonCode: "COMMIT_NOT_APPLIED", reasonCodes: committed?.reasonCodes ?? [],
           inboxBatchStatus: committed?.inboxBatchStatus ?? null } };
     },

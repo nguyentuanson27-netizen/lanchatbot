@@ -1,0 +1,168 @@
+{
+  "sourceSha": "8d4a0ab3ff8f65823a2f0bf112658d150a05b58a",
+  "accepted": true,
+  "reviewedOutcomes": 22,
+  "decision": "ALLOW_REMAINING29_COLLECTION_NOT_B_GO",
+  "voiceGoalMet": false,
+  "entries": [
+    {
+      "caseId": "opening-ad",
+      "artifactSha256": "2c68c03a829f7cf8ab26352a4b848cff69dca52847c08c3af9746844c57a4cfb",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng set799k, size có tồn và2ảnh đúng mẫu trong capture; form opening theo yêu cầu."
+    },
+    {
+      "caseId": "opening-ad-repeat",
+      "artifactSha256": "bff3e8ea97355efffd518cabda76bd86cb68537a3f56f2282f1eef469dd500f9",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng799k, không lặp ảnh hay nguyên mô tả; còn ngoặc giải thích cả bộ nhưng không gây sai nghĩa."
+    },
+    {
+      "caseId": "opening-organic",
+      "artifactSha256": "9621c351ebc899d11f6528678938773b9c310ed0109f8dcd90427115062bd380",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng mẫu/giá/size có tồn và2ảnh; không nhầm món cùng tên."
+    },
+    {
+      "caseId": "opening-unresolved",
+      "artifactSha256": "390820c366287250af7295e9b4266b7f0558f0a049f6c469115fa85448bfb208",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Thiếu định danh từ khách nên hỏi ảnh/tên, không bàn giao nhầm hoặc lấy giá món mặc định."
+    },
+    {
+      "caseId": "opening-multipart",
+      "artifactSha256": "b5c7848d52903dbb3d77934015fbc30485b725e407311bff200c0ebc33817d0b",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Trả đủ set799k/áo499k;2ảnh đúng mẫu, không đưa thêm giá chân váy. Mô tả dài ghi minor."
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "artifactSha256": "1c5ff2a5941cbc2b85d7953b0141127d0a2182b72d62dcb820a7cf47fe394c90",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Missing feedback -> committed silent handoff, HUMAN/event1/tag1,0text/ảnh."
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "artifactSha256": "992c41641f3c60b99fb7b2cc121d573ee193c68f03cf8e9b94098b26f74d0634",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "NO_SEND sau HUMAN đúng policy mới; không yêu cầu bot tự tiếp tục. Chưa đo phản hồi người nhận."
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "artifactSha256": "048f9877282fa0d4ce177447667b518303f2945e867ba3ea70c0c56b41fb62c4",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Missing feedback -> committed silent handoff, HUMAN/event1/tag1,0text/ảnh."
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "artifactSha256": "9eca3af45a6c6b32561d2c961ecac2c98bdd369b8ea4a6561574a95ab012416a",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "NO_SEND sau HUMAN đúng ownership, không tạo reply hay ảnh sau bàn giao."
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "artifactSha256": "692cdc76760145788a929ca32821c0a189c79cd72883c82a255100b5c6567884",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Theo owner mới thiếu ảnh -> handoff không partial giá; HUMAN/event1/tag1,0capture. Không coi mất giá là regression theo rule cũ."
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "artifactSha256": "07558cd6479d57a7ca74a37d7f61e93e4e6fbaa26b9f25871dab68b3bb71c908",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Engine chọnM từ158/52, ảnh DETAIL confirmedAO và actual capture1ảnh. Còn giúp em/nhắc input là wording minor."
+    },
+    {
+      "caseId": "media-decision:ask",
+      "artifactSha256": "a74c467a9163d57ff948db04fe1391ff439dc154f9e68e2d45852945ff489212",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Có phương án phối áo với phần dưới trơn, giá đúng. Tuy nhiên vẫn nhiều tính từ/phủ định và hai lựa chọn; chưa đạt mục tiêu giọng, không có protected/effect sai rõ trong ca này."
+    },
+    {
+      "caseId": "b1-partial-source",
+      "artifactSha256": "0632172aeef9012da96babc3898ed6eb44d41f4b0af9b35f516fb9da411dc8ce",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Exact input cũ qua composed POS fault: PRICE_UNAVAILABLE, committed HUMAN/event1/tag1/0Outbox/capture; không hứa callback."
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "artifactSha256": "494d94cbff833fefa093377c67dcb3fba16d41ea732b40dea2ffda457788b7f5",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Exact input chân váy qua composed POS fault: committed HUMAN/event1/tag1/0Outbox/capture."
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "artifactSha256": "92cb62e7ebc4822dc1ba4207c8e4d34f4c1cf47e469da6c269d7d4d8d0dea2c2",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Exact input chất liệu+giá/tồn qua composed POS fault: committed HUMAN/event1/tag1/0Outbox/capture."
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "artifactSha256": "7affc3fb08d6d28faee3df13d12fbded6fd0a6d26c2ed4de96650b15217549e1",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Chọn1mẫu thay và so sánh định tính chất liệu trong phạm vi owner duyệt; không coi mốc3giờ là phép thử. Chưa đọc POS của món thay, nên chưa qualify readiness mua mẫu đó. Giọng/giúp em vẫn yếu, ghi limitation."
+    },
+    {
+      "caseId": "b1-current-policy",
+      "artifactSha256": "d4b761e98909da2ee1c90e5559da98818d3a5999da48558966dfb83c4fd2c21e",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Trả đúng15ngày/30k trong phạm vi thời hạn/phí, không cần đọc toàn bộ điều kiện."
+    },
+    {
+      "caseId": "b1-price",
+      "artifactSha256": "dfd523c5fcf46c451609e16bfaff73105e5738b8ea618b123239d06c9983f3a7",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng set799k/size có tồn; giữ form mở đầu, còn mô tả khá dài."
+    },
+    {
+      "caseId": "b1-component-stock",
+      "artifactSha256": "4ddb4be790727da868eca52d65abc601df1f8f99662b8067a4ad1a795cce08c4",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng áo lẻM có tồn/499k, gọn và không nhầm giá cả bộ."
+    },
+    {
+      "caseId": "b1-search-read",
+      "artifactSha256": "fd8cc4ad70f981e7101de543ba77581f3fa8dc1debe707f55552a135519fd9ed",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Tìm đúngSD375, áo929k/cả bộ1065k theo đúng offer."
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "artifactSha256": "9b4a1368d0cda969dee05e659b2574646c2455cd6de25d2d6035442e44165ef8",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Trả phù hợp tiệc ban ngày/giá799k; các lời khen chung được xét trong ngữ cảnh thẩm mỹ, không chốt size/độ ôm khách. Vẫn bác cảm nhận bằng lời khen, nhắc budget và hỏi size gượng; quality finding chưa giải quyết."
+    },
+    {
+      "caseId": "b1-policy-used",
+      "artifactSha256": "3d6c8c3eea1b114f855a2fc74fa4bf1161f0a3ee57cbdd2dd26cdda143d78001",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Hiểu đã mặc đi làm thì không đổi; phí30k chỉ cho trường hợp hợp lệ, không cấp quyền sai trước rồi đính chính."
+    }
+  ],
+  "limitations": [
+    "Ba ca concern/advice còn máy móc, không coi implementation APPROVE hay verifierPASS là giọng đạt.",
+    "Mẫu thay chưa đọc POS trong changed-occasion; không qualify availability/ETA cho bước mua.",
+    "N1 không chứng minh ổn định, human response sau handoff chưa đo."
+  ]
+}
