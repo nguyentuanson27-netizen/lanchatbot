@@ -1,3 +1,10 @@
+## Current — kế hoạch media/size context, 27/10/2026
+
+- [x] Soạn plan chi tiết từ full51 evidence, gọi reviewer độc lập; revision1 REVISE1P1+3P2.
+- [x] Sửa đủ bốn finding trong revision2; gửi lại cùng reviewer. [Plan](../docs/specs/c3-phase-b-media-size-context-fix-plan-20261027.md), [trail](../docs/specs/c3-phase-b-media-size-context-fix-plan-review-20261027.md).
+- [x] Cùng reviewer APPROVE revision2/hash `2cb2803f…`, không còn blocker. Giữ bytes đã review; decision trong trail. Chưa implementation/provider/source write.
+- [ ] Triển khai S0–S4 và qualification ở task sau, không coi plan APPROVE là đã sửa runtime/B GO.
+
 ## Current — full Phase B Compact V2 đã hoàn tất
 
 - [x] Source sạch `50753ec7`, đúng CLI0.159.2/hash/login trước fresh17controls→đủ51native, không quality-stop giữa lượt. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/CHECKPOINT_B.md).
