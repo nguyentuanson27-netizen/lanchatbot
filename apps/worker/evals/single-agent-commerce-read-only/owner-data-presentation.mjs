@@ -38,3 +38,31 @@ export function presentOwnerData(original){
  assert.deepEqual(readDataBlocks(wire.contents[0]),blocks,'PRESENTATION_DATA_LOSS');
  return wire;
 }
+
+// Source paths stay in this local plan, never in the compact provider content.
+export function compactContextSections(original){
+ const top=JSON.parse(original.contents[0].parts[0].text),sections=[],seen=new Set(),traces=[];
+ for(const block of contextDataBlocks(original)){
+  if(block.path[0]==='completedToolTurns'){traces.push(block.value);continue;}
+  const path=block.path[0]==='trusted'?block.path.slice(0,2):block.path;
+  const key=JSON.stringify(path);if(seen.has(key))continue;seen.add(key);
+  const field=path.at(-1),label=labels[field]??JSON.stringify(field);
+  sections.push({path,label,value:path[0]==='trusted'?top.trusted[field]:top[field]});
+ }
+ if(traces.length)sections.push({path:['completedToolTurns'],label:'Lịch sử công cụ đã hoàn tất',value:traces});
+ return sections;
+}
+export function readCompactSections(message){
+ assert.equal(message.parts.length,1,'COMPACT_PARTS');
+ assert.equal(typeof message.parts[0].text,'string');
+ return message.parts[0].text.split('\n\n').map(section=>{
+  const split=section.indexOf('\n');assert(split>0,'COMPACT_SECTION');
+  return {label:section.slice(0,split),value:JSON.parse(section.slice(split+1))};
+ });
+}
+export function presentCompactOwnerData(original){
+ const wire=presentOwnerData(original),sections=compactContextSections(original);
+ wire.contents[0]={role:'user',parts:[{text:sections.map(({label,value})=>label+'\n'+JSON.stringify(value)).join('\n\n')}]};
+ assert.deepEqual(readCompactSections(wire.contents[0]),sections.map(({label,value})=>({label,value})),'COMPACT_DATA_LOSS');
+ return wire;
+}

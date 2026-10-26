@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
-import {presentOwnerData} from './owner-data-presentation.mjs';
+import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
@@ -249,8 +249,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(imageParts.length){body.contents.splice(1,0,{role:'user',parts:imageParts});body.generationConfig.mediaResolution='MEDIA_RESOLUTION_MEDIUM';}
  if(bytes(body)>OWNER_IMAGE_BOUNDS.maxRequestBytes)throw new Error('OWNER_REQUEST_BOUND');
  if(request.ownerContextPresentation!==undefined){
-  requireThat(request.ownerContextPresentation==='VI_DATA_BLOCKS_V1','OWNER_PRESENTATION');
-  const presented=presentOwnerData(body);
+  requireThat(['VI_DATA_BLOCKS_V1','VI_DATA_BLOCKS_COMPACT_V2'].includes(request.ownerContextPresentation),'OWNER_PRESENTATION');
+  const presented=request.ownerContextPresentation==='VI_DATA_BLOCKS_V1'?presentOwnerData(body):presentCompactOwnerData(body);
   requireThat(bytes(presented)<=OWNER_REQUEST_MAX_BYTES,'OWNER_REQUEST_BOUND');
   return presented;
  }

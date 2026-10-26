@@ -1,4 +1,8 @@
-## Current — thử toàn bộ cách trình bày context, 2026-10-26
+## Current — rút gọn presentation overhead, 2026-10-26
+
+[V2 plan](../docs/specs/c3-phase-b-compact-context-20261026.md). Owner yêu cầu bỏ đườngdẫn/nhãn lặp/fence/indentation. Thêmcompactopt-in, giữ V1/default và toàn source values/history/openingQuote. Offlinerequestbytes235886→200389 trên8cases; chưa gọi đó là token. Chuẩn bị24countTokens calls đúngmodel/credential đã chốt,0generation/retry0, cleansealedsource trướcđo. Khôngrerunconversation/fullB hoặcclaimqualityimprovement; BchưaGO.
+
+## Previous — thử toàn bộ cách trình bày context, 2026-10-26
 
 **COMPLETE33outcomes/49requests, STOP experiment/B chưa GO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/full-context-presentation-run-20261026/CHECKPOINT_B.md). Same reviewer plan+executable APPROVE clean0fd1893d/độc lập10testsPASS;17controlsPASS→16historicalpairedslots,0errors/max1/retry0/sourceunchanged. X/Y review freeze trước unmask:0/3clearconcernwins,1localizedBwin(changedoccasion practicalstyling),5ties/2neither. Ba price vàpolicykhôngregression; eligibility16/16khôngsalesqualityPASS. Binput+19.7%; giữrendereropt-in/eval-only, khôngpromote/fullB/stylefixcontinuation.200Node+75boundary+21protectedPASS/directtsc/lint exit0. [Plan](../docs/specs/c3-phase-b-full-context-presentation-experiment-20261026.md): cùng8frozenworlds/prompt/models/facts/openingQuote; đổi toàn presentation+traceorder, khôngnewsource/deduction/template. Historical clock khôngcurrent-send/nativequalification. No2/3concernwins nên dừng theo preregistration; khôngquyrootcauseđộcnhấtchomodel/prompt/data.
 

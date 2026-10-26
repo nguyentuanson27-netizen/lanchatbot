@@ -1,4 +1,9 @@
-## Current — thử toàn bộ cách trình bày context, 2026-10-26
+## Current — rút gọn presentation overhead, 2026-10-26
+
+- [x] RED→GREEN compactV2 giữ đủ originalfield/trace/history/openingQuote, đườngdẫn chỉlocal;0prompt/model/verifier/default/V1changes. [Plan](../docs/specs/c3-phase-b-compact-context-20261026.md).
+- [ ] Focused verification→sealclean source→24countTokens-only calls (0generation)→report actual counts/errors; chưaclaimquality/fullB/GO.
+
+## Previous — thử toàn bộ cách trình bày context, 2026-10-26
 
 - [x] Freeze [plan](../docs/specs/c3-phase-b-full-context-presentation-experiment-20261026.md):8pairs/16slots N1+17freshcontrols,49maxrequests. Owner request đổi presentation, không đổi facts/prompt/model/verifier.
 - [x] RED→GREEN lossless full owner data renderer; exact history/latest, giữ openingQuote, native/tool/authority không đổi.200Node/75boundary/21protectedPASS, directtsc/lint exit0, driverAST/diffPASS; [input preview](../apps/worker/evals/single-agent-commerce-read-only/full-context-presentation-run-20261026/INPUT_PREVIEW.md).
