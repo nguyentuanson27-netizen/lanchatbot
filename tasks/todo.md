@@ -1,9 +1,16 @@
-## Current — implementation media/size context, 27/10/2026
+## Current — model qualification sau media/size fix, 27/10/2026
+
+- [x] Chốt source0ef9991a sạch; đúng scoped CLI/hash/login,17fresh controls PASS trước51native, không sửa executable/config trong run.
+- [x] Đủ51outcomes:37eligible/10silentHANDOFF/4NO_SEND;143requests/retry0. Giữ2owner output-contract errors HTTP200 trong accounting, không gọi là0generation errors;6testDBdrop.
+- [x] Đọc đủ51case/context/actual outcomes;42actual owner hint fields và2size response fields,143wire/privacy/label checks; [report](../apps/worker/evals/single-agent-commerce-read-only/media-size-context-run-20261027/CHECKPOINT_B.md).
+- [ ] Metadata shop còn gap; discovery fit claim,2output-contract errors và usefulness còn hạn chế. Chưa stability/human acknowledgement/live qualification/B GO; không tự fix/rerun.
+
+## Previous — implementation media/size context, 27/10/2026
 
 - [x] S0 audit; S1 verified per-asset color provenance/selector; S2 same-source bounded hints; S3 co-located verified size fields và instruction consistency. Savepoints tới `ff5e0543`.
 - [x] S4 focused final checks: 537worker/192shared/216Node/2Python PASS; shared/worker typecheck/build/lint và self-review. [Record](../docs/specs/c3-phase-b-media-size-context-implementation-20261027.md).
 - [x] Persisted regression 49COD+49BANK_TRANSFER PASS trên source sạch; cả hai database test đã drop, provider generations0/live sends0.
-- [ ] Data readiness cho metadata ảnh thật và fresh model qualification: chưa thực hiện, không lấy local tests làm model PASS/B GO.
+- [x] Fresh model qualification đã thực hiện ở task tiếp theo, xem current report. Data readiness vẫn chưa đủ; không lấy local tests/model eligibility làm B GO.
 
 ## Previous — kế hoạch media/size context, 27/10/2026
 

@@ -1,0 +1,96 @@
+{
+  "sourceSha": "0ef9991a578e8da33f9bfbd4f81a86765380fe9f",
+  "allRegisteredOutcomes": 68,
+  "nativeOutcomes": 51,
+  "controlOutcomes": 17,
+  "generationAttemptsIncludingErrors": 143,
+  "providerGenerationRequests": 143,
+  "httpTransportErrors": 0,
+  "timeouts": 0,
+  "ownerOutputContractErrors": [
+    {
+      "caseId": "b1-partial-source",
+      "code": "OWNER_TOOL_OUTPUT",
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "code": "OWNER_TOOL_OUTPUT",
+      "httpStatus": 200,
+      "providerRequests": 1
+    }
+  ],
+  "contractErrorRateAllGenerationAttempts": 0.013986013986013986,
+  "contractErrorRateOwnerAttempts": 0.022727272727272728,
+  "nativeVerifierVerdicts": {
+    "PASS": 37,
+    "FAIL": 1
+  },
+  "handoffs": [
+    {
+      "caseId": "media-overview-next:ask",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "b1-partial-source",
+      "reason": "DEPENDENCY_FAILURE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "reason": "DEPENDENCY_FAILURE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "reason": "PRICE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "reason": "DEPENDENCY_FAILURE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "stateful-confirm",
+      "reason": "PURCHASE_CONFIRMED",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "stateful-human-request",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "silentCommitted": true
+    }
+  ],
+  "handoffRate": 0.19607843137254902,
+  "noSendRate": 0.0784313725490196,
+  "fallbackTextRate": 0,
+  "freshModelVersionsAndEffortsMatch": true,
+  "knownSyntheticPrivateCanaryMatches": 0,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "notes": [
+    "Runtime labels adapter output failures PROVIDER_ERROR; HTTP200/OWNER_TOOL_OUTPUT identify output-contract failures, not HTTP outages.",
+    "Exact malformed tool argument was not retained; no field-specific root cause claimed.",
+    "All errors/tokens included, no retry or generation discarded.",
+    "Private public capture is masked; placeholders are not literal customer messages.",
+    "First offline checker assumed ownerGenerations on code-only result; corrected to explicit owners/verifiers counters, no provider rerun."
+  ]
+}

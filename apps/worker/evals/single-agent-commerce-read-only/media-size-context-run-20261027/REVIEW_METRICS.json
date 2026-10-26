@@ -1,0 +1,120 @@
+{
+  "sourceSha": "0ef9991a578e8da33f9bfbd4f81a86765380fe9f",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 37,
+    "HANDOFF": 10,
+    "NO_SEND": 4
+  },
+  "providerGenerationRequests": 143,
+  "maximumUpstreamPerGeneration": 1,
+  "retry": 0,
+  "requestsByRole": {
+    "control-verifier": 17,
+    "owner": 88,
+    "verifier": 38
+  },
+  "observedModelVersions": {
+    "gpt-6.1-sol": 55,
+    "gemini-3.5-flash-lite": 88
+  },
+  "generationErrors": [
+    {
+      "role": "owner",
+      "id": "d7fc0e8f-4975-4508-9492-35ca9b4fe503:owner:1",
+      "httpStatus": 200,
+      "code": "OWNER_TOOL_OUTPUT",
+      "providerRequests": 1
+    },
+    {
+      "role": "owner",
+      "id": "52fdcab8-53db-414c-8314-22475cbe2311:owner:1",
+      "httpStatus": 200,
+      "code": "OWNER_TOOL_OUTPUT",
+      "providerRequests": 1
+    }
+  ],
+  "tokens": {
+    "input": 971229,
+    "output": 84835,
+    "thinkingIncludedInOutput": 77652
+  },
+  "tokensByRole": {
+    "owner": {
+      "input": 623552,
+      "output": 78867,
+      "thinkingIncludedInOutput": 73976
+    },
+    "verifier": {
+      "input": 222188,
+      "output": 3595,
+      "thinkingIncludedInOutput": 2584
+    },
+    "control-verifier": {
+      "input": 125489,
+      "output": 2373,
+      "thinkingIncludedInOutput": 1092
+    }
+  },
+  "cost": null,
+  "verifierProviderLatencyMs": {
+    "samples": 38,
+    "p50": 6319,
+    "p95": 15360
+  },
+  "verificationWithReadbackMs": {
+    "samples": 38,
+    "p50": 7185.083099999989,
+    "p95": 18917.335799999986
+  },
+  "driverSlotLatencyMs": {
+    "samples": 51,
+    "p50": 23729.990699999995,
+    "p95": 49218.2874
+  },
+  "wireAudit": {
+    "capturedActualBodies": 143,
+    "ownerHashChecks": 88,
+    "ownerWireMatchChecks": 88,
+    "verifierWireChecks": 34,
+    "b1VerifierTelemetryChecks": 21,
+    "boundedEvaluatorOrSecretKeyMatches": 0,
+    "boundedCaseIdStringMatches": 0
+  },
+  "testDatabaseCleanup": [
+    {
+      "cohort": "opening-quotes",
+      "testDatabase": "c3_b_test_423c8446ab30d91a",
+      "dropped": true
+    },
+    {
+      "cohort": "media-followup",
+      "testDatabase": "c3_b_test_2602177e03ad2ca0",
+      "dropped": true
+    },
+    {
+      "cohort": "missing-pos",
+      "testDatabase": "c3_b_test_bf22918a03aafffb",
+      "dropped": true
+    },
+    {
+      "cohort": "journey-openings",
+      "testDatabase": "c3_b_test_db375b4b2bc05223",
+      "dropped": true
+    },
+    {
+      "cohort": "stateful",
+      "testDatabase": "c3_b_test_9964eb4e82975cd8",
+      "dropped": true
+    },
+    {
+      "cohort": "negotiation",
+      "testDatabase": "c3_b_test_94d2f4308cd2d233",
+      "dropped": true
+    }
+  ]
+}

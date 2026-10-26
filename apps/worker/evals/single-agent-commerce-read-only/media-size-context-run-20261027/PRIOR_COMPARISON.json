@@ -1,0 +1,55 @@
+{
+  "priorSourceSha": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+  "currentSourceSha": "0ef9991a578e8da33f9bfbd4f81a86765380fe9f",
+  "sameCaseIds": 51,
+  "causalOrStabilityClaim": false,
+  "priorTerminals": {
+    "SEND_ELIGIBLE": 36,
+    "HANDOFF": 11,
+    "NO_SEND": 4
+  },
+  "currentTerminals": {
+    "SEND_ELIGIBLE": 37,
+    "HANDOFF": 10,
+    "NO_SEND": 4
+  },
+  "changedTerminals": [
+    {
+      "caseId": "media-decision:ask",
+      "prior": "HANDOFF",
+      "current": "SEND_ELIGIBLE",
+      "reason": "Không tự tạo phụ thuộc ảnh cận váy. Trả lời được bằng dữ liệu hiện có và đưa phương án áo lẻ phối đồ trơn để xử lý lo ren nhiều. Đoạn mở còn dài/nhiều tính từ; không kết luận giọng đã tốt hơn ổn định."
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "prior": "SEND_ELIGIBLE",
+      "current": "HANDOFF",
+      "reason": "Có sản phẩm/phom/lưng chun để gợi ý, nhưng chưa có thông tin/SIZE_FIT để hứa khách mặc không bó bụng. Owner vẫn thêm bảo đảm này vào draft; verifier FAIL và actual silent handoff. Root cause là suy từ cấu tạo sang độ vừa của khách, không phải thiếu dữ liệu sản phẩm hoặc lỗi HTTP."
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "prior": "HANDOFF",
+      "current": "SEND_ELIGIBLE",
+      "reason": "Code đã nhận RELAXED và xác nhận M/alternatives rỗng; owner chỉ chọn M, không tự thêm L. Câu còn lặp toàn bộ height/weight/preference; thành công logic trong N1, không proof ổn định hoặc giọng tự nhiên."
+    }
+  ],
+  "requests": {
+    "prior": 140,
+    "current": 143
+  },
+  "inputTokens": {
+    "prior": 910216,
+    "current": 971229,
+    "changePct": 6.703134201112704
+  },
+  "ownerInputTokens": {
+    "prior": 572699,
+    "current": 623552,
+    "changePct": 8.879533576974996
+  },
+  "limits": [
+    "N1 in each run; owner prompt/source clocks/tool choices differ.",
+    "Net eligibility +1 does not imply aggregate sales quality improvement.",
+    "Current two OWNER_TOOL_OUTPUT errors follow HTTP200; preserve both in generation/error accounting."
+  ]
+}
