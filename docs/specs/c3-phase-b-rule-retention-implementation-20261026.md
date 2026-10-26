@@ -1,6 +1,6 @@
 # Phase B — implementation giữ quy tắc, 26/10/2026
 
-Implementation base `56538349eef07ff26b1a8cb8db2031192a4f4289`, [plan revision 2](c3-phase-b-rule-retention-fix-plan-20261026.md). **IN_PROGRESS, PROVIDER_NOT_RUN; B chưa GO.** Không production wiring/deploy/live send. Các kết quả dưới là deterministic, không phải model acceptance.
+Implementation base `56538349eef07ff26b1a8cb8db2031192a4f4289`, [plan revision 2](c3-phase-b-rule-retention-fix-plan-20261026.md). **IMPLEMENTED, INDEPENDENT_REVIEW_APPROVE, DETERMINISTIC_READINESS_PASS; provider campaign được owner yêu cầu, chưa dispatch tại savepoint này; B chưa GO.** Không production wiring/deploy/live send. Các kết quả dưới là deterministic, không phải model acceptance.
 
 ## S1 — terminal quyền và accounting
 
@@ -108,3 +108,15 @@ Self-review cuối phát hiện ingress recovery sau runner bỏ sót terminal c
 
 
 Accounting fixb82ba079: full commerce/boundary578PASS; reviewer APPROVE121PASS. P3 actual-enqueued fix RED1→GREEN1 tại851a81b3; TypeScript tests ban đầu chưa narrow private/native union nên tsc exit2, đã thêm type guards trong tests và tsc final exit0. Full worker build sau accounting/P3 exit0, không ghi intermediate lỗi là PASS. Model campaign đã preregister17controls+51native, targeted20→31remaining, source/runtime config giữ nguyên; provider chưa dispatch tại savepoint này.
+
+
+Final accounting source55cf9c44: COD4PASS +BANK4PASS, dropped2DB, source/configclean,0provider. [Curated deterministic results](../../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/DETERMINISTIC_CHECKS.json) giữ riêng full45+45source89433ba2 và final4+4source55cf9c44, không cộng thành98full cases ở cùngsource. Existing full worker578/Node163 và121focused sau P3, fullbuild/lint/tsc exit0. Same reviewer APPROVE851a81b3/P3/dispatchdriver; kiểm AST/counts0provider. Source executable không đổi sau đó; chỉ tasks/docs/evidence savepoint trước capture provider sourceHEAD.
+
+Hai focused PostgreSQL commands thực chạy:
+
+```powershell
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-rule-retention-final-accounting-cod-20261026' COD --check-prefix 'B composed recovery accounting'
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs 'C:/Users/nguye/Documents/Sản phẩm AI/c3-b-rule-retention-final-accounting-bank-20261026' BANK_TRANSFER --check-prefix 'B composed recovery accounting'
+```
+
+Full commands tương tự dùng sealed3-cod/bank output, `--composed-only --candidate-handoff` thay check-prefix. Không live send/deploy. Bước tiếp theo theo owner mới yêu cầu là chạy [preregistered campaign](../../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/PREREGISTRATION.md), không tự đổi N/model hoặc retry.

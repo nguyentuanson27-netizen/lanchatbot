@@ -80,3 +80,6 @@ PostgreSQL sau đó bắt receipt-success gap (không capture receipt proof sau 
 
 
 Self-review accounting cuối được reviewer xác nhận P2; executableb82ba079 được **APPROVE**, độc lập ingress/handoff121PASS. Một P3 reporting: readback-unavailable phải giữ actual enqueued từ port dù terminalNO_SEND. Added RED1→GREEN1,851a81b3 sửa đúng `enqueued: port.outboxCount()`, đồng thời đăng ký model campaign theo owner mới yêu cầu. Không thêm retry hoặc send từ lỗi readback.
+
+
+Reviewer cùng agent kiểm P3/driver tại851a81b3: **APPROVE**, AST/slot arithmetic PASS,0provider, không evaluator labels mới vào wire. 17controls+51native68slots, targeted20/remaining31disjoint, cap217,N1/retry0; full đòi20exact artifact hashes/reviews. Yêu cầu sourceclean trước capture đã được thực hiện ở savepoint report; không dùng driver approval thay whole-terminal review.
