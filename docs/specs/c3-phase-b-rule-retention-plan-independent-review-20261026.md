@@ -77,3 +77,6 @@ Cùng reviewer kiểm lại exact executable `af0bc76b8668a4f62ec0cfe66b6d9670ee
 
 
 PostgreSQL sau đó bắt receipt-success gap (không capture receipt proof sau mutation thành công). Reviewer kiểm diffaf0bc76b..1207cee9, verdict **APPROVE**, độc lập effects/delivery100PASS. Successful persisted path đọc ledger và acceptReceipt, unavailable giữ fail-closed; gate so exact receipt hash. Không sửa file/provider/DB. Sau review có test-only savepointc53a87f7: composition fixture cũ trả null receipt ở mọi lần dù mô phỏng persisted success; thay bằng ledger fixture ghi trên APPLIED rồi đọc theo operationId, thêm proof assertion. Không nới runtime để giữ mock null thành công.
+
+
+Self-review accounting cuối được reviewer xác nhận P2; executableb82ba079 được **APPROVE**, độc lập ingress/handoff121PASS. Một P3 reporting: readback-unavailable phải giữ actual enqueued từ port dù terminalNO_SEND. Added RED1→GREEN1,851a81b3 sửa đúng `enqueued: port.outboxCount()`, đồng thời đăng ký model campaign theo owner mới yêu cầu. Không thêm retry hoặc send từ lỗi readback.
