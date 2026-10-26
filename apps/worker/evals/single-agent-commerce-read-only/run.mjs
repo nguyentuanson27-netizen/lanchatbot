@@ -9,9 +9,11 @@ import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclara
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {publicSnapshotDiff} from './snapshot-diagnosis.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
+import {nativePresentation,withNativePresentation} from './native-presentation.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'live-only':{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'},'image-registration':{type:'string'}}});
+const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'live-only':{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'},'image-registration':{type:'string'},'owner-presentation':{type:'string'}}});
+const ownerContextPresentation=nativePresentation(process.argv.slice(2));
 const comparison=!!args['image-registration'];
 if(comparison&&args.range)throw new Error('IMAGE_COMPARISON_FULL_DISPATCH_ONLY');
 if(comparison&&args['live-only'])throw new Error('LIVE_ONLY_B1_ONLY');
@@ -52,6 +54,7 @@ const verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.met
 const out=resolve(args.out);mkdirSync(out); // Existing evidence is never overwritten.
 const audit=(id,phase,value)=>appendFileSync(join(out,'requests.jsonl'),JSON.stringify({id,phase,value})+'\n');
 if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSourceSha,manifestHash:sha256(JSON.stringify(m)),sourceConfigHash:sha256(configBytes),
+ ...(ownerContextPresentation?{ownerContextPresentation}:{}),
  promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify(effectiveDeclarations)),
  inputHash,caseIds:samples.map(c=>c.caseId),registered,repetitions:1,maximumGenerationRequests:maximumGenerations,
  ...(comparison?{mode:"IMAGE_PRELOAD_VS_ON_DEMAND",imageRegistrationHash:imageRegistration.hash,slots:imageSlots}:{}),
@@ -127,7 +130,7 @@ try{
    const tools={...preparedTools,invokeBatch:async calls=>{
     const results=await rawTools.invokeBatch(calls);audit(requestId,'TOOL_RESULTS',{calls,results});return results;
    }};
-   const owner=async request=>{audit(request.generationId,'PUBLIC_CONTEXT_CAPTURE',{generationId:request.generationId,toolsAllowed:request.toolsAllowed,capturedAt:clock().toISOString(),context:request.context});audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
+   const owner=async original=>{const request=withNativePresentation(original,ownerContextPresentation);audit(request.generationId,'PUBLIC_CONTEXT_CAPTURE',{generationId:request.generationId,toolsAllowed:request.toolsAllowed,capturedAt:clock().toISOString(),context:request.context});audit(request.generationId,'OWNER_REQUEST',buildGeminiCommerceRequest(request));
     const generated=await ownerInference(request);audit(request.generationId,'OWNER_RESULT',generated);return generated;};
    let before=null;const checkedVerifier=async request=>{before=request.trusted;return verifier(request);};
    result=await runCommerceTurn({scope,clock,tools,latest:sample.latest,history:sample.history,

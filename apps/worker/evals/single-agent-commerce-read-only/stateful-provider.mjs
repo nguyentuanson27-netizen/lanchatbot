@@ -11,6 +11,7 @@ import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSou
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {ASSUMPTION,assumedFeedback} from './assumed-feedback.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
+import {nativePresentation,withNativePresentation} from './native-presentation.mjs';
 import {registerOpeningQuotes,registerJourneyOpenings,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe,registerMediaFollowup,registerMissingPos} from './sales-journeys-registration.mjs';
 
 export function scopedProviderFacts(facts,mode,counters){
@@ -25,6 +26,7 @@ export function scopedProviderFacts(facts,mode,counters){
 
 export function statefulPreflight(root){
  assert.notEqual(process.env.C3_TEST_CODEX_TRANSPORT,'1','TEST_TRANSPORT_FORBIDDEN_IN_PROVIDER_RUN');
+ const ownerContextPresentation=nativePresentation(process.argv.slice(2));
  const head=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
  const paths=['apps/worker/src','packages','apps/worker/evals/single-agent-commerce-read-only','apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs','pnpm-lock.yaml'];
  assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=all','--',...paths],{cwd:root,encoding:'utf8'}).trim(),'','DIRTY_EXECUTABLE_OR_CONFIG');
@@ -46,6 +48,7 @@ export function statefulPreflight(root){
  assert.equal(new Set(cases.map(c=>c.caseId)).size,cases.length);
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
+  ...(ownerContextPresentation?{ownerContextPresentation}:{}),
   models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
   toolBudget:{normalRounds:m.toolRounds,normalCalls:m.toolCalls,terminalHandoffAttempts:m.terminalHandoffAttempts,maximumExecutedToolInvocations:m.maximumExecutedToolInvocations},
   handoffReply:{...m.handoffReply,rendererSourceSha256:sha256(readFileSync(new URL('../../src/single-agent-commerce-read-only-tools.ts',import.meta.url)))},
@@ -87,7 +90,7 @@ export async function createStatefulProvider(input){
    const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog,policyStore,facts:sourceFacts});
    return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds,
     ...(config.productGroups?{productGroups:config.productGroups}:{})};},
-  async owner(request){assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
+  async owner(original){const request=withNativePresentation(original,registration.ownerContextPresentation);assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
    let completedTelemetry;
    try{const wire=buildGeminiCommerceRequest(request);assert(!/"(?:caseId|evaluator|purposeId|requiredBehaviors|expectedSafe|qualityScore)"/.test(JSON.stringify(wire)),'EVALUATOR_LABEL_LEAK');
     audit(request.generationId,'OWNER_REQUEST',wire);const r=await infer(request);completedTelemetry=r.telemetry;audit(request.generationId,'OWNER_RESULT',r);return r;}

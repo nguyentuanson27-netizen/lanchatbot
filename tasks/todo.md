@@ -1,3 +1,10 @@
+## Current — full Phase B Compact V2, 2026-10-26
+
+- [x] Owner chọnV2/full51;nativeexplicitselectionRED→GREEN,toolpairs/signatures/images/historyexact vàdefaultunchanged. [Plan](../docs/specs/c3-phase-b-compact-native-full-run-20261026.md).
+- [x] 210Node/1PythonstubdriverPASS/build/directtsc/lintexit0,selfreviewdone.
+- [ ] SealcleanHEAD→17freshcontrols→all51native once,retain errors/fallback/handoff/privateCode;noautomaticretry/stylepatch.
+- [ ] Whole-turnreview actualoutcomes/wirehashes/accounting/DBcleanup→report;noBGO/stability/liveclaim.
+
 ## Current — Compact V2 model campaign, 2026-10-26
 
 - [x] Owner yêu cầu chạy; sourcec31e206b sạch/khôngđổi→driverexplicitV2,17controlsPASS→16historicalpairedoutcomes,49requests/0errors/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-run-20261026/CHECKPOINT_B.md).

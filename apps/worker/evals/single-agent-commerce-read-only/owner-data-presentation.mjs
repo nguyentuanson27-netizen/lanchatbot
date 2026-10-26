@@ -61,7 +61,12 @@ export function readCompactSections(message){
  });
 }
 export function presentCompactOwnerData(original){
- const wire=presentOwnerData(original),sections=compactContextSections(original);
+ // Native tool pairs/signatures and multimodal parts keep their exact positions.
+ // The historical final-only textual experiment retains its existing trace ordering.
+ const finalText=original.toolConfig.functionCallingConfig.mode==='NONE'&&original.tools.length===0&&
+  original.contents.every(m=>m.parts.every(p=>typeof p.text==='string'));
+ const wire=finalText?presentOwnerData(original):structuredClone(original);
+ const sections=compactContextSections(finalText?original:{...original,contents:[original.contents[0]]});
  wire.contents[0]={role:'user',parts:[{text:sections.map(({label,value})=>label+'\n'+JSON.stringify(value)).join('\n\n')}]};
  assert.deepEqual(readCompactSections(wire.contents[0]),sections.map(({label,value})=>({label,value})),'COMPACT_DATA_LOSS');
  return wire;

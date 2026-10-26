@@ -1,3 +1,7 @@
+## Current — full Phase B Compact V2, 2026-10-26
+
+Owner yêu cầu rerun toàn51native và chọnCompactV2, thêm17freshcontrols. [Plan](../docs/specs/c3-phase-b-compact-native-full-run-20261026.md). Implementexplicitselection cảB1/stateful registration/audit/HTTP; nativeV2 giữsignedtoolpairs/images/historyposition, chỉcompactcontexttop, finaltexttreatmentcũkhôngđổi.210Node+1PythonstubdriverPASS/build/directtsc/lintexit0;selfreviewdone, chờcleansourcesseal/provider. Khôngprompt/model/corpus/default/productionchange;N1/retry0/cap217,fullallcohorts khicontrolsPASS,khôngstylequalitygategiữachừng. NoBGO/nativeevidenceyet.
+
 ## Current — Compact V2 model campaign, 2026-10-26
 
 **COMPLETE33outcomes/49requests; STOP experiment, B chưaGO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-run-20261026/CHECKPOINT_B.md), [16reply](../apps/worker/evals/single-agent-commerce-read-only/compact-context-run-20261026/CONVERSATIONS_XY.md). Sourcec31e206b clean/unchanged; explicitV2/N1/retry0.17controlsPASS→16historicalpairedoutcomes eligible,0providererrors. Selfblind freeze before unmask: Bwin1/Awin1/TIE4/NEITHER2;0/3clearconcernBwins, khôngoverallpositive. OwnerinputA41827/B42319(+1.18%);vsV150066−15.47%.16ownerhashes/33actualverifierbodiesmatch/0boundedlabel/keyleak;290707input/25947output(thinking23026included). Khôngnative/current-send/stability/BGO hoặcfinalindependentreviewclaim. Giữdefault/prompt, khôngstylefixloop/fullB/rerun tựđộng.
