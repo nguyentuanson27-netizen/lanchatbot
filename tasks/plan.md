@@ -1,3 +1,7 @@
+## Current — Compact V2 model campaign, 2026-10-26
+
+**COMPLETE33outcomes/49requests; STOP experiment, B chưaGO.** [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-run-20261026/CHECKPOINT_B.md), [16reply](../apps/worker/evals/single-agent-commerce-read-only/compact-context-run-20261026/CONVERSATIONS_XY.md). Sourcec31e206b clean/unchanged; explicitV2/N1/retry0.17controlsPASS→16historicalpairedoutcomes eligible,0providererrors. Selfblind freeze before unmask: Bwin1/Awin1/TIE4/NEITHER2;0/3clearconcernBwins, khôngoverallpositive. OwnerinputA41827/B42319(+1.18%);vsV150066−15.47%.16ownerhashes/33actualverifierbodiesmatch/0boundedlabel/keyleak;290707input/25947output(thinking23026included). Khôngnative/current-send/stability/BGO hoặcfinalindependentreviewclaim. Giữdefault/prompt, khôngstylefixloop/fullB/rerun tựđộng.
+
 ## Current — chọn đúng compact V2 cho lượt chạy sau, 2026-10-26
 
 [Plan/implementation/review](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md). **IMPLEMENTED+INDEPENDENT APPROVE** clean exact5ee79350, độc lập10Node+2PythonPASS/no blocker. Reviewtrướckhôngblocker; bổsungexplicitselection: defaultV1 bundle/wires/IDs giữexactarchived, `--compact-v2` driver→offline/preflight/run→registeredownerContextPresentation+bundle, V2slotIDs namespace riêng. MockHTTP kiểm đúngwire/cả2arms/mandatoryverifier;208commerceeval+2PythonPASS/directtsc/lint/diff0. Khôngthayrenderer/prompt/model/canonicalcontext. Taskchỉfix+review,0realprovider/count/generation calls; chưaquality/native/BGO.

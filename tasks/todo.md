@@ -1,3 +1,10 @@
+## Current — Compact V2 model campaign, 2026-10-26
+
+- [x] Owner yêu cầu chạy; sourcec31e206b sạch/khôngđổi→driverexplicitV2,17controlsPASS→16historicalpairedoutcomes,49requests/0errors/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-run-20261026/CHECKPOINT_B.md).
+- [x] Selfblind whole-turn review freeze trướcunmask:1Bwin/1Awin/4TIE/2NEITHER,0/3concernBwins;STOPexperiment/BchưaGO. Khôngclaim independentreview mới.
+- [x] GenerationinputA41827/B42319(+1.18%);V2−15.47%vsV1sameinputs.16ownerhash/33verifierbodymatch,49actualrequests/max1/0boundedlabel/keyleak. Raw/hashes/config/commands/usage và16exactreply giữđủ.
+- [ ] Native/stability/salesqualityqualification/BGO chưađạt; khôngpromote hoặc tựrerun/stylefix.
+
 ## Current — chọn đúng compact V2 cho lượt chạy sau, 2026-10-26
 
 - [x] RED→GREEN explicitV2 CLI/registration/uniqueIDs/actualHTTP selection; defaultV1 unchanged. [Plan](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md).
@@ -9,7 +16,7 @@
 - [x] RED→GREEN compactV2 giữ đủ originalfield/trace/history/openingQuote, đườngdẫn chỉlocal;0prompt/model/verifier/default/V1changes. [Plan](../docs/specs/c3-phase-b-compact-context-20261026.md).
 - [x] 205NodePASS/directtsc/lint/diffexit0; sourced9161647clean→24countTokens-only calls HTTP200/0errors/retry0/0generation. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-20261026/REPORT.md):V150610→V242863(−15.3%);ORIGINAL42371, V2+1.2%. Bytes235886→200389.
 - [x] Owner-requested same independent reviewer APPROVE exactb727829d:78testsPASS,24reconstructedrequest/rawhashes/accounting/totalsmatch,0findings requiringfix. [Review](../apps/worker/evals/single-agent-commerce-read-only/compact-context-20261026/INDEPENDENT_REVIEW.md). Scopecompactimplementation/counts, khôngconversationquality/BGO.
-- [ ] V2actualconversationquality/latency/nativequalification chưa chạy; khôngclaim preserve/improve salesquality hoặcfullB/GO. V1/default và oldevidence giữ nguyên; oldrunnerV1khôngsilently đổi.
+- [x] Final-reply V2 diagnostic đã chạy sau owner yêu cầu: xem current campaign ở đầu file; không đạt quality improvement. Nativequalification/fullB/GO vẫn chưa đạt; V1/default và oldevidence giữ nguyên.
 
 ## Previous — thử toàn bộ cách trình bày context, 2026-10-26
 
