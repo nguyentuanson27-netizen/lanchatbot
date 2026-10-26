@@ -159,10 +159,8 @@ Exact final owner request hash (JSON.stringify): `fe3413ffa3dc27f9078498230e2259
       "type": "SIZE_FIT",
       "value": {
         "alternativeSizes": [],
-        "customerProfileId": "ccf3970a-62bf-4239-9884-489be82e82da",
         "customerProfileRevision": 2,
         "evidenceBasis": "MEASUREMENTS",
-        "measurementFingerprint": "b44eef747feceaef833fd5a668f7682ebf2882360fa0a454f8166f2b8243cb94",
         "recommendedSizes": [
           "M"
         ]
@@ -182,3 +180,13 @@ Observed RED: qdrant adapter không giữ colorBinding; sau minimum GREEN qdrant
 Recognition publisher cần ngoại lệ hẹp cho delivery-only color metadata: PAYLOAD_ONLY nếu stripped content identity và pipeline giữ nguyên; update payload exact point, giữ observation timestamp/vector, readback xác nhận. Không được NOOP bỏ mất metadata hoặc re-embed chỉ vì color binding. Legacy V3 embedding hash không đổi, payload/provenance hashes đổi. HTTP overwrite payload theo [Qdrant official reference](https://api.qdrant.tech/api-reference/points/overwrite-payload), đã đọc trước khi thêm adapter method; tests chỉ mock HTTP, không gọi service. Không thay generic framework hoặc provider API.
 
 Các test đã chạy tới savepoint: shared focused192PASS; targeted worker112PASS trước closure, publisher/adapter48PASS, staging/publisher51PASS (2 files thực sự được discover, không gọi tên test file không tồn tại là đã chạy), sau closure thêm tests source errors/bounds/readback100+ checks trong bước tiếp theo. S1 test metadata-only write failure có no-success-without-readback, generic/default metadata path vẫn giữ. Build shared và directworker tsc trước closure PASS; final checks sẽ chạy lại trên source hoàn tất.
+
+## S2 — bounded media capability và request projection
+
+Observed RED: mediaCapabilities chưa có; sau GREEN getter lấy từ source catalog đã đọc, initial prepare/read_product/batch/media source dùng cùng catalog wrapper. Không thêm catalogue read/download. Lookup lỗi source mới clear hint; deep clone observation immutable, getter không renew TTL, expiry/permission/binding thay đổi omit. Sáu query cố định và một color query theo lần read_product; cùng predicate eligibility với media selector. Field tối đa1.024B/product và4.096B/tổng; toàn field bị omit nếu vượt, không truncate thành negative. Hint không vào canonical protected snapshot/receipt và không thêm invalidation cho reply không dùng media; selected media readback vẫn nguyên.
+
+Có một field projection trên owner execution, không copy vào tool history. Code capture thời điểm generation cho hint validity để audit/request builder và HTTP giống nhau ở biên expiry; không dùng processingAt đầu lượt giả thời điểm mới. Omission diagnostics chỉ telemetry, không gửi evaluator labels hoặc thông tin source nội bộ. RED về request ảnh lớn đã xác nhận rồi GREEN: default transport giữ image bound hiện hành, không vô tình ép xuống64KB; optional hint bị bỏ nếu cần, không drop image/facts/history. CompactV2 vẫn64KB cũ.
+
+Tests: actual mocked HTTP matches, ORIGINAL/CompactV2 native pairs/signatures/history exact, malformed/unbound/expired hints omitted, near-bound omission, large-image default regression5PASS. Worker media tests kiểm no extra reads/immutable expiry/source-error/field bound/authority/color tuple; runtime lifecycle đều dùng helper thuần. Toàn commerceeval214PASS trước final thêm expiry/large-image tests; final source sẽ chạy lại. Không provider thật.
+
+S1 self-review follow-up: metadata write readback so toàn payload bằng canonicalJsonV1, không dùng canonicalForHash vốn bỏ bookkeeping. S0 excerpt đã bỏ synthetic profile UUID/fingerprint, chỉ giữ M/alternatives và RELAXED như cam kết.

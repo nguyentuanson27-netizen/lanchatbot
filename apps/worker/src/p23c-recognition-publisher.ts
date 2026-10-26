@@ -1,3 +1,4 @@
+import {canonicalJsonV1} from "@lana/contracts";
 /**
  * Product Image Recognition V2 — dedicated catalog publisher (Phase 3).
  *
@@ -260,7 +261,7 @@ export class P23cRecognitionPublisher {
         }
         await this.options.target.overwritePayload(job.point_id,payload,controller.signal);
         const actual=await this.options.target.getPoint(job.point_id,controller.signal);
-        if(!actual||actual.sourceHash!==job.source_hash||JSON.stringify(canonicalForHash(actual.payload))!==JSON.stringify(canonicalForHash(payload)))throw Error("COLOR_METADATA_READBACK_UNCONFIRMED");
+        if(!actual||actual.sourceHash!==job.source_hash||canonicalJsonV1(actual.payload)!==canonicalJsonV1(payload))throw Error("COLOR_METADATA_READBACK_UNCONFIRMED");
         return {...base,status:"SUCCESS",error:""};
       }
       // Build and validate the complete point before touching the target.

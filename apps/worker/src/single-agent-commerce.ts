@@ -1,3 +1,4 @@
+import {createMediaCapabilityCache} from "./single-agent-commerce-media-capabilities.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { createCustomerStateTools } from "./single-agent-commerce-state.js";
 import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
@@ -49,10 +50,14 @@ export async function createCommerceTools(input: {
   };
   const handoffSources=()=>evidenceComplete?structuredClone([...evidence.values()]):null;
   const originalCatalog=input.read.catalog;
+  const hints=input.media?createMediaCapabilityCache(clock,input.media.allowedHostSuffixes,scope.bindingVersion):null;
   const catalog={searchText:(query:string)=>originalCatalog.searchText(query),
     ...(originalCatalog.resolveProductCode?{resolveProductCode:(code:string)=>originalCatalog.resolveProductCode!(code)}:{}),
-    readProduct:(id:string,readPos=true)=>observed("PRODUCT",{productId:id,readPos},()=>originalCatalog.readProduct(id,readPos))};
-  const readTools = createReadOnlyTools({...input.read,catalog});
+    readProduct:(id:string,readPos=true)=>observed("PRODUCT",{productId:id,readPos},async()=>{
+      try{const source=await originalCatalog.readProduct(id,readPos);try{hints?.observe(id,source.product);}catch{}return source;}
+      catch(error){hints?.clear(id,"SOURCE_ERROR");throw error;}
+    })};
+  const readTools = createReadOnlyTools({...input.read,catalog,...(hints?{onMediaColor:(id:string,color:string)=>hints.addColor(id,color)}:{})});
   let tools: CommerceTools = readTools;
   tools={...tools,handoffSources};
   const availableTools = ["search_products", "read_product", "read_policy"];
@@ -97,7 +102,7 @@ export async function createCommerceTools(input: {
       missingInformationUnproved=outcome.status!=="OK";
     } catch { missingInformationUnproved=true; }
   }
-  return { ...composed, prepare: () => readTools.prepare(), availableTools, invoke: call => missingInformationUnproved
+  return { ...composed, ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}), prepare: () => readTools.prepare(), availableTools, invoke: call => missingInformationUnproved
     ? Promise.resolve({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}) : availableTools.includes(call.name) ? composed.invoke(call)
     .then(async result=>{await handoffRequiredRead([call],[result]);return result;})
     : Promise.resolve({ status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" }),

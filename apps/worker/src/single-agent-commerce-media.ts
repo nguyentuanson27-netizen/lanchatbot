@@ -1,3 +1,4 @@
+import {eligibleCommerceMedia,type MediaQuery} from "./single-agent-commerce-media-eligibility.js";
 import {buildProtectedMediaClaimsV1,selectRequestedImages,selectPriceCardImages,normalizeCatalogToken,type CustomerImageIntent} from "@lana/business-tools";
 import {MEDIA_FRESH_FOR_SECONDS} from "@lana/contracts";
 import {buildReadOnlyContext,commerceHash} from "./single-agent-commerce-read-only-context.js";
@@ -15,7 +16,6 @@ export interface CommerceMediaAsset {
 export interface CommerceCatalogImage {subjectRef:string;assetRef:string;sha256:string;downloadSha256:string;registrySha256:string;mimeType:"image/png"|"image/jpeg"|"image/webp";data:string}
 export const COMMERCE_VISION_BOUNDS={count:2,maxBytes:512*1024,maxSourceBytes:2*1024*1024,maxDimension:1024,maxSourceDimension:12000,maxSourcePixels:50000000,timeoutMs:8000} as const;
 const intents=new Set<CustomerImageIntent>(["GENERIC","BACK","DETAIL","SIZE_GUIDE","PRODUCT_ONLY","FEEDBACK"]);
-interface MediaQuery {subjectRef:string;intent:CustomerImageIntent;color?:string;componentRole?:"TOP"|"SKIRT"|"PANTS"}
 const componentParts={TOP:"AO",SKIRT:"CHAN_VAY",PANTS:"QUAN"};
 // Projection of approved asset metadata, not inferred garment/material properties.
 function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset[]) {
@@ -65,25 +65,8 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     onSource?.({sourceVersion:commerceHash({productId:product.productId,observedAt:product.observedAt,colors:product.colors,
       images:product.images??[],query,allowedHosts:input.allowedHostSuffixes}),
       expiresAt:new Date(Math.min(at+MEDIA_FRESH_FOR_SECONDS*1000,...transitions)).toISOString()});
-    // This source has no per-asset color field. Only a uniquely colored product can prove it.
-    if(query.color && (product.colors.length!==1 || normalizeCatalogToken(product.colors[0]!)!==normalizeCatalogToken(query.color))) throw new Error("MEDIA_COLOR_BINDING_UNVERIFIED");
-    const now=input.clock().getTime();
-    const images=(product.images??[]).filter(image=>{
-      const observed=Date.parse(image.observedAt??product.observedAt??"");
-      if(image.reviewStatus!=="APPROVED"||image.metadataVerified!==true||!image.sourceContentSha256||
-        !/^[a-f0-9]{64}$/u.test(image.sourceContentSha256)||!Number.isFinite(observed)||observed>now||observed+MEDIA_FRESH_FOR_SECONDS*1000<=now) return false;
-      try{safeRecognitionImageUrl(image.url,input.allowedHostSuffixes);}catch{return false;}
-      if(query.componentRole){const parts=image.partsVisible??[];if(parts.length!==1||normalizeCatalogToken(parts[0]!)!==componentParts[query.componentRole])return false;}
-      return true;
-    });
-    // Reuse the existing main + complementary-angle rule on approved assets only.
-    // Disable its legacy URL fallback: a raw URL has not passed the media authority checks.
-    const approvedProduct={...product,images,imageUrls:[]};
-    const selected=query.intent==="GENERIC"?selectPriceCardImages(approvedProduct):selectRequestedImages(approvedProduct,query.intent);
-    // Reuse this filtered snapshot, never another fetch or an automatic substitute.
-    // These are lookup options under the same color/component scope, not prepared attachments.
-    if(!selected.images.length&&onAlternatives)onAlternatives([...intents].filter(intent=>intent!==query.intent&&
-      (intent==="GENERIC"?selectPriceCardImages(approvedProduct):selectRequestedImages(approvedProduct,intent)).images.length>0));
+    const selected=eligibleCommerceMedia(product,query,input.clock().getTime(),input.allowedHostSuffixes);
+    if(!selected.images.length&&onAlternatives)onAlternatives(selected.alternatives);
     return selected.images.map(image=>{
       const observedAt=image.observedAt??product.observedAt!;
       const sourceVersion=commerceHash({productId:product.productId,catalogVersion:product.catalogVersion,image});

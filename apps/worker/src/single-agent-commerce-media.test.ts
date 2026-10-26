@@ -1,3 +1,4 @@
+import {createMediaCapabilityCache} from "./single-agent-commerce-media-capabilities.js";
 import {describe,it,expect,vi} from "vitest";
 import {createCommerceTools} from "./single-agent-commerce.js";
 import {runCommerceTurn} from "./single-agent-commerce-read-only.js";
@@ -334,4 +335,61 @@ it("accepts null color for viewing only verified generic image bytes",async()=>{
   expect(s.tools.catalogImages!()).toHaveLength(1);
   expect(s.tools.mediaSelection!()).toEqual([]);
  }finally{fetch.mockRestore();}
+});
+
+it("uses verified per-asset color for multicolor products and never falls back for invalid bindings",async()=>{
+ const s=await setup();s.f.product.colors=["be","navy"];
+ s.f.product.images[0]!.colorBinding={status:"VALID",color:"be",sha256:"a".repeat(64)};
+ const call={name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"BACK",color:"be"}};
+ expect(await s.tools.invoke(call)).toMatchObject({status:"OK",data:{colorMatched:true}});
+ const bad=await setup();bad.f.product.colors=["be"];bad.f.product.images[0]!.colorBinding={status:"INVALID"};
+ expect(await bad.tools.invoke({...call,args:{...call.args,subjectRef:bad.f.product.productId}})).toMatchObject({status:"UNAVAILABLE"});
+});
+
+it("prepares bounded media hints without an extra read, never renews a cached observation, and clears failed reads",async()=>{
+ let now=new Date(commerceNow);const s=await setup(()=>now);
+ await s.tools.prepare!();const reads=s.readProduct.mock.calls.length;
+ const first=s.tools.mediaCapabilities!();expect(first).toHaveLength(1);
+ expect(first[0]!.queries).toContainEqual({intent:"BACK",componentRole:null,color:null,status:"MATCH_AVAILABLE"});
+ now=new Date(now.getTime()+1000);expect(s.tools.mediaCapabilities!()).toEqual(first);expect(s.readProduct).toHaveBeenCalledTimes(reads);
+ now=new Date(Date.parse(first[0]!.expiresAt)+1);expect(s.tools.mediaCapabilities!()).toEqual([]);
+ now=new Date(commerceNow);await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId,detailsOnly:true}});expect(s.tools.mediaCapabilities!()).toHaveLength(1);
+ s.readProduct.mockRejectedValue(new Error("source down"));await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId,detailsOnly:true}});
+ expect(s.tools.mediaCapabilities!()).toEqual([]);
+});
+
+it.each([{status:"INVALID"} as const,{status:"VALID",color:"navy",sha256:"a".repeat(64)} as const,{status:"VALID",color:"be",sha256:"b".repeat(64)} as const])("blocks corrupt/conflicting color proof even on a single-color product (%j)",async colorBinding=>{
+ const s=await setup();s.f.product.colors=["be"];s.f.product.images[0]!.colorBinding=colorBinding;
+ expect(await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"BACK",color:"be"}})).toMatchObject({status:"UNAVAILABLE"});
+ const generic=await setup();generic.f.product.images[0]!.colorBinding=colorBinding;expect(await generic.tools.invoke(generic.call)).toMatchObject({status:"OK"});
+});
+it("does not invalidate an unchanged text-only reply merely because an optional media hint changes",async()=>{
+ const s=await setup();
+ const result=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Chào em",history:[],clock:()=>commerceNow,
+ ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async request=>{expect(request.mediaCapabilities).toHaveLength(1);return {kind:"FINAL",text:"Dạ em chào chị."};},
+ verifier:async()=>{s.f.product.images[0]!.colorBinding={status:"INVALID"};return {result:{verdict:"PASS",violations:[]}};}});
+ expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(s.tools.mediaSelection!()).toEqual([]);
+});
+
+it("clears capabilities on a failed media source read, not only read_product",async()=>{
+ const s=await setup();await s.tools.prepare!();expect(s.tools.mediaCapabilities!()).toHaveLength(1);
+ s.readProduct.mockRejectedValue(new Error("source down"));await s.tools.invoke(s.call);expect(s.tools.mediaCapabilities!()).toEqual([]);
+ expect(s.tools.mediaCapabilityDiagnostics!()).toContain("SOURCE_ERROR");
+});
+
+it("capability observations are immutable and bounded and never cross subject or permission boundaries",async()=>{
+ const s=await setup();await s.tools.prepare!();let now=new Date(commerceNow);
+ const cache=createMediaCapabilityCache(()=>now,["content.pancake.vn"],s.scope.bindingVersion);
+ cache.observe(s.f.product.productId,s.f.product);const first=cache.get(s.tools.snapshot());expect(first).toHaveLength(1);
+ s.f.product.images=[];expect(cache.get(s.tools.snapshot())).toEqual(first);
+ const denied=s.tools.snapshot();denied.state.permission=false;expect(cache.get(denied)).toEqual([]);expect(cache.get(s.tools.snapshot())).toEqual([]);
+ const product={...s.f.product,images:[s.image]};for(let i=0;i<8;i++)cache.observe("P"+i,{...product,productId:"P"+i});
+ const ctx=s.tools.snapshot();ctx.boundSubjects=Array.from({length:8},(_,i)=>({ref:"P"+i,kind:"PRODUCT" as const,label:"p",bindingVersion:s.scope.bindingVersion}));
+ expect(cache.get(ctx)).toEqual([]);expect(cache.takeDiagnostics()).toContain("FIELD_BYTES");
+});
+it("color hints summarize only the requested color tuple from the same read and do not prepare attachments",async()=>{
+ const s=await setup();s.f.product.colors=["be","navy"];s.f.product.images[0]!.colorBinding={status:"VALID",color:"be",sha256:"a".repeat(64)};
+ await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId,offerType:"DIRECT",color:"be"}});
+ expect(s.tools.mediaCapabilities!()[0]?.queries).toContainEqual({intent:"GENERIC",componentRole:null,color:"be",status:"MATCH_AVAILABLE"});
+ expect(s.tools.mediaSelection!()).toEqual([]);
 });

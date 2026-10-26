@@ -15,6 +15,9 @@ export interface OwnerRequest { generationId: string; instructions: string; cont
   pendingHandoff?: { reason: string };
   historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   turnTime?: CommerceTurnTime;
+  mediaCapabilitiesAt?: number;
+  mediaCapabilityDiagnostics?: readonly string[];
+  mediaCapabilities?: readonly import("./single-agent-commerce-media-capabilities.js").MediaCapability[];
   catalogImages?: readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   toolBudget: { roundsRemaining: number; callsRemaining: number }; availableTools?: readonly string[]; signal: AbortSignal }
 export interface VerifierRequest { generationId: string; instructions: string; finalDraft: string; trusted: TrustedContext;
@@ -32,6 +35,8 @@ export interface CommerceTools {
   /** Code-owned exact static fallback identity after a tool outcome. */
   fallbackId?(): string;
   sizeOutcome?(): { status: string } | null;
+  mediaCapabilityDiagnostics?(): readonly string[];
+  mediaCapabilities?(): readonly import("./single-agent-commerce-media-capabilities.js").MediaCapability[];
   catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
   prepare?(): Promise<number>;
@@ -159,6 +164,8 @@ export async function runCommerceTurn(input: {
       terminalHandoffAllowed, ...(pendingHandoff ? {pendingHandoff} : {}),
       ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}),
       ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
+      ...(input.tools.mediaCapabilities?{mediaCapabilities:input.tools.mediaCapabilities(),mediaCapabilitiesAt:input.clock().getTime()}:{}),
+      ...(input.tools.mediaCapabilityDiagnostics?{mediaCapabilityDiagnostics:input.tools.mediaCapabilityDiagnostics()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: !handoff && toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
     // The native transport owns its serialized wire bound after projection.

@@ -34,6 +34,7 @@ export function createReadOnlyTools(input: {
   maxFactAgeSeconds?: number;
   entry?: { firstContact: boolean | null; fromAd: boolean };
   productGroups?: readonly CommerceProductGroup[];
+  onMediaColor?(id:string,color:string):void;
 }) {
   const { scope } = input;
   const maxAge = input.maxFactAgeSeconds ?? 1200;
@@ -185,6 +186,7 @@ export function createReadOnlyTools(input: {
     let fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
     try { fetched = loaded ?? await input.catalog.readProduct(id); }
     catch (error) { if (posPins.has(id)) posInvalidated = true; throw error; }
+    if(typeof args.color==="string")input.onMediaColor?.(id,args.color);
     const source = pinPos(id, fetched), p = source.product;
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
     if (p.productId !== id || (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) ||
