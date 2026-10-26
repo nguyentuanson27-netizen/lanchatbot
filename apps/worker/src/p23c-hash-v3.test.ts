@@ -258,3 +258,9 @@ describe("P2.3C Hash v3", () => {
     expect(batch.selected[0]?.reason).toBe("URL_CHANGED_SAME_CONTENT");
   });
 });
+
+it("color provenance changes payload/provenance hashes without changing embedding identity",()=>{
+ const a=computePointHashes("p",payload(),CONFIG);
+ const b=computePointHashes("p",payload({image_verified_product_color:"be",image_color_binding_sha256:SHA_A,image_color_binding_status:"VALID"}),CONFIG);
+ expect(b.embedding_hash).toBe(a.embedding_hash);expect(b.payload_hash).not.toBe(a.payload_hash);expect(b.provenance_hash).not.toBe(a.provenance_hash);
+});

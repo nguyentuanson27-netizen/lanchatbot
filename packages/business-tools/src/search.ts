@@ -46,7 +46,15 @@ const StableProductDocumentSchema = z
         sourceContentSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable().optional().default(null),
         reviewStatus: z.literal("APPROVED").nullable().optional().default(null),
         metadataVerified: z.boolean().optional().default(false),
-      }).strict(),
+        colorBinding: z.discriminatedUnion("status",[
+          z.object({status:z.literal("VALID"),color:z.string().trim().min(1).max(64),sha256:z.string().regex(/^[a-f0-9]{64}$/)}).strict(),
+          z.object({status:z.literal("INVALID")}).strict(),z.object({status:z.literal("ABSENT")}).strict(),
+        ]).optional(),
+      }).strict().superRefine((image,ctx)=>{
+        const b=image.colorBinding;
+        if(b?.status==="VALID"&&(b.sha256!==image.sourceContentSha256||image.metadataVerified!==true||image.reviewStatus!=="APPROVED"))
+          ctx.addIssue({code:z.ZodIssueCode.custom,message:"Invalid verified image color binding"});
+      }),
     ).max(40).default([]),
     catalogVersion: z.string().min(1).max(128),
     observedAt: z.string().datetime().nullable().optional().default(null),

@@ -1,3 +1,4 @@
+import {imageColorBindingFromPayload} from "./image-color-binding.js";
 import { normalizeProductCode } from "./inventory.js";
 import type {
   MultimodalEmbeddingPort,
@@ -94,6 +95,7 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
   const url = validImageUrls(payload.image_url)[0];
   if (!url) return null;
   const quality = Number(payload.image_quality_score);
+  const colorBinding=imageColorBindingFromPayload(payload);
   return {
     url,
     role: text(payload.image_role).toUpperCase() === "PRIMARY" ? "PRIMARY" : "ADDITIONAL",
@@ -114,6 +116,7 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
       ? "APPROVED"
       : null,
     metadataVerified: payload.metadata_verified === true,
+    ...(colorBinding?{colorBinding}:{}),
   };
 }
 

@@ -189,3 +189,10 @@ describe("Qdrant stable catalog adapter", () => {
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 });
+
+it("preserves approved asset color and rejects corrupted binding instead of legacy fallback",()=>{
+ const p={...payload,image_verified_product_color:"be",image_color_binding_sha256:"a".repeat(64),image_color_binding_status:"VALID"};
+ expect(stableProductDocumentFromQdrantPayload(p)?.images[0]).toMatchObject({colorBinding:{status:"VALID",color:"be",sha256:"a".repeat(64)}});
+ expect(stableProductDocumentFromQdrantPayload({...p,image_color_binding_sha256:"b".repeat(64)})?.images[0]).toMatchObject({colorBinding:{status:"INVALID"}});
+ expect(stableProductDocumentFromQdrantPayload({...payload,image_visual_colors:["be"]})?.images[0]?.colorBinding).toBeUndefined();
+});

@@ -174,3 +174,11 @@ Exact final owner request hash (JSON.stringify): `fe3413ffa3dc27f9078498230e2259
 ```
 
 Implementation và commands sẽ được ghi theo evidence; chưa có PASS implementation ở savepoint S0.
+
+## S1 — metadata implementation savepoint
+
+Observed RED: qdrant adapter không giữ colorBinding; sau minimum GREEN qdrant7PASS. Binding ABSENT/VALID/INVALID giữ xuyên publisher→adapter→strict validator, không promote visual/AI colors. Legacy missing không tự có field màu; invalid partial/hash vẫn INVALID. Source pipeline đọc A:AR và append thêm hai manual columns AQ/AR, giữ vị trí A:AP và vùng AI A:V. Không Sheet/Qdrant writes thực tế.
+
+Recognition publisher cần ngoại lệ hẹp cho delivery-only color metadata: PAYLOAD_ONLY nếu stripped content identity và pipeline giữ nguyên; update payload exact point, giữ observation timestamp/vector, readback xác nhận. Không được NOOP bỏ mất metadata hoặc re-embed chỉ vì color binding. Legacy V3 embedding hash không đổi, payload/provenance hashes đổi. HTTP overwrite payload theo [Qdrant official reference](https://api.qdrant.tech/api-reference/points/overwrite-payload), đã đọc trước khi thêm adapter method; tests chỉ mock HTTP, không gọi service. Không thay generic framework hoặc provider API.
+
+Các test đã chạy tới savepoint: shared focused192PASS; targeted worker112PASS trước closure, publisher/adapter48PASS, staging/publisher51PASS (2 files thực sự được discover, không gọi tên test file không tồn tại là đã chạy), sau closure thêm tests source errors/bounds/readback100+ checks trong bước tiếp theo. S1 test metadata-only write failure có no-success-without-readback, generic/default metadata path vẫn giữ. Build shared và directworker tsc trước closure PASS; final checks sẽ chạy lại trên source hoàn tất.

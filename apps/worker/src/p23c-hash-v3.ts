@@ -232,6 +232,10 @@ export function computePointHashes(
     normalized_image_url: normalizedImageUrl(payload),
     image_metadata_review_status: normalizeString(payload.image_metadata_review_status).toUpperCase(),
     metadata_verified: payload.metadata_verified === true,
+    ...(Object.hasOwn(payload,"image_color_binding_status")||Object.hasOwn(payload,"image_verified_product_color")||Object.hasOwn(payload,"image_color_binding_sha256")?{
+      image_color_binding_status:payload.image_color_binding_status??null,
+      image_verified_product_color:payload.image_verified_product_color??null,
+      image_color_binding_sha256:payload.image_color_binding_sha256??null}:{}),
     source: normalizeString(payload.source),
     source_context: normalizeString(payload.source_context),
     image_metadata_version: normalizeString(payload.image_metadata_version),

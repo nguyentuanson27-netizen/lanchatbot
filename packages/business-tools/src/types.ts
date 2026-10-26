@@ -77,6 +77,7 @@ export type ProductImageType =
 /** Một ảnh đã duyệt của sản phẩm, kèm phân loại do P2.3B gắn. Trước đây runtime
  *  chỉ giữ danh sách URL phẳng nên không chọn được ảnh theo ý khách hỏi. */
 export interface ProductImage {
+  colorBinding?: {status:"VALID";color:string;sha256:string} | {status:"INVALID"} | {status:"ABSENT"} | undefined;
   url: string;
   role: "PRIMARY" | "ADDITIONAL";
   angle: ProductImageAngle;

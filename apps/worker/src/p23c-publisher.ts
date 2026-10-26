@@ -338,7 +338,7 @@ export class P23cPublisher {
         this.options.feed.fetchFeed(),
         this.options.sheets.batchGetValues(
           this.options.sheetId,
-          ["product_registry!A:AZ", "image_registry!A:AP"],
+          ["product_registry!A:AZ", "image_registry!A:AR"],
           "UNFORMATTED_VALUE",
         ),
       ]);

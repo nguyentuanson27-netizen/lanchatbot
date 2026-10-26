@@ -1,3 +1,5 @@
+import {validateStableProductDocument} from "./search.js";
+import {stableProductDocumentFromQdrantPayload} from "./qdrant.js";
 import { describe, expect, it } from "vitest";
 import type { AgentProposalV1, BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { composeVerifiedProductFacts } from "./facts.js";
@@ -541,4 +543,12 @@ describe("facts and deterministic policy guard", () => {
       },
     });
   });
+});
+
+it("strict catalog validator preserves invalid markers and rejects a fabricated valid color binding",()=>{
+ const source=stableProductDocumentFromQdrantPayload({product_id:"P1",image_url:"https://example.com/a.jpg",image_content_sha256:"a".repeat(64),image_metadata_review_status:"APPROVED",metadata_verified:true,image_verified_product_color:"be",image_color_binding_sha256:"a".repeat(64),image_color_binding_status:"VALID"})!;
+ expect(validateStableProductDocument(source).images[0]?.colorBinding).toEqual({status:"VALID",color:"be",sha256:"a".repeat(64)});
+ const altered=structuredClone(source);altered.images[0]!.colorBinding={status:"VALID",color:"be",sha256:"b".repeat(64)};
+ expect(()=>validateStableProductDocument(altered)).toThrow();
+ altered.images[0]!.colorBinding={status:"INVALID"};expect(validateStableProductDocument(altered).images[0]?.colorBinding).toEqual({status:"INVALID"});
 });
