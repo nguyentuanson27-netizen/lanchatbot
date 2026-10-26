@@ -136,8 +136,9 @@ export function createCommerceHandoffTools(input: {
         policyIdentity(await input.policy()) === expectedPolicyHash && (!checkReply || await checkReply());
     };
     try { if (!await input.commit({ before, next, decision, policy, validate, ...(media ? { media } : {}), ...(reply?{reply}:{}) })) return { status: "REJECTED", reason: "HANDOFF_CONFLICT" }; }
-    catch { uncertain = true; return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" }; }
+    catch { uncertain = true; status="UNKNOWN"; return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" }; }
     committed = { next, decision, policyHash: expectedPolicyHash, ...(reply?{text:reply.text}:{}) };
+    status="COMMITTED";
     const outcome = await terminalOutcome();
     return outcome?.disposition === "HANDOFF" ? { status: "OK", data: { handoffAccepted: true } }
       : { status: "UNAVAILABLE", reason: "HANDOFF_SCOPE_CHANGED" };

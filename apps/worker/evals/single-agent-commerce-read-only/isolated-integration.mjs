@@ -442,6 +442,17 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ for(const mode of ['committed','conflict','commit-response-lost','rollback-response-lost'])await check('B composed recovery accounting '+mode,async()=>{
+  const holding='Bên em kiểm tra rồi báo lại chị nhé.',j=await statefulFixture({dependencyHoldingReply:holding});
+  const r=await j.turn('Áo này bao nhiêu em?',[],{loseCommitReply:mode==='commit-response-lost',rollbackCommitReply:mode==='rollback-response-lost',
+   beforeCommit:async()=>{if(mode==='conflict')j.changeHandoffPolicy();}});
+  const expectedStatus=mode==='committed'?'COMMITTED':mode==='conflict'?'BLOCKED':'UNKNOWN';
+  assert.equal(r.result.terminalHandoffCalls,1);assert.equal(r.result.toolCalls,r.result.normalToolCalls+1);
+  assert.equal(r.result.handoff.attempts,1);assert.equal(r.result.handoff.status,expectedStatus);assert.equal(r.owners,1);assert.equal(r.verifiers,0);
+  assert.equal(r.result.terminal.disposition,mode==='committed'?'HANDOFF':'NO_SEND');
+  j.restartDelivery();await j.drain();await j.drain();
+  assert.deepEqual(j.capture,['committed','commit-response-lost'].includes(mode)?[holding]:[]);
+ });
  for(const mode of ['verified','owner-error','source-changed-before-delivery','commit-response-lost','rollback-response-lost','cart-receipt','cart-source-changed'])await check('B composed prepared handoff partial '+mode,async()=>{
   const holding='Bên em sẽ kiểm tra ảnh rồi báo chị nhé.',j=await statefulFixture({deferredHandoff:true,dependencyHoldingReply:holding});
   const cart=mode.startsWith('cart-'),outputs=[native([cart?{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',color:'navy',size:'M',quantity:1}}:

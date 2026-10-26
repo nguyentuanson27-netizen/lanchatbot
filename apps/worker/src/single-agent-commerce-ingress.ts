@@ -292,7 +292,7 @@ export async function runPersistedCommerceIngress(input: {
     BUDGET:"RESPONSE_UNAVAILABLE",OWNER_TOOL_MODE:"RESPONSE_UNAVAILABLE",OWNER_OUTPUT_ARTIFACT:"RESPONSE_UNAVAILABLE",
   };
   const recoveryReason = result.terminal.disposition === "FALLBACK" && !recoveredMedia ? recoveryReasons[result.terminal.reason] : undefined;
-  if (recoveryReason && current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
+  if (recoveryReason && result.terminalHandoffCalls===0 && !tools.handoffStatus?.()?.attempts && current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
     hardPrecheck(world,terminalFallback("C3_A_NONPROTECTED_V2").text!,input.clock())===null) {
     const policy = await policyBundle();
     if (policy.artifacts.handoffMatrix?.rules.some(rule=>rule.reason===recoveryReason)) {
@@ -301,10 +301,18 @@ export async function runPersistedCommerceIngress(input: {
         read:readAuthority,inboxBatchGuard:guard,resolveTagId:input.resolveTagId,deliveryRecipient:last.senderId});
       const recovery=createCommerceHandoffTools({...port,base:tools,scope,clock:input.clock,policy:policyBundle});
       let outcome: TerminalOutcome | null | undefined;
+      let readbackFailed=false;
       try {
         await recovery.invoke({name:"request_handoff",args:{reason:recoveryReason}});
         outcome=await recovery.terminalOutcome?.();
-      } catch { return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE")}; }
+      } catch { readbackFailed=true; }
+      finally {
+        const status=recovery.handoffStatus?.();
+        result.terminalHandoffCalls+=status?.attempts??0;
+        result.toolCalls=result.normalToolCalls+result.terminalHandoffCalls;
+        if(status)result.handoff=status;
+      }
+      if(readbackFailed)return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE")};
       if (outcome?.disposition === "HANDOFF" || outcome?.disposition === "NO_SEND") return {...result,terminal:outcome,
         recovery:{originalDisposition:original.disposition,originalReason:original.reason},enqueued:port.outboxCount()};
       return {...result,...await closeWithoutSend("RECOVERY_HANDOFF_UNAVAILABLE")};

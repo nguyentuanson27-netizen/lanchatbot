@@ -107,6 +107,8 @@ it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-v
     return {kind:"FINAL" as const,text:"Dạ chị."};});
   const result=await f.run(owner);
   expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:providerFault?"DEPENDENCY_FAILURE":"RESPONSE_UNAVAILABLE"});
+  expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:"COMMITTED"}});
+  expect(result.toolCalls).toBe(result.normalToolCalls+1);
   const handoffs=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);
   expect(handoffs).toHaveLength(1);
   expect(handoffs[0]![1]).toMatchObject({pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
@@ -120,6 +122,8 @@ it("fails closed if recovery commit readback becomes unavailable",async()=>{
   const result=await f.run(async()=>{throw new Error("HTTP_429");});
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
   expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
+  expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:"COMMITTED"}});
+  expect(result.toolCalls).toBe(result.normalToolCalls+1);
 });
 
 it("keeps an automatic recovery handoff silent when current policy is silent",async()=>{
@@ -140,6 +144,10 @@ it.each(["conflict","ambiguous","superseded","missing-rule"])("does not acknowle
   expect(result.terminal.disposition).not.toBe("HANDOFF");
   expect(result.terminal.text??"").not.toContain("Shop đã nhận");
   expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan).length).toBeLessThanOrEqual(1);
+  if(fault==="conflict"||fault==="ambiguous"){
+    expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:fault==="conflict"?"BLOCKED":"UNKNOWN"}});
+    expect(result.toolCalls).toBe(result.normalToolCalls+1);
+  }else expect(result.terminalHandoffCalls).toBe(0);
 });
 
 it.each(["Không lấy Thạch Thảo nữa, gửi chị mẫu kia.","Chị đang so Thạch Thảo với Diệp An.","Cho chị xem bộ Thạch Thảo.","Mẫu kia cơ em."])("does not manufacture durable product focus from unbound prose: %s",async text=>{

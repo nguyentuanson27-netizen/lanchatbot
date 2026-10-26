@@ -65,3 +65,43 @@ Hai run clean sourceaf0bc76b ở c3-b-rule-retention-sealed2-cod-20261026 và c3
 
 
 Reviewer độc lập APPROVE1207cee9, effects/delivery100PASS. Full commerce sau đổi receipt có577PASS/1FAIL ở composed fixture cũ hardcode readReceipt=null cho cả success. Test-only savepointc53a87f7 đã thay thành explicit test ledger ghi ở APPLIED và assert proof SALES_STATE/RECEIPT, focused2PASS; không đổi runtime/expected SEND_ELIGIBLE. Full build1207cee9/lint exit0; final focused/full regression và sealed PostgreSQL cần chạy lại trên executable hiện hành.
+
+## Final executable checks (runtime unchanged after 1207cee9)
+
+Implementation base56538349; executable reviewed1207cee9, test-only followupc53a87f7, sealed run source89433ba25b63b5c53faa963bfafb1a3e1f09f3c7. Không đổi executable/config trong sealed3 runs. Current owner prompt SHA256 `786e4cd7338e8a21d17557e03c41314301f005b913d83b687377ac4efe106cb6`; verifier prompt `8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c`; schema `19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115`; manifest `9e89897d4b8378dbab3f100e88a23b7f653e3c6bc9f49c7fda58bb9a19abd457`.
+
+Model/config không thay: Gemini3.5FlashLite HIGH owner, GPT6.1Sol HIGH verifier, generation retry0. Manifest là nguồn exact generation config hiện hành; không có generation/provider measurement mới trong lượt này.
+
+Commands thực sự chạy và final evidence (các RED/intermediate FAIL phía trên không bị xóa):
+
+| Command | Result |
+| --- | --- |
+| `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/single-agent-semantic-verifier-boundary.test.ts` | 578PASS/20files sau fixture ledger fix |
+| `node --test --test-concurrency=1 "apps/worker/evals/single-agent-commerce-read-only/*.test.mjs"` | 163PASS |
+| `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-handoff.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-handoff-delivery.test.ts src/single-agent-commerce-media-delivery.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-ingress.test.ts` | 326PASS trên af0bc76b; final578 suite bao gồm8files này với2gate cases thêm |
+| `node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/candidate-handoff.test.mjs apps/worker/evals/single-agent-commerce-read-only/sales-journeys-registration.test.mjs` | 97PASS; final163 bao gồm4files này |
+| `pnpm --filter @lana/contracts exec vitest run src/commerce-handoff-delivery.test.ts src/commerce-media-delivery.test.ts` | 3PASS |
+| `pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/image-selection.test.ts` | 43PASS |
+| `pnpm --filter @lana/database exec vitest run src/realtime-runtime.test.ts` | 56PASS |
+| `pnpm --filter @lana/contracts build` / `pnpm --filter @lana/contracts typecheck` | exit0 cả hai; shared consumers build trong worker prebuild |
+| `pnpm --filter @lana/worker build` | exit0 sau receipt runtime fix; gồm12dependency builds |
+| `pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit` | exit0 sau test-only fixture fix |
+| `pnpm --filter @lana/worker lint` | exit0 sau receipt runtime fix |
+| `node --check apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs` / `git diff --check` | exit0 |
+
+Không cộng các suite chồng lặp thành số unique tests lớn hơn. Lần gọi business-tools với filename `product-image-assembler.test.ts` không tồn tại chỉ chạy21tests protected/assembler; không coi đó là image test. Lệnh đúng image-selection phía trên đã chạy43PASS.
+
+## Giới hạn giữ nguyên
+
+- Không provider acceptance/latency/token/cost mới; chất lượng owner ở opening/photos/handoff chưa được chứng minh bằng model run. Controls17 trước targeted rồi full hiện hành là bước riêng theo plan, chưa dispatch.
+- PRICE fragment chỉ explicit SINGLE một pair/variant không mơ hồ. Không tách nghĩa câu khách để tự chọn phần trong COMPARE hoặc multipart; thiếu renderer procedure được duyệt thì dùng holding/silent/no-send hiện hữu.
+- Source-version/timestamp refresh vẫn có thể block dù business value chưa đổi; không nới freshness để sửa số PASS.
+- Delivery proof yêu cầu existing scoped reader; cấu hình thiếu reader hoặc proof không đủ thì chặn protected group. Không bật route này vào production.
+- Owner prompt +626bytes do capability/prepare/opening contract; verifier prompt giữ nguyên; thêm một specialized scoped source-reader module, optional shared binding, không thêm semantic role/generation/parser/framework hoặc repair loop. Không claim mọi partial handoff đều có tư vấn đầy đủ hoặc B GO.
+
+
+## Full PostgreSQL và accounting self-review trước provider run
+
+Full composed capture source89433ba2 **45PASS COD +45PASS BANK**, cả hai worktree executable/config sạch, providerGenerations0, databaseDropped=true. Outputs sealed3-cod/bank-20261026. Đây là full deterministic source89433ba2; không chuyển thành provider acceptance hoặc exact-source PASS cho code thay sau đó.
+
+Self-review cuối phát hiện ingress recovery sau runner bỏ sót terminal counter/status. Reviewer độc lập xác nhận P2 và status BLOCKED sai khi commit true nhưng readback throw. Observed RED9 trong ingress counters assertions; sửa guard chỉ1terminal attempt, finally cập nhật actual terminal/total/handoff trước mọi return/catch, giữ normal/proposed counts. Gán COMMITTED tại điểm commit known và UNKNOWN tại ambiguous catch; NO_SEND do readback không tự đổi commit thành BLOCKED. GREEN121 ingress/handoff; thêm4 synthetic DB recovery-accounting situations, chạy final-source focused COD/BANK sau seal, không chạy lại toàn45 chỉ vì accounting đổi. User đã yêu cầu review/fix và chạy model: provider run được phép sau readiness; registration/control/targeted gating theo plan giữ nguyên.
