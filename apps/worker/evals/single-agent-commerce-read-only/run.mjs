@@ -4,16 +4,17 @@ import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange,
- REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt,readImageComparisonCases,readImageComparisonRegistration,imageComparisonSlots,prepareImageComparison,verifyImageComparisonPins} from './protocol.mjs';
+ REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt,readImageComparisonCases,readImageComparisonRegistration,imageComparisonSlots,prepareImageComparison,verifyImageComparisonPins,liveDispatchSlots} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,mediaDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {publicSnapshotDiff} from './snapshot-diagnosis.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'},'image-registration':{type:'string'}}});
+const {values:args}=parseArgs({options:{config:{type:'string'},cases:{type:'string'},out:{type:'string'},range:{type:'string'},run:{type:'boolean'},preflight:{type:'boolean'},'live-only':{type:'boolean'},'source-check':{type:'boolean'},'owner-registration':{type:'string'},'image-registration':{type:'string'}}});
 const comparison=!!args['image-registration'];
 if(comparison&&args.range)throw new Error('IMAGE_COMPARISON_FULL_DISPATCH_ONLY');
+if(comparison&&args['live-only'])throw new Error('LIVE_ONLY_B1_ONLY');
 const dispatch=comparison?{first:1,last:12}:dispatchRange(args.range);
 const registered=comparison?12:REGISTERED_CASE_COUNT,maximumGenerations=comparison?48:MAXIMUM_GENERATION_REQUESTS;
 const effectiveDeclarations=comparison?[...readOnlyDeclarations,...mediaDeclarations]:readOnlyDeclarations;
@@ -28,6 +29,8 @@ const corpus=comparison?readImageComparisonCases(resolve(args.cases)):readRegist
 const {samples,inputs,hash:inputHash}=corpus;
 const imageRegistration=comparison?readImageComparisonRegistration(resolve(args['image-registration']),corpus):null;
 const imageSlots=comparison?imageComparisonSlots():null;
+const selectedSlots=comparison?imageSlots.map((_,i)=>i):liveDispatchSlots(samples,dispatch,args['live-only']);
+if(!selectedSlots.length)throw new Error('EMPTY_DISPATCH');
 if(!['CANARY_SHADOW','CANARY_LIVE','PUBLISHED'].includes(config.channel)||config.scope.pageId!=='1198992073286645'||
  !['shopId','shopAlias','conversationId','customerHash','recipient','bindingVersion','revision'].every(k=>config.scope[k]!==undefined)||
  !/^[a-f0-9]{64}$/.test(config.scope.customerHash)||!/^[a-f0-9]{64}$/.test(config.scope.recipient)||
@@ -53,7 +56,8 @@ if(args.run)writeFileSync(join(out,'registration.json'),JSON.stringify({bRunSour
  inputHash,caseIds:samples.map(c=>c.caseId),registered,repetitions:1,maximumGenerationRequests:maximumGenerations,
  ...(comparison?{mode:"IMAGE_PRELOAD_VS_ON_DEMAND",imageRegistrationHash:imageRegistration.hash,slots:imageSlots}:{}),
  dispatch,effectiveOwnerPromptHash:selectedOwner.sha256,ownerRegistrationHash:selectedOwner.registrationHash,
- dispatchedCases:dispatch.last-dispatch.first+1,dispatchedMaximumGenerationRequests:(dispatch.last-dispatch.first+1)*4,
+ dispatchedCases:selectedSlots.length,dispatchedCaseIds:selectedSlots.map(i=>samples[comparison?imageSlots[i].caseIndex:i].caseId),liveOnly:args['live-only']===true,
+ dispatchedMaximumGenerationRequests:selectedSlots.length*4,
  catalogInputMode:config.candidateDescriptions?'LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION':'LIVE_PUBLIC',
  registeredAt:new Date().toISOString(),codex,sendEnabled:false},null,2),{flag:'wx'});
 const [{PostgresRuntimePolicyStore},{ProductSearchService,QdrantStableCatalogSearchAdapter},{RedisBusinessFactsReader},
@@ -106,7 +110,7 @@ const ownerInference=createGeminiCommerceInference({model:m.models.conversation.
 const verifier=createCommerceVerifier(m,undefined,(id,value)=>audit(id,value.phase,value.provider));
 const clock=()=>new Date();
 try{
- for(let i=dispatch.first-1;i<dispatch.last;i++){
+ for(const [recordedIndex,i] of selectedSlots.entries()){
   const sampleIndex=comparison?imageSlots[i].caseIndex:i,arm=comparison?imageSlots[i].arm:null;
   const sample=inputs[sampleIndex],started=performance.now(),requestId=sha256(bRunSourceSha+':'+i+':'+sha256(JSON.stringify(sample)));
   const scope={...config.scope,requestId,sourceMessageId:requestId,sourceObservedAt:clock().toISOString(),conversationOwner:'BOT',permission:true,privacyAllowed:true};
@@ -132,10 +136,10 @@ try{
   }catch(error){result={terminal:{disposition:'NO_SEND',reason:'SOURCE_OR_ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},errorType:error.name,
    errorCode:typeof error.message==='string'&&/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:null,sendEnabled:false};}
   writeFileSync(join(out,`attempt-${i+1}.json`),JSON.stringify({caseId:samples[sampleIndex].caseId,...(comparison?{arm,preparation}:{}),sourceMode:samples[sampleIndex].sourceMode??'LIVE',elapsedMs:performance.now()-started,runtime:sample,result,counters:{...counters}},null,2),{flag:'wx'});
-  console.log(JSON.stringify({slot:i+1,recorded:i-dispatch.first+2,registered,terminal:result.terminal.disposition}));
+  console.log(JSON.stringify({slot:i+1,recorded:recordedIndex+1,registered,terminal:result.terminal.disposition}));
  }
- const recorded=dispatch.last-dispatch.first+1;
+ const recorded=selectedSlots.length;
  const status=head()===bRunSourceSha&&!dirty()?(recorded===registered?'AWAITING_WHOLE_REPLY_REVIEW':'DISPATCH_RANGE_COMPLETE_REVIEW_PENDING'):'INVALID_SOURCE_IDENTITY';
- writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered,recorded,dispatch,counters,sendEnabled:false},null,2),{flag:'wx'});
+ writeFileSync(join(out,'completion.json'),JSON.stringify({status,registered,recorded,dispatch,liveOnly:args['live-only']===true,counters,sendEnabled:false},null,2),{flag:'wx'});
  console.log(JSON.stringify({status,registered,recorded,out,sendEnabled:false}));
 }finally{await Promise.allSettled([database.close(),redis.close()]);}

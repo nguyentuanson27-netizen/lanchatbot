@@ -29,6 +29,10 @@ export function dispatchRange(value=undefined){
  const [first,last]=value.split(':').map(Number);
  check(first>=1&&first<=last&&last<=REGISTERED_CASE_COUNT,'DISPATCH_RANGE');return {first,last};
 }
+// Registered harness partition, never a runtime semantic classifier.
+export function liveDispatchSlots(samples,range,liveOnly=false){
+ return samples.flatMap((s,i)=>i+1>=range.first&&i+1<=range.last&&(!liveOnly||(s.sourceMode??'LIVE')==='LIVE')?[i]:[]);
+}
 const bytes=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 export function validateProtocol(m){
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');

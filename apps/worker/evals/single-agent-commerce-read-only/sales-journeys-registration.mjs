@@ -1,5 +1,17 @@
 // Evaluator registration only. Never forwarded to a model or used as a production router.
 import assert from 'node:assert/strict';
+export function registerMissingPos(rows){
+ assert(Array.isArray(rows)&&rows.length===24,'EXACT_B1_CORPUS_REQUIRED');
+ const selected=rows.filter(r=>r.sourceMode==='POS_UNAVAILABLE');
+ assert.equal(selected.length,3,'THREE_MISSING_POS_CASES');
+ return selected.map(c=>{
+  assert(typeof c.runtime.latest==='string'&&c.runtime.history.length===0,'MISSING_POS_FRESH_TURN');
+  assert.deepEqual(c.runtime.initialProductCodes,['SV2447'],'MISSING_POS_SUBJECT');
+  return {caseId:c.caseId,journeyId:c.caseId,sourceMode:'POS_UNAVAILABLE',
+   runtime:{latest:c.runtime.latest,initialProductCodes:[...c.runtime.initialProductCodes]},
+   evaluator:{expected:'Committed silent handoff; HUMAN ownership, one event/tag, zero customer text/images.'}};
+ });
+}
 export function selectStatefulThrough(cases,through){
  if(through===undefined)return cases;
  const index=cases.findIndex(c=>c.caseId===through);

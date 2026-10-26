@@ -40,3 +40,12 @@ Kết quả: contracts16PASS + typecheck/build; focused candidate/protocol53PASS
 - B1 read-only vẫn không có handoff port. Prompt không tạo ra capability: không claim ca B1 POS_UNAVAILABLE đã được bàn giao. Khi kiểm acceptance thiếu nguồn phải dùng composed candidate có port; B1 chỉ dùng kiểm tư vấn/đọc và ghi rõ giới hạn. Không giả handoff bằng lời nói hoặc NO_SEND.
 - Chưa chạy provider trên prompt/matrix mới, chưa xác nhận giọng tự nhiên hơn bằng hội thoại thật. Không sửa registration/gate của campaign cũ để coi 31 lượt deferred là đã chạy hoặc mở lại run cùng identity.
 - Không source-store write, migration, production wiring, live send, deploy hoặc B GO. Bản này là implementation và kiểm chứng local; lần chạy model tiếp phải seal identity mới.
+
+
+## Review độc lập và closure POS trước model
+
+Reviewer cùng phiên kiểm7143b04d: REVISE1P2, policy45–46 bảo trả quy trình cho yêu cầu cần xử lý nhưng47 yêu cầu silent handoff. Đã giới hạn phần trả lời vào hỏi quy định/quy trình; khách cần xử lý thực tế handoff. Reviewer chưa thấy lỗi thực thi silent; độc lập53candidate/protocol+111ingress/persistence+16contractsPASS.
+
+Để không chỉ ghi giới hạn B1, thêm eval-only cohort --missing-pos: đúng3runtime POS_UNAVAILABLE từ corpus24 chạy qua persisted ingress và candidate handoff. Proxy chỉ làm POS snapshot unavailable và từ chối cart selection; không sửa catalog/policy nguồn. Actual owner/event/tag/capture được ghi riêng. Read-only --live-only chạy21LIVE còn lại; test chứng minh hợp24 không trùng/không đổi lời khách,3source cases không bị mất denominator. Không thay corpus/production routing.
+
+Đăng ký campaign mới trong silent-handoff-run-20261026/PREREGISTRATION.md:68slots=17controls+51native, targeted22→remaining29, N1/retry0 và cap217giữ nguyên. Chưa provider trước reviewerAPPROVE+clean executable seal. Lần sửa này Node189PASS; worker ingress/missing/persistence127PASS; worker lint exit0; syntax3JS+Python ASTPASS. Chưa có provider result cho bản mới.
