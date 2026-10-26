@@ -335,14 +335,14 @@ try{
   const newer=await inbox.claimNextBatch('c3-b-handoff-cleanup',60000);assert(newer);
   assert.equal(newer.conversationHash,h.h.customerHash);assert.equal(await inbox.completeBatch(newer),true);
  });
- for(const reason of ['EXCHANGE','DEFECT'])await check('B handoff candidate '+reason+' captures the configured reply exactly once after commit',async()=>{
+ for(const reason of ['EXCHANGE','DEFECT'])await check('B handoff candidate '+reason+' commits silently without a customer Outbox',async()=>{
   const candidateMatrix=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url)));
   const expected=candidateMatrix.rules.find(r=>r.reason===reason).holdingReply;
   const h=await handoffFixture({candidateMatrix}),captured=[];
   const accepted=await h.tools.invoke({name:'request_handoff',args:{reason}});
   assert.equal(accepted.status,'OK',JSON.stringify(accepted));
   assert.equal((await h.read()).state.conversationOwner,'HUMAN');
-  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:1});
+  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:0});
   assert.equal((await h.tools.terminalOutcome()).text,expected);
   const dispatcher=new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
    const body=JSON.parse(r.body);if(body.recipient.id===h.deliveryRecipient)captured.push(body.message.text);
@@ -350,18 +350,18 @@ try{
   }},{sendEnabled:true}),new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),
   handoffGate({authorize:async()=>({status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()})},async()=>h.policy),{workerId:'handoff-candidate-capture'});
   for(let n=0;n<20&&await dispatcher.processOne();n++);
-  assert.deepEqual(captured,[expected]);
+  assert.deepEqual(captured,[]);
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
   for(let n=0;n<20&&await dispatcher.processOne();n++);
-  assert.deepEqual(captured,[expected]);
-  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:1});
+  assert.deepEqual(captured,[]);
+  assert.deepEqual(await h.counts(),{events:1,tags:1,messages:0});
  });
  // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
  if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,media=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE'}={}){
-  assert(!live||dependencyHoldingReply===null,'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE'}={}){
+  assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
   const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
@@ -378,10 +378,10 @@ try{
   const facts=live?providerPorts.factsForMode(sourceMode):{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
   let policyChanged=false,receiptAvailable=true;
   const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
-   if(!dependencyHoldingReply&&!policyChanged)return resolved;
+   if(!dependencyHoldingReply&&!sizeHoldingReply&&!policyChanged)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
    return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:{schemaVersion:1,kind:'HANDOFF_MATRIX',
-    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged?null:dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
+    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:sizeHoldingReply?'SIZE_RULE_UNAVAILABLE':'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged?null:sizeHoldingReply??dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
@@ -518,35 +518,32 @@ try{
   if(['after-commit','restart','cached-allowed','receipt-unavailable'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
  });
  if(process.argv.includes('--candidate-handoff'))for(const reason of ['CUSTOMER_REQUESTED_HUMAN','SIZE_RULE_UNAVAILABLE'])
- await check('B composed candidate first '+reason+' acknowledges once after real atomic commit',async()=>{
+ await check('B composed candidate first '+reason+' commits silently and does not resume after handoff',async()=>{
   const matrix=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))),holding=matrix.rules.find(r=>r.reason===reason).holdingReply;
   const j=await statefulFixture(),r=await j.turn('Cho chị gặp nhân viên nhé',[native([{name:'request_handoff',args:{reason}}])]);
-  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,1);assert.equal(r.verifiers,0);
-  await j.drain();await j.drain();assert.deepEqual(j.capture,[holding]);
+  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.terminal.text,null);assert.equal(r.result.enqueued,0);assert.equal(r.verifiers,0);
+  await j.drain();await j.drain();assert.deepEqual(j.capture,[]);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
   const replay=await j.turn('Em ơi',[]);assert.equal(replay.owners,0);assert.equal(replay.verifiers,0);assert.equal(replay.result.enqueued,0);
-  await j.drain();assert.deepEqual(j.capture,[holding]);
+  await j.drain();assert.deepEqual(j.capture,[]);
  });
  await check('B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it',async()=>{
-  const j=await statefulFixture({media:true});
+  const holding='Shop đã nhận yêu cầu chọn size.',j=await statefulFixture({media:true,sizeHoldingReply:holding});
   const r=await j.turn('Chọn size SM613 và gửi ảnh chị nhé',[
    native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}])]);
   assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
   assert.equal(r.result.terminal.reason,'SIZE_RULE_UNAVAILABLE');await j.drain();
-  if(process.argv.includes('--candidate-handoff')){
    assert.equal(r.result.enqueued,3,JSON.stringify(r.result));
-   const holding=JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))).rules.find(r=>r.reason==='SIZE_RULE_UNAVAILABLE').holdingReply;
    assert.deepEqual(j.capture,['Em gửi chị ảnh của mẫu để mình xem trước nhé.','[CODE_IMAGE]',holding]);
    assert.equal(new Set(j.gateCalls).size,1);
    await j.drain();assert.equal(j.capture.length,3);
-  }else assert(!j.capture.includes('[CODE_IMAGE]'));
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
  });
  for(const fault of ['source','rollback'])await check('B composed mixed media handoff '+fault+' never leaves partial intents',async()=>{
   if(!process.argv.includes('--candidate-handoff'))return;
-  const j=await statefulFixture({media:true});let commits=0;
+  const j=await statefulFixture({media:true,sizeHoldingReply:'Shop đã nhận yêu cầu chọn size.'});let commits=0;
   const r=await j.turn('Cho chị xem ảnh SM613 và chọn size nhé',[
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}}])],
    {beforeCommit:async()=>{if(++commits===1){if(fault==='source')j.changeMediaSource();else await pool.query("DELETE FROM provider_conversation_links WHERE conversation_id=$1 AND provider='PANCAKE'",[j.bound.conversationId]);}}});
@@ -556,7 +553,7 @@ try{
  });
  for(const fault of ['unchanged','source','revision'])await check('B composed mixed media delivery restart revalidates '+fault+' before any message',async()=>{
   if(!process.argv.includes('--candidate-handoff'))return;
-  const j=await statefulFixture({media:true});
+  const j=await statefulFixture({media:true,sizeHoldingReply:'Shop đã nhận yêu cầu chọn size.'});
   const r=await j.turn('Cho chị xem ảnh SM613 và chọn size nhé',[
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}}])]);
   assert.equal(r.result.enqueued,3,JSON.stringify(r.result));assert.equal(j.capture.length,0);
@@ -610,7 +607,7 @@ try{
   assert.equal(r.batch.items[0].envelope.message.attachments[0].providerId,'synthetic-receipt');
   assert.equal(await inbox.isBatchCurrent(r.batch),false);
   await j.drain();await j.drain();
-  if(process.argv.includes('--candidate-handoff'))assert.deepEqual(j.capture,[JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url))).rules.find(r=>r.reason==='DEPENDENCY_FAILURE').holdingReply]);
+  if(process.argv.includes('--candidate-handoff'))assert.deepEqual(j.capture,[]);
   assert(!JSON.stringify(j.capturePayloads).includes('c3-private-receipt'));
  });
  await check('B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence',async()=>{
