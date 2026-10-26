@@ -1,4 +1,8 @@
-## Current — silent handoff full run và checkout correction, 2026-10-26
+## Current — POS refresh và owner wire, 2026-10-26
+
+[Plan](../docs/specs/c3-phase-b-pos-refresh-wire-plan-20261026.md), [implementation](../docs/specs/c3-phase-b-pos-refresh-wire-implementation-20261026.md). Plan REVISE/P2→fix sticky source invalidation→APPROVE. Implement full-read request-local POS pin, chỉ ngoại lệ root synced_at khi toàn parsed source còn lại exact/fresh/nonfuture/monotonic và original expiry còn hạn; finalgate không đổi. Metadata-only giữ offer-only contract. Hai mô tả tool handoff/media trái silent policy được sửa, không rewrite tư vấn hoặc projection theo suy đoán. RED28+wire1 và sourceerrorRED2→GREEN32; worker636/Node190/protected21PASS, build/directtsc/lintPASS; working-tree PostgreSQL3PASS. Chờ executable independent review/exact source DB qualification rồi mới seal/chạy campaign17controls+51native; PROVIDER_NOT_RUN/BchưaGO tại savepoint này. Các phần dưới là lịch sử.
+
+## Previous — silent handoff full run và checkout correction, 2026-10-26
 
 **IMPLEMENTED → INDEPENDENT REVIEW → FIX → APPROVE → MODEL COMPLETE → EVIDENCE REVIEW APPROVE (checkout scope). B chưa GO.** [Full 51 report](../apps/worker/evals/single-agent-commerce-read-only/silent-handoff-run-20261026/CHECKPOINT_B.md), [focused checkout report](../apps/worker/evals/single-agent-commerce-read-only/checkout-silent-run-20261026/CHECKPOINT_B.md).
 

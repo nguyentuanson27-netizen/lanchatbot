@@ -1,4 +1,13 @@
-## Current — full model và sửa checkout handoff đã review, 2026-10-26
+## Current — POS refresh và owner wire, 2026-10-26
+
+[Plan](../docs/specs/c3-phase-b-pos-refresh-wire-plan-20261026.md), [implementation/commands](../docs/specs/c3-phase-b-pos-refresh-wire-implementation-20261026.md). **PROVIDER_NOT_RUN/B chưa GO tại savepoint này.**
+
+- [x] Reviewer REVISE plan/P2 về nonprojected fields; sửa sticky invalidation/latest-seen/expiry, reviewer APPROVE revision2 trước code.
+- [x] Full-read POS pin không renew evidence; mọi field ngoài synced_at hoặc source error đổi→stickyfailclosed. Giữ metadata-only và các gate/capability khác; không cache cross-turn.
+- [x] Sửa2tool-description conflicts silent handoff; không projection/style rewrite/benchmark examples. RED→GREEN32, worker636/Node190/protected21PASS; build/directtsc/lintPASS; PostgreSQL3PASS working tree.
+- [ ] Exact committed source DB qualification; independent executable review→fix→APPROVE, rồi clean seal model17controls+51native N1retry0. Không gọi old source evidence qualify new source hoặc claim đã fix giọng.
+
+## Previous — full model và sửa checkout handoff đã review, 2026-10-26
 
 **Đủ 51 native + 17 controls trên source `8d4a0ab3`; full-run STOP được giữ nguyên.** [Full report](../apps/worker/evals/single-agent-commerce-read-only/silent-handoff-run-20261026/CHECKPOINT_B.md), [51 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/silent-handoff-run-20261026/CONVERSATIONS.md). Sau đó sửa checkout trên source mới `a479b955`, reviewer APPROVE trước chạy; [17 controls + 7 lượt checkout mới](../apps/worker/evals/single-agent-commerce-read-only/checkout-silent-run-20261026/CHECKPOINT_B.md) đã hoàn tất và cùng reviewer APPROVE kết quả. **B chưa GO.**
 

@@ -35,6 +35,21 @@ import {readFileSync} from 'node:fs';
 import {createCommerceVerifier} from './protocol.mjs';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
 
+test('actual owner wire describes silent handoff consistently without changing receipts, history or tool authority',()=>{
+ const r=request();r.availableTools=['request_handoff','select_product_media'];
+ const original=structuredClone(r),wire=buildGeminiCommerceRequest(r);
+ const declarations=wire.tools[0].functionDeclarations;
+ const handoff=declarations.find(d=>d.name==='request_handoff').description;
+ const media=declarations.find(d=>d.name==='select_product_media').description;
+ assert.match(handoff,/không kèm tin khách/);assert.doesNotMatch(handoff,/lượt tiếp theo trả phần đã biết/);
+ assert.match(media,/handoff thì không kèm giá, ảnh hoặc phần trả lời/);
+ assert.doesNotMatch(media,/thiếu ảnh không phải lý do bỏ cả câu hỏi/);
+ assert.deepEqual({...r,signal:undefined},{...original,signal:undefined});
+ assert.deepEqual(JSON.parse(wire.contents[0].parts[0].text).trusted.receipts,r.context.effectReceipts);
+ assert.deepEqual(declarations.map(d=>d.name),r.availableTools);
+ assert.doesNotMatch(JSON.stringify(wire),/caseId|expectedSafe|attackFamily|requiredBehaviors/);
+});
+
 test('owner media metadata omits transport identities without mutating binding evidence',()=>{
  const r=request(),asset={assetRef:'asset:opaque',angle:'FRONT',imageType:'MODEL',feedback:false,partsVisible:['AO']};
  r.context.policyLiterals.push({ref:'media:selection',text:JSON.stringify({subjectRef:'P1',assets:[asset]})});

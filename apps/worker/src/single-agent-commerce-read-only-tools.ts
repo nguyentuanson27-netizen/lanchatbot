@@ -53,6 +53,35 @@ export function createReadOnlyTools(input: {
   let ambiguousPriceRead=false;
   const prepared = new Set<string>();
   const preparationContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  // One request, one immutable full POS read per product. Only a monotonic
+  // sync heartbeat may change; every other parsed field (including passthrough
+  // fields not exposed to the models) is part of the equality proof.
+  const posPins = new Map<string, { identity: string; snapshot: CatalogSnapshotV3; latest: number }>();
+  let posInvalidated = false;
+  const invalidatePos = (): never => { posInvalidated = true; throw new Error("POS_OBSERVATION_CHANGED"); };
+  const pinPos = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) => {
+    if (posInvalidated) return invalidatePos();
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), pinned = posPins.get(id);
+    const raw = parsed.success ? parsed.data : null, at = input.clock().getTime();
+    const observed = raw ? Date.parse(raw.synced_at) : NaN;
+    if (!raw || source.product.productId !== id || raw.product_id !== id || raw.shop_alias !== scope.shopAlias ||
+      !["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
+      !Number.isFinite(at) || observed > at || observed + maxAge * 1000 <= at) {
+      if (pinned) return invalidatePos();
+      return source;
+    }
+    const { synced_at: _observation, ...content } = raw;
+    const identity = commerceHash(content);
+    if (pinned) {
+      if (identity !== pinned.identity || observed < pinned.latest ||
+        Date.parse(pinned.snapshot.synced_at) + maxAge * 1000 <= at) return invalidatePos();
+      pinned.latest = observed;
+      return { ...source, snapshot: structuredClone(pinned.snapshot) };
+    }
+    const snapshot = structuredClone(raw);
+    posPins.set(id, { identity, snapshot, latest: observed });
+    return { ...source, snapshot: structuredClone(snapshot) };
+  };
   // Offer identities are source metadata, not price/stock facts or variant bindings.
   const offerLiteral = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) => {
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), now = input.clock().getTime();
@@ -153,7 +182,10 @@ export function createReadOnlyTools(input: {
   }
   async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
     const id = args.subjectRef as string, now = input.clock();
-    const source = loaded ?? await input.catalog.readProduct(id), p = source.product;
+    let fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
+    try { fetched = loaded ?? await input.catalog.readProduct(id); }
+    catch (error) { if (posPins.has(id)) posInvalidated = true; throw error; }
+    const source = pinPos(id, fetched), p = source.product;
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
     if (p.productId !== id || (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) ||
       Date.parse(p.observedAt) > now.getTime())) || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
@@ -377,6 +409,7 @@ export function createReadOnlyTools(input: {
     for(const call of calls){
       const id=call.args&&typeof call.args==="object"?(call.args as Record<string,unknown>).subjectRef:undefined;
       const source=call.name==="read_product"&&typeof id==="string"&&sources.has(id)?await sources.get(id):undefined;
+      if (source === null && typeof id === "string" && posPins.has(id)) posInvalidated = true;
       // Revalidate before consuming staged sources; malformed calls never inherit
       // a valid sibling's fetch, and revoked permission never authorizes a read.
       results.push(!permitted()?{status:"REJECTED",reason:"PERMISSION"}:call.name==="read_product"&&!readArgs(call.args)?{status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"}:
@@ -384,6 +417,7 @@ export function createReadOnlyTools(input: {
     }
     return results;
   }, async readback() {
+    if (posInvalidated) invalidatePos();
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
     const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
     for (const id of prepared) if (!fullReads.has(id)) await prepareProduct(id);

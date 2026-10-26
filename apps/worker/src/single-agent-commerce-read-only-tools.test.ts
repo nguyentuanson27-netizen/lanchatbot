@@ -162,7 +162,7 @@ describe("read-only domain tools", () => {
     expect(makeBinding("turn","Dự kiến 3–6 ngày.",await tools.readback())).toEqual(before);
   });
 
-  it("keeps repeated reads stable but binds a new POS observation even when business values match", async () => {
+  it("keeps repeated full reads stable across a synced_at-only refresh", async () => {
     const { f, tools } = sellingFixture({ DIRECT: 499_000 });
     f.snapshot.synced_at = new Date(commerceNow.getTime() - 60_000).toISOString();
     await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } });
@@ -176,7 +176,7 @@ describe("read-only domain tools", () => {
     });
     expect(businessValues(after)).toEqual(businessValues(before));
     expect(hardPrecheck(after, "Giá 499k chị nhé.", commerceNow)).toBeNull();
-    expect(makeBinding("turn", "Giá 499k chị nhé.", after).trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
+    expect(makeBinding("turn", "Giá 499k chị nhé.", after)).toEqual(binding);
   });
   it("rejects search overflow before exposing or binding unretained product evidence", async () => {
     const records = Array.from({ length: 7 }, (_, i) => fixtureProduct(`TEST${i + 1}`));
@@ -312,7 +312,7 @@ describe("read-only domain tools", () => {
     expect(makeBinding("turn", "Áo lẻ 645k chị nhé.", await tools.readback())).toEqual(before);
     f.snapshot.offers.AO!.sale_price = 650_000;
     f.snapshot.offers.AO!.rows[0]!.sale_price = 650_000;
-    expect(makeBinding("turn", "Áo lẻ 645k chị nhé.", await tools.readback()).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+    await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
   });
   it("keeps an explicitly requested option isolated from another option with an unavailable price", async () => {
     const { tools, f } = sellingFixture({ COMPOSITE: 1_065_000, AO: 645_000 });
@@ -366,7 +366,8 @@ describe("read-only domain tools", () => {
     f.snapshot.offers = {};
     expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: [], sellingOptions: [] });
     f.snapshot.synced_at = "2026-10-01T00:00:00.000Z";
-    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null, sellingOptions: null });
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("UNAVAILABLE");
+    await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
   });
   it("preserves the existing claim bound across independently filtered multi-option reads", async () => {
     const { tools, f } = sellingFixture({ COMPOSITE: 800_000, SET_VAY: 700_000, SET_CV: 600_000,
@@ -394,7 +395,7 @@ describe("read-only domain tools", () => {
     expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).toEqual(before);
     f.snapshot.offers.AO = { ...structuredClone(f.snapshot.offers.DIRECT!),
       rows: f.snapshot.offers.DIRECT!.rows.map(r => ({ ...r, offer_type: "AO" })) };
-    expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).not.toEqual(before);
+    await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
   });
   it("never represents unavailable or stale selling options as verified absence", async () => {
     const f = fixtureProduct(), { catalog } = setup(); let available = true;
@@ -402,10 +403,10 @@ describe("read-only domain tools", () => {
       initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => ({ ...f, snapshot: available ? f.snapshot : null }) } });
     await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
     available = false;
-    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null });
-    expect(tools.snapshot().policyLiterals.some(p => JSON.parse(p.text).availableOffers)).toBe(false);
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("UNAVAILABLE");
+    await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
     available = true; f.snapshot.synced_at = "2026-10-01T00:00:00.000Z";
-    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null });
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("UNAVAILABLE");
   });
   it("keeps size-filtered stock attached to the code-read size when only an offer identity resolves", async () => {
     const f = fixtureProduct(), { catalog } = setup();
@@ -427,9 +428,8 @@ describe("read-only domain tools", () => {
     f.snapshot.offers = {};
     for (const status of ["PRODUCT_NOT_FOUND", "SHOP_ERROR", "ERROR"]) {
       f.snapshot.data_status = status;
-      expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).data).toMatchObject({ availableOffers: null });
-      expect(tools.snapshot().policyLiterals.some(p => p.ref === "offers:SM613")).toBe(false);
-      expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).not.toEqual(before);
+      expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("UNAVAILABLE");
+      await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
     }
   });
   it("keeps independent offer mappings when fulfillment policy or price is missing", async () => {
@@ -460,11 +460,11 @@ describe("read-only domain tools", () => {
       productId: "SM613", deliveryRegion: "HANOI", etaClaimId: expect.any(String) }));
     const binding = makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", tools.snapshot());
     expect(makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", await tools.readback())).toEqual(binding);
-    f.snapshot.shipping_eta.HANOI!.transit_max_days = 5;
-    expect(makeBinding("turn", "Dự kiến 3–6 ngày chị nhé.", await tools.readback()).trustedSnapshotId).not.toBe(binding.trustedSnapshotId);
     const missing = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", deliveryRegion: "UNKNOWN" } });
     expect(missing).toMatchObject({ status: "OK", data: { availability: { price: { status: "OK" }, stock: { status: "OK" },
       eta: { status: "NOT_FOUND" } } } });
+    f.snapshot.shipping_eta.HANOI!.transit_max_days = 5;
+    await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
   });
   it("search accounts one source metadata read without binding POS facts and revalidates before eligibility", async () => {
     const f = fixtureProduct(); f.product.descriptionXml = "Áo cotton dáng suông.";
@@ -693,9 +693,9 @@ describe("read-only domain tools", () => {
     await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } });
     const before = makeBinding("turn", "Giá 499k.", tools.snapshot());
     f.snapshot.synced_at = "2026-10-01T00:00:00.000Z";
-    expect(makeBinding("turn", "Giá 499k.", await tools.readback()).trustedSnapshotId).not.toBe(before.trustedSnapshotId);
+    await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
     f.snapshot.shop_alias = "OTHER";
-    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("STALE");
+    expect((await tools.invoke({ name: "read_product", args: { subjectRef: "SM613" } })).status).toBe("UNAVAILABLE");
   });
   it("keeps both allowed variant claims when comparing sizes of one product", async () => {
     const f = fixtureProduct(), { catalog } = setup();
@@ -825,10 +825,7 @@ it("shares scoped positive-stock sizes with owner and verifier and invalidates a
   const draft = "Size M còn chị nhé.", binding = makeBinding("turn", draft, trusted);
   // Total quantity and source timestamps stay unchanged; only size identities change.
   f.snapshot.offers.DIRECT!.rows[0]!.size = "S";
-  const current = await tools.readback();
-  expect(makeBinding("turn", draft, current)).not.toEqual(binding);
-  expect(finalGate({ expected: binding, response: { kind: "VERDICT", binding, result: { verdict: "PASS", violations: [] } },
-    current, finalDraft: draft, now: commerceNow, fallback: { id: "C3_A_NONPROTECTED_V2", text: "Phần này em chưa trả lời được, chị nhé." } }).disposition).not.toBe("SEND_ELIGIBLE");
+  await expect(tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
 });
 
 it.each(["empty", "unknown", "size-filter", "stale"])("does not expand confirmed in-stock sizes from %s evidence", async mode => {

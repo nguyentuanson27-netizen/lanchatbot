@@ -152,7 +152,7 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(result.toolCalls).toBe(2);
     expect(result.verifierGenerations).toBe(1);
     expect(result.terminal.disposition).toBe(changed ? "HANDOFF" : "SEND_ELIGIBLE");
-    expect(result.terminal.reason).toBe(changed ? "STALE" : "PASS");
+    expect(result.terminal.reason).toBe(changed ? "CURRENT_READBACK_UNAVAILABLE" : "PASS");
     expect(result.sendEnabled).toBe(false);
   });
   it("does not reject a read batch solely because product evidence is duplicated in the trusted snapshot", async () => {

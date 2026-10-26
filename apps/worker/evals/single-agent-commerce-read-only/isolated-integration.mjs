@@ -481,7 +481,15 @@ try{
   if(mode==='cart-changed'){assert.deepEqual(j.capture,[]);assert(j.deliveryObservations.some(o=>o.reasonCode==='C3_HANDOFF_SOURCE_SALES_STATE_CHANGED'));}
   else {assert.equal(j.capture.length,1,JSON.stringify(j.deliveryObservations));assert.match(j.capture[0],/499\.000đ/);assert(j.capture[0].includes(holding));}
  });
- for(const mode of ['source-refresh','stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and captures only committed holding reply',async()=>{
+ await check('B composed snapshot invalidation source-refresh preserves the exact verified reply without renewing evidence',async()=>{
+  const j=await statefulFixture(),draft='Áo 499.000đ chị nhé.';
+  const r=await j.turn('Áo SM613 bao nhiêu em?',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),say(draft)],
+   {afterVerify:async()=>j.refreshPosSource('source-refresh')});
+  assert.equal(r.verifiers,1);assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));
+  assert.equal(r.result.terminal.text,draft);assert.equal((await j.state()).stage,'DISCOVERY');
+  j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[draft]);
+ });
+ for(const mode of ['stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and captures only committed holding reply',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
   const r=await j.turn('Áo SM613 bao nhiêu em?',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),say('Áo 499.000đ chị nhé.')],
    {afterVerify:async()=>j.refreshPosSource(mode)});
