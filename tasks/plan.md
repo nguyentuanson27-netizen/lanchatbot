@@ -1,4 +1,8 @@
-## Current — kế hoạch media/size context, 27/10/2026
+## Current — implementation media/size context, 27/10/2026
+
+S0–S4 đã implement và kiểm tra, commit riêng tới executable source `ff5e0543fb425ddf0f2a1b5ec6d722a690e831f9`. [Implementation/evidence](../docs/specs/c3-phase-b-media-size-context-implementation-20261027.md). Final checks: 537worker/192shared/216Node/2Python PASS, shared và worker typecheck/build/lint exit0; self-review không còn finding cần sửa trong scope. Persisted PostgreSQL trên source sạch:49COD+49BANK_TRANSFER PASS, cả hai database test đã drop; synthetic domain/current policy/capture transport, không provider. Không source-store writes/publish/live send. Data readiness còn thiếu, owner behavior sau sửa chưa verified; không B GO. Plan bytes/hash giữ nguyên.
+
+## Previous — kế hoạch media/size context, 27/10/2026
 
 [Plan revision 2](../docs/specs/c3-phase-b-media-size-context-fix-plan-20261027.md), [review trail](../docs/specs/c3-phase-b-media-size-context-fix-plan-review-20261027.md). Revision1 bị REVISE (1P1+3P2); đã sửa binding màu ABSENT/VALID/INVALID, lifecycle/byte omission của hint, instruction/producer/consumer scope và chẩn đoán size đã có facts trong exact wire. Cùng reviewer **APPROVE revision2**, hash `2cb2803f96e65511cee7daf0b9471fc957eceef875a991826c115ce9fe18e4ba`, không còn blocker ở scope kế hoạch. Chỉ plan/review; chưa implementation, source write hoặc provider. Giữ nguyên plan bytes đã review, decision hiện hành trong trail. Không B GO.
 

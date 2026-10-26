@@ -198,3 +198,63 @@ Observed RED: recommend_size response chưa có inputFitPreference/alternativeSi
 Chỉ thay hai dòng owner prompt (ảnh và size); policy/giọng/form báo giá giữ, verifier prompt hash giữ nguyên. Current owner hash cập nhật manifest. Các historical frozen wire tests đọc đúng historical prompt từ artifact, không ghi lại corpus; một test riêng chứng minh current prompt bị từ chối khi thử dùng historical population. Snapshot/run cũ giữ nguyên. Đây là presentation/adherence hypothesis; chưa có model generation evidence để kết luận owner hết thêm L.
 
 Preflight driver full native thêm exact Codex CLI version/hash/login check trước source capture hoặc control đầu tiên; đăng ký client identity, native phải khớp. Hai Python argument/accounting tests PASS qua all-child stubs, trong đó wrong client phải reject trước mọi output/child. Không hạ version global, không launch provider.
+
+## S4 — final verification và self-review
+
+Executable source `ff5e0543fb425ddf0f2a1b5ec6d722a690e831f9`, worktree sạch trước các checks cuối. Verification output ngoài repository: `C:/Users/nguye/Documents/Sản phẩm AI/c3-b-media-size-verification-20261027`. Source và logs được giữ riêng với historical model runs; không ghi đè frozen inputs/evidence cũ.
+
+| Check đã chạy trên source hoàn tất | Kết quả |
+| --- | --- |
+| Worker focused, 17 files | 537 PASS |
+| Shared focused đúng 7 files trong plan | 192 PASS |
+| Shared bổ sung image-selection, cùng 6 files overlap | 116 PASS; không cộng thành số test duy nhất với hàng trên |
+| Commerce eval Node suite | 216 PASS, 0 skipped |
+| Native full driver Python, all children stubbed | 2 PASS |
+| Shared typecheck/build | exit 0 |
+| Worker direct typecheck/build/lint | exit 0 từng command |
+| git diff --check | PASS |
+
+Lệnh unittest discover đầu tìm 0 test do tên file `driver.test.py`; exit0 đó không được tính là test PASS. Đã chạy trực tiếp đúng file và quan sát 2 tests PASS. Build cũ không còn process exit result không được lấy làm proof; command build cuối có exit0 trên source hoàn tất. Mọi test suite nêu trên chạy local, không phải remote CI hoặc model generation.
+
+Self-review đối chiếu diff với base: giữ ba trạng thái binding, byte/hash/approval checks và chỉ ABSENT dùng legacy fallback; payload-only recognition giữ vector/timestamp và xác nhận full payload bằng readback; producer/consumer ranges khép tới AQ/AR; hint dùng cùng predicate/cache, không extra reads/download, không canonical claims/receipts; request bound omit không làm mất verified data/history/image; SIZE_FIT engine/verifier và handoff/delivery gates nguyên. Những điểm closure được sửa trước source seal gồm source-read error clear cache, recognition metadata-only propagation, generation-clock consistency và regression request ảnh lớn.
+
+Structural delta: 4 helper modules hẹp (color-binding adapter, shared eligibility, request-local capability cache, wire projection); không thêm semantic role, parser/router, template theo ca, provider framework, rewrite/reverify hoặc generation retry. Recognition publisher có một nhánh PAYLOAD_ONLY cho đúng metadata màu, không áp dụng cho thay đổi recognition content khác. Prompt owner chỉ sửa hai dòng về ảnh/size và hai tool descriptions liên quan; không vòng sửa giọng văn. Không đổi barrel export của shared package hoặc production entrypoint.
+
+Approved plan SHA256 vẫn `2cb2803f96e65511cee7daf0b9471fc957eceef875a991826c115ce9fe18e4ba`. Owner prompt SHA256 `ecc60d49142849d34263471bb8b9a14d54d33747a0ef078af64d308ed947dff6`; verifier SHA256 `8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c`, bytes không đổi so với base. Manifest khớp hai hash. Independent review trước đó APPROVE kế hoạch; implementation này self-review, không mạo nhận đã có independent code approval.
+
+### Exact commands thực sự chạy
+
+Paths dưới tương đối với repository root; log name trong verification directory giữ output của từng command.
+
+```powershell
+pnpm --filter @lana/worker exec vitest run src/p23c-jobs.test.ts src/p23c-hash-v3.test.ts src/p23c-recognition-publisher.test.ts src/p23b-metadata-staging.test.ts src/p23c-publisher.test.ts src/image-recognition-qdrant.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-media-delivery.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-product-groups.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-session-silent.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts
+pnpm --filter @lana/business-tools exec vitest run src/qdrant.test.ts src/business-tools.test.ts src/media-selector-v2.test.ts src/size-engine.test.ts src/size-claim-guard.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts
+pnpm --filter @lana/business-tools exec vitest run src/qdrant.test.ts src/business-tools.test.ts src/image-selection.test.ts src/media-selector-v2.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts
+node --test --test-concurrency=1 "apps/worker/evals/single-agent-commerce-read-only/*.test.mjs"
+python apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/driver.test.py
+pnpm --filter @lana/business-tools typecheck
+pnpm --filter @lana/business-tools build
+pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+git diff --check
+```
+
+### Phân biệt acceptance
+
+Code correctness đã có focused regression evidence. Data readiness vẫn DATA_NOT_READY ở các asset chưa xác nhận IMAGE_ID/feedback/component/color binding thật; không tự điền metadata hoặc publish. Owner adherence/quality sau sửa chưa verified: chưa có provider request nào trong implementation này, chưa chứng minh model không tự thêm L hay giảm handoff. Native full51 + fresh17controls chỉ là bước qualification sau khi được yêu cầu chạy, không lấy các local tests làm model PASS/B GO. Không merge/deploy/live send hoặc source-store write.
+
+### Persisted PostgreSQL — COMPLETE
+
+Cả hai command exit0: **49COD+49BANK_TRANSFER PASS** trên exact executable source `ff5e0543`, `sourceDirty:false`. Hai database riêng có prefix `c3_b_test_` và cả hai `testDatabaseDropped:true`. Synthetic domain/tool-owner/verifier stubs + current policy capture; `providerGenerations:0`, `sendEnabled:false`, delivery capture không gọi Meta/Pancake thật. Live policy source được đọc qua route hiện có ở chế độ read-only; schema/test data chỉ ghi trong database test rồi drop. Không gọi đây là model/native quality hoặc live-send proof.
+
+Suite kiểm partial commits/recovery accounting, silent và configured holding policies, media source/revision invalidation/restart, exact response-group capture/idempotency, private checkout, sửa hồ sơ/size receipts, cart/quote/negotiation, confirmation, concurrency và rollback safety. PURCHASE_CONFIRMED/ownership/event/tag/zero-new-Outbox theo policy vẫn giữ. Hai phương thức thanh toán dùng database riêng, không trộn attempt hoặc dùng rerun để bỏ lỗi; không có case FAIL trong hai lượt.
+
+```powershell
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs "C:/Users/nguye/Documents/Sản phẩm AI/c3-b-media-size-verification-20261027/postgres-cod" COD --candidate-handoff --composed-only
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs "C:/Users/nguye/Documents/Sản phẩm AI/c3-b-media-size-verification-20261027/postgres-bank" BANK_TRANSFER --candidate-handoff --composed-only
+```
+
+[Machine-readable verification](../../apps/worker/evals/single-agent-commerce-read-only/media-size-context-implementation-20261027/VERIFICATION.json) chỉ curate source/hash/check/case status và cleanup; không copy raw published-policy pointers hoặc customer/profile identifiers. Raw integration reports/logs giữ ở verification directory ngoài source. Bounded added-diff credential scan có0 matches cho private-key blocks, credential literals/URLs và provider-key patterns; không thay thế full security/PII audit. `git diff --check` kiểm lại trước commit.
+
+Kết luận implementation: **S0–S4 COMPLETE, code sẵn cho qualification tiếp theo**. Metadata shop thật vẫn DATA_NOT_READY, chưa cập nhật AQ/AR hoặc nhãn ảnh thật; **fresh provider/model qualification NOT_RUN**, không kết luận tư vấn/owner adherence đã cải thiện và không B GO. Các commit sau executable source chỉ ghi documentation/evidence, không đổi executable/config. Không triển khai post-plan work hoặc tự mở model rerun.

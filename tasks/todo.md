@@ -1,9 +1,16 @@
-## Current — kế hoạch media/size context, 27/10/2026
+## Current — implementation media/size context, 27/10/2026
+
+- [x] S0 audit; S1 verified per-asset color provenance/selector; S2 same-source bounded hints; S3 co-located verified size fields và instruction consistency. Savepoints tới `ff5e0543`.
+- [x] S4 focused final checks: 537worker/192shared/216Node/2Python PASS; shared/worker typecheck/build/lint và self-review. [Record](../docs/specs/c3-phase-b-media-size-context-implementation-20261027.md).
+- [x] Persisted regression 49COD+49BANK_TRANSFER PASS trên source sạch; cả hai database test đã drop, provider generations0/live sends0.
+- [ ] Data readiness cho metadata ảnh thật và fresh model qualification: chưa thực hiện, không lấy local tests làm model PASS/B GO.
+
+## Previous — kế hoạch media/size context, 27/10/2026
 
 - [x] Soạn plan chi tiết từ full51 evidence, gọi reviewer độc lập; revision1 REVISE1P1+3P2.
 - [x] Sửa đủ bốn finding trong revision2; gửi lại cùng reviewer. [Plan](../docs/specs/c3-phase-b-media-size-context-fix-plan-20261027.md), [trail](../docs/specs/c3-phase-b-media-size-context-fix-plan-review-20261027.md).
 - [x] Cùng reviewer APPROVE revision2/hash `2cb2803f…`, không còn blocker. Giữ bytes đã review; decision trong trail. Chưa implementation/provider/source write.
-- [ ] Triển khai S0–S4 và qualification ở task sau, không coi plan APPROVE là đã sửa runtime/B GO.
+- [x] Đã bắt đầu triển khai S0–S4 trong task hiện hành; qualification tách riêng, không coi plan APPROVE là runtime/B GO.
 
 ## Current — full Phase B Compact V2 đã hoàn tất
 
