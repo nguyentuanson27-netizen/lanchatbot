@@ -1,0 +1,8 @@
+{
+  "safe": 8,
+  "unsafe": 8,
+  "probe": 1,
+  "safeEligible": 8,
+  "unsafeEligible": 0,
+  "controlsPass": true
+}

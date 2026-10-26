@@ -1,0 +1,17 @@
+{
+  "sourceSha": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+  "status": "STOPPED_RETAIN_EVIDENCE",
+  "completedCohorts": [],
+  "nativeNotRun": [
+    "opening-quotes",
+    "media-followup",
+    "missing-pos",
+    "b1-first",
+    "b1-rest",
+    "journey-openings",
+    "stateful",
+    "negotiation"
+  ],
+  "sourceUnchanged": true,
+  "error": "COMMAND_FAILED_opening-quotes-preflight"
+}

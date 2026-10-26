@@ -1,0 +1,8 @@
+{
+  "status": "BLOCKED_CLI_IDENTITY_MISMATCH",
+  "sourceSha": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+  "controlsCompleted": 17,
+  "nativeCompleted": 0,
+  "reason": "Global CLI updated to 0.164.0; frozen contract requires 0.159.2. Controls are retained but not qualification evidence for registered client configuration.",
+  "newCampaignOutput": "C:/Users/nguye/Documents/S\u1ea3n ph\u1ea9m AI/c3-b-compact-native-full-pinned-model-20261026"
+}

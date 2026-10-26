@@ -1,3 +1,7 @@
+## Current — full Phase B Compact V2 đã hoàn tất
+
+[Report](../apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/CHECKPOINT_B.md), [51 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/CONVERSATIONS.md). Source `50753ec7` sạch/không đổi:17controls PASS→51native,36eligible/11silentHANDOFF/4NO_SEND (hai lượt có code question/preview).140requests/0providererrors/retry0,86owner hashes match;33verifier shadow matches và21B1 telemetry matches;6testDB dropped. Exact CLI0.159.2/hash cũ được scope riêng sau lượt đầu BLOCKED/version mismatch (17controls/0native), tổng task157requests, không xóa accounting. Self-review cả51: ảnh thiếu provenance/metadata; owner tự thêm L ngoài SIZE_FIT M bị chặn; concern còn yếu, giao dịch/cart/checkout/negotiation hoạt động. Không causal V2-quality/stability/fullA2/live/BGO claim hoặc independent review mới.
+
 ## Current — full Phase B Compact V2, 2026-10-26
 
 Owner yêu cầu rerun toàn51native và chọnCompactV2, thêm17freshcontrols. [Plan](../docs/specs/c3-phase-b-compact-native-full-run-20261026.md). Implementexplicitselection cảB1/stateful registration/audit/HTTP; nativeV2 giữsignedtoolpairs/images/historyposition, chỉcompactcontexttop, finaltexttreatmentcũkhôngđổi.210Node+1PythonstubdriverPASS/build/directtsc/lintexit0;selfreviewdone, chờcleansourcesseal/provider. Khôngprompt/model/corpus/default/productionchange;N1/retry0/cap217,fullallcohorts khicontrolsPASS,khôngstylequalitygategiữachừng. NoBGO/nativeevidenceyet.

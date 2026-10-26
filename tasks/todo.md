@@ -1,9 +1,16 @@
+## Current — full Phase B Compact V2 đã hoàn tất
+
+- [x] Source sạch `50753ec7`, đúng CLI0.159.2/hash/login trước fresh17controls→đủ51native, không quality-stop giữa lượt. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/CHECKPOINT_B.md).
+- [x]36eligible/11silentHANDOFF/4NO_SEND;140requests/0errors/retry0. Giữ lượt CLI mismatch đầu17controls/0native riêng, tổng task157requests.
+- [x] Review đủ51actual outcomes;86owner hash checks,33verifier shadow+21B1 telemetry checks,11HUMAN/event/tag/0capture, confirmPURCHASE_CONFIRMED/0newOutbox,6DBdrop. Nguồn ảnh còn thiếu nhãn, size L do owner thêm sai bị chặn.
+- [ ] B chưa GO: chưa stability/human acknowledgement/live qualification; không tự mở style/source/model loop hoặc claim independent review mới.
+
 ## Current — full Phase B Compact V2, 2026-10-26
 
 - [x] Owner chọnV2/full51;nativeexplicitselectionRED→GREEN,toolpairs/signatures/images/historyexact vàdefaultunchanged. [Plan](../docs/specs/c3-phase-b-compact-native-full-run-20261026.md).
 - [x] 210Node/1PythonstubdriverPASS/build/directtsc/lintexit0,selfreviewdone.
-- [ ] SealcleanHEAD→17freshcontrols→all51native once,retain errors/fallback/handoff/privateCode;noautomaticretry/stylepatch.
-- [ ] Whole-turnreview actualoutcomes/wirehashes/accounting/DBcleanup→report;noBGO/stability/liveclaim.
+- [x] Seal source50753ec7; exact CLI campaign hoàn tất17freshcontrols và51native. Lượt CLI mismatch đầu giữ riêng; xem report ở đầu file.
+- [x] Review51actual outcomes, wire hashes/accounting và6DB cleanup hoàn tất; xem report. Không claim B GO/stability/live.
 
 ## Current — Compact V2 model campaign, 2026-10-26
 

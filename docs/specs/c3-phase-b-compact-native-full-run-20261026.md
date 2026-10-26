@@ -11,3 +11,7 @@ Review cả51actual terminal/capture/handoff/privateCode—not draft alone. Repo
 Commands dự kiến: focused native/compact tests, commerceeval tests, directworker tsc/build/lint; commit→driver newexternal controls→native→report. Actualresults ghi sau run, khôngclaim plannedPASS.
 
 Implementation/self-review: observed RED đúng OWNER_PRESENTATION_FINAL_ONLY→GREEN.8focused/210commerceeval tests PASS;1Python full driver argument/accounting test PASS (all children/git stubs);worker build, directtsc/lint exit0. Node check của2runnersPASS. Native tool/image/history/context preservation + mockedHTTP match; oldV1/finalV2 bundled identities vẫn PASS. Driverregisterattempt trướcchild, fullall8cohorts once/noqualitymiddle gate;actualcontrols gate unchanged. Khôngprovidercall trong implementation. KhôngnewproviderAPI nên khôngAPIclientchanges.
+
+## Run completed
+
+Source `50753ec7aab3d7365fdabc2e2c71152c448719ea` sạch/không đổi; kết quả đầy đủ trong [report](../../apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/CHECKPOINT_B.md). Lượt đầu bị CLI version mismatch ở native preflight sau17controls,0native; giữ accounting. Scope riêng CLI0.159.2 đúng binary hash/login rồi campaign mới17controls PASS→51native,36eligible/11handoff/4NO_SEND;140requests,0provider errors/retry0,6testDB dropped. Tổng task157requests gồm17blocked controls. Self-review51ca và raw/hash/request checks PASS; không independent review mới hoặc B GO. Không sửa prompt/source/effects sau generation.
