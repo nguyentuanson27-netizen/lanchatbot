@@ -1,7 +1,8 @@
 ## Current — rút gọn presentation overhead, 2026-10-26
 
 - [x] RED→GREEN compactV2 giữ đủ originalfield/trace/history/openingQuote, đườngdẫn chỉlocal;0prompt/model/verifier/default/V1changes. [Plan](../docs/specs/c3-phase-b-compact-context-20261026.md).
-- [ ] Focused verification→sealclean source→24countTokens-only calls (0generation)→report actual counts/errors; chưaclaimquality/fullB/GO.
+- [x] 205NodePASS/directtsc/lint/diffexit0; sourced9161647clean→24countTokens-only calls HTTP200/0errors/retry0/0generation. [Report](../apps/worker/evals/single-agent-commerce-read-only/compact-context-20261026/REPORT.md):V150610→V242863(−15.3%);ORIGINAL42371, V2+1.2%. Bytes235886→200389.
+- [ ] V2actualconversationquality/latency/nativequalification chưa chạy; khôngclaim preserve/improve salesquality hoặcfullB/GO. V1/default và oldevidence giữ nguyên; oldrunnerV1khôngsilently đổi.
 
 ## Previous — thử toàn bộ cách trình bày context, 2026-10-26
 

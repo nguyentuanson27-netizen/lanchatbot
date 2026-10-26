@@ -1,6 +1,6 @@
 ## Current — rút gọn presentation overhead, 2026-10-26
 
-[V2 plan](../docs/specs/c3-phase-b-compact-context-20261026.md). Owner yêu cầu bỏ đườngdẫn/nhãn lặp/fence/indentation. Thêmcompactopt-in, giữ V1/default và toàn source values/history/openingQuote. Offlinerequestbytes235886→200389 trên8cases; chưa gọi đó là token. Chuẩn bị24countTokens calls đúngmodel/credential đã chốt,0generation/retry0, cleansealedsource trướcđo. Khôngrerunconversation/fullB hoặcclaimqualityimprovement; BchưaGO.
+[V2 plan](../docs/specs/c3-phase-b-compact-context-20261026.md), [implementation/measurement](../apps/worker/evals/single-agent-commerce-read-only/compact-context-20261026/REPORT.md). **COMPLETE reduction/measurement; provider conversation NOT RUN; B chưaGO.** Compactopt-in bỏ đườngdẫn/nhãn lặp/fence/indentation, giữ V1/default và toàn source values/history/openingQuote.205NodePASS/tsc/lint/diffexit0. Clean sealed sourced9161647:24countTokens HTTP200/0errors/retry0/0generation. Same-countAPI ORIGINAL42371/V150610/V242863; V2−15.3%vsV1, +1.2%vsORIGINAL. Bytes235886→200389. Khôngmix với generationusage cũ41827/50066 hoặcclaimquality/latency stable; futureconversationrunphảichọn/registerV2.
 
 ## Previous — thử toàn bộ cách trình bày context, 2026-10-26
 
