@@ -1,0 +1,110 @@
+{
+  "identity": {
+    "sourceSha": "beac5ec91c76249994337f4beaabbc73bc52455f",
+    "manifestHash": "cf1db09a6390e8ddd06e7f61339e2a99e9a0c78d2373e022a18ad4225ec5eb92",
+    "sourceConfigHash": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "promptHashes": {
+      "owner": "71292eea99022f78c3ba5264eb4de6c8394dd2f345eb80bacb10a933c4e8e8db",
+      "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "inputHash": "7c5d962a6fccc9cbc82cfe5e17a35d629a3df50c10bf4f8093e68eea97557458",
+  "bundleHash": "ca7e10810fc8088bfd757c451b19cd36fdf8e9e766b55e56adf3b8a9099f26e3",
+  "controlsHash": "28a7978488e605d787e105871fc5e553729b227ec482083430944d62f6b72abb",
+  "registeredOutcomes": 6,
+  "mode": "CAPTURED_WORLD_FINAL_REPLY_DIAGNOSTIC_NOT_LIVE_ELIGIBILITY",
+  "maximumGenerationRequests": 12,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false,
+  "slots": [
+    {
+      "id": "0cbb3ce7b27fce5e3269c427a87174582d6072adf76fc8b19dfc8a42bec5ce62",
+      "caseId": "b1-buying-concern-v2",
+      "arm": "A"
+    },
+    {
+      "id": "e9da9606d0b2a158e7b0e49b53249166bc0dfd0f3d13512295bc35b1ac78cf1c",
+      "caseId": "b1-buying-concern-v2",
+      "arm": "B"
+    },
+    {
+      "id": "d7b4b2d1d4a3a733c71d08edeaa39f85567f44aa94afcbc9ad516e343cd7780e",
+      "caseId": "b1-price",
+      "arm": "B"
+    },
+    {
+      "id": "2f25dd71aad04daaf802da8ec97e7ac82728b217a25b4a097b18b4e4ed246b3a",
+      "caseId": "b1-price",
+      "arm": "A"
+    },
+    {
+      "id": "d8ecb709ed17742125e7a115050d77b6bfbcc11a0881d73d3708065e78875de6",
+      "caseId": "b1-price-v3",
+      "arm": "A"
+    },
+    {
+      "id": "81c8b42d3b30769801442ecae31c6614e60013a808dfcb78ae36390e26cdecfc",
+      "caseId": "b1-price-v3",
+      "arm": "B"
+    }
+  ]
+}

@@ -2,7 +2,9 @@
 
 - [x] Same reviewer REVISE broad approach → REVISE8pairs → APPROVE3exposed pairs/6slots. [Plan](../docs/specs/c3-phase-b-quote-presentation-diagnostic-plan-20261026.md).
 - [x] Evaluation-only replay, frozen8captures, golden normalization, exact3treatments/5offline no-change, label firewall, terminal-only blind export; RED→GREEN6tests. Không đổi runtime/prompt/verifier/model.
-- [ ] Exact clean source APPROVE + checks complete →17freshcontrols PASS →6historical final-reply diagnostic slots →blind review/unmask/report. Không tự full51 hoặc promote runtime; B chưa GO.
+- [x] Reviewer exact clean `beac5ec91c76249994337f4beaabbc73bc52455f` APPROVE;638NodePASS+2SKIP/75boundary/21protectedPASS; build/directtsc/lint exit0.17freshcontrols PASS→6historical final-reply slots complete,29requests/0errors/max1/retry0; sourceunchanged. [Report](../apps/worker/evals/single-agent-commerce-read-only/quote-presentation-run-20261026/CHECKPOINT_B.md).
+- [x] Blind review freezehash trướcunmask: concern NEITHER, price TIE/TIE. B bỏopeningQuote không positive signal; giữ runtime/prompt/verifier, STOP diagnostic, không tự full51/promote hoặc nối stylefix để cứu giả thuyết. B chưa GO.
+- [ ] Final corrected-report independent sign-off: reviewer yêu cầu sửa probe eligible/thinking attribution, đã sửa và self-check; confirmation bị workspace out of credits. Không claim final report APPROVE; executable/blind approvals giữ đúng scope. [Trail](../apps/worker/evals/single-agent-commerce-read-only/quote-presentation-run-20261026/INDEPENDENT_REVIEW.md).
 
 ## Previous — POS refresh và full model hoàn tất, 2026-10-26
 
