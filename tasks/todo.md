@@ -1,4 +1,10 @@
-## Current — POS refresh và full model hoàn tất, 2026-10-26
+## Current — diagnostic riêng form báo giá, 2026-10-26
+
+- [x] Same reviewer REVISE broad approach → REVISE8pairs → APPROVE3exposed pairs/6slots. [Plan](../docs/specs/c3-phase-b-quote-presentation-diagnostic-plan-20261026.md).
+- [x] Evaluation-only replay, frozen8captures, golden normalization, exact3treatments/5offline no-change, label firewall, terminal-only blind export; RED→GREEN6tests. Không đổi runtime/prompt/verifier/model.
+- [ ] Exact clean source APPROVE + checks complete →17freshcontrols PASS →6historical final-reply diagnostic slots →blind review/unmask/report. Không tự full51 hoặc promote runtime; B chưa GO.
+
+## Previous — POS refresh và full model hoàn tất, 2026-10-26
 
 [Report](../apps/worker/evals/single-agent-commerce-read-only/pos-refresh-run-20261026/CHECKPOINT_B.md), [51 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/pos-refresh-run-20261026/CONVERSATIONS.md). **SCOPED APPROVE; B chưa GO.**
 
