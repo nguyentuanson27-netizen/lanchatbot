@@ -8,8 +8,8 @@ Khách: Bộ này bao nhiêu em?
 
 Terminal: SEND_ELIGIBLE / PASS; PERSISTED_CAPTURE
 
-> Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé. 
-> 
+> Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé.
+>
 > Thiết kế gồm áo tơ Hàn thêu nổi form nhẹ kết hợp chân váy ren tơ mềm mại, có độ bay và rũ tự nhiên ạ. Mẫu này hiện đủ size S, M, L, XL chị nha.
 
 > [CODE_IMAGE]
@@ -58,10 +58,10 @@ Khách: Set Thạch Thảo SV2447 giá bao nhiêu? Chị mua áo riêng được
 
 Terminal: SEND_ELIGIBLE / PASS; PERSISTED_CAPTURE
 
-> Dạ, set váy Thạch Thảo có giá 799.000đ ạ. 
-> 
+> Dạ, set váy Thạch Thảo có giá 799.000đ ạ.
+>
 > Chị hoàn toàn có thể mua áo riêng được nha chị, áo lẻ có giá 499.000đ ạ.
-> 
+>
 > Set gồm áo tơ Hàn thêu nổi form nhẹ (vải mềm, thoáng, bay tự nhiên) và chân váy ren tơ Hàn mềm form nhẹ rũ tự nhiên. Sản phẩm hiện có sẵn các size S, M, L, XL ạ.
 
 > [CODE_IMAGE]
@@ -138,8 +138,8 @@ Khách: Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều
 
 Terminal: SEND_ELIGIBLE / PASS; PERSISTED_CAPTURE
 
-> Chân váy của set Thạch Thảo dùng chất ren mềm và có độ rũ tự nhiên nên khi mặc lên form khá thanh thoát, bay bổng chứ không bị cứng hay quá nặng nề đâu ạ. 
-> 
+> Chân váy của set Thạch Thảo dùng chất ren mềm và có độ rũ tự nhiên nên khi mặc lên form khá thanh thoát, bay bổng chứ không bị cứng hay quá nặng nề đâu ạ.
+>
 > Nếu chị muốn mặc đi tiệc trưa vừa điệu đà vừa sang trọng thì chọn nguyên bộ (799k) rất hợp lý. Còn nếu chị thích sự gọn gàng, nhã nhặn hơn, mình có thể lấy riêng áo thêu (499k) rồi kết hợp với chân váy trơn hoặc quần suông sẵn có trong tủ cũng rất lịch sự để đi cưới đó ạ.
 
 Handoff evidence: `{"conversationOwner": "BOT", "events": 0, "tags": 0}`
@@ -180,8 +180,8 @@ Khách: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có d
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Dạ, set Thạch Thảo dùng chất tơ và ren tơ nên khi ngồi ô tô di chuyển gần 3 tiếng sẽ dễ bị hằn nếp nhăn ở tơ và ren ạ. 
-> 
+> Dạ, set Thạch Thảo dùng chất tơ và ren tơ nên khi ngồi ô tô di chuyển gần 3 tiếng sẽ dễ bị hằn nếp nhăn ở tơ và ren ạ.
+>
 > Nếu mình đi xe lâu mà ngại nhăn, chị chuyển sang **SET QUẦN SQ675** giúp em nhé. Set này dùng chất thô hoa laze phối thô ướt cao cấp kèm lót habutai, ít nhăn hơn và giữ form rất đứng dáng, ngồi xe thoải mái mà vẫn lịch sự, thanh lịch đi đám cưới ạ.
 
 ## b1-current-policy
@@ -198,8 +198,8 @@ Khách: Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Set váy Thạch Thảo có giá 799.000đ chị nhé. 
-> 
+> Set váy Thạch Thảo có giá 799.000đ chị nhé.
+>
 > Mẫu gồm áo tơ Hàn thêu nổi họa tiết và chân váy ren mềm, form nhẹ có độ bay và rũ tự nhiên. Sản phẩm hiện sẵn các size S, M, L, XL ạ.
 
 ## b1-component-stock
@@ -224,8 +224,8 @@ Khách: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Dạ set này diện đi tiệc ban ngày rất sang và hợp dáng đó chị ạ. Chất ren tơ Hàn mềm có độ rũ tự nhiên kết hợp áo tơ thêu nổi nhẹ nhàng tạo cảm giác bay bổng, thanh thoát chứ không hề bị rườm rà hay nặng nề đâu ạ. 
-> 
+> Dạ set này diện đi tiệc ban ngày rất sang và hợp dáng đó chị ạ. Chất ren tơ Hàn mềm có độ rũ tự nhiên kết hợp áo tơ thêu nổi nhẹ nhàng tạo cảm giác bay bổng, thanh thoát chứ không hề bị rườm rà hay nặng nề đâu ạ.
+>
 > Giá nguyên set là 799.000đ, vừa vặn trong ngân sách của mình luôn chị nhé. Chị mặc size nào để em kiểm tra tư vấn thêm cho mình ạ?
 
 ## b1-policy-used
@@ -234,8 +234,8 @@ Khách: Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấ
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải chưa qua sử dụng và chưa giặt (chỉ ướm thử bên ngoài). Do chị đã mặc đi làm một buổi rồi nên sản phẩm không đủ điều kiện đổi sang màu khác ạ. 
-> 
+> Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải chưa qua sử dụng và chưa giặt (chỉ ướm thử bên ngoài). Do chị đã mặc đi làm một buổi rồi nên sản phẩm không đủ điều kiện đổi sang màu khác ạ.
+>
 > Trường hợp đổi hàng hợp lệ, phí vận chuyển 2 chiều là 30.000đ chị nhé.
 
 ## b1-changed-occasion-v2
@@ -277,11 +277,11 @@ Khách: Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
 > Dạ shop có sẵn set váy Khánh Trang chị nhé. Giá cụ thể từng phần:
-> 
+>
 > - Nguyên set: 999.000đ (có sẵn size S, M, L)
 > - Áo lẻ: 499.000đ (size S, M, L)
 > - Chân váy lẻ: 499.000đ (size S, M, L, XL)
-> 
+>
 > Mẫu này làm từ chất liệu thô boi phối ren nhẹ nhàng, thoáng mát, áo form suông nhẹ và chân váy cạp chun thoải mái dễ mặc ạ. Chị muốn lấy cả set hay mua rời món nào ạ?
 
 ## b1-buying-concern-v2
@@ -290,8 +290,8 @@ Khách: Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn 
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Dạ, nếu chị quen mặc đồ trơn và sợ set này bị điệu quá thì hoàn toàn yên tâm nha chị. Set Thạch Thảo có form áo và chân váy nhẹ nhàng, chất tơ và ren mềm tạo độ rũ cùng độ bay tự nhiên, không bị phồng cứng hay rườm rà. Đi ăn cưới ban ngày, set này mang lại cảm giác trang nhã, sang trọng và lịch sự vừa đủ, không bị quá sến hay lấn át phong cách thường ngày của chị đâu ạ. 
-> 
+> Dạ, nếu chị quen mặc đồ trơn và sợ set này bị điệu quá thì hoàn toàn yên tâm nha chị. Set Thạch Thảo có form áo và chân váy nhẹ nhàng, chất tơ và ren mềm tạo độ rũ cùng độ bay tự nhiên, không bị phồng cứng hay rườm rà. Đi ăn cưới ban ngày, set này mang lại cảm giác trang nhã, sang trọng và lịch sự vừa đủ, không bị quá sến hay lấn át phong cách thường ngày của chị đâu ạ.
+>
 > Mẫu này hiện có giá 799.000đ (đủ size S đến XL), chị lấy diện đi ăn cưới rất hợp đấy ạ.
 
 ## b1-policy-used-v2
@@ -332,8 +332,8 @@ Khách: Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn t
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Dạ, áo Thạch Thảo có bán lẻ chị nhé. Áo lẻ size M hiện còn hàng, giá 499.000đ ạ. 
-> 
+> Dạ, áo Thạch Thảo có bán lẻ chị nhé. Áo lẻ size M hiện còn hàng, giá 499.000đ ạ.
+>
 > Áo làm từ chất liệu tơ Hàn thêu, họa tiết thêu nổi với form nhẹ, vải mềm, thoáng và có độ bay tự nhiên. Chị lấy áo size M này em lên đơn luôn cho chị nhé ạ?
 
 ## b1-search-read-v3
@@ -350,8 +350,8 @@ Khách: Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị m
 
 Terminal: SEND_ELIGIBLE / PASS; ELIGIBILITY_ONLY
 
-> Chị lấy riêng áo Thạch Thảo (499.000đ) là hợp lý nhất ạ. Áo form nhẹ, chất tơ thêu mềm mại và thoáng, khi phối cùng chân váy đen sẵn có của chị sẽ tạo set đồ rất thanh lịch. 
-> 
+> Chị lấy riêng áo Thạch Thảo (499.000đ) là hợp lý nhất ạ. Áo form nhẹ, chất tơ thêu mềm mại và thoáng, khi phối cùng chân váy đen sẵn có của chị sẽ tạo set đồ rất thanh lịch.
+>
 > Kiểu áo này cũng dễ mix&match linh hoạt với các quần hoặc chân váy khác để chị thoải mái mặc lại nhiều lần mà vẫn mới mẻ, lại rất vừa vặn với ngân sách của mình ạ.
 
 ## b1-policy-used-v3
@@ -511,4 +511,3 @@ Terminal: SEND_ELIGIBLE / PASS; PERSISTED_CAPTURE
 > Dạ tổng đơn áo và phí ship của mình là 499k chị nhé.
 
 Handoff evidence: `{"conversationOwner": "BOT", "events": 0, "tags": 0}`
-
