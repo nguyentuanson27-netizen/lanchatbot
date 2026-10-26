@@ -2,7 +2,7 @@
 
 - [x] RED→GREEN explicitV2 CLI/registration/uniqueIDs/actualHTTP selection; defaultV1 unchanged. [Plan](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md).
 - [x]3newNode/208commerceevalPASS,2Python driverarg testsPASS (allchildrenstubbed), directtsc/lint/diffexit0. ArchivedV1bundlehash exact, V2IDs distinct/wireexact/mandatoryverifier.
-- [ ] Same independent exact-source reviewer→fix findings nếu có.0realprovider/count/model calls; chưaV2conversationquality/native/BGO.
+- [x] Same independent reviewer APPROVE clean exact5ee79350;10Node+2PythonindependentPASS, no blocker. Registrationselection/bundle bound, shared dispatch đúng, V1archived unchanged.0realprovider/count/model calls; chưaV2conversationquality/native/BGO.
 
 ## Previous — rút gọn presentation overhead, 2026-10-26
 

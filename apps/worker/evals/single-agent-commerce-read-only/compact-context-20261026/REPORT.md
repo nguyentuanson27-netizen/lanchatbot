@@ -35,3 +35,5 @@ Self-review completed. Subsequently, owner-requested independent reviewer **APPR
 ## Limits
 
 This completes overhead reduction. It does **not** prove V2 improves or preserves advice quality, naturalness, latency or the single occasion win seen withV1. Data equality is not a semantic/sales guarantee. V2 stays opt-in/evaluation-only; no runtime promotion or Phase B GO.
+
+Subsequent owner-requested fix/re-review added explicit V2 selection through the existing campaign driver: `--compact-v2`, bound into registration/preflight/run; V1 remains default and its archived bundle/wires/IDs unchanged. Same reviewer APPROVE exact5ee79350; independently10Node+2PythonPASS. [Selection change and review](../../../../../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md). No new model/API run or conversation qualification in that follow-up; CountTokens results above retain sourced9161647.

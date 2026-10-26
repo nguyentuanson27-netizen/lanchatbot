@@ -1,6 +1,6 @@
 ## Current — chọn đúng compact V2 cho lượt chạy sau, 2026-10-26
 
-[Plan](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md). Reviewtrướckhôngblocker; bổsungexplicitselection chứkhôngbịa lỗi: defaultV1 giữnguyên, `--compact-v2` driver→offline/preflight/run→registeredownerContextPresentation, V2slotIDs namespace riêng. MockHTTP kiểm đúngwire/cả2arms/mandatoryverifier, khôngthayrenderer/prompt/model/canonicalcontext. Taskchỉfix+independentreview,0provider/count/generation calls; chưaquality/native/BGO.
+[Plan/implementation/review](../docs/specs/c3-phase-b-compact-v2-run-selection-20261026.md). **IMPLEMENTED+INDEPENDENT APPROVE** clean exact5ee79350, độc lập10Node+2PythonPASS/no blocker. Reviewtrướckhôngblocker; bổsungexplicitselection: defaultV1 bundle/wires/IDs giữexactarchived, `--compact-v2` driver→offline/preflight/run→registeredownerContextPresentation+bundle, V2slotIDs namespace riêng. MockHTTP kiểm đúngwire/cả2arms/mandatoryverifier;208commerceeval+2PythonPASS/directtsc/lint/diff0. Khôngthayrenderer/prompt/model/canonicalcontext. Taskchỉfix+review,0realprovider/count/generation calls; chưaquality/native/BGO.
 
 ## Previous — rút gọn presentation overhead, 2026-10-26
 
