@@ -1,0 +1,78 @@
+{
+  "sourceSha": "1ebd4dcc50fce13f890085f6995b8ccb876b16fe",
+  "registeredControls": 17,
+  "controlsExecuted": 17,
+  "controlsSafeEligible": 8,
+  "controlsUnsafeBlocked": 8,
+  "controlsProbeEligible": 1,
+  "observedUnsafeSendEligibleControlFalsePass": 0,
+  "registeredNative": 51,
+  "nativeExecuted": 20,
+  "nativeNotRun": 31,
+  "completeCampaignDenominator": 68,
+  "executedSlots": 37,
+  "repetitions": 1,
+  "retry": 0,
+  "nativeTerminal": {
+    "SEND_ELIGIBLE": 15,
+    "HANDOFF": 3,
+    "NO_SEND": 2
+  },
+  "nativeFallbackRate": 0,
+  "nativeHandoffRate": 0.15,
+  "nativeNoSendRate": 0.1,
+  "nativeHandoffOrNoSendRate": 0.25,
+  "persistedSlots": 12,
+  "b1EligibilityOnlySlots": 8,
+  "persistedAcceptedTextMessages": 10,
+  "persistedAcceptedImages": 7,
+  "persistedCaptureMessages": 17,
+  "providerRequests": 72,
+  "ownerRequests": 37,
+  "nativeVerifierRequests": 18,
+  "controlVerifierRequests": 17,
+  "maxUpstreamPerGeneration": 1,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0,
+  "providerTimeoutRate": 0,
+  "observedModelVersions": {
+    "gpt-6.1-sol": 35,
+    "gemini-3.5-flash-lite": 37
+  },
+  "nativeVerifierLatencySeconds": {
+    "p50": 6.863,
+    "p95": 15.935
+  },
+  "verificationWithReadbackAndPossibleCommitSeconds": {
+    "p50": 8.44,
+    "p95": 23.009
+  },
+  "nativeElapsedSeconds": {
+    "p50": 25.322,
+    "p95": 53.328,
+    "interpretation": "driver elapsedMs; includes ingress and capture-related code, not production SLA or isolated causal added latency"
+  },
+  "observedInputTokens": 456425,
+  "observedOutputTokens": 41770,
+  "cost": null,
+  "costReason": "Provider telemetry does not expose cost; no estimated rates applied.",
+  "wholeTurnReview": {
+    "reviewed": 20,
+    "criticalWorkflowFailures": [
+      "b1-partial-source"
+    ],
+    "minorWordingAccepted": true,
+    "acceptedForFull": false
+  },
+  "recommendation": "STOP_BEFORE_REMAINING31_B_NOT_GO",
+  "sendEnabled": false,
+  "wireAudit": {
+    "actualProviderWires": 72,
+    "evaluatorLabelMatches": 0,
+    "ownerRequestHashesChecked": 37,
+    "ownerRequestHashMismatches": 0
+  },
+  "geminiThinkingTokensIncludedInOutput": 35814,
+  "percentileMethod": "nearest-rank, ceil(n*p)-1; native verifier n=18"
+}

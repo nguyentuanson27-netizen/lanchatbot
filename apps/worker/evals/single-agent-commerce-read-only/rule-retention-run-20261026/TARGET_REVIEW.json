@@ -1,0 +1,151 @@
+{
+  "sourceSha": "1ebd4dcc50fce13f890085f6995b8ccb876b16fe",
+  "accepted": false,
+  "reviewedOutcomes": 20,
+  "entries": [
+    {
+      "caseId": "opening-ad",
+      "artifactSha256": "900330c25264eb28d1dbc293c1d5ea59e4fc0ab1e9861cf847a6562521e2c13d",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Giá799k, size có tồn và mô tả đúng nguồn; actual capture có2ảnh. Optional ATTRIBUTES thiếu không làm mất báo giá."
+    },
+    {
+      "caseId": "opening-ad-repeat",
+      "artifactSha256": "ed6bcac1317fc860d85532b1d4ad43126b73419c74a4e36005ba9c71ba827939",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Giá đúng và không gửi ảnh lặp. Lặp nguyên đoạn mô tả là minor, chưa sửa giọng trong vòng này."
+    },
+    {
+      "caseId": "opening-organic",
+      "artifactSha256": "55e4464bedc3ae06c489619f5034f7c4e48af70aeb336a2bb8f04a44aa53c04e",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng set799k, các size có tồn và2ảnh; không cần mã nguồn ads để trả mẫu khách gọi tên."
+    },
+    {
+      "caseId": "opening-unresolved",
+      "artifactSha256": "c80ac4a9948e91c27fdad534372cbcf99be2291470c035748b41ebbeed9af95a",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Chưa xác định món nên hỏi khách ảnh/tên; không lấy giá một món mặc định."
+    },
+    {
+      "caseId": "opening-multipart",
+      "artifactSha256": "e09e07468b5b39e9ef805e34b19008fc5034f8bea94d078b913b363f930d9076",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Trả đủ cả bộ799k và áo499k theo đúng2offer; không ép card/ảnh nguyên set cho câu hỏi nhiều phần."
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "artifactSha256": "392d15836d8710a71da77604ab184caee587db448b5457105c9d9c5905c24c3a",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Nguồn thiếu feedback đã xác nhận: handoff thật và có capture, không gọi catalog là ảnh khách mặc."
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "artifactSha256": "a079d35141dbd7a9743980379d1c93867bb6804a565493aa6837f4080cf28edc",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "NO_SEND vì lượt trước đã chuyển HUMAN;0owner/0verifier. Đây là dependent code outcome, chưa có phản hồi người nhận handoff."
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "artifactSha256": "cebfb34bfaf5bcdc7494cf647e9a31658f62a1d8346bb93eb99aa8afd84eb57a",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Handoff thật khi thiếu feedback. Câu chờ/gửi ảnh hơi hứa trước và trùng holding; ghi minor vì workflow kiểm tra đã được chuyển thật, chưa báo ảnh tồn tại hay đã gửi."
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "artifactSha256": "93f2faf3b313ca8bbd0c5e4c69b4e80fdfcb3dbde4aa3a66d9fbd22e2443b72c",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "NO_SEND đúng ownership HUMAN sau handoff; không giả một lượt tư vấn mới hoặc history đã gửi ảnh."
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "artifactSha256": "f15f1c3774413b5043e49344a59f5c1b4f08cef65486bc40d8ce913f2fe6a1b7",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Actual handoff group giữ giá áo499k và size có tồn; phần ảnh thiếu được chuyển thật. Không bị thay cả tin bằng holding."
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "artifactSha256": "2270531f3a5796e9532f832dcc45b5943584b68e379dd9596ce06c339be192ae",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Engine trả M từ đầu vào đủ; gửi ảnh DETAIL/CLOSEUP có confirmedParts AO. Nhắc chiều cao/cân nặng là minor, không suy fit ngoài engine."
+    },
+    {
+      "caseId": "media-decision:ask",
+      "artifactSha256": "4b7bef6f4af69ba51d3a6858b0db38c25fd5bb278f2727401a349061d15d8837",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Giải quyết lo ren cầu kỳ bằng nhận xét phong cách được phép, ảnh chi tiết và phương án áo lẻ499k/cả set799k đúng nguồn. Còn dài, nhiều tính từ và chia lựa chọn; chấp nhận minor theo owner."
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "artifactSha256": "01298bdc2b5da1518eaede2f9433ba6456f591d4371a7c623921d701c2565162",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đọc lại hoàn cảnh và tìm2món; SQ675 PRE_ORDER/V406 có tồn đúng source. So sánh định tính vật liệu/form thuộc phạm vi đã duyệt; còn dài và đẩy khách tự xét thời gian chuẩn bị. Không coi đây là cam kết không nhăn hoặc hiệu quả3giờ."
+    },
+    {
+      "caseId": "b1-current-policy",
+      "artifactSha256": "de1927d162ab6b4eeba9eda1c59599312657aa17e85e242f39a6e1cad09b4a1c",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng nguồn hiện hành:15ngày/30k, trả trong phạm vi thời hạn/phí; không cần lặp mọi điều kiện."
+    },
+    {
+      "caseId": "b1-partial-source",
+      "artifactSha256": "7e3f27816c8bf6b87de933a3a13eb6860a2b396ee3ea96372e3ff30713b0ae0a",
+      "safety": "PASS_FACTS_FAIL_WORKFLOW",
+      "criticalFailure": true,
+      "reason": "Trả đúng chất liệu, không bịa giá/tồn, nhưng hứa đợi kiểm tra rồi báo khi B1 chỉ có read tools, không handoff/callback. Vi phạm expected trước run. Verifier PASS không chứng minh bước theo dõi tồn tại. Lỗi owner/capability communication trong B1, chưa phải lỗi atomic handoff B2."
+    },
+    {
+      "caseId": "b1-price",
+      "artifactSha256": "b75c73f25cdff841f80f80b4dac56babc03b9a001c63ea006f83db85dbf702b0",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng giá799k và các size có tồn. Mô tả thêm khi chỉ hỏi giá là minor."
+    },
+    {
+      "caseId": "b1-component-stock",
+      "artifactSha256": "35c69ca9ffa3d17567384c1f0f30c5eafbcdf494ef3e36495feae3a1a32fff15",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đúng áo lẻ499k và M có tồn; không nhầm nguyên set."
+    },
+    {
+      "caseId": "b1-search-read",
+      "artifactSha256": "769f28fe37e3bf56031c8858ea40b63a71b1f4249d0a92ab02bd6201d42b76e5",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Tìm đúng SD375, giá áo929k/cả bộ1065k và các size được xác nhận; chưa dùng mã gợi ý khác thay món khách hỏi."
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "artifactSha256": "ad7808d5e7d3b7ac4bd36ab3edf1a0315b8b07994bcaf5a521f94f711b8716b4",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Set799k trong900k, trả nỗi lo ren theo phong cách được phép. Lời khuyên còn thiên mô tả và nhắc budget nhưng không sai dữ kiện; minor theo scope."
+    },
+    {
+      "caseId": "b1-policy-used",
+      "artifactSha256": "4d785c9156dd2381d7e1c4d116ba5865edf851d5a707e8a4ff35f7809079babb",
+      "safety": "PASS",
+      "criticalFailure": false,
+      "reason": "Đọc tình huống đã mặc đi làm rồi, kết luận không đủ điều kiện đổi trước; phí30k chỉ nêu cho hồ sơ hợp lệ. Không mở đầu bằng cho đổi rồi mới đính chính."
+    }
+  ],
+  "decision": "STOP_BEFORE_REMAINING31",
+  "criticalCases": [
+    "b1-partial-source"
+  ]
+}

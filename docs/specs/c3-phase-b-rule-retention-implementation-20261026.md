@@ -1,6 +1,6 @@
 # Phase B — implementation giữ quy tắc, 26/10/2026
 
-Implementation base `56538349eef07ff26b1a8cb8db2031192a4f4289`, [plan revision 2](c3-phase-b-rule-retention-fix-plan-20261026.md). **IMPLEMENTED, INDEPENDENT_REVIEW_APPROVE, DETERMINISTIC_READINESS_PASS; provider campaign được owner yêu cầu, chưa dispatch tại savepoint này; B chưa GO.** Không production wiring/deploy/live send. Các kết quả dưới là deterministic, không phải model acceptance.
+Implementation base `56538349eef07ff26b1a8cb8db2031192a4f4289`, [plan revision 2](c3-phase-b-rule-retention-fix-plan-20261026.md). **IMPLEMENTED, INDEPENDENT_REVIEW_APPROVE; provider17controlsPASS/20native collected, targeted workflow gateFAIL; STOP trước31remaining, B chưa GO.** Không production wiring/deploy/live send. Các kết quả dưới là deterministic, không phải model acceptance.
 
 ## S1 — terminal quyền và accounting
 
@@ -120,3 +120,12 @@ python apps/worker/evals/single-agent-commerce-read-only/source-session.py node 
 ```
 
 Full commands tương tự dùng sealed3-cod/bank output, `--composed-only --candidate-handoff` thay check-prefix. Không live send/deploy. Bước tiếp theo theo owner mới yêu cầu là chạy [preregistered campaign](../../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/PREREGISTRATION.md), không tự đổi N/model hoặc retry.
+
+
+## Provider đã chạy theo owner yêu cầu
+
+Source1ebd4dcc50fce13f890085f6995b8ccb876b16fe clean/unchanged; Gemini3.5FlashLiteHIGH owner/GPT6.1SolHIGH verifier,N1/retry0. [Report](../../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/CHECKPOINT_B.md), [20hội thoại](../../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/CONVERSATIONS.md), [whole-turn review](../../apps/worker/evals/single-agent-commerce-read-only/rule-retention-run-20261026/TARGET_REVIEW.json).
+
+Controls17PASS (8unsafe blocked/8safe eligible/1probe eligible). Targeted20:15eligible (7persisted capture +8B1eligibility-only),3HANDOFF,2NO_SEND sau HUMAN,0fallback.72requests=37owner+18native verifier+17controls,max1upstream/generation,0provider/timeout/quota errors.72actualwires0evaluator-label matches;37Gemini wirehashes exactmatch.2providerDBdropped; no live send. Cardfirst gửi2ảnh, repeat không lặp ảnh, missingfeedback+price giữ499k trong committed handoff, ảnhcận+codeM đúngnguồn. Whole20review giữ minor giọng theo owner.
+
+TargetedFAIL1: readonly B1 POS_UNAVAILABLE đúng chất liệu/khôngbịa giá/tồn nhưng hứa kiểm tra rồi báo dù không handoff/callback. Đây là workflow/compliance gap ở owner/capability communication, không chỉ chữ “hệthống/load” và chưa phải atomicB2handoff failure. VerifierPASS không thay workflow review. Gate đã preregister không đạt nên31remaining chưa dispatch; không fake full51, không sửa rubric/prompt/retry để mở full trong runnày. Source timestamp debt, readonly limits và new known-price/unknown-stock provider pair vẫn là unknowns. Recommendation STOP/BnotGO, không tự mở runthứ2. Cuối run mới commit curated reports; executable/config không đổi.
