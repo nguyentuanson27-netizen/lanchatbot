@@ -2,7 +2,9 @@
 
 - [x] Freeze [plan](../docs/specs/c3-phase-b-full-context-presentation-experiment-20261026.md):8pairs/16slots N1+17freshcontrols,49maxrequests. Owner request đổi presentation, không đổi facts/prompt/model/verifier.
 - [x] RED→GREEN lossless full owner data renderer; exact history/latest, giữ openingQuote, native/tool/authority không đổi.200Node/75boundary/21protectedPASS, directtsc/lint exit0, driverAST/diffPASS; [input preview](../apps/worker/evals/single-agent-commerce-read-only/full-context-presentation-run-20261026/INPUT_PREVIEW.md).
-- [ ] Review→seal clean source→preflight/17controls→16slots→blind whole-turn review beforeunmask/report. Khôngclaim stable/fullB/GO hoặc tựpromote.
+- [x] Same reviewer APPROVE plan/executable clean0fd1893d,10independentPASS→17controlsPASS→16slots complete.33outcomes/49requests/max1/retry0/0errors/sourceunchanged; chatinterruptionkhôngretry.
+- [x] Blind freeze→unmask:0/3clearconcernwins,1localizedBoccasionwin,5ties/2neither. Ownerinput+19.7%, khôngoverallpositive. [Report](../apps/worker/evals/single-agent-commerce-read-only/full-context-presentation-run-20261026/CHECKPOINT_B.md). Giữopt-in/eval-only; STOP experiment/BchưaGO, khôngnative/current-send/stability/promotionclaim.
+- [x] Same reviewer final evidence/report APPROVE, raw/hash/mapping/counts/usage/commands matched; khôngremainingfinding. [Trail](../apps/worker/evals/single-agent-commerce-read-only/full-context-presentation-run-20261026/INDEPENDENT_REVIEW.md).
 
 ## Previous — diagnostic riêng form báo giá, 2026-10-26
 
