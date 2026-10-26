@@ -8,7 +8,7 @@ import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.j
 import {prepareQuoteDiagnostic,buildQuoteRequest,stripQuote,normalizedCapturedWire,recordQuoteSlot,renderBlindPairs} from './quote-presentation-diagnostic.mjs';
 
 const inputs=()=>JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url)));
-const prompt=()=>readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+const prompt=()=>inputs().records[0].wire.systemInstruction.parts[0].text;
 test('all three exposed pairs and five offline controls have exact golden wires',()=>{
  const frozen=inputs(),before=structuredClone(frozen),bundle=prepareQuoteDiagnostic(frozen,prompt());
  assert.equal(bundle.slots.length,6);assert.equal(new Set(bundle.slots.map(s=>s.id)).size,6);
@@ -71,4 +71,10 @@ test('blind review includes terminal fallback rather than rejected draft and wit
  const md=renderBlindPairs(f.records,attempts,mapping);
  assert.doesNotMatch(md,/REJECTED_DRAFT|b1-buying-concern|"X":"B"|openingQuote/);
  assert.equal(md.match(/Câu fallback thực tế/g).length,3);assert.equal(md.match(/Câu đủ điều kiện/g).length,3);
+});
+
+test('changed current prompt cannot silently reuse the historical registered wire population',()=>{
+ const f=inputs(),live=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+ assert.notEqual(live,prompt());assert.throws(()=>prepareQuoteDiagnostic(f,live),/PROMPT_CHANGED/);
+ assert.doesNotThrow(()=>prepareQuoteDiagnostic(f,prompt()));
 });

@@ -5,7 +5,7 @@ import {buildQuoteRequest,prepareQuoteDiagnostic} from './quote-presentation-dia
 import {buildGeminiCommerceRequest,createGeminiCommerceInference} from './gemini-inference.mjs';
 import {presentOwnerData,readDataBlocks,contextDataBlocks} from './owner-data-presentation.mjs';
 const frozen=()=>JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url)));
-const instructions=()=>readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+const instructions=()=>frozen().records[0].wire.systemInstruction.parts[0].text;
 test('all eight presentations preserve data/history/prompt/config while moving completed trace before latest',()=>{
  const f=frozen();prepareQuoteDiagnostic(f,instructions());
  for(const row of f.records){

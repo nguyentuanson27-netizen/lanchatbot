@@ -22,6 +22,7 @@ class DriverTest(unittest.TestCase):
                       'b1-first': 7, 'b1-rest': 14, 'journey-openings': 4,
                       'stateful': 8, 'negotiation': 3}
             def git(args, **kwargs):
+                if args[0]=='node': return json.dumps({'version':'codex-cli 0.159.2','binarySha256':'52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a'})
                 return 'stub-source\n' if args == ['git', 'rev-parse', 'HEAD'] else ''
             def child(args, **kwargs):
                 calls.append(args)
@@ -49,5 +50,15 @@ class DriverTest(unittest.TestCase):
                 i=args.index('--owner-presentation')
                 self.assertEqual(args[i+1],'VI_DATA_BLOCKS_COMPACT_V2')
             self.assertTrue(all(c['status']=='COMPLETE' for c in json.loads((out/'COMMANDS.json').read_text())))
+
+    def test_wrong_client_blocks_before_any_child_or_output(self):
+        with tempfile.TemporaryDirectory(prefix='c3-client-precheck-') as parent:
+            out=Path(parent)/'new'
+            def read(args,**kwargs):
+                if args[0]=='node':raise RuntimeError('CODEX_CLIENT_VERSION')
+                return 'stub-source' if args[1:] == ['rev-parse','HEAD'] else ''
+            with patch.object(sys,'argv',[str(driver),str(out),'controls']),patch.object(subprocess,'check_output',side_effect=read),patch.object(subprocess,'run') as child:
+                with self.assertRaisesRegex(RuntimeError,'CODEX_CLIENT_VERSION'):runpy.run_path(str(driver),run_name='__main__')
+                child.assert_not_called();self.assertFalse(out.exists())
 
 if __name__=='__main__':unittest.main()

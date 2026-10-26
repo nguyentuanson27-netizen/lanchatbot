@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {countInputTokens,prepareCompactMeasurement} from './compact-context-measure.mjs';
 test('whole frozen measurement prepares all24 counts without generation or changing prompts',()=>{
- const f=JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url))),prompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+ const f=JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url))),prompt=f.records[0].wire.systemInstruction.parts[0].text;
  const rows=prepareCompactMeasurement(f,prompt);assert.equal(rows.length,24);
  assert.equal(new Set(rows.map(r=>r.caseId+':'+r.variant)).size,24);
  for(const row of rows){assert.equal(row.body.systemInstruction.parts[0].text,prompt);assert.deepEqual(Object.keys(row.body),['contents','systemInstruction','tools','generationConfig']);}

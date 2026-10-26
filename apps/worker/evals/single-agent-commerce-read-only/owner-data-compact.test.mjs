@@ -5,7 +5,7 @@ import {buildQuoteRequest} from './quote-presentation-diagnostic.mjs';
 import {buildGeminiCommerceRequest,createGeminiCommerceInference} from './gemini-inference.mjs';
 import {compactContextSections,readCompactSections,presentCompactOwnerData} from './owner-data-presentation.mjs';
 const records=()=>JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url))).records;
-const prompt=()=>readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+const prompt=()=>records()[0].wire.systemInstruction.parts[0].text;
 test('compact V2 preserves every original context field and complete trace, without model-visible paths or repeated section labels',()=>{
  for(const row of records()){
   const req=buildQuoteRequest(row,'A','neutral',prompt()),a=buildGeminiCommerceRequest(req),before=structuredClone(a);

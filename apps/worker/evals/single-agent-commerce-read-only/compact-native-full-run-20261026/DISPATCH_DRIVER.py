@@ -32,6 +32,11 @@ manifest = json.loads((base / 'manifest.json').read_text())
 assert manifest['models']['conversation']['model'] == 'gemini-3.5-flash-lite'
 assert manifest['models']['verifier']['model'] == 'gpt-6.1-sol'
 assert all(m['effort'] == 'high' for m in manifest['models'].values())
+# Verify the frozen client before source capture or the first control generation.
+codex = json.loads(subprocess.check_output(['node', '--input-type=module', '-e',
+    "import{inspectCodex}from'./apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs';console.log(JSON.stringify(inspectCodex()));"], cwd=repo, text=True))
+assert codex['version'] == 'codex-cli 0.159.2'
+assert codex['binarySha256'] == '52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a'
 if phase == 'controls':
     out.mkdir()
     names = ['manifest.json', 'source-config.b1.json', 'cases.b1.json', 'opening-quote-cases.json',
@@ -41,7 +46,7 @@ if phase == 'controls':
              'feedback-controls-20261023.mjs', 'source-session.py', 'candidate-handoff.mjs', 'run.mjs',
              'sales-journeys-registration.mjs', 'native-presentation.mjs', 'owner-data-presentation.mjs']
     registration = {'sourceSha': source, 'implementationBaseSha': 'dc1308c90a7f790767e21249d115877e55b633b9',
-        'mode': 'COMPACT_V2_FULL_NATIVE_ALL_REGISTERED_COHORTS', 'ownerContextPresentation': 'VI_DATA_BLOCKS_COMPACT_V2', 'models': manifest['models'],
+        'codex': codex, 'mode': 'COMPACT_V2_FULL_NATIVE_ALL_REGISTERED_COHORTS', 'ownerContextPresentation': 'VI_DATA_BLOCKS_COMPACT_V2', 'models': manifest['models'],
         'promptHashes': manifest['promptHashes'], 'schemaHash': manifest['schemaHash'],
         'nativeOutcomes': 51, 'controls': 17, 'totalRegisteredOutcomes': 68,
         'publicModelNativeTurns': 50,
@@ -57,6 +62,7 @@ if phase == 'controls':
 else:
     registration = json.loads((out / 'REGISTRATION.json').read_text())
     assert registration['sourceSha'] == source, 'SOURCE_CHANGED'
+    assert registration['codex'] == codex, 'CLIENT_CHANGED'
     assert registration['driverSha256'] == hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     status = json.loads((out / 'DISPATCH_STATUS.json').read_text())
     commands = json.loads((out / 'COMMANDS.json').read_text())

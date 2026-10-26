@@ -8,7 +8,7 @@ import {parsePresentationArgs,prepareFullPresentation,recordPresentationSlot} fr
 import * as gate from '../../dist/single-agent-semantic-verifier-boundary.js';
 const V1='VI_DATA_BLOCKS_V1',V2='VI_DATA_BLOCKS_COMPACT_V2';
 const frozen=()=>JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url)));
-const prompt=()=>readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+const prompt=()=>frozen().records[0].wire.systemInstruction.parts[0].text;
 test('legacy commands keep V1; compact is explicit and malformed selections fail closed',()=>{
  assert.equal(parsePresentationArgs(['new-out','--preflight','controls']).presentation,V1);
  assert.equal(parsePresentationArgs(['new-out','--run','controls','prepared']).presentation,V1);

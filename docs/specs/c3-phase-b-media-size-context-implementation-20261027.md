@@ -190,3 +190,11 @@ Có một field projection trên owner execution, không copy vào tool history.
 Tests: actual mocked HTTP matches, ORIGINAL/CompactV2 native pairs/signatures/history exact, malformed/unbound/expired hints omitted, near-bound omission, large-image default regression5PASS. Worker media tests kiểm no extra reads/immutable expiry/source-error/field bound/authority/color tuple; runtime lifecycle đều dùng helper thuần. Toàn commerceeval214PASS trước final thêm expiry/large-image tests; final source sẽ chạy lại. Không provider thật.
 
 S1 self-review follow-up: metadata write readback so toàn payload bằng canonicalJsonV1, không dùng canonicalForHash vốn bỏ bookkeeping. S0 excerpt đã bỏ synthetic profile UUID/fingerprint, chỉ giữ M/alternatives và RELAXED như cam kết.
+
+## S3 — co-location size và instruction consistency
+
+Observed RED: recommend_size response chưa có inputFitPreference/alternativeSizes. Minimum GREEN thêm đúng hai field cạnh recommendedSizes; alternatives lấy từ verified claim, null khi không có claim, recommendedSizes rỗng khi decision không được claim xác nhận. Engine/bands/SIZE_FIT/verifier không đổi. Test profile RELAXED/M-only đối chiếu actual canonical claim; missing measurements không được quảng bá raw candidates thành alternatives. Không thêm block size, profile IDs hoặc bảng chart mới vào owner wire.
+
+Chỉ thay hai dòng owner prompt (ảnh và size); policy/giọng/form báo giá giữ, verifier prompt hash giữ nguyên. Current owner hash cập nhật manifest. Các historical frozen wire tests đọc đúng historical prompt từ artifact, không ghi lại corpus; một test riêng chứng minh current prompt bị từ chối khi thử dùng historical population. Snapshot/run cũ giữ nguyên. Đây là presentation/adherence hypothesis; chưa có model generation evidence để kết luận owner hết thêm L.
+
+Preflight driver full native thêm exact Codex CLI version/hash/login check trước source capture hoặc control đầu tiên; đăng ký client identity, native phải khớp. Hai Python argument/accounting tests PASS qua all-child stubs, trong đó wrong client phải reject trước mọi output/child. Không hạ version global, không launch provider.
