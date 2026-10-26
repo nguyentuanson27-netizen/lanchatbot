@@ -1,0 +1,9 @@
+{
+  "sourceSha": "a479b9559121d22b969202799dd64791ea5f36ef",
+  "status": "TARGETED_COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+  "completedCohorts": [
+    "checkout-prefix"
+  ],
+  "nativeNotRun": [],
+  "sourceUnchanged": true
+}

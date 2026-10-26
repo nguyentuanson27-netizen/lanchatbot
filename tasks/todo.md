@@ -1,4 +1,14 @@
-## Current — handoff im lặng và tư vấn cách mặc, 2026-10-26
+## Current — full model và sửa checkout handoff đã review, 2026-10-26
+
+**Đủ 51 native + 17 controls trên source `8d4a0ab3`; full-run STOP được giữ nguyên.** [Full report](../apps/worker/evals/single-agent-commerce-read-only/silent-handoff-run-20261026/CHECKPOINT_B.md), [51 hội thoại](../apps/worker/evals/single-agent-commerce-read-only/silent-handoff-run-20261026/CONVERSATIONS.md). Sau đó sửa checkout trên source mới `a479b955`, reviewer APPROVE trước chạy; [17 controls + 7 lượt checkout mới](../apps/worker/evals/single-agent-commerce-read-only/checkout-silent-run-20261026/CHECKPOINT_B.md) đã hoàn tất và cùng reviewer APPROVE kết quả. **B chưa GO.**
+
+- [x] Sửa mâu thuẫn prompt policy hỏi quy định vs yêu cầu xử lý; giữ silent matrix/tag/transaction. Đúng 3 POS unavailable cũ được kiểm qua persisted ingress, 21 B1 còn lại là eligibility-only; không đổi corpus/labels.
+- [x] Full model N1/retry0: 35 eligible/12 HANDOFF/4 NO_SEND, 140 requests, 2 Gemini malformed completion giữ denominator. Đọc đủ 51, giữ thiếu sót giọng/capability/source timestamp; 6 DB đã drop.
+- [x] Full run phát hiện checkout chuyển HUMAN nhưng còn gửi ACK. Sửa candidate session theo cùng resolved published all-SILENT matrix; giữ legacy/mixed/nontransfer. RED3→GREEN7; 186 worker/189 Node tests, build/direct tsc/lint PASS; reviewer độc lập 34 tests PASS.
+- [x] Focused campaign source sạch/không đổi: 24/24 slots, 30 requests, không provider errors/retry/label leak; confirm PURCHASE_CONFIRMED/HUMAN/event1/tag1/0 Outbox mới/0 capture. Hỏi thông tin/preview trước đó vẫn gửi. 1 DB drop; chỉ COD provider, BANK suppression kiểm unit. Không gọi focused7 là full51 hoặc dùng source cũ qualify source mới.
+- [ ] B1 stale/capability, chất lượng tư vấn, stability, human acknowledgement và production/live delivery chưa đạt/chưa verified. Không mở thêm vòng sửa giọng hoặc tự GO/deploy.
+
+## Previous savepoint — handoff im lặng và tư vấn cách mặc, 2026-10-26
 
 [Implementation/self-review/commands](../docs/specs/c3-phase-b-silent-handoff-sales-language-20261026.md). **PROVIDER_NOT_RUN; B chưa GO.**
 

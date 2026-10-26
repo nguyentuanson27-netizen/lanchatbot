@@ -1,4 +1,10 @@
-## Current — handoff im lặng và tư vấn cách mặc, 2026-10-26
+## Current — silent handoff full run và checkout correction, 2026-10-26
+
+**IMPLEMENTED → INDEPENDENT REVIEW → FIX → APPROVE → MODEL COMPLETE → EVIDENCE REVIEW APPROVE (checkout scope). B chưa GO.** [Full 51 report](../apps/worker/evals/single-agent-commerce-read-only/silent-handoff-run-20261026/CHECKPOINT_B.md), [focused checkout report](../apps/worker/evals/single-agent-commerce-read-only/checkout-silent-run-20261026/CHECKPOINT_B.md).
+
+Full source8d4a0ab3 chạy17controls+51native, giữ STOP vì checkout transfer còn ACK và các giới hạn B1/giọng. Đóng run trước sửa. Candidate-only session fix suppress group khi transfer dùng cùng resolved published complete all-SILENT matrix; state/confirmation/receipt/event/tag giữ atomic. RED3→GREEN7, 186worker/189NodePASS và build/directtsc/lintPASS, reviewer34PASS/APPROVE exacta479b955. Fresh campaign prereg17controls+7statefulprefix, không rerunfull51: đủ24slots/30requests/0errors/max1upstream, confirmPURCHASE_CONFIRMED/HUMAN/event1/tag1/0newOutbox/0capture; hỏi/preview vẫn gửi, DBdrop. Cùng reviewer kiểm actual evidence và APPROVE nhánh này; confirmation object riêng không được export trong public artifact, không claim direct object readback. Giữ full-run STOP/voice limitations; không tự mở vòng stylefix, production wiring, live send hoặc GO. Các savepoint dưới giữ lịch sử theo thời điểm.
+
+## Previous savepoint — handoff im lặng và tư vấn cách mặc, 2026-10-26
 
 **IMPLEMENTED_LOCAL_CHECKS; PROVIDER_NOT_RUN; B chưa GO.** [Chi tiết](../docs/specs/c3-phase-b-silent-handoff-sales-language-20261026.md). Owner thay yêu cầu partial+holding bằng handoff không tin khách. Candidate matrix/adapter/manifest đồng bộ silent; schema cho hậu mãi silent có admin matrix, vẫn giữ tag/quyền/transaction và default cũ. Prompt tập trung phối/điểm mạnh, câu nói gọn, không ví dụ benchmark; verifier/model/corpus giữ nguyên. RED→GREEN; contracts16/engine49/worker578/Node187PASS, bổ sung persistence silent17PASS; build/typecheck và lint được kiểm riêng. Chưa có provider evidence cho giọng; B1 không có handoff port vẫn là giới hạn, không giả đã bàn giao. Các mục dưới giữ lịch sử.
 
