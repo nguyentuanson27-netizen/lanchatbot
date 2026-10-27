@@ -214,7 +214,7 @@ export function createCommerceHandoffTools(input: {
           status=committed?"COMMITTED":uncertain?"UNKNOWN":"BLOCKED";
         } else if(!attempts) {
           const reason=outcome.reason==="SIZE_RULE_UNAVAILABLE"?"SIZE_RULE_UNAVAILABLE":
-            ["PROVIDER_ERROR","TIMEOUT","PREPARATION_UNAVAILABLE","CURRENT_READBACK_UNAVAILABLE","STALE"].includes(outcome.reason)
+            ["PROVIDER_ERROR","TIMEOUT","PREPARATION_UNAVAILABLE","CURRENT_READBACK_UNAVAILABLE","STALE","PRIVATE_CHECKOUT_UNAVAILABLE"].includes(outcome.reason)
               ?"DEPENDENCY_FAILURE":"RESPONSE_UNAVAILABLE";
           await request(reason,false,true);
         }

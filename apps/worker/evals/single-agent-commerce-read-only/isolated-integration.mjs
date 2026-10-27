@@ -363,8 +363,8 @@ try{
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
  if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE'}={}){
-  assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false}={}){
+  assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
   const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
@@ -381,10 +381,10 @@ try{
   const facts=live?providerPorts.factsForMode(sourceMode):{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
   let policyChanged=false,receiptAvailable=true;
   const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
-   if(!dependencyHoldingReply&&!sizeHoldingReply&&!policyChanged)return resolved;
+   if(!dependencyHoldingReply&&!sizeHoldingReply&&!policyChanged&&!missingDependencyRule)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
    return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:{schemaVersion:1,kind:'HANDOFF_MATRIX',
-    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:sizeHoldingReply?'SIZE_RULE_UNAVAILABLE':'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged?null:sizeHoldingReply??dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
+    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:missingDependencyRule?'EXCHANGE':sizeHoldingReply?'SIZE_RULE_UNAVAILABLE':'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged?null:sizeHoldingReply??dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
@@ -457,7 +457,24 @@ try{
   assert.equal(r.result.handoff.attempts,1);assert.equal(r.result.handoff.status,expectedStatus);assert.equal(r.owners,1);assert.equal(r.verifiers,0);
   assert.equal(r.result.terminal.disposition,mode==='committed'?'HANDOFF':'NO_SEND');
   j.restartDelivery();await j.drain();await j.drain();
-  assert.deepEqual(j.capture,['committed','commit-response-lost'].includes(mode)?[holding]:[]);
+  assert.deepEqual(j.capture,[]);
+  const committed=['committed','commit-response-lost'].includes(mode);
+  const counts=(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags, (SELECT count(*)::int FROM meta_outbox WHERE conversation_id=$1) AS messages',[j.bound.conversationId])).rows[0];
+  assert.deepEqual(counts,{events:committed?1:0,tags:committed?1:0,messages:0});
+  const inboxRows=(await pool.query('SELECT status FROM webhook_inbox WHERE inbox_id=ANY($1::uuid[])',[r.batch.inboxIds])).rows;
+  assert(inboxRows.every(row=>row.status===(mode==='rollback-response-lost'?'PROCESSING':'PROCESSED')));
+  if(mode==='rollback-response-lost')assert.equal(r.result.inboxCompletion,'RECONCILE_REQUIRED');
+ });
+ for(const kind of ['public','private'])await check('B composed blocked fallback completes Inbox '+kind+' without regeneration',async()=>{
+  const j=await statefulFixture({missingDependencyRule:true});
+  const r=await j.turn(kind==='private'?'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD':'Áo này bao nhiêu em?',[]);
+  assert.equal(r.result.terminal.disposition,'NO_SEND');assert.equal(r.result.terminal.text,null);assert.equal(r.result.enqueued,0);
+  assert.equal(r.result.inboxCompletion,'COMPLETED');assert.equal(r.owners,kind==='private'?0:1);assert.equal(r.verifiers,0);
+  const rows=(await pool.query('SELECT status FROM webhook_inbox WHERE inbox_id=ANY($1::uuid[])',[r.batch.inboxIds])).rows;
+  assert(rows.length&&rows.every(row=>row.status==='PROCESSED'));
+  assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+  await j.drain();assert.deepEqual(j.capture,[]);
  });
  for(const mode of ['verified','owner-error','source-changed-before-delivery','commit-response-lost','rollback-response-lost','cart-receipt','cart-source-changed'])await check('B composed prepared handoff partial '+mode,async()=>{
   const holding='Bên em sẽ kiểm tra ảnh rồi báo chị nhé.',j=await statefulFixture({deferredHandoff:true,dependencyHoldingReply:holding});
@@ -471,7 +488,7 @@ try{
   if(mode==='source-changed-before-delivery')j.refreshPosSource('stock-change');
   if(mode==='cart-source-changed')j.changeVariantSource();
   j.restartDelivery();await j.drain();await j.drain();
-  if(['source-changed-before-delivery','rollback-response-lost','cart-source-changed'].includes(mode))assert.deepEqual(j.capture,[]);
+  if(['owner-error','source-changed-before-delivery','rollback-response-lost','cart-source-changed'].includes(mode))assert.deepEqual(j.capture,[]);
   else {assert.equal(j.capture.length,1,JSON.stringify(j.deliveryObservations));assert.match(j.capture[0],cart?/navy size M/:/499\.000đ/);assert(j.capture[0].includes(holding));}
  });
  for(const mode of ['unchanged','cart-changed'])await check('B composed prepared handoff existing cart '+mode,async()=>{
@@ -495,13 +512,13 @@ try{
   assert.equal(r.result.terminal.text,draft);assert.equal((await j.state()).stage,'DISCOVERY');
   j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[draft]);
  });
- for(const mode of ['stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and captures only committed holding reply',async()=>{
+ for(const mode of ['stock-change','expired'])await check('B composed snapshot invalidation '+mode+' discards draft and hands off without messages',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
   const r=await j.turn('Áo SM613 bao nhiêu em?',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),say('Áo 499.000đ chị nhé.')],
    {afterVerify:async()=>j.refreshPosSource(mode)});
   assert.equal(r.verifiers,1);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
-  j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[text]);
-  const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.verifiers,0);await j.drain();assert.deepEqual(j.capture,[text]);
+  j.restartDelivery();await j.drain();await j.drain();assert.deepEqual(j.capture,[]);
+  const next=await j.turn('Em ơi',[]);assert.equal(next.owners,0);assert.equal(next.verifiers,0);await j.drain();assert.deepEqual(j.capture,[]);
  });
  for(const mode of ['unchanged','before-commit','after-commit','restart','cached-allowed','receipt-unavailable','lost-commit-reply'])await check('B composed dependency holding delivery '+mode+' uses committed policy and actual capture',async()=>{
   const text='Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.',j=await statefulFixture({dependencyHoldingReply:text});
@@ -527,7 +544,7 @@ try{
    if(['restart','cached-allowed','lost-commit-reply'].includes(mode))j.restartDelivery();
   }
   await j.drain();await j.drain();
-  const expected=mode==='before-commit'&&r.result.terminal.disposition==='FALLBACK'?[r.result.terminal.text]:['unchanged','lost-commit-reply'].includes(mode)?[text]:[];
+  const expected=['unchanged','lost-commit-reply'].includes(mode)?[text]:[];
   assert.deepEqual(j.capture,expected);if(mode==='before-commit')assert(!j.capture.includes(text));
   if(['after-commit','restart','cached-allowed','receipt-unavailable'].includes(mode))assert.equal((await pool.query("SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1 AND status='MANUAL_REVIEW'",[j.bound.conversationId])).rows[0].n,1);
  });
@@ -541,17 +558,16 @@ try{
   const replay=await j.turn('Em ơi',[]);assert.equal(replay.owners,0);assert.equal(replay.verifiers,0);assert.equal(replay.result.enqueued,0);
   await j.drain();assert.deepEqual(j.capture,[]);
  });
- await check('B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it',async()=>{
+ await check('B composed no-chart fallback hands off without text or images even under a holding policy',async()=>{
   const holding='Shop đã nhận yêu cầu chọn size.',j=await statefulFixture({media:true,sizeHoldingReply:holding});
   const r=await j.turn('Chọn size SM613 và gửi ảnh chị nhé',[
    native([{name:'read_product',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}]),
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}},{name:'read_product',args:{subjectRef:'SM613'}}])]);
   assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
   assert.equal(r.result.terminal.reason,'SIZE_RULE_UNAVAILABLE');await j.drain();
-   assert.equal(r.result.enqueued,3,JSON.stringify(r.result));
-   assert.deepEqual(j.capture,['Em gửi chị ảnh của mẫu để mình xem trước nhé.','[CODE_IMAGE]',holding]);
-   assert.equal(new Set(j.gateCalls).size,1);
-   await j.drain();assert.equal(j.capture.length,3);
+   assert.equal(r.result.enqueued,0,JSON.stringify(r.result));
+   assert.deepEqual(j.capture,[]);assert.equal(r.result.terminal.text,null);
+   assert.equal(j.gateCalls.length,0);await j.drain();assert.equal(j.capture.length,0);
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
  });
@@ -562,22 +578,20 @@ try{
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}}])],
    {beforeCommit:async()=>{if(++commits===1){if(fault==='source')j.changeMediaSource();else await pool.query("DELETE FROM provider_conversation_links WHERE conversation_id=$1 AND provider='PANCAKE'",[j.bound.conversationId]);}}});
   assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();assert(!j.capture.includes('[CODE_IMAGE]'));
-  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
-  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'BOT');
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,fault==='source'?1:0);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,fault==='source'?'HUMAN':'BOT');
  });
- for(const fault of ['unchanged','source','revision'])await check('B composed mixed media delivery restart revalidates '+fault+' before any message',async()=>{
+ for(const fault of ['unchanged','source','revision'])await check('B composed mixed media fallback remains silent after '+fault+' and restart',async()=>{
   if(!process.argv.includes('--candidate-handoff'))return;
   const j=await statefulFixture({media:true,sizeHoldingReply:'Shop đã nhận yêu cầu chọn size.'});
   const r=await j.turn('Cho chị xem ảnh SM613 và chọn size nhé',[
    native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}},{name:'recommend_size',args:{subjectRef:'SM613'}}])]);
-  assert.equal(r.result.enqueued,3,JSON.stringify(r.result));assert.equal(j.capture.length,0);
+  assert.equal(r.result.enqueued,0,JSON.stringify(r.result));assert.equal(j.capture.length,0);
   if(fault==='source')j.changeMediaSource();
   if(fault==='revision')await pool.query("UPDATE conversations SET state_version=state_version+1,state_snapshot=jsonb_set(state_snapshot,'{revision}',to_jsonb(state_version+1)) WHERE conversation_id=$1",[j.bound.conversationId]);
   j.restartDelivery();await j.drain();await j.drain();
   const rows=(await pool.query('SELECT response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
-  assert.equal(new Set(rows.map(row=>row.response_group_id)).size,1);
-  if(fault==='unchanged'){assert.equal(j.capture.length,3);assert.equal(j.capture.filter(s=>s==='[CODE_IMAGE]').length,1);assert.equal(new Set(j.gateCalls).size,1);}
-  else {assert.equal(j.capture.length,0);assert(rows.every(row=>row.status==='MANUAL_REVIEW'));}
+  assert.deepEqual(rows,[]);assert.deepEqual(j.capture,[]);assert.equal(j.gateCalls.length,0);
   report.mediaDeliveryChecks??=[];report.mediaDeliveryChecks.push({fault,captured:j.capture,rows});save();
  });
  await check('B composed N1 single-field private checkout keeps bare answers out of both models and public history',async()=>{
@@ -636,13 +650,14 @@ try{
   assert.equal(changed.result.enqueued,1,JSON.stringify(changed.result));const after=await j.state();assert.equal(after.negotiation.customerState,before.negotiation.customerState);
   assert.deepEqual(after.negotiation.consumedObjectionEvidenceIds,before.negotiation.consumedObjectionEvidenceIds);
  });
- await check('B composed generation failure preserves the committed total through cart readiness and captures recovery once',async()=>{
+ await check('B composed generation failure preserves committed cart and silently hands off without replay',async()=>{
   const j=await statefulFixture(),r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}}])]);
-  assert.equal(r.result.terminal.reason,'RECEIPT_BACKED_CART_SUMMARY',JSON.stringify(r.result));
-  assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.enqueued,1);
+  assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
+  assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.enqueued,0);
   const stored=await j.state();assert.equal(stored.cart.value.lines[0].quantity,1);
-  assert(r.result.terminal.text.includes(stored.cart.value.grandTotalVnd.toLocaleString('vi-VN')+'đ'));
-  await j.drain();await j.drain();assert.deepEqual(j.capture,[r.result.terminal.text]);assert.equal(j.gateCalls.length,1);
+  assert.equal(r.result.terminal.text,null);
+  await j.drain();await j.drain();assert.deepEqual(j.capture,[]);assert.equal(j.gateCalls.length,0);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
  });
  let journey;
  await check('B composed ingress commits an open cart, authorizes the exact reply and captures delivery once',async()=>{
@@ -704,14 +719,14 @@ try{
   assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
  });
- await check('B composed configured private dependency holding reply commits and is captured exactly once with the handoff',async()=>{
+ await check('B composed configured private dependency fallback overrides holding and commits silently',async()=>{
   const text='Nhân viên sẽ kiểm tra thông tin nhận hàng của chị.',j=await statefulFixture({missingEta:true,dependencyHoldingReply:text});
   await j.turn('Chị lấy áo navy size M',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:1}}]),say('Dạ chị.')]);
   await j.drain();
   const before=j.capture.length,r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[]);
-  assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,1);
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);
   await j.drain();
-  assert.deepEqual(j.capture.slice(before),[text]);assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  assert.deepEqual(j.capture.slice(before),[]);assert.equal(r.result.terminal.text,null);assert.equal(await inbox.isBatchCurrent(r.batch),false);
   assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
   const rows=await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1 ORDER BY created_at',[j.bound.conversationId]);
   assert(rows.rows.every(row=>row.status==='SENT_ACCEPTED'));

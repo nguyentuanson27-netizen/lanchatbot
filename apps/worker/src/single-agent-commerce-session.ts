@@ -30,6 +30,7 @@ export function createPersistedCommerceExecutor(input: {
 }) {
   const { scope } = input;
   let outboxMessages = 0;
+  let terminalCommitted = false;
   const repository: SalesCycleStateRepositoryV1 = {
     async read(key) {
       if (key !== scope.conversationId) throw new Error("COMMERCE_SCOPE");
@@ -90,14 +91,17 @@ export function createPersistedCommerceExecutor(input: {
       ...(messages.length ? { metaPlan: { replyPlanId: randomUUID(), responseGroupId: randomUUID(), recipientId: input.deliveryRecipient!, messages,
         sourceMessageIdHash: output.plan.sourceMessageIdHash!, protectedClaimTypes: output.protectedOutbound?.claimTypes ?? [],
         protectedClaims: output.protectedOutbound?.claims ?? [], effectReadiness: outbound!, sendAfterOwnerHandoff: transfer } } : {}) };
-    return input.transaction(async client => {
+    const committed = await input.transaction(async client => {
       const r = await input.store.commitWithinTransaction(client, prepared, now);
       if (r.stateCommitted && ((transfer && (!r.pancakeTagOutboxCreated || !r.handoffEventCreated)) || (messages.length && r.metaOutboxCreated !== messages.length))) throw new Error("ATOMIC_EFFECT_INTENTS");
       if (r.stateCommitted) outboxMessages += r.metaOutboxCreated;
       return r;
     });
+    if (terminal && committed.stateCommitted) terminalCommitted = true;
+    return committed;
   }
-  return { repository, outboxCount: () => outboxMessages, readReceipt: createPersistedCommerceReceiptReader({ store: input.store, repository, scope, conversationKey: scope.conversationId }),
+  return { repository, outboxCount: () => outboxMessages, terminalCommitted: () => terminalCommitted,
+    readReceipt: createPersistedCommerceReceiptReader({ store: input.store, repository, scope, conversationKey: scope.conversationId }),
     async privateCheckoutPending() {
       const current = await repository.read(scope.conversationId);
       return !!current && ["CART_OPEN", "ORDER_PREVIEW"].includes(current.stage) &&

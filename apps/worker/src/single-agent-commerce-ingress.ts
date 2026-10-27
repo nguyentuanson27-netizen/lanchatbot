@@ -111,8 +111,13 @@ export async function runPersistedCommerceIngress(input: {
     recipient: textHash(last.senderId), bindingVersion: `commerce:${batch.generation}:${textHash(last.senderId)}`, revision: record.stateVersion,
     conversationOwner: record.state.conversationOwner, permission: record.state.conversationOwner === "BOT", privacyAllowed: true };
   const guard = { generation: batch.generation, leaseToken: batch.leaseToken, inboxIds: batch.inboxIds };
+  let unconfirmedCommit = false;
+  const observeWrite = async <T>(write: () => Promise<T>): Promise<T> => {
+    try { return await write(); } catch (error) { unconfirmedCommit = true; throw error; }
+  };
+  const transaction: typeof input.transaction = work => observeWrite(() => input.transaction(work));
   const facts = bindCommerceFacts(input.facts, scope);
-  const closeWithoutSend = async (reason: string) => { await input.inbox.completeBatch(batch); return noSend(reason); };
+  const closeWithoutSend = async (reason: string) => ({ ...noSend(reason), inboxCompletion: await completeUnsent() });
   const readAuthority = async () => {
     const [row, generation] = await Promise.all([
       input.store.loadOrCreate<ConversationState>(scope.pageId, scope.customerHash, "APP", () => { throw new Error("CONVERSATION_REQUIRED"); }, input.clock()),
@@ -122,12 +127,18 @@ export async function runPersistedCommerceIngress(input: {
       bindingVersion: `commerce:${generation}:${scope.recipient}`, permission: row.state.conversationOwner === "BOT" };
   };
   const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
-    store: input.store, transaction: input.transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
+    store: input.store, transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
     ...(mediaMessage ? {paymentReceiptInbound:{messageId:mediaMessage.messageId??mediaMessage.eventKey,pageId:scope.pageId,conversationId:scope.conversationId,
       senderType:"CUSTOMER" as const,observedAt:mediaMessage.occurredAt,
       attachments:mediaMessage.attachments.map((a,i)=>({attachmentId:`${mediaMessage.messageId??mediaMessage.eventKey}:attachment:${i}`,kind:a.type==="image"?"IMAGE" as const:a.type==="file"?"FILE" as const:"OTHER" as const}))}} : {}),
     handoffSource:()=>mediaLink,
     productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })) });
+  const completeUnsent = async (handoffStatus?: string) => {
+    if (handoffStatus === "COMMITTED" || executor.terminalCommitted()) return "ALREADY_COMMITTED" as const;
+    if (unconfirmedCommit || handoffStatus === "UNKNOWN") return "RECONCILE_REQUIRED" as const;
+    try { return await input.inbox.completeBatch(batch, true) ? "COMPLETED" as const : "SUPERSEDED" as const; }
+    catch { return "UNCONFIRMED" as const; }
+  };
   const pendingCheckout = await executor.privateCheckoutPending();
   const privateInput = !!mediaMessage || pendingCheckout || isPrivateCommerceText(latest);
   for (const m of messages) {
@@ -146,13 +157,14 @@ export async function runPersistedCommerceIngress(input: {
     const receiptPending=mediaMessage&&(await executor.repository.read(scope.conversationId))?.stage==="PURCHASE_CONFIRMED";
     const privateResult = !mediaMessage||receiptPending ? await executor.advancePrivateCheckout() : {committed:false,messages:0};
     if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages };
-    const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
+    const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction,
       read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
       ...(mediaLink?{triggerSource:mediaLink}:{}) });
     const recovery = createCommerceHandoffTools({ ...handoff, scope, clock: input.clock, policy: policyBundle,
       base: createReadOnlyTools({ ...input.read, scope, clock: input.clock }) });
-    await recovery.invoke({ name: "request_handoff", args: { reason: "DEPENDENCY_FAILURE" } });
-    return { ...noSend("PRIVATE_CHECKOUT_UNAVAILABLE"), terminal: await recovery.terminalOutcome?.() ?? noSend("PRIVATE_CHECKOUT_UNAVAILABLE").terminal,
+    const terminal = await recovery.recoverFallback!({disposition:"FALLBACK",reason:"PRIVATE_CHECKOUT_UNAVAILABLE",text:null,fallbackId:null});
+    return { ...noSend("PRIVATE_CHECKOUT_UNAVAILABLE"), terminal,
+      inboxCompletion: await completeUnsent(recovery.handoffStatus?.()?.status),
       mode: "PRIVATE_CODE_PATH", enqueued: handoff.outboxCount(), privateCheckoutFailure: privateResult.failure ?? null };
   }
   // Hints select only source-verified identities, never prices or effects. A new unresolved ad must not fall back to an old product.
@@ -177,13 +189,15 @@ export async function runPersistedCommerceIngress(input: {
   const initialProducts = [...new Map([...(ads.length && !hinted.length ? [] : [...focused,...(input.read.initialProducts ?? [])])]
     .map(p => [p.productId,p])).values()].slice(0,MAX_RUNTIME_PRODUCTS);
   const scopedRead = {...input.read,initialProducts,state:()=>({...scope,currentProductId,factSnapshotVersion:""})};
-  const profilePort = createRealtimeCustomerStatePort(input.store, scope, () => {
+  const rawProfilePort = createRealtimeCustomerStatePort(input.store, scope, () => {
     const at = input.clock().toISOString();
     return { profile: CustomerProfileV1Schema.parse({ schemaVersion: 1, profileId: randomUUID(), customerKey: { namespace: "meta", algorithm: "HMAC_SHA256", digest: scope.customerHash },
       revision: 1, measurements: [], fitPreference: null, preferences: { colors: [], styles: [], materials: [] }, sizeHistory: [], createdAt: at, updatedAt: at }), fieldEvidence: {} };
   }, input.clock, { read: readAuthority, inboxBatchGuard: guard });
+  const profilePort = { read: rawProfilePort.read, compareAndSwap: (...args: Parameters<typeof rawProfilePort.compareAndSwap>) =>
+    observeWrite(() => rawProfilePort.compareAndSwap(...args)) };
   const profile = await profilePort.read();
-  const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
+  const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction,
     read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
   let mediaHistoryUnavailable = false;
@@ -220,6 +234,7 @@ export async function runPersistedCommerceIngress(input: {
   // mutate state again after a rejected/unknown handoff transaction.
   if (result.terminal.disposition !== "SEND_ELIGIBLE") return {
     ...result, ...(result.terminal.disposition === "FALLBACK" ? noSend("FALLBACK_OUTPUT_FORBIDDEN") : {}),
+    inboxCompletion: await completeUnsent(tools.handoffStatus?.()?.status),
     enqueued: handoff.outboxCount()+executor.outboxCount() };
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.

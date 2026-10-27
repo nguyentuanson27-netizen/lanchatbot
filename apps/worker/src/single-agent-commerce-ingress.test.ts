@@ -40,7 +40,8 @@ function fixture(productIds = ["SM613"]) {
     evaluationGroupId: "turn", leaseToken: "lease", inboxIds: ["inbox"], items: [{ envelope: { message } }] };
   const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
   const select = vi.fn(async (): Promise<CartSelectionResult> => ({ status: "INVALID", reasonCode: "FIXTURE_SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] }));
-  const inbox = { isBatchCurrent: async () => generation === batch.generation, readGeneration: async () => generation, completeBatch: async () => {} };
+  const inbox = { isBatchCurrent: async () => generation === batch.generation, readGeneration: async () => generation,
+    completeBatch: vi.fn(async (_batch: unknown, _requireCurrentGeneration = true) => true) };
   const policy = vi.fn(() => fixturePolicy());
   const catalogRead = vi.fn(async (id: string) => products.find(p => p.product.productId === id));
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
@@ -77,6 +78,85 @@ async function enableRecoveryHandoff(f: ReturnType<typeof fixture>, mode: "holdi
       holdingReply:mode==="holding"?"Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.":null,tag:"NHAN_VIEN"}))}});
   f.policy.mockResolvedValue({...resolved,bundle});
 }
+
+it.each(["customer-image", "private-text"])("keeps private fallback silent even with a holding policy (%s)",async kind=>{
+  const f=fixture();await enableRecoveryHandoff(f,"holding");
+  if(kind==="customer-image")f.message.attachments=[{type:"image",url:"https://content.pancake.vn/private.jpg"}] as never;
+  else f.message.text="Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD";
+  const owner=vi.fn(),r=await f.run(owner);
+  expect(r).toMatchObject({mode:"PRIVATE_CODE_PATH",enqueued:0,terminal:{disposition:"HANDOFF",text:null,fallbackId:null}});
+  expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+  const change=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1];
+  expect(change.metaPlan).toBeUndefined();expect(change.state).toMatchObject({conversationOwner:"HUMAN"});
+  expect(change.pancakeTagPlan).toMatchObject({desiredTag:"NHAN_VIEN"});
+  if(kind==="customer-image")expect(change.handoffEventPlan).toMatchObject({triggerEventKey:f.message.eventKey,
+    triggerMessagePk:"90000000-0000-4000-8000-000000000001",reasonDetailSafe:{attachmentCount:1}});
+});
+
+it.each(["public", "private"])("completes a definitely uncommitted blocked fallback so the same batch cannot regenerate (%s)",async kind=>{
+  const f=fixture();f.enableHandoff();
+  const resolved=await fixturePolicy();Object.assign(resolved.bundle!.artifacts,{handoffMatrix:{schemaVersion:1,kind:"HANDOFF_MATRIX",
+    sourceMetadata:resolved.bundle!.artifacts.shopPolicy.sourceMetadata,
+    rules:[{reason:"EXCHANGE",customerMessagePolicy:"SILENT_HANDOFF",holdingReply:null,tag:"NHAN_VIEN"}]}});
+  f.policy.mockResolvedValue(resolved);
+  if(kind==="private")f.message.attachments=[{type:"image",url:"https://content.pancake.vn/private.jpg"}] as never;
+  let completed=false;const current=f.inbox.isBatchCurrent;
+  f.inbox.isBatchCurrent=async()=>!completed&&await current();
+  f.inbox.completeBatch.mockImplementation(async(_batch,requireCurrent)=>{expect(requireCurrent).toBe(true);completed=true;return true;});
+  const owner=vi.fn(async()=>{throw Error("HTTP_429");});
+  const r=await f.run(owner);
+  expect(r).toMatchObject({enqueued:0,terminal:{disposition:"NO_SEND",text:null},inboxCompletion:"COMPLETED"});
+  expect(f.commit).not.toHaveBeenCalled();expect(f.inbox.completeBatch).toHaveBeenCalledOnce();
+  await f.run(owner);expect(owner).toHaveBeenCalledTimes(kind==="private"?0:1);
+});
+
+it.each(["rejected", "unknown", "readback"])("completes only definite no-commit and does not touch uncertain/already committed Inbox (%s)",async fault=>{
+  const f=fixture();await enableRecoveryHandoff(f,"silent");
+  if(fault==="rejected")f.commit.mockResolvedValue({stateCommitted:false,metaOutboxCreated:0,inboxBatchStatus:"STALE",handoffEventCreated:false,pancakeTagOutboxCreated:false} as never);
+  if(fault==="unknown")f.commit.mockRejectedValue(Error("COMMIT_UNKNOWN"));
+  if(fault==="readback")f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw Error("READBACK_UNAVAILABLE");};});
+  const r=await f.run(async()=>{throw Error("HTTP_429");});
+  expect(r).toMatchObject({enqueued:0,terminal:{disposition:"NO_SEND",text:null}});
+  expect(f.inbox.completeBatch).toHaveBeenCalledTimes(fault==="rejected"?1:0);
+  expect(f.commit).toHaveBeenCalledOnce();
+});
+
+it("uses current-generation completion without closing a superseding batch",async()=>{
+  const f=fixture();await enableRecoveryHandoff(f,"silent");
+  f.inbox.completeBatch.mockResolvedValue(false);
+  const r=await f.run(async()=>{f.supersede();throw Error("HTTP_429");});
+  expect(r).toMatchObject({enqueued:0,inboxCompletion:"SUPERSEDED",terminal:{disposition:"NO_SEND",text:null}});
+  expect(f.inbox.completeBatch).toHaveBeenCalledWith(f.batch,true);expect(f.commit).not.toHaveBeenCalled();
+});
+
+it.each(["profile", "cart"])("does not close Inbox after an earlier unknown %s write even if handoff is definitely blocked",async kind=>{
+  const f=fixture();f.enableHandoff();
+  const resolved=await fixturePolicy();Object.assign(resolved.bundle!.artifacts,{handoffMatrix:{schemaVersion:1,kind:"HANDOFF_MATRIX",
+    sourceMetadata:resolved.bundle!.artifacts.shopPolicy.sourceMetadata,
+    rules:[{reason:"EXCHANGE",customerMessagePolicy:"SILENT_HANDOFF",holdingReply:null,tag:"NHAN_VIEN"}]}});f.policy.mockResolvedValue(resolved);
+  if(kind==="cart"){await seedCart(f);f.beforeTransaction(async()=>{throw Error("TRANSACTION_RESPONSE_LOST");});}
+  else f.profileWrite.mockRejectedValue(Error("PROFILE_RESPONSE_LOST"));
+  f.message.text=kind==="profile"?"Eo 75 nhé.":"Lấy hai chiếc chị nhé.";
+  let turns=0;
+  const r=await f.run(async()=>{
+    if(++turns>1)throw Error("HTTP_429");
+    const call=kind==="profile"?{name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:75,sourceQuote:"75"}]}}:
+      {name:"change_cart_item",args:{subjectRef:f.cycle().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}};
+    return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};
+  });
+  expect(r).toMatchObject({enqueued:0,inboxCompletion:"RECONCILE_REQUIRED",terminal:{disposition:"NO_SEND",text:null}});
+  expect(f.inbox.completeBatch).not.toHaveBeenCalled();
+  expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(0);
+});
+
+it("does not complete Inbox twice after the checkout invitation transaction already completed it",async()=>{
+  const f=fixture();await seedCart(f);f.message.text="Chốt đơn cho chị nhé.";
+  const call={name:"confirm_purchase",args:{}};
+  const r=await f.run(async()=>({kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}));
+  expect(r).toMatchObject({inboxCompletion:"ALREADY_COMMITTED",terminal:{disposition:"NO_SEND",reason:"CHECKOUT_DETAILS_MISSING"}});
+  expect(f.inbox.completeBatch).not.toHaveBeenCalled();
+  expect(f.commit.mock.calls.filter(c=>c[1].completeInboxBatch)).toHaveLength(1);
+});
 
 it("commits the owner's relevant price-unavailable handoff and its customer message",async()=>{
   const f=fixture(),source=f.products[0]!;f.enableHandoff();
