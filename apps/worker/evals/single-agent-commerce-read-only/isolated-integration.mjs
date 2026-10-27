@@ -747,9 +747,21 @@ try{
  });
  await check('B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged',async()=>{
   const j=await statefulFixture();const r=await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{afterVerify:async()=>j.changeVariantSource()});
-  assert.equal(r.result.terminal.disposition,'NO_SEND',JSON.stringify(r.result));assert.equal(r.result.enqueued,0);assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal(r.result.terminal.text,null);
+  assert.equal(r.result.recovery.originalReason,'STALE');assert.equal(r.result.enqueued,0);assert.equal(await inbox.isBatchCurrent(r.batch),false);
+  const counts=(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM pancake_tag_outbox WHERE conversation_id=$1) AS tags, (SELECT count(*)::int FROM meta_outbox WHERE conversation_id=$1) AS messages',[j.bound.conversationId])).rows[0];
+  assert.deepEqual(counts,{events:1,tags:1,messages:0});
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
  });
  await check('B composed clarification rollback refuses to destroy existing append-only events',async()=>{
+  // This check must also work when selected alone after an earlier acceptance
+  // failure. Create its real clarification prerequisite through the same ports.
+  if(Number((await pool.query("SELECT count(*) AS n FROM sales_cycle_events WHERE command_kind IN ('CLARIFICATION_REQUESTED','CLARIFICATION_RESOLVED')")).rows[0].n)===0){
+   const j=await statefulFixture();
+   await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
+   const r=await j.turn('Chốt đơn cho chị nhé',[native([{name:'confirm_purchase',args:{}}])]);
+   assert.equal(r.result.terminal.reason,'CHECKOUT_DETAILS_MISSING');
+  }
   const definition=await commandConstraint(),count=Number((await pool.query("SELECT count(*) AS n FROM sales_cycle_events WHERE command_kind IN ('CLARIFICATION_REQUESTED','CLARIFICATION_RESOLVED')")).rows[0].n);assert(count>0);
   await assert.rejects(withTransaction(pool,client=>client.query(clarificationDown)),/SALES_CLARIFICATION_EVENTS_REQUIRE_COMPATIBLE_SCHEMA/);
   assert.equal(await commandConstraint(),definition);assert.equal(Number((await pool.query("SELECT count(*) AS n FROM sales_cycle_events WHERE command_kind IN ('CLARIFICATION_REQUESTED','CLARIFICATION_RESOLVED')")).rows[0].n),count);
