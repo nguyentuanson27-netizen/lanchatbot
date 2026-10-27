@@ -1,4 +1,13 @@
-## Current — silent fallback independent review closed, 28/10/2026
+## Current — full Phase B model sau silent fallback, 28/10/2026
+
+- [x] Seal source `dc69f712fa85ef318ff3f58bf7e26c8d28368aee`, clean trước/sau; source/dist/prompt hashes giữ nguyên. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/CHECKPOINT_B.md).
+- [x] Campaign đầu: 17 controls HTTP401, giữ accounting và51 native NOT_RUN. Sau khi login được làm mới, mở campaign mới cùng source/config; không retry attempt cũ. Tổng157 generation requests qua hai campaign.
+- [x] Campaign hoàn tất:17 controls PASS →51/51 native N1/retry0;38 eligible/9 handoff/4 NO_SEND;140 requests,0 provider/qualification errors,30 VALID persisted outcomes,6 DB DROP,6 CAPTURE_JOB_PASS.
+- [x] Cả9 handoff có HUMAN/event/tag và0 text/ảnh. Không có native verifier rejection/fallback terminal trong N1; không claim model đã kích hoạt mọi nhánh fallback. B1 eligibility không có persisted handoff adapter.
+- [x] Whole-turn self-review đủ51 ca;140 actual bodies qua bounded firewall và prompt/wire audit. Không lấy38 eligible làm qualityPASS hoặc zero native falsePASS.
+- [ ] Còn catalog/fit-scope questions, discovery quyết định yếu, thương lượng bỏ ưu đãi30k dù context đủ; gallery dependency thiếu exception gốc. Minor voice tạm chấp nhận. B_NOT_GO; không tự fix/rerun/publish/merge/deploy/live send.
+
+## Previous — silent fallback independent review closed, 28/10/2026
 
 - [x] P1 private fallback vào silent recovery, giữ source linkage và transaction/tag authority; holding policy không tạo text/ảnh.
 - [x] P2 current Inbox completion phân biệt committed/definite no-commit/unknown, cả transaction và profile CAS; không double-complete checkout hoặc xử lý lại definite blocked batch.

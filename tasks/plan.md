@@ -1,3 +1,14 @@
+## Current — full Phase B model sau silent fallback, 28/10/2026
+
+Đã thực hiện model qualification trên exact clean source `dc69f712fa85ef318ff3f58bf7e26c8d28368aee`, sau executable approval `24a2ed1b`. [Evidence và commands](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/CHECKPOINT_B.md). Owner Gemini3.5FlashLite HIGH, verifier Sol6.1 HIGH, CompactV2; không thay prompt/corpus giữa run.
+
+1. Giữ nguyên campaign17HTTP401,51nativechưachạy; sau login refresh mở campaign mới, không generation retry hoặc ghi đè lỗi.
+2. Campaign mới17controlsPASS và51native hoàn tất:38eligible/9handoff/4NO_SEND,140requests/0errors,6DBDROP. Hai campaign tổng157requests.
+3. Bàn giao9/9 im lặng có committedHUMAN/event/tag; hai NO_SEND checkout vẫn có code-owned question/preview. Native không kích hoạt verifier rejection, nên coverage nhánh lỗi mới tiếp tục dựa vào focused deterministic evidence riêng.
+4. Whole-turn self-review và source/wire/firewall audits đã xong; SQ223 không còn lỗi gộp lớp trong N1. Không quy kết thành causal/stability proof; hai scope questions và hiệu quả quyết định/ưu đãi còn mở.
+
+Dừng tại báo cáo B_NOT_GO; không tự thêm vòng sửa giọng, rerun, publish nguồn, merge, deploy hoặc live send. Full coherent synthetic COD/BANK sau driver fixes cuối vẫn chưa chạy lại, không đổi các run FAIL cũ thành PASS.
+
 ## Current — silent fallback review closed, 28/10/2026
 
 Đã đóng P1 private holding, P2 definite no-commit Inbox, P2 stale acceptance và P3 fixture/filter; cùng reviewer độc lập APPROVE executable source24a2ed1b. Runtime33e0fc14: silent recovery chung private/public, quan sát transaction/profile uncertainty, chỉ complete current Inbox khi đủ căn cứ; không gửi text/ảnh/ACK hoặc replay mutation. [Record và review chain](../docs/specs/c3-phase-b-silent-fallback-review-fixes-20261028.md). 732Vitest/228NodePASS; direct build/typecheck/lintPASS; independent200focusedPASS. PostgreSQL focused6checksPASS,7/7DBdrop,provider0. Hai fullSQLrun đầu giữFAIL61PASS/1staleassertFAIL mỗi run; đã sửa assertion và chạy lại affected/suffix, khôngclaimfullPASS hoặc model/BGO. Không live/merge/deploy.
