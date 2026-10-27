@@ -1,0 +1,48 @@
+{
+  "implementationBaseSha": "008fa28210e8587e6e248486b6b85537800bfc43",
+  "executableSourceSha": "cc068a8f72b58e5b186705e6f07cfd03b398991e",
+  "independentReview": "APPROVE",
+  "approvedWorkerSnapshotSha256": "49590a51e4c34e99954bc22bd5afa3606843bd419b53ab9278e4d269353bc454",
+  "workerFocused": 516,
+  "commerceNode": 221,
+  "pythonStubbed": 2,
+  "workerTypecheck": "PASS",
+  "workerBuild": "PASS",
+  "workerLint": "PASS",
+  "providerRequests": 0,
+  "freshPostgresRun": false,
+  "liveSends": 0,
+  "sourceStoreWrites": 0,
+  "BGO": false,
+  "remaining": [
+    "Owner operation omission/misuse not qualified by provider",
+    "Sales decision adherence limitations remain",
+    "Four media needs lack evidence in observed source; three POS failures are controlled fixtures"
+  ],
+  "logHashes": [
+    {
+      "file": "node-full-final.log",
+      "sha256": "fa44892fb80dbcf5fa39b6154cde1d9f19c05671c53a95b48df73546fefda14b"
+    },
+    {
+      "file": "node-full.log",
+      "sha256": "80e95696f4ac06f97d40e1a76af0388d8cbcdee1368a83a70c18393857be61e9"
+    },
+    {
+      "file": "worker-build-final.log",
+      "sha256": "099630815327f1a821b221850cc435c905590a80aa3c59cd162ab57b62c799f0"
+    },
+    {
+      "file": "worker-build.log",
+      "sha256": "e5b49532d0aebe4a596962380ca1ec78bede1fedf160cf4ba4bfa95e8d7d57e0"
+    },
+    {
+      "file": "worker-focused-final.log",
+      "sha256": "39f4c4044a36ca039206739a1fc7a0e500b9c594d99ff2759f7df5ad742281ea"
+    },
+    {
+      "file": "worker-focused.log",
+      "sha256": "853631940f19ebf8b8ac80ea138523d0ec491f4a2ef11d29925eb6d3fb8a6ebb"
+    }
+  ]
+}

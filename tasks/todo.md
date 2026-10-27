@@ -1,4 +1,11 @@
-## Current — kế hoạch quote completion và audit tư vấn, 27/10/2026
+## Current — implementation quote completion và audit tư vấn, 27/10/2026
+
+- [x] P0corrigendum4media/3controlledPOS/1verifier/2businesshandoff; P2audit20exactfinalrequests và22mediaobservations, khôngwiredefect cụthể→khôngcontext/fit/voicepatch. [Audit](../docs/specs/c3-phase-b-quote-completion-corrigendum-audit-20261027.md).
+- [x] P1observedRED→GREEN: explicitquote_product, standalone/strictsubjectofferscolor, canonicalPRICE+media quaexistingtools, silenthandoff, opt-in/legacyB1 và exactfinalgate. Newnative/finalwire/metadata/accounting/protocol/schemahash consumers.
+- [x] Independent same reviewer REVISE2P2→fix actualdispatchproof/schemafreeze→APPROVE snapshot49590a51…;14stagedhashes match executablecc068a8f. Final516worker/221Node/2Python PASS;worker directtypecheck/build/lint PASS. [Implementation/review](../docs/specs/c3-phase-b-quote-completion-implementation-20261027.md).
+- [ ] Freshproviderqualification chưa chạy; owner có thể bỏ/gọi sai operation và tư vấn còn hạn chế; source ảnh chưa bổ sung, không suy thiếuPOSthật từcontrolledfaults. Không tự model run, source write, live send hoặc BGO.
+
+## Previous — kế hoạch quote completion và audit tư vấn, 27/10/2026
 
 - [x] Viết [plan](../docs/specs/c3-phase-b-quote-completion-advice-plan-20261027.md): corrigendum4media/3controlledPOS; explicit quote operation và completion bounds; exact-wire advisory audit/no-patch mặc định; acceptance và lệnh dự kiến.
 - [x] Cùng reviewer REVISE3P2→revision2fix→APPROVE canonicalLF hash `526ac86377593db4f652c72cb2159c514081a8d4e8b24df6189da14bca77b468`; standalonebatch, explicitprimitivecounting/protocolcompat và resultconsumer chain đã đóng. [Trail](../docs/specs/c3-phase-b-quote-completion-advice-plan-review-20261027.md).

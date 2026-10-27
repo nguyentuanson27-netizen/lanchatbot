@@ -1,4 +1,8 @@
-## Current — kế hoạch quote completion và audit tư vấn, 27/10/2026
+## Current — implementation quote completion và audit tư vấn, 27/10/2026
+
+**IMPLEMENTED + independent APPROVE, chưa provider/BGO.** [Record](../docs/specs/c3-phase-b-quote-completion-implementation-20261027.md). Base008fa282, audit63d7d8f1, executablecc068a8f. P0/P2corrigendum:4observed media gaps/3controlledPOS;20finalwires/22mediaobservations, NO_CONTEXT_PATCH. P1quote_product explicitowneraction, standalonebatch, same read/media/handoff/finalgate; PRIMITIVE_WORK_V2 reserve2/prepare trongcap6 +1handoff; actualadmittedproof/counters, schemahash gồmquote, native/finalprojection/capabilitygates. Cùng reviewer REVISE2P2→fix→APPROVE snapshot49590a51…/14stagedfiles match. Final516worker/221Node/2Python PASS, directtypecheck/build/lint PASS. Giữ limitsowneromission/misuse; chưa sửa tư vấn/fit/renderer/verifier hoặc shopdata, chưa provider/PostgreSQL/livequalification, không tự chạy model/deploy.
+
+## Previous — kế hoạch quote completion và audit tư vấn, 27/10/2026
 
 [Kế hoạch chi tiết](../docs/specs/c3-phase-b-quote-completion-advice-plan-20261027.md) revision2 **APPROVE** bởi cùng reviewer độc lập, canonicalLF SHA256 `526ac86377593db4f652c72cb2159c514081a8d4e8b24df6189da14bca77b468`; [review trail](../docs/specs/c3-phase-b-quote-completion-advice-plan-review-20261027.md) giữ REVISE3P2→fix→APPROVE và line-ending identity. P0 sửa phân loại:4observed media evidence gaps +3controlled POS failures +1verifier rejection +2business handoffs mỗi vòng; không suy POS shop thật thiếu từ fault injection. P1 quote_product tường minh, standalone batch, PRIMITIVE_WORK_V2/cap6+1/consumer projection/finalgate, chưa giải quyết mọi owner omission. P2 exact-wire audit/no-patch mặc định, không renderer/fit/voice loop. Chỉ plan/docs trong task hiện tại; links/12focusedtestpaths/hash/diff/credential-pattern checks, chưa implementation/runtime tests/provider/source writes/BGO.
 
