@@ -1,0 +1,4091 @@
+{
+  "reviewedHead": "b7e197d8877c4643fba2f86121ac1f8ec87af21d",
+  "scope": "OFFLINE_COMPARISON_ONLY_NO_NEW_PROVIDER_RUN",
+  "historicalReviewLabelsAreNotCommonQualityScores": true,
+  "privacy": "No customer inputs, private checkout content, raw requests or reply texts copied. Hashes/counts/references only.",
+  "runs": [
+    {
+      "id": "compact-native-full-run-20261026",
+      "sourceSha": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+      "models": {
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        }
+      },
+      "promptHashes": {
+        "owner": "71292eea99022f78c3ba5264eb4de6c8394dd2f345eb80bacb10a933c4e8e8db",
+        "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+      },
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "repetitions": 1,
+      "generationRetry": 0,
+      "nativeRegistered": 51,
+      "controlsExecuted": 17,
+      "generationRequests": 140,
+      "generationErrors": 0,
+      "terminals": {
+        "SEND_ELIGIBLE": 36,
+        "HANDOFF": 11,
+        "NO_SEND": 4
+      },
+      "imageCount": 7,
+      "outcomesWithCapturedMessages": 38,
+      "files": {
+        "REGISTRATION.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/REGISTRATION.json",
+          "sha256": "1bb6cdb8471298699ad6ca1aa00c926a862a8a0a6cdfe33c4dc8ac33bed26205"
+        },
+        "REVIEW_METRICS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/REVIEW_METRICS.json",
+          "sha256": "2ec6adf05bf4a72a4e0f41d3bb3b42dde9781b66c5612349771901c393c0aa5a"
+        },
+        "ACTUAL_TERMINALS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/ACTUAL_TERMINALS.json",
+          "sha256": "c8181c361a200fa8faae4d549b3fb00e32885c0a90ea7ce756f3d5aafdb57504"
+        },
+        "WHOLE_TURN_REVIEW.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/WHOLE_TURN_REVIEW.json",
+          "sha256": "46b9dd1e139db1d27272b310b99797c982882f1f8bfccca5580f77a8e424386e"
+        }
+      }
+    },
+    {
+      "id": "media-size-context-run-20261027",
+      "sourceSha": "0ef9991a578e8da33f9bfbd4f81a86765380fe9f",
+      "models": {
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        }
+      },
+      "promptHashes": {
+        "owner": "ecc60d49142849d34263471bb8b9a14d54d33747a0ef078af64d308ed947dff6",
+        "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+      },
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "repetitions": 1,
+      "generationRetry": 0,
+      "nativeRegistered": 51,
+      "controlsExecuted": 17,
+      "generationRequests": 143,
+      "generationErrors": 2,
+      "terminals": {
+        "SEND_ELIGIBLE": 37,
+        "HANDOFF": 10,
+        "NO_SEND": 4
+      },
+      "imageCount": 7,
+      "outcomesWithCapturedMessages": 39,
+      "files": {
+        "REGISTRATION.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-run-20261027/REGISTRATION.json",
+          "sha256": "365c0e4b76bee5ce7ff579144ffc1760bb71ac4cf1676c065386c19c85c0410f"
+        },
+        "REVIEW_METRICS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-run-20261027/REVIEW_METRICS.json",
+          "sha256": "84f47b3a5e7c31fdb39452b3e606c8f7396ac1ed2ec06faa0c1236150d7d3a03"
+        },
+        "ACTUAL_TERMINALS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-run-20261027/ACTUAL_TERMINALS.json",
+          "sha256": "8f74938c4f614474b3fc143503904d8ca00024c6ed41ad3f5b8936f0278ee1d1"
+        },
+        "WHOLE_TURN_REVIEW.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-run-20261027/WHOLE_TURN_REVIEW.json",
+          "sha256": "4aae7357a11d0a8e6d59d046343a96b9688357f2a38669e9e2fc3bb4d23061fb"
+        }
+      }
+    },
+    {
+      "id": "media-size-context-repeat-run-20261027",
+      "sourceSha": "4efbea67356f1e3e4f7fa886dec48d58c4ab1474",
+      "models": {
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        }
+      },
+      "promptHashes": {
+        "owner": "ecc60d49142849d34263471bb8b9a14d54d33747a0ef078af64d308ed947dff6",
+        "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+      },
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "repetitions": 1,
+      "generationRetry": 0,
+      "nativeRegistered": 51,
+      "controlsExecuted": 17,
+      "generationRequests": 143,
+      "generationErrors": 0,
+      "terminals": {
+        "SEND_ELIGIBLE": 37,
+        "HANDOFF": 10,
+        "NO_SEND": 4
+      },
+      "imageCount": 3,
+      "outcomesWithCapturedMessages": 39,
+      "files": {
+        "REGISTRATION.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-repeat-run-20261027/REGISTRATION.json",
+          "sha256": "1e01a9827bb204818f3be253b55cd83a162d3a854355d1e39d9387746ed49b15"
+        },
+        "REVIEW_METRICS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-repeat-run-20261027/REVIEW_METRICS.json",
+          "sha256": "38d979eee823ce001e7e33e58cd7f90ec280f24f9c8573a6cd0ec0d72ea00340"
+        },
+        "ACTUAL_TERMINALS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-repeat-run-20261027/ACTUAL_TERMINALS.json",
+          "sha256": "c3fece1113d31a79a566ea667ca791d4c53c89c15805a2c681d7568d0cf5608d"
+        },
+        "WHOLE_TURN_REVIEW.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/media-size-context-repeat-run-20261027/WHOLE_TURN_REVIEW.json",
+          "sha256": "1e9609a4032a3b9ac06fba56269d802cc596d62ac68441e5e4812e0af6271313"
+        }
+      }
+    },
+    {
+      "id": "quote-completion-run-20261027",
+      "sourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+      "models": {
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        }
+      },
+      "promptHashes": {
+        "owner": "a9fdb61fcbdbb26e2b79a1e70e0cb6637d0ed265ebe6f191f4971c98b8cc1ce1",
+        "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+      },
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "repetitions": 1,
+      "generationRetry": 0,
+      "nativeRegistered": 51,
+      "controlsExecuted": 17,
+      "generationRequests": 141,
+      "generationErrors": 0,
+      "terminals": {
+        "SEND_ELIGIBLE": 37,
+        "HANDOFF": 10,
+        "NO_SEND": 4
+      },
+      "imageCount": 9,
+      "outcomesWithCapturedMessages": 39,
+      "files": {
+        "REGISTRATION.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-run-20261027/REGISTRATION.json",
+          "sha256": "17f59db6c86f6058e8d38b48394e00291b07c419b637fac760f94cc08b9281dd"
+        },
+        "REVIEW_METRICS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-run-20261027/REVIEW_METRICS.json",
+          "sha256": "f45a7fe5a838c9e414dd51d18d261399b63f7722405a24cd60daba25d8b7f3c3"
+        },
+        "ACTUAL_TERMINALS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-run-20261027/ACTUAL_TERMINALS.json",
+          "sha256": "16d0133b5c0cdcfba36985bea3c4bffe3146979d9f158b4859533d6113dd35cd"
+        },
+        "WHOLE_TURN_REVIEW.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-run-20261027/WHOLE_TURN_REVIEW.json",
+          "sha256": "04e66858b9285003d8e0854e6112184175a6b6106116ff59afe2c6e30ba45a1a"
+        }
+      }
+    },
+    {
+      "id": "quote-completion-repeat-run-20261027",
+      "sourceSha": "bb87949347bc8c1b3f28d41a475f57202824e83a",
+      "models": {
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        }
+      },
+      "promptHashes": {
+        "owner": "a9fdb61fcbdbb26e2b79a1e70e0cb6637d0ed265ebe6f191f4971c98b8cc1ce1",
+        "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+      },
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "repetitions": 1,
+      "generationRetry": 0,
+      "nativeRegistered": 51,
+      "controlsExecuted": 17,
+      "generationRequests": 138,
+      "generationErrors": 1,
+      "terminals": {
+        "SEND_ELIGIBLE": 36,
+        "HANDOFF": 10,
+        "NO_SEND": 5
+      },
+      "imageCount": 7,
+      "outcomesWithCapturedMessages": 38,
+      "files": {
+        "REGISTRATION.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-repeat-run-20261027/REGISTRATION.json",
+          "sha256": "f8d1498a732165344823724a7c77eb144880483985d66c2a5fb9dcd77e7af3e4"
+        },
+        "REVIEW_METRICS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-repeat-run-20261027/REVIEW_METRICS.json",
+          "sha256": "cb4010695ac58441bd7a159a81f7e120bb4fef5884602dbc8d0c070d47866904"
+        },
+        "ACTUAL_TERMINALS.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-repeat-run-20261027/ACTUAL_TERMINALS.json",
+          "sha256": "d50d1748e94dd18b301abbb60a27a4b1658f1a86c1fecc6123a6280cd060a74c"
+        },
+        "WHOLE_TURN_REVIEW.json": {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/quote-completion-repeat-run-20261027/WHOLE_TURN_REVIEW.json",
+          "sha256": "317b1c012639ed00a1daedf93cd4aac5074a20b4fc53f6605a813ee4dad50b19"
+        }
+      }
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "opening-ad",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "opening-quotes/provider-attempt-1.json",
+          "artifactSha256": "7b96a1d1194162009aaea37a0aa8ca6f743844497368d6f645212285d0e5e3fe",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e858ace79e8ed3726d6a341de79859444d8b44779e095a1be825b790bb7cbc68",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VOICE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-1.json",
+          "artifactSha256": "2661e77a7012c361f61e7afd32f07a1e2bf80c3a8364183d4631e3a5d4eb91fe",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "d07ae0d1f1dc5add67cd85e443dd61fb3643c78037c54b9f91f6ab18ef5f5db0",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-1.json",
+          "artifactSha256": "a4a559a57e72ea8c48dc619b9ffd27a5c0617c1aa8ce8140580ce17e79e6d395",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "3b4d7a953b14d4296167712bf0827347ffbcf08acf676b9fc2782f5187b15008",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-1.json",
+          "artifactSha256": "51e131d9b6c39f92abcc5b7e751474f5de2b6a37627d40880e6f180d2f6f2fc6",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "78dc700d8e9857d7b06d2bd0d9c1bb64efe5991f34e9d1f660db49b75376ef52",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-1.json",
+          "artifactSha256": "32588b461d0b948716cd26b947ba31ccff8e786c04d258906561aee152beda89",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "04022af21457088b49d3f708cfcdc40195548818e72ab57db28f5fb0bb4b155e",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "opening-ad-repeat",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "opening-quotes/provider-attempt-2.json",
+          "artifactSha256": "bb57d947e82ddacc4919fb104fcc1a79f4be9bf8aee90f1f743b33c3c0a92b6a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "0937675952d73f485fe790e8bbad3823482090ac7c782869b79479f3c5eaf072",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-2.json",
+          "artifactSha256": "fac69238a6a7a4947ab90045ddcc8cd5adab53e4f7f53c4360b473e6be05df57",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "5d5cf4d22825c83094ad343b2b8afd0c38bf04e117b0fe6d8495281381bf2104",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-2.json",
+          "artifactSha256": "f4b34dc04ba87e8458c1de7d32a6f5e3276e314dc5d2c0c5c362a5d00ea0a204",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "b220438ed4c0eec5567393ced36f8cb07f2114a5c3a2b31d72e2b9c9ca6b037f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-2.json",
+          "artifactSha256": "df7448aabf900a0adc529438f406db7ae5269e3dd7783e99426072bf4d48c56b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "1b3ef511bba6e7a2391b1308424ccfbfb84cc16c3b1a27b954ab1a17a681f877",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-2.json",
+          "artifactSha256": "56349a44344048438afd4da2f5d69ed9e4630352cb0aea4930f853313b0296f8",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "01a964d0ef442bda47617b6031cbc0f3112fcbbd42949aaed8b7987dbed43d91",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "opening-organic",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "opening-quotes/provider-attempt-3.json",
+          "artifactSha256": "d71fb1bd30b03e5b90a8acbcd16dd261d61cc9932c2b828848331192e4cde240",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "0e9d641f83172b10a0ed818c71a213eabd2ca0e87be338a60afa1ed2f4d5b42a",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-3.json",
+          "artifactSha256": "bd8b4b626d5d67496c73324c0b223afb24c8e662dcbca2b1e4043452eb920058",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "595f219f750e0163f7344e2a3e5b4bbd5a19287c03fb383d741f19b424960dae",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-3.json",
+          "artifactSha256": "6a1b73c1b20f972b9d97e3987bd76853220f68fc392ca7c4afc757f9a8c91ba0",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7372058188d798f34b2367f6db870592c95915e04da318849005964f9ea9a72d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-3.json",
+          "artifactSha256": "2867cdc69382bf12326165acaadabba1c37a5287af84824d7f93b2a37f185840",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "761a0b1492bc2db38ceec32f2e7b38e8eaeb726f3cefc40e9e9135ba2ce822fb",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-3.json",
+          "artifactSha256": "3f2f3355ef40c222f87319543b225b3681ee9d984d99ef2eb8673192733cc125",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c4ffbca0e8ee22d7d45e7fc2a76558f5bc845d57ed4040c234623f39b9047594",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "opening-unresolved",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "opening-quotes/provider-attempt-4.json",
+          "artifactSha256": "8be3fd2731bf8c43d997fa8c96614ca1422d9a224c4a757ba5f7a9116bb47036",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "cb05debf09b22e480614586673578c706ed4d33458b4a4bd55e248ddb55a7d96",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-4.json",
+          "artifactSha256": "fbfcb74c3384de1d0cab18230ad7cf67533ec7857841139992af55dce63afb00",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a49de89ca2c434140eed08336271120450342ad0b4927f985abd7137f03f391f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-4.json",
+          "artifactSha256": "213cd21a9c055491a7fc6757e47bab25a12efe6e40bfc6a3cff96d97c9ae31d6",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8686f3de67006b22ecb984b200f0d4bd480bea2cc307327cb7902cdc8ca20491",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-4.json",
+          "artifactSha256": "bd289d0ad6de51fb2bd53c9dd56c5e8036bdd6aaf5076aee975751600d49b929",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ab0afe27a33062b0b529bfe3625ed1c1eb814ce921dfabfd0a732ad050849f79",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-4.json",
+          "artifactSha256": "e16c63195f24a51e6cb2ab309db5d42ac660e45e9830e1b1d69b3f6d55134a05",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "836091529c4bd02bbe22d053349ee529304154926113bcfbbe3885fa8df8b5dd",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "opening-multipart",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "opening-quotes/provider-attempt-5.json",
+          "artifactSha256": "86e26a402a8cde6411566d64a90590f652d4e85ed52d3947fca6e3860e45b290",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "b293eac3ed757cb1b38273154997a1afa19e480f6bf786aa34b04ef15f430d3c",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-5.json",
+          "artifactSha256": "e2b6071a309f9f3fb9287e08e48d157f1cdbbaf13609cf0690a2f0024d405487",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a0f78e084f199368fd1a997ba4a7e2c1ca8ffbc4351c0032d7c6b47edf60c7ae",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-5.json",
+          "artifactSha256": "8280c0f7eadd54ea8171a5a719c2a40621c614d1e83057fb011b193f8a91b89b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "2a4827f6b1b219ffec8327a3a3cc010feb8d6b6b01240eb468398bdc18fe7bb1",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-5.json",
+          "artifactSha256": "7c11e007b0b56577a5090fd7a1792424270245d41184d5706c81178446d06307",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c3b48adb4fda8825cfd1b6c2a9f9dc548568d702c9343bf4c312212552c856aa",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "opening-quotes/provider-attempt-5.json",
+          "artifactSha256": "8a97c3a743d54e0e0dc170519181cf6aed22ac167e932408918b7af67675c066",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "fb95f7aef5f3d63ff7a7ba5331b83be70a2706b9fdd9e2b67c8cad23ceb1b5d3",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-1.json",
+          "artifactSha256": "7c8066861fe2993a39963c1a009ff393db4968218e48d3656051f5507115f3a6",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_SHOP_DATA"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-1.json",
+          "artifactSha256": "6249c50e370660e056dc098fbf81241b973486b1674e8cca50ea85105e34a1e1",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-1.json",
+          "artifactSha256": "03c559071bf4f0a1fb2fa545d390e39f3f9848bb74e6204890e4cf93a9e404d0",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-1.json",
+          "artifactSha256": "64a22812aba8034b803ffd97dfff6ee4a0d5709dc4db2c6c57ca8122f532e12e",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-1.json",
+          "artifactSha256": "6566b7ec0de70e375e540126d05f80e752991381cb50a3a86d1d85aefc52978b",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        }
+      ]
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-2.json",
+          "artifactSha256": "50e5b23087c71e9b84ee3cf51e50cb38e9eb72637d2b782e1c6994984bfb4576",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_NO_SEND_HUMAN"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-2.json",
+          "artifactSha256": "aa169258dc1097f398e93d1157d1cea77c4cc5a3d766831e5656139c271e0592",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-2.json",
+          "artifactSha256": "6b9da861e25823b6b8819fc547a687d0405731ddc3662a19c9c6e542681ed769",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-2.json",
+          "artifactSha256": "8a1c12da479d01590558052a8d890e2ab94f625b9895f8831fb881d620b13600",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-2.json",
+          "artifactSha256": "bdf6e0ca4c99a902b2d7a2210898ae3e98d761206b2b02278004c4697475efd9",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        }
+      ]
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-3.json",
+          "artifactSha256": "fe5bea030b6b122ed0d0b0328f3fcd4ef24aa6f2e7431076306f7791f08c37d7",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_SHOP_DATA"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-3.json",
+          "artifactSha256": "25aac160a1ccebcf55e9c1c3c6ce9ae4afe7eaf0d2501a404ea2736d931e23b7",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-3.json",
+          "artifactSha256": "a18f0fcc7793ab4d4528f3fc6f4d6c05f9f63a5d5ec65988eee99f4bd9fa9967",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-3.json",
+          "artifactSha256": "36e6991c6b63714a3f36db957fcf82dc3eb37c3ae4587a81d07c54c4000aba1e",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-3.json",
+          "artifactSha256": "6fbb722338a7dc2a597234ecff20872fc00cb2baf14bab7a4d4ef4cb50b69361",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        }
+      ]
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-4.json",
+          "artifactSha256": "4576b51b3b43b89c1998325906684087dca117d76d2ebb3fbb375cbeb215835a",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_NO_SEND_HUMAN"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-4.json",
+          "artifactSha256": "ce75507ab92fc84865079d0184ed7021fca6542eff8ff28b5f86f6031e3448c5",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-4.json",
+          "artifactSha256": "ddac29fba438ca9a5c14d9c1b6d48080aed3624b2a7f81a1599fd0879ba11868",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-4.json",
+          "artifactSha256": "edd4fb909f4585ffe046995c3ad05fd96a2821b94e0e3423ef636c84e14c1ff7",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-4.json",
+          "artifactSha256": "7687e94ecbda5a4743f9dcc6be17af1864c858a1439b0cf693d4098a7163b836",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "HUMAN_OWNS_CONVERSATION",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_NO_SEND_AFTER_HANDOFF"
+        }
+      ]
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-5.json",
+          "artifactSha256": "20966ef2953e275c32283a54e149fdd08407c5ddbc6bc724bf54f0ca8db439cb",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_EXPERIENCE_LOSS"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-5.json",
+          "artifactSha256": "373c06ef1f39c085d6274dc6e447c3dcca36fecce484449535942451d807759c",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-5.json",
+          "artifactSha256": "4e42bac24185628ed30087a838bbb997775fade5279c2ce78a76131aa810dfac",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-5.json",
+          "artifactSha256": "f0ed2749063305964643b17211c37b99de4a640d8df728cf777be672d3b915f0",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-5.json",
+          "artifactSha256": "ca5c265b607bb21a9f6d1a9a684ec17660141c12c52ec33908ea20492382cf3c",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        }
+      ]
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-6.json",
+          "artifactSha256": "d98627b156d6392c982133680de3df16286ffd6939f25d910473d3c504cfc91b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "9c517073d318da33c1be6d9189f798eaed40bf77e4497c833205132602d7e984",
+          "capturedMessages": 2,
+          "images": 1,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VOICE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-6.json",
+          "artifactSha256": "394d1afefc0dd90e2f7efa13a4d855fc5356e29cb331216bf9b69bb6c059794d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "06f92bdbaaee93f247c7058b83776470a0e7e54419bd55734e5e7776e72ef024",
+          "capturedMessages": 2,
+          "images": 1,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-6.json",
+          "artifactSha256": "1813251c990f33a5af635b79c5edeb2801b2baf0b68baab9eff1b32717bda7b9",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7f706115cbf8933127405c097efe89c3839a1d8de320f45f09ca742174baa6fa",
+          "capturedMessages": 2,
+          "images": 1,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-6.json",
+          "artifactSha256": "4a7d7dd037393e5243a8cd86e422f5a73b2fdb0925fc3d82ef8118b133ed6ebb",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "fd7d510fa690fd3099c14b2e185b5b06724766774347e439877851f01b32dca5",
+          "capturedMessages": 2,
+          "images": 1,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-6.json",
+          "artifactSha256": "e8d8449b1f753eca3948995ff5f85513ff43f113fb14286a7334c6ded0070f73",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e39ca48d53413a9c40f7cb057989996c951e8cad5834060522b157f3dfe290b1",
+          "capturedMessages": 2,
+          "images": 1,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "media-decision:ask",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "media-followup/provider-attempt-7.json",
+          "artifactSha256": "1d04cd9dfe50323992703a2bd4682344203ba5cddff609141e6cd941e5987096",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "OWNER_OPTIONAL_DEPENDENCY"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "media-followup/provider-attempt-7.json",
+          "artifactSha256": "bb5ee1be1da80b80a423e5b77ce05f8934b0597535d6de5472915dd929be4bbc",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "45588aefda8d62cc9d3f1d2b4ffb6490c1fd6cff41ba41a6d039196c077a581b",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-7.json",
+          "artifactSha256": "5c4bc8f9efe0d998599a68d5804631b6eb4c8b630707e7610a01076232b8e470",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "de88beddabf3213057985f20fde9a55043c57a289f433c08d151ab2cc391c75f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "media-followup/provider-attempt-7.json",
+          "artifactSha256": "9af6135772d257e6a71ba696d94bc4810d3db91a67fb630bf7400cfcfac3a1a5",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7ad48c26bdb37e201345a0547ec8136221cfee91237ba987dfa2540f7e2a205e",
+          "capturedMessages": 3,
+          "images": 2,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "media-followup/provider-attempt-7.json",
+          "artifactSha256": "7d454e618b5e3120218686604d00e726c61b716ba7b0943366a22fe1bf928c5b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "041ec77257ef918de421175e80140913958eb749793e729a701f469abff99f64",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-partial-source",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "missing-pos/provider-attempt-1.json",
+          "artifactSha256": "aa36712bb756d3a144eba0ac010ae5e4ddeb92beb4e4c2e3be02371b4a66223a",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_SHOP_DATA"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "missing-pos/provider-attempt-1.json",
+          "artifactSha256": "a5c2e098e8126df39825066a5c724887ac3907e2f72e204f7703d2bc9c44f333",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "missing-pos/provider-attempt-1.json",
+          "artifactSha256": "a5f8c524edd9e63e923bbb37a801ca4fd31a803b980b5f2ada80078bf2f322df",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "missing-pos/provider-attempt-1.json",
+          "artifactSha256": "d050a946582b2f7c00c6ae1a9f5ab76b3e65365ad037ec1886f6e93dee0b8898",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "missing-pos/provider-attempt-1.json",
+          "artifactSha256": "de874142477f0fe7145364df478fb2998ab08692db59dafcff034f9f13708dca",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "missing-pos/provider-attempt-2.json",
+          "artifactSha256": "087d9eb32db1a8df9a9bd47ff83f479225fe0ea22a7ade478eaa2e6aca6b2ec9",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_SHOP_DATA"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "missing-pos/provider-attempt-2.json",
+          "artifactSha256": "9a00bcb265f9170a4a7ce08c5e9fa3fe3646c64add7bb4911cc1c9dd9499f9cf",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "missing-pos/provider-attempt-2.json",
+          "artifactSha256": "9c832735fc2d51a20afd011691e01f8fc01d989eb64e2bd45d3ea0aba5c35168",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "missing-pos/provider-attempt-2.json",
+          "artifactSha256": "2870a5191f690220f8a8aaf50bc32ab000830288ab905e72de30400a2310d3d7",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "missing-pos/provider-attempt-2.json",
+          "artifactSha256": "df77ad96c5294342016f02d371fcd8b07b615ab134cf6596f131205a4f592206",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "missing-pos/provider-attempt-3.json",
+          "artifactSha256": "23efa44f3b88a0103a79993897756ddeadd36e87dd6e478ffd7e8dff0e5c3760",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_SHOP_DATA"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "missing-pos/provider-attempt-3.json",
+          "artifactSha256": "51deef1ea2a56008cab1fcc9d84ad2ae7c99d47677ae112bbae10deeebdd521a",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "missing-pos/provider-attempt-3.json",
+          "artifactSha256": "9f94244b8f7f6aa0d636b1e930040e9de625f540197a739af154a3817186fd39",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "missing-pos/provider-attempt-3.json",
+          "artifactSha256": "75a447e74a6e9519afa94a27d6c477a50a7f3638e7700d30e115128f98272dea",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "missing-pos/provider-attempt-3.json",
+          "artifactSha256": "0ff777930bc99bc7f474de6c26321d41d993e498cd48573758e508748a297432",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "ATTEMPT_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-1.json",
+          "artifactSha256": "771332cea1ff5da8e86977b9b34ab205faafcff59db222375e50f0445b8d3928",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7f010bdc2c7b0cf97b570a1a9985b0cdadb46a4e9ec0e5f14afbbadd1e7846ba",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_WITH_INFERENCE_LIMIT"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-1.json",
+          "artifactSha256": "b2977db1661c95fcb2d95f3ed0df1fce5dfa8d98f578073559290ac207d8fa60",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "6bc7fd02122b3732b4eecc486836fb1288938bf06c389c61654ab9ceb175dc72",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-1.json",
+          "artifactSha256": "e43e1c53c717857bd44c892e4c61b6448d77c9f966a0a52c8cc2d684a16e0df2",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "24a2bd22d6dce5e4e48dc9740361f92c3c4505fba1f7719add42c5356f57d8c2",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-1.json",
+          "artifactSha256": "cd1cef73341430465b8f184dffb643c6ed9d57805aedd50685b6e1f65f9f71bc",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7d3ee1d8726a190158c9e50a4be7464bca29bb98013c34c25218a63df59fa861",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-1.json",
+          "artifactSha256": "d08cdba8cad4a4e326b509f16a31fa2c00a9103c23fa54444b5d319f1dd4796b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "60124a95025e9680bd778321b543bbef05f2289e1cdc25f812194b6a7edf21f3",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-current-policy",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-2.json",
+          "artifactSha256": "1a919cdaf45126471247d10cc4a45222af2b2bff116e583b510fbe6951f4d5e3",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "db21c3f9a8c1010563e9d47be0b2d7b8a73701c7504a8b4964ac5a74d7fbc570",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-2.json",
+          "artifactSha256": "d87f9a4640496e06feeaa41989bbfdae2f95ce3a765acb87e97b1599149675dd",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "f938a6b45da21d6d8f3ea2bbd7a8d53ec1fda2e5d8f39fba96ff9b16fa4e5160",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-2.json",
+          "artifactSha256": "d420b1caff1fbeb9eaeb043b7d54544b1850c48164a09fc503b54b2d1b531051",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "d80a3d9f3c8535ba2f2e96de2d444c7ffd33eff07fcd7ed51260304f65dec4d1",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-2.json",
+          "artifactSha256": "0a1f58e38c1257f4ef5ed2b202079ba72118936318834c8d15fd12227baf69a7",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "f149f9348bed2bd560f66946d407062c37d736258fa4ac40d2c4758c37abbf87",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-2.json",
+          "artifactSha256": "7087ac7432829caaf1c36a740b3fe0c5ed63a2e52d1be6ff5453c5d98e6fec87",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e8c59f1c19f20a7d5ef3f90b510c9b4fdbb1f7f8a36449f97dff8f286188a1a7",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-price",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-4.json",
+          "artifactSha256": "f23626d362cb071f0698c5dd235b46953b4ce003d5504c3b8daa4280dd5b13b8",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "edf3ff9769097036a8f10561b16338ef8c93f6c84784178a5da68670058fca41",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-4.json",
+          "artifactSha256": "dbcb837a61bb21a3f294e82da3b1054ff8f5726a4f6dff71a2afbd6d0621adef",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "0a3cadaf56e3c0b97094ecc3530b7f2a7e7372f8a4d766a4fb5e7de431007232",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-4.json",
+          "artifactSha256": "b25e42183cc898a4a67947ecc836f08708dd8c3b7379bd8dd015632c2d99ac26",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e73d28dd66a072220f7ba7c4345b63590837d69de539f0581352ed05c31c9e26",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-4.json",
+          "artifactSha256": "325f01759d77d93f9e8aceed69cac42f68d92d00bf35eea93fed607e2996719d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "1d7a39577059fb66a8a1b0bff2310afb3189151af9bf13d98abd8d0a0d4831ee",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-4.json",
+          "artifactSha256": "58583ace82486aba1f8ae29c29ccc9cf1e13a081cc624910fba032d7b3e14734",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ce6c994ed05b1190b4506b541158590933bf395e0a951432a560b3f1710b6800",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-component-stock",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-5.json",
+          "artifactSha256": "7d0c50a3b6a4a6e39782ea541b2fa1a9ebc153a6acc39aabb8765c810ccf6d0b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "0ea9222cf11f0c78af57b501d9db4d39acd6b3a27e1c7b1c8183cf06ed1b820a",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-5.json",
+          "artifactSha256": "b5c00f3f4b5cb4fc2af2f446619d4c3bd885b2d04eae8023e3d10d52ed2f3007",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e16331e7985b4928f118225af033cce74fd832d0cca32f0d1c0963fcbd8d1c01",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-5.json",
+          "artifactSha256": "15f52470ecff33a25979abaf4f4f2e33c594ce299bee9f9fa7dcb79c31af8c2f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "42d4bdcab45eadb211a43ed28f47b2dac7bb9abd4b2a4a23d4c0f935ac60eb3b",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-5.json",
+          "artifactSha256": "af7a94ce948e0dfd495dbd4a2e8cb2061bf5cf96d1bcf4e1718349656d0e9a80",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "558437ee252b56f0b45952bba724ef5748d595d7228864e81838bae12ae84be7",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-5.json",
+          "artifactSha256": "94742303af44328cb783f732ba994c48d8ce8cf451f26577d0ae3b396053e20c",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8b066147288599a3ab3275c555fe00fde5e11fe0f98bf73390d1aa9cb4162395",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-search-read",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-6.json",
+          "artifactSha256": "c1f96ce5e4c467fbca75e27a3f5a0a3d2ef98619c030d5589f084fe907c155ea",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c499b70db603ea535943432046abcbbbf1bf8f562bc64dc8e307222a201c0663",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-6.json",
+          "artifactSha256": "57e84b6afea57ae745a46d40137c78f1f0bbb714a4897ee2187ed39df12e06c0",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "49369c1adaa5f7f10771accbe68cbc7773f6b268cf8f42e845c26467099df9c4",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-6.json",
+          "artifactSha256": "a00eb44a849c59d0d7562a018fbc731a7c8dac609b54f66ba4e7554bd83f1873",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "4fcb32518da1e08905cccf0fee60b29aebacba1e0cec9ccb7c604c53e8c2c957",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-6.json",
+          "artifactSha256": "bbf3c908b2ffe6add04fa5492fae5204786148beb8b83f63537b8c8648d4443d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "762574ef228c495fb48613264451b6da100625e61c486ef0f88a787df41c180d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-6.json",
+          "artifactSha256": "455f8a04b487b74a8b0d9546413ec6963357fd34335b0f0c9c31bbfde97f9016",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "75f91dc25a6f9c3f6c1e2109e4d2a3019936e70262f09199f8edb0853e1fb442",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-7.json",
+          "artifactSha256": "310c1fac33dcd2c8174121a0fc22e41f72488f82455ef3fefd2f01ed9453cb1a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "3c30a39ac5cda0b0d125dc044fe59b699d86f7d8b5db01f006acfdfd454c993e",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "ADVICE_NEEDS_IMPROVEMENT"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-7.json",
+          "artifactSha256": "e2f6b6c7137d972dbed9b7b87171edfef61787a1b2497c51fc02e724cf7b1cc2",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "05223e8c037ca04bff50ce15c5af2710b271e4130948cd40a61789c2d3bfdd19",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-7.json",
+          "artifactSha256": "4861bae1aaa806e46cda06b565f27807aa57d593e5ce816d2a085591a454de12",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "3763234362f722e071a1449d2393281d4d39794d805555407d414631c0a6e017",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-7.json",
+          "artifactSha256": "ecd599535b2a579bde91b468ba42a5816382516a5c4f3b88c30cb54988227a34",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c9add8581846ddde0699114a35b37a7d9240b4f1877d7aae7c7a1a55da74f0a6",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-7.json",
+          "artifactSha256": "eccee84631e6eace547a115b5fb2eb1451f88b99e59c60276516839cb61eb20c",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "cec0c9bc3167ea89f0ea33e12c2353f3d0f62e91b508c8bfa0d5150812be2289",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-policy-used",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-first/attempt-8.json",
+          "artifactSha256": "e38f834159fe2de7081598872af2f017bc6b6813ace55a5ddb59c9f3c7bd0c0d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "058590ce43878fa8f02c7b688eac95d1fa20246209854681afd1b81eba7ed5c9",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VOICE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-first/attempt-8.json",
+          "artifactSha256": "01980536f6c926e051da956b367abfdb8ee12e849cc9ba86b260e5c78e6409d3",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "aaa596a0c14d84685d40e3f6a05b7ae5fe7a3639062a68cf596be5fac679572b",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-first/attempt-8.json",
+          "artifactSha256": "fc253b25f6031b5a189ffd5fa14178a874b279e78f230dd04a16e02019424a48",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ff9c65212824855a9f389bab124a0ec8cacb8d3674707df719802f691c34d20a",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-first/attempt-8.json",
+          "artifactSha256": "cc77a0b6aaa3597241a325bd379bdb9ae06214a12c7ae18b95b852fc5ca71649",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "b8145ba6d6a2f5c7560c9fae7d0db91a139d163fa02c4eab946710c9e7005f14",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-first/attempt-8.json",
+          "artifactSha256": "7abd043570e726d6e72a94ae1614ed18d4175807604fc3055f916f9f2fd52cef",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "0e8d0cdfb9f7962bd3d230416e106b04caf8d4353be1752ab8a39ce27b88dc84",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-9.json",
+          "artifactSha256": "69116e4cc48a06aaa12a5f15253774ae1a598bf02228408a9949f89ee466465e",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "77f5b4d9aca291dd83cdc1b8f6d5647c1470202c04205d847bc93b7183f75200",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_WITH_LIMIT"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-9.json",
+          "artifactSha256": "7084aec2ebf549a774d59e476d5b003e87e91d169db5a72f0e6a49aa80aca73f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "92ef8594ead0b1ddc6a6d0ba8e8e3eb5b660f6c49f40fb985e0bf1d0cb8cc0a8",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-9.json",
+          "artifactSha256": "7e918410188154f6ebee4e0a542ab3a35ef301af552239a21786dad9f63b3118",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a48af7917fd10c48d22c107eb5ab71a6f85c86419c87f841420c0b6e59a1433f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-9.json",
+          "artifactSha256": "0cc8b6554c40ed5bf65f47a14fb092e198511f7859ed1b619a0f35d5afdaf262",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "cbeab82714d2388243592afc882e0ea0434cf349d0871af795d644d3c34f6e67",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-9.json",
+          "artifactSha256": "8f4dcd6674863183482a423e42f188378d4b58443e1cdcad09abeaaa80b7b519",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8f00e656086edde7fcb3c6f4f88d641718210bc840bbc599e54363491bf58095",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-10.json",
+          "artifactSha256": "18bf67bfe8de90d3608df25a4ae9cf7c181a35ce364d8f24fd03adfb58faa122",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "fd212035b4b55be5a72363bd4eb9a7918555bfe6d329a8bc0c08417474f7d23f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-10.json",
+          "artifactSha256": "9fcef070cc91fb917b92145ec1981b1a97282426e6f18efbd3b889fb2a2b5e7e",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c2373ea3d3ad33905107ea22bcfc8307801cf29221236869d74a6a1c818d645f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-10.json",
+          "artifactSha256": "dbed8796df8cbed1c0823d007f3795f9b6c4b6a22e94f2b0edd9b21d53d52a8e",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8925b7c31322a3d3495759349d3611a52bdbd761828fbe3f3f5f23237075c6b8",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-10.json",
+          "artifactSha256": "0e4bdcb54d21646c0291450f32ca769d8a2bf24043b91fc9cb5ded24742b73a2",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "825c7ecdf50e49e5b8b3fdbd171d5ef95422a03a226eb662e366ec5ebc9dd8f7",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-10.json",
+          "artifactSha256": "7b62d897f86edf20029b85752103239d3b0cffc72d89d7d7625dca43617f11db",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "f560bc6df11598fe624f57035b1548db72bedf7a2e105c1fa219d9288d09c7e3",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-price-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-12.json",
+          "artifactSha256": "aa8fd223ae713e3958f45c78c5d241cc0bf1bd201f5494a370747068fb25fd08",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7b78ecdccd3ab9c8d0471234a7623702bcd4aaa0d1bfedb50071ef9d5c250983",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-12.json",
+          "artifactSha256": "3198ff16b6562d3360cb4a71ff4f7fe92ad121de0567579ccae0ce3054c80253",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "9d814969472015509fd25e30765083793e0e7fec4240a9dd0f262f70db53b855",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-12.json",
+          "artifactSha256": "d3c4d5dc03a6c5ddef52d778769339e11f7704c8aca50d45bd0647d38b2bc6fb",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "5711263112dc5b03055c0d13247600c5fdbde96c3e6524799e4a36b475df429c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-12.json",
+          "artifactSha256": "94b66eaa135198e39a758bc1c12fcaa2afcb81f8b0d939331defb953642bfaa8",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "28565b5f301ce0887f7ff558e404f80c45190dae57b9835dbb50d37863d39296",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-12.json",
+          "artifactSha256": "7b688c5b7e5eb991d581e9db4c304cb667bc97d7fbba95f9313d4c29fdec6ad5",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "bb7db2ba19f99a2b4fd16e3e4d1b46bd241f41d93afce6a29e37d51044e7aebc",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-13.json",
+          "artifactSha256": "d55eaad1243fcf9faf9ced1a40777640b046e2c1ddf3cb02b315b8755bd72626",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "25f28dba76cc009bc077556a1465acd1eb9f0181d754d1669f0d6f1232f7cedc",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-13.json",
+          "artifactSha256": "d49e492438c8723783d44f01fced62b235f621df911e50bc0b257e29d84a6fff",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "2d89bbacd5f46ae7d6a586f004585ba5b1a0c17e6f0cfb71b065c1c3f68c6fc5",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-13.json",
+          "artifactSha256": "8898401a41015349bea499d67aac928f4a585fe7f0f728680876809f62553063",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "1394c6729f6aac0739b5ce79bebefcc56d7df009dffbabc5c1575b2ef952d91d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-13.json",
+          "artifactSha256": "6c2b717eebc66b85341568127b0dd269de073706509efc34864b89923207d93c",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "5502b3d170e793068a1275f8ead68a4cfcbf642defb21a7c046a641e1769d9ed",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-13.json",
+          "artifactSha256": "45600cd70b4013659a7bd617087de0b5cd7d7f0e8a6f6b6a64f26082d11362d2",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "1ff8d1ee1ad4431a4413042a8b7aee784ffdbe77d25d90715de6a8792cf07bbe",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-14.json",
+          "artifactSha256": "3c048e33f30cedeb1bf6ed30f0a6f7a1240393fffedeeac7dfa4508cc21c1236",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "eb253e9f8c7ff155a129d7e2877e50bb2f045c45be5ddf86a582c6c148269f4c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VERBOSITY"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-14.json",
+          "artifactSha256": "01910800c10f9d5350e31f6aa946457b8c455c437e345a629ad7f5c796c54ff6",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8107c456bb604edd17c64f4a5c24392c5ed6cfb04a75b31cb69894772d48c3cc",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-14.json",
+          "artifactSha256": "0588dd5d6cbb835faad56bd8e567a44319078d18ed684581e53dc93cc01a563a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a7bc1b2921225a38e4d4446677b325995fcd0c73e4143df5784c4abb8e4a5b25",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-14.json",
+          "artifactSha256": "125b51408427d1009fe423035098b3b6350e8a1a7d6c0f3089319037106ac3aa",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a09c3ee250757a6a178034a6b1b07d4fbcff04b3e13718bd774fd5d2519a3041",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-14.json",
+          "artifactSha256": "40acb9b701fedef5103407bb08eaf6869f820206042aa2063e6d21b6c8ea7dc7",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "10b2aa5e6985f8dba9eda3aa3eee0583a33bc99f13b020f330cc284eae8618a9",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-15.json",
+          "artifactSha256": "7cbb4491cb9720ae16e8edfff3fbfb882f82759879e180b5c609246baa85bb00",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a71cb03251e9cd9f3c3cd20a7e411771c962e84c39ab9fa904306f2d05bd9364",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VOICE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-15.json",
+          "artifactSha256": "a84a7429136db2fd186892a5565ad9a9c1d26ae1be0f2f52b4c214a43718fe02",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "540ff53268f4377117f7a14cdb7e9328a42d0165227eae621e6622d1cd5dc0b1",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-15.json",
+          "artifactSha256": "d6660a8fd5cf9f6e73928dcb58705b0b2f20d8feea96e0affa50da609da273da",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "5c147ac1ba9dad3bc50b757009281fff493de33ee95a3ed73e5b5e0c76593741",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-15.json",
+          "artifactSha256": "8d843c7346f7f7b911bc64046f8e68cd6a58cad0c5f89b1107f1a96dafeae1c7",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "d61001217fcbd162196f9095ee979a3c5c59c6da610a780f19cb1ed273e7e0b7",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-15.json",
+          "artifactSha256": "0f280d7b4ea0114ef1d945705d8d8471a735590fcefdedbe0b631bdfdba09f06",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "fecc57ea35259a2a658f7656cb9d3ceaf67a1880c5e7547b90af6cf18379fc4d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-16.json",
+          "artifactSha256": "8e5a9101c60985bd1ac3ea2fdaf74f34e4a09a8ab42e3d4bd8f4b3199463ac52",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e5c930c41ba93ac976bffec00e995a728cb356326becae79d78fd990a7143ef0",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VERBOSITY"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-16.json",
+          "artifactSha256": "ffa6c3686aba5f5e1e08b5fc1647144dba8c601f5945770f523accbd558f3c6a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "6795514f7b030362d895d1f5648fd2d580ae20b24747d62174d9825864447e78",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-16.json",
+          "artifactSha256": "b3bc23c7d47e776ae3c6e732293c4f3a06cc85e7138ee513160de032f09be5f8",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7f09c9d02c42a1b15d898dd8bd250caa4661110b7e75ba257930e526d8a702e2",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-16.json",
+          "artifactSha256": "0215cc281eee8dfae88ce13af747a3e6690d031a8bb2399563926758ff6c533c",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "b8f2d142d46ffa0ef4a3590b18b35c1d6e6133dc151f7a4a783675057dd2d654",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-16.json",
+          "artifactSha256": "06a9c88843a7c663f67a879023e6b16291254e2afe1c7fcd20ed5fd93b8a68ff",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "4319b3ef0e8ebb5da0572182f2b4b9ec9932145ec7e6b10e19d487270845358c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-17.json",
+          "artifactSha256": "2b93bfc31bb55b5e4d055e1e48f1c410439f3d6348d98824144c91c43ca8e9fa",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "2bc205668215befb2d9a6783ef9b9ca8778e8d43b241d8d8a763742895db3e33",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-17.json",
+          "artifactSha256": "5e2b8a6a72329e13f4cc8a251b73936e2010b67ac1384f91d7bb889858bbd92a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "9ea8711745c7984f28f60f37632c359ffdd3dd572026af84980f2858ffd62439",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-17.json",
+          "artifactSha256": "a0bff70a87138bca0287877417abc3cf52059f6f50a74d4af4cf12e847604277",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "99acef7817409d2eeaca27f942408cc08d7846efd2b203b31b999bf6906fef31",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-17.json",
+          "artifactSha256": "d3627e6bc7c8fb06532b2abee06e0c7b6433b3a8af4ec8f5ee0ef9218ca25efd",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "08078a44e251dbb5dbb69d418b119ae4c41d7640a22f86dda50be47488ea0506",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-17.json",
+          "artifactSha256": "643667c7cc685a584e91799197bb055aa9288de84e35e5cf60f93f36a9b683dd",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c642f108e6e6e2740eb52d93803b62621b65d17f38853f4ab52be4aa1da434fb",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-18.json",
+          "artifactSha256": "b92f115513ac461bbccc982ba0b0c1c2849cacbbced2518e762e633cfc71cf42",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "52389ebd2f35ecedaad1f8514627ff8edb01a31553b93a76c7d4de2a08c2db91",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_NEXT_STEP"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-18.json",
+          "artifactSha256": "41c2dfaffa8c1eb2b82dedcb1ac6c239e85fc7f5fca51eaeb43df208e20aef5b",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "789791c38d6055dea06b34b19c8f074c09afceeb1509fabb8c957be2ee59840f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-18.json",
+          "artifactSha256": "417c546f5570206b978ae30007a81d0af67bf6e79d420eb870455c3e21d8ac35",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "5ce7f1da1d817f64a72b80fd55d44fe375c51357c5b26f0a89df0fc3a6b7ed3a",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-18.json",
+          "artifactSha256": "965778701f046fddbbc5f8c14289066730124e9a630e4256c96cf699f40699ae",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "861f9f5a674170e55ce82bac091905f9fb9a832d9a064a61ea5d06ea788a16ee",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-18.json",
+          "artifactSha256": "257e6ea9970150647f8aa7ef64eda9096f6da981325bf58ab5054410f25c1803",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a7532a01500fbb5f888903efe457aa54b759db4b5c352d46912356e56a01d797",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-price-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-20.json",
+          "artifactSha256": "c4ba666afafb8c29bcd56df3db2fc70f9a1cb9eb86180123af22045544880a65",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a52bdc7413dde98de48caa11a86c926181993414f2f4ccd1782b8ff96d7779d0",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-20.json",
+          "artifactSha256": "cabb9e5a36b3398c835e9a1794a3001ef985a247d274838c40a3ffd6b9806f82",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "956653509e6a8d6a8c3895eb89b56e36e0a6eaf98392df857ff593a70bcaef3c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-20.json",
+          "artifactSha256": "5ca7aa391f174876955699a67dcabbc7cf0689b9beb2363bd2091741f6eb3420",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8584601aba8c8c54b0d4da8faa668a7ba890d91f129c737c7efed9269a0121c7",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-20.json",
+          "artifactSha256": "c2a913c0a75046b6d45f05b3586c12439387b70fe5dbdee1786dc8c1902f40c3",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ef069cddee605b8b5bb9396d7900da572b87c0a62e1bf576b51722bb57e03479",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-20.json",
+          "artifactSha256": "a2f3659ba2322fb45d5957659f78d7735f4fe5b95128c4e2207432a90a11ba1d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "24ad6d603eb79da22c44b5317558ad3023e50c6567194ce7f1519a7fafcf3e0c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-21.json",
+          "artifactSha256": "4396c398f9e3400588475cba3260e54241145662c58c366ffedd6f2bf9aad254",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "4f0550c16b0f1b2912c05e37b915d75cf0b76c1dc89fe730a8ebac30fe942040",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VERBOSITY"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-21.json",
+          "artifactSha256": "25d42ac2534f3f565e65a2003dd15ecc4e37fee082d63d262e71b328e4662436",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "051a823e3da0008799d14aa1ccf41c55583dbecfbda574dfbe7885bdfe279c2a",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-21.json",
+          "artifactSha256": "cd17938984488c21d5ae7c4e5bdc9667f677cd5220896f88761dbd28348ba981",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "49e0e8b6ee4d303a82d3422183c4093cbb721b435da5cbaf17085f240c05eae2",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-21.json",
+          "artifactSha256": "9f0f0b0fd1d4670fb06b77b3065d6afe065e21dfa74a384cd4f691859a3552ca",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "3b4947e4b4109187f178c868f037c2c05ef28b39c0129f1c46867bf7245dff23",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-21.json",
+          "artifactSha256": "07612e34eea381c4ceb14adbc7fa36cb22e7b613a4894fcde948a52a60914720",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "7fd15ad1ca73c56e682c82c5649d2e294a62767a623ed8a44e51707671a53a44",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-22.json",
+          "artifactSha256": "f004039a186f79c6251b238962c8ef272ef69c816b61f4f6605e84c0f8e3041a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "2c24a3cc1d83f18dbcd3cd9abc1494fa103d96e5e1e0f7c71904f49388838f7b",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VERBOSITY"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-22.json",
+          "artifactSha256": "76e61edbcafcea6d94f21d5cc4609dcefbb165c6931aff473b51242df93adce3",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "b8c4303086c8d8b78ca41d6cabdcfdf5d1f7fa6dce127c10b37207935f49dcf3",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-22.json",
+          "artifactSha256": "70c0a19c9803161cd44334e6f4ef1fc122e3a4445b3bfaae7274c68ca41a1ed4",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ba4e0376bad8fac2f5a9e25125ed8ec52fe5116d5b4b0c573e239e0230f92e55",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-22.json",
+          "artifactSha256": "fd10a33cfcb7a48e1f66075048f86b42653236b99ea3097cefcc13f826eedf6d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "50ac513500fabccdccfe7f1729f908893fc2b63022e5f257f629433784a761fe",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-22.json",
+          "artifactSha256": "e469f3d7c3090fb75b73d11e5b847bc7402c81de753f68052e9b6af4c11cbd9f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "b6945434dd9f46cd2ad65d931587c5e24182809608e5ebba8d031a988263f52a",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-23.json",
+          "artifactSha256": "258ada7f2fc99ef68aa997c82e3b0ac34cbaacf323364a54622f42bdae1f111d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "46467ac50d8a162d092f934727796d89da05d0ce492d248da122c001a7bd37b5",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_HEDGING"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-23.json",
+          "artifactSha256": "7a3c4ac389850a09c5fa872c3a70be55973a55c617d0f094b539114dca4ddd9e",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e6e0f8a8cfff40e9fd3c950450abe41f8fe4f37745048304ac77dfc02ab8f22e",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-23.json",
+          "artifactSha256": "795f373040741f680a00acc41059ba998abf82a93a75be85709e3c5384813026",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "1be785229e7a49fdeb3ea2f3076e23d52433aa2657d398bfd061c7801561816a",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-23.json",
+          "artifactSha256": "dcee254e5ee7a97b51815218977f4ac3b667a8b244e5cc6e0a1e544845104b41",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c857c366da26afd714faa68296d3f8c8d37876cbebba2e754ad003fe7d8abab0",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-23.json",
+          "artifactSha256": "efdfd456dfc623a3571b55e1d3f18bb1421b3ebc17b6632c4e0f2fd2813d47b3",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "32b06fe6b6f23f3f22d197244aa456e4db2314ee80ef634bde4adc2e27432a4d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "b1-rest/attempt-24.json",
+          "artifactSha256": "5014cffa0460a716ebdb6dca7583c81a25433f22258e2f7db2e468bb116a6e02",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "40a58de72d0ae9771fce38eccb4790b771e30dedf8a16f44acdd727c0298c38f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VERBOSITY"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "b1-rest/attempt-24.json",
+          "artifactSha256": "d8f789e05aba8eb6d2257ca6a0d97653c957945c4322fa53e37107a0e1eef914",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8e50c7569d41fc7bb8c0c3cc82077457e2245e51d3a4fa7d56e7f5809d5015b9",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-24.json",
+          "artifactSha256": "253ffc4a3ec54ca37cafd274a05554959699669e5b4a56ec4bbea44db18d8362",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "154dd59d3a07421ac72d5c9f64010a2abd25cf28b374cf84f6c702f1b236eb9f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "b1-rest/attempt-24.json",
+          "artifactSha256": "f62ede6cf6fb0baf3f305e2ef2a945dfd60a3addef762a1fa1f6f39560f6ac28",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a93cbd1e0d53c265ad2b80d6f72fa459527df22ab6f7c308cb4d0d668ef83cc8",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "b1-rest/attempt-24.json",
+          "artifactSha256": "c5252e63ec8f93650e1b60e5ec176506674ab03552f2b22ad24c3df634af561e",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "12d2d8fd547e3eff1a8fc0136cebb76d792430be9d2cd0c3522acec957adcc10",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "journey-openings/provider-attempt-1.json",
+          "artifactSha256": "3ef4f1106f1364a53ca4cc592a34b7f6bb1586050b6ec8b5a7a49abb34cefbee",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "baf91a929390843120d508d4e091f513d9fbf206f8652f701ce4b7b72c6970ec",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_WITH_ADVISORY_LIMIT"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "journey-openings/provider-attempt-1.json",
+          "artifactSha256": "2a71e9fd6b8fc941a713cb9858d10fbf62c58f1b53f7780e925e0e0e6cda15cb",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-1.json",
+          "artifactSha256": "144d53a8843d7e48238ec8590b9591d1fb0a3c311b5306291f65418fbad2231c",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "journey-openings/provider-attempt-1.json",
+          "artifactSha256": "1ae613d66b962fe66e8e3cf08e3ad7ae791dc7a91db46ca7f528148598510f5e",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-1.json",
+          "artifactSha256": "8c6264695d80b34af5b750aa243df10e3a9bdbf105164ab6da36e9fb145a6ddd",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PRICE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        }
+      ]
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "journey-openings/provider-attempt-2.json",
+          "artifactSha256": "fecc78ea8c2aa11639c549e2b83983bcae87a85a81a2c92fce06032191bd0061",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_HANDOFF_SHOP_DATA"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "journey-openings/provider-attempt-2.json",
+          "artifactSha256": "f36f2b2cbd636138b302d8a3fa909543f6afd80fd8f57d0471262de737f30032",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-2.json",
+          "artifactSha256": "f3954ddcc40eadf912b83238648d28c28f3637b646f85efa293c101c4427f63d",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_DATA_GAP"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "journey-openings/provider-attempt-2.json",
+          "artifactSha256": "99008b82d30ca3db07ca54e293fbd5d63bc82fdab8d722f65080e9085bc8297a",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-2.json",
+          "artifactSha256": "5713227e4cf06d84db241eeb2a8e90ca8f379d94873486dbbe7a895b9719ab17",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "DEPENDENCY_FAILURE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP"
+        }
+      ]
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "journey-openings/provider-attempt-3.json",
+          "artifactSha256": "4a85924e20ca74700fa413d3bc75ab89d4f763474de1534d3ec1537cb6fa70e8",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "RESPONSE_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "OWNER_UNSUPPORTED_SIZE_BLOCKED"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "journey-openings/provider-attempt-3.json",
+          "artifactSha256": "dad8326620819a7ed00508b9b94ea8190dfc2c3f6b7931ae9c36502435db7f93",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "d3e93e8f9d2d0b932211b2d6068da4df7e030610b7acb6fe407ac6efa500d27d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-3.json",
+          "artifactSha256": "0bf01245331ddfdaa2d5044bd71446955053f796eab7cbbee39677e538c8906d",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "2eaab5e2663e28adc34db439ed939b3dbd9843792ecd36a5420a943a54b2f7a9",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "journey-openings/provider-attempt-3.json",
+          "artifactSha256": "bbb07d6b3c7e3e2d0ce91be58a4b301c44ef5a73ddb1069cafca6de2809d9ec5",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e62f32a99c5a9354c9d344fed1158937d41c3816673c6da72da244e7e266b118",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-3.json",
+          "artifactSha256": "475bb36bd29511a6ac0500f560b6d35a11b8a06d248ffb00fdfee647951b67fa",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "3164d34263b3e5b4ace162f01ff85f08c2803c0febd8cab88be84010531318af",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "sales-southern-delivery:deadline",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "journey-openings/provider-attempt-4.json",
+          "artifactSha256": "3db75367e2e5e86f877040f8e4d40e0c036049a23cfb33a1d0c6b2af46d9d11a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "db02eea6ab77f10039e587adc163fc6a6c1f9126898e344a5f141d474e7a53a6",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "journey-openings/provider-attempt-4.json",
+          "artifactSha256": "a17d534aa0f47d11fdbabba3213936f01c7c73b3b56c3bbe09869cacaeee5bae",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a0656d92544a1254cc4c402a2fd8f4e57d89bb44ef0ecbf594b41ef85dd38c5b",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-4.json",
+          "artifactSha256": "33269e77b0ee508cf0f393fe180fb90d5673383397bc62ba90658ae5ceb4ab03",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e545120681dc14fd10eb4d00600bba9cdc227cd7efcdc6af0880df6f9dffa293",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "journey-openings/provider-attempt-4.json",
+          "artifactSha256": "b4c620a5e21159e734d6f84db829dc6e0e823e7dbfe3e7b6018d2f808b3ab261",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "43485b01dc111587f6e5483c8c196c313273d5a27faf5763fd72c0b26b92eaec",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "journey-openings/provider-attempt-4.json",
+          "artifactSha256": "0a7cbce7edf88717a5dab511dbf0e94002016a97c8009dd866b48c9056caec9c",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "ETA_UNAVAILABLE",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "NEEDS_FIX"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-open",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-1.json",
+          "artifactSha256": "cc7a80b2d885559ded148ae20135e2031919ea465f3bd742ae10d16701f630a0",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "07ec32571a38011eb64ab8497e3d069b76f2b771a213abb0f9da1faa01105816",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-1.json",
+          "artifactSha256": "2cc1264f31a6223ecf1bb1986a73cb165c1fdc44609b18414caeb556d8f8da97",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "8ce196840f0b4eceddecd6d0870346e1aefaeede1bae6d4c46c6888758e9d39d",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-1.json",
+          "artifactSha256": "440389300aaf11b2645168992091de55b940f7a6cb61cd3dfd2c454ae2ca739f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e82dd16485d9767a3d1d817e83c6b6bb86358ecc01e64d8518137a703e196d35",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-1.json",
+          "artifactSha256": "8f92614419a454201c9b8a04f77015c6d6a774c2de6b5cf88d5b63a79b0c8774",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "44564d186e69ed8991e6955e07a77e729164fbb647703babfaf8340908e70364",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-1.json",
+          "artifactSha256": "db8e459dee9d6b51e1e2485631427e0a8cb51e0acf6381dfa411b165b9b9c944",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "25cd4969c2bf407cf06f09f2d31d3913d30521551113807d670894a1e6a26a0e",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-2.json",
+          "artifactSha256": "742a47982776bfb48680e6821939f052b0d927998d95043b30b361bcf51b8130",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "858d0215fb1746ba9a0e3e3da17dc3be198ed1318eb7eeea8726ed9d78054fce",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-2.json",
+          "artifactSha256": "aeb3ed77af999903d0cdfd8c3f6c067bd5f5a03fe4c2d8ac7c0fdfb28c2a7649",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "940979935b0e42449c0dbd2d08f8826eaa03946b6198cbff0ba8a6f9ff6934f0",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-2.json",
+          "artifactSha256": "357ae24ec40649a2f7173aa8f0d11ea77e0f4d542b749f006aec0b6d54a85f5f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "034e6fd15b88652fb66da39fa5e28f309aa02e307448b9b56bad26d1778e1628",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-2.json",
+          "artifactSha256": "5a0c8a4db6faf46c1d23add517c693861a118397cd2a563e4b101f46fa7f99a5",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "18e035188b08c73247dd71d4850998134457f879b28bb5e77ea735d280f64804",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-2.json",
+          "artifactSha256": "b61397ea14eff75597b1f671c224751445be9bac32857feb4e4c72b5e3334406",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "57085f0882f56390909eb39218f556c6e1fb4f6898c9bb6586e47ce5623d546e",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-quote",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-3.json",
+          "artifactSha256": "71fff91abec280db10a9dbc8d8cffbc4f95405bdec0044ca42a0cae2f519c5f4",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a128cc01ca178c7baaf9338874efdf1d650246174b4787c49c0a7003a1f6bb7b",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-3.json",
+          "artifactSha256": "7c8c84626b1242f1210183b51f2f1bc56b1b4401cc3af1bc275d22a56a52b5b0",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "929dbcaa17be5aa1f2a94b57b4d2e7d29fc5cfecf6935acbf950601c98606ac1",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-3.json",
+          "artifactSha256": "ec1a6a82802b6d8bbc986afdbac950ab525ccef2204511f175aae2abd06a0e30",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "36a9f6bfdd9386fb9e48039748c8b51cbc33ce84e41427fc6b048a83e776a5cf",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-3.json",
+          "artifactSha256": "a8a09b9476766b7ac364d6def09d7f4273f792c53d8b6f9de4f6e44c1121f915",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "24033e58904ec725877cbf1e01202500fdf435ecbccc522ee00aa56a05cdd93c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-3.json",
+          "artifactSha256": "b7991d64fbb6dfc0efbc8e4792518e9aea95bced621bff5f3c2b713ee09b5f22",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ecc557d24c4b31a82d5bc0557c81da6ab1f4604d62d59875cd553ccc662bc922",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-correction",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-4.json",
+          "artifactSha256": "1df0e54e07b86670b2dc115ded330b0224b8b01e08bac545199a3c4e1ccf7f77",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "a93de401ed9a9121cfd5bafa11dbd0ca74e32c69c16f03be28e3b7e27e9376db",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_SYSTEM_VOICE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-4.json",
+          "artifactSha256": "9a66a34bbe0cacd6ba878156c3e252f5142a72ce5b6aa096b9a68e9acadb6f7f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "6a90e1978239e3088baf232d77cbe6250b4a889a67fcafc878e55095d77547ad",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-4.json",
+          "artifactSha256": "ba0cba924b6ad06e7281274cf2804925496545354c106ed5ea61a5e7645550ff",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "fc66db1da270493e02c79fdfa2407f040238810c4e57b91cd0930561699d18d0",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-4.json",
+          "artifactSha256": "31b31d1b3f0e3d27819fba8e04151d6db900769065a93107bbfc6716dcf13520",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "0663787ba7acd00c8b9317426a34b8de43f120c8d1361dcaa1832406328c0776",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-4.json",
+          "artifactSha256": "cd9db453122b0979686371d16cae3e8f489c41d8ffb4db942d34e7c1f34f2458",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "13261a5c9b772a598183315a291a2d38cf8257ed8a1b9cef8ce2638e9e772ccd",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-5.json",
+          "artifactSha256": "e3d12d0e3370f9cac8a53b8ca225af0a3bf4adc06251812faf344298913949e9",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "CHECKOUT_DETAILS_MISSING",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_QUESTION_ALLOWED"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-5.json",
+          "artifactSha256": "7a90cb8003cf6108ee4a508fac7a3ea7cf4a089ef4f6ea0feed0d75126afaae2",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "CHECKOUT_DETAILS_MISSING",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-5.json",
+          "artifactSha256": "561dbbb9eaa1584e1ea673c7fb8670a37b06491ee1b57c6d0b0ba85dd271f484",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "CHECKOUT_DETAILS_MISSING",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-5.json",
+          "artifactSha256": "b4e1dccfad354581aad6c329ffd00e8dd869dacd318198733c84f6b2ba534b64",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "CHECKOUT_DETAILS_MISSING",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-5.json",
+          "artifactSha256": "1930c82825b7c4c5d77a1733457c36416eb1be81f76e910fbe9b44f627d61451",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "CHECKOUT_DETAILS_MISSING",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "privateInputOmitted": true,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-6.json",
+          "artifactSha256": "bb7e2770c1b99621979de410db0dac9bbe139119206ca12cd5ac77910b516314",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "PRIVATE_CHECKOUT_COMMITTED",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_PREVIEW_ALLOWED"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-6.json",
+          "artifactSha256": "31d224bc200d767dd2b2649ec8654c3f824c5bcebed72d23a6401ffb7e520098",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "PRIVATE_CHECKOUT_COMMITTED",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-6.json",
+          "artifactSha256": "878328cfddd4fbe10a01fff2b5559ce254bf8001f5cc7aebaa3ffa2603cd42b9",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "PRIVATE_CHECKOUT_COMMITTED",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-6.json",
+          "artifactSha256": "21d92d69a1199440bf42129b1086c929147a39b1ec1586627e0f7d8523836255",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "PRIVATE_CHECKOUT_COMMITTED",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-6.json",
+          "artifactSha256": "ff24fa15ed66720dcc7a8adfec8861b12c14005a57017fd0761e2ceb173ddda5",
+          "terminalDisposition": "NO_SEND",
+          "terminalReason": "PRIVATE_CHECKOUT_COMMITTED",
+          "terminalTextSha256": null,
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 0,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "CODE_OWNED_OUTPUT"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-confirm",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-7.json",
+          "artifactSha256": "9e5a7249bb5686ed8a008a9fdae329fdbe4e3740533ee71d6346b3e0a36f2f46",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PURCHASE_CONFIRMED",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_SILENT_CONFIRM_HANDOFF"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-7.json",
+          "artifactSha256": "06f9166e82959ef2d4f1d7011bc15e5ebd080aa9e9771159c42ada6a7f5013b4",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PURCHASE_CONFIRMED",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-7.json",
+          "artifactSha256": "47ed2ec237fda6765e2590bc1ed94781d7c119024639c5b5cb073d8396ca1073",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PURCHASE_CONFIRMED",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-7.json",
+          "artifactSha256": "cbae5730d5bf33ed0c6a874eab76222b87c78f93cd2d050138f1e8d65291aa8e",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PURCHASE_CONFIRMED",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-7.json",
+          "artifactSha256": "2d2bf7ade582cbe7e19b0c31abc39a275c90888b4975a0d45c995e34e99498e4",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "PURCHASE_CONFIRMED",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-human-request",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "stateful/provider-attempt-8.json",
+          "artifactSha256": "02f9bd1e498d04857485305d4ca8e49e276905c4437a1cbc845de9916f1b5320",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "CUSTOMER_REQUESTED_HUMAN",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "ALLOWED_SILENT_HANDOFF"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "stateful/provider-attempt-8.json",
+          "artifactSha256": "f010dc2be4abdab8ecb067214018ec36493741912f8a5c74d5370ebd72edf46e",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "CUSTOMER_REQUESTED_HUMAN",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-8.json",
+          "artifactSha256": "7201d2c97684b9aa5a615538b78662a8a22dec9368cf60a7205dae2369ed37ac",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "CUSTOMER_REQUESTED_HUMAN",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "stateful/provider-attempt-8.json",
+          "artifactSha256": "afea056e4e604d5919d5edf6af1aee39d477b2aadf4611eb9705cd61b9962fd5",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "CUSTOMER_REQUESTED_HUMAN",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "stateful/provider-attempt-8.json",
+          "artifactSha256": "e881709ba5dad5368f61a74f471e1a2ee5ef6445eb51ef53438fb63deaf1eb6b",
+          "terminalDisposition": "HANDOFF",
+          "terminalReason": "CUSTOMER_REQUESTED_HUMAN",
+          "terminalTextSha256": null,
+          "capturedMessages": 0,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 0,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "negotiation/provider-attempt-1.json",
+          "artifactSha256": "8892b9be02d8feaee14688d8cc4df4aafae56ce99aeede79cf419478411e2965",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "2d7d242ad7d41a8e53d3a194e0b68da88b8892f2e4d1a9c8494ed8a4af30be68",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE_MINOR_VOICE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "negotiation/provider-attempt-1.json",
+          "artifactSha256": "cd41d3b19545d9a93604a74e4e1825c639a717500ba00d9ad18d04aed3a34a9f",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "1a50d6624c78f0419121d94e215ea8d6fbf750a5d14dfbc787859b9f79caae93",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "negotiation/provider-attempt-1.json",
+          "artifactSha256": "2e80b96db1dc7735aa2830f90492ba48cc077b67dc9fed804a0035815b0c17cc",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c651e40a954bfa91127f17ee44844286ee4345b5626b8b4a2704229b27f10899",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "negotiation/provider-attempt-1.json",
+          "artifactSha256": "f3999f8361c7f11f5d5b4e82043f30e094a1b13c01e8846c3ef3c36ef2311813",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "e625530832db5c6ac5adc927030cbe7c34e8bc8811fa59055ff71fc180f1f874",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 3,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "negotiation/provider-attempt-1.json",
+          "artifactSha256": "ff13b799b3db4f2de54695517e72df8ac15083080ed302ceda7fca8699eedc34",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "d4d924b704e384e81f9a8a3927b2277c38dc3baed7ad3bdd9fa59a8d5152e3c5",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "negotiation/provider-attempt-2.json",
+          "artifactSha256": "1882d92da2200af225a7ac0f2da9a583fe177a6226faeacdfc1de94a03597edf",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "df9d91921b373582a5043b0363bede0fc9f97c23e9f1a27ab86725d1a027e4d4",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "negotiation/provider-attempt-2.json",
+          "artifactSha256": "9ba402c99a8923a07926664f43549306a97e74f74da67255e2c8b3a9e2d75619",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "f1925e137f0659cf2844f749a57b84e8d5c9be4866999a1c8b08b6fd29a4b255",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "negotiation/provider-attempt-2.json",
+          "artifactSha256": "5444633ea336ff9217dc570630c3c6763c80b909c42f979c6cfceb4aea74b842",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "87b2221be454edee936a99c8bf46856b100ea4ceaac60eb3f0d27e4107e029f3",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "negotiation/provider-attempt-2.json",
+          "artifactSha256": "4a00aec557544a9a1bc78a5138b52bf6e9fc916c7170a4220079f2aac6e0a2cb",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c63c24c2f9fdeae179f0ff9226a78238dbc155dca8ecf1cadc2ce0203365653c",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "negotiation/provider-attempt-2.json",
+          "artifactSha256": "a68c9d47bce1dd0dab3f67302806e0508b85ff56250438186975fb00b5686e53",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "f5da41bf5a5e830454e4947efdf5d23f36831030621ec3e2ceb16e0dc6b36e94",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 2,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "MINOR_LIMITATION"
+        }
+      ]
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "privateInputOmitted": false,
+      "runs": [
+        {
+          "run": "compact-native-full-run-20261026",
+          "artifact": "negotiation/provider-attempt-3.json",
+          "artifactSha256": "b0266dce478d19dc6b50fd773491439d70ec1cb41a6b49824d0ae0030f7ace05",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ade7ef267c5f0f18f26b9f93084b2c5ac1b5d142fa87d3ac85104b9bd60a127f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-run-20261027",
+          "artifact": "negotiation/provider-attempt-3.json",
+          "artifactSha256": "4f2652fadedd9830b31387120cdf70db44b10c2caacca8406c919ab5361ca925",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "13e866b5d8a08b4a40540156c6aa31b758170ad8d73de9e9fff4d78a3b7232b3",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "media-size-context-repeat-run-20261027",
+          "artifact": "negotiation/provider-attempt-3.json",
+          "artifactSha256": "91c7aea002c7b3940d0c3908c0f7dc213b6a5a2e3ec6511a3e30616d98389cc3",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "c62b6157bd252c4ab2c111c3dbdcd059a81448024bff75a5e1793ec01b9e4206",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-run-20261027",
+          "artifact": "negotiation/provider-attempt-3.json",
+          "artifactSha256": "755723a3d80b42608efd4512c290ff89cd97a63ae4662fc880072c63391b914a",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "ca0376a17af7cb3ebe9fbc2a0a62219e608cf54bb4e78aa6688fe220ae6b1f7f",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        },
+        {
+          "run": "quote-completion-repeat-run-20261027",
+          "artifact": "negotiation/provider-attempt-3.json",
+          "artifactSha256": "92ec101786bbba2988bf7c884a97fddb8c06b881ba625e44bad22717a6d9eecd",
+          "terminalDisposition": "SEND_ELIGIBLE",
+          "terminalReason": "PASS",
+          "terminalTextSha256": "4682b8ea5dc24429bd4e6388f2ad7e3a25770cd3f647a4a97e3577aeb4838658",
+          "capturedMessages": 1,
+          "images": 0,
+          "ownerGenerations": 1,
+          "verifierGenerations": 1,
+          "historicalReviewAssessment": "USABLE"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "nativeOutcomes": 255,
+    "controls": 85,
+    "generationRequests": 705
+  }
+}

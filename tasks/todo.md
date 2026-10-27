@@ -1,4 +1,12 @@
-## Current — lặp lại model quote task, 27/10/2026
+## Current — kế hoạch recovery/discovery sau review năm vòng, 27/10/2026
+
+- [x] Đối chiếu review kết luận/source/cap; planR1/self-review→cùng reviewer REVISE3P2→R2 REVISE1P2 sharedqueue→[revision3 APPROVE](../docs/specs/c3-phase-b-recovery-discovery-fix-plan-20261027.md), canonicalLF hash `762769e338908b8733900bda9af96760dea0b440a5509ad68a758a9633f0d698`; [trail](../docs/specs/c3-phase-b-recovery-discovery-fix-plan-review-20261027.md). Không còn P1/P2 mở ở scope kế hoạch; chưa implementation/test/provider qualification.
+- [ ] W1: observed RED ingress V2 recovery → sửa counter/retained envelope → GREEN; giữ request/error/token và UNKNOWN thực tế.
+- [ ] W2/W3: thay hướng dẫn search/read, dùng kết quả negotiation và thiếu dữ liệu; batch trong 2 rounds/cap6, không thêm router/tool/budget hoặc rewrite giọng/verifier.
+- [ ] W4: audit feedback/color evidence đến đúng registry/publisher/selector; chỉ patch field mất đã chứng minh, nguồn thật thiếu thì DATA_NOT_READY, không tự ghi/publish.
+- [ ] Implementation/focused verification và model qualification chưa thực hiện trong task lập kế hoạch. Giữ 51 native +17 controls N1/retry0 cho task chạy sau; không tự model run/live/B GO.
+
+## Previous — lặp lại model quote task, 27/10/2026
 
 - [x] Run sourcebb879493 sạch/unchanged;17controlsPASS và51native đủ N1/retry0;138generationrequests,6DBdrop. [Report](../apps/worker/evals/single-agent-commerce-read-only/quote-completion-repeat-run-20261027/CHECKPOINT_B.md).
 - [x] Quote3/3haiảnh mỗi ca,6cohortschema matches;26counter envelopes validate và1missing sau runtimeexception ghi riêng. Wholeturnreview51; actual generation accounting phục hồi từ log cho1lost envelope, không sửa raw/counters gốc.
